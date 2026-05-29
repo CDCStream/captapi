@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { ALL_ENDPOINTS, SITE_URL } from "@/lib/api-catalog";
+import { TOOL_SLUGS } from "@/lib/tools";
 import { getServiceClient } from "@/lib/supabase/admin";
 
 export const revalidate = 3600;
@@ -18,16 +19,6 @@ async function blogEntries(base: string): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 }
-
-const TOOL_SLUGS = [
-  "youtube-transcript",
-  "youtube-summarizer",
-  "tiktok-transcript",
-  "tiktok-summarizer",
-  "instagram-transcript",
-  "instagram-summarizer",
-  "facebook-transcript",
-];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = SITE_URL;
