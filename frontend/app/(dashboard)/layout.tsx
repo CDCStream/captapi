@@ -1,17 +1,10 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/components/logout-button";
-import { Code2, Key, BarChart3, CreditCard, PlayCircle, LayoutDashboard } from "lucide-react";
-
-const nav = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
-  { href: "/dashboard/playground", label: "Playground", icon: PlayCircle },
-  { href: "/dashboard/usage", label: "Usage", icon: BarChart3 },
-  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
-];
+import { SidebarNav } from "@/components/dashboard/sidebar-nav";
+import { WelcomePing } from "@/components/dashboard/welcome-ping";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const sb = await createClient();
@@ -19,28 +12,40 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!user) redirect("/login");
 
   return (
-    <div className="min-h-screen flex">
-      <aside className="hidden md:flex flex-col w-60 border-r p-4 gap-1">
+    <div className="min-h-screen flex bg-muted/30">
+      <WelcomePing />
+      <aside className="hidden md:flex flex-col w-60 shrink-0 border-r bg-background p-4">
         <Link href="/" className="flex items-center gap-2 mb-6 px-2">
-          <div className="size-7 rounded-md bg-primary" />
-          <span className="font-bold">Captapi</span>
+          <Image src="/logo.png" alt="Captapi" width={28} height={28} className="size-7 rounded-md" />
+          <span className="brand-wordmark text-lg">
+            Capt<span className="gradient-text">api</span>
+          </span>
         </Link>
-        {nav.map((n) => (
-          <Button key={n.href} asChild variant="ghost" className="justify-start">
-            <Link href={n.href}>
-              <n.icon className="size-4 mr-2" />
-              {n.label}
-            </Link>
-          </Button>
-        ))}
+        <SidebarNav />
         <div className="mt-auto pt-4 border-t">
-          <div className="text-xs text-muted-foreground px-2 mb-2 truncate">{user.email}</div>
-          <LogoutButton />
+          <Link
+            href="/dashboard/account"
+            className="flex items-center gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-muted"
+          >
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold uppercase text-primary">
+              {(user.email ?? "?").charAt(0)}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-medium">{user.email}</span>
+              <span className="block text-xs text-muted-foreground">Account settings</span>
+            </span>
+          </Link>
+          <div className="mt-1">
+            <LogoutButton />
+          </div>
         </div>
       </aside>
-      <div className="flex-1 flex flex-col">
-        <header className="md:hidden border-b p-4 flex items-center justify-between">
-          <Link href="/" className="font-bold">Captapi</Link>
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="md:hidden border-b bg-background p-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <Image src="/logo.png" alt="Captapi" width={24} height={24} className="size-6 rounded-md" />
+            <span className="brand-wordmark">Capt<span className="gradient-text">api</span></span>
+          </Link>
           <LogoutButton />
         </header>
         <main className="flex-1 p-6 md:p-10">{children}</main>

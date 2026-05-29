@@ -1,15 +1,58 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { SITE_URL } from "@/lib/api-catalog";
+
+const STRUCTURED_DATA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "Captapi",
+      url: SITE_URL,
+      logo: `${SITE_URL}/logo.png`,
+      sameAs: [] as string[],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: "Captapi",
+      description:
+        "One API for structured data from YouTube, TikTok, Instagram & Facebook.",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "Captapi",
+      applicationCategory: "DeveloperApplication",
+      operatingSystem: "Any",
+      url: SITE_URL,
+      description:
+        "Extract transcripts, AI summaries, comments, video details, and downloads from YouTube, TikTok, Instagram, and Facebook with a single REST API.",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+        description: "Free tier with 100 credits; paid plans from $9/mo.",
+      },
+    },
+  ],
+};
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
+      />
       <header className="border-b">
         <div className="container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Image src="/logo.png" alt="Captapi" width={28} height={28} className="size-7 rounded-md" priority />
-            <span className="font-bold text-lg tracking-tight">
+            <span className="brand-wordmark text-xl">
               Capt<span className="gradient-text">api</span>
             </span>
           </Link>
@@ -32,7 +75,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Image src="/logo.png" alt="Captapi" width={24} height={24} className="size-6 rounded-md" />
-                <span className="font-bold">
+                <span className="brand-wordmark text-base">
                   Capt<span className="gradient-text">api</span>
                 </span>
               </div>

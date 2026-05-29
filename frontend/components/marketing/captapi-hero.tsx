@@ -8,6 +8,7 @@ import {
   ShineBorder,
   TypeWriter,
 } from "@/components/ui/hero-designali";
+import { GoogleButton } from "@/components/auth/google-button";
 import { Button } from "@/components/ui/button";
 
 const platformsTyped = [
@@ -110,11 +111,7 @@ export function CaptapiHero() {
                 </Button>
               </ShineBorder>
             </Link>
-            <Link href="/docs">
-              <Button className="rounded-2xl" variant="outline">
-                View Docs
-              </Button>
-            </Link>
+            <GoogleButton className="w-auto rounded-2xl" />
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
             No credit card required.

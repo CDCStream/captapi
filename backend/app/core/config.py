@@ -86,6 +86,11 @@ class Settings(BaseSettings):
     SENTRY_DSN: str = ""
     LOG_LEVEL: str = "INFO"
 
+    # Transactional email (Resend)
+    RESEND_API_KEY: str = ""
+    EMAIL_FROM: str = "Captapi <no-reply@captapi.com>"
+    FRONTEND_URL: str = "http://localhost:3000"
+
     @property
     def cors_origins(self) -> list[str]:
         return [o.strip() for o in self.APP_CORS_ORIGINS.split(",") if o.strip()]

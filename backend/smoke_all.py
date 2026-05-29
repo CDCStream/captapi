@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import time
 from datetime import datetime
 
@@ -15,7 +16,7 @@ import httpx
 from app.core.security import generate_api_key
 from app.services.supabase_client import get_supabase
 
-BASE = "http://localhost:8000"
+BASE = os.environ.get("SMOKE_BASE", "http://localhost:8000")
 
 YOUTUBE_VIDEO = "https://www.youtube.com/watch?v=gKHe12T6GMY"
 YOUTUBE_CHANNEL = "https://www.youtube.com/@MrBeast"

@@ -2,20 +2,30 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { GoogleButton } from "@/components/auth/google-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const redirect = params.get("redirect") || "/dashboard";
+
+  useEffect(() => {
+    const oauthError = params.get("error");
+    if (oauthError) {
+      toast.error(oauthError);
+    }
+  }, [params]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,7 +37,6 @@ export default function LoginPage() {
       toast.error(error.message);
       return;
     }
-    const redirect = params.get("redirect") || "/dashboard";
     router.push(redirect);
     router.refresh();
   }
@@ -39,6 +48,12 @@ export default function LoginPage() {
         <CardDescription>Sign in to your Captapi account.</CardDescription>
       </CardHeader>
       <CardContent>
+        <GoogleButton next={redirect} />
+        <div className="my-4 flex items-center gap-3">
+          <span className="h-px flex-1 bg-border" />
+          <span className="text-xs text-muted-foreground">or</span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -60,5 +75,13 @@ export default function LoginPage() {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

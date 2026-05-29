@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import time
 
 import httpx
@@ -18,7 +19,7 @@ from app.core.security import generate_api_key
 from app.services.supabase_client import get_supabase
 
 VIDEO_URL = "https://www.youtube.com/watch?v=gKHe12T6GMY&list=RDgKHe12T6GMY&start_radio=1"
-BASE = "http://localhost:8000"
+BASE = os.environ.get("SMOKE_BASE", "http://localhost:8000")
 
 
 async def call(client: httpx.AsyncClient, name: str, path: str, params: dict) -> dict:

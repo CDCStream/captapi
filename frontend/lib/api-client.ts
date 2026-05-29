@@ -64,4 +64,31 @@ export const api = {
     }),
   createPortal: () =>
     apiFetch<{ url: string }>("/v1/billing/portal", { method: "POST" }),
+  getSubscription: () =>
+    apiFetch<{
+      active: boolean;
+      status?: string;
+      plan?: string;
+      current_period_end?: string | null;
+      cancel_at_period_end?: boolean;
+    }>("/v1/billing/subscription"),
+  changePlan: (plan: string, cycle: "monthly" | "yearly" = "monthly") =>
+    apiFetch<{ plan: string; credits: number }>(
+      "/v1/billing/subscription/change-plan",
+      { method: "POST", body: JSON.stringify({ plan, cycle }) },
+    ),
+  cancelSubscription: () =>
+    apiFetch<{ cancel_at_period_end: boolean }>(
+      "/v1/billing/subscription/cancel",
+      { method: "POST" },
+    ),
+  reactivateSubscription: () =>
+    apiFetch<{ cancel_at_period_end: boolean }>(
+      "/v1/billing/subscription/reactivate",
+      { method: "POST" },
+    ),
+  sendWelcome: () =>
+    apiFetch<{ data: { sent: boolean } }>("/v1/account/welcome", {
+      method: "POST",
+    }),
 };

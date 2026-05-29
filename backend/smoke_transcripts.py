@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import sys
 import time
 from datetime import datetime
@@ -16,7 +17,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from app.core.security import generate_api_key
 from app.services.supabase_client import get_supabase
 
-BASE = "http://localhost:8000"
+BASE = os.environ.get("SMOKE_BASE", "http://localhost:8000")
 
 FACEBOOK_VIDEO_CANDIDATES = [
     "https://www.facebook.com/watch?v=10153231379946509",

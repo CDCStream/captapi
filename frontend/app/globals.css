@@ -61,6 +61,12 @@
   background-clip: text;
 }
 
+.brand-wordmark {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
 .hero-gradient {
   background: radial-gradient(circle at top, hsl(217 91% 55% / 0.15), transparent 60%);
 }

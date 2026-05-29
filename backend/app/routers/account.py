@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
+import structlog
 from fastapi import APIRouter, Depends, Query
 
 from app.core.auth import ApiCaller, require_api_key
 from app.schemas.common import ApiResponse
+from app.services.email_client import send_welcome_email
 from app.services.supabase_client import get_supabase
 
 router = APIRouter()
+log = structlog.get_logger(__name__)
 
 PLAN_QUOTAS = {
     "free": 100,
@@ -55,6 +60,35 @@ async def get_usage(
             "recent_requests": reqs.data or [],
         }
     )
+
+
+@router.post("/welcome", summary="Send the one-time welcome email (idempotent)")
+async def send_welcome(caller: ApiCaller = Depends(require_api_key)):
+    """Sends a welcome email once per user. Safe to call on every dashboard load."""
+    sb = get_supabase()
+    bal = (
+        sb.table("credit_balances")
+        .select("welcomed_at")
+        .eq("user_id", caller.user_id)
+        .limit(1)
+        .execute()
+    )
+    if bal.data and bal.data[0].get("welcomed_at"):
+        return ApiResponse(data={"sent": False, "reason": "already_sent"})
+
+    user_res = sb.auth.admin.get_user_by_id(caller.user_id)
+    email = user_res.user.email if user_res and user_res.user else None
+    if not email:
+        return ApiResponse(data={"sent": False, "reason": "no_email"})
+
+    name = email.split("@")[0]
+    sent = send_welcome_email(email, name)
+    if sent:
+        sb.table("credit_balances").update(
+            {"welcomed_at": datetime.now(timezone.utc).isoformat()}
+        ).eq("user_id", caller.user_id).execute()
+        log.info("welcome_email_sent", user_id=caller.user_id)
+    return ApiResponse(data={"sent": sent})
 
 
 @router.get("/limits", summary="Plan quotas + remaining credits")
