@@ -60,6 +60,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <Link href="/apis" className="text-muted-foreground hover:text-foreground">APIs</Link>
             <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
             <Link href="/tools" className="text-muted-foreground hover:text-foreground">Free Tools</Link>
+            <Link href="/blog" className="text-muted-foreground hover:text-foreground">Blog</Link>
             <Link href="/docs" className="text-muted-foreground hover:text-foreground">Docs</Link>
           </nav>
           <div className="flex items-center gap-2">
@@ -97,6 +98,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
               <h3 className="font-semibold mb-3">Resources</h3>
               <ul className="space-y-2 text-muted-foreground">
                 <li><Link href="/docs" className="hover:text-foreground">API Reference</Link></li>
+                <li><Link href="/blog" className="hover:text-foreground">Blog</Link></li>
                 <li><Link href="/#faq" className="hover:text-foreground">FAQ</Link></li>
                 <li><a href="mailto:support@captapi.com" className="hover:text-foreground">Contact</a></li>
               </ul>

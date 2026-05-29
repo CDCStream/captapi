@@ -1,5 +1,23 @@
 import type { MetadataRoute } from "next";
 import { ALL_ENDPOINTS, SITE_URL } from "@/lib/api-catalog";
+import { getServiceClient } from "@/lib/supabase/admin";
+
+export const revalidate = 3600;
+
+async function blogEntries(base: string): Promise<MetadataRoute.Sitemap> {
+  const sb = getServiceClient();
+  if (!sb) return [];
+  const { data } = await sb
+    .from("blog_posts")
+    .select("slug, updated_at")
+    .eq("status", "published");
+  return (data ?? []).map((p: { slug: string; updated_at: string | null }) => ({
+    url: `${base}/blog/${p.slug}`,
+    lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+}
 
 const TOOL_SLUGS = [
   "youtube-transcript",
@@ -11,7 +29,7 @@ const TOOL_SLUGS = [
   "facebook-transcript",
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = SITE_URL;
   const now = new Date();
 
@@ -21,6 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/pricing`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
     { url: `${base}/docs`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/tools`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/blog`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
     { url: `${base}/legal/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/legal/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ];
@@ -39,5 +58,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...apiPages, ...toolPages];
+  const blogPages = await blogEntries(base);
+
+  return [...staticPages, ...apiPages, ...toolPages, ...blogPages];
 }
