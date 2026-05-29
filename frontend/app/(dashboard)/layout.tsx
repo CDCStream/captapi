@@ -14,15 +14,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen flex bg-muted/30">
       <WelcomePing />
-      <aside className="hidden md:flex flex-col w-60 shrink-0 border-r bg-background p-4">
+      <aside className="hidden md:flex flex-col w-60 shrink-0 border-r bg-background p-4 sticky top-0 h-screen">
         <Link href="/" className="flex items-center gap-2 mb-6 px-2">
           <Image src="/logo.png" alt="Captapi" width={28} height={28} className="size-7 rounded-md" />
           <span className="brand-wordmark text-lg">
             Capt<span className="gradient-text">api</span>
           </span>
         </Link>
-        <SidebarNav />
-        <div className="mt-auto pt-4 border-t">
+        <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1">
+          <SidebarNav />
+        </div>
+        <div className="mt-4 pt-4 border-t">
           <Link
             href="/dashboard/account"
             className="flex items-center gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-muted"

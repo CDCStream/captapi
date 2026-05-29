@@ -76,7 +76,7 @@ export default async function UsagePage() {
                   <div className="flex items-center gap-3 text-xs shrink-0">
                     {r.cache_hit && <Badge variant="success">cache</Badge>}
                     <span>{r.response_time_ms}ms</span>
-                    <span className="font-medium">{r.credits_used} cr</span>
+                    <span className="font-medium">{r.credits_used} credit{r.credits_used === 1 ? "" : "s"}</span>
                     <Badge variant={r.status_code && r.status_code < 400 ? "secondary" : "destructive"}>
                       {r.status_code}
                     </Badge>

@@ -76,8 +76,22 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    def _error_cors_headers(request: Request) -> dict[str, str]:
+        # Starlette runs this catch-all via ServerErrorMiddleware, which sits
+        # OUTSIDE CORSMiddleware — so 500 responses would otherwise ship without
+        # CORS headers and surface in browsers as an opaque "Failed to fetch".
+        origin = request.headers.get("origin")
+        allowed = settings.cors_origins
+        if origin and (origin in allowed or "*" in allowed):
+            return {
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Credentials": "true",
+                "Vary": "Origin",
+            }
+        return {}
+
     @app.exception_handler(Exception)
-    async def unhandled(_: Request, exc: Exception) -> JSONResponse:
+    async def unhandled(request: Request, exc: Exception) -> JSONResponse:
         # The catch-all handler "consumes" the exception, so report it to
         # Sentry explicitly to make sure it isn't swallowed silently.
         sentry_sdk.capture_exception(exc)
@@ -86,6 +100,7 @@ def create_app() -> FastAPI:
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": "internal_server_error"},
+            headers=_error_cors_headers(request),
         )
 
     static_dir = Path(__file__).parent / "static"

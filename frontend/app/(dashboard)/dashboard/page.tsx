@@ -232,7 +232,7 @@ export default async function DashboardOverview() {
                   <div className="flex shrink-0 items-center gap-3">
                     {r.cache_hit && <Badge variant="success">cache</Badge>}
                     <span className="text-muted-foreground">
-                      {r.credits_used} cr
+                      {r.credits_used} credit{r.credits_used === 1 ? "" : "s"}
                     </span>
                     <span className="hidden text-xs text-muted-foreground sm:inline">
                       {new Date(r.created_at).toLocaleTimeString()}

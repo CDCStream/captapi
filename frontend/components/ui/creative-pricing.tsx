@@ -14,6 +14,10 @@ interface PricingTier {
   color: string;
   cta?: string;
   href?: string;
+  /** Action when the card has no href (e.g. dashboard billing). */
+  onClick?: () => void;
+  /** Disable the CTA (e.g. current plan, busy state). */
+  disabled?: boolean;
 }
 
 // Static map so Tailwind keeps these classes (dynamic `text-${color}-500` would be purged).
@@ -155,8 +159,11 @@ function CreativePricing({
 
               <Button
                 asChild={Boolean(tier.href)}
+                onClick={tier.href ? undefined : tier.onClick}
+                disabled={tier.disabled}
                 className={cn(
                   "w-full h-12 font-handwritten text-lg relative",
+                  tier.disabled && "opacity-60 cursor-not-allowed",
                   "border-2 border-zinc-900 dark:border-white",
                   "transition-all duration-300",
                   "shadow-[4px_4px_0px_0px] shadow-zinc-900 dark:shadow-white",
