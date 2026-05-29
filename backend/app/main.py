@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import logging
 import sys
+from pathlib import Path
 
 import sentry_sdk
 import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from app import __version__
@@ -87,6 +88,8 @@ def create_app() -> FastAPI:
             content={"success": False, "error": "internal_server_error"},
         )
 
+    static_dir = Path(__file__).parent / "static"
+
     @app.get("/", tags=["meta"])
     async def root() -> dict[str, str]:
         return {
@@ -94,6 +97,10 @@ def create_app() -> FastAPI:
             "version": __version__,
             "docs": "/v1/docs",
         }
+
+    @app.get("/favicon.ico", include_in_schema=False)
+    async def favicon() -> FileResponse:
+        return FileResponse(static_dir / "favicon.ico", media_type="image/x-icon")
 
     @app.get("/healthz", tags=["meta"])
     async def healthz() -> dict[str, str]:
