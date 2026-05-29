@@ -11,12 +11,18 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import structlog
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.security import hash_api_key
 from app.services.supabase_client import get_supabase
 
 log = structlog.get_logger(__name__)
+
+bearer_scheme = HTTPBearer(
+    auto_error=False,
+    description="Your API key (sk_live_… / sk_test_…) or a dashboard session token.",
+)
 
 
 @dataclass
@@ -30,23 +36,6 @@ class ApiCaller:
     @property
     def total_credits(self) -> int:
         return self.subscription_credits + self.topup_credits
-
-
-def _parse_bearer(auth_header: str | None) -> str:
-    if not auth_header:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing Authorization header",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    parts = auth_header.split(" ", 1)
-    if len(parts) != 2 or parts[0].lower() != "bearer" or not parts[1]:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authorization header must be 'Bearer <token>'",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return parts[1].strip()
 
 
 def _load_credits(user_id: str) -> dict:
@@ -115,9 +104,15 @@ async def _resolve_session_jwt(jwt: str) -> ApiCaller:
 
 
 async def require_api_key(
-    authorization: str | None = Header(default=None),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ) -> ApiCaller:
-    plain = _parse_bearer(authorization)
+    if credentials is None or not credentials.credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing Authorization header",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    plain = credentials.credentials.strip()
 
     if plain.startswith(("sk_live_", "sk_test_")):
         caller = await _resolve_api_key(plain)
