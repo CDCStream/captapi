@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { CreativePricing, type PricingTier } from "@/components/ui/creative-pricing";
 import { api } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/client";
+import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 interface Balance {
@@ -164,6 +165,7 @@ export default function BillingPage() {
 
   async function checkout(body: { plan?: string; cycle?: "monthly" | "yearly"; pack?: string }) {
     setBusy(true);
+    track("checkout_started", { ...body });
     try {
       const { url } = await api.createCheckout(body);
       window.location.href = url;

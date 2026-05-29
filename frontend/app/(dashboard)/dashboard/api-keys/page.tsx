@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { api, type ApiKey, type CreatedKey } from "@/lib/api-client";
+import { track } from "@/lib/analytics";
 import { formatDate } from "@/lib/utils";
 
 export default function ApiKeysPage() {
@@ -61,6 +62,7 @@ export default function ApiKeysPage() {
     setCreating(true);
     try {
       const created = await api.createKey(name.trim() || "Default");
+      track("api_key_created");
       setCreateOpen(false);
       setName("");
       setReveal(false);

@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
+import { track } from "@/lib/analytics";
 
 function LoginForm() {
   const router = useRouter();
@@ -37,6 +38,7 @@ function LoginForm() {
       toast.error(error.message);
       return;
     }
+    track("login", { method: "password" });
     router.push(redirect);
     router.refresh();
   }

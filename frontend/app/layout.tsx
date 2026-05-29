@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Bricolage_Grotesque, Caveat } from "next/font/google";
 import { Toaster } from "sonner";
+import { PageViewTracker } from "@/components/analytics/page-view-tracker";
 import "./globals.css";
 
 const handwritten = Caveat({
@@ -65,6 +67,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning className={`${handwritten.variable} ${display.variable}`}>
       <body className="min-h-screen bg-background font-sans antialiased">
         {children}
+        <Suspense fallback={null}>
+          <PageViewTracker />
+        </Suspense>
         <Toaster richColors closeButton position="top-right" />
       </body>
     </html>

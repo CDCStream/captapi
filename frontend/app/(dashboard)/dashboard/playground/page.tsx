@@ -21,6 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createClient } from "@/lib/supabase/client";
+import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import {
   PLATFORM_GROUPS,
@@ -117,6 +118,7 @@ export default function PlaygroundPage() {
     setResponse("");
     setStatus(null);
     setElapsed(null);
+    track("api_request", { path: selected.path, platform: selected.platform, source: "playground" });
     const started = performance.now();
     try {
       const sb = createClient();

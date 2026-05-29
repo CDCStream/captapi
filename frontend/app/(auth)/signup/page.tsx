@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
+import { track } from "@/lib/analytics";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -37,6 +38,7 @@ export default function SignupPage() {
       toast.error(error.message);
       return;
     }
+    track("signup", { method: "password" });
     toast.success("Account created! Check your email to verify.");
     router.push("/dashboard");
     router.refresh();

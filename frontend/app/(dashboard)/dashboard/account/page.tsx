@@ -2,20 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, KeyRound, MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
+import { track } from "@/lib/analytics";
 
 export default function AccountPage() {
   const [email, setEmail] = useState("");
   const [provider, setProvider] = useState<string>("email");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [savingPw, setSavingPw] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -27,27 +25,23 @@ export default function AccountPage() {
     })();
   }, []);
 
-  async function updatePassword(e: React.FormEvent) {
-    e.preventDefault();
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters.");
+  async function sendResetEmail() {
+    if (!email) {
+      toast.error("No email on file.");
       return;
     }
-    if (password !== confirm) {
-      toast.error("Passwords don't match.");
-      return;
-    }
-    setSavingPw(true);
+    setSending(true);
     const sb = createClient();
-    const { error } = await sb.auth.updateUser({ password });
-    setSavingPw(false);
+    const redirectTo = `${window.location.origin}/auth/callback?next=/reset-password`;
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+    setSending(false);
     if (error) {
       toast.error(error.message);
       return;
     }
-    toast.success("Password updated.");
-    setPassword("");
-    setConfirm("");
+    track("password_reset_requested", { provider });
+    setSent(true);
+    toast.success("Check your inbox for the password reset link.");
   }
 
   return (
@@ -84,26 +78,39 @@ export default function AccountPage() {
           <CardTitle>{provider === "google" ? "Set a password" : "Change password"}</CardTitle>
           <CardDescription>
             {provider === "google"
-              ? "Add a password so you can also sign in without Google."
-              : "Use at least 8 characters."}
+              ? "We'll email you a secure link to set a password so you can also sign in without Google."
+              : "We'll email you a secure link. Open it to choose a new password."}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={updatePassword} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">New password</Label>
-              <Input id="password" type="password" autoComplete="new-password" minLength={8}
-                value={password} onChange={(e) => setPassword(e.target.value)} />
+          {sent ? (
+            <div className="flex items-start gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-4">
+              <MailCheck className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+              <div className="text-sm">
+                <p className="font-medium">Email sent to {email}</p>
+                <p className="mt-0.5 text-muted-foreground">
+                  Click the link in that email to set a new password. Didn&apos;t get it?{" "}
+                  <button
+                    onClick={sendResetEmail}
+                    disabled={sending}
+                    className="font-medium text-primary underline underline-offset-2 disabled:opacity-50"
+                  >
+                    Resend
+                  </button>
+                  .
+                </p>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm">Confirm password</Label>
-              <Input id="confirm" type="password" autoComplete="new-password" minLength={8}
-                value={confirm} onChange={(e) => setConfirm(e.target.value)} />
-            </div>
-            <Button type="submit" disabled={savingPw}>
-              {savingPw && <Loader2 className="size-4 animate-spin" />} Save password
+          ) : (
+            <Button onClick={sendResetEmail} disabled={sending}>
+              {sending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <KeyRound className="size-4" />
+              )}
+              {provider === "google" ? "Email me a link to set a password" : "Change password"}
             </Button>
-          </form>
+          )}
         </CardContent>
       </Card>
     </div>

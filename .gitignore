@@ -37,3 +37,4 @@ next-env.d.ts.bak
 .DS_Store
 Thumbs.db
 *.log
+.commitmsg.tmp

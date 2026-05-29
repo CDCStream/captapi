@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { track } from "@/lib/analytics";
 
 export function GoogleButton({
   next,
@@ -16,6 +17,7 @@ export function GoogleButton({
 
   async function signInWithGoogle() {
     setLoading(true);
+    track("cta_click", { cta: "continue_with_google", next: next ?? "/dashboard" });
     const sb = createClient();
     const params = next ? `?next=${encodeURIComponent(next)}` : "";
     const { error } = await sb.auth.signInWithOAuth({
