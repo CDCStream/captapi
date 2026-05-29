@@ -18,6 +18,7 @@ import { CreativePricing, type PricingTier } from "@/components/ui/creative-pric
 import { api } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics";
+import { gaEvent, adsConversion } from "@/lib/gtag";
 import { cn } from "@/lib/utils";
 
 interface Balance {
@@ -166,6 +167,10 @@ export default function BillingPage() {
   async function checkout(body: { plan?: string; cycle?: "monthly" | "yearly"; pack?: string }) {
     setBusy(true);
     track("checkout_started", { ...body });
+    // Marketing signals: GA4 funnel event + Google Ads conversion for campaign
+    // optimisation. Fired on subscribe intent (checkout initiation).
+    gaEvent("begin_checkout", { ...body });
+    adsConversion();
     try {
       const { url } = await api.createCheckout(body);
       window.location.href = url;

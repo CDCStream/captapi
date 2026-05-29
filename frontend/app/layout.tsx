@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Bricolage_Grotesque, Caveat } from "next/font/google";
 import { Toaster } from "sonner";
 import { PageViewTracker } from "@/components/analytics/page-view-tracker";
+import { ThirdPartyScripts } from "@/components/analytics/third-party-scripts";
 import "./globals.css";
 
 const handwritten = Caveat({
@@ -41,6 +42,9 @@ export const metadata: Metadata = {
     "video data API",
   ],
   alternates: { canonical: "/" },
+  verification: process.env.NEXT_PUBLIC_GSC_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION }
+    : undefined,
   robots: {
     index: true,
     follow: true,
@@ -70,6 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Suspense fallback={null}>
           <PageViewTracker />
         </Suspense>
+        <ThirdPartyScripts />
         <Toaster richColors closeButton position="top-right" />
       </body>
     </html>
