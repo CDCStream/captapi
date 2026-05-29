@@ -70,7 +70,7 @@ export default function PlaygroundPage() {
   }
 
   const curl = `curl "${API_URL}${selected.path}?url=${encodeURIComponent(url || selected.placeholder)}" \\
-  -H "Authorization: Bearer sk_live_..."`;
+  -H "Authorization: Bearer capt_live_..."`;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -122,7 +122,7 @@ export default function PlaygroundPage() {
           <p className="text-xs text-muted-foreground mb-2">
             For programmatic use outside the dashboard, create an API key in{" "}
             <a href="/dashboard/api-keys" className="text-primary underline">API Keys</a> and replace{" "}
-            <code>sk_live_...</code> below.
+            <code>capt_live_...</code> below.
           </p>
           <pre className="bg-muted/50 p-4 rounded-md text-xs overflow-auto">{curl}</pre>
         </TabsContent>

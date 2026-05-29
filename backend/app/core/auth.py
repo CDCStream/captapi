@@ -1,8 +1,8 @@
 """Authentication dependency.
 
 Accepts either:
-  1. `Authorization: Bearer sk_live_...` / `sk_test_...`  → API key (programmatic use)
-  2. `Authorization: Bearer <Supabase JWT>`              → Logged-in dashboard user
+  1. `Authorization: Bearer capt_live_...` / `capt_test_...`  → API key (programmatic use)
+  2. `Authorization: Bearer <Supabase JWT>`                  → Logged-in dashboard user
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ log = structlog.get_logger(__name__)
 
 bearer_scheme = HTTPBearer(
     auto_error=False,
-    description="Your API key (sk_live_… / sk_test_…) or a dashboard session token.",
+    description="Your API key (capt_live_… / capt_test_…) or a dashboard session token.",
 )
 
 
@@ -114,7 +114,7 @@ async def require_api_key(
         )
     plain = credentials.credentials.strip()
 
-    if plain.startswith(("sk_live_", "sk_test_")):
+    if plain.startswith(("capt_live_", "capt_test_", "sk_live_", "sk_test_")):
         caller = await _resolve_api_key(plain)
     else:
         caller = await _resolve_session_jwt(plain)

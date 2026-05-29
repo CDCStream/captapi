@@ -90,7 +90,7 @@ socialkit-clone/
 
 ## API Endpoints
 
-All endpoints require `Authorization: Bearer sk_live_...` header.
+All endpoints require `Authorization: Bearer capt_live_...` header.
 
 ### YouTube
 - `GET /v1/youtube/transcript?url=...`

@@ -294,7 +294,7 @@ export default async function ApiDetailPage({
           <p className="mt-3 text-sm text-muted-foreground">
             Authentication: send your key as{" "}
             <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-              Authorization: Bearer sk_live_...
+              Authorization: Bearer capt_live_...
             </code>
             . Each successful call costs{" "}
             <strong className="text-foreground">

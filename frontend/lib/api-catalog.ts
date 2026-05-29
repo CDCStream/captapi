@@ -431,7 +431,7 @@ export function exampleQueryString(ep: ApiEndpoint): string {
 }
 
 export function curlExample(ep: ApiEndpoint): string {
-  return `curl "${API_URL}${ep.path}?${exampleQueryString(ep)}" \\\n  -H "Authorization: Bearer sk_live_..."`;
+  return `curl "${API_URL}${ep.path}?${exampleQueryString(ep)}" \\\n  -H "Authorization: Bearer capt_live_..."`;
 }
 
 export function faqs(ep: ApiEndpoint): FaqItem[] {

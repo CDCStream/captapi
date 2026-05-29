@@ -115,7 +115,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
           </CardHeader>
           <CardContent>
             <pre className="bg-muted/50 p-3 rounded text-xs overflow-x-auto"><code>{`curl "${(process.env.NEXT_PUBLIC_API_URL || "https://api.captapi.com")}${t.apiEndpoint}?url=YOUR_URL" \\
-  -H "Authorization: Bearer sk_live_..."`}</code></pre>
+  -H "Authorization: Bearer capt_live_..."`}</code></pre>
             <Button asChild className="mt-4 w-full"><Link href="/signup">Get API key (free)</Link></Button>
           </CardContent>
         </Card>

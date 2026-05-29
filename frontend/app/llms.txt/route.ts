@@ -39,7 +39,7 @@ export async function GET() {
 Captapi is a developer API (Merchant of Record billing via Dodo Payments) that unifies access to public social-media video data across four platforms. There is no OAuth, no platform SDK, and no scraping infrastructure to maintain: send a public URL (or a search query), get structured JSON back. A single API key works across every platform. Responses are cached for 24 hours, so repeat lookups are instant and cost 0 credits. New accounts start with 100 free credits.
 
 Base API URL: https://api.captapi.com
-Authentication: \`Authorization: Bearer sk_live_...\` (create a key in the dashboard).
+Authentication: \`Authorization: Bearer capt_live_...\` (create a key in the dashboard).
 Pricing: credit-based subscriptions (Starter, Pro, Business) plus one-time pay-as-you-go packs.
 
 ## Platforms

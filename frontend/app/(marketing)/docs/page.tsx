@@ -19,7 +19,7 @@ const firstRequest = [
   {
     label: "cURL",
     code: `curl "${API_URL}/v1/youtube/transcript?url=https%3A%2F%2Fyoutube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ" \\
-  -H "Authorization: Bearer sk_live_..."`,
+  -H "Authorization: Bearer capt_live_..."`,
   },
   {
     label: "Python",
@@ -28,7 +28,7 @@ const firstRequest = [
 res = requests.get(
     "${API_URL}/v1/youtube/transcript",
     params={"url": "https://youtube.com/watch?v=dQw4w9WgXcQ"},
-    headers={"Authorization": "Bearer sk_live_..."},
+    headers={"Authorization": "Bearer capt_live_..."},
 )
 print(res.json())`,
   },
@@ -39,7 +39,7 @@ print(res.json())`,
   encodeURIComponent("https://youtube.com/watch?v=dQw4w9WgXcQ");
 
 const res = await fetch(url, {
-  headers: { Authorization: "Bearer sk_live_..." },
+  headers: { Authorization: "Bearer capt_live_..." },
 });
 const data = await res.json();
 console.log(data);`,
@@ -52,7 +52,7 @@ curl_setopt($ch, CURLOPT_URL, "${API_URL}/v1/youtube/transcript?" . http_build_q
     "url" => "https://youtube.com/watch?v=dQw4w9WgXcQ",
 ]));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer sk_live_..."]);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer capt_live_..."]);
 echo curl_exec($ch);
 curl_close($ch);`,
   },
@@ -69,7 +69,7 @@ import (
 func main() {
 	req, _ := http.NewRequest("GET",
 		"${API_URL}/v1/youtube/transcript?url=https://youtube.com/watch?v=dQw4w9WgXcQ", nil)
-	req.Header.Set("Authorization", "Bearer sk_live_...")
+	req.Header.Set("Authorization", "Bearer capt_live_...")
 	res, _ := http.DefaultClient.Do(req)
 	defer res.Body.Close()
 	body, _ := io.ReadAll(res.Body)
@@ -247,13 +247,13 @@ export default function DocsPage() {
           your dashboard
         </Link>{" "}
         and send them in the <code className="rounded bg-muted px-1.5 py-0.5 text-xs">Authorization</code>{" "}
-        header. Keep keys secret — never expose <code className="rounded bg-muted px-1.5 py-0.5 text-xs">sk_live_</code>{" "}
+        header. Keep keys secret — never expose <code className="rounded bg-muted px-1.5 py-0.5 text-xs">capt_live_</code>{" "}
         keys in client-side code.
       </p>
       <div className="mt-4">
         <CodeTabs
           samples={[
-            { label: "Header", code: `Authorization: Bearer sk_live_xxxxxxxxxxxxxxxxxxxx` },
+            { label: "Header", code: `Authorization: Bearer capt_live_xxxxxxxxxxxxxxxxxxxx` },
           ]}
         />
       </div>

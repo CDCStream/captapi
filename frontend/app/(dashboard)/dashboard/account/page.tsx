@@ -13,10 +13,8 @@ import { createClient } from "@/lib/supabase/client";
 export default function AccountPage() {
   const [email, setEmail] = useState("");
   const [provider, setProvider] = useState<string>("email");
-  const [newEmail, setNewEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [savingEmail, setSavingEmail] = useState(false);
   const [savingPw, setSavingPw] = useState(false);
 
   useEffect(() => {
@@ -28,24 +26,6 @@ export default function AccountPage() {
       setProvider((user.app_metadata?.provider as string) ?? "email");
     })();
   }, []);
-
-  async function updateEmail(e: React.FormEvent) {
-    e.preventDefault();
-    if (!newEmail || newEmail === email) {
-      toast.error("Enter a new, different email.");
-      return;
-    }
-    setSavingEmail(true);
-    const sb = createClient();
-    const { error } = await sb.auth.updateUser({ email: newEmail });
-    setSavingEmail(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Confirmation sent. Check both inboxes to confirm the change.");
-    setNewEmail("");
-  }
 
   async function updatePassword(e: React.FormEvent) {
     e.preventDefault();
@@ -95,28 +75,6 @@ export default function AccountPage() {
               </Badge>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Change email */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Change email</CardTitle>
-          <CardDescription>
-            We&apos;ll email a confirmation link to verify the new address.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={updateEmail} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="newEmail">New email</Label>
-              <Input id="newEmail" type="email" value={newEmail} placeholder={email}
-                onChange={(e) => setNewEmail(e.target.value)} />
-            </div>
-            <Button type="submit" disabled={savingEmail}>
-              {savingEmail && <Loader2 className="size-4 animate-spin" />} Update email
-            </Button>
-          </form>
         </CardContent>
       </Card>
 

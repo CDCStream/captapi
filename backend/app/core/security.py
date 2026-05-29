@@ -5,8 +5,8 @@ import secrets
 
 import bcrypt
 
-API_KEY_PREFIX_LIVE = "sk_live_"
-API_KEY_PREFIX_TEST = "sk_test_"
+API_KEY_PREFIX_LIVE = "capt_live_"
+API_KEY_PREFIX_TEST = "capt_test_"
 API_KEY_BODY_BYTES = 24
 
 
@@ -16,9 +16,9 @@ def generate_api_key(env: str = "development") -> tuple[str, str, str]:
 
     Returns
     -------
-    plain_key : str        The full key to show user once (sk_live_...).
+    plain_key : str        The full key to show user once (capt_live_...).
     key_hash  : str        Hash to store in DB.
-    key_prefix: str        First 12 chars for display ("sk_live_abc1").
+    key_prefix: str        First 12 chars for display ("capt_live_ab").
     """
     prefix = API_KEY_PREFIX_LIVE if env == "production" else API_KEY_PREFIX_TEST
     body = secrets.token_urlsafe(API_KEY_BODY_BYTES).replace("-", "").replace("_", "")[:32]
