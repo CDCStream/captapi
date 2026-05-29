@@ -20,6 +20,7 @@ const display = Bricolage_Grotesque({
 });
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const AHREFS_KEY = process.env.NEXT_PUBLIC_AHREFS_KEY || "";
 
 export const metadata: Metadata = {
   title: {
@@ -70,6 +71,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning className={`${handwritten.variable} ${display.variable}`}>
       <body className="min-h-screen bg-background font-sans antialiased">
+        {/* Ahrefs Web Analytics — static tag so analytics.js can read data-key
+            from document.currentScript (breaks if injected dynamically). */}
+        {AHREFS_KEY && (
+          // eslint-disable-next-line @next/next/no-sync-scripts
+          <script src="https://analytics.ahrefs.com/analytics.js" data-key={AHREFS_KEY} async />
+        )}
         {children}
         <Suspense fallback={null}>
           <PageViewTracker />
