@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { ALL_ENDPOINTS, SITE_URL } from "@/lib/api-catalog";
 import { TOOL_SLUGS } from "@/lib/tools";
+import { COMPETITOR_SLUGS } from "@/lib/competitors";
 import { getServiceClient } from "@/lib/supabase/admin";
 
 export const revalidate = 3600;
@@ -30,6 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/pricing`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
     { url: `${base}/docs`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/tools`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/alternatives`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/blog`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
     { url: `${base}/legal/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/legal/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
@@ -49,7 +51,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  const alternativePages: MetadataRoute.Sitemap = COMPETITOR_SLUGS.map((slug) => ({
+    url: `${base}/alternatives/${slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
   const blogPages = await blogEntries(base);
 
-  return [...staticPages, ...apiPages, ...toolPages, ...blogPages];
+  return [...staticPages, ...apiPages, ...toolPages, ...alternativePages, ...blogPages];
 }

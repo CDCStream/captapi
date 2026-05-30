@@ -99,6 +99,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
               <ul className="space-y-2 text-muted-foreground">
                 <li><Link href="/docs" className="hover:text-foreground">API Reference</Link></li>
                 <li><Link href="/blog" className="hover:text-foreground">Blog</Link></li>
+                <li><Link href="/alternatives" className="hover:text-foreground">Alternatives</Link></li>
                 <li><Link href="/#faq" className="hover:text-foreground">FAQ</Link></li>
                 <li><a href="mailto:support@captapi.com" className="hover:text-foreground">Contact</a></li>
               </ul>
