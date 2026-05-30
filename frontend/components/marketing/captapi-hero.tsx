@@ -92,7 +92,7 @@ export function CaptapiHero() {
           <p className="text-primary/60 mx-auto max-w-2xl py-6 text-base md:text-lg">
             Extract transcripts, AI summaries, comments, downloads &amp;
             engagement metrics from{" "}
-            <span className="inline-block min-w-[10ch] text-left align-bottom font-semibold text-primary">
+            <span className="font-semibold text-primary">
               <TypeWriter strings={platformsTyped} />
             </span>{" "}
             — with a single request.
@@ -217,8 +217,12 @@ export function CaptapiHero() {
       </div>
 
       {/* mouse-trail canvas */}
+      {/* Decorative mouse-trail. Give it a definite CSS size (h-screen w-full)
+          so it does NOT depend on its intrinsic 300x150 default before JS sets
+          the width/height attrs — otherwise it jumps to viewport size on mount
+          and causes a huge layout shift (CLS). */}
       <canvas
-        className="pointer-events-none absolute inset-0 mx-auto"
+        className="pointer-events-none absolute inset-0 h-screen w-full"
         id="canvas"
       />
     </section>
