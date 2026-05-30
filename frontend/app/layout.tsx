@@ -42,7 +42,6 @@ export const metadata: Metadata = {
     "comments API",
     "video data API",
   ],
-  alternates: { canonical: "/" },
   verification: process.env.NEXT_PUBLIC_GSC_VERIFICATION
     ? { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION }
     : undefined,

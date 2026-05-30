@@ -12,6 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${t.title} | Captapi`,
     description: t.description,
+    alternates: { canonical: `/tools/${slug}` },
   };
 }
 

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,10 @@ import { CaptapiHero } from "@/components/marketing/captapi-hero";
 import { ApiCatalog } from "@/components/marketing/api-catalog";
 import { PricingPlans } from "@/components/marketing/pricing-plans";
 import { ALL_ENDPOINTS } from "@/lib/api-catalog";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const features = [
   {

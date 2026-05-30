@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import { PricingPlans } from "@/components/marketing/pricing-plans";
+
+export const metadata: Metadata = {
+  title: "Pricing — Captapi",
+  description:
+    "Simple, usage-based pricing for the Captapi social media data API. Start free with 100 credits — no credit card required.",
+  alternates: { canonical: "/pricing" },
+};
 
 export default function PricingPage() {
   return (

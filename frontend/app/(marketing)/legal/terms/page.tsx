@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Terms of Service — Captapi",
   description: "Terms of Service for Captapi API.",
+  alternates: { canonical: "/legal/terms" },
 };
 
 export default function TermsPage() {
