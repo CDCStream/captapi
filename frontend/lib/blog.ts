@@ -103,18 +103,47 @@ export function parseBlogPost(row: BlogPostRow): BlogPost {
   };
 }
 
-/** Best-effort sitemap ping to Google & Bing. Never throws. */
-export async function pingSearchEngines(): Promise<void> {
-  const sitemap = encodeURIComponent(`${SITE_URL}/sitemap.xml`);
-  const urls = [
-    `https://www.google.com/ping?sitemap=${sitemap}`,
-    `https://www.bing.com/ping?sitemap=${sitemap}`,
-  ];
+// Public IndexNow key — published at /<key>.txt (NOT a secret by design).
+export const INDEXNOW_KEY = "7c3e1a9f4b2d486e8a05f1c6d92b3e74";
+
+/**
+ * Submit specific URLs to IndexNow (Bing, Yandex, Seznam, Naver…).
+ * The legacy Google/Bing `?sitemap=` ping endpoints were both deprecated,
+ * so IndexNow is the only working instant-notification protocol now.
+ * Google does not support IndexNow — it relies on the sitemap + crawl.
+ * Never throws; indexing notifications are best-effort.
+ */
+export async function submitToIndexNow(urls: string[]): Promise<void> {
+  const list = Array.from(new Set(urls.filter(Boolean)));
+  if (!list.length) return;
+  let host: string;
   try {
-    await Promise.allSettled(urls.map((u) => fetch(u, { method: "GET" })));
+    host = new URL(SITE_URL).host;
+  } catch {
+    return;
+  }
+  try {
+    await fetch("https://api.indexnow.org/indexnow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({
+        host,
+        key: INDEXNOW_KEY,
+        keyLocation: `${SITE_URL}/${INDEXNOW_KEY}.txt`,
+        urlList: list,
+      }),
+    });
   } catch {
     // ignore — pinging is non-critical
   }
+}
+
+/**
+ * Notify search engines about new/updated blog content. Always includes the
+ * blog index so listing pages refresh too. Never throws.
+ */
+export async function pingSearchEngines(urls: string[] = []): Promise<void> {
+  await submitToIndexNow([...urls, `${SITE_URL}/blog`]);
 }
 
 export function formatDate(iso: string): string {

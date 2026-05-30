@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { SITE_URL } from "@/lib/api-catalog";
 import { getServiceClient } from "@/lib/supabase/admin";
 import { pingSearchEngines, slugify, type BlogPostRow } from "@/lib/blog";
 
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (status === "published") {
-    await pingSearchEngines();
+    await pingSearchEngines([`${SITE_URL}/blog/${row.slug}`]);
   }
 
   return NextResponse.json({ ok: true, slug: row.slug });

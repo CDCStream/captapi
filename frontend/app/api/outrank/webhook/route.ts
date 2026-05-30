@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { SITE_URL } from "@/lib/api-catalog";
 import { getServiceClient } from "@/lib/supabase/admin";
 import {
   pickArray,
@@ -147,8 +148,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  if (rows.some((r) => r.status === "published")) {
-    await pingSearchEngines();
+  const publishedUrls = rows
+    .filter((r) => r.status === "published")
+    .map((r) => `${SITE_URL}/blog/${r.slug}`);
+  if (publishedUrls.length) {
+    await pingSearchEngines(publishedUrls);
   }
 
   return NextResponse.json({
