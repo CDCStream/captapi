@@ -92,7 +92,7 @@ export function CaptapiHero() {
           <p className="text-primary/60 mx-auto max-w-2xl py-6 text-base md:text-lg">
             Extract transcripts, AI summaries, comments, downloads &amp;
             engagement metrics from{" "}
-            <span className="font-semibold text-primary">
+            <span className="inline-block min-w-[10ch] text-left align-bottom font-semibold text-primary">
               <TypeWriter strings={platformsTyped} />
             </span>{" "}
             — with a single request.
