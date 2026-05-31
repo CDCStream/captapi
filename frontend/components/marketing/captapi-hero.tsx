@@ -50,7 +50,7 @@ export function CaptapiHero() {
       {/* top glow — capped to viewport so it never causes horizontal scroll */}
       <div className="absolute left-1/2 top-0 -z-10 h-[400px] w-full max-w-[700px] -translate-x-1/2 rounded-full bg-gradient-to-b from-blue-500/20 to-transparent blur-3xl" />
 
-      <div className="flex flex-col items-center justify-center px-4 sm:px-6 text-center">
+      <div className="flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center px-4 sm:px-6 text-center">
         {/* badge pill */}
         <div className="mb-5 mt-6 md:mb-6 md:mt-12">
           <div className="relative flex items-center rounded-full border bg-popover px-3 py-1 text-xs text-primary/70">
