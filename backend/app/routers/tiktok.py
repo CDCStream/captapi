@@ -952,13 +952,16 @@ async def tiktok_popular_hashtags(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            # coregent only emits hashtag *entity* records for explicit hashtag
-            # inputs; for a keyword we instead aggregate the hashtags attached to
-            # the trending videos and rank them by frequency + total plays.
+            # The keyword is used as a seed hashtag (coregent's search mode is
+            # unreliable, but hashtag pages are solid). We then aggregate the
+            # co-occurring hashtags on those videos and rank them by frequency
+            # + total plays to surface related/trending hashtags.
+            seed = query.lstrip("#").strip()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK_TREND_DISCOVERY,
                 {
-                    "searchQueries": [query],
+                    "searchQueries": [],
+                    "hashtags": [seed],
                     "resultsPerQuery": n_videos,
                     "includeVideos": True,
                     "includeHashtags": False,
