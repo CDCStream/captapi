@@ -265,6 +265,23 @@ const TypeWriter = ({ strings }: TypeWriterProps) => {
   );
 };
 
+// Variant for large headings — slower, longer pause, no cursor clutter.
+const HeadlineTypeWriter = ({ strings }: TypeWriterProps) => {
+  return (
+    <ReactTyped
+      loop
+      typeSpeed={60}
+      backSpeed={30}
+      strings={strings}
+      smartBackspace
+      backDelay={2000}
+      loopCount={0}
+      showCursor
+      cursorChar="_"
+    />
+  );
+};
+
 type TColorProp = string | string[];
 
 interface ShineBorderProps {
@@ -317,4 +334,4 @@ function ShineBorder({
   );
 }
 
-export { renderCanvas, TypeWriter, ShineBorder };
+export { renderCanvas, TypeWriter, HeadlineTypeWriter, ShineBorder };

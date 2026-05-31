@@ -7,6 +7,7 @@ import {
   renderCanvas,
   ShineBorder,
   TypeWriter,
+  HeadlineTypeWriter,
 } from "@/components/ui/hero-designali";
 import { GoogleButton } from "@/components/auth/google-button";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,17 @@ const platformsTyped = [
   "Facebook",
   "Shorts",
   "Reels",
+];
+
+const contentTyped = [
+  "videos",
+  "posts",
+  "comments",
+  "hashtags",
+  "followers",
+  "transcripts",
+  "reels",
+  "shorts",
 ];
 
 export function CaptapiHero() {
@@ -73,7 +85,7 @@ export function CaptapiHero() {
                 <span className="gradient-text">
                   structured data from Social Media
                 </span>{" "}
-                videos, posts, comments &amp; more
+                <HeadlineTypeWriter strings={contentTyped} />
               </span>
             </h1>
 
