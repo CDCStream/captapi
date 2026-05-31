@@ -115,9 +115,9 @@ export default function LandingPage() {
       <CaptapiHero />
 
       {/* APIs — One API. Every platform. */}
-      <section className="py-16 border-t bg-muted/30" id="apis">
+      <section className="pt-6 pb-16 border-t bg-muted/30" id="apis">
         <div className="container max-w-6xl">
-          <div className="text-center mb-10">
+          <div className="text-center mb-8">
             <h2 className="text-3xl font-bold">One API. Every platform.</h2>
             <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
               {ALL_ENDPOINTS.length} REST endpoints across YouTube, TikTok,
