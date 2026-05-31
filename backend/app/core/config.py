@@ -34,12 +34,17 @@ class Settings(BaseSettings):
 
     APIFY_ACTOR_TIKTOK: str = "clockworks/tiktok-scraper"
     APIFY_ACTOR_TIKTOK_COMMENTS: str = "clockworks/tiktok-comments-scraper"
+    # Dedicated comment+reply scraper with a real reply API (parentCommentId
+    # linking); far more reliable for fetching replies than the base comments
+    # actor, billed pay-per-result.
+    APIFY_ACTOR_TIKTOK_COMMENT_REPLIES: str = "coregent/tiktok-comment-scraper"
     APIFY_ACTOR_TIKTOK_PROFILE: str = "clockworks/tiktok-profile-scraper"
     APIFY_ACTOR_TIKTOK_SEARCH: str = "clockworks/tiktok-scraper"
-    # Followers / followings use a dedicated relationship scraper (mode-driven);
-    # music feeds use the clockworks sound scraper.
-    APIFY_ACTOR_TIKTOK_FOLLOWERS: str = "coregent/tiktok-followers-following-scraper"
-    APIFY_ACTOR_TIKTOK_FOLLOWINGS: str = "coregent/tiktok-followers-following-scraper"
+    # Followers / followings use the official Clockworks relationship scraper
+    # (returns `authorMeta` + `connectionType`); music feeds use the clockworks
+    # sound scraper.
+    APIFY_ACTOR_TIKTOK_FOLLOWERS: str = "clockworks/tiktok-followers-scraper"
+    APIFY_ACTOR_TIKTOK_FOLLOWINGS: str = "clockworks/tiktok-followers-scraper"
     APIFY_ACTOR_TIKTOK_MUSIC: str = "clockworks/tiktok-sound-scraper"
 
     APIFY_ACTOR_INSTAGRAM: str = "apify/instagram-scraper"

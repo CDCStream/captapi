@@ -31,44 +31,29 @@ CREDIT_FOLLOWERS_BASE = 2
 CREDIT_MUSIC_POSTS_BASE = 2
 
 
-# Residential proxy is required for the followers/followings relationship
-# scraper; without it the actor only returns error records.
+# Residential proxy improves reliability of the dedicated comment/reply scraper
+# on large or rate-limited videos (optional but recommended by the actor).
 TIKTOK_RESIDENTIAL_PROXY = {"useApifyProxy": True, "apifyProxyGroups": ["RESIDENTIAL"]}
 
 
-def _is_user_record(item: dict) -> bool:
-    """Keep only real relationship rows (drop error/summary records)."""
-    record_type = item.get("recordType")
-    if record_type and record_type != "relationship":
-        return False
-    if item.get("isSummary"):
-        return False
-    return bool(item.get("username") or item.get("uniqueId"))
+def _normalize_connection(item: dict) -> dict:
+    """Map a Clockworks follower/following relationship row to our user shape.
 
-
-def _normalize_user(item: dict) -> dict:
-    """Map a raw TikTok user object (follower / following list) to our shape."""
-    stats = item.get("authorStats") or item.get("stats") or {}
-    username = item.get("username") or item.get("uniqueId") or item.get("name") or item.get("nickName")
-    verified = item.get("isVerified")
-    if verified is None:
-        verified = item.get("verified")
+    Each row exposes the connected profile under ``authorMeta`` plus a
+    ``connectionType`` ("follower" / "following").
+    """
+    a = item.get("authorMeta") or {}
+    username = a.get("name") or a.get("uniqueId")
     return {
         "username": safe_str(username),
-        "displayName": safe_str(item.get("displayName") or item.get("nickname") or item.get("nickName")),
-        "bio": safe_str(item.get("bio") or item.get("signature")),
-        "url": safe_str(item.get("profileUrl"))
+        "displayName": safe_str(a.get("nickName") or a.get("nickname")),
+        "bio": safe_str(a.get("signature")),
+        "url": safe_str(a.get("profileUrl"))
         or (f"https://www.tiktok.com/@{username}" if username else None),
-        "followers": safe_int(
-            item.get("followersCount")
-            or stats.get("followerCount")
-            or item.get("followerCount")
-            or item.get("fans")
-        ),
-        "verified": verified,
-        "profileImage": safe_str(
-            item.get("profilePictureUrl") or item.get("avatarLarger") or item.get("avatar")
-        ),
+        "followers": safe_int(a.get("fans")),
+        "following": safe_int(a.get("following")),
+        "verified": a.get("verified"),
+        "profileImage": safe_str(a.get("avatar") or a.get("originalAvatarUrl")),
     }
 
 
@@ -482,54 +467,48 @@ async def tiktok_comment_replies(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
+            # The dedicated reply scraper crawls a video's comments and emits
+            # each reply as its own row linked to its parent via
+            # ``parentCommentId``. We crawl enough top comments to surface the
+            # target comment, then keep only its replies.
             items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_COMMENTS,
+                settings.APIFY_ACTOR_TIKTOK_COMMENT_REPLIES,
                 {
-                    "postURLs": [url],
-                    "commentsPerPost": limit,
-                    "maxRepliesPerComment": limit,
+                    "videoUrls": [url],
+                    "maxComments": 200,
+                    "includeReplies": True,
+                    "maxRepliesPerComment": min(limit, 500),
+                    "includeAuthorInfo": True,
+                    "sort": "top",
+                    "proxyConfiguration": TIKTOK_RESIDENTIAL_PROXY,
                 },
-                max_items=limit * 4,
+                max_items=2500,
             )
             replies = []
-            for c in items:
-                parent = safe_str(
-                    c.get("repliesToId")
-                    or c.get("parentCommentId")
-                    or c.get("replyToId")
-                )
-                is_reply = bool(parent) and parent == comment_id
-                # Some actors nest replies under the parent comment object.
-                if not is_reply and safe_str(c.get("cid") or c.get("id")) == comment_id:
-                    for r in c.get("replies") or c.get("replyComments") or []:
-                        user = r.get("user") or {}
-                        replies.append(
-                            {
-                                "id": safe_str(r.get("cid") or r.get("id")),
-                                "text": (r.get("text") or "").strip(),
-                                "author": safe_str(user.get("uniqueId") or r.get("authorName")),
-                                "likeCount": safe_int(r.get("diggCount") or r.get("likeCount")),
-                                "publishedAt": safe_str(r.get("createTimeISO")),
-                            }
-                        )
+            for r in items:
+                # Reply rows are the only ones carrying parentCommentId.
+                if safe_str(r.get("parentCommentId")) != comment_id:
                     continue
-                if is_reply:
-                    user = c.get("user") or {}
-                    replies.append(
-                        {
-                            "id": safe_str(c.get("cid") or c.get("id")),
-                            "text": (c.get("text") or "").strip(),
-                            "author": safe_str(user.get("uniqueId") or c.get("authorName")),
-                            "likeCount": safe_int(c.get("diggCount") or c.get("likeCount")),
-                            "publishedAt": safe_str(c.get("createTimeISO")),
-                        }
-                    )
+                replies.append(
+                    {
+                        "id": safe_str(r.get("replyId") or r.get("cid") or r.get("id")),
+                        "text": (r.get("replyText") or r.get("text") or "").strip(),
+                        "author": safe_str(r.get("replyAuthorUsername")),
+                        "authorName": safe_str(r.get("replyAuthorNickname")),
+                        "likeCount": safe_int(r.get("replyLikeCount")),
+                        "publishedAt": safe_str(r.get("replyCreateTime")),
+                        "verified": r.get("replyAuthorVerified"),
+                        "profileImage": safe_str(r.get("replyAuthorAvatar")),
+                    }
+                )
+                if len(replies) >= limit:
+                    break
             return {
                 "platform": "tiktok",
                 "url": url,
                 "commentId": comment_id,
-                "totalReturned": len(replies[:limit]),
-                "replies": replies[:limit],
+                "totalReturned": len(replies),
+                "replies": replies,
             }
 
         data = await cached_or_run(
@@ -565,13 +544,16 @@ async def tiktok_user_followers(
                 settings.APIFY_ACTOR_TIKTOK_FOLLOWERS,
                 {
                     "profiles": [handle],
-                    "mode": "followers",
-                    "maxItemsPerProfile": limit,
-                    "proxyConfiguration": TIKTOK_RESIDENTIAL_PROXY,
+                    "maxFollowersPerProfile": limit,
+                    "maxFollowingPerProfile": 0,
                 },
                 max_items=limit,
             )
-            users = [_normalize_user(i) for i in items if _is_user_record(i)][:limit]
+            users = [
+                _normalize_connection(i)
+                for i in items
+                if i.get("connectionType") == "follower"
+            ][:limit]
             return {"url": url, "totalReturned": len(users), "followers": users}
 
         data = await cached_or_run(
@@ -607,13 +589,16 @@ async def tiktok_user_followings(
                 settings.APIFY_ACTOR_TIKTOK_FOLLOWINGS,
                 {
                     "profiles": [handle],
-                    "mode": "following",
-                    "maxItemsPerProfile": limit,
-                    "proxyConfiguration": TIKTOK_RESIDENTIAL_PROXY,
+                    "maxFollowersPerProfile": 0,
+                    "maxFollowingPerProfile": limit,
                 },
                 max_items=limit,
             )
-            users = [_normalize_user(i) for i in items if _is_user_record(i)][:limit]
+            users = [
+                _normalize_connection(i)
+                for i in items
+                if i.get("connectionType") == "following"
+            ][:limit]
             return {"url": url, "totalReturned": len(users), "followings": users}
 
         data = await cached_or_run(
