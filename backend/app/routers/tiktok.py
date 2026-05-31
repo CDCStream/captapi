@@ -940,7 +940,9 @@ async def tiktok_popular_hashtags(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_TREND, CREDIT_SEARCH)
+    # Apify cost is driven by the number of videos fetched, not returned tags.
+    n_videos = max(limit, 25)
+    cost = _scaled_credits(n_videos, RATE_TREND, CREDIT_SEARCH)
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/popular-hashtags",
@@ -950,34 +952,50 @@ async def tiktok_popular_hashtags(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
+            # coregent only emits hashtag *entity* records for explicit hashtag
+            # inputs; for a keyword we instead aggregate the hashtags attached to
+            # the trending videos and rank them by frequency + total plays.
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK_TREND_DISCOVERY,
                 {
                     "searchQueries": [query],
-                    "resultsPerQuery": limit,
-                    "includeVideos": False,
-                    "includeHashtags": True,
+                    "resultsPerQuery": n_videos,
+                    "includeVideos": True,
+                    "includeHashtags": False,
                     "sortBy": "popular",
                     "proxyConfiguration": {"useApifyProxy": True},
                 },
-                max_items=limit * 2,
+                max_items=n_videos,
             )
-            hashtags = []
-            for h in items:
-                if h.get("recordType") != "hashtag":
+            agg: dict[str, dict[str, int]] = {}
+            for v in items:
+                if v.get("recordType") != "video":
                     continue
-                hashtags.append(
-                    {
-                        "name": safe_str(h.get("hashtag") or h.get("hashtagTitle")),
-                        "url": safe_str(h.get("hashtagUrl")),
-                        "rank": safe_int(h.get("position")),
-                        "viewCount": safe_int(h.get("viewCount")),
-                        "videoCount": safe_int(h.get("videoCount")),
-                        "description": safe_str(h.get("description")),
-                    }
-                )
-                if len(hashtags) >= limit:
-                    break
+                tags = v.get("hashtags")
+                if not isinstance(tags, list):
+                    tags = []
+                plays = safe_int(v.get("playCount")) or 0
+                for t in tags:
+                    name = safe_str(t)
+                    if not name:
+                        continue
+                    name = name.lstrip("#").lower()
+                    if not name:
+                        continue
+                    slot = agg.setdefault(name, {"count": 0, "plays": 0})
+                    slot["count"] += 1
+                    slot["plays"] += plays
+            ranked = sorted(agg.items(), key=lambda kv: (kv[1]["count"], kv[1]["plays"]), reverse=True)
+            hashtags = [
+                {
+                    "name": name,
+                    "url": f"https://www.tiktok.com/tag/{name}",
+                    "rank": i + 1,
+                    "videoCount": slot["count"],
+                    "totalPlays": slot["plays"],
+                }
+                for i, (name, slot) in enumerate(ranked[:limit])
+            ]
             return {"query": query, "totalReturned": len(hashtags), "hashtags": hashtags}
 
         data = await cached_or_run(
@@ -986,5 +1004,5 @@ async def tiktok_popular_hashtags(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["hashtags"]), RATE_TREND, CREDIT_SEARCH)
+        ctx["credits_override"] = cost
         return ApiResponse(data=data)
