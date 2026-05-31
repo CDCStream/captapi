@@ -67,7 +67,15 @@ export default async function DashboardOverview() {
   const total = subCredits + topupCredits;
   const subPct = total > 0 ? Math.round((subCredits / total) * 100) : 0;
 
-  const name = user?.email?.split("@")[0] ?? "there";
+  const meta = user?.user_metadata ?? {};
+  const metaName =
+    meta.full_name ||
+    meta.name ||
+    [meta.first_name, meta.last_name].filter(Boolean).join(" ");
+  const name =
+    (typeof metaName === "string" && metaName.trim()) ||
+    user?.email?.split("@")[0] ||
+    "there";
   const renews = balance?.subscription_renews_at
     ? new Date(balance.subscription_renews_at).toLocaleDateString(undefined, {
         month: "short",
