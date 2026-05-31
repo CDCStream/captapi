@@ -68,8 +68,9 @@ class Settings(BaseSettings):
     APIFY_ACTOR_FACEBOOK_POSTS: str = "apify/facebook-posts-scraper"
     APIFY_ACTOR_FACEBOOK_PAGES: str = "apify/facebook-pages-scraper"
     APIFY_ACTOR_FACEBOOK_COMMENTS: str = "apify/facebook-comments-scraper"
-    # Pay-per-result ($3.90/1k), no monthly rental. Input: profileUrls + maxResults.
-    APIFY_ACTOR_FACEBOOK_REELS: str = "powerful_bachelor/facebook-profile-reels-scraper-ppr"
+    # Reels are filtered out of the official posts scraper's feed (no separate
+    # reels actor needed -> trusted, no full-permission grant, no monthly rent).
+    APIFY_ACTOR_FACEBOOK_REELS: str = "apify/facebook-posts-scraper"
     APIFY_ACTOR_FACEBOOK_GROUPS: str = "apify/facebook-groups-scraper"
 
     # YouTube community ("posts") tab. alpha-scraper is the cheapest rental
