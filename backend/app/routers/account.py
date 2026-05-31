@@ -77,11 +77,18 @@ async def send_welcome(caller: ApiCaller = Depends(require_api_key)):
         return ApiResponse(data={"sent": False, "reason": "already_sent"})
 
     user_res = sb.auth.admin.get_user_by_id(caller.user_id)
-    email = user_res.user.email if user_res and user_res.user else None
+    user = user_res.user if user_res else None
+    email = user.email if user else None
     if not email:
         return ApiResponse(data={"sent": False, "reason": "no_email"})
 
-    name = email.split("@")[0]
+    meta = getattr(user, "user_metadata", None) or {}
+    name = (
+        meta.get("first_name")
+        or meta.get("full_name")
+        or meta.get("name")
+        or email.split("@")[0]
+    )
     sent = send_welcome_email(email, name)
     if sent:
         sb.table("credit_balances").update(

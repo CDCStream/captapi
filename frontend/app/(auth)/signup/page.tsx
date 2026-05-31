@@ -14,6 +14,8 @@ import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics";
 
 export default function SignupPage() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,11 +30,18 @@ export default function SignupPage() {
     }
     setLoading(true);
     const sb = createClient();
+    const first = firstName.trim();
+    const last = lastName.trim();
     const { error } = await sb.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        data: {
+          first_name: first,
+          last_name: last,
+          full_name: [first, last].filter(Boolean).join(" "),
+        },
       },
     });
     setLoading(false);
@@ -111,6 +120,18 @@ export default function SignupPage() {
           <span className="h-px flex-1 bg-border" />
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">First name</Label>
+              <Input id="firstName" autoComplete="given-name" value={firstName}
+                onChange={(e) => setFirstName(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last name</Label>
+              <Input id="lastName" autoComplete="family-name" value={lastName}
+                onChange={(e) => setLastName(e.target.value)} required />
+            </div>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" autoComplete="email" value={email}
