@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -18,6 +19,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </span>
       </Link>
       {children}
+      <Link
+        href="/"
+        className="mt-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" />
+        Back to home
+      </Link>
     </div>
   );
 }
