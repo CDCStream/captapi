@@ -38,15 +38,15 @@ export function CaptapiHero() {
   }, []);
 
   return (
-    <section id="home" className="relative overflow-hidden">
+    <section id="home" className="relative overflow-x-hidden">
       {/* grid backdrop */}
       <div className="absolute inset-0 top-[300px] -z-10 h-[400px] w-full bg-[linear-gradient(to_right,#cbd5e1_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e1_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-30 [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)] dark:bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)]" />
-      {/* top glow */}
-      <div className="absolute left-1/2 top-0 -z-10 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-gradient-to-b from-blue-500/20 to-transparent blur-3xl" />
+      {/* top glow — capped to viewport so it never causes horizontal scroll */}
+      <div className="absolute left-1/2 top-0 -z-10 h-[400px] w-full max-w-[700px] -translate-x-1/2 rounded-full bg-gradient-to-b from-blue-500/20 to-transparent blur-3xl" />
 
-      <div className="flex flex-col items-center justify-center px-6 text-center">
+      <div className="flex flex-col items-center justify-center px-4 sm:px-6 text-center">
         {/* badge pill */}
-        <div className="mb-6 mt-10 sm:justify-center md:mb-6 md:mt-28">
+        <div className="mb-6 mt-10 md:mb-6 md:mt-28">
           <div className="relative flex items-center rounded-full border bg-popover px-3 py-1 text-xs text-primary/70">
             Social Media Data API
             <Link
@@ -59,37 +59,24 @@ export function CaptapiHero() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto w-full max-w-5xl">
           {/* headline box with plus corners */}
-          <div className="relative mx-auto h-full border border-border bg-background p-6 py-12 [mask-image:radial-gradient(800rem_96rem_at_center,white,transparent)]">
-            <Plus
-              strokeWidth={4}
-              className="absolute -left-5 -top-5 h-10 w-10 text-primary"
-            />
-            <Plus
-              strokeWidth={4}
-              className="absolute -bottom-5 -left-5 h-10 w-10 text-primary"
-            />
-            <Plus
-              strokeWidth={4}
-              className="absolute -right-5 -top-5 h-10 w-10 text-primary"
-            />
-            <Plus
-              strokeWidth={4}
-              className="absolute -bottom-5 -right-5 h-10 w-10 text-primary"
-            />
+          <div className="relative mx-auto h-full border border-border bg-background px-6 py-8 sm:py-12 [mask-image:radial-gradient(600rem_96rem_at_center,white,transparent)]">
+            {/* Plus corners — smaller on mobile to avoid clipping */}
+            <Plus strokeWidth={4} className="absolute -left-3 -top-3 h-6 w-6 sm:-left-5 sm:-top-5 sm:h-10 sm:w-10 text-primary" />
+            <Plus strokeWidth={4} className="absolute -bottom-3 -left-3 h-6 w-6 sm:-bottom-5 sm:-left-5 sm:h-10 sm:w-10 text-primary" />
+            <Plus strokeWidth={4} className="absolute -right-3 -top-3 h-6 w-6 sm:-right-5 sm:-top-5 sm:h-10 sm:w-10 text-primary" />
+            <Plus strokeWidth={4} className="absolute -bottom-3 -right-3 h-6 w-6 sm:-bottom-5 sm:-right-5 sm:h-10 sm:w-10 text-primary" />
 
-            <h1 className="flex flex-col text-center text-4xl font-semibold leading-none tracking-tight md:text-7xl">
-              <span>
-                One API for getting{" "}
-                <span className="gradient-text">
-                  structured data from Social Media
-                </span>{" "}
-                <HeadlineTypeWriter strings={contentTyped} />
-              </span>
+            <h1 className="text-center text-3xl font-semibold leading-tight tracking-tight sm:text-4xl md:text-6xl lg:text-7xl">
+              One API for getting{" "}
+              <span className="gradient-text">
+                structured data from Social Media
+              </span>{" "}
+              <HeadlineTypeWriter strings={contentTyped} />
             </h1>
 
-            <div className="mt-4 flex items-center justify-center gap-1">
+            <div className="mt-5 flex items-center justify-center gap-1">
               <span className="relative flex h-3 w-3 items-center justify-center">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
@@ -101,7 +88,7 @@ export function CaptapiHero() {
           </div>
 
           {/* subtext with typewriter */}
-          <p className="text-primary/60 mx-auto max-w-2xl py-6 text-base md:text-lg">
+          <p className="text-primary/60 mx-auto max-w-2xl py-6 text-sm sm:text-base md:text-lg">
             Extract transcripts, AI summaries, comments, followers, engagement
             metrics &amp; more from{" "}
             <span className="font-semibold text-primary">
@@ -110,12 +97,12 @@ export function CaptapiHero() {
             — with a single request.
           </p>
 
-          {/* CTAs */}
-          <div className="flex items-center justify-center gap-3">
-            <Link href="/signup">
+          {/* CTAs — stack vertically on mobile */}
+          <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Link href="/signup" className="w-full sm:w-auto">
               <ShineBorder
                 borderWidth={3}
-                className="h-auto w-auto cursor-pointer border bg-white/5 p-1 backdrop-blur-md dark:bg-black/5"
+                className="h-auto w-full cursor-pointer border bg-white/5 p-1 backdrop-blur-md dark:bg-black/5 sm:w-auto"
                 color={["#3b82f6", "#0ea5e9", "#06b6d4"]}
               >
                 <Button className="w-full rounded-2xl">
@@ -123,35 +110,35 @@ export function CaptapiHero() {
                 </Button>
               </ShineBorder>
             </Link>
-            <GoogleButton className="w-auto rounded-2xl" />
+            <GoogleButton className="w-full rounded-2xl sm:w-auto" />
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
             No credit card required.
           </p>
 
           {/* API client mockup */}
-          <div className="relative mx-auto mt-14 w-full max-w-2xl text-left">
+          <div className="relative mx-auto mt-10 sm:mt-14 w-full max-w-2xl text-left">
             <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-blue-500/20 to-sky-400/10 blur-2xl" />
             <div className="relative overflow-hidden rounded-xl border border-white/10 bg-zinc-950 shadow-2xl">
               {/* window bar with platform tabs */}
-              <div className="flex items-center gap-3 border-b border-white/10 px-4 py-2.5">
+              <div className="flex items-center gap-2 border-b border-white/10 px-3 py-2.5 sm:gap-3 sm:px-4">
                 <div className="flex gap-1.5">
                   <span className="size-2.5 rounded-full bg-red-500" />
                   <span className="size-2.5 rounded-full bg-amber-400" />
                   <span className="size-2.5 rounded-full bg-green-500" />
                 </div>
-                <div className="ml-2 flex items-center gap-1 text-[10px]">
+                <div className="ml-1 flex items-center gap-1 text-[10px] sm:ml-2">
                   <span className="rounded bg-blue-500/20 px-2 py-0.5 font-medium text-blue-300">
                     youtube
                   </span>
-                  <span className="px-2 py-0.5 text-zinc-500">tiktok</span>
-                  <span className="px-2 py-0.5 text-zinc-500">instagram</span>
-                  <span className="px-2 py-0.5 text-zinc-500">facebook</span>
+                  <span className="px-1 py-0.5 text-zinc-500 sm:px-2">tiktok</span>
+                  <span className="hidden px-2 py-0.5 text-zinc-500 sm:inline">instagram</span>
+                  <span className="hidden px-2 py-0.5 text-zinc-500 sm:inline">facebook</span>
                 </div>
               </div>
 
               {/* request line */}
-              <div className="px-4 pb-2 pt-3 font-mono text-[11px] md:text-xs">
+              <div className="overflow-x-auto px-3 pb-2 pt-3 font-mono text-[11px] sm:px-4 md:text-xs">
                 <span className="rounded bg-sky-500/20 px-1.5 py-0.5 font-semibold text-sky-300">
                   GET
                 </span>{" "}
@@ -161,7 +148,7 @@ export function CaptapiHero() {
               </div>
 
               {/* response status bar */}
-              <div className="flex items-center gap-3 border-y border-white/10 bg-white/[0.03] px-4 py-1.5 font-mono text-[10px]">
+              <div className="flex items-center gap-2 border-y border-white/10 bg-white/[0.03] px-3 py-1.5 font-mono text-[10px] sm:gap-3 sm:px-4">
                 <span className="flex items-center gap-1 text-green-400">
                   <span className="size-1.5 rounded-full bg-green-400" />
                   200 OK
@@ -174,7 +161,7 @@ export function CaptapiHero() {
               </div>
 
               {/* JSON response body */}
-              <pre className="overflow-x-auto px-4 py-3 font-mono text-[11px] leading-relaxed md:text-xs">
+              <pre className="overflow-x-auto px-3 py-3 font-mono text-[10px] leading-relaxed sm:px-4 sm:text-[11px] md:text-xs">
                 <code>
                   <span className="text-zinc-500">{"{"}</span>
                   {"\n  "}
@@ -228,11 +215,6 @@ export function CaptapiHero() {
         </div>
       </div>
 
-      {/* mouse-trail canvas */}
-      {/* Decorative mouse-trail. Give it a definite CSS size (h-screen w-full)
-          so it does NOT depend on its intrinsic 300x150 default before JS sets
-          the width/height attrs — otherwise it jumps to viewport size on mount
-          and causes a huge layout shift (CLS). */}
       <canvas
         className="pointer-events-none absolute inset-0 h-screen w-full"
         id="canvas"
