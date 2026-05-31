@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Loader2, MailCheck } from "lucide-react";
 import { GoogleButton } from "@/components/auth/google-button";
+import { PasswordInput } from "@/components/auth/password-input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,10 +14,11 @@ import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics";
 
 export default function SignupPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sentTo, setSentTo] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,7 +32,7 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
       },
     });
     setLoading(false);
@@ -39,9 +41,60 @@ export default function SignupPage() {
       return;
     }
     track("signup", { method: "password" });
-    toast.success("Account created! Check your email to verify.");
-    router.push("/dashboard");
-    router.refresh();
+    setSentTo(email);
+  }
+
+  async function resend() {
+    if (!sentTo) return;
+    setResending(true);
+    const sb = createClient();
+    const { error } = await sb.auth.resend({
+      type: "signup",
+      email: sentTo,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
+    });
+    setResending(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Verification email resent.");
+  }
+
+  if (sentTo) {
+    return (
+      <Card className="w-full max-w-sm">
+        <CardHeader className="items-center text-center">
+          <div className="mb-2 flex size-12 items-center justify-center rounded-full bg-primary/10">
+            <MailCheck className="size-6 text-primary" />
+          </div>
+          <CardTitle>Check your email</CardTitle>
+          <CardDescription>
+            We sent a verification link to{" "}
+            <span className="font-medium text-foreground">{sentTo}</span>. Click it to
+            activate your account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Didn&apos;t get it? Check your spam folder, or resend below.
+          </p>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={resend}
+            disabled={resending}
+          >
+            {resending && <Loader2 className="size-4 animate-spin" />}
+            {resending ? "Resending…" : "Resend email"}
+          </Button>
+          <p className="text-center text-sm text-muted-foreground">
+            Already verified?{" "}
+            <Link href="/login" className="text-primary hover:underline">Sign in</Link>
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -65,7 +118,7 @@ export default function SignupPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" autoComplete="new-password" minLength={8}
+            <PasswordInput id="password" autoComplete="new-password" minLength={8}
               value={password} onChange={(e) => setPassword(e.target.value)} required />
             <p className="text-xs text-muted-foreground">At least 8 characters.</p>
           </div>
