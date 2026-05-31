@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  Bot,
   CreditCard,
   Key,
   LayoutDashboard,
@@ -19,6 +20,7 @@ const nav = [
   { href: "/dashboard/playground", label: "Playground", icon: PlayCircle },
   { href: "/dashboard/usage", label: "Usage", icon: BarChart3 },
   { href: "/dashboard/analytics", label: "Dashboard", icon: LineChart },
+  { href: "/dashboard/agent-integrations", label: "Agent Integrations", icon: Bot },
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/account", label: "Account", icon: UserCog },
 ];

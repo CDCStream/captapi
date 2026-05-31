@@ -1,0 +1,50 @@
+{
+  "name": "@captapi/mcp",
+  "version": "0.1.0",
+  "description": "Official Captapi MCP server — give Claude, Cursor, and any MCP-compatible AI agent access to 62 social media data endpoints (YouTube, TikTok, Instagram, Facebook).",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "captapi-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "captapi",
+    "youtube",
+    "tiktok",
+    "instagram",
+    "facebook",
+    "social-media",
+    "transcript",
+    "ai-agent",
+    "claude",
+    "cursor"
+  ],
+  "homepage": "https://captapi.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CDCStream/captapi.git",
+    "directory": "packages/captapi-mcp"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
