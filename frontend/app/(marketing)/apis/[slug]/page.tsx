@@ -26,6 +26,7 @@ import {
   exampleResponse,
   responseStructure,
   useCases,
+  creditLabel,
   SITE_URL,
   type ApiEndpoint,
 } from "@/lib/api-catalog";
@@ -296,11 +297,13 @@ export default async function ApiDetailPage({
             <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
               Authorization: Bearer capt_live_...
             </code>
-            . Each successful call costs{" "}
-            <strong className="text-foreground">
-              {ep.credits} credit{ep.credits === 1 ? "" : "s"}
-            </strong>
-            ; cached responses (24h) are free.
+            . A typical call costs{" "}
+            <strong className="text-foreground">{creditLabel(ep)}</strong>
+            {ep.creditsPerResult
+              ? " — billed per result, so the exact amount scales with how many items you request"
+              : ""}
+            . Repeat calls for the same request are served from cache for free
+            {ep.creditsPerResult ? " (metrics refresh within ~1 hour)" : ""}.
           </p>
         </section>
 

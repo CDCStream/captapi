@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -21,8 +22,16 @@ router = APIRouter()
 CREDIT_TRANSCRIPT = 2
 CREDIT_SUMMARIZE = 4
 CREDIT_DETAILS = 1
-CREDIT_COMMENTS_BASE = 2
 CREDIT_PAGE_DETAILS = 1
+
+# apify/facebook-comments-scraper is billed per result ($1.50/1k = $0.0015).
+# Charge 0.7 credit/comment for an ~80% markup, via ctx["credits_override"].
+RATE_FB_COMMENTS = 0.7
+
+
+def _scaled_credits(n: int, rate: float, minimum: int) -> int:
+    """Credits for `n` returned items at `rate` credits/item (with a floor)."""
+    return max(minimum, math.ceil(n * rate))
 
 
 def _normalize_post(item: dict) -> dict:
@@ -209,7 +218,7 @@ async def facebook_comments(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = max(CREDIT_COMMENTS_BASE, (limit + 99) // 100 * 2)
+    cost = _scaled_credits(limit, RATE_FB_COMMENTS, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/comments",
@@ -249,6 +258,7 @@ async def facebook_comments(
             runner=_run,
             ctx=ctx,
         )
+        ctx["credits_override"] = _scaled_credits(len(data["comments"]), RATE_FB_COMMENTS, 2)
         return ApiResponse(data=data)
 
 

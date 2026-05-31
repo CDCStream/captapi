@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -24,15 +25,22 @@ router = APIRouter()
 CREDIT_TRANSCRIPT = 1
 CREDIT_SUMMARIZE = 3
 CREDIT_VIDEO_DETAILS = 1
-CREDIT_COMMENTS_BASE = 2
 CREDIT_CHANNEL_DETAILS = 1
-CREDIT_CHANNEL_VIDEOS_BASE = 2
-CREDIT_PLAYLIST_BASE = 2
-CREDIT_SEARCH = 2
 CREDIT_DOWNLOAD = 5
-CREDIT_CHANNEL_SHORTS_BASE = 2
-CREDIT_CHANNEL_STREAMS_BASE = 2
-CREDIT_HASHTAG_SEARCH = 2
+
+# YouTube list endpoints hit per-result Apify actors:
+#   streamers/youtube-scraper          $2.40/1k with an Apify sub, $5/1k without
+#   streamers/youtube-comments-scraper $0.90/1k results (comments)
+# RATE_YT_VIDEO=1.2 stays profitable even at the no-subscription $5/1k price
+# (1.2 x $0.0045 = $0.0054 > $0.005); with an Apify sub the margin is ~80%+.
+# Charged via ctx["credits_override"] on the actual item count returned.
+RATE_YT_VIDEO = 1.2
+RATE_YT_COMMENTS = 0.4
+
+
+def _scaled_credits(n: int, rate: float, minimum: int) -> int:
+    """Credits for `n` returned items at `rate` credits/item (with a floor)."""
+    return max(minimum, math.ceil(n * rate))
 
 
 def _channel_tab_url(url: str, tab: str) -> str:
@@ -258,8 +266,7 @@ async def youtube_comments(
 ):
     vid, norm_url = _require_youtube_url(url)
     settings = get_settings()
-    # 1 credit per 100 comments, min 2
-    cost = max(CREDIT_COMMENTS_BASE, (limit + 99) // 100 * 2)
+    cost = _scaled_credits(limit, RATE_YT_COMMENTS, 2)
 
     async with billed_call(
         caller=caller,
@@ -311,6 +318,7 @@ async def youtube_comments(
             runner=_run,
             ctx=ctx,
         )
+        ctx["credits_override"] = _scaled_credits(len(data["comments"]), RATE_YT_COMMENTS, 2)
         return ApiResponse(data=data)
 
 
@@ -368,7 +376,7 @@ async def youtube_channel_videos(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = max(CREDIT_CHANNEL_VIDEOS_BASE, (limit + 49) // 50)
+    cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
 
     async with billed_call(
         caller=caller,
@@ -404,6 +412,7 @@ async def youtube_channel_videos(
             runner=_run,
             ctx=ctx,
         )
+        ctx["credits_override"] = _scaled_credits(len(data["videos"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
 
 
@@ -415,7 +424,7 @@ async def youtube_playlist_videos(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = max(CREDIT_PLAYLIST_BASE, (limit + 49) // 50)
+    cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
 
     async with billed_call(
         caller=caller,
@@ -451,6 +460,7 @@ async def youtube_playlist_videos(
             runner=_run,
             ctx=ctx,
         )
+        ctx["credits_override"] = _scaled_credits(len(data["videos"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
 
 
@@ -462,12 +472,13 @@ async def youtube_search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
+    cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/search",
         platform="youtube",
         resource_url=None,
-        base_credits=CREDIT_SEARCH,
+        base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
@@ -497,6 +508,7 @@ async def youtube_search(
             runner=_run,
             ctx=ctx,
         )
+        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
 
 
@@ -558,7 +570,7 @@ async def youtube_channel_shorts(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = max(CREDIT_CHANNEL_SHORTS_BASE, (limit + 49) // 50)
+    cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/channel-shorts",
@@ -582,6 +594,7 @@ async def youtube_channel_shorts(
             runner=_run,
             ctx=ctx,
         )
+        ctx["credits_override"] = _scaled_credits(len(data["shorts"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
 
 
@@ -592,7 +605,7 @@ async def youtube_channel_streams(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = max(CREDIT_CHANNEL_STREAMS_BASE, (limit + 49) // 50)
+    cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/channel-streams",
@@ -616,6 +629,7 @@ async def youtube_channel_streams(
             runner=_run,
             ctx=ctx,
         )
+        ctx["credits_override"] = _scaled_credits(len(data["streams"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
 
 
@@ -626,12 +640,13 @@ async def youtube_hashtag_search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
+    cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/hashtag-search",
         platform="youtube",
         resource_url=None,
-        base_credits=CREDIT_HASHTAG_SEARCH,
+        base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
@@ -653,6 +668,7 @@ async def youtube_hashtag_search(
             runner=_run,
             ctx=ctx,
         )
+        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
 
 

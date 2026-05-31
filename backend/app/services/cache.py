@@ -28,6 +28,28 @@ def make_cache_key(endpoint: str, params: dict[str, Any]) -> str:
     return "sk:cache:" + hashlib.sha256(raw.encode()).hexdigest()
 
 
+# Endpoints whose payload never changes once published -> safe to cache long.
+_STATIC_KINDS = {"transcript", "summarize"}
+# Endpoints returning short-lived signed media URLs.
+_VOLATILE_KINDS = {"video-download"}
+
+
+def default_ttl_for(endpoint: str) -> int:
+    """Pick a cache TTL based on how time-sensitive an endpoint's data is.
+
+    Endpoints carry engagement metrics (likes/views/followers/comments) that
+    change over time, so they get the short DYNAMIC TTL (which can be set to 0
+    to disable caching). Transcripts/summaries are immutable -> STATIC.
+    """
+    settings = get_settings()
+    kind = endpoint.rsplit(".", 1)[-1]
+    if kind in _STATIC_KINDS:
+        return settings.CACHE_TTL_STATIC
+    if kind in _VOLATILE_KINDS:
+        return settings.CACHE_TTL_VOLATILE
+    return settings.CACHE_TTL_DYNAMIC
+
+
 async def cache_get(key: str) -> dict[str, Any] | None:
     try:
         raw = await get_redis().get(key)

@@ -25,6 +25,7 @@ import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import {
   PLATFORM_GROUPS,
+  creditLabel,
   type ApiEndpoint,
   type PlatformId,
 } from "@/lib/api-catalog";
@@ -233,7 +234,7 @@ export default function PlaygroundPage() {
                             </span>
                             <span className="flex-1 truncate font-medium">{e.shortName}</span>
                             <span className="text-[10px] text-muted-foreground/70">
-                              {e.credits} credit{e.credits === 1 ? "" : "s"}
+                              {e.creditsPerResult ? `~${e.credits} cr` : `${e.credits} cr`}
                             </span>
                             <ChevronRight
                               className={cn(
@@ -263,7 +264,7 @@ export default function PlaygroundPage() {
                 </span>
                 <span className="font-medium">{selected.name}</span>
                 <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                  {selected.credits} credit{selected.credits === 1 ? "" : "s"}
+                  {creditLabel(selected)}
                 </span>
               </div>
               <code className="block font-mono text-xs text-muted-foreground">{selected.path}</code>

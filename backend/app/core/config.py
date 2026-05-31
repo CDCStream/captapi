@@ -85,7 +85,17 @@ class Settings(BaseSettings):
 
     REDIS_URL: str = "redis://localhost:6379/0"
 
+    # Default fallback TTL (kept for backwards compatibility).
     CACHE_TTL_SECONDS: int = 86_400
+    # Tiered cache TTLs by how time-sensitive the data is (all <= 24h to stay
+    # within our data-retention policy):
+    #  - STATIC: content that never changes (transcripts, AI summaries).
+    #  - DYNAMIC: data that changes over time (likes/views/followers/comments,
+    #    lists, search). Short TTL so metrics stay fresh. Set 0 to disable caching.
+    #  - VOLATILE: short-lived signed URLs (video downloads).
+    CACHE_TTL_STATIC: int = 86_400  # 24 hours
+    CACHE_TTL_DYNAMIC: int = 3_600  # 1 hour
+    CACHE_TTL_VOLATILE: int = 3_600  # 1 hour
     RATE_LIMIT_PER_MINUTE: int = 60  # fallback when a plan has no explicit limit
 
     # Per-plan request-per-minute limits (must match the pricing page).

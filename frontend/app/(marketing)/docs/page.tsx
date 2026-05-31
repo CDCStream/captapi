@@ -193,8 +193,8 @@ function refRows(eps: ApiEndpoint[]) {
   return eps.map((e) => ({
     method: e.method,
     path: e.path,
-    credits: ["comments", "search", "list"].includes(e.category)
-      ? `${e.credits}+`
+    credits: e.creditsPerResult
+      ? `~${e.credits}`
       : e.credits,
     desc: e.shortName,
     slug: e.slug,
@@ -224,7 +224,7 @@ export default function DocsPage() {
       </p>
       <ul className="mt-4 space-y-2 text-sm text-muted-foreground max-w-3xl">
         <li>• One API key works across all four platforms.</li>
-        <li>• Results are cached for 24 hours and shared — repeat calls are instant and free.</li>
+        <li>• Repeat calls are served from a shared cache for free (up to 24h; time-sensitive metrics refresh within ~1h).</li>
         <li>• You are only charged for successful requests.</li>
       </ul>
 
@@ -299,8 +299,10 @@ export default function DocsPage() {
         results are never charged.</strong>
       </p>
       <p className="mt-3 text-muted-foreground max-w-3xl">
-        Responses are cached for <strong className="text-foreground">24 hours</strong>{" "}
-        and shared across all accounts. If a result is served from cache,{" "}
+        Responses are cached and shared across all accounts for{" "}
+        <strong className="text-foreground">up to 24 hours</strong> — time-sensitive
+        data (engagement metrics, follower lists) refreshes within ~1 hour so it
+        stays current. If a result is served from cache,{" "}
         <code className="rounded bg-muted px-1.5 py-0.5 text-xs">cached</code> is{" "}
         <code className="rounded bg-muted px-1.5 py-0.5 text-xs">true</code> and{" "}
         <code className="rounded bg-muted px-1.5 py-0.5 text-xs">creditsUsed</code>{" "}

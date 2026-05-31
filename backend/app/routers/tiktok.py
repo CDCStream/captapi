@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -21,14 +22,39 @@ router = APIRouter()
 CREDIT_TRANSCRIPT = 2
 CREDIT_SUMMARIZE = 4
 CREDIT_VIDEO_DETAILS = 1
-CREDIT_COMMENTS_BASE = 2
 CREDIT_CHANNEL_DETAILS = 1
 CREDIT_SEARCH = 2
 CREDIT_DOWNLOAD = 3
-CREDIT_CHANNEL_POSTS_BASE = 2
-CREDIT_REPLIES_BASE = 2
-CREDIT_FOLLOWERS_BASE = 2
-CREDIT_MUSIC_POSTS_BASE = 2
+
+# ---------------------------------------------------------------------------
+# Per-result credit rates for list endpoints.
+#
+# These actors are billed by Apify PER RESULT, so our credit charge must scale
+# with the number of items, otherwise margin collapses. Rates are chosen so
+# that revenue (rate x $0.0045/credit) >= Apify per-result cost x 1.8 (~80%
+# markup). The endpoint charges `ctx["credits_override"]` based on the actual
+# number of items returned (never more than the upfront `limit` estimate).
+# ---------------------------------------------------------------------------
+# Verified Apify prices (Free/no-subscription tier = worst case for us). Sell
+# price is $0.0045/credit, so an ~80% markup needs rate >= cost_per_result*400.
+RATE_FOLLOWERS = 0.5       # clockworks followers-scraper  $1.00/1k ($0.001)
+RATE_COMMENTS = 0.5        # clockworks comments-scraper   $0.50/1k (safe buffer)
+RATE_CHANNEL_POSTS = 0.7   # clockworks tiktok-scraper     $1.70/1k ($0.0017)
+RATE_MUSIC_POSTS = 1.6     # clockworks sound-scraper      $4.00/1k ($0.004)
+
+# Reply scraper crawls a video's comments to find one comment's replies, and is
+# billed per ROW pushed (comment or reply) at $2.40/1k = $0.0024/row. We
+# therefore bill on the actual crawl size, not the returned reply count, and cap
+# the crawl so a viral video can't run up an unbounded bill.
+REPLIES_MAX_COMMENTS = 40
+REPLIES_MAX_ITEMS = 400
+RATE_REPLIES_ROW = 1.0     # ~80% markup on $0.0024/row
+CREDIT_REPLIES_MIN = 30
+
+
+def _scaled_credits(n: int, rate: float, minimum: int) -> int:
+    """Credits for `n` returned items at `rate` credits/item (with a floor)."""
+    return max(minimum, math.ceil(n * rate))
 
 
 # Residential proxy improves reliability of the dedicated comment/reply scraper
@@ -244,7 +270,7 @@ async def tiktok_comments(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = max(CREDIT_COMMENTS_BASE, (limit + 99) // 100 * 2)
+    cost = _scaled_credits(limit, RATE_COMMENTS, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/comments",
@@ -285,6 +311,7 @@ async def tiktok_comments(
             runner=_run,
             ctx=ctx,
         )
+        ctx["credits_override"] = _scaled_credits(len(data["comments"]), RATE_COMMENTS, 2)
         return ApiResponse(data=data)
 
 
@@ -345,12 +372,13 @@ async def tiktok_search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
+    cost = _scaled_credits(limit, RATE_CHANNEL_POSTS, CREDIT_SEARCH)
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/search",
         platform="tiktok",
         resource_url=None,
-        base_credits=CREDIT_SEARCH,
+        base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
@@ -368,6 +396,7 @@ async def tiktok_search(
             runner=_run,
             ctx=ctx,
         )
+        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_CHANNEL_POSTS, CREDIT_SEARCH)
         return ApiResponse(data=data)
 
 
@@ -422,7 +451,7 @@ async def tiktok_channel_posts(
     if not handle:
         raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
     settings = get_settings()
-    cost = max(CREDIT_CHANNEL_POSTS_BASE, (limit + 49) // 50)
+    cost = _scaled_credits(limit, RATE_CHANNEL_POSTS, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/channel-posts",
@@ -446,6 +475,7 @@ async def tiktok_channel_posts(
             runner=_run,
             ctx=ctx,
         )
+        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_CHANNEL_POSTS, 2)
         return ApiResponse(data=data)
 
 
@@ -457,7 +487,10 @@ async def tiktok_comment_replies(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = max(CREDIT_REPLIES_BASE, (limit + 99) // 100 * 2)
+    # Worst-case crawl is REPLIES_MAX_ITEMS rows; pre-authorize that so we never
+    # do paid work the caller can't afford. Actual charge is set from the real
+    # number of rows crawled (see credits_override below).
+    cost = max(CREDIT_REPLIES_MIN, _scaled_credits(REPLIES_MAX_ITEMS, RATE_REPLIES_ROW, CREDIT_REPLIES_MIN))
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/comment-replies",
@@ -465,7 +498,10 @@ async def tiktok_comment_replies(
         resource_url=url,
         base_credits=cost,
     ) as ctx:
+        crawled = 0
+
         async def _run() -> dict[str, Any]:
+            nonlocal crawled
             apify = get_apify()
             # The dedicated reply scraper crawls a video's comments and emits
             # each reply as its own row linked to its parent via
@@ -475,15 +511,16 @@ async def tiktok_comment_replies(
                 settings.APIFY_ACTOR_TIKTOK_COMMENT_REPLIES,
                 {
                     "videoUrls": [url],
-                    "maxComments": 200,
+                    "maxComments": REPLIES_MAX_COMMENTS,
                     "includeReplies": True,
                     "maxRepliesPerComment": min(limit, 500),
                     "includeAuthorInfo": True,
                     "sort": "top",
                     "proxyConfiguration": TIKTOK_RESIDENTIAL_PROXY,
                 },
-                max_items=2500,
+                max_items=REPLIES_MAX_ITEMS,
             )
+            crawled = len(items)
             replies = []
             for r in items:
                 # Reply rows are the only ones carrying parentCommentId.
@@ -517,6 +554,11 @@ async def tiktok_comment_replies(
             runner=_run,
             ctx=ctx,
         )
+        # Bill on the actual rows crawled (what Apify charged us for), not the
+        # filtered reply count. On a cache hit this is ignored (cache_hit -> 0).
+        ctx["credits_override"] = max(
+            CREDIT_REPLIES_MIN, _scaled_credits(crawled, RATE_REPLIES_ROW, CREDIT_REPLIES_MIN)
+        )
         return ApiResponse(data=data)
 
 
@@ -530,7 +572,7 @@ async def tiktok_user_followers(
     if not handle:
         raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
     settings = get_settings()
-    cost = max(CREDIT_FOLLOWERS_BASE, (limit + 99) // 100 * 2)
+    cost = _scaled_credits(limit, RATE_FOLLOWERS, 5)
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/user-followers",
@@ -562,6 +604,7 @@ async def tiktok_user_followers(
             runner=_run,
             ctx=ctx,
         )
+        ctx["credits_override"] = _scaled_credits(len(data["followers"]), RATE_FOLLOWERS, 5)
         return ApiResponse(data=data)
 
 
@@ -575,7 +618,7 @@ async def tiktok_user_followings(
     if not handle:
         raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
     settings = get_settings()
-    cost = max(CREDIT_FOLLOWERS_BASE, (limit + 99) // 100 * 2)
+    cost = _scaled_credits(limit, RATE_FOLLOWERS, 5)
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/user-followings",
@@ -607,6 +650,7 @@ async def tiktok_user_followings(
             runner=_run,
             ctx=ctx,
         )
+        ctx["credits_override"] = _scaled_credits(len(data["followings"]), RATE_FOLLOWERS, 5)
         return ApiResponse(data=data)
 
 
@@ -617,7 +661,7 @@ async def tiktok_music_posts(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = max(CREDIT_MUSIC_POSTS_BASE, (limit + 49) // 50)
+    cost = _scaled_credits(limit, RATE_MUSIC_POSTS, 3)
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/music-posts",
@@ -641,4 +685,5 @@ async def tiktok_music_posts(
             runner=_run,
             ctx=ctx,
         )
+        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_MUSIC_POSTS, 3)
         return ApiResponse(data=data)
