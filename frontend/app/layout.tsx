@@ -24,11 +24,11 @@ const AHREFS_KEY = process.env.NEXT_PUBLIC_AHREFS_KEY || "";
 
 export const metadata: Metadata = {
   title: {
-    default: "Captapi — One API for YouTube, TikTok, Instagram & Facebook",
+    default: "Captapi — One API for Social Media videos, posts, comments & more",
     template: "%s — Captapi",
   },
   description:
-    "Extract transcripts, AI summaries, comments, and engagement metrics from YouTube, TikTok, Instagram, and Facebook videos with a single API call.",
+    "Extract transcripts, AI summaries, comments, followers, and engagement metrics from YouTube, TikTok, Instagram, and Facebook — 45 endpoints, one API call.",
   metadataBase: new URL(SITE),
   applicationName: "Captapi",
   keywords: [
@@ -40,7 +40,10 @@ export const metadata: Metadata = {
     "video summarizer API",
     "transcript API",
     "comments API",
+    "followers API",
+    "social media posts API",
     "video data API",
+    "social media scraping API",
   ],
   verification: process.env.NEXT_PUBLIC_GSC_VERIFICATION
     ? { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION }
@@ -51,9 +54,9 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
   },
   openGraph: {
-    title: "Captapi — One API for YouTube, TikTok, Instagram & Facebook",
+    title: "Captapi — One API for Social Media videos, posts, comments & more",
     description:
-      "Transcripts, AI summaries, comments & engagement metrics from social video — one REST API, clean JSON.",
+      "Transcripts, AI summaries, comments, followers & engagement metrics from YouTube, TikTok, Instagram & Facebook — one REST API, clean JSON.",
     url: SITE,
     siteName: "Captapi",
     type: "website",
@@ -62,7 +65,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Captapi — Social Media Data API",
     description:
-      "One API for structured data from YouTube, TikTok, Instagram & Facebook.",
+      "One API for structured data from Social Media videos, posts, comments & more — YouTube, TikTok, Instagram & Facebook.",
   },
 };
 

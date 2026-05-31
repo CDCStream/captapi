@@ -73,7 +73,7 @@ export function CaptapiHero() {
                 <span className="gradient-text">
                   structured data from Social Media
                 </span>{" "}
-                video
+                videos, posts, comments &amp; more
               </span>
             </h1>
 
@@ -83,15 +83,15 @@ export function CaptapiHero() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
               </span>
               <p className="text-xs text-green-500">
-                31 endpoints live across 4 platforms
+                45 endpoints live across 4 platforms
               </p>
             </div>
           </div>
 
           {/* subtext with typewriter */}
           <p className="text-primary/60 mx-auto max-w-2xl py-6 text-base md:text-lg">
-            Extract transcripts, AI summaries, comments, downloads &amp;
-            engagement metrics from{" "}
+            Extract transcripts, AI summaries, comments, followers, engagement
+            metrics &amp; more from{" "}
             <span className="font-semibold text-primary">
               <TypeWriter strings={platformsTyped} />
             </span>{" "}
