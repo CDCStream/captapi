@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import {
-  renderCanvas,
   ShineBorder,
   TypeWriter,
   HeadlineTypeWriter,
@@ -39,10 +37,6 @@ const contentTyped = [
 ];
 
 export function CaptapiHero() {
-  useEffect(() => {
-    renderCanvas();
-  }, []);
-
   return (
     <section id="home" className="relative overflow-x-hidden">
       {/* grid backdrop */}
@@ -224,11 +218,6 @@ export function CaptapiHero() {
           </div>
         </div>
       </div>
-
-      <canvas
-        className="pointer-events-none absolute inset-0 h-screen w-full"
-        id="canvas"
-      />
     </section>
   );
 }

@@ -48,7 +48,7 @@ function CreativePricing({
   tiers: PricingTier[];
 }) {
   return (
-    <div className="w-full max-w-6xl mx-auto px-4">
+    <div className="w-full max-w-6xl mx-auto px-4 overflow-x-clip">
       <div className="text-center space-y-6 mb-16">
         <div className="font-handwritten text-xl text-blue-500 rotate-[-1deg]">
           {tag}
