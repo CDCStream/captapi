@@ -933,9 +933,9 @@ async def tiktok_trending_feed(
         return ApiResponse(data=data)
 
 
-@router.get("/popular-hashtags", summary="Top trending TikTok hashtags by region")
+@router.get("/popular-hashtags", summary="Trending TikTok hashtags for a topic/keyword")
 async def tiktok_popular_hashtags(
-    country: str = Query("US", min_length=2, max_length=2, description="ISO country code"),
+    query: str = Query("trending", min_length=1, description="Topic or keyword to discover trending hashtags for"),
     limit: int = Query(20, ge=1, le=100),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -951,88 +951,40 @@ async def tiktok_popular_hashtags(
         async def _run() -> dict[str, Any]:
             apify = get_apify()
             items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_TRENDING,
-                {"content_type": "hashtag", "country_code": country.upper(), "limit": limit},
-                max_items=limit,
+                settings.APIFY_ACTOR_TIKTOK_TREND_DISCOVERY,
+                {
+                    "searchQueries": [query],
+                    "resultsPerQuery": limit,
+                    "includeVideos": False,
+                    "includeHashtags": True,
+                    "sortBy": "popular",
+                    "proxyConfiguration": {"useApifyProxy": True},
+                },
+                max_items=limit * 2,
             )
             hashtags = []
-            for h in items[:limit]:
-                trend = h.get("trend") or []
-                last_val = None
-                if isinstance(trend, list) and trend and isinstance(trend[-1], dict):
-                    last_val = trend[-1].get("value")
-                country_info = h.get("country_info") or {}
-                industry_info = h.get("industry_info") or {}
+            for h in items:
+                if h.get("recordType") != "hashtag":
+                    continue
                 hashtags.append(
                     {
-                        "name": safe_str(h.get("hashtag_name") or h.get("name") or h.get("title")),
-                        "id": safe_str(h.get("hashtag_id")),
-                        "rank": safe_int(h.get("_rank") or h.get("rank")),
-                        "trendScore": safe_float(last_val),
-                        "country": safe_str(country_info.get("id") if isinstance(country_info, dict) else None),
-                        "industry": safe_str(industry_info.get("value") if isinstance(industry_info, dict) else None),
-                        "isPromoted": h.get("is_promoted"),
+                        "name": safe_str(h.get("hashtag") or h.get("hashtagTitle")),
+                        "url": safe_str(h.get("hashtagUrl")),
+                        "rank": safe_int(h.get("position")),
+                        "viewCount": safe_int(h.get("viewCount")),
+                        "videoCount": safe_int(h.get("videoCount")),
+                        "description": safe_str(h.get("description")),
                     }
                 )
-            return {"country": country.upper(), "totalReturned": len(hashtags), "hashtags": hashtags}
+                if len(hashtags) >= limit:
+                    break
+            return {"query": query, "totalReturned": len(hashtags), "hashtags": hashtags}
 
         data = await cached_or_run(
             endpoint="tiktok.popular-hashtags",
-            params={"country": country.upper(), "limit": limit},
+            params={"query": query, "limit": limit},
             runner=_run,
             ctx=ctx,
         )
         ctx["credits_override"] = _scaled_credits(len(data["hashtags"]), RATE_TREND, CREDIT_SEARCH)
-        return ApiResponse(data=data)
-
-
-@router.get("/popular-creators", summary="Top trending TikTok creators by region")
-async def tiktok_popular_creators(
-    country: str = Query("US", min_length=2, max_length=2, description="ISO country code"),
-    limit: int = Query(20, ge=1, le=100),
-    caller: ApiCaller = Depends(require_api_key),
-):
-    settings = get_settings()
-    cost = _scaled_credits(limit, RATE_TREND, CREDIT_SEARCH)
-    async with billed_call(
-        caller=caller,
-        endpoint="/v1/tiktok/popular-creators",
-        platform="tiktok",
-        resource_url=None,
-        base_credits=cost,
-    ) as ctx:
-        async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_TRENDING,
-                {"content_type": "creator", "country_code": country.upper(), "limit": limit},
-                max_items=limit,
-            )
-            creators = []
-            for c in items[:limit]:
-                tt_link = c.get("tt_link") or ""
-                username = c.get("username") or c.get("unique_id")
-                if not username and "@" in tt_link:
-                    username = tt_link.rsplit("@", 1)[-1].strip("/")
-                creators.append(
-                    {
-                        "username": safe_str(username),
-                        "displayName": safe_str(c.get("nick_name") or c.get("nickname")),
-                        "followers": safe_int(c.get("follower_cnt") or c.get("followers")),
-                        "likes": safe_int(c.get("liked_cnt") or c.get("likes")),
-                        "url": safe_str(tt_link) or (f"https://www.tiktok.com/@{username}" if username else None),
-                        "profileImage": safe_str(c.get("avatar_url") or c.get("avatar")),
-                        "country": safe_str(c.get("country_code")),
-                        "rank": safe_int(c.get("_rank") or c.get("rank")),
-                    }
-                )
-            return {"country": country.upper(), "totalReturned": len(creators), "creators": creators}
-
-        data = await cached_or_run(
-            endpoint="tiktok.popular-creators",
-            params={"country": country.upper(), "limit": limit},
-            runner=_run,
-            ctx=ctx,
-        )
-        ctx["credits_override"] = _scaled_credits(len(data["creators"]), RATE_TREND, CREDIT_SEARCH)
         return ApiResponse(data=data)

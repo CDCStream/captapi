@@ -27,8 +27,11 @@ CREDIT_PAGE_DETAILS = 1
 # apify/facebook-comments-scraper is billed per result ($1.50/1k = $0.0015).
 # 0.6 credit/comment = ~80% markup (0.6 * $0.0045 = $0.0027 vs $0.0015).
 RATE_FB_COMMENTS = 0.6
-# Posts / reels / group posts scrapers are billed per result (~$0.0015-0.002).
+# Posts / group posts scrapers are billed per result (~$0.0015-0.002).
 RATE_FB_POSTS = 0.6
+# powerful_bachelor reels PPR actor is billed $3.90/1k ($0.0039). 1.6 credit/reel
+# = ~80% markup (1.6 * $0.0045 = $0.0072 vs $0.0039).
+RATE_FB_REELS = 1.6
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -75,6 +78,35 @@ def _normalize_post(item: dict) -> dict:
             "likes": safe_int(item.get("likesCount") or item.get("reactionsCount")),
             "comments": safe_int(item.get("commentsCount")),
             "shares": safe_int(item.get("sharesCount")),
+        },
+    }
+
+
+def _normalize_reel(item: dict) -> dict:
+    owner = item.get("video_owner") or {}
+    dur_ms = item.get("playable_duration_in_ms")
+    return {
+        "platform": "facebook",
+        "url": safe_str(item.get("permalink_url") or item.get("shareable_url")),
+        "id": safe_str(item.get("video_id") or item.get("id")),
+        "caption": safe_str(item.get("message") or item.get("caption")),
+        "description": safe_str(item.get("message")),
+        "publishedAt": safe_str(item.get("creation_time") or item.get("publishedAt")),
+        "durationSeconds": (safe_float(dur_ms) / 1000.0) if dur_ms else safe_float(item.get("duration")),
+        "audioTitle": safe_str(item.get("track_title")),
+        "thumbnailUrl": safe_str(item.get("thumbnail_url") or item.get("preview_image_url")),
+        "videoUrl": safe_str(item.get("video_url") or item.get("playable_url")),
+        "author": {
+            "username": safe_str(owner.get("profile_url") or owner.get("id")),
+            "displayName": safe_str(owner.get("name")),
+            "url": safe_str(owner.get("profile_url")),
+            "verified": owner.get("is_verified"),
+        },
+        "engagement": {
+            "views": safe_int(item.get("play_count") or item.get("view_count")),
+            "likes": safe_int(item.get("like_count") or item.get("reaction_count")),
+            "comments": safe_int(item.get("comment_count")),
+            "shares": safe_int(item.get("share_count")),
         },
     }
 
@@ -368,7 +400,7 @@ async def facebook_profile_reels(
     if not extract_facebook_page(url):
         raise HTTPException(status_code=400, detail="Invalid Facebook profile/page URL")
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_FB_POSTS, 2)
+    cost = _scaled_credits(limit, RATE_FB_REELS, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/profile-reels",
@@ -380,10 +412,10 @@ async def facebook_profile_reels(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_FACEBOOK_REELS,
-                {"startUrls": [url], "resultsLimit": limit},
+                {"profileUrls": [url], "maxResults": limit},
                 max_items=limit,
             )
-            reels = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+            reels = [_normalize_reel(i) for i in items[:limit] if not i.get("error")]
             return {"url": url, "totalReturned": len(reels), "reels": reels}
 
         data = await cached_or_run(
@@ -392,7 +424,7 @@ async def facebook_profile_reels(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_FB_POSTS, 2)
+        ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_FB_REELS, 2)
         return ApiResponse(data=data)
 
 

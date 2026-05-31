@@ -46,9 +46,12 @@ class Settings(BaseSettings):
     APIFY_ACTOR_TIKTOK_FOLLOWERS: str = "clockworks/tiktok-followers-scraper"
     APIFY_ACTOR_TIKTOK_FOLLOWINGS: str = "clockworks/tiktok-followers-scraper"
     APIFY_ACTOR_TIKTOK_MUSIC: str = "clockworks/tiktok-sound-scraper"
-    # Trending feed / popular hashtags / popular creators by region. HTTP-only,
-    # `content_type` ("video"|"hashtag"|"creator"|"music") + `country_code`.
+    # Trending (For You) video feed by region. HTTP-only, cheap pay-per-result.
+    # `content_type` ("video") + `country_code`.
     APIFY_ACTOR_TIKTOK_TRENDING: str = "xtracto/tiktok-trending-scraper"
+    # Popular/trending hashtag entity discovery. Pay-per-result ($1.60/1k),
+    # no monthly rent. Input: searchQueries + includeHashtags.
+    APIFY_ACTOR_TIKTOK_TREND_DISCOVERY: str = "coregent/tiktok-trend-discovery-scraper"
 
     APIFY_ACTOR_INSTAGRAM: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_REEL: str = "apify/instagram-scraper"
@@ -65,11 +68,13 @@ class Settings(BaseSettings):
     APIFY_ACTOR_FACEBOOK_POSTS: str = "apify/facebook-posts-scraper"
     APIFY_ACTOR_FACEBOOK_PAGES: str = "apify/facebook-pages-scraper"
     APIFY_ACTOR_FACEBOOK_COMMENTS: str = "apify/facebook-comments-scraper"
-    APIFY_ACTOR_FACEBOOK_REELS: str = "scraply/facebook-reels-scraper"
+    # Pay-per-result ($3.90/1k), no monthly rental. Input: profileUrls + maxResults.
+    APIFY_ACTOR_FACEBOOK_REELS: str = "powerful_bachelor/facebook-profile-reels-scraper-ppr"
     APIFY_ACTOR_FACEBOOK_GROUPS: str = "apify/facebook-groups-scraper"
 
-    # YouTube community ("posts") tab.
-    APIFY_ACTOR_YOUTUBE_COMMUNITY: str = "scrapapi/youtube-community-posts-scraper"
+    # YouTube community ("posts") tab. alpha-scraper is the cheapest rental
+    # ($7.50/mo). Input: startUrls/usernames + maxposts.
+    APIFY_ACTOR_YOUTUBE_COMMUNITY: str = "alpha-scraper/youtube-community-posts-scraper"
 
     OPENAI_API_KEY: str
     OPENAI_MODEL_SUMMARY: str = "gpt-4o-mini"
