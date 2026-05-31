@@ -31,24 +31,44 @@ CREDIT_FOLLOWERS_BASE = 2
 CREDIT_MUSIC_POSTS_BASE = 2
 
 
+# Residential proxy is required for the followers/followings relationship
+# scraper; without it the actor only returns error records.
+TIKTOK_RESIDENTIAL_PROXY = {"useApifyProxy": True, "apifyProxyGroups": ["RESIDENTIAL"]}
+
+
+def _is_user_record(item: dict) -> bool:
+    """Keep only real relationship rows (drop error/summary records)."""
+    record_type = item.get("recordType")
+    if record_type and record_type != "relationship":
+        return False
+    if item.get("isSummary"):
+        return False
+    return bool(item.get("username") or item.get("uniqueId"))
+
+
 def _normalize_user(item: dict) -> dict:
     """Map a raw TikTok user object (follower / following list) to our shape."""
     stats = item.get("authorStats") or item.get("stats") or {}
-    username = item.get("uniqueId") or item.get("username") or item.get("name") or item.get("nickName")
+    username = item.get("username") or item.get("uniqueId") or item.get("name") or item.get("nickName")
+    verified = item.get("isVerified")
+    if verified is None:
+        verified = item.get("verified")
     return {
         "username": safe_str(username),
-        "displayName": safe_str(item.get("nickname") or item.get("nickName") or item.get("displayName")),
-        "bio": safe_str(item.get("signature") or item.get("bio")),
+        "displayName": safe_str(item.get("displayName") or item.get("nickname") or item.get("nickName")),
+        "bio": safe_str(item.get("bio") or item.get("signature")),
         "url": safe_str(item.get("profileUrl"))
         or (f"https://www.tiktok.com/@{username}" if username else None),
         "followers": safe_int(
-            stats.get("followerCount")
+            item.get("followersCount")
+            or stats.get("followerCount")
             or item.get("followerCount")
             or item.get("fans")
-            or item.get("followers")
         ),
-        "verified": item.get("verified"),
-        "profileImage": safe_str(item.get("avatarLarger") or item.get("avatar")),
+        "verified": verified,
+        "profileImage": safe_str(
+            item.get("profilePictureUrl") or item.get("avatarLarger") or item.get("avatar")
+        ),
     }
 
 
@@ -543,10 +563,15 @@ async def tiktok_user_followers(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK_FOLLOWERS,
-                {"profiles": [handle], "mode": "followers", "maxItemsPerProfile": limit},
+                {
+                    "profiles": [handle],
+                    "mode": "followers",
+                    "maxItemsPerProfile": limit,
+                    "proxyConfiguration": TIKTOK_RESIDENTIAL_PROXY,
+                },
                 max_items=limit,
             )
-            users = [_normalize_user(i) for i in items[:limit] if not i.get("isSummary")]
+            users = [_normalize_user(i) for i in items if _is_user_record(i)][:limit]
             return {"url": url, "totalReturned": len(users), "followers": users}
 
         data = await cached_or_run(
@@ -580,10 +605,15 @@ async def tiktok_user_followings(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK_FOLLOWINGS,
-                {"profiles": [handle], "mode": "following", "maxItemsPerProfile": limit},
+                {
+                    "profiles": [handle],
+                    "mode": "following",
+                    "maxItemsPerProfile": limit,
+                    "proxyConfiguration": TIKTOK_RESIDENTIAL_PROXY,
+                },
                 max_items=limit,
             )
-            users = [_normalize_user(i) for i in items[:limit] if not i.get("isSummary")]
+            users = [_normalize_user(i) for i in items if _is_user_record(i)][:limit]
             return {"url": url, "totalReturned": len(users), "followings": users}
 
         data = await cached_or_run(
