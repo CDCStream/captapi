@@ -30,6 +30,31 @@ CREDIT_CHANNEL_VIDEOS_BASE = 2
 CREDIT_PLAYLIST_BASE = 2
 CREDIT_SEARCH = 2
 CREDIT_DOWNLOAD = 5
+CREDIT_CHANNEL_SHORTS_BASE = 2
+CREDIT_CHANNEL_STREAMS_BASE = 2
+CREDIT_HASHTAG_SEARCH = 2
+
+
+def _channel_tab_url(url: str, tab: str) -> str:
+    """Build a channel sub-tab URL (videos / shorts / streams)."""
+    base = (url or "").rstrip("/")
+    for suffix in ("/videos", "/shorts", "/streams", "/featured"):
+        if base.endswith(suffix):
+            base = base[: -len(suffix)]
+            break
+    return f"{base}/{tab}"
+
+
+def _video_card(v: dict) -> dict:
+    return {
+        "url": safe_str(v.get("url") or v.get("videoUrl")),
+        "title": safe_str(v.get("title")) or "",
+        "publishedAt": safe_str(v.get("date") or v.get("publishedAt")),
+        "viewCount": safe_int(v.get("viewCount") or v.get("views")),
+        "durationSeconds": safe_int(v.get("duration")),
+        "thumbnailUrl": safe_str(v.get("thumbnailUrl")),
+        "channelName": safe_str(v.get("channelName") or v.get("channel")),
+    }
 
 
 # ---------- helpers -------------------------------------------------------
@@ -526,6 +551,111 @@ async def youtube_video_download(
 
 
 # ---------- SHORTS (alias to same actors with Short URL handling) ---------
+@router.get("/channel-shorts", summary="List Shorts for a YouTube channel")
+async def youtube_channel_shorts(
+    url: str = Query(..., description="Channel URL (youtube.com/@handle)"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = max(CREDIT_CHANNEL_SHORTS_BASE, (limit + 49) // 50)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/youtube/channel-shorts",
+        platform="youtube",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_YOUTUBE_SEARCH,
+                {"startUrls": [{"url": _channel_tab_url(url, "shorts")}], "maxResults": limit},
+                max_items=limit,
+            )
+            shorts = [_video_card(v) for v in items[:limit]]
+            return {"url": url, "totalReturned": len(shorts), "shorts": shorts}
+
+        data = await cached_or_run(
+            endpoint="youtube.channel-shorts",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/channel-streams", summary="List live/past streams for a YouTube channel")
+async def youtube_channel_streams(
+    url: str = Query(..., description="Channel URL (youtube.com/@handle)"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = max(CREDIT_CHANNEL_STREAMS_BASE, (limit + 49) // 50)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/youtube/channel-streams",
+        platform="youtube",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_YOUTUBE_SEARCH,
+                {"startUrls": [{"url": _channel_tab_url(url, "streams")}], "maxResults": limit},
+                max_items=limit,
+            )
+            streams = [_video_card(v) for v in items[:limit]]
+            return {"url": url, "totalReturned": len(streams), "streams": streams}
+
+        data = await cached_or_run(
+            endpoint="youtube.channel-streams",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/hashtag-search", summary="Search YouTube videos by hashtag")
+async def youtube_hashtag_search(
+    q: str = Query(..., min_length=2, description="Hashtag (with or without #)"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/youtube/hashtag-search",
+        platform="youtube",
+        resource_url=None,
+        base_credits=CREDIT_HASHTAG_SEARCH,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            tag = q.lstrip("#")
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_YOUTUBE_SEARCH,
+                {
+                    "startUrls": [{"url": f"https://www.youtube.com/hashtag/{tag}"}],
+                    "maxResults": limit,
+                },
+                max_items=limit,
+            )
+            results = [_video_card(v) for v in items[:limit]]
+            return {"query": q, "totalReturned": len(results), "results": results}
+
+        data = await cached_or_run(
+            endpoint="youtube.hashtag-search",
+            params={"q": q, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
 @router.get("/shorts/transcript", summary="YouTube Shorts transcript")
 async def shorts_transcript(
     url: str = Query(...),

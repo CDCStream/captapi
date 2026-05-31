@@ -25,6 +25,31 @@ CREDIT_COMMENTS_BASE = 2
 CREDIT_CHANNEL_DETAILS = 1
 CREDIT_SEARCH = 2
 CREDIT_DOWNLOAD = 3
+CREDIT_CHANNEL_POSTS_BASE = 2
+CREDIT_REPLIES_BASE = 2
+CREDIT_FOLLOWERS_BASE = 2
+CREDIT_MUSIC_POSTS_BASE = 2
+
+
+def _normalize_user(item: dict) -> dict:
+    """Map a raw TikTok user object (follower / following list) to our shape."""
+    stats = item.get("authorStats") or item.get("stats") or {}
+    username = item.get("uniqueId") or item.get("username") or item.get("name") or item.get("nickName")
+    return {
+        "username": safe_str(username),
+        "displayName": safe_str(item.get("nickname") or item.get("nickName") or item.get("displayName")),
+        "bio": safe_str(item.get("signature") or item.get("bio")),
+        "url": safe_str(item.get("profileUrl"))
+        or (f"https://www.tiktok.com/@{username}" if username else None),
+        "followers": safe_int(
+            stats.get("followerCount")
+            or item.get("followerCount")
+            or item.get("fans")
+            or item.get("followers")
+        ),
+        "verified": item.get("verified"),
+        "profileImage": safe_str(item.get("avatarLarger") or item.get("avatar")),
+    }
 
 
 def _normalize(item: dict) -> dict:
@@ -378,5 +403,227 @@ async def tiktok_video_download(
             runner=_run,
             ctx=ctx,
             ttl=3600,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/channel-posts", summary="Latest posts from a TikTok profile")
+async def tiktok_channel_posts(
+    url: str = Query(..., description="https://tiktok.com/@username"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    handle = extract_tiktok_username(url)
+    if not handle:
+        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    settings = get_settings()
+    cost = max(CREDIT_CHANNEL_POSTS_BASE, (limit + 49) // 50)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/channel-posts",
+        platform="tiktok",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK,
+                {"profiles": [handle], "resultsPerPage": limit, "shouldDownloadVideos": False},
+                max_items=limit,
+            )
+            posts = [_normalize(i) for i in items[:limit]]
+            return {"url": url, "totalReturned": len(posts), "posts": posts}
+
+        data = await cached_or_run(
+            endpoint="tiktok.channel-posts",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/comment-replies", summary="Replies to a TikTok comment")
+async def tiktok_comment_replies(
+    url: str = Query(..., description="URL of the TikTok video the comment belongs to"),
+    comment_id: str = Query(..., description="ID of the parent comment"),
+    limit: int = Query(50, ge=1, le=500),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = max(CREDIT_REPLIES_BASE, (limit + 99) // 100 * 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/comment-replies",
+        platform="tiktok",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_COMMENTS,
+                {
+                    "postURLs": [url],
+                    "commentsPerPost": limit,
+                    "maxRepliesPerComment": limit,
+                },
+                max_items=limit * 4,
+            )
+            replies = []
+            for c in items:
+                parent = safe_str(
+                    c.get("repliesToId")
+                    or c.get("parentCommentId")
+                    or c.get("replyToId")
+                )
+                is_reply = bool(parent) and parent == comment_id
+                # Some actors nest replies under the parent comment object.
+                if not is_reply and safe_str(c.get("cid") or c.get("id")) == comment_id:
+                    for r in c.get("replies") or c.get("replyComments") or []:
+                        user = r.get("user") or {}
+                        replies.append(
+                            {
+                                "id": safe_str(r.get("cid") or r.get("id")),
+                                "text": (r.get("text") or "").strip(),
+                                "author": safe_str(user.get("uniqueId") or r.get("authorName")),
+                                "likeCount": safe_int(r.get("diggCount") or r.get("likeCount")),
+                                "publishedAt": safe_str(r.get("createTimeISO")),
+                            }
+                        )
+                    continue
+                if is_reply:
+                    user = c.get("user") or {}
+                    replies.append(
+                        {
+                            "id": safe_str(c.get("cid") or c.get("id")),
+                            "text": (c.get("text") or "").strip(),
+                            "author": safe_str(user.get("uniqueId") or c.get("authorName")),
+                            "likeCount": safe_int(c.get("diggCount") or c.get("likeCount")),
+                            "publishedAt": safe_str(c.get("createTimeISO")),
+                        }
+                    )
+            return {
+                "platform": "tiktok",
+                "url": url,
+                "commentId": comment_id,
+                "totalReturned": len(replies[:limit]),
+                "replies": replies[:limit],
+            }
+
+        data = await cached_or_run(
+            endpoint="tiktok.comment-replies",
+            params={"url": url, "comment_id": comment_id, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/user-followers", summary="List a TikTok user's followers")
+async def tiktok_user_followers(
+    url: str = Query(..., description="https://tiktok.com/@username"),
+    limit: int = Query(50, ge=1, le=500),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    handle = extract_tiktok_username(url)
+    if not handle:
+        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    settings = get_settings()
+    cost = max(CREDIT_FOLLOWERS_BASE, (limit + 99) // 100 * 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/user-followers",
+        platform="tiktok",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_FOLLOWERS,
+                {"profiles": [handle], "mode": "followers", "maxItemsPerProfile": limit},
+                max_items=limit,
+            )
+            users = [_normalize_user(i) for i in items[:limit] if not i.get("isSummary")]
+            return {"url": url, "totalReturned": len(users), "followers": users}
+
+        data = await cached_or_run(
+            endpoint="tiktok.user-followers",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/user-followings", summary="List who a TikTok user follows")
+async def tiktok_user_followings(
+    url: str = Query(..., description="https://tiktok.com/@username"),
+    limit: int = Query(50, ge=1, le=500),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    handle = extract_tiktok_username(url)
+    if not handle:
+        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    settings = get_settings()
+    cost = max(CREDIT_FOLLOWERS_BASE, (limit + 99) // 100 * 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/user-followings",
+        platform="tiktok",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_FOLLOWINGS,
+                {"profiles": [handle], "mode": "following", "maxItemsPerProfile": limit},
+                max_items=limit,
+            )
+            users = [_normalize_user(i) for i in items[:limit] if not i.get("isSummary")]
+            return {"url": url, "totalReturned": len(users), "followings": users}
+
+        data = await cached_or_run(
+            endpoint="tiktok.user-followings",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/music-posts", summary="Posts using a TikTok sound/music")
+async def tiktok_music_posts(
+    url: str = Query(..., description="TikTok music/sound URL"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = max(CREDIT_MUSIC_POSTS_BASE, (limit + 49) // 50)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/music-posts",
+        platform="tiktok",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_MUSIC,
+                {"musics": [url], "resultsPerPage": limit, "shouldDownloadVideos": False},
+                max_items=limit,
+            )
+            posts = [_normalize(i) for i in items[:limit]]
+            return {"url": url, "totalReturned": len(posts), "posts": posts}
+
+        data = await cached_or_run(
+            endpoint="tiktok.music-posts",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
         )
         return ApiResponse(data=data)

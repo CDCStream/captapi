@@ -107,6 +107,9 @@ const YOUTUBE: Spec[] = [
   { slug: "youtube-shorts-summarizer", name: "YouTube Shorts Summarizer API", shortName: "Shorts Summarizer", category: "summarize", method: "GET", path: "/v1/youtube/shorts/summarize", credits: 4 },
   { slug: "youtube-shorts-stats", name: "YouTube Shorts Stats API", shortName: "Shorts Stats", category: "details", method: "GET", path: "/v1/youtube/shorts/video-details", credits: 1 },
   { slug: "youtube-shorts-comments", name: "YouTube Shorts Comments API", shortName: "Shorts Comments", category: "comments", method: "GET", path: "/v1/youtube/shorts/comments", credits: 2 },
+  { slug: "youtube-channel-shorts", name: "YouTube Channel Shorts API", shortName: "Channel Shorts", category: "list", method: "GET", path: "/v1/youtube/channel-shorts", credits: 2 },
+  { slug: "youtube-channel-streams", name: "YouTube Channel Streams API", shortName: "Channel Streams", category: "list", method: "GET", path: "/v1/youtube/channel-streams", credits: 2 },
+  { slug: "youtube-hashtag-search", name: "YouTube Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/youtube/hashtag-search", credits: 2 },
 ];
 
 const TIKTOK: Spec[] = [
@@ -117,6 +120,11 @@ const TIKTOK: Spec[] = [
   { slug: "tiktok-channel-details", name: "TikTok Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/tiktok/channel-details", credits: 1 },
   { slug: "tiktok-search", name: "TikTok Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/tiktok/search", credits: 2 },
   { slug: "tiktok-video-download", name: "TikTok Video Download API", shortName: "Video Download", category: "download", method: "GET", path: "/v1/tiktok/video-download", credits: 3 },
+  { slug: "tiktok-channel-posts", name: "TikTok Channel Posts API", shortName: "Channel Posts", category: "list", method: "GET", path: "/v1/tiktok/channel-posts", credits: 2 },
+  { slug: "tiktok-comment-replies", name: "TikTok Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/tiktok/comment-replies", credits: 2 },
+  { slug: "tiktok-user-followers", name: "TikTok User Followers API", shortName: "User Followers", category: "list", method: "GET", path: "/v1/tiktok/user-followers", credits: 2 },
+  { slug: "tiktok-user-followings", name: "TikTok User Followings API", shortName: "User Followings", category: "list", method: "GET", path: "/v1/tiktok/user-followings", credits: 2 },
+  { slug: "tiktok-music-posts", name: "TikTok Music Posts API", shortName: "Music Posts", category: "list", method: "GET", path: "/v1/tiktok/music-posts", credits: 2 },
 ];
 
 const INSTAGRAM: Spec[] = [
@@ -129,6 +137,8 @@ const INSTAGRAM: Spec[] = [
   { slug: "instagram-channel-reels", name: "Instagram Channel Reels API", shortName: "Channel Reels", category: "list", method: "GET", path: "/v1/instagram/channel-reels", credits: 2 },
   { slug: "instagram-reels-search", name: "Instagram Reels Search API", shortName: "Reels Search", category: "search", method: "GET", path: "/v1/instagram/reels-search", credits: 2 },
   { slug: "instagram-video-download", name: "Instagram Video Download API", shortName: "Video Download", category: "download", method: "GET", path: "/v1/instagram/video-download", credits: 3 },
+  { slug: "instagram-tagged-posts", name: "Instagram Tagged Posts API", shortName: "Tagged Posts", category: "list", method: "GET", path: "/v1/instagram/tagged-posts", credits: 2 },
+  { slug: "instagram-music-posts", name: "Instagram Music Posts API", shortName: "Music Posts", category: "list", method: "GET", path: "/v1/instagram/music-posts", credits: 2 },
 ];
 
 const FACEBOOK: Spec[] = [

@@ -36,12 +36,18 @@ class Settings(BaseSettings):
     APIFY_ACTOR_TIKTOK_COMMENTS: str = "clockworks/tiktok-comments-scraper"
     APIFY_ACTOR_TIKTOK_PROFILE: str = "clockworks/tiktok-profile-scraper"
     APIFY_ACTOR_TIKTOK_SEARCH: str = "clockworks/tiktok-scraper"
+    # Followers / followings use a dedicated relationship scraper (mode-driven);
+    # music feeds use the clockworks sound scraper.
+    APIFY_ACTOR_TIKTOK_FOLLOWERS: str = "coregent/tiktok-followers-following-scraper"
+    APIFY_ACTOR_TIKTOK_FOLLOWINGS: str = "coregent/tiktok-followers-following-scraper"
+    APIFY_ACTOR_TIKTOK_MUSIC: str = "clockworks/tiktok-sound-scraper"
 
     APIFY_ACTOR_INSTAGRAM: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_REEL: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_PROFILE: str = "apify/instagram-profile-scraper"
     APIFY_ACTOR_INSTAGRAM_POST: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_COMMENT: str = "apify/instagram-comment-scraper"
+    APIFY_ACTOR_INSTAGRAM_TAGGED: str = "apify/instagram-tagged-scraper"
 
     APIFY_ACTOR_FACEBOOK_POSTS: str = "apify/facebook-posts-scraper"
     APIFY_ACTOR_FACEBOOK_PAGES: str = "apify/facebook-pages-scraper"

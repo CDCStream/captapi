@@ -27,6 +27,8 @@ CREDIT_CHANNEL_POSTS_BASE = 2
 CREDIT_CHANNEL_REELS_BASE = 2
 CREDIT_SEARCH = 2
 CREDIT_DOWNLOAD = 3
+CREDIT_TAGGED_BASE = 2
+CREDIT_MUSIC_POSTS_BASE = 2
 
 
 def _normalize_post(item: dict) -> dict:
@@ -454,5 +456,76 @@ async def instagram_video_download(
             runner=_run,
             ctx=ctx,
             ttl=3600,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/tagged-posts", summary="Posts an Instagram user is tagged in")
+async def instagram_tagged_posts(
+    url: str = Query(..., description="Instagram profile URL"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    handle = extract_instagram_username(url)
+    if not handle:
+        raise HTTPException(status_code=400, detail="Invalid profile URL")
+    settings = get_settings()
+    cost = max(CREDIT_TAGGED_BASE, (limit + 49) // 50)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/instagram/tagged-posts",
+        platform="instagram",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_INSTAGRAM_TAGGED,
+                {"username": [handle], "resultsLimit": limit},
+                max_items=limit,
+            )
+            posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+            return {"url": url, "totalReturned": len(posts), "posts": posts}
+
+        data = await cached_or_run(
+            endpoint="instagram.tagged-posts",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/music-posts", summary="Posts/Reels using an Instagram audio")
+async def instagram_music_posts(
+    url: str = Query(..., description="Instagram audio/music page URL"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = max(CREDIT_MUSIC_POSTS_BASE, (limit + 49) // 50)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/instagram/music-posts",
+        platform="instagram",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_INSTAGRAM,
+                {"directUrls": [url], "resultsLimit": limit, "resultsType": "posts"},
+                max_items=limit,
+            )
+            posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+            return {"url": url, "totalReturned": len(posts), "posts": posts}
+
+        data = await cached_or_run(
+            endpoint="instagram.music-posts",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
         )
         return ApiResponse(data=data)
