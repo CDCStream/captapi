@@ -7,6 +7,7 @@ import {
   CreditCard,
   Key,
   LayoutDashboard,
+  LineChart,
   PlayCircle,
   UserCog,
 } from "lucide-react";
@@ -17,6 +18,7 @@ const nav = [
   { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
   { href: "/dashboard/playground", label: "Playground", icon: PlayCircle },
   { href: "/dashboard/usage", label: "Usage", icon: BarChart3 },
+  { href: "/dashboard/analytics", label: "Dashboard", icon: LineChart },
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/account", label: "Account", icon: UserCog },
 ];
