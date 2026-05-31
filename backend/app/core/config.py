@@ -46,6 +46,9 @@ class Settings(BaseSettings):
     APIFY_ACTOR_TIKTOK_FOLLOWERS: str = "clockworks/tiktok-followers-scraper"
     APIFY_ACTOR_TIKTOK_FOLLOWINGS: str = "clockworks/tiktok-followers-scraper"
     APIFY_ACTOR_TIKTOK_MUSIC: str = "clockworks/tiktok-sound-scraper"
+    # Trending feed / popular hashtags / popular creators by region. HTTP-only,
+    # `content_type` ("video"|"hashtag"|"creator"|"music") + `country_code`.
+    APIFY_ACTOR_TIKTOK_TRENDING: str = "xtracto/tiktok-trending-scraper"
 
     APIFY_ACTOR_INSTAGRAM: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_REEL: str = "apify/instagram-scraper"
@@ -56,10 +59,17 @@ class Settings(BaseSettings):
     # Dedicated reels-by-audio scraper (input: audioUrls). The generic
     # apify/instagram-scraper does not reliably resolve audio pages.
     APIFY_ACTOR_INSTAGRAM_AUDIO: str = "kinaesthetic_millionaire/instagram-reels-audio-scraper"
+    # Story highlights (list + expanded items). Input: `usernames`.
+    APIFY_ACTOR_INSTAGRAM_HIGHLIGHTS: str = "goat255/instagram-stories-highlights-scraper"
 
     APIFY_ACTOR_FACEBOOK_POSTS: str = "apify/facebook-posts-scraper"
     APIFY_ACTOR_FACEBOOK_PAGES: str = "apify/facebook-pages-scraper"
     APIFY_ACTOR_FACEBOOK_COMMENTS: str = "apify/facebook-comments-scraper"
+    APIFY_ACTOR_FACEBOOK_REELS: str = "scraply/facebook-reels-scraper"
+    APIFY_ACTOR_FACEBOOK_GROUPS: str = "apify/facebook-groups-scraper"
+
+    # YouTube community ("posts") tab.
+    APIFY_ACTOR_YOUTUBE_COMMUNITY: str = "scrapapi/youtube-community-posts-scraper"
 
     OPENAI_API_KEY: str
     OPENAI_MODEL_SUMMARY: str = "gpt-4o-mini"

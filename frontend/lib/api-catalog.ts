@@ -127,6 +127,9 @@ const YOUTUBE: Spec[] = [
   { slug: "youtube-channel-shorts", name: "YouTube Channel Shorts API", shortName: "Channel Shorts", category: "list", method: "GET", path: "/v1/youtube/channel-shorts", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-channel-streams", name: "YouTube Channel Streams API", shortName: "Channel Streams", category: "list", method: "GET", path: "/v1/youtube/channel-streams", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-hashtag-search", name: "YouTube Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/youtube/hashtag-search", credits: 20, creditsPerResult: 1 },
+  { slug: "youtube-comment-replies", name: "YouTube Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/youtube/comment-replies", credits: 20, creditsPerResult: 0.4 },
+  { slug: "youtube-channel-playlists", name: "YouTube Channel Playlists API", shortName: "Channel Playlists", category: "list", method: "GET", path: "/v1/youtube/channel-playlists", credits: 20, creditsPerResult: 1 },
+  { slug: "youtube-community-posts", name: "YouTube Community Posts API", shortName: "Community Posts", category: "list", method: "GET", path: "/v1/youtube/community-posts", credits: 10, creditsPerResult: 0.5 },
 ];
 
 const TIKTOK: Spec[] = [
@@ -142,6 +145,13 @@ const TIKTOK: Spec[] = [
   { slug: "tiktok-user-followers", name: "TikTok User Followers API", shortName: "User Followers", category: "list", method: "GET", path: "/v1/tiktok/user-followers", credits: 20, creditsPerResult: 0.4 },
   { slug: "tiktok-user-followings", name: "TikTok User Followings API", shortName: "User Followings", category: "list", method: "GET", path: "/v1/tiktok/user-followings", credits: 20, creditsPerResult: 0.4 },
   { slug: "tiktok-music-posts", name: "TikTok Music Posts API", shortName: "Music Posts", category: "list", method: "GET", path: "/v1/tiktok/music-posts", credits: 32, creditsPerResult: 1.6 },
+  { slug: "tiktok-hashtag-search", name: "TikTok Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/tiktok/hashtag-search", credits: 14, creditsPerResult: 0.7 },
+  { slug: "tiktok-top-search", name: "TikTok Top Search API", shortName: "Top Search", category: "search", method: "GET", path: "/v1/tiktok/top-search", credits: 14, creditsPerResult: 0.7 },
+  { slug: "tiktok-user-search", name: "TikTok User Search API", shortName: "User Search", category: "search", method: "GET", path: "/v1/tiktok/user-search", credits: 8, creditsPerResult: 0.4 },
+  { slug: "tiktok-song-details", name: "TikTok Song Details API", shortName: "Song Details", category: "details", method: "GET", path: "/v1/tiktok/song-details", credits: 2 },
+  { slug: "tiktok-trending-feed", name: "TikTok Trending Feed API", shortName: "Trending Feed", category: "list", method: "GET", path: "/v1/tiktok/trending-feed", credits: 14, creditsPerResult: 0.7 },
+  { slug: "tiktok-popular-hashtags", name: "TikTok Popular Hashtags API", shortName: "Popular Hashtags", category: "list", method: "GET", path: "/v1/tiktok/popular-hashtags", credits: 14, creditsPerResult: 0.7 },
+  { slug: "tiktok-popular-creators", name: "TikTok Popular Creators API", shortName: "Popular Creators", category: "list", method: "GET", path: "/v1/tiktok/popular-creators", credits: 14, creditsPerResult: 0.7 },
 ];
 
 const INSTAGRAM: Spec[] = [
@@ -156,6 +166,11 @@ const INSTAGRAM: Spec[] = [
   { slug: "instagram-video-download", name: "Instagram Video Download API", shortName: "Video Download", category: "download", method: "GET", path: "/v1/instagram/video-download", credits: 3 },
   { slug: "instagram-tagged-posts", name: "Instagram Tagged Posts API", shortName: "Tagged Posts", category: "list", method: "GET", path: "/v1/instagram/tagged-posts", credits: 18, creditsPerResult: 0.9 },
   { slug: "instagram-music-posts", name: "Instagram Music Posts API", shortName: "Music Posts", category: "list", method: "GET", path: "/v1/instagram/music-posts", credits: 18, creditsPerResult: 0.9 },
+  { slug: "instagram-hashtag-search", name: "Instagram Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/instagram/hashtag-search", credits: 12, creditsPerResult: 0.6 },
+  { slug: "instagram-profile-search", name: "Instagram Profile Search API", shortName: "Profile Search", category: "search", method: "GET", path: "/v1/instagram/profile-search", credits: 12, creditsPerResult: 0.6 },
+  { slug: "instagram-story-highlights", name: "Instagram Story Highlights API", shortName: "Story Highlights", category: "list", method: "GET", path: "/v1/instagram/story-highlights", credits: 5 },
+  { slug: "instagram-highlights-details", name: "Instagram Highlights Details API", shortName: "Highlights Details", category: "list", method: "GET", path: "/v1/instagram/highlights-details", credits: 9, creditsPerResult: 0.9 },
+  { slug: "instagram-embed", name: "Instagram Embed API", shortName: "Embed", category: "details", method: "GET", path: "/v1/instagram/embed", credits: 1 },
 ];
 
 const FACEBOOK: Spec[] = [
@@ -164,6 +179,10 @@ const FACEBOOK: Spec[] = [
   { slug: "facebook-summarizer", name: "Facebook Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/facebook/summarize", credits: 4 },
   { slug: "facebook-comments", name: "Facebook Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/facebook/comments", credits: 30, creditsPerResult: 0.6 },
   { slug: "facebook-page-details", name: "Facebook Page Details API", shortName: "Page Details", category: "channel", method: "GET", path: "/v1/facebook/page-details", credits: 1 },
+  { slug: "facebook-profile-posts", name: "Facebook Profile Posts API", shortName: "Profile Posts", category: "list", method: "GET", path: "/v1/facebook/profile-posts", credits: 12, creditsPerResult: 0.6 },
+  { slug: "facebook-profile-reels", name: "Facebook Profile Reels API", shortName: "Profile Reels", category: "list", method: "GET", path: "/v1/facebook/profile-reels", credits: 12, creditsPerResult: 0.6 },
+  { slug: "facebook-group-posts", name: "Facebook Group Posts API", shortName: "Group Posts", category: "list", method: "GET", path: "/v1/facebook/group-posts", credits: 12, creditsPerResult: 0.6 },
+  { slug: "facebook-comment-replies", name: "Facebook Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/facebook/comment-replies", credits: 30, creditsPerResult: 0.6 },
 ];
 
 export const PLATFORM_GROUPS: PlatformGroup[] = [

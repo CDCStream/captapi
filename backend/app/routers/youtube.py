@@ -39,6 +39,9 @@ CREDIT_DOWNLOAD = 5
 # Charged via ctx["credits_override"] on the actual item count returned.
 RATE_YT_VIDEO = 1.0
 RATE_YT_COMMENTS = 0.4
+# Community posts use a third-party HTTP actor; cost not yet verified, so the
+# rate is conservative until confirmed in the Apify console.
+RATE_YT_COMMUNITY = 0.5
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -54,6 +57,16 @@ def _channel_tab_url(url: str, tab: str) -> str:
             base = base[: -len(suffix)]
             break
     return f"{base}/{tab}"
+
+
+def _reply_payload(r: dict) -> dict:
+    return {
+        "id": safe_str(r.get("cid") or r.get("commentId") or r.get("id")),
+        "author": safe_str(r.get("author") or r.get("authorName")),
+        "text": (r.get("comment") or r.get("text") or r.get("content") or "").strip(),
+        "likeCount": safe_int(r.get("voteCount") or r.get("votes") or r.get("likeCount")),
+        "publishedAt": safe_str(r.get("publishedAt") or r.get("publishedTimeText")),
+    }
 
 
 def _video_card(v: dict) -> dict:
@@ -706,3 +719,152 @@ async def shorts_comments(
     caller: ApiCaller = Depends(require_api_key),
 ):
     return await youtube_comments(url=url, limit=limit, caller=caller)
+
+
+# ---------- COMMENT REPLIES ----------------------------------------------
+@router.get("/comment-replies", summary="Replies to a YouTube comment")
+async def youtube_comment_replies(
+    url: str = Query(..., description="YouTube video URL the comment belongs to"),
+    comment_id: str = Query(..., description="ID of the parent comment"),
+    limit: int = Query(50, ge=1, le=500),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    vid, norm_url = _require_youtube_url(url)
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_YT_COMMENTS, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/youtube/comment-replies",
+        platform="youtube",
+        resource_url=norm_url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_YOUTUBE_COMMENTS,
+                {"startUrls": [{"url": norm_url}], "maxComments": limit * 4, "includeReplies": True},
+                max_items=limit * 4,
+            )
+            replies = []
+            for c in items:
+                parent = safe_str(c.get("replyToCid") or c.get("parentCommentId") or c.get("replyTo"))
+                nested = c.get("replies")
+                # Some actors nest replies inside the parent comment object.
+                if isinstance(nested, list) and safe_str(c.get("cid") or c.get("commentId") or c.get("id")) == comment_id:
+                    for r in nested:
+                        replies.append(_reply_payload(r))
+                elif parent == comment_id:
+                    replies.append(_reply_payload(c))
+                if len(replies) >= limit:
+                    break
+            return {
+                "url": norm_url,
+                "videoId": vid,
+                "commentId": comment_id,
+                "totalReturned": len(replies[:limit]),
+                "replies": replies[:limit],
+            }
+
+        data = await cached_or_run(
+            endpoint="youtube.comment-replies",
+            params={"url": norm_url, "comment_id": comment_id, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["replies"]), RATE_YT_COMMENTS, 2)
+        return ApiResponse(data=data)
+
+
+# ---------- CHANNEL PLAYLISTS ---------------------------------------------
+@router.get("/channel-playlists", summary="List a YouTube channel's playlists")
+async def youtube_channel_playlists(
+    url: str = Query(..., description="Channel URL (youtube.com/@handle)"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/youtube/channel-playlists",
+        platform="youtube",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_YOUTUBE_SEARCH,
+                {"startUrls": [{"url": _channel_tab_url(url, "playlists")}], "maxResults": limit},
+                max_items=limit,
+            )
+            playlists = []
+            for p in items[:limit]:
+                playlists.append(
+                    {
+                        "url": safe_str(p.get("url") or p.get("playlistUrl")),
+                        "title": safe_str(p.get("title")) or "",
+                        "videoCount": safe_int(p.get("videoCount") or p.get("numberOfVideos")),
+                        "thumbnailUrl": safe_str(p.get("thumbnailUrl")),
+                    }
+                )
+            return {"url": url, "totalReturned": len(playlists), "playlists": playlists}
+
+        data = await cached_or_run(
+            endpoint="youtube.channel-playlists",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["playlists"]), RATE_YT_VIDEO, 2)
+        return ApiResponse(data=data)
+
+
+# ---------- COMMUNITY POSTS -----------------------------------------------
+@router.get("/community-posts", summary="List a YouTube channel's community posts")
+async def youtube_community_posts(
+    url: str = Query(..., description="Channel URL (youtube.com/@handle)"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_YT_COMMUNITY, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/youtube/community-posts",
+        platform="youtube",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_YOUTUBE_COMMUNITY,
+                {"channelUrls": [url], "maxPosts": limit},
+                max_items=limit,
+            )
+            posts = []
+            for p in items[:limit]:
+                images = p.get("images") or p.get("attachments") or []
+                posts.append(
+                    {
+                        "id": safe_str(p.get("postId") or p.get("id")),
+                        "url": safe_str(p.get("postUrl") or p.get("url")),
+                        "text": (p.get("text") or p.get("content") or "").strip(),
+                        "likeCount": safe_int(p.get("likeCount") or p.get("votes") or p.get("likes")),
+                        "commentCount": safe_int(p.get("commentCount") or p.get("comments")),
+                        "publishedAt": safe_str(p.get("publishedAt") or p.get("date") or p.get("publishedTimeText")),
+                        "images": [safe_str(i) if isinstance(i, str) else safe_str(i.get("url")) for i in images] if isinstance(images, list) else [],
+                    }
+                )
+            return {"url": url, "totalReturned": len(posts), "posts": posts}
+
+        data = await cached_or_run(
+            endpoint="youtube.community-posts",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_YT_COMMUNITY, 2)
+        return ApiResponse(data=data)

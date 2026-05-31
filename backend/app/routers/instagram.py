@@ -582,3 +582,248 @@ async def instagram_music_posts(
         )
         ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_RICH, 3)
         return ApiResponse(data=data)
+
+
+@router.get("/hashtag-search", summary="Search Instagram posts by hashtag")
+async def instagram_hashtag_search(
+    q: str = Query(..., min_length=2, description="Hashtag (without #)"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_IG_POSTS, CREDIT_SEARCH)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/instagram/hashtag-search",
+        platform="instagram",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            tag = q.lstrip("#")
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_INSTAGRAM,
+                {
+                    "directUrls": [f"https://www.instagram.com/explore/tags/{tag}/"],
+                    "resultsLimit": limit,
+                    "resultsType": "posts",
+                },
+                max_items=limit,
+            )
+            results = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+            return {"query": q, "totalReturned": len(results), "results": results}
+
+        data = await cached_or_run(
+            endpoint="instagram.hashtag-search",
+            params={"q": q, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_IG_POSTS, CREDIT_SEARCH)
+        return ApiResponse(data=data)
+
+
+def _normalize_ig_profile(item: dict) -> dict:
+    username = item.get("username") or item.get("ownerUsername")
+    return {
+        "username": safe_str(username),
+        "displayName": safe_str(item.get("fullName") or item.get("ownerFullName")),
+        "url": f"https://instagram.com/{username}" if username else None,
+        "followers": safe_int(item.get("followersCount")),
+        "verified": item.get("verified") or item.get("isVerified"),
+        "private": item.get("private") or item.get("isPrivate"),
+        "profileImage": safe_str(item.get("profilePicUrl")),
+    }
+
+
+@router.get("/profile-search", summary="Search Instagram profiles by keyword")
+async def instagram_profile_search(
+    q: str = Query(..., min_length=2),
+    limit: int = Query(20, ge=1, le=100),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_IG_POSTS, CREDIT_SEARCH)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/instagram/profile-search",
+        platform="instagram",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_INSTAGRAM,
+                {"search": q, "searchType": "user", "searchLimit": limit, "resultsType": "details"},
+                max_items=limit,
+            )
+            users = [_normalize_ig_profile(i) for i in items[:limit] if i.get("username") or i.get("ownerUsername")]
+            return {"query": q, "totalReturned": len(users), "users": users}
+
+        data = await cached_or_run(
+            endpoint="instagram.profile-search",
+            params={"q": q, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["users"]), RATE_IG_POSTS, CREDIT_SEARCH)
+        return ApiResponse(data=data)
+
+
+def _highlight_payload(item: dict) -> dict:
+    return {
+        "id": safe_str(item.get("id") or item.get("highlightId")),
+        "title": safe_str(item.get("title") or item.get("name")),
+        "coverUrl": safe_str(item.get("coverUrl") or item.get("cover") or item.get("coverMediaUrl")),
+        "itemCount": safe_int(item.get("itemCount") or item.get("mediaCount")),
+    }
+
+
+@router.get("/story-highlights", summary="List an Instagram profile's story highlights")
+async def instagram_story_highlights(
+    url: str = Query(..., description="Instagram profile URL"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    handle = extract_instagram_username(url)
+    if not handle:
+        raise HTTPException(status_code=400, detail="Invalid profile URL")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/instagram/story-highlights",
+        platform="instagram",
+        resource_url=url,
+        base_credits=CREDIT_CHANNEL + 4,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_INSTAGRAM_HIGHLIGHTS,
+                {
+                    "usernames": [handle],
+                    "includeStories": False,
+                    "includeHighlights": True,
+                    "expandHighlightItems": False,
+                },
+                max_items=1,
+            )
+            highlights: list[dict[str, Any]] = []
+            for row in items:
+                raw = row.get("highlights") or row.get("highlightsList") or []
+                if isinstance(raw, list):
+                    highlights.extend(_highlight_payload(h) for h in raw if isinstance(h, dict))
+            return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
+
+        data = await cached_or_run(
+            endpoint="instagram.story-highlights",
+            params={"url": url},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/highlights-details", summary="Items inside an Instagram profile's highlights")
+async def instagram_highlights_details(
+    url: str = Query(..., description="Instagram profile URL"),
+    limit: int = Query(10, ge=1, le=50, description="Max highlights to expand"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    handle = extract_instagram_username(url)
+    if not handle:
+        raise HTTPException(status_code=400, detail="Invalid profile URL")
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_IG_RICH, 5)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/instagram/highlights-details",
+        platform="instagram",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_INSTAGRAM_HIGHLIGHTS,
+                {
+                    "usernames": [handle],
+                    "includeStories": False,
+                    "includeHighlights": True,
+                    "expandHighlightItems": True,
+                    "maxHighlightsPerUser": limit,
+                },
+                max_items=limit,
+            )
+            highlights: list[dict[str, Any]] = []
+            for row in items:
+                raw = row.get("highlights") or row.get("highlightsList") or []
+                if not isinstance(raw, list):
+                    continue
+                for h in raw:
+                    if not isinstance(h, dict):
+                        continue
+                    payload = _highlight_payload(h)
+                    media = h.get("items") or h.get("media") or []
+                    payload["items"] = [
+                        {
+                            "type": safe_str(m.get("type") or m.get("mediaType")),
+                            "url": safe_str(m.get("url") or m.get("mediaUrl") or m.get("videoUrl") or m.get("imageUrl")),
+                            "thumbnailUrl": safe_str(m.get("thumbnailUrl") or m.get("displayUrl")),
+                            "takenAt": safe_str(m.get("takenAt") or m.get("timestamp")),
+                        }
+                        for m in (media if isinstance(media, list) else [])
+                        if isinstance(m, dict)
+                    ]
+                    highlights.append(payload)
+            return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
+
+        data = await cached_or_run(
+            endpoint="instagram.highlights-details",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["highlights"]), RATE_IG_RICH, 5)
+        return ApiResponse(data=data)
+
+
+@router.get("/embed", summary="Embed HTML for an Instagram post/reel")
+async def instagram_embed(
+    url: str = Query(..., description="Instagram post or reel URL"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    shortcode = extract_instagram_shortcode(url)
+    if not shortcode:
+        raise HTTPException(status_code=400, detail="Invalid Instagram post/reel URL")
+    # Pure string build — no Apify call, so this is a flat 1-credit endpoint.
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/instagram/embed",
+        platform="instagram",
+        resource_url=url,
+        base_credits=1,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            permalink = f"https://www.instagram.com/p/{shortcode}/"
+            html = (
+                '<blockquote class="instagram-media" '
+                f'data-instgrm-permalink="{permalink}" data-instgrm-version="14"></blockquote>'
+                '<script async src="//www.instagram.com/embed.js"></script>'
+            )
+            return {
+                "platform": "instagram",
+                "url": url,
+                "shortcode": shortcode,
+                "permalink": permalink,
+                "html": html,
+            }
+
+        data = await cached_or_run(
+            endpoint="instagram.embed",
+            params={"url": url},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)

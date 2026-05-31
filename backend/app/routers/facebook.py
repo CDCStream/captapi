@@ -27,11 +27,23 @@ CREDIT_PAGE_DETAILS = 1
 # apify/facebook-comments-scraper is billed per result ($1.50/1k = $0.0015).
 # 0.6 credit/comment = ~80% markup (0.6 * $0.0045 = $0.0027 vs $0.0015).
 RATE_FB_COMMENTS = 0.6
+# Posts / reels / group posts scrapers are billed per result (~$0.0015-0.002).
+RATE_FB_POSTS = 0.6
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
     """Credits for `n` returned items at `rate` credits/item (with a floor)."""
     return max(minimum, math.ceil(n * rate))
+
+
+def _reply_payload(r: dict) -> dict:
+    return {
+        "id": safe_str(r.get("id") or r.get("commentId")),
+        "text": (r.get("text") or "").strip(),
+        "author": safe_str(r.get("profileName") or r.get("authorName")),
+        "likeCount": safe_int(r.get("likesCount") or r.get("reactionsCount")),
+        "publishedAt": safe_str(r.get("date") or r.get("publishedAt")),
+    }
 
 
 def _normalize_post(item: dict) -> dict:
@@ -307,4 +319,165 @@ async def facebook_page_details(
             runner=_run,
             ctx=ctx,
         )
+        return ApiResponse(data=data)
+
+
+@router.get("/profile-posts", summary="Latest posts from a Facebook profile/page")
+async def facebook_profile_posts(
+    url: str = Query(..., description="Facebook profile or page URL"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    if not extract_facebook_page(url):
+        raise HTTPException(status_code=400, detail="Invalid Facebook profile/page URL")
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_FB_POSTS, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/facebook/profile-posts",
+        platform="facebook",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_FACEBOOK_POSTS,
+                {"startUrls": [{"url": url}], "resultsLimit": limit},
+                max_items=limit,
+            )
+            posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+            return {"url": url, "totalReturned": len(posts), "posts": posts}
+
+        data = await cached_or_run(
+            endpoint="facebook.profile-posts",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_FB_POSTS, 2)
+        return ApiResponse(data=data)
+
+
+@router.get("/profile-reels", summary="Latest Reels from a Facebook profile/page")
+async def facebook_profile_reels(
+    url: str = Query(..., description="Facebook profile or page URL"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    if not extract_facebook_page(url):
+        raise HTTPException(status_code=400, detail="Invalid Facebook profile/page URL")
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_FB_POSTS, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/facebook/profile-reels",
+        platform="facebook",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_FACEBOOK_REELS,
+                {"startUrls": [url], "resultsLimit": limit},
+                max_items=limit,
+            )
+            reels = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+            return {"url": url, "totalReturned": len(reels), "reels": reels}
+
+        data = await cached_or_run(
+            endpoint="facebook.profile-reels",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_FB_POSTS, 2)
+        return ApiResponse(data=data)
+
+
+@router.get("/group-posts", summary="Posts from a public Facebook group")
+async def facebook_group_posts(
+    url: str = Query(..., description="Public Facebook group URL"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_FB_POSTS, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/facebook/group-posts",
+        platform="facebook",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_FACEBOOK_GROUPS,
+                {"startUrls": [{"url": url}], "resultsLimit": limit},
+                max_items=limit,
+            )
+            posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+            return {"url": url, "totalReturned": len(posts), "posts": posts}
+
+        data = await cached_or_run(
+            endpoint="facebook.group-posts",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_FB_POSTS, 2)
+        return ApiResponse(data=data)
+
+
+@router.get("/comment-replies", summary="Replies to a Facebook comment")
+async def facebook_comment_replies(
+    url: str = Query(..., description="Facebook post URL the comment belongs to"),
+    comment_id: str = Query(..., description="ID of the parent comment"),
+    limit: int = Query(50, ge=1, le=500),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_FB_COMMENTS, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/facebook/comment-replies",
+        platform="facebook",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_FACEBOOK_COMMENTS,
+                {"startUrls": [{"url": url}], "resultsLimit": limit * 4, "includeNestedComments": True},
+                max_items=limit * 4,
+            )
+            replies = []
+            for c in items:
+                parent = safe_str(c.get("parentCommentId") or c.get("replyToId") or c.get("commentParentId"))
+                nested = c.get("replies") or c.get("nestedComments")
+                if isinstance(nested, list) and safe_str(c.get("id") or c.get("commentId")) == comment_id:
+                    for r in nested:
+                        replies.append(_reply_payload(r))
+                elif parent == comment_id:
+                    replies.append(_reply_payload(c))
+                if len(replies) >= limit:
+                    break
+            return {
+                "platform": "facebook",
+                "url": url,
+                "commentId": comment_id,
+                "totalReturned": len(replies[:limit]),
+                "replies": replies[:limit],
+            }
+
+        data = await cached_or_run(
+            endpoint="facebook.comment-replies",
+            params={"url": url, "comment_id": comment_id, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["replies"]), RATE_FB_COMMENTS, 2)
         return ApiResponse(data=data)

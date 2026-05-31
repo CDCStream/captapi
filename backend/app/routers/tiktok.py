@@ -41,6 +41,10 @@ RATE_FOLLOWERS = 0.4       # clockworks followers-scraper  $1.00/1k ($0.001)
 RATE_COMMENTS = 0.2        # clockworks comments-scraper   $0.50/1k ($0.0005)
 RATE_CHANNEL_POSTS = 0.7   # clockworks tiktok-scraper     $1.70/1k ($0.0017)
 RATE_MUSIC_POSTS = 1.6     # clockworks sound-scraper      $4.00/1k ($0.004)
+RATE_USER_SEARCH = 0.4     # clockworks user search (per profile)
+# Trending/popular endpoints hit a third-party HTTP actor; cost not yet verified
+# in the Apify console, so rates are conservative until confirmed.
+RATE_TREND = 0.7
 
 # Reply scraper crawls a video's comments to find one comment's replies, and is
 # billed per ROW pushed (comment or reply) at $2.40/1k = $0.0024/row. We
@@ -80,6 +84,27 @@ def _normalize_connection(item: dict) -> dict:
         "following": safe_int(a.get("following")),
         "verified": a.get("verified"),
         "profileImage": safe_str(a.get("avatar") or a.get("originalAvatarUrl")),
+    }
+
+
+def _normalize_user(item: dict) -> dict:
+    """Map a TikTok user-search result to our user shape.
+
+    The search actor may nest the profile under ``authorMeta`` or expose it at
+    the top level, so we look in both places.
+    """
+    a = item.get("authorMeta") or item.get("author") or item
+    stats = item.get("authorStats") or item.get("stats") or {}
+    username = a.get("name") or a.get("uniqueId") or item.get("uniqueId")
+    return {
+        "username": safe_str(username),
+        "displayName": safe_str(a.get("nickName") or a.get("nickname")),
+        "bio": safe_str(a.get("signature")),
+        "url": safe_str(a.get("profileUrl"))
+        or (f"https://www.tiktok.com/@{username}" if username else None),
+        "followers": safe_int(a.get("fans") or a.get("followerCount") or stats.get("followerCount")),
+        "verified": a.get("verified"),
+        "profileImage": safe_str(a.get("avatar") or a.get("avatarLarger") or a.get("originalAvatarUrl")),
     }
 
 
@@ -686,4 +711,298 @@ async def tiktok_music_posts(
             ctx=ctx,
         )
         ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_MUSIC_POSTS, 3)
+        return ApiResponse(data=data)
+
+
+@router.get("/hashtag-search", summary="Search TikTok videos by hashtag")
+async def tiktok_hashtag_search(
+    q: str = Query(..., min_length=2, description="Hashtag (with or without #)"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_CHANNEL_POSTS, CREDIT_SEARCH)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/hashtag-search",
+        platform="tiktok",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK,
+                {"hashtags": [q.lstrip("#")], "resultsPerPage": limit, "shouldDownloadVideos": False},
+                max_items=limit,
+            )
+            results = [_normalize(i) for i in items[:limit]]
+            return {"query": q, "totalReturned": len(results), "results": results}
+
+        data = await cached_or_run(
+            endpoint="tiktok.hashtag-search",
+            params={"q": q, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_CHANNEL_POSTS, CREDIT_SEARCH)
+        return ApiResponse(data=data)
+
+
+@router.get("/top-search", summary="Top mixed TikTok search results for a keyword")
+async def tiktok_top_search(
+    q: str = Query(..., min_length=2),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_CHANNEL_POSTS, CREDIT_SEARCH)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/top-search",
+        platform="tiktok",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK,
+                {"searchQueries": [q], "searchSection": "", "resultsPerPage": limit},
+                max_items=limit,
+            )
+            results = [_normalize(i) for i in items[:limit]]
+            return {"query": q, "totalReturned": len(results), "results": results}
+
+        data = await cached_or_run(
+            endpoint="tiktok.top-search",
+            params={"q": q, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_CHANNEL_POSTS, CREDIT_SEARCH)
+        return ApiResponse(data=data)
+
+
+@router.get("/user-search", summary="Search TikTok users/creators by keyword")
+async def tiktok_user_search(
+    q: str = Query(..., min_length=2),
+    limit: int = Query(20, ge=1, le=100),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_USER_SEARCH, 5)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/user-search",
+        platform="tiktok",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK,
+                {
+                    "searchQueries": [q],
+                    "searchSection": "/user",
+                    "maxProfilesPerQuery": limit,
+                    "resultsPerPage": limit,
+                },
+                max_items=limit,
+            )
+            users = [_normalize_user(i) for i in items[:limit]]
+            return {"query": q, "totalReturned": len(users), "users": users}
+
+        data = await cached_or_run(
+            endpoint="tiktok.user-search",
+            params={"q": q, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["users"]), RATE_USER_SEARCH, 5)
+        return ApiResponse(data=data)
+
+
+@router.get("/song-details", summary="Details of a TikTok sound/song")
+async def tiktok_song_details(
+    url: str = Query(..., description="TikTok music/sound URL"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/song-details",
+        platform="tiktok",
+        resource_url=url,
+        base_credits=CREDIT_VIDEO_DETAILS + 1,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_MUSIC,
+                {"musics": [url], "resultsPerPage": 1, "shouldDownloadVideos": False},
+                max_items=1,
+            )
+            if not items:
+                raise HTTPException(status_code=404, detail="Song not found")
+            music = items[0].get("musicMeta") or items[0].get("music") or {}
+            return {
+                "platform": "tiktok",
+                "url": url,
+                "id": safe_str(music.get("musicId") or music.get("id")),
+                "title": safe_str(music.get("musicName") or music.get("title")),
+                "author": safe_str(music.get("musicAuthor") or music.get("authorName")),
+                "original": music.get("musicOriginal"),
+                "duration": safe_float(music.get("duration")),
+                "coverUrl": safe_str(music.get("coverLarge") or music.get("coverMedium")),
+                "playUrl": safe_str(music.get("playUrl")),
+            }
+
+        data = await cached_or_run(
+            endpoint="tiktok.song-details",
+            params={"url": url},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+def _normalize_trend_video(v: dict) -> dict:
+    return {
+        "url": safe_str(v.get("url") or v.get("webVideoUrl")),
+        "title": safe_str(v.get("title") or v.get("text")),
+        "coverUrl": safe_str(v.get("cover") or v.get("coverUrl")),
+        "durationSeconds": safe_float(v.get("duration")),
+        "views": safe_int(v.get("views") or v.get("playCount")),
+        "likes": safe_int(v.get("likes") or v.get("diggCount")),
+        "comments": safe_int(v.get("comments") or v.get("commentCount")),
+        "shares": safe_int(v.get("shares") or v.get("shareCount")),
+    }
+
+
+@router.get("/trending-feed", summary="TikTok trending (For You) videos by region")
+async def tiktok_trending_feed(
+    country: str = Query("US", min_length=2, max_length=2, description="ISO country code"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_TREND, CREDIT_SEARCH)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/trending-feed",
+        platform="tiktok",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_TRENDING,
+                {"content_type": "video", "country_code": country.upper(), "limit": limit},
+                max_items=limit,
+            )
+            results = [_normalize_trend_video(v) for v in items[:limit]]
+            return {"country": country.upper(), "totalReturned": len(results), "results": results}
+
+        data = await cached_or_run(
+            endpoint="tiktok.trending-feed",
+            params={"country": country.upper(), "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_TREND, CREDIT_SEARCH)
+        return ApiResponse(data=data)
+
+
+@router.get("/popular-hashtags", summary="Top trending TikTok hashtags by region")
+async def tiktok_popular_hashtags(
+    country: str = Query("US", min_length=2, max_length=2, description="ISO country code"),
+    limit: int = Query(20, ge=1, le=100),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_TREND, CREDIT_SEARCH)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/popular-hashtags",
+        platform="tiktok",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_TRENDING,
+                {"content_type": "hashtag", "country_code": country.upper(), "limit": limit},
+                max_items=limit,
+            )
+            hashtags = []
+            for h in items[:limit]:
+                hashtags.append(
+                    {
+                        "name": safe_str(h.get("hashtag_name") or h.get("name") or h.get("title")),
+                        "videoCount": safe_int(h.get("video_count") or h.get("videoCount") or h.get("publish_cnt")),
+                        "views": safe_int(h.get("views") or h.get("video_views")),
+                        "rank": safe_int(h.get("rank")),
+                    }
+                )
+            return {"country": country.upper(), "totalReturned": len(hashtags), "hashtags": hashtags}
+
+        data = await cached_or_run(
+            endpoint="tiktok.popular-hashtags",
+            params={"country": country.upper(), "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["hashtags"]), RATE_TREND, CREDIT_SEARCH)
+        return ApiResponse(data=data)
+
+
+@router.get("/popular-creators", summary="Top trending TikTok creators by region")
+async def tiktok_popular_creators(
+    country: str = Query("US", min_length=2, max_length=2, description="ISO country code"),
+    limit: int = Query(20, ge=1, le=100),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_TREND, CREDIT_SEARCH)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/popular-creators",
+        platform="tiktok",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_TRENDING,
+                {"content_type": "creator", "country_code": country.upper(), "limit": limit},
+                max_items=limit,
+            )
+            creators = []
+            for c in items[:limit]:
+                username = c.get("username") or c.get("unique_id") or c.get("nick_name")
+                creators.append(
+                    {
+                        "username": safe_str(username),
+                        "displayName": safe_str(c.get("nick_name") or c.get("nickname")),
+                        "followers": safe_int(c.get("follower_cnt") or c.get("followers")),
+                        "likes": safe_int(c.get("liked_cnt") or c.get("likes")),
+                        "url": f"https://www.tiktok.com/@{username}" if username else None,
+                        "profileImage": safe_str(c.get("avatar_url") or c.get("avatar")),
+                        "rank": safe_int(c.get("rank")),
+                    }
+                )
+            return {"country": country.upper(), "totalReturned": len(creators), "creators": creators}
+
+        data = await cached_or_run(
+            endpoint="tiktok.popular-creators",
+            params={"country": country.upper(), "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["creators"]), RATE_TREND, CREDIT_SEARCH)
         return ApiResponse(data=data)
