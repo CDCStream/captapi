@@ -59,7 +59,7 @@ export function CaptapiHero() {
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-5xl">
+        <div className="mx-auto w-full max-w-6xl">
           {/* headline box with plus corners */}
           <div className="relative mx-auto h-full border border-border bg-background px-6 py-8 sm:py-12 [mask-image:radial-gradient(600rem_96rem_at_center,white,transparent)]">
             {/* Plus corners — smaller on mobile to avoid clipping */}
@@ -73,7 +73,11 @@ export function CaptapiHero() {
               <span className="gradient-text">
                 structured data from Social Media
               </span>{" "}
-              <HeadlineTypeWriter strings={contentTyped} />
+              {/* Reserve width of the longest word ("transcripts") so the line
+                  wrapping never changes and the box height stays constant. */}
+              <span className="inline-block min-w-[11ch] text-left align-baseline">
+                <HeadlineTypeWriter strings={contentTyped} />
+              </span>
             </h1>
 
             <div className="mt-5 flex items-center justify-center gap-1">
