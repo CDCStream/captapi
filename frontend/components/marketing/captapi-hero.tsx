@@ -52,7 +52,7 @@ export function CaptapiHero() {
 
       <div className="flex flex-col items-center justify-center px-4 sm:px-6 text-center">
         {/* badge pill */}
-        <div className="mb-6 mt-10 md:mb-6 md:mt-28">
+        <div className="mb-5 mt-6 md:mb-6 md:mt-12">
           <div className="relative flex items-center rounded-full border bg-popover px-3 py-1 text-xs text-primary/70">
             Social Media Data API
             <Link
@@ -67,7 +67,7 @@ export function CaptapiHero() {
 
         <div className="mx-auto w-full max-w-6xl">
           {/* headline box with plus corners */}
-          <div className="relative mx-auto h-full border border-border bg-background px-6 py-8 sm:py-12 [mask-image:radial-gradient(600rem_96rem_at_center,white,transparent)]">
+          <div className="relative mx-auto h-full border border-border bg-background px-6 py-6 sm:py-8 [mask-image:radial-gradient(600rem_96rem_at_center,white,transparent)]">
             {/* Plus corners — smaller on mobile to avoid clipping */}
             <Plus strokeWidth={4} className="absolute -left-3 -top-3 h-6 w-6 sm:-left-5 sm:-top-5 sm:h-10 sm:w-10 text-primary" />
             <Plus strokeWidth={4} className="absolute -bottom-3 -left-3 h-6 w-6 sm:-bottom-5 sm:-left-5 sm:h-10 sm:w-10 text-primary" />
@@ -98,7 +98,7 @@ export function CaptapiHero() {
           </div>
 
           {/* subtext with typewriter */}
-          <p className="text-primary/60 mx-auto max-w-2xl py-6 text-sm sm:text-base md:text-lg">
+          <p className="text-primary/60 mx-auto max-w-2xl py-4 text-sm sm:text-base md:text-lg">
             Extract transcripts, AI summaries, comments, followers, engagement
             metrics &amp; more from{" "}
             <span className="font-semibold text-primary">
@@ -127,7 +127,7 @@ export function CaptapiHero() {
           </p>
 
           {/* API client mockup */}
-          <div className="relative mx-auto mt-10 sm:mt-14 w-full max-w-2xl text-left">
+          <div className="relative mx-auto mt-6 sm:mt-8 w-full max-w-2xl text-left">
             <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-blue-500/20 to-sky-400/10 blur-2xl" />
             <div className="relative overflow-hidden rounded-xl border border-white/10 bg-zinc-950 shadow-2xl">
               {/* window bar with platform tabs */}
