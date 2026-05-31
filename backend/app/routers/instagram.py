@@ -60,6 +60,38 @@ def _normalize_post(item: dict) -> dict:
     }
 
 
+def _normalize_audio_reel(item: dict) -> dict:
+    """Map the reels-by-audio scraper output (capitalized keys) to our shape."""
+    author = item.get("author") or {}
+    username = author.get("username")
+    return {
+        "platform": "instagram",
+        "url": safe_str(item.get("URL") or item.get("url")),
+        "id": safe_str(item.get("Id") or item.get("id")),
+        "caption": safe_str(item.get("caption")),
+        "description": safe_str(item.get("caption")),
+        "publishedAt": safe_str(item.get("postedAt")),
+        "durationSeconds": safe_float(item.get("videoDuration")),
+        "thumbnailUrl": safe_str(author.get("temporaryProfilePictureUrl")),
+        "videoUrl": safe_str(item.get("videoTemporaryUrl") or item.get("storedVideoUrl")),
+        "author": {
+            "username": safe_str(username),
+            "displayName": safe_str(author.get("fullname")),
+            "url": f"https://instagram.com/{username}" if username else None,
+            "followers": None,
+            "verified": author.get("isVerified"),
+            "profileImage": safe_str(author.get("temporaryProfilePictureUrl")),
+        },
+        "engagement": {
+            "views": safe_int(item.get("playCount")),
+            "likes": safe_int(item.get("likeCount")),
+            "comments": safe_int(item.get("commentCount")),
+        },
+        "musicId": safe_str(item.get("musicId")),
+        "musicUrl": safe_str(item.get("musicUrl")),
+    }
+
+
 @router.get("/details", summary="Instagram post/reel details")
 async def instagram_details(
     url: str = Query(..., description="Instagram post or reel URL"),
@@ -515,11 +547,15 @@ async def instagram_music_posts(
         async def _run() -> dict[str, Any]:
             apify = get_apify()
             items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM,
-                {"directUrls": [url], "resultsLimit": limit, "resultsType": "posts"},
+                settings.APIFY_ACTOR_INSTAGRAM_AUDIO,
+                {"audioUrls": [url], "maxResults": limit, "downloadVideos": False},
                 max_items=limit,
             )
-            posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+            posts = [
+                _normalize_audio_reel(i)
+                for i in items[:limit]
+                if not i.get("error")
+            ]
             return {"url": url, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(

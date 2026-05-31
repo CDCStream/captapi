@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     APIFY_ACTOR_INSTAGRAM_POST: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_COMMENT: str = "apify/instagram-comment-scraper"
     APIFY_ACTOR_INSTAGRAM_TAGGED: str = "apify/instagram-tagged-scraper"
+    # Dedicated reels-by-audio scraper (input: audioUrls). The generic
+    # apify/instagram-scraper does not reliably resolve audio pages.
+    APIFY_ACTOR_INSTAGRAM_AUDIO: str = "kinaesthetic_millionaire/instagram-reels-audio-scraper"
 
     APIFY_ACTOR_FACEBOOK_POSTS: str = "apify/facebook-posts-scraper"
     APIFY_ACTOR_FACEBOOK_PAGES: str = "apify/facebook-pages-scraper"
