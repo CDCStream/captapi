@@ -847,15 +847,24 @@ async def youtube_community_posts(
             posts = []
             for p in items[:limit]:
                 images = p.get("images") or p.get("attachments") or []
+                clean_images = [
+                    safe_str(i) if isinstance(i, str) else safe_str(i.get("url"))
+                    for i in (images if isinstance(images, list) else [])
+                ]
+                # The actor reports counts as display strings (e.g. "330K"), so
+                # we surface them verbatim rather than forcing an int.
                 posts.append(
                     {
                         "id": safe_str(p.get("postId") or p.get("id")),
-                        "url": safe_str(p.get("postUrl") or p.get("url")),
+                        "author": safe_str(p.get("author")),
                         "text": (p.get("text") or p.get("content") or "").strip(),
-                        "likeCount": safe_int(p.get("likeCount") or p.get("votes") or p.get("likes")),
-                        "commentCount": safe_int(p.get("commentCount") or p.get("comments")),
-                        "publishedAt": safe_str(p.get("publishedAt") or p.get("date") or p.get("publishedTimeText")),
-                        "images": [safe_str(i) if isinstance(i, str) else safe_str(i.get("url")) for i in images] if isinstance(images, list) else [],
+                        "likeCount": safe_str(p.get("likeCount") or p.get("votes") or p.get("likes")),
+                        "commentCount": safe_str(p.get("commentCount") or p.get("comments")),
+                        "publishedTime": safe_str(p.get("publishedTime") or p.get("publishedAt") or p.get("date") or p.get("publishedTimeText")),
+                        "attachmentType": safe_str(p.get("attachmentType")),
+                        "videoThumbnail": safe_str(p.get("videoThumbnail")) if safe_str(p.get("videoThumbnail")) not in (None, "N/A") else None,
+                        "images": [i for i in clean_images if i and i != "N/A"],
+                        "sourceUrl": safe_str(p.get("sourceUrl")) or url,
                     }
                 )
             return {"url": url, "totalReturned": len(posts), "posts": posts}

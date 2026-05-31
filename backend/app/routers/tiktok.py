@@ -869,15 +869,32 @@ async def tiktok_song_details(
 
 
 def _normalize_trend_video(v: dict) -> dict:
+    """Map an xtracto trending video row (TikTok Explore API shape).
+
+    Rows look like ``{id, desc, author:{uniqueId,nickname}, stats:{...},
+    video:{cover,playAddr}, _rank}`` — close to the clockworks shape but with
+    no top-level webVideoUrl, so we build the URL from author + id.
+    """
+    author = v.get("author") or {}
+    stats = v.get("stats") or {}
+    video = v.get("video") or {}
+    uid = author.get("uniqueId") or author.get("unique_id")
+    vid = v.get("id") or v.get("videoId")
+    url = v.get("webVideoUrl") or v.get("url")
+    if not url and uid and vid:
+        url = f"https://www.tiktok.com/@{uid}/video/{vid}"
     return {
-        "url": safe_str(v.get("url") or v.get("webVideoUrl")),
-        "title": safe_str(v.get("title") or v.get("text")),
-        "coverUrl": safe_str(v.get("cover") or v.get("coverUrl")),
-        "durationSeconds": safe_float(v.get("duration")),
-        "views": safe_int(v.get("views") or v.get("playCount")),
-        "likes": safe_int(v.get("likes") or v.get("diggCount")),
-        "comments": safe_int(v.get("comments") or v.get("commentCount")),
-        "shares": safe_int(v.get("shares") or v.get("shareCount")),
+        "url": safe_str(url),
+        "id": safe_str(vid),
+        "title": safe_str(v.get("desc") or v.get("title") or v.get("text")),
+        "coverUrl": safe_str(video.get("cover") or v.get("cover")),
+        "author": safe_str(uid),
+        "authorName": safe_str(author.get("nickname") or author.get("nickName")),
+        "views": safe_int(stats.get("playCount") or v.get("playCount")),
+        "likes": safe_int(stats.get("diggCount") or v.get("diggCount")),
+        "comments": safe_int(stats.get("commentCount") or v.get("commentCount")),
+        "shares": safe_int(stats.get("shareCount") or v.get("shareCount")),
+        "rank": safe_int(v.get("_rank") or v.get("rank")),
     }
 
 
@@ -940,12 +957,21 @@ async def tiktok_popular_hashtags(
             )
             hashtags = []
             for h in items[:limit]:
+                trend = h.get("trend") or []
+                last_val = None
+                if isinstance(trend, list) and trend and isinstance(trend[-1], dict):
+                    last_val = trend[-1].get("value")
+                country_info = h.get("country_info") or {}
+                industry_info = h.get("industry_info") or {}
                 hashtags.append(
                     {
                         "name": safe_str(h.get("hashtag_name") or h.get("name") or h.get("title")),
-                        "videoCount": safe_int(h.get("video_count") or h.get("videoCount") or h.get("publish_cnt")),
-                        "views": safe_int(h.get("views") or h.get("video_views")),
-                        "rank": safe_int(h.get("rank")),
+                        "id": safe_str(h.get("hashtag_id")),
+                        "rank": safe_int(h.get("_rank") or h.get("rank")),
+                        "trendScore": safe_float(last_val),
+                        "country": safe_str(country_info.get("id") if isinstance(country_info, dict) else None),
+                        "industry": safe_str(industry_info.get("value") if isinstance(industry_info, dict) else None),
+                        "isPromoted": h.get("is_promoted"),
                     }
                 )
             return {"country": country.upper(), "totalReturned": len(hashtags), "hashtags": hashtags}
@@ -984,16 +1010,20 @@ async def tiktok_popular_creators(
             )
             creators = []
             for c in items[:limit]:
-                username = c.get("username") or c.get("unique_id") or c.get("nick_name")
+                tt_link = c.get("tt_link") or ""
+                username = c.get("username") or c.get("unique_id")
+                if not username and "@" in tt_link:
+                    username = tt_link.rsplit("@", 1)[-1].strip("/")
                 creators.append(
                     {
                         "username": safe_str(username),
                         "displayName": safe_str(c.get("nick_name") or c.get("nickname")),
                         "followers": safe_int(c.get("follower_cnt") or c.get("followers")),
                         "likes": safe_int(c.get("liked_cnt") or c.get("likes")),
-                        "url": f"https://www.tiktok.com/@{username}" if username else None,
+                        "url": safe_str(tt_link) or (f"https://www.tiktok.com/@{username}" if username else None),
                         "profileImage": safe_str(c.get("avatar_url") or c.get("avatar")),
-                        "rank": safe_int(c.get("rank")),
+                        "country": safe_str(c.get("country_code")),
+                        "rank": safe_int(c.get("_rank") or c.get("rank")),
                     }
                 )
             return {"country": country.upper(), "totalReturned": len(creators), "creators": creators}
