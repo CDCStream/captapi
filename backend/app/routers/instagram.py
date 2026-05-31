@@ -26,10 +26,14 @@ CREDIT_CHANNEL = 1
 CREDIT_SEARCH = 2
 CREDIT_DOWNLOAD = 3
 
-# Instagram scrapers are billed per result and are pricier than TikTok's
-# (~$2.30/1k results), so list endpoints charge ~1 credit/item to keep an
-# ~80% markup. Charged via ctx["credits_override"] on the actual item count.
-RATE_IG_LIST = 1.0
+# Per-result rates calibrated to ~80% markup (rate = cost_per_result * 400 at a
+# $0.0045/credit sell price) over verified Apify prices:
+#   apify/instagram-scraper          $1.50/1k ($0.0015) -> posts/reels/search
+#   apify/instagram-comment-scraper  $2.30/1k ($0.0023) -> comments
+#   apify/instagram-tagged-scraper / reels-audio ~$0.0023 -> tagged / music
+# Charged via ctx["credits_override"] on the actual item count.
+RATE_IG_POSTS = 0.6
+RATE_IG_RICH = 0.9
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -253,7 +257,7 @@ async def instagram_comments(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_IG_LIST, 2)
+    cost = _scaled_credits(limit, RATE_IG_RICH, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/comments",
@@ -293,7 +297,7 @@ async def instagram_comments(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["comments"]), RATE_IG_LIST, 2)
+        ctx["credits_override"] = _scaled_credits(len(data["comments"]), RATE_IG_RICH, 2)
         return ApiResponse(data=data)
 
 
@@ -356,7 +360,7 @@ async def instagram_channel_posts(
     if not handle:
         raise HTTPException(status_code=400, detail="Invalid profile URL")
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_IG_LIST, 2)
+    cost = _scaled_credits(limit, RATE_IG_POSTS, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/channel-posts",
@@ -380,7 +384,7 @@ async def instagram_channel_posts(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_LIST, 2)
+        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_POSTS, 2)
         return ApiResponse(data=data)
 
 
@@ -394,7 +398,7 @@ async def instagram_channel_reels(
     if not handle:
         raise HTTPException(status_code=400, detail="Invalid profile URL")
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_IG_LIST, 2)
+    cost = _scaled_credits(limit, RATE_IG_POSTS, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/channel-reels",
@@ -418,7 +422,7 @@ async def instagram_channel_reels(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_LIST, 2)
+        ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_POSTS, 2)
         return ApiResponse(data=data)
 
 
@@ -429,7 +433,7 @@ async def instagram_reels_search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_IG_LIST, CREDIT_SEARCH)
+    cost = _scaled_credits(limit, RATE_IG_POSTS, CREDIT_SEARCH)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/reels-search",
@@ -458,7 +462,7 @@ async def instagram_reels_search(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_IG_LIST, CREDIT_SEARCH)
+        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_IG_POSTS, CREDIT_SEARCH)
         return ApiResponse(data=data)
 
 
@@ -513,7 +517,7 @@ async def instagram_tagged_posts(
     if not handle:
         raise HTTPException(status_code=400, detail="Invalid profile URL")
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_IG_LIST, 2)
+    cost = _scaled_credits(limit, RATE_IG_RICH, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/tagged-posts",
@@ -537,7 +541,7 @@ async def instagram_tagged_posts(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_LIST, 2)
+        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_RICH, 2)
         return ApiResponse(data=data)
 
 
@@ -548,7 +552,7 @@ async def instagram_music_posts(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_IG_LIST, 3)
+    cost = _scaled_credits(limit, RATE_IG_RICH, 3)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/music-posts",
@@ -576,5 +580,5 @@ async def instagram_music_posts(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_LIST, 3)
+        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_RICH, 3)
         return ApiResponse(data=data)

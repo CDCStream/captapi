@@ -37,8 +37,8 @@ CREDIT_DOWNLOAD = 3
 # ---------------------------------------------------------------------------
 # Verified Apify prices (Free/no-subscription tier = worst case for us). Sell
 # price is $0.0045/credit, so an ~80% markup needs rate >= cost_per_result*400.
-RATE_FOLLOWERS = 0.5       # clockworks followers-scraper  $1.00/1k ($0.001)
-RATE_COMMENTS = 0.5        # clockworks comments-scraper   $0.50/1k (safe buffer)
+RATE_FOLLOWERS = 0.4       # clockworks followers-scraper  $1.00/1k ($0.001)
+RATE_COMMENTS = 0.2        # clockworks comments-scraper   $0.50/1k ($0.0005)
 RATE_CHANNEL_POSTS = 0.7   # clockworks tiktok-scraper     $1.70/1k ($0.0017)
 RATE_MUSIC_POSTS = 1.6     # clockworks sound-scraper      $4.00/1k ($0.004)
 

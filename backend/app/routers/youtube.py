@@ -29,12 +29,15 @@ CREDIT_CHANNEL_DETAILS = 1
 CREDIT_DOWNLOAD = 5
 
 # YouTube list endpoints hit per-result Apify actors:
-#   streamers/youtube-scraper          $2.40/1k with an Apify sub, $5/1k without
+#   streamers/youtube-scraper          $2.40/1k WITH an Apify sub ($5/1k without)
 #   streamers/youtube-comments-scraper $0.90/1k results (comments)
-# RATE_YT_VIDEO=1.2 stays profitable even at the no-subscription $5/1k price
-# (1.2 x $0.0045 = $0.0054 > $0.005); with an Apify sub the margin is ~80%+.
+# Rates target ~80% markup (rate = cost * 400) at the subscription price:
+#   videos:   1.0 * $0.0045 = $0.0045 vs $0.0024 -> ~88%. NOTE: requires the
+#             $29 Apify Starter sub; at the no-sub $5/1k it's break-even, so
+#             keep the subscription active.
+#   comments: 0.4 * $0.0045 = $0.0018 vs $0.0009 -> ~100%.
 # Charged via ctx["credits_override"] on the actual item count returned.
-RATE_YT_VIDEO = 1.2
+RATE_YT_VIDEO = 1.0
 RATE_YT_COMMENTS = 0.4
 
 

@@ -11,6 +11,12 @@ import {
 } from "@/components/ui/hero-designali";
 import { GoogleButton } from "@/components/auth/google-button";
 import { Button } from "@/components/ui/button";
+import { PLATFORM_GROUPS } from "@/lib/api-catalog";
+
+const ENDPOINT_COUNT = PLATFORM_GROUPS.reduce(
+  (n, g) => n + g.endpoints.length,
+  0,
+);
 
 const platformsTyped = [
   "YouTube",
@@ -86,7 +92,7 @@ export function CaptapiHero() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
               </span>
               <p className="text-xs text-green-500">
-                45 endpoints live across 4 platforms
+                {ENDPOINT_COUNT} endpoints live across 4 platforms
               </p>
             </div>
           </div>

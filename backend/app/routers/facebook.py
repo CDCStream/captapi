@@ -25,8 +25,8 @@ CREDIT_DETAILS = 1
 CREDIT_PAGE_DETAILS = 1
 
 # apify/facebook-comments-scraper is billed per result ($1.50/1k = $0.0015).
-# Charge 0.7 credit/comment for an ~80% markup, via ctx["credits_override"].
-RATE_FB_COMMENTS = 0.7
+# 0.6 credit/comment = ~80% markup (0.6 * $0.0045 = $0.0027 vs $0.0015).
+RATE_FB_COMMENTS = 0.6
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
