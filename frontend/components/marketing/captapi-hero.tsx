@@ -48,10 +48,11 @@ export function CaptapiHero() {
         {/* badge pill */}
         <div className="mb-5 mt-6 md:mb-6 md:mt-12">
           <div className="relative flex items-center rounded-full border bg-popover px-3 py-1 text-xs text-primary/70">
-            Social Media Data API
+            <span className="mr-1.5 flex size-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
+            Now MCP server is live!
             <Link
-              href="/docs"
-              className="ml-1 flex items-center font-semibold text-primary"
+              href="/docs/integrations"
+              className="ml-1.5 flex items-center font-semibold text-primary"
             >
               <span className="absolute inset-0" aria-hidden="true" />
               Explore →
