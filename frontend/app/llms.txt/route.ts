@@ -2,7 +2,11 @@ import {
   ALL_ENDPOINTS,
   PLATFORM_GROUPS,
   SITE_URL,
+  API_URL,
   tagline,
+  params,
+  creditLabel,
+  mcpToolName,
 } from "@/lib/api-catalog";
 
 export const dynamic = "force-static";
@@ -20,9 +24,21 @@ const TOOLS: { slug: string; name: string; desc: string }[] = [
 export async function GET() {
   const base = SITE_URL;
 
-  const apiLines = ALL_ENDPOINTS.map(
-    (ep) => `- [${ep.name}](${base}/apis/${ep.slug}): ${tagline(ep)}`,
-  ).join("\n");
+  // Rich, agent-actionable endpoint reference: method, path, params, credits,
+  // MCP tool name, and docs link — enough to write REST code directly.
+  const apiLines = PLATFORM_GROUPS.map((g) => {
+    const rows = g.endpoints
+      .map((ep) => {
+        const ps = params(ep)
+          .map((p) => `${p.name}${p.required ? "*" : "?"} (${p.type})`)
+          .join(", ");
+        return `- \`${ep.method} ${ep.path}\` — ${tagline(ep)} Params: ${
+          ps || "none"
+        }. ${creditLabel(ep)}. MCP tool: \`${mcpToolName(ep)}\`. Docs: ${base}/apis/${ep.slug}`;
+      })
+      .join("\n");
+    return `### ${g.name}\n${rows}`;
+  }).join("\n\n");
 
   const toolLines = TOOLS.map(
     (t) => `- [${t.name}](${base}/tools/${t.slug}): ${t.desc}`,
@@ -71,6 +87,50 @@ Environment variables: \`CAPTAPI_API_KEY\` (required), \`CAPTAPI_BASE_URL\` (opt
 Tool naming convention: \`platform_action\` — e.g. \`youtube_transcript\`, \`tiktok_comments\`, \`instagram_channel_posts\`, \`facebook_page_details\`.
 Machine-readable manifest: ${base}/.well-known/mcp.json (also at ${base}/mcp.json)
 Full integration guide: ${base}/docs/integrations
+
+## Connect via REST API (call it directly from code)
+
+If you are not using MCP, every endpoint is a single authenticated GET request — write code against it directly (no SDK required).
+
+- Base URL: ${API_URL}
+- Auth: send the header \`Authorization: Bearer capt_live_...\` (a human creates the key once at ${base}/dashboard/api-keys).
+- Method: GET. Pass parameters as URL query params (URL-encode values). Parameter names per endpoint are listed under "## APIs" below (\`*\` = required).
+- Success response: JSON \`{ "success": true, "cached": boolean, "creditsUsed": number, "data": { ... } }\`.
+- Error response: non-2xx with \`{ "detail": "..." }\`. Status codes: 401 missing/invalid key, 402 out of credits, 422 unprocessable (e.g. video has no captions — not charged), 429 rate limited (back off and retry).
+- Credits: repeat calls for the same request are cached for 24h and cost 0. Failed/empty results are not charged. New accounts include 100 free credits.
+
+Example request (cURL):
+\`\`\`bash
+curl "${API_URL}/v1/youtube/transcript?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ" \\
+  -H "Authorization: Bearer capt_live_..."
+\`\`\`
+
+Example request (Python):
+\`\`\`python
+import requests
+
+res = requests.get(
+    "${API_URL}/v1/youtube/transcript",
+    params={"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"},
+    headers={"Authorization": "Bearer capt_live_..."},
+)
+print(res.json())
+\`\`\`
+
+Example request (Node / fetch):
+\`\`\`js
+const url = "${API_URL}/v1/youtube/transcript?url=" +
+  encodeURIComponent("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+const res = await fetch(url, {
+  headers: { Authorization: "Bearer capt_live_..." },
+});
+console.log(await res.json());
+\`\`\`
+
+Example response:
+\`\`\`json
+{ "success": true, "cached": false, "creditsUsed": 2, "data": { "language": "en", "text": "..." } }
+\`\`\`
 
 ## Platforms
 ${platformLines}
