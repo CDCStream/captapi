@@ -111,8 +111,49 @@ export default function IntegrationsPage() {
         >
           Agent Integrations
         </Link>{" "}
-        in your dashboard for install buttons with your key pre-filled.
+        in your dashboard for install buttons with your key pre-filled. Agents
+        can read the machine-readable manifest at{" "}
+        <Link href="/mcp.json" className="text-primary hover:underline">
+          /mcp.json
+        </Link>
+        .
       </p>
+
+      {/* 2-step connect flow */}
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="rounded-xl border bg-card p-5">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+              1
+            </span>
+            <h3 className="text-sm font-semibold">A human creates the API key</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Sign-up and key creation can&apos;t be automated by an agent. Create a{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">capt_live_…</code>{" "}
+            key once in{" "}
+            <Link href="/dashboard/api-keys" className="text-primary hover:underline">
+              API Keys
+            </Link>{" "}
+            (100 free credits) and hand it to your agent.
+          </p>
+        </div>
+        <div className="rounded-xl border bg-card p-5">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+              2
+            </span>
+            <h3 className="text-sm font-semibold">The agent adds the config</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Point your agent at this page or at{" "}
+            <Link href="/mcp.json" className="text-primary hover:underline">
+              /mcp.json
+            </Link>
+            , paste the snippet below with your key, and restart the client.
+          </p>
+        </div>
+      </div>
 
       <H2 id="mcp">MCP Server</H2>
       <p className="text-muted-foreground max-w-3xl">

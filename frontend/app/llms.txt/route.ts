@@ -42,6 +42,36 @@ Base API URL: https://api.captapi.com
 Authentication: \`Authorization: Bearer capt_live_...\` (create a key in the dashboard).
 Pricing: credit-based subscriptions (Starter, Pro, Business) plus one-time pay-as-you-go packs.
 
+## Connect via MCP (recommended for AI agents)
+
+Captapi ships an official Model Context Protocol server, \`@captapi/mcp\` (npm), that exposes all ${ALL_ENDPOINTS.length} endpoints as MCP tools. This is the easiest way for an AI agent to use Captapi.
+
+Setup is two steps:
+1. A human creates an API key ONCE at ${base}/dashboard/api-keys. Sign-up and key creation cannot be automated by an agent — if you do not have a \`capt_live_...\` key, ask the user to create one and paste it. New accounts include 100 free credits.
+2. Add the MCP server to the client config and restart the client.
+
+Cursor — file \`~/.cursor/mcp.json\` (or \`.cursor/mcp.json\` per project):
+\`\`\`json
+{
+  "mcpServers": {
+    "captapi": {
+      "command": "npx",
+      "args": ["-y", "@captapi/mcp"],
+      "env": { "CAPTAPI_API_KEY": "capt_live_xxxxxxxxxxxxxxxx" }
+    }
+  }
+}
+\`\`\`
+
+Claude Desktop — file \`claude_desktop_config.json\`: use the same \`mcpServers\` block shown above.
+VS Code — file \`.vscode/mcp.json\`: use the key \`servers\` instead of \`mcpServers\`.
+CLI (no config file): \`CAPTAPI_API_KEY=capt_live_xxxx npx -y @captapi/mcp\`
+
+Environment variables: \`CAPTAPI_API_KEY\` (required), \`CAPTAPI_BASE_URL\` (optional, default https://api.captapi.com).
+Tool naming convention: \`platform_action\` — e.g. \`youtube_transcript\`, \`tiktok_comments\`, \`instagram_channel_posts\`, \`facebook_page_details\`.
+Machine-readable manifest: ${base}/.well-known/mcp.json (also at ${base}/mcp.json)
+Full integration guide: ${base}/docs/integrations
+
 ## Platforms
 ${platformLines}
 
