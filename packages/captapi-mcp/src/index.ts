@@ -13,7 +13,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { ENDPOINTS, describe, type Endpoint } from "./catalog.js";
+import { ENDPOINTS, describe, type Endpoint, type ToolParam } from "./catalog.js";
 
 const API_KEY = process.env.CAPTAPI_API_KEY?.trim();
 const BASE_URL = (
@@ -22,49 +22,28 @@ const BASE_URL = (
 
 const VERSION = "0.1.0";
 
-type ToolArgs = {
-  url?: string;
-  q?: string;
-  limit?: number;
-  language?: string;
-};
+type ToolArgs = Record<string, string | number | undefined>;
 
-/** Build the Zod raw-shape input schema for an endpoint. */
+/** Build a single Zod field for one declared parameter. */
+function fieldFor(p: ToolParam): z.ZodTypeAny {
+  let base: z.ZodTypeAny;
+  if (p.type === "number") {
+    base = z.number().int().positive();
+  } else if (p.name === "url") {
+    base = z.string().url();
+  } else {
+    base = z.string();
+  }
+  base = base.describe(p.description);
+  return p.required ? base : base.optional();
+}
+
+/** Build the Zod raw-shape input schema from an endpoint's declared params. */
 function inputSchema(e: Endpoint): Record<string, z.ZodTypeAny> {
   const shape: Record<string, z.ZodTypeAny> = {};
-
-  if (e.category === "search") {
-    shape.q = z.string().describe("Search query or keywords.");
-  } else {
-    shape.url = z
-      .string()
-      .url()
-      .describe(
-        e.category === "channel"
-          ? "Public profile / channel URL."
-          : e.category === "list"
-            ? "Public channel, profile, playlist, group, or music URL."
-            : "Public video / post URL.",
-      );
+  for (const p of e.params) {
+    shape[p.name] = fieldFor(p);
   }
-
-  if (["comments", "search", "list"].includes(e.category)) {
-    shape.limit = z
-      .number()
-      .int()
-      .positive()
-      .max(1000)
-      .optional()
-      .describe("Max items to return (default 20). Billed per result.");
-  }
-
-  if (e.category === "transcript" || e.category === "summarize") {
-    shape.language = z
-      .string()
-      .optional()
-      .describe('Preferred caption language as an ISO code, e.g. "en".');
-  }
-
   return shape;
 }
 
@@ -84,10 +63,12 @@ async function callEndpoint(e: Endpoint, args: ToolArgs) {
   }
 
   const qs = new URLSearchParams();
-  if (args.url) qs.set("url", args.url);
-  if (args.q) qs.set("q", args.q);
-  if (typeof args.limit === "number") qs.set("limit", String(args.limit));
-  if (args.language) qs.set("language", args.language);
+  for (const p of e.params) {
+    const v = args[p.name];
+    if (v !== undefined && v !== null && v !== "") {
+      qs.set(p.name, String(v));
+    }
+  }
 
   const requestUrl = `${BASE_URL}${e.path}?${qs.toString()}`;
 

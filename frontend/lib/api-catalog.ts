@@ -231,6 +231,21 @@ export function getEndpoint(slug: string): ApiEndpoint | undefined {
   return ALL_ENDPOINTS.find((e) => e.slug === slug);
 }
 
+// Maps a catalog slug to its @captapi/mcp tool name. Most are the slug with
+// dashes turned into underscores; a few names differ from the marketing slug.
+const MCP_TOOL_OVERRIDES: Record<string, string> = {
+  "youtube-summarizer": "youtube_summarize",
+  "youtube-shorts-summarizer": "youtube_shorts_summarize",
+  "youtube-shorts-stats": "youtube_shorts_details",
+  "tiktok-summarizer": "tiktok_summarize",
+  "instagram-summarizer": "instagram_summarize",
+  "facebook-summarizer": "facebook_summarize",
+};
+
+export function mcpToolName(ep: ApiEndpoint): string {
+  return MCP_TOOL_OVERRIDES[ep.slug] ?? ep.slug.replace(/-/g, "_");
+}
+
 export function getGroup(id: PlatformId): PlatformGroup {
   return PLATFORM_GROUPS.find((g) => g.id === id)!;
 }
@@ -351,27 +366,105 @@ export function delivers(ep: ApiEndpoint): string[] {
   }
 }
 
+// --- Precise, per-endpoint input parameters -------------------------------
+// These mirror the backend routers exactly so every endpoint page, the docs,
+// and the MCP "Agent Integrations" tab show the correct inputs.
+
+const up = (description: string): ApiParam => ({ name: "url", type: "string", required: true, description });
+const qp = (description = "Search query or keywords (min 2 characters)."): ApiParam => ({ name: "q", type: "string", required: true, description });
+const lp = (def: number, max: number): ApiParam => ({ name: "limit", type: "integer", required: false, description: `Max items to return (default ${def}, max ${max}). Billed per result.` });
+const lang = (): ApiParam => ({ name: "language", type: "string", required: false, description: 'Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.' });
+const cid = (): ApiParam => ({ name: "comment_id", type: "string", required: true, description: "ID of the parent comment to fetch replies for (from the comments endpoint)." });
+
+const YT_VIDEO = "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID.";
+const YT_SHORTS = "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID.";
+const YT_CHANNEL = "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC...";
+const TT_VIDEO = "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID.";
+const TT_PROFILE = "TikTok profile URL, e.g. https://tiktok.com/@username.";
+const TT_MUSIC = "TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID.";
+const IG_POST = "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/.";
+const IG_REEL = "Instagram Reel URL, e.g. https://instagram.com/reel/ID/.";
+const IG_PROFILE = "Instagram profile URL, e.g. https://instagram.com/username/.";
+const FB_VIDEO = "Public Facebook video or post URL.";
+
+const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
+  // YouTube
+  "youtube-transcript": [up(YT_VIDEO), lang()],
+  "youtube-summarizer": [up(YT_VIDEO), lang()],
+  "youtube-video-details": [up(YT_VIDEO)],
+  "youtube-comments": [up(YT_VIDEO), lp(50, 500)],
+  "youtube-channel-details": [up(YT_CHANNEL)],
+  "youtube-search": [qp(), lp(20, 200)],
+  "youtube-channel-videos": [up(YT_CHANNEL), lp(20, 200)],
+  "youtube-playlist-videos": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500)],
+  "youtube-video-download": [up(YT_VIDEO)],
+  "youtube-shorts-transcript": [up(YT_SHORTS), lang()],
+  "youtube-shorts-summarizer": [up(YT_SHORTS), lang()],
+  "youtube-shorts-stats": [up(YT_SHORTS)],
+  "youtube-shorts-comments": [up(YT_SHORTS), lp(50, 500)],
+  "youtube-channel-shorts": [up(YT_CHANNEL), lp(20, 200)],
+  "youtube-channel-streams": [up(YT_CHANNEL), lp(20, 200)],
+  "youtube-hashtag-search": [qp("Hashtag with or without the # (min 2 characters)."), lp(20, 200)],
+  "youtube-comment-replies": [up(YT_VIDEO), cid(), lp(50, 500)],
+  "youtube-channel-playlists": [up(YT_CHANNEL), lp(20, 200)],
+  "youtube-community-posts": [up(YT_CHANNEL), lp(20, 200)],
+  // TikTok
+  "tiktok-transcript": [up(TT_VIDEO), lang()],
+  "tiktok-summarizer": [up(TT_VIDEO), lang()],
+  "tiktok-video-details": [up(TT_VIDEO)],
+  "tiktok-comments": [up(TT_VIDEO), lp(50, 500)],
+  "tiktok-channel-details": [up(TT_PROFILE)],
+  "tiktok-search": [qp(), lp(20, 200)],
+  "tiktok-video-download": [up(TT_VIDEO)],
+  "tiktok-channel-posts": [up(TT_PROFILE), lp(20, 200)],
+  "tiktok-comment-replies": [up(TT_VIDEO), cid(), lp(50, 500)],
+  "tiktok-user-followers": [up(TT_PROFILE), lp(50, 500)],
+  "tiktok-user-followings": [up(TT_PROFILE), lp(50, 500)],
+  "tiktok-music-posts": [up(TT_MUSIC), lp(20, 200)],
+  "tiktok-hashtag-search": [qp("Hashtag with or without the # (min 2 characters)."), lp(20, 200)],
+  "tiktok-top-search": [qp(), lp(20, 200)],
+  "tiktok-user-search": [qp(), lp(20, 100)],
+  "tiktok-song-details": [up(TT_MUSIC)],
+  "tiktok-trending-feed": [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code, e.g. US, GB, TR. Default US." }, lp(20, 200)],
+  "tiktok-popular-hashtags": [{ name: "query", type: "string", required: false, description: 'Topic or keyword to discover trending hashtags for. Default "trending".' }, lp(20, 100)],
+  // Instagram
+  "instagram-transcript": [up(IG_REEL), lang()],
+  "instagram-summarizer": [up(IG_REEL), lang()],
+  "instagram-details": [up(IG_POST)],
+  "instagram-comments": [up(IG_POST), lp(50, 500)],
+  "instagram-channel-details": [up(IG_PROFILE)],
+  "instagram-channel-posts": [up(IG_PROFILE), lp(20, 200)],
+  "instagram-channel-reels": [up(IG_PROFILE), lp(20, 200)],
+  "instagram-reels-search": [qp("Hashtag (without #) or keyword (min 2 characters)."), lp(20, 200)],
+  "instagram-video-download": [up(IG_REEL)],
+  "instagram-tagged-posts": [up(IG_PROFILE), lp(20, 200)],
+  "instagram-music-posts": [up("Instagram audio/music page URL."), lp(20, 200)],
+  "instagram-hashtag-search": [qp("Hashtag without the # (min 2 characters)."), lp(20, 200)],
+  "instagram-profile-search": [qp(), lp(20, 100)],
+  "instagram-story-highlights": [up(IG_PROFILE)],
+  "instagram-highlights-details": [up(IG_PROFILE), { name: "limit", type: "integer", required: false, description: "Max highlights to expand (default 10, max 50)." }],
+  "instagram-embed": [up(IG_POST)],
+  // Facebook
+  "facebook-details": [up(FB_VIDEO)],
+  "facebook-transcript": [up(FB_VIDEO), lang()],
+  "facebook-summarizer": [up(FB_VIDEO), lang()],
+  "facebook-comments": [up(FB_VIDEO), lp(50, 500)],
+  "facebook-page-details": [up("Facebook page URL, e.g. https://facebook.com/PageName.")],
+  "facebook-profile-posts": [up("Facebook profile or page URL."), lp(20, 200)],
+  "facebook-profile-reels": [up("Facebook profile or page URL."), lp(20, 200)],
+  "facebook-group-posts": [up("Public Facebook group URL, e.g. https://facebook.com/groups/ID."), lp(20, 200)],
+  "facebook-comment-replies": [up("Facebook post URL the comment belongs to."), cid(), lp(50, 500)],
+};
+
 export function params(ep: ApiEndpoint): ApiParam[] {
+  const explicit = ENDPOINT_PARAMS[ep.slug];
+  if (explicit) return explicit;
+  // Fallback (should not happen for catalog endpoints): derive from category.
   const base: ApiParam[] = [];
-  if (ep.category === "search") {
-    base.push({ name: "q", type: "string", required: true, description: "Search query or keywords." });
-  } else {
-    base.push({
-      name: "url",
-      type: "string",
-      required: true,
-      description:
-        ep.category === "channel"
-          ? `Public ${PLATFORM_LABEL[ep.platform]} profile / channel URL.`
-          : `Public ${PLATFORM_LABEL[ep.platform]} ${ep.category === "list" ? "channel/playlist" : "video"} URL.`,
-    });
-  }
-  if (["comments", "search", "list"].includes(ep.category)) {
-    base.push({ name: "limit", type: "integer", required: false, description: "Max items to return (default 20)." });
-  }
-  if (ep.category === "transcript" || ep.category === "summarize") {
-    base.push({ name: "language", type: "string", required: false, description: "Preferred caption language (ISO code, e.g. \"en\")." });
-  }
+  if (ep.category === "search") base.push(qp());
+  else base.push(up(`Public ${PLATFORM_LABEL[ep.platform]} URL.`));
+  if (["comments", "search", "list"].includes(ep.category)) base.push(lp(20, 200));
+  if (ep.category === "transcript" || ep.category === "summarize") base.push(lang());
   return base;
 }
 
@@ -460,6 +553,10 @@ export function exampleResponse(ep: ApiEndpoint): string {
 
 export function exampleQueryString(ep: ApiEndpoint): string {
   const g = getGroup(ep.platform);
+  const names = params(ep).map((p) => p.name);
+  // Endpoints whose primary input isn't url/q.
+  if (names.includes("country") && !names.includes("url")) return "country=US";
+  if (names.includes("query") && !names.includes("url")) return "query=skincare";
   if (ep.category === "search") return "q=structured%20data%20api";
   if (ep.category === "channel") {
     const profile =

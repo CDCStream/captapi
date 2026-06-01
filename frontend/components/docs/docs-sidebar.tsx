@@ -28,6 +28,14 @@ export const DOCS_NAV: NavSection[] = [
     ],
   },
   {
+    title: "AI Agents",
+    items: [
+      { id: "mcp", label: "MCP Server" },
+      { id: "mcp-install", label: "Installation" },
+      { id: "mcp-tools", label: "Tools & Parameters" },
+    ],
+  },
+  {
     title: "API Reference",
     items: [
       { id: "api-youtube", label: "YouTube", badge: "13" },

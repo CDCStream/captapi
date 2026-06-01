@@ -112,6 +112,53 @@ const errorResponse = `{
   }
 }`;
 
+const mcpInstall = [
+  {
+    label: "Cursor",
+    code: `// ~/.cursor/mcp.json  (or .cursor/mcp.json per project)
+{
+  "mcpServers": {
+    "captapi": {
+      "command": "npx",
+      "args": ["-y", "@captapi/mcp"],
+      "env": { "CAPTAPI_API_KEY": "capt_live_xxxxxxxxxxxxxxxx" }
+    }
+  }
+}`,
+  },
+  {
+    label: "Claude Desktop",
+    code: `// claude_desktop_config.json
+{
+  "mcpServers": {
+    "captapi": {
+      "command": "npx",
+      "args": ["-y", "@captapi/mcp"],
+      "env": { "CAPTAPI_API_KEY": "capt_live_xxxxxxxxxxxxxxxx" }
+    }
+  }
+}`,
+  },
+  {
+    label: "VS Code",
+    code: `// .vscode/mcp.json
+{
+  "servers": {
+    "captapi": {
+      "command": "npx",
+      "args": ["-y", "@captapi/mcp"],
+      "env": { "CAPTAPI_API_KEY": "capt_live_xxxxxxxxxxxxxxxx" }
+    }
+  }
+}`,
+  },
+  {
+    label: "CLI",
+    code: `npm install -g @captapi/mcp
+CAPTAPI_API_KEY=capt_live_xxxxxxxxxxxxxxxx captapi-mcp`,
+  },
+];
+
 const ERRORS: { code: string; status: string; meaning: string }[] = [
   { code: "invalid_api_key", status: "401", meaning: "Missing or malformed Authorization header." },
   { code: "insufficient_credits", status: "402", meaning: "Your balance is too low for this request." },
@@ -348,6 +395,100 @@ export default function DocsPage() {
         headers. When you exceed the limit you&apos;ll get a{" "}
         <code className="rounded bg-muted px-1.5 py-0.5 text-xs">429</code> — back off
         and retry after the reset window.
+      </p>
+
+      {/* AI Agents / MCP */}
+      <p className="text-sm font-medium text-primary mb-2 mt-14">AI Agents</p>
+      <H2 id="mcp">MCP Server (Claude, Cursor, VS Code)</H2>
+      <p className="text-muted-foreground leading-relaxed max-w-3xl">
+        Captapi ships an official{" "}
+        <a
+          href="https://www.npmjs.com/package/@captapi/mcp"
+          className="text-primary hover:underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Model Context Protocol (MCP) server
+        </a>{" "}
+        that exposes all{" "}
+        {PLATFORM_GROUPS.reduce((n, g) => n + g.endpoints.length, 0)} endpoints
+        as typed tools. Wire it into any MCP-compatible AI agent and it can pull
+        transcripts, comments, profiles, search results, and more — billed to
+        your account, with cached results free.
+      </p>
+
+      <H3 id="mcp-install">Installation</H3>
+      <p className="text-muted-foreground max-w-3xl mb-4">
+        Add the config below to your client (replace the key with your own from{" "}
+        <Link href="/dashboard/api-keys" className="text-primary hover:underline">
+          API Keys
+        </Link>
+        ). For one-click install buttons, open{" "}
+        <Link
+          href="/dashboard/agent-integrations"
+          className="text-primary hover:underline"
+        >
+          Agent Integrations
+        </Link>{" "}
+        in your dashboard.
+      </p>
+      <CodeTabs samples={mcpInstall} />
+
+      <H3 id="mcp-config">Configuration</H3>
+      <div className="overflow-hidden rounded-lg border">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/50 text-left">
+            <tr>
+              <th className="px-4 py-2.5 font-medium">Env var</th>
+              <th className="px-4 py-2.5 font-medium w-24">Required</th>
+              <th className="px-4 py-2.5 font-medium">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-t">
+              <td className="px-4 py-2.5 font-mono text-xs">CAPTAPI_API_KEY</td>
+              <td className="px-4 py-2.5 text-muted-foreground">yes</td>
+              <td className="px-4 py-2.5 text-muted-foreground">
+                Your <code className="rounded bg-muted px-1 py-0.5 text-xs">capt_live_…</code> key.
+              </td>
+            </tr>
+            <tr className="border-t">
+              <td className="px-4 py-2.5 font-mono text-xs">CAPTAPI_BASE_URL</td>
+              <td className="px-4 py-2.5 text-muted-foreground">no</td>
+              <td className="px-4 py-2.5 text-muted-foreground">
+                Override the API base URL (default{" "}
+                <code className="rounded bg-muted px-1 py-0.5 text-xs">{API_URL}</code>).
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <H3 id="mcp-tools">Tools &amp; parameters</H3>
+      <p className="text-muted-foreground max-w-3xl">
+        Each endpoint is a tool named{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">platform_action</code>{" "}
+        — e.g. <code className="rounded bg-muted px-1.5 py-0.5 text-xs">youtube_transcript</code>,{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">tiktok_comments</code>,{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">instagram_channel_posts</code>.
+        Inputs match the REST parameters exactly:
+      </p>
+      <ul className="mt-3 space-y-2 text-sm text-muted-foreground max-w-3xl">
+        <li>• <strong className="text-foreground">Most tools</strong> take a <code className="rounded bg-muted px-1 py-0.5 text-xs">url</code> (the exact URL type is described per tool — video, profile, playlist, sound, group…).</li>
+        <li>• <strong className="text-foreground">Search tools</strong> take <code className="rounded bg-muted px-1 py-0.5 text-xs">q</code>; list/comments tools also accept an optional <code className="rounded bg-muted px-1 py-0.5 text-xs">limit</code>.</li>
+        <li>• <strong className="text-foreground">Comment-replies tools</strong> additionally require <code className="rounded bg-muted px-1 py-0.5 text-xs">comment_id</code>.</li>
+        <li>• <code className="rounded bg-muted px-1 py-0.5 text-xs">tiktok_trending_feed</code> takes <code className="rounded bg-muted px-1 py-0.5 text-xs">country</code>; <code className="rounded bg-muted px-1 py-0.5 text-xs">tiktok_popular_hashtags</code> takes <code className="rounded bg-muted px-1 py-0.5 text-xs">query</code>.</li>
+        <li>• Transcript/summarize tools accept an optional <code className="rounded bg-muted px-1 py-0.5 text-xs">language</code>.</li>
+      </ul>
+      <p className="mt-3 text-muted-foreground max-w-3xl">
+        The exact, per-tool parameter list (with which are required) is shown in{" "}
+        <Link
+          href="/dashboard/agent-integrations"
+          className="text-primary hover:underline"
+        >
+          Agent Integrations
+        </Link>{" "}
+        and in the per-endpoint reference below.
       </p>
 
       {/* API Reference */}

@@ -1,6 +1,6 @@
 {
   "name": "@captapi/mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Official Captapi MCP server — give Claude, Cursor, and any MCP-compatible AI agent access to 62 social media data endpoints (YouTube, TikTok, Instagram, Facebook).",
   "license": "MIT",
   "type": "module",

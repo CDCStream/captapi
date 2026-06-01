@@ -18,6 +18,11 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api-client";
+import {
+  PLATFORM_GROUPS,
+  params as endpointParams,
+  mcpToolName,
+} from "@/lib/api-catalog";
 
 const PLACEHOLDER = "capt_live_xxxxxxxxxxxxxxxx";
 
@@ -51,6 +56,7 @@ function CodeBlock({ code, label }: { code: string; label?: string }) {
 export default function AgentIntegrationsPage() {
   const [apiKey, setApiKey] = useState("");
   const [hintPrefix, setHintPrefix] = useState<string | null>(null);
+  const [toolQuery, setToolQuery] = useState("");
 
   useEffect(() => {
     api
@@ -262,6 +268,86 @@ export default function AgentIntegrationsPage() {
             Works with Cursor, Claude, VS Code, and any MCP-compatible client
             over stdio.
           </p>
+        </div>
+      </div>
+
+      {/* Tool reference */}
+      <div className="rounded-2xl border bg-background overflow-hidden">
+        <div className="flex flex-wrap items-center gap-3 border-b px-5 py-4">
+          <Terminal className="size-4 text-primary" />
+          <h2 className="font-semibold">Tools &amp; parameters</h2>
+          <div className="relative ml-auto w-full max-w-xs">
+            <Input
+              placeholder="Filter tools…"
+              value={toolQuery}
+              onChange={(e) => setToolQuery(e.target.value)}
+              className="h-9"
+            />
+          </div>
+        </div>
+
+        <div className="p-5 space-y-6">
+          <p className="text-sm text-muted-foreground">
+            Exactly what each tool expects. Required parameters are marked{" "}
+            <span className="font-mono text-rose-500">*</span>. The agent fills
+            these in for you — this is just a reference.
+          </p>
+
+          {PLATFORM_GROUPS.map((group) => {
+            const q = toolQuery.trim().toLowerCase();
+            const eps = group.endpoints.filter((ep) => {
+              if (!q) return true;
+              const tool = mcpToolName(ep).toLowerCase();
+              return (
+                tool.includes(q) ||
+                ep.name.toLowerCase().includes(q) ||
+                endpointParams(ep).some((p) => p.name.includes(q))
+              );
+            });
+            if (eps.length === 0) return null;
+            return (
+              <div key={group.id}>
+                <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
+                  {group.name}{" "}
+                  <span className="font-normal">({eps.length})</span>
+                </h3>
+                <div className="overflow-hidden rounded-xl border">
+                  <table className="w-full text-sm">
+                    <tbody className="divide-y">
+                      {eps.map((ep) => (
+                        <tr key={ep.slug} className="align-top">
+                          <td className="w-1/3 px-4 py-3">
+                            <code className="font-mono text-xs text-primary">
+                              {mcpToolName(ep)}
+                            </code>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1.5">
+                              {endpointParams(ep).map((p) => (
+                                <span
+                                  key={p.name}
+                                  title={p.description}
+                                  className="inline-flex items-center gap-1 rounded-md border bg-muted/40 px-1.5 py-0.5 font-mono text-[11px]"
+                                >
+                                  {p.name}
+                                  {p.required && (
+                                    <span className="text-rose-500">*</span>
+                                  )}
+                                  <span className="text-muted-foreground">
+                                    {p.type}
+                                  </span>
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

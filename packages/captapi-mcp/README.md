@@ -65,13 +65,15 @@ Add to `.vscode/mcp.json`:
 
 Each endpoint is exposed as a tool named `<platform>_<action>`, e.g.
 `youtube_transcript`, `tiktok_comments`, `instagram_channel_posts`,
-`facebook_profile_posts`. Inputs:
+`facebook_profile_posts`. Every tool declares its exact inputs (and the precise
+URL type expected — video, profile, playlist, sound, group, …):
 
-- **Search** tools take `q` (query) and optional `limit`.
-- **Channel** tools take a profile/channel `url`.
-- **Comments / list** tools take a `url` and optional `limit`.
-- **Transcript / summarize** tools take a `url` and optional `language`.
-- **Details / download** tools take a `url`.
+- **Most tools** take a `url`. The description tells you which URL type.
+- **Search** tools take `q`; list/comments tools also accept an optional `limit`.
+- **Comment-replies** tools (`*_comment_replies`) additionally require `comment_id`.
+- `tiktok_trending_feed` takes `country` (ISO-2, default `US`);
+  `tiktok_popular_hashtags` takes `query` (default `trending`).
+- **Transcript / summarize** tools accept an optional `language`.
 
 Cached results (24h) are free. Failed or empty results are never charged.
 
