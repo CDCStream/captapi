@@ -1,4 +1,5 @@
 import { DocsSidebar } from "@/components/docs/docs-sidebar";
+import { DocsTabs } from "@/components/docs/docs-tabs";
 import { OnThisPage } from "@/components/docs/on-this-page";
 
 export default function DocsLayout({
@@ -8,6 +9,7 @@ export default function DocsLayout({
 }) {
   return (
     <div className="container max-w-[90rem]">
+      <DocsTabs />
       <div className="flex gap-8">
         <DocsSidebar />
         <article

@@ -551,29 +551,156 @@ export function exampleResponse(ep: ApiEndpoint): string {
   );
 }
 
-export function exampleQueryString(ep: ApiEndpoint): string {
-  const g = getGroup(ep.platform);
-  const names = params(ep).map((p) => p.name);
-  // Endpoints whose primary input isn't url/q.
-  if (names.includes("country") && !names.includes("url")) return "country=US";
-  if (names.includes("query") && !names.includes("url")) return "query=skincare";
-  if (ep.category === "search") return "q=structured%20data%20api";
-  if (ep.category === "channel") {
-    const profile =
-      ep.platform === "youtube"
-        ? "https://www.youtube.com/@MrBeast"
-        : ep.platform === "tiktok"
-        ? "https://www.tiktok.com/@khaby.lame"
-        : ep.platform === "instagram"
-        ? "https://www.instagram.com/natgeo/"
-        : "https://www.facebook.com/NASA";
-    return `url=${encodeURIComponent(profile)}`;
+const PROFILE_URL: Record<PlatformId, string> = {
+  youtube: "https://www.youtube.com/@MrBeast",
+  tiktok: "https://www.tiktok.com/@khaby.lame",
+  instagram: "https://www.instagram.com/natgeo/",
+  facebook: "https://www.facebook.com/NASA",
+};
+
+/** A realistic example value for a single parameter of an endpoint. */
+function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
+  switch (p.name) {
+    case "q":
+      return ep.platform === "youtube" ? "structured data api" : "skincare";
+    case "query":
+      return "skincare";
+    case "country":
+      return "US";
+    case "comment_id":
+      return "7311234567890123456";
+    case "limit":
+      return "20";
+    case "language":
+      return "en";
+    case "url": {
+      const d = p.description.toLowerCase();
+      if (d.includes("playlist"))
+        return "https://www.youtube.com/playlist?list=PLrAXtmqj7v3Y";
+      if (d.includes("music") || d.includes("sound") || d.includes("audio"))
+        return ep.platform === "tiktok"
+          ? "https://www.tiktok.com/music/original-sound-7300000000000000000"
+          : "https://www.instagram.com/reels/audio/1234567890123456/";
+      if (d.includes("group"))
+        return "https://www.facebook.com/groups/123456789012345";
+      if (d.includes("page")) return PROFILE_URL.facebook;
+      if (d.includes("channel") || d.includes("profile"))
+        return PROFILE_URL[ep.platform];
+      return getGroup(ep.platform).exampleUrl;
+    }
+    default:
+      return "value";
   }
-  return `url=${encodeURIComponent(g.exampleUrl)}`;
+}
+
+/** The required params (or the primary param if none required) for an example call. */
+function exampleArgs(ep: ApiEndpoint): { name: string; value: string }[] {
+  const ps = params(ep);
+  const required = ps.filter((p) => p.required);
+  const chosen = required.length > 0 ? required : ps.slice(0, 1);
+  return chosen.map((p) => ({ name: p.name, value: exampleValue(ep, p) }));
+}
+
+export function exampleQueryString(ep: ApiEndpoint): string {
+  return exampleArgs(ep)
+    .map((a) => `${a.name}=${encodeURIComponent(a.value)}`)
+    .join("&");
+}
+
+export function exampleUrl(ep: ApiEndpoint): string {
+  return `${API_URL}${ep.path}?${exampleQueryString(ep)}`;
 }
 
 export function curlExample(ep: ApiEndpoint): string {
-  return `curl "${API_URL}${ep.path}?${exampleQueryString(ep)}" \\\n  -H "Authorization: Bearer capt_live_..."`;
+  return `curl "${exampleUrl(ep)}" \\\n  -H "Authorization: Bearer capt_live_..."`;
+}
+
+/**
+ * Multi-language, copy-pasteable request examples for an endpoint.
+ * Covers cURL, Python, Node, PHP, Go, and Java.
+ */
+export function codeSamples(ep: ApiEndpoint): { label: string; code: string }[] {
+  const args = exampleArgs(ep);
+  const u = exampleUrl(ep);
+  const base = `${API_URL}${ep.path}`;
+  const pyParams = args.map((a) => `        "${a.name}": ${JSON.stringify(a.value)},`).join("\n");
+  const phpParams = args.map((a) => `    "${a.name}" => ${JSON.stringify(a.value)},`).join("\n");
+
+  return [
+    {
+      label: "cURL",
+      code: `curl "${u}" \\\n  -H "Authorization: Bearer capt_live_..."`,
+    },
+    {
+      label: "Python",
+      code: `import requests
+
+res = requests.get(
+    "${base}",
+    params={
+${pyParams}
+    },
+    headers={"Authorization": "Bearer capt_live_..."},
+)
+print(res.json())`,
+    },
+    {
+      label: "Node",
+      code: `const res = await fetch(
+  "${u}",
+  { headers: { Authorization: "Bearer capt_live_..." } },
+);
+const data = await res.json();
+console.log(data);`,
+    },
+    {
+      label: "PHP",
+      code: `<?php
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, "${base}?" . http_build_query([
+${phpParams}
+]));
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer capt_live_..."]);
+echo curl_exec($ch);
+curl_close($ch);`,
+    },
+    {
+      label: "Go",
+      code: `package main
+
+import (
+	"fmt"
+	"io"
+	"net/http"
+)
+
+func main() {
+	req, _ := http.NewRequest("GET",
+		"${u}", nil)
+	req.Header.Set("Authorization", "Bearer capt_live_...")
+	res, _ := http.DefaultClient.Do(req)
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+	fmt.Println(string(body))
+}`,
+    },
+    {
+      label: "Java",
+      code: `import java.net.URI;
+import java.net.http.*;
+
+HttpClient client = HttpClient.newHttpClient();
+HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create("${u}"))
+    .header("Authorization", "Bearer capt_live_...")
+    .GET()
+    .build();
+HttpResponse<String> res = client.send(
+    request, HttpResponse.BodyHandlers.ofString());
+System.out.println(res.body());`,
+    },
+  ];
 }
 
 export function faqs(ep: ApiEndpoint): FaqItem[] {

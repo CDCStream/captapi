@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 
 interface NavItem {
@@ -28,14 +29,6 @@ export const DOCS_NAV: NavSection[] = [
     ],
   },
   {
-    title: "AI Agents",
-    items: [
-      { id: "mcp", label: "MCP Server" },
-      { id: "mcp-install", label: "Installation" },
-      { id: "mcp-tools", label: "Tools & Parameters" },
-    ],
-  },
-  {
     title: "API Reference",
     items: [
       { id: "api-youtube", label: "YouTube", badge: "13" },
@@ -43,6 +36,19 @@ export const DOCS_NAV: NavSection[] = [
       { id: "api-instagram", label: "Instagram", badge: "9" },
       { id: "api-facebook", label: "Facebook", badge: "5" },
       { id: "api-video-files", label: "Video Files", badge: "2" },
+    ],
+  },
+];
+
+export const INTEGRATIONS_NAV: NavSection[] = [
+  {
+    title: "Integrations",
+    items: [
+      { id: "overview", label: "Overview" },
+      { id: "mcp", label: "MCP Server" },
+      { id: "mcp-install", label: "Installation" },
+      { id: "mcp-config", label: "Configuration" },
+      { id: "mcp-tools", label: "Tools & Parameters" },
     ],
   },
 ];
@@ -70,20 +76,24 @@ function useScrollSpy(ids: string[]) {
 
 export function DocsSidebar() {
   const [query, setQuery] = useState("");
+  const pathname = usePathname();
+  const nav = pathname.startsWith("/docs/integrations")
+    ? INTEGRATIONS_NAV
+    : DOCS_NAV;
   const allIds = useMemo(
-    () => DOCS_NAV.flatMap((s) => s.items.map((i) => i.id)),
-    [],
+    () => nav.flatMap((s) => s.items.map((i) => i.id)),
+    [nav],
   );
   const active = useScrollSpy(allIds);
 
   const sections = useMemo(() => {
-    if (!query.trim()) return DOCS_NAV;
+    if (!query.trim()) return nav;
     const q = query.toLowerCase();
-    return DOCS_NAV.map((s) => ({
+    return nav.map((s) => ({
       ...s,
       items: s.items.filter((i) => i.label.toLowerCase().includes(q)),
     })).filter((s) => s.items.length > 0);
-  }, [query]);
+  }, [query, nav]);
 
   return (
     <aside className="hidden lg:block w-60 shrink-0">

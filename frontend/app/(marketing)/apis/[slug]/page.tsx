@@ -22,14 +22,16 @@ import {
   delivers,
   params,
   faqs,
-  curlExample,
+  codeSamples,
   exampleResponse,
   responseStructure,
   useCases,
   creditLabel,
+  mcpToolName,
   SITE_URL,
   type ApiEndpoint,
 } from "@/lib/api-catalog";
+import { CodeTabs } from "@/components/docs/code-tabs";
 
 const PLATFORM_ICONS: Record<string, LucideIcon> = {
   youtube: Youtube,
@@ -205,17 +207,13 @@ export default async function ApiDetailPage({
 
         {/* Request / response */}
         <section className="mt-12 grid gap-6 lg:grid-cols-2">
-          <div>
-            <h2 className="text-2xl font-semibold">Example request</h2>
-            <pre className="mt-4 overflow-x-auto rounded-lg border bg-card p-4 text-xs leading-relaxed">
-              <code>{curlExample(ep)}</code>
-            </pre>
+          <div className="min-w-0">
+            <h2 className="text-2xl font-semibold mb-4">Example request</h2>
+            <CodeTabs samples={codeSamples(ep)} />
           </div>
-          <div>
-            <h2 className="text-2xl font-semibold">Example response</h2>
-            <pre className="mt-4 overflow-x-auto rounded-lg border bg-card p-4 text-xs leading-relaxed">
-              <code>{exampleResponse(ep)}</code>
-            </pre>
+          <div className="min-w-0">
+            <h2 className="text-2xl font-semibold mb-4">Example response</h2>
+            <CodeTabs samples={[{ label: "200 OK", code: exampleResponse(ep) }]} />
           </div>
         </section>
 
@@ -302,9 +300,22 @@ export default async function ApiDetailPage({
             {ep.creditsPerResult
               ? " — billed per result, so the exact amount scales with how many items you request"
               : ""}
-            . Repeat calls for the same request are served from cache for free
+            .             Repeat calls for the same request are served from cache for free
             {ep.creditsPerResult ? " (metrics refresh within ~1 hour)" : ""}.
           </p>
+          <div className="mt-4 rounded-lg border bg-muted/30 px-4 py-3 text-sm">
+            <span className="text-muted-foreground">Using an AI agent? This endpoint is the MCP tool </span>
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
+              {mcpToolName(ep)}
+            </code>
+            <span className="text-muted-foreground">
+              {" "}via{" "}
+              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">@captapi/mcp</code>.{" "}
+            </span>
+            <Link href="/docs/integrations" className="text-primary hover:underline">
+              Set it up →
+            </Link>
+          </div>
         </section>
 
         {/* How it works */}
