@@ -639,18 +639,37 @@ export function exampleValues(ep: ApiEndpoint): Record<string, string> {
  * `apiKey` to inject a real, runnable key into the snippets.
  * Covers cURL, Python, Node, PHP, Go, and Java.
  */
+/** Active (non-empty) parameter values for an endpoint, in declared order. */
+export function activeArgs(
+  ep: ApiEndpoint,
+  values: Record<string, string>,
+): { name: string; value: string }[] {
+  return params(ep)
+    .map((p) => ({ name: p.name, value: (values[p.name] ?? "").trim() }))
+    .filter((a) => a.value !== "");
+}
+
+/** Full request URL (with encoded query string) for a set of param values. */
+export function requestUrl(
+  ep: ApiEndpoint,
+  values: Record<string, string>,
+): string {
+  const base = `${API_URL}${ep.path}`;
+  const qs = activeArgs(ep, values)
+    .map((a) => `${a.name}=${encodeURIComponent(a.value)}`)
+    .join("&");
+  return qs ? `${base}?${qs}` : base;
+}
+
 export function requestSamples(
   ep: ApiEndpoint,
   values: Record<string, string>,
   apiKey?: string,
 ): { label: string; code: string }[] {
   const key = apiKey && apiKey.trim() ? apiKey.trim() : "capt_live_...";
-  const args = params(ep)
-    .map((p) => ({ name: p.name, value: (values[p.name] ?? "").trim() }))
-    .filter((a) => a.value !== "");
+  const args = activeArgs(ep, values);
   const base = `${API_URL}${ep.path}`;
-  const qs = args.map((a) => `${a.name}=${encodeURIComponent(a.value)}`).join("&");
-  const u = qs ? `${base}?${qs}` : base;
+  const u = requestUrl(ep, values);
   const pyParams = args.map((a) => `        "${a.name}": ${JSON.stringify(a.value)},`).join("\n");
   const phpParams = args.map((a) => `    "${a.name}" => ${JSON.stringify(a.value)},`).join("\n");
 
