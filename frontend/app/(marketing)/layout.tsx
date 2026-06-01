@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { MobileNav } from "@/components/marketing/mobile-nav";
 import { SITE_URL } from "@/lib/api-catalog";
 
 const STRUCTURED_DATA = {
@@ -64,8 +65,11 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <Link href="/docs" className="text-muted-foreground hover:text-foreground">Docs</Link>
           </nav>
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost"><Link href="/login">Sign in</Link></Button>
-            <Button asChild><Link href="/signup">Start Free</Link></Button>
+            <div className="hidden md:flex items-center gap-2">
+              <Button asChild variant="ghost"><Link href="/login">Sign in</Link></Button>
+              <Button asChild><Link href="/signup">Start Free</Link></Button>
+            </div>
+            <MobileNav />
           </div>
         </div>
       </header>
