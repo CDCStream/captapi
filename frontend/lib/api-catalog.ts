@@ -615,21 +615,49 @@ export function curlExample(ep: ApiEndpoint): string {
   return `curl "${exampleUrl(ep)}" \\\n  -H "Authorization: Bearer capt_live_..."`;
 }
 
+/** A placeholder example value for a single param (used in form inputs). */
+export function paramPlaceholder(ep: ApiEndpoint, p: ApiParam): string {
+  return exampleValue(ep, p);
+}
+
 /**
- * Multi-language, copy-pasteable request examples for an endpoint.
+ * Example values keyed by param name. Required params (or the primary param
+ * when none are required) are pre-filled; optional params start blank.
+ */
+export function exampleValues(ep: ApiEndpoint): Record<string, string> {
+  const ps = params(ep);
+  const required = ps.filter((p) => p.required);
+  const fill = new Set((required.length > 0 ? required : ps.slice(0, 1)).map((p) => p.name));
+  const out: Record<string, string> = {};
+  for (const p of ps) out[p.name] = fill.has(p.name) ? exampleValue(ep, p) : "";
+  return out;
+}
+
+/**
+ * Multi-language, copy-pasteable request examples built from a set of
+ * parameter values. Empty values are omitted from the query string. Pass an
+ * `apiKey` to inject a real, runnable key into the snippets.
  * Covers cURL, Python, Node, PHP, Go, and Java.
  */
-export function codeSamples(ep: ApiEndpoint): { label: string; code: string }[] {
-  const args = exampleArgs(ep);
-  const u = exampleUrl(ep);
+export function requestSamples(
+  ep: ApiEndpoint,
+  values: Record<string, string>,
+  apiKey?: string,
+): { label: string; code: string }[] {
+  const key = apiKey && apiKey.trim() ? apiKey.trim() : "capt_live_...";
+  const args = params(ep)
+    .map((p) => ({ name: p.name, value: (values[p.name] ?? "").trim() }))
+    .filter((a) => a.value !== "");
   const base = `${API_URL}${ep.path}`;
+  const qs = args.map((a) => `${a.name}=${encodeURIComponent(a.value)}`).join("&");
+  const u = qs ? `${base}?${qs}` : base;
   const pyParams = args.map((a) => `        "${a.name}": ${JSON.stringify(a.value)},`).join("\n");
   const phpParams = args.map((a) => `    "${a.name}" => ${JSON.stringify(a.value)},`).join("\n");
 
   return [
     {
       label: "cURL",
-      code: `curl "${u}" \\\n  -H "Authorization: Bearer capt_live_..."`,
+      code: `curl "${u}" \\\n  -H "Authorization: Bearer ${key}"`,
     },
     {
       label: "Python",
@@ -640,7 +668,7 @@ res = requests.get(
     params={
 ${pyParams}
     },
-    headers={"Authorization": "Bearer capt_live_..."},
+    headers={"Authorization": "Bearer ${key}"},
 )
 print(res.json())`,
     },
@@ -648,7 +676,7 @@ print(res.json())`,
       label: "Node",
       code: `const res = await fetch(
   "${u}",
-  { headers: { Authorization: "Bearer capt_live_..." } },
+  { headers: { Authorization: "Bearer ${key}" } },
 );
 const data = await res.json();
 console.log(data);`,
@@ -661,7 +689,7 @@ curl_setopt($ch, CURLOPT_URL, "${base}?" . http_build_query([
 ${phpParams}
 ]));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer capt_live_..."]);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer ${key}"]);
 echo curl_exec($ch);
 curl_close($ch);`,
     },
@@ -678,7 +706,7 @@ import (
 func main() {
 	req, _ := http.NewRequest("GET",
 		"${u}", nil)
-	req.Header.Set("Authorization", "Bearer capt_live_...")
+	req.Header.Set("Authorization", "Bearer ${key}")
 	res, _ := http.DefaultClient.Do(req)
 	defer res.Body.Close()
 	body, _ := io.ReadAll(res.Body)
@@ -693,7 +721,7 @@ import java.net.http.*;
 HttpClient client = HttpClient.newHttpClient();
 HttpRequest request = HttpRequest.newBuilder()
     .uri(URI.create("${u}"))
-    .header("Authorization", "Bearer capt_live_...")
+    .header("Authorization", "Bearer ${key}")
     .GET()
     .build();
 HttpResponse<String> res = client.send(
@@ -701,6 +729,11 @@ HttpResponse<String> res = client.send(
 System.out.println(res.body());`,
     },
   ];
+}
+
+/** Static example request samples using default example values. */
+export function codeSamples(ep: ApiEndpoint): { label: string; code: string }[] {
+  return requestSamples(ep, exampleValues(ep));
 }
 
 export function faqs(ep: ApiEndpoint): FaqItem[] {

@@ -22,7 +22,6 @@ import {
   delivers,
   params,
   faqs,
-  codeSamples,
   exampleResponse,
   responseStructure,
   useCases,
@@ -32,6 +31,7 @@ import {
   type ApiEndpoint,
 } from "@/lib/api-catalog";
 import { CodeTabs } from "@/components/docs/code-tabs";
+import { ApiPlayground } from "@/components/docs/api-playground";
 
 const PLATFORM_ICONS: Record<string, LucideIcon> = {
   youtube: Youtube,
@@ -205,14 +205,20 @@ export default async function ApiDetailPage({
           </ul>
         </section>
 
-        {/* Request / response */}
-        <section className="mt-12 grid gap-6 lg:grid-cols-2">
-          <div className="min-w-0">
-            <h2 className="text-2xl font-semibold mb-4">Example request</h2>
-            <CodeTabs samples={codeSamples(ep)} />
-          </div>
-          <div className="min-w-0">
-            <h2 className="text-2xl font-semibold mb-4">Example response</h2>
+        {/* Interactive request builder */}
+        <section className="mt-12">
+          <h2 className="text-2xl font-semibold">Try it</h2>
+          <p className="mt-2 mb-4 max-w-3xl text-sm text-muted-foreground">
+            Fill in the parameters below and copy a ready-to-run request in your
+            language of choice.
+          </p>
+          <ApiPlayground ep={ep} />
+        </section>
+
+        {/* Response */}
+        <section className="mt-12">
+          <h2 className="text-2xl font-semibold mb-4">Example response</h2>
+          <div className="max-w-3xl">
             <CodeTabs samples={[{ label: "200 OK", code: exampleResponse(ep) }]} />
           </div>
         </section>
