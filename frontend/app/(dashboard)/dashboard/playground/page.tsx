@@ -103,7 +103,7 @@ export default function PlaygroundPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
       <div className="flex items-end justify-between flex-wrap gap-4">
         <div>
@@ -125,9 +125,9 @@ export default function PlaygroundPage() {
         </span>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-5">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Endpoint picker */}
-        <Card className="lg:col-span-2 h-fit lg:sticky lg:top-6">
+        <Card className="lg:col-span-1 h-fit lg:sticky lg:top-6">
           <CardContent className="p-4">
             <div className="flex items-center justify-between px-2 pb-2">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -209,7 +209,7 @@ export default function PlaygroundPage() {
         </Card>
 
         {/* Interactive builder + live response */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-2">
           <div className="mb-4 flex items-center gap-2 text-sm">
             <span
               className={cn(

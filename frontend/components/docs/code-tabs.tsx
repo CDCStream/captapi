@@ -101,6 +101,7 @@ export function CodeTabs({ samples }: { samples: CodeSample[] }) {
       <SyntaxHighlighter
         language={langFor(samples[active])}
         style={vscDarkPlus}
+        wrapLongLines
         customStyle={{
           margin: 0,
           background: "transparent",
@@ -109,7 +110,11 @@ export function CodeTabs({ samples }: { samples: CodeSample[] }) {
           lineHeight: 1.6,
         }}
         codeTagProps={{
-          style: { fontFamily: "var(--font-mono, ui-monospace, monospace)" },
+          style: {
+            fontFamily: "var(--font-mono, ui-monospace, monospace)",
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+          },
         }}
       >
         {samples[active].code}

@@ -142,7 +142,7 @@ export default async function ApiDetailPage({
         />
       ))}
 
-      <div className="container max-w-5xl">
+      <div className="container max-w-6xl">
         {/* Breadcrumb */}
         <nav
           aria-label="Breadcrumb"
@@ -218,9 +218,7 @@ export default async function ApiDetailPage({
         {/* Response */}
         <section className="mt-12">
           <h2 className="text-2xl font-semibold mb-4">Example response</h2>
-          <div className="max-w-3xl">
-            <CodeTabs samples={[{ label: "200 OK", code: exampleResponse(ep) }]} />
-          </div>
+          <CodeTabs samples={[{ label: "200 OK", code: exampleResponse(ep) }]} />
         </section>
 
         {/* Response structure */}
