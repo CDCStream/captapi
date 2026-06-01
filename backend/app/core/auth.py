@@ -109,7 +109,11 @@ async def require_api_key(
     if credentials is None or not credentials.credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing Authorization header",
+            detail=(
+                "Missing Authorization header. Send 'Authorization: Bearer "
+                "capt_live_...'. Create a key at "
+                "https://captapi.com/dashboard/api-keys"
+            ),
             headers={"WWW-Authenticate": "Bearer"},
         )
     plain = credentials.credentials.strip()

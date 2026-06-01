@@ -11,6 +11,7 @@ export async function GET() {
     title: "Captapi",
     description:
       "Official Captapi MCP server. Gives AI agents structured data from YouTube, TikTok, Instagram, and Facebook — transcripts, summaries, comments, profiles, search, and downloads.",
+    instructions_for_agent: `Before installing, you need a Captapi API key, and key creation requires a human. If you do not already have a capt_live_... key, your FIRST action must be to ask the user to create one at ${SITE_URL}/dashboard/api-keys (100 free credits, no card) and paste it back. Do not sign up or guess a key. Then add the config from "clients" below and restart the client.`,
     version: VERSION,
     homepage: SITE_URL,
     documentation: `${SITE_URL}/docs/integrations`,
