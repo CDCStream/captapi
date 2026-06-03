@@ -5,6 +5,12 @@
 // Content (taglines, descriptions, params, FAQs, example responses) is generated
 // from a small declarative spec so every endpoint gets a unique, answer-first
 // page that is SEO / GEO / AEO friendly without hand-writing 34 pages.
+//
+// Example responses prefer real snapshots captured live from the production API
+// (see api-examples.generated.ts); a generic per-category shape is used as a
+// fallback for any endpoint without a snapshot.
+
+import { API_EXAMPLES } from "./api-examples.generated";
 
 export type PlatformId = "youtube" | "tiktok" | "instagram" | "facebook";
 
@@ -469,6 +475,8 @@ export function params(ep: ApiEndpoint): ApiParam[] {
 }
 
 function exampleData(ep: ApiEndpoint): Record<string, unknown> {
+  const real = API_EXAMPLES[ep.slug];
+  if (real) return real;
   switch (ep.category) {
     case "transcript":
       return {
