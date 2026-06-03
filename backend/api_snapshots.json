@@ -1693,11 +1693,22 @@
   "error": null
  },
  "tiktok-song-details": {
-  "ok": false,
-  "status": 404,
+  "ok": true,
+  "status": 200,
   "credits": null,
-  "data": null,
-  "error": "Song not found"
+  "data": {
+   "platform": "tiktok",
+   "url": "https://www.tiktok.com/music/original-sound-7646812079113898783",
+   "id": "7646812079113898783",
+   "title": "original sound - khaby.lame",
+   "author": "Khabane lame",
+   "original": true,
+   "album": null,
+   "duration": 29.0,
+   "coverUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-maliva-avt-0068/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter-q:1080:1080:q70.heic?dr=9608&idc=no1a&ps=87d6e48a&refresh_token=a52130c1&s=MUSIC_AWEME&sc=avatar&shcp=f6441914&shp=d05b14bd&t=223449c4&x-expires=1780606800&x-signature=%2FKM4VPiUHXg8W250%2BhUXJaib%2F6o%3D",
+   "playUrl": null
+  },
+  "error": null
  },
  "tiktok-music-posts": {
   "ok": true,
