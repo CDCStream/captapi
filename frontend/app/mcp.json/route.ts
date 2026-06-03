@@ -19,6 +19,40 @@ export async function GET() {
     transport: "stdio",
     command: "npx",
     args: ["-y", "@captapi/mcp"],
+    remote: {
+      transport: "http",
+      url: `${API_URL}/mcp`,
+      auth_header: "Authorization: Bearer <CAPTAPI_API_KEY>",
+      alt_auth_header: "x-api-key: <CAPTAPI_API_KEY>",
+      note: "Hosted MCP — no install required. Add the url to your client and pass your capt_live_... key via header.",
+      clients: {
+        cursor: {
+          file: "~/.cursor/mcp.json",
+          config: {
+            mcpServers: {
+              captapi: {
+                url: `${API_URL}/mcp`,
+                headers: { Authorization: "Bearer capt_live_xxxxxxxxxxxxxxxx" },
+              },
+            },
+          },
+        },
+        claude_code: {
+          command: `claude mcp add --transport http captapi ${API_URL}/mcp --header "Authorization: Bearer capt_live_xxxxxxxxxxxxxxxx"`,
+        },
+        vscode: {
+          file: ".vscode/mcp.json",
+          config: {
+            servers: {
+              captapi: {
+                url: `${API_URL}/mcp`,
+                headers: { Authorization: "Bearer capt_live_xxxxxxxxxxxxxxxx" },
+              },
+            },
+          },
+        },
+      },
+    },
     env: {
       CAPTAPI_API_KEY: {
         required: true,
@@ -37,7 +71,8 @@ export async function GET() {
     },
     setup: [
       `A human creates an API key once at ${SITE_URL}/dashboard/api-keys (100 free credits on signup).`,
-      "Add the server config below to your MCP client and restart it.",
+      "Pick a transport: 'remote' (hosted, just a URL — no install) or stdio (local via npx).",
+      "Add the matching server config to your MCP client and restart it.",
     ],
     clients: {
       cursor: {

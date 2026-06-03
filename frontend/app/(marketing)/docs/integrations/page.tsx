@@ -18,6 +18,38 @@ export const metadata: Metadata = {
 
 const TOTAL = PLATFORM_GROUPS.reduce((n, g) => n + g.endpoints.length, 0);
 
+const hostedInstall = [
+  {
+    label: "Cursor",
+    code: `// ~/.cursor/mcp.json  (or .cursor/mcp.json per project)
+{
+  "mcpServers": {
+    "captapi": {
+      "url": "${API_URL}/mcp",
+      "headers": { "Authorization": "Bearer capt_live_xxxxxxxxxxxxxxxx" }
+    }
+  }
+}`,
+  },
+  {
+    label: "Claude Code",
+    code: `claude mcp add --transport http captapi ${API_URL}/mcp \\
+  --header "Authorization: Bearer capt_live_xxxxxxxxxxxxxxxx"`,
+  },
+  {
+    label: "VS Code",
+    code: `// .vscode/mcp.json
+{
+  "servers": {
+    "captapi": {
+      "url": "${API_URL}/mcp",
+      "headers": { "Authorization": "Bearer capt_live_xxxxxxxxxxxxxxxx" }
+    }
+  }
+}`,
+  },
+];
+
 const mcpInstall = [
   {
     label: "Cursor",
@@ -157,23 +189,39 @@ export default function IntegrationsPage() {
 
       <H2 id="mcp">MCP Server</H2>
       <p className="text-muted-foreground max-w-3xl">
-        The server runs locally via <code className="rounded bg-muted px-1.5 py-0.5 text-xs">npx</code>{" "}
-        and talks to your client over stdio. It needs your Captapi key, which it
-        reads from the <code className="rounded bg-muted px-1.5 py-0.5 text-xs">CAPTAPI_API_KEY</code>{" "}
-        environment variable.
-      </p>
-
-      <H3 id="mcp-install">Installation</H3>
-      <p className="text-muted-foreground max-w-3xl mb-4">
-        Add the config for your client (replace the key with your own from{" "}
+        There are two ways to connect — both expose the same {TOTAL} tools.
+        Pick <strong>Hosted</strong> for the fastest setup (no install), or{" "}
+        <strong>Local</strong> if you prefer running the package on your machine.
+        Replace the key with your own from{" "}
         <Link href="/dashboard/api-keys" className="text-primary hover:underline">
           API Keys
         </Link>
-        ), then restart the client.
+        , then restart the client.
+      </p>
+
+      <H3 id="mcp-hosted">Option A — Hosted (no install, just a URL)</H3>
+      <p className="text-muted-foreground max-w-3xl mb-4">
+        Connect over HTTP to{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{API_URL}/mcp</code>.
+        Nothing to install — your key is passed as an{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">Authorization</code>{" "}
+        header (or <code className="rounded bg-muted px-1.5 py-0.5 text-xs">x-api-key</code>).
+        Ideal for agents that can&apos;t run local processes.
+      </p>
+      <CodeTabs samples={hostedInstall} />
+
+      <H3 id="mcp-local">Option B — Local (npx / stdio)</H3>
+      <p className="text-muted-foreground max-w-3xl mb-4">
+        Run the official{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">@captapi/mcp</code>{" "}
+        package via <code className="rounded bg-muted px-1.5 py-0.5 text-xs">npx</code>.
+        It talks to your client over stdio and reads your key from the{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">CAPTAPI_API_KEY</code>{" "}
+        environment variable.
       </p>
       <CodeTabs samples={mcpInstall} />
 
-      <H3 id="mcp-config">Configuration</H3>
+      <H3 id="mcp-config">Configuration (local mode)</H3>
       <div className="overflow-hidden rounded-lg border">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left">

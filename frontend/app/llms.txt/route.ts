@@ -62,11 +62,37 @@ Pricing: credit-based subscriptions (Starter, Pro, Business) plus one-time pay-a
 
 ## Connect via MCP (recommended for AI agents)
 
-Captapi ships an official Model Context Protocol server, \`@captapi/mcp\` (npm), that exposes all ${ALL_ENDPOINTS.length} endpoints as MCP tools. This is the easiest way for an AI agent to use Captapi.
+Captapi exposes all ${ALL_ENDPOINTS.length} endpoints as Model Context Protocol tools. There are two ways to connect — both require an API key (a human creates it ONCE at ${base}/dashboard/api-keys; sign-up cannot be automated, so if you do not have a \`capt_live_...\` key, ask the user to create one and paste it).
 
-Setup is two steps:
-1. A human creates an API key ONCE at ${base}/dashboard/api-keys. Sign-up and key creation cannot be automated by an agent — if you do not have a \`capt_live_...\` key, ask the user to create one and paste it. New accounts include 100 free credits.
-2. Add the MCP server to the client config and restart the client.
+### Option A — Hosted MCP (no install, just a URL)
+
+Connect to the remote MCP server over HTTP. Nothing to install (no \`npx\`, no Node). Best for agents that cannot run local processes. Pass the API key as a request header.
+
+- URL: ${API_URL}/mcp
+- Auth header: \`Authorization: Bearer capt_live_...\` (or \`x-api-key: capt_live_...\`)
+
+Cursor — file \`~/.cursor/mcp.json\` (or \`.cursor/mcp.json\` per project):
+\`\`\`json
+{
+  "mcpServers": {
+    "captapi": {
+      "url": "${API_URL}/mcp",
+      "headers": { "Authorization": "Bearer capt_live_xxxxxxxxxxxxxxxx" }
+    }
+  }
+}
+\`\`\`
+
+Claude Code — one command:
+\`\`\`bash
+claude mcp add --transport http captapi ${API_URL}/mcp --header "Authorization: Bearer capt_live_xxxxxxxxxxxxxxxx"
+\`\`\`
+
+VS Code — file \`.vscode/mcp.json\`: use the key \`servers\` with the same \`url\` + \`headers\`.
+
+### Option B — Local MCP (npx / stdio)
+
+Run the official \`@captapi/mcp\` package locally. The key is passed as an environment variable.
 
 Cursor — file \`~/.cursor/mcp.json\` (or \`.cursor/mcp.json\` per project):
 \`\`\`json
@@ -83,11 +109,13 @@ Cursor — file \`~/.cursor/mcp.json\` (or \`.cursor/mcp.json\` per project):
 
 Claude Desktop — file \`claude_desktop_config.json\`: use the same \`mcpServers\` block shown above.
 VS Code — file \`.vscode/mcp.json\`: use the key \`servers\` instead of \`mcpServers\`.
+Claude Code — one command: \`claude mcp add captapi --env CAPTAPI_API_KEY=capt_live_xxxx -- npx -y @captapi/mcp\`
 CLI (no config file): \`CAPTAPI_API_KEY=capt_live_xxxx npx -y @captapi/mcp\`
 
-Environment variables: \`CAPTAPI_API_KEY\` (required), \`CAPTAPI_BASE_URL\` (optional, default https://api.captapi.com).
+Environment variables (local mode): \`CAPTAPI_API_KEY\` (required), \`CAPTAPI_BASE_URL\` (optional, default https://api.captapi.com).
 Tool naming convention: \`platform_action\` — e.g. \`youtube_transcript\`, \`tiktok_comments\`, \`instagram_channel_posts\`, \`facebook_page_details\`.
 Machine-readable manifest: ${base}/.well-known/mcp.json (also at ${base}/mcp.json)
+Full machine-readable endpoint reference: ${base}/llms-full.txt
 Full integration guide: ${base}/docs/integrations
 
 ## Connect via REST API (call it directly from code)
