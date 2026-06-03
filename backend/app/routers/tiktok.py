@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import re
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -839,6 +840,35 @@ async def tiktok_song_details(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
+            # The TikTok music URL ends with the numeric sound id; parse it here
+            # because apidojo returns the id as a JS number (precision loss).
+            m = re.search(r"(\d{6,})(?:\?|$)", url)
+            url_id = m.group(1) if m else None
+
+            # Fast path: apidojo music scraper (~9s, has duration + cover).
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_SONG,
+                {"startUrls": [url], "maxItems": 1},
+                max_items=1,
+            )
+            if items:
+                song = items[0].get("song") or {}
+                if song:
+                    title = safe_str(song.get("title"))
+                    return {
+                        "platform": "tiktok",
+                        "url": url,
+                        "id": url_id or safe_str(song.get("id")),
+                        "title": title,
+                        "author": safe_str(song.get("artist")),
+                        "original": bool(title) and title.lower().startswith("original sound"),
+                        "album": safe_str(song.get("album")),
+                        "duration": safe_float(song.get("duration")),
+                        "coverUrl": safe_str(song.get("cover")),
+                        "playUrl": None,
+                    }
+
+            # Fallback: clockworks sound scraper (slower, exposes playUrl).
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK_MUSIC,
                 {"musics": [url], "resultsPerPage": 1, "shouldDownloadVideos": False},
@@ -850,18 +880,21 @@ async def tiktok_song_details(
             return {
                 "platform": "tiktok",
                 "url": url,
-                "id": safe_str(music.get("musicId") or music.get("id")),
+                "id": url_id or safe_str(music.get("musicId") or music.get("id")),
                 "title": safe_str(music.get("musicName") or music.get("title")),
                 "author": safe_str(music.get("musicAuthor") or music.get("authorName")),
                 "original": music.get("musicOriginal"),
+                "album": None,
                 "duration": safe_float(music.get("duration")),
-                "coverUrl": safe_str(music.get("coverLarge") or music.get("coverMedium")),
+                "coverUrl": safe_str(
+                    music.get("coverLarge") or music.get("coverMedium") or music.get("coverMediumUrl")
+                ),
                 "playUrl": safe_str(music.get("playUrl")),
             }
 
         data = await cached_or_run(
             endpoint="tiktok.song-details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )

@@ -53,6 +53,10 @@ class Settings(BaseSettings):
     APIFY_ACTOR_TIKTOK_FOLLOWERS: str = "clockworks/tiktok-followers-scraper"
     APIFY_ACTOR_TIKTOK_FOLLOWINGS: str = "clockworks/tiktok-followers-scraper"
     APIFY_ACTOR_TIKTOK_MUSIC: str = "clockworks/tiktok-sound-scraper"
+    # Song/sound metadata only. apidojo returns song details in ~9s vs ~40s for
+    # the clockworks sound scraper (which crawls the sound's video feed); the
+    # latter stays as the music-posts actor and a song-details fallback.
+    APIFY_ACTOR_TIKTOK_SONG: str = "apidojo/tiktok-music-scraper"
     # Trending (For You) video feed by region. HTTP-only, cheap pay-per-result.
     # `content_type` ("video") + `country_code`.
     APIFY_ACTOR_TIKTOK_TRENDING: str = "xtracto/tiktok-trending-scraper"
