@@ -25,7 +25,14 @@ class Settings(BaseSettings):
     SUPABASE_ANON_KEY: str
 
     APIFY_TOKEN: str
+    # Legacy single transcript actor (kept for backward-compat env binding).
     APIFY_ACTOR_YOUTUBE_TRANSCRIPT: str = "pintostudio/youtube-transcript-scraper"
+    # Primary + fallback timestamped transcript actors. The old pintostudio
+    # actor started returning empty `{"data": []}` for every video, so we run
+    # two independent actors for resilience. New names (not the legacy var) so
+    # deployments that pinned APIFY_ACTOR_YOUTUBE_TRANSCRIPT still pick these up.
+    APIFY_ACTOR_YT_TRANSCRIPT_1: str = "scrape-creators/best-youtube-transcripts-scraper"
+    APIFY_ACTOR_YT_TRANSCRIPT_2: str = "automation-lab/youtube-transcript"
     APIFY_ACTOR_YOUTUBE_VIDEO: str = "streamers/youtube-scraper"
     APIFY_ACTOR_YOUTUBE_COMMENTS: str = "streamers/youtube-comments-scraper"
     APIFY_ACTOR_YOUTUBE_SEARCH: str = "streamers/youtube-scraper"
