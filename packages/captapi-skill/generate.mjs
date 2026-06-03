@@ -92,7 +92,7 @@ If you have the **MCP server** connected instead, call the tool named in the tab
 - \`url\` — pass the **full public URL** of the video/reel/post/profile. Each endpoint's table notes the expected URL type.
 - \`q\` — search query or keyword (min 2 chars). For hashtag endpoints, pass the tag **without** \`#\`.
 - \`limit\` — optional; controls how many items list/search/comment endpoints return. **Billed per result**, so request only what you need. Defaults and maxes vary per endpoint.
-- \`language\` — optional ISO code (e.g. \`en\`) for transcript/summary endpoints; defaults to auto-detect.
+- \`language\` — optional ISO code (e.g. \`en\`) for the **YouTube** transcript/summary endpoints (incl. Shorts); defaults to auto-detect. Other platforms' transcript/summary endpoints take only \`url\`.
 - \`comment_id\` — required for \`*_comment_replies\`; get it from the corresponding \`*_comments\` response.
 
 ## Credits & errors

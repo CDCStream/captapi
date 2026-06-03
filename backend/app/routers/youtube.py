@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import math
 from typing import Any
 
@@ -89,6 +90,41 @@ def _require_youtube_url(url: str) -> tuple[str, str]:
     return vid, normalize_youtube_url(url)
 
 
+_TRANSCRIPT_ATTEMPTS = 3
+
+
+def _transcript_segments(item: dict[str, Any]) -> list[dict[str, Any]]:
+    raw = item.get("data") or item.get("transcript") or item.get("segments") or []
+    return raw if isinstance(raw, list) else []
+
+
+async def _fetch_transcript_item(norm_url: str, language: str | None) -> dict[str, Any]:
+    """Run the transcript actor, retrying when it returns an empty dataset.
+
+    The pintostudio actor intermittently returns ``{"data": []}`` for videos
+    that *do* have captions, so we retry a few times before giving up.
+    ``targetLanguage`` is a required field in the actor's input schema.
+    """
+    apify = get_apify()
+    settings = get_settings()
+    run_input: dict[str, Any] = {
+        "videoUrl": norm_url,
+        "targetLanguage": (language or "en"),
+    }
+    last_item: dict[str, Any] = {}
+    for attempt in range(_TRANSCRIPT_ATTEMPTS):
+        items = await apify.run_actor_sync(
+            settings.APIFY_ACTOR_YOUTUBE_TRANSCRIPT, run_input, max_items=1
+        )
+        if items:
+            last_item = items[0]
+            if _transcript_segments(last_item):
+                return last_item
+        if attempt < _TRANSCRIPT_ATTEMPTS - 1:
+            await asyncio.sleep(1.5 * (attempt + 1))
+    return last_item
+
+
 # ---------- TRANSCRIPT ----------------------------------------------------
 @router.get(
     "/transcript",
@@ -101,7 +137,6 @@ async def youtube_transcript(
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, norm_url = _require_youtube_url(url)
-    settings = get_settings()
 
     async with billed_call(
         caller=caller,
@@ -111,17 +146,8 @@ async def youtube_transcript(
         base_credits=CREDIT_TRANSCRIPT,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            run_input: dict[str, Any] = {"videoUrl": norm_url}
-            if language:
-                run_input["language"] = language
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_YOUTUBE_TRANSCRIPT, run_input, max_items=1
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Transcript not available")
-            item = items[0]
-            segments_raw = item.get("data") or item.get("transcript") or item.get("segments") or []
+            item = await _fetch_transcript_item(norm_url, language)
+            segments_raw = _transcript_segments(item)
             segments = []
             text_parts = []
             for s in segments_raw:
@@ -140,6 +166,11 @@ async def youtube_transcript(
                         }
                     )
                     text_parts.append(text)
+            if not segments:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Transcript not available for this video",
+                )
             full = " ".join(text_parts)
             return {
                 "url": norm_url,
@@ -154,7 +185,7 @@ async def youtube_transcript(
 
         data = await cached_or_run(
             endpoint="youtube.transcript",
-            params={"url": norm_url, "language": language or ""},
+            params={"url": norm_url, "language": language or "", "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -173,7 +204,6 @@ async def youtube_summarize(
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, norm_url = _require_youtube_url(url)
-    settings = get_settings()
 
     async with billed_call(
         caller=caller,
@@ -183,22 +213,17 @@ async def youtube_summarize(
         base_credits=CREDIT_SUMMARIZE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            tx_items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_YOUTUBE_TRANSCRIPT,
-                {"videoUrl": norm_url},
-                max_items=1,
-            )
-            if not tx_items:
-                raise HTTPException(status_code=404, detail="Transcript not available")
-            item = tx_items[0]
+            item = await _fetch_transcript_item(norm_url, language)
             title = safe_str(item.get("title")) or ""
-            seg_raw = item.get("data") or item.get("transcript") or item.get("segments") or []
+            seg_raw = _transcript_segments(item)
             transcript_text = " ".join(
                 (s.get("text") or "").strip() for s in seg_raw
             ).strip()
             if not transcript_text:
-                raise HTTPException(status_code=422, detail="Empty transcript")
+                raise HTTPException(
+                    status_code=404,
+                    detail="Transcript not available for this video",
+                )
 
             ai = await summarize_transcript(
                 transcript_text, title=title, language=language or "en"
@@ -215,7 +240,7 @@ async def youtube_summarize(
 
         data = await cached_or_run(
             endpoint="youtube.summarize",
-            params={"url": norm_url, "language": language or ""},
+            params={"url": norm_url, "language": language or "", "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -691,17 +716,19 @@ async def youtube_hashtag_search(
 @router.get("/shorts/transcript", summary="YouTube Shorts transcript")
 async def shorts_transcript(
     url: str = Query(...),
+    language: str | None = Query(None, description="ISO language code (en, tr, es...)"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    return await youtube_transcript(url=url, language=None, caller=caller)
+    return await youtube_transcript(url=url, language=language, caller=caller)
 
 
 @router.get("/shorts/summarize", summary="YouTube Shorts AI summary")
 async def shorts_summarize(
     url: str = Query(...),
+    language: str | None = Query(None),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    return await youtube_summarize(url=url, language=None, caller=caller)
+    return await youtube_summarize(url=url, language=language, caller=caller)
 
 
 @router.get("/shorts/video-details", summary="YouTube Shorts metadata")

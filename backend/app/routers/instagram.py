@@ -372,10 +372,14 @@ async def instagram_channel_posts(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_INSTAGRAM,
-                {"username": [handle], "resultsLimit": limit, "resultsType": "posts"},
+                {
+                    "directUrls": [f"https://www.instagram.com/{handle}/"],
+                    "resultsLimit": limit,
+                    "resultsType": "posts",
+                },
                 max_items=limit,
             )
-            posts = [_normalize_post(i) for i in items[:limit]]
+            posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
             return {"url": url, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
@@ -410,10 +414,14 @@ async def instagram_channel_reels(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_INSTAGRAM,
-                {"username": [handle], "resultsLimit": limit, "resultsType": "reels"},
+                {
+                    "directUrls": [f"https://www.instagram.com/{handle}/"],
+                    "resultsLimit": limit,
+                    "resultsType": "reels",
+                },
                 max_items=limit,
             )
-            reels = [_normalize_post(i) for i in items[:limit]]
+            reels = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
             return {"url": url, "totalReturned": len(reels), "reels": reels}
 
         data = await cached_or_run(

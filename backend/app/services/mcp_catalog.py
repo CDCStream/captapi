@@ -103,8 +103,8 @@ _YOUTUBE: tuple[tuple, ...] = (
 )
 
 _TIKTOK: tuple[tuple, ...] = (
-    ("tiktok_transcript", "TikTok Transcript", "/v1/tiktok/transcript", 2, "Transcript of a TikTok video (via captions).", (_url(TT_VIDEO), _language())),
-    ("tiktok_summarize", "TikTok Summarizer", "/v1/tiktok/summarize", 4, "AI summary of a TikTok video.", (_url(TT_VIDEO), _language())),
+    ("tiktok_transcript", "TikTok Transcript", "/v1/tiktok/transcript", 2, "Transcript of a TikTok video (via captions).", (_url(TT_VIDEO),)),
+    ("tiktok_summarize", "TikTok Summarizer", "/v1/tiktok/summarize", 4, "AI summary of a TikTok video.", (_url(TT_VIDEO),)),
     ("tiktok_video_details", "TikTok Video Details", "/v1/tiktok/video-details", 1, "Metadata + stats for a TikTok video.", (_url(TT_VIDEO),)),
     ("tiktok_comments", "TikTok Comments", "/v1/tiktok/comments", 10, "Comments on a TikTok video.", (_url(TT_VIDEO), _limit(50, 500))),
     ("tiktok_channel_details", "TikTok Channel Details", "/v1/tiktok/channel-details", 1, "Profile info & stats for a TikTok user.", (_url(TT_PROFILE),)),
@@ -124,8 +124,8 @@ _TIKTOK: tuple[tuple, ...] = (
 )
 
 _INSTAGRAM: tuple[tuple, ...] = (
-    ("instagram_transcript", "Instagram Transcript", "/v1/instagram/transcript", 2, "Transcript of an Instagram Reel.", (_url(IG_REEL), _language())),
-    ("instagram_summarize", "Instagram Summarizer", "/v1/instagram/summarize", 4, "AI summary of an Instagram Reel.", (_url(IG_REEL), _language())),
+    ("instagram_transcript", "Instagram Transcript", "/v1/instagram/transcript", 2, "Transcript of an Instagram Reel.", (_url(IG_REEL),)),
+    ("instagram_summarize", "Instagram Summarizer", "/v1/instagram/summarize", 4, "AI summary of an Instagram Reel.", (_url(IG_REEL),)),
     ("instagram_details", "Instagram Details", "/v1/instagram/details", 1, "Details for an Instagram post or reel.", (_url(IG_POST),)),
     ("instagram_comments", "Instagram Comments", "/v1/instagram/comments", 45, "Comments on an Instagram post or reel.", (_url(IG_POST), _limit(50, 500))),
     ("instagram_channel_details", "Instagram Channel Details", "/v1/instagram/channel-details", 1, "Profile info & stats for an Instagram account.", (_url(IG_PROFILE),)),
@@ -144,8 +144,8 @@ _INSTAGRAM: tuple[tuple, ...] = (
 
 _FACEBOOK: tuple[tuple, ...] = (
     ("facebook_details", "Facebook Details", "/v1/facebook/details", 1, "Details for a Facebook video or post.", (_url(FB_VIDEO),)),
-    ("facebook_transcript", "Facebook Transcript", "/v1/facebook/transcript", 2, "Transcript of a Facebook video.", (_url(FB_VIDEO), _language())),
-    ("facebook_summarize", "Facebook Summarizer", "/v1/facebook/summarize", 4, "AI summary of a Facebook video or post.", (_url(FB_VIDEO), _language())),
+    ("facebook_transcript", "Facebook Transcript", "/v1/facebook/transcript", 2, "Transcript of a Facebook video.", (_url(FB_VIDEO),)),
+    ("facebook_summarize", "Facebook Summarizer", "/v1/facebook/summarize", 4, "AI summary of a Facebook video or post.", (_url(FB_VIDEO),)),
     ("facebook_comments", "Facebook Comments", "/v1/facebook/comments", 30, "Comments on a Facebook post.", (_url(FB_VIDEO), _limit(50, 500))),
     ("facebook_page_details", "Facebook Page Details", "/v1/facebook/page-details", 1, "Info & stats for a Facebook page.", (_url("Facebook page URL, e.g. https://facebook.com/PageName."),)),
     ("facebook_profile_posts", "Facebook Profile Posts", "/v1/facebook/profile-posts", 12, "Latest posts from a Facebook profile/page.", (_url("Facebook profile or page URL."), _limit(20, 200))),

@@ -409,8 +409,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-channel-playlists": [up(YT_CHANNEL), lp(20, 200)],
   "youtube-community-posts": [up(YT_CHANNEL), lp(20, 200)],
   // TikTok
-  "tiktok-transcript": [up(TT_VIDEO), lang()],
-  "tiktok-summarizer": [up(TT_VIDEO), lang()],
+  "tiktok-transcript": [up(TT_VIDEO)],
+  "tiktok-summarizer": [up(TT_VIDEO)],
   "tiktok-video-details": [up(TT_VIDEO)],
   "tiktok-comments": [up(TT_VIDEO), lp(50, 500)],
   "tiktok-channel-details": [up(TT_PROFILE)],
@@ -428,8 +428,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-trending-feed": [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code, e.g. US, GB, TR. Default US." }, lp(20, 200)],
   "tiktok-popular-hashtags": [{ name: "query", type: "string", required: false, description: 'Topic or keyword to discover trending hashtags for. Default "trending".' }, lp(20, 100)],
   // Instagram
-  "instagram-transcript": [up(IG_REEL), lang()],
-  "instagram-summarizer": [up(IG_REEL), lang()],
+  "instagram-transcript": [up(IG_REEL)],
+  "instagram-summarizer": [up(IG_REEL)],
   "instagram-details": [up(IG_POST)],
   "instagram-comments": [up(IG_POST), lp(50, 500)],
   "instagram-channel-details": [up(IG_PROFILE)],
@@ -446,8 +446,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "instagram-embed": [up(IG_POST)],
   // Facebook
   "facebook-details": [up(FB_VIDEO)],
-  "facebook-transcript": [up(FB_VIDEO), lang()],
-  "facebook-summarizer": [up(FB_VIDEO), lang()],
+  "facebook-transcript": [up(FB_VIDEO)],
+  "facebook-summarizer": [up(FB_VIDEO)],
   "facebook-comments": [up(FB_VIDEO), lp(50, 500)],
   "facebook-page-details": [up("Facebook page URL, e.g. https://facebook.com/PageName.")],
   "facebook-profile-posts": [up("Facebook profile or page URL."), lp(20, 200)],

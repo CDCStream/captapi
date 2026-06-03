@@ -46,7 +46,7 @@ If you have the **MCP server** connected instead, call the tool named in the tab
 - `url` — pass the **full public URL** of the video/reel/post/profile. Each endpoint's table notes the expected URL type.
 - `q` — search query or keyword (min 2 chars). For hashtag endpoints, pass the tag **without** `#`.
 - `limit` — optional; controls how many items list/search/comment endpoints return. **Billed per result**, so request only what you need. Defaults and maxes vary per endpoint.
-- `language` — optional ISO code (e.g. `en`) for transcript/summary endpoints; defaults to auto-detect.
+- `language` — optional ISO code (e.g. `en`) for the **YouTube** transcript/summary endpoints (incl. Shorts); defaults to auto-detect. Other platforms' transcript/summary endpoints take only `url`.
 - `comment_id` — required for `*_comment_replies`; get it from the corresponding `*_comments` response.
 
 ## Credits & errors
@@ -88,8 +88,8 @@ If you have the **MCP server** connected instead, call the tool named in the tab
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `tiktok_transcript` | `/v1/tiktok/transcript` | `url` (string), `language`? (string) | 2 |
-| `tiktok_summarize` | `/v1/tiktok/summarize` | `url` (string), `language`? (string) | 4 |
+| `tiktok_transcript` | `/v1/tiktok/transcript` | `url` (string) | 2 |
+| `tiktok_summarize` | `/v1/tiktok/summarize` | `url` (string) | 4 |
 | `tiktok_video_details` | `/v1/tiktok/video-details` | `url` (string) | 1 |
 | `tiktok_comments` | `/v1/tiktok/comments` | `url` (string), `limit`? (number) | 10 |
 | `tiktok_channel_details` | `/v1/tiktok/channel-details` | `url` (string) | 1 |
@@ -111,8 +111,8 @@ If you have the **MCP server** connected instead, call the tool named in the tab
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `instagram_transcript` | `/v1/instagram/transcript` | `url` (string), `language`? (string) | 2 |
-| `instagram_summarize` | `/v1/instagram/summarize` | `url` (string), `language`? (string) | 4 |
+| `instagram_transcript` | `/v1/instagram/transcript` | `url` (string) | 2 |
+| `instagram_summarize` | `/v1/instagram/summarize` | `url` (string) | 4 |
 | `instagram_details` | `/v1/instagram/details` | `url` (string) | 1 |
 | `instagram_comments` | `/v1/instagram/comments` | `url` (string), `limit`? (number) | 45 |
 | `instagram_channel_details` | `/v1/instagram/channel-details` | `url` (string) | 1 |
@@ -133,8 +133,8 @@ If you have the **MCP server** connected instead, call the tool named in the tab
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
 | `facebook_details` | `/v1/facebook/details` | `url` (string) | 1 |
-| `facebook_transcript` | `/v1/facebook/transcript` | `url` (string), `language`? (string) | 2 |
-| `facebook_summarize` | `/v1/facebook/summarize` | `url` (string), `language`? (string) | 4 |
+| `facebook_transcript` | `/v1/facebook/transcript` | `url` (string) | 2 |
+| `facebook_summarize` | `/v1/facebook/summarize` | `url` (string) | 4 |
 | `facebook_comments` | `/v1/facebook/comments` | `url` (string), `limit`? (number) | 30 |
 | `facebook_page_details` | `/v1/facebook/page-details` | `url` (string) | 1 |
 | `facebook_profile_posts` | `/v1/facebook/profile-posts` | `url` (string), `limit`? (number) | 12 |
