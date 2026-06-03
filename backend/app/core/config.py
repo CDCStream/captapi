@@ -38,6 +38,10 @@ class Settings(BaseSettings):
     APIFY_ACTOR_YOUTUBE_SEARCH: str = "streamers/youtube-scraper"
     APIFY_ACTOR_YOUTUBE_CHANNEL: str = "streamers/youtube-channel-scraper"
     APIFY_ACTOR_YOUTUBE_DOWNLOAD: str = "api-ninja/youtube-video-downloader"
+    # Fallback downloader (used only if the primary returns no link), so a
+    # single downloader outage doesn't break /video-download. Slower (~2min)
+    # but high-volume/reliable; returns discrete file URLs.
+    APIFY_ACTOR_YOUTUBE_DOWNLOAD_FALLBACK: str = "streamers/youtube-video-downloader"
 
     APIFY_ACTOR_TIKTOK: str = "clockworks/tiktok-scraper"
     APIFY_ACTOR_TIKTOK_COMMENTS: str = "clockworks/tiktok-comments-scraper"

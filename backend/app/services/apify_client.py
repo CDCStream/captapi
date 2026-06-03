@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 import httpx
@@ -82,6 +83,31 @@ class ApifyClient:
     ) -> dict[str, Any] | None:
         items = await self.run_actor_sync(actor_id, run_input, max_items=1)
         return items[0] if items else None
+
+    async def run_with_fallback(
+        self,
+        candidates: list[tuple[str, dict[str, Any]]],
+        *,
+        max_items: int | None = None,
+        is_valid: Callable[[list[dict[str, Any]]], bool] | None = None,
+    ) -> tuple[list[dict[str, Any]], str | None]:
+        """Try each ``(actor_id, run_input)`` in order, returning the first run
+        whose items pass ``is_valid`` (default: non-empty) along with the actor
+        that produced them. Guards against a single third-party actor silently
+        returning empty/erroring. Returns ``([], None)`` if every candidate
+        fails.
+        """
+        check = is_valid or (lambda items: bool(items))
+        last: list[dict[str, Any]] = []
+        for actor_id, run_input in candidates:
+            try:
+                items = await self.run_actor_sync(actor_id, run_input, max_items=max_items)
+            except (ApifyError, httpx.HTTPError):
+                items = []
+            if check(items):
+                return items, actor_id
+            last = items or last
+        return last, None
 
 
 _client: ApifyClient | None = None

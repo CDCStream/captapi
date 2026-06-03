@@ -630,27 +630,60 @@ async def youtube_video_download(
         resource_url=norm_url,
         base_credits=CREDIT_DOWNLOAD,
     ) as ctx:
+        _DISCRETE_URLS = (
+            ("downloadedFileUrl", "combined"),
+            ("videoOnlyUrl", "video-only"),
+            ("audioOnlyUrl", "audio-only"),
+        )
+
+        def _has_download(items: list[dict[str, Any]]) -> bool:
+            if not items:
+                return False
+            v = items[0]
+            fmts = v.get("formats") or v.get("downloads") or []
+            return bool(
+                v.get("downloadUrl") or v.get("url") or v.get("mediaUrl") or fmts
+                or any(v.get(k) for k, _ in _DISCRETE_URLS)
+            )
+
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_YOUTUBE_DOWNLOAD,
-                {"urls": [norm_url], "format": "all", "ttl": "none"},
+            items, _ = await apify.run_with_fallback(
+                [
+                    (settings.APIFY_ACTOR_YOUTUBE_DOWNLOAD,
+                     {"urls": [norm_url], "format": "all", "ttl": "none"}),
+                    (settings.APIFY_ACTOR_YOUTUBE_DOWNLOAD_FALLBACK,
+                     {"videos": [{"url": norm_url}]}),
+                ],
                 max_items=1,
+                is_valid=_has_download,
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Video not available")
             v = items[0]
             formats_raw = v.get("formats") or v.get("downloads") or []
+            download_url = safe_str(
+                v.get("downloadUrl")
+                or v.get("url")
+                or v.get("mediaUrl")
+                or (formats_raw[0].get("url") if formats_raw else None)
+            )
+            # The fallback downloader returns discrete file URLs rather than a
+            # formats array; synthesize entries so the response shape is stable.
+            if not formats_raw:
+                synth = [
+                    {"url": safe_str(v.get(key)), "quality": label}
+                    for key, label in _DISCRETE_URLS
+                    if v.get(key)
+                ]
+                if synth:
+                    formats_raw = synth
+                    download_url = download_url or synth[0]["url"]
             return {
                 "url": norm_url,
                 "videoId": vid,
                 "title": safe_str(v.get("title")),
-                "downloadUrl": safe_str(
-                    v.get("downloadUrl")
-                    or v.get("url")
-                    or v.get("mediaUrl")
-                    or (formats_raw[0].get("url") if formats_raw else None)
-                ),
+                "downloadUrl": download_url,
                 "formats": formats_raw,
                 "expiresAt": safe_str(v.get("expiresAt")),
             }
