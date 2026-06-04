@@ -13,7 +13,11 @@ const STRUCTURED_DATA = {
       name: "Captapi",
       url: SITE_URL,
       logo: `${SITE_URL}/logo.png`,
-      sameAs: [] as string[],
+      sameAs: [
+        "https://github.com/CDCStream/captapi",
+        "https://www.npmjs.com/package/@captapi/mcp",
+        "https://www.npmjs.com/package/@captapi/cli",
+      ],
     },
     {
       "@type": "WebSite",
@@ -26,18 +30,46 @@ const STRUCTURED_DATA = {
     },
     {
       "@type": "SoftwareApplication",
+      "@id": `${SITE_URL}/#software`,
       name: "Captapi",
       applicationCategory: "DeveloperApplication",
+      applicationSubCategory: "API",
       operatingSystem: "Any",
       url: SITE_URL,
       description:
-        "Extract transcripts, AI summaries, comments, video details, and downloads from YouTube, TikTok, Instagram, and Facebook with a single REST API.",
+        "Extract transcripts, AI summaries, comments, video details, and downloads from YouTube, TikTok, Instagram, and Facebook with a single REST API. Also available as a Model Context Protocol (MCP) server and CLI for AI agents like Claude and Cursor.",
+      featureList: [
+        "YouTube, TikTok, Instagram & Facebook transcripts",
+        "AI video summaries",
+        "Comments, replies & profile/channel stats",
+        "Keyword, hashtag & user search",
+        "No-watermark video & media downloads",
+        "MCP server for Claude, Cursor, VS Code (62 tools)",
+        "Official CLI (@captapi/cli)",
+      ],
+      downloadUrl: "https://www.npmjs.com/package/@captapi/mcp",
+      softwareHelp: `${SITE_URL}/docs/integrations`,
+      sameAs: [
+        "https://www.npmjs.com/package/@captapi/mcp",
+        "https://www.npmjs.com/package/@captapi/cli",
+      ],
       offers: {
         "@type": "Offer",
         price: "0",
         priceCurrency: "USD",
         description: "Free tier with 100 credits; paid plans from $9/mo.",
       },
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+    {
+      "@type": "WebAPI",
+      "@id": `${SITE_URL}/#webapi`,
+      name: "Captapi REST API",
+      description:
+        "REST API for structured social-media data across YouTube, TikTok, Instagram, and Facebook. One Bearer key; 62 endpoints returning clean JSON. Connectable by AI agents via an MCP server (@captapi/mcp) and CLI (@captapi/cli).",
+      documentation: `${SITE_URL}/docs`,
+      termsOfService: `${SITE_URL}/legal/terms`,
+      provider: { "@id": `${SITE_URL}/#organization` },
     },
   ],
 };

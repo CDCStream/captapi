@@ -1,0 +1,39 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.CDCStream/captapi",
+  "description": "Structured data from YouTube, TikTok, Instagram & Facebook — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, and downloads. 62 tools, one API key.",
+  "version": "0.2.0",
+  "websiteUrl": "https://captapi.com",
+  "repository": {
+    "url": "https://github.com/CDCStream/captapi",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@captapi/mcp",
+      "version": "0.2.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "CAPTAPI_API_KEY",
+          "description": "Your capt_live_... API key. Create one at https://captapi.com/dashboard/api-keys (100 free credits).",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "CAPTAPI_BASE_URL",
+          "description": "Override the Captapi API base URL (default https://api.captapi.com).",
+          "isRequired": false
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://api.captapi.com/mcp"
+    }
+  ]
+}
