@@ -1,0 +1,47 @@
+{
+  "name": "@captapi/cli",
+  "version": "0.1.0",
+  "description": "Official Captapi command-line interface — call 62 social media data endpoints (YouTube, TikTok, Instagram, Facebook), check your credit balance, and wire Captapi into AI agents from your terminal.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "captapi": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "captapi",
+    "cli",
+    "youtube",
+    "tiktok",
+    "instagram",
+    "facebook",
+    "social-media",
+    "transcript",
+    "api",
+    "command-line"
+  ],
+  "homepage": "https://captapi.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CDCStream/captapi.git",
+    "directory": "packages/captapi-cli"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
