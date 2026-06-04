@@ -1,7 +1,7 @@
 // Thin HTTP client around the Captapi REST API + small TTY helpers.
 import { loadConfig } from "./config.js";
 
-export const VERSION = "0.1.0";
+export const VERSION = "0.1.1";
 
 const useColor = process.stdout.isTTY && !process.env.NO_COLOR;
 const wrap = (code: string) => (s: string) =>

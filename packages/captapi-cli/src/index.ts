@@ -16,15 +16,10 @@ import { login, logout, whoami } from "./commands/auth.js";
 import { balance } from "./commands/balance.js";
 import { agentAdd } from "./commands/agent.js";
 
-/** camelCase key commander assigns for a --flag-name option. */
-function optKey(name: string): string {
-  return name.replace(/_([a-z])/g, (_, ch: string) => ch.toUpperCase());
-}
-
 function runEndpoint(e: Endpoint, opts: Record<string, unknown>): void {
   const query: Record<string, string | number | undefined> = {};
   for (const p of e.params) {
-    const v = opts[optKey(p.name)];
+    const v = opts[p.name];
     if (v !== undefined) query[p.name] = v as string | number;
   }
   apiGet(e.path, query)
