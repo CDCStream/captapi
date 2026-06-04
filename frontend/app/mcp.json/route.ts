@@ -16,6 +16,21 @@ export async function GET() {
     homepage: SITE_URL,
     documentation: `${SITE_URL}/docs/integrations`,
     package: { registry: "npm", name: "@captapi/mcp" },
+    cli: {
+      package: { registry: "npm", name: "@captapi/cli" },
+      bin: "captapi",
+      description:
+        "Official command-line interface. Calls the same API from the terminal; every endpoint is a subcommand, params are flags, output is JSON.",
+      install: "npm install -g @captapi/cli",
+      examples: [
+        "npx @captapi/cli login",
+        "npx @captapi/cli balance",
+        "npx @captapi/cli list",
+        'npx @captapi/cli youtube-transcript --url "https://www.youtube.com/watch?v=dQw4w9WgXcQ"',
+        "npx @captapi/cli agent add cursor",
+      ],
+      auth: "Reads CAPTAPI_API_KEY env var or ~/.captapi/config.json (via `captapi login`).",
+    },
     transport: "stdio",
     command: "npx",
     args: ["-y", "@captapi/mcp"],

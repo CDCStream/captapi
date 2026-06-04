@@ -11,7 +11,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata = buildMetadata({
   title: "Integrations — Captapi MCP Server for AI Agents",
   description:
-    "Connect Captapi to Claude, Cursor, VS Code, and any MCP-compatible AI agent. Install the official @captapi/mcp server and give your agent all 62 social media data endpoints.",
+    "Connect Captapi to Claude, Cursor, VS Code, and any MCP-compatible AI agent. Install the official @captapi/mcp server or @captapi/cli and access all 62 social media data endpoints from your agent, terminal, or scripts.",
   path: "/docs/integrations",
 });
 
@@ -93,6 +93,32 @@ const mcpInstall = [
     label: "CLI",
     code: `npm install -g @captapi/mcp
 CAPTAPI_API_KEY=capt_live_xxxxxxxxxxxxxxxx captapi-mcp`,
+  },
+];
+
+const cliUsage = [
+  {
+    label: "Setup",
+    code: `npm install -g @captapi/cli      # or just use: npx @captapi/cli <command>
+
+captapi login                    # paste your capt_live_… key (saved to ~/.captapi/config.json)
+captapi whoami                   # confirm the active key
+captapi balance                  # remaining credits + recent requests`,
+  },
+  {
+    label: "Call endpoints",
+    code: `captapi list                     # every endpoint as a command
+captapi list youtube             # filter by platform
+
+captapi youtube-transcript --url "https://youtube.com/watch?v=dQw4w9WgXcQ"
+captapi tiktok-channel-details --url "https://tiktok.com/@username"
+captapi instagram-channel-posts --url "https://instagram.com/nasa/" --limit 12 | jq '.data'`,
+  },
+  {
+    label: "Wire an agent",
+    code: `captapi agent add cursor         # writes ~/.cursor/mcp.json
+captapi agent add claude         # writes the Claude Desktop config
+captapi agent add cursor --print # print the snippet instead of writing`,
   },
 ];
 
@@ -297,6 +323,31 @@ export default function IntegrationsPage() {
           </div>
         </div>
       ))}
+
+      <H2 id="cli">Command-line (CLI)</H2>
+      <p className="text-muted-foreground max-w-3xl">
+        Prefer the terminal, a shell script, or CI? The official{" "}
+        <a
+          href="https://www.npmjs.com/package/@captapi/cli"
+          className="text-primary hover:underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">@captapi/cli</code>
+        </a>{" "}
+        package exposes all {TOTAL} endpoints as commands. Authenticate once with{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">captapi login</code>{" "}
+        (or set{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">CAPTAPI_API_KEY</code>),
+        then call any endpoint — each one is a subcommand, parameters are flags, and
+        responses print as JSON to stdout so they pipe cleanly into{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">jq</code> and scripts.
+        It can even wire the MCP server into your agent with{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">captapi agent add</code>.
+      </p>
+      <div className="mt-4">
+        <CodeTabs samples={cliUsage} />
+      </div>
 
       <div className="mt-12 rounded-xl border bg-muted/30 p-6 text-center">
         <p className="font-semibold">Connect your agent in 60 seconds</p>

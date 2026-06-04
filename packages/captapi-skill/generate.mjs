@@ -80,6 +80,20 @@ Response shape:
 
 If you have the **MCP server** connected instead, call the tool named in the tables below (e.g. \`youtube_transcript\`) with the same parameters — no URL building needed.
 
+## Use from the command line (@captapi/cli)
+
+For shell tasks, scripts, or when no MCP client is available, the official CLI calls the same API. Every endpoint is a subcommand (the tool name with dashes), parameters are flags, and results print as JSON to stdout:
+
+\`\`\`bash
+npx @captapi/cli login                 # save the human-provided key to ~/.captapi/config.json
+npx @captapi/cli balance               # remaining credits
+npx @captapi/cli list                  # all ${total} commands
+npx @captapi/cli youtube-transcript --url "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+npx @captapi/cli tiktok-comment-replies --url "<video>" --comment_id "<id>" --limit 20
+\`\`\`
+
+The CLI reads the key from \`~/.captapi/config.json\` (via \`login\`) or the \`CAPTAPI_API_KEY\` env var. \`npx @captapi/cli agent add cursor\` writes the MCP config into Cursor/Claude for you. Same auth, credits, and error codes as the REST API.
+
 ## Choosing the right endpoint
 
 - **Single piece of content** (one video / reel / post): use \`*_transcript\`, \`*_summarize\`, \`*_video_details\` / \`*_details\`, or \`*_comments\` with the content \`url\`.

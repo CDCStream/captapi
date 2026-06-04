@@ -118,6 +118,20 @@ Machine-readable manifest: ${base}/.well-known/mcp.json (also at ${base}/mcp.jso
 Full machine-readable endpoint reference: ${base}/llms-full.txt
 Full integration guide: ${base}/docs/integrations
 
+## Connect via CLI (terminal & scripts)
+
+For shell tasks, CI, or when no MCP client is available, the official \`@captapi/cli\` package calls the same API from the terminal. Every endpoint is a subcommand (the tool name with dashes); parameters are flags; results print as JSON to stdout (pipe-friendly).
+
+\`\`\`bash
+npx @captapi/cli login                 # save the human-provided capt_live_... key to ~/.captapi/config.json
+npx @captapi/cli balance               # remaining credits + recent requests
+npx @captapi/cli list                  # all ${ALL_ENDPOINTS.length} endpoint commands
+npx @captapi/cli youtube-transcript --url "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+npx @captapi/cli agent add cursor      # write the MCP server config into Cursor (or: claude)
+\`\`\`
+
+Auth: reads the key from \`~/.captapi/config.json\` (via \`login\`) or the \`CAPTAPI_API_KEY\` env var. Override the host with \`CAPTAPI_BASE_URL\`. Same credits, caching, and error codes as the REST API. Run \`npx @captapi/cli <command> --help\` for a command's exact parameters.
+
 ## Connect via REST API (call it directly from code)
 
 If you are not using MCP, every endpoint is a single authenticated GET request — write code against it directly (no SDK required).
