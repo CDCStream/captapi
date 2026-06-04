@@ -635,6 +635,15 @@ async def youtube_video_download(
             ("videoOnlyUrl", "video-only"),
             ("audioOnlyUrl", "audio-only"),
         )
+        # Keys the primary downloader emits per format; fallback entries carry
+        # the same keys (null) so the formats[] element schema is path-stable.
+        _FALLBACK_FORMAT_KEYS = {
+            "itag": None, "mimeType": None, "bitrate": None,
+            "width": None, "height": None, "fps": None, "qualityLabel": None,
+            "audioQuality": None, "approxDurationMs": None,
+            "audioSampleRate": None, "audioChannels": None,
+            "lastModified": None, "projectionType": None, "qualityOrdinal": None,
+        }
 
         def _has_download(items: list[dict[str, Any]]) -> bool:
             if not items:
@@ -669,10 +678,12 @@ async def youtube_video_download(
                 or (formats_raw[0].get("url") if formats_raw else None)
             )
             # The fallback downloader returns discrete file URLs rather than a
-            # formats array; synthesize entries so the response shape is stable.
+            # formats array; synthesize entries carrying the same keys as the
+            # primary actor (null where unknown) so the formats[] element schema
+            # is identical on both paths.
             if not formats_raw:
                 synth = [
-                    {"url": safe_str(v.get(key)), "quality": label}
+                    {**_FALLBACK_FORMAT_KEYS, "url": safe_str(v.get(key)), "quality": label}
                     for key, label in _DISCRETE_URLS
                     if v.get(key)
                 ]
