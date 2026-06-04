@@ -1,16 +1,15 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SITE_URL } from "@/lib/api-catalog";
 import { USE_CASE_LIST } from "@/lib/use-cases";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: "Captapi Use Cases | Social Media Data API for Every Team",
   description:
     "See how teams use Captapi — AI startups, agencies, content creators, researchers and developers — to extract transcripts, summaries, comments and engagement from social video.",
-  alternates: { canonical: `${SITE_URL}/for` },
-};
+  path: "/for",
+});
 
 export default function UseCasesHub() {
   return (

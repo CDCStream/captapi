@@ -4,16 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TOOL_SLUGS, getTool } from "@/lib/tools";
+import { JsonLd } from "@/components/seo/json-ld";
+import { buildMetadata, breadcrumbLd, faqLd } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const t = getTool(slug);
   if (!t) return {};
-  return {
+  return buildMetadata({
     title: `${t.title} | Captapi`,
     description: t.description,
-    alternates: { canonical: `/tools/${slug}` },
-  };
+    path: `/tools/${slug}`,
+  });
 }
 
 export function generateStaticParams() {
@@ -25,8 +27,29 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
   const t = getTool(slug);
   if (!t) notFound();
 
+  const jsonLd = [
+    breadcrumbLd([
+      { name: "Home", path: "/" },
+      { name: "Free Tools", path: "/tools" },
+      { name: t.title, path: `/tools/${slug}` },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      name: t.title,
+      description: t.description,
+      step: [
+        { "@type": "HowToStep", position: 1, name: "Sign up", text: "Sign up — 100 credits free, no card required." },
+        { "@type": "HowToStep", position: 2, name: "Create an API key", text: "Create an API key from the dashboard." },
+        { "@type": "HowToStep", position: 3, name: "Make a request", text: "Make a single GET request — done." },
+      ],
+    },
+    ...(t.faq.length > 0 ? [faqLd(t.faq)] : []),
+  ];
+
   return (
     <div>
+      <JsonLd data={jsonLd} />
       <Badge variant="secondary" className="mb-3">{t.platform}</Badge>
       <h1 className="text-4xl font-bold mb-3">{t.title}</h1>
       <p className="text-muted-foreground text-lg max-w-2xl">{t.description}</p>

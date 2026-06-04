@@ -32,6 +32,8 @@ import {
 } from "@/lib/api-catalog";
 import { CodeTabs } from "@/components/docs/code-tabs";
 import { ApiPlayground } from "@/components/docs/api-playground";
+import { Tldr } from "@/components/marketing/tldr";
+import { CONTENT_UPDATED } from "@/lib/seo";
 
 const PLATFORM_ICONS: Record<string, LucideIcon> = {
   youtube: Youtube,
@@ -111,7 +113,24 @@ function jsonLd(ep: ApiEndpoint) {
     },
   };
 
-  return [faqPage, breadcrumb, webApi];
+  const techArticle = {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    headline: `${ep.name} — ${platformLabel(ep.platform)} API`,
+    description: longDescription(ep),
+    datePublished: CONTENT_UPDATED,
+    dateModified: CONTENT_UPDATED,
+    author: { "@type": "Organization", name: "Captapi", url: SITE_URL },
+    publisher: {
+      "@type": "Organization",
+      name: "Captapi",
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    proficiencyLevel: "Beginner",
+  };
+
+  return [faqPage, breadcrumb, webApi, techArticle];
 }
 
 export default async function ApiDetailPage({
@@ -184,6 +203,14 @@ export default async function ApiDetailPage({
 
         {/* Answer-first overview (AEO) */}
         <section className="mt-14">
+          <Tldr>
+            The <strong>{ep.name}</strong> ({platformLabel(ep.platform)}) returns{" "}
+            {tagline(ep).charAt(0).toLowerCase() + tagline(ep).slice(1)} It&apos;s a
+            single authenticated <code>{ep.method ?? "GET"}</code> request to{" "}
+            <code>{ep.path}</code> that responds with clean JSON, costs{" "}
+            {creditLabel(ep)}, and is cached for 24 hours (repeat calls are free).
+            Start with 100 free credits — no credit card.
+          </Tldr>
           <h2 className="text-2xl font-semibold">
             What is the {ep.name}?
           </h2>

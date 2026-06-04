@@ -4,6 +4,7 @@ import { Bricolage_Grotesque, Caveat } from "next/font/google";
 import { Toaster } from "sonner";
 import { PageViewTracker } from "@/components/analytics/page-view-tracker";
 import { ThirdPartyScripts } from "@/components/analytics/third-party-scripts";
+import { SITE_URL } from "@/lib/api-catalog";
 import "./globals.css";
 
 const handwritten = Caveat({
@@ -19,7 +20,7 @@ const display = Bricolage_Grotesque({
   display: "swap",
 });
 
-const SITE = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const SITE = SITE_URL;
 const AHREFS_KEY = process.env.NEXT_PUBLIC_AHREFS_KEY || "";
 
 export const metadata: Metadata = {

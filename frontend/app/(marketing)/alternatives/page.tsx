@@ -1,16 +1,15 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SITE_URL } from "@/lib/api-catalog";
 import { COMPETITOR_LIST } from "@/lib/competitors";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: "Captapi Alternatives & Comparisons | Social Media Data API",
   description:
     "See how Captapi compares to other social media and video data APIs. One REST API for transcripts, AI summaries, comments & engagement across YouTube, TikTok, Instagram & Facebook.",
-  alternates: { canonical: `${SITE_URL}/alternatives` },
-};
+  path: "/alternatives",
+});
 
 export default function AlternativesHub() {
   return (

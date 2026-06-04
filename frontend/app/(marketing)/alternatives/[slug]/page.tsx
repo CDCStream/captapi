@@ -14,6 +14,7 @@ import {
   type Cap,
   type Competitor,
 } from "@/lib/competitors";
+import { Tldr } from "@/components/marketing/tldr";
 
 export function generateStaticParams() {
   return COMPETITOR_SLUGS.map((slug) => ({ slug }));
@@ -163,6 +164,13 @@ export default async function AlternativePage({
 
         {/* Answer-first */}
         <section className="mt-14">
+          <Tldr>
+            <strong>Captapi is a strong {c.name} alternative</strong> if you need
+            social-video data: transcripts, AI summaries, comments and engagement
+            across YouTube, TikTok, Instagram and Facebook behind one REST API.{" "}
+            {c.edge[0]}. Start with 100 free credits — no credit card. (Comparison
+            as of {COMPARE_AS_OF}.)
+          </Tldr>
           <h2 className="text-2xl font-semibold">
             Is Captapi a good {c.name} alternative?
           </h2>

@@ -102,6 +102,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
               <h3 className="font-semibold mb-3">Resources</h3>
               <ul className="space-y-2 text-muted-foreground">
                 <li><Link href="/docs" className="hover:text-foreground">API Reference</Link></li>
+                <li><Link href="/how-to" className="hover:text-foreground">How-to Guides</Link></li>
                 <li><Link href="/blog" className="hover:text-foreground">Blog</Link></li>
                 <li><Link href="/alternatives" className="hover:text-foreground">Alternatives</Link></li>
                 <li><Link href="/for" className="hover:text-foreground">Use Cases</Link></li>

@@ -283,6 +283,40 @@ export function platformLabel(p: PlatformId): string {
   return PLATFORM_LABEL[p];
 }
 
+/**
+ * Natural "How to …" predicate for an endpoint, used by /how-to/[slug] pSEO
+ * pages (e.g. "get a YouTube transcript", "download a TikTok video").
+ */
+export function howToAction(ep: ApiEndpoint): string {
+  const p = PLATFORM_LABEL[ep.platform];
+  const sn = ep.shortName.toLowerCase();
+  switch (ep.category) {
+    case "transcript":
+      return `get a ${p} ${sn}`;
+    case "summarize":
+      return `get an AI summary of a ${p} ${sn
+        .replace("summarizer", "video")
+        .replace("shorts video", "short")}`;
+    case "details":
+      return `get ${p} ${sn}`;
+    case "comments":
+      return `get ${p} ${sn}`;
+    case "channel":
+      return `get ${p} ${sn}`;
+    case "search":
+      return `run a ${p} ${sn}`;
+    case "list":
+      return `get ${p} ${sn}`;
+    case "download":
+      return `download a ${p} ${sn.replace("video download", "video")}`;
+  }
+}
+
+/** Page title for the how-to guide, e.g. "How to get a YouTube transcript". */
+export function howToTitle(ep: ApiEndpoint): string {
+  return `How to ${howToAction(ep)}`;
+}
+
 export function tagline(ep: ApiEndpoint): string {
   const platform = PLATFORM_LABEL[ep.platform];
   switch (ep.category) {

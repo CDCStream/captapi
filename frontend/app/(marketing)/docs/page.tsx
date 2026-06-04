@@ -1,19 +1,18 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { CodeTabs } from "@/components/docs/code-tabs";
 import {
   PLATFORM_GROUPS,
   API_URL,
-  SITE_URL,
   type ApiEndpoint,
 } from "@/lib/api-catalog";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: "Documentation — Captapi API Reference",
   description:
     "Captapi documentation: authentication, requests, response format, credits, errors, and the full REST API reference for YouTube, TikTok, Instagram, and Facebook.",
-  alternates: { canonical: `${SITE_URL}/docs` },
-};
+  path: "/docs",
+});
 
 const firstRequest = [
   {

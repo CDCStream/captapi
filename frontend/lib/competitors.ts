@@ -164,6 +164,40 @@ export const COMPETITORS: Record<string, Competitor> = {
     ],
   },
 
+  apify: {
+    slug: "apify",
+    name: "Apify",
+    domain: "apify.com",
+    targetKeyword: "apify alternative",
+    focus: "General-purpose scraping platform & actor marketplace",
+    platforms: "Any (via individual actors)",
+    intro:
+      "Apify is a powerful general-purpose scraping platform where you assemble and run individual \"actors\" per site. Captapi is the opposite trade-off: a single, ready-made REST API purpose-built for social video — transcripts, AI summaries, comments and engagement across YouTube, TikTok, Instagram and Facebook — with no actor selection, scaling or output-shape wrangling.",
+    transcripts: "varies",
+    summaries: "varies",
+    comments: "varies",
+    freeTools: true,
+    freeTier: "$5 free credit",
+    pricing: "Platform usage + per-actor",
+    edge: [
+      "One stable REST endpoint per task — no choosing, chaining or maintaining actors",
+      "Consistent, normalized JSON shape across every endpoint (we handle actor drift for you)",
+      "Built-in transcripts and AI summaries, not just raw scrapes",
+      "Predictable per-call credits with 24h caching — repeat calls are free",
+      "100 free credits and free public tools to start, no platform to learn",
+    ],
+    faqs: [
+      {
+        q: "Is Captapi a good Apify alternative?",
+        a: "If your goal is social-video data specifically, yes. Apify gives you maximum flexibility but you pick, configure and maintain actors and normalize their output yourself. Captapi wraps that work into one REST API with a stable response shape, built-in transcripts/summaries, and resilient multi-actor fallbacks behind the scenes.",
+      },
+      {
+        q: "Can I use Captapi on top of Apify?",
+        a: "Captapi already runs on a curated set of battle-tested actors with automatic fallbacks, so you don't have to. You call one endpoint and get clean JSON — no Apify account, actor selection or scaling setup required.",
+      },
+    ],
+  },
+
   ensembledata: {
     slug: "ensembledata",
     name: "EnsembleData",

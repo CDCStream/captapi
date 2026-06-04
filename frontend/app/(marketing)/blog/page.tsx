@@ -1,25 +1,18 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Clock, User } from "lucide-react";
 import { getServiceClient } from "@/lib/supabase/admin";
 import { formatDate, parseBlogPost, type BlogPostRow } from "@/lib/blog";
-import { SITE_URL } from "@/lib/api-catalog";
+import { buildMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: "Blog — Guides & insights on social media APIs",
   description:
     "Tutorials, guides, and insights on extracting transcripts, summaries, comments, and engagement data from YouTube, TikTok, Instagram, and Facebook.",
-  alternates: { canonical: "/blog" },
-  openGraph: {
-    title: "Captapi Blog",
-    description: "Guides & insights on working with social media data APIs.",
-    url: `${SITE_URL}/blog`,
-    type: "website",
-  },
-};
+  path: "/blog",
+});
 
 async function getPosts() {
   const sb = getServiceClient();

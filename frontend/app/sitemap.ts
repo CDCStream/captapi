@@ -3,6 +3,7 @@ import { ALL_ENDPOINTS, SITE_URL } from "@/lib/api-catalog";
 import { TOOL_SLUGS } from "@/lib/tools";
 import { COMPETITOR_SLUGS } from "@/lib/competitors";
 import { USE_CASE_SLUGS } from "@/lib/use-cases";
+import { CONTENT_UPDATED_DATE } from "@/lib/seo";
 import { getServiceClient } from "@/lib/supabase/admin";
 
 export const revalidate = 3600;
@@ -24,14 +25,16 @@ async function blogEntries(base: string): Promise<MetadataRoute.Sitemap> {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = SITE_URL;
-  const now = new Date();
+  const now = CONTENT_UPDATED_DATE;
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${base}/`, lastModified: now, changeFrequency: "weekly", priority: 1 },
     { url: `${base}/apis`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/pricing`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
     { url: `${base}/docs`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${base}/docs/integrations`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/tools`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/how-to`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/alternatives`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/for`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/blog`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
@@ -44,6 +47,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: now,
     changeFrequency: "weekly",
     priority: 0.7,
+  }));
+
+  const howToPages: MetadataRoute.Sitemap = ALL_ENDPOINTS.map((ep) => ({
+    url: `${base}/how-to/${ep.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.6,
   }));
 
   const toolPages: MetadataRoute.Sitemap = TOOL_SLUGS.map((slug) => ({
@@ -69,5 +79,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const blogPages = await blogEntries(base);
 
-  return [...staticPages, ...apiPages, ...toolPages, ...alternativePages, ...useCasePages, ...blogPages];
+  return [...staticPages, ...apiPages, ...howToPages, ...toolPages, ...alternativePages, ...useCasePages, ...blogPages];
 }

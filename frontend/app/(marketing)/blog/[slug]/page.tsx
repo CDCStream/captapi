@@ -5,6 +5,7 @@ import { ArrowLeft, Clock, User } from "lucide-react";
 import { getServiceClient } from "@/lib/supabase/admin";
 import { formatDate, parseBlogPost, type BlogPost, type BlogPostRow } from "@/lib/blog";
 import { SITE_URL } from "@/lib/api-catalog";
+import { Tldr } from "@/components/marketing/tldr";
 
 export const revalidate = 60;
 
@@ -84,7 +85,7 @@ export default async function BlogPostPage({
         image: post.image || `${SITE_URL}/opengraph-image`,
         datePublished: post.publishedAt,
         dateModified: post.updatedAt,
-        author: { "@type": "Organization", name: post.author },
+        author: { "@type": "Person", name: post.author, url: SITE_URL },
         publisher: {
           "@type": "Organization",
           name: "Captapi",
@@ -146,7 +147,12 @@ export default async function BlogPostPage({
             <Clock className="size-4" />
             {post.readingTime} min read
           </span>
+          {post.updatedAt && post.updatedAt.slice(0, 10) !== post.publishedAt.slice(0, 10) && (
+            <span className="text-xs">Updated {formatDate(post.updatedAt)}</span>
+          )}
         </div>
+
+        {post.description && <Tldr>{post.description}</Tldr>}
 
         {post.image && (
           <div className="mb-10 overflow-hidden rounded-xl border">

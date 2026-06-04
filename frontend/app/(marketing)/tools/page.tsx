@@ -2,13 +2,14 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { TOOL_LIST } from "@/lib/tools";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata = {
+export const metadata = buildMetadata({
   title: "Free Tools — transcripts & summaries for social video",
   description:
     "Free YouTube, TikTok, Instagram, and Facebook transcript & summarizer tools. Powered by the Captapi.",
-  alternates: { canonical: "/tools" },
-};
+  path: "/tools",
+});
 
 export default function ToolsHub() {
   return (

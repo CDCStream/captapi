@@ -1,20 +1,19 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { CodeTabs } from "@/components/docs/code-tabs";
 import {
   PLATFORM_GROUPS,
   API_URL,
-  SITE_URL,
   params as endpointParams,
   mcpToolName,
 } from "@/lib/api-catalog";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = buildMetadata({
   title: "Integrations — Captapi MCP Server for AI Agents",
   description:
     "Connect Captapi to Claude, Cursor, VS Code, and any MCP-compatible AI agent. Install the official @captapi/mcp server and give your agent all 62 social media data endpoints.",
-  alternates: { canonical: `${SITE_URL}/docs/integrations` },
-};
+  path: "/docs/integrations",
+});
 
 const TOTAL = PLATFORM_GROUPS.reduce((n, g) => n + g.endpoints.length, 0);
 
