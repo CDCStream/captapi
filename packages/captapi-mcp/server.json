@@ -1,8 +1,8 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
   "name": "io.github.CDCStream/captapi",
-  "description": "Structured data from YouTube, TikTok, Instagram & Facebook — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, and downloads. 62 tools, one API key.",
-  "version": "0.2.0",
+  "description": "Social media data from YouTube, TikTok, Instagram & Facebook. 62 tools, one API key.",
+  "version": "0.2.1",
   "websiteUrl": "https://captapi.com",
   "repository": {
     "url": "https://github.com/CDCStream/captapi",
@@ -13,8 +13,10 @@
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@captapi/mcp",
-      "version": "0.2.0",
-      "transport": { "type": "stdio" },
+      "version": "0.2.1",
+      "transport": {
+        "type": "stdio"
+      },
       "environmentVariables": [
         {
           "name": "CAPTAPI_API_KEY",
@@ -35,5 +37,6 @@
       "type": "streamable-http",
       "url": "https://api.captapi.com/mcp"
     }
-  ]
+  ],
+  "": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json"
 }
