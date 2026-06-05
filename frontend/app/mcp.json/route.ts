@@ -48,6 +48,14 @@ export async function GET() {
       credential: "Create a 'Captapi API Key' connection with your capt_live_... key; verified against /v1/account/limits.",
       auth: "Authorization: Bearer <CAPTAPI_API_KEY> (set on the connection).",
     },
+    apify: {
+      type: "apify-actor",
+      description:
+        "Captapi Actor on Apify (bring-your-own-key wrapper around the REST API, no scraping). Pick an operation, get one dataset item with the same JSON.",
+      install: "Run the Captapi Actor on Apify, or push the source in packages/captapi-apify with `apify push`.",
+      credential: "Set the apiKey input to your capt_live_... key (stored encrypted). Credits are billed to your own Captapi account.",
+      auth: "Authorization: Bearer <CAPTAPI_API_KEY> (sent by the Actor).",
+    },
     transport: "stdio",
     command: "npx",
     args: ["-y", "@captapi/mcp"],

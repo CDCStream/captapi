@@ -91,6 +91,7 @@ export default function AgentIntegrationsPage() {
   const cliInstall = `npm install -g @captapi/mcp\nCAPTAPI_API_KEY=${key} captapi-mcp`;
   const n8nInstall = `# In n8n: Settings -> Community Nodes -> Install\nn8n-nodes-captapi\n\n# Self-hosted (npm), then restart n8n:\nnpm install n8n-nodes-captapi`;
   const makeInstall = `# In Make.com: add the Captapi custom app, then\n# create a "Captapi API Key" connection:\nAPI Key = ${key}\n\n# Drop any module (grouped by platform) into a scenario.`;
+  const apifyInstall = `// Run the Captapi Actor on Apify with this input:\n{\n  "apiKey": "${key}",\n  "operation": "youtube_transcript",\n  "url": "https://youtube.com/watch?v=dQw4w9WgXcQ"\n}`;
 
   const cursorDeeplink = useMemo(() => {
     const b64 =
@@ -200,6 +201,7 @@ export default function AgentIntegrationsPage() {
               <TabsTrigger value="cli">CLI</TabsTrigger>
               <TabsTrigger value="n8n">n8n</TabsTrigger>
               <TabsTrigger value="make">Make.com</TabsTrigger>
+              <TabsTrigger value="apify">Apify</TabsTrigger>
             </TabsList>
 
             <TabsContent value="cursor" className="space-y-3">
@@ -264,6 +266,17 @@ export default function AgentIntegrationsPage() {
                 returns the same JSON as the REST API.
               </p>
               <CodeBlock code={makeInstall} label="Make.com app" />
+            </TabsContent>
+
+            <TabsContent value="apify" className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                On <strong>Apify</strong>: run the Captapi Actor (a
+                bring-your-own-key wrapper, no scraping). Set your key as the{" "}
+                <code className="font-mono">apiKey</code> input, pick an
+                operation, and get one dataset item with the same JSON as the
+                REST API.
+              </p>
+              <CodeBlock code={apifyInstall} label="Apify Actor input" />
             </TabsContent>
           </Tabs>
         </div>

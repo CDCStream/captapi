@@ -67,8 +67,9 @@ def create_app() -> FastAPI:
             "Extract transcripts, summaries, comments and stats from social "
             "media videos (YouTube, TikTok, Instagram, Facebook). Connect by AI "
             "agents and no-code tools via the MCP server (@captapi/mcp), the CLI "
-            "(@captapi/cli), the n8n community node (n8n-nodes-captapi), or the "
-            "Make.com custom app. Full guide: https://captapi.com/docs/integrations"
+            "(@captapi/cli), the n8n community node (n8n-nodes-captapi), the "
+            "Make.com custom app, or the Apify Actor (BYO key). "
+            "Full guide: https://captapi.com/docs/integrations"
         ),
         openapi_url="/v1/openapi.json",
         docs_url="/v1/docs",

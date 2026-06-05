@@ -38,7 +38,7 @@ const STRUCTURED_DATA = {
       operatingSystem: "Any",
       url: SITE_URL,
       description:
-        "Extract transcripts, AI summaries, comments, video details, and downloads from YouTube, TikTok, Instagram, and Facebook with a single REST API. Also available as a Model Context Protocol (MCP) server, a CLI, an n8n community node, and a Make.com app for AI agents like Claude and Cursor and for no-code workflows.",
+        "Extract transcripts, AI summaries, comments, video details, and downloads from YouTube, TikTok, Instagram, and Facebook with a single REST API. Also available as a Model Context Protocol (MCP) server, a CLI, an n8n community node, a Make.com app, and an Apify Actor for AI agents like Claude and Cursor and for no-code workflows.",
       featureList: [
         "YouTube, TikTok, Instagram & Facebook transcripts",
         "AI video summaries",
@@ -49,6 +49,7 @@ const STRUCTURED_DATA = {
         "Official CLI (@captapi/cli)",
         "n8n community node (n8n-nodes-captapi)",
         "Make.com custom app (62 modules)",
+        "Apify Actor (bring-your-own-key)",
       ],
       downloadUrl: "https://www.npmjs.com/package/@captapi/mcp",
       softwareHelp: `${SITE_URL}/docs/integrations`,
@@ -70,7 +71,7 @@ const STRUCTURED_DATA = {
       "@id": `${SITE_URL}/#webapi`,
       name: "Captapi REST API",
       description:
-        "REST API for structured social-media data across YouTube, TikTok, Instagram, and Facebook. One Bearer key; 62 endpoints returning clean JSON. Connectable by AI agents via an MCP server (@captapi/mcp), a CLI (@captapi/cli), an n8n community node (n8n-nodes-captapi), and a Make.com custom app.",
+        "REST API for structured social-media data across YouTube, TikTok, Instagram, and Facebook. One Bearer key; 62 endpoints returning clean JSON. Connectable by AI agents via an MCP server (@captapi/mcp), a CLI (@captapi/cli), an n8n community node (n8n-nodes-captapi), a Make.com custom app, and an Apify Actor.",
       documentation: `${SITE_URL}/docs`,
       termsOfService: `${SITE_URL}/legal/terms`,
       provider: { "@id": `${SITE_URL}/#organization` },

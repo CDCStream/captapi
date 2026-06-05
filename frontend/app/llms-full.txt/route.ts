@@ -94,6 +94,7 @@ Local (npx / stdio):
 - CLI: \`npx @captapi/cli <command>\` — every endpoint as a terminal subcommand (flags = params, JSON to stdout). https://www.npmjs.com/package/@captapi/cli
 - n8n: install the \`n8n-nodes-captapi\` community node (Settings -> Community Nodes), add a "Captapi API" credential, then use the Captapi node (Platform -> Operation). https://www.npmjs.com/package/n8n-nodes-captapi
 - Make.com: add the Captapi custom app, create a "Captapi API Key" connection, then use any module (grouped by platform) in a scenario — returns the same JSON as the REST API.
+- Apify: the Captapi Actor (BYO key) wraps the REST API — set your key, pick an operation, get one dataset item with the same JSON. No scraping.
 - Full integration guide: ${base}/docs/integrations
 
 ## Full Endpoint Reference

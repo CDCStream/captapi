@@ -11,7 +11,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata = buildMetadata({
   title: "Integrations — Captapi MCP Server for AI Agents",
   description:
-    "Connect Captapi to Claude, Cursor, VS Code, and any MCP-compatible AI agent. Install the official @captapi/mcp server, @captapi/cli, the n8n-nodes-captapi community node, or the Make.com app and access all 62 social media data endpoints from your agent, terminal, scripts, n8n, or Make.com scenarios.",
+    "Connect Captapi to Claude, Cursor, VS Code, and any MCP-compatible AI agent. Install the official @captapi/mcp server, @captapi/cli, the n8n-nodes-captapi community node, the Make.com app, or the Apify Actor and access all 62 social media data endpoints from your agent, terminal, scripts, n8n, Make.com, or Apify.",
   path: "/docs/integrations",
 });
 
@@ -166,6 +166,27 @@ const makeUsage = [
   },
 ];
 
+const apifyUsage = [
+  {
+    label: "Input",
+    code: `{
+  "apiKey": "capt_live_xxxxxxxxxxxxxxxx",
+  "operation": "youtube_transcript",
+  "url": "https://youtube.com/watch?v=dQw4w9WgXcQ"
+}`,
+  },
+  {
+    label: "Output (dataset)",
+    code: `{
+  "operation": "youtube_transcript",
+  "ok": true,
+  "cached": false,
+  "creditsUsed": 2,
+  "data": { /* same payload as the REST API */ }
+}`,
+  },
+];
+
 function H2({ id, children }: { id: string; children: React.ReactNode }) {
   return (
     <h2
@@ -228,9 +249,13 @@ export default function IntegrationsPage() {
         <a href="#n8n" className="text-primary hover:underline">
           n8n community node
         </a>
-        , and a{" "}
+        , a{" "}
         <a href="#make" className="text-primary hover:underline">
           Make.com app
+        </a>
+        , and an{" "}
+        <a href="#apify" className="text-primary hover:underline">
+          Apify Actor
         </a>{" "}
         — or call the REST API directly.
       </p>
@@ -458,6 +483,28 @@ export default function IntegrationsPage() {
       </p>
       <div className="mt-4">
         <CodeTabs samples={makeUsage} />
+      </div>
+
+      <H2 id="apify">Apify Actor (bring your own key)</H2>
+      <p className="text-muted-foreground max-w-3xl">
+        Running on{" "}
+        <a
+          href="https://apify.com"
+          className="text-primary hover:underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Apify
+        </a>
+        ? The Captapi Actor is a thin bring-your-own-key wrapper around the REST
+        API — it does <strong>not</strong> scrape. Set your{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">capt_live_…</code>{" "}
+        key, pick an operation, and the Actor returns one dataset item with the
+        same structured JSON. Credits are billed to your own Captapi account, so
+        it stays free to run.
+      </p>
+      <div className="mt-4">
+        <CodeTabs samples={apifyUsage} />
       </div>
 
       <div className="mt-12 rounded-xl border bg-muted/30 p-6 text-center">

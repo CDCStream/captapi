@@ -102,6 +102,10 @@ For no-code/low-code automations, the official \`n8n-nodes-captapi\` community n
 
 For Make.com (Integromat), the Captapi custom app exposes all ${total} endpoints as action modules grouped by platform. Create a **Captapi API Key** connection with the human-provided \`capt_live_...\` key (verified against \`/v1/account/limits\`), then drop the module you need into a scenario, fill in the \`url\` (or search query) and optional \`limit\`, and it returns the same structured JSON \`data\` as the REST API for downstream modules.
 
+## Use on Apify (BYO-key Actor)
+
+On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API (no scraping). Set the \`apiKey\` input to the human-provided \`capt_live_...\` key, choose an \`operation\` (any of the ${total} endpoints), fill the fields it needs (\`url\` / search query / \`limit\` / ...), and the Actor returns one dataset item with the same structured JSON \`data\` as the REST API. Credits are billed to the user's own Captapi account.
+
 ## Choosing the right endpoint
 
 - **Single piece of content** (one video / reel / post): use \`*_transcript\`, \`*_summarize\`, \`*_video_details\` / \`*_details\`, or \`*_comments\` with the content \`url\`.

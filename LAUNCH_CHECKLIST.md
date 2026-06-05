@@ -64,6 +64,7 @@ A pragmatic launch playbook based on what works for API-as-a-Service products.
 - [ ] Zapier integration — submit for review (takes 2-4 weeks)
 - [x] Make.com app — local app built (packages/captapi-make), deploy via Make Apps Editor + submit for review
 - [x] n8n community node — published (n8n-nodes-captapi)
+- [x] Apify Actor — BYO-key wrapper built (packages/captapi-apify), `apify push` + publish as free Actor
 - [ ] Publish Python SDK on PyPI
 - [ ] Publish Node SDK on npm
 - [ ] Free Chrome extension for transcript extraction (funnel to signup)

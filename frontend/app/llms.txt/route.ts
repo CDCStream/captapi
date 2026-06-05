@@ -140,6 +140,10 @@ For no-code/low-code automations, the official \`n8n-nodes-captapi\` community n
 
 A Make custom app exposes all ${ALL_ENDPOINTS.length} endpoints as action modules grouped by platform (YouTube/TikTok/Instagram/Facebook). Add a **Captapi API Key** connection with the human-provided \`capt_live_...\` key, then drop the module you need into a scenario, fill in the URL (or search query) and optional limit, and it returns the same structured JSON \`data\` as the REST API for downstream modules. Auth is \`Authorization: Bearer\` against ${API_URL}; failures and out-of-credit errors surface the API error message.
 
+## Connect via Apify (BYO-key Actor)
+
+The Captapi Actor on Apify is a bring-your-own-key wrapper around the REST API (it does not scrape). Provide your \`capt_live_...\` key, pick an **Operation** (any of the ${ALL_ENDPOINTS.length} endpoints), fill the fields it needs (url / search query / limit / ...), and the Actor returns one dataset item with the same structured JSON \`data\` as the REST API. Credits are billed to your own Captapi account; cached results are free and failures are never charged.
+
 ## Connect via REST API (call it directly from code)
 
 If you are not using MCP, every endpoint is a single authenticated GET request — write code against it directly (no SDK required).

@@ -52,6 +52,7 @@ export const INTEGRATIONS_NAV: NavSection[] = [
       { id: "cli", label: "Command-line (CLI)" },
       { id: "n8n", label: "Workflow automation (n8n)" },
       { id: "make", label: "No-code scenarios (Make.com)" },
+      { id: "apify", label: "Apify Actor" },
     ],
   },
 ];
