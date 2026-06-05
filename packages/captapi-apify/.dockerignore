@@ -1,0 +1,7 @@
+.git
+node_modules
+README.md
+generate.mjs
+storage
+apify_storage
+.gitignore

@@ -1,0 +1,18 @@
+{
+  "name": "captapi-apify-actor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Apify Actor (BYO key) that calls the Captapi REST API for social media data from YouTube, TikTok, Instagram & Facebook.",
+  "type": "module",
+  "main": "src/main.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/main.js",
+    "generate": "node generate.mjs"
+  },
+  "dependencies": {
+    "apify": "^3.2.6"
+  }
+}

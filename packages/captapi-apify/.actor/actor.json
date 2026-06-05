@@ -1,0 +1,11 @@
+{
+  "actorSpecification": 1,
+  "name": "captapi",
+  "title": "Captapi - Social Media Data (YouTube, TikTok, Instagram, Facebook)",
+  "description": "Bring your own Captapi API key. Calls the Captapi REST API (no scraping) for transcripts, AI summaries, comments, stats, search and downloads across 62 operations.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "dockerfile": "./Dockerfile",
+  "input": "./input_schema.json",
+  "readme": "./ACTOR.md"
+}

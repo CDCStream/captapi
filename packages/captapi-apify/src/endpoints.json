@@ -1,0 +1,1258 @@
+[
+  {
+    "tool": "youtube_transcript",
+    "platform": "youtube",
+    "name": "YouTube Transcript",
+    "path": "/v1/youtube/transcript",
+    "credits": 2,
+    "summary": "Extract the full timestamped transcript of a YouTube video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_summarize",
+    "platform": "youtube",
+    "name": "YouTube Summarizer",
+    "path": "/v1/youtube/summarize",
+    "credits": 4,
+    "summary": "AI summary (key points, topics, sentiment) of a YouTube video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_video_details",
+    "platform": "youtube",
+    "name": "YouTube Video Details",
+    "path": "/v1/youtube/video-details",
+    "credits": 1,
+    "summary": "Metadata + engagement stats for a YouTube video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_comments",
+    "platform": "youtube",
+    "name": "YouTube Comments",
+    "path": "/v1/youtube/comments",
+    "credits": 20,
+    "summary": "Comments on a YouTube video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_channel_details",
+    "platform": "youtube",
+    "name": "YouTube Channel Details",
+    "path": "/v1/youtube/channel-details",
+    "credits": 1,
+    "summary": "Channel info & subscriber/stats for a YouTube channel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC..."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_search",
+    "platform": "youtube",
+    "name": "YouTube Search",
+    "path": "/v1/youtube/search",
+    "credits": 20,
+    "summary": "Search YouTube videos by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_channel_videos",
+    "platform": "youtube",
+    "name": "YouTube Channel Videos",
+    "path": "/v1/youtube/channel-videos",
+    "credits": 20,
+    "summary": "List a channel's uploaded videos.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC..."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_playlist_videos",
+    "platform": "youtube",
+    "name": "YouTube Playlist Videos",
+    "path": "/v1/youtube/playlist-videos",
+    "credits": 50,
+    "summary": "List videos in a YouTube playlist.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_video_download",
+    "platform": "youtube",
+    "name": "YouTube Video Download",
+    "path": "/v1/youtube/video-download",
+    "credits": 3,
+    "summary": "Direct download URLs for a YouTube video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_shorts_transcript",
+    "platform": "youtube",
+    "name": "YouTube Shorts Transcript",
+    "path": "/v1/youtube/shorts/transcript",
+    "credits": 2,
+    "summary": "Transcript of a YouTube Short.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_shorts_summarize",
+    "platform": "youtube",
+    "name": "YouTube Shorts Summarizer",
+    "path": "/v1/youtube/shorts/summarize",
+    "credits": 4,
+    "summary": "AI summary of a YouTube Short.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_shorts_details",
+    "platform": "youtube",
+    "name": "YouTube Shorts Stats",
+    "path": "/v1/youtube/shorts/video-details",
+    "credits": 1,
+    "summary": "Metadata + stats for a YouTube Short.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_shorts_comments",
+    "platform": "youtube",
+    "name": "YouTube Shorts Comments",
+    "path": "/v1/youtube/shorts/comments",
+    "credits": 20,
+    "summary": "Comments on a YouTube Short.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_channel_shorts",
+    "platform": "youtube",
+    "name": "YouTube Channel Shorts",
+    "path": "/v1/youtube/channel-shorts",
+    "credits": 20,
+    "summary": "List a channel's Shorts.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC..."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_channel_streams",
+    "platform": "youtube",
+    "name": "YouTube Channel Streams",
+    "path": "/v1/youtube/channel-streams",
+    "credits": 20,
+    "summary": "List a channel's live/past streams.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC..."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_hashtag_search",
+    "platform": "youtube",
+    "name": "YouTube Hashtag Search",
+    "path": "/v1/youtube/hashtag-search",
+    "credits": 20,
+    "summary": "Search YouTube videos by hashtag.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Hashtag with or without the # (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_comment_replies",
+    "platform": "youtube",
+    "name": "YouTube Comment Replies",
+    "path": "/v1/youtube/comment-replies",
+    "credits": 20,
+    "summary": "Replies to a specific YouTube comment.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+      },
+      {
+        "name": "comment_id",
+        "type": "string",
+        "required": true,
+        "description": "ID of the parent comment to fetch replies for (from the comments endpoint)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_channel_playlists",
+    "platform": "youtube",
+    "name": "YouTube Channel Playlists",
+    "path": "/v1/youtube/channel-playlists",
+    "credits": 20,
+    "summary": "List a channel's playlists.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC..."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_community_posts",
+    "platform": "youtube",
+    "name": "YouTube Community Posts",
+    "path": "/v1/youtube/community-posts",
+    "credits": 10,
+    "summary": "List a channel's community (posts) tab.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC..."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_transcript",
+    "platform": "tiktok",
+    "name": "TikTok Transcript",
+    "path": "/v1/tiktok/transcript",
+    "credits": 2,
+    "summary": "Transcript of a TikTok video (via captions).",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_summarize",
+    "platform": "tiktok",
+    "name": "TikTok Summarizer",
+    "path": "/v1/tiktok/summarize",
+    "credits": 4,
+    "summary": "AI summary of a TikTok video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_video_details",
+    "platform": "tiktok",
+    "name": "TikTok Video Details",
+    "path": "/v1/tiktok/video-details",
+    "credits": 1,
+    "summary": "Metadata + stats for a TikTok video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_comments",
+    "platform": "tiktok",
+    "name": "TikTok Comments",
+    "path": "/v1/tiktok/comments",
+    "credits": 10,
+    "summary": "Comments on a TikTok video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_channel_details",
+    "platform": "tiktok",
+    "name": "TikTok Channel Details",
+    "path": "/v1/tiktok/channel-details",
+    "credits": 1,
+    "summary": "Profile info & stats for a TikTok user.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_search",
+    "platform": "tiktok",
+    "name": "TikTok Search",
+    "path": "/v1/tiktok/search",
+    "credits": 14,
+    "summary": "Search TikTok videos by keyword/hashtag.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_video_download",
+    "platform": "tiktok",
+    "name": "TikTok Video Download",
+    "path": "/v1/tiktok/video-download",
+    "credits": 3,
+    "summary": "No-watermark download URL for a TikTok video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_channel_posts",
+    "platform": "tiktok",
+    "name": "TikTok Channel Posts",
+    "path": "/v1/tiktok/channel-posts",
+    "credits": 14,
+    "summary": "Latest posts from a TikTok profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_comment_replies",
+    "platform": "tiktok",
+    "name": "TikTok Comment Replies",
+    "path": "/v1/tiktok/comment-replies",
+    "credits": 50,
+    "summary": "Replies to a specific TikTok comment.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+      },
+      {
+        "name": "comment_id",
+        "type": "string",
+        "required": true,
+        "description": "ID of the parent comment to fetch replies for (from the comments endpoint)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_user_followers",
+    "platform": "tiktok",
+    "name": "TikTok User Followers",
+    "path": "/v1/tiktok/user-followers",
+    "credits": 20,
+    "summary": "List a TikTok user's followers.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_user_followings",
+    "platform": "tiktok",
+    "name": "TikTok User Followings",
+    "path": "/v1/tiktok/user-followings",
+    "credits": 20,
+    "summary": "List who a TikTok user follows.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_music_posts",
+    "platform": "tiktok",
+    "name": "TikTok Music Posts",
+    "path": "/v1/tiktok/music-posts",
+    "credits": 32,
+    "summary": "Posts using a specific TikTok sound/music.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_hashtag_search",
+    "platform": "tiktok",
+    "name": "TikTok Hashtag Search",
+    "path": "/v1/tiktok/hashtag-search",
+    "credits": 14,
+    "summary": "Search TikTok videos by hashtag.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Hashtag with or without the # (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_top_search",
+    "platform": "tiktok",
+    "name": "TikTok Top Search",
+    "path": "/v1/tiktok/top-search",
+    "credits": 14,
+    "summary": "Top mixed TikTok results for a keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_user_search",
+    "platform": "tiktok",
+    "name": "TikTok User Search",
+    "path": "/v1/tiktok/user-search",
+    "credits": 8,
+    "summary": "Search TikTok users/creators by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_song_details",
+    "platform": "tiktok",
+    "name": "TikTok Song Details",
+    "path": "/v1/tiktok/song-details",
+    "credits": 2,
+    "summary": "Details of a TikTok sound/song.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_trending_feed",
+    "platform": "tiktok",
+    "name": "TikTok Trending Feed",
+    "path": "/v1/tiktok/trending-feed",
+    "credits": 14,
+    "summary": "TikTok trending (For You) videos by region.",
+    "params": [
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "Two-letter ISO country code, e.g. US, GB, TR. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_popular_hashtags",
+    "platform": "tiktok",
+    "name": "TikTok Popular Hashtags",
+    "path": "/v1/tiktok/popular-hashtags",
+    "credits": 14,
+    "summary": "Trending TikTok hashtags for a topic/keyword.",
+    "params": [
+      {
+        "name": "query",
+        "type": "string",
+        "required": false,
+        "description": "Topic or keyword to discover trending hashtags for. Default \"trending\"."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_transcript",
+    "platform": "instagram",
+    "name": "Instagram Transcript",
+    "path": "/v1/instagram/transcript",
+    "credits": 2,
+    "summary": "Transcript of an Instagram Reel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_summarize",
+    "platform": "instagram",
+    "name": "Instagram Summarizer",
+    "path": "/v1/instagram/summarize",
+    "credits": 4,
+    "summary": "AI summary of an Instagram Reel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_details",
+    "platform": "instagram",
+    "name": "Instagram Details",
+    "path": "/v1/instagram/details",
+    "credits": 1,
+    "summary": "Details for an Instagram post or reel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_comments",
+    "platform": "instagram",
+    "name": "Instagram Comments",
+    "path": "/v1/instagram/comments",
+    "credits": 45,
+    "summary": "Comments on an Instagram post or reel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_channel_details",
+    "platform": "instagram",
+    "name": "Instagram Channel Details",
+    "path": "/v1/instagram/channel-details",
+    "credits": 1,
+    "summary": "Profile info & stats for an Instagram account.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_channel_posts",
+    "platform": "instagram",
+    "name": "Instagram Channel Posts",
+    "path": "/v1/instagram/channel-posts",
+    "credits": 12,
+    "summary": "Latest posts from an Instagram profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_channel_reels",
+    "platform": "instagram",
+    "name": "Instagram Channel Reels",
+    "path": "/v1/instagram/channel-reels",
+    "credits": 12,
+    "summary": "Latest Reels from an Instagram profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_reels_search",
+    "platform": "instagram",
+    "name": "Instagram Reels Search",
+    "path": "/v1/instagram/reels-search",
+    "credits": 12,
+    "summary": "Search Instagram Reels by hashtag/keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Hashtag (without #) or keyword (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_video_download",
+    "platform": "instagram",
+    "name": "Instagram Video Download",
+    "path": "/v1/instagram/video-download",
+    "credits": 3,
+    "summary": "Direct video URL for an Instagram Reel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_tagged_posts",
+    "platform": "instagram",
+    "name": "Instagram Tagged Posts",
+    "path": "/v1/instagram/tagged-posts",
+    "credits": 18,
+    "summary": "Posts an Instagram user is tagged in.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_music_posts",
+    "platform": "instagram",
+    "name": "Instagram Music Posts",
+    "path": "/v1/instagram/music-posts",
+    "credits": 18,
+    "summary": "Posts/Reels using an Instagram audio.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram audio/music page URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_hashtag_search",
+    "platform": "instagram",
+    "name": "Instagram Hashtag Search",
+    "path": "/v1/instagram/hashtag-search",
+    "credits": 12,
+    "summary": "Search Instagram posts by hashtag.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Hashtag without the # (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_profile_search",
+    "platform": "instagram",
+    "name": "Instagram Profile Search",
+    "path": "/v1/instagram/profile-search",
+    "credits": 12,
+    "summary": "Search Instagram profiles by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_story_highlights",
+    "platform": "instagram",
+    "name": "Instagram Story Highlights",
+    "path": "/v1/instagram/story-highlights",
+    "credits": 5,
+    "summary": "List a profile's story highlight covers.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_highlights_details",
+    "platform": "instagram",
+    "name": "Instagram Highlights Details",
+    "path": "/v1/instagram/highlights-details",
+    "credits": 9,
+    "summary": "Items inside a profile's story highlights.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max highlights to expand. Default 10, max 50."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_embed",
+    "platform": "instagram",
+    "name": "Instagram Embed",
+    "path": "/v1/instagram/embed",
+    "credits": 1,
+    "summary": "Embed HTML for an Instagram post/reel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_details",
+    "platform": "facebook",
+    "name": "Facebook Details",
+    "path": "/v1/facebook/details",
+    "credits": 1,
+    "summary": "Details for a Facebook video or post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public Facebook video or post URL."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_transcript",
+    "platform": "facebook",
+    "name": "Facebook Transcript",
+    "path": "/v1/facebook/transcript",
+    "credits": 2,
+    "summary": "Transcript of a Facebook video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public Facebook video or post URL."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_summarize",
+    "platform": "facebook",
+    "name": "Facebook Summarizer",
+    "path": "/v1/facebook/summarize",
+    "credits": 4,
+    "summary": "AI summary of a Facebook video or post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public Facebook video or post URL."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_comments",
+    "platform": "facebook",
+    "name": "Facebook Comments",
+    "path": "/v1/facebook/comments",
+    "credits": 30,
+    "summary": "Comments on a Facebook post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public Facebook video or post URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_page_details",
+    "platform": "facebook",
+    "name": "Facebook Page Details",
+    "path": "/v1/facebook/page-details",
+    "credits": 1,
+    "summary": "Info & stats for a Facebook page.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook page URL, e.g. https://facebook.com/PageName."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_profile_posts",
+    "platform": "facebook",
+    "name": "Facebook Profile Posts",
+    "path": "/v1/facebook/profile-posts",
+    "credits": 12,
+    "summary": "Latest posts from a Facebook profile/page.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook profile or page URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_profile_reels",
+    "platform": "facebook",
+    "name": "Facebook Profile Reels",
+    "path": "/v1/facebook/profile-reels",
+    "credits": 36,
+    "summary": "Latest Reels from a Facebook profile/page.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook profile or page URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_group_posts",
+    "platform": "facebook",
+    "name": "Facebook Group Posts",
+    "path": "/v1/facebook/group-posts",
+    "credits": 12,
+    "summary": "Posts from a public Facebook group.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public Facebook group URL, e.g. https://facebook.com/groups/ID."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_comment_replies",
+    "platform": "facebook",
+    "name": "Facebook Comment Replies",
+    "path": "/v1/facebook/comment-replies",
+    "credits": 30,
+    "summary": "Replies to a specific Facebook comment.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook post URL the comment belongs to."
+      },
+      {
+        "name": "comment_id",
+        "type": "string",
+        "required": true,
+        "description": "ID of the parent comment to fetch replies for (from the comments endpoint)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  }
+]
