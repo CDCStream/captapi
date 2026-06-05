@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC..."
+  }
+]

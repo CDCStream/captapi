@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID."
+  }
+]

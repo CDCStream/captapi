@@ -1,0 +1,16 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID."
+  },
+  {
+    "name": "language",
+    "type": "text",
+    "label": "Language",
+    "required": false,
+    "help": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+  }
+]

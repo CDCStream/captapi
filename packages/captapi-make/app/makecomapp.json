@@ -1,0 +1,1082 @@
+{
+  "fileVersion": 1,
+  "generalCodeFiles": {
+    "base": "general/base.iml.json",
+    "common": null,
+    "readme": "README.md",
+    "groups": "modules/groups.json"
+  },
+  "components": {
+    "connection": {
+      "captapi": {
+        "label": "Captapi API Key",
+        "connectionType": "basic",
+        "codeFiles": {
+          "communication": "connections/captapi/communication.iml.json",
+          "params": "connections/captapi/params.iml.json",
+          "common": null
+        }
+      }
+    },
+    "module": {
+      "youtubeTranscript": {
+        "label": "YouTube Transcript",
+        "description": "Extract the full timestamped transcript of a YouTube video. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeTranscript/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeTranscript/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeSummarize": {
+        "label": "YouTube Summarizer",
+        "description": "AI summary (key points, topics, sentiment) of a YouTube video. Costs ~4 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeSummarize/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeSummarize/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeVideoDetails": {
+        "label": "YouTube Video Details",
+        "description": "Metadata + engagement stats for a YouTube video. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeVideoDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeVideoDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeComments": {
+        "label": "YouTube Comments",
+        "description": "Comments on a YouTube video. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeComments/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeComments/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeChannelDetails": {
+        "label": "YouTube Channel Details",
+        "description": "Channel info & subscriber/stats for a YouTube channel. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeChannelDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeChannelDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeSearch": {
+        "label": "YouTube Search",
+        "description": "Search YouTube videos by keyword. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeChannelVideos": {
+        "label": "YouTube Channel Videos",
+        "description": "List a channel's uploaded videos. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeChannelVideos/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeChannelVideos/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubePlaylistVideos": {
+        "label": "YouTube Playlist Videos",
+        "description": "List videos in a YouTube playlist. Costs ~50 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubePlaylistVideos/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubePlaylistVideos/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeVideoDownload": {
+        "label": "YouTube Video Download",
+        "description": "Direct download URLs for a YouTube video. Costs ~3 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeVideoDownload/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeVideoDownload/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeShortsTranscript": {
+        "label": "YouTube Shorts Transcript",
+        "description": "Transcript of a YouTube Short. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeShortsTranscript/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeShortsTranscript/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeShortsSummarize": {
+        "label": "YouTube Shorts Summarizer",
+        "description": "AI summary of a YouTube Short. Costs ~4 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeShortsSummarize/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeShortsSummarize/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeShortsDetails": {
+        "label": "YouTube Shorts Stats",
+        "description": "Metadata + stats for a YouTube Short. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeShortsDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeShortsDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeShortsComments": {
+        "label": "YouTube Shorts Comments",
+        "description": "Comments on a YouTube Short. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeShortsComments/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeShortsComments/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeChannelShorts": {
+        "label": "YouTube Channel Shorts",
+        "description": "List a channel's Shorts. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeChannelShorts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeChannelShorts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeChannelStreams": {
+        "label": "YouTube Channel Streams",
+        "description": "List a channel's live/past streams. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeChannelStreams/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeChannelStreams/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeHashtagSearch": {
+        "label": "YouTube Hashtag Search",
+        "description": "Search YouTube videos by hashtag. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeHashtagSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeHashtagSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeCommentReplies": {
+        "label": "YouTube Comment Replies",
+        "description": "Replies to a specific YouTube comment. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeCommentReplies/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeCommentReplies/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeChannelPlaylists": {
+        "label": "YouTube Channel Playlists",
+        "description": "List a channel's playlists. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeChannelPlaylists/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeChannelPlaylists/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeCommunityPosts": {
+        "label": "YouTube Community Posts",
+        "description": "List a channel's community (posts) tab. Costs ~10 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeCommunityPosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeCommunityPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokTranscript": {
+        "label": "TikTok Transcript",
+        "description": "Transcript of a TikTok video (via captions). Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokTranscript/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokTranscript/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokSummarize": {
+        "label": "TikTok Summarizer",
+        "description": "AI summary of a TikTok video. Costs ~4 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokSummarize/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokSummarize/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokVideoDetails": {
+        "label": "TikTok Video Details",
+        "description": "Metadata + stats for a TikTok video. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokVideoDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokVideoDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokComments": {
+        "label": "TikTok Comments",
+        "description": "Comments on a TikTok video. Costs ~10 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokComments/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokComments/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokChannelDetails": {
+        "label": "TikTok Channel Details",
+        "description": "Profile info & stats for a TikTok user. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokChannelDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokChannelDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokSearch": {
+        "label": "TikTok Search",
+        "description": "Search TikTok videos by keyword/hashtag. Costs ~14 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokVideoDownload": {
+        "label": "TikTok Video Download",
+        "description": "No-watermark download URL for a TikTok video. Costs ~3 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokVideoDownload/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokVideoDownload/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokChannelPosts": {
+        "label": "TikTok Channel Posts",
+        "description": "Latest posts from a TikTok profile. Costs ~14 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokChannelPosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokChannelPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokCommentReplies": {
+        "label": "TikTok Comment Replies",
+        "description": "Replies to a specific TikTok comment. Costs ~50 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokCommentReplies/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokCommentReplies/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokUserFollowers": {
+        "label": "TikTok User Followers",
+        "description": "List a TikTok user's followers. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokUserFollowers/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokUserFollowers/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokUserFollowings": {
+        "label": "TikTok User Followings",
+        "description": "List who a TikTok user follows. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokUserFollowings/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokUserFollowings/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokMusicPosts": {
+        "label": "TikTok Music Posts",
+        "description": "Posts using a specific TikTok sound/music. Costs ~32 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokMusicPosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokMusicPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokHashtagSearch": {
+        "label": "TikTok Hashtag Search",
+        "description": "Search TikTok videos by hashtag. Costs ~14 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokHashtagSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokHashtagSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokTopSearch": {
+        "label": "TikTok Top Search",
+        "description": "Top mixed TikTok results for a keyword. Costs ~14 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokTopSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokTopSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokUserSearch": {
+        "label": "TikTok User Search",
+        "description": "Search TikTok users/creators by keyword. Costs ~8 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokUserSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokUserSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokSongDetails": {
+        "label": "TikTok Song Details",
+        "description": "Details of a TikTok sound/song. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokSongDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokSongDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokTrendingFeed": {
+        "label": "TikTok Trending Feed",
+        "description": "TikTok trending (For You) videos by region. Costs ~14 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokTrendingFeed/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokTrendingFeed/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokPopularHashtags": {
+        "label": "TikTok Popular Hashtags",
+        "description": "Trending TikTok hashtags for a topic/keyword. Costs ~14 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokPopularHashtags/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokPopularHashtags/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramTranscript": {
+        "label": "Instagram Transcript",
+        "description": "Transcript of an Instagram Reel. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramTranscript/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramTranscript/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramSummarize": {
+        "label": "Instagram Summarizer",
+        "description": "AI summary of an Instagram Reel. Costs ~4 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramSummarize/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramSummarize/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramDetails": {
+        "label": "Instagram Details",
+        "description": "Details for an Instagram post or reel. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramComments": {
+        "label": "Instagram Comments",
+        "description": "Comments on an Instagram post or reel. Costs ~45 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramComments/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramComments/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramChannelDetails": {
+        "label": "Instagram Channel Details",
+        "description": "Profile info & stats for an Instagram account. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramChannelDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramChannelDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramChannelPosts": {
+        "label": "Instagram Channel Posts",
+        "description": "Latest posts from an Instagram profile. Costs ~12 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramChannelPosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramChannelPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramChannelReels": {
+        "label": "Instagram Channel Reels",
+        "description": "Latest Reels from an Instagram profile. Costs ~12 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramChannelReels/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramChannelReels/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramReelsSearch": {
+        "label": "Instagram Reels Search",
+        "description": "Search Instagram Reels by hashtag/keyword. Costs ~12 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramReelsSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramReelsSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramVideoDownload": {
+        "label": "Instagram Video Download",
+        "description": "Direct video URL for an Instagram Reel. Costs ~3 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramVideoDownload/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramVideoDownload/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramTaggedPosts": {
+        "label": "Instagram Tagged Posts",
+        "description": "Posts an Instagram user is tagged in. Costs ~18 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramTaggedPosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramTaggedPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramMusicPosts": {
+        "label": "Instagram Music Posts",
+        "description": "Posts/Reels using an Instagram audio. Costs ~18 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramMusicPosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramMusicPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramHashtagSearch": {
+        "label": "Instagram Hashtag Search",
+        "description": "Search Instagram posts by hashtag. Costs ~12 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramHashtagSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramHashtagSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramProfileSearch": {
+        "label": "Instagram Profile Search",
+        "description": "Search Instagram profiles by keyword. Costs ~12 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramProfileSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramProfileSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramStoryHighlights": {
+        "label": "Instagram Story Highlights",
+        "description": "List a profile's story highlight covers. Costs ~5 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramStoryHighlights/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramStoryHighlights/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramHighlightsDetails": {
+        "label": "Instagram Highlights Details",
+        "description": "Items inside a profile's story highlights. Costs ~9 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramHighlightsDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramHighlightsDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramEmbed": {
+        "label": "Instagram Embed",
+        "description": "Embed HTML for an Instagram post/reel. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramEmbed/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramEmbed/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "facebookDetails": {
+        "label": "Facebook Details",
+        "description": "Details for a Facebook video or post. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "facebookTranscript": {
+        "label": "Facebook Transcript",
+        "description": "Transcript of a Facebook video. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookTranscript/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookTranscript/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "facebookSummarize": {
+        "label": "Facebook Summarizer",
+        "description": "AI summary of a Facebook video or post. Costs ~4 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookSummarize/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookSummarize/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "facebookComments": {
+        "label": "Facebook Comments",
+        "description": "Comments on a Facebook post. Costs ~30 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookComments/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookComments/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "facebookPageDetails": {
+        "label": "Facebook Page Details",
+        "description": "Info & stats for a Facebook page. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookPageDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookPageDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "facebookProfilePosts": {
+        "label": "Facebook Profile Posts",
+        "description": "Latest posts from a Facebook profile/page. Costs ~12 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookProfilePosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookProfilePosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "facebookProfileReels": {
+        "label": "Facebook Profile Reels",
+        "description": "Latest Reels from a Facebook profile/page. Costs ~36 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookProfileReels/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookProfileReels/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "facebookGroupPosts": {
+        "label": "Facebook Group Posts",
+        "description": "Posts from a public Facebook group. Costs ~12 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookGroupPosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookGroupPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "facebookCommentReplies": {
+        "label": "Facebook Comment Replies",
+        "description": "Replies to a specific Facebook comment. Costs ~30 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookCommentReplies/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookCommentReplies/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      }
+    },
+    "function": {},
+    "rpc": {},
+    "webhook": {}
+  },
+  "origins": []
+}

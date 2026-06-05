@@ -1,0 +1,16 @@
+[
+  {
+    "name": "query",
+    "type": "text",
+    "label": "Query",
+    "required": false,
+    "help": "Topic or keyword to discover trending hashtags for. Default \"trending\"."
+  },
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max items to return. Default 20, max 100. Billed per result."
+  }
+]

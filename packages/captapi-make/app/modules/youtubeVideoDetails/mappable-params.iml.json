@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+  }
+]

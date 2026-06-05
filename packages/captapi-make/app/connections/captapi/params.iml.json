@@ -1,0 +1,10 @@
+[
+  {
+    "name": "apiKey",
+    "type": "password",
+    "label": "API Key",
+    "required": true,
+    "editable": true,
+    "help": "Your Captapi API key. Create one at https://captapi.com/dashboard."
+  }
+]

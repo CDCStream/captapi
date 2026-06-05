@@ -1,0 +1,16 @@
+[
+  {
+    "name": "country",
+    "type": "text",
+    "label": "Country",
+    "required": false,
+    "help": "Two-letter ISO country code, e.g. US, GB, TR. Default US."
+  },
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max items to return. Default 20, max 200. Billed per result."
+  }
+]

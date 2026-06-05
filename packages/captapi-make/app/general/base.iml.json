@@ -1,0 +1,16 @@
+{
+  "baseUrl": "https://api.captapi.com",
+  "headers": {
+    "Authorization": "Bearer {{connection.apiKey}}"
+  },
+  "response": {
+    "error": {
+      "message": "[{{statusCode}}] {{ifempty(body.detail, ifempty(body.error, ifempty(body.message, 'Request failed')))}}"
+    }
+  },
+  "log": {
+    "sanitize": [
+      "request.headers.authorization"
+    ]
+  }
+}

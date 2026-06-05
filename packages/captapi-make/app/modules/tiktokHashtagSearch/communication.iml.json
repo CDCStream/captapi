@@ -1,0 +1,11 @@
+{
+  "url": "/v1/tiktok/hashtag-search",
+  "method": "GET",
+  "qs": {
+    "q": "{{parameters.q}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID."
+  }
+]

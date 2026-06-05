@@ -1,0 +1,11 @@
+{
+  "url": "/v1/tiktok/trending-feed",
+  "method": "GET",
+  "qs": {
+    "country": "{{parameters.country}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

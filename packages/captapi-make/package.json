@@ -1,0 +1,10 @@
+{
+  "name": "captapi-make-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Generator for the Captapi Make.com custom app (local app definition built from the shared endpoint catalog).",
+  "type": "module",
+  "scripts": {
+    "generate": "node generate.mjs"
+  }
+}

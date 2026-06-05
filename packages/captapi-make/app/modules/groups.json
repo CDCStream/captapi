@@ -1,0 +1,84 @@
+[
+  {
+    "label": "YouTube",
+    "modules": [
+      "youtubeTranscript",
+      "youtubeSummarize",
+      "youtubeVideoDetails",
+      "youtubeComments",
+      "youtubeChannelDetails",
+      "youtubeSearch",
+      "youtubeChannelVideos",
+      "youtubePlaylistVideos",
+      "youtubeVideoDownload",
+      "youtubeShortsTranscript",
+      "youtubeShortsSummarize",
+      "youtubeShortsDetails",
+      "youtubeShortsComments",
+      "youtubeChannelShorts",
+      "youtubeChannelStreams",
+      "youtubeHashtagSearch",
+      "youtubeCommentReplies",
+      "youtubeChannelPlaylists",
+      "youtubeCommunityPosts"
+    ]
+  },
+  {
+    "label": "TikTok",
+    "modules": [
+      "tiktokTranscript",
+      "tiktokSummarize",
+      "tiktokVideoDetails",
+      "tiktokComments",
+      "tiktokChannelDetails",
+      "tiktokSearch",
+      "tiktokVideoDownload",
+      "tiktokChannelPosts",
+      "tiktokCommentReplies",
+      "tiktokUserFollowers",
+      "tiktokUserFollowings",
+      "tiktokMusicPosts",
+      "tiktokHashtagSearch",
+      "tiktokTopSearch",
+      "tiktokUserSearch",
+      "tiktokSongDetails",
+      "tiktokTrendingFeed",
+      "tiktokPopularHashtags"
+    ]
+  },
+  {
+    "label": "Instagram",
+    "modules": [
+      "instagramTranscript",
+      "instagramSummarize",
+      "instagramDetails",
+      "instagramComments",
+      "instagramChannelDetails",
+      "instagramChannelPosts",
+      "instagramChannelReels",
+      "instagramReelsSearch",
+      "instagramVideoDownload",
+      "instagramTaggedPosts",
+      "instagramMusicPosts",
+      "instagramHashtagSearch",
+      "instagramProfileSearch",
+      "instagramStoryHighlights",
+      "instagramHighlightsDetails",
+      "instagramEmbed"
+    ]
+  },
+  {
+    "label": "Facebook",
+    "modules": [
+      "facebookDetails",
+      "facebookTranscript",
+      "facebookSummarize",
+      "facebookComments",
+      "facebookPageDetails",
+      "facebookProfilePosts",
+      "facebookProfileReels",
+      "facebookGroupPosts",
+      "facebookCommentReplies"
+    ]
+  }
+]

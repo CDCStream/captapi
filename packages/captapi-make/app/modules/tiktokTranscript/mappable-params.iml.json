@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+  }
+]

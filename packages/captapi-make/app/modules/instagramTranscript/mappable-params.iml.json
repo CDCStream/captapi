@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/."
+  }
+]

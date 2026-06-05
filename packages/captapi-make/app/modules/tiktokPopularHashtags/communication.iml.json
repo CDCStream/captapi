@@ -1,0 +1,11 @@
+{
+  "url": "/v1/tiktok/popular-hashtags",
+  "method": "GET",
+  "qs": {
+    "query": "{{parameters.query}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

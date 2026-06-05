@@ -1,0 +1,17 @@
+{
+  "url": "https://api.captapi.com/v1/account/limits",
+  "method": "GET",
+  "headers": {
+    "Authorization": "Bearer {{parameters.apiKey}}"
+  },
+  "response": {
+    "error": {
+      "message": "[{{statusCode}}] Invalid API key or request failed."
+    }
+  },
+  "log": {
+    "sanitize": [
+      "request.headers.authorization"
+    ]
+  }
+}

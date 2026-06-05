@@ -1,0 +1,10 @@
+{
+  "url": "/v1/tiktok/video-details",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

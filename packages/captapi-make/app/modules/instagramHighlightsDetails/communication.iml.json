@@ -1,0 +1,11 @@
+{
+  "url": "/v1/instagram/highlights-details",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

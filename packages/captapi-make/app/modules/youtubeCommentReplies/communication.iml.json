@@ -1,0 +1,12 @@
+{
+  "url": "/v1/youtube/comment-replies",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}",
+    "comment_id": "{{parameters.comment_id}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

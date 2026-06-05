@@ -1,0 +1,11 @@
+{
+  "url": "/v1/youtube/shorts/transcript",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}",
+    "language": "{{parameters.language}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

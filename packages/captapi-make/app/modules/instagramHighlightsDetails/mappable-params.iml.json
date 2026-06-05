@@ -1,0 +1,16 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Instagram profile URL, e.g. https://instagram.com/username/."
+  },
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max highlights to expand. Default 10, max 50."
+  }
+]
