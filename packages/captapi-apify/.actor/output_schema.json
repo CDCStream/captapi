@@ -1,0 +1,13 @@
+{
+  "actorOutputSchemaVersion": 1,
+  "title": "Captapi output",
+  "description": "One dataset item per run: operation, ok, cached, creditsUsed and the structured data payload (identical to the Captapi REST API).",
+  "properties": {
+    "result": {
+      "type": "string",
+      "title": "Result",
+      "description": "The default dataset containing the structured result of the operation.",
+      "template": "{{links.apiDefaultDatasetUrl}}/items"
+    }
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "actorSpecification": 1,
+  "fields": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "operation": {
+        "type": "string",
+        "title": "Operation",
+        "description": "The Captapi endpoint that was called (e.g. youtube_transcript).",
+        "example": "youtube_transcript"
+      },
+      "ok": {
+        "type": "boolean",
+        "title": "OK",
+        "description": "Whether the API call succeeded.",
+        "example": true
+      },
+      "cached": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "title": "Cached",
+        "description": "Whether the result was served from cache (cached results are free).",
+        "example": false
+      },
+      "creditsUsed": {
+        "type": [
+          "number",
+          "null"
+        ],
+        "title": "Credits used",
+        "description": "Captapi credits billed for this request (failures are never charged).",
+        "example": 2
+      },
+      "data": {
+        "type": [
+          "object",
+          "array",
+          "null"
+        ],
+        "title": "Data",
+        "description": "The structured result payload, identical to the Captapi REST API 'data' field."
+      },
+      "status": {
+        "type": "number",
+        "title": "HTTP status",
+        "description": "HTTP status code, present when the call fails.",
+        "example": 422
+      },
+      "error": {
+        "type": "string",
+        "title": "Error",
+        "description": "Error message, present when the call fails."
+      }
+    },
+    "required": [
+      "operation",
+      "ok"
+    ]
+  },
+  "views": {
+    "overview": {
+      "title": "Overview",
+      "transformation": {
+        "fields": [
+          "operation",
+          "ok",
+          "cached",
+          "creditsUsed",
+          "data"
+        ]
+      },
+      "display": {
+        "component": "table",
+        "properties": {
+          "operation": {
+            "label": "Operation",
+            "format": "text"
+          },
+          "ok": {
+            "label": "OK",
+            "format": "boolean"
+          },
+          "cached": {
+            "label": "Cached",
+            "format": "boolean"
+          },
+          "creditsUsed": {
+            "label": "Credits",
+            "format": "number"
+          },
+          "data": {
+            "label": "Data",
+            "format": "object"
+          }
+        }
+      }
+    }
+  }
+}
