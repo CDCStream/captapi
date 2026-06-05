@@ -219,6 +219,21 @@ export default function IntegrationsPage() {
         </Link>
         .
       </p>
+      <p className="mt-3 text-muted-foreground max-w-3xl">
+        Not using MCP? The same {TOTAL} endpoints are also available as a{" "}
+        <a href="#cli" className="text-primary hover:underline">
+          CLI
+        </a>
+        , an{" "}
+        <a href="#n8n" className="text-primary hover:underline">
+          n8n community node
+        </a>
+        , and a{" "}
+        <a href="#make" className="text-primary hover:underline">
+          Make.com app
+        </a>{" "}
+        — or call the REST API directly.
+      </p>
 
       {/* 2-step connect flow */}
       <div className="mt-6 grid gap-4 sm:grid-cols-2">

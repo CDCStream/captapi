@@ -63,7 +63,13 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Captapi API",
         version=__version__,
-        description="Extract transcripts, summaries, comments and stats from social media videos.",
+        description=(
+            "Extract transcripts, summaries, comments and stats from social "
+            "media videos (YouTube, TikTok, Instagram, Facebook). Connect by AI "
+            "agents and no-code tools via the MCP server (@captapi/mcp), the CLI "
+            "(@captapi/cli), the n8n community node (n8n-nodes-captapi), or the "
+            "Make.com custom app. Full guide: https://captapi.com/docs/integrations"
+        ),
         openapi_url="/v1/openapi.json",
         docs_url="/v1/docs",
         redoc_url="/v1/redoc",

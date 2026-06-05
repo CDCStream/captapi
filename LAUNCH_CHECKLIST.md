@@ -62,8 +62,8 @@ A pragmatic launch playbook based on what works for API-as-a-Service products.
 
 ### Integrations
 - [ ] Zapier integration — submit for review (takes 2-4 weeks)
-- [ ] Make.com app
-- [ ] n8n community node
+- [x] Make.com app — local app built (packages/captapi-make), deploy via Make Apps Editor + submit for review
+- [x] n8n community node — published (n8n-nodes-captapi)
 - [ ] Publish Python SDK on PyPI
 - [ ] Publish Node SDK on npm
 - [ ] Free Chrome extension for transcript extraction (funnel to signup)

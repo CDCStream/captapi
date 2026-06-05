@@ -49,6 +49,9 @@ export const INTEGRATIONS_NAV: NavSection[] = [
       { id: "mcp-install", label: "Installation" },
       { id: "mcp-config", label: "Configuration" },
       { id: "mcp-tools", label: "Tools & Parameters" },
+      { id: "cli", label: "Command-line (CLI)" },
+      { id: "n8n", label: "Workflow automation (n8n)" },
+      { id: "make", label: "No-code scenarios (Make.com)" },
     ],
   },
 ];
