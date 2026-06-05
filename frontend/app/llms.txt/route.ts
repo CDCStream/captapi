@@ -136,6 +136,10 @@ Auth: reads the key from \`~/.captapi/config.json\` (via \`login\`) or the \`CAP
 
 For no-code/low-code automations, the official \`n8n-nodes-captapi\` community node exposes all ${ALL_ENDPOINTS.length} endpoints inside n8n. Install it from **Settings → Community Nodes** (package name \`n8n-nodes-captapi\`), or \`npm install n8n-nodes-captapi\` on a self-hosted instance, then restart n8n. Create a **Captapi API** credential with the human-provided \`capt_live_...\` key (Base URL defaults to ${API_URL}). Add the **Captapi** node, pick a Platform (YouTube/TikTok/Instagram/Facebook) and an Operation, and the node returns the same structured JSON as the REST API for use in downstream nodes. npm: https://www.npmjs.com/package/n8n-nodes-captapi
 
+## Connect via Make.com (Integromat scenarios)
+
+A Make custom app exposes all ${ALL_ENDPOINTS.length} endpoints as action modules grouped by platform (YouTube/TikTok/Instagram/Facebook). Add a **Captapi API Key** connection with the human-provided \`capt_live_...\` key, then drop the module you need into a scenario, fill in the URL (or search query) and optional limit, and it returns the same structured JSON \`data\` as the REST API for downstream modules. Auth is \`Authorization: Bearer\` against ${API_URL}; failures and out-of-credit errors surface the API error message.
+
 ## Connect via REST API (call it directly from code)
 
 If you are not using MCP, every endpoint is a single authenticated GET request — write code against it directly (no SDK required).

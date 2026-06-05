@@ -40,6 +40,14 @@ export async function GET() {
       credential: "Create a 'Captapi API' credential with your capt_live_... key; Base URL defaults to the Captapi API.",
       auth: "Captapi API credential (API key). The credential test calls /v1/account/limits.",
     },
+    make: {
+      type: "make-custom-app",
+      description:
+        "Captapi custom app for Make.com (Integromat). Exposes all endpoints as action modules grouped by platform for no-code scenarios.",
+      install: "Add the Captapi app in Make, or deploy the local app from packages/captapi-make with the Make Apps Editor.",
+      credential: "Create a 'Captapi API Key' connection with your capt_live_... key; verified against /v1/account/limits.",
+      auth: "Authorization: Bearer <CAPTAPI_API_KEY> (set on the connection).",
+    },
     transport: "stdio",
     command: "npx",
     args: ["-y", "@captapi/mcp"],

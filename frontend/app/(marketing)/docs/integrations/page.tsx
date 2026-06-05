@@ -11,7 +11,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata = buildMetadata({
   title: "Integrations — Captapi MCP Server for AI Agents",
   description:
-    "Connect Captapi to Claude, Cursor, VS Code, and any MCP-compatible AI agent. Install the official @captapi/mcp server, @captapi/cli, or the n8n-nodes-captapi community node and access all 62 social media data endpoints from your agent, terminal, scripts, or n8n workflows.",
+    "Connect Captapi to Claude, Cursor, VS Code, and any MCP-compatible AI agent. Install the official @captapi/mcp server, @captapi/cli, the n8n-nodes-captapi community node, or the Make.com app and access all 62 social media data endpoints from your agent, terminal, scripts, n8n, or Make.com scenarios.",
   path: "/docs/integrations",
 });
 
@@ -146,6 +146,23 @@ npm install n8n-nodes-captapi`,
 //   URL       = https://youtube.com/watch?v=dQw4w9WgXcQ
 // Output: structured JSON you can map into later nodes.
 // Every one of the ${TOTAL} endpoints is available as an Operation.`,
+  },
+];
+
+const makeUsage = [
+  {
+    label: "Connection",
+    code: `// Create a "Captapi API Key" connection once:
+//   API Key = capt_live_xxxxxxxxxxxxxxxx   (from /dashboard/api-keys)
+// Make verifies the key against /v1/account/limits.`,
+  },
+  {
+    label: "Add a module",
+    code: `// Modules are grouped by platform (YouTube / TikTok / Instagram / Facebook).
+// Drop one into a scenario, e.g. "YouTube Transcript":
+//   URL = https://youtube.com/watch?v=dQw4w9WgXcQ
+// Output: the API "data" payload, ready to map into later modules.
+// Every one of the ${TOTAL} endpoints is available as a module.`,
   },
 ];
 
@@ -404,6 +421,28 @@ export default function IntegrationsPage() {
       </p>
       <div className="mt-4">
         <CodeTabs samples={n8nUsage} />
+      </div>
+
+      <H2 id="make">No-code scenarios (Make.com)</H2>
+      <p className="text-muted-foreground max-w-3xl">
+        Prefer{" "}
+        <a
+          href="https://www.make.com"
+          className="text-primary hover:underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Make.com
+        </a>{" "}
+        (Integromat)? The Captapi custom app exposes all {TOTAL} endpoints as
+        action modules grouped by platform. Add a{" "}
+        <strong>Captapi API Key</strong> connection with your{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">capt_live_…</code>{" "}
+        key, then drop the module you need into a scenario — it returns the same
+        structured JSON as the REST API for downstream modules.
+      </p>
+      <div className="mt-4">
+        <CodeTabs samples={makeUsage} />
       </div>
 
       <div className="mt-12 rounded-xl border bg-muted/30 p-6 text-center">

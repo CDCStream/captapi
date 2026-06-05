@@ -90,6 +90,7 @@ export default function AgentIntegrationsPage() {
   );
   const cliInstall = `npm install -g @captapi/mcp\nCAPTAPI_API_KEY=${key} captapi-mcp`;
   const n8nInstall = `# In n8n: Settings -> Community Nodes -> Install\nn8n-nodes-captapi\n\n# Self-hosted (npm), then restart n8n:\nnpm install n8n-nodes-captapi`;
+  const makeInstall = `# In Make.com: add the Captapi custom app, then\n# create a "Captapi API Key" connection:\nAPI Key = ${key}\n\n# Drop any module (grouped by platform) into a scenario.`;
 
   const cursorDeeplink = useMemo(() => {
     const b64 =
@@ -198,6 +199,7 @@ export default function AgentIntegrationsPage() {
               <TabsTrigger value="vscode">VS Code</TabsTrigger>
               <TabsTrigger value="cli">CLI</TabsTrigger>
               <TabsTrigger value="n8n">n8n</TabsTrigger>
+              <TabsTrigger value="make">Make.com</TabsTrigger>
             </TabsList>
 
             <TabsContent value="cursor" className="space-y-3">
@@ -251,6 +253,17 @@ export default function AgentIntegrationsPage() {
                 Operation) in any workflow.
               </p>
               <CodeBlock code={n8nInstall} label="n8n community node" />
+            </TabsContent>
+
+            <TabsContent value="make" className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                For no-code scenarios: add the Captapi app in{" "}
+                <strong>Make.com</strong>, create a{" "}
+                <strong>Captapi API Key</strong> connection with your key, then
+                drop any module (grouped by platform) into a scenario — it
+                returns the same JSON as the REST API.
+              </p>
+              <CodeBlock code={makeInstall} label="Make.com app" />
             </TabsContent>
           </Tabs>
         </div>
