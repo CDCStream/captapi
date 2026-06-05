@@ -17,6 +17,7 @@ const STRUCTURED_DATA = {
         "https://github.com/CDCStream/captapi",
         "https://www.npmjs.com/package/@captapi/mcp",
         "https://www.npmjs.com/package/@captapi/cli",
+        "https://www.npmjs.com/package/n8n-nodes-captapi",
       ],
     },
     {
@@ -37,7 +38,7 @@ const STRUCTURED_DATA = {
       operatingSystem: "Any",
       url: SITE_URL,
       description:
-        "Extract transcripts, AI summaries, comments, video details, and downloads from YouTube, TikTok, Instagram, and Facebook with a single REST API. Also available as a Model Context Protocol (MCP) server and CLI for AI agents like Claude and Cursor.",
+        "Extract transcripts, AI summaries, comments, video details, and downloads from YouTube, TikTok, Instagram, and Facebook with a single REST API. Also available as a Model Context Protocol (MCP) server, a CLI, and an n8n community node for AI agents like Claude and Cursor and for no-code workflows.",
       featureList: [
         "YouTube, TikTok, Instagram & Facebook transcripts",
         "AI video summaries",
@@ -46,12 +47,14 @@ const STRUCTURED_DATA = {
         "No-watermark video & media downloads",
         "MCP server for Claude, Cursor, VS Code (62 tools)",
         "Official CLI (@captapi/cli)",
+        "n8n community node (n8n-nodes-captapi)",
       ],
       downloadUrl: "https://www.npmjs.com/package/@captapi/mcp",
       softwareHelp: `${SITE_URL}/docs/integrations`,
       sameAs: [
         "https://www.npmjs.com/package/@captapi/mcp",
         "https://www.npmjs.com/package/@captapi/cli",
+        "https://www.npmjs.com/package/n8n-nodes-captapi",
       ],
       offers: {
         "@type": "Offer",
@@ -66,7 +69,7 @@ const STRUCTURED_DATA = {
       "@id": `${SITE_URL}/#webapi`,
       name: "Captapi REST API",
       description:
-        "REST API for structured social-media data across YouTube, TikTok, Instagram, and Facebook. One Bearer key; 62 endpoints returning clean JSON. Connectable by AI agents via an MCP server (@captapi/mcp) and CLI (@captapi/cli).",
+        "REST API for structured social-media data across YouTube, TikTok, Instagram, and Facebook. One Bearer key; 62 endpoints returning clean JSON. Connectable by AI agents via an MCP server (@captapi/mcp), a CLI (@captapi/cli), and an n8n community node (n8n-nodes-captapi).",
       documentation: `${SITE_URL}/docs`,
       termsOfService: `${SITE_URL}/legal/terms`,
       provider: { "@id": `${SITE_URL}/#organization` },

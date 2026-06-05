@@ -89,6 +89,7 @@ export default function AgentIntegrationsPage() {
     [serverEntry],
   );
   const cliInstall = `npm install -g @captapi/mcp\nCAPTAPI_API_KEY=${key} captapi-mcp`;
+  const n8nInstall = `# In n8n: Settings -> Community Nodes -> Install\nn8n-nodes-captapi\n\n# Self-hosted (npm), then restart n8n:\nnpm install n8n-nodes-captapi`;
 
   const cursorDeeplink = useMemo(() => {
     const b64 =
@@ -196,6 +197,7 @@ export default function AgentIntegrationsPage() {
               <TabsTrigger value="claude">Claude Desktop</TabsTrigger>
               <TabsTrigger value="vscode">VS Code</TabsTrigger>
               <TabsTrigger value="cli">CLI</TabsTrigger>
+              <TabsTrigger value="n8n">n8n</TabsTrigger>
             </TabsList>
 
             <TabsContent value="cursor" className="space-y-3">
@@ -238,6 +240,17 @@ export default function AgentIntegrationsPage() {
                 Run the server directly from any terminal or container.
               </p>
               <CodeBlock code={cliInstall} label="CLI command" />
+            </TabsContent>
+
+            <TabsContent value="n8n" className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                For no-code workflows: install the{" "}
+                <code className="font-mono">n8n-nodes-captapi</code> community
+                node, add a <strong>Captapi API</strong> credential with your
+                key, then use the <strong>Captapi</strong> node (Platform →
+                Operation) in any workflow.
+              </p>
+              <CodeBlock code={n8nInstall} label="n8n community node" />
             </TabsContent>
           </Tabs>
         </div>

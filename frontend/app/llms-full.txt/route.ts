@@ -90,6 +90,11 @@ Local (npx / stdio):
 - Cursor \`~/.cursor/mcp.json\`: \`{ "mcpServers": { "captapi": { "command": "npx", "args": ["-y", "@captapi/mcp"], "env": { "CAPTAPI_API_KEY": "capt_live_..." } } } }\`
 - Tools are named \`platform_action\` (e.g. \`youtube_transcript\`). Manifest: ${base}/mcp.json
 
+## Other ways to connect
+- CLI: \`npx @captapi/cli <command>\` — every endpoint as a terminal subcommand (flags = params, JSON to stdout). https://www.npmjs.com/package/@captapi/cli
+- n8n: install the \`n8n-nodes-captapi\` community node (Settings -> Community Nodes), add a "Captapi API" credential, then use the Captapi node (Platform -> Operation). https://www.npmjs.com/package/n8n-nodes-captapi
+- Full integration guide: ${base}/docs/integrations
+
 ## Full Endpoint Reference
 
 ${sections}
