@@ -76,6 +76,7 @@ const inputSchema = {
       enumTitles: ENDPOINTS.map(
         (e) => `${PLATFORM_LABELS[e.platform] ?? e.platform}: ${e.name}`,
       ),
+      prefill: "youtube_transcript",
     },
     url: {
       title: "URL",
@@ -83,6 +84,7 @@ const inputSchema = {
       description:
         "Content/profile URL for the operation (video, reel, post, channel, profile, playlist, music...). Required by most operations.",
       editor: "textfield",
+      prefill: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     },
     q: {
       title: "Search query",

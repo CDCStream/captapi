@@ -142,7 +142,7 @@ A Make custom app exposes all ${ALL_ENDPOINTS.length} endpoints as action module
 
 ## Connect via Apify (BYO-key Actor)
 
-The Captapi Actor on Apify is a bring-your-own-key wrapper around the REST API (it does not scrape). Provide your \`capt_live_...\` key, pick an **Operation** (any of the ${ALL_ENDPOINTS.length} endpoints), fill the fields it needs (url / search query / limit / ...), and the Actor returns one dataset item with the same structured JSON \`data\` as the REST API. Credits are billed to your own Captapi account; cached results are free and failures are never charged.
+The Captapi Actor on Apify is a bring-your-own-key wrapper around the REST API (it does not scrape). Provide your \`capt_live_...\` key, pick an **Operation** (any of the ${ALL_ENDPOINTS.length} endpoints), fill the fields it needs (url / search query / limit / ...), and the Actor returns one dataset item with the same structured JSON \`data\` as the REST API. Credits are billed to your own Captapi account; cached results are free and failures are never charged. The Actor is also discoverable and callable by AI agents through Apify's MCP server (mcp.apify.com) — its input and output fields are fully documented so agents can run it and chain the result.
 
 ## Connect via REST API (call it directly from code)
 

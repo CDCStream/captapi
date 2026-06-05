@@ -501,7 +501,17 @@ export default function IntegrationsPage() {
         <code className="rounded bg-muted px-1.5 py-0.5 text-xs">capt_live_…</code>{" "}
         key, pick an operation, and the Actor returns one dataset item with the
         same structured JSON. Credits are billed to your own Captapi account, so
-        it stays free to run.
+        it stays free to run. Its input and output fields are fully documented,
+        so AI agents on{" "}
+        <a
+          href="https://mcp.apify.com"
+          className="text-primary hover:underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Apify&apos;s MCP server
+        </a>{" "}
+        can discover and run it too.
       </p>
       <div className="mt-4">
         <CodeTabs samples={apifyUsage} />

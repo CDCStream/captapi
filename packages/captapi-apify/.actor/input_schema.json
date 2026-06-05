@@ -143,13 +143,15 @@
         "Facebook: Facebook Profile Reels",
         "Facebook: Facebook Group Posts",
         "Facebook: Facebook Comment Replies"
-      ]
+      ],
+      "prefill": "youtube_transcript"
     },
     "url": {
       "title": "URL",
       "type": "string",
       "description": "Content/profile URL for the operation (video, reel, post, channel, profile, playlist, music...). Required by most operations.",
-      "editor": "textfield"
+      "editor": "textfield",
+      "prefill": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
     },
     "q": {
       "title": "Search query",
