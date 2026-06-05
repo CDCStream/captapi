@@ -1,0 +1,56 @@
+{
+  "name": "n8n-nodes-captapi",
+  "version": "0.1.0",
+  "description": "n8n community node for Captapi — structured social media data from YouTube, TikTok, Instagram & Facebook (transcripts, AI summaries, comments, stats, search, downloads). 62 operations, one API key.",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "captapi",
+    "youtube",
+    "tiktok",
+    "instagram",
+    "facebook",
+    "social-media",
+    "transcript",
+    "scraper"
+  ],
+  "license": "MIT",
+  "homepage": "https://captapi.com",
+  "author": {
+    "name": "Captapi",
+    "email": "support@captapi.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CDCStream/captapi.git",
+    "directory": "packages/captapi-n8n"
+  },
+  "engines": {
+    "node": ">=18.10"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/CaptapiApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Captapi/Captapi.node.js"
+    ]
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "n8n-workflow": "^1.66.0",
+    "typescript": "^5.6.0"
+  }
+}

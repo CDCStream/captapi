@@ -48,6 +48,10 @@ npx @captapi/cli tiktok-comment-replies --url "<video>" --comment_id "<id>" --li
 
 The CLI reads the key from `~/.captapi/config.json` (via `login`) or the `CAPTAPI_API_KEY` env var. `npx @captapi/cli agent add cursor` writes the MCP config into Cursor/Claude for you. Same auth, credits, and error codes as the REST API.
 
+## Use in n8n workflows (n8n-nodes-captapi)
+
+For no-code/low-code automations, the official `n8n-nodes-captapi` community node exposes all 62 endpoints in n8n. Install it from **Settings → Community Nodes** (package `n8n-nodes-captapi`; self-hosted: `npm install n8n-nodes-captapi`, then restart). Create a **Captapi API** credential with the human-provided `capt_live_...` key, add the **Captapi** node, pick a **Platform** and **Operation**, and it returns the same structured JSON as the REST API for downstream nodes.
+
 ## Choosing the right endpoint
 
 - **Single piece of content** (one video / reel / post): use `*_transcript`, `*_summarize`, `*_video_details` / `*_details`, or `*_comments` with the content `url`.

@@ -11,7 +11,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata = buildMetadata({
   title: "Integrations — Captapi MCP Server for AI Agents",
   description:
-    "Connect Captapi to Claude, Cursor, VS Code, and any MCP-compatible AI agent. Install the official @captapi/mcp server or @captapi/cli and access all 62 social media data endpoints from your agent, terminal, or scripts.",
+    "Connect Captapi to Claude, Cursor, VS Code, and any MCP-compatible AI agent. Install the official @captapi/mcp server, @captapi/cli, or the n8n-nodes-captapi community node and access all 62 social media data endpoints from your agent, terminal, scripts, or n8n workflows.",
   path: "/docs/integrations",
 });
 
@@ -119,6 +119,33 @@ captapi instagram-channel-posts --url "https://instagram.com/nasa/" --limit 12 |
     code: `captapi agent add cursor         # writes ~/.cursor/mcp.json
 captapi agent add claude         # writes the Claude Desktop config
 captapi agent add cursor --print # print the snippet instead of writing`,
+  },
+];
+
+const n8nUsage = [
+  {
+    label: "Install",
+    code: `# In n8n: Settings → Community Nodes → Install
+n8n-nodes-captapi
+
+# Self-hosted (npm), then restart n8n:
+npm install n8n-nodes-captapi`,
+  },
+  {
+    label: "Credential",
+    code: `// Create a "Captapi API" credential once:
+//   API Key  = capt_live_xxxxxxxxxxxxxxxx   (from /dashboard/api-keys)
+//   Base URL = ${API_URL}      (default, rarely changed)
+// The credential test calls /v1/account/limits to verify the key.`,
+  },
+  {
+    label: "Use the node",
+    code: `// Add the "Captapi" node to any workflow:
+//   Platform  = YouTube
+//   Operation = YouTube Transcript
+//   URL       = https://youtube.com/watch?v=dQw4w9WgXcQ
+// Output: structured JSON you can map into later nodes.
+// Every one of the ${TOTAL} endpoints is available as an Operation.`,
   },
 ];
 
@@ -347,6 +374,36 @@ export default function IntegrationsPage() {
       </p>
       <div className="mt-4">
         <CodeTabs samples={cliUsage} />
+      </div>
+
+      <H2 id="n8n">Workflow automation (n8n)</H2>
+      <p className="text-muted-foreground max-w-3xl">
+        Building no-code/low-code automations? The official{" "}
+        <a
+          href="https://www.npmjs.com/package/n8n-nodes-captapi"
+          className="text-primary hover:underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">n8n-nodes-captapi</code>
+        </a>{" "}
+        community node brings all {TOTAL} endpoints into{" "}
+        <a
+          href="https://n8n.io"
+          className="text-primary hover:underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          n8n
+        </a>
+        . Install it from <strong>Settings → Community Nodes</strong>, add a{" "}
+        <strong>Captapi API</strong> credential with your{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">capt_live_…</code>{" "}
+        key, then drop the <strong>Captapi</strong> node into any workflow — pick a{" "}
+        platform and operation, and pipe the structured JSON into your other nodes.
+      </p>
+      <div className="mt-4">
+        <CodeTabs samples={n8nUsage} />
       </div>
 
       <div className="mt-12 rounded-xl border bg-muted/30 p-6 text-center">

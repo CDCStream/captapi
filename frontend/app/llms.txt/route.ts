@@ -132,6 +132,10 @@ npx @captapi/cli agent add cursor      # write the MCP server config into Cursor
 
 Auth: reads the key from \`~/.captapi/config.json\` (via \`login\`) or the \`CAPTAPI_API_KEY\` env var. Override the host with \`CAPTAPI_BASE_URL\`. Same credits, caching, and error codes as the REST API. Run \`npx @captapi/cli <command> --help\` for a command's exact parameters.
 
+## Connect via n8n (workflow automation)
+
+For no-code/low-code automations, the official \`n8n-nodes-captapi\` community node exposes all ${ALL_ENDPOINTS.length} endpoints inside n8n. Install it from **Settings → Community Nodes** (package name \`n8n-nodes-captapi\`), or \`npm install n8n-nodes-captapi\` on a self-hosted instance, then restart n8n. Create a **Captapi API** credential with the human-provided \`capt_live_...\` key (Base URL defaults to ${API_URL}). Add the **Captapi** node, pick a Platform (YouTube/TikTok/Instagram/Facebook) and an Operation, and the node returns the same structured JSON as the REST API for use in downstream nodes. npm: https://www.npmjs.com/package/n8n-nodes-captapi
+
 ## Connect via REST API (call it directly from code)
 
 If you are not using MCP, every endpoint is a single authenticated GET request — write code against it directly (no SDK required).

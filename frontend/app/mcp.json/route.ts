@@ -31,6 +31,15 @@ export async function GET() {
       ],
       auth: "Reads CAPTAPI_API_KEY env var or ~/.captapi/config.json (via `captapi login`).",
     },
+    n8n: {
+      package: { registry: "npm", name: "n8n-nodes-captapi" },
+      type: "n8n-community-node",
+      description:
+        "Official n8n community node. Exposes all endpoints as a single Captapi node (Platform → Operation) for no-code/low-code workflows.",
+      install: "In n8n: Settings → Community Nodes → install `n8n-nodes-captapi` (self-hosted: `npm install n8n-nodes-captapi`, then restart n8n).",
+      credential: "Create a 'Captapi API' credential with your capt_live_... key; Base URL defaults to the Captapi API.",
+      auth: "Captapi API credential (API key). The credential test calls /v1/account/limits.",
+    },
     transport: "stdio",
     command: "npx",
     args: ["-y", "@captapi/mcp"],
