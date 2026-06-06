@@ -74,7 +74,6 @@ function subscriptionTiers(cycle: "monthly" | "yearly"): PricingTier[] {
         "100 lifetime credits",
         "40 requests / minute",
         "All 34 APIs included",
-        "Community support",
       ],
     },
     {
@@ -90,7 +89,6 @@ function subscriptionTiers(cycle: "monthly" | "yearly"): PricingTier[] {
         `${PLAN_CREDITS.starter.toLocaleString("en-US")} credits / month`,
         "120 requests / minute",
         "All 34 APIs included",
-        "Email support",
       ],
     },
     {
