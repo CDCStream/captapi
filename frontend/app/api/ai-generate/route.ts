@@ -173,7 +173,7 @@ export async function POST(req: Request) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: process.env.ANTHROPIC_MODEL || "claude-3-5-haiku-latest",
+        model: process.env.ANTHROPIC_MODEL || "claude-haiku-4-5",
         max_tokens: 1500,
         system:
           "You are an expert social media growth assistant. Respond with ONLY valid, minified JSON that matches the requested schema. No markdown, no commentary, no code fences.",
@@ -184,16 +184,7 @@ export async function POST(req: Request) {
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
       console.error("Anthropic error", res.status, detail.slice(0, 500));
-      let reason = "";
-      try {
-        reason = (JSON.parse(detail)?.error?.message || "").slice(0, 160);
-      } catch {
-        reason = detail.slice(0, 160);
-      }
-      return NextResponse.json(
-        { error: "The AI service is busy. Please try again.", upstream: res.status, reason },
-        { status: 502 },
-      );
+      return NextResponse.json({ error: "The AI service is busy. Please try again." }, { status: 502 });
     }
 
     const data = (await res.json()) as { content?: { text?: string }[] };
