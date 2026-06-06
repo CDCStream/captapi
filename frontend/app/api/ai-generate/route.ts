@@ -184,7 +184,16 @@ export async function POST(req: Request) {
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
       console.error("Anthropic error", res.status, detail.slice(0, 500));
-      return NextResponse.json({ error: "The AI service is busy. Please try again." }, { status: 502 });
+      let reason = "";
+      try {
+        reason = (JSON.parse(detail)?.error?.message || "").slice(0, 160);
+      } catch {
+        reason = detail.slice(0, 160);
+      }
+      return NextResponse.json(
+        { error: "The AI service is busy. Please try again.", upstream: res.status, reason },
+        { status: 502 },
+      );
     }
 
     const data = (await res.json()) as { content?: { text?: string }[] };
