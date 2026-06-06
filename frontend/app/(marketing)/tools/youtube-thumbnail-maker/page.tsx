@@ -1,145 +1,170 @@
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildMetadata, breadcrumbLd, faqLd } from "@/lib/seo";
 import { ToolHero, HowToUse, FAQSection, LongContent, ToolCTA, webApplicationLd } from "@/components/tools/tool-sections";
-import { Palette, Type, Image as ImageIcon, Download } from "lucide-react";
+import { Download, Layers, Sparkles, Upload, Wand2 } from "lucide-react";
 import YouTubeThumbnailClient from "./YouTubeThumbnailClient";
 
 const PATH = "/tools/youtube-thumbnail-maker";
-const TITLE = "Free YouTube Thumbnail Maker — 1280×720, No Watermark";
+const TITLE = "Free AI YouTube Thumbnail Maker";
 const DESC =
-  "Make click-worthy YouTube thumbnails free in your browser. Bold outlined text, gradient or photo backgrounds, ready-made templates, and instant 1280×720 PNG export — no watermark, no sign-up.";
+  "Generate AI YouTube thumbnails from a title, style, optional portrait, and optional reference image. Create 16:9 click-ready thumbnail variations free, no sign-up required.";
 
 export const metadata = buildMetadata({
-  title: `${TITLE} | Captapi`,
+  title: TITLE + " | Captapi",
   description: DESC,
   path: PATH,
   keywords: [
-    "youtube thumbnail maker",
-    "free youtube thumbnail generator",
-    "youtube thumbnail size",
-    "thumbnail creator",
-    "1280x720 thumbnail",
-    "youtube thumbnail template",
+    "free ai youtube thumbnail maker",
+    "ai youtube thumbnail generator",
+    "youtube thumbnail maker no sign up",
+    "youtube thumbnail generator",
+    "video thumbnail maker",
+    "youtube thumbnail size 1280x720",
+    "ai thumbnail maker",
   ],
 });
 
 const FAQS = [
-  { q: "What is the correct YouTube thumbnail size?", a: "YouTube recommends 1280×720 pixels with a 16:9 aspect ratio, and a file under 2MB in JPG, PNG, or GIF. This tool exports at exactly 1280×720 PNG so your thumbnail is sharp on every device, from phones in India to TVs in the US." },
-  { q: "Is this YouTube thumbnail maker really free?", a: "Yes — completely free with no watermark, no account, and no credit card. Everything runs in your browser, so you can make as many thumbnails as you want." },
-  { q: "Do you add a watermark to my thumbnail?", a: "Never. The PNG you download is 100% yours, with no logo, badge, or watermark of any kind." },
-  { q: "Does my image get uploaded to a server?", a: "No. Image editing happens entirely on your device using the HTML Canvas API. Your background photos never leave your browser, which keeps your content private." },
-  { q: "Can I use my own photo as the background?", a: "Yes. Upload any JPG or PNG and it is auto-cropped to fill the 16:9 frame. You can also dim it so your text stays readable." },
-  { q: "Which fonts work best for YouTube thumbnails?", a: "Bold, condensed fonts like Anton, Bebas Neue, and Impact read well at small sizes in the YouTube feed. All three are built in here." },
-  { q: "Will the thumbnail look good on mobile?", a: "Most YouTube views happen on mobile, so keep text to 3–5 large words. The live preview shows roughly how it appears in the feed for viewers worldwide." },
-  { q: "Can I make thumbnails for Shorts or other platforms?", a: "This tool is tuned for standard 16:9 YouTube thumbnails. For vertical Shorts (9:16) you can still export and crop, but a dedicated vertical canvas works better." },
-  { q: "How do I get more clicks with my thumbnail?", a: "Use high contrast, a single clear focal point, expressive faces, and 3–5 bold words that create curiosity. Match the thumbnail promise to your title and content." },
-  { q: "Do I need design skills to use it?", a: "No. Start from a template (Gaming, Vlog, Tutorial, Reaction, Before/After), change the text and colors, and download. Most creators finish in under two minutes." },
+  {
+    q: "What does the Free AI YouTube Thumbnail Maker do?",
+    a: "It turns your video title or topic into high-contrast 16:9 YouTube thumbnail concepts. You can choose a style, add a target audience, upload a portrait, and upload a reference thumbnail so the AI can generate multiple click-ready variations.",
+  },
+  {
+    q: "Is this really an AI thumbnail generator, not just a template editor?",
+    a: "Yes. The page now uses an image generation model to create original thumbnail images. It is not limited to preset canvas templates, although the prompt still follows YouTube thumbnail best practices such as strong contrast, simple composition, and readable text.",
+  },
+  {
+    q: "Can I upload my face or portrait?",
+    a: "Yes. Upload a selfie or creator portrait and the AI will use it as the main subject of the thumbnail, removing the need for manual cutouts in Photoshop or Canva. For best results, use a clear front-facing image with good lighting.",
+  },
+  {
+    q: "Can I clone the style of another thumbnail?",
+    a: "You can upload a reference thumbnail so the AI can learn the layout, contrast, framing, and visual mood. The tool asks the model to create an original result rather than copying logos, exact text, or protected artwork.",
+  },
+  {
+    q: "What size are the generated thumbnails?",
+    a: "The model is instructed to generate a 16:9 YouTube thumbnail suitable for 1280x720 usage. Downloaded files can be uploaded to YouTube as custom thumbnails and should remain readable on mobile previews.",
+  },
+  {
+    q: "How many thumbnail variations can I generate?",
+    a: "You can generate one, two, or three variations at a time. Multiple outputs are useful for A/B testing different hooks, emotions, compositions, and visual styles before you publish.",
+  },
+  {
+    q: "Do I need design skills?",
+    a: "No. You only need a video topic or title. The AI handles composition, color, focal point, text hierarchy, and overall thumbnail style. Optional reference images help when you want a specific look.",
+  },
+  {
+    q: "Can I use the thumbnails for monetized YouTube videos?",
+    a: "The tool is designed for original, commercially usable outputs based on your prompt and uploaded assets. You should only upload portraits, brand assets, or references that you have the right to use.",
+  },
+  {
+    q: "Why does a good YouTube thumbnail matter?",
+    a: "Thumbnails affect click-through rate. A clearer hook, stronger emotion, and more readable design can help a video earn more clicks from impressions, which can support more views and better distribution.",
+  },
+  {
+    q: "Do I need to sign up?",
+    a: "No sign-up is required for the free tool. Captapi also offers APIs for creators and teams who want to automate transcripts, summaries, comments, stats, and other social data workflows.",
+  },
+];
+
+const STEPS = [
+  { title: "Enter your video idea", text: "Paste the title, topic, or hook you want the thumbnail to sell.", icon: <Wand2 className="size-4" /> },
+  { title: "Pick a CTR style", text: "Choose a visual direction such as challenge, tutorial, gaming, tech, or premium brand.", icon: <Sparkles className="size-4" /> },
+  { title: "Add optional images", text: "Upload a portrait for creator branding or a reference thumbnail for layout inspiration.", icon: <Upload className="size-4" /> },
+  { title: "Download variations", text: "Generate multiple 16:9 thumbnails and save the strongest option for YouTube.", icon: <Download className="size-4" /> },
+];
+
+const FEATURES = [
+  { title: "AI video hook composition", text: "The prompt focuses the model on one clear emotional hook so the thumbnail communicates instantly at small preview size." },
+  { title: "Smart portrait integration", text: "Creator faces help channels become recognizable. Upload a portrait and the model will build the thumbnail around it." },
+  { title: "Reference style matching", text: "Use a thumbnail you admire as visual guidance for contrast, framing, mood, and layout without directly copying it." },
+  { title: "A/B test ready", text: "Generate multiple distinct outputs so you can test curiosity, urgency, transformation, or authority angles." },
+  { title: "YouTube-first sizing", text: "Outputs are composed as 16:9 thumbnails suitable for the standard 1280x720 YouTube workflow." },
+  { title: "No manual editing workflow", text: "Skip timeline scrubbing, face cutouts, font pairing, and layer-by-layer thumbnail design." },
 ];
 
 export default function Page() {
-  const jsonLd = [
-    breadcrumbLd([
-      { name: "Home", path: "/" },
-      { name: "Free Tools", path: "/tools" },
-      { name: "YouTube Thumbnail Maker", path: PATH },
-    ]),
-    webApplicationLd({ name: "YouTube Thumbnail Maker", description: DESC, path: PATH, category: "DesignApplication" }),
-    faqLd(FAQS),
-  ];
-
   return (
-    <div>
-      <JsonLd data={jsonLd} />
+    <>
+      <JsonLd data={webApplicationLd({ name: TITLE, description: DESC, path: PATH })} />
+      <JsonLd data={breadcrumbLd([{ name: "Tools", path: "/tools" }, { name: TITLE, path: PATH }])} />
+      <JsonLd data={faqLd(FAQS)} />
+
       <ToolHero
         platform="YouTube"
-        title="YouTube Thumbnail Maker"
-        subtitle="Design scroll-stopping thumbnails in your browser — bold text, templates, and instant 1280×720 PNG export. Free, private, and watermark-free."
+        title={TITLE}
+        subtitle="Generate click-ready AI thumbnails from your title, style, portrait, and reference image. Create multiple 16:9 variations for YouTube without Photoshop, Canva, or sign-up."
       />
 
       <YouTubeThumbnailClient />
 
-      <HowToUse
-        steps={[
-          { title: "Pick a template", text: "Start from Gaming, Vlog, Tutorial, Reaction, or Before/After — or a blank gradient.", icon: <Palette className="size-4" /> },
-          { title: "Add your background", text: "Choose a gradient, solid color, or upload your own photo. Dim it for readability.", icon: <ImageIcon className="size-4" /> },
-          { title: "Write bold text", text: "Type your headline, pick a bold font, and set text and outline colors.", icon: <Type className="size-4" /> },
-          { title: "Download PNG", text: "Export a crisp 1280×720 PNG with no watermark and upload it to YouTube.", icon: <Download className="size-4" /> },
-        ]}
-      />
+      <HowToUse steps={STEPS} />
 
-      <FAQSection faqs={FAQS} />
+      <section className="mt-16">
+        <h2 className="text-2xl font-semibold">Why choose this AI YouTube thumbnail maker?</h2>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((feature) => (
+            <div key={feature.title} className="rounded-xl border bg-card p-5">
+              <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Layers className="size-5" />
+              </div>
+              <h3 className="font-semibold">{feature.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{feature.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <LongContent>
         <div>
-          <h2>The free YouTube thumbnail maker built for clicks</h2>
+          <h2>AI thumbnails that help viewers understand the hook fast</h2>
           <p>
-            Your thumbnail is the single most important factor in whether someone clicks your video. Before anyone reads
-            your title or watches a second of content, they judge your thumbnail in a crowded feed full of competing
-            videos. This free YouTube thumbnail maker helps you win that split-second decision — without Photoshop, design
-            skills, or a subscription. Everything runs in your browser, exports at the official 1280×720 resolution, and
-            never adds a watermark.
+            A YouTube thumbnail has one job: make the right viewer stop scrolling and understand why the video is worth clicking. This free AI YouTube Thumbnail Maker is built around that job. Instead of starting from a blank canvas, you give the tool your video title, audience, and desired emotion. The AI then composes a 16:9 thumbnail around a clear focal point, strong contrast, and short readable text.
           </p>
           <p>
-            Whether you are a gaming creator in Brazil, a tutorial channel in India, a vlogger in the United Kingdom, or a
-            small business in the United States, the principles of a high-CTR thumbnail are the same. This tool bakes those
-            principles into ready-made templates so you can focus on your message instead of fighting with design software.
+            The workflow is designed for creators who want the speed of an AI thumbnail generator without writing complex prompts. Choose a style such as gaming reaction, clean tech tutorial, business authority, or premium brand. Add a portrait if your channel uses creator-led thumbnails. Upload a reference if you want the model to understand a layout or visual mood you already like.
           </p>
         </div>
 
         <div>
-          <h3>What the right YouTube thumbnail size is</h3>
+          <h2>From portrait and reference image to custom YouTube thumbnail</h2>
           <p>
-            YouTube&apos;s recommended thumbnail size is 1280×720 pixels (16:9 aspect ratio), with a minimum width of 640
-            pixels and a file size under 2MB. This tool exports exactly at 1280×720 PNG, so your thumbnail stays crisp
-            whether it is shown as a tiny preview on a phone or full-screen on a smart TV. Because most YouTube watch time
-            now comes from mobile devices, the safest design choice is large text and one clear focal point that survives
-            being shrunk down.
+            Many high-performing thumbnails use a recognizable face, exaggerated emotion, and a simple visual story. Manually cutting out a face, matching lighting, and balancing text can take longer than editing the video itself. With the portrait upload, the tool can use your image as the primary subject and blend it into a fresh thumbnail composition.
+          </p>
+          <p>
+            Reference images are useful when you want to follow a proven trend without copying it. The AI looks at composition signals such as subject placement, contrast, spacing, and mood, then creates an original thumbnail for your own topic. That makes it easier to test styles from your niche while keeping the output unique.
           </p>
         </div>
 
         <div>
-          <h3>How to design a thumbnail that earns clicks</h3>
+          <h2>Generate multiple options for thumbnail A/B testing</h2>
+          <p>
+            Thumbnail testing works best when each option has a different angle. One version might focus on surprise, another on a before-and-after transformation, and another on expert authority. This tool can create up to three variations in one run, giving you more than one creative direction to compare before publishing.
+          </p>
           <ul>
-            <li><strong>Use 3–5 bold words.</strong> Short, punchy text is readable at any size. Long sentences disappear in the feed.</li>
-            <li><strong>Maximize contrast.</strong> Bright text with a dark outline (or vice versa) pops against busy backgrounds. The built-in outline and shadow do this automatically.</li>
-            <li><strong>Show emotion.</strong> Expressive faces and reactions consistently outperform flat product shots in viewer testing.</li>
-            <li><strong>Keep one focal point.</strong> A single subject beats a cluttered collage. Let the background support — not compete with — your text.</li>
-            <li><strong>Stay consistent.</strong> A recognizable color palette and font help returning viewers spot your videos instantly.</li>
+            <li>Use curiosity for videos with a surprising result or reveal.</li>
+            <li>Use transformation for tutorials, fitness, finance, and case studies.</li>
+            <li>Use authority for reviews, explainers, SaaS, education, and B2B videos.</li>
+            <li>Use reaction for entertainment, gaming, commentary, and challenge formats.</li>
           </ul>
         </div>
 
         <div>
-          <h3>Templates for every kind of video</h3>
+          <h2>Built for YouTube thumbnail best practices</h2>
           <p>
-            Each template is a proven starting point: <strong>Gaming</strong> uses high-energy reds and yellows; <strong>Vlog</strong>
-            leans into soft, personal tones; <strong>Tutorial</strong> uses clean, trustworthy blues; <strong>Reaction</strong> pairs
-            bold expressions with bright accents; and <strong>Before / After</strong> is built for transformations and results.
-            Apply one with a single click, then swap the text, colors, and background to match your video.
+            The generator is instructed to avoid clutter, tiny text, weak contrast, misleading badges, and watermark-style elements. It favors a single clear focal point, readable text, and bold visual hierarchy. The output is composed in 16:9 format for the standard YouTube thumbnail workflow, so it works for long-form videos and many YouTube surfaces where a horizontal preview is shown.
           </p>
-        </div>
-
-        <div>
-          <h3>Privacy-first and watermark-free</h3>
           <p>
-            Unlike many online thumbnail generators, this tool processes everything locally with the HTML Canvas API. Your
-            uploaded photos never touch a server, there is no account to create, and the exported PNG is completely clean —
-            no watermark, no branding, no catch. Make one thumbnail or a hundred; it is always free.
-          </p>
-        </div>
-
-        <div>
-          <h3>From thumbnail to full content workflow</h3>
-          <p>
-            A great thumbnail is one piece of a bigger publishing workflow. Many creators pair it with a strong title,
-            an SEO-friendly description, and the right hashtags — all of which you can generate with our other free tools.
-            And when you are ready to scale beyond manual work, Captapi&apos;s API lets you pull transcripts, comments,
-            and engagement metrics from YouTube, TikTok, Instagram, and Facebook to research what is working and double
-            down on it.
+            A strong thumbnail cannot rescue a weak video, but it can stop a strong video from being ignored. Use the generated options as a fast creative starting point, then publish the version that best matches your title, promise, and audience intent.
           </p>
         </div>
       </LongContent>
 
-      <ToolCTA />
-    </div>
+      <FAQSection faqs={FAQS} />
+      <ToolCTA
+        headline="Need more than thumbnails?"
+        sub="Captapi gives you APIs for YouTube, TikTok, Instagram, and Facebook transcripts, summaries, comments, stats, and creator workflows. Start with free credits and automate the parts that come after the thumbnail."
+      />
+    </>
   );
 }

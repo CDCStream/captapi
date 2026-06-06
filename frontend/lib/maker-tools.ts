@@ -17,10 +17,10 @@ export interface MakerTool {
 export const MAKER_TOOLS: MakerTool[] = [
   {
     slug: "youtube-thumbnail-maker",
-    name: "YouTube Thumbnail Maker",
-    blurb: "Design click-worthy 1280×720 thumbnails in your browser. Templates, bold text, no watermark.",
+    name: "Free AI YouTube Thumbnail Maker",
+    blurb: "Generate click-ready AI thumbnails from a title, portrait, and reference image. Multiple 16:9 variations, no sign-up.",
     platform: "YouTube",
-    type: "canvas",
+    type: "ai",
   },
   {
     slug: "youtube-banner-maker",
