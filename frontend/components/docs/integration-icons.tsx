@@ -32,8 +32,10 @@ export function MakeIcon({ className }: IconProps) {
 
 export function ApifyIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" fill="#97CC04" className={className} aria-hidden="true">
-      <path d="M12 2 1.5 21h4.4l1.85-3.35h8.7L18.3 21h4.2L12 2Zm0 7.55 2.4 4.3H9.6L12 9.55Z" />
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path d="M7.4 2 12.1 11H2.7Z" fill="#1FA34A" />
+      <path d="M16.6 2 21.3 11h-9.4Z" fill="#2D6DF6" />
+      <path d="M12 10.2 20.6 21H3.4Z" fill="#FB6304" />
     </svg>
   );
 }
