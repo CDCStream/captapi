@@ -97,7 +97,7 @@ export function AiToolClient({ config }: { config: AiToolConfig }) {
   return (
     <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,380px)_1fr]">
       {/* Form */}
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+      <div className="rounded-2xl border border-white/10 bg-zinc-950 p-5">
         <div className="space-y-4">
           {config.fields.map((f) => (
             <div key={f.name}>
@@ -153,7 +153,7 @@ export function AiToolClient({ config }: { config: AiToolConfig }) {
       </div>
 
       {/* Results */}
-      <div className="min-h-[240px] rounded-2xl border border-white/10 bg-white/5 p-5">
+      <div className="min-h-[240px] rounded-2xl border border-white/10 bg-zinc-950 p-5">
         {!result && !loading && !error && (
           <div className="flex h-full min-h-[200px] flex-col items-center justify-center text-center text-gray-500">
             <Sparkles className="mb-2 size-6" />

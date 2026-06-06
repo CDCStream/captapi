@@ -93,7 +93,7 @@ export function ToolRunnerClient({
 
   return (
     <div className="mt-8">
-      <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 sm:flex-row">
+      <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-zinc-950 p-4 sm:flex-row">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-500" />
           <input
@@ -122,7 +122,7 @@ export function ToolRunnerClient({
       </p>
 
       {error && (
-        <div className="mt-4 flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
+        <div className="mt-4 flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-zinc-950 p-6 text-center">
           <p className="text-sm text-rose-400">{error}</p>
           <button
             type="button"
@@ -135,7 +135,7 @@ export function ToolRunnerClient({
       )}
 
       {data && !loading && (
-        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-5">
+        <div className="mt-4 rounded-2xl border border-white/10 bg-zinc-950 p-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
               {data.title && <p className="truncate font-medium text-white">{data.title}</p>}
