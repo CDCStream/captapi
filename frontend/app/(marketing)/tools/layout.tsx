@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import { MAKER_TOOLS } from "@/lib/maker-tools";
 
 const tools = [
   { slug: "youtube-transcript",  name: "YouTube Transcript Extractor" },
@@ -9,6 +10,7 @@ const tools = [
   { slug: "instagram-transcript",name: "Instagram Reel Transcript" },
   { slug: "instagram-summarizer",name: "Instagram Reel Summarizer" },
   { slug: "facebook-transcript", name: "Facebook Video Transcript" },
+  ...MAKER_TOOLS.map((t) => ({ slug: t.slug, name: t.name })),
 ];
 
 export default function ToolsLayout({ children }: { children: React.ReactNode }) {
