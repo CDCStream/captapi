@@ -2,7 +2,27 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, LayoutGrid, Download, Settings2, Wrench, Boxes } from "lucide-react";
+import {
+  McpIcon,
+  CliIcon,
+  N8nIcon,
+  MakeIcon,
+  ApifyIcon,
+} from "@/components/docs/integration-icons";
+
+const NAV_ICONS: Record<string, React.ReactNode> = {
+  integrations: <Boxes className="size-4" />,
+  overview: <LayoutGrid className="size-4" />,
+  mcp: <McpIcon className="size-4" />,
+  "mcp-install": <Download className="size-4" />,
+  "mcp-config": <Settings2 className="size-4" />,
+  "mcp-tools": <Wrench className="size-4" />,
+  cli: <CliIcon className="size-4" />,
+  n8n: <N8nIcon className="size-4" />,
+  make: <MakeIcon className="size-4" />,
+  apify: <ApifyIcon className="size-4" />,
+};
 
 interface NavItem {
   id: string;
@@ -37,6 +57,10 @@ export const DOCS_NAV: NavSection[] = [
       { id: "api-facebook", label: "Facebook", badge: "5" },
       { id: "api-video-files", label: "Video Files", badge: "2" },
     ],
+  },
+  {
+    title: "More",
+    items: [{ id: "integrations", label: "Integrations" }],
   },
 ];
 
@@ -132,7 +156,12 @@ export function DocsSidebar() {
                           : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       }`}
                     >
-                      <span>{item.label}</span>
+                      <span className="flex items-center gap-2">
+                        {NAV_ICONS[item.id] && (
+                          <span className="shrink-0">{NAV_ICONS[item.id]}</span>
+                        )}
+                        {item.label}
+                      </span>
                       {item.badge && (
                         <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
                           {item.badge}

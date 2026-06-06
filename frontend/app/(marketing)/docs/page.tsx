@@ -1,11 +1,16 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { CodeTabs } from "@/components/docs/code-tabs";
+import { IntegrationCards } from "@/components/docs/integration-cards";
 import {
   PLATFORM_GROUPS,
   API_URL,
   type ApiEndpoint,
 } from "@/lib/api-catalog";
 import { buildMetadata } from "@/lib/seo";
+
+const TOTAL_ENDPOINTS =
+  PLATFORM_GROUPS.reduce((n, g) => n + g.endpoints.length, 0) + 2;
 
 export const metadata = buildMetadata({
   title: "Documentation — Captapi API Reference",
@@ -374,6 +379,23 @@ export default function DocsPage() {
           { method: "POST", path: "/v1/video/summarize", credits: "1/min +1", desc: "Transcribe an uploaded file + AI summary" },
         ]}
       />
+
+      {/* Integrations */}
+      <H2 id="integrations">Integrations</H2>
+      <div className="not-prose mb-5 flex flex-wrap items-center justify-between gap-3">
+        <p className="max-w-2xl text-muted-foreground">
+          Use Captapi from AI agents, workflow tools, cloud actors, or your
+          terminal — the same {TOTAL_ENDPOINTS} endpoints, no REST plumbing.
+        </p>
+        <Link
+          href="/docs/integrations"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+        >
+          View all integrations
+          <ArrowRight className="size-4" />
+        </Link>
+      </div>
+      <IntegrationCards total={TOTAL_ENDPOINTS} basePath="/docs/integrations" />
 
       <div className="mt-12 rounded-xl border bg-muted/30 p-6 text-center">
         <p className="font-semibold">Ready to build?</p>

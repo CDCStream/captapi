@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CodeTabs } from "@/components/docs/code-tabs";
+import { IntegrationCards } from "@/components/docs/integration-cards";
 import {
   PLATFORM_GROUPS,
   API_URL,
@@ -253,12 +254,16 @@ export default function IntegrationsPage() {
         <a href="#make" className="text-primary hover:underline">
           Make.com app
         </a>
-        , and an{" "}
+        ,         and an{" "}
         <a href="#apify" className="text-primary hover:underline">
           Apify Actor
         </a>{" "}
         — or call the REST API directly.
       </p>
+
+      <div className="mt-6">
+        <IntegrationCards total={TOTAL} />
+      </div>
 
       {/* 2-step connect flow */}
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
