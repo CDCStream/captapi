@@ -1,11 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { slugify } from "@/lib/blog";
+
+function extractMeta(html: string) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+
+  const titleEl = doc.querySelector("h1") || doc.querySelector("h2") || doc.querySelector("title");
+  const title = titleEl?.textContent?.trim() || "";
+
+  const firstP = doc.querySelector("p");
+  const description = firstP?.textContent?.trim().slice(0, 160) || "";
+
+  const firstImg = doc.querySelector("img");
+  const image = firstImg?.getAttribute("src") || "";
+
+  const headings = Array.from(doc.querySelectorAll("h2, h3"));
+  const tagSet = new Set<string>();
+  headings.forEach((h) => {
+    const text = h.textContent?.trim().toLowerCase();
+    if (text && text.length < 40) tagSet.add(text);
+  });
+  const metaKeywords = doc.querySelector('meta[name="keywords"]');
+  if (metaKeywords) {
+    metaKeywords.getAttribute("content")?.split(",").forEach((k) => {
+      const trimmed = k.trim().toLowerCase();
+      if (trimmed) tagSet.add(trimmed);
+    });
+  }
+  const tags = Array.from(tagSet).slice(0, 8).join(", ");
+
+  return { title, description, image, tags };
+}
 
 export default function NewBlogPostPage() {
   const [secret, setSecret] = useState("");
@@ -21,6 +51,16 @@ export default function NewBlogPostPage() {
   const [busy, setBusy] = useState(false);
 
   const effectiveSlug = slug.trim() || slugify(title);
+
+  const handleContentChange = useCallback((html: string) => {
+    setContent(html);
+    if (!html.trim()) return;
+    const meta = extractMeta(html);
+    if (meta.title && !title) setTitle(meta.title);
+    if (meta.description && !description) setDescription(meta.description);
+    if (meta.image && !image) setImage(meta.image);
+    if (meta.tags && !tags) setTags(meta.tags);
+  }, [title, description, image, tags]);
 
   async function save() {
     if (!secret) return toast.error("Enter the admin secret");
@@ -123,7 +163,7 @@ export default function NewBlogPostPage() {
           {tab === "edit" ? (
             <textarea
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => handleContentChange(e.target.value)}
               rows={18}
               className="rounded-md border border-input bg-background p-3 font-mono text-sm"
               placeholder="<h2>Heading</h2><p>Body…</p>"
