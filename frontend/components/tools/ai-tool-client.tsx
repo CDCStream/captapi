@@ -111,14 +111,14 @@ export function AiToolClient({ config }: { config: AiToolConfig }) {
                   placeholder={f.placeholder}
                   value={values[f.name]}
                   onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.value }))}
-                  className="w-full resize-y rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-gray-500 outline-none focus:border-primary"
+                  className="w-full resize-y rounded-lg border border-white/15 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-gray-500 outline-none focus:border-primary"
                 />
               ) : f.type === "select" ? (
                 <select
                   id={f.name}
                   value={values[f.name]}
                   onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.value }))}
-                  className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-primary"
+                  className="w-full rounded-lg border border-white/15 bg-zinc-900 px-3 py-2 text-sm text-white outline-none focus:border-primary"
                 >
                   {f.options.map((o) => (
                     <option key={o.value} value={o.value} className="bg-zinc-900">
@@ -133,7 +133,7 @@ export function AiToolClient({ config }: { config: AiToolConfig }) {
                   placeholder={f.placeholder}
                   value={values[f.name]}
                   onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.value }))}
-                  className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-gray-500 outline-none focus:border-primary"
+                  className="w-full rounded-lg border border-white/15 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-gray-500 outline-none focus:border-primary"
                 />
               )}
               {f.help && <p className="mt-1 text-xs text-gray-500">{f.help}</p>}

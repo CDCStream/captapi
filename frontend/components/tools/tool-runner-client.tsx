@@ -104,7 +104,7 @@ export function ToolRunnerClient({
             onKeyDown={(e) => e.key === "Enter" && run()}
             placeholder={placeholder || `Paste a ${platform} video URL`}
             aria-label={`${platform} video URL`}
-            className="w-full rounded-lg border border-white/15 bg-black/30 py-2.5 pl-9 pr-3 text-sm text-white placeholder:text-gray-500 outline-none focus:border-primary"
+            className="w-full rounded-lg border border-white/15 bg-zinc-900 py-2.5 pl-9 pr-3 text-sm text-white placeholder:text-gray-500 outline-none focus:border-primary"
           />
         </div>
         <button
@@ -169,7 +169,7 @@ export function ToolRunnerClient({
             <textarea
               readOnly
               value={data.transcript || ""}
-              className="h-72 w-full resize-y rounded-lg border border-white/10 bg-black/30 p-3 text-sm leading-relaxed text-gray-200 outline-none"
+              className="h-72 w-full resize-y rounded-lg border border-white/10 bg-zinc-900 p-3 text-sm leading-relaxed text-gray-200 outline-none"
             />
           ) : (
             <div className="space-y-4 text-sm text-gray-200">
