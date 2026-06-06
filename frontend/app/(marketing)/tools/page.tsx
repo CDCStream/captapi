@@ -36,7 +36,7 @@ const tools: HubTool[] = [
     title: tool.name,
     description: tool.blurb,
     platform: tool.platform,
-    badge: tool.type === "ai" ? "AI generator" : "Maker",
+    badge: tool.type === "ai" ? "AI generator" : tool.type === "converter" ? "Converter" : "Maker",
   })),
 ];
 

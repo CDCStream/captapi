@@ -3,7 +3,7 @@
 // the data-driven /tools/[slug] transcript tools in lib/tools.ts).
 // Used by the tools hub, the tools layout footer, the sitemap, and the nav.
 
-export type MakerToolType = "canvas" | "ai";
+export type MakerToolType = "canvas" | "ai" | "converter";
 
 export interface MakerTool {
   slug: string;
@@ -15,6 +15,13 @@ export interface MakerTool {
 }
 
 export const MAKER_TOOLS: MakerTool[] = [
+  {
+    slug: "youtube-to-mp4",
+    name: "YouTube to MP4 Converter",
+    blurb: "Paste a YouTube link to preview the video and pick an MP4 quality from 144p to 1080p HD. Free, no sign-up.",
+    platform: "YouTube",
+    type: "converter",
+  },
   {
     slug: "youtube-thumbnail-maker",
     name: "Free AI YouTube Thumbnail Maker",
