@@ -32,10 +32,19 @@ export function MakeIcon({ className }: IconProps) {
 
 export function ApifyIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <path d="M7.4 2 12.1 11H2.7Z" fill="#1FA34A" />
-      <path d="M16.6 2 21.3 11h-9.4Z" fill="#2D6DF6" />
-      <path d="M12 10.2 20.6 21H3.4Z" fill="#FB6304" />
+    <svg viewBox="0 0 200 200" className={className} aria-hidden="true">
+      <path
+        d="M114.695 0H196.97C198.643 0 200 1.35671 200 3.03031V128.766C200 131.778 196.083 132.945 194.434 130.425L112.159 4.68953C110.841 2.67412 112.287 0 114.695 0Z"
+        fill="#246DFF"
+      />
+      <path
+        d="M85.3048 0H3.0303C1.35671 0 0 1.35671 0 3.03031V128.766C0 131.778 3.91698 132.945 5.566 130.425L87.8405 4.68953C89.1593 2.67412 87.7134 0 85.3048 0Z"
+        fill="#20A34E"
+      />
+      <path
+        d="M98.5909 100.668L5.12683 194.835C3.22886 196.747 4.58334 200 7.27759 200H192.8C195.483 200 196.842 196.77 194.967 194.852L102.908 100.685C101.726 99.4749 99.7824 99.4676 98.5909 100.668Z"
+        fill="#F86606"
+      />
     </svg>
   );
 }
