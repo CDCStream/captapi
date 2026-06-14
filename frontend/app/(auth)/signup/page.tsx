@@ -22,10 +22,20 @@ export default function SignupPage() {
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
 
+  function isDisposableEmail(addr: string) {
+    const blocked = ["web-library.net","mailinator.com","guerrillamail.com","tempmail.com","throwaway.email","temp-mail.org","10minutemail.com","trashmail.com","yopmail.com","sharklasers.com","guerrillamailblock.com","grr.la","dispostable.com","mailnesia.com","maildrop.cc","fakeinbox.com","mailcatch.com","tempail.com","tempr.email","discard.email","tmpmail.net","tmpmail.org","emailondeck.com","mohmal.com","getnada.com","burnermail.io","mailsac.com","inboxkitten.com","mytemp.email","spam4.me","tmail.ws"];
+    const domain = addr.split("@")[1]?.toLowerCase();
+    return domain ? blocked.includes(domain) : false;
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (password.length < 8) {
       toast.error("Password must be at least 8 characters");
+      return;
+    }
+    if (isDisposableEmail(email)) {
+      toast.error("Disposable email addresses are not allowed. Please use a real email.");
       return;
     }
     setLoading(true);
