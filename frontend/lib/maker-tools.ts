@@ -23,6 +23,13 @@ export const MAKER_TOOLS: MakerTool[] = [
     type: "converter",
   },
   {
+    slug: "youtube-to-mp3",
+    name: "YouTube to MP3 Converter",
+    blurb: "Paste a YouTube link to preview the video and pick an MP3 audio quality from 64 to 320 kbps. Free, no sign-up.",
+    platform: "YouTube",
+    type: "converter",
+  },
+  {
     slug: "youtube-thumbnail-maker",
     name: "Free AI YouTube Thumbnail Maker",
     blurb: "Generate click-ready AI thumbnails from a title, portrait, and reference image. Multiple 16:9 variations, no sign-up.",
