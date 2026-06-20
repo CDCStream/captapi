@@ -18,7 +18,7 @@ const PLATFORM_ORDER = ["YouTube", "TikTok", "Instagram", "Facebook", "General"]
 const PLATFORM_DESCRIPTIONS: Record<string, string> = {
   YouTube: "Transcript, summary, thumbnail, banner, title, description, hashtag, and Shorts idea tools for YouTube creators.",
   TikTok: "Transcript, summary, username, hashtag, and video idea tools for TikTok content workflows.",
-  Instagram: "Free transcript, summarizer, and highlights viewer tools for Instagram.",
+  Instagram: "Free transcript, summarizer, highlights viewer, and photo downloader tools for Instagram.",
   Facebook: "Free transcript tools for public Facebook videos.",
   General: "Cross-platform creator utilities for bios and reusable social media assets.",
 };
@@ -43,7 +43,9 @@ const tools: HubTool[] = [
           ? "Converter"
           : tool.type === "viewer"
             ? "Viewer"
-            : "Maker",
+            : tool.type === "downloader"
+              ? "Downloader"
+              : "Maker",
   })),
 ];
 

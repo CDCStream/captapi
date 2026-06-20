@@ -3,7 +3,7 @@
 // the data-driven /tools/[slug] transcript tools in lib/tools.ts).
 // Used by the tools hub, the tools layout footer, the sitemap, and the nav.
 
-export type MakerToolType = "canvas" | "ai" | "converter" | "viewer";
+export type MakerToolType = "canvas" | "ai" | "converter" | "viewer" | "downloader";
 
 export interface MakerTool {
   slug: string;
@@ -98,6 +98,13 @@ export const MAKER_TOOLS: MakerTool[] = [
     blurb: "Enter any public username to open and browse their story highlights anonymously. Free, no login.",
     platform: "Instagram",
     type: "viewer",
+  },
+  {
+    slug: "instagram-photo-downloader",
+    name: "Instagram Photo Downloader",
+    blurb: "Paste a public post or reel link to open and save the image in original quality. Free, no login.",
+    platform: "Instagram",
+    type: "downloader",
   },
   {
     slug: "social-media-bio-generator",
