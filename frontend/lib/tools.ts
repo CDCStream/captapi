@@ -20,7 +20,7 @@ export const TOOLS: Record<string, Tool> = {
   "youtube-transcript": {
     slug: "youtube-transcript",
     title: "Free YouTube Transcript Extractor",
-    description: "Get the full transcript of any YouTube video in seconds. Powered by Captapi.",
+    description: "Get the full, timestamped transcript of any public YouTube video in seconds. Free, no sign-up — copy or download the text for subtitles, notes, or repurposing.",
     platform: "YouTube",
     apiEndpoint: "/v1/youtube/transcript",
     faq: [
@@ -32,7 +32,7 @@ export const TOOLS: Record<string, Tool> = {
   "youtube-summarizer": {
     slug: "youtube-summarizer",
     title: "Free YouTube Video Summarizer",
-    description: "AI-powered summary, key points, and topics from any YouTube video.",
+    description: "Summarize any YouTube video with AI in seconds — get a concise overview, key bullet points, and the main topics. Free, no sign-up, copy or download the result.",
     platform: "YouTube",
     apiEndpoint: "/v1/youtube/summarize",
     faq: [
@@ -43,7 +43,7 @@ export const TOOLS: Record<string, Tool> = {
   "tiktok-transcript": {
     slug: "tiktok-transcript",
     title: "Free TikTok Transcript Extractor",
-    description: "Extract speech and captions from any TikTok video.",
+    description: "Extract speech and captions from any public TikTok video as clean, copyable text. Free and no sign-up — AI transcribes the audio when there are no captions.",
     platform: "TikTok",
     apiEndpoint: "/v1/tiktok/transcript",
     faq: [
@@ -53,7 +53,7 @@ export const TOOLS: Record<string, Tool> = {
   "tiktok-summarizer": {
     slug: "tiktok-summarizer",
     title: "Free TikTok Video Summarizer",
-    description: "Get the gist of any TikTok in seconds.",
+    description: "Summarize any public TikTok video with AI in seconds — get the key takeaways, main points, and topics as copyable text. Free, no sign-up, no install.",
     platform: "TikTok",
     apiEndpoint: "/v1/tiktok/summarize",
     faq: [
@@ -63,7 +63,7 @@ export const TOOLS: Record<string, Tool> = {
   "instagram-transcript": {
     slug: "instagram-transcript",
     title: "Free Instagram Reel Transcript",
-    description: "Extract transcripts from public Instagram Reels.",
+    description: "Extract a clean, copyable transcript from any public Instagram Reel in seconds. Free, no sign-up — turn Reels into text for captions, notes, or content.",
     platform: "Instagram",
     apiEndpoint: "/v1/instagram/transcript",
     faq: [{ q: "Stories?", a: "No, Reels and Posts only." }],
@@ -71,7 +71,7 @@ export const TOOLS: Record<string, Tool> = {
   "instagram-summarizer": {
     slug: "instagram-summarizer",
     title: "Free Instagram Reel Summarizer",
-    description: "AI summaries for Instagram Reels.",
+    description: "Summarize any public Instagram Reel with AI in seconds — get a short overview, key points, and topics as copyable text. Free, no sign-up required.",
     platform: "Instagram",
     apiEndpoint: "/v1/instagram/summarize",
     faq: [],
@@ -79,7 +79,7 @@ export const TOOLS: Record<string, Tool> = {
   "facebook-transcript": {
     slug: "facebook-transcript",
     title: "Free Facebook Video Transcript",
-    description: "Transcripts from public Facebook videos.",
+    description: "Get a clean, timestamped transcript from any public Facebook video in seconds. Free, no sign-up — copy or download the text for subtitles, notes, or research.",
     platform: "Facebook",
     apiEndpoint: "/v1/facebook/transcript",
     faq: [],

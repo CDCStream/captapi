@@ -113,17 +113,17 @@ export const INDEXNOW_KEY = "7c3e1a9f4b2d486e8a05f1c6d92b3e74";
  * Google does not support IndexNow — it relies on the sitemap + crawl.
  * Never throws; indexing notifications are best-effort.
  */
-export async function submitToIndexNow(urls: string[]): Promise<void> {
+export async function submitToIndexNow(urls: string[]): Promise<number | null> {
   const list = Array.from(new Set(urls.filter(Boolean)));
-  if (!list.length) return;
+  if (!list.length) return null;
   let host: string;
   try {
     host = new URL(SITE_URL).host;
   } catch {
-    return;
+    return null;
   }
   try {
-    await fetch("https://api.indexnow.org/indexnow", {
+    const res = await fetch("https://api.indexnow.org/indexnow", {
       method: "POST",
       headers: { "Content-Type": "application/json; charset=utf-8" },
       body: JSON.stringify({
@@ -133,8 +133,10 @@ export async function submitToIndexNow(urls: string[]): Promise<void> {
         urlList: list,
       }),
     });
+    return res.status;
   } catch {
     // ignore — pinging is non-critical
+    return null;
   }
 }
 

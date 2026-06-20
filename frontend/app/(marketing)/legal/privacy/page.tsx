@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — Captapi",
-  description: "Privacy Policy for Captapi API.",
+  description: "Read the Captapi Privacy Policy — what data the social media data API collects, how we use and store it, cookies, third-party processors, retention, and your privacy rights.",
   alternates: { canonical: "/legal/privacy" },
 };
 

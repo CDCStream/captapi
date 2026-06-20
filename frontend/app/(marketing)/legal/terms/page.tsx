@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Terms of Service — Captapi",
-  description: "Terms of Service for Captapi API.",
+  description: "Read the Terms of Service for the Captapi social media data API — covering acceptable use, accounts, credits and billing, fair use, liability, and account termination.",
   alternates: { canonical: "/legal/terms" },
 };
 
