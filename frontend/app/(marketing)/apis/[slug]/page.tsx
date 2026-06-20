@@ -55,7 +55,7 @@ export async function generateMetadata({
   const ep = getEndpoint(slug);
   if (!ep) return {};
   const title = `${ep.name} — ${platformLabel(ep.platform)} Data via REST`;
-  const description = tagline(ep);
+  const description = `${tagline(ep)} No OAuth and no scraping — send a URL and get clean, structured JSON back, with results cached for 24 hours.`;
   const url = `${SITE_URL}/apis/${ep.slug}`;
   return {
     title: `${ep.name} | Captapi`,
