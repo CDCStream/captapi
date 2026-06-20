@@ -3,7 +3,7 @@
 // the data-driven /tools/[slug] transcript tools in lib/tools.ts).
 // Used by the tools hub, the tools layout footer, the sitemap, and the nav.
 
-export type MakerToolType = "canvas" | "ai" | "converter" | "viewer" | "downloader";
+export type MakerToolType = "canvas" | "ai" | "converter" | "viewer" | "downloader" | "reference";
 
 export interface MakerTool {
   slug: string;
@@ -91,6 +91,13 @@ export const MAKER_TOOLS: MakerTool[] = [
     blurb: "8 video ideas with hooks, concepts, suggested sounds, and a virality score.",
     platform: "TikTok",
     type: "ai",
+  },
+  {
+    slug: "tiktok-emojis",
+    name: "TikTok Emojis",
+    blurb: "All 46 secret TikTok emoji codes with meanings. Search and copy codes like [smile] in one click.",
+    platform: "TikTok",
+    type: "reference",
   },
   {
     slug: "instagram-highlights-viewer",

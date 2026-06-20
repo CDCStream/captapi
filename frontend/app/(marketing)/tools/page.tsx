@@ -2,8 +2,17 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { TOOL_LIST } from "@/lib/tools";
-import { MAKER_TOOLS } from "@/lib/maker-tools";
+import { MAKER_TOOLS, type MakerToolType } from "@/lib/maker-tools";
 import { buildMetadata } from "@/lib/seo";
+
+const MAKER_BADGES: Record<MakerToolType, string> = {
+  ai: "AI generator",
+  converter: "Converter",
+  viewer: "Viewer",
+  downloader: "Downloader",
+  reference: "Reference",
+  canvas: "Maker",
+};
 
 type HubTool = {
   slug: string;
@@ -17,7 +26,7 @@ const PLATFORM_ORDER = ["YouTube", "TikTok", "Instagram", "Facebook", "General"]
 
 const PLATFORM_DESCRIPTIONS: Record<string, string> = {
   YouTube: "Transcript, summary, thumbnail, banner, title, description, hashtag, and Shorts idea tools for YouTube creators.",
-  TikTok: "Transcript, summary, username, hashtag, and video idea tools for TikTok content workflows.",
+  TikTok: "Transcript, summary, username, hashtag, video idea, and secret emoji tools for TikTok content workflows.",
   Instagram: "Free transcript, summarizer, highlights viewer, and photo downloader tools for Instagram.",
   Facebook: "Free transcript tools for public Facebook videos.",
   General: "Cross-platform creator utilities for bios and reusable social media assets.",
@@ -36,16 +45,7 @@ const tools: HubTool[] = [
     title: tool.name,
     description: tool.blurb,
     platform: tool.platform,
-    badge:
-      tool.type === "ai"
-        ? "AI generator"
-        : tool.type === "converter"
-          ? "Converter"
-          : tool.type === "viewer"
-            ? "Viewer"
-            : tool.type === "downloader"
-              ? "Downloader"
-              : "Maker",
+    badge: MAKER_BADGES[tool.type] ?? "Maker",
   })),
 ];
 
