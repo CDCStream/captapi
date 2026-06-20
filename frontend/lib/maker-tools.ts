@@ -3,14 +3,14 @@
 // the data-driven /tools/[slug] transcript tools in lib/tools.ts).
 // Used by the tools hub, the tools layout footer, the sitemap, and the nav.
 
-export type MakerToolType = "canvas" | "ai" | "converter";
+export type MakerToolType = "canvas" | "ai" | "converter" | "viewer";
 
 export interface MakerTool {
   slug: string;
   name: string;
   /** Short card blurb. */
   blurb: string;
-  platform: "YouTube" | "TikTok" | "General";
+  platform: "YouTube" | "TikTok" | "Instagram" | "General";
   type: MakerToolType;
 }
 
@@ -91,6 +91,13 @@ export const MAKER_TOOLS: MakerTool[] = [
     blurb: "8 video ideas with hooks, concepts, suggested sounds, and a virality score.",
     platform: "TikTok",
     type: "ai",
+  },
+  {
+    slug: "instagram-highlights-viewer",
+    name: "Instagram Highlights Viewer",
+    blurb: "Enter any public username to open and browse their story highlights anonymously. Free, no login.",
+    platform: "Instagram",
+    type: "viewer",
   },
   {
     slug: "social-media-bio-generator",
