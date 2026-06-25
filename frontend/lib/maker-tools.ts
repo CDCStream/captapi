@@ -107,6 +107,13 @@ export const MAKER_TOOLS: MakerTool[] = [
     type: "viewer",
   },
   {
+    slug: "instagram-profile-viewer",
+    name: "Instagram Profile Viewer",
+    blurb: "Enter any public username to browse the profile photo, posts, reels, and highlights anonymously. Free, no login.",
+    platform: "Instagram",
+    type: "viewer",
+  },
+  {
     slug: "instagram-photo-downloader",
     name: "Instagram Photo Downloader",
     blurb: "Paste a public post or reel link to open and save the image in original quality. Free, no login.",
