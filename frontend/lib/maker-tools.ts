@@ -30,6 +30,13 @@ export const MAKER_TOOLS: MakerTool[] = [
     type: "converter",
   },
   {
+    slug: "youtube-shorts-downloader",
+    name: "YouTube Shorts Downloader",
+    blurb: "Paste a YouTube Shorts link to preview it and pick an MP4 quality from 360p to 1080p HD. Free, no watermark.",
+    platform: "YouTube",
+    type: "downloader",
+  },
+  {
     slug: "youtube-thumbnail-maker",
     name: "Free AI YouTube Thumbnail Maker",
     blurb: "Generate click-ready AI thumbnails from a title, portrait, and reference image. Multiple 16:9 variations, no sign-up.",

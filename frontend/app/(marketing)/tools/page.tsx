@@ -25,7 +25,7 @@ type HubTool = {
 const PLATFORM_ORDER = ["YouTube", "TikTok", "Instagram", "Facebook", "General"];
 
 const PLATFORM_DESCRIPTIONS: Record<string, string> = {
-  YouTube: "Transcript, summary, thumbnail, banner, title, description, hashtag, and Shorts idea tools for YouTube creators.",
+  YouTube: "Transcript, summary, thumbnail, banner, title, description, hashtag, converter, and Shorts downloader tools for YouTube creators.",
   TikTok: "Transcript, summary, username, hashtag, video idea, and secret emoji tools for TikTok content workflows.",
   Instagram: "Free transcript, summarizer, profile viewer, highlights viewer, and photo downloader tools for Instagram.",
   Facebook: "Free transcript tools for public Facebook videos.",
