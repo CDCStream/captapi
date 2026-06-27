@@ -32,17 +32,25 @@ def _scaled(n: int, rate: float, minimum: int) -> int:
 def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
     return {
         "platform": "rumble",
-        "id": safe_str(item.get("id") or item.get("videoId")),
+        "id": safe_str(item.get("id") or item.get("videoId") or item.get("videoSlug")),
         "url": safe_str(item.get("url") or item.get("videoUrl")),
-        "title": safe_str(item.get("title")),
+        "title": safe_str(item.get("title") or item.get("videoTitle")),
         "description": safe_str(item.get("description")),
         "channel": safe_str(item.get("channel") or item.get("channelName") or item.get("author")),
         "channelUrl": safe_str(item.get("channelUrl")),
-        "views": safe_int(item.get("views") or item.get("viewCount")),
-        "likes": safe_int(item.get("likes") or item.get("likeCount") or item.get("votes")),
+        "views": safe_int(item.get("views") or item.get("viewCount") or item.get("viewsCount")),
+        "likes": safe_int(
+            item.get("likes")
+            or item.get("likeCount")
+            or item.get("likesCount")
+            or item.get("engagementCount")
+            or item.get("votes")
+        ),
         "dislikes": safe_int(item.get("dislikes") or item.get("dislikeCount")),
-        "duration": safe_str(item.get("duration")),
-        "publishedAt": safe_str(item.get("uploadDate") or item.get("publishedAt") or item.get("date")),
+        "duration": safe_str(item.get("duration") or item.get("durationSeconds")),
+        "publishedAt": safe_str(
+            item.get("uploadDate") or item.get("publishedAt") or item.get("date")
+        ),
         "thumbnail": safe_str(item.get("thumbnail") or item.get("thumbnailUrl") or item.get("image")),
     }
 
@@ -66,7 +74,12 @@ async def video_details(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_RUMBLE,
-                {"startUrls": [{"url": url}], "maxItems": 1},
+                {
+                    "queries": [url],
+                    "contentTypes": ["videos"],
+                    "maxItems": 1,
+                    "includeComments": False,
+                },
                 max_items=1,
             )
             if not items:
@@ -104,7 +117,12 @@ async def channel_videos(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_RUMBLE,
-                {"startUrls": [{"url": url}], "maxItems": limit},
+                {
+                    "queries": [url],
+                    "contentTypes": ["videos"],
+                    "maxItems": limit,
+                    "includeComments": False,
+                },
                 max_items=limit,
             )
             videos = [_normalize_video(i) for i in items][:limit]
@@ -139,7 +157,12 @@ async def rumble_search(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_RUMBLE,
-                {"search": q, "maxItems": limit},
+                {
+                    "queries": [f"search:{q}"],
+                    "contentTypes": ["videos"],
+                    "maxItems": limit,
+                    "includeComments": False,
+                },
                 max_items=limit,
             )
             results = [_normalize_video(i) for i in items][:limit]

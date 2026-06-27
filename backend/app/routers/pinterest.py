@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import math
 from typing import Any
+from urllib.parse import quote_plus
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -82,7 +83,11 @@ async def pin_details(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_PINTEREST,
-                {"startUrls": [{"url": url}], "maxItems": 1},
+                {
+                    "startUrls": [{"url": url}],
+                    "maxItems": 1,
+                    "proxy": {"useApifyProxy": True},
+                },
                 max_items=1,
             )
             if not items:
@@ -120,7 +125,11 @@ async def user_pins(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_PINTEREST,
-                {"startUrls": [{"url": f"https://www.pinterest.com/{username}/"}], "maxItems": limit},
+                {
+                    "startUrls": [{"url": f"https://www.pinterest.com/{username}/"}],
+                    "maxItems": limit,
+                    "proxy": {"useApifyProxy": True},
+                },
                 max_items=limit,
             )
             pins = [_normalize_pin(i) for i in items][:limit]
@@ -153,9 +162,16 @@ async def pinterest_search(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
+            search_url = f"https://www.pinterest.com/search/pins/?q={quote_plus(q)}"
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_PINTEREST,
-                {"search": q, "maxItems": limit},
+                {
+                    "startUrls": [{"url": search_url}],
+                    "search": q,
+                    "endPage": 1,
+                    "maxItems": limit,
+                    "proxy": {"useApifyProxy": True},
+                },
                 max_items=limit,
             )
             results = [_normalize_pin(i) for i in items][:limit]

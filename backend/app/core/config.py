@@ -103,8 +103,10 @@ class Settings(BaseSettings):
     # maxItems). Slug is config-driven so it can be swapped without code edits.
     APIFY_ACTOR_REDDIT: str = "trudax/reddit-scraper-lite"
 
-    # Threads (Meta). Input: profile URLs / usernames / post URLs + maxItems.
-    APIFY_ACTOR_THREADS: str = "curious_coder/threads-scraper"
+    # Threads (Meta). User media actor accepts username + maxPosts; post media
+    # actor accepts direct post links.
+    APIFY_ACTOR_THREADS: str = "igview-owner/threads-user-media-scraper"
+    APIFY_ACTOR_THREADS_POST: str = "easyapi/threads-post-media-downloader"
 
     # Pinterest. Input: startUrls (pin/board/profile) / search + maxItems.
     APIFY_ACTOR_PINTEREST: str = "epctex/pinterest-scraper"
@@ -116,7 +118,7 @@ class Settings(BaseSettings):
     APIFY_ACTOR_LINKEDIN_POST: str = "apimaestro/linkedin-post-detail"
 
     # Rumble. Channel videos, single video, and keyword search.
-    APIFY_ACTOR_RUMBLE: str = "lexis-solutions/rumble-scraper"
+    APIFY_ACTOR_RUMBLE: str = "thescrapelab/apify-rumble-scraper"
 
     # Bluesky uses the public AT-Protocol AppView API directly (no actor).
     BLUESKY_API_BASE: str = "https://public.api.bsky.app"

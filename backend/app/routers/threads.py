@@ -43,21 +43,29 @@ def _user(u: dict[str, Any]) -> dict[str, Any]:
 
 
 def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
-    user = item.get("user") or item.get("author") or {}
-    code = item.get("code") or item.get("shortcode")
+    user = item.get("user") or item.get("author") or item
+    code = item.get("code") or item.get("shortcode") or item.get("post_code")
     return {
         "platform": "threads",
-        "id": safe_str(item.get("pk") or item.get("id")),
+        "id": safe_str(item.get("pk") or item.get("id") or item.get("post_id")),
         "code": safe_str(code),
-        "url": safe_str(item.get("url"))
+        "url": safe_str(item.get("url") or item.get("post_url"))
         or (f"https://www.threads.net/t/{code}" if code else None),
         "text": safe_str(item.get("caption") or item.get("text") or item.get("caption_text")),
-        "publishedAt": safe_str(item.get("taken_at") or item.get("published_on") or item.get("publishedAt")),
+        "publishedAt": safe_str(
+            item.get("taken_at") or item.get("published_on") or item.get("publishedAt")
+        ),
         "author": _user(user),
         "engagement": {
             "likes": safe_int(item.get("like_count") or item.get("likeCount") or item.get("likes")),
-            "replies": safe_int(item.get("reply_count") or item.get("replyCount") or item.get("replies")),
+            "replies": safe_int(
+                item.get("reply_count")
+                or item.get("replyCount")
+                or item.get("direct_reply_count")
+                or item.get("replies")
+            ),
             "reposts": safe_int(item.get("repost_count") or item.get("repostCount") or item.get("reposts")),
+            "quotes": safe_int(item.get("quote_count") or item.get("quoteCount")),
         },
     }
 
@@ -75,6 +83,29 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
         "verified": item.get("is_verified") or item.get("isVerified"),
         "followers": safe_int(item.get("follower_count") or item.get("followerCount") or item.get("followers")),
         "profileImage": safe_str(item.get("profile_pic_url") or item.get("profilePicUrl")),
+    }
+
+
+def _normalize_post_download(item: dict[str, Any]) -> dict[str, Any]:
+    result = item.get("result") if isinstance(item.get("result"), dict) else item
+    media = result.get("medias") if isinstance(result.get("medias"), list) else []
+    first_media = media[0] if media and isinstance(media[0], dict) else {}
+    return {
+        "platform": "threads",
+        "id": safe_str(first_media.get("id")),
+        "code": safe_str(extract_threads_post_code(result.get("url") or item.get("url") or "")),
+        "url": safe_str(result.get("url") or item.get("url")),
+        "text": safe_str(result.get("title") or first_media.get("caption")),
+        "publishedAt": None,
+        "author": {
+            "username": safe_str(result.get("author")),
+            "displayName": safe_str(result.get("author")),
+            "verified": None,
+            "followers": 0,
+            "profileImage": None,
+        },
+        "engagement": {"likes": 0, "replies": 0, "reposts": 0, "quotes": 0},
+        "media": media,
     }
 
 
@@ -98,7 +129,7 @@ async def threads_profile(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_THREADS,
-                {"usernames": [handle], "urls": [f"https://www.threads.net/@{handle}"], "resultsType": "profile"},
+                {"username": handle, "maxPosts": 1},
                 max_items=1,
             )
             if not items:
@@ -136,7 +167,7 @@ async def threads_user_posts(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_THREADS,
-                {"usernames": [handle], "resultsType": "posts", "resultsLimit": limit},
+                {"username": handle, "maxPosts": limit},
                 max_items=limit,
             )
             posts = [_normalize_post(i) for i in items][:limit]
@@ -170,13 +201,13 @@ async def threads_post_details(
         async def _run() -> dict[str, Any]:
             apify = get_apify()
             items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_THREADS,
-                {"urls": [url], "resultsType": "details", "resultsLimit": 1},
+                settings.APIFY_ACTOR_THREADS_POST,
+                {"links": [url], "proxyConfiguration": {"useApifyProxy": False}},
                 max_items=1,
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Post not found")
-            return _normalize_post(items[0])
+            return _normalize_post_download(items[0])
 
         data = await cached_or_run(
             endpoint="threads.post-details",
