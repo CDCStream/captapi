@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import math
 from typing import Any
-from urllib.parse import quote_plus
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -37,9 +36,11 @@ def _image(item: dict[str, Any]) -> str | None:
             v = imgs.get(key)
             if isinstance(v, dict) and v.get("url"):
                 return safe_str(v["url"])
+            if isinstance(v, str):
+                return safe_str(v)
         if imgs.get("url"):
             return safe_str(imgs["url"])
-    return safe_str(item.get("imageUrl") or item.get("thumbnail"))
+    return safe_str(item.get("imageUrl") or item.get("image_url") or item.get("thumbnail"))
 
 
 def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
@@ -51,14 +52,25 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
         or (f"https://www.pinterest.com/pin/{item.get('id')}/" if item.get("id") else None),
         "title": safe_str(item.get("title") or item.get("grid_title")),
         "description": safe_str(item.get("description")),
-        "destinationUrl": safe_str(item.get("link") or item.get("destinationUrl")),
+        "destinationUrl": safe_str(item.get("link") or item.get("destinationUrl") or item.get("sourceLink")),
         "image": _image(item),
-        "saves": safe_int(item.get("repin_count") or item.get("saveCount") or item.get("repinCount")),
+        "saves": safe_int(
+            item.get("repin_count")
+            or item.get("saveCount")
+            or item.get("repinCount")
+            or item.get("save_count")
+        ),
         "comments": safe_int(item.get("comment_count") or item.get("commentCount")),
         "publishedAt": safe_str(item.get("created_at") or item.get("createdAt")),
         "author": {
-            "username": safe_str(pinner.get("username")),
-            "displayName": safe_str(pinner.get("full_name") or pinner.get("fullName")),
+            "username": safe_str(
+                pinner.get("username") or item.get("pinner_username")
+            ),
+            "displayName": safe_str(
+                pinner.get("full_name")
+                or pinner.get("fullName")
+                or item.get("pinner_name")
+            ),
             "followers": safe_int(pinner.get("follower_count") or pinner.get("followerCount")),
         },
     }
@@ -83,11 +95,7 @@ async def pin_details(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_PINTEREST,
-                {
-                    "startUrls": [{"url": url}],
-                    "maxItems": 1,
-                    "proxy": {"useApifyProxy": True},
-                },
+                {"pinUrls": [url], "maxResults": 1},
                 max_items=1,
             )
             if not items:
@@ -125,11 +133,7 @@ async def user_pins(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_PINTEREST,
-                {
-                    "startUrls": [{"url": f"https://www.pinterest.com/{username}/"}],
-                    "maxItems": limit,
-                    "proxy": {"useApifyProxy": True},
-                },
+                {"usernames": [username], "maxResults": limit},
                 max_items=limit,
             )
             pins = [_normalize_pin(i) for i in items][:limit]
@@ -162,16 +166,9 @@ async def pinterest_search(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            search_url = f"https://www.pinterest.com/search/pins/?q={quote_plus(q)}"
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_PINTEREST,
-                {
-                    "startUrls": [{"url": search_url}],
-                    "search": q,
-                    "endPage": 1,
-                    "maxItems": limit,
-                    "proxy": {"useApifyProxy": True},
-                },
+                {"searchQueries": [q], "maxResults": limit},
                 max_items=limit,
             )
             results = [_normalize_pin(i) for i in items][:limit]

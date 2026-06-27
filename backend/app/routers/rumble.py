@@ -33,7 +33,7 @@ def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
     return {
         "platform": "rumble",
         "id": safe_str(item.get("id") or item.get("videoId") or item.get("videoSlug")),
-        "url": safe_str(item.get("url") or item.get("videoUrl")),
+        "url": safe_str(item.get("url") or item.get("videoUrl") or item.get("sourceUrl")),
         "title": safe_str(item.get("title") or item.get("videoTitle")),
         "description": safe_str(item.get("description")),
         "channel": safe_str(item.get("channel") or item.get("channelName") or item.get("author")),
@@ -74,12 +74,7 @@ async def video_details(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_RUMBLE,
-                {
-                    "queries": [url],
-                    "contentTypes": ["videos"],
-                    "maxItems": 1,
-                    "includeComments": False,
-                },
+                {"searchQueries": [url], "maxItems": 1},
                 max_items=1,
             )
             if not items:
@@ -117,12 +112,7 @@ async def channel_videos(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_RUMBLE,
-                {
-                    "queries": [url],
-                    "contentTypes": ["videos"],
-                    "maxItems": limit,
-                    "includeComments": False,
-                },
+                {"searchQueries": [url], "maxItems": limit},
                 max_items=limit,
             )
             videos = [_normalize_video(i) for i in items][:limit]
@@ -157,12 +147,7 @@ async def rumble_search(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_RUMBLE,
-                {
-                    "queries": [f"search:{q}"],
-                    "contentTypes": ["videos"],
-                    "maxItems": limit,
-                    "includeComments": False,
-                },
+                {"searchQueries": [q], "maxItems": limit},
                 max_items=limit,
             )
             results = [_normalize_video(i) for i in items][:limit]

@@ -108,8 +108,9 @@ class Settings(BaseSettings):
     APIFY_ACTOR_THREADS: str = "igview-owner/threads-user-media-scraper"
     APIFY_ACTOR_THREADS_POST: str = "easyapi/threads-post-media-downloader"
 
-    # Pinterest. Input: startUrls (pin/board/profile) / search + maxItems.
-    APIFY_ACTOR_PINTEREST: str = "epctex/pinterest-scraper"
+    # Pinterest. Pay-per-result actor (no monthly rent). Input:
+    # searchQueries / usernames / boardUrls / pinUrls + maxResults.
+    APIFY_ACTOR_PINTEREST: str = "thirdwatch/pinterest-scraper"
 
     # LinkedIn. Profile + company + post/search actors (rental, public data
     # only). Slugs are config-driven; verify access in the Apify console.
@@ -117,8 +118,8 @@ class Settings(BaseSettings):
     APIFY_ACTOR_LINKEDIN_COMPANY: str = "apimaestro/linkedin-company-detail"
     APIFY_ACTOR_LINKEDIN_POST: str = "apimaestro/linkedin-post-detail"
 
-    # Rumble. Channel videos, single video, and keyword search.
-    APIFY_ACTOR_RUMBLE: str = "thescrapelab/apify-rumble-scraper"
+    # Rumble. Input: searchQueries + maxItems.
+    APIFY_ACTOR_RUMBLE: str = "kawsar/rumble-video-extractor"
 
     # Bluesky uses the public AT-Protocol AppView API directly (no actor).
     BLUESKY_API_BASE: str = "https://public.api.bsky.app"
