@@ -9,6 +9,7 @@ import html
 import math
 import re
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -103,6 +104,11 @@ def _meta(page: str, key: str) -> str | None:
         pattern = rf'<meta\s+content=["\']([^"\']+)["\']\s+(?:property|name)=["\']{re.escape(key)}["\']'
         match = re.search(pattern, page, flags=re.IGNORECASE)
     return html.unescape(match.group(1)).strip() if match else None
+
+
+def _canonical_video_url(url: str) -> str:
+    parts = urlsplit(url)
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
 
 
 def _query_from_video_url(url: str) -> str | None:
@@ -253,11 +259,14 @@ async def transcript(
         base_credits=3,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_RUMBLE_TRANSCRIPT,
-                {"url": url, "language": language, "format": "json"},
-                max_items=1,
-            )
+            try:
+                items = await get_apify().run_actor_sync(
+                    settings.APIFY_ACTOR_RUMBLE_TRANSCRIPT,
+                    {"url": _canonical_video_url(url), "language": language, "format": "json"},
+                    max_items=1,
+                )
+            except Exception as exc:
+                raise HTTPException(status_code=404, detail="Transcript not available for this Rumble video") from exc
             if not items:
                 raise HTTPException(status_code=404, detail="Transcript not found")
             return _normalize_transcript(items[0])

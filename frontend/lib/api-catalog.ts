@@ -872,7 +872,7 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
     case "advertiser":
       return "nike.com";
     case "creative_id":
-      return "CR08100116008800354305";
+      return "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR10754779872199966721";
     case "comment_id":
       return "7311234567890123456";
     case "limit":

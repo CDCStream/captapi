@@ -2257,13 +2257,19 @@
     "name": "Google Ad Details",
     "path": "/v1/ad-library/google/ad-details",
     "credits": 2,
-    "summary": "Google ad details by creative ID or preview URL.",
+    "summary": "Google ad details by Transparency Center URL.",
     "params": [
       {
         "name": "creative_id",
         "type": "string",
         "required": true,
-        "description": "Google creative/ad ID or preview URL."
+        "description": "Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
       }
     ]
   },

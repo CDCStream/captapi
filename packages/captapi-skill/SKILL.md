@@ -266,7 +266,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `tiktok_ad_library_search` | `/v1/ad-library/tiktok/search` | `q` (string), `country`? (string), `limit`? (number) | 20 |
 | `tiktok_ad_library_ad_details` | `/v1/ad-library/tiktok/ad-details` | `url` (string), `country`? (string) | 2 |
 | `google_ad_library_company_ads` | `/v1/ad-library/google/company-ads` | `advertiser` (string), `country`? (string), `limit`? (number) | 20 |
-| `google_ad_library_ad_details` | `/v1/ad-library/google/ad-details` | `creative_id` (string) | 2 |
+| `google_ad_library_ad_details` | `/v1/ad-library/google/ad-details` | `creative_id` (Transparency Center URL with AR + CR), `country`? (string) | 2 |
 | `google_ad_library_advertiser_search` | `/v1/ad-library/google/advertiser-search` | `q` (string), `country`? (string), `limit`? (number) | 10 |
 | `linkedin_ad_library_search_ads` | `/v1/ad-library/linkedin/search-ads` | `q` (string), `country`? (string), `limit`? (number) | 20 |
 | `linkedin_ad_library_ad_details` | `/v1/ad-library/linkedin/ad-details` | `url` (string) | 2 |

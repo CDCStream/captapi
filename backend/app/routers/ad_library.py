@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import math
+import re
 from typing import Any
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -24,65 +26,248 @@ def _scaled(limit: int, minimum: int = 2) -> int:
     return max(minimum, math.ceil(limit * RATE))
 
 
+def _first(*values: Any) -> Any:
+    for value in values:
+        if value not in (None, "", [], {}):
+            return value
+    return None
+
+
+def _dig(obj: dict[str, Any], *path: str) -> Any:
+    cur: Any = obj
+    for part in path:
+        if not isinstance(cur, dict):
+            return None
+        cur = cur.get(part)
+    return cur
+
+
+def _listify(value: Any) -> list[Any]:
+    if not value:
+        return []
+    if isinstance(value, list):
+        return value
+    return [value]
+
+
+def _facebook_ad_url(value: str) -> str:
+    value = value.strip()
+    if value.isdigit():
+        return f"https://www.facebook.com/ads/library/?id={value}"
+    return value
+
+
+def _facebook_search_url(q: str, country: str) -> str:
+    params = {
+        "active_status": "all",
+        "ad_type": "all",
+        "country": country.upper(),
+        "q": q,
+        "search_type": "keyword_unordered",
+        "media_type": "all",
+    }
+    return f"https://www.facebook.com/ads/library/?{urlencode(params)}"
+
+
+def _tiktok_ad_id(value: str) -> str:
+    match = re.search(r"(?:ad_id|id)=([0-9]+)", value)
+    if match:
+        return match.group(1)
+    match = re.search(r"/ads/(?:detail/)?([0-9]+)", value)
+    if match:
+        return match.group(1)
+    match = re.search(r"\b([0-9]{10,})\b", value)
+    return match.group(1) if match else value.strip()
+
+
+def _linkedin_ad_url(value: str) -> str:
+    value = value.strip()
+    if value.isdigit():
+        return f"https://www.linkedin.com/ad-library/detail/{value}"
+    return value
+
+
+def _google_ids(value: str) -> tuple[str | None, str | None]:
+    advertiser = re.search(r"\b(AR[0-9]+)\b", value)
+    creative = re.search(r"\b(CR[0-9]+)\b", value)
+    return (
+        advertiser.group(1) if advertiser else None,
+        creative.group(1) if creative else None,
+    )
+
+
 def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
+    snapshot = item.get("snapshot") if isinstance(item.get("snapshot"), dict) else {}
     advertiser = item.get("advertiser") or item.get("page") or item.get("company") or {}
-    media = item.get("media") or item.get("mediaUrls") or item.get("images") or item.get("videos") or []
-    extra_media = [
-        item.get("imageUrl"),
-        item.get("thumbnailUrl"),
-        item.get("videoUrl"),
-        item.get("previewUrl"),
-    ]
-    if not media:
-        media = [m for m in extra_media if m]
+    media: list[Any] = []
+
+    media.extend(_listify(item.get("media")))
+    media.extend(_listify(item.get("mediaUrls")))
+    media.extend(_listify(item.get("images")))
+    media.extend(_listify(item.get("imageUrls")))
+    media.extend(_listify(item.get("videos")))
+    media.extend(_listify(item.get("videoUrls")))
+    media.extend(
+        m
+        for m in [
+            item.get("imageUrl"),
+            item.get("creativeImageUrl"),
+            item.get("primaryImageUrl"),
+            item.get("thumbnailUrl"),
+            item.get("coverImageUrl"),
+            item.get("adVideoCover"),
+            item.get("videoUrl"),
+            item.get("adVideoUrl"),
+            item.get("previewUrl"),
+            item.get("creativeAssetUrl"),
+        ]
+        if m
+    )
+    media.extend(_listify(snapshot.get("images")))
+    for video in _listify(snapshot.get("videos")):
+        if isinstance(video, dict):
+            media.extend(
+                m
+                for m in [
+                    video.get("videoHdUrl"),
+                    video.get("videoSdUrl"),
+                    video.get("videoPreviewImageUrl"),
+                ]
+                if m
+            )
+        else:
+            media.append(video)
+    for card in _listify(snapshot.get("cards")):
+        if isinstance(card, dict):
+            media.extend(
+                m
+                for m in [
+                    card.get("originalImageUrl"),
+                    card.get("videoHdUrl"),
+                    card.get("videoSdUrl"),
+                    card.get("videoPreviewImageUrl"),
+                ]
+                if m
+            )
+
+    ad_id = safe_str(
+        _first(
+            item.get("id"),
+            item.get("adId"),
+            item.get("ad_id"),
+            item.get("adArchiveID"),
+            item.get("adArchiveId"),
+            item.get("creativeId"),
+            item.get("creative_id"),
+            item.get("adCreativeId"),
+            item.get("ad_id"),
+        )
+    )
+    url = safe_str(
+        _first(
+            item.get("url"),
+            item.get("adUrl"),
+            item.get("ad_url"),
+            item.get("adLibraryURL"),
+            item.get("adLibraryUrl"),
+            item.get("ad_library_url"),
+            item.get("adTransparencyUrl"),
+            item.get("transparencyUrl"),
+            item.get("detailUrl"),
+            item.get("deeplink"),
+            item.get("adDetailUrl"),
+            item.get("previewUrl"),
+            item.get("sourceUrl"),
+            item.get("source_url"),
+        )
+    )
+    if platform == "facebook_ad_library" and not url and ad_id:
+        url = _facebook_ad_url(ad_id)
+
+    text = safe_str(
+        _first(
+            item.get("text"),
+            item.get("body"),
+            item.get("body_text"),
+            item.get("bodyText"),
+            item.get("adText"),
+            item.get("ad_text"),
+            item.get("adCopy"),
+            item.get("copy"),
+            item.get("description"),
+            _dig(snapshot, "body", "text"),
+        )
+    )
+    headline = safe_str(
+        _first(
+            item.get("headline"),
+            item.get("title"),
+            item.get("adTitle"),
+            item.get("ad_type"),
+            item.get("adFormat"),
+            item.get("format"),
+            item.get("ctaHeadline"),
+            snapshot.get("title"),
+        )
+    )
+
     return {
         "platform": platform,
-        "id": safe_str(
-            item.get("id")
-            or item.get("adId")
-            or item.get("ad_id")
-            or item.get("creativeId")
-            or item.get("creative_id")
+        "id": ad_id,
+        "url": url,
+        "text": text,
+        "headline": headline,
+        "cta": safe_str(
+            _first(
+                item.get("cta"),
+                item.get("ctaText"),
+                item.get("cta_text"),
+                item.get("callToAction"),
+                snapshot.get("ctaText"),
+            )
         ),
-        "url": safe_str(
-            item.get("url")
-            or item.get("adUrl")
-            or item.get("ad_url")
-            or item.get("detailUrl")
-            or item.get("deeplink")
-            or item.get("previewUrl")
-            or item.get("sourceUrl")
-            or item.get("source_url")
+        "landingUrl": safe_str(
+            _first(
+                item.get("landingUrl"),
+                item.get("landing_page_url"),
+                item.get("destinationUrl"),
+                item.get("ctaUrl"),
+                item.get("cta_url"),
+                snapshot.get("linkUrl"),
+            )
         ),
-        "text": safe_str(
-            item.get("text")
-            or item.get("body")
-            or item.get("body_text")
-            or item.get("adText")
-            or item.get("ad_text")
-            or item.get("copy")
-        ),
-        "headline": safe_str(item.get("headline") or item.get("title") or item.get("adTitle") or item.get("ad_type")),
-        "cta": safe_str(item.get("cta") or item.get("ctaText") or item.get("cta_text") or item.get("callToAction")),
-        "landingUrl": safe_str(item.get("landingUrl") or item.get("landing_page_url") or item.get("ctaUrl") or item.get("cta_url")),
-        "adFormat": safe_str(item.get("adFormat") or item.get("ad_format") or item.get("format") or item.get("type")),
-        "firstShown": safe_str(item.get("firstShown") or item.get("first_shown_date") or item.get("startDate")),
-        "lastShown": safe_str(item.get("lastShown") or item.get("last_shown_date") or item.get("endDate")),
-        "impressions": item.get("impressions") or item.get("impressionsRange") or item.get("reach"),
-        "spend": item.get("spend") or item.get("spendRange"),
-        "country": safe_str(item.get("country") or item.get("region")),
+        "adFormat": safe_str(_first(item.get("adFormat"), item.get("ad_format"), item.get("format"), item.get("type"), item.get("creativeType"), snapshot.get("displayFormat"))),
+        "firstShown": safe_str(_first(item.get("firstShown"), item.get("first_shown_date"), item.get("startDateFormatted"), item.get("startDate"), item.get("adStartDate"))),
+        "lastShown": safe_str(_first(item.get("lastShown"), item.get("last_shown_date"), item.get("endDateFormatted"), item.get("endDate"), item.get("adEndDate"))),
+        "impressions": _first(item.get("impressions"), item.get("impressionsRange"), item.get("reach"), item.get("impressionRange"), item.get("totalImpressionsInterval"), item.get("impressionsMin")),
+        "spend": _first(item.get("spend"), item.get("spendRange"), item.get("adSpent")),
+        "country": safe_str(_first(item.get("country"), item.get("region"), item.get("regions"))),
         "advertiser": {
-            "id": safe_str(advertiser.get("id") or item.get("advertiserId") or item.get("advertiser_id")),
+            "id": safe_str(_first(advertiser.get("id") if isinstance(advertiser, dict) else None, item.get("advertiserId"), item.get("advertiser_id"), item.get("advertiserBusinessId"), item.get("pageID"), item.get("pageId"))),
             "name": safe_str(
-                advertiser.get("name")
-                or item.get("advertiserName")
-                or item.get("advertiser_name")
-                or item.get("pageName")
-                or item.get("brandName")
+                _first(
+                    advertiser.get("name") if isinstance(advertiser, dict) else None,
+                    item.get("advertiserName"),
+                    item.get("advertiser_name"),
+                    item.get("pageName"),
+                    item.get("brandName"),
+                    item.get("pageInfo.page.name"),
+                    snapshot.get("pageName"),
+                )
             ),
-            "url": safe_str(advertiser.get("url") or item.get("advertiserUrl") or item.get("advertiser_url")),
+            "url": safe_str(
+                _first(
+                    advertiser.get("url") if isinstance(advertiser, dict) else None,
+                    item.get("advertiserUrl"),
+                    item.get("advertiser_url"),
+                    item.get("advertiserLogoUrl"),
+                    item.get("pageUrl"),
+                    item.get("pageURL"),
+                    snapshot.get("pageProfileUri"),
+                )
+            ),
         },
-        "media": media if isinstance(media, list) else [media],
+        "media": media,
     }
 
 
@@ -101,7 +286,11 @@ async def facebook_search(
     settings = get_settings()
     async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/search", platform="facebook_ad_library", resource_url=None, base_credits=_scaled(limit)) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY, {"queries": [q], "countries": [country.upper()], "activeStatus": "all", "maxAdsPerQuery": limit}, limit)
+            items = await _run_actor(
+                settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2,
+                {"startUrls": [{"url": _facebook_search_url(q, country)}], "resultsLimit": limit, "isDetailsPerAd": True},
+                limit,
+            )
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
@@ -120,7 +309,11 @@ async def facebook_company_ads(
     settings = get_settings()
     async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/company-ads", platform="facebook_ad_library", resource_url=url, base_credits=_scaled(limit)) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY, {"pageUrls": [url], "countries": [country.upper()], "activeStatus": "all", "maxAdsPerQuery": limit}, limit)
+            items = await _run_actor(
+                settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2,
+                {"startUrls": [{"url": url}], "resultsLimit": limit, "isDetailsPerAd": True},
+                limit,
+            )
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
             return {"url": url, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
@@ -131,18 +324,19 @@ async def facebook_company_ads(
 
 @router.get("/facebook/ad-details", summary="Meta/Facebook ad details")
 async def facebook_ad_details(
-    url: str = Query(..., description="Meta Ad Library ad URL"),
+    url: str = Query(..., description="Meta Ad Library ad URL or ad ID"),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/ad-details", platform="facebook_ad_library", resource_url=url, base_credits=2) as ctx:
+    ad_url = _facebook_ad_url(url)
+    async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/ad-details", platform="facebook_ad_library", resource_url=ad_url, base_credits=2) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY, {"pageUrls": [url], "queries": [], "scrapeAdDetails": True, "maxAdsPerQuery": 1}, 1)
+            items = await _run_actor(settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2, {"startUrls": [{"url": ad_url}], "resultsLimit": 1, "isDetailsPerAd": True}, 1)
             if not items:
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(items[0], "facebook_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.facebook.ad-details", {"url": url}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.facebook.ad-details", {"url": ad_url}, _run, ctx))
 
 
 @router.get("/tiktok/search", summary="Search TikTok Ad Library")
@@ -171,14 +365,19 @@ async def tiktok_ad_details(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/tiktok/ad-details", platform="tiktok_ad_library", resource_url=url, base_credits=2) as ctx:
+    ad_id = _tiktok_ad_id(url)
+    async with billed_call(caller=caller, endpoint="/v1/ad-library/tiktok/ad-details", platform="tiktok_ad_library", resource_url=ad_id, base_credits=2) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY, {"source": "library", "searchTerms": [url], "countries": [country.upper()], "maxResults": 1, "resolveAdDetails": True}, 1)
+            items = await _run_actor(
+                settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL,
+                {"adIds": [ad_id], "country": country.upper(), "maxResults": 1, "quickSearch": False},
+                1,
+            )
             if not items:
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(items[0], "tiktok_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.tiktok.ad-details", {"url": url, "country": country}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.tiktok.ad-details", {"ad_id": ad_id, "country": country}, _run, ctx))
 
 
 @router.get("/google/company-ads", summary="Google Ads Transparency Center company ads")
@@ -191,12 +390,7 @@ async def google_company_ads(
     settings = get_settings()
     async with billed_call(caller=caller, endpoint="/v1/ad-library/google/company-ads", platform="google_ad_library", resource_url=None, base_credits=_scaled(limit)) as ctx:
         async def _run() -> dict[str, Any]:
-            payload = {"searchTerms": [advertiser], "region": country.upper(), "maxAds": limit}
-            if "." in advertiser and not advertiser.startswith("AR"):
-                payload = {"domains": [advertiser.replace("https://", "").replace("http://", "").strip("/")], "region": country.upper(), "maxAds": limit}
-            elif advertiser.startswith("AR"):
-                payload = {"advertiserIds": [advertiser], "region": country.upper(), "maxAds": limit}
-            items = await _run_actor(settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY, payload, limit)
+            items = await _run_actor(settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2, {"advertisers": [advertiser], "region": country.upper(), "maxResults": limit}, limit)
             ads = [_normalize_ad(i, "google_ad_library") for i in items]
             return {"advertiser": advertiser, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
@@ -207,18 +401,23 @@ async def google_company_ads(
 
 @router.get("/google/ad-details", summary="Google ad details")
 async def google_ad_details(
-    creative_id: str = Query(..., description="Google creative/ad ID or preview URL"),
+    creative_id: str = Query(..., description="Google Ads Transparency URL containing AR... and CR... IDs"),
+    country: str = Query("US", min_length=2, max_length=2),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
+    advertiser_id, creative = _google_ids(creative_id)
+    if not advertiser_id or not creative:
+        raise HTTPException(status_code=400, detail="Google ad details requires a Transparency Center URL containing both AR advertiser ID and CR creative ID")
     async with billed_call(caller=caller, endpoint="/v1/ad-library/google/ad-details", platform="google_ad_library", resource_url=creative_id, base_credits=2) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY, {"creativeIds": [creative_id], "maxAds": 1, "enrichDetails": True}, 1)
-            if not items:
-                raise HTTPException(status_code=404, detail="Ad not found")
-            return _normalize_ad(items[0], "google_ad_library")
+            items = await _run_actor(settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2, {"advertisers": [advertiser_id], "region": country.upper(), "maxResults": 50}, 50)
+            for item in items:
+                if item.get("creativeId") == creative or item.get("adCreativeId") == creative:
+                    return _normalize_ad(item, "google_ad_library")
+            raise HTTPException(status_code=404, detail="Ad not found")
 
-        return ApiResponse(data=await cached_or_run("ad-library.google.ad-details", {"creative_id": creative_id}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.google.ad-details", {"creative_id": creative_id, "country": country}, _run, ctx))
 
 
 @router.get("/google/advertiser-search", summary="Search Google Ads advertisers")
@@ -231,7 +430,7 @@ async def google_advertiser_search(
     settings = get_settings()
     async with billed_call(caller=caller, endpoint="/v1/ad-library/google/advertiser-search", platform="google_ad_library", resource_url=None, base_credits=_scaled(limit)) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY, {"searchTerms": [q], "region": country.upper(), "maxAds": limit}, limit)
+            items = await _run_actor(settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2, {"advertisers": [q], "region": country.upper(), "maxResults": limit}, limit)
             advertisers = {}
             for item in items:
                 ad = _normalize_ad(item, "google_ad_library")
@@ -268,11 +467,12 @@ async def linkedin_ad_details(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/linkedin/ad-details", platform="linkedin_ad_library", resource_url=url, base_credits=2) as ctx:
+    ad_url = _linkedin_ad_url(url)
+    async with billed_call(caller=caller, endpoint="/v1/ad-library/linkedin/ad-details", platform="linkedin_ad_library", resource_url=ad_url, base_credits=2) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_LINKEDIN_AD_LIBRARY, {"search": url, "sort": "NEWEST"}, 1)
+            items = await _run_actor(settings.APIFY_ACTOR_LINKEDIN_AD_LIBRARY_DETAIL, {"adUrls": [ad_url], "maxResults": 1, "includeDetails": True}, 1)
             if not items:
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(items[0], "linkedin_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.linkedin.ad-details", {"url": url}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.linkedin.ad-details", {"url": ad_url}, _run, ctx))

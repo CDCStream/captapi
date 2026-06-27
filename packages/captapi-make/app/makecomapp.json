@@ -1891,7 +1891,7 @@
       },
       "googleAdLibraryAdDetails": {
         "label": "Google Ad Details",
-        "description": "Google ad details by creative ID or preview URL. Costs ~2 credits.",
+        "description": "Google ad details by Transparency Center URL containing AR advertiser ID and CR creative ID. Costs ~2 credits.",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
