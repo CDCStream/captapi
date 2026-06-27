@@ -5,9 +5,12 @@ Backed by a config-driven Pinterest actor. Field mappings are defensive.
 
 from __future__ import annotations
 
+import html
 import math
+import re
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import ApiCaller, require_api_key
@@ -78,6 +81,46 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _meta(page: str, key: str) -> str | None:
+    pattern = rf'<meta\s+(?:property|name)=["\']{re.escape(key)}["\']\s+content=["\']([^"\']+)["\']'
+    match = re.search(pattern, page, flags=re.IGNORECASE)
+    if not match:
+        pattern = rf'<meta\s+content=["\']([^"\']+)["\']\s+(?:property|name)=["\']{re.escape(key)}["\']'
+        match = re.search(pattern, page, flags=re.IGNORECASE)
+    return html.unescape(match.group(1)).strip() if match else None
+
+
+async def _fetch_pin_page(url: str) -> dict[str, Any]:
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
+    async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
+        resp = await client.get(url)
+    if resp.status_code >= 400:
+        raise HTTPException(status_code=404, detail="Pin not found")
+
+    page = resp.text
+    pin_id = extract_pinterest_pin_id(str(resp.url)) or extract_pinterest_pin_id(url)
+    title = _meta(page, "og:title")
+    description = _meta(page, "og:description") or _meta(page, "description")
+    image = _meta(page, "og:image")
+    canonical = _meta(page, "og:url") or str(resp.url)
+    if not (title or description or image):
+        raise HTTPException(status_code=404, detail="Pin not found")
+
+    return {
+        "platform": "pinterest",
+        "id": safe_str(pin_id),
+        "url": safe_str(canonical),
+        "title": safe_str(title),
+        "description": safe_str(description),
+        "destinationUrl": None,
+        "image": safe_str(image),
+        "saves": 0,
+        "comments": 0,
+        "publishedAt": None,
+        "author": {"username": None, "displayName": None, "followers": 0},
+    }
+
+
 @router.get("/pin-details", summary="Pinterest pin metadata + stats")
 async def pin_details(
     url: str = Query(..., description="Pinterest pin URL"),
@@ -95,14 +138,17 @@ async def pin_details(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_PINTEREST,
-                {"pinUrls": [url], "maxResults": 1},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Pin not found")
-            return _normalize_pin(items[0])
+            try:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_PINTEREST,
+                    {"pinUrls": [url], "maxResults": 1},
+                    max_items=1,
+                )
+            except Exception:
+                items = []
+            if items:
+                return _normalize_pin(items[0])
+            return await _fetch_pin_page(url)
 
         data = await cached_or_run(
             endpoint="pinterest.pin-details",

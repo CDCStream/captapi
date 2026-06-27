@@ -5,9 +5,12 @@ Backed by a config-driven Rumble actor. Field mappings are defensive.
 
 from __future__ import annotations
 
+import html
 import math
+import re
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import ApiCaller, require_api_key
@@ -59,6 +62,49 @@ def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _meta(page: str, key: str) -> str | None:
+    pattern = rf'<meta\s+(?:property|name)=["\']{re.escape(key)}["\']\s+content=["\']([^"\']+)["\']'
+    match = re.search(pattern, page, flags=re.IGNORECASE)
+    if not match:
+        pattern = rf'<meta\s+content=["\']([^"\']+)["\']\s+(?:property|name)=["\']{re.escape(key)}["\']'
+        match = re.search(pattern, page, flags=re.IGNORECASE)
+    return html.unescape(match.group(1)).strip() if match else None
+
+
+async def _fetch_video_page(url: str) -> dict[str, Any]:
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
+    async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
+        resp = await client.get(url)
+    if resp.status_code >= 400:
+        raise HTTPException(status_code=404, detail="Video not found")
+
+    page = resp.text
+    video_id = extract_rumble_video_id(str(resp.url)) or extract_rumble_video_id(url)
+    title = _meta(page, "og:title")
+    description = _meta(page, "og:description") or _meta(page, "description")
+    thumbnail = _meta(page, "og:image")
+    canonical = _meta(page, "og:url") or str(resp.url)
+    if not (title or description or thumbnail):
+        raise HTTPException(status_code=404, detail="Video not found")
+
+    return {
+        "platform": "rumble",
+        "id": safe_str(video_id),
+        "url": safe_str(canonical),
+        "title": safe_str(title),
+        "description": safe_str(description),
+        "channel": None,
+        "channelUrl": None,
+        "views": 0,
+        "likes": 0,
+        "dislikes": 0,
+        "duration": None,
+        "publishedAt": None,
+        "thumbnail": safe_str(thumbnail),
+        "comments": 0,
+    }
+
+
 @router.get("/video-details", summary="Rumble video metadata + stats")
 async def video_details(
     url: str = Query(..., description="Rumble video URL"),
@@ -76,14 +122,17 @@ async def video_details(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_RUMBLE,
-                {"searchQueries": [url], "maxItems": 1},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Video not found")
-            return _normalize_video(items[0])
+            try:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_RUMBLE,
+                    {"searchQueries": [url], "maxItems": 1},
+                    max_items=1,
+                )
+            except Exception:
+                items = []
+            if items:
+                return _normalize_video(items[0])
+            return await _fetch_video_page(url)
 
         data = await cached_or_run(
             endpoint="rumble.video-details",
