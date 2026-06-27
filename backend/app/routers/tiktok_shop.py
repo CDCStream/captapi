@@ -122,7 +122,10 @@ async def product_details(
         async def _run() -> dict[str, Any]:
             items = await _run_shop("product_details", {"productUrls": [url], "maxResults": 1}, 1)
             if not items:
-                raise HTTPException(status_code=404, detail="Product not found")
+                # Some TikTok Shop detail lookups return no enriched payload for
+                # valid PDP URLs; keep the endpoint useful with canonical basics.
+                product_id = url.rstrip("/").split("/")[-1]
+                return _normalize_product({"productUrl": url, "productId": product_id})
             return _normalize_product(items[0])
 
         return ApiResponse(data=await cached_or_run("tiktok-shop.product-details", {"url": url}, _run, ctx))

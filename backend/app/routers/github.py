@@ -12,6 +12,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import ApiCaller, require_api_key
+from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.cached_runner import cached_or_run
@@ -48,6 +49,9 @@ async def _get(path: str, params: dict[str, Any] | None = None) -> Any:
         "User-Agent": "Captapi/1.0",
         "X-GitHub-Api-Version": "2022-11-28",
     }
+    token = get_settings().GITHUB_TOKEN
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     async with httpx.AsyncClient(timeout=30, headers=headers) as client:
         resp = await client.get(f"{GITHUB_API}{path}", params=params)
     if resp.status_code == 404:

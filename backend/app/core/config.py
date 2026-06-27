@@ -136,6 +136,9 @@ class Settings(BaseSettings):
     APIFY_ACTOR_GOOGLE_AD_LIBRARY: str = "automation-lab/google-ads-scraper"
     APIFY_ACTOR_LINKEDIN_AD_LIBRARY: str = "s-r/linkedin-ads-library"
 
+    # Optional GitHub token avoids low unauthenticated public API limits.
+    GITHUB_TOKEN: str = ""
+
     # Bluesky uses the public AT-Protocol AppView API directly (no actor).
     BLUESKY_API_BASE: str = "https://public.api.bsky.app"
 

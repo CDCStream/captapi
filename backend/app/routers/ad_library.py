@@ -27,6 +27,14 @@ def _scaled(limit: int, minimum: int = 2) -> int:
 def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
     advertiser = item.get("advertiser") or item.get("page") or item.get("company") or {}
     media = item.get("media") or item.get("mediaUrls") or item.get("images") or item.get("videos") or []
+    extra_media = [
+        item.get("imageUrl"),
+        item.get("thumbnailUrl"),
+        item.get("videoUrl"),
+        item.get("previewUrl"),
+    ]
+    if not media:
+        media = [m for m in extra_media if m]
     return {
         "platform": platform,
         "id": safe_str(
@@ -41,8 +49,10 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             or item.get("adUrl")
             or item.get("ad_url")
             or item.get("detailUrl")
+            or item.get("deeplink")
             or item.get("previewUrl")
             or item.get("sourceUrl")
+            or item.get("source_url")
         ),
         "text": safe_str(
             item.get("text")
@@ -52,7 +62,7 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             or item.get("ad_text")
             or item.get("copy")
         ),
-        "headline": safe_str(item.get("headline") or item.get("title") or item.get("adTitle")),
+        "headline": safe_str(item.get("headline") or item.get("title") or item.get("adTitle") or item.get("ad_type")),
         "cta": safe_str(item.get("cta") or item.get("ctaText") or item.get("cta_text") or item.get("callToAction")),
         "landingUrl": safe_str(item.get("landingUrl") or item.get("landing_page_url") or item.get("ctaUrl") or item.get("cta_url")),
         "adFormat": safe_str(item.get("adFormat") or item.get("ad_format") or item.get("format") or item.get("type")),
