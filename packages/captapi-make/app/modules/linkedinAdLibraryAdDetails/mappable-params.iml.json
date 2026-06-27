@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "Ad URL or ID",
+    "required": true,
+    "help": "LinkedIn Ad Library URL or ad ID."
+  }
+]

@@ -1,11 +1,11 @@
 ---
 name: captapi
-description: Use when extracting public social-media data from YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, or video downloads. Captapi is one REST API (and MCP server) covering all 11 platforms with a single key. Trigger on requests like "get this YouTube transcript", "scrape this TikTok profile", "fetch Instagram reel comments", or "summarize this video".
+description: Use when extracting public social-media data from YouTube, TikTok, TikTok Shop, Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, or public Ad Libraries — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, or video downloads. Captapi is one REST API (and MCP server) covering all supported platforms with a single key. Trigger on requests like "get this YouTube transcript", "scrape this TikTok profile", "fetch Instagram reel comments", or "summarize this video".
 ---
 
 # Captapi
 
-Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble**. One key works across all 11 platforms. No OAuth, no per-platform SDKs. Responses are clean JSON and cached for 24h (repeat calls cost 0 credits). 85 endpoints total.
+Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble**. One key works across all supported platforms. No OAuth, no per-platform SDKs. Responses are clean JSON and cached for 24h (repeat calls cost 0 credits). 85 endpoints total.
 
 - Base URL: `https://api.captapi.com`
 - Docs: https://captapi.com/docs · Full machine reference: https://captapi.com/llms-full.txt
@@ -41,7 +41,7 @@ For shell tasks, scripts, or when no MCP client is available, the official CLI c
 ```bash
 npx @captapi/cli login                 # save the human-provided key to ~/.captapi/config.json
 npx @captapi/cli balance               # remaining credits
-npx @captapi/cli list                  # all 85 commands
+npx @captapi/cli list                  # all 114 commands
 npx @captapi/cli youtube-transcript --url "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 npx @captapi/cli tiktok-comment-replies --url "<video>" --comment_id "<id>" --limit 20
 ```
@@ -50,15 +50,15 @@ The CLI reads the key from `~/.captapi/config.json` (via `login`) or the `CAPTAP
 
 ## Use in n8n workflows (n8n-nodes-captapi)
 
-For no-code/low-code automations, the official `n8n-nodes-captapi` community node exposes all 85 endpoints in n8n. Install it from **Settings → Community Nodes** (package `n8n-nodes-captapi`; self-hosted: `npm install n8n-nodes-captapi`, then restart). Create a **Captapi API** credential with the human-provided `capt_live_...` key, add the **Captapi** node, pick a **Platform** and **Operation**, and it returns the same structured JSON as the REST API for downstream nodes.
+For no-code/low-code automations, the official `n8n-nodes-captapi` community node exposes all 114 endpoints in n8n. Install it from **Settings → Community Nodes** (package `n8n-nodes-captapi`; self-hosted: `npm install n8n-nodes-captapi`, then restart). Create a **Captapi API** credential with the human-provided `capt_live_...` key, add the **Captapi** node, pick a **Platform** and **Operation**, and it returns the same structured JSON as the REST API for downstream nodes.
 
 ## Use in Make.com scenarios (custom app)
 
-For Make.com (Integromat), the Captapi custom app exposes all 85 endpoints as action modules grouped by platform. Create a **Captapi API Key** connection with the human-provided `capt_live_...` key (verified against `/v1/account/limits`), then drop the module you need into a scenario, fill in the `url` (or search query) and optional `limit`, and it returns the same structured JSON `data` as the REST API for downstream modules.
+For Make.com (Integromat), the Captapi custom app exposes all 114 endpoints as action modules grouped by platform. Create a **Captapi API Key** connection with the human-provided `capt_live_...` key (verified against `/v1/account/limits`), then drop the module you need into a scenario, fill in the `url` (or search query) and optional `limit`, and it returns the same structured JSON `data` as the REST API for downstream modules.
 
 ## Use on Apify (BYO-key Actor)
 
-On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API (no scraping). Set the `apiKey` input to the human-provided `capt_live_...` key, choose an `operation` (any of the 85 endpoints), fill the fields it needs (`url` / search query / `limit` / ...), and the Actor returns one dataset item with the same structured JSON `data` as the REST API. Credits are billed to the user's own Captapi account. The Actor is also callable through Apify's MCP server (mcp.apify.com), so agents already connected to Apify can run it by name.
+On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API (no scraping). Set the `apiKey` input to the human-provided `capt_live_...` key, choose an `operation` (any of the 114 endpoints), fill the fields it needs (`url` / search query / `limit` / ...), and the Actor returns one dataset item with the same structured JSON `data` as the REST API. Credits are billed to the user's own Captapi account. The Actor is also callable through Apify's MCP server (mcp.apify.com), so agents already connected to Apify can run it by name.
 
 ## Choosing the right endpoint
 
@@ -217,6 +217,8 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `linkedin_profile` | `/v1/linkedin/profile` | `url` (string) | 2 |
 | `linkedin_company` | `/v1/linkedin/company` | `url` (string) | 2 |
 | `linkedin_post_details` | `/v1/linkedin/post-details` | `url` (string) | 1 |
+| `linkedin_company_posts` | `/v1/linkedin/company-posts` | `url` (string), `limit`? (number) | 16 |
+| `linkedin_search_posts` | `/v1/linkedin/search-posts` | `q` (string), `sort`? (string), `limit`? (number) | 16 |
 
 ### Rumble
 
@@ -225,6 +227,49 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `rumble_video_details` | `/v1/rumble/video-details` | `url` (string) | 1 |
 | `rumble_channel_videos` | `/v1/rumble/channel-videos` | `url` (string), `limit`? (number) | 12 |
 | `rumble_search` | `/v1/rumble/search` | `q` (string), `limit`? (number) | 12 |
+| `rumble_transcript` | `/v1/rumble/transcript` | `url` (string), `language`? (string) | 3 |
+| `rumble_comments` | `/v1/rumble/comments` | `url` (string), `limit`? (number) | 30 |
+
+
+### TikTok Shop
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `tiktok_shop_search` | `/v1/tiktok-shop/shop-search` | `q` (string), `region`? (string), `limit`? (number) | 16 |
+| `tiktok_shop_products` | `/v1/tiktok-shop/shop-products` | `url` (string), `limit`? (number) | 16 |
+| `tiktok_shop_product_details` | `/v1/tiktok-shop/product-details` | `url` (string) | 2 |
+| `tiktok_shop_product_reviews` | `/v1/tiktok-shop/product-reviews` | `url` (string), `limit`? (number) | 16 |
+| `tiktok_shop_user_showcase` | `/v1/tiktok-shop/user-showcase` | `username` (string), `limit`? (number) | 16 |
+
+### GitHub
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `github_user` | `/v1/github/user` | `username` (string) | 1 |
+| `github_repositories` | `/v1/github/repositories` | `username` (string), `limit`? (number) | 3 |
+| `github_repository` | `/v1/github/repository` | `repo` (string) | 1 |
+| `github_pull_requests` | `/v1/github/pull-requests` | `repo` (string), `state`? (string), `limit`? (number) | 3 |
+| `github_activity` | `/v1/github/activity` | `username` (string), `limit`? (number) | 3 |
+| `github_followers` | `/v1/github/followers` | `username` (string), `limit`? (number) | 3 |
+| `github_following` | `/v1/github/following` | `username` (string), `limit`? (number) | 3 |
+| `github_contributions` | `/v1/github/contributions` | `username` (string) | 2 |
+| `github_trending_repositories` | `/v1/github/trending-repositories` | `q`? (string), `limit`? (number) | 2 |
+| `github_trending_developers` | `/v1/github/trending-developers` | `q`? (string), `limit`? (number) | 2 |
+
+### Ad Library
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `facebook_ad_library_search` | `/v1/ad-library/facebook/search` | `q` (string), `country`? (string), `limit`? (number) | 20 |
+| `facebook_ad_library_company_ads` | `/v1/ad-library/facebook/company-ads` | `url` (string), `country`? (string), `limit`? (number) | 20 |
+| `facebook_ad_library_ad_details` | `/v1/ad-library/facebook/ad-details` | `url` (string) | 2 |
+| `tiktok_ad_library_search` | `/v1/ad-library/tiktok/search` | `q` (string), `country`? (string), `limit`? (number) | 20 |
+| `tiktok_ad_library_ad_details` | `/v1/ad-library/tiktok/ad-details` | `url` (string), `country`? (string) | 2 |
+| `google_ad_library_company_ads` | `/v1/ad-library/google/company-ads` | `advertiser` (string), `country`? (string), `limit`? (number) | 20 |
+| `google_ad_library_ad_details` | `/v1/ad-library/google/ad-details` | `creative_id` (string) | 2 |
+| `google_ad_library_advertiser_search` | `/v1/ad-library/google/advertiser-search` | `q` (string), `country`? (string), `limit`? (number) | 10 |
+| `linkedin_ad_library_search_ads` | `/v1/ad-library/linkedin/search-ads` | `q` (string), `country`? (string), `limit`? (number) | 20 |
+| `linkedin_ad_library_ad_details` | `/v1/ad-library/linkedin/ad-details` | `url` (string) | 2 |
 
 ---
 Generated from the Captapi catalog. Do not edit by hand — run `node generate.mjs`.

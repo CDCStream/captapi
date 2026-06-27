@@ -1,0 +1,23 @@
+[
+  {
+    "name": "advertiser",
+    "type": "text",
+    "label": "Advertiser",
+    "required": true,
+    "help": "Advertiser name, domain, or Google advertiser ID."
+  },
+  {
+    "name": "country",
+    "type": "text",
+    "label": "Country",
+    "required": false,
+    "help": "ISO country code. Default US."
+  },
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max ads to return. Default 20, max 200."
+  }
+]

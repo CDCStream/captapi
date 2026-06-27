@@ -1,0 +1,16 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "Company URL",
+    "required": true,
+    "help": "LinkedIn company URL."
+  },
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max items to return. Default 20, max 100. Billed per result."
+  }
+]

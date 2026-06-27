@@ -17,10 +17,12 @@ from app import __version__
 from app.core.config import get_settings
 from app.routers import (
     account,
+    ad_library,
     analytics,
     auth_keys,
     billing,
     facebook,
+    github,
     instagram,
     bluesky,
     linkedin,
@@ -30,6 +32,7 @@ from app.routers import (
     rumble,
     threads,
     tiktok,
+    tiktok_shop,
     twitter,
     video,
     youtube,
@@ -147,8 +150,11 @@ def create_app() -> FastAPI:
 
     app.include_router(youtube.router, prefix="/v1/youtube", tags=["YouTube"])
     app.include_router(tiktok.router, prefix="/v1/tiktok", tags=["TikTok"])
+    app.include_router(tiktok_shop.router, prefix="/v1/tiktok-shop", tags=["TikTok Shop"])
     app.include_router(instagram.router, prefix="/v1/instagram", tags=["Instagram"])
     app.include_router(facebook.router, prefix="/v1/facebook", tags=["Facebook"])
+    app.include_router(ad_library.router, prefix="/v1/ad-library", tags=["Ad Library"])
+    app.include_router(github.router, prefix="/v1/github", tags=["GitHub"])
     app.include_router(twitter.router, prefix="/v1/twitter", tags=["Twitter"])
     app.include_router(reddit.router, prefix="/v1/reddit", tags=["Reddit"])
     app.include_router(threads.router, prefix="/v1/threads", tags=["Threads"])

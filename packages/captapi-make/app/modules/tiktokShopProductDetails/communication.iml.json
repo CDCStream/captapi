@@ -1,0 +1,10 @@
+{
+  "url": "/v1/tiktok-shop/product-details",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

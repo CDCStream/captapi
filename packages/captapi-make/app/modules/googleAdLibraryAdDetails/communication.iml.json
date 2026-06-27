@@ -1,0 +1,10 @@
+{
+  "url": "/v1/ad-library/google/ad-details",
+  "method": "GET",
+  "qs": {
+    "creative_id": "{{parameters.creative_id}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

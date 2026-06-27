@@ -1,0 +1,16 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "Video URL",
+    "required": true,
+    "help": "Rumble video URL."
+  },
+  {
+    "name": "language",
+    "type": "text",
+    "label": "Language",
+    "required": false,
+    "help": "Preferred caption language as ISO code. Default en."
+  }
+]

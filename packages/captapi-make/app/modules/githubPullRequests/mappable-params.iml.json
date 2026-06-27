@@ -1,0 +1,23 @@
+[
+  {
+    "name": "repo",
+    "type": "text",
+    "label": "Repository",
+    "required": true,
+    "help": "Repository URL or owner/name."
+  },
+  {
+    "name": "state",
+    "type": "text",
+    "label": "State",
+    "required": false,
+    "help": "open, closed, or all. Default open."
+  },
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max items to return. Default 30, max 100."
+  }
+]

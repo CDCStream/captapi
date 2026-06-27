@@ -1,0 +1,11 @@
+{
+  "url": "/v1/github/repositories",
+  "method": "GET",
+  "qs": {
+    "username": "{{parameters.username}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

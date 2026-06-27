@@ -23,7 +23,10 @@ export type PlatformId =
   | "bluesky"
   | "pinterest"
   | "linkedin"
-  | "rumble";
+  | "rumble"
+  | "tiktok_shop"
+  | "github"
+  | "ad_library";
 
 export type Category =
   | "transcript"
@@ -102,7 +105,10 @@ export interface PlatformGroup {
     | "bluesky"
     | "pinterest"
     | "linkedin"
-    | "rumble";
+    | "rumble"
+    | "shoppingBag"
+    | "github"
+    | "megaphone";
   /** brand color class for the icon */
   color: string;
   exampleUrl: string;
@@ -137,6 +143,9 @@ const PLATFORM_LABEL: Record<PlatformId, string> = {
   pinterest: "Pinterest",
   linkedin: "LinkedIn",
   rumble: "Rumble",
+  tiktok_shop: "TikTok Shop",
+  github: "GitHub",
+  ad_library: "Ad Library",
 };
 
 // ---------------------------------------------------------------------------
@@ -255,12 +264,50 @@ const LINKEDIN: Spec[] = [
   { slug: "linkedin-profile", name: "LinkedIn Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/linkedin/profile", credits: 2 },
   { slug: "linkedin-company", name: "LinkedIn Company API", shortName: "Company", category: "channel", method: "GET", path: "/v1/linkedin/company", credits: 2 },
   { slug: "linkedin-post-details", name: "LinkedIn Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/linkedin/post-details", credits: 1 },
+  { slug: "linkedin-company-posts", name: "LinkedIn Company Posts API", shortName: "Company Posts", category: "list", method: "GET", path: "/v1/linkedin/company-posts", credits: 16, creditsPerResult: 0.8 },
+  { slug: "linkedin-search-posts", name: "LinkedIn Search Posts API", shortName: "Search Posts", category: "search", method: "GET", path: "/v1/linkedin/search-posts", credits: 16, creditsPerResult: 0.8 },
 ];
 
 const RUMBLE: Spec[] = [
   { slug: "rumble-video-details", name: "Rumble Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/rumble/video-details", credits: 1 },
   { slug: "rumble-channel-videos", name: "Rumble Channel Videos API", shortName: "Channel Videos", category: "list", method: "GET", path: "/v1/rumble/channel-videos", credits: 12, creditsPerResult: 0.6 },
   { slug: "rumble-search", name: "Rumble Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/rumble/search", credits: 12, creditsPerResult: 0.6 },
+  { slug: "rumble-transcript", name: "Rumble Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/rumble/transcript", credits: 3 },
+  { slug: "rumble-comments", name: "Rumble Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/rumble/comments", credits: 30, creditsPerResult: 0.6 },
+];
+
+const TIKTOK_SHOP: Spec[] = [
+  { slug: "tiktok-shop-search", name: "TikTok Shop Search API", shortName: "Shop Search", category: "search", method: "GET", path: "/v1/tiktok-shop/shop-search", credits: 16, creditsPerResult: 0.8 },
+  { slug: "tiktok-shop-products", name: "TikTok Shop Products API", shortName: "Shop Products", category: "list", method: "GET", path: "/v1/tiktok-shop/shop-products", credits: 16, creditsPerResult: 0.8 },
+  { slug: "tiktok-shop-product-details", name: "TikTok Shop Product Details API", shortName: "Product Details", category: "details", method: "GET", path: "/v1/tiktok-shop/product-details", credits: 2 },
+  { slug: "tiktok-shop-product-reviews", name: "TikTok Shop Product Reviews API", shortName: "Product Reviews", category: "comments", method: "GET", path: "/v1/tiktok-shop/product-reviews", credits: 16, creditsPerResult: 0.8 },
+  { slug: "tiktok-shop-user-showcase", name: "TikTok Shop User Showcase API", shortName: "User Showcase", category: "list", method: "GET", path: "/v1/tiktok-shop/user-showcase", credits: 16, creditsPerResult: 0.8 },
+];
+
+const GITHUB: Spec[] = [
+  { slug: "github-user", name: "GitHub User API", shortName: "User", category: "channel", method: "GET", path: "/v1/github/user", credits: 1 },
+  { slug: "github-repositories", name: "GitHub Repositories API", shortName: "Repositories", category: "list", method: "GET", path: "/v1/github/repositories", credits: 3, creditsPerResult: 0.1 },
+  { slug: "github-pull-requests", name: "GitHub Pull Requests API", shortName: "Pull Requests", category: "list", method: "GET", path: "/v1/github/pull-requests", credits: 3, creditsPerResult: 0.1 },
+  { slug: "github-activity", name: "GitHub Activity API", shortName: "Activity", category: "list", method: "GET", path: "/v1/github/activity", credits: 3, creditsPerResult: 0.1 },
+  { slug: "github-followers", name: "GitHub Followers API", shortName: "Followers", category: "list", method: "GET", path: "/v1/github/followers", credits: 3, creditsPerResult: 0.1 },
+  { slug: "github-following", name: "GitHub Following API", shortName: "Following", category: "list", method: "GET", path: "/v1/github/following", credits: 3, creditsPerResult: 0.1 },
+  { slug: "github-contributions", name: "GitHub Contributions API", shortName: "Contributions", category: "details", method: "GET", path: "/v1/github/contributions", credits: 2 },
+  { slug: "github-repository", name: "GitHub Repository API", shortName: "Repository", category: "details", method: "GET", path: "/v1/github/repository", credits: 1 },
+  { slug: "github-trending-repositories", name: "GitHub Trending Repositories API", shortName: "Trending Repositories", category: "search", method: "GET", path: "/v1/github/trending-repositories", credits: 2, creditsPerResult: 0.1 },
+  { slug: "github-trending-developers", name: "GitHub Trending Developers API", shortName: "Trending Developers", category: "search", method: "GET", path: "/v1/github/trending-developers", credits: 2, creditsPerResult: 0.1 },
+];
+
+const AD_LIBRARY: Spec[] = [
+  { slug: "facebook-ad-library-search", name: "Facebook Ad Library Search API", shortName: "Facebook Search", category: "search", method: "GET", path: "/v1/ad-library/facebook/search", credits: 20, creditsPerResult: 1 },
+  { slug: "facebook-ad-library-company-ads", name: "Facebook Company Ads API", shortName: "Facebook Company Ads", category: "list", method: "GET", path: "/v1/ad-library/facebook/company-ads", credits: 20, creditsPerResult: 1 },
+  { slug: "facebook-ad-library-ad-details", name: "Facebook Ad Details API", shortName: "Facebook Ad Details", category: "details", method: "GET", path: "/v1/ad-library/facebook/ad-details", credits: 2 },
+  { slug: "tiktok-ad-library-search", name: "TikTok Ad Library Search API", shortName: "TikTok Search", category: "search", method: "GET", path: "/v1/ad-library/tiktok/search", credits: 20, creditsPerResult: 1 },
+  { slug: "tiktok-ad-library-ad-details", name: "TikTok Ad Details API", shortName: "TikTok Ad Details", category: "details", method: "GET", path: "/v1/ad-library/tiktok/ad-details", credits: 2 },
+  { slug: "google-ad-library-company-ads", name: "Google Company Ads API", shortName: "Google Company Ads", category: "list", method: "GET", path: "/v1/ad-library/google/company-ads", credits: 20, creditsPerResult: 1 },
+  { slug: "google-ad-library-ad-details", name: "Google Ad Details API", shortName: "Google Ad Details", category: "details", method: "GET", path: "/v1/ad-library/google/ad-details", credits: 2 },
+  { slug: "google-ad-library-advertiser-search", name: "Google Advertiser Search API", shortName: "Google Advertiser Search", category: "search", method: "GET", path: "/v1/ad-library/google/advertiser-search", credits: 10, creditsPerResult: 1 },
+  { slug: "linkedin-ad-library-search-ads", name: "LinkedIn Ad Library Search API", shortName: "LinkedIn Search Ads", category: "search", method: "GET", path: "/v1/ad-library/linkedin/search-ads", credits: 20, creditsPerResult: 1 },
+  { slug: "linkedin-ad-library-ad-details", name: "LinkedIn Ad Details API", shortName: "LinkedIn Ad Details", category: "details", method: "GET", path: "/v1/ad-library/linkedin/ad-details", credits: 2 },
 ];
 
 export const PLATFORM_GROUPS: PlatformGroup[] = [
@@ -362,6 +409,33 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     color: "text-green-600",
     exampleUrl: "https://rumble.com/v4abcd-example-video.html",
     endpoints: RUMBLE.map((s) => ({ ...s, platform: "rumble" as const })),
+  },
+  {
+    id: "tiktok_shop",
+    name: "TikTok Shop",
+    blurb: "Research TikTok Shop products, reviews, stores, and creator showcases for ecommerce intelligence.",
+    icon: "shoppingBag",
+    color: "text-pink-500",
+    exampleUrl: "https://shop.tiktok.com/us/pdp/example-product/1234567890",
+    endpoints: TIKTOK_SHOP.map((s) => ({ ...s, platform: "tiktok_shop" as const })),
+  },
+  {
+    id: "github",
+    name: "GitHub",
+    blurb: "Pull public GitHub users, repositories, pull requests, activity, followers, and trending repos.",
+    icon: "github",
+    color: "text-foreground",
+    exampleUrl: "https://github.com/vercel/next.js",
+    endpoints: GITHUB.map((s) => ({ ...s, platform: "github" as const })),
+  },
+  {
+    id: "ad_library",
+    name: "Ad Library",
+    blurb: "Search public Meta, TikTok, Google, and LinkedIn ad libraries for competitor creative intelligence.",
+    icon: "megaphone",
+    color: "text-amber-600",
+    exampleUrl: "https://adstransparency.google.com/",
+    endpoints: AD_LIBRARY.map((s) => ({ ...s, platform: "ad_library" as const })),
   },
 ];
 
@@ -771,6 +845,9 @@ const PROFILE_URL: Record<PlatformId, string> = {
   pinterest: "https://www.pinterest.com/nasa",
   linkedin: "https://www.linkedin.com/in/williamhgates",
   rumble: "https://rumble.com/c/Bongino",
+  tiktok_shop: "https://shop.tiktok.com/us/pdp/example-product/1234567890",
+  github: "https://github.com/vercel/next.js",
+  ad_library: "https://adstransparency.google.com/",
 };
 
 /** A realistic example value for a single parameter of an endpoint. */
@@ -782,6 +859,20 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       return "skincare";
     case "country":
       return "US";
+    case "region":
+      return "US";
+    case "username":
+      return ep.platform === "github" ? "vercel" : "hydrojug";
+    case "repo":
+      return "vercel/next.js";
+    case "state":
+      return "open";
+    case "sort":
+      return "relevance";
+    case "advertiser":
+      return "nike.com";
+    case "creative_id":
+      return "CR08100116008800354305";
     case "comment_id":
       return "7311234567890123456";
     case "limit":

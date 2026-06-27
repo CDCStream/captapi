@@ -1,0 +1,16 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "Shop URL",
+    "required": true,
+    "help": "TikTok Shop store URL."
+  },
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max items to return. Default 20, max 200. Billed per result."
+  }
+]

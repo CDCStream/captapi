@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "Product URL",
+    "required": true,
+    "help": "TikTok Shop product URL."
+  }
+]

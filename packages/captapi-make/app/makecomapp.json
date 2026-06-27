@@ -1463,6 +1463,499 @@
           "samples": null,
           "scope": null
         }
+      },
+      "linkedinCompanyPosts": {
+        "label": "LinkedIn Company Posts",
+        "description": "Recent public posts from a LinkedIn company page. Costs ~16 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/linkedinCompanyPosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/linkedinCompanyPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "linkedinSearchPosts": {
+        "label": "LinkedIn Search Posts",
+        "description": "Search public LinkedIn posts by keyword. Costs ~16 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/linkedinSearchPosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/linkedinSearchPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "rumbleTranscript": {
+        "label": "Rumble Transcript",
+        "description": "Extract a timestamped Rumble video transcript. Costs ~3 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/rumbleTranscript/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/rumbleTranscript/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "rumbleComments": {
+        "label": "Rumble Comments",
+        "description": "Comments on a Rumble video. Costs ~30 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/rumbleComments/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/rumbleComments/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokShopSearch": {
+        "label": "TikTok Shop Search",
+        "description": "Search TikTok Shop products by keyword. Costs ~16 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokShopSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokShopSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokShopProducts": {
+        "label": "TikTok Shop Products",
+        "description": "List products from a TikTok Shop store. Costs ~16 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokShopProducts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokShopProducts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokShopProductDetails": {
+        "label": "TikTok Shop Product Details",
+        "description": "Full TikTok Shop product details. Costs ~2 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokShopProductDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokShopProductDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokShopProductReviews": {
+        "label": "TikTok Shop Product Reviews",
+        "description": "Customer reviews for a TikTok Shop product. Costs ~16 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokShopProductReviews/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokShopProductReviews/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokShopUserShowcase": {
+        "label": "TikTok Shop User Showcase",
+        "description": "Products promoted in a TikTok creator showcase. Costs ~16 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokShopUserShowcase/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokShopUserShowcase/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "githubUser": {
+        "label": "GitHub User",
+        "description": "Public GitHub user profile details. Costs ~1 credit.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/githubUser/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/githubUser/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "githubRepositories": {
+        "label": "GitHub Repositories",
+        "description": "List a GitHub user repositories. Costs ~3 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/githubRepositories/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/githubRepositories/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "githubRepository": {
+        "label": "GitHub Repository",
+        "description": "Repository details, stars, forks and metadata. Costs ~1 credit.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/githubRepository/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/githubRepository/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "githubPullRequests": {
+        "label": "GitHub Pull Requests",
+        "description": "List repository pull requests. Costs ~3 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/githubPullRequests/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/githubPullRequests/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "githubActivity": {
+        "label": "GitHub Activity",
+        "description": "Recent public activity for a GitHub user. Costs ~3 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/githubActivity/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/githubActivity/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "githubFollowers": {
+        "label": "GitHub Followers",
+        "description": "List GitHub followers. Costs ~3 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/githubFollowers/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/githubFollowers/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "githubFollowing": {
+        "label": "GitHub Following",
+        "description": "List accounts a GitHub user follows. Costs ~3 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/githubFollowing/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/githubFollowing/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "githubContributions": {
+        "label": "GitHub Contributions",
+        "description": "Summary of recent public GitHub contributions. Costs ~2 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/githubContributions/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/githubContributions/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "githubTrendingRepositories": {
+        "label": "GitHub Trending Repositories",
+        "description": "Search trending repositories by stars or query. Costs ~2 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/githubTrendingRepositories/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/githubTrendingRepositories/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "githubTrendingDevelopers": {
+        "label": "GitHub Trending Developers",
+        "description": "Search popular GitHub developers. Costs ~2 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/githubTrendingDevelopers/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/githubTrendingDevelopers/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "facebookAdLibrarySearch": {
+        "label": "Facebook Ad Library Search",
+        "description": "Search Meta/Facebook ads by keyword. Costs ~20 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookAdLibrarySearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookAdLibrarySearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "facebookAdLibraryCompanyAds": {
+        "label": "Facebook Company Ads",
+        "description": "Ads for a Facebook page or Meta Ad Library URL. Costs ~20 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookAdLibraryCompanyAds/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookAdLibraryCompanyAds/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "facebookAdLibraryAdDetails": {
+        "label": "Facebook Ad Details",
+        "description": "Meta/Facebook ad details. Costs ~2 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookAdLibraryAdDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookAdLibraryAdDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokAdLibrarySearch": {
+        "label": "TikTok Ad Library Search",
+        "description": "Search TikTok Ad Library and Creative Center. Costs ~20 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokAdLibrarySearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokAdLibrarySearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokAdLibraryAdDetails": {
+        "label": "TikTok Ad Details",
+        "description": "TikTok ad details by ad URL or ID. Costs ~2 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokAdLibraryAdDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokAdLibraryAdDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "googleAdLibraryCompanyAds": {
+        "label": "Google Company Ads",
+        "description": "Google Ads Transparency Center ads for an advertiser. Costs ~20 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/googleAdLibraryCompanyAds/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/googleAdLibraryCompanyAds/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "googleAdLibraryAdDetails": {
+        "label": "Google Ad Details",
+        "description": "Google ad details by creative ID or preview URL. Costs ~2 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/googleAdLibraryAdDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/googleAdLibraryAdDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "googleAdLibraryAdvertiserSearch": {
+        "label": "Google Advertiser Search",
+        "description": "Search Google Ads advertisers. Costs ~10 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/googleAdLibraryAdvertiserSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/googleAdLibraryAdvertiserSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "linkedinAdLibrarySearchAds": {
+        "label": "LinkedIn Ad Library Search",
+        "description": "Search LinkedIn Ad Library ads. Costs ~20 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/linkedinAdLibrarySearchAds/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/linkedinAdLibrarySearchAds/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "linkedinAdLibraryAdDetails": {
+        "label": "LinkedIn Ad Details",
+        "description": "LinkedIn ad details by URL or ID. Costs ~2 credits.",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/linkedinAdLibraryAdDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/linkedinAdLibraryAdDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
       }
     },
     "function": {},

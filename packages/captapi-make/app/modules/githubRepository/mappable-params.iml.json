@@ -1,0 +1,9 @@
+[
+  {
+    "name": "repo",
+    "type": "text",
+    "label": "Repository",
+    "required": true,
+    "help": "Repository URL or owner/name."
+  }
+]

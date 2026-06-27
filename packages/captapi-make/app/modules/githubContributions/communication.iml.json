@@ -1,0 +1,10 @@
+{
+  "url": "/v1/github/contributions",
+  "method": "GET",
+  "qs": {
+    "username": "{{parameters.username}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

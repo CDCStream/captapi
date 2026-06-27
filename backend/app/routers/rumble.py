@@ -62,6 +62,40 @@ def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _normalize_comment(item: dict[str, Any]) -> dict[str, Any]:
+    author = item.get("author") or item.get("user") or {}
+    return {
+        "platform": "rumble",
+        "id": safe_str(item.get("id") or item.get("commentId")),
+        "text": safe_str(item.get("text") or item.get("comment") or item.get("body")),
+        "author": {
+            "name": safe_str(author.get("name") or item.get("authorName") or item.get("username")),
+            "url": safe_str(author.get("url") or item.get("authorUrl")),
+        },
+        "likes": safe_int(item.get("likes") or item.get("upvotes")),
+        "createdAt": safe_str(item.get("createdAt") or item.get("date") or item.get("publishedAt")),
+        "videoUrl": safe_str(item.get("videoUrl") or item.get("sourceUrl")),
+    }
+
+
+def _normalize_transcript(item: dict[str, Any]) -> dict[str, Any]:
+    segments = item.get("segments") or item.get("transcript") or item.get("captions") or []
+    text = item.get("text") or item.get("plainText") or item.get("transcriptText")
+    if not text and isinstance(segments, list):
+        text = " ".join(
+            safe_str(s.get("text") if isinstance(s, dict) else s) or ""
+            for s in segments
+        ).strip()
+    return {
+        "platform": "rumble",
+        "url": safe_str(item.get("url") or item.get("videoUrl") or item.get("sourceUrl")),
+        "language": safe_str(item.get("language")),
+        "title": safe_str(item.get("title") or item.get("videoTitle")),
+        "text": safe_str(text),
+        "segments": segments if isinstance(segments, list) else [],
+    }
+
+
 def _meta(page: str, key: str) -> str | None:
     pattern = rf'<meta\s+(?:property|name)=["\']{re.escape(key)}["\']\s+content=["\']([^"\']+)["\']'
     match = re.search(pattern, page, flags=re.IGNORECASE)
@@ -199,6 +233,86 @@ async def channel_videos(
             ctx=ctx,
         )
         ctx["credits_override"] = _scaled(len(data["videos"]), RATE, 2)
+        return ApiResponse(data=data)
+
+
+@router.get("/transcript", summary="Rumble video transcript")
+async def transcript(
+    url: str = Query(..., description="Rumble video URL"),
+    language: str = Query("en", min_length=2, max_length=8),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    if not extract_rumble_video_id(url):
+        raise HTTPException(status_code=400, detail="Invalid Rumble video URL")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/rumble/transcript",
+        platform="rumble",
+        resource_url=url,
+        base_credits=3,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_RUMBLE_TRANSCRIPT,
+                {"url": url, "language": language, "format": "json"},
+                max_items=1,
+            )
+            if not items:
+                raise HTTPException(status_code=404, detail="Transcript not found")
+            return _normalize_transcript(items[0])
+
+        data = await cached_or_run(
+            endpoint="rumble.transcript",
+            params={"url": url, "language": language},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/comments", summary="Rumble video comments")
+async def comments(
+    url: str = Query(..., description="Rumble video URL"),
+    limit: int = Query(50, ge=1, le=500),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    if not extract_rumble_video_id(url):
+        raise HTTPException(status_code=400, detail="Invalid Rumble video URL")
+    settings = get_settings()
+    cost = _scaled(limit, RATE, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/rumble/comments",
+        platform="rumble",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_RUMBLE_COMMENTS,
+                {
+                    "queries": [url],
+                    "contentTypes": ["videos"],
+                    "maxItems": 1,
+                    "includeComments": True,
+                },
+                max_items=limit + 1,
+            )
+            comments = [
+                _normalize_comment(i)
+                for i in items
+                if (i.get("type") == "comment" or i.get("comment") or i.get("commentId"))
+            ][:limit]
+            return {"url": url, "totalReturned": len(comments), "comments": comments}
+
+        data = await cached_or_run(
+            endpoint="rumble.comments",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled(len(data["comments"]), RATE, 2)
         return ApiResponse(data=data)
 
 

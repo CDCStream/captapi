@@ -3,9 +3,19 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   Youtube,
+  AtSign,
+  Cloud,
   Music2,
   Instagram,
   Facebook,
+  Github,
+  Linkedin,
+  Megaphone,
+  MessagesSquare,
+  Pin,
+  ShoppingBag,
+  Twitter,
+  Video,
   Check,
   type LucideIcon,
 } from "lucide-react";
@@ -40,6 +50,16 @@ const PLATFORM_ICONS: Record<string, LucideIcon> = {
   music: Music2,
   instagram: Instagram,
   facebook: Facebook,
+  twitter: Twitter,
+  reddit: MessagesSquare,
+  threads: AtSign,
+  bluesky: Cloud,
+  pinterest: Pin,
+  linkedin: Linkedin,
+  rumble: Video,
+  github: Github,
+  megaphone: Megaphone,
+  shoppingBag: ShoppingBag,
 };
 
 export function generateStaticParams() {

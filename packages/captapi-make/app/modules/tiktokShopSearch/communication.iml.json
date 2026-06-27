@@ -1,0 +1,12 @@
+{
+  "url": "/v1/tiktok-shop/shop-search",
+  "method": "GET",
+  "qs": {
+    "q": "{{parameters.q}}",
+    "region": "{{parameters.region}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

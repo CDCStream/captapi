@@ -1,0 +1,10 @@
+{
+  "url": "/v1/github/repository",
+  "method": "GET",
+  "qs": {
+    "repo": "{{parameters.repo}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

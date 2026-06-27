@@ -1,0 +1,12 @@
+{
+  "url": "/v1/linkedin/search-posts",
+  "method": "GET",
+  "qs": {
+    "q": "{{parameters.q}}",
+    "sort": "{{parameters.sort}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

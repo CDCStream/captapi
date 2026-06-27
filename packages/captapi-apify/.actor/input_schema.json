@@ -99,9 +99,38 @@
         "linkedin_profile",
         "linkedin_company",
         "linkedin_post_details",
+        "linkedin_company_posts",
+        "linkedin_search_posts",
         "rumble_video_details",
         "rumble_channel_videos",
-        "rumble_search"
+        "rumble_search",
+        "rumble_transcript",
+        "rumble_comments",
+        "tiktok_shop_search",
+        "tiktok_shop_products",
+        "tiktok_shop_product_details",
+        "tiktok_shop_product_reviews",
+        "tiktok_shop_user_showcase",
+        "github_user",
+        "github_repositories",
+        "github_repository",
+        "github_pull_requests",
+        "github_activity",
+        "github_followers",
+        "github_following",
+        "github_contributions",
+        "github_trending_repositories",
+        "github_trending_developers",
+        "facebook_ad_library_search",
+        "facebook_ad_library_company_ads",
+        "facebook_ad_library_ad_details",
+        "tiktok_ad_library_search",
+        "tiktok_ad_library_ad_details",
+        "google_ad_library_company_ads",
+        "google_ad_library_ad_details",
+        "google_ad_library_advertiser_search",
+        "linkedin_ad_library_search_ads",
+        "linkedin_ad_library_ad_details"
       ],
       "enumTitles": [
         "YouTube: YouTube Transcript",
@@ -186,9 +215,38 @@
         "LinkedIn: LinkedIn Profile",
         "LinkedIn: LinkedIn Company",
         "LinkedIn: LinkedIn Post Details",
+        "LinkedIn: LinkedIn Company Posts",
+        "LinkedIn: LinkedIn Search Posts",
         "Rumble: Rumble Video Details",
         "Rumble: Rumble Channel Videos",
-        "Rumble: Rumble Search"
+        "Rumble: Rumble Search",
+        "Rumble: Rumble Transcript",
+        "Rumble: Rumble Comments",
+        "TikTok Shop: TikTok Shop Search",
+        "TikTok Shop: TikTok Shop Products",
+        "TikTok Shop: TikTok Shop Product Details",
+        "TikTok Shop: TikTok Shop Product Reviews",
+        "TikTok Shop: TikTok Shop User Showcase",
+        "GitHub: GitHub User",
+        "GitHub: GitHub Repositories",
+        "GitHub: GitHub Repository",
+        "GitHub: GitHub Pull Requests",
+        "GitHub: GitHub Activity",
+        "GitHub: GitHub Followers",
+        "GitHub: GitHub Following",
+        "GitHub: GitHub Contributions",
+        "GitHub: GitHub Trending Repositories",
+        "GitHub: GitHub Trending Developers",
+        "Ad Library: Facebook Ad Library Search",
+        "Ad Library: Facebook Company Ads",
+        "Ad Library: Facebook Ad Details",
+        "Ad Library: TikTok Ad Library Search",
+        "Ad Library: TikTok Ad Details",
+        "Ad Library: Google Company Ads",
+        "Ad Library: Google Ad Details",
+        "Ad Library: Google Advertiser Search",
+        "Ad Library: LinkedIn Ad Library Search",
+        "Ad Library: LinkedIn Ad Details"
       ],
       "prefill": "youtube_transcript"
     },
@@ -227,7 +285,59 @@
     "country": {
       "title": "Country",
       "type": "string",
-      "description": "Two-letter ISO country code (e.g. US, GB, TR) for tiktok_trending_feed. Optional.",
+      "description": "Two-letter ISO country code (e.g. US, GB, TR). Used by trending, TikTok Shop, and Ad Library operations.",
+      "editor": "textfield"
+    },
+    "region": {
+      "title": "Region",
+      "type": "string",
+      "description": "Two-letter TikTok Shop region (e.g. US, GB, SG). Optional.",
+      "editor": "textfield"
+    },
+    "username": {
+      "title": "Username",
+      "type": "string",
+      "description": "Username/profile handle for GitHub or TikTok Shop creator showcase operations.",
+      "editor": "textfield"
+    },
+    "repo": {
+      "title": "Repository",
+      "type": "string",
+      "description": "GitHub repository URL or owner/name.",
+      "editor": "textfield"
+    },
+    "state": {
+      "title": "Pull request state",
+      "type": "string",
+      "description": "GitHub pull request state: open, closed, or all.",
+      "editor": "select",
+      "enum": [
+        "open",
+        "closed",
+        "all"
+      ],
+      "enumTitles": [
+        "Open",
+        "Closed",
+        "All"
+      ]
+    },
+    "sort": {
+      "title": "Sort",
+      "type": "string",
+      "description": "Sort mode for endpoints that support it, e.g. relevance or date.",
+      "editor": "textfield"
+    },
+    "advertiser": {
+      "title": "Advertiser",
+      "type": "string",
+      "description": "Advertiser name, domain, or Google advertiser ID for Google Ads Transparency Center operations.",
+      "editor": "textfield"
+    },
+    "creative_id": {
+      "title": "Creative ID",
+      "type": "string",
+      "description": "Google creative/ad ID or preview URL.",
       "editor": "textfield"
     },
     "query": {

@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "Ad URL",
+    "required": true,
+    "help": "Meta Ad Library ad URL."
+  }
+]

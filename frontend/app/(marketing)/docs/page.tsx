@@ -253,6 +253,9 @@ const platformAnchor: Record<string, string> = {
   pinterest: "api-pinterest",
   linkedin: "api-linkedin",
   rumble: "api-rumble",
+  tiktok_shop: "api-tiktok-shop",
+  github: "api-github",
+  ad_library: "api-ad-library",
 };
 
 export default function DocsPage() {

@@ -1,0 +1,9 @@
+[
+  {
+    "name": "creative_id",
+    "type": "text",
+    "label": "Creative ID",
+    "required": true,
+    "help": "Google creative/ad ID or preview URL."
+  }
+]

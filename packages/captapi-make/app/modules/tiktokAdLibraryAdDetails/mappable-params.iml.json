@@ -1,0 +1,16 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "Ad URL or ID",
+    "required": true,
+    "help": "TikTok Ad Library URL or ad ID."
+  },
+  {
+    "name": "country",
+    "type": "text",
+    "label": "Country",
+    "required": false,
+    "help": "ISO country code. Default DE."
+  }
+]

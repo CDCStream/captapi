@@ -1,7 +1,10 @@
 import Link from "next/link";
 import {
   Youtube,
+  Github,
+  Megaphone,
   Music2,
+  ShoppingBag,
   Instagram,
   Facebook,
   Twitter,
@@ -39,6 +42,9 @@ const PLATFORM_ICONS: Record<string, LucideIcon> = {
   pinterest: Pin,
   linkedin: Linkedin,
   rumble: Video,
+  github: Github,
+  megaphone: Megaphone,
+  shoppingBag: ShoppingBag,
 };
 
 const CATEGORY_ICONS: Record<Category, LucideIcon> = {

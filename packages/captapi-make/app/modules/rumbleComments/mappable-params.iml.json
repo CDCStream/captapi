@@ -1,0 +1,16 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "Video URL",
+    "required": true,
+    "help": "Rumble video URL."
+  },
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max comments to return. Default 50, max 500. Billed per result."
+  }
+]

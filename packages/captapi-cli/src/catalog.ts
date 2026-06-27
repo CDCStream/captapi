@@ -13,7 +13,10 @@ export type Platform =
   | "bluesky"
   | "pinterest"
   | "linkedin"
-  | "rumble";
+  | "rumble"
+  | "tiktok_shop"
+  | "github"
+  | "ad_library";
 
 export interface ToolParam {
   name: string;
@@ -208,12 +211,50 @@ const LINKEDIN: Omit<Endpoint, "platform">[] = [
   { tool: "linkedin_profile", name: "LinkedIn Profile", path: "/v1/linkedin/profile", credits: 2, summary: "Public LinkedIn person profile details.", params: [url(LI_PROFILE)] },
   { tool: "linkedin_company", name: "LinkedIn Company", path: "/v1/linkedin/company", credits: 2, summary: "Public LinkedIn company page details.", params: [url(LI_COMPANY)] },
   { tool: "linkedin_post_details", name: "LinkedIn Post Details", path: "/v1/linkedin/post-details", credits: 1, summary: "Metadata + engagement for a LinkedIn post.", params: [url(LI_POST)] },
+  { tool: "linkedin_company_posts", name: "LinkedIn Company Posts", path: "/v1/linkedin/company-posts", credits: 16, summary: "Recent public posts from a LinkedIn company page.", params: [url(LI_COMPANY), limit(20, 100)] },
+  { tool: "linkedin_search_posts", name: "LinkedIn Search Posts", path: "/v1/linkedin/search-posts", credits: 16, summary: "Search public LinkedIn posts by keyword.", params: [q(), { name: "sort", type: "string", required: false, description: "relevance or date. Default relevance." }, limit(20, 50)] },
 ];
 
 const RUMBLE: Omit<Endpoint, "platform">[] = [
   { tool: "rumble_video_details", name: "Rumble Video Details", path: "/v1/rumble/video-details", credits: 1, summary: "Metadata + stats for a Rumble video.", params: [url(RB_VIDEO)] },
   { tool: "rumble_channel_videos", name: "Rumble Channel Videos", path: "/v1/rumble/channel-videos", credits: 12, summary: "List videos from a Rumble channel.", params: [url(RB_CHANNEL), limit(20, 200)] },
   { tool: "rumble_search", name: "Rumble Search", path: "/v1/rumble/search", credits: 12, summary: "Search Rumble videos by keyword.", params: [q(), limit(20, 200)] },
+  { tool: "rumble_transcript", name: "Rumble Transcript", path: "/v1/rumble/transcript", credits: 3, summary: "Extract a timestamped Rumble video transcript.", params: [url(RB_VIDEO), language()] },
+  { tool: "rumble_comments", name: "Rumble Comments", path: "/v1/rumble/comments", credits: 30, summary: "Comments on a Rumble video.", params: [url(RB_VIDEO), limit(50, 500)] },
+];
+
+const TIKTOK_SHOP: Omit<Endpoint, "platform">[] = [
+  { tool: "tiktok_shop_search", name: "TikTok Shop Search", path: "/v1/tiktok-shop/shop-search", credits: 16, summary: "Search TikTok Shop products by keyword.", params: [q("Product search query."), { name: "region", type: "string", required: false, description: "Two-letter TikTok Shop region. Default US." }, limit(20, 200)] },
+  { tool: "tiktok_shop_products", name: "TikTok Shop Products", path: "/v1/tiktok-shop/shop-products", credits: 16, summary: "List products from a TikTok Shop store.", params: [url("TikTok Shop store URL."), limit(20, 200)] },
+  { tool: "tiktok_shop_product_details", name: "TikTok Shop Product Details", path: "/v1/tiktok-shop/product-details", credits: 2, summary: "Full TikTok Shop product details, seller and price metadata.", params: [url("TikTok Shop product URL.")] },
+  { tool: "tiktok_shop_product_reviews", name: "TikTok Shop Product Reviews", path: "/v1/tiktok-shop/product-reviews", credits: 16, summary: "Customer reviews for a TikTok Shop product.", params: [url("TikTok Shop product URL."), limit(20, 200)] },
+  { tool: "tiktok_shop_user_showcase", name: "TikTok Shop User Showcase", path: "/v1/tiktok-shop/user-showcase", credits: 16, summary: "Products promoted in a TikTok creator showcase.", params: [{ name: "username", type: "string", required: true, description: "TikTok username with or without @." }, limit(20, 200)] },
+];
+
+const GITHUB: Omit<Endpoint, "platform">[] = [
+  { tool: "github_user", name: "GitHub User", path: "/v1/github/user", credits: 1, summary: "Public GitHub user profile details.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }] },
+  { tool: "github_repositories", name: "GitHub Repositories", path: "/v1/github/repositories", credits: 3, summary: "List a GitHub user's repositories.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100)] },
+  { tool: "github_repository", name: "GitHub Repository", path: "/v1/github/repository", credits: 1, summary: "Repository details, stars, forks and metadata.", params: [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name." }] },
+  { tool: "github_pull_requests", name: "GitHub Pull Requests", path: "/v1/github/pull-requests", credits: 3, summary: "List repository pull requests.", params: [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name." }, { name: "state", type: "string", required: false, description: "open, closed, or all. Default open." }, limit(30, 100)] },
+  { tool: "github_activity", name: "GitHub Activity", path: "/v1/github/activity", credits: 3, summary: "Recent public activity for a GitHub user.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100)] },
+  { tool: "github_followers", name: "GitHub Followers", path: "/v1/github/followers", credits: 3, summary: "List GitHub followers.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100)] },
+  { tool: "github_following", name: "GitHub Following", path: "/v1/github/following", credits: 3, summary: "List accounts a GitHub user follows.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100)] },
+  { tool: "github_contributions", name: "GitHub Contributions", path: "/v1/github/contributions", credits: 2, summary: "Summary of recent public GitHub contributions.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }] },
+  { tool: "github_trending_repositories", name: "GitHub Trending Repositories", path: "/v1/github/trending-repositories", credits: 2, summary: "Search trending repositories by stars or query.", params: [q("GitHub repository search query. Default stars:>1000."), limit(20, 100)] },
+  { tool: "github_trending_developers", name: "GitHub Trending Developers", path: "/v1/github/trending-developers", credits: 2, summary: "Search popular GitHub developers.", params: [q("GitHub user search query. Default followers:>1000."), limit(20, 100)] },
+];
+
+const AD_LIBRARY: Omit<Endpoint, "platform">[] = [
+  { tool: "facebook_ad_library_search", name: "Facebook Ad Library Search", path: "/v1/ad-library/facebook/search", credits: 20, summary: "Search Meta/Facebook ads by keyword.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
+  { tool: "facebook_ad_library_company_ads", name: "Facebook Company Ads", path: "/v1/ad-library/facebook/company-ads", credits: 20, summary: "Ads for a Facebook page or Meta Ad Library URL.", params: [url("Facebook page URL or Meta Ad Library URL."), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
+  { tool: "facebook_ad_library_ad_details", name: "Facebook Ad Details", path: "/v1/ad-library/facebook/ad-details", credits: 2, summary: "Meta/Facebook ad details.", params: [url("Meta Ad Library ad URL.")] },
+  { tool: "tiktok_ad_library_search", name: "TikTok Ad Library Search", path: "/v1/ad-library/tiktok/search", credits: 20, summary: "Search TikTok Ad Library and Creative Center.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default DE." }, limit(20, 200)] },
+  { tool: "tiktok_ad_library_ad_details", name: "TikTok Ad Details", path: "/v1/ad-library/tiktok/ad-details", credits: 2, summary: "TikTok ad details by ad URL or ID.", params: [url("TikTok Ad Library URL or ad ID."), { name: "country", type: "string", required: false, description: "ISO country code. Default DE." }] },
+  { tool: "google_ad_library_company_ads", name: "Google Company Ads", path: "/v1/ad-library/google/company-ads", credits: 20, summary: "Google Ads Transparency Center ads for an advertiser.", params: [{ name: "advertiser", type: "string", required: true, description: "Advertiser name, domain, or Google advertiser ID." }, { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
+  { tool: "google_ad_library_ad_details", name: "Google Ad Details", path: "/v1/ad-library/google/ad-details", credits: 2, summary: "Google ad details by creative ID or preview URL.", params: [{ name: "creative_id", type: "string", required: true, description: "Google creative/ad ID or preview URL." }] },
+  { tool: "google_ad_library_advertiser_search", name: "Google Advertiser Search", path: "/v1/ad-library/google/advertiser-search", credits: 10, summary: "Search Google Ads advertisers.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(10, 50)] },
+  { tool: "linkedin_ad_library_search_ads", name: "LinkedIn Ad Library Search", path: "/v1/ad-library/linkedin/search-ads", credits: 20, summary: "Search LinkedIn Ad Library ads.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
+  { tool: "linkedin_ad_library_ad_details", name: "LinkedIn Ad Details", path: "/v1/ad-library/linkedin/ad-details", credits: 2, summary: "LinkedIn ad details by URL or ID.", params: [url("LinkedIn Ad Library URL or ad ID.")] },
 ];
 
 function withPlatform(
@@ -235,6 +276,9 @@ export const ENDPOINTS: Endpoint[] = [
   ...withPlatform(PINTEREST, "pinterest"),
   ...withPlatform(LINKEDIN, "linkedin"),
   ...withPlatform(RUMBLE, "rumble"),
+  ...withPlatform(TIKTOK_SHOP, "tiktok_shop"),
+  ...withPlatform(GITHUB, "github"),
+  ...withPlatform(AD_LIBRARY, "ad_library"),
 ];
 
 /** A concise, agent-facing description (summary + cost) for an endpoint. */

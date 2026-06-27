@@ -6,6 +6,7 @@ defensive across actor versions.
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -23,6 +24,11 @@ router = APIRouter()
 
 CREDIT_PROFILE = 2
 CREDIT_DETAILS = 1
+RATE = 0.8
+
+
+def _scaled(limit: int, minimum: int = 2) -> int:
+    return max(minimum, math.ceil(limit * RATE))
 
 
 def _first(items: list[dict[str, Any]]) -> dict[str, Any]:
@@ -97,6 +103,13 @@ def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
             ),
         },
     }
+
+
+def _normalize_post_list_item(p: dict[str, Any]) -> dict[str, Any]:
+    base = _normalize_post(p)
+    base["id"] = safe_str(p.get("id") or p.get("urn") or p.get("post_id"))
+    base["media"] = p.get("media") or p.get("images") or p.get("videos") or []
+    return base
 
 
 @router.get("/profile", summary="LinkedIn person profile details")
@@ -197,4 +210,81 @@ async def linkedin_post_details(
             runner=_run,
             ctx=ctx,
         )
+        return ApiResponse(data=data)
+
+
+@router.get("/company-posts", summary="LinkedIn company posts")
+async def linkedin_company_posts(
+    url: str = Query(..., description="LinkedIn company URL, e.g. https://linkedin.com/company/slug"),
+    limit: int = Query(20, ge=1, le=100),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    slug = extract_linkedin_company(url)
+    if not slug:
+        raise HTTPException(status_code=400, detail="Invalid LinkedIn company URL")
+    settings = get_settings()
+    company_url = f"https://www.linkedin.com/company/{slug}"
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/linkedin/company-posts",
+        platform="linkedin",
+        resource_url=company_url,
+        base_credits=_scaled(limit),
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_LINKEDIN_COMPANY_POSTS,
+                {"companyUrls": [company_url], "maxPostsPerCompany": limit},
+                max_items=limit,
+            )
+            posts = [_normalize_post_list_item(i) for i in items[:limit]]
+            return {"company": slug, "totalReturned": len(posts), "posts": posts}
+
+        data = await cached_or_run(
+            endpoint="linkedin.company-posts",
+            params={"slug": slug, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled(len(data["posts"]))
+        return ApiResponse(data=data)
+
+
+@router.get("/search-posts", summary="Search LinkedIn posts")
+async def linkedin_search_posts(
+    q: str = Query(..., min_length=2, description="Keyword to search in public LinkedIn posts"),
+    sort: str = Query("relevance", pattern="^(relevance|date)$"),
+    limit: int = Query(20, ge=1, le=50),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/linkedin/search-posts",
+        platform="linkedin",
+        resource_url=None,
+        base_credits=_scaled(limit),
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_LINKEDIN_POST_SEARCH,
+                {
+                    "keyword": q,
+                    "sort_type": sort,
+                    "page_number": 1,
+                    "date_filter": "",
+                    "limit": limit,
+                },
+                max_items=limit,
+            )
+            posts = [_normalize_post_list_item(i) for i in items[:limit]]
+            return {"query": q, "sort": sort, "totalReturned": len(posts), "posts": posts}
+
+        data = await cached_or_run(
+            endpoint="linkedin.search-posts",
+            params={"q": q, "sort": sort, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled(len(data["posts"]))
         return ApiResponse(data=data)

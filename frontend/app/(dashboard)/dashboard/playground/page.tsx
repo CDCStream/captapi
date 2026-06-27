@@ -7,11 +7,14 @@ import {
   ChevronRight,
   Cloud,
   Facebook,
+  Github,
   Instagram,
   Linkedin,
+  Megaphone,
   MessagesSquare,
   Music2,
   Pin,
+  ShoppingBag,
   ShieldCheck,
   Terminal,
   Twitter,
@@ -43,6 +46,9 @@ const PLATFORM_ICON: Record<PlatformId, typeof Youtube> = {
   pinterest: Pin,
   linkedin: Linkedin,
   rumble: Video,
+  tiktok_shop: ShoppingBag,
+  github: Github,
+  ad_library: Megaphone,
 };
 
 const PLATFORM_BG: Record<PlatformId, string> = {
@@ -57,6 +63,9 @@ const PLATFORM_BG: Record<PlatformId, string> = {
   pinterest: "bg-red-600/10",
   linkedin: "bg-blue-700/10",
   rumble: "bg-green-600/10",
+  tiktok_shop: "bg-pink-500/10",
+  github: "bg-foreground/10",
+  ad_library: "bg-amber-500/10",
 };
 
 const PLATFORM_FG: Record<PlatformId, string> = {
@@ -71,6 +80,9 @@ const PLATFORM_FG: Record<PlatformId, string> = {
   pinterest: "text-red-600",
   linkedin: "text-blue-700",
   rumble: "text-green-600",
+  tiktok_shop: "text-pink-500",
+  github: "text-foreground",
+  ad_library: "text-amber-600",
 };
 
 const FIRST = PLATFORM_GROUPS[0].endpoints[0];

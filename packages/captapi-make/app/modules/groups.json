@@ -128,7 +128,9 @@
     "modules": [
       "linkedinProfile",
       "linkedinCompany",
-      "linkedinPostDetails"
+      "linkedinPostDetails",
+      "linkedinCompanyPosts",
+      "linkedinSearchPosts"
     ]
   },
   {
@@ -136,7 +138,49 @@
     "modules": [
       "rumbleVideoDetails",
       "rumbleChannelVideos",
-      "rumbleSearch"
+      "rumbleSearch",
+      "rumbleTranscript",
+      "rumbleComments"
+    ]
+  },
+  {
+    "label": "TikTok Shop",
+    "modules": [
+      "tiktokShopSearch",
+      "tiktokShopProducts",
+      "tiktokShopProductDetails",
+      "tiktokShopProductReviews",
+      "tiktokShopUserShowcase"
+    ]
+  },
+  {
+    "label": "GitHub",
+    "modules": [
+      "githubUser",
+      "githubRepositories",
+      "githubRepository",
+      "githubPullRequests",
+      "githubActivity",
+      "githubFollowers",
+      "githubFollowing",
+      "githubContributions",
+      "githubTrendingRepositories",
+      "githubTrendingDevelopers"
+    ]
+  },
+  {
+    "label": "Ad Library",
+    "modules": [
+      "facebookAdLibrarySearch",
+      "facebookAdLibraryCompanyAds",
+      "facebookAdLibraryAdDetails",
+      "tiktokAdLibrarySearch",
+      "tiktokAdLibraryAdDetails",
+      "googleAdLibraryCompanyAds",
+      "googleAdLibraryAdDetails",
+      "googleAdLibraryAdvertiserSearch",
+      "linkedinAdLibrarySearchAds",
+      "linkedinAdLibraryAdDetails"
     ]
   }
 ]

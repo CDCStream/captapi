@@ -1,0 +1,12 @@
+{
+  "url": "/v1/github/pull-requests",
+  "method": "GET",
+  "qs": {
+    "repo": "{{parameters.repo}}",
+    "state": "{{parameters.state}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

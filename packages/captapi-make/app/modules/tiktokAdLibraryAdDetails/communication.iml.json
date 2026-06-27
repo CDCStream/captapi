@@ -1,0 +1,11 @@
+{
+  "url": "/v1/ad-library/tiktok/ad-details",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}",
+    "country": "{{parameters.country}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

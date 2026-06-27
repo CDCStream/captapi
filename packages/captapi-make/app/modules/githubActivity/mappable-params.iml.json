@@ -1,0 +1,16 @@
+[
+  {
+    "name": "username",
+    "type": "text",
+    "label": "Username",
+    "required": true,
+    "help": "GitHub username or profile URL."
+  },
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max items to return. Default 30, max 100."
+  }
+]

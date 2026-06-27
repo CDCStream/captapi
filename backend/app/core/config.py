@@ -117,9 +117,24 @@ class Settings(BaseSettings):
     APIFY_ACTOR_LINKEDIN_PROFILE: str = "apimaestro/linkedin-profile-detail"
     APIFY_ACTOR_LINKEDIN_COMPANY: str = "apimaestro/linkedin-company-detail"
     APIFY_ACTOR_LINKEDIN_POST: str = "apimaestro/linkedin-post-detail"
+    APIFY_ACTOR_LINKEDIN_COMPANY_POSTS: str = "automation-lab/linkedin-company-posts-scraper"
+    APIFY_ACTOR_LINKEDIN_POST_SEARCH: str = "apimaestro/linkedin-posts-search-scraper-no-cookies"
 
     # Rumble. Input: searchQueries + maxItems.
     APIFY_ACTOR_RUMBLE: str = "kawsar/rumble-video-extractor"
+    APIFY_ACTOR_RUMBLE_COMMENTS: str = "thescrapelab/apify-rumble-scraper"
+    APIFY_ACTOR_RUMBLE_TRANSCRIPT: str = "bulletproof/rumble-transcript-extractor"
+
+    # TikTok Shop. 5 modes: shop_search, shop_catalog, product_details,
+    # product_reviews, creator_showcase.
+    APIFY_ACTOR_TIKTOK_SHOP: str = "unseenuser/tiktok-shop-scraper"
+
+    # Public ad libraries. Kept separate because each platform has a different
+    # public transparency surface and actor input schema.
+    APIFY_ACTOR_FACEBOOK_AD_LIBRARY: str = "scrapemint/facebook-ads-library-scraper"
+    APIFY_ACTOR_TIKTOK_AD_LIBRARY: str = "brilliant_gum/tiktok-ads-library-scraper"
+    APIFY_ACTOR_GOOGLE_AD_LIBRARY: str = "automation-lab/google-ads-scraper"
+    APIFY_ACTOR_LINKEDIN_AD_LIBRARY: str = "s-r/linkedin-ads-library"
 
     # Bluesky uses the public AT-Protocol AppView API directly (no actor).
     BLUESKY_API_BASE: str = "https://public.api.bsky.app"

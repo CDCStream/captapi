@@ -24,6 +24,9 @@ const PLATFORM_LABELS = {
   pinterest: "Pinterest",
   linkedin: "LinkedIn",
   rumble: "Rumble",
+  tiktok_shop: "TikTok Shop",
+  github: "GitHub",
+  ad_library: "Ad Library",
 };
 
 function writeJson(relPath, value) {
@@ -126,7 +129,54 @@ const inputSchema = {
       title: "Country",
       type: "string",
       description:
-        "Two-letter ISO country code (e.g. US, GB, TR) for tiktok_trending_feed. Optional.",
+        "Two-letter ISO country code (e.g. US, GB, TR). Used by trending, TikTok Shop, and Ad Library operations.",
+      editor: "textfield",
+    },
+    region: {
+      title: "Region",
+      type: "string",
+      description:
+        "Two-letter TikTok Shop region (e.g. US, GB, SG). Optional.",
+      editor: "textfield",
+    },
+    username: {
+      title: "Username",
+      type: "string",
+      description:
+        "Username/profile handle for GitHub or TikTok Shop creator showcase operations.",
+      editor: "textfield",
+    },
+    repo: {
+      title: "Repository",
+      type: "string",
+      description: "GitHub repository URL or owner/name.",
+      editor: "textfield",
+    },
+    state: {
+      title: "Pull request state",
+      type: "string",
+      description: "GitHub pull request state: open, closed, or all.",
+      editor: "select",
+      enum: ["open", "closed", "all"],
+      enumTitles: ["Open", "Closed", "All"],
+    },
+    sort: {
+      title: "Sort",
+      type: "string",
+      description: "Sort mode for endpoints that support it, e.g. relevance or date.",
+      editor: "textfield",
+    },
+    advertiser: {
+      title: "Advertiser",
+      type: "string",
+      description:
+        "Advertiser name, domain, or Google advertiser ID for Google Ads Transparency Center operations.",
+      editor: "textfield",
+    },
+    creative_id: {
+      title: "Creative ID",
+      type: "string",
+      description: "Google creative/ad ID or preview URL.",
       editor: "textfield",
     },
     query: {

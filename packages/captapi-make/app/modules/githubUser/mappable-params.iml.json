@@ -1,0 +1,9 @@
+[
+  {
+    "name": "username",
+    "type": "text",
+    "label": "Username",
+    "required": true,
+    "help": "GitHub username or profile URL."
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "url": "/v1/ad-library/facebook/company-ads",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}",
+    "country": "{{parameters.country}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

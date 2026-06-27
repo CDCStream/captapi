@@ -1630,6 +1630,56 @@
     ]
   },
   {
+    "tool": "linkedin_company_posts",
+    "platform": "linkedin",
+    "name": "LinkedIn Company Posts",
+    "path": "/v1/linkedin/company-posts",
+    "credits": 16,
+    "summary": "Recent public posts from a LinkedIn company page.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "LinkedIn company URL, e.g. https://linkedin.com/company/slug."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_search_posts",
+    "platform": "linkedin",
+    "name": "LinkedIn Search Posts",
+    "path": "/v1/linkedin/search-posts",
+    "credits": 16,
+    "summary": "Search public LinkedIn posts by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "sort",
+        "type": "string",
+        "required": false,
+        "description": "relevance or date. Default relevance."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 50. Billed per result."
+      }
+    ]
+  },
+  {
     "tool": "rumble_video_details",
     "platform": "rumble",
     "name": "Rumble Video Details",
@@ -1686,6 +1736,606 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "rumble_transcript",
+    "platform": "rumble",
+    "name": "Rumble Transcript",
+    "path": "/v1/rumble/transcript",
+    "credits": 3,
+    "summary": "Extract a timestamped Rumble video transcript.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      }
+    ]
+  },
+  {
+    "tool": "rumble_comments",
+    "platform": "rumble",
+    "name": "Rumble Comments",
+    "path": "/v1/rumble/comments",
+    "credits": 30,
+    "summary": "Comments on a Rumble video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_shop_search",
+    "platform": "tiktok_shop",
+    "name": "TikTok Shop Search",
+    "path": "/v1/tiktok-shop/shop-search",
+    "credits": 16,
+    "summary": "Search TikTok Shop products by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Product search query."
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "required": false,
+        "description": "Two-letter TikTok Shop region. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_shop_products",
+    "platform": "tiktok_shop",
+    "name": "TikTok Shop Products",
+    "path": "/v1/tiktok-shop/shop-products",
+    "credits": 16,
+    "summary": "List products from a TikTok Shop store.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok Shop store URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_shop_product_details",
+    "platform": "tiktok_shop",
+    "name": "TikTok Shop Product Details",
+    "path": "/v1/tiktok-shop/product-details",
+    "credits": 2,
+    "summary": "Full TikTok Shop product details, seller and price metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok Shop product URL."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_shop_product_reviews",
+    "platform": "tiktok_shop",
+    "name": "TikTok Shop Product Reviews",
+    "path": "/v1/tiktok-shop/product-reviews",
+    "credits": 16,
+    "summary": "Customer reviews for a TikTok Shop product.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok Shop product URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_shop_user_showcase",
+    "platform": "tiktok_shop",
+    "name": "TikTok Shop User Showcase",
+    "path": "/v1/tiktok-shop/user-showcase",
+    "credits": 16,
+    "summary": "Products promoted in a TikTok creator showcase.",
+    "params": [
+      {
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "TikTok username with or without @."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "github_user",
+    "platform": "github",
+    "name": "GitHub User",
+    "path": "/v1/github/user",
+    "credits": 1,
+    "summary": "Public GitHub user profile details.",
+    "params": [
+      {
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "GitHub username or profile URL."
+      }
+    ]
+  },
+  {
+    "tool": "github_repositories",
+    "platform": "github",
+    "name": "GitHub Repositories",
+    "path": "/v1/github/repositories",
+    "credits": 3,
+    "summary": "List a GitHub user's repositories.",
+    "params": [
+      {
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "GitHub username or profile URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 30, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "github_repository",
+    "platform": "github",
+    "name": "GitHub Repository",
+    "path": "/v1/github/repository",
+    "credits": 1,
+    "summary": "Repository details, stars, forks and metadata.",
+    "params": [
+      {
+        "name": "repo",
+        "type": "string",
+        "required": true,
+        "description": "Repository URL or owner/name."
+      }
+    ]
+  },
+  {
+    "tool": "github_pull_requests",
+    "platform": "github",
+    "name": "GitHub Pull Requests",
+    "path": "/v1/github/pull-requests",
+    "credits": 3,
+    "summary": "List repository pull requests.",
+    "params": [
+      {
+        "name": "repo",
+        "type": "string",
+        "required": true,
+        "description": "Repository URL or owner/name."
+      },
+      {
+        "name": "state",
+        "type": "string",
+        "required": false,
+        "description": "open, closed, or all. Default open."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 30, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "github_activity",
+    "platform": "github",
+    "name": "GitHub Activity",
+    "path": "/v1/github/activity",
+    "credits": 3,
+    "summary": "Recent public activity for a GitHub user.",
+    "params": [
+      {
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "GitHub username or profile URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 30, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "github_followers",
+    "platform": "github",
+    "name": "GitHub Followers",
+    "path": "/v1/github/followers",
+    "credits": 3,
+    "summary": "List GitHub followers.",
+    "params": [
+      {
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "GitHub username or profile URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 30, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "github_following",
+    "platform": "github",
+    "name": "GitHub Following",
+    "path": "/v1/github/following",
+    "credits": 3,
+    "summary": "List accounts a GitHub user follows.",
+    "params": [
+      {
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "GitHub username or profile URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 30, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "github_contributions",
+    "platform": "github",
+    "name": "GitHub Contributions",
+    "path": "/v1/github/contributions",
+    "credits": 2,
+    "summary": "Summary of recent public GitHub contributions.",
+    "params": [
+      {
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "GitHub username or profile URL."
+      }
+    ]
+  },
+  {
+    "tool": "github_trending_repositories",
+    "platform": "github",
+    "name": "GitHub Trending Repositories",
+    "path": "/v1/github/trending-repositories",
+    "credits": 2,
+    "summary": "Search trending repositories by stars or query.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "GitHub repository search query. Default stars:>1000."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "github_trending_developers",
+    "platform": "github",
+    "name": "GitHub Trending Developers",
+    "path": "/v1/github/trending-developers",
+    "credits": 2,
+    "summary": "Search popular GitHub developers.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "GitHub user search query. Default followers:>1000."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_search",
+    "platform": "ad_library",
+    "name": "Facebook Ad Library Search",
+    "path": "/v1/ad-library/facebook/search",
+    "credits": 20,
+    "summary": "Search Meta/Facebook ads by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_company_ads",
+    "platform": "ad_library",
+    "name": "Facebook Company Ads",
+    "path": "/v1/ad-library/facebook/company-ads",
+    "credits": 20,
+    "summary": "Ads for a Facebook page or Meta Ad Library URL.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook page URL or Meta Ad Library URL."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_ad_details",
+    "platform": "ad_library",
+    "name": "Facebook Ad Details",
+    "path": "/v1/ad-library/facebook/ad-details",
+    "credits": 2,
+    "summary": "Meta/Facebook ad details.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Meta Ad Library ad URL."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_ad_library_search",
+    "platform": "ad_library",
+    "name": "TikTok Ad Library Search",
+    "path": "/v1/ad-library/tiktok/search",
+    "credits": 20,
+    "summary": "Search TikTok Ad Library and Creative Center.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default DE."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_ad_library_ad_details",
+    "platform": "ad_library",
+    "name": "TikTok Ad Details",
+    "path": "/v1/ad-library/tiktok/ad-details",
+    "credits": 2,
+    "summary": "TikTok ad details by ad URL or ID.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok Ad Library URL or ad ID."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default DE."
+      }
+    ]
+  },
+  {
+    "tool": "google_ad_library_company_ads",
+    "platform": "ad_library",
+    "name": "Google Company Ads",
+    "path": "/v1/ad-library/google/company-ads",
+    "credits": 20,
+    "summary": "Google Ads Transparency Center ads for an advertiser.",
+    "params": [
+      {
+        "name": "advertiser",
+        "type": "string",
+        "required": true,
+        "description": "Advertiser name, domain, or Google advertiser ID."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "google_ad_library_ad_details",
+    "platform": "ad_library",
+    "name": "Google Ad Details",
+    "path": "/v1/ad-library/google/ad-details",
+    "credits": 2,
+    "summary": "Google ad details by creative ID or preview URL.",
+    "params": [
+      {
+        "name": "creative_id",
+        "type": "string",
+        "required": true,
+        "description": "Google creative/ad ID or preview URL."
+      }
+    ]
+  },
+  {
+    "tool": "google_ad_library_advertiser_search",
+    "platform": "ad_library",
+    "name": "Google Advertiser Search",
+    "path": "/v1/ad-library/google/advertiser-search",
+    "credits": 10,
+    "summary": "Search Google Ads advertisers.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 10, max 50. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_ad_library_search_ads",
+    "platform": "ad_library",
+    "name": "LinkedIn Ad Library Search",
+    "path": "/v1/ad-library/linkedin/search-ads",
+    "credits": 20,
+    "summary": "Search LinkedIn Ad Library ads.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_ad_library_ad_details",
+    "platform": "ad_library",
+    "name": "LinkedIn Ad Details",
+    "path": "/v1/ad-library/linkedin/ad-details",
+    "credits": 2,
+    "summary": "LinkedIn ad details by URL or ID.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "LinkedIn Ad Library URL or ad ID."
       }
     ]
   }
