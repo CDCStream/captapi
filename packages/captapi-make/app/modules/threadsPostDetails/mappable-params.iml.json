@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Threads post URL, e.g. https://threads.net/@user/post/CODE."
+  }
+]

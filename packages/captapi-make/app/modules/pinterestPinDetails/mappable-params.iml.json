@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Pinterest pin URL, e.g. https://pinterest.com/pin/ID/."
+  }
+]

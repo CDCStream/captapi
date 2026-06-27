@@ -12,7 +12,18 @@
 
 import { API_EXAMPLES } from "./api-examples.generated";
 
-export type PlatformId = "youtube" | "tiktok" | "instagram" | "facebook";
+export type PlatformId =
+  | "youtube"
+  | "tiktok"
+  | "instagram"
+  | "facebook"
+  | "twitter"
+  | "reddit"
+  | "threads"
+  | "bluesky"
+  | "pinterest"
+  | "linkedin"
+  | "rumble";
 
 export type Category =
   | "transcript"
@@ -80,7 +91,18 @@ export interface PlatformGroup {
   name: string;
   blurb: string;
   /** lucide-react icon name (resolved in components) */
-  icon: "youtube" | "music" | "instagram" | "facebook";
+  icon:
+    | "youtube"
+    | "music"
+    | "instagram"
+    | "facebook"
+    | "twitter"
+    | "reddit"
+    | "threads"
+    | "bluesky"
+    | "pinterest"
+    | "linkedin"
+    | "rumble";
   /** brand color class for the icon */
   color: string;
   exampleUrl: string;
@@ -108,6 +130,13 @@ const PLATFORM_LABEL: Record<PlatformId, string> = {
   tiktok: "TikTok",
   instagram: "Instagram",
   facebook: "Facebook",
+  twitter: "Twitter / X",
+  reddit: "Reddit",
+  threads: "Threads",
+  bluesky: "Bluesky",
+  pinterest: "Pinterest",
+  linkedin: "LinkedIn",
+  rumble: "Rumble",
 };
 
 // ---------------------------------------------------------------------------
@@ -190,6 +219,50 @@ const FACEBOOK: Spec[] = [
   { slug: "facebook-comment-replies", name: "Facebook Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/facebook/comment-replies", credits: 30, creditsPerResult: 0.6 },
 ];
 
+const TWITTER: Spec[] = [
+  { slug: "twitter-tweet-details", name: "Twitter/X Tweet Details API", shortName: "Tweet Details", category: "details", method: "GET", path: "/v1/twitter/tweet-details", credits: 1 },
+  { slug: "twitter-profile", name: "Twitter/X Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/twitter/profile", credits: 1 },
+  { slug: "twitter-user-tweets", name: "Twitter/X User Tweets API", shortName: "User Tweets", category: "list", method: "GET", path: "/v1/twitter/user-tweets", credits: 14, creditsPerResult: 0.7 },
+  { slug: "twitter-search", name: "Twitter/X Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/twitter/search", credits: 14, creditsPerResult: 0.7 },
+];
+
+const REDDIT: Spec[] = [
+  { slug: "reddit-subreddit-posts", name: "Reddit Subreddit Posts API", shortName: "Subreddit Posts", category: "list", method: "GET", path: "/v1/reddit/subreddit-posts", credits: 10, creditsPerResult: 0.4 },
+  { slug: "reddit-post-details", name: "Reddit Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/reddit/post-details", credits: 1 },
+  { slug: "reddit-post-comments", name: "Reddit Post Comments API", shortName: "Post Comments", category: "comments", method: "GET", path: "/v1/reddit/post-comments", credits: 20, creditsPerResult: 0.4 },
+  { slug: "reddit-search", name: "Reddit Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/reddit/search", credits: 10, creditsPerResult: 0.4 },
+];
+
+const THREADS: Spec[] = [
+  { slug: "threads-profile", name: "Threads Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/threads/profile", credits: 1 },
+  { slug: "threads-user-posts", name: "Threads User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/threads/user-posts", credits: 14, creditsPerResult: 0.7 },
+  { slug: "threads-post-details", name: "Threads Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/threads/post-details", credits: 1 },
+];
+
+const BLUESKY: Spec[] = [
+  { slug: "bluesky-profile", name: "Bluesky Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/bluesky/profile", credits: 1 },
+  { slug: "bluesky-user-posts", name: "Bluesky User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/bluesky/user-posts", credits: 3, creditsPerResult: 0.1 },
+  { slug: "bluesky-post-details", name: "Bluesky Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/bluesky/post-details", credits: 1 },
+];
+
+const PINTEREST: Spec[] = [
+  { slug: "pinterest-pin-details", name: "Pinterest Pin Details API", shortName: "Pin Details", category: "details", method: "GET", path: "/v1/pinterest/pin-details", credits: 1 },
+  { slug: "pinterest-user-pins", name: "Pinterest User Pins API", shortName: "User Pins", category: "list", method: "GET", path: "/v1/pinterest/user-pins", credits: 13, creditsPerResult: 0.5 },
+  { slug: "pinterest-search", name: "Pinterest Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/pinterest/search", credits: 13, creditsPerResult: 0.5 },
+];
+
+const LINKEDIN: Spec[] = [
+  { slug: "linkedin-profile", name: "LinkedIn Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/linkedin/profile", credits: 2 },
+  { slug: "linkedin-company", name: "LinkedIn Company API", shortName: "Company", category: "channel", method: "GET", path: "/v1/linkedin/company", credits: 2 },
+  { slug: "linkedin-post-details", name: "LinkedIn Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/linkedin/post-details", credits: 1 },
+];
+
+const RUMBLE: Spec[] = [
+  { slug: "rumble-video-details", name: "Rumble Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/rumble/video-details", credits: 1 },
+  { slug: "rumble-channel-videos", name: "Rumble Channel Videos API", shortName: "Channel Videos", category: "list", method: "GET", path: "/v1/rumble/channel-videos", credits: 12, creditsPerResult: 0.6 },
+  { slug: "rumble-search", name: "Rumble Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/rumble/search", credits: 12, creditsPerResult: 0.6 },
+];
+
 export const PLATFORM_GROUPS: PlatformGroup[] = [
   {
     id: "youtube",
@@ -226,6 +299,69 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     color: "text-blue-600",
     exampleUrl: "https://www.facebook.com/watch/?v=1234567890123456",
     endpoints: FACEBOOK.map((s) => ({ ...s, platform: "facebook" as const })),
+  },
+  {
+    id: "twitter",
+    name: "Twitter / X",
+    blurb: "Pull tweet metadata and engagement, profiles, timelines, and keyword search from Twitter / X.",
+    icon: "twitter",
+    color: "text-sky-500",
+    exampleUrl: "https://x.com/NASA/status/1816004914774937656",
+    endpoints: TWITTER.map((s) => ({ ...s, platform: "twitter" as const })),
+  },
+  {
+    id: "reddit",
+    name: "Reddit",
+    blurb: "Fetch subreddit posts, post details and stats, comment threads, and keyword search from Reddit.",
+    icon: "reddit",
+    color: "text-orange-500",
+    exampleUrl: "https://www.reddit.com/r/technology/comments/1a2b3c4/example_discussion_thread/",
+    endpoints: REDDIT.map((s) => ({ ...s, platform: "reddit" as const })),
+  },
+  {
+    id: "threads",
+    name: "Threads",
+    blurb: "Extract Threads profiles, post timelines, and individual post metadata and engagement.",
+    icon: "threads",
+    color: "text-foreground",
+    exampleUrl: "https://www.threads.net/@zuck/post/C8H1abcdEFG",
+    endpoints: THREADS.map((s) => ({ ...s, platform: "threads" as const })),
+  },
+  {
+    id: "bluesky",
+    name: "Bluesky",
+    blurb: "Pull Bluesky profiles, post timelines, and post details via the public AT-Protocol API.",
+    icon: "bluesky",
+    color: "text-sky-400",
+    exampleUrl: "https://bsky.app/profile/bsky.app/post/3kabcd2efg2h",
+    endpoints: BLUESKY.map((s) => ({ ...s, platform: "bluesky" as const })),
+  },
+  {
+    id: "pinterest",
+    name: "Pinterest",
+    blurb: "Extract Pinterest pin details and saves, user pins, and keyword search results.",
+    icon: "pinterest",
+    color: "text-red-600",
+    exampleUrl: "https://www.pinterest.com/pin/99360735500167749/",
+    endpoints: PINTEREST.map((s) => ({ ...s, platform: "pinterest" as const })),
+  },
+  {
+    id: "linkedin",
+    name: "LinkedIn",
+    blurb: "Pull public LinkedIn person profiles, company pages, and post engagement metrics.",
+    icon: "linkedin",
+    color: "text-blue-700",
+    exampleUrl: "https://www.linkedin.com/posts/williamhgates_example-activity-7180000000000000000-abcd",
+    endpoints: LINKEDIN.map((s) => ({ ...s, platform: "linkedin" as const })),
+  },
+  {
+    id: "rumble",
+    name: "Rumble",
+    blurb: "Extract Rumble video details and stats, channel video lists, and keyword search.",
+    icon: "rumble",
+    color: "text-green-600",
+    exampleUrl: "https://rumble.com/v4abcd-example-video.html",
+    endpoints: RUMBLE.map((s) => ({ ...s, platform: "rumble" as const })),
   },
 ];
 
@@ -494,6 +630,36 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "facebook-profile-reels": [up("Facebook profile or page URL."), lp(20, 200)],
   "facebook-group-posts": [up("Public Facebook group URL, e.g. https://facebook.com/groups/ID."), lp(20, 200)],
   "facebook-comment-replies": [up("Facebook post URL the comment belongs to."), cid(), lp(50, 500)],
+  // Twitter / X
+  "twitter-tweet-details": [up("Public tweet URL, e.g. https://x.com/user/status/ID.")],
+  "twitter-profile": [up("Twitter/X profile URL or @handle, e.g. https://x.com/username.")],
+  "twitter-user-tweets": [up("Twitter/X profile URL or @handle."), lp(20, 200)],
+  "twitter-search": [qp("Keywords or search query (min 2 characters)."), lp(20, 200)],
+  // Reddit
+  "reddit-subreddit-posts": [up("Subreddit URL, r/name, or bare name, e.g. r/technology."), lp(25, 200)],
+  "reddit-post-details": [up("Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/...")],
+  "reddit-post-comments": [up("Reddit post URL."), lp(50, 500)],
+  "reddit-search": [qp("Keywords or search query (min 2 characters)."), lp(25, 200)],
+  // Threads
+  "threads-profile": [up("Threads profile URL or @handle, e.g. https://threads.net/@username.")],
+  "threads-user-posts": [up("Threads profile URL or @handle."), lp(20, 100)],
+  "threads-post-details": [up("Threads post URL, e.g. https://threads.net/@user/post/CODE.")],
+  // Bluesky
+  "bluesky-profile": [up("Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle.")],
+  "bluesky-user-posts": [up("Bluesky profile URL, @handle, or handle."), lp(25, 100)],
+  "bluesky-post-details": [up("Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY.")],
+  // Pinterest
+  "pinterest-pin-details": [up("Pinterest pin URL, e.g. https://pinterest.com/pin/ID/.")],
+  "pinterest-user-pins": [up("Pinterest profile URL or username."), lp(25, 200)],
+  "pinterest-search": [qp("Keywords or search query (min 2 characters)."), lp(25, 200)],
+  // LinkedIn
+  "linkedin-profile": [up("LinkedIn profile URL, e.g. https://linkedin.com/in/slug.")],
+  "linkedin-company": [up("LinkedIn company URL, e.g. https://linkedin.com/company/slug.")],
+  "linkedin-post-details": [up("LinkedIn post or activity URL.")],
+  // Rumble
+  "rumble-video-details": [up("Rumble video URL, e.g. https://rumble.com/vXXXX-title.html.")],
+  "rumble-channel-videos": [up("Rumble channel URL, e.g. https://rumble.com/c/name."), lp(20, 200)],
+  "rumble-search": [qp("Keywords or search query (min 2 characters)."), lp(20, 200)],
 };
 
 export function params(ep: ApiEndpoint): ApiParam[] {
@@ -598,6 +764,13 @@ const PROFILE_URL: Record<PlatformId, string> = {
   tiktok: "https://www.tiktok.com/@khaby.lame",
   instagram: "https://www.instagram.com/natgeo/",
   facebook: "https://www.facebook.com/NASA",
+  twitter: "https://x.com/NASA",
+  reddit: "https://www.reddit.com/r/technology",
+  threads: "https://www.threads.net/@zuck",
+  bluesky: "https://bsky.app/profile/bsky.app",
+  pinterest: "https://www.pinterest.com/nasa",
+  linkedin: "https://www.linkedin.com/in/williamhgates",
+  rumble: "https://rumble.com/c/Bongino",
 };
 
 /** A realistic example value for a single parameter of an endpoint. */
@@ -625,8 +798,12 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
           : "https://www.instagram.com/reels/audio/1234567890123456/";
       if (d.includes("group"))
         return "https://www.facebook.com/groups/123456789012345";
+      if (d.includes("subreddit"))
+        return "https://www.reddit.com/r/technology/";
+      if (d.includes("company"))
+        return "https://www.linkedin.com/company/microsoft";
       if (d.includes("page")) return PROFILE_URL.facebook;
-      if (d.includes("channel") || d.includes("profile"))
+      if (d.includes("channel") || d.includes("profile") || d.includes("@handle"))
         return PROFILE_URL[ep.platform];
       return getGroup(ep.platform).exampleUrl;
     }
@@ -812,7 +989,7 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     },
     {
       q: `Do I need a ${platform} API key or OAuth?`,
-      a: `No. A single Captapi key works across YouTube, TikTok, Instagram, and Facebook. We handle proxies, rate limits, retries, and authentication for you.`,
+      a: `No. A single Captapi key works across every platform Captapi supports — YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble. We handle proxies, rate limits, retries, and authentication for you.`,
     },
   ];
 

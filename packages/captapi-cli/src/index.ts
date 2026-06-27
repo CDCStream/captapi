@@ -66,7 +66,7 @@ function buildProgram(): Command {
   program
     .name("captapi")
     .description(
-      "Captapi CLI — social media data (YouTube, TikTok, Instagram, Facebook) from your terminal.",
+      "Captapi CLI — social media data from 11 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble) from your terminal.",
     )
     .version(VERSION, "-v, --version", "Print the CLI version");
 
@@ -91,7 +91,10 @@ function buildProgram(): Command {
 
   program
     .command("list")
-    .argument("[platform]", "Filter by platform: youtube | tiktok | instagram | facebook")
+    .argument(
+      "[platform]",
+      "Filter by platform: youtube | tiktok | instagram | facebook | twitter | reddit | threads | bluesky | pinterest | linkedin | rumble",
+    )
     .description("List all available endpoints (commands)")
     .option("--json", "Output as JSON")
     .action((platform, opts) => list(platform, opts));

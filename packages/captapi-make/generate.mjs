@@ -22,6 +22,13 @@ const PLATFORM_LABELS = {
   tiktok: "TikTok",
   instagram: "Instagram",
   facebook: "Facebook",
+  twitter: "Twitter / X",
+  reddit: "Reddit",
+  threads: "Threads",
+  bluesky: "Bluesky",
+  pinterest: "Pinterest",
+  linkedin: "LinkedIn",
+  rumble: "Rumble",
 };
 
 const PARAM_LABELS = {
@@ -200,7 +207,8 @@ writeText(
   "README.md",
   `# Captapi for Make.com
 
-Structured social media data from YouTube, TikTok, Instagram & Facebook —
+Structured social media data from 11 platforms — YouTube, TikTok, Instagram,
+Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn & Rumble —
 transcripts, AI summaries, comments, stats, search and downloads.
 
 - **${moduleCount} action modules**, one per Captapi endpoint.
@@ -215,9 +223,10 @@ https://captapi.com/dashboard. The key is validated against
 
 ## Modules
 
-Modules are grouped by platform (YouTube, TikTok, Instagram, Facebook). Pick the
-operation you need, fill in the URL (or search query) and an optional limit, and
-the module returns the structured result.
+Modules are grouped by platform (YouTube, TikTok, Instagram, Facebook, X/Twitter,
+Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble). Pick the operation you
+need, fill in the URL (or search query) and an optional limit, and the module
+returns the structured result.
 
 Docs: https://captapi.com/docs
 `,

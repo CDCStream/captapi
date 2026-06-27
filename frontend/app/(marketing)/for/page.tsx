@@ -52,7 +52,7 @@ export default function UseCasesHub() {
         <section className="mt-14 rounded-xl border bg-muted/30 p-8 text-center">
           <h2 className="text-2xl font-bold">Start building with Captapi</h2>
           <p className="mt-2 text-muted-foreground">
-            One API, four platforms, 100 free credits. No credit card required.
+            One API, 11 platforms, 100 free credits. No credit card required.
           </p>
           <div className="mt-6">
             <Button asChild size="lg">

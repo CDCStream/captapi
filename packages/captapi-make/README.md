@@ -1,9 +1,10 @@
 # Captapi - Make.com custom app
 
 A [Make.com](https://www.make.com) (Integromat) custom app that exposes every
-Captapi endpoint as a module. Structured social media data from **YouTube,
-TikTok, Instagram & Facebook** - transcripts, AI summaries, comments, stats,
-search and downloads - with one API-key connection.
+Captapi endpoint as a module. Structured social media data from **11 platforms**
+(YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest,
+LinkedIn & Rumble) - transcripts, AI summaries, comments, stats, search and
+downloads - with one API-key connection.
 
 The app definition lives in [`app/`](./app) as a Make **local app** and is
 generated from the shared endpoint catalog, so it always matches the API.
@@ -12,11 +13,11 @@ generated from the shared endpoint catalog, so it always matches the API.
 
 | Path | Purpose |
 | --- | --- |
-| `makecomapp.json` | App manifest (connection + 62 modules, grouped by platform) |
+| `makecomapp.json` | App manifest (connection + 85 modules, grouped by platform) |
 | `general/base.iml.json` | Base URL + `Authorization: Bearer {{connection.apiKey}}` + error handling |
 | `connections/captapi/` | API-key connection: params + verification request (`GET /v1/account/limits`) |
 | `modules/<name>/` | One **action** module per endpoint (`communication` + `mappable-params`) |
-| `modules/groups.json` | Picker grouping by YouTube / TikTok / Instagram / Facebook |
+| `modules/groups.json` | Picker grouping by platform (11 groups) |
 
 Every module returns the API `data` payload directly (`{{body.data}}`). List
 endpoints return their array inside that payload.

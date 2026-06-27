@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     template: "%s — Captapi",
   },
   description:
-    "Extract transcripts, AI summaries, comments, followers, and engagement metrics from YouTube, TikTok, Instagram, and Facebook — 62 endpoints, one API call.",
+    "Extract transcripts, AI summaries, comments, followers, and engagement metrics from YouTube, TikTok, Instagram, Facebook, X, Reddit, LinkedIn and more — 85 endpoints across 11 platforms, one API call.",
   metadataBase: new URL(SITE),
   applicationName: "Captapi",
   keywords: [

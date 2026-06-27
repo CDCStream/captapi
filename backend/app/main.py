@@ -17,12 +17,20 @@ from app import __version__
 from app.core.config import get_settings
 from app.routers import (
     account,
+    analytics,
     auth_keys,
     billing,
     facebook,
     instagram,
+    bluesky,
+    linkedin,
     mcp,
+    pinterest,
+    reddit,
+    rumble,
+    threads,
     tiktok,
+    twitter,
     video,
     youtube,
 )
@@ -141,6 +149,14 @@ def create_app() -> FastAPI:
     app.include_router(tiktok.router, prefix="/v1/tiktok", tags=["TikTok"])
     app.include_router(instagram.router, prefix="/v1/instagram", tags=["Instagram"])
     app.include_router(facebook.router, prefix="/v1/facebook", tags=["Facebook"])
+    app.include_router(twitter.router, prefix="/v1/twitter", tags=["Twitter"])
+    app.include_router(reddit.router, prefix="/v1/reddit", tags=["Reddit"])
+    app.include_router(threads.router, prefix="/v1/threads", tags=["Threads"])
+    app.include_router(bluesky.router, prefix="/v1/bluesky", tags=["Bluesky"])
+    app.include_router(pinterest.router, prefix="/v1/pinterest", tags=["Pinterest"])
+    app.include_router(linkedin.router, prefix="/v1/linkedin", tags=["LinkedIn"])
+    app.include_router(rumble.router, prefix="/v1/rumble", tags=["Rumble"])
+    app.include_router(analytics.router, prefix="/v1/analytics", tags=["Analytics"])
     app.include_router(video.router, prefix="/v1/video", tags=["Video Files"])
     app.include_router(account.router, prefix="/v1/account", tags=["Account"])
     app.include_router(auth_keys.router, prefix="/v1/auth/keys", tags=["API Keys"])

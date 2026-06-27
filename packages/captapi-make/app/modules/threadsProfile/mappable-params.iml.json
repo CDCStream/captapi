@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Threads profile URL or @handle, e.g. https://threads.net/@username."
+  }
+]

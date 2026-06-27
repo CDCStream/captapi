@@ -20,6 +20,13 @@ const PLATFORMS: Array<{ value: Platform; name: string }> = [
 	{ value: 'tiktok', name: 'TikTok' },
 	{ value: 'instagram', name: 'Instagram' },
 	{ value: 'facebook', name: 'Facebook' },
+	{ value: 'twitter', name: 'Twitter / X' },
+	{ value: 'reddit', name: 'Reddit' },
+	{ value: 'threads', name: 'Threads' },
+	{ value: 'bluesky', name: 'Bluesky' },
+	{ value: 'pinterest', name: 'Pinterest' },
+	{ value: 'linkedin', name: 'LinkedIn' },
+	{ value: 'rumble', name: 'Rumble' },
 ];
 
 // Friendly field labels for the known parameter names in the catalog.
@@ -105,7 +112,7 @@ export class Captapi implements INodeType {
 		version: 1,
 		subtitle: '={{$parameter["operation"]}}',
 		description:
-			'Structured social media data from YouTube, TikTok, Instagram & Facebook — transcripts, AI summaries, comments, stats, search and downloads.',
+			'Structured social media data from 11 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble) — transcripts, AI summaries, comments, stats, search and downloads.',
 		defaults: {
 			name: 'Captapi',
 		},

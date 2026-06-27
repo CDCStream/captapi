@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "LinkedIn profile URL, e.g. https://linkedin.com/in/slug."
+  }
+]

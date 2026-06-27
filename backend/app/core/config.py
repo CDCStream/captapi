@@ -92,6 +92,35 @@ class Settings(BaseSettings):
     # ($7.50/mo). Input: startUrls/usernames + maxposts.
     APIFY_ACTOR_YOUTUBE_COMMUNITY: str = "alpha-scraper/youtube-community-posts-scraper"
 
+    # Twitter / X. apidojo "Tweet Scraper V2" handles tweets by URL, search
+    # terms, and per-handle timelines (input: startUrls / searchTerms /
+    # twitterHandles + maxItems). The user-scraper returns profile metadata.
+    APIFY_ACTOR_TWITTER_TWEET: str = "apidojo/tweet-scraper"
+    APIFY_ACTOR_TWITTER_PROFILE: str = "apidojo/twitter-user-scraper"
+
+    # Reddit. trudax "Reddit Scraper Lite" handles subreddit URLs, post URLs
+    # (with comments), and keyword search (input: startUrls / searches + type +
+    # maxItems). Slug is config-driven so it can be swapped without code edits.
+    APIFY_ACTOR_REDDIT: str = "trudax/reddit-scraper-lite"
+
+    # Threads (Meta). Input: profile URLs / usernames / post URLs + maxItems.
+    APIFY_ACTOR_THREADS: str = "curious_coder/threads-scraper"
+
+    # Pinterest. Input: startUrls (pin/board/profile) / search + maxItems.
+    APIFY_ACTOR_PINTEREST: str = "epctex/pinterest-scraper"
+
+    # LinkedIn. Profile + company + post/search actors (rental, public data
+    # only). Slugs are config-driven; verify access in the Apify console.
+    APIFY_ACTOR_LINKEDIN_PROFILE: str = "apimaestro/linkedin-profile-detail"
+    APIFY_ACTOR_LINKEDIN_COMPANY: str = "apimaestro/linkedin-company-detail"
+    APIFY_ACTOR_LINKEDIN_POST: str = "apimaestro/linkedin-post-detail"
+
+    # Rumble. Channel videos, single video, and keyword search.
+    APIFY_ACTOR_RUMBLE: str = "lexis-solutions/rumble-scraper"
+
+    # Bluesky uses the public AT-Protocol AppView API directly (no actor).
+    BLUESKY_API_BASE: str = "https://public.api.bsky.app"
+
     OPENAI_API_KEY: str
     OPENAI_MODEL_SUMMARY: str = "gpt-4o-mini"
     OPENAI_MODEL_TRANSCRIPTION: str = "whisper-1"

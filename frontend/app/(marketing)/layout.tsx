@@ -71,7 +71,7 @@ const STRUCTURED_DATA = {
       "@id": `${SITE_URL}/#webapi`,
       name: "Captapi REST API",
       description:
-        "REST API for structured social-media data across YouTube, TikTok, Instagram, and Facebook. One Bearer key; 62 endpoints returning clean JSON. Connectable by AI agents via an MCP server (@captapi/mcp), a CLI (@captapi/cli), an n8n community node (n8n-nodes-captapi), a Make.com custom app, and an Apify Actor.",
+        "REST API for structured social-media data across 11 platforms — YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble. One Bearer key; 85 endpoints returning clean JSON. Connectable by AI agents via an MCP server (@captapi/mcp), a CLI (@captapi/cli), an n8n community node (n8n-nodes-captapi), a Make.com custom app, and an Apify Actor.",
       documentation: `${SITE_URL}/docs`,
       termsOfService: `${SITE_URL}/legal/terms`,
       provider: { "@id": `${SITE_URL}/#organization` },

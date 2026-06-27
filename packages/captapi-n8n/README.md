@@ -2,7 +2,7 @@
 
 This is an [n8n](https://n8n.io) community node. It lets you use **[Captapi](https://captapi.com)** in your n8n workflows.
 
-Captapi turns YouTube, TikTok, Instagram and Facebook URLs into clean, structured JSON — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups and downloads. One API key, **62 operations**.
+Captapi turns YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn and Rumble URLs into clean, structured JSON — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups and downloads. One API key, **85 operations** across 11 platforms.
 
 [Installation](#installation) · [Credentials](#credentials) · [Operations](#operations) · [Usage](#usage) · [Resources](#resources)
 
@@ -31,12 +31,19 @@ The credential test calls `/v1/account/limits` to confirm the key works. `Base U
 
 ## Operations
 
-Pick a **Platform** (YouTube, TikTok, Instagram, Facebook), then an **Operation**. Highlights per platform:
+Pick a **Platform** (YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble), then an **Operation**. Highlights per platform:
 
 - **YouTube** — Transcript, Summarizer, Video/Channel Details, Comments, Search, Channel Videos/Shorts/Streams/Playlists, Community Posts, Comment Replies, Downloads.
 - **TikTok** — Transcript, Summarizer, Video/Channel Details, Comments, Search, Channel Posts, Followers/Followings, Music Posts, Song Details, Trending Feed, Popular Hashtags, Downloads.
 - **Instagram** — Transcript, Summarizer, Post/Reel Details, Comments, Channel Posts/Reels, Reels/Hashtag/Profile Search, Story Highlights, Tagged & Music Posts, Embed, Downloads.
 - **Facebook** — Details, Transcript, Summarizer, Comments, Page Details, Profile Posts/Reels, Group Posts, Comment Replies.
+- **X (Twitter)** — Tweet Details, Profile, User Tweets, Search.
+- **Reddit** — Subreddit Posts, Post Details, Post Comments, Search.
+- **Threads** — Profile, User Posts, Post Details.
+- **Bluesky** — Profile, User Posts, Post Details.
+- **Pinterest** — Pin Details, User Pins, Search.
+- **LinkedIn** — Profile, Company, Post Details.
+- **Rumble** — Video Details, Channel Videos, Search.
 
 Each operation maps 1:1 to a Captapi REST endpoint and exposes exactly the inputs that endpoint accepts (e.g. `URL`, `Query`, `Limit`, `Language`, `Comment ID`).
 

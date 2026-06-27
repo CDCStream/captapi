@@ -95,6 +95,42 @@ $encoded = urlencode("https://youtube.com/watch?v=dQw4w9WgXcQ");` },
 encoded := url.QueryEscape("https://youtube.com/watch?v=dQw4w9WgXcQ")` },
 ];
 
+const analyticsSample = [
+  {
+    label: "cURL",
+    code: `# Platform is auto-detected from the URL
+curl "${API_URL}/v1/analytics/post?url=https%3A%2F%2Fwww.tiktok.com%2F%40user%2Fvideo%2F7311234567890123456" \\
+  -H "Authorization: Bearer capt_live_..."
+
+# Compare several posts across platforms in one call
+curl "${API_URL}/v1/analytics/compare?urls=URL1,URL2,URL3" \\
+  -H "Authorization: Bearer capt_live_..."`,
+  },
+  {
+    label: "Response",
+    code: `{
+  "success": true,
+  "data": {
+    "platform": "tiktok",
+    "url": "https://www.tiktok.com/@user/video/7311234567890123456",
+    "id": "7311234567890123456",
+    "title": "...",
+    "publishedAt": "2024-12-01T12:00:00.000Z",
+    "author": { "username": "user", "followers": 120000, "verified": true },
+    "metrics": {
+      "views": 1840000,
+      "likes": 245000,
+      "comments": 3100,
+      "shares": 8800,
+      "saves": 12400,
+      "interactions": 269300,
+      "engagementRate": 0.1464
+    }
+  }
+}`,
+  },
+];
+
 const successResponse = `{
   "success": true,
   "cached": false,
@@ -210,6 +246,13 @@ const platformAnchor: Record<string, string> = {
   tiktok: "api-tiktok",
   instagram: "api-instagram",
   facebook: "api-facebook",
+  twitter: "api-twitter",
+  reddit: "api-reddit",
+  threads: "api-threads",
+  bluesky: "api-bluesky",
+  pinterest: "api-pinterest",
+  linkedin: "api-linkedin",
+  rumble: "api-rumble",
 };
 
 export default function DocsPage() {
@@ -227,7 +270,7 @@ export default function DocsPage() {
         infrastructure to maintain.
       </p>
       <ul className="mt-4 space-y-2 text-sm text-muted-foreground max-w-3xl">
-        <li>• One API key works across all four platforms.</li>
+        <li>• One API key works across all 11 platforms.</li>
         <li>• Repeat calls are served from a shared cache for free (up to 24h; time-sensitive metrics refresh within ~1h).</li>
         <li>• You are only charged for successful requests.</li>
       </ul>
@@ -357,8 +400,8 @@ export default function DocsPage() {
       {/* API Reference */}
       <H2 id="api-reference">API Reference</H2>
       <p className="text-muted-foreground max-w-3xl mb-2">
-        {PLATFORM_GROUPS.reduce((n, g) => n + g.endpoints.length, 0) + 2} endpoints
-        across five groups. Click any endpoint for full parameters, examples, and
+        {PLATFORM_GROUPS.reduce((n, g) => n + g.endpoints.length, 0) + 4} endpoints
+        across thirteen groups. Click any endpoint for full parameters, examples, and
         FAQs.
       </p>
 
@@ -370,6 +413,23 @@ export default function DocsPage() {
           endpoints={refRows(g.endpoints)}
         />
       ))}
+
+      <ReferenceTable
+        id="api-analytics"
+        title="Cross-platform Analytics"
+        endpoints={[
+          { method: "GET", path: "/v1/analytics/post", credits: 1, desc: "Unified metrics for one post/video/reel (platform auto-detected)" },
+          { method: "GET", path: "/v1/analytics/compare", credits: "1/url", desc: "Compare unified metrics across up to 10 URLs in one call" },
+        ]}
+      />
+      <p className="text-muted-foreground max-w-3xl mt-3 mb-4">
+        The read-side companion to publishing and scheduling tools: pass any
+        supported post, video, or reel URL (YouTube, TikTok, Instagram, Facebook,
+        X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble) and get one
+        normalized metrics object — views, likes, comments, shares, saves, and an
+        engagement rate — with the platform auto-detected.
+      </p>
+      <CodeTabs samples={analyticsSample} />
 
       <ReferenceTable
         id="api-video-files"

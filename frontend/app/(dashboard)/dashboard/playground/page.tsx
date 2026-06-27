@@ -3,12 +3,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
+  AtSign,
   ChevronRight,
+  Cloud,
   Facebook,
   Instagram,
+  Linkedin,
+  MessagesSquare,
   Music2,
+  Pin,
   ShieldCheck,
   Terminal,
+  Twitter,
+  Video,
   Youtube,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,6 +36,13 @@ const PLATFORM_ICON: Record<PlatformId, typeof Youtube> = {
   tiktok: Music2,
   instagram: Instagram,
   facebook: Facebook,
+  twitter: Twitter,
+  reddit: MessagesSquare,
+  threads: AtSign,
+  bluesky: Cloud,
+  pinterest: Pin,
+  linkedin: Linkedin,
+  rumble: Video,
 };
 
 const PLATFORM_BG: Record<PlatformId, string> = {
@@ -36,6 +50,13 @@ const PLATFORM_BG: Record<PlatformId, string> = {
   tiktok: "bg-foreground/10",
   instagram: "bg-fuchsia-500/10",
   facebook: "bg-blue-600/10",
+  twitter: "bg-sky-500/10",
+  reddit: "bg-orange-500/10",
+  threads: "bg-foreground/10",
+  bluesky: "bg-sky-400/10",
+  pinterest: "bg-red-600/10",
+  linkedin: "bg-blue-700/10",
+  rumble: "bg-green-600/10",
 };
 
 const PLATFORM_FG: Record<PlatformId, string> = {
@@ -43,6 +64,13 @@ const PLATFORM_FG: Record<PlatformId, string> = {
   tiktok: "text-foreground",
   instagram: "text-fuchsia-500",
   facebook: "text-blue-600",
+  twitter: "text-sky-500",
+  reddit: "text-orange-500",
+  threads: "text-foreground",
+  bluesky: "text-sky-400",
+  pinterest: "text-red-600",
+  linkedin: "text-blue-700",
+  rumble: "text-green-600",
 };
 
 const FIRST = PLATFORM_GROUPS[0].endpoints[0];

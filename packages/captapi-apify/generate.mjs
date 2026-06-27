@@ -17,6 +17,13 @@ const PLATFORM_LABELS = {
   tiktok: "TikTok",
   instagram: "Instagram",
   facebook: "Facebook",
+  twitter: "Twitter/X",
+  reddit: "Reddit",
+  threads: "Threads",
+  bluesky: "Bluesky",
+  pinterest: "Pinterest",
+  linkedin: "LinkedIn",
+  rumble: "Rumble",
 };
 
 function writeJson(relPath, value) {

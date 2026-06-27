@@ -1,9 +1,10 @@
 # Captapi - Apify Actor (BYO key)
 
 A thin **Apify Actor** that calls the [Captapi](https://captapi.com) REST API
-(it does not scrape) for social media data from YouTube, TikTok, Instagram &
-Facebook. Users bring their own `capt_live_...` key; credits are billed to their
-Captapi account.
+(it does not scrape) for social media data from 11 platforms (YouTube, TikTok,
+Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn & Rumble).
+Users bring their own `capt_live_...` key; credits are billed to their Captapi
+account.
 
 The input form and the runtime endpoint table are generated from the shared
 endpoint catalog, so the Actor always matches the API.

@@ -4,6 +4,13 @@ import {
   Music2,
   Instagram,
   Facebook,
+  Twitter,
+  Linkedin,
+  MessagesSquare,
+  AtSign,
+  Cloud,
+  Pin,
+  Video,
   FileText,
   Sparkles,
   BarChart3,
@@ -25,6 +32,13 @@ const PLATFORM_ICONS: Record<string, LucideIcon> = {
   music: Music2,
   instagram: Instagram,
   facebook: Facebook,
+  twitter: Twitter,
+  reddit: MessagesSquare,
+  threads: AtSign,
+  bluesky: Cloud,
+  pinterest: Pin,
+  linkedin: Linkedin,
+  rumble: Video,
 };
 
 const CATEGORY_ICONS: Record<Category, LucideIcon> = {

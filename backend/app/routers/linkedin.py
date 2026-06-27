@@ -1,0 +1,186 @@
+"""LinkedIn endpoints: person profile, company page, post details.
+
+Public data only, via config-driven rental actors. Field mappings are
+defensive across actor versions.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+
+from app.core.auth import ApiCaller, require_api_key
+from app.core.config import get_settings
+from app.core.credits import billed_call
+from app.schemas.common import ApiResponse
+from app.services.apify_client import get_apify
+from app.services.cached_runner import cached_or_run
+from app.utils.formatters import safe_int, safe_str
+from app.utils.url import extract_linkedin_company, extract_linkedin_profile
+
+router = APIRouter()
+
+CREDIT_PROFILE = 2
+CREDIT_DETAILS = 1
+
+
+def _first(items: list[dict[str, Any]]) -> dict[str, Any]:
+    if not items:
+        raise HTTPException(status_code=404, detail="Not found on LinkedIn")
+    return items[0]
+
+
+def _normalize_profile(p: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "platform": "linkedin",
+        "type": "person",
+        "url": safe_str(p.get("url") or p.get("profileUrl") or p.get("linkedinUrl")),
+        "name": safe_str(p.get("fullName") or p.get("name")
+                         or f"{p.get('firstName', '')} {p.get('lastName', '')}".strip()),
+        "headline": safe_str(p.get("headline") or p.get("occupation")),
+        "location": safe_str(p.get("location") or p.get("locationName")),
+        "about": safe_str(p.get("about") or p.get("summary")),
+        "followers": safe_int(p.get("followers") or p.get("followerCount")),
+        "connections": safe_int(p.get("connections") or p.get("connectionsCount")),
+        "profileImage": safe_str(p.get("profilePicture") or p.get("photoUrl") or p.get("avatar")),
+        "currentCompany": safe_str(p.get("companyName") or p.get("company")),
+    }
+
+
+def _normalize_company(c: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "platform": "linkedin",
+        "type": "company",
+        "url": safe_str(c.get("url") or c.get("linkedinUrl")),
+        "name": safe_str(c.get("name") or c.get("companyName")),
+        "industry": safe_str(c.get("industry")),
+        "description": safe_str(c.get("description") or c.get("about")),
+        "website": safe_str(c.get("website") or c.get("websiteUrl")),
+        "followers": safe_int(c.get("followers") or c.get("followerCount")),
+        "employees": safe_int(c.get("employeeCount") or c.get("staffCount") or c.get("companySize")),
+        "headquarters": safe_str(c.get("headquarters") or c.get("location")),
+        "logo": safe_str(c.get("logo") or c.get("logoUrl")),
+    }
+
+
+def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
+    author = p.get("author") or {}
+    return {
+        "platform": "linkedin",
+        "type": "post",
+        "url": safe_str(p.get("url") or p.get("postUrl")),
+        "text": safe_str(p.get("text") or p.get("content") or p.get("commentary")),
+        "publishedAt": safe_str(p.get("postedAt") or p.get("publishedAt") or p.get("date")),
+        "author": {
+            "name": safe_str(author.get("name") or p.get("authorName")),
+            "headline": safe_str(author.get("headline")),
+            "url": safe_str(author.get("url") or p.get("authorUrl")),
+        },
+        "engagement": {
+            "likes": safe_int(p.get("likes") or p.get("numLikes") or p.get("reactionsCount")),
+            "comments": safe_int(p.get("comments") or p.get("numComments") or p.get("commentsCount")),
+            "reposts": safe_int(p.get("reposts") or p.get("numShares") or p.get("repostsCount")),
+        },
+    }
+
+
+@router.get("/profile", summary="LinkedIn person profile details")
+async def linkedin_profile(
+    url: str = Query(..., description="LinkedIn profile URL, e.g. https://linkedin.com/in/slug"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    slug = extract_linkedin_profile(url)
+    if not slug:
+        raise HTTPException(status_code=400, detail="Invalid LinkedIn profile URL")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/linkedin/profile",
+        platform="linkedin",
+        resource_url=f"https://www.linkedin.com/in/{slug}",
+        base_credits=CREDIT_PROFILE,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_LINKEDIN_PROFILE,
+                {"username": slug, "url": f"https://www.linkedin.com/in/{slug}"},
+                max_items=1,
+            )
+            return _normalize_profile(_first(items))
+
+        data = await cached_or_run(
+            endpoint="linkedin.profile",
+            params={"slug": slug},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/company", summary="LinkedIn company page details")
+async def linkedin_company(
+    url: str = Query(..., description="LinkedIn company URL, e.g. https://linkedin.com/company/slug"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    slug = extract_linkedin_company(url)
+    if not slug:
+        raise HTTPException(status_code=400, detail="Invalid LinkedIn company URL")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/linkedin/company",
+        platform="linkedin",
+        resource_url=f"https://www.linkedin.com/company/{slug}",
+        base_credits=CREDIT_PROFILE,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_LINKEDIN_COMPANY,
+                {"company": slug, "url": f"https://www.linkedin.com/company/{slug}"},
+                max_items=1,
+            )
+            return _normalize_company(_first(items))
+
+        data = await cached_or_run(
+            endpoint="linkedin.company",
+            params={"slug": slug},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/post-details", summary="LinkedIn post metadata + engagement")
+async def linkedin_post_details(
+    url: str = Query(..., description="LinkedIn post/activity URL"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    if "linkedin.com" not in (url or ""):
+        raise HTTPException(status_code=400, detail="Invalid LinkedIn post URL")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/linkedin/post-details",
+        platform="linkedin",
+        resource_url=url,
+        base_credits=CREDIT_DETAILS,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_LINKEDIN_POST,
+                {"url": url},
+                max_items=1,
+            )
+            return _normalize_post(_first(items))
+
+        data = await cached_or_run(
+            endpoint="linkedin.post-details",
+            params={"url": url},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)

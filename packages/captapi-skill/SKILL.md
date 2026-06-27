@@ -1,11 +1,11 @@
 ---
 name: captapi
-description: Use when extracting public social-media data from YouTube, TikTok, Instagram, or Facebook — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, or video downloads. Captapi is one REST API (and MCP server) covering all four platforms with a single key. Trigger on requests like "get this YouTube transcript", "scrape this TikTok profile", "fetch Instagram reel comments", or "summarize this video".
+description: Use when extracting public social-media data from YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, or video downloads. Captapi is one REST API (and MCP server) covering all 11 platforms with a single key. Trigger on requests like "get this YouTube transcript", "scrape this TikTok profile", "fetch Instagram reel comments", or "summarize this video".
 ---
 
 # Captapi
 
-Captapi is one API for structured data from **YouTube, TikTok, Instagram, and Facebook**. One key works across all platforms. No OAuth, no per-platform SDKs. Responses are clean JSON and cached for 24h (repeat calls cost 0 credits). 62 endpoints total.
+Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble**. One key works across all 11 platforms. No OAuth, no per-platform SDKs. Responses are clean JSON and cached for 24h (repeat calls cost 0 credits). 85 endpoints total.
 
 - Base URL: `https://api.captapi.com`
 - Docs: https://captapi.com/docs · Full machine reference: https://captapi.com/llms-full.txt
@@ -41,7 +41,7 @@ For shell tasks, scripts, or when no MCP client is available, the official CLI c
 ```bash
 npx @captapi/cli login                 # save the human-provided key to ~/.captapi/config.json
 npx @captapi/cli balance               # remaining credits
-npx @captapi/cli list                  # all 62 commands
+npx @captapi/cli list                  # all 85 commands
 npx @captapi/cli youtube-transcript --url "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 npx @captapi/cli tiktok-comment-replies --url "<video>" --comment_id "<id>" --limit 20
 ```
@@ -50,15 +50,15 @@ The CLI reads the key from `~/.captapi/config.json` (via `login`) or the `CAPTAP
 
 ## Use in n8n workflows (n8n-nodes-captapi)
 
-For no-code/low-code automations, the official `n8n-nodes-captapi` community node exposes all 62 endpoints in n8n. Install it from **Settings → Community Nodes** (package `n8n-nodes-captapi`; self-hosted: `npm install n8n-nodes-captapi`, then restart). Create a **Captapi API** credential with the human-provided `capt_live_...` key, add the **Captapi** node, pick a **Platform** and **Operation**, and it returns the same structured JSON as the REST API for downstream nodes.
+For no-code/low-code automations, the official `n8n-nodes-captapi` community node exposes all 85 endpoints in n8n. Install it from **Settings → Community Nodes** (package `n8n-nodes-captapi`; self-hosted: `npm install n8n-nodes-captapi`, then restart). Create a **Captapi API** credential with the human-provided `capt_live_...` key, add the **Captapi** node, pick a **Platform** and **Operation**, and it returns the same structured JSON as the REST API for downstream nodes.
 
 ## Use in Make.com scenarios (custom app)
 
-For Make.com (Integromat), the Captapi custom app exposes all 62 endpoints as action modules grouped by platform. Create a **Captapi API Key** connection with the human-provided `capt_live_...` key (verified against `/v1/account/limits`), then drop the module you need into a scenario, fill in the `url` (or search query) and optional `limit`, and it returns the same structured JSON `data` as the REST API for downstream modules.
+For Make.com (Integromat), the Captapi custom app exposes all 85 endpoints as action modules grouped by platform. Create a **Captapi API Key** connection with the human-provided `capt_live_...` key (verified against `/v1/account/limits`), then drop the module you need into a scenario, fill in the `url` (or search query) and optional `limit`, and it returns the same structured JSON `data` as the REST API for downstream modules.
 
 ## Use on Apify (BYO-key Actor)
 
-On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API (no scraping). Set the `apiKey` input to the human-provided `capt_live_...` key, choose an `operation` (any of the 62 endpoints), fill the fields it needs (`url` / search query / `limit` / ...), and the Actor returns one dataset item with the same structured JSON `data` as the REST API. Credits are billed to the user's own Captapi account. The Actor is also callable through Apify's MCP server (mcp.apify.com), so agents already connected to Apify can run it by name.
+On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API (no scraping). Set the `apiKey` input to the human-provided `capt_live_...` key, choose an `operation` (any of the 85 endpoints), fill the fields it needs (`url` / search query / `limit` / ...), and the Actor returns one dataset item with the same structured JSON `data` as the REST API. Credits are billed to the user's own Captapi account. The Actor is also callable through Apify's MCP server (mcp.apify.com), so agents already connected to Apify can run it by name.
 
 ## Choosing the right endpoint
 
@@ -167,6 +167,64 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `facebook_profile_reels` | `/v1/facebook/profile-reels` | `url` (string), `limit`? (number) | 36 |
 | `facebook_group_posts` | `/v1/facebook/group-posts` | `url` (string), `limit`? (number) | 12 |
 | `facebook_comment_replies` | `/v1/facebook/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number) | 30 |
+
+### Twitter / X
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `twitter_tweet_details` | `/v1/twitter/tweet-details` | `url` (string) | 1 |
+| `twitter_profile` | `/v1/twitter/profile` | `url` (string) | 1 |
+| `twitter_user_tweets` | `/v1/twitter/user-tweets` | `url` (string), `limit`? (number) | 14 |
+| `twitter_search` | `/v1/twitter/search` | `q` (string), `limit`? (number) | 14 |
+
+### Reddit
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `reddit_subreddit_posts` | `/v1/reddit/subreddit-posts` | `url` (string), `limit`? (number) | 10 |
+| `reddit_post_details` | `/v1/reddit/post-details` | `url` (string) | 1 |
+| `reddit_post_comments` | `/v1/reddit/post-comments` | `url` (string), `limit`? (number) | 20 |
+| `reddit_search` | `/v1/reddit/search` | `q` (string), `limit`? (number) | 10 |
+
+### Threads
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `threads_profile` | `/v1/threads/profile` | `url` (string) | 1 |
+| `threads_user_posts` | `/v1/threads/user-posts` | `url` (string), `limit`? (number) | 14 |
+| `threads_post_details` | `/v1/threads/post-details` | `url` (string) | 1 |
+
+### Bluesky
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `bluesky_profile` | `/v1/bluesky/profile` | `url` (string) | 1 |
+| `bluesky_user_posts` | `/v1/bluesky/user-posts` | `url` (string), `limit`? (number) | 3 |
+| `bluesky_post_details` | `/v1/bluesky/post-details` | `url` (string) | 1 |
+
+### Pinterest
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `pinterest_pin_details` | `/v1/pinterest/pin-details` | `url` (string) | 1 |
+| `pinterest_user_pins` | `/v1/pinterest/user-pins` | `url` (string), `limit`? (number) | 13 |
+| `pinterest_search` | `/v1/pinterest/search` | `q` (string), `limit`? (number) | 13 |
+
+### LinkedIn
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `linkedin_profile` | `/v1/linkedin/profile` | `url` (string) | 2 |
+| `linkedin_company` | `/v1/linkedin/company` | `url` (string) | 2 |
+| `linkedin_post_details` | `/v1/linkedin/post-details` | `url` (string) | 1 |
+
+### Rumble
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `rumble_video_details` | `/v1/rumble/video-details` | `url` (string) | 1 |
+| `rumble_channel_videos` | `/v1/rumble/channel-videos` | `url` (string), `limit`? (number) | 12 |
+| `rumble_search` | `/v1/rumble/search` | `q` (string), `limit`? (number) | 12 |
 
 ---
 Generated from the Captapi catalog. Do not edit by hand — run `node generate.mjs`.

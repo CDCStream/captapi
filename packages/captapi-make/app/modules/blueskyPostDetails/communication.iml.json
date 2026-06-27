@@ -1,0 +1,10 @@
+{
+  "url": "/v1/bluesky/post-details",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

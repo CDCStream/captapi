@@ -1,9 +1,10 @@
 # @captapi/mcp
 
 Official **Captapi** MCP server. Give Claude, Cursor, VS Code, and any
-MCP-compatible AI agent direct access to **62 social media data endpoints**
-across YouTube, TikTok, Instagram, and Facebook — transcripts, summaries,
-comments, channel stats, search, bulk lists, and downloads.
+MCP-compatible AI agent direct access to **85 social media data endpoints**
+across 11 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads,
+Bluesky, Pinterest, LinkedIn, Rumble) — transcripts, summaries, comments,
+channel stats, search, bulk lists, and downloads.
 
 One Captapi key works across every platform. The agent calls a tool, Captapi
 handles proxies, rate limits, retries, and auth, and returns clean JSON.

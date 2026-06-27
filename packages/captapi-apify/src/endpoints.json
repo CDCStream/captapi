@@ -1254,5 +1254,439 @@
         "description": "Max items to return. Default 50, max 500. Billed per result."
       }
     ]
+  },
+  {
+    "tool": "twitter_tweet_details",
+    "platform": "twitter",
+    "name": "Twitter/X Tweet Details",
+    "path": "/v1/twitter/tweet-details",
+    "credits": 1,
+    "summary": "Metadata + engagement stats for a tweet.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public tweet URL, e.g. https://x.com/user/status/ID."
+      }
+    ]
+  },
+  {
+    "tool": "twitter_profile",
+    "platform": "twitter",
+    "name": "Twitter/X Profile",
+    "path": "/v1/twitter/profile",
+    "credits": 1,
+    "summary": "Profile info & stats for a Twitter/X account.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Twitter/X profile URL or @handle, e.g. https://x.com/username."
+      }
+    ]
+  },
+  {
+    "tool": "twitter_user_tweets",
+    "platform": "twitter",
+    "name": "Twitter/X User Tweets",
+    "path": "/v1/twitter/user-tweets",
+    "credits": 14,
+    "summary": "Recent tweets from a Twitter/X profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Twitter/X profile URL or @handle, e.g. https://x.com/username."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "twitter_search",
+    "platform": "twitter",
+    "name": "Twitter/X Search",
+    "path": "/v1/twitter/search",
+    "credits": 14,
+    "summary": "Search tweets by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "reddit_subreddit_posts",
+    "platform": "reddit",
+    "name": "Reddit Subreddit Posts",
+    "path": "/v1/reddit/subreddit-posts",
+    "credits": 10,
+    "summary": "Recent posts in a subreddit.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Subreddit URL, r/name, or bare name, e.g. r/technology."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "reddit_post_details",
+    "platform": "reddit",
+    "name": "Reddit Post Details",
+    "path": "/v1/reddit/post-details",
+    "credits": 1,
+    "summary": "Metadata + stats for a Reddit post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/..."
+      }
+    ]
+  },
+  {
+    "tool": "reddit_post_comments",
+    "platform": "reddit",
+    "name": "Reddit Post Comments",
+    "path": "/v1/reddit/post-comments",
+    "credits": 20,
+    "summary": "Comments on a Reddit post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/..."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "reddit_search",
+    "platform": "reddit",
+    "name": "Reddit Search",
+    "path": "/v1/reddit/search",
+    "credits": 10,
+    "summary": "Search Reddit posts by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "threads_profile",
+    "platform": "threads",
+    "name": "Threads Profile",
+    "path": "/v1/threads/profile",
+    "credits": 1,
+    "summary": "Profile info & stats for a Threads account.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Threads profile URL or @handle, e.g. https://threads.net/@username."
+      }
+    ]
+  },
+  {
+    "tool": "threads_user_posts",
+    "platform": "threads",
+    "name": "Threads User Posts",
+    "path": "/v1/threads/user-posts",
+    "credits": 14,
+    "summary": "Recent posts from a Threads profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Threads profile URL or @handle, e.g. https://threads.net/@username."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "threads_post_details",
+    "platform": "threads",
+    "name": "Threads Post Details",
+    "path": "/v1/threads/post-details",
+    "credits": 1,
+    "summary": "Metadata + engagement for a Threads post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Threads post URL, e.g. https://threads.net/@user/post/CODE."
+      }
+    ]
+  },
+  {
+    "tool": "bluesky_profile",
+    "platform": "bluesky",
+    "name": "Bluesky Profile",
+    "path": "/v1/bluesky/profile",
+    "credits": 1,
+    "summary": "Profile info & stats for a Bluesky account.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle."
+      }
+    ]
+  },
+  {
+    "tool": "bluesky_user_posts",
+    "platform": "bluesky",
+    "name": "Bluesky User Posts",
+    "path": "/v1/bluesky/user-posts",
+    "credits": 3,
+    "summary": "Recent posts from a Bluesky profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "bluesky_post_details",
+    "platform": "bluesky",
+    "name": "Bluesky Post Details",
+    "path": "/v1/bluesky/post-details",
+    "credits": 1,
+    "summary": "Metadata + engagement for a Bluesky post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY."
+      }
+    ]
+  },
+  {
+    "tool": "pinterest_pin_details",
+    "platform": "pinterest",
+    "name": "Pinterest Pin Details",
+    "path": "/v1/pinterest/pin-details",
+    "credits": 1,
+    "summary": "Metadata + saves for a Pinterest pin.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Pinterest pin URL, e.g. https://pinterest.com/pin/ID/."
+      }
+    ]
+  },
+  {
+    "tool": "pinterest_user_pins",
+    "platform": "pinterest",
+    "name": "Pinterest User Pins",
+    "path": "/v1/pinterest/user-pins",
+    "credits": 13,
+    "summary": "Pins from a Pinterest profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Pinterest profile URL or username."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "pinterest_search",
+    "platform": "pinterest",
+    "name": "Pinterest Search",
+    "path": "/v1/pinterest/search",
+    "credits": 13,
+    "summary": "Search Pinterest pins by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_profile",
+    "platform": "linkedin",
+    "name": "LinkedIn Profile",
+    "path": "/v1/linkedin/profile",
+    "credits": 2,
+    "summary": "Public LinkedIn person profile details.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "LinkedIn profile URL, e.g. https://linkedin.com/in/slug."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_company",
+    "platform": "linkedin",
+    "name": "LinkedIn Company",
+    "path": "/v1/linkedin/company",
+    "credits": 2,
+    "summary": "Public LinkedIn company page details.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "LinkedIn company URL, e.g. https://linkedin.com/company/slug."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_post_details",
+    "platform": "linkedin",
+    "name": "LinkedIn Post Details",
+    "path": "/v1/linkedin/post-details",
+    "credits": 1,
+    "summary": "Metadata + engagement for a LinkedIn post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "LinkedIn post or activity URL."
+      }
+    ]
+  },
+  {
+    "tool": "rumble_video_details",
+    "platform": "rumble",
+    "name": "Rumble Video Details",
+    "path": "/v1/rumble/video-details",
+    "credits": 1,
+    "summary": "Metadata + stats for a Rumble video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html."
+      }
+    ]
+  },
+  {
+    "tool": "rumble_channel_videos",
+    "platform": "rumble",
+    "name": "Rumble Channel Videos",
+    "path": "/v1/rumble/channel-videos",
+    "credits": 12,
+    "summary": "List videos from a Rumble channel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Rumble channel URL, e.g. https://rumble.com/c/name."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "rumble_search",
+    "platform": "rumble",
+    "name": "Rumble Search",
+    "path": "/v1/rumble/search",
+    "credits": 12,
+    "summary": "Search Rumble videos by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
   }
 ]

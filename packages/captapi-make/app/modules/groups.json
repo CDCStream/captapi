@@ -80,5 +80,63 @@
       "facebookGroupPosts",
       "facebookCommentReplies"
     ]
+  },
+  {
+    "label": "Twitter / X",
+    "modules": [
+      "twitterTweetDetails",
+      "twitterProfile",
+      "twitterUserTweets",
+      "twitterSearch"
+    ]
+  },
+  {
+    "label": "Reddit",
+    "modules": [
+      "redditSubredditPosts",
+      "redditPostDetails",
+      "redditPostComments",
+      "redditSearch"
+    ]
+  },
+  {
+    "label": "Threads",
+    "modules": [
+      "threadsProfile",
+      "threadsUserPosts",
+      "threadsPostDetails"
+    ]
+  },
+  {
+    "label": "Bluesky",
+    "modules": [
+      "blueskyProfile",
+      "blueskyUserPosts",
+      "blueskyPostDetails"
+    ]
+  },
+  {
+    "label": "Pinterest",
+    "modules": [
+      "pinterestPinDetails",
+      "pinterestUserPins",
+      "pinterestSearch"
+    ]
+  },
+  {
+    "label": "LinkedIn",
+    "modules": [
+      "linkedinProfile",
+      "linkedinCompany",
+      "linkedinPostDetails"
+    ]
+  },
+  {
+    "label": "Rumble",
+    "modules": [
+      "rumbleVideoDetails",
+      "rumbleChannelVideos",
+      "rumbleSearch"
+    ]
   }
 ]

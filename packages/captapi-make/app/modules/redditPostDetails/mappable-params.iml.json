@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/..."
+  }
+]

@@ -1,6 +1,6 @@
 # Captapi Agent Skill
 
-An [Agent Skill](https://docs.claude.com/en/docs/agents-and-tools/agent-skills) that teaches AI coding agents how to use the **Captapi** API — endpoint selection, parameters, credit costs, and platform gotchas for YouTube, TikTok, Instagram, and Facebook.
+An [Agent Skill](https://docs.claude.com/en/docs/agents-and-tools/agent-skills) that teaches AI coding agents how to use the **Captapi** API — endpoint selection, parameters, credit costs, and platform gotchas for YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble.
 
 The skill complements the MCP server: the MCP server gives the agent **access** to the API; this skill teaches it **how to use it well** (which endpoint to pick, how to handle params/pagination/credits, what the errors mean). Use either or both.
 
@@ -19,7 +19,7 @@ Works with Claude Code, Cursor, Codex, GitHub Copilot, Gemini CLI, Windsurf, and
 - Endpoint selection guidance per platform.
 - Parameter rules (`url`, `q`, `limit`, `language`, `comment_id`) and gotchas.
 - Credits, caching, and error handling (401/402/422/429).
-- A full table of all 62 endpoints (tool name, REST path, params, credits).
+- A full table of all 85 endpoints (tool name, REST path, params, credits).
 
 ## Publishing
 

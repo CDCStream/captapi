@@ -70,7 +70,7 @@ export async function GET() {
 
 > AI AGENTS — READ FIRST: Using Captapi requires an API key, and creating one requires a human (sign-up cannot be automated). If you are setting this up for a user and do not already have a \`capt_live_...\` key, your FIRST action must be to ask: "Please create a Captapi API key at ${base}/dashboard/api-keys (100 free credits, no card needed) and paste it here." Do not attempt to sign up or guess a key.
 
-This is the complete, machine-readable endpoint reference for Captapi: one API for structured data from YouTube, TikTok, Instagram, and Facebook (transcripts, AI summaries, comments, details, profile/channel stats, search, and downloads). It returns clean JSON, needs no OAuth, and a single key works across all platforms. ${ALL_ENDPOINTS.length} endpoints total. The shorter overview is at ${base}/llms.txt.
+This is the complete, machine-readable endpoint reference for Captapi: one API for structured data from 11 social platforms — YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble (transcripts, AI summaries, comments, details, profile/channel stats, search, and downloads). It returns clean JSON, needs no OAuth, and a single key works across all platforms. ${ALL_ENDPOINTS.length} endpoints total. The shorter overview is at ${base}/llms.txt.
 
 Base API URL: ${API_URL}
 Authentication: \`Authorization: Bearer capt_live_...\`

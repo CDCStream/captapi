@@ -2,7 +2,18 @@
 // Each endpoint declares its EXACT input parameters (matching the REST API),
 // so agents know precisely what to pass. Mirrors the backend routers.
 
-export type Platform = "youtube" | "tiktok" | "instagram" | "facebook";
+export type Platform =
+  | "youtube"
+  | "tiktok"
+  | "instagram"
+  | "facebook"
+  | "twitter"
+  | "reddit"
+  | "threads"
+  | "bluesky"
+  | "pinterest"
+  | "linkedin"
+  | "rumble";
 
 export interface ToolParam {
   name: string;
@@ -145,6 +156,66 @@ const FACEBOOK: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_comment_replies", name: "Facebook Comment Replies", path: "/v1/facebook/comment-replies", credits: 30, summary: "Replies to a specific Facebook comment.", params: [url("Facebook post URL the comment belongs to."), commentId(), limit(50, 500)] },
 ];
 
+const TW_TWEET = "Public tweet URL, e.g. https://x.com/user/status/ID.";
+const TW_PROFILE = "Twitter/X profile URL or @handle, e.g. https://x.com/username.";
+const RD_SUB = "Subreddit URL, r/name, or bare name, e.g. r/technology.";
+const RD_POST = "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/...";
+const TH_PROFILE = "Threads profile URL or @handle, e.g. https://threads.net/@username.";
+const TH_POST = "Threads post URL, e.g. https://threads.net/@user/post/CODE.";
+const BS_PROFILE = "Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle.";
+const BS_POST = "Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY.";
+const PIN_PIN = "Pinterest pin URL, e.g. https://pinterest.com/pin/ID/.";
+const PIN_PROFILE = "Pinterest profile URL or username.";
+const LI_PROFILE = "LinkedIn profile URL, e.g. https://linkedin.com/in/slug.";
+const LI_COMPANY = "LinkedIn company URL, e.g. https://linkedin.com/company/slug.";
+const LI_POST = "LinkedIn post or activity URL.";
+const RB_VIDEO = "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html.";
+const RB_CHANNEL = "Rumble channel URL, e.g. https://rumble.com/c/name.";
+
+const TWITTER: Omit<Endpoint, "platform">[] = [
+  { tool: "twitter_tweet_details", name: "Twitter/X Tweet Details", path: "/v1/twitter/tweet-details", credits: 1, summary: "Metadata + engagement stats for a tweet.", params: [url(TW_TWEET)] },
+  { tool: "twitter_profile", name: "Twitter/X Profile", path: "/v1/twitter/profile", credits: 1, summary: "Profile info & stats for a Twitter/X account.", params: [url(TW_PROFILE)] },
+  { tool: "twitter_user_tweets", name: "Twitter/X User Tweets", path: "/v1/twitter/user-tweets", credits: 14, summary: "Recent tweets from a Twitter/X profile.", params: [url(TW_PROFILE), limit(20, 200)] },
+  { tool: "twitter_search", name: "Twitter/X Search", path: "/v1/twitter/search", credits: 14, summary: "Search tweets by keyword.", params: [q(), limit(20, 200)] },
+];
+
+const REDDIT: Omit<Endpoint, "platform">[] = [
+  { tool: "reddit_subreddit_posts", name: "Reddit Subreddit Posts", path: "/v1/reddit/subreddit-posts", credits: 10, summary: "Recent posts in a subreddit.", params: [url(RD_SUB), limit(25, 200)] },
+  { tool: "reddit_post_details", name: "Reddit Post Details", path: "/v1/reddit/post-details", credits: 1, summary: "Metadata + stats for a Reddit post.", params: [url(RD_POST)] },
+  { tool: "reddit_post_comments", name: "Reddit Post Comments", path: "/v1/reddit/post-comments", credits: 20, summary: "Comments on a Reddit post.", params: [url(RD_POST), limit(50, 500)] },
+  { tool: "reddit_search", name: "Reddit Search", path: "/v1/reddit/search", credits: 10, summary: "Search Reddit posts by keyword.", params: [q(), limit(25, 200)] },
+];
+
+const THREADS: Omit<Endpoint, "platform">[] = [
+  { tool: "threads_profile", name: "Threads Profile", path: "/v1/threads/profile", credits: 1, summary: "Profile info & stats for a Threads account.", params: [url(TH_PROFILE)] },
+  { tool: "threads_user_posts", name: "Threads User Posts", path: "/v1/threads/user-posts", credits: 14, summary: "Recent posts from a Threads profile.", params: [url(TH_PROFILE), limit(20, 100)] },
+  { tool: "threads_post_details", name: "Threads Post Details", path: "/v1/threads/post-details", credits: 1, summary: "Metadata + engagement for a Threads post.", params: [url(TH_POST)] },
+];
+
+const BLUESKY: Omit<Endpoint, "platform">[] = [
+  { tool: "bluesky_profile", name: "Bluesky Profile", path: "/v1/bluesky/profile", credits: 1, summary: "Profile info & stats for a Bluesky account.", params: [url(BS_PROFILE)] },
+  { tool: "bluesky_user_posts", name: "Bluesky User Posts", path: "/v1/bluesky/user-posts", credits: 3, summary: "Recent posts from a Bluesky profile.", params: [url(BS_PROFILE), limit(25, 100)] },
+  { tool: "bluesky_post_details", name: "Bluesky Post Details", path: "/v1/bluesky/post-details", credits: 1, summary: "Metadata + engagement for a Bluesky post.", params: [url(BS_POST)] },
+];
+
+const PINTEREST: Omit<Endpoint, "platform">[] = [
+  { tool: "pinterest_pin_details", name: "Pinterest Pin Details", path: "/v1/pinterest/pin-details", credits: 1, summary: "Metadata + saves for a Pinterest pin.", params: [url(PIN_PIN)] },
+  { tool: "pinterest_user_pins", name: "Pinterest User Pins", path: "/v1/pinterest/user-pins", credits: 13, summary: "Pins from a Pinterest profile.", params: [url(PIN_PROFILE), limit(25, 200)] },
+  { tool: "pinterest_search", name: "Pinterest Search", path: "/v1/pinterest/search", credits: 13, summary: "Search Pinterest pins by keyword.", params: [q(), limit(25, 200)] },
+];
+
+const LINKEDIN: Omit<Endpoint, "platform">[] = [
+  { tool: "linkedin_profile", name: "LinkedIn Profile", path: "/v1/linkedin/profile", credits: 2, summary: "Public LinkedIn person profile details.", params: [url(LI_PROFILE)] },
+  { tool: "linkedin_company", name: "LinkedIn Company", path: "/v1/linkedin/company", credits: 2, summary: "Public LinkedIn company page details.", params: [url(LI_COMPANY)] },
+  { tool: "linkedin_post_details", name: "LinkedIn Post Details", path: "/v1/linkedin/post-details", credits: 1, summary: "Metadata + engagement for a LinkedIn post.", params: [url(LI_POST)] },
+];
+
+const RUMBLE: Omit<Endpoint, "platform">[] = [
+  { tool: "rumble_video_details", name: "Rumble Video Details", path: "/v1/rumble/video-details", credits: 1, summary: "Metadata + stats for a Rumble video.", params: [url(RB_VIDEO)] },
+  { tool: "rumble_channel_videos", name: "Rumble Channel Videos", path: "/v1/rumble/channel-videos", credits: 12, summary: "List videos from a Rumble channel.", params: [url(RB_CHANNEL), limit(20, 200)] },
+  { tool: "rumble_search", name: "Rumble Search", path: "/v1/rumble/search", credits: 12, summary: "Search Rumble videos by keyword.", params: [q(), limit(20, 200)] },
+];
+
 function withPlatform(
   list: Omit<Endpoint, "platform">[],
   platform: Platform,
@@ -157,6 +228,13 @@ export const ENDPOINTS: Endpoint[] = [
   ...withPlatform(TIKTOK, "tiktok"),
   ...withPlatform(INSTAGRAM, "instagram"),
   ...withPlatform(FACEBOOK, "facebook"),
+  ...withPlatform(TWITTER, "twitter"),
+  ...withPlatform(REDDIT, "reddit"),
+  ...withPlatform(THREADS, "threads"),
+  ...withPlatform(BLUESKY, "bluesky"),
+  ...withPlatform(PINTEREST, "pinterest"),
+  ...withPlatform(LINKEDIN, "linkedin"),
+  ...withPlatform(RUMBLE, "rumble"),
 ];
 
 /** A concise, agent-facing description (summary + cost) for an endpoint. */

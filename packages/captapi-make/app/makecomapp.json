@@ -1072,6 +1072,397 @@
           "samples": null,
           "scope": null
         }
+      },
+      "twitterTweetDetails": {
+        "label": "Twitter/X Tweet Details",
+        "description": "Metadata + engagement stats for a tweet. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/twitterTweetDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/twitterTweetDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "twitterProfile": {
+        "label": "Twitter/X Profile",
+        "description": "Profile info & stats for a Twitter/X account. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/twitterProfile/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/twitterProfile/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "twitterUserTweets": {
+        "label": "Twitter/X User Tweets",
+        "description": "Recent tweets from a Twitter/X profile. Costs ~14 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/twitterUserTweets/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/twitterUserTweets/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "twitterSearch": {
+        "label": "Twitter/X Search",
+        "description": "Search tweets by keyword. Costs ~14 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/twitterSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/twitterSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "redditSubredditPosts": {
+        "label": "Reddit Subreddit Posts",
+        "description": "Recent posts in a subreddit. Costs ~10 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/redditSubredditPosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/redditSubredditPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "redditPostDetails": {
+        "label": "Reddit Post Details",
+        "description": "Metadata + stats for a Reddit post. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/redditPostDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/redditPostDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "redditPostComments": {
+        "label": "Reddit Post Comments",
+        "description": "Comments on a Reddit post. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/redditPostComments/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/redditPostComments/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "redditSearch": {
+        "label": "Reddit Search",
+        "description": "Search Reddit posts by keyword. Costs ~10 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/redditSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/redditSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "threadsProfile": {
+        "label": "Threads Profile",
+        "description": "Profile info & stats for a Threads account. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/threadsProfile/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/threadsProfile/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "threadsUserPosts": {
+        "label": "Threads User Posts",
+        "description": "Recent posts from a Threads profile. Costs ~14 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/threadsUserPosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/threadsUserPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "threadsPostDetails": {
+        "label": "Threads Post Details",
+        "description": "Metadata + engagement for a Threads post. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/threadsPostDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/threadsPostDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "blueskyProfile": {
+        "label": "Bluesky Profile",
+        "description": "Profile info & stats for a Bluesky account. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/blueskyProfile/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/blueskyProfile/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "blueskyUserPosts": {
+        "label": "Bluesky User Posts",
+        "description": "Recent posts from a Bluesky profile. Costs ~3 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/blueskyUserPosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/blueskyUserPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "blueskyPostDetails": {
+        "label": "Bluesky Post Details",
+        "description": "Metadata + engagement for a Bluesky post. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/blueskyPostDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/blueskyPostDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "pinterestPinDetails": {
+        "label": "Pinterest Pin Details",
+        "description": "Metadata + saves for a Pinterest pin. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/pinterestPinDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/pinterestPinDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "pinterestUserPins": {
+        "label": "Pinterest User Pins",
+        "description": "Pins from a Pinterest profile. Costs ~13 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/pinterestUserPins/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/pinterestUserPins/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "pinterestSearch": {
+        "label": "Pinterest Search",
+        "description": "Search Pinterest pins by keyword. Costs ~13 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/pinterestSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/pinterestSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "linkedinProfile": {
+        "label": "LinkedIn Profile",
+        "description": "Public LinkedIn person profile details. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/linkedinProfile/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/linkedinProfile/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "linkedinCompany": {
+        "label": "LinkedIn Company",
+        "description": "Public LinkedIn company page details. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/linkedinCompany/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/linkedinCompany/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "linkedinPostDetails": {
+        "label": "LinkedIn Post Details",
+        "description": "Metadata + engagement for a LinkedIn post. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/linkedinPostDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/linkedinPostDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "rumbleVideoDetails": {
+        "label": "Rumble Video Details",
+        "description": "Metadata + stats for a Rumble video. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/rumbleVideoDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/rumbleVideoDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "rumbleChannelVideos": {
+        "label": "Rumble Channel Videos",
+        "description": "List videos from a Rumble channel. Costs ~12 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/rumbleChannelVideos/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/rumbleChannelVideos/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "rumbleSearch": {
+        "label": "Rumble Search",
+        "description": "Search Rumble videos by keyword. Costs ~12 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/rumbleSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/rumbleSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
       }
     },
     "function": {},

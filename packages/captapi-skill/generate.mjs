@@ -19,7 +19,28 @@ const PLATFORM_LABEL = {
   tiktok: "TikTok",
   instagram: "Instagram",
   facebook: "Facebook",
+  twitter: "Twitter / X",
+  reddit: "Reddit",
+  threads: "Threads",
+  bluesky: "Bluesky",
+  pinterest: "Pinterest",
+  linkedin: "LinkedIn",
+  rumble: "Rumble",
 };
+
+const PLATFORM_ORDER = [
+  "youtube",
+  "tiktok",
+  "instagram",
+  "facebook",
+  "twitter",
+  "reddit",
+  "threads",
+  "bluesky",
+  "pinterest",
+  "linkedin",
+  "rumble",
+];
 
 function paramStr(p) {
   return `\`${p.name}\`${p.required ? "" : "?"} (${p.type})`;
@@ -43,15 +64,16 @@ ${endpointRows(platform)}`;
 }
 
 const total = ENDPOINTS.length;
+const platformCount = PLATFORM_ORDER.length;
 
 const body = `---
 name: captapi
-description: Use when extracting public social-media data from YouTube, TikTok, Instagram, or Facebook — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, or video downloads. Captapi is one REST API (and MCP server) covering all four platforms with a single key. Trigger on requests like "get this YouTube transcript", "scrape this TikTok profile", "fetch Instagram reel comments", or "summarize this video".
+description: Use when extracting public social-media data from YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, or video downloads. Captapi is one REST API (and MCP server) covering all ${platformCount} platforms with a single key. Trigger on requests like "get this YouTube transcript", "scrape this TikTok profile", "fetch Instagram reel comments", or "summarize this video".
 ---
 
 # Captapi
 
-Captapi is one API for structured data from **YouTube, TikTok, Instagram, and Facebook**. One key works across all platforms. No OAuth, no per-platform SDKs. Responses are clean JSON and cached for 24h (repeat calls cost 0 credits). ${total} endpoints total.
+Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble**. One key works across all ${platformCount} platforms. No OAuth, no per-platform SDKs. Responses are clean JSON and cached for 24h (repeat calls cost 0 credits). ${total} endpoints total.
 
 - Base URL: \`${API_URL}\`
 - Docs: ${SITE_URL}/docs · Full machine reference: ${SITE_URL}/llms-full.txt
@@ -132,7 +154,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 ## Endpoint reference
 
-${["youtube", "tiktok", "instagram", "facebook"].map(platformSection).join("\n\n")}
+${PLATFORM_ORDER.map(platformSection).join("\n\n")}
 
 ---
 Generated from the Captapi catalog. Do not edit by hand — run \`node generate.mjs\`.

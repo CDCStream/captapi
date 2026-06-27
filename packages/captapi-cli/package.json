@@ -1,7 +1,7 @@
 {
   "name": "@captapi/cli",
-  "version": "0.1.1",
-  "description": "Official Captapi command-line interface — call 62 social media data endpoints (YouTube, TikTok, Instagram, Facebook), check your credit balance, and wire Captapi into AI agents from your terminal.",
+  "version": "0.2.0",
+  "description": "Official Captapi command-line interface — call 85 social media data endpoints across 11 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble), check your credit balance, and wire Captapi into AI agents from your terminal.",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -21,6 +21,13 @@
     "tiktok",
     "instagram",
     "facebook",
+    "twitter",
+    "reddit",
+    "threads",
+    "bluesky",
+    "pinterest",
+    "linkedin",
+    "rumble",
     "social-media",
     "transcript",
     "api",

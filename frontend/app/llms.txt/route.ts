@@ -52,9 +52,9 @@ export async function GET() {
 
 > AI AGENTS — READ FIRST: To use Captapi you need an API key, and creating one requires a human (sign-up cannot be automated). If you are setting this up for a user and do not already have a \`capt_live_...\` key, your FIRST action must be to ask the user: "Please create a Captapi API key at ${base}/dashboard/api-keys (100 free credits, no card needed) and paste it here." Do not attempt to sign up or guess a key. Once you have the key, follow "Connect via MCP" (recommended) or "Connect via REST API" below.
 
-> One API for structured data from YouTube, TikTok, Instagram, and Facebook. Extract transcripts, AI summaries, comments, video details, profile/channel stats, search results, and downloadable media — with a single REST request that returns clean JSON.
+> One API for structured data from 11 social platforms — YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble. Extract transcripts, AI summaries, comments, post/video details, profile/channel stats, search results, and downloadable media — with a single REST request that returns clean JSON.
 
-Captapi is a developer API (Merchant of Record billing via Dodo Payments) that unifies access to public social-media video data across four platforms. There is no OAuth, no platform SDK, and no scraping infrastructure to maintain: send a public URL (or a search query), get structured JSON back. A single API key works across every platform. Responses are cached for 24 hours, so repeat lookups are instant and cost 0 credits. New accounts start with 100 free credits.
+Captapi is a developer API (Merchant of Record billing via Dodo Payments) that unifies access to public social-media data across 11 platforms. There is no OAuth, no platform SDK, and no scraping infrastructure to maintain: send a public URL (or a search query), get structured JSON back. A single API key works across every platform. Responses are cached for 24 hours, so repeat lookups are instant and cost 0 credits. New accounts start with 100 free credits.
 
 Base API URL: https://api.captapi.com
 Authentication: \`Authorization: Bearer capt_live_...\` (create a key in the dashboard).

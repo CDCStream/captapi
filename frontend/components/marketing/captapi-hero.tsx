@@ -87,7 +87,7 @@ export function CaptapiHero() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
               </span>
               <p className="text-xs text-green-500">
-                {ENDPOINT_COUNT} endpoints live across 4 platforms
+                {ENDPOINT_COUNT} endpoints live across 11 platforms
               </p>
             </div>
           </div>

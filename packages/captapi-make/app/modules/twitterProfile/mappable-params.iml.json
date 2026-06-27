@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Twitter/X profile URL or @handle, e.g. https://x.com/username."
+  }
+]

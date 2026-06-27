@@ -70,7 +70,7 @@ const useCases = [
 const faqs = [
   {
     q: "Do I need OAuth or each platform's API key?",
-    a: "No. One Captapi key gives you access to all four platforms. We handle authentication, proxies, rate limits, and retries for you.",
+    a: "No. One Captapi key gives you access to all 11 platforms. We handle authentication, proxies, rate limits, and retries for you.",
   },
   {
     q: "How is this different from the official YouTube/Instagram APIs?",
@@ -91,6 +91,14 @@ const faqs = [
   {
     q: "Is this GDPR / TOS compliant?",
     a: "Captapi only extracts publicly accessible data and is intended for compliant business use. You are responsible for how you process and store the data within your jurisdiction.",
+  },
+  {
+    q: "Does Captapi post or schedule content for me?",
+    a: "No. Captapi is a read-only data API — it extracts transcripts, comments, metadata, and engagement metrics from public content. It pairs perfectly with publishing and scheduling tools: use them to post, and use Captapi as the data layer that measures and analyzes performance across YouTube, TikTok, Instagram, and Facebook.",
+  },
+  {
+    q: "Can I get analytics for any post in one consistent format?",
+    a: "Yes. The cross-platform analytics endpoint detects the platform from the URL and returns the same normalized metrics object — views, likes, comments, shares, saves, and an engagement rate — whether the post is on YouTube, TikTok, Instagram, or Facebook, so you never have to special-case each network.",
   },
 ];
 
@@ -120,9 +128,9 @@ export default function LandingPage() {
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold">One API. Every platform.</h2>
             <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-              {ALL_ENDPOINTS.length} REST endpoints across YouTube, TikTok,
-              Instagram, and Facebook. No more juggling 4 different scrapers or
-              platform SDKs.
+              {ALL_ENDPOINTS.length} REST endpoints across 11 platforms — YouTube,
+              TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest,
+              LinkedIn, and Rumble. No more juggling separate scrapers or SDKs.
             </p>
           </div>
           <ApiCatalog />
@@ -133,6 +141,58 @@ export default function LandingPage() {
             >
               Browse all APIs →
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* POSITIONING — the data layer for social */}
+      <section className="py-16 border-t">
+        <div className="container max-w-5xl">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold">The data layer for social</h2>
+            <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
+              Publishing and scheduling tools push content out. Captapi is the
+              read side — it pulls clean, structured data back in. Drop it in
+              next to your scheduler, social CRM, analytics dashboard, or AI
+              agent. No OAuth, no per-platform SDKs.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <TrendingUp className="size-6 text-primary mb-2" />
+                <CardTitle className="text-lg">
+                  Cross-platform analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground">
+                One endpoint, one shape. Pass any YouTube, TikTok, Instagram, or
+                Facebook URL and get the same normalized metrics back — views,
+                likes, comments, shares, and engagement rate.
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Database className="size-6 text-primary mb-2" />
+                <CardTitle className="text-lg">Deep content data</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground">
+                Transcripts, comments, profiles, and search — the rich,
+                read-side data that publishing tools don&apos;t give you,
+                delivered as clean JSON.
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <Code2 className="size-6 text-primary mb-2" />
+                <CardTitle className="text-lg">Fits your stack</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground">
+                Plain REST plus an MCP server, n8n node, Make app, and Apify
+                actor — wire Captapi into whatever you already use to post,
+                schedule, or automate.
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>

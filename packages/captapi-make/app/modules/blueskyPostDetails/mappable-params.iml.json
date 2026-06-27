@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY."
+  }
+]

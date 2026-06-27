@@ -106,7 +106,7 @@ export function ToolCTA({
 }) {
   const points = [
     "100 free credits, no card required",
-    "62 endpoints across 4 platforms",
+    "85 endpoints across 11 platforms",
     "Clean JSON — MCP, CLI, n8n, Make & Apify ready",
   ];
   return (
