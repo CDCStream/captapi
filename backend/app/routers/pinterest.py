@@ -45,11 +45,13 @@ def _image(item: dict[str, Any]) -> str | None:
 
 def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
     pinner = item.get("pinner") or item.get("user") or {}
+    pin_id = item.get("id") or item.get("pinId") or item.get("pin_id")
+    pin_url = item.get("url") or item.get("pinUrl") or item.get("pin_url")
     return {
         "platform": "pinterest",
-        "id": safe_str(item.get("id")),
-        "url": safe_str(item.get("url") or item.get("link"))
-        or (f"https://www.pinterest.com/pin/{item.get('id')}/" if item.get("id") else None),
+        "id": safe_str(pin_id),
+        "url": safe_str(pin_url)
+        or (f"https://www.pinterest.com/pin/{pin_id}/" if pin_id else None),
         "title": safe_str(item.get("title") or item.get("grid_title")),
         "description": safe_str(item.get("description")),
         "destinationUrl": safe_str(item.get("link") or item.get("destinationUrl") or item.get("sourceLink")),

@@ -49,9 +49,13 @@ def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
         "dislikes": safe_int(item.get("dislikes") or item.get("dislikeCount")),
         "duration": safe_str(item.get("duration") or item.get("durationSeconds")),
         "publishedAt": safe_str(
-            item.get("uploadDate") or item.get("publishedAt") or item.get("date")
+            item.get("uploadedAt")
+            or item.get("uploadDate")
+            or item.get("publishedAt")
+            or item.get("date")
         ),
         "thumbnail": safe_str(item.get("thumbnail") or item.get("thumbnailUrl") or item.get("image")),
+        "comments": safe_int(item.get("commentsCount") or item.get("comments")),
     }
 
 

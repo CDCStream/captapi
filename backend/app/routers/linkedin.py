@@ -65,22 +65,36 @@ def _normalize_company(c: dict[str, Any]) -> dict[str, Any]:
 
 
 def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
-    author = p.get("author") or {}
+    post = p.get("post") if isinstance(p.get("post"), dict) else p
+    author = p.get("author") or post.get("author") or {}
+    created = post.get("created_at") if isinstance(post.get("created_at"), dict) else {}
+    stats = p.get("stats") if isinstance(p.get("stats"), dict) else p
     return {
         "platform": "linkedin",
         "type": "post",
-        "url": safe_str(p.get("url") or p.get("postUrl")),
-        "text": safe_str(p.get("text") or p.get("content") or p.get("commentary")),
-        "publishedAt": safe_str(p.get("postedAt") or p.get("publishedAt") or p.get("date")),
+        "url": safe_str(post.get("url") or p.get("url") or p.get("postUrl")),
+        "text": safe_str(post.get("text") or p.get("text") or p.get("content") or p.get("commentary")),
+        "publishedAt": safe_str(
+            created.get("date")
+            or post.get("postedAt")
+            or post.get("publishedAt")
+            or p.get("date")
+        ),
         "author": {
             "name": safe_str(author.get("name") or p.get("authorName")),
             "headline": safe_str(author.get("headline")),
-            "url": safe_str(author.get("url") or p.get("authorUrl")),
+            "url": safe_str(author.get("url") or author.get("profile_url") or p.get("authorUrl")),
         },
         "engagement": {
-            "likes": safe_int(p.get("likes") or p.get("numLikes") or p.get("reactionsCount")),
-            "comments": safe_int(p.get("comments") or p.get("numComments") or p.get("commentsCount")),
-            "reposts": safe_int(p.get("reposts") or p.get("numShares") or p.get("repostsCount")),
+            "likes": safe_int(
+                stats.get("likes") or p.get("numLikes") or p.get("reactionsCount")
+            ),
+            "comments": safe_int(
+                stats.get("comments") or p.get("numComments") or p.get("commentsCount")
+            ),
+            "reposts": safe_int(
+                stats.get("shares") or p.get("reposts") or p.get("numShares") or p.get("repostsCount")
+            ),
         },
     }
 
@@ -172,7 +186,7 @@ async def linkedin_post_details(
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_LINKEDIN_POST,
-                {"url": url},
+                {"post_urls": [url]},
                 max_items=1,
             )
             return _normalize_post(_first(items))
