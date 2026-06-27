@@ -71,6 +71,16 @@ def _meta(page: str, key: str) -> str | None:
     return html.unescape(match.group(1)).strip() if match else None
 
 
+def _query_from_video_url(url: str) -> str | None:
+    match = re.search(r"/v[^/]*--([^/?#]+)\.html", url)
+    if not match:
+        match = re.search(r"/v[^/]*-([^/?#]+)\.html", url)
+    if not match:
+        return None
+    query = re.sub(r"[-_]+", " ", match.group(1)).strip()
+    return query or None
+
+
 async def _fetch_video_page(url: str) -> dict[str, Any]:
     headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
     async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
@@ -130,6 +140,17 @@ async def video_details(
                 )
             except Exception:
                 items = []
+            if not items:
+                query = _query_from_video_url(url)
+                if query:
+                    try:
+                        items = await apify.run_actor_sync(
+                            settings.APIFY_ACTOR_RUMBLE,
+                            {"searchQueries": [query], "maxItems": 1},
+                            max_items=1,
+                        )
+                    except Exception:
+                        items = []
             if items:
                 return _normalize_video(items[0])
             return await _fetch_video_page(url)

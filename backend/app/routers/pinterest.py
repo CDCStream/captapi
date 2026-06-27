@@ -90,6 +90,21 @@ def _meta(page: str, key: str) -> str | None:
     return html.unescape(match.group(1)).strip() if match else None
 
 
+def _html_title(page: str) -> str | None:
+    match = re.search(r"<title[^>]*>(.*?)</title>", page, flags=re.IGNORECASE | re.DOTALL)
+    return html.unescape(re.sub(r"\s+", " ", match.group(1))).strip() if match else None
+
+
+def _json_string(page: str, key: str) -> str | None:
+    match = re.search(rf'"{re.escape(key)}"\s*:\s*"([^"]+)"', page)
+    if not match:
+        return None
+    try:
+        return html.unescape(match.group(1).encode("utf-8").decode("unicode_escape")).strip()
+    except UnicodeDecodeError:
+        return html.unescape(match.group(1)).strip()
+
+
 async def _fetch_pin_page(url: str) -> dict[str, Any]:
     headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
     async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
@@ -99,8 +114,12 @@ async def _fetch_pin_page(url: str) -> dict[str, Any]:
 
     page = resp.text
     pin_id = extract_pinterest_pin_id(str(resp.url)) or extract_pinterest_pin_id(url)
-    title = _meta(page, "og:title")
-    description = _meta(page, "og:description") or _meta(page, "description")
+    title = _meta(page, "og:title") or _json_string(page, "title") or _html_title(page)
+    description = (
+        _meta(page, "og:description")
+        or _meta(page, "description")
+        or _json_string(page, "description")
+    )
     image = _meta(page, "og:image")
     canonical = _meta(page, "og:url") or str(resp.url)
     if not (title or description or image):
