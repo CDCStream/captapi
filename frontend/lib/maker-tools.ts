@@ -79,6 +79,13 @@ export const MAKER_TOOLS: MakerTool[] = [
     type: "ai",
   },
   {
+    slug: "youtube-name-generator",
+    name: "YouTube Name Generator",
+    blurb: "15 catchy, brandable channel name ideas from your niche. Pick personal or business and a style. AI, no sign-up.",
+    platform: "YouTube",
+    type: "ai",
+  },
+  {
     slug: "tiktok-username-generator",
     name: "TikTok Username Generator",
     blurb: "15 available-style usernames in your vibe — aesthetic, funny, edgy, or cute.",

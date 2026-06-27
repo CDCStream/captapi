@@ -51,6 +51,17 @@ const TOOLS: Record<string, ToolSpec> = {
       }).filter((x) => x.value),
     }),
   },
+  "youtube-name-generator": {
+    prompt: (i) =>
+      `Generate 15 YouTube channel name ideas for a ${i.accountType || "personal"} channel about "${i.niche}".${i.keywords ? ` Try to naturally incorporate these words where it fits: ${i.keywords}.` : ""} Style: ${i.style || "brandable"}. Names must be short, memorable, easy to say and spell, brandable, and hint at the niche. Each name should be at most 50 characters (YouTube's channel name limit) and may contain spaces. Avoid trademarked brand names. Return JSON: {"names":[{"name":string,"reason":a short reason it works, max 8 words}]}.`,
+    normalize: (j) => ({
+      items: arr((j as { names?: unknown }).names).map((n) => {
+        const o = n as { name?: string; reason?: string };
+        const value = clip(o.name);
+        return { value, meta: [clip(o.reason), `${value.length}/50 chars${value.length > 50 ? " — too long" : ""}`].filter(Boolean).join(" · ") };
+      }).filter((x) => x.value),
+    }),
+  },
   "youtube-description-generator": {
     prompt: (i) =>
       `Write one SEO-optimized YouTube description for a video titled "${i.title}" about "${i.topic}".${i.timestamps ? ` Include these timestamps:\n${i.timestamps}` : ""} Structure: a 2-line hook first, then a keyword-rich paragraph, a "Timestamps" section if provided, a call-to-action to subscribe and like, social link placeholders, and 3-5 relevant hashtags at the end. Return JSON: {"description": string with line breaks}.`,
