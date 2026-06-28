@@ -15,6 +15,7 @@ from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
+from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
 from app.utils.formatters import safe_float, safe_int, safe_str
@@ -669,17 +670,40 @@ async def facebook_marketplace_item(
                 return _normalize_listing(items[0])
 
             # Fallback: scrape OpenGraph metadata from the public listing page.
-            headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
-            async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
-                resp = await client.get(url)
-            if resp.status_code >= 400:
-                raise HTTPException(status_code=404, detail="Listing not found")
-            page = resp.text
-            title = _og_meta(page, "og:title")
-            description = _og_meta(page, "og:description")
-            image = _og_meta(page, "og:image")
+            # Facebook serves OG tags to residential IPs but login-walls
+            # datacenter IPs, so try the Apify residential proxy first and fall
+            # back to a direct fetch.
+            headers = {
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                    "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+                )
+            }
+            resp = None
+            try:
+                resp = await fetch_via_residential(url, headers=headers, timeout=35)
+            except Exception:  # noqa: BLE001
+                resp = None
+
+            def _og_fields(page: str) -> tuple[str | None, str | None, str | None]:
+                return (
+                    _og_meta(page, "og:title"),
+                    _og_meta(page, "og:description"),
+                    _og_meta(page, "og:image"),
+                )
+
+            title = description = image = None
+            if resp is not None and resp.status_code < 400:
+                title, description, image = _og_fields(resp.text)
+            if not (title or description or image):
+                async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
+                    resp = await client.get(url)
+                if resp.status_code >= 400:
+                    raise HTTPException(status_code=404, detail="Listing not found")
+                title, description, image = _og_fields(resp.text)
             if not (title or description or image):
                 raise HTTPException(status_code=404, detail="Listing not found")
+            page = resp.text
             item_id = None
             m = re.search(r"/marketplace/item/(\d+)", url)
             if m:

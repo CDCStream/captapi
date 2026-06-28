@@ -29,14 +29,14 @@ BASE = os.environ.get("SMOKE_BASE", "https://api.captapi.com")
 # Representative live targets.
 YT_VIDEO = "https://www.youtube.com/watch?v=kJQP7kiw5Fk"
 REDDIT_SUB = "https://www.reddit.com/r/programming/"
-PIN_BOARD = "https://www.pinterest.com/nasa/nasa-images/"
+PIN_BOARD = "https://www.pinterest.com/nasa/hubble-space-telescope/"
 PIN_PROFILE = "https://www.pinterest.com/nasa/"
 FB_PROFILE = "https://www.facebook.com/nasa"
 IG_PROFILE = "https://www.instagram.com/nasa/"
 THREADS_Q = "ai"
 TIKTOK_PROFILE = "https://www.tiktok.com/@charlidamelio"
 TW_COMMUNITY = "https://x.com/i/communities/1493446837214187523"
-FB_MARKET_ITEM = "https://www.facebook.com/marketplace/item/1234567890123456/"
+FB_MARKET_ITEM = "https://www.facebook.com/marketplace/item/1008932195180823/"
 
 
 async def call(client: httpx.AsyncClient, name: str, path: str, params: dict) -> dict:
