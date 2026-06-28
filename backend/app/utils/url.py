@@ -121,17 +121,22 @@ def detect_url_platform(value: str) -> str | None:
     return None
 
 
+def _article(label: str) -> str:
+    return "an" if label[:1].lower() in {"a", "e", "i", "o", "u"} else "a"
+
+
 def platform_mismatch_detail(value: str, expected: str, expected_example: str) -> str:
     detected = detect_url_platform(value)
     expected_label = PLATFORM_DISPLAY_NAMES.get(expected, expected.title())
+    expected_article = _article(expected_label)
     if detected and detected != expected:
         detected_label = PLATFORM_DISPLAY_NAMES.get(detected, detected.title())
         return (
-            f"Expected a {expected_label} URL, but received a {detected_label} URL. "
-            f"Use the {detected_label} endpoint for that URL, or pass a {expected_label} URL "
+            f"Expected {expected_article} {expected_label} URL, but received {_article(detected_label)} {detected_label} URL. "
+            f"Use the {detected_label} endpoint for that URL, or pass {expected_article} {expected_label} URL "
             f"like {expected_example}."
         )
-    return f"Invalid {expected_label} URL. Pass a {expected_label} URL like {expected_example}."
+    return f"Invalid {expected_label} URL. Pass {expected_article} {expected_label} URL like {expected_example}."
 
 
 def is_youtube_short(url: str) -> bool:
