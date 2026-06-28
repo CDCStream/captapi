@@ -20,7 +20,8 @@
       "youtubeHashtagSearch",
       "youtubeCommentReplies",
       "youtubeChannelPlaylists",
-      "youtubeCommunityPosts"
+      "youtubeCommunityPosts",
+      "youtubeVideoSponsors"
     ]
   },
   {
@@ -81,7 +82,8 @@
       "facebookCommentReplies",
       "facebookMarketplaceSearch",
       "facebookEventSearch",
-      "facebookEventDetails"
+      "facebookEventDetails",
+      "facebookProfilePhotos"
     ]
   },
   {
@@ -99,7 +101,8 @@
       "redditSubredditPosts",
       "redditPostDetails",
       "redditPostComments",
-      "redditSearch"
+      "redditSearch",
+      "redditSubredditDetails"
     ]
   },
   {
@@ -123,7 +126,8 @@
     "modules": [
       "pinterestPinDetails",
       "pinterestUserPins",
-      "pinterestSearch"
+      "pinterestSearch",
+      "pinterestBoard"
     ]
   },
   {

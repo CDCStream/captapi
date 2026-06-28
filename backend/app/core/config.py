@@ -92,6 +92,7 @@ class Settings(BaseSettings):
     # actor; input: searchQueries / startUrls + maxEvents.
     APIFY_ACTOR_FACEBOOK_MARKETPLACE: str = "unseenuser/fb-marketplace"
     APIFY_ACTOR_FACEBOOK_EVENTS: str = "apify/facebook-events-scraper"
+    APIFY_ACTOR_FACEBOOK_PHOTOS: str = "apify/facebook-photos-scraper"
 
     # YouTube community ("posts") tab. alpha-scraper is the cheapest rental
     # ($7.50/mo). Input: startUrls/usernames + maxposts.
@@ -150,6 +151,10 @@ class Settings(BaseSettings):
 
     # Bluesky uses the public AT-Protocol AppView API directly (no actor).
     BLUESKY_API_BASE: str = "https://public.api.bsky.app"
+
+    # SponsorBlock public crowdsourced API (no key) powers YouTube ad/sponsor
+    # segment lookups. Free, so the endpoint only bills a flat credit.
+    SPONSORBLOCK_API_BASE: str = "https://sponsor.ajay.app"
 
     OPENAI_API_KEY: str
     OPENAI_MODEL_SUMMARY: str = "gpt-4o-mini"

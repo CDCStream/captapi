@@ -174,6 +174,7 @@ const YOUTUBE: Spec[] = [
   { slug: "youtube-comment-replies", name: "YouTube Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/youtube/comment-replies", credits: 20, creditsPerResult: 0.4 },
   { slug: "youtube-channel-playlists", name: "YouTube Channel Playlists API", shortName: "Channel Playlists", category: "list", method: "GET", path: "/v1/youtube/channel-playlists", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-community-posts", name: "YouTube Community Posts API", shortName: "Community Posts", category: "list", method: "GET", path: "/v1/youtube/community-posts", credits: 10, creditsPerResult: 0.5 },
+  { slug: "youtube-video-sponsors", name: "YouTube Video Sponsors API", shortName: "Video Sponsors", category: "details", method: "GET", path: "/v1/youtube/video-sponsors", credits: 1 },
 ];
 
 const TIKTOK: Spec[] = [
@@ -229,6 +230,7 @@ const FACEBOOK: Spec[] = [
   { slug: "facebook-marketplace-search", name: "Facebook Marketplace Search API", shortName: "Marketplace Search", category: "search", method: "GET", path: "/v1/facebook/marketplace-search", credits: 20, creditsPerResult: 1 },
   { slug: "facebook-event-search", name: "Facebook Event Search API", shortName: "Event Search", category: "search", method: "GET", path: "/v1/facebook/event-search", credits: 40, creditsPerResult: 2 },
   { slug: "facebook-event-details", name: "Facebook Event Details API", shortName: "Event Details", category: "details", method: "GET", path: "/v1/facebook/event-details", credits: 2 },
+  { slug: "facebook-profile-photos", name: "Facebook Profile Photos API", shortName: "Profile Photos", category: "list", method: "GET", path: "/v1/facebook/profile-photos", credits: 12, creditsPerResult: 0.6 },
 ];
 
 const TWITTER: Spec[] = [
@@ -243,6 +245,7 @@ const REDDIT: Spec[] = [
   { slug: "reddit-post-details", name: "Reddit Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/reddit/post-details", credits: 1 },
   { slug: "reddit-post-comments", name: "Reddit Post Comments API", shortName: "Post Comments", category: "comments", method: "GET", path: "/v1/reddit/post-comments", credits: 20, creditsPerResult: 0.4 },
   { slug: "reddit-search", name: "Reddit Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/reddit/search", credits: 10, creditsPerResult: 0.4 },
+  { slug: "reddit-subreddit-details", name: "Reddit Subreddit Details API", shortName: "Subreddit Details", category: "details", method: "GET", path: "/v1/reddit/subreddit-details", credits: 1 },
 ];
 
 const THREADS: Spec[] = [
@@ -261,6 +264,7 @@ const PINTEREST: Spec[] = [
   { slug: "pinterest-pin-details", name: "Pinterest Pin Details API", shortName: "Pin Details", category: "details", method: "GET", path: "/v1/pinterest/pin-details", credits: 1 },
   { slug: "pinterest-user-pins", name: "Pinterest User Pins API", shortName: "User Pins", category: "list", method: "GET", path: "/v1/pinterest/user-pins", credits: 13, creditsPerResult: 0.5 },
   { slug: "pinterest-search", name: "Pinterest Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/pinterest/search", credits: 13, creditsPerResult: 0.5 },
+  { slug: "pinterest-board", name: "Pinterest Board API", shortName: "Board", category: "list", method: "GET", path: "/v1/pinterest/board", credits: 13, creditsPerResult: 0.5 },
 ];
 
 const LINKEDIN: Spec[] = [
@@ -661,6 +665,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-comment-replies": [up(YT_VIDEO), cid(), lp(50, 500)],
   "youtube-channel-playlists": [up(YT_CHANNEL), lp(20, 200)],
   "youtube-community-posts": [up(YT_CHANNEL), lp(20, 200)],
+  "youtube-video-sponsors": [up(YT_VIDEO)],
   // TikTok
   "tiktok-transcript": [up(TT_VIDEO)],
   "tiktok-summarizer": [up(TT_VIDEO)],
@@ -710,6 +715,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "facebook-marketplace-search": [qp("Product or keyword to search Facebook Marketplace for."), { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." }, lp(20, 200), { name: "details", type: "string", required: false, description: "Set true to fetch full description, photos and coordinates per listing (slower, costs more)." }],
   "facebook-event-search": [qp("Topic and/or place, e.g. 'comedy Chicago'."), lp(20, 200)],
   "facebook-event-details": [up("Facebook event URL, e.g. https://facebook.com/events/ID.")],
+  "facebook-profile-photos": [up("Facebook profile or page URL."), lp(20, 200)],
   // Twitter / X
   "twitter-tweet-details": [up("Public tweet URL, e.g. https://x.com/user/status/ID.")],
   "twitter-profile": [up("Twitter/X profile URL or @handle, e.g. https://x.com/username.")],
@@ -720,6 +726,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "reddit-post-details": [up("Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/...")],
   "reddit-post-comments": [up("Reddit post URL."), lp(50, 500)],
   "reddit-search": [qp("Keywords or search query (min 2 characters)."), lp(25, 200)],
+  "reddit-subreddit-details": [up("Subreddit URL, r/name, or bare name, e.g. r/technology.")],
   // Threads
   "threads-profile": [up("Threads profile URL or @handle, e.g. https://threads.net/@username.")],
   "threads-user-posts": [up("Threads profile URL or @handle."), lp(20, 100)],
@@ -732,6 +739,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "pinterest-pin-details": [up("Pinterest pin URL, e.g. https://pinterest.com/pin/ID/.")],
   "pinterest-user-pins": [up("Pinterest profile URL or username."), lp(25, 200)],
   "pinterest-search": [qp("Keywords or search query (min 2 characters)."), lp(25, 200)],
+  "pinterest-board": [up("Pinterest board URL, e.g. https://pinterest.com/username/board-name/."), lp(25, 200)],
   // LinkedIn
   "linkedin-profile": [up("LinkedIn profile URL, e.g. https://linkedin.com/in/slug.")],
   "linkedin-company": [up("LinkedIn company URL, e.g. https://linkedin.com/company/slug.")],

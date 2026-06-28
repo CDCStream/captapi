@@ -216,6 +216,53 @@ async def user_pins(
         return ApiResponse(data=data)
 
 
+def _is_board_url(url: str) -> bool:
+    return bool(
+        re.match(
+            r"^https?://(?:[a-z]{2,3}\.)?pinterest\.[a-z.]+/[^/]+/[^/]+/?",
+            (url or "").strip(),
+            flags=re.IGNORECASE,
+        )
+    )
+
+
+@router.get("/board", summary="List pins inside a Pinterest board")
+async def pinterest_board(
+    url: str = Query(..., description="Pinterest board URL (.../username/board-name/)"),
+    limit: int = Query(25, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    if not _is_board_url(url):
+        raise HTTPException(status_code=400, detail="Invalid Pinterest board URL")
+    settings = get_settings()
+    cost = _scaled(limit, RATE, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/pinterest/board",
+        platform="pinterest",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_PINTEREST,
+                {"boardUrls": [url], "maxResults": limit},
+                max_items=limit,
+            )
+            pins = [_normalize_pin(i) for i in items][:limit]
+            return {"board": url, "totalReturned": len(pins), "pins": pins}
+
+        data = await cached_or_run(
+            endpoint="pinterest.board",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled(len(data["pins"]), RATE, 2)
+        return ApiResponse(data=data)
+
+
 @router.get("/search", summary="Search Pinterest pins by keyword")
 async def pinterest_search(
     q: str = Query(..., min_length=2, description="Search query"),

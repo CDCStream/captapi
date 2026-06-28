@@ -107,6 +107,71 @@ async def subreddit_posts(
         return ApiResponse(data=data)
 
 
+def _is_community(item: dict[str, Any]) -> bool:
+    dt = (item.get("dataType") or item.get("type") or "").lower()
+    return dt == "community" or item.get("numberOfMembers") is not None
+
+
+def _normalize_community(item: dict[str, Any]) -> dict[str, Any]:
+    name = item.get("communityName") or item.get("name") or item.get("title")
+    return {
+        "platform": "reddit",
+        "name": safe_str(name),
+        "url": safe_str(item.get("url"))
+        or (f"https://www.reddit.com/r/{name}" if name else None),
+        "title": safe_str(item.get("title") or item.get("displayName")),
+        "description": safe_str(item.get("description") or item.get("publicDescription")),
+        "members": safe_int(item.get("numberOfMembers") or item.get("subscribers") or item.get("members")),
+        "category": safe_str(item.get("category")),
+        "createdAt": safe_str(item.get("createdAt") or item.get("created")),
+        "nsfw": item.get("over18") or item.get("nsfw"),
+        "icon": safe_str(item.get("iconImage") or item.get("icon") or item.get("communityIcon")),
+    }
+
+
+@router.get("/subreddit-details", summary="Subreddit info & member stats")
+async def subreddit_details(
+    url: str = Query(..., description="Subreddit URL, r/name, or bare name"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    sub = extract_subreddit(url)
+    if not sub:
+        raise HTTPException(status_code=400, detail="Invalid subreddit")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/reddit/subreddit-details",
+        platform="reddit",
+        resource_url=f"https://www.reddit.com/r/{sub}",
+        base_credits=CREDIT_DETAILS,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_REDDIT,
+                {
+                    "startUrls": [{"url": f"https://www.reddit.com/r/{sub}/"}],
+                    "type": "communities",
+                    "maxItems": 5,
+                    "maxComments": 0,
+                    "maxPostCount": 0,
+                },
+                max_items=5,
+            )
+            community = next((i for i in items if _is_community(i)), None)
+            if not community:
+                raise HTTPException(status_code=404, detail="Subreddit not found")
+            return _normalize_community(community)
+
+        data = await cached_or_run(
+            endpoint="reddit.subreddit-details",
+            params={"sub": sub},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
 @router.get("/post-details", summary="Reddit post metadata + stats")
 async def post_details(
     url: str = Query(..., description="Reddit post URL"),

@@ -569,6 +569,64 @@ async def facebook_comment_replies(
         return ApiResponse(data=data)
 
 
+def _normalize_photo(item: dict) -> dict:
+    return {
+        "platform": "facebook",
+        "id": safe_str(item.get("id") or item.get("photoId") or item.get("photo_id")),
+        "url": safe_str(item.get("url") or item.get("photoUrl") or item.get("postUrl")),
+        "image": safe_str(
+            item.get("imageUrl")
+            or item.get("image")
+            or item.get("imageUri")
+            or item.get("src")
+            or item.get("thumbnail")
+        ),
+        "caption": safe_str(item.get("caption") or item.get("text") or item.get("ocrText")),
+        "publishedAt": safe_str(item.get("timestamp") or item.get("date") or item.get("publishedAt")),
+        "likes": safe_int(item.get("likesCount") or item.get("reactionsCount")),
+        "comments": safe_int(item.get("commentsCount")),
+        "width": safe_int(item.get("width")),
+        "height": safe_int(item.get("height")),
+    }
+
+
+@router.get("/profile-photos", summary="Photos from a Facebook profile/page")
+async def facebook_profile_photos(
+    url: str = Query(..., description="Facebook profile or page URL"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    if not extract_facebook_page(url):
+        raise HTTPException(status_code=400, detail="Invalid Facebook profile/page URL")
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_FB_POSTS, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/facebook/profile-photos",
+        platform="facebook",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_FACEBOOK_PHOTOS,
+                {"startUrls": [{"url": url}], "resultsLimit": limit},
+                max_items=limit,
+            )
+            photos = [_normalize_photo(i) for i in items[:limit] if not i.get("error")]
+            return {"url": url, "totalReturned": len(photos), "photos": photos}
+
+        data = await cached_or_run(
+            endpoint="facebook.profile-photos",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["photos"]), RATE_FB_POSTS, 2)
+        return ApiResponse(data=data)
+
+
 @router.get("/marketplace-search", summary="Search Facebook Marketplace listings")
 async def facebook_marketplace_search(
     q: str = Query(..., min_length=2, description="Product/keyword to search for"),

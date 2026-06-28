@@ -105,6 +105,7 @@ const YOUTUBE: Omit<Endpoint, "platform">[] = [
   { tool: "youtube_comment_replies", name: "YouTube Comment Replies", path: "/v1/youtube/comment-replies", credits: 20, summary: "Replies to a specific YouTube comment.", params: [url(YT_VIDEO), commentId(), limit(50, 500)] },
   { tool: "youtube_channel_playlists", name: "YouTube Channel Playlists", path: "/v1/youtube/channel-playlists", credits: 20, summary: "List a channel's playlists.", params: [url(YT_CHANNEL), limit(20, 200)] },
   { tool: "youtube_community_posts", name: "YouTube Community Posts", path: "/v1/youtube/community-posts", credits: 10, summary: "List a channel's community (posts) tab.", params: [url(YT_CHANNEL), limit(20, 200)] },
+  { tool: "youtube_video_sponsors", name: "YouTube Video Sponsors", path: "/v1/youtube/video-sponsors", credits: 1, summary: "Sponsor / self-promo / interaction segments in a YouTube video (via SponsorBlock).", params: [url(YT_VIDEO)] },
 ];
 
 const TIKTOK: Omit<Endpoint, "platform">[] = [
@@ -160,6 +161,7 @@ const FACEBOOK: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_marketplace_search", name: "Facebook Marketplace Search", path: "/v1/facebook/marketplace-search", credits: 20, summary: "Search Facebook Marketplace listings by keyword and location.", params: [q("Product or keyword to search for (min 2 chars)."), { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." }, limit(20, 200), { name: "details", type: "string", required: false, description: "Set true to fetch full description, photos and coordinates per listing (slower, costs more)." }] },
   { tool: "facebook_event_search", name: "Facebook Event Search", path: "/v1/facebook/event-search", credits: 40, summary: "Search Facebook events by topic and/or location.", params: [q("Topic and/or place, e.g. 'comedy Chicago' (min 2 chars)."), limit(20, 200)] },
   { tool: "facebook_event_details", name: "Facebook Event Details", path: "/v1/facebook/event-details", credits: 2, summary: "Details for a Facebook event (date, location, attendees, tickets).", params: [url("Facebook event URL, e.g. https://facebook.com/events/ID.")] },
+  { tool: "facebook_profile_photos", name: "Facebook Profile Photos", path: "/v1/facebook/profile-photos", credits: 12, summary: "Photos from a Facebook profile or page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
 ];
 
 const TW_TWEET = "Public tweet URL, e.g. https://x.com/user/status/ID.";
@@ -172,6 +174,7 @@ const BS_PROFILE = "Bluesky profile URL, @handle, or handle, e.g. bsky.app/profi
 const BS_POST = "Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY.";
 const PIN_PIN = "Pinterest pin URL, e.g. https://pinterest.com/pin/ID/.";
 const PIN_PROFILE = "Pinterest profile URL or username.";
+const PIN_BOARD = "Pinterest board URL, e.g. https://pinterest.com/username/board-name/.";
 const LI_PROFILE = "LinkedIn profile URL, e.g. https://linkedin.com/in/slug.";
 const LI_COMPANY = "LinkedIn company URL, e.g. https://linkedin.com/company/slug.";
 const LI_POST = "LinkedIn post or activity URL.";
@@ -190,6 +193,7 @@ const REDDIT: Omit<Endpoint, "platform">[] = [
   { tool: "reddit_post_details", name: "Reddit Post Details", path: "/v1/reddit/post-details", credits: 1, summary: "Metadata + stats for a Reddit post.", params: [url(RD_POST)] },
   { tool: "reddit_post_comments", name: "Reddit Post Comments", path: "/v1/reddit/post-comments", credits: 20, summary: "Comments on a Reddit post.", params: [url(RD_POST), limit(50, 500)] },
   { tool: "reddit_search", name: "Reddit Search", path: "/v1/reddit/search", credits: 10, summary: "Search Reddit posts by keyword.", params: [q(), limit(25, 200)] },
+  { tool: "reddit_subreddit_details", name: "Reddit Subreddit Details", path: "/v1/reddit/subreddit-details", credits: 1, summary: "Info & member stats for a subreddit.", params: [url(RD_SUB)] },
 ];
 
 const THREADS: Omit<Endpoint, "platform">[] = [
@@ -208,6 +212,7 @@ const PINTEREST: Omit<Endpoint, "platform">[] = [
   { tool: "pinterest_pin_details", name: "Pinterest Pin Details", path: "/v1/pinterest/pin-details", credits: 1, summary: "Metadata + saves for a Pinterest pin.", params: [url(PIN_PIN)] },
   { tool: "pinterest_user_pins", name: "Pinterest User Pins", path: "/v1/pinterest/user-pins", credits: 13, summary: "Pins from a Pinterest profile.", params: [url(PIN_PROFILE), limit(25, 200)] },
   { tool: "pinterest_search", name: "Pinterest Search", path: "/v1/pinterest/search", credits: 13, summary: "Search Pinterest pins by keyword.", params: [q(), limit(25, 200)] },
+  { tool: "pinterest_board", name: "Pinterest Board", path: "/v1/pinterest/board", credits: 13, summary: "List pins inside a Pinterest board.", params: [url(PIN_BOARD), limit(25, 200)] },
 ];
 
 const LINKEDIN: Omit<Endpoint, "platform">[] = [

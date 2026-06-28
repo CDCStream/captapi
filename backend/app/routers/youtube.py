@@ -6,6 +6,7 @@ import asyncio
 import math
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import ApiCaller, require_api_key
@@ -1008,4 +1009,83 @@ async def youtube_community_posts(
             ctx=ctx,
         )
         ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_YT_COMMUNITY, 2)
+        return ApiResponse(data=data)
+
+
+# ---------- VIDEO SPONSORS (SponsorBlock) ---------------------------------
+CREDIT_SPONSORS = 1
+_SPONSOR_CATEGORIES = ["sponsor", "selfpromo", "interaction"]
+
+
+def _format_seconds(value: float | int | None) -> str | None:
+    if value is None:
+        return None
+    total = int(round(float(value)))
+    h, rem = divmod(total, 3600)
+    m, s = divmod(rem, 60)
+    return f"{h:d}:{m:02d}:{s:02d}" if h else f"{m:d}:{s:02d}"
+
+
+def _normalize_sponsor_segment(seg: dict[str, Any]) -> dict[str, Any]:
+    bounds = seg.get("segment") or [None, None]
+    start = bounds[0] if len(bounds) > 0 else None
+    end = bounds[1] if len(bounds) > 1 else None
+    return {
+        "category": safe_str(seg.get("category")),
+        "actionType": safe_str(seg.get("actionType")),
+        "startSeconds": start,
+        "endSeconds": end,
+        "startFormatted": _format_seconds(start),
+        "endFormatted": _format_seconds(end),
+        "durationSeconds": round(end - start, 3) if start is not None and end is not None else None,
+        "votes": safe_int(seg.get("votes")),
+        "uuid": safe_str(seg.get("UUID")),
+    }
+
+
+@router.get("/video-sponsors", summary="Sponsor/self-promo segments in a YouTube video")
+async def youtube_video_sponsors(
+    url: str = Query(..., description="YouTube video URL or ID"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    vid, _ = _require_youtube_url(url)
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/youtube/video-sponsors",
+        platform="youtube",
+        resource_url=f"https://www.youtube.com/watch?v={vid}",
+        base_credits=CREDIT_SPONSORS,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            params = [("videoID", vid)]
+            params += [("category", c) for c in _SPONSOR_CATEGORIES]
+            async with httpx.AsyncClient(timeout=30) as client:
+                resp = await client.get(
+                    f"{settings.SPONSORBLOCK_API_BASE}/api/skipSegments",
+                    params=params,
+                )
+            if resp.status_code == 404:
+                return {"videoId": vid, "totalReturned": 0, "segments": []}
+            if resp.status_code >= 400:
+                raise HTTPException(status_code=502, detail="Sponsor lookup failed upstream")
+            raw = resp.json()
+            segments = [_normalize_sponsor_segment(s) for s in raw if isinstance(s, dict)]
+            video_duration = next(
+                (s.get("videoDuration") for s in raw if isinstance(s, dict) and s.get("videoDuration")),
+                None,
+            )
+            return {
+                "videoId": vid,
+                "videoDurationSeconds": video_duration,
+                "totalReturned": len(segments),
+                "segments": segments,
+            }
+
+        data = await cached_or_run(
+            endpoint="youtube.video-sponsors",
+            params={"vid": vid},
+            runner=_run,
+            ctx=ctx,
+        )
         return ApiResponse(data=data)

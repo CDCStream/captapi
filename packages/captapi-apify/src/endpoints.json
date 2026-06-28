@@ -400,6 +400,22 @@
     ]
   },
   {
+    "tool": "youtube_video_sponsors",
+    "platform": "youtube",
+    "name": "YouTube Video Sponsors",
+    "path": "/v1/youtube/video-sponsors",
+    "credits": 1,
+    "summary": "Sponsor / self-promo / interaction segments in a YouTube video (via SponsorBlock).",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+      }
+    ]
+  },
+  {
     "tool": "tiktok_transcript",
     "platform": "tiktok",
     "name": "TikTok Transcript",
@@ -1328,6 +1344,28 @@
     ]
   },
   {
+    "tool": "facebook_profile_photos",
+    "platform": "facebook",
+    "name": "Facebook Profile Photos",
+    "path": "/v1/facebook/profile-photos",
+    "credits": 12,
+    "summary": "Photos from a Facebook profile or page.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook profile or page URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
     "tool": "twitter_tweet_details",
     "platform": "twitter",
     "name": "Twitter/X Tweet Details",
@@ -1482,6 +1520,22 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "reddit_subreddit_details",
+    "platform": "reddit",
+    "name": "Reddit Subreddit Details",
+    "path": "/v1/reddit/subreddit-details",
+    "credits": 1,
+    "summary": "Info & member stats for a subreddit.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Subreddit URL, r/name, or bare name, e.g. r/technology."
       }
     ]
   },
@@ -1644,6 +1698,28 @@
         "type": "string",
         "required": true,
         "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "pinterest_board",
+    "platform": "pinterest",
+    "name": "Pinterest Board",
+    "path": "/v1/pinterest/board",
+    "credits": 13,
+    "summary": "List pins inside a Pinterest board.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Pinterest board URL, e.g. https://pinterest.com/username/board-name/."
       },
       {
         "name": "limit",

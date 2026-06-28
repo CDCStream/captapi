@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Subreddit URL, r/name, or bare name, e.g. r/technology."
+  }
+]

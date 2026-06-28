@@ -342,6 +342,23 @@
           "scope": null
         }
       },
+      "youtubeVideoSponsors": {
+        "label": "YouTube Video Sponsors",
+        "description": "Sponsor / self-promo / interaction segments in a YouTube video (via SponsorBlock). Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeVideoSponsors/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeVideoSponsors/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
       "tiktokTranscript": {
         "label": "TikTok Transcript",
         "description": "Transcript of a TikTok video (via captions). Costs ~2 credits (cached results free, failures never charged).",
@@ -1124,6 +1141,23 @@
           "scope": null
         }
       },
+      "facebookProfilePhotos": {
+        "label": "Facebook Profile Photos",
+        "description": "Photos from a Facebook profile or page. Costs ~12 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookProfilePhotos/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookProfilePhotos/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
       "twitterTweetDetails": {
         "label": "Twitter/X Tweet Details",
         "description": "Metadata + engagement stats for a tweet. Costs ~1 credit (cached results free, failures never charged).",
@@ -1255,6 +1289,23 @@
           "communication": "modules/redditSearch/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/redditSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "redditSubredditDetails": {
+        "label": "Reddit Subreddit Details",
+        "description": "Info & member stats for a subreddit. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/redditSubredditDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/redditSubredditDetails/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null
@@ -1408,6 +1459,23 @@
           "communication": "modules/pinterestSearch/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/pinterestSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "pinterestBoard": {
+        "label": "Pinterest Board",
+        "description": "List pins inside a Pinterest board. Costs ~13 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/pinterestBoard/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/pinterestBoard/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null
