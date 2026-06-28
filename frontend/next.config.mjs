@@ -9,6 +9,8 @@ const nextConfig = {
     return [
       // Agents commonly probe /.well-known/ for service manifests.
       { source: "/.well-known/mcp.json", destination: "/mcp.json" },
+      { source: "/.well-known/llms.txt", destination: "/llms.txt" },
+      { source: "/.well-known/llms-full.txt", destination: "/llms-full.txt" },
     ];
   },
 };

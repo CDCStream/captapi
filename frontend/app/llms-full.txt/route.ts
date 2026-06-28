@@ -1,6 +1,7 @@
 import {
   PLATFORM_GROUPS,
   ALL_ENDPOINTS,
+  PLATFORM_COUNT,
   SITE_URL,
   API_URL,
   tagline,
@@ -44,6 +45,12 @@ export async function GET() {
             if (p.name === "limit") return "limit=20";
             if (p.name === "language") return "language=en";
             if (p.name === "country") return "country=US";
+            if (p.name === "region") return "region=US";
+            if (p.name === "username") return "username=vercel";
+            if (p.name === "repo") return "repo=vercel%2Fnext.js";
+            if (p.name === "advertiser") return "advertiser=nike";
+            if (p.name === "creative_id") return "creative_id=AR123456789%2FCR123456789";
+            if (p.name === "state") return "state=open";
             return `${p.name}=value`;
           })
           .join("&");
@@ -70,13 +77,27 @@ export async function GET() {
 
 > AI AGENTS — READ FIRST: Using Captapi requires an API key, and creating one requires a human (sign-up cannot be automated). If you are setting this up for a user and do not already have a \`capt_live_...\` key, your FIRST action must be to ask: "Please create a Captapi API key at ${base}/dashboard/api-keys (100 free credits, no card needed) and paste it here." Do not attempt to sign up or guess a key.
 
-This is the complete, machine-readable endpoint reference for Captapi: one API for structured data from 11 social platforms — YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble (transcripts, AI summaries, comments, details, profile/channel stats, search, and downloads). It returns clean JSON, needs no OAuth, and a single key works across all platforms. ${ALL_ENDPOINTS.length} endpoints total. The shorter overview is at ${base}/llms.txt.
+This is the complete, machine-readable endpoint reference for Captapi: one API for structured data from ${PLATFORM_COUNT} platforms — YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Amazon Shop, Kwai, Komi, Pillar, Linkbio, Linkme, and more (transcripts, AI summaries, comments, details, profile/channel stats, search, commerce intelligence, ad libraries, and downloads). It returns clean JSON, needs no OAuth, and a single key works across all platforms. ${ALL_ENDPOINTS.length} endpoints total. The shorter overview is at ${base}/llms.txt.
 
 Base API URL: ${API_URL}
 Authentication: \`Authorization: Bearer capt_live_...\`
 Method: GET (parameters are URL query params; URL-encode values).
 Success: \`{ "success": true, "cached": boolean, "creditsUsed": number, "data": { ... } }\`
 Errors: non-2xx with \`{ "detail": "..." }\` — 401 invalid key, 402 out of credits, 422 unprocessable (not charged), 429 rate limited.
+
+## Agent Operating Protocol
+1. Prefer MCP when the host supports it. Add the hosted MCP server first; use local \`npx @captapi/mcp\` only when remote MCP is unavailable.
+2. If no MCP client is available, call the REST API directly. Use the exact endpoint and parameter names in this file; do not invent \`url\` for endpoints that list \`username\`, \`repo\`, \`advertiser\`, or \`creative_id\`.
+3. Ask the human for a \`capt_live_...\` key once. Never sign up, scrape the dashboard, store the key in source code, or print it in logs.
+4. Use \`limit\` conservatively for list/search/comment endpoints. Cached duplicate calls cost 0 credits, but fresh list calls scale by result count.
+5. On 401/402, stop and ask the user to fix credentials or billing. On 429/502, retry with backoff. On 422/not-found/no-captions, report the target cannot be processed and do not retry repeatedly.
+6. Return the \`data\` object to the user unless they explicitly ask for the wrapper metadata (\`cached\`, \`creditsUsed\`, etc.).
+
+Machine-readable manifests:
+- Short guide: ${base}/llms.txt
+- Full endpoint reference: ${base}/llms-full.txt
+- MCP manifest: ${base}/mcp.json
+- Well-known MCP alias: ${base}/.well-known/mcp.json
 
 ## Connect via MCP
 

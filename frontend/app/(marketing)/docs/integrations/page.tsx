@@ -3,6 +3,8 @@ import { CodeTabs } from "@/components/docs/code-tabs";
 import { IntegrationCards } from "@/components/docs/integration-cards";
 import {
   PLATFORM_GROUPS,
+  ENDPOINT_COUNT,
+  PLATFORM_COUNT,
   API_URL,
   params as endpointParams,
   mcpToolName,
@@ -11,8 +13,7 @@ import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
   title: "Integrations — Captapi MCP Server for AI Agents",
-  description:
-    "Connect Captapi to Claude, Cursor, VS Code, and any MCP-compatible AI agent. Install the official @captapi/mcp server, @captapi/cli, the n8n-nodes-captapi community node, the Make.com app, or the Apify Actor and access all 62 social media data endpoints from your agent, terminal, scripts, n8n, Make.com, or Apify.",
+  description: `Connect Captapi to Claude, Cursor, VS Code, and any MCP-compatible AI agent. Install the official @captapi/mcp server, @captapi/cli, the n8n-nodes-captapi community node, the Make.com app, or the Apify Actor and access all ${ENDPOINT_COUNT} endpoints across ${PLATFORM_COUNT} platforms from your agent, terminal, scripts, n8n, Make.com, or Apify.`,
   path: "/docs/integrations",
 });
 
@@ -159,7 +160,7 @@ const makeUsage = [
   },
   {
     label: "Add a module",
-    code: `// Modules are grouped by platform (YouTube / TikTok / Instagram / Facebook).
+    code: `// Modules are grouped by platform (YouTube / TikTok / Instagram / Facebook / X / Reddit / LinkedIn / ...).
 // Drop one into a scenario, e.g. "YouTube Transcript":
 //   URL = https://youtube.com/watch?v=dQw4w9WgXcQ
 // Output: the API "data" payload, ready to map into later modules.

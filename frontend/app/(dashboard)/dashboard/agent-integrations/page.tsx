@@ -20,6 +20,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api-client";
 import {
   PLATFORM_GROUPS,
+  ENDPOINT_COUNT,
+  PLATFORM_COUNT,
   params as endpointParams,
   mcpToolName,
 } from "@/lib/api-catalog";
@@ -130,7 +132,7 @@ export default function AgentIntegrationsPage() {
           </h1>
           <p className="text-muted-foreground mt-1">
             Wire up Claude, Cursor, VS Code, and any MCP-compatible AI agent to
-            all 62 Captapi endpoints in seconds.
+            all {ENDPOINT_COUNT} Captapi endpoints in seconds.
           </p>
         </div>
       </div>
@@ -286,10 +288,10 @@ export default function AgentIntegrationsPage() {
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border bg-background p-5">
           <Terminal className="size-5 text-primary" />
-          <h3 className="mt-3 font-semibold">62 tools</h3>
+          <h3 className="mt-3 font-semibold">{ENDPOINT_COUNT} tools</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Every Captapi endpoint across YouTube, TikTok, Instagram, and
-            Facebook, exposed as a typed tool.
+            Every Captapi endpoint across {PLATFORM_COUNT} platforms, exposed as
+            a typed tool.
           </p>
         </div>
         <div className="rounded-2xl border bg-background p-5">

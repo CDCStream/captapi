@@ -1,4 +1,9 @@
-import { ALL_ENDPOINTS, SITE_URL, API_URL } from "@/lib/api-catalog";
+import {
+  ALL_ENDPOINTS,
+  PLATFORM_COUNT,
+  SITE_URL,
+  API_URL,
+} from "@/lib/api-catalog";
 
 export const dynamic = "force-static";
 
@@ -9,12 +14,13 @@ export async function GET() {
     $schema: "https://modelcontextprotocol.io/schema/mcp.json",
     name: "captapi",
     title: "Captapi",
-    description:
-      "Official Captapi MCP server. Gives AI agents structured data from YouTube, TikTok, Instagram, and Facebook — transcripts, summaries, comments, profiles, search, and downloads.",
+    description: `Official Captapi MCP server. Gives AI agents structured public data from ${PLATFORM_COUNT} platforms — including YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, LinkedIn, Threads, Pinterest, Twitch, Spotify, Ad Library, TikTok Shop, GitHub, Kwai, and link-in-bio pages — with transcripts, summaries, comments, profiles, search, commerce data, ad intelligence, and downloads.`,
     instructions_for_agent: `Before installing, you need a Captapi API key, and key creation requires a human. If you do not already have a capt_live_... key, your FIRST action must be to ask the user to create one at ${SITE_URL}/dashboard/api-keys (100 free credits, no card) and paste it back. Do not sign up or guess a key. Then add the config from "clients" below and restart the client.`,
     version: VERSION,
     homepage: SITE_URL,
     documentation: `${SITE_URL}/docs/integrations`,
+    llms_txt: `${SITE_URL}/llms.txt`,
+    llms_full_txt: `${SITE_URL}/llms-full.txt`,
     package: { registry: "npm", name: "@captapi/mcp" },
     cli: {
       package: { registry: "npm", name: "@captapi/cli" },
@@ -154,17 +160,31 @@ export async function GET() {
     },
     tools: {
       count: ALL_ENDPOINTS.length,
+      platform_count: PLATFORM_COUNT,
       naming: "platform_action",
       examples: [
         "youtube_transcript",
         "tiktok_comments",
         "instagram_channel_posts",
         "facebook_page_details",
+        "github_repository",
+        "google_ad_library_company_ads",
+        "tiktok_shop_user_showcase",
       ],
     },
     api: {
       base_url: API_URL,
       auth_header: "Authorization: Bearer <CAPTAPI_API_KEY>",
+      docs: `${SITE_URL}/apis`,
+      openapi: `${API_URL}/v1/openapi.json`,
+      endpoint_reference: `${SITE_URL}/llms-full.txt`,
+    },
+    agent_usage: {
+      recommended_path: "Use hosted MCP first; use local stdio MCP when the client cannot connect to remote HTTP MCP; use REST as a fallback.",
+      key_policy: "Ask the human for a capt_live_... key. Never sign up automatically, guess keys, commit keys, or print keys in logs.",
+      parameter_policy: "Use each tool schema exactly. Some endpoints require username, repo, advertiser, creative_id, q, or limit instead of url.",
+      retry_policy: "Do not retry 401/402; ask the user to fix auth or credits. Retry 429/502 with backoff. Do not loop on 422/not-found/no-captions.",
+      output_policy: "Return the API data object by default; include cached and creditsUsed only when relevant.",
     },
   };
 

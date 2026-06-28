@@ -61,6 +61,14 @@ Base API URL: https://api.captapi.com
 Authentication: \`Authorization: Bearer capt_live_...\` (create a key in the dashboard).
 Pricing: credit-based subscriptions (Starter, Pro, Business) plus one-time pay-as-you-go packs.
 
+## Agent Operating Protocol
+1. Prefer MCP for AI agents. Use hosted MCP first (\`${API_URL}/mcp\`) because it requires no local install; use local \`npx @captapi/mcp\` when the host only supports stdio.
+2. If MCP is not available, call REST directly. Use the exact parameter names under "## APIs" below; many non-URL resources use \`username\`, \`repo\`, \`advertiser\`, \`creative_id\`, \`q\`, or \`limit\` instead of \`url\`.
+3. Ask the human for a \`capt_live_...\` API key once. Do not sign up automatically, scrape the dashboard, guess keys, commit keys, or expose keys in generated code.
+4. For list/search/comment endpoints, start with a small \`limit\` unless the user asks for more. Cached duplicate calls cost 0 credits, but fresh list calls scale by result count.
+5. Error handling: 401/402 means stop and ask the user to fix auth/billing; 429/502 can be retried with backoff; 422/no-captions/not-found means report the target cannot be processed and avoid retry loops.
+6. Return \`data\` by default. Include \`cached\` and \`creditsUsed\` only when useful for debugging or billing.
+
 ## Connect via MCP (recommended for AI agents)
 
 Captapi exposes all ${ALL_ENDPOINTS.length} endpoints as Model Context Protocol tools. There are two ways to connect — both require an API key (a human creates it ONCE at ${base}/dashboard/api-keys; sign-up cannot be automated, so if you do not have a \`capt_live_...\` key, ask the user to create one and paste it).
@@ -135,11 +143,11 @@ Auth: reads the key from \`~/.captapi/config.json\` (via \`login\`) or the \`CAP
 
 ## Connect via n8n (workflow automation)
 
-For no-code/low-code automations, the official \`n8n-nodes-captapi\` community node exposes all ${ALL_ENDPOINTS.length} endpoints inside n8n. Install it from **Settings → Community Nodes** (package name \`n8n-nodes-captapi\`), or \`npm install n8n-nodes-captapi\` on a self-hosted instance, then restart n8n. Create a **Captapi API** credential with the human-provided \`capt_live_...\` key (Base URL defaults to ${API_URL}). Add the **Captapi** node, pick a Platform (YouTube/TikTok/Instagram/Facebook) and an Operation, and the node returns the same structured JSON as the REST API for use in downstream nodes. npm: https://www.npmjs.com/package/n8n-nodes-captapi
+For no-code/low-code automations, the official \`n8n-nodes-captapi\` community node exposes all ${ALL_ENDPOINTS.length} endpoints inside n8n. Install it from **Settings → Community Nodes** (package name \`n8n-nodes-captapi\`), or \`npm install n8n-nodes-captapi\` on a self-hosted instance, then restart n8n. Create a **Captapi API** credential with the human-provided \`capt_live_...\` key (Base URL defaults to ${API_URL}). Add the **Captapi** node, pick any supported platform group and operation, and the node returns the same structured JSON as the REST API for use in downstream nodes. npm: https://www.npmjs.com/package/n8n-nodes-captapi
 
 ## Connect via Make.com (Integromat scenarios)
 
-A Make custom app exposes all ${ALL_ENDPOINTS.length} endpoints as action modules grouped by platform (YouTube/TikTok/Instagram/Facebook). Add a **Captapi API Key** connection with the human-provided \`capt_live_...\` key, then drop the module you need into a scenario, fill in the URL (or search query) and optional limit, and it returns the same structured JSON \`data\` as the REST API for downstream modules. Auth is \`Authorization: Bearer\` against ${API_URL}; failures and out-of-credit errors surface the API error message.
+A Make custom app exposes all ${ALL_ENDPOINTS.length} endpoints as action modules grouped by platform. Add a **Captapi API Key** connection with the human-provided \`capt_live_...\` key, then drop the module you need into a scenario, fill in the required fields (URL, username, repo, advertiser, query, and/or limit), and it returns the same structured JSON \`data\` as the REST API for downstream modules. Auth is \`Authorization: Bearer\` against ${API_URL}; failures and out-of-credit errors surface the API error message.
 
 ## Connect via Apify (BYO-key Actor)
 
