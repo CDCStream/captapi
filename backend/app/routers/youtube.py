@@ -147,15 +147,31 @@ def _reply_payload(r: dict) -> dict:
 
 
 def _video_card(v: dict) -> dict:
+    video_id = safe_str(v.get("videoId") or v.get("video_id") or v.get("id"))
+    url = safe_str(v.get("url") or v.get("videoUrl") or v.get("video_url") or v.get("link"))
+    if not url and video_id:
+        url = f"https://www.youtube.com/watch?v={video_id}"
     return {
-        "url": safe_str(v.get("url") or v.get("videoUrl") or v.get("video_url")),
-        "title": safe_str(v.get("title") or v.get("videoTitle") or v.get("video_title")) or "",
-        "publishedAt": safe_str(v.get("date") or v.get("publishedAt") or v.get("published_at")),
-        "viewCount": safe_int(v.get("viewCount") or v.get("views") or v.get("view_count")),
+        "url": url,
+        "title": safe_str(v.get("title") or v.get("videoTitle") or v.get("video_title") or v.get("name")) or "",
+        "publishedAt": safe_str(v.get("date") or v.get("publishedAt") or v.get("published_at") or v.get("published")),
+        "viewCount": safe_int(v.get("viewCount") or v.get("views") or v.get("view_count") or v.get("view_count_text")),
         "durationSeconds": safe_int(v.get("duration") or v.get("durationSeconds") or v.get("duration_seconds")),
-        "thumbnailUrl": safe_str(v.get("thumbnailUrl") or v.get("thumbnail") or v.get("thumbnail_url")),
-        "channelName": safe_str(v.get("channelName") or v.get("channel") or v.get("channelTitle")),
+        "thumbnailUrl": safe_str(v.get("thumbnailUrl") or v.get("thumbnail") or v.get("thumbnail_url") or v.get("thumbnailUrlHigh")),
+        "channelName": safe_str(v.get("channelName") or v.get("channel") or v.get("channelTitle") or v.get("channel_name")),
     }
+
+
+def _has_video_card_data(v: dict[str, Any]) -> bool:
+    if v.get("error"):
+        return False
+    explicit_url = safe_str(v.get("url") or v.get("videoUrl") or v.get("video_url") or v.get("link"))
+    title = safe_str(v.get("title") or v.get("videoTitle") or v.get("video_title") or v.get("name"))
+    return bool(explicit_url or title)
+
+
+def _valid_video_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [i for i in items if isinstance(i, dict) and _has_video_card_data(i)]
 
 
 def _playlist_actor_candidates(settings: Any, url: str, limit: int) -> list[tuple[str, dict[str, Any]]]:
@@ -672,7 +688,9 @@ async def youtube_playlist_videos(
             items, _actor = await apify.run_with_fallback(
                 _playlist_actor_candidates(settings, url, limit),
                 max_items=limit,
+                is_valid=lambda rows: bool(_valid_video_items(rows)),
             )
+            items = _valid_video_items(items)
             if not items:
                 feed_videos = await _youtube_playlist_feed(url, limit)
                 if feed_videos:
@@ -684,7 +702,7 @@ async def youtube_playlist_videos(
 
         data = await cached_or_run(
             endpoint="youtube.playlist-videos",
-            params={"url": url, "limit": limit, "fast": fast},
+            params={"url": url, "limit": limit, "fast": fast, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -723,7 +741,9 @@ async def youtube_playlist(
             items, _actor = await get_apify().run_with_fallback(
                 _playlist_actor_candidates(settings, url, limit),
                 max_items=limit,
+                is_valid=lambda rows: bool(_valid_video_items(rows)),
             )
+            items = _valid_video_items(items)
             if not items:
                 feed_videos = await _youtube_playlist_feed(url, limit)
                 if feed_videos:
@@ -748,7 +768,7 @@ async def youtube_playlist(
 
         data = await cached_or_run(
             endpoint="youtube.playlist",
-            params={"url": url, "limit": limit, "fast": fast},
+            params={"url": url, "limit": limit, "fast": fast, "v": 3},
             runner=_run,
             ctx=ctx,
         )
