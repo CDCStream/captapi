@@ -1,5 +1,7 @@
 import { SITE_URL } from "@/lib/api-catalog";
 
+export const DEFAULT_BLOG_IMAGE = `${SITE_URL}/opengraph-image`;
+
 export interface BlogPostRow {
   id?: string;
   slug: string;
@@ -52,6 +54,47 @@ export function stripHtml(html: string): string {
     .trim();
 }
 
+export function normalizeImageUrl(value: string | null | undefined): string {
+  const raw = (value || "").trim();
+  if (!raw || raw.startsWith("data:") || raw.startsWith("blob:")) return "";
+
+  try {
+    const url = new URL(raw, SITE_URL);
+    if (url.pathname === "/_next/image") {
+      const nested = url.searchParams.get("url");
+      return normalizeImageUrl(nested);
+    }
+    if (url.origin === SITE_URL && url.pathname === "/opengraph-image") {
+      return DEFAULT_BLOG_IMAGE;
+    }
+    return url.toString();
+  } catch {
+    return "";
+  }
+}
+
+export function normalizeContentImageUrls(content: string): string {
+  return (content || "").replace(
+    /\s(src|srcset)=["']([^"']+)["']/gi,
+    (match, attr: string, value: string) => {
+      if (attr.toLowerCase() === "srcset") {
+        const normalizedSet = value
+          .split(",")
+          .map((part) => {
+            const [url, descriptor] = part.trim().split(/\s+/, 2);
+            const normalized = normalizeImageUrl(url);
+            return normalized ? [normalized, descriptor].filter(Boolean).join(" ") : "";
+          })
+          .filter(Boolean)
+          .join(", ");
+        return normalizedSet ? ` ${attr}="${normalizedSet}"` : "";
+      }
+      const normalized = normalizeImageUrl(value);
+      return normalized ? ` ${attr}="${normalized}"` : "";
+    },
+  );
+}
+
 /** Estimated reading time in minutes (200 wpm). */
 export function readingTime(html: string): number {
   const words = stripHtml(html).split(/\s+/).filter(Boolean).length;
@@ -86,7 +129,7 @@ export function pickArray(obj: Record<string, unknown>, keys: string[]): string[
 
 /** Normalise a raw DB row into a typed, render-ready blog post. */
 export function parseBlogPost(row: BlogPostRow): BlogPost {
-  const content = row.content ?? "";
+  const content = normalizeContentImageUrls(row.content ?? "");
   const now = new Date().toISOString();
   return {
     slug: row.slug,
@@ -94,7 +137,7 @@ export function parseBlogPost(row: BlogPostRow): BlogPost {
     description: row.description ?? "",
     content,
     author: row.author || "Outrank",
-    image: row.image ?? "",
+    image: normalizeImageUrl(row.image),
     tags: row.tags ?? [],
     status: row.status || "published",
     publishedAt: row.published_at ?? row.created_at ?? now,

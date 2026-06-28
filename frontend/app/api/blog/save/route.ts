@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SITE_URL } from "@/lib/api-catalog";
 import { getServiceClient } from "@/lib/supabase/admin";
-import { pingSearchEngines, slugify, type BlogPostRow } from "@/lib/blog";
+import { normalizeImageUrl, pingSearchEngines, slugify, type BlogPostRow } from "@/lib/blog";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     title,
     content,
     description: String(body.description ?? ""),
-    image: String(body.image ?? ""),
+    image: normalizeImageUrl(String(body.image ?? "")),
     author: String(body.author ?? "Captapi"),
     tags,
     status,

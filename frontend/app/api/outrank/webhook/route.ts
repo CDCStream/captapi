@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { SITE_URL } from "@/lib/api-catalog";
 import { getServiceClient } from "@/lib/supabase/admin";
 import {
+  normalizeImageUrl,
   pickArray,
   pickString,
   pingSearchEngines,
@@ -76,7 +77,7 @@ function toRow(a: Json): BlogPostRow | null {
     "summary",
     "seo_description",
   ]);
-  const image = pickString(a, [
+  const image = normalizeImageUrl(pickString(a, [
     "image",
     "image_url",
     "cover",
@@ -84,7 +85,7 @@ function toRow(a: Json): BlogPostRow | null {
     "featured_image",
     "thumbnail",
     "og_image",
-  ]);
+  ]));
   const tags = pickArray(a, ["tags", "keywords", "categories", "labels"]);
   const author = pickString(a, ["author", "author_name", "byline"]) || "Outrank";
 

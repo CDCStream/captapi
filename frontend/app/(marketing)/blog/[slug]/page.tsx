@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Clock, User } from "lucide-react";
 import { getServiceClient } from "@/lib/supabase/admin";
-import { formatDate, parseBlogPost, type BlogPost, type BlogPostRow } from "@/lib/blog";
+import { DEFAULT_BLOG_IMAGE, formatDate, parseBlogPost, type BlogPost, type BlogPostRow } from "@/lib/blog";
 import { SITE_URL } from "@/lib/api-catalog";
 import { Tldr } from "@/components/marketing/tldr";
 
@@ -42,6 +42,7 @@ export async function generateMetadata({
   if (!post) return { title: "Post not found" };
 
   const url = `${SITE_URL}/blog/${post.slug}`;
+  const image = post.image || DEFAULT_BLOG_IMAGE;
   return {
     title: post.title,
     description: post.description,
@@ -54,13 +55,13 @@ export async function generateMetadata({
       publishedTime: post.publishedAt,
       modifiedTime: post.updatedAt,
       authors: [post.author],
-      images: post.image ? [{ url: post.image }] : undefined,
+      images: [{ url: image }],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.description,
-      images: post.image ? [post.image] : undefined,
+      images: [image],
     },
   };
 }
@@ -82,7 +83,7 @@ export default async function BlogPostPage({
         "@type": "BlogPosting",
         headline: post.title,
         description: post.description,
-        image: post.image || `${SITE_URL}/opengraph-image`,
+        image: post.image || DEFAULT_BLOG_IMAGE,
         datePublished: post.publishedAt,
         dateModified: post.updatedAt,
         author: { "@type": "Person", name: post.author, url: SITE_URL },
