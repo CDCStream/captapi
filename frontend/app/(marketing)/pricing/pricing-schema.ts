@@ -20,7 +20,7 @@ export function pricingJsonLd() {
     "@type": "Product",
     name: "Captapi Social Media Data API",
     description:
-      "One REST API for transcripts, AI summaries, comments, followers and engagement metrics from YouTube, TikTok, Instagram and Facebook. Usage-based credit pricing with a free tier.",
+      "One REST API for transcripts, AI summaries, comments, followers, search, profiles, ad intelligence, commerce data and engagement metrics across public social platforms. Usage-based credit pricing with a free tier.",
     brand: { "@type": "Brand", name: "Captapi" },
     url,
     offers: PLANS.map((p) => ({

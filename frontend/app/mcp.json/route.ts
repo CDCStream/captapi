@@ -3,6 +3,10 @@ import {
   PLATFORM_COUNT,
   SITE_URL,
   API_URL,
+  params,
+  mcpToolName,
+  getEndpoint,
+  AGENT_ROUTING_EXAMPLES,
 } from "@/lib/api-catalog";
 
 export const dynamic = "force-static";
@@ -186,6 +190,29 @@ export async function GET() {
       retry_policy: "Do not retry 401/402; ask the user to fix auth or credits. Retry 429/502 with backoff. Do not loop on 422/not-found/no-captions.",
       output_policy: "Return the API data object by default; include cached and creditsUsed only when relevant.",
     },
+    routing_hints: AGENT_ROUTING_EXAMPLES.map((ex) => {
+      const ep = getEndpoint(ex.endpointSlug)!;
+      return {
+        intent: ex.intent,
+        user_phrases: ex.whenUserSays,
+        prefer: ex.prefer,
+        endpoint: {
+          slug: ep.slug,
+          method: ep.method,
+          path: ep.path,
+          url: `${API_URL}${ep.path}`,
+          mcp_tool: mcpToolName(ep),
+          params: params(ep).map((p) => ({
+            name: p.name,
+            type: p.type,
+            required: p.required,
+            description: p.description,
+          })),
+          docs: `${SITE_URL}/apis/${ep.slug}`,
+        },
+        why: ex.why,
+      };
+    }),
   };
 
   return new Response(JSON.stringify(manifest, null, 2), {

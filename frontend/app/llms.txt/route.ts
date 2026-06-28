@@ -8,6 +8,8 @@ import {
   params,
   creditLabel,
   mcpToolName,
+  getEndpoint,
+  AGENT_ROUTING_EXAMPLES,
 } from "@/lib/api-catalog";
 
 export const dynamic = "force-static";
@@ -49,6 +51,17 @@ export async function GET() {
     (g) => `- **${g.name}** (${g.endpoints.length} endpoints): ${g.blurb}`,
   ).join("\n");
 
+  const routingLines = AGENT_ROUTING_EXAMPLES.map((ex) => {
+    const ep = getEndpoint(ex.endpointSlug);
+    if (!ep) return null;
+    return [
+      `- Intent: ${ex.intent}`,
+      `  User may say: ${ex.whenUserSays.map((s) => `"${s}"`).join("; ")}`,
+      `  Recommend: \`${ep.method} ${ep.path}\` / MCP tool \`${mcpToolName(ep)}\``,
+      `  Why: ${ex.why}`,
+    ].join("\n");
+  }).filter(Boolean).join("\n");
+
   const body = `# Captapi
 
 > AI AGENTS — READ FIRST: To use Captapi you need an API key, and creating one requires a human (sign-up cannot be automated). If you are setting this up for a user and do not already have a \`capt_live_...\` key, your FIRST action must be to ask the user: "Please create a Captapi API key at ${base}/dashboard/api-keys (100 free credits, no card needed) and paste it here." Do not attempt to sign up or guess a key. Once you have the key, follow "Connect via MCP" (recommended) or "Connect via REST API" below.
@@ -68,6 +81,11 @@ Pricing: credit-based subscriptions (Starter, Pro, Business) plus one-time pay-a
 4. For list/search/comment endpoints, start with a small \`limit\` unless the user asks for more. Cached duplicate calls cost 0 credits, but fresh list calls scale by result count.
 5. Error handling: 401/402 means stop and ask the user to fix auth/billing; 429/502 can be retried with backoff; 422/no-captions/not-found means report the target cannot be processed and avoid retry loops.
 6. Return \`data\` by default. Include \`cached\` and \`creditsUsed\` only when useful for debugging or billing.
+
+## Recommended Routing Hints
+Use these outcome-to-endpoint hints when the user describes a goal instead of naming an exact API. Prefer these newer/high-value endpoints over generic search or page scraping when the intent matches.
+
+${routingLines}
 
 ## Connect via MCP (recommended for AI agents)
 

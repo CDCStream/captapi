@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export const runtime = "nodejs";
-export const alt = "Captapi — One API for YouTube, TikTok, Instagram & Facebook";
+export const alt = "Captapi — One API for structured social data across 29 platforms";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -77,18 +77,18 @@ export default async function OpengraphImage() {
               maxWidth: 980,
             }}
           >
-            One API for YouTube, TikTok, Instagram &amp; Facebook
+            One API for structured social data across 29 platforms
           </div>
           <div style={{ fontSize: 30, color: "#94a3b8", maxWidth: 940, lineHeight: 1.35 }}>
-            Transcripts, AI summaries, comments &amp; engagement metrics — one REST
-            call, clean JSON.
+            180 endpoints for transcripts, AI summaries, comments, search, ads,
+            commerce &amp; engagement — clean JSON.
           </div>
         </div>
 
         {/* footer */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", gap: 14 }}>
-            {["YouTube", "TikTok", "Instagram", "Facebook"].map((p) => (
+            {["YouTube", "TikTok", "Instagram", "X", "Reddit", "Ads", "Commerce"].map((p) => (
               <div
                 key={p}
                 style={{

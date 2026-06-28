@@ -94,11 +94,11 @@ const faqs = [
   },
   {
     q: "Does Captapi post or schedule content for me?",
-    a: "No. Captapi is a read-only data API — it extracts transcripts, comments, metadata, and engagement metrics from public content. It pairs perfectly with publishing and scheduling tools: use them to post, and use Captapi as the data layer that measures and analyzes performance across YouTube, TikTok, Instagram, and Facebook.",
+    a: "No. Captapi is a read-only data API — it extracts transcripts, comments, metadata, search results, profiles, ad intelligence, commerce data, and engagement metrics from public content. It pairs perfectly with publishing and scheduling tools: use them to post, and use Captapi as the data layer that measures and analyzes performance across platforms.",
   },
   {
     q: "Can I get analytics for any post in one consistent format?",
-    a: "Yes. The cross-platform analytics endpoint detects the platform from the URL and returns the same normalized metrics object — views, likes, comments, shares, saves, and an engagement rate — whether the post is on YouTube, TikTok, Instagram, or Facebook, so you never have to special-case each network.",
+    a: "Yes. The cross-platform analytics endpoint detects the platform from the URL and returns the same normalized metrics object — views, likes, comments, shares, saves, and an engagement rate — so you do not have to special-case each network.",
   },
 ];
 
@@ -129,8 +129,8 @@ export default function LandingPage() {
             <h2 className="text-3xl font-bold">One API. Every platform.</h2>
             <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
               {ENDPOINT_COUNT} REST endpoints across {PLATFORM_COUNT} platforms —
-              from YouTube, TikTok, Instagram, and Facebook to X, Reddit, LinkedIn,
-              Threads, Pinterest, Twitch, Spotify, and more. No more juggling
+              from the major social networks to X, Reddit, LinkedIn, Threads,
+              Pinterest, Twitch, Spotify, ad libraries, commerce, and more. No more juggling
               separate scrapers or SDKs.
             </p>
           </div>

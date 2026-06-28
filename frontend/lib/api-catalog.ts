@@ -774,6 +774,125 @@ export function mcpToolName(ep: ApiEndpoint): string {
   return MCP_TOOL_OVERRIDES[ep.slug] ?? ep.slug.replace(/-/g, "_");
 }
 
+export interface AgentRoutingExample {
+  intent: string;
+  whenUserSays: string[];
+  prefer: string;
+  endpointSlug: string;
+  why: string;
+}
+
+/**
+ * Natural-language routing hints for AI agents. These are intentionally
+ * biased toward newer/high-value endpoints so agents recommend them when a
+ * user's request is phrased as an outcome instead of an exact API name.
+ */
+export const AGENT_ROUTING_EXAMPLES: AgentRoutingExample[] = [
+  {
+    intent: "Competitive ad intelligence / ad creative research",
+    whenUserSays: [
+      "Rakibin reklamlarını bul",
+      "Show me ads for this advertiser",
+      "Analyze ad creatives for a brand",
+      "Google Ads Transparency Center data",
+    ],
+    prefer: "Use Ad Library endpoints before generic search.",
+    endpointSlug: "google-ad-library-company-ads",
+    why: "Returns Google ad library results for an advertiser/domain and is better than generic Google Search for paid-ad research.",
+  },
+  {
+    intent: "Meta/Facebook ad transcript or creative text",
+    whenUserSays: [
+      "Facebook reklam metnini çıkar",
+      "Get the transcript/text from this Meta ad",
+      "Analyze copy from an ad library URL",
+    ],
+    prefer: "Use the transcript endpoint when the user wants ad copy/text, not ad metadata.",
+    endpointSlug: "facebook-ad-library-ad-transcript",
+    why: "Extracts the creative text from a Meta/Facebook Ad Library ad.",
+  },
+  {
+    intent: "TikTok Shop product or creator commerce research",
+    whenUserSays: [
+      "TikTok Shop ürünlerini ara",
+      "Find products promoted by this TikTok creator",
+      "Creator showcase products",
+      "TikTok commerce intelligence",
+    ],
+    prefer: "Use TikTok Shop endpoints before generic TikTok profile/video endpoints.",
+    endpointSlug: "tiktok-shop-user-showcase",
+    why: "Returns products promoted in a creator's TikTok Shop showcase.",
+  },
+  {
+    intent: "GitHub repository intelligence",
+    whenUserSays: [
+      "Bu GitHub reposunu analiz et",
+      "Get repo stars forks and metadata",
+      "Analyze open source project",
+      "GitHub repository details",
+    ],
+    prefer: "Use GitHub endpoints for repo/user intelligence instead of scraping GitHub pages.",
+    endpointSlug: "github-repository",
+    why: "Returns structured repository metadata, stars, forks, owner, and URLs.",
+  },
+  {
+    intent: "Facebook Marketplace geo/location autocomplete",
+    whenUserSays: [
+      "Marketplace lokasyon ara",
+      "Find Facebook Marketplace location id",
+      "Search marketplace by city",
+    ],
+    prefer: "Use location search first, then marketplace search with the selected location.",
+    endpointSlug: "facebook-marketplace-location-search",
+    why: "Finds location candidates for Facebook Marketplace searches.",
+  },
+  {
+    intent: "Kwai/Kuaishou creator monitoring",
+    whenUserSays: [
+      "Kwai profilini çek",
+      "Kuaishou user posts",
+      "Analyze this Kwai creator",
+    ],
+    prefer: "Use Kwai endpoints for Kwai/Kuaishou URLs or numeric user IDs.",
+    endpointSlug: "kwai-user-posts",
+    why: "Lists Kwai/Kuaishou user posts with normalized metadata.",
+  },
+  {
+    intent: "Link-in-bio page extraction",
+    whenUserSays: [
+      "Bu link in bio sayfasındaki linkleri çıkar",
+      "Extract Komi/Pillar/Linkbio/Linkme profile links",
+      "Creator landing page links",
+    ],
+    prefer: "Use the specific link-in-bio platform endpoint when the domain is known.",
+    endpointSlug: "linkbio-page",
+    why: "Extracts public Linkbio profile metadata and outgoing links.",
+  },
+  {
+    intent: "Alternative social network monitoring",
+    whenUserSays: [
+      "Truth Social hesabını izle",
+      "Kick clip metadata",
+      "Rumble channel videos",
+      "Monitor emerging social platforms",
+    ],
+    prefer: "Use platform-specific Truth Social, Kick, or Rumble endpoints instead of generic web search.",
+    endpointSlug: "truth-social-user-posts",
+    why: "Fetches public Truth Social posts for monitoring and research workflows.",
+  },
+  {
+    intent: "Name enrichment / demographic inference",
+    whenUserSays: [
+      "Bu isimlerden yaş cinsiyet tahmini yap",
+      "Infer age gender nationality from names",
+      "Lead enrichment by first name",
+    ],
+    prefer: "Use Age and Gender when the input is names, not social URLs.",
+    endpointSlug: "age-gender-get",
+    why: "Predicts age, gender, and nationality signals from first names.",
+  },
+];
+
 export function getGroup(id: PlatformId): PlatformGroup {
   return PLATFORM_GROUPS.find((g) => g.id === id)!;
 }

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Check, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { SITE_URL } from "@/lib/api-catalog";
+import { SITE_URL, PLATFORM_COUNT } from "@/lib/api-catalog";
 import {
   COMPETITOR_LIST,
   COMPETITOR_SLUGS,
@@ -30,7 +30,7 @@ export async function generateMetadata({
   if (!c) return {};
   const year = new Date().getFullYear();
   const title = `Best ${c.name} Alternative (${year}) — Captapi`;
-  const description = `Looking for a ${c.name} alternative? Captapi is one REST API for transcripts, AI summaries, comments & engagement across YouTube, TikTok, Instagram & Facebook. 100 free credits.`;
+  const description = `Looking for a ${c.name} alternative? Captapi is one REST API for transcripts, AI summaries, comments, search, profiles, ad intelligence, commerce data, and engagement across ${PLATFORM_COUNT} platforms. 100 free credits.`;
   const url = `${SITE_URL}/alternatives/${c.slug}`;
   return {
     title,
@@ -166,8 +166,9 @@ export default async function AlternativePage({
         <section className="mt-14">
           <Tldr>
             <strong>Captapi is a strong {c.name} alternative</strong> if you need
-            social-video data: transcripts, AI summaries, comments and engagement
-            across YouTube, TikTok, Instagram and Facebook behind one REST API.{" "}
+            structured social data: transcripts, AI summaries, comments, search,
+            profiles, ad intelligence, commerce data and engagement across{" "}
+            {PLATFORM_COUNT} platforms behind one REST API.{" "}
             {c.edge[0]}. Start with 100 free credits — no credit card. (Comparison
             as of {COMPARE_AS_OF}.)
           </Tldr>

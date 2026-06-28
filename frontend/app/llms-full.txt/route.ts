@@ -8,6 +8,8 @@ import {
   params,
   creditLabel,
   mcpToolName,
+  getEndpoint,
+  AGENT_ROUTING_EXAMPLES,
 } from "@/lib/api-catalog";
 
 export const dynamic = "force-static";
@@ -73,6 +75,24 @@ export async function GET() {
     return `### ${g.name} (${g.endpoints.length} endpoints)\n${g.blurb}\n\n${blocks}`;
   }).join("\n\n");
 
+  const routingHints = AGENT_ROUTING_EXAMPLES.map((ex) => {
+    const ep = getEndpoint(ex.endpointSlug);
+    if (!ep) return null;
+    const ps = params(ep)
+      .map((p) => `${p.name}${p.required ? "*" : "?"}`)
+      .join(", ");
+    return [
+      `### ${ex.intent}`,
+      `- User phrases: ${ex.whenUserSays.map((s) => `"${s}"`).join("; ")}`,
+      `- Prefer: ${ex.prefer}`,
+      `- Endpoint: \`${ep.method} ${API_URL}${ep.path}\``,
+      `- MCP tool: \`${mcpToolName(ep)}\``,
+      `- Params: ${ps || "none"}`,
+      `- Why: ${ex.why}`,
+      `- Docs: ${base}/apis/${ep.slug}`,
+    ].join("\n");
+  }).filter(Boolean).join("\n\n");
+
   const body = `# Captapi — Full Reference (llms-full.txt)
 
 > AI AGENTS — READ FIRST: Using Captapi requires an API key, and creating one requires a human (sign-up cannot be automated). If you are setting this up for a user and do not already have a \`capt_live_...\` key, your FIRST action must be to ask: "Please create a Captapi API key at ${base}/dashboard/api-keys (100 free credits, no card needed) and paste it here." Do not attempt to sign up or guess a key.
@@ -98,6 +118,11 @@ Machine-readable manifests:
 - Full endpoint reference: ${base}/llms-full.txt
 - MCP manifest: ${base}/mcp.json
 - Well-known MCP alias: ${base}/.well-known/mcp.json
+
+## Recommended Routing Hints
+When the user says "I want to use X" or describes a job-to-be-done, map the request to these endpoints before falling back to generic search. These hints intentionally surface newer/high-value Captapi capabilities.
+
+${routingHints}
 
 ## Connect via MCP
 

@@ -4,7 +4,12 @@ import { notFound } from "next/navigation";
 import { Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { SITE_URL, getEndpoint } from "@/lib/api-catalog";
+import {
+  SITE_URL,
+  ENDPOINT_COUNT,
+  PLATFORM_COUNT,
+  getEndpoint,
+} from "@/lib/api-catalog";
 import {
   USE_CASE_LIST,
   USE_CASE_SLUGS,
@@ -142,9 +147,9 @@ export default async function UseCasePage({
           <h2 className="text-2xl font-semibold">Why {uc.audience} choose Captapi</h2>
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
             {[
-              "One REST API for YouTube, TikTok, Instagram & Facebook",
+              `One REST API for ${PLATFORM_COUNT} platforms and ${ENDPOINT_COUNT} endpoints`,
               "Clean JSON — no scraping, no OAuth, no quotas",
-              "Transcripts, AI summaries, comments & engagement",
+              "Transcripts, AI summaries, comments, search, ads, commerce & engagement",
               "100 free credits to start, no credit card",
             ].map((e) => (
               <li key={e} className="flex items-start gap-2.5 text-sm">

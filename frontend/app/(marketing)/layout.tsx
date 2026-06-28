@@ -25,8 +25,7 @@ const STRUCTURED_DATA = {
       "@id": `${SITE_URL}/#website`,
       url: SITE_URL,
       name: "Captapi",
-      description:
-        "One API for structured data from YouTube, TikTok, Instagram & Facebook.",
+      description: `One API for structured public data from ${PLATFORM_COUNT} platforms.`,
       publisher: { "@id": `${SITE_URL}/#organization` },
     },
     {
@@ -120,7 +119,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
                 </span>
               </div>
               <p className="text-muted-foreground text-xs">
-                One API for YouTube, TikTok, Instagram & Facebook.
+                One API for {PLATFORM_COUNT} platforms and {ENDPOINT_COUNT} endpoints.
               </p>
             </div>
             <div>

@@ -163,7 +163,7 @@ export default function Page() {
       <FAQSection faqs={FAQS} />
       <ToolCTA
         headline="Need more than thumbnails?"
-        sub="Captapi gives you APIs for YouTube, TikTok, Instagram, and Facebook transcripts, summaries, comments, stats, and creator workflows. Start with free credits and automate the parts that come after the thumbnail."
+        sub="Captapi gives you APIs for transcripts, summaries, comments, stats, search, ad intelligence, commerce data, and creator workflows across dozens of platforms. Start with free credits and automate the parts that come after the thumbnail."
       />
     </>
   );

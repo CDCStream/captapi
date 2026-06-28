@@ -100,7 +100,7 @@ export function LongContent({ children }: { children: React.ReactNode }) {
 /** Bottom CTA — "more than a tool" → drive to signup. */
 export function ToolCTA({
   headline = "Need this at scale?",
-  sub = "These free tools run on Captapi — the social data API for YouTube, TikTok, Instagram & Facebook. Sign up for 100 free credits and automate transcripts, comments, stats, and more.",
+  sub = `These free tools run on Captapi — the social data API with ${ENDPOINT_COUNT} endpoints across ${PLATFORM_COUNT} platforms. Sign up for 100 free credits and automate transcripts, comments, stats, and more.`,
 }: {
   headline?: string;
   sub?: string;

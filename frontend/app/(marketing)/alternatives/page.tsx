@@ -8,7 +8,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata = buildMetadata({
   title: "Captapi Alternatives & Comparisons | Social Media Data API",
   description:
-    "See how Captapi compares to other social media and video data APIs. One REST API for transcripts, AI summaries, comments & engagement across YouTube, TikTok, Instagram & Facebook.",
+    "See how Captapi compares to other social media and video data APIs. One REST API for transcripts, AI summaries, comments, profiles, search, ad intelligence, commerce data, and engagement across dozens of platforms.",
   path: "/alternatives",
 });
 
@@ -31,8 +31,8 @@ export default function AlternativesHub() {
         <p className="mt-4 max-w-3xl text-lg text-muted-foreground">
           Evaluating social media and video data APIs? See how Captapi compares.
           One REST API for transcripts, AI summaries, comments and engagement
-          metrics across YouTube, TikTok, Instagram and Facebook — with 100 free
-          credits and free public tools.
+          metrics across {PLATFORM_COUNT} platforms — with 100 free credits and
+          free public tools.
         </p>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">

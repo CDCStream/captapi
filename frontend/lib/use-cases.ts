@@ -21,22 +21,22 @@ export const USE_CASES: Record<string, UseCase> = {
     audience: "AI Startups",
     metaTitle: "Video Data API for AI Startups & LLM Apps | Captapi",
     metaDescription:
-      "Feed clean transcripts and summaries into your RAG pipeline, fine-tuning dataset, or video Q&A agent. One REST API for YouTube, TikTok, Instagram & Facebook.",
+      "Feed clean transcripts, summaries, comments, profiles, and search results into your RAG pipeline, fine-tuning dataset, or AI agent. One REST API across 29 platforms.",
     keyword: "video data api for ai",
     h1: "The video data API for AI startups",
     intro:
-      "Building RAG pipelines, fine-tuning datasets, or video Q&A agents? Captapi turns social video into clean, structured text your models can use — transcripts, AI summaries, comments and metadata from YouTube, TikTok, Instagram and Facebook, all behind one REST API.",
+      "Building RAG pipelines, fine-tuning datasets, or social Q&A agents? Captapi turns public social, video, commerce, ad library, and creator data into clean structured JSON your models can use — transcripts, AI summaries, comments, profiles, search results and metadata, all behind one REST API.",
     builds: [
       { title: "RAG knowledge bases", desc: "Pull transcripts at scale and embed them into your vector store for grounded answers." },
       { title: "Video Q&A agents", desc: "Let users ask questions about any video — fetch the transcript on demand and answer." },
-      { title: "Fine-tuning datasets", desc: "Collect clean, labelled transcript + metadata pairs across four platforms." },
+      { title: "Fine-tuning datasets", desc: "Collect clean, labelled transcript + metadata pairs across many public platforms." },
       { title: "Content moderation", desc: "Summarize and classify video content before it reaches your users." },
     ],
     apiSlugs: ["youtube-transcript", "tiktok-transcript", "instagram-transcript", "youtube-summarizer"],
     faqs: [
       {
         q: "Can I use Captapi to build a RAG pipeline from videos?",
-        a: "Yes. Call the transcript endpoint for any YouTube, TikTok, Instagram or Facebook video, get clean JSON text back, then chunk and embed it into your vector database.",
+        a: "Yes. Call the transcript endpoint for supported video URLs, get clean JSON text back, then chunk and embed it into your vector database.",
       },
       {
         q: "Do you return clean text suitable for LLMs?",
@@ -50,11 +50,11 @@ export const USE_CASES: Record<string, UseCase> = {
     audience: "Marketing Agencies",
     metaTitle: "Social Media Monitoring API for Agencies & Brands | Captapi",
     metaDescription:
-      "Track competitor content, monitor brand mentions, and analyze sentiment across YouTube, TikTok, Instagram & Facebook with one social media data API.",
+      "Track competitor content, monitor brand mentions, analyze sentiment, and research ads or commerce across 29 platforms with one social media data API.",
     keyword: "social media monitoring api",
     h1: "Social media data API for agencies & brands",
     intro:
-      "Captapi gives agencies and brands a single API to track competitor content, monitor mentions, and analyze engagement across YouTube, TikTok, Instagram and Facebook — comments, summaries and metrics in clean JSON, ready for your dashboards and reports.",
+      "Captapi gives agencies and brands a single API to track competitor content, monitor mentions, research ads and commerce, and analyze engagement across 29 platforms — comments, summaries and metrics in clean JSON, ready for your dashboards and reports.",
     builds: [
       { title: "Competitor content tracking", desc: "Pull videos, summaries and engagement metrics to see what's working for rivals." },
       { title: "Brand & mention monitoring", desc: "Search and collect comments to surface what people say about a brand." },
@@ -65,7 +65,7 @@ export const USE_CASES: Record<string, UseCase> = {
     faqs: [
       {
         q: "Can I monitor competitors across platforms with one API?",
-        a: "Yes. Captapi covers YouTube, TikTok, Instagram and Facebook through a single REST API, so you can collect content, comments and engagement metrics without juggling four integrations.",
+        a: "Yes. Captapi covers 29 platforms through a single REST API, so you can collect content, comments, search results, profiles, ad intelligence, commerce data and engagement metrics without juggling separate integrations.",
       },
       {
         q: "Is the data ready for client reporting?",
@@ -79,11 +79,11 @@ export const USE_CASES: Record<string, UseCase> = {
     audience: "Content Creators",
     metaTitle: "Transcript & Summary API for Content Creators | Captapi",
     metaDescription:
-      "Auto-generate timestamps, blog posts and social captions from your videos. Transcripts and AI summaries for YouTube, TikTok and Instagram via one API.",
+      "Auto-generate timestamps, blog posts and social captions from your videos. Transcripts, AI summaries and creator data via one API.",
     keyword: "transcript api for creators",
     h1: "Transcript & repurposing API for creators",
     intro:
-      "Turn one video into a dozen assets. Captapi extracts transcripts and AI summaries from YouTube, TikTok and Instagram so you can auto-generate timestamps, blog posts, show notes and social captions — without copy-pasting or manual transcription.",
+      "Turn one video into a dozen assets. Captapi extracts transcripts, AI summaries, comments and metadata from supported social video platforms so you can auto-generate timestamps, blog posts, show notes and social captions — without copy-pasting or manual transcription.",
     builds: [
       { title: "Repurpose to blog posts", desc: "Convert a video transcript into a draft article in seconds." },
       { title: "Auto timestamps & chapters", desc: "Generate chapter markers and key moments from the transcript." },
@@ -108,11 +108,11 @@ export const USE_CASES: Record<string, UseCase> = {
     audience: "Researchers & Journalists",
     metaTitle: "Social Media Data API for Research & Journalism | Captapi",
     metaDescription:
-      "Bulk-export comments, transcripts and metadata for trend analysis, OSINT and academic studies. One API for YouTube, TikTok, Instagram & Facebook.",
+      "Bulk-export comments, transcripts, search results, profiles and metadata for trend analysis, OSINT and academic studies across 29 platforms.",
     keyword: "social media data for research",
     h1: "Social media data API for researchers & journalists",
     intro:
-      "Captapi helps researchers and journalists collect public social data at scale — comments, transcripts, video details and engagement metrics across YouTube, TikTok, Instagram and Facebook — in clean JSON ready for analysis, with no scraping infrastructure to maintain.",
+      "Captapi helps researchers and journalists collect public social data at scale — comments, transcripts, search results, profiles, video details and engagement metrics across 29 platforms — in clean JSON ready for analysis, with no scraping infrastructure to maintain.",
     builds: [
       { title: "Trend & discourse analysis", desc: "Bulk-collect comments and transcripts to study narratives over time." },
       { title: "OSINT investigations", desc: "Pull public metadata and engagement signals for verification work." },
@@ -141,7 +141,7 @@ export const USE_CASES: Record<string, UseCase> = {
     keyword: "social media api for developers",
     h1: "Social media data API for developers",
     intro:
-      "Ship video-data features without building scrapers or wrangling four platform APIs. Captapi is a plain REST API — no OAuth, no quotas to negotiate — that returns transcripts, summaries, comments and video details from YouTube, TikTok, Instagram and Facebook as clean JSON.",
+      "Ship social-data features without building scrapers or wrangling dozens of platform APIs. Captapi is a plain REST API — no OAuth, no quotas to negotiate — that returns transcripts, summaries, comments, search results, profiles, ad intelligence, commerce data and video details as clean JSON.",
     builds: [
       { title: "Add video search & details", desc: "Embed search and metadata lookups into your product in minutes." },
       { title: "On-demand transcripts", desc: "Fetch transcripts when a user pastes a link — no pre-processing." },
@@ -152,7 +152,7 @@ export const USE_CASES: Record<string, UseCase> = {
     faqs: [
       {
         q: "Do I need OAuth or per-platform API keys?",
-        a: "No. One Captapi key works across YouTube, TikTok, Instagram and Facebook. We handle authentication, proxies, rate limits and retries for you.",
+        a: "No. One Captapi key works across 29 supported platforms. We handle authentication, proxies, rate limits and retries for you.",
       },
       {
         q: "How fast can I integrate?",

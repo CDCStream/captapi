@@ -161,7 +161,7 @@ export default function Page() {
       <FAQSection faqs={FAQS} />
       <ToolCTA
         headline="Need YouTube data, not just audio files?"
-        sub="Captapi gives you APIs for YouTube, TikTok, Instagram, and Facebook transcripts, summaries, comments, and stats. Start free and automate the data side of your content workflow."
+        sub="Captapi gives you APIs for transcripts, summaries, comments, profiles, search, ad intelligence, commerce data, and stats across dozens of platforms. Start free and automate the data side of your content workflow."
       />
     </>
   );

@@ -48,7 +48,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     focus: "Video transcript API for YouTube, TikTok & Instagram",
     platforms: "YouTube, TikTok, Instagram",
     intro:
-      "Supadata is a popular video transcript API. If you also need AI summaries, comments and engagement data — or Facebook coverage — Captapi gives you all of it behind a single REST API, with 100 free credits to start.",
+      "Supadata is a popular video transcript API. If you also need AI summaries, comments, engagement data, profiles, search, ad intelligence, commerce data, or broader platform coverage, Captapi gives you all of it behind a single REST API, with 100 free credits to start.",
     transcripts: true,
     summaries: "varies",
     comments: "varies",
@@ -56,7 +56,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     freeTier: "Varies",
     pricing: "Subscription / credits",
     edge: [
-      "Adds Facebook on top of YouTube, TikTok & Instagram — 4 platforms in one API",
+      "Goes beyond the core video platforms with 29 social, commerce, ad library, and creator data sources",
       "Goes beyond transcripts: AI summaries, comments and engagement metrics from the same endpoints",
       "100 free credits on signup, no credit card required",
       "Free public tools you can try without an account",
@@ -65,7 +65,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     faqs: [
       {
         q: "Is Captapi a good Supadata alternative?",
-        a: "Yes. Captapi covers the same transcript use case for YouTube, TikTok and Instagram, adds Facebook, and also returns AI summaries, comments and engagement metrics — all through one REST API with pay-as-you-go credits.",
+        a: "Yes. Captapi covers the same transcript use cases and adds broader social, commerce, ad library, and creator data endpoints — all through one REST API with pay-as-you-go credits.",
       },
       {
         q: "Can I migrate from Supadata easily?",
@@ -82,7 +82,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     focus: "Transcript extractors and comment viewers",
     platforms: "YouTube, TikTok, Instagram",
     intro:
-      "SocialKit offers transcript extractors and comment viewers. Captapi packages the same capabilities into one developer-first REST API across four platforms, with summaries and engagement metrics included.",
+      "SocialKit offers transcript extractors and comment viewers. Captapi packages the same capabilities into one developer-first REST API across 29 platforms, with summaries, search, profiles, ad intelligence, commerce data, and engagement metrics included.",
     transcripts: true,
     summaries: "varies",
     comments: true,
@@ -91,7 +91,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     pricing: "Varies",
     edge: [
       "One unified REST API instead of separate tools — transcripts, comments, summaries and details",
-      "Covers YouTube, TikTok, Instagram and Facebook",
+      "Covers 29 social, commerce, ad library, and creator data platforms",
       "Predictable credit pricing with 100 free credits to start",
       "Full developer docs and clean JSON responses",
       "Free public tools for quick one-off extractions",
@@ -99,7 +99,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     faqs: [
       {
         q: "Is Captapi a good SocialKit alternative?",
-        a: "Yes. Captapi delivers transcripts, comments, summaries and video details for YouTube, TikTok, Instagram and Facebook through a single REST API, designed for developers who want to build, not just view.",
+        a: "Yes. Captapi delivers transcripts, comments, summaries, video details, profiles, search, ad intelligence, and commerce data through a single REST API, designed for developers who want to build, not just view.",
       },
     ],
   },
@@ -129,7 +129,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     faqs: [
       {
         q: "Is Captapi a good Scrape Creators alternative?",
-        a: "If you mainly need transcripts, summaries, comments and engagement metrics from YouTube, TikTok, Instagram and Facebook videos, Captapi is a focused, developer-friendly option with a free tier and free tools.",
+        a: "If you need transcripts, summaries, comments, profiles, search, engagement metrics, ad intelligence, or commerce data across many public platforms, Captapi is a focused, developer-friendly option with a free tier and free tools.",
       },
     ],
   },
@@ -142,7 +142,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     focus: "TikTok-only API",
     platforms: "TikTok",
     intro:
-      "TikAPI focuses on TikTok. Captapi gives you TikTok plus YouTube, Instagram and Facebook in one API — including transcripts, AI summaries, comments and engagement metrics.",
+      "TikAPI focuses on TikTok. Captapi gives you TikTok plus 28 more social, commerce, ad library, and creator data sources in one API — including transcripts, AI summaries, comments, search, profiles, commerce data, and engagement metrics.",
     transcripts: "varies",
     summaries: "varies",
     comments: "varies",
@@ -150,7 +150,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     freeTier: "Varies",
     pricing: "Subscription",
     edge: [
-      "Four platforms in one API — not TikTok only",
+      "29 platforms in one API — not TikTok only",
       "Transcripts, AI summaries, comments and video details from a single key",
       "100 free credits on signup, no credit card",
       "Free public tools you can try instantly",
@@ -159,7 +159,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     faqs: [
       {
         q: "Is Captapi a good TikAPI alternative?",
-        a: "Yes, especially if you need more than TikTok. Captapi covers TikTok, YouTube, Instagram and Facebook with transcripts, summaries, comments and details behind one REST API.",
+        a: "Yes, especially if you need more than TikTok. Captapi covers 29 platforms with transcripts, summaries, comments, details, search, profiles, ad intelligence, and commerce data behind one REST API.",
       },
     ],
   },
@@ -172,7 +172,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     focus: "General-purpose scraping platform & actor marketplace",
     platforms: "Any (via individual actors)",
     intro:
-      "Apify is a powerful general-purpose scraping platform where you assemble and run individual \"actors\" per site. Captapi is the opposite trade-off: a single, ready-made REST API purpose-built for social video — transcripts, AI summaries, comments and engagement across YouTube, TikTok, Instagram and Facebook — with no actor selection, scaling or output-shape wrangling.",
+      "Apify is a powerful general-purpose scraping platform where you assemble and run individual \"actors\" per site. Captapi is the opposite trade-off: a single, ready-made REST API purpose-built for structured social, commerce, ad library, and creator data — transcripts, AI summaries, comments, search, profiles, commerce data, and engagement — with no actor selection, scaling or output-shape wrangling.",
     transcripts: "varies",
     summaries: "varies",
     comments: "varies",
@@ -206,7 +206,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     focus: "Social media scraping API",
     platforms: "Instagram, TikTok, YouTube, Twitter, Snapchat",
     intro:
-      "EnsembleData is a social media scraping API. Captapi specializes in video content intelligence — transcripts and AI summaries plus comments and engagement — with a simple credit model and a free tier.",
+      "EnsembleData is a social media scraping API. Captapi specializes in structured social, commerce, ad library, and creator intelligence — transcripts, AI summaries, comments, search, profiles, commerce data, and engagement — with a simple credit model and a free tier.",
     transcripts: "varies",
     summaries: "varies",
     comments: "varies",
@@ -215,7 +215,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     pricing: "Credits / units",
     edge: [
       "Focused on video content: transcripts, AI summaries, comments and engagement",
-      "Covers YouTube, TikTok, Instagram and Facebook",
+      "Covers 29 social, commerce, ad library, and creator data platforms",
       "100 free credits on signup — no credit card",
       "Free public tools without an account",
       "Clean JSON with 24h response caching",
@@ -223,7 +223,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     faqs: [
       {
         q: "Is Captapi a good EnsembleData alternative?",
-        a: "If your use case is transcripts, summaries, comments and engagement metrics from social video, Captapi is a focused, developer-friendly alternative with a free tier and transparent credit pricing.",
+        a: "If your use case needs transcripts, summaries, comments, search, profiles, commerce data, ad intelligence, or engagement metrics from public platforms, Captapi is a focused, developer-friendly alternative with a free tier and transparent credit pricing.",
       },
     ],
   },

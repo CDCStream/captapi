@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Captapi — Social Media Data API",
     short_name: "Captapi",
     description:
-      "One API for structured data from YouTube, TikTok, Instagram & Facebook.",
+      "One API for structured public data from 29 social, commerce, ad library, and creator platforms.",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

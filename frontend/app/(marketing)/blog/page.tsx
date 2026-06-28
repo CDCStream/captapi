@@ -10,7 +10,7 @@ export const revalidate = 60;
 export const metadata = buildMetadata({
   title: "Blog — Guides & insights on social media APIs",
   description:
-    "Tutorials, guides, and insights on extracting transcripts, summaries, comments, and engagement data from YouTube, TikTok, Instagram, and Facebook.",
+    "Tutorials, guides, and insights on extracting transcripts, summaries, comments, search results, profiles, commerce data, ad intelligence, and engagement data from public social platforms.",
   path: "/blog",
 });
 

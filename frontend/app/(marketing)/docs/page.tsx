@@ -24,7 +24,7 @@ const REFERENCE_GROUPS = PLATFORM_GROUPS.length + 2;
 export const metadata = buildMetadata({
   title: "Documentation — Captapi API Reference",
   description:
-    "Captapi documentation: authentication, requests, response format, credits, errors, and the full REST API reference for YouTube, TikTok, Instagram, and Facebook.",
+    "Captapi documentation: authentication, requests, response format, credits, errors, and the full REST API reference for all supported social, commerce, ad library, and creator data endpoints.",
   path: "/docs",
 });
 

@@ -30,8 +30,8 @@ export default function UseCasesHub() {
         </h1>
         <p className="mt-4 max-w-3xl text-lg text-muted-foreground">
           Captapi turns social video into structured data — transcripts, AI
-          summaries, comments and engagement metrics across YouTube, TikTok,
-          Instagram and Facebook. See how different teams put it to work.
+          summaries, comments and engagement metrics across {PLATFORM_COUNT}
+          platforms. See how different teams put it to work.
         </p>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">

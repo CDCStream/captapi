@@ -55,8 +55,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Captapi — One API for Social Media videos, posts, comments & more",
-    description:
-      "Transcripts, AI summaries, comments, followers & engagement metrics from YouTube, TikTok, Instagram & Facebook — one REST API, clean JSON.",
+    description: `Transcripts, AI summaries, comments, followers, search, ad intelligence, commerce data, and engagement metrics across ${PLATFORM_COUNT} platforms — one REST API, clean JSON.`,
     url: SITE,
     siteName: "Captapi",
     type: "website",
@@ -64,8 +63,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Captapi — Social Media Data API",
-    description:
-      "One API for structured data from Social Media videos, posts, comments & more — YouTube, TikTok, Instagram & Facebook.",
+    description: `One API for structured social data — ${ENDPOINT_COUNT} endpoints across ${PLATFORM_COUNT} platforms.`,
   },
 };
 
