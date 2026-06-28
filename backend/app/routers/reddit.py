@@ -165,6 +165,49 @@ async def _fetch_reddit_json_post(post_id: str, limit: int) -> tuple[dict[str, A
     return _normalize_post(post), [_normalize_comment(c) for c in comments[:limit]]
 
 
+async def _search_reddit_json(sub: str, q: str, limit: int) -> list[dict[str, Any]]:
+    url = f"https://www.reddit.com/r/{sub}/search.json"
+    headers = {"User-Agent": "CaptapiBot/1.0 (+https://captapi.com)"}
+    params = {
+        "q": q,
+        "restrict_sr": "1",
+        "sort": "relevance",
+        "raw_json": "1",
+        "limit": max(limit, 1),
+    }
+    try:
+        async with httpx.AsyncClient(timeout=8.0, follow_redirects=True, headers=headers) as client:
+            resp = await client.get(url, params=params)
+    except httpx.HTTPError:
+        return []
+    if resp.status_code >= 400:
+        return []
+    payload = resp.json()
+    children = ((payload.get("data") or {}).get("children") or []) if isinstance(payload, dict) else []
+    posts: list[dict[str, Any]] = []
+    for child in children:
+        raw = child.get("data") if isinstance(child, dict) else None
+        if not isinstance(raw, dict):
+            continue
+        posts.append(
+            _normalize_post(
+                {
+                    "id": raw.get("id"),
+                    "url": f"https://www.reddit.com{raw.get('permalink')}" if raw.get("permalink") else raw.get("url"),
+                    "title": raw.get("title"),
+                    "body": raw.get("selftext"),
+                    "subreddit": raw.get("subreddit"),
+                    "author": raw.get("author"),
+                    "score": raw.get("score") or raw.get("ups"),
+                    "numComments": raw.get("num_comments"),
+                    "created": raw.get("created_utc"),
+                    "thumbnail": raw.get("thumbnail"),
+                }
+            )
+        )
+    return posts[:limit]
+
+
 @router.get("/subreddit-posts", summary="List recent posts in a subreddit")
 async def subreddit_posts(
     url: str = Query(..., description="Subreddit URL, r/name, or bare name"),
@@ -182,6 +225,9 @@ async def subreddit_posts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            results = await _search_reddit_json(sub, q, limit)
+            if results:
+                return {"subreddit": sub, "query": q, "totalReturned": len(results), "results": results}
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_REDDIT,
@@ -274,7 +320,6 @@ async def post_details(
     caller: ApiCaller = Depends(require_api_key),
 ):
     post_id = _require_reddit_post_url(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/reddit/post-details",
@@ -283,22 +328,8 @@ async def post_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            try:
-                post, _ = await _fetch_reddit_json_post(post_id, limit=1)
-                return post
-            except HTTPException as exc:
-                if exc.status_code == 404:
-                    raise
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_REDDIT,
-                {"startUrls": [{"url": url}], "type": "posts", "maxItems": 1},
-                max_items=2,
-            )
-            posts = [i for i in items if not _is_comment(i)]
-            if not posts:
-                raise HTTPException(status_code=404, detail="Post not found")
-            return _normalize_post(posts[0])
+            post, _ = await _fetch_reddit_json_post(post_id, limit=1)
+            return post
 
         data = await cached_or_run(
             endpoint="reddit.post-details",
@@ -315,8 +346,7 @@ async def post_comments(
     limit: int = Query(50, ge=1, le=500),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    _require_reddit_post_url(url)
-    settings = get_settings()
+    post_id = _require_reddit_post_url(url)
     cost = _scaled(limit, RATE, 2)
     async with billed_call(
         caller=caller,
@@ -326,13 +356,7 @@ async def post_comments(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_REDDIT,
-                {"startUrls": [{"url": url}], "type": "comments", "maxItems": limit},
-                max_items=limit,
-            )
-            comments = [_normalize_comment(i) for i in items if _is_comment(i)][:limit]
+            _, comments = await _fetch_reddit_json_post(post_id, limit=limit)
             return {"totalReturned": len(comments), "comments": comments}
 
         data = await cached_or_run(
@@ -352,7 +376,6 @@ async def post_transcript(
     caller: ApiCaller = Depends(require_api_key),
 ):
     post_id = _require_reddit_post_url(url)
-    settings = get_settings()
     cost = _scaled(max(limit, 1), RATE, 2)
     async with billed_call(
         caller=caller,
@@ -362,28 +385,7 @@ async def post_transcript(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            try:
-                post, comments = await _fetch_reddit_json_post(post_id, limit=max(limit, 1))
-            except HTTPException as exc:
-                if exc.status_code == 404:
-                    raise
-                items = await get_apify().run_actor_sync(
-                    settings.APIFY_ACTOR_REDDIT,
-                    {"startUrls": [{"url": url}], "type": "comments", "maxItems": max(limit, 1)},
-                    max_items=max(limit, 1),
-                )
-                posts = [_normalize_post(i) for i in items if not _is_comment(i)]
-                comments = [_normalize_comment(i) for i in items if _is_comment(i)][:limit]
-                if not posts:
-                    detail_items = await get_apify().run_actor_sync(
-                        settings.APIFY_ACTOR_REDDIT,
-                        {"startUrls": [{"url": url}], "type": "posts", "maxItems": 1},
-                        max_items=2,
-                    )
-                    posts = [_normalize_post(i) for i in detail_items if not _is_comment(i)]
-                if not posts:
-                    raise HTTPException(status_code=404, detail="Post not found")
-                post = posts[0]
+            post, comments = await _fetch_reddit_json_post(post_id, limit=max(limit, 1))
             segments: list[dict[str, Any]] = []
             parts: list[str] = []
             title = (post.get("title") or "").strip()

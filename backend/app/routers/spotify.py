@@ -5,13 +5,14 @@ from __future__ import annotations
 import math
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
-from app.services.apify_client import get_apify
+from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
 from app.utils.url import detect_url_platform, platform_mismatch_detail
@@ -86,22 +87,58 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
     }
 
 
+async def _oembed_details(kind: str, uri: str) -> dict[str, Any]:
+    async with httpx.AsyncClient(timeout=6.0, follow_redirects=True) as client:
+        resp = await client.get("https://open.spotify.com/oembed", params={"url": uri})
+    if resp.status_code >= 400:
+        raise HTTPException(status_code=404, detail="Spotify item not found")
+    item = resp.json()
+    return {
+        "platform": "spotify",
+        "type": kind,
+        "uri": safe_str(uri),
+        "url": safe_str(uri),
+        "name": safe_str(item.get("title")),
+        "description": "",
+        "artists": [],
+        "album": "",
+        "durationMs": 0,
+        "playCount": 0,
+        "followers": 0,
+        "monthlyListeners": 0,
+        "releaseYear": 0,
+        "image": safe_str(item.get("thumbnail_url")),
+        "totalTracks": 0,
+        "totalEpisodes": 0,
+        "raw": item,
+    }
+
+
 async def _details(kind: str, uri: str, limit: int | None = None) -> dict[str, Any]:
     settings = get_settings()
+    album_limit = limit if kind == "album" else 0
+    podcast_limit = limit if kind == "podcast" else 0
     run_input: dict[str, Any] = {
         "getDetailsType": kind,
         "spotifyUris": [uri],
         "proxyCountry": "US",
         "albums_get_offset": 0,
-        "albums_get_limit": limit or 50,
+        "albums_get_limit": album_limit,
         "podcasts_get_offset": 0,
-        "podcasts_get_limit": limit or 50,
+        "podcasts_get_limit": podcast_limit,
         "podcasts_includeRecommended": False,
         "episodes_includeRecommended": False,
     }
-    items = await get_apify().run_actor_sync(settings.APIFY_ACTOR_SPOTIFY_DETAILS, run_input, max_items=1)
+    try:
+        items = await get_apify().run_actor_sync(
+            settings.APIFY_ACTOR_SPOTIFY_DETAILS,
+            run_input,
+            max_items=1,
+        )
+    except (ApifyError, httpx.HTTPError):
+        return await _oembed_details(kind, uri)
     if not items:
-        raise HTTPException(status_code=404, detail="Spotify item not found")
+        return await _oembed_details(kind, uri)
     return _normalize(items[0], kind)
 
 
@@ -112,7 +149,7 @@ async def artist(
 ):
     uri = _url(url, "artist")
     async with billed_call(caller=caller, endpoint="/v1/spotify/artist", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.artist", {"uri": uri}, lambda: _details("artist", uri), ctx)
+        data = await cached_or_run("spotify.artist", {"uri": uri}, lambda: _details("artist", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC)
         return ApiResponse(data=data)
 
 
@@ -123,7 +160,7 @@ async def track(
 ):
     uri = _url(url, "track")
     async with billed_call(caller=caller, endpoint="/v1/spotify/track", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.track", {"uri": uri}, lambda: _details("track", uri), ctx)
+        data = await cached_or_run("spotify.track", {"uri": uri}, lambda: _details("track", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC)
         return ApiResponse(data=data)
 
 
@@ -134,7 +171,7 @@ async def album(
 ):
     uri = _url(url, "album")
     async with billed_call(caller=caller, endpoint="/v1/spotify/album", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.album", {"uri": uri}, lambda: _details("album", uri), ctx)
+        data = await cached_or_run("spotify.album", {"uri": uri}, lambda: _details("album", uri, limit=1), ctx, ttl=get_settings().CACHE_TTL_STATIC)
         return ApiResponse(data=data)
 
 
@@ -146,7 +183,7 @@ async def podcast(
 ):
     uri = _url(url, "show")
     async with billed_call(caller=caller, endpoint="/v1/spotify/podcast", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.podcast", {"uri": uri, "limit": limit}, lambda: _details("podcast", uri, limit), ctx)
+        data = await cached_or_run("spotify.podcast", {"uri": uri, "limit": limit}, lambda: _details("podcast", uri, limit), ctx, ttl=get_settings().CACHE_TTL_STATIC)
         return ApiResponse(data=data)
 
 

@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import math
+import re
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
-from app.services.apify_client import get_apify
+from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_float, safe_int, safe_str
 from app.utils.url import detect_url_platform, platform_mismatch_detail
@@ -54,6 +56,58 @@ def _normalize_shop(items: list[dict[str, Any]], url: str, marketplace: str) -> 
     }
 
 
+def _meta(page: str, key: str) -> str:
+    if key == "title":
+        match = re.search(r"<title[^>]*>(.*?)</title>", page, flags=re.IGNORECASE | re.DOTALL)
+        if match:
+            return re.sub(r"\s+", " ", match.group(1)).strip()
+    patterns = [
+        rf'<meta[^>]+property=["\']{re.escape(key)}["\'][^>]+content=["\']([^"\']+)["\']',
+        rf'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']{re.escape(key)}["\']',
+        rf'<meta[^>]+name=["\']{re.escape(key)}["\'][^>]+content=["\']([^"\']+)["\']',
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, page, flags=re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+    return ""
+
+
+async def _public_shop_metadata(url: str, marketplace: str) -> dict[str, Any] | None:
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+        )
+    }
+    try:
+        async with httpx.AsyncClient(timeout=6.0, follow_redirects=True, headers=headers) as client:
+            resp = await client.get(url)
+    except httpx.HTTPError:
+        return None
+    if resp.status_code >= 400:
+        return None
+    title = _meta(resp.text, "og:title") or _meta(resp.text, "title")
+    image = _meta(resp.text, "og:image")
+    if not (title or image):
+        return None
+    return {
+        "platform": "amazon_shop",
+        "url": safe_str(str(resp.url) or url),
+        "marketplace": marketplace.upper(),
+        "seller": {
+            "id": "",
+            "name": safe_str(title),
+            "url": safe_str(str(resp.url) or url),
+            "rating": 0.0,
+            "reviewCount": 0,
+        },
+        "totalReturned": 0,
+        "products": [],
+        "rawFirstItem": {"title": title, "image": image} if image else {"title": title},
+    }
+
+
 @router.get("/page", summary="Amazon Shop / storefront page")
 async def amazon_shop_page(
     url: str = Query(..., description="Amazon seller storefront URL, seller profile URL, or seller ID"),
@@ -71,12 +125,18 @@ async def amazon_shop_page(
     async with billed_call(caller=caller, endpoint="/v1/amazon-shop/page", platform="amazon_shop", resource_url=url, base_credits=max(5, math.ceil(limit * 4.45))) as ctx:
         async def _run() -> dict[str, Any]:
             max_products = limit if limit > 0 else 1
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_AMAZON_SHOP,
-                {"sellerUrls": [url], "marketplace": marketplace.upper(), "maxProducts": max_products},
-                max_items=max_products,
-            )
+            try:
+                items = await get_apify().run_actor_sync(
+                    settings.APIFY_ACTOR_AMAZON_SHOP,
+                    {"sellerUrls": [url], "marketplace": marketplace.upper(), "maxProducts": max_products},
+                    max_items=max_products,
+                )
+            except (ApifyError, httpx.HTTPError):
+                items = []
             if not items:
+                metadata = await _public_shop_metadata(url, marketplace)
+                if metadata:
+                    return metadata
                 raise HTTPException(status_code=404, detail="Amazon Shop page not found")
             return _normalize_shop(items[:max_products], url, marketplace)
 

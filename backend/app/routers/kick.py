@@ -5,13 +5,14 @@ from __future__ import annotations
 import re
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
-from app.services.apify_client import get_apify
+from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
 from app.utils.url import detect_url_platform, platform_mismatch_detail
@@ -61,6 +62,23 @@ def _normalize_clip(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+async def _kick_api_clips(channel: str, limit: int) -> list[dict[str, Any]]:
+    slug = channel.rstrip("/").rsplit("/", 1)[-1]
+    headers = {"User-Agent": "Captapi/1.0 (+https://captapi.com)"}
+    try:
+        async with httpx.AsyncClient(timeout=8.0, follow_redirects=True, headers=headers) as client:
+            resp = await client.get(f"https://kick.com/api/v2/channels/{slug}/clips", params={"limit": limit})
+    except httpx.HTTPError:
+        return []
+    if resp.status_code >= 400:
+        return []
+    payload = resp.json()
+    raw_items = payload.get("clips") or payload.get("data") or payload.get("items") or payload
+    if not isinstance(raw_items, list):
+        return []
+    return raw_items[:limit]
+
+
 @router.get("/clip", summary="Kick clip metadata")
 async def kick_clip(
     url: str = Query(..., description="Kick clip URL, channel URL, or channel username"),
@@ -74,11 +92,16 @@ async def kick_clip(
     settings = get_settings()
     async with billed_call(caller=caller, endpoint="/v1/kick/clip", platform="kick", resource_url=url, base_credits=34) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_KICK,
-                {"channelUrls": [channel], "searchType": "clips", "maxitems": limit, "useProxy": True},
-                max_items=limit,
-            )
+            items = await _kick_api_clips(channel, limit)
+            if not items:
+                try:
+                    items = await get_apify().run_actor_sync(
+                        settings.APIFY_ACTOR_KICK,
+                        {"channelUrls": [channel], "searchType": "clips", "maxitems": limit, "useProxy": True},
+                        max_items=limit,
+                    )
+                except (ApifyError, httpx.HTTPError):
+                    items = []
             clips = [_normalize_clip(i) for i in items[:limit] if not i.get("error")]
             selected = None
             if wanted:

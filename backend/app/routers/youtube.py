@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import asyncio
 import math
+import re
 from typing import Any
+from urllib.parse import parse_qs, urlparse
+import xml.etree.ElementTree as ET
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -61,6 +64,76 @@ def _channel_tab_url(url: str, tab: str) -> str:
             base = base[: -len(suffix)]
             break
     return f"{base}/{tab}"
+
+
+def _playlist_id(url: str) -> str | None:
+    parsed = urlparse(url if "://" in url else f"https://{url}")
+    return parse_qs(parsed.query).get("list", [None])[0]
+
+
+async def _youtube_channel_id(url: str) -> str | None:
+    match = re.search(r"youtube\.com/channel/(UC[\w-]+)", url)
+    if match:
+        return match.group(1)
+    headers = {"User-Agent": "Captapi/1.0 (+https://captapi.com)"}
+    try:
+        async with httpx.AsyncClient(timeout=6.0, follow_redirects=True, headers=headers) as client:
+            resp = await client.get(url)
+    except httpx.HTTPError:
+        return None
+    if resp.status_code >= 400:
+        return None
+    for pattern in (
+        r'"channelId":"(UC[\w-]+)"',
+        r'<meta itemprop="channelId" content="(UC[\w-]+)"',
+        r'"externalId":"(UC[\w-]+)"',
+    ):
+        found = re.search(pattern, resp.text)
+        if found:
+            return found.group(1)
+    return None
+
+
+async def _youtube_feed_videos(feed_url: str, limit: int) -> list[dict[str, Any]]:
+    headers = {"User-Agent": "Captapi/1.0 (+https://captapi.com)"}
+    async with httpx.AsyncClient(timeout=6.0, follow_redirects=True, headers=headers) as client:
+        resp = await client.get(feed_url)
+    if resp.status_code >= 400:
+        return []
+    root = ET.fromstring(resp.text)
+    ns = {"atom": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/schemas/2015"}
+    videos: list[dict[str, Any]] = []
+    for entry in root.findall("atom:entry", ns)[:limit]:
+        video_id = safe_str(entry.findtext("yt:videoId", default="", namespaces=ns))
+        title = safe_str(entry.findtext("atom:title", default="", namespaces=ns))
+        published = safe_str(entry.findtext("atom:published", default="", namespaces=ns))
+        channel_name = safe_str(entry.findtext("atom:author/atom:name", default="", namespaces=ns))
+        videos.append(
+            {
+                "url": f"https://www.youtube.com/watch?v={video_id}" if video_id else "",
+                "title": title,
+                "publishedAt": published,
+                "viewCount": 0,
+                "durationSeconds": 0,
+                "thumbnailUrl": f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg" if video_id else "",
+                "channelName": channel_name,
+            }
+        )
+    return videos
+
+
+async def _youtube_channel_feed(url: str, limit: int) -> list[dict[str, Any]]:
+    channel_id = await _youtube_channel_id(url)
+    if not channel_id:
+        return []
+    return await _youtube_feed_videos(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}", limit)
+
+
+async def _youtube_playlist_feed(url: str, limit: int) -> list[dict[str, Any]]:
+    playlist_id = _playlist_id(url)
+    if not playlist_id:
+        return []
+    return await _youtube_feed_videos(f"https://www.youtube.com/feeds/videos.xml?playlist_id={playlist_id}", limit)
 
 
 def _reply_payload(r: dict) -> dict:
@@ -515,6 +588,9 @@ async def youtube_channel_videos(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            feed_videos = await _youtube_channel_feed(url, limit)
+            if feed_videos:
+                return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_SEARCH,
@@ -563,6 +639,9 @@ async def youtube_playlist_videos(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            feed_videos = await _youtube_playlist_feed(url, limit)
+            if feed_videos:
+                return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_SEARCH,
@@ -609,6 +688,16 @@ async def youtube_playlist(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            feed_videos = await _youtube_playlist_feed(url, limit)
+            if feed_videos:
+                return {
+                    "platform": "youtube",
+                    "url": url,
+                    "title": "",
+                    "channelName": feed_videos[0].get("channelName") if feed_videos else "",
+                    "totalReturned": len(feed_videos),
+                    "videos": feed_videos,
+                }
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_SEARCH,
                 {"startUrls": [{"url": url}], "maxResults": limit, "type": "playlist"},

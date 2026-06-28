@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import math
+import re
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
-from app.services.apify_client import get_apify
+from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
 from app.utils.formatters import safe_float, safe_int, safe_list, safe_str
@@ -103,6 +105,40 @@ def _normalize_post(item: dict) -> dict:
         },
         "hashtags": safe_list(item.get("hashtags")),
     }
+
+
+def _meta(page: str, key: str) -> str:
+    patterns = [
+        rf'<meta[^>]+property=["\']{re.escape(key)}["\'][^>]+content=["\']([^"\']+)["\']',
+        rf'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']{re.escape(key)}["\']',
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, page, flags=re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+    return ""
+
+
+async def _public_instagram_meta(url: str) -> dict[str, str] | None:
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+        )
+    }
+    try:
+        async with httpx.AsyncClient(timeout=6.0, follow_redirects=True, headers=headers) as client:
+            resp = await client.get(url)
+    except httpx.HTTPError:
+        return None
+    if resp.status_code >= 400:
+        return None
+    title = _meta(resp.text, "og:title")
+    description = _meta(resp.text, "og:description")
+    image = _meta(resp.text, "og:image")
+    if not (title or description or image):
+        return None
+    return {"url": str(resp.url), "title": title, "description": description, "image": image}
 
 
 def _transcript_from_item(item: dict[str, Any]) -> tuple[str, list[dict[str, Any]]]:
@@ -220,11 +256,31 @@ async def instagram_details(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM_POST,
-                {"directUrls": [url], "resultsLimit": 1},
-                max_items=1,
-            )
+            try:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_INSTAGRAM_POST,
+                    {"directUrls": [url], "resultsLimit": 1},
+                    max_items=1,
+                )
+            except (ApifyError, httpx.HTTPError):
+                items = []
+            if not items:
+                meta = await _public_instagram_meta(url)
+                if meta:
+                    return {
+                        "platform": "instagram",
+                        "url": meta["url"] or url,
+                        "id": extract_instagram_shortcode(url) or "",
+                        "caption": meta["description"],
+                        "description": meta["description"],
+                        "publishedAt": "",
+                        "durationSeconds": 0,
+                        "thumbnailUrl": meta["image"],
+                        "videoUrl": "",
+                        "author": {"username": "", "displayName": meta["title"], "url": None, "followers": 0, "verified": None, "profileImage": ""},
+                        "engagement": {"views": 0, "likes": 0, "comments": 0},
+                        "hashtags": [],
+                    }
             if not items:
                 raise HTTPException(status_code=404, detail="Post not found")
             return _normalize_post(items[0])
@@ -377,13 +433,31 @@ async def instagram_channel_details(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM_PROFILE,
-                {"usernames": [handle]},
-                max_items=1,
-            )
+            try:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_INSTAGRAM_PROFILE,
+                    {"usernames": [handle]},
+                    max_items=1,
+                )
+            except (ApifyError, httpx.HTTPError):
+                items = []
             if not items:
-                raise HTTPException(status_code=404, detail="Profile not found")
+                meta = await _public_instagram_meta(f"https://www.instagram.com/{handle}/")
+                if not meta:
+                    raise HTTPException(status_code=404, detail="Profile not found")
+                return {
+                    "platform": "instagram",
+                    "url": meta["url"] or f"https://instagram.com/{handle}",
+                    "username": handle,
+                    "displayName": meta["title"],
+                    "bio": meta["description"],
+                    "followers": 0,
+                    "following": 0,
+                    "postCount": 0,
+                    "verified": None,
+                    "profileImage": meta["image"],
+                    "externalUrl": "",
+                }
             p = items[0]
             return {
                 "platform": "instagram",
@@ -424,13 +498,28 @@ async def instagram_basic_profile(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM_PROFILE,
-                {"usernames": [handle]},
-                max_items=1,
-            )
+            try:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_INSTAGRAM_PROFILE,
+                    {"usernames": [handle]},
+                    max_items=1,
+                )
+            except (ApifyError, httpx.HTTPError):
+                items = []
             if not items:
-                raise HTTPException(status_code=404, detail="Profile not found")
+                meta = await _public_instagram_meta(f"https://www.instagram.com/{handle}/")
+                if not meta:
+                    raise HTTPException(status_code=404, detail="Profile not found")
+                return {
+                    "platform": "instagram",
+                    "id": "",
+                    "username": handle,
+                    "displayName": meta["title"],
+                    "profileImage": meta["image"],
+                    "verified": None,
+                    "private": None,
+                    "followers": 0,
+                }
             p = items[0]
             return {
                 "platform": "instagram",
@@ -538,7 +627,6 @@ async def instagram_reels_search(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    _require_instagram_post_url(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_IG_POSTS, CREDIT_SEARCH)
     async with billed_call(

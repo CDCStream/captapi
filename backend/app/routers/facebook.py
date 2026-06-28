@@ -14,7 +14,7 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
-from app.services.apify_client import get_apify
+from app.services.apify_client import ApifyError, get_apify
 from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
@@ -799,11 +799,14 @@ async def facebook_marketplace_item(
 
             # Fallback: run the marketplace actor when public metadata is blocked.
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_FACEBOOK_MARKETPLACE,
-                {"startUrls": [{"url": url}], "fetchItemDetails": True, "maxResultsPerQuery": 1},
-                max_items=1,
-            )
+            try:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_FACEBOOK_MARKETPLACE,
+                    {"startUrls": [{"url": url}], "fetchItemDetails": True, "maxResultsPerQuery": 1},
+                    max_items=1,
+                )
+            except (ApifyError, httpx.HTTPError):
+                items = []
             if items and not items[0].get("error"):
                 return _normalize_listing(items[0])
             raise HTTPException(status_code=404, detail="Listing not found")

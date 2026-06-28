@@ -962,12 +962,6 @@ async def tiktok_comment_replies(
                 ],
                 max_items=REPLIES_MAX_ITEMS,
             )
-            if not items:
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_TIKTOK_COMMENT_REPLIES,
-                    legacy_input,
-                    max_items=REPLIES_MAX_ITEMS,
-                )
             crawled = len(items)
             replies = []
             for r in items:

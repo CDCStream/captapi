@@ -13,7 +13,7 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
-from app.services.apify_client import get_apify
+from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
 from app.utils.url import detect_url_platform, platform_mismatch_detail
@@ -288,7 +288,10 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
 
 
 async def _run_actor(actor: str, payload: dict[str, Any], limit: int) -> list[dict[str, Any]]:
-    items = await get_apify().run_actor_sync(actor, payload, max_items=limit)
+    try:
+        items = await get_apify().run_actor_sync(actor, payload, max_items=limit)
+    except ApifyError as exc:
+        raise HTTPException(status_code=502, detail=f"Ad Library upstream error: {exc}") from exc
     return items[:limit]
 
 
@@ -304,7 +307,7 @@ async def facebook_search(
         async def _run() -> dict[str, Any]:
             items = await _run_actor(
                 settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2,
-                {"startUrls": [{"url": _facebook_search_url(q, country)}], "resultsLimit": limit, "isDetailsPerAd": True},
+                {"startUrls": [{"url": _facebook_search_url(q, country)}], "resultsLimit": limit, "isDetailsPerAd": False},
                 limit,
             )
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
