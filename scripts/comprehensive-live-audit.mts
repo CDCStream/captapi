@@ -230,6 +230,18 @@ async function buildParams(endpoint: { path: string; params: { name: string; req
   return params;
 }
 
+async function buildMcpArgs(endpoint: { path: string; params: { name: string; required: boolean; type?: string }[] }) {
+  const params = await buildParams(endpoint);
+  return Object.fromEntries(
+    Object.entries(params).map(([key, value]) => {
+      const param = endpoint.params.find((item) => item.name === key);
+      if (param?.type === "number" || param?.type === "integer") return [key, Number(value)];
+      if (param?.type === "boolean") return [key, value === "true"];
+      return [key, value];
+    }),
+  );
+}
+
 function endpointParams(endpoint: (typeof ALL_ENDPOINTS)[number]) {
   return frontendParams(endpoint).map((param) => ({
     name: param.name,
@@ -463,15 +475,15 @@ async function liveAudit() {
 async function mcpAudit() {
   const packageDir = join(process.cwd(), "packages", "captapi-mcp");
   const [{ Client }, { StdioClientTransport }] = await Promise.all([
-    import("../packages/captapi-mcp/node_modules/@modelcontextprotocol/sdk/client/index.js"),
-    import("../packages/captapi-mcp/node_modules/@modelcontextprotocol/sdk/client/stdio.js"),
+    import("../packages/captapi-mcp/node_modules/@modelcontextprotocol/sdk/dist/esm/client/index.js"),
+    import("../packages/captapi-mcp/node_modules/@modelcontextprotocol/sdk/dist/esm/client/stdio.js"),
   ]);
 
   await new Promise<void>((resolve, reject) => {
     const child = spawn(/^win/.test(process.platform) ? "npm.cmd" : "npm", ["run", "build"], {
       cwd: packageDir,
       stdio: "pipe",
-      env: process.env,
+      shell: /^win/.test(process.platform),
     });
     let stderr = "";
     child.stderr.on("data", (chunk) => (stderr += String(chunk)));
@@ -481,11 +493,13 @@ async function mcpAudit() {
   const transport = new StdioClientTransport({
     command: process.execPath,
     args: [join(packageDir, "dist", "index.js")],
-    env: {
-      ...process.env,
-      CAPTAPI_API_KEY: API_KEY || "",
-      CAPTAPI_BASE_URL: BASE_URL,
-    } as Record<string, string>,
+    env: Object.fromEntries(
+      Object.entries({
+        ...process.env,
+        CAPTAPI_API_KEY: API_KEY || "",
+        CAPTAPI_BASE_URL: BASE_URL,
+      }).filter(([key, value]) => key && !key.startsWith("=") && typeof value === "string"),
+    ) as Record<string, string>,
   });
   const client = new Client({ name: "captapi-live-audit", version: "1.0.0" });
   await client.connect(transport);
@@ -521,7 +535,7 @@ async function mcpAudit() {
     try {
       const result = await client.callTool({
         name: toolName,
-        arguments: await buildParams(endpoint),
+        arguments: await buildMcpArgs(endpoint),
       });
       const text = result.content?.[0]?.type === "text" ? result.content[0].text : JSON.stringify(result);
       calls.push({
