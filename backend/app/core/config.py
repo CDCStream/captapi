@@ -127,7 +127,10 @@ class Settings(BaseSettings):
 
     # Pinterest. Pay-per-result actor (no monthly rent). Input:
     # searchQueries / usernames / boardUrls / pinUrls + maxResults.
-    APIFY_ACTOR_PINTEREST: str = "thirdwatch/pinterest-scraper"
+    # crawlerbros "Pinterest Scraper Pro": single actor, mode-based
+    # (search / pinDetail / userPins / userBoards / boardPins / userProfile),
+    # residential proxy with HTML fallback, pay-per-result (no monthly rent).
+    APIFY_ACTOR_PINTEREST: str = "crawlerbros/pinterest-scraper-pro"
 
     # LinkedIn. Profile + company + post/search actors (rental, public data
     # only). Slugs are config-driven; verify access in the Apify console.
