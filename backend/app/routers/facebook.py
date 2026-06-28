@@ -664,11 +664,14 @@ async def facebook_event_details(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_FACEBOOK_EVENTS,
-                {"startUrls": [{"url": url}], "maxEvents": 1},
-                max_items=1,
-            )
+            try:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_FACEBOOK_EVENTS,
+                    {"startUrls": [url], "maxEvents": 1},
+                    max_items=1,
+                )
+            except Exception as exc:  # noqa: BLE001
+                raise HTTPException(status_code=502, detail="Event lookup failed upstream") from exc
             if not items or items[0].get("error"):
                 raise HTTPException(status_code=404, detail="Event not found")
             return _normalize_event(items[0])
