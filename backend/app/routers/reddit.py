@@ -7,8 +7,10 @@ actor returns mixed post/comment items; we split them by ``dataType``.
 from __future__ import annotations
 
 import math
+import time
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import ApiCaller, require_api_key
@@ -24,6 +26,9 @@ router = APIRouter()
 
 CREDIT_DETAILS = 1
 RATE = 0.4
+
+# Cached app-only OAuth token: (access_token, expires_at_epoch).
+_reddit_token: tuple[str, float] | None = None
 
 
 def _scaled(n: int, rate: float, minimum: int) -> int:
@@ -107,26 +112,82 @@ async def subreddit_posts(
         return ApiResponse(data=data)
 
 
-def _is_community(item: dict[str, Any]) -> bool:
-    dt = (item.get("dataType") or item.get("type") or "").lower()
-    return dt == "community" or item.get("numberOfMembers") is not None
-
-
-def _normalize_community(item: dict[str, Any]) -> dict[str, Any]:
-    name = item.get("communityName") or item.get("name") or item.get("title")
+def _normalize_about(d: dict[str, Any]) -> dict[str, Any]:
+    """Map a Reddit /r/{sub}/about ``data`` object to our response shape."""
+    name = d.get("display_name")
+    icon = d.get("community_icon") or d.get("icon_img")
+    created = d.get("created_utc")
     return {
         "platform": "reddit",
         "name": safe_str(name),
-        "url": safe_str(item.get("url"))
-        or (f"https://www.reddit.com/r/{name}" if name else None),
-        "title": safe_str(item.get("title") or item.get("displayName")),
-        "description": safe_str(item.get("description") or item.get("publicDescription")),
-        "members": safe_int(item.get("numberOfMembers") or item.get("subscribers") or item.get("members")),
-        "category": safe_str(item.get("category")),
-        "createdAt": safe_str(item.get("createdAt") or item.get("created")),
-        "nsfw": item.get("over18") or item.get("nsfw"),
-        "icon": safe_str(item.get("iconImage") or item.get("icon") or item.get("communityIcon")),
+        "url": (f"https://www.reddit.com/r/{name}" if name else None),
+        "title": safe_str(d.get("title")),
+        "description": safe_str(d.get("public_description") or d.get("description")),
+        "members": safe_int(d.get("subscribers")),
+        "activeUsers": safe_int(d.get("active_user_count") or d.get("accounts_active")),
+        "category": safe_str(d.get("advertiser_category")),
+        "createdAt": (
+            time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(created)) if created else None
+        ),
+        "nsfw": bool(d.get("over18")),
+        "type": safe_str(d.get("subreddit_type")),
+        "icon": safe_str(icon),
+        "banner": safe_str(d.get("banner_background_image") or d.get("banner_img")),
     }
+
+
+async def _reddit_app_token(settings: Any) -> str:
+    """Fetch (and cache) an app-only OAuth token via client_credentials."""
+    global _reddit_token
+    now = time.time()
+    if _reddit_token and _reddit_token[1] - 60 > now:
+        return _reddit_token[0]
+    auth = (settings.REDDIT_CLIENT_ID, settings.REDDIT_CLIENT_SECRET)
+    headers = {"User-Agent": settings.REDDIT_USER_AGENT}
+    async with httpx.AsyncClient(timeout=20) as client:
+        resp = await client.post(
+            "https://www.reddit.com/api/v1/access_token",
+            data={"grant_type": "client_credentials"},
+            auth=auth,
+            headers=headers,
+        )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=502, detail="Reddit auth failed")
+    payload = resp.json()
+    token = payload.get("access_token")
+    if not token:
+        raise HTTPException(status_code=502, detail="Reddit auth failed")
+    _reddit_token = (token, now + float(payload.get("expires_in", 3600)))
+    return token
+
+
+async def _fetch_subreddit_about(sub: str) -> dict[str, Any]:
+    settings = get_settings()
+    if not (settings.REDDIT_CLIENT_ID and settings.REDDIT_CLIENT_SECRET):
+        raise HTTPException(
+            status_code=503,
+            detail="Subreddit details are temporarily unavailable.",
+        )
+    token = await _reddit_app_token(settings)
+    headers = {
+        "Authorization": f"bearer {token}",
+        "User-Agent": settings.REDDIT_USER_AGENT,
+    }
+    async with httpx.AsyncClient(timeout=25, headers=headers) as client:
+        resp = await client.get(f"https://oauth.reddit.com/r/{sub}/about", params={"raw_json": 1})
+    if resp.status_code == 404:
+        raise HTTPException(status_code=404, detail="Subreddit not found")
+    if resp.status_code in (403, 451):
+        raise HTTPException(status_code=404, detail="Subreddit is private or banned")
+    if resp.status_code != 200:
+        raise HTTPException(status_code=502, detail="Failed to load subreddit")
+    data = resp.json().get("data") or {}
+    kind = resp.json().get("kind")
+    # Reddit returns kind "t5" for a subreddit; anything else means it resolved
+    # to a user/redirect rather than a real community.
+    if kind != "t5" or not data.get("display_name"):
+        raise HTTPException(status_code=404, detail="Subreddit not found")
+    return _normalize_about(data)
 
 
 @router.get("/subreddit-details", summary="Subreddit info & member stats")
@@ -137,7 +198,6 @@ async def subreddit_details(
     sub = extract_subreddit(url)
     if not sub:
         raise HTTPException(status_code=400, detail="Invalid subreddit")
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/reddit/subreddit-details",
@@ -146,22 +206,7 @@ async def subreddit_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_REDDIT,
-                {
-                    "startUrls": [{"url": f"https://www.reddit.com/r/{sub}/"}],
-                    "type": "communities",
-                    "maxItems": 5,
-                    "maxComments": 0,
-                    "maxPostCount": 0,
-                },
-                max_items=5,
-            )
-            community = next((i for i in items if _is_community(i)), None)
-            if not community:
-                raise HTTPException(status_code=404, detail="Subreddit not found")
-            return _normalize_community(community)
+            return await _fetch_subreddit_about(sub)
 
         data = await cached_or_run(
             endpoint="reddit.subreddit-details",

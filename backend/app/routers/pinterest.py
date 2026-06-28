@@ -216,22 +216,110 @@ async def user_pins(
         return ApiResponse(data=data)
 
 
-def _normalize_board(item: dict[str, Any]) -> dict[str, Any]:
+def _normalize_board(item: dict[str, Any], username: str | None = None) -> dict[str, Any]:
+    raw_url = item.get("boardUrl") or item.get("url")
+    url = safe_str(raw_url)
+    if url and url.startswith("/"):
+        url = f"https://www.pinterest.com{url}"
+    owner = item.get("owner") if isinstance(item.get("owner"), dict) else {}
     return {
         "platform": "pinterest",
+        "id": safe_str(item.get("id") or item.get("boardId")),
         "name": safe_str(item.get("boardName") or item.get("name")),
-        "url": safe_str(item.get("boardUrl") or item.get("url")),
+        "url": url,
         "privacy": safe_str(item.get("privacy")),
-        "pinCount": safe_int(item.get("pinCount")),
-        "followers": safe_int(item.get("followerCount")),
-        "sectionCount": safe_int(item.get("sectionCount")),
-        "coverImage": safe_str(item.get("coverImageHdUrl") or item.get("coverImageUrl")),
-        "createdAt": safe_str(item.get("createdDate")),
+        "pinCount": safe_int(item.get("pinCount") or item.get("pin_count")),
+        "followers": safe_int(item.get("followerCount") or item.get("follower_count")),
+        "sectionCount": safe_int(item.get("sectionCount") or item.get("section_count")),
+        "coverImage": safe_str(
+            item.get("coverImageHdUrl")
+            or item.get("coverImageUrl")
+            or item.get("image_cover_url")
+        ),
+        "createdAt": safe_str(item.get("createdDate") or item.get("created_at")),
         "owner": {
-            "username": safe_str(item.get("ownerUsername") or item.get("owner")),
-            "displayName": safe_str(item.get("ownerName")),
+            "username": safe_str(
+                owner.get("username") or item.get("ownerUsername") or username
+            ),
+            "displayName": safe_str(owner.get("full_name") or item.get("ownerName")),
         },
     }
+
+
+def _extract_boards(page: str, username: str) -> list[dict[str, Any]]:
+    """Pull board objects out of the embedded JSON on a Pinterest profile page.
+
+    Pinterest no longer exposes a stable free Apify actor for boards, so we read
+    the boards that the profile page ships inline. Each board is a JSON object
+    that contains a ``"url":"/username/slug/"`` property; we find that anchor and
+    expand to the surrounding balanced-brace object, then parse it.
+    """
+    import json as _json
+
+    boards: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    url_pat = re.compile(rf'"url":"(/{re.escape(username)}/[a-z0-9\-]+/)"')
+    for m in url_pat.finditer(page):
+        depth = 0
+        start: int | None = None
+        i = m.start()
+        while i >= 0:
+            ch = page[i]
+            if ch == "}":
+                depth += 1
+            elif ch == "{":
+                if depth == 0:
+                    start = i
+                    break
+                depth -= 1
+            i -= 1
+        if start is None:
+            continue
+        depth = 0
+        end: int | None = None
+        j = start
+        while j < len(page):
+            ch = page[j]
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    end = j + 1
+                    break
+            j += 1
+        if end is None:
+            continue
+        try:
+            obj = _json.loads(page[start:end])
+        except Exception:
+            continue
+        if not isinstance(obj, dict) or not obj.get("name"):
+            continue
+        key = str(obj.get("id") or obj.get("url"))
+        if key in seen:
+            continue
+        seen.add(key)
+        boards.append(obj)
+    return boards
+
+
+async def _fetch_profile_boards(username: str, limit: int) -> list[dict[str, Any]]:
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+        )
+    }
+    url = f"https://www.pinterest.com/{username}/"
+    async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
+        resp = await client.get(url)
+    if resp.status_code == 404:
+        raise HTTPException(status_code=404, detail="Pinterest profile not found")
+    if resp.status_code >= 400:
+        raise HTTPException(status_code=502, detail="Failed to load Pinterest profile")
+    raw = _extract_boards(resp.text, username)
+    return [_normalize_board(b, username) for b in raw][:limit]
 
 
 @router.get("/user-boards", summary="List the boards on a Pinterest profile")
@@ -243,7 +331,6 @@ async def pinterest_user_boards(
     username = extract_pinterest_username(url)
     if not username:
         raise HTTPException(status_code=400, detail="Invalid Pinterest profile")
-    settings = get_settings()
     cost = _scaled(limit, RATE, 2)
     async with billed_call(
         caller=caller,
@@ -253,13 +340,7 @@ async def pinterest_user_boards(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_PINTEREST_BOARDS,
-                {"data_source": "profile-page", "source_value": username, "size": limit},
-                max_items=limit,
-            )
-            boards = [_normalize_board(i) for i in items][:limit]
+            boards = await _fetch_profile_boards(username, limit)
             return {"username": username, "totalReturned": len(boards), "boards": boards}
 
         data = await cached_or_run(

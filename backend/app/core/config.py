@@ -111,6 +111,14 @@ class Settings(BaseSettings):
     # maxItems). Slug is config-driven so it can be swapped without code edits.
     APIFY_ACTOR_REDDIT: str = "trudax/reddit-scraper-lite"
 
+    # Reddit official OAuth API (free, app-only client_credentials). Used for
+    # subreddit-details (members/description/title), which the scraper actor
+    # can't provide. Create a free "script" app at
+    # https://www.reddit.com/prefs/apps and set the id/secret below.
+    REDDIT_CLIENT_ID: str = ""
+    REDDIT_CLIENT_SECRET: str = ""
+    REDDIT_USER_AGENT: str = "web:captapi:1.0 (by /u/captapi)"
+
     # Threads (Meta). User media actor accepts username + maxPosts; post media
     # actor accepts direct post links.
     APIFY_ACTOR_THREADS: str = "igview-owner/threads-user-media-scraper"
@@ -120,7 +128,6 @@ class Settings(BaseSettings):
     # Pinterest. Pay-per-result actor (no monthly rent). Input:
     # searchQueries / usernames / boardUrls / pinUrls + maxResults.
     APIFY_ACTOR_PINTEREST: str = "thirdwatch/pinterest-scraper"
-    APIFY_ACTOR_PINTEREST_BOARDS: str = "shareze001/pinterest-boards"
 
     # LinkedIn. Profile + company + post/search actors (rental, public data
     # only). Slugs are config-driven; verify access in the Apify console.
