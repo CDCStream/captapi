@@ -1398,6 +1398,22 @@
     ]
   },
   {
+    "tool": "facebook_marketplace_item",
+    "platform": "facebook",
+    "name": "Facebook Marketplace Item",
+    "path": "/v1/facebook/marketplace-item",
+    "credits": 1,
+    "summary": "Details for a single Facebook Marketplace listing.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook Marketplace item URL."
+      }
+    ]
+  },
+  {
     "tool": "twitter_tweet_details",
     "platform": "twitter",
     "name": "Twitter/X Tweet Details",
@@ -1470,6 +1486,44 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "twitter_community",
+    "platform": "twitter",
+    "name": "Twitter/X Community",
+    "path": "/v1/twitter/community",
+    "credits": 1,
+    "summary": "Details for an X (Twitter) community.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "X community URL (x.com/i/communities/ID) or community ID."
+      }
+    ]
+  },
+  {
+    "tool": "twitter_community_tweets",
+    "platform": "twitter",
+    "name": "Twitter/X Community Tweets",
+    "path": "/v1/twitter/community-tweets",
+    "credits": 18,
+    "summary": "Tweets posted in an X community.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "X community URL (x.com/i/communities/ID) or community ID."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
       }
     ]
   },
@@ -2416,6 +2470,34 @@
         "type": "string",
         "required": true,
         "description": "Facebook page URL or Meta Ad Library URL."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_search_companies",
+    "platform": "ad_library",
+    "name": "Facebook Ad Library Search Companies",
+    "path": "/v1/ad-library/facebook/search-companies",
+    "credits": 20,
+    "summary": "Find advertisers/pages in the Meta Ad Library by name.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
       },
       {
         "name": "country",

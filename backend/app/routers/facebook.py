@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import html
 import math
+import re
 from typing import Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import ApiCaller, require_api_key
@@ -624,6 +627,81 @@ async def facebook_profile_photos(
             ctx=ctx,
         )
         ctx["credits_override"] = _scaled_credits(len(data["photos"]), RATE_FB_POSTS, 2)
+        return ApiResponse(data=data)
+
+
+def _og_meta(page: str, key: str) -> str | None:
+    pattern = rf'<meta\s+(?:property|name)=["\']{re.escape(key)}["\']\s+content=["\']([^"\']*)["\']'
+    match = re.search(pattern, page, flags=re.IGNORECASE)
+    if not match:
+        pattern = rf'<meta\s+content=["\']([^"\']*)["\']\s+(?:property|name)=["\']{re.escape(key)}["\']'
+        match = re.search(pattern, page, flags=re.IGNORECASE)
+    return html.unescape(match.group(1)).strip() if match else None
+
+
+@router.get("/marketplace-item", summary="Facebook Marketplace listing details")
+async def facebook_marketplace_item(
+    url: str = Query(..., description="Facebook Marketplace item URL"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    if "/marketplace/item/" not in (url or "").lower():
+        raise HTTPException(status_code=400, detail="Invalid Facebook Marketplace item URL")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/facebook/marketplace-item",
+        platform="facebook",
+        resource_url=url,
+        base_credits=CREDIT_DETAILS,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            # Preferred: the marketplace actor when it accepts a direct item URL.
+            try:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_FACEBOOK_MARKETPLACE,
+                    {"startUrls": [{"url": url}], "fetchItemDetails": True, "maxResultsPerQuery": 1},
+                    max_items=1,
+                )
+            except Exception:
+                items = []
+            if items and not items[0].get("error"):
+                return _normalize_listing(items[0])
+
+            # Fallback: scrape OpenGraph metadata from the public listing page.
+            headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
+            async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
+                resp = await client.get(url)
+            if resp.status_code >= 400:
+                raise HTTPException(status_code=404, detail="Listing not found")
+            page = resp.text
+            title = _og_meta(page, "og:title")
+            description = _og_meta(page, "og:description")
+            image = _og_meta(page, "og:image")
+            if not (title or description or image):
+                raise HTTPException(status_code=404, detail="Listing not found")
+            item_id = None
+            m = re.search(r"/marketplace/item/(\d+)", url)
+            if m:
+                item_id = m.group(1)
+            return {
+                "platform": "facebook",
+                "id": safe_str(item_id),
+                "url": safe_str(_og_meta(page, "og:url") or url),
+                "title": safe_str(title),
+                "description": safe_str(description),
+                "image": safe_str(image),
+                "price": None,
+                "location": None,
+                "photos": [image] if image else [],
+            }
+
+        data = await cached_or_run(
+            endpoint="facebook.marketplace-item",
+            params={"url": url},
+            runner=_run,
+            ctx=ctx,
+        )
         return ApiResponse(data=data)
 
 

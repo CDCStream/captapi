@@ -104,6 +104,7 @@ class Settings(BaseSettings):
     # twitterHandles + maxItems). The user-scraper returns profile metadata.
     APIFY_ACTOR_TWITTER_TWEET: str = "apidojo/tweet-scraper"
     APIFY_ACTOR_TWITTER_PROFILE: str = "apidojo/twitter-user-scraper"
+    APIFY_ACTOR_TWITTER_COMMUNITY: str = "scrape.badger/twitter-community-scraper"
 
     # Reddit. trudax "Reddit Scraper Lite" handles subreddit URLs, post URLs
     # (with comments), and keyword search (input: startUrls / searches + type +

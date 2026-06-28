@@ -85,7 +85,8 @@
       "facebookMarketplaceSearch",
       "facebookEventSearch",
       "facebookEventDetails",
-      "facebookProfilePhotos"
+      "facebookProfilePhotos",
+      "facebookMarketplaceItem"
     ]
   },
   {
@@ -94,7 +95,9 @@
       "twitterTweetDetails",
       "twitterProfile",
       "twitterUserTweets",
-      "twitterSearch"
+      "twitterSearch",
+      "twitterCommunity",
+      "twitterCommunityTweets"
     ]
   },
   {
@@ -186,6 +189,7 @@
     "modules": [
       "facebookAdLibrarySearch",
       "facebookAdLibraryCompanyAds",
+      "facebookAdLibrarySearchCompanies",
       "facebookAdLibraryAdDetails",
       "tiktokAdLibrarySearch",
       "tiktokAdLibraryAdDetails",

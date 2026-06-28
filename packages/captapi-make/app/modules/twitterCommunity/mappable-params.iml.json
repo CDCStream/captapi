@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "X community URL (x.com/i/communities/ID) or community ID."
+  }
+]

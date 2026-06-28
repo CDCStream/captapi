@@ -322,6 +322,36 @@ async def facebook_company_ads(
         return ApiResponse(data=data)
 
 
+@router.get("/facebook/search-companies", summary="Find advertisers/pages in Meta Ad Library")
+async def facebook_search_companies(
+    q: str = Query(..., min_length=2, description="Company or brand name to search for"),
+    country: str = Query("US", min_length=2, max_length=2),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/search-companies", platform="facebook_ad_library", resource_url=None, base_credits=_scaled(limit)) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await _run_actor(
+                settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2,
+                {"startUrls": [{"url": _facebook_search_url(q, country)}], "resultsLimit": limit, "isDetailsPerAd": False},
+                limit,
+            )
+            advertisers: dict[str, Any] = {}
+            for item in items:
+                ad = _normalize_ad(item, "facebook_ad_library")
+                adv = ad["advertiser"]
+                key = adv["id"] or adv["name"]
+                if key and key not in advertisers:
+                    advertisers[key] = adv
+            companies = list(advertisers.values())
+            return {"query": q, "country": country.upper(), "totalReturned": len(companies), "companies": companies}
+
+        data = await cached_or_run("ad-library.facebook.search-companies", {"q": q, "country": country, "limit": limit}, _run, ctx)
+        ctx["credits_override"] = _scaled(len(data["companies"]))
+        return ApiResponse(data=data)
+
+
 @router.get("/facebook/ad-details", summary="Meta/Facebook ad details")
 async def facebook_ad_details(
     url: str = Query(..., description="Meta Ad Library ad URL or ad ID"),

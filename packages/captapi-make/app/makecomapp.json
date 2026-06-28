@@ -1192,6 +1192,23 @@
           "scope": null
         }
       },
+      "facebookMarketplaceItem": {
+        "label": "Facebook Marketplace Item",
+        "description": "Details for a single Facebook Marketplace listing. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookMarketplaceItem/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookMarketplaceItem/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
       "twitterTweetDetails": {
         "label": "Twitter/X Tweet Details",
         "description": "Metadata + engagement stats for a tweet. Costs ~1 credit (cached results free, failures never charged).",
@@ -1255,6 +1272,40 @@
           "communication": "modules/twitterSearch/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/twitterSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "twitterCommunity": {
+        "label": "Twitter/X Community",
+        "description": "Details for an X (Twitter) community. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/twitterCommunity/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/twitterCommunity/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "twitterCommunityTweets": {
+        "label": "Twitter/X Community Tweets",
+        "description": "Tweets posted in an X community. Costs ~18 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/twitterCommunityTweets/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/twitterCommunityTweets/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null
@@ -2037,6 +2088,23 @@
           "communication": "modules/facebookAdLibraryCompanyAds/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/facebookAdLibraryCompanyAds/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "facebookAdLibrarySearchCompanies": {
+        "label": "Facebook Ad Library Search Companies",
+        "description": "Find advertisers/pages in the Meta Ad Library by name. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookAdLibrarySearchCompanies/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookAdLibrarySearchCompanies/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null

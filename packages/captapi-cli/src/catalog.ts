@@ -164,10 +164,12 @@ const FACEBOOK: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_event_search", name: "Facebook Event Search", path: "/v1/facebook/event-search", credits: 40, summary: "Search Facebook events by topic and/or location.", params: [q("Topic and/or place, e.g. 'comedy Chicago' (min 2 chars)."), limit(20, 200)] },
   { tool: "facebook_event_details", name: "Facebook Event Details", path: "/v1/facebook/event-details", credits: 2, summary: "Details for a Facebook event (date, location, attendees, tickets).", params: [url("Facebook event URL, e.g. https://facebook.com/events/ID.")] },
   { tool: "facebook_profile_photos", name: "Facebook Profile Photos", path: "/v1/facebook/profile-photos", credits: 12, summary: "Photos from a Facebook profile or page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
+  { tool: "facebook_marketplace_item", name: "Facebook Marketplace Item", path: "/v1/facebook/marketplace-item", credits: 1, summary: "Details for a single Facebook Marketplace listing.", params: [url("Facebook Marketplace item URL.")] },
 ];
 
 const TW_TWEET = "Public tweet URL, e.g. https://x.com/user/status/ID.";
 const TW_PROFILE = "Twitter/X profile URL or @handle, e.g. https://x.com/username.";
+const TW_COMMUNITY = "X community URL (x.com/i/communities/ID) or community ID.";
 const RD_SUB = "Subreddit URL, r/name, or bare name, e.g. r/technology.";
 const RD_POST = "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/...";
 const TH_PROFILE = "Threads profile URL or @handle, e.g. https://threads.net/@username.";
@@ -188,6 +190,8 @@ const TWITTER: Omit<Endpoint, "platform">[] = [
   { tool: "twitter_profile", name: "Twitter/X Profile", path: "/v1/twitter/profile", credits: 1, summary: "Profile info & stats for a Twitter/X account.", params: [url(TW_PROFILE)] },
   { tool: "twitter_user_tweets", name: "Twitter/X User Tweets", path: "/v1/twitter/user-tweets", credits: 14, summary: "Recent tweets from a Twitter/X profile.", params: [url(TW_PROFILE), limit(20, 200)] },
   { tool: "twitter_search", name: "Twitter/X Search", path: "/v1/twitter/search", credits: 14, summary: "Search tweets by keyword.", params: [q(), limit(20, 200)] },
+  { tool: "twitter_community", name: "Twitter/X Community", path: "/v1/twitter/community", credits: 1, summary: "Details for an X (Twitter) community.", params: [url(TW_COMMUNITY)] },
+  { tool: "twitter_community_tweets", name: "Twitter/X Community Tweets", path: "/v1/twitter/community-tweets", credits: 18, summary: "Tweets posted in an X community.", params: [url(TW_COMMUNITY), limit(25, 200)] },
 ];
 
 const REDDIT: Omit<Endpoint, "platform">[] = [
@@ -261,6 +265,7 @@ const GITHUB: Omit<Endpoint, "platform">[] = [
 const AD_LIBRARY: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_ad_library_search", name: "Facebook Ad Library Search", path: "/v1/ad-library/facebook/search", credits: 20, summary: "Search Meta/Facebook ads by keyword.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
   { tool: "facebook_ad_library_company_ads", name: "Facebook Company Ads", path: "/v1/ad-library/facebook/company-ads", credits: 20, summary: "Ads for a Facebook page or Meta Ad Library URL.", params: [url("Facebook page URL or Meta Ad Library URL."), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
+  { tool: "facebook_ad_library_search_companies", name: "Facebook Ad Library Search Companies", path: "/v1/ad-library/facebook/search-companies", credits: 20, summary: "Find advertisers/pages in the Meta Ad Library by name.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
   { tool: "facebook_ad_library_ad_details", name: "Facebook Ad Details", path: "/v1/ad-library/facebook/ad-details", credits: 2, summary: "Meta/Facebook ad details.", params: [url("Meta Ad Library ad URL.")] },
   { tool: "tiktok_ad_library_search", name: "TikTok Ad Library Search", path: "/v1/ad-library/tiktok/search", credits: 20, summary: "Search TikTok Ad Library and Creative Center.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default DE." }, limit(20, 200)] },
   { tool: "tiktok_ad_library_ad_details", name: "TikTok Ad Details", path: "/v1/ad-library/tiktok/ad-details", credits: 2, summary: "TikTok ad details by ad URL or ID.", params: [url("TikTok Ad Library URL or ad ID."), { name: "country", type: "string", required: false, description: "ISO country code. Default DE." }] },

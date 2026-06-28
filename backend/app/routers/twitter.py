@@ -8,6 +8,7 @@ both actors expose several aliases for the same value across versions.
 from __future__ import annotations
 
 import math
+import re
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -243,4 +244,105 @@ async def twitter_search(
             ctx=ctx,
         )
         ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_TWEET, 2)
+        return ApiResponse(data=data)
+
+
+def _extract_community_id(value: str) -> str | None:
+    value = (value or "").strip()
+    match = re.search(r"/communities/(\d+)", value)
+    if match:
+        return match.group(1)
+    if value.isdigit():
+        return value
+    return None
+
+
+@router.get("/community", summary="X (Twitter) community details")
+async def twitter_community(
+    url: str = Query(..., description="Community URL (x.com/i/communities/ID) or community ID"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    community_id = _extract_community_id(url)
+    if not community_id:
+        raise HTTPException(status_code=400, detail="Invalid X community URL or ID")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/twitter/community",
+        platform="twitter",
+        resource_url=f"https://x.com/i/communities/{community_id}",
+        base_credits=1,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TWITTER_COMMUNITY,
+                {"mode": "Get Community Detail", "community_id": community_id},
+                max_items=1,
+            )
+            if not items:
+                raise HTTPException(status_code=404, detail="Community not found")
+            c = items[0]
+            return {
+                "platform": "twitter",
+                "id": safe_str(c.get("id") or c.get("community_id") or community_id),
+                "url": f"https://x.com/i/communities/{community_id}",
+                "name": safe_str(c.get("name") or c.get("title")),
+                "description": safe_str(c.get("description")),
+                "memberCount": safe_int(c.get("memberCount") or c.get("member_count") or c.get("members")),
+                "moderatorCount": safe_int(c.get("moderatorCount") or c.get("moderator_count")),
+                "createdAt": safe_str(c.get("createdAt") or c.get("created_at")),
+                "bannerImage": safe_str(c.get("bannerUrl") or c.get("banner_url") or c.get("coverImage")),
+                "rules": c.get("rules") or [],
+            }
+
+        data = await cached_or_run(
+            endpoint="twitter.community",
+            params={"community_id": community_id},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/community-tweets", summary="Tweets posted in an X community")
+async def twitter_community_tweets(
+    url: str = Query(..., description="Community URL (x.com/i/communities/ID) or community ID"),
+    limit: int = Query(25, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    community_id = _extract_community_id(url)
+    if not community_id:
+        raise HTTPException(status_code=400, detail="Invalid X community URL or ID")
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_TWEET, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/twitter/community-tweets",
+        platform="twitter",
+        resource_url=f"https://x.com/i/communities/{community_id}",
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TWITTER_COMMUNITY,
+                {
+                    "mode": "Get Community Tweets",
+                    "community_id": community_id,
+                    "tweet_type": "Latest",
+                    "max_results": limit,
+                },
+                max_items=limit,
+            )
+            tweets = [_normalize_tweet(t) for t in items[:limit]]
+            return {"communityId": community_id, "totalReturned": len(tweets), "tweets": tweets}
+
+        data = await cached_or_run(
+            endpoint="twitter.community-tweets",
+            params={"community_id": community_id, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["tweets"]), RATE_TWEET, 2)
         return ApiResponse(data=data)
