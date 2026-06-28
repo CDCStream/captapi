@@ -5,6 +5,61 @@ from __future__ import annotations
 import re
 from urllib.parse import parse_qs, urlparse
 
+PLATFORM_HOST_HINTS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("youtube", ("youtube.com", "youtu.be")),
+    ("tiktok", ("tiktok.com",)),
+    ("instagram", ("instagram.com",)),
+    ("facebook", ("facebook.com", "fb.watch")),
+    ("twitter", ("twitter.com", "x.com")),
+    ("reddit", ("reddit.com",)),
+    ("threads", ("threads.net", "threads.com")),
+    ("bluesky", ("bsky.app",)),
+    ("pinterest", ("pinterest.",)),
+    ("linkedin", ("linkedin.com",)),
+    ("rumble", ("rumble.com",)),
+    ("twitch", ("twitch.tv",)),
+    ("spotify", ("spotify.com",)),
+    ("soundcloud", ("soundcloud.com",)),
+    ("google_ad_library", ("adstransparency.google.com",)),
+    ("linktree", ("linktr.ee", "linktree.com")),
+    ("snapchat", ("snapchat.com",)),
+    ("truth_social", ("truthsocial.com",)),
+    ("kick", ("kick.com",)),
+    ("amazon_shop", ("amazon.",)),
+    ("kwai", ("kwai.com", "kuaishou.com")),
+    ("komi", ("komi.io",)),
+    ("pillar", ("pillar.io",)),
+    ("linkbio", ("lnk.bio",)),
+    ("linkme", ("link.me",)),
+)
+PLATFORM_DISPLAY_NAMES = {
+    "youtube": "YouTube",
+    "tiktok": "TikTok",
+    "instagram": "Instagram",
+    "facebook": "Facebook",
+    "twitter": "X/Twitter",
+    "reddit": "Reddit",
+    "threads": "Threads",
+    "bluesky": "Bluesky",
+    "pinterest": "Pinterest",
+    "linkedin": "LinkedIn",
+    "rumble": "Rumble",
+    "twitch": "Twitch",
+    "spotify": "Spotify",
+    "soundcloud": "SoundCloud",
+    "google_ad_library": "Google Ads Transparency Center",
+    "linktree": "Linktree",
+    "snapchat": "Snapchat",
+    "truth_social": "Truth Social",
+    "kick": "Kick",
+    "amazon_shop": "Amazon Shop",
+    "kwai": "Kwai",
+    "komi": "Komi",
+    "pillar": "Pillar",
+    "linkbio": "Linkbio",
+    "linkme": "Linkme",
+}
+
 YOUTUBE_RE = re.compile(
     r"(?:youtube\.com/(?:watch\?v=|shorts/|embed/|v/)|youtu\.be/)([A-Za-z0-9_-]{11})"
 )
@@ -47,6 +102,36 @@ def extract_youtube_id(url: str) -> str | None:
 def normalize_youtube_url(url: str) -> str:
     vid = extract_youtube_id(url)
     return f"https://www.youtube.com/watch?v={vid}" if vid else url
+
+
+def detect_url_platform(value: str) -> str | None:
+    """Best-effort platform detection from a public URL's hostname."""
+    if not value:
+        return None
+    try:
+        parsed = urlparse(value if "://" in value else f"https://{value}")
+        host = (parsed.netloc or "").lower()
+    except Exception:
+        host = ""
+    if not host:
+        return None
+    for platform, hints in PLATFORM_HOST_HINTS:
+        if any(hint in host for hint in hints):
+            return platform
+    return None
+
+
+def platform_mismatch_detail(value: str, expected: str, expected_example: str) -> str:
+    detected = detect_url_platform(value)
+    expected_label = PLATFORM_DISPLAY_NAMES.get(expected, expected.title())
+    if detected and detected != expected:
+        detected_label = PLATFORM_DISPLAY_NAMES.get(detected, detected.title())
+        return (
+            f"Expected a {expected_label} URL, but received a {detected_label} URL. "
+            f"Use the {detected_label} endpoint for that URL, or pass a {expected_label} URL "
+            f"like {expected_example}."
+        )
+    return f"Invalid {expected_label} URL. Pass a {expected_label} URL like {expected_example}."
 
 
 def is_youtube_short(url: str) -> bool:

@@ -16,7 +16,11 @@ from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
 from app.utils.formatters import safe_float, safe_int, safe_list, safe_str
-from app.utils.url import extract_tiktok_id, extract_tiktok_username
+from app.utils.url import (
+    extract_tiktok_id,
+    extract_tiktok_username,
+    platform_mismatch_detail,
+)
 
 router = APIRouter()
 
@@ -61,6 +65,34 @@ CREDIT_REPLIES_MIN = 30
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
     """Credits for `n` returned items at `rate` credits/item (with a floor)."""
     return max(minimum, math.ceil(n * rate))
+
+
+def _require_tiktok_video_url(url: str) -> str:
+    video_id = extract_tiktok_id(url)
+    if not video_id:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(
+                url,
+                "tiktok",
+                "https://www.tiktok.com/@user/video/1234567890",
+            ),
+        )
+    return video_id
+
+
+def _require_tiktok_profile(value: str) -> str:
+    handle = extract_tiktok_username(value)
+    if not handle:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(
+                value,
+                "tiktok",
+                "https://www.tiktok.com/@username",
+            ),
+        )
+    return handle
 
 
 # Residential proxy improves reliability of the dedicated comment/reply scraper
@@ -222,8 +254,7 @@ async def tiktok_video_details(
     url: str = Query(...),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_tiktok_id(url):
-        raise HTTPException(status_code=400, detail="Invalid TikTok video URL")
+    _require_tiktok_video_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -257,6 +288,7 @@ async def tiktok_transcript(
     url: str = Query(...),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _require_tiktok_video_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -315,6 +347,7 @@ async def tiktok_summarize(
     url: str = Query(...),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _require_tiktok_video_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -368,6 +401,7 @@ async def tiktok_comments(
     limit: int = Query(50, ge=1, le=500),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _require_tiktok_video_url(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_COMMENTS, 2)
     async with billed_call(
@@ -419,9 +453,7 @@ async def tiktok_channel_details(
     url: str = Query(..., description="https://tiktok.com/@username"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = extract_tiktok_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    handle = _require_tiktok_profile(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -469,9 +501,7 @@ async def tiktok_profile_region(
     url: str = Query(..., description="https://tiktok.com/@username or @handle"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = extract_tiktok_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    handle = _require_tiktok_profile(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -504,9 +534,7 @@ async def tiktok_live(
     url: str = Query(..., description="https://tiktok.com/@username or @handle"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = extract_tiktok_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    handle = _require_tiktok_profile(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -569,9 +597,7 @@ async def tiktok_live_info(
     # ScrapeCreators exposes both Live and Live Info. Our live endpoint already
     # returns status plus full room details, so this route is an explicit alias
     # with its own billing/cache key for compatibility.
-    handle = extract_tiktok_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    handle = _require_tiktok_profile(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -681,11 +707,21 @@ async def tiktok_popular_creators(
                 "maxItems": limit,
                 "proxyConfiguration": {"useApifyProxy": False, "apifyProxyGroups": []},
             }
+            fallback_input: dict[str, Any] = {
+                "creator_country": country.upper(),
+                "sort_by": "avg_views" if sort == "popularity" else sort,
+                "maxResults": limit,
+                "limit": min(limit, 50),
+            }
             if follower_count:
                 run_input["followerCount"] = follower_count
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_POPULAR_CREATORS,
-                run_input,
+                range_map = {"10k-100k": "1", "100k-1m": "2", "1m-10m": "3", ">10m": "4"}
+                fallback_input["audience_count"] = range_map.get(follower_count.lower(), follower_count)
+            items, _actor = await get_apify().run_with_fallback(
+                [
+                    (settings.APIFY_ACTOR_TIKTOK_POPULAR_CREATORS, run_input),
+                    (settings.APIFY_ACTOR_TIKTOK_POPULAR_CREATORS_FALLBACK, fallback_input),
+                ],
                 max_items=limit,
             )
             creators = [_normalize_creator(i) for i in items[:limit]]
@@ -712,9 +748,7 @@ async def tiktok_audience_demographics(
     url: str = Query(..., description="https://tiktok.com/@username or @handle"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = extract_tiktok_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    handle = _require_tiktok_profile(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -851,9 +885,7 @@ async def tiktok_channel_posts(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = extract_tiktok_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    handle = _require_tiktok_profile(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_CHANNEL_POSTS, 2)
     async with billed_call(
@@ -890,6 +922,7 @@ async def tiktok_comment_replies(
     limit: int = Query(50, ge=1, le=500),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _require_tiktok_video_url(url)
     settings = get_settings()
     # Worst-case crawl is REPLIES_MAX_ITEMS rows; pre-authorize that so we never
     # do paid work the caller can't afford. Actual charge is set from the real
@@ -907,39 +940,74 @@ async def tiktok_comment_replies(
         async def _run() -> dict[str, Any]:
             nonlocal crawled
             apify = get_apify()
-            # The dedicated reply scraper crawls a video's comments and emits
-            # each reply as its own row linked to its parent via
-            # ``parentCommentId``. We crawl enough top comments to surface the
-            # target comment, then keep only its replies.
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_COMMENT_REPLIES,
-                {
-                    "videoUrls": [url],
-                    "maxComments": REPLIES_MAX_COMMENTS,
-                    "includeReplies": True,
-                    "maxRepliesPerComment": min(limit, 500),
-                    "includeAuthorInfo": True,
-                    "sort": "top",
-                    "proxyConfiguration": TIKTOK_RESIDENTIAL_PROXY,
-                },
+            fast_input = {
+                "videoUrls": [url],
+                "maxCommentsPerVideo": REPLIES_MAX_COMMENTS,
+                "includeReplies": True,
+                "maxRepliesPerComment": min(limit, 500),
+            }
+            legacy_input = {
+                "videoUrls": [url],
+                "maxComments": REPLIES_MAX_COMMENTS,
+                "includeReplies": True,
+                "maxRepliesPerComment": min(limit, 500),
+                "includeAuthorInfo": True,
+                "sort": "top",
+                "proxyConfiguration": TIKTOK_RESIDENTIAL_PROXY,
+            }
+            items, _actor = await apify.run_with_fallback(
+                [
+                    (settings.APIFY_ACTOR_TIKTOK_COMMENT_REPLIES_FAST, fast_input),
+                    (settings.APIFY_ACTOR_TIKTOK_COMMENT_REPLIES, legacy_input),
+                ],
                 max_items=REPLIES_MAX_ITEMS,
             )
+            if not items:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_TIKTOK_COMMENT_REPLIES,
+                    legacy_input,
+                    max_items=REPLIES_MAX_ITEMS,
+                )
             crawled = len(items)
             replies = []
             for r in items:
-                # Reply rows are the only ones carrying parentCommentId.
-                if safe_str(r.get("parentCommentId")) != comment_id:
+                # Reply rows can use different parent id names depending on
+                # the actor. Some actors nest replies on the parent comment.
+                parent_id = safe_str(
+                    r.get("parentCommentId")
+                    or r.get("parentId")
+                    or r.get("repliesToId")
+                    or r.get("replyToCommentId")
+                )
+                if parent_id != comment_id:
+                    nested = r.get("replies") or r.get("_replies") or []
+                    if isinstance(nested, list) and safe_str(r.get("id") or r.get("cid")) == comment_id:
+                        for child in nested:
+                            replies.append(
+                                {
+                                    "id": safe_str(child.get("replyId") or child.get("cid") or child.get("id")),
+                                    "text": (child.get("replyText") or child.get("text") or child.get("body") or "").strip(),
+                                    "author": safe_str(child.get("replyAuthorUsername") or child.get("author") or child.get("uniqueId")),
+                                    "authorName": safe_str(child.get("replyAuthorNickname") or child.get("authorName") or child.get("nickname")),
+                                    "likeCount": safe_int(child.get("replyLikeCount") or child.get("likeCount") or child.get("likes")),
+                                    "publishedAt": safe_str(child.get("replyCreateTime") or child.get("createdAt") or child.get("createTimeISO")),
+                                    "verified": child.get("replyAuthorVerified") or child.get("verified"),
+                                    "profileImage": safe_str(child.get("replyAuthorAvatar") or child.get("avatar")),
+                                }
+                            )
+                            if len(replies) >= limit:
+                                break
                     continue
                 replies.append(
                     {
                         "id": safe_str(r.get("replyId") or r.get("cid") or r.get("id")),
-                        "text": (r.get("replyText") or r.get("text") or "").strip(),
-                        "author": safe_str(r.get("replyAuthorUsername")),
-                        "authorName": safe_str(r.get("replyAuthorNickname")),
-                        "likeCount": safe_int(r.get("replyLikeCount")),
-                        "publishedAt": safe_str(r.get("replyCreateTime")),
-                        "verified": r.get("replyAuthorVerified"),
-                        "profileImage": safe_str(r.get("replyAuthorAvatar")),
+                        "text": (r.get("replyText") or r.get("text") or r.get("body") or "").strip(),
+                        "author": safe_str(r.get("replyAuthorUsername") or r.get("author") or r.get("uniqueId")),
+                        "authorName": safe_str(r.get("replyAuthorNickname") or r.get("authorName") or r.get("nickname")),
+                        "likeCount": safe_int(r.get("replyLikeCount") or r.get("likeCount") or r.get("likes")),
+                        "publishedAt": safe_str(r.get("replyCreateTime") or r.get("createdAt") or r.get("createTimeISO")),
+                        "verified": r.get("replyAuthorVerified") or r.get("verified"),
+                        "profileImage": safe_str(r.get("replyAuthorAvatar") or r.get("avatar")),
                     }
                 )
                 if len(replies) >= limit:
@@ -972,9 +1040,7 @@ async def tiktok_user_followers(
     limit: int = Query(50, ge=1, le=500),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = extract_tiktok_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    handle = _require_tiktok_profile(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_FOLLOWERS, 5)
     async with billed_call(
@@ -1018,9 +1084,7 @@ async def tiktok_user_followings(
     limit: int = Query(50, ge=1, le=500),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = extract_tiktok_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    handle = _require_tiktok_profile(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_FOLLOWERS, 5)
     async with billed_call(
@@ -1244,6 +1308,39 @@ async def tiktok_song_details(
                         "duration": safe_float(song.get("duration")),
                         "coverUrl": safe_str(song.get("cover")),
                         "playUrl": None,
+                    }
+
+            # Fast fallback: summary-only sound scraper. Avoid crawling videos
+            # for a simple song-details lookup when possible.
+            try:
+                summary_items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_TIKTOK_SONG_FAST_FALLBACK,
+                    {
+                        "sounds": [url_id or url],
+                        "maxVideosPerSound": 0,
+                        "includeSoundSummary": True,
+                        "includeVideoFields": False,
+                    },
+                    max_items=1,
+                )
+            except Exception:  # noqa: BLE001
+                summary_items = []
+            if summary_items:
+                item = summary_items[0]
+                music = item.get("sound") or item.get("music") or item.get("summary") or item
+                title = safe_str(music.get("title") or music.get("musicName") or music.get("name"))
+                if title:
+                    return {
+                        "platform": "tiktok",
+                        "url": url,
+                        "id": url_id or safe_str(music.get("id") or music.get("musicId") or music.get("soundId")),
+                        "title": title,
+                        "author": safe_str(music.get("artist") or music.get("authorName") or music.get("author")),
+                        "original": bool(title) and title.lower().startswith("original sound"),
+                        "album": safe_str(music.get("album")),
+                        "duration": safe_float(music.get("duration") or music.get("durationSeconds")),
+                        "coverUrl": safe_str(music.get("cover") or music.get("coverUrl") or music.get("coverLarge")),
+                        "playUrl": safe_str(music.get("playUrl") or music.get("audioUrl")),
                     }
 
             # Fallback: clockworks sound scraper (slower, exposes playUrl).

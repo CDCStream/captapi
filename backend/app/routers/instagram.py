@@ -15,7 +15,12 @@ from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
 from app.utils.formatters import safe_float, safe_int, safe_list, safe_str
-from app.utils.url import extract_instagram_shortcode, extract_instagram_username
+from app.utils.url import (
+    detect_url_platform,
+    extract_instagram_shortcode,
+    extract_instagram_username,
+    platform_mismatch_detail,
+)
 
 router = APIRouter()
 
@@ -40,6 +45,35 @@ RATE_IG_MARGIN = 1.4
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
     """Credits for `n` returned items at `rate` credits/item (with a floor)."""
     return max(minimum, math.ceil(n * rate))
+
+
+def _reject_instagram_platform_mismatch(url: str, example: str) -> None:
+    detected = detect_url_platform(url)
+    if detected and detected != "instagram":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(url, "instagram", example),
+        )
+
+
+def _require_instagram_post_url(url: str) -> str:
+    shortcode = extract_instagram_shortcode(url)
+    if not shortcode:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(url, "instagram", "https://www.instagram.com/reel/SHORTCODE/"),
+        )
+    return shortcode
+
+
+def _require_instagram_profile(value: str) -> str:
+    handle = extract_instagram_username(value)
+    if not handle:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "instagram", "https://www.instagram.com/username/"),
+        )
+    return handle
 
 
 def _normalize_post(item: dict) -> dict:
@@ -69,6 +103,73 @@ def _normalize_post(item: dict) -> dict:
         },
         "hashtags": safe_list(item.get("hashtags")),
     }
+
+
+def _transcript_from_item(item: dict[str, Any]) -> tuple[str, list[dict[str, Any]]]:
+    raw_segments = (
+        item.get("transcriptSegments")
+        or item.get("segments")
+        or item.get("subtitles")
+        or item.get("captions")
+        or []
+    )
+    segments: list[dict[str, Any]] = []
+    parts: list[str] = []
+    if isinstance(raw_segments, list):
+        for seg in raw_segments:
+            if isinstance(seg, dict):
+                text = safe_str(seg.get("text") or seg.get("caption") or seg.get("sentence")).strip()
+                start = safe_float(seg.get("start") or seg.get("startTime") or seg.get("startMs")) or 0
+                duration = safe_float(seg.get("duration") or seg.get("dur") or seg.get("end")) or 0
+            else:
+                text = str(seg).strip()
+                start = 0
+                duration = 0
+            if text:
+                mm = int(start // 60)
+                ss = int(start % 60)
+                segments.append({"text": text, "start": start, "duration": duration, "timestamp": f"{mm:02d}:{ss:02d}"})
+                parts.append(text)
+    full = (
+        " ".join(parts)
+        or safe_str(item.get("transcript"))
+        or safe_str(item.get("text"))
+        or safe_str(item.get("caption"))
+        or ""
+    ).strip()
+    return full, segments
+
+
+async def _fetch_instagram_transcript(url: str) -> tuple[str, list[dict[str, Any]]]:
+    settings = get_settings()
+    apify = get_apify()
+    try:
+        items = await apify.run_actor_sync(
+            settings.APIFY_ACTOR_INSTAGRAM_TRANSCRIPT,
+            {
+                "videoUrls": [url],
+                "transcriptionMethod": settings.APIFY_INSTAGRAM_TRANSCRIPT_METHOD,
+            },
+            max_items=1,
+        )
+    except Exception:  # noqa: BLE001
+        items = []
+    if items:
+        full, segments = _transcript_from_item(items[0])
+        if full:
+            return full, segments
+
+    items = await apify.run_actor_sync(
+        settings.APIFY_ACTOR_INSTAGRAM_REEL,
+        {"directUrls": [url], "shouldDownloadSubtitles": True, "resultsLimit": 1},
+        max_items=1,
+    )
+    if not items:
+        raise HTTPException(status_code=404, detail="Reel not found")
+    full, segments = _transcript_from_item(items[0])
+    if not full:
+        raise HTTPException(status_code=422, detail="No transcript available")
+    return full, segments
 
 
 def _normalize_audio_reel(item: dict) -> dict:
@@ -108,8 +209,7 @@ async def instagram_details(
     url: str = Query(..., description="Instagram post or reel URL"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_instagram_shortcode(url):
-        raise HTTPException(status_code=400, detail="Invalid Instagram post/reel URL")
+    _require_instagram_post_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -143,8 +243,7 @@ async def instagram_transcript(
     url: str = Query(...),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_instagram_shortcode(url):
-        raise HTTPException(status_code=400, detail="Invalid Instagram URL")
+    _require_instagram_post_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -154,33 +253,7 @@ async def instagram_transcript(
         base_credits=CREDIT_TRANSCRIPT,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM_REEL,
-                {"directUrls": [url], "shouldDownloadSubtitles": True, "resultsLimit": 1},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Reel not found")
-            item = items[0]
-            subs = item.get("subtitles") or []
-            segments = []
-            parts = []
-            if isinstance(subs, list):
-                for s in subs:
-                    text = ((s.get("text") if isinstance(s, dict) else str(s)) or "").strip()
-                    start = float((s.get("start") if isinstance(s, dict) else 0) or 0)
-                    dur = float((s.get("duration") if isinstance(s, dict) else 0) or 0)
-                    if text:
-                        mm = int(start // 60)
-                        ss = int(start % 60)
-                        segments.append(
-                            {"text": text, "start": start, "duration": dur, "timestamp": f"{mm:02d}:{ss:02d}"}
-                        )
-                        parts.append(text)
-            full = " ".join(parts) or safe_str(item.get("caption")) or ""
-            if not full:
-                raise HTTPException(status_code=422, detail="No transcript available")
+            full, segments = await _fetch_instagram_transcript(url)
             return {
                 "platform": "instagram",
                 "url": url,
@@ -204,6 +277,7 @@ async def instagram_summarize(
     url: str = Query(...),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _require_instagram_post_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -213,26 +287,10 @@ async def instagram_summarize(
         base_credits=CREDIT_SUMMARIZE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM_REEL,
-                {"directUrls": [url], "shouldDownloadSubtitles": True, "resultsLimit": 1},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Reel not found")
-            item = items[0]
-            subs = item.get("subtitles") or []
-            parts = []
-            if isinstance(subs, list):
-                for s in subs:
-                    text = ((s.get("text") if isinstance(s, dict) else str(s)) or "").strip()
-                    if text:
-                        parts.append(text)
-            text = (" ".join(parts) or safe_str(item.get("caption")) or "").strip()
+            text, _segments = await _fetch_instagram_transcript(url)
             if not text:
                 raise HTTPException(status_code=422, detail="No content to summarize")
-            ai = await summarize_transcript(text, title=safe_str(item.get("caption")))
+            ai = await summarize_transcript(text)
             return {
                 "platform": "instagram",
                 "url": url,
@@ -257,6 +315,7 @@ async def instagram_comments(
     limit: int = Query(50, ge=1, le=500),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _require_instagram_post_url(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_IG_RICH, 2)
     async with billed_call(
@@ -307,9 +366,7 @@ async def instagram_channel_details(
     url: str = Query(...),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = extract_instagram_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid Instagram profile URL")
+    handle = _require_instagram_profile(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -356,9 +413,7 @@ async def instagram_basic_profile(
     url: str = Query(..., description="Instagram profile URL or @handle"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = extract_instagram_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid Instagram profile URL")
+    handle = _require_instagram_profile(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -403,9 +458,7 @@ async def instagram_channel_posts(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = extract_instagram_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid profile URL")
+    handle = _require_instagram_profile(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_IG_POSTS, 2)
     async with billed_call(
@@ -445,9 +498,7 @@ async def instagram_channel_reels(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = extract_instagram_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid profile URL")
+    handle = _require_instagram_profile(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_IG_POSTS, 2)
     async with billed_call(
@@ -487,6 +538,7 @@ async def instagram_reels_search(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _require_instagram_post_url(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_IG_POSTS, CREDIT_SEARCH)
     async with billed_call(
@@ -602,6 +654,7 @@ async def instagram_reels_by_audio_id(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_instagram_platform_mismatch(audio_id, "https://www.instagram.com/reels/audio/123456789/")
     audio_url = audio_id if audio_id.startswith("http") else f"https://www.instagram.com/reels/audio/{audio_id}/"
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_IG_MARGIN, 2)
@@ -637,9 +690,7 @@ async def instagram_tagged_posts(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = extract_instagram_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid profile URL")
+    handle = _require_instagram_profile(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_IG_RICH, 2)
     async with billed_call(
@@ -675,6 +726,7 @@ async def instagram_music_posts(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_instagram_platform_mismatch(url, "https://www.instagram.com/reels/audio/123456789/")
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_IG_RICH, 3)
     async with billed_call(
@@ -810,9 +862,7 @@ async def instagram_story_highlights(
     url: str = Query(..., description="Instagram profile URL"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = extract_instagram_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid profile URL")
+    handle = _require_instagram_profile(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -855,9 +905,7 @@ async def instagram_highlights_details(
     limit: int = Query(10, ge=1, le=50, description="Max highlights to expand"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = extract_instagram_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid profile URL")
+    handle = _require_instagram_profile(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_IG_RICH, 5)
     async with billed_call(
@@ -918,9 +966,7 @@ async def instagram_embed(
     url: str = Query(..., description="Instagram post or reel URL"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    shortcode = extract_instagram_shortcode(url)
-    if not shortcode:
-        raise HTTPException(status_code=400, detail="Invalid Instagram post/reel URL")
+    shortcode = _require_instagram_post_url(url)
     # Pure string build — no Apify call, so this is a flat 1-credit endpoint.
     async with billed_call(
         caller=caller,

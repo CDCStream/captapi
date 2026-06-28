@@ -21,6 +21,7 @@ from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 
 from app import __version__
+from app.core.config import get_settings
 from app.services.mcp_catalog import BY_TOOL, ENDPOINTS, describe, tool_input_schema
 
 router = APIRouter()
@@ -103,12 +104,13 @@ async def _call_tool(request: Request, name: str, arguments: dict) -> dict:
 
     # Dispatch in-process to the real REST endpoint so all auth / credit /
     # cache / rate-limit logic runs exactly once, identically to a direct call.
+    settings = get_settings()
     transport = httpx.ASGITransport(app=request.app, raise_app_exceptions=False)
     try:
         async with httpx.AsyncClient(
             transport=transport,
             base_url="http://captapi.internal",
-            timeout=httpx.Timeout(120.0),
+            timeout=httpx.Timeout(settings.MCP_TOOL_TIMEOUT_SECONDS),
         ) as client:
             resp = await client.get(
                 endpoint.path,

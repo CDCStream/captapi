@@ -15,11 +15,18 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_str
+from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
 
 
 def _profile_url(value: str) -> str:
+    detected = detect_url_platform(value)
+    if detected and detected != "linktree":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "linktree", "https://linktr.ee/username"),
+        )
     value = (value or "").strip().rstrip("/")
     if value.startswith("http"):
         return value

@@ -14,6 +14,7 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
+from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
 
@@ -25,6 +26,12 @@ def _scaled(n: int, rate: float = RATE, minimum: int = 2) -> int:
 
 
 def _profile_url(value: str) -> str:
+    detected = detect_url_platform(value)
+    if detected and detected != "soundcloud":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "soundcloud", "https://soundcloud.com/artist"),
+        )
     value = (value or "").strip().rstrip("/")
     if value.startswith("http"):
         return value
@@ -118,8 +125,14 @@ async def track(
     url: str = Query(..., description="SoundCloud track URL"),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    detected = detect_url_platform(url)
+    if detected and detected != "soundcloud":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(url, "soundcloud", "https://soundcloud.com/artist/track"),
+        )
     if "soundcloud.com/" not in url:
-        raise HTTPException(status_code=400, detail="Invalid SoundCloud track URL")
+        raise HTTPException(status_code=400, detail="Invalid SoundCloud track URL. Pass a SoundCloud URL like https://soundcloud.com/artist/track.")
     async with billed_call(caller=caller, endpoint="/v1/soundcloud/track", platform="soundcloud", resource_url=url, base_credits=7) as ctx:
         async def _run() -> dict[str, Any]:
             settings = get_settings()

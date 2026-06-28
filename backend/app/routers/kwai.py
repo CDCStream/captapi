@@ -15,11 +15,18 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
+from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
 
 
 def _id(value: str) -> str | None:
+    detected = detect_url_platform(value)
+    if detected and detected != "kwai":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "kwai", "https://www.kuaishou.com/profile/2542916559"),
+        )
     value = (value or "").strip().rstrip("/")
     match = re.search(r"(?:profile|user)/([A-Za-z0-9_-]+)", value)
     if match:

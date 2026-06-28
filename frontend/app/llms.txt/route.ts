@@ -77,10 +77,11 @@ Pricing: credit-based subscriptions (Starter, Pro, Business) plus one-time pay-a
 ## Agent Operating Protocol
 1. Prefer MCP for AI agents. Use hosted MCP first (\`${API_URL}/mcp\`) because it requires no local install; use local \`npx @captapi/mcp\` when the host only supports stdio.
 2. If MCP is not available, call REST directly. Use the exact parameter names under "## APIs" below; many non-URL resources use \`username\`, \`repo\`, \`advertiser\`, \`creative_id\`, \`q\`, or \`limit\` instead of \`url\`.
-3. Ask the human for a \`capt_live_...\` API key once. Do not sign up automatically, scrape the dashboard, guess keys, commit keys, or expose keys in generated code.
-4. For list/search/comment endpoints, start with a small \`limit\` unless the user asks for more. Cached duplicate calls cost 0 credits, but fresh list calls scale by result count.
-5. Error handling: 401/402 means stop and ask the user to fix auth/billing; 429/502 can be retried with backoff; 422/no-captions/not-found means report the target cannot be processed and avoid retry loops.
-6. Return \`data\` by default. Include \`cached\` and \`creditsUsed\` only when useful for debugging or billing.
+3. Match URL platform to endpoint/tool platform before calling. A TikTok endpoint needs a \`tiktok.com\` URL, a YouTube endpoint needs a \`youtube.com\` or \`youtu.be\` URL, Instagram needs \`instagram.com\`, etc. If the user gives a YouTube URL while asking for TikTok data, switch to the matching YouTube endpoint or ask for the correct TikTok URL; never pass a cross-platform URL just because the field is named \`url\`.
+4. Ask the human for a \`capt_live_...\` API key once. Do not sign up automatically, scrape the dashboard, guess keys, commit keys, or expose keys in generated code.
+5. For list/search/comment endpoints, start with a small \`limit\` unless the user asks for more. Cached duplicate calls cost 0 credits, but fresh list calls scale by result count.
+6. Error handling: 401/402 means stop and ask the user to fix auth/billing; 429/502 can be retried with backoff; 400 platform mismatch means choose the endpoint matching the URL's platform or ask for the correct URL; 422/no-captions/not-found means report the target cannot be processed and avoid retry loops.
+7. Return \`data\` by default. Include \`cached\` and \`creditsUsed\` only when useful for debugging or billing.
 
 ## Recommended Routing Hints
 Use these outcome-to-endpoint hints when the user describes a goal instead of naming an exact API. Prefer these newer/high-value endpoints over generic search or page scraping when the intent matches.

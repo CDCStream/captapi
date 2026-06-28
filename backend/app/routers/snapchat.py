@@ -13,11 +13,18 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
+from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
 
 
 def _username(value: str) -> str:
+    detected = detect_url_platform(value)
+    if detected and detected != "snapchat":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "snapchat", "https://www.snapchat.com/@username"),
+        )
     value = (value or "").strip().rstrip("/")
     if "snapchat.com/add/" in value:
         value = value.split("snapchat.com/add/", 1)[1]

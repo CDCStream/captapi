@@ -15,6 +15,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_str
+from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
 
@@ -24,6 +25,12 @@ BASES = {
     # ScrapeCreators' "Linkbio" endpoint targets lnk.bio (not linkbio.co/Instabio).
     "linkbio": "https://lnk.bio",
     "linkme": "https://link.me",
+}
+EXAMPLES = {
+    "komi": "https://komi.io/username",
+    "pillar": "https://pillar.io/username",
+    "linkbio": "https://lnk.bio/username",
+    "linkme": "https://link.me/username",
 }
 
 # lnk.bio (and similar) sprinkle their own nav/share links through the markup;
@@ -168,6 +175,12 @@ async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
 
 
 async def _page(platform: str, url: str, caller: ApiCaller):
+    detected = detect_url_platform(url)
+    if detected and detected != platform:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(url, platform, EXAMPLES[platform]),
+        )
     profile = _url(platform, url)
     async with billed_call(caller=caller, endpoint=f"/v1/{platform}/{'profile' if platform == 'linkme' else 'page'}", platform=platform, resource_url=profile, base_credits=4) as ctx:
         data = await cached_or_run(f"{platform}.page", {"url": profile}, lambda: _fetch_page(platform, profile), ctx)

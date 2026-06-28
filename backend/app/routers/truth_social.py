@@ -15,6 +15,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
+from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
 
@@ -26,6 +27,12 @@ HEADERS = {
 
 
 def _username(value: str) -> str:
+    detected = detect_url_platform(value)
+    if detected and detected != "truth_social":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "truth_social", "https://truthsocial.com/@username"),
+        )
     value = (value or "").strip().rstrip("/")
     match = re.search(r"truthsocial\.com/@([^/?#]+)", value)
     if match:
@@ -34,6 +41,12 @@ def _username(value: str) -> str:
 
 
 def _post_id(value: str) -> str | None:
+    detected = detect_url_platform(value)
+    if detected and detected != "truth_social":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "truth_social", "https://truthsocial.com/@username/posts/1234567890"),
+        )
     match = re.search(r"/posts/([0-9]+)", value or "")
     if match:
         return match.group(1)

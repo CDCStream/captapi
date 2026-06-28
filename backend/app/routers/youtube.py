@@ -20,6 +20,7 @@ from app.utils.formatters import safe_int, safe_list, safe_str
 from app.utils.url import (
     extract_youtube_id,
     normalize_youtube_url,
+    platform_mismatch_detail,
 )
 
 router = APIRouter()
@@ -104,7 +105,14 @@ def _community_post(p: dict) -> dict:
 def _require_youtube_url(url: str) -> tuple[str, str]:
     vid = extract_youtube_id(url)
     if not vid:
-        raise HTTPException(status_code=400, detail="Invalid YouTube URL")
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(
+                url,
+                "youtube",
+                "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            ),
+        )
     return vid, normalize_youtube_url(url)
 
 

@@ -20,7 +20,12 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
-from app.utils.url import extract_pinterest_pin_id, extract_pinterest_username
+from app.utils.url import (
+    detect_url_platform,
+    extract_pinterest_pin_id,
+    extract_pinterest_username,
+    platform_mismatch_detail,
+)
 
 router = APIRouter()
 
@@ -30,6 +35,36 @@ RATE = 0.5
 
 def _scaled(n: int, rate: float, minimum: int) -> int:
     return max(minimum, math.ceil(n * rate))
+
+
+def _reject_pinterest_platform_mismatch(value: str, example: str) -> None:
+    detected = detect_url_platform(value)
+    if detected and detected != "pinterest":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "pinterest", example),
+        )
+
+
+def _require_pinterest_pin_url(url: str) -> str:
+    pin_id = extract_pinterest_pin_id(url)
+    if not pin_id:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(url, "pinterest", "https://www.pinterest.com/pin/123456789/"),
+        )
+    return pin_id
+
+
+def _require_pinterest_username(value: str) -> str:
+    _reject_pinterest_platform_mismatch(value, "https://www.pinterest.com/username/")
+    username = extract_pinterest_username(value)
+    if not username:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "pinterest", "https://www.pinterest.com/username/"),
+        )
+    return username
 
 
 def _image(item: dict[str, Any]) -> str | None:
@@ -162,8 +197,7 @@ async def pin_details(
     url: str = Query(..., description="Pinterest pin URL"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_pinterest_pin_id(url):
-        raise HTTPException(status_code=400, detail="Invalid Pinterest pin URL")
+    _require_pinterest_pin_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -201,9 +235,7 @@ async def user_pins(
     limit: int = Query(25, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    username = extract_pinterest_username(url)
-    if not username:
-        raise HTTPException(status_code=400, detail="Invalid Pinterest profile")
+    username = _require_pinterest_username(url)
     settings = get_settings()
     cost = _scaled(limit, RATE, 2)
     async with billed_call(
@@ -273,9 +305,7 @@ async def pinterest_user_boards(
     limit: int = Query(25, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    username = extract_pinterest_username(url)
-    if not username:
-        raise HTTPException(status_code=400, detail="Invalid Pinterest profile")
+    username = _require_pinterest_username(url)
     settings = get_settings()
     cost = _scaled(limit, RATE, 2)
     async with billed_call(
@@ -321,6 +351,7 @@ async def pinterest_board(
     limit: int = Query(25, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_pinterest_platform_mismatch(url, "https://www.pinterest.com/username/board-name/")
     if not _is_board_url(url):
         raise HTTPException(status_code=400, detail="Invalid Pinterest board URL")
     settings = get_settings()

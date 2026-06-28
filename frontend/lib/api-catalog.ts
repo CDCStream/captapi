@@ -1051,17 +1051,22 @@ export function delivers(ep: ApiEndpoint): string[] {
 // These mirror the backend routers exactly so every endpoint page, the docs,
 // and the MCP "Agent Integrations" tab show the correct inputs.
 
-const up = (description: string): ApiParam => ({ name: "url", type: "string", required: true, description });
+const up = (description: string): ApiParam => ({
+  name: "url",
+  type: "string",
+  required: true,
+  description: `${description} The URL platform must match this endpoint's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.`,
+});
 const qp = (description = "Search query or keywords (min 2 characters)."): ApiParam => ({ name: "q", type: "string", required: true, description });
 const lp = (def: number, max: number): ApiParam => ({ name: "limit", type: "integer", required: false, description: `Max items to return (default ${def}, max ${max}). Billed per result.` });
 const lang = (): ApiParam => ({ name: "language", type: "string", required: false, description: 'Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.' });
 const cid = (): ApiParam => ({ name: "comment_id", type: "string", required: true, description: "ID of the parent comment to fetch replies for (from the comments endpoint)." });
 
-const YT_VIDEO = "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID.";
-const YT_SHORTS = "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID.";
+const YT_VIDEO = "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL.";
+const YT_SHORTS = "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL.";
 const YT_CHANNEL = "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC...";
-const TT_VIDEO = "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID.";
-const TT_PROFILE = "TikTok profile URL, e.g. https://tiktok.com/@username.";
+const TT_VIDEO = "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL.";
+const TT_PROFILE = "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL.";
 const TT_MUSIC = "TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID.";
 const IG_POST = "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/.";
 const IG_REEL = "Instagram Reel URL, e.g. https://instagram.com/reel/ID/.";

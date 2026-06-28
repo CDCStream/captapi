@@ -26,9 +26,18 @@ class ApifyError(Exception):
 class ApifyClient:
     BASE = "https://api.apify.com/v2"
 
-    def __init__(self, token: str | None = None, timeout: float = 180.0):
-        self.token = token or get_settings().APIFY_TOKEN
-        self.timeout = timeout
+    def __init__(
+        self,
+        token: str | None = None,
+        timeout: float | None = None,
+        max_attempts: int | None = None,
+        retry_max_wait: float | None = None,
+    ):
+        settings = get_settings()
+        self.token = token or settings.APIFY_TOKEN
+        self.timeout = timeout or settings.APIFY_SYNC_TIMEOUT_SECONDS
+        self.max_attempts = max_attempts or settings.APIFY_SYNC_MAX_ATTEMPTS
+        self.retry_max_wait = retry_max_wait or settings.APIFY_SYNC_RETRY_MAX_WAIT_SECONDS
 
     async def run_actor_sync(
         self,
@@ -47,17 +56,22 @@ class ApifyClient:
             params["limit"] = max_items
 
         async for attempt in AsyncRetrying(
-            stop=stop_after_attempt(3),
-            wait=wait_exponential(multiplier=1, min=2, max=10),
+            stop=stop_after_attempt(self.max_attempts),
+            wait=wait_exponential(multiplier=1, min=1, max=self.retry_max_wait),
             retry=retry_if_exception_type((httpx.HTTPError, ApifyError)),
             reraise=True,
         ):
             with attempt:
-                async with httpx.AsyncClient(timeout=self.timeout) as client:
-                    resp = await client.post(url, params=params, json=run_input)
+                try:
+                    async with httpx.AsyncClient(timeout=self.timeout) as client:
+                        resp = await client.post(url, params=params, json=run_input)
+                except httpx.TimeoutException as exc:
+                    raise ApifyError(
+                        f"Actor timeout after {self.timeout:g}s"
+                    ) from exc
 
                 if resp.status_code == 408:
-                    raise ApifyError("Actor timeout")
+                    raise ApifyError(f"Actor timeout after {self.timeout:g}s")
                 if resp.status_code >= 500:
                     raise ApifyError(f"Apify server error: {resp.status_code}")
                 if resp.status_code == 402:

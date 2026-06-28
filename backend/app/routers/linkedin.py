@@ -18,7 +18,12 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
-from app.utils.url import extract_linkedin_company, extract_linkedin_profile
+from app.utils.url import (
+    detect_url_platform,
+    extract_linkedin_company,
+    extract_linkedin_profile,
+    platform_mismatch_detail,
+)
 
 router = APIRouter()
 
@@ -29,6 +34,35 @@ RATE = 0.8
 
 def _scaled(limit: int, minimum: int = 2) -> int:
     return max(minimum, math.ceil(limit * RATE))
+
+
+def _reject_linkedin_platform_mismatch(value: str, example: str) -> None:
+    detected = detect_url_platform(value)
+    if detected and detected != "linkedin":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "linkedin", example),
+        )
+
+
+def _require_linkedin_profile_url(url: str) -> str:
+    slug = extract_linkedin_profile(url)
+    if not slug:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(url, "linkedin", "https://www.linkedin.com/in/username"),
+        )
+    return slug
+
+
+def _require_linkedin_company_url(url: str) -> str:
+    slug = extract_linkedin_company(url)
+    if not slug:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(url, "linkedin", "https://www.linkedin.com/company/company-name"),
+        )
+    return slug
 
 
 def _first(items: list[dict[str, Any]]) -> dict[str, Any]:
@@ -117,9 +151,7 @@ async def linkedin_profile(
     url: str = Query(..., description="LinkedIn profile URL, e.g. https://linkedin.com/in/slug"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    slug = extract_linkedin_profile(url)
-    if not slug:
-        raise HTTPException(status_code=400, detail="Invalid LinkedIn profile URL")
+    slug = _require_linkedin_profile_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -151,9 +183,7 @@ async def linkedin_company(
     url: str = Query(..., description="LinkedIn company URL, e.g. https://linkedin.com/company/slug"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    slug = extract_linkedin_company(url)
-    if not slug:
-        raise HTTPException(status_code=400, detail="Invalid LinkedIn company URL")
+    slug = _require_linkedin_company_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -185,8 +215,9 @@ async def linkedin_post_details(
     url: str = Query(..., description="LinkedIn post/activity URL"),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_linkedin_platform_mismatch(url, "https://www.linkedin.com/posts/activity-123456789")
     if "linkedin.com" not in (url or ""):
-        raise HTTPException(status_code=400, detail="Invalid LinkedIn post URL")
+        raise HTTPException(status_code=400, detail="Invalid LinkedIn post URL. Pass a LinkedIn URL like https://www.linkedin.com/posts/activity-123456789.")
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -218,8 +249,9 @@ async def linkedin_post_transcript(
     url: str = Query(..., description="LinkedIn post/activity URL"),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_linkedin_platform_mismatch(url, "https://www.linkedin.com/posts/activity-123456789")
     if "linkedin.com" not in (url or ""):
-        raise HTTPException(status_code=400, detail="Invalid LinkedIn post URL")
+        raise HTTPException(status_code=400, detail="Invalid LinkedIn post URL. Pass a LinkedIn URL like https://www.linkedin.com/posts/activity-123456789.")
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -264,9 +296,7 @@ async def linkedin_company_posts(
     limit: int = Query(20, ge=1, le=100),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    slug = extract_linkedin_company(url)
-    if not slug:
-        raise HTTPException(status_code=400, detail="Invalid LinkedIn company URL")
+    slug = _require_linkedin_company_url(url)
     settings = get_settings()
     company_url = f"https://www.linkedin.com/company/{slug}"
     async with billed_call(

@@ -186,8 +186,8 @@ export async function GET() {
     agent_usage: {
       recommended_path: "Use hosted MCP first; use local stdio MCP when the client cannot connect to remote HTTP MCP; use REST as a fallback.",
       key_policy: "Ask the human for a capt_live_... key. Never sign up automatically, guess keys, commit keys, or print keys in logs.",
-      parameter_policy: "Use each tool schema exactly. Some endpoints require username, repo, advertiser, creative_id, q, or limit instead of url.",
-      retry_policy: "Do not retry 401/402; ask the user to fix auth or credits. Retry 429/502 with backoff. Do not loop on 422/not-found/no-captions.",
+      parameter_policy: "Use each tool schema exactly. Some endpoints require username, repo, advertiser, creative_id, q, or limit instead of url. For url parameters, the URL platform must match the tool platform: do not pass a YouTube URL to a TikTok tool, or a TikTok URL to a YouTube tool. If the URL platform differs from the requested tool, switch to the matching platform tool or ask the user for the correct URL.",
+      retry_policy: "Do not retry 401/402; ask the user to fix auth or credits. Retry 429/502 with backoff. Do not retry 400 platform mismatch; choose the endpoint matching the URL's platform or ask for the correct URL. Do not loop on 422/not-found/no-captions.",
       output_policy: "Return the API data object by default; include cached and creditsUsed only when relevant.",
     },
     routing_hints: AGENT_ROUTING_EXAMPLES.map((ex) => {

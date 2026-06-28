@@ -16,6 +16,7 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
+from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
 
@@ -26,6 +27,15 @@ RATE_GOOGLE_ADVERTISER = 4.5
 
 def _scaled(limit: int, rate: float = RATE_AD_LIST, minimum: int = 2) -> int:
     return max(minimum, math.ceil(limit * rate))
+
+
+def _reject_ad_platform_mismatch(value: str, expected: str, example: str) -> None:
+    detected = detect_url_platform(value)
+    if detected and detected != expected:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, expected, example),
+        )
 
 
 def _first(*values: Any) -> Any:
@@ -53,6 +63,7 @@ def _listify(value: Any) -> list[Any]:
 
 
 def _facebook_ad_url(value: str) -> str:
+    _reject_ad_platform_mismatch(value, "facebook", "https://www.facebook.com/ads/library/?id=123456789")
     value = value.strip()
     if value.isdigit():
         return f"https://www.facebook.com/ads/library/?id={value}"
@@ -72,6 +83,7 @@ def _facebook_search_url(q: str, country: str) -> str:
 
 
 def _tiktok_ad_id(value: str) -> str:
+    _reject_ad_platform_mismatch(value, "tiktok", "https://ads.tiktok.com/business/creativecenter/inspiration/topads/detail/123456789")
     match = re.search(r"(?:ad_id|id)=([0-9]+)", value)
     if match:
         return match.group(1)
@@ -83,6 +95,7 @@ def _tiktok_ad_id(value: str) -> str:
 
 
 def _linkedin_ad_url(value: str) -> str:
+    _reject_ad_platform_mismatch(value, "linkedin", "https://www.linkedin.com/ad-library/detail/123456789")
     value = value.strip()
     if value.isdigit():
         return f"https://www.linkedin.com/ad-library/detail/{value}"
@@ -90,6 +103,7 @@ def _linkedin_ad_url(value: str) -> str:
 
 
 def _google_ids(value: str) -> tuple[str | None, str | None]:
+    _reject_ad_platform_mismatch(value, "google_ad_library", "https://adstransparency.google.com/advertiser/AR123/creative/CR123")
     advertiser = re.search(r"\b(AR[0-9]+)\b", value)
     creative = re.search(r"\b(CR[0-9]+)\b", value)
     return (
@@ -308,6 +322,7 @@ async def facebook_company_ads(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_ad_platform_mismatch(url, "facebook", "https://www.facebook.com/ads/library/?id=123456789")
     settings = get_settings()
     async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/company-ads", platform="facebook_ad_library", resource_url=url, base_credits=_scaled(limit)) as ctx:
         async def _run() -> dict[str, Any]:
@@ -443,11 +458,20 @@ async def tiktok_ad_details(
     ad_id = _tiktok_ad_id(url)
     async with billed_call(caller=caller, endpoint="/v1/ad-library/tiktok/ad-details", platform="tiktok_ad_library", resource_url=ad_id, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(
-                settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL,
-                {"adIds": [ad_id], "country": country.upper(), "maxResults": 1, "quickSearch": False},
-                1,
-            )
+            try:
+                items = await _run_actor(
+                    settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL,
+                    {"adIds": [ad_id], "country": country.upper(), "maxResults": 1, "quickSearch": False},
+                    1,
+                )
+            except Exception:  # noqa: BLE001
+                items = []
+            if not items:
+                items = await _run_actor(
+                    settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL_FALLBACK,
+                    {"ad_id": ad_id, "region": country.lower(), "limit": 1},
+                    1,
+                )
             if not items:
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(items[0], "tiktok_ad_library")

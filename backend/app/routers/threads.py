@@ -18,7 +18,12 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
-from app.utils.url import extract_threads_post_code, normalize_threads_username
+from app.utils.url import (
+    detect_url_platform,
+    extract_threads_post_code,
+    normalize_threads_username,
+    platform_mismatch_detail,
+)
 
 router = APIRouter()
 
@@ -29,6 +34,36 @@ RATE = 0.7
 
 def _scaled(n: int, rate: float, minimum: int) -> int:
     return max(minimum, math.ceil(n * rate))
+
+
+def _reject_threads_platform_mismatch(value: str, example: str) -> None:
+    detected = detect_url_platform(value)
+    if detected and detected != "threads":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "threads", example),
+        )
+
+
+def _require_threads_handle(value: str) -> str:
+    _reject_threads_platform_mismatch(value, "https://www.threads.net/@username")
+    handle = normalize_threads_username(value)
+    if not handle:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "threads", "https://www.threads.net/@username"),
+        )
+    return handle
+
+
+def _require_threads_post_url(url: str) -> str:
+    code = extract_threads_post_code(url)
+    if not code:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(url, "threads", "https://www.threads.net/@user/post/POST_ID"),
+        )
+    return code
 
 
 def _user(u: dict[str, Any]) -> dict[str, Any]:
@@ -114,9 +149,7 @@ async def threads_profile(
     url: str = Query(..., description="Threads profile URL or @handle"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = normalize_threads_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid Threads profile URL or handle")
+    handle = _require_threads_handle(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -151,9 +184,7 @@ async def threads_user_posts(
     limit: int = Query(20, ge=1, le=100),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = normalize_threads_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid Threads profile URL or handle")
+    handle = _require_threads_handle(url)
     settings = get_settings()
     cost = _scaled(limit, RATE, 2)
     async with billed_call(
@@ -270,8 +301,7 @@ async def threads_post_details(
     url: str = Query(..., description="Threads post URL"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_threads_post_code(url):
-        raise HTTPException(status_code=400, detail="Invalid Threads post URL")
+    _require_threads_post_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,

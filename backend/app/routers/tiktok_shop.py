@@ -14,6 +14,7 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
+from app.utils.url import detect_url_platform, extract_tiktok_username, platform_mismatch_detail
 
 router = APIRouter()
 
@@ -23,6 +24,15 @@ RATE_REVIEWS = 2.25
 
 def _scaled(limit: int, rate: float, minimum: int = 2) -> int:
     return max(minimum, math.ceil(limit * rate))
+
+
+def _reject_non_tiktok_url(value: str, example: str) -> None:
+    detected = detect_url_platform(value)
+    if detected and detected != "tiktok":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "tiktok", example),
+        )
 
 
 def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
@@ -99,8 +109,9 @@ async def shop_products(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_non_tiktok_url(url, "https://www.tiktok.com/shop/store")
     if "tiktok" not in url or "shop" not in url:
-        raise HTTPException(status_code=400, detail="Invalid TikTok Shop URL")
+        raise HTTPException(status_code=400, detail="Invalid TikTok Shop URL. Pass a TikTok Shop URL like https://www.tiktok.com/shop/store.")
     async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/shop-products", platform="tiktok_shop", resource_url=url, base_credits=_scaled(limit, RATE_SHOP)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_shop("shop_catalog", {"shopUrls": [url], "maxResults": limit}, limit)
@@ -117,8 +128,9 @@ async def product_details(
     url: str = Query(..., description="TikTok Shop product URL"),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_non_tiktok_url(url, "https://www.tiktok.com/shop/pdp/product/123")
     if "tiktok" not in url or "shop" not in url:
-        raise HTTPException(status_code=400, detail="Invalid TikTok Shop product URL")
+        raise HTTPException(status_code=400, detail="Invalid TikTok Shop product URL. Pass a TikTok Shop product URL like https://www.tiktok.com/shop/pdp/product/123.")
     async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/product-details", platform="tiktok_shop", resource_url=url, base_credits=14) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_shop("product_details", {"productUrls": [url], "maxResults": 1}, 1)
@@ -138,8 +150,9 @@ async def product_reviews(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_non_tiktok_url(url, "https://www.tiktok.com/shop/pdp/product/123")
     if "tiktok" not in url or "shop" not in url:
-        raise HTTPException(status_code=400, detail="Invalid TikTok Shop product URL")
+        raise HTTPException(status_code=400, detail="Invalid TikTok Shop product URL. Pass a TikTok Shop product URL like https://www.tiktok.com/shop/pdp/product/123.")
     async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/product-reviews", platform="tiktok_shop", resource_url=url, base_credits=_scaled(limit, RATE_REVIEWS)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_shop("product_reviews", {"productUrls": [url], "maxReviews": limit, "maxResults": limit}, limit)
@@ -157,7 +170,8 @@ async def user_showcase(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = username.strip().lstrip("@")
+    _reject_non_tiktok_url(username, "https://www.tiktok.com/@username")
+    handle = extract_tiktok_username(username) or username.strip().lstrip("@")
     if not handle:
         raise HTTPException(status_code=400, detail="Invalid TikTok username")
     async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/user-showcase", platform="tiktok_shop", resource_url=f"https://www.tiktok.com/@{handle}", base_credits=_scaled(limit, RATE_REVIEWS)) as ctx:

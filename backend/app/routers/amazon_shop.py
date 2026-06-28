@@ -14,6 +14,7 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_float, safe_int, safe_str
+from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
 
@@ -60,6 +61,12 @@ async def amazon_shop_page(
     limit: int = Query(20, ge=0, le=200, description="Max products to include. Use 0 for shop metadata only when supported."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    detected = detect_url_platform(url)
+    if detected and detected != "amazon_shop":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(url, "amazon_shop", "https://www.amazon.com/shop/storefront"),
+        )
     settings = get_settings()
     async with billed_call(caller=caller, endpoint="/v1/amazon-shop/page", platform="amazon_shop", resource_url=url, base_credits=max(5, math.ceil(limit * 4.45))) as ctx:
         async def _run() -> dict[str, Any]:

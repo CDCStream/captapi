@@ -18,7 +18,12 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
-from app.utils.url import extract_bluesky_post, normalize_bluesky_handle
+from app.utils.url import (
+    detect_url_platform,
+    extract_bluesky_post,
+    normalize_bluesky_handle,
+    platform_mismatch_detail,
+)
 
 router = APIRouter()
 
@@ -29,6 +34,40 @@ RATE = 0.1
 
 def _scaled(n: int, rate: float, minimum: int) -> int:
     return max(minimum, math.ceil(n * rate))
+
+
+def _reject_bluesky_platform_mismatch(value: str, example: str) -> None:
+    detected = detect_url_platform(value)
+    if detected and detected != "bluesky":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "bluesky", example),
+        )
+
+
+def _require_bluesky_actor(value: str) -> str:
+    _reject_bluesky_platform_mismatch(value, "https://bsky.app/profile/user.bsky.social")
+    actor = normalize_bluesky_handle(value)
+    if not actor:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "bluesky", "https://bsky.app/profile/user.bsky.social"),
+        )
+    return actor
+
+
+def _require_bluesky_post_url(url: str) -> tuple[str, str]:
+    parsed = extract_bluesky_post(url)
+    if not parsed:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(
+                url,
+                "bluesky",
+                "https://bsky.app/profile/user.bsky.social/post/postid",
+            ),
+        )
+    return parsed
 
 
 async def _xrpc(method: str, params: dict[str, Any]) -> dict[str, Any]:
@@ -94,9 +133,7 @@ async def bluesky_profile(
     url: str = Query(..., description="Bluesky profile URL, @handle, or handle"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    actor = normalize_bluesky_handle(url)
-    if not actor:
-        raise HTTPException(status_code=400, detail="Invalid Bluesky profile URL or handle")
+    actor = _require_bluesky_actor(url)
     async with billed_call(
         caller=caller,
         endpoint="/v1/bluesky/profile",
@@ -123,9 +160,7 @@ async def bluesky_user_posts(
     limit: int = Query(25, ge=1, le=100),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    actor = normalize_bluesky_handle(url)
-    if not actor:
-        raise HTTPException(status_code=400, detail="Invalid Bluesky profile URL or handle")
+    actor = _require_bluesky_actor(url)
     cost = _scaled(limit, RATE, 1)
     async with billed_call(
         caller=caller,
@@ -157,9 +192,7 @@ async def bluesky_post_details(
     url: str = Query(..., description="Bluesky post URL"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    parsed = extract_bluesky_post(url)
-    if not parsed:
-        raise HTTPException(status_code=400, detail="Invalid Bluesky post URL")
+    parsed = _require_bluesky_post_url(url)
     handle, rkey = parsed
     async with billed_call(
         caller=caller,

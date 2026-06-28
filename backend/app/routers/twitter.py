@@ -21,8 +21,10 @@ from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_list, safe_str
 from app.utils.url import (
+    detect_url_platform,
     extract_tweet_id,
     normalize_twitter_username,
+    platform_mismatch_detail,
 )
 
 router = APIRouter()
@@ -36,6 +38,36 @@ RATE_TWEET = 0.7
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
     return max(minimum, math.ceil(n * rate))
+
+
+def _reject_twitter_platform_mismatch(value: str, example: str) -> None:
+    detected = detect_url_platform(value)
+    if detected and detected != "twitter":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "twitter", example),
+        )
+
+
+def _require_tweet_url(url: str) -> str:
+    tweet_id = extract_tweet_id(url)
+    if not tweet_id:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(url, "twitter", "https://x.com/user/status/123456789"),
+        )
+    return tweet_id
+
+
+def _require_twitter_handle(value: str) -> str:
+    _reject_twitter_platform_mismatch(value, "https://x.com/username")
+    handle = normalize_twitter_username(value)
+    if not handle:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "twitter", "https://x.com/username"),
+        )
+    return handle
 
 
 def _author(a: dict[str, Any]) -> dict[str, Any]:
@@ -108,8 +140,7 @@ async def twitter_tweet_details(
     url: str = Query(..., description="Public tweet URL, e.g. https://x.com/user/status/ID"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_tweet_id(url):
-        raise HTTPException(status_code=400, detail="Invalid tweet URL")
+    _require_tweet_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -143,8 +174,7 @@ async def twitter_transcript(
     url: str = Query(..., description="Public tweet URL, e.g. https://x.com/user/status/ID"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_tweet_id(url):
-        raise HTTPException(status_code=400, detail="Invalid tweet URL")
+    _require_tweet_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -191,9 +221,7 @@ async def twitter_profile(
     url: str = Query(..., description="Profile URL or @handle, e.g. https://x.com/username"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = normalize_twitter_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid Twitter/X profile URL or handle")
+    handle = _require_twitter_handle(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -228,9 +256,7 @@ async def twitter_user_tweets(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = normalize_twitter_username(url)
-    if not handle:
-        raise HTTPException(status_code=400, detail="Invalid Twitter/X profile URL or handle")
+    handle = _require_twitter_handle(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_TWEET, 2)
     async with billed_call(
@@ -310,6 +336,7 @@ async def twitter_community(
     url: str = Query(..., description="Community URL (x.com/i/communities/ID) or community ID"),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_twitter_platform_mismatch(url, "https://x.com/i/communities/123456789")
     community_id = _extract_community_id(url)
     if not community_id:
         raise HTTPException(status_code=400, detail="Invalid X community URL or ID")
@@ -359,6 +386,7 @@ async def twitter_community_tweets(
     limit: int = Query(25, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_twitter_platform_mismatch(url, "https://x.com/i/communities/123456789")
     community_id = _extract_community_id(url)
     if not community_id:
         raise HTTPException(status_code=400, detail="Invalid X community URL or ID")

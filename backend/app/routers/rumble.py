@@ -21,7 +21,11 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
-from app.utils.url import extract_rumble_channel, extract_rumble_video_id
+from app.utils.url import (
+    extract_rumble_channel,
+    extract_rumble_video_id,
+    platform_mismatch_detail,
+)
 
 router = APIRouter()
 
@@ -31,6 +35,26 @@ RATE = 0.6
 
 def _scaled(n: int, rate: float, minimum: int) -> int:
     return max(minimum, math.ceil(n * rate))
+
+
+def _require_rumble_video_url(url: str) -> str:
+    video_id = extract_rumble_video_id(url)
+    if not video_id:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(url, "rumble", "https://rumble.com/v123abc-video-title.html"),
+        )
+    return video_id
+
+
+def _require_rumble_channel_url(url: str) -> str:
+    channel = extract_rumble_channel(url)
+    if not channel:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(url, "rumble", "https://rumble.com/c/channel-name"),
+        )
+    return channel
 
 
 def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
@@ -160,8 +184,7 @@ async def video_details(
     url: str = Query(..., description="Rumble video URL"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_rumble_video_id(url):
-        raise HTTPException(status_code=400, detail="Invalid Rumble video URL")
+    _require_rumble_video_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -210,9 +233,7 @@ async def channel_videos(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    channel = extract_rumble_channel(url)
-    if not channel:
-        raise HTTPException(status_code=400, detail="Invalid Rumble channel URL")
+    channel = _require_rumble_channel_url(url)
     settings = get_settings()
     cost = _scaled(limit, RATE, 2)
     async with billed_call(
@@ -248,8 +269,7 @@ async def transcript(
     language: str = Query("en", min_length=2, max_length=8),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_rumble_video_id(url):
-        raise HTTPException(status_code=400, detail="Invalid Rumble video URL")
+    _require_rumble_video_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -286,8 +306,7 @@ async def comments(
     limit: int = Query(50, ge=1, le=500),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_rumble_video_id(url):
-        raise HTTPException(status_code=400, detail="Invalid Rumble video URL")
+    _require_rumble_video_url(url)
     settings = get_settings()
     cost = _scaled(limit, RATE, 2)
     async with billed_call(

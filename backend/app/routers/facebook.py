@@ -19,7 +19,12 @@ from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
 from app.utils.formatters import safe_float, safe_int, safe_str
-from app.utils.url import extract_facebook_page, extract_facebook_video_id
+from app.utils.url import (
+    detect_url_platform,
+    extract_facebook_page,
+    extract_facebook_video_id,
+    platform_mismatch_detail,
+)
 
 router = APIRouter()
 
@@ -42,6 +47,34 @@ RATE_FB_EVENTS = 2.0
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
     """Credits for `n` returned items at `rate` credits/item (with a floor)."""
     return max(minimum, math.ceil(n * rate))
+
+
+def _reject_facebook_platform_mismatch(url: str, example: str) -> None:
+    detected = detect_url_platform(url)
+    if detected and detected != "facebook":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(url, "facebook", example),
+        )
+
+
+def _require_facebook_page(url: str) -> str:
+    page = extract_facebook_page(url)
+    if not page:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(url, "facebook", "https://www.facebook.com/page"),
+        )
+    return page
+
+
+def _require_facebook_path(url: str, path: str, example: str, label: str) -> None:
+    _reject_facebook_platform_mismatch(url, example)
+    if path not in (url or "").lower():
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid Facebook {label} URL. Pass a Facebook URL like {example}.",
+        )
 
 
 def _reply_payload(r: dict) -> dict:
@@ -184,6 +217,7 @@ async def facebook_details(
     url: str = Query(...),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_facebook_platform_mismatch(url, "https://www.facebook.com/page/posts/123")
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -217,6 +251,7 @@ async def facebook_transcript(
     url: str = Query(...),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_facebook_platform_mismatch(url, "https://www.facebook.com/watch/?v=123")
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -276,6 +311,7 @@ async def facebook_summarize(
     url: str = Query(...),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_facebook_platform_mismatch(url, "https://www.facebook.com/watch/?v=123")
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -329,6 +365,7 @@ async def facebook_comments(
     limit: int = Query(50, ge=1, le=500),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_facebook_platform_mismatch(url, "https://www.facebook.com/page/posts/123")
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_FB_COMMENTS, 2)
     async with billed_call(
@@ -379,8 +416,7 @@ async def facebook_page_details(
     url: str = Query(...),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_facebook_page(url):
-        raise HTTPException(status_code=400, detail="Invalid Facebook page URL")
+    _require_facebook_page(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -428,8 +464,7 @@ async def facebook_profile_posts(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_facebook_page(url):
-        raise HTTPException(status_code=400, detail="Invalid Facebook profile/page URL")
+    _require_facebook_page(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_FB_POSTS, 2)
     async with billed_call(
@@ -465,8 +500,7 @@ async def facebook_profile_reels(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_facebook_page(url):
-        raise HTTPException(status_code=400, detail="Invalid Facebook profile/page URL")
+    _require_facebook_page(url)
     settings = get_settings()
     # Reels are a subset of the feed, so we over-fetch posts and filter. Cost is
     # driven by posts fetched, not reels returned.
@@ -509,6 +543,7 @@ async def facebook_group_posts(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_facebook_platform_mismatch(url, "https://www.facebook.com/groups/group-name")
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_FB_POSTS, 2)
     async with billed_call(
@@ -545,6 +580,7 @@ async def facebook_comment_replies(
     limit: int = Query(50, ge=1, le=500),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    _reject_facebook_platform_mismatch(url, "https://www.facebook.com/page/posts/123")
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_FB_COMMENTS, 2)
     async with billed_call(
@@ -617,8 +653,7 @@ async def facebook_profile_photos(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_facebook_page(url):
-        raise HTTPException(status_code=400, detail="Invalid Facebook profile/page URL")
+    _require_facebook_page(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_FB_POSTS, 2)
     async with billed_call(
@@ -654,8 +689,7 @@ async def facebook_profile_events(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if not extract_facebook_page(url):
-        raise HTTPException(status_code=400, detail="Invalid Facebook profile/page URL")
+    _require_facebook_page(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_FB_EVENTS, 4)
     async with billed_call(
@@ -698,8 +732,12 @@ async def facebook_marketplace_item(
     url: str = Query(..., description="Facebook Marketplace item URL"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if "/marketplace/item/" not in (url or "").lower():
-        raise HTTPException(status_code=400, detail="Invalid Facebook Marketplace item URL")
+    _require_facebook_path(
+        url,
+        "/marketplace/item/",
+        "https://www.facebook.com/marketplace/item/123456789",
+        "Marketplace item",
+    )
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -709,23 +747,11 @@ async def facebook_marketplace_item(
         base_credits=17,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            # Preferred: the marketplace actor when it accepts a direct item URL.
-            try:
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_FACEBOOK_MARKETPLACE,
-                    {"startUrls": [{"url": url}], "fetchItemDetails": True, "maxResultsPerQuery": 1},
-                    max_items=1,
-                )
-            except Exception:
-                items = []
-            if items and not items[0].get("error"):
-                return _normalize_listing(items[0])
-
-            # Fallback: scrape OpenGraph metadata from the public listing page.
+            # Fast path: scrape OpenGraph metadata from the public listing page.
             # Facebook serves OG tags to residential IPs but login-walls
             # datacenter IPs, so try the Apify residential proxy first and fall
-            # back to a direct fetch.
+            # back to a direct fetch. This avoids waiting on a full marketplace
+            # actor run for single-item detail pages.
             headers = {
                 "User-Agent": (
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -734,7 +760,7 @@ async def facebook_marketplace_item(
             }
             resp = None
             try:
-                resp = await fetch_via_residential(url, headers=headers, timeout=35)
+                resp = await fetch_via_residential(url, headers=headers, timeout=8)
             except Exception:  # noqa: BLE001
                 resp = None
 
@@ -749,29 +775,38 @@ async def facebook_marketplace_item(
             if resp is not None and resp.status_code < 400:
                 title, description, image = _og_fields(resp.text)
             if not (title or description or image):
-                async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
+                async with httpx.AsyncClient(timeout=6, follow_redirects=True, headers=headers) as client:
                     resp = await client.get(url)
-                if resp.status_code >= 400:
-                    raise HTTPException(status_code=404, detail="Listing not found")
-                title, description, image = _og_fields(resp.text)
-            if not (title or description or image):
-                raise HTTPException(status_code=404, detail="Listing not found")
-            page = resp.text
-            item_id = None
-            m = re.search(r"/marketplace/item/(\d+)", url)
-            if m:
-                item_id = m.group(1)
-            return {
-                "platform": "facebook",
-                "id": safe_str(item_id),
-                "url": safe_str(_og_meta(page, "og:url") or url),
-                "title": safe_str(title),
-                "description": safe_str(description),
-                "image": safe_str(image),
-                "price": None,
-                "location": None,
-                "photos": [image] if image else [],
-            }
+                if resp.status_code < 400:
+                    title, description, image = _og_fields(resp.text)
+            if title or description or image:
+                page = resp.text if resp is not None else ""
+                item_id = None
+                m = re.search(r"/marketplace/item/(\d+)", url)
+                if m:
+                    item_id = m.group(1)
+                return {
+                    "platform": "facebook",
+                    "id": safe_str(item_id),
+                    "url": safe_str(_og_meta(page, "og:url") or url),
+                    "title": safe_str(title),
+                    "description": safe_str(description),
+                    "image": safe_str(image),
+                    "price": None,
+                    "location": None,
+                    "photos": [image] if image else [],
+                }
+
+            # Fallback: run the marketplace actor when public metadata is blocked.
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_FACEBOOK_MARKETPLACE,
+                {"startUrls": [{"url": url}], "fetchItemDetails": True, "maxResultsPerQuery": 1},
+                max_items=1,
+            )
+            if items and not items[0].get("error"):
+                return _normalize_listing(items[0])
+            raise HTTPException(status_code=404, detail="Listing not found")
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-item",
@@ -912,8 +947,12 @@ async def facebook_event_details(
     url: str = Query(..., description="Facebook event URL, e.g. https://facebook.com/events/ID"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    if "/events/" not in url.lower():
-        raise HTTPException(status_code=400, detail="Invalid Facebook event URL")
+    _require_facebook_path(
+        url,
+        "/events/",
+        "https://www.facebook.com/events/123456789",
+        "event",
+    )
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -923,6 +962,39 @@ async def facebook_event_details(
         base_credits=2,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            headers = {
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                    "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+                )
+            }
+            try:
+                async with httpx.AsyncClient(timeout=6, follow_redirects=True, headers=headers) as client:
+                    resp = await client.get(url)
+                if resp.status_code < 400:
+                    title = _og_meta(resp.text, "og:title")
+                    description = _og_meta(resp.text, "og:description")
+                    image = _og_meta(resp.text, "og:image")
+                    if title or description or image:
+                        event_id = None
+                        match = re.search(r"/events/(\d+)", url)
+                        if match:
+                            event_id = match.group(1)
+                        return {
+                            "platform": "facebook",
+                            "id": safe_str(event_id),
+                            "url": safe_str(_og_meta(resp.text, "og:url") or url),
+                            "name": safe_str(title),
+                            "description": safe_str(description),
+                            "image": safe_str(image),
+                            "startTime": None,
+                            "endTime": None,
+                            "location": None,
+                            "hosts": [],
+                        }
+            except Exception:  # noqa: BLE001
+                pass
+
             apify = get_apify()
             try:
                 items = await apify.run_actor_sync(

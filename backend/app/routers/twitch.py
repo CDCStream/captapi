@@ -14,6 +14,7 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
+from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
 
@@ -25,6 +26,12 @@ def _scaled(n: int, rate: float = RATE, minimum: int = 2) -> int:
 
 
 def _target(value: str) -> str:
+    detected = detect_url_platform(value)
+    if detected and detected != "twitch":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(value, "twitch", "https://www.twitch.tv/channel"),
+        )
     value = (value or "").strip().rstrip("/")
     if "twitch.tv/" in value:
         value = value.split("twitch.tv/", 1)[1].split("/", 1)[0]

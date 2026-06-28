@@ -25,6 +25,13 @@ class Settings(BaseSettings):
     SUPABASE_ANON_KEY: str
 
     APIFY_TOKEN: str
+    # Keep user-facing API calls responsive. Most Apify-backed endpoints should
+    # either return quickly or fail as a retryable upstream error instead of
+    # holding the HTTP request open for minutes.
+    APIFY_SYNC_TIMEOUT_SECONDS: float = 45.0
+    APIFY_SYNC_MAX_ATTEMPTS: int = 1
+    APIFY_SYNC_RETRY_MAX_WAIT_SECONDS: float = 3.0
+    MCP_TOOL_TIMEOUT_SECONDS: float = 60.0
     # Legacy single transcript actor (kept for backward-compat env binding).
     APIFY_ACTOR_YOUTUBE_TRANSCRIPT: str = "pintostudio/youtube-transcript-scraper"
     # Primary + fallback timestamped transcript actors. The old pintostudio
@@ -49,6 +56,7 @@ class Settings(BaseSettings):
     # linking); far more reliable for fetching replies than the base comments
     # actor, billed pay-per-result.
     APIFY_ACTOR_TIKTOK_COMMENT_REPLIES: str = "coregent/tiktok-comment-scraper"
+    APIFY_ACTOR_TIKTOK_COMMENT_REPLIES_FAST: str = "automation-lab/tiktok-comments-scraper"
     APIFY_ACTOR_TIKTOK_PROFILE: str = "clockworks/tiktok-profile-scraper"
     APIFY_ACTOR_TIKTOK_SEARCH: str = "clockworks/tiktok-scraper"
     # Followers / followings use the official Clockworks relationship scraper
@@ -61,6 +69,7 @@ class Settings(BaseSettings):
     # the clockworks sound scraper (which crawls the sound's video feed); the
     # latter stays as the music-posts actor and a song-details fallback.
     APIFY_ACTOR_TIKTOK_SONG: str = "apidojo/tiktok-music-scraper"
+    APIFY_ACTOR_TIKTOK_SONG_FAST_FALLBACK: str = "coregent/tiktok-sound-music-scraper"
     # Trending (For You) video feed by region. HTTP-only, cheap pay-per-result.
     # `content_type` ("video") + `country_code`.
     APIFY_ACTOR_TIKTOK_TRENDING: str = "xtracto/tiktok-trending-scraper"
@@ -70,6 +79,7 @@ class Settings(BaseSettings):
     APIFY_ACTOR_TIKTOK_LIVE: str = "unseenuser/tiktok-live-status-scraper"
     APIFY_ACTOR_TIKTOK_SEARCH_SUGGESTIONS: str = "automation-lab/tiktok-keywords-discovery"
     APIFY_ACTOR_TIKTOK_POPULAR_CREATORS: str = "scraperx/tiktok-trending-creator-scraper"
+    APIFY_ACTOR_TIKTOK_POPULAR_CREATORS_FALLBACK: str = "burbn/tiktok-trending-creators"
     APIFY_ACTOR_TIKTOK_AUDIENCE: str = ""
 
     APIFY_ACTOR_INSTAGRAM: str = "apify/instagram-scraper"
@@ -77,6 +87,8 @@ class Settings(BaseSettings):
     APIFY_ACTOR_INSTAGRAM_PROFILE: str = "apify/instagram-profile-scraper"
     APIFY_ACTOR_INSTAGRAM_POST: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_COMMENT: str = "apify/instagram-comment-scraper"
+    APIFY_ACTOR_INSTAGRAM_TRANSCRIPT: str = "crawlerbros/instagram-transcript-scraper"
+    APIFY_INSTAGRAM_TRANSCRIPT_METHOD: str = "native"
     APIFY_ACTOR_INSTAGRAM_TAGGED: str = "apify/instagram-tagged-scraper"
     # Dedicated reels-by-audio scraper (input: audioUrls). The generic
     # apify/instagram-scraper does not reliably resolve audio pages.
@@ -171,6 +183,7 @@ class Settings(BaseSettings):
     APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2: str = "apify/facebook-ads-scraper"
     APIFY_ACTOR_TIKTOK_AD_LIBRARY: str = "brilliant_gum/tiktok-ads-library-scraper"
     APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL: str = "jy-labs/tiktok-ad-library-fast-search"
+    APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL_FALLBACK: str = "prodiger/tiktok-ads-library-scraper"
     APIFY_ACTOR_GOOGLE_AD_LIBRARY: str = "automation-lab/google-ads-scraper"
     APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2: str = "unseenuser/google-ads"
     APIFY_ACTOR_LINKEDIN_AD_LIBRARY: str = "s-r/linkedin-ads-library"
