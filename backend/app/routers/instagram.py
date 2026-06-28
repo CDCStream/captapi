@@ -350,6 +350,52 @@ async def instagram_channel_details(
         return ApiResponse(data=data)
 
 
+@router.get("/basic-profile", summary="Lightweight Instagram profile lookup")
+async def instagram_basic_profile(
+    url: str = Query(..., description="Instagram profile URL or @handle"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    handle = extract_instagram_username(url)
+    if not handle:
+        raise HTTPException(status_code=400, detail="Invalid Instagram profile URL")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/instagram/basic-profile",
+        platform="instagram",
+        resource_url=f"https://instagram.com/{handle}",
+        base_credits=CREDIT_CHANNEL,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_INSTAGRAM_PROFILE,
+                {"usernames": [handle]},
+                max_items=1,
+            )
+            if not items:
+                raise HTTPException(status_code=404, detail="Profile not found")
+            p = items[0]
+            return {
+                "platform": "instagram",
+                "id": safe_str(p.get("id") or p.get("pk")),
+                "username": safe_str(p.get("username") or handle),
+                "displayName": safe_str(p.get("fullName")),
+                "profileImage": safe_str(p.get("profilePicUrl") or p.get("profilePicUrlHD")),
+                "verified": p.get("verified"),
+                "private": p.get("private") or p.get("isPrivate"),
+                "followers": safe_int(p.get("followersCount")),
+            }
+
+        data = await cached_or_run(
+            endpoint="instagram.basic-profile",
+            params={"url": url},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
 @router.get("/channel-posts", summary="Latest posts from an Instagram profile")
 async def instagram_channel_posts(
     url: str = Query(...),

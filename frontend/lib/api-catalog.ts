@@ -196,6 +196,7 @@ const TIKTOK: Spec[] = [
   { slug: "tiktok-song-details", name: "TikTok Song Details API", shortName: "Song Details", category: "details", method: "GET", path: "/v1/tiktok/song-details", credits: 2 },
   { slug: "tiktok-trending-feed", name: "TikTok Trending Feed API", shortName: "Trending Feed", category: "list", method: "GET", path: "/v1/tiktok/trending-feed", credits: 14, creditsPerResult: 0.7 },
   { slug: "tiktok-popular-hashtags", name: "TikTok Popular Hashtags API", shortName: "Popular Hashtags", category: "list", method: "GET", path: "/v1/tiktok/popular-hashtags", credits: 14, creditsPerResult: 0.7 },
+  { slug: "tiktok-live", name: "TikTok Live API", shortName: "Live", category: "details", method: "GET", path: "/v1/tiktok/live", credits: 1 },
 ];
 
 const INSTAGRAM: Spec[] = [
@@ -215,6 +216,7 @@ const INSTAGRAM: Spec[] = [
   { slug: "instagram-story-highlights", name: "Instagram Story Highlights API", shortName: "Story Highlights", category: "list", method: "GET", path: "/v1/instagram/story-highlights", credits: 5 },
   { slug: "instagram-highlights-details", name: "Instagram Highlights Details API", shortName: "Highlights Details", category: "list", method: "GET", path: "/v1/instagram/highlights-details", credits: 9, creditsPerResult: 0.9 },
   { slug: "instagram-embed", name: "Instagram Embed API", shortName: "Embed", category: "details", method: "GET", path: "/v1/instagram/embed", credits: 1 },
+  { slug: "instagram-basic-profile", name: "Instagram Basic Profile API", shortName: "Basic Profile", category: "channel", method: "GET", path: "/v1/instagram/basic-profile", credits: 1 },
 ];
 
 const FACEBOOK: Spec[] = [
@@ -246,12 +248,15 @@ const REDDIT: Spec[] = [
   { slug: "reddit-post-comments", name: "Reddit Post Comments API", shortName: "Post Comments", category: "comments", method: "GET", path: "/v1/reddit/post-comments", credits: 20, creditsPerResult: 0.4 },
   { slug: "reddit-search", name: "Reddit Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/reddit/search", credits: 10, creditsPerResult: 0.4 },
   { slug: "reddit-subreddit-details", name: "Reddit Subreddit Details API", shortName: "Subreddit Details", category: "details", method: "GET", path: "/v1/reddit/subreddit-details", credits: 1 },
+  { slug: "reddit-subreddit-search", name: "Reddit Subreddit Search API", shortName: "Subreddit Search", category: "search", method: "GET", path: "/v1/reddit/subreddit-search", credits: 10, creditsPerResult: 0.4 },
 ];
 
 const THREADS: Spec[] = [
   { slug: "threads-profile", name: "Threads Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/threads/profile", credits: 1 },
   { slug: "threads-user-posts", name: "Threads User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/threads/user-posts", credits: 14, creditsPerResult: 0.7 },
   { slug: "threads-post-details", name: "Threads Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/threads/post-details", credits: 1 },
+  { slug: "threads-search", name: "Threads Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/threads/search", credits: 18, creditsPerResult: 0.7 },
+  { slug: "threads-search-users", name: "Threads Search Users API", shortName: "Search Users", category: "search", method: "GET", path: "/v1/threads/search-users", credits: 14, creditsPerResult: 0.7 },
 ];
 
 const BLUESKY: Spec[] = [
@@ -265,6 +270,7 @@ const PINTEREST: Spec[] = [
   { slug: "pinterest-user-pins", name: "Pinterest User Pins API", shortName: "User Pins", category: "list", method: "GET", path: "/v1/pinterest/user-pins", credits: 13, creditsPerResult: 0.5 },
   { slug: "pinterest-search", name: "Pinterest Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/pinterest/search", credits: 13, creditsPerResult: 0.5 },
   { slug: "pinterest-board", name: "Pinterest Board API", shortName: "Board", category: "list", method: "GET", path: "/v1/pinterest/board", credits: 13, creditsPerResult: 0.5 },
+  { slug: "pinterest-user-boards", name: "Pinterest User Boards API", shortName: "User Boards", category: "list", method: "GET", path: "/v1/pinterest/user-boards", credits: 13, creditsPerResult: 0.5 },
 ];
 
 const LINKEDIN: Spec[] = [
@@ -685,6 +691,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-song-details": [up(TT_MUSIC)],
   "tiktok-trending-feed": [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code, e.g. US, GB, TR. Default US." }, lp(20, 200)],
   "tiktok-popular-hashtags": [{ name: "query", type: "string", required: false, description: 'Topic or keyword to discover trending hashtags for. Default "trending".' }, lp(20, 100)],
+  "tiktok-live": [up(TT_PROFILE)],
   // Instagram
   "instagram-transcript": [up(IG_REEL)],
   "instagram-summarizer": [up(IG_REEL)],
@@ -702,6 +709,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "instagram-story-highlights": [up(IG_PROFILE)],
   "instagram-highlights-details": [up(IG_PROFILE), { name: "limit", type: "integer", required: false, description: "Max highlights to expand (default 10, max 50)." }],
   "instagram-embed": [up(IG_POST)],
+  "instagram-basic-profile": [up("Instagram profile URL or @handle.")],
   // Facebook
   "facebook-details": [up(FB_VIDEO)],
   "facebook-transcript": [up(FB_VIDEO)],
@@ -727,10 +735,13 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "reddit-post-comments": [up("Reddit post URL."), lp(50, 500)],
   "reddit-search": [qp("Keywords or search query (min 2 characters)."), lp(25, 200)],
   "reddit-subreddit-details": [up("Subreddit URL, r/name, or bare name, e.g. r/technology.")],
+  "reddit-subreddit-search": [up("Subreddit URL, r/name, or bare name, e.g. r/technology."), qp("Keywords or search query (min 2 characters)."), lp(25, 200)],
   // Threads
   "threads-profile": [up("Threads profile URL or @handle, e.g. https://threads.net/@username.")],
   "threads-user-posts": [up("Threads profile URL or @handle."), lp(20, 100)],
   "threads-post-details": [up("Threads post URL, e.g. https://threads.net/@user/post/CODE.")],
+  "threads-search": [qp("Keyword or phrase to search Threads (min 2 characters)."), lp(25, 200)],
+  "threads-search-users": [qp("Keyword to find Threads users (min 2 characters)."), lp(20, 100)],
   // Bluesky
   "bluesky-profile": [up("Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle.")],
   "bluesky-user-posts": [up("Bluesky profile URL, @handle, or handle."), lp(25, 100)],
@@ -740,6 +751,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "pinterest-user-pins": [up("Pinterest profile URL or username."), lp(25, 200)],
   "pinterest-search": [qp("Keywords or search query (min 2 characters)."), lp(25, 200)],
   "pinterest-board": [up("Pinterest board URL, e.g. https://pinterest.com/username/board-name/."), lp(25, 200)],
+  "pinterest-user-boards": [up("Pinterest profile URL or username."), lp(25, 200)],
   // LinkedIn
   "linkedin-profile": [up("LinkedIn profile URL, e.g. https://linkedin.com/in/slug.")],
   "linkedin-company": [up("LinkedIn company URL, e.g. https://linkedin.com/company/slug.")],

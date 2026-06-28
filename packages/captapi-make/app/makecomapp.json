@@ -665,6 +665,23 @@
           "scope": null
         }
       },
+      "tiktokLive": {
+        "label": "TikTok Live",
+        "description": "Live status & room info for a TikTok creator. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokLive/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokLive/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
       "instagramTranscript": {
         "label": "Instagram Transcript",
         "description": "Transcript of an Instagram Reel. Costs ~2 credits (cached results free, failures never charged).",
@@ -932,6 +949,23 @@
           "communication": "modules/instagramEmbed/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/instagramEmbed/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramBasicProfile": {
+        "label": "Instagram Basic Profile",
+        "description": "Lightweight Instagram profile lookup (core fields). Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramBasicProfile/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramBasicProfile/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null
@@ -1311,6 +1345,23 @@
           "scope": null
         }
       },
+      "redditSubredditSearch": {
+        "label": "Reddit Subreddit Search",
+        "description": "Search posts within a specific subreddit. Costs ~10 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/redditSubredditSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/redditSubredditSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
       "threadsProfile": {
         "label": "Threads Profile",
         "description": "Profile info & stats for a Threads account. Costs ~1 credit (cached results free, failures never charged).",
@@ -1357,6 +1408,40 @@
           "communication": "modules/threadsPostDetails/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/threadsPostDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "threadsSearch": {
+        "label": "Threads Search",
+        "description": "Search Threads posts by keyword. Costs ~18 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/threadsSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/threadsSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "threadsSearchUsers": {
+        "label": "Threads Search Users",
+        "description": "Find Threads users matching a keyword. Costs ~14 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/threadsSearchUsers/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/threadsSearchUsers/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null
@@ -1476,6 +1561,23 @@
           "communication": "modules/pinterestBoard/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/pinterestBoard/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "pinterestUserBoards": {
+        "label": "Pinterest User Boards",
+        "description": "List the boards on a Pinterest profile. Costs ~13 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/pinterestUserBoards/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/pinterestUserBoards/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null

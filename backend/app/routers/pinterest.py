@@ -216,6 +216,62 @@ async def user_pins(
         return ApiResponse(data=data)
 
 
+def _normalize_board(item: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "platform": "pinterest",
+        "name": safe_str(item.get("boardName") or item.get("name")),
+        "url": safe_str(item.get("boardUrl") or item.get("url")),
+        "privacy": safe_str(item.get("privacy")),
+        "pinCount": safe_int(item.get("pinCount")),
+        "followers": safe_int(item.get("followerCount")),
+        "sectionCount": safe_int(item.get("sectionCount")),
+        "coverImage": safe_str(item.get("coverImageHdUrl") or item.get("coverImageUrl")),
+        "createdAt": safe_str(item.get("createdDate")),
+        "owner": {
+            "username": safe_str(item.get("ownerUsername") or item.get("owner")),
+            "displayName": safe_str(item.get("ownerName")),
+        },
+    }
+
+
+@router.get("/user-boards", summary="List the boards on a Pinterest profile")
+async def pinterest_user_boards(
+    url: str = Query(..., description="Pinterest profile URL or username"),
+    limit: int = Query(25, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    username = extract_pinterest_username(url)
+    if not username:
+        raise HTTPException(status_code=400, detail="Invalid Pinterest profile")
+    settings = get_settings()
+    cost = _scaled(limit, RATE, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/pinterest/user-boards",
+        platform="pinterest",
+        resource_url=f"https://www.pinterest.com/{username}/",
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_PINTEREST_BOARDS,
+                {"data_source": "profile-page", "source_value": username, "size": limit},
+                max_items=limit,
+            )
+            boards = [_normalize_board(i) for i in items][:limit]
+            return {"username": username, "totalReturned": len(boards), "boards": boards}
+
+        data = await cached_or_run(
+            endpoint="pinterest.user-boards",
+            params={"username": username, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled(len(data["boards"]), RATE, 2)
+        return ApiResponse(data=data)
+
+
 def _is_board_url(url: str) -> bool:
     return bool(
         re.match(

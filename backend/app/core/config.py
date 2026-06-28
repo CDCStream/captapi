@@ -67,6 +67,7 @@ class Settings(BaseSettings):
     # Popular/trending hashtag entity discovery. Pay-per-result ($1.60/1k),
     # no monthly rent. Input: searchQueries + includeHashtags.
     APIFY_ACTOR_TIKTOK_TREND_DISCOVERY: str = "coregent/tiktok-trend-discovery-scraper"
+    APIFY_ACTOR_TIKTOK_LIVE: str = "unseenuser/tiktok-live-status-scraper"
 
     APIFY_ACTOR_INSTAGRAM: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_REEL: str = "apify/instagram-scraper"
@@ -113,10 +114,12 @@ class Settings(BaseSettings):
     # actor accepts direct post links.
     APIFY_ACTOR_THREADS: str = "igview-owner/threads-user-media-scraper"
     APIFY_ACTOR_THREADS_POST: str = "easyapi/threads-post-media-downloader"
+    APIFY_ACTOR_THREADS_SEARCH: str = "automation-lab/threads-scraper"
 
     # Pinterest. Pay-per-result actor (no monthly rent). Input:
     # searchQueries / usernames / boardUrls / pinUrls + maxResults.
     APIFY_ACTOR_PINTEREST: str = "thirdwatch/pinterest-scraper"
+    APIFY_ACTOR_PINTEREST_BOARDS: str = "shareze001/pinterest-boards"
 
     # LinkedIn. Profile + company + post/search actors (rental, public data
     # only). Slugs are config-driven; verify access in the Apify console.

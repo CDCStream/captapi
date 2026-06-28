@@ -782,6 +782,22 @@
     ]
   },
   {
+    "tool": "tiktok_live",
+    "platform": "tiktok",
+    "name": "TikTok Live",
+    "path": "/v1/tiktok/live",
+    "credits": 1,
+    "summary": "Live status & room info for a TikTok creator.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+      }
+    ]
+  },
+  {
     "tool": "instagram_transcript",
     "platform": "instagram",
     "name": "Instagram Transcript",
@@ -1088,6 +1104,22 @@
         "type": "string",
         "required": true,
         "description": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_basic_profile",
+    "platform": "instagram",
+    "name": "Instagram Basic Profile",
+    "path": "/v1/instagram/basic-profile",
+    "credits": 1,
+    "summary": "Lightweight Instagram profile lookup (core fields).",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/."
       }
     ]
   },
@@ -1540,6 +1572,34 @@
     ]
   },
   {
+    "tool": "reddit_subreddit_search",
+    "platform": "reddit",
+    "name": "Reddit Subreddit Search",
+    "path": "/v1/reddit/subreddit-search",
+    "credits": 10,
+    "summary": "Search posts within a specific subreddit.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Subreddit URL, r/name, or bare name, e.g. r/technology."
+      },
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
     "tool": "threads_profile",
     "platform": "threads",
     "name": "Threads Profile",
@@ -1590,6 +1650,50 @@
         "type": "string",
         "required": true,
         "description": "Threads post URL, e.g. https://threads.net/@user/post/CODE."
+      }
+    ]
+  },
+  {
+    "tool": "threads_search",
+    "platform": "threads",
+    "name": "Threads Search",
+    "path": "/v1/threads/search",
+    "credits": 18,
+    "summary": "Search Threads posts by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "threads_search_users",
+    "platform": "threads",
+    "name": "Threads Search Users",
+    "path": "/v1/threads/search-users",
+    "credits": 14,
+    "summary": "Find Threads users matching a keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
       }
     ]
   },
@@ -1720,6 +1824,28 @@
         "type": "string",
         "required": true,
         "description": "Pinterest board URL, e.g. https://pinterest.com/username/board-name/."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "pinterest_user_boards",
+    "platform": "pinterest",
+    "name": "Pinterest User Boards",
+    "path": "/v1/pinterest/user-boards",
+    "credits": 13,
+    "summary": "List the boards on a Pinterest profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Pinterest profile URL or username."
       },
       {
         "name": "limit",

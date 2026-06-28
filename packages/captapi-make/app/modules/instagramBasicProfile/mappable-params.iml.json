@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Instagram profile URL, e.g. https://instagram.com/username/."
+  }
+]

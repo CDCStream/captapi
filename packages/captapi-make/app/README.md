@@ -4,7 +4,7 @@ Structured social media data from 11 platforms — YouTube, TikTok, Instagram,
 Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn & Rumble —
 transcripts, AI summaries, comments, stats, search and downloads.
 
-- **121 action modules**, one per Captapi endpoint.
+- **127 action modules**, one per Captapi endpoint.
 - **One connection**: paste your Captapi API key (Bearer auth).
 - Every module returns the API `data` payload directly.
 

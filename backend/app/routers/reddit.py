@@ -245,6 +245,51 @@ async def post_comments(
         return ApiResponse(data=data)
 
 
+@router.get("/subreddit-search", summary="Search posts within a specific subreddit")
+async def subreddit_search(
+    url: str = Query(..., description="Subreddit URL, r/name, or bare name"),
+    q: str = Query(..., min_length=2, description="Search query"),
+    limit: int = Query(25, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    sub = extract_subreddit(url)
+    if not sub:
+        raise HTTPException(status_code=400, detail="Invalid subreddit")
+    settings = get_settings()
+    cost = _scaled(limit, RATE, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/reddit/subreddit-search",
+        platform="reddit",
+        resource_url=f"https://www.reddit.com/r/{sub}",
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_REDDIT,
+                {
+                    "searches": [q],
+                    "searchCommunityName": sub,
+                    "type": "posts",
+                    "sort": "relevance",
+                    "maxItems": limit,
+                },
+                max_items=limit,
+            )
+            results = [_normalize_post(i) for i in items if not _is_comment(i)][:limit]
+            return {"subreddit": sub, "query": q, "totalReturned": len(results), "results": results}
+
+        data = await cached_or_run(
+            endpoint="reddit.subreddit-search",
+            params={"sub": sub, "q": q, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled(len(data["results"]), RATE, 2)
+        return ApiResponse(data=data)
+
+
 @router.get("/search", summary="Search Reddit posts by keyword")
 async def reddit_search(
     q: str = Query(..., min_length=2, description="Search query"),

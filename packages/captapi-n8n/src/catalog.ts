@@ -127,6 +127,7 @@ const TIKTOK: Omit<Endpoint, "platform">[] = [
   { tool: "tiktok_song_details", name: "TikTok Song Details", path: "/v1/tiktok/song-details", credits: 2, summary: "Details of a TikTok sound/song.", params: [url(TT_MUSIC)] },
   { tool: "tiktok_trending_feed", name: "TikTok Trending Feed", path: "/v1/tiktok/trending-feed", credits: 14, summary: "TikTok trending (For You) videos by region.", params: [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code, e.g. US, GB, TR. Default US." }, limit(20, 200)] },
   { tool: "tiktok_popular_hashtags", name: "TikTok Popular Hashtags", path: "/v1/tiktok/popular-hashtags", credits: 14, summary: "Trending TikTok hashtags for a topic/keyword.", params: [{ name: "query", type: "string", required: false, description: 'Topic or keyword to discover trending hashtags for. Default "trending".' }, limit(20, 100)] },
+  { tool: "tiktok_live", name: "TikTok Live", path: "/v1/tiktok/live", credits: 1, summary: "Live status & room info for a TikTok creator.", params: [url(TT_PROFILE)] },
 ];
 
 const INSTAGRAM: Omit<Endpoint, "platform">[] = [
@@ -146,6 +147,7 @@ const INSTAGRAM: Omit<Endpoint, "platform">[] = [
   { tool: "instagram_story_highlights", name: "Instagram Story Highlights", path: "/v1/instagram/story-highlights", credits: 5, summary: "List a profile's story highlight covers.", params: [url(IG_PROFILE)] },
   { tool: "instagram_highlights_details", name: "Instagram Highlights Details", path: "/v1/instagram/highlights-details", credits: 9, summary: "Items inside a profile's story highlights.", params: [url(IG_PROFILE), { name: "limit", type: "number", required: false, description: "Max highlights to expand. Default 10, max 50." }] },
   { tool: "instagram_embed", name: "Instagram Embed", path: "/v1/instagram/embed", credits: 1, summary: "Embed HTML for an Instagram post/reel.", params: [url(IG_POST)] },
+  { tool: "instagram_basic_profile", name: "Instagram Basic Profile", path: "/v1/instagram/basic-profile", credits: 1, summary: "Lightweight Instagram profile lookup (core fields).", params: [url(IG_PROFILE)] },
 ];
 
 const FACEBOOK: Omit<Endpoint, "platform">[] = [
@@ -194,12 +196,15 @@ const REDDIT: Omit<Endpoint, "platform">[] = [
   { tool: "reddit_post_comments", name: "Reddit Post Comments", path: "/v1/reddit/post-comments", credits: 20, summary: "Comments on a Reddit post.", params: [url(RD_POST), limit(50, 500)] },
   { tool: "reddit_search", name: "Reddit Search", path: "/v1/reddit/search", credits: 10, summary: "Search Reddit posts by keyword.", params: [q(), limit(25, 200)] },
   { tool: "reddit_subreddit_details", name: "Reddit Subreddit Details", path: "/v1/reddit/subreddit-details", credits: 1, summary: "Info & member stats for a subreddit.", params: [url(RD_SUB)] },
+  { tool: "reddit_subreddit_search", name: "Reddit Subreddit Search", path: "/v1/reddit/subreddit-search", credits: 10, summary: "Search posts within a specific subreddit.", params: [url(RD_SUB), q(), limit(25, 200)] },
 ];
 
 const THREADS: Omit<Endpoint, "platform">[] = [
   { tool: "threads_profile", name: "Threads Profile", path: "/v1/threads/profile", credits: 1, summary: "Profile info & stats for a Threads account.", params: [url(TH_PROFILE)] },
   { tool: "threads_user_posts", name: "Threads User Posts", path: "/v1/threads/user-posts", credits: 14, summary: "Recent posts from a Threads profile.", params: [url(TH_PROFILE), limit(20, 100)] },
   { tool: "threads_post_details", name: "Threads Post Details", path: "/v1/threads/post-details", credits: 1, summary: "Metadata + engagement for a Threads post.", params: [url(TH_POST)] },
+  { tool: "threads_search", name: "Threads Search", path: "/v1/threads/search", credits: 18, summary: "Search Threads posts by keyword.", params: [q(), limit(25, 200)] },
+  { tool: "threads_search_users", name: "Threads Search Users", path: "/v1/threads/search-users", credits: 14, summary: "Find Threads users matching a keyword.", params: [q(), limit(20, 100)] },
 ];
 
 const BLUESKY: Omit<Endpoint, "platform">[] = [
@@ -213,6 +218,7 @@ const PINTEREST: Omit<Endpoint, "platform">[] = [
   { tool: "pinterest_user_pins", name: "Pinterest User Pins", path: "/v1/pinterest/user-pins", credits: 13, summary: "Pins from a Pinterest profile.", params: [url(PIN_PROFILE), limit(25, 200)] },
   { tool: "pinterest_search", name: "Pinterest Search", path: "/v1/pinterest/search", credits: 13, summary: "Search Pinterest pins by keyword.", params: [q(), limit(25, 200)] },
   { tool: "pinterest_board", name: "Pinterest Board", path: "/v1/pinterest/board", credits: 13, summary: "List pins inside a Pinterest board.", params: [url(PIN_BOARD), limit(25, 200)] },
+  { tool: "pinterest_user_boards", name: "Pinterest User Boards", path: "/v1/pinterest/user-boards", credits: 13, summary: "List the boards on a Pinterest profile.", params: [url(PIN_PROFILE), limit(25, 200)] },
 ];
 
 const LINKEDIN: Omit<Endpoint, "platform">[] = [

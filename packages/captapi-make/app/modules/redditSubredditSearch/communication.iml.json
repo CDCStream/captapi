@@ -1,0 +1,12 @@
+{
+  "url": "/v1/reddit/subreddit-search",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}",
+    "q": "{{parameters.q}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

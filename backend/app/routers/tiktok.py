@@ -391,6 +391,68 @@ async def tiktok_channel_details(
         return ApiResponse(data=data)
 
 
+@router.get("/live", summary="TikTok live status + room info for a creator")
+async def tiktok_live(
+    url: str = Query(..., description="https://tiktok.com/@username or @handle"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    handle = extract_tiktok_username(url)
+    if not handle:
+        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/live",
+        platform="tiktok",
+        resource_url=f"https://www.tiktok.com/@{handle}/live",
+        base_credits=CREDIT_CHANNEL_DETAILS,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_LIVE,
+                {"handles": [handle], "include_stream_urls": True},
+                max_items=1,
+            )
+            if not items:
+                raise HTTPException(status_code=404, detail="Creator not found")
+            item = items[0]
+            if item.get("error"):
+                raise HTTPException(status_code=404, detail="Creator not found")
+            user = item.get("liveRoomUserInfo") or {}
+            room = item.get("liveRoom") or {}
+            return {
+                "platform": "tiktok",
+                "username": safe_str(user.get("uniqueId") or handle),
+                "isLive": bool(item.get("is_live")),
+                "creator": {
+                    "displayName": safe_str(user.get("nickname")),
+                    "followers": safe_int(user.get("followerCount")),
+                    "verified": user.get("verified"),
+                    "avatar": safe_str(user.get("avatarUrl") or user.get("avatarThumb")),
+                    "bio": safe_str(user.get("signature")),
+                },
+                "room": {
+                    "id": safe_str(item.get("roomId") or room.get("room_id")),
+                    "title": safe_str(room.get("title")),
+                    "startedAt": safe_str(room.get("started_at")),
+                    "viewerCount": safe_int(room.get("viewer_count")),
+                    "totalEnterCount": safe_int(room.get("total_enter_count")),
+                    "likeCount": safe_int(room.get("like_count")),
+                    "coverUrl": safe_str(room.get("cover_url")),
+                    "streamUrls": room.get("stream_urls"),
+                },
+            }
+
+        data = await cached_or_run(
+            endpoint="tiktok.live",
+            params={"handle": handle},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
 @router.get("/search", summary="Search TikTok videos by hashtag/keyword")
 async def tiktok_search(
     q: str = Query(..., min_length=2),

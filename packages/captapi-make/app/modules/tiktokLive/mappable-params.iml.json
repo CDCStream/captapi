@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "TikTok profile URL, e.g. https://tiktok.com/@username."
+  }
+]

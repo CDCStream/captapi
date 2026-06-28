@@ -183,6 +183,88 @@ async def threads_user_posts(
         return ApiResponse(data=data)
 
 
+@router.get("/search", summary="Search Threads posts by keyword")
+async def threads_search(
+    q: str = Query(..., min_length=2, description="Keyword or phrase to search Threads"),
+    limit: int = Query(25, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled(limit, RATE, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/threads/search",
+        platform="threads",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_THREADS_SEARCH,
+                {"mode": "search", "searchQueries": [q], "maxPosts": limit},
+                max_items=limit,
+            )
+            results = [_normalize_post(i) for i in items][:limit]
+            return {"query": q, "totalReturned": len(results), "results": results}
+
+        data = await cached_or_run(
+            endpoint="threads.search",
+            params={"q": q, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled(len(data["results"]), RATE, 2)
+        return ApiResponse(data=data)
+
+
+@router.get("/search-users", summary="Find Threads users matching a keyword")
+async def threads_search_users(
+    q: str = Query(..., min_length=2, description="Keyword to search Threads users"),
+    limit: int = Query(20, ge=1, le=100),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled(limit, RATE, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/threads/search-users",
+        platform="threads",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            # No dedicated user-search; derive distinct authors from a keyword
+            # search over a wider post sample.
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_THREADS_SEARCH,
+                {"mode": "search", "searchQueries": [q], "maxPosts": limit * 4},
+                max_items=limit * 4,
+            )
+            seen: set[str] = set()
+            users: list[dict[str, Any]] = []
+            for item in items:
+                u = _user(item.get("user") or item.get("author") or item)
+                uname = u.get("username")
+                if not uname or uname in seen:
+                    continue
+                seen.add(uname)
+                users.append(u)
+                if len(users) >= limit:
+                    break
+            return {"query": q, "totalReturned": len(users), "users": users}
+
+        data = await cached_or_run(
+            endpoint="threads.search-users",
+            params={"q": q, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled(len(data["users"]), RATE, 2)
+        return ApiResponse(data=data)
+
+
 @router.get("/post-details", summary="Threads post metadata + engagement")
 async def threads_post_details(
     url: str = Query(..., description="Threads post URL"),
