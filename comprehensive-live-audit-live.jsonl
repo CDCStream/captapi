@@ -1,0 +1,53 @@
+{"slug":"tiktok-comment-replies","platform":"tiktok","path":"/v1/tiktok/comment-replies","status":"OK","http":200,"ms":1588,"note":""}
+{"slug":"instagram-transcript","platform":"instagram","path":"/v1/instagram/transcript","status":"TIMEOUT","ms":120013,"note":"TimeoutError: The operation was aborted due to timeout"}
+{"slug":"instagram-summarizer","platform":"instagram","path":"/v1/instagram/summarize","status":"TIMEOUT","ms":120016,"note":"TimeoutError: The operation was aborted due to timeout"}
+{"slug":"instagram-trending-reels","platform":"instagram","path":"/v1/instagram/trending-reels","status":"INPUT_OR_EMPTY_TARGET","http":422,"ms":2478,"note":"[{\"type\":\"greater_than_equal\",\"loc\":[\"query\",\"limit\"],\"msg\":\"Input should be greater than or equal to 10\",\"input\":\"1\",\"ctx\":{\"ge\":10}}]"}
+{"slug":"instagram-video-download","platform":"instagram","path":"/v1/instagram/video-download","status":"INPUT_OR_EMPTY_TARGET","http":404,"ms":92926,"note":"\"Video download URL not found\""}
+{"slug":"facebook-marketplace-item","platform":"facebook","path":"/v1/facebook/marketplace-item","status":"INPUT_OR_EMPTY_TARGET","http":404,"ms":6542,"note":"\"Listing not found\""}
+{"slug":"twitter-community","platform":"twitter","path":"/v1/twitter/community","status":"HTTP_FAIL","http":400,"ms":1064,"note":"\"Invalid X community URL or ID\""}
+{"slug":"twitter-community-tweets","platform":"twitter","path":"/v1/twitter/community-tweets","status":"HTTP_FAIL","http":400,"ms":935,"note":"\"Invalid X community URL or ID\""}
+{"slug":"facebook-event-details","platform":"facebook","path":"/v1/facebook/event-details","status":"TIMEOUT","ms":120003,"note":"TimeoutError: The operation was aborted due to timeout"}
+{"slug":"reddit-post-details","platform":"reddit","path":"/v1/reddit/post-details","status":"INPUT_OR_EMPTY_TARGET","http":404,"ms":40957,"note":"\"Post not found\""}
+{"slug":"reddit-post-transcript","platform":"reddit","path":"/v1/reddit/post-transcript","status":"INPUT_OR_EMPTY_TARGET","http":422,"ms":2037,"note":"\"No transcript text available for this Reddit post\""}
+{"slug":"bluesky-post-details","platform":"bluesky","path":"/v1/bluesky/post-details","status":"INPUT_OR_EMPTY_TARGET","http":404,"ms":1852,"note":"\"Post not found\""}
+{"slug":"rumble-transcript","platform":"rumble","path":"/v1/rumble/transcript","status":"INPUT_OR_EMPTY_TARGET","http":404,"ms":11671,"note":"\"Transcript not available for this Rumble video\""}
+{"slug":"tiktok-shop-products","platform":"tiktok_shop","path":"/v1/tiktok-shop/shop-products","status":"HTTP_FAIL","http":400,"ms":1618,"note":"\"Expected a TikTok URL, but received a YouTube URL. Use the YouTube endpoint for that URL, or pass a TikTok URL like https://www.tiktok.com/shop/store.\""}
+{"slug":"tiktok-shop-product-details","platform":"tiktok_shop","path":"/v1/tiktok-shop/product-details","status":"HTTP_FAIL","http":400,"ms":901,"note":"\"Expected a TikTok URL, but received a YouTube URL. Use the YouTube endpoint for that URL, or pass a TikTok URL like https://www.tiktok.com/shop/pdp/product/123.\""}
+{"slug":"tiktok-shop-product-reviews","platform":"tiktok_shop","path":"/v1/tiktok-shop/product-reviews","status":"HTTP_FAIL","http":400,"ms":901,"note":"\"Expected a TikTok URL, but received a YouTube URL. Use the YouTube endpoint for that URL, or pass a TikTok URL like https://www.tiktok.com/shop/pdp/product/123.\""}
+{"slug":"github-pull-requests","platform":"github","path":"/v1/github/pull-requests","status":"INPUT_OR_EMPTY_TARGET","http":422,"ms":889,"note":"[{\"type\":\"string_pattern_mismatch\",\"loc\":[\"query\",\"state\"],\"msg\":\"String should match pattern '^(open|closed|all)$'\",\"input\":\"CA\",\"ctx\":{\"pattern\":\"^(open|closed|all)$\"}}]"}
+{"slug":"twitch-user-schedule","platform":"twitch","path":"/v1/twitch/user-schedule","status":"OK","http":200,"ms":1292,"note":""}
+{"slug":"twitch-clip","platform":"twitch","path":"/v1/twitch/clip","status":"OK","http":200,"ms":1271,"note":""}
+{"slug":"spotify-artist","platform":"spotify","path":"/v1/spotify/artist","status":"OK","http":200,"ms":1274,"note":""}
+{"slug":"spotify-track","platform":"spotify","path":"/v1/spotify/track","status":"OK","http":200,"ms":1236,"note":""}
+{"slug":"spotify-album","platform":"spotify","path":"/v1/spotify/album","status":"OK","http":200,"ms":1272,"note":""}
+{"slug":"spotify-podcast","platform":"spotify","path":"/v1/spotify/podcast","status":"OK","http":200,"ms":1236,"note":""}
+{"slug":"soundcloud-artist","platform":"soundcloud","path":"/v1/soundcloud/artist","status":"OK","http":200,"ms":1276,"note":""}
+{"slug":"soundcloud-track","platform":"soundcloud","path":"/v1/soundcloud/track","status":"OK","http":200,"ms":1269,"note":""}
+{"slug":"linktree-page","platform":"linktree","path":"/v1/linktree/page","status":"OK","http":200,"ms":1220,"note":""}
+{"slug":"snapchat-user-profile","platform":"snapchat","path":"/v1/snapchat/user-profile","status":"OK","http":200,"ms":1267,"note":""}
+{"slug":"truth-social-profile","platform":"truth_social","path":"/v1/truth-social/profile","status":"OK","http":200,"ms":1643,"note":""}
+{"slug":"truth-social-user-posts","platform":"truth_social","path":"/v1/truth-social/user-posts","status":"OK","http":200,"ms":1265,"note":""}
+{"slug":"truth-social-post","platform":"truth_social","path":"/v1/truth-social/post","status":"INPUT_OR_EMPTY_TARGET","http":404,"ms":1518,"note":"\"Truth Social resource not found\""}
+{"slug":"kick-clip","platform":"kick","path":"/v1/kick/clip","status":"OK","http":200,"ms":2125,"note":""}
+{"slug":"amazon-shop-page","platform":"amazon_shop","path":"/v1/amazon-shop/page","status":"INPUT_OR_EMPTY_TARGET","http":404,"ms":3470,"note":"\"Amazon Shop page not found\""}
+{"slug":"age-gender-get","platform":"age_gender","path":"/v1/age-gender","status":"OK","http":200,"ms":1276,"note":""}
+{"slug":"kwai-profile","platform":"kwai","path":"/v1/kwai/profile","status":"OK","http":200,"ms":2355,"note":""}
+{"slug":"kwai-user-posts","platform":"kwai","path":"/v1/kwai/user-posts","status":"INPUT_OR_EMPTY_TARGET","http":404,"ms":6949,"note":"\"Kwai profile not found\""}
+{"slug":"kwai-post","platform":"kwai","path":"/v1/kwai/post","status":"OK","http":200,"ms":1361,"note":""}
+{"slug":"komi-page","platform":"komi","path":"/v1/komi/page","status":"OK","http":200,"ms":1310,"note":""}
+{"slug":"reddit-post-comments","platform":"reddit","path":"/v1/reddit/post-comments","status":"INPUT_OR_EMPTY_TARGET","http":404,"ms":97986,"note":"\"Post not found\""}
+{"slug":"pillar-page","platform":"pillar","path":"/v1/pillar/page","status":"OK","http":200,"ms":1376,"note":""}
+{"slug":"linkme-profile","platform":"linkme","path":"/v1/linkme/profile","status":"OK","http":200,"ms":1392,"note":""}
+{"slug":"linkbio-page","platform":"linkbio","path":"/v1/linkbio/page","status":"OK","http":200,"ms":1234,"note":""}
+{"slug":"facebook-ad-library-search","platform":"ad_library","path":"/v1/ad-library/facebook/search","status":"OK","http":200,"ms":1238,"note":""}
+{"slug":"facebook-ad-library-company-ads","platform":"ad_library","path":"/v1/ad-library/facebook/company-ads","status":"OK","http":200,"ms":1357,"note":""}
+{"slug":"facebook-ad-library-search-companies","platform":"ad_library","path":"/v1/ad-library/facebook/search-companies","status":"OK","http":200,"ms":1236,"note":""}
+{"slug":"facebook-ad-library-ad-details","platform":"ad_library","path":"/v1/ad-library/facebook/ad-details","status":"OK","http":200,"ms":1246,"note":""}
+{"slug":"tiktok-ad-library-search","platform":"ad_library","path":"/v1/ad-library/tiktok/search","status":"OK","http":200,"ms":1506,"note":""}
+{"slug":"tiktok-ad-library-ad-details","platform":"ad_library","path":"/v1/ad-library/tiktok/ad-details","status":"OK","http":200,"ms":1243,"note":""}
+{"slug":"google-ad-library-company-ads","platform":"ad_library","path":"/v1/ad-library/google/company-ads","status":"OK","http":200,"ms":1254,"note":""}
+{"slug":"google-ad-library-ad-details","platform":"ad_library","path":"/v1/ad-library/google/ad-details","status":"HTTP_FAIL","http":400,"ms":910,"note":"\"Google ad details requires a Transparency Center URL containing both AR advertiser ID and CR creative ID\""}
+{"slug":"google-ad-library-advertiser-search","platform":"ad_library","path":"/v1/ad-library/google/advertiser-search","status":"OK","http":200,"ms":1240,"note":""}
+{"slug":"linkedin-ad-library-search-ads","platform":"ad_library","path":"/v1/ad-library/linkedin/search-ads","status":"OK","http":200,"ms":1303,"note":""}
+{"slug":"linkedin-ad-library-ad-details","platform":"ad_library","path":"/v1/ad-library/linkedin/ad-details","status":"OK","http":200,"ms":1231,"note":""}
+{"slug":"facebook-ad-library-ad-transcript","platform":"ad_library","path":"/v1/ad-library/facebook/ad-transcript","status":"INPUT_OR_EMPTY_TARGET","http":422,"ms":23926,"note":"\"No transcript text available for this ad\""}
