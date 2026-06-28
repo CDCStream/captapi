@@ -15,19 +15,42 @@ import { ENDPOINTS, type Endpoint, type Platform } from '../../catalog';
 
 const VERSION = '0.1.0';
 
-const PLATFORMS: Array<{ value: Platform; name: string }> = [
-	{ value: 'youtube', name: 'YouTube' },
-	{ value: 'tiktok', name: 'TikTok' },
-	{ value: 'instagram', name: 'Instagram' },
-	{ value: 'facebook', name: 'Facebook' },
-	{ value: 'twitter', name: 'Twitter / X' },
-	{ value: 'reddit', name: 'Reddit' },
-	{ value: 'threads', name: 'Threads' },
-	{ value: 'bluesky', name: 'Bluesky' },
-	{ value: 'pinterest', name: 'Pinterest' },
-	{ value: 'linkedin', name: 'LinkedIn' },
-	{ value: 'rumble', name: 'Rumble' },
-];
+const PLATFORM_LABELS: Record<Platform, string> = {
+	youtube: 'YouTube',
+	tiktok: 'TikTok',
+	instagram: 'Instagram',
+	facebook: 'Facebook',
+	twitter: 'Twitter / X',
+	reddit: 'Reddit',
+	threads: 'Threads',
+	bluesky: 'Bluesky',
+	pinterest: 'Pinterest',
+	linkedin: 'LinkedIn',
+	rumble: 'Rumble',
+	tiktok_shop: 'TikTok Shop',
+	github: 'GitHub',
+	ad_library: 'Ad Library',
+	google: 'Google',
+	twitch: 'Twitch',
+	spotify: 'Spotify',
+	soundcloud: 'SoundCloud',
+	linktree: 'Linktree',
+	snapchat: 'Snapchat',
+	truth_social: 'Truth Social',
+	kick: 'Kick',
+	amazon_shop: 'Amazon Shop',
+	age_gender: 'Age and Gender',
+	account: 'Account',
+	kwai: 'Kwai',
+	komi: 'Komi',
+	pillar: 'Pillar',
+	linkbio: 'Linkbio',
+	linkme: 'Linkme',
+};
+
+const PLATFORMS = Array.from(new Set(ENDPOINTS.map((e) => e.platform))).map(
+	(platform) => ({ value: platform, name: PLATFORM_LABELS[platform] ?? platform }),
+);
 
 // Friendly field labels for the known parameter names in the catalog.
 const PARAM_LABELS: Record<string, string> = {

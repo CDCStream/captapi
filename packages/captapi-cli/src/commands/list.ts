@@ -1,19 +1,9 @@
 import { ENDPOINTS, type Platform } from "../catalog.js";
 import { printJson, c } from "../client.js";
 
-const PLATFORMS: Platform[] = [
-  "youtube",
-  "tiktok",
-  "instagram",
-  "facebook",
-  "twitter",
-  "reddit",
-  "threads",
-  "bluesky",
-  "pinterest",
-  "linkedin",
-  "rumble",
-];
+const PLATFORMS = Array.from(
+  new Set(ENDPOINTS.map((endpoint) => endpoint.platform)),
+) as Platform[];
 
 /** Command name for an endpoint, e.g. youtube_transcript -> youtube-transcript. */
 export function commandName(tool: string): string {

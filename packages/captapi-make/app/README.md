@@ -19,9 +19,8 @@ https://captapi.com/dashboard. The key is validated against
 
 ## Modules
 
-Modules are grouped by platform (YouTube, TikTok, Instagram, Facebook, X/Twitter,
-Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble). Pick the operation you
-need, fill in the URL (or search query) and an optional limit, and the module
+Modules are grouped by platform in the Make picker. Pick the operation you need,
+fill in the URL, search query, or platform-specific fields, and the module
 returns the structured result.
 
 Docs: https://captapi.com/docs

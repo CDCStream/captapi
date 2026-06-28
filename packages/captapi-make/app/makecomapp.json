@@ -276,7 +276,7 @@
       },
       "youtubeTrendingShorts": {
         "label": "YouTube Trending Shorts",
-        "description": "Discover trending YouTube Shorts by seed keyword. Costs ~20 credits (cached results free, failures never charged).",
+        "description": "Discover trending YouTube Shorts by seed keyword. Costs ~28 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -378,7 +378,7 @@
       },
       "youtubeCommunityPostDetails": {
         "label": "YouTube Community Post Details",
-        "description": "Details for a single YouTube community post. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Details for a single YouTube community post. Costs ~7 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -497,7 +497,7 @@
       },
       "tiktokProfileRegion": {
         "label": "TikTok Profile Region",
-        "description": "Region and language signals for a TikTok profile. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Region and language signals for a TikTok profile. Costs ~7 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -514,7 +514,7 @@
       },
       "tiktokAudienceDemographics": {
         "label": "TikTok Audience Demographics",
-        "description": "Audience and demographic signals for a TikTok profile. Costs ~4 credits (cached results free, failures never charged).",
+        "description": "Audience and demographic signals for a TikTok profile. Costs ~7 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -548,7 +548,7 @@
       },
       "tiktokSearchSuggestions": {
         "label": "TikTok Search Suggestions",
-        "description": "TikTok search/autocomplete suggestions for a seed keyword. Costs ~14 credits (cached results free, failures never charged).",
+        "description": "TikTok search/autocomplete suggestions for a seed keyword. Costs ~28 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -786,7 +786,7 @@
       },
       "tiktokLiveInfo": {
         "label": "TikTok Live Info",
-        "description": "Live room details for a TikTok creator. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Live room details for a TikTok creator. Costs ~7 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -803,7 +803,7 @@
       },
       "tiktokPopularCreators": {
         "label": "TikTok Popular Creators",
-        "description": "Popular TikTok creators by country and ranking mode. Costs ~14 credits (cached results free, failures never charged).",
+        "description": "Popular TikTok creators by country and ranking mode. Costs ~28 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -956,7 +956,7 @@
       },
       "instagramTrendingReels": {
         "label": "Instagram Trending Reels",
-        "description": "Trending Instagram Reels / Explore posts by country. Costs ~12 credits (cached results free, failures never charged).",
+        "description": "Trending Instagram Reels / Explore posts by country. Costs ~28 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1024,7 +1024,7 @@
       },
       "instagramReelsByAudioId": {
         "label": "Instagram Reels By Audio ID",
-        "description": "Posts/Reels using an Instagram audio ID. Costs ~18 credits (cached results free, failures never charged).",
+        "description": "Posts/Reels using an Instagram audio ID. Costs ~28 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1296,7 +1296,7 @@
       },
       "facebookMarketplaceSearch": {
         "label": "Facebook Marketplace Search",
-        "description": "Search Facebook Marketplace listings by keyword and location. Costs ~20 credits (cached results free, failures never charged).",
+        "description": "Search Facebook Marketplace listings by keyword and location. Costs ~28 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1313,7 +1313,7 @@
       },
       "facebookMarketplaceLocationSearch": {
         "label": "Facebook Marketplace Location Search",
-        "description": "Find Facebook Marketplace location candidates for a city or place query. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Find Facebook Marketplace location candidates for a city or place query. Costs ~17 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1398,7 +1398,7 @@
       },
       "facebookMarketplaceItem": {
         "label": "Facebook Marketplace Item",
-        "description": "Details for a single Facebook Marketplace listing. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Details for a single Facebook Marketplace listing. Costs ~17 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1432,7 +1432,7 @@
       },
       "twitterTranscript": {
         "label": "Twitter/X Transcript",
-        "description": "Extract tweet text as transcript text. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Extract tweet text as transcript text. Costs ~7 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1925,7 +1925,7 @@
       },
       "linkedinPostTranscript": {
         "label": "LinkedIn Post Transcript",
-        "description": "Extract post text as a transcript for a LinkedIn post. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Extract post text as a transcript for a LinkedIn post. Costs ~7 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2061,7 +2061,7 @@
       },
       "tiktokShopSearch": {
         "label": "TikTok Shop Search",
-        "description": "Search TikTok Shop products by keyword. Costs ~16 credits (cached results free, failures never charged).",
+        "description": "Search TikTok Shop products by keyword. Costs ~56 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2078,7 +2078,7 @@
       },
       "tiktokShopProducts": {
         "label": "TikTok Shop Products",
-        "description": "List products from a TikTok Shop store. Costs ~16 credits (cached results free, failures never charged).",
+        "description": "List products from a TikTok Shop store. Costs ~56 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2095,7 +2095,7 @@
       },
       "tiktokShopProductDetails": {
         "label": "TikTok Shop Product Details",
-        "description": "Full TikTok Shop product details, seller and price metadata. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Full TikTok Shop product details, seller and price metadata. Costs ~14 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2112,7 +2112,7 @@
       },
       "tiktokShopProductReviews": {
         "label": "TikTok Shop Product Reviews",
-        "description": "Customer reviews for a TikTok Shop product. Costs ~16 credits (cached results free, failures never charged).",
+        "description": "Customer reviews for a TikTok Shop product. Costs ~45 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2129,7 +2129,7 @@
       },
       "tiktokShopUserShowcase": {
         "label": "TikTok Shop User Showcase",
-        "description": "Products promoted in a TikTok creator showcase. Costs ~16 credits (cached results free, failures never charged).",
+        "description": "Products promoted in a TikTok creator showcase. Costs ~45 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2146,7 +2146,7 @@
       },
       "githubUser": {
         "label": "GitHub User",
-        "description": "Public GitHub user profile details. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Public GitHub user profile details. Costs ~3 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2163,7 +2163,7 @@
       },
       "githubRepositories": {
         "label": "GitHub Repositories",
-        "description": "List a GitHub user's repositories. Costs ~3 credits (cached results free, failures never charged).",
+        "description": "List a GitHub user's repositories. Costs ~12 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2180,7 +2180,7 @@
       },
       "githubRepository": {
         "label": "GitHub Repository",
-        "description": "Repository details, stars, forks and metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Repository details, stars, forks and metadata. Costs ~3 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2197,7 +2197,7 @@
       },
       "githubPullRequests": {
         "label": "GitHub Pull Requests",
-        "description": "List repository pull requests. Costs ~3 credits (cached results free, failures never charged).",
+        "description": "List repository pull requests. Costs ~12 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2214,7 +2214,7 @@
       },
       "githubActivity": {
         "label": "GitHub Activity",
-        "description": "Recent public activity for a GitHub user. Costs ~3 credits (cached results free, failures never charged).",
+        "description": "Recent public activity for a GitHub user. Costs ~12 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2231,7 +2231,7 @@
       },
       "githubFollowers": {
         "label": "GitHub Followers",
-        "description": "List GitHub followers. Costs ~3 credits (cached results free, failures never charged).",
+        "description": "List GitHub followers. Costs ~12 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2248,7 +2248,7 @@
       },
       "githubFollowing": {
         "label": "GitHub Following",
-        "description": "List accounts a GitHub user follows. Costs ~3 credits (cached results free, failures never charged).",
+        "description": "List accounts a GitHub user follows. Costs ~12 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2265,7 +2265,7 @@
       },
       "githubContributions": {
         "label": "GitHub Contributions",
-        "description": "Summary of recent public GitHub contributions. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Summary of recent public GitHub contributions. Costs ~3 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2282,7 +2282,7 @@
       },
       "githubTrendingRepositories": {
         "label": "GitHub Trending Repositories",
-        "description": "Search trending repositories by stars or query. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Search trending repositories by stars or query. Costs ~12 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2299,7 +2299,7 @@
       },
       "githubTrendingDevelopers": {
         "label": "GitHub Trending Developers",
-        "description": "Search popular GitHub developers. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Search popular GitHub developers. Costs ~12 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2316,7 +2316,7 @@
       },
       "googleSearch": {
         "label": "Google Search",
-        "description": "Google SERP organic search results by keyword, country, and language. Costs ~5 credits (cached results free, failures never charged).",
+        "description": "Google SERP organic search results by keyword, country, and language. Costs ~42 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2333,7 +2333,7 @@
       },
       "twitchProfile": {
         "label": "Twitch Profile",
-        "description": "Twitch channel profile, followers, live status and recent metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Twitch channel profile, followers, live status and recent metadata. Costs ~9 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2350,7 +2350,7 @@
       },
       "twitchUserVideos": {
         "label": "Twitch User Videos",
-        "description": "Recent Twitch VODs for a channel. Costs ~12 credits (cached results free, failures never charged).",
+        "description": "Recent Twitch VODs for a channel. Costs ~34 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2367,7 +2367,7 @@
       },
       "twitchUserSchedule": {
         "label": "Twitch User Schedule",
-        "description": "Upcoming Twitch schedule data when exposed on the public channel. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Upcoming Twitch schedule data when exposed on the public channel. Costs ~34 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2384,7 +2384,7 @@
       },
       "twitchClip": {
         "label": "Twitch Clip",
-        "description": "Twitch clip metadata from a clip URL or channel fallback. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Twitch clip metadata from a clip URL or channel fallback. Costs ~9 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2401,7 +2401,7 @@
       },
       "spotifyArtist": {
         "label": "Spotify Artist",
-        "description": "Spotify artist details, followers and listener metadata. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Spotify artist details, followers and listener metadata. Costs ~6 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2418,7 +2418,7 @@
       },
       "spotifyTrack": {
         "label": "Spotify Track",
-        "description": "Spotify track metadata, artists, album and play count when available. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Spotify track metadata, artists, album and play count when available. Costs ~6 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2435,7 +2435,7 @@
       },
       "spotifyAlbum": {
         "label": "Spotify Album",
-        "description": "Spotify album metadata and track count. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Spotify album metadata and track count. Costs ~6 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2452,7 +2452,7 @@
       },
       "spotifySearch": {
         "label": "Spotify Search",
-        "description": "Search Spotify tracks, albums, artists, podcasts or episodes. Costs ~8 credits (cached results free, failures never charged).",
+        "description": "Search Spotify tracks, albums, artists, podcasts or episodes. Costs ~23 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2469,7 +2469,7 @@
       },
       "spotifyPodcast": {
         "label": "Spotify Podcast",
-        "description": "Spotify podcast/show details and episode summary metadata. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Spotify podcast/show details and episode summary metadata. Costs ~6 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2486,7 +2486,7 @@
       },
       "spotifyPodcastEpisodes": {
         "label": "Spotify Podcast Episodes",
-        "description": "List episodes for a Spotify podcast/show. Costs ~8 credits (cached results free, failures never charged).",
+        "description": "List episodes for a Spotify podcast/show. Costs ~23 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2503,7 +2503,7 @@
       },
       "soundcloudArtist": {
         "label": "SoundCloud Artist",
-        "description": "SoundCloud artist profile metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "SoundCloud artist profile metadata. Costs ~7 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2520,7 +2520,7 @@
       },
       "soundcloudArtistTracks": {
         "label": "SoundCloud Artist Tracks",
-        "description": "Tracks from a SoundCloud artist profile. Costs ~10 credits (cached results free, failures never charged).",
+        "description": "Tracks from a SoundCloud artist profile. Costs ~28 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2537,7 +2537,7 @@
       },
       "soundcloudTrack": {
         "label": "SoundCloud Track",
-        "description": "SoundCloud track metadata and engagement stats. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "SoundCloud track metadata and engagement stats. Costs ~7 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2554,7 +2554,7 @@
       },
       "linktreePage": {
         "label": "Linktree Page",
-        "description": "Public Linktree profile links, socials and profile metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Public Linktree profile links, socials and profile metadata. Costs ~4 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2571,7 +2571,7 @@
       },
       "snapchatUserProfile": {
         "label": "Snapchat User Profile",
-        "description": "Public Snapchat profile metadata, subscriber count, avatar and highlights. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Public Snapchat profile metadata, subscriber count, avatar and highlights. Costs ~11 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2588,7 +2588,7 @@
       },
       "truthSocialProfile": {
         "label": "Truth Social Profile",
-        "description": "Public Truth Social profile metadata and stats. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Public Truth Social profile metadata and stats. Costs ~5 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2605,7 +2605,7 @@
       },
       "truthSocialUserPosts": {
         "label": "Truth Social User Posts",
-        "description": "Recent public posts from a Truth Social profile. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Recent public posts from a Truth Social profile. Costs ~17 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2622,7 +2622,7 @@
       },
       "truthSocialPost": {
         "label": "Truth Social Post",
-        "description": "Truth Social post metadata, text, media and engagement. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Truth Social post metadata, text, media and engagement. Costs ~5 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2639,7 +2639,7 @@
       },
       "kickClip": {
         "label": "Kick Clip",
-        "description": "Kick clip metadata from a clip URL or recent channel clips. Costs ~3 credits (cached results free, failures never charged).",
+        "description": "Kick clip metadata from a clip URL or recent channel clips. Costs ~34 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2656,7 +2656,7 @@
       },
       "amazonShopPage": {
         "label": "Amazon Shop Page",
-        "description": "Amazon seller storefront metadata and product listings. Costs ~20 credits (cached results free, failures never charged).",
+        "description": "Amazon seller storefront metadata and product listings. Costs ~89 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2673,7 +2673,7 @@
       },
       "ageGenderGet": {
         "label": "Age and Gender",
-        "description": "Predict age, gender and nationality signals from first names. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Predict age, gender and nationality signals from first names. Costs ~4 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2758,7 +2758,7 @@
       },
       "kwaiProfile": {
         "label": "Kwai Profile",
-        "description": "Kwai/Kuaishou public profile details and stats. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Kwai/Kuaishou public profile details and stats. Costs ~17 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2775,7 +2775,7 @@
       },
       "kwaiUserPosts": {
         "label": "Kwai User Posts",
-        "description": "Recent Kwai/Kuaishou videos from a profile. Costs ~16 credits (cached results free, failures never charged).",
+        "description": "Recent Kwai/Kuaishou videos from a profile. Costs ~45 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2792,7 +2792,7 @@
       },
       "kwaiPost": {
         "label": "Kwai Post",
-        "description": "Kwai/Kuaishou post metadata and engagement. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Kwai/Kuaishou post metadata and engagement. Costs ~17 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2809,7 +2809,7 @@
       },
       "komiPage": {
         "label": "Komi Page",
-        "description": "Public Komi page links and profile metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Public Komi page links and profile metadata. Costs ~4 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2826,7 +2826,7 @@
       },
       "pillarPage": {
         "label": "Pillar Page",
-        "description": "Public Pillar page links and profile metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Public Pillar page links and profile metadata. Costs ~4 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2843,7 +2843,7 @@
       },
       "linkbioPage": {
         "label": "Linkbio Page",
-        "description": "Public Linkbio page links and profile metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Public Linkbio page links and profile metadata. Costs ~4 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2860,7 +2860,7 @@
       },
       "linkmeProfile": {
         "label": "Linkme Profile",
-        "description": "Public Linkme profile links and metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Public Linkme profile links and metadata. Costs ~4 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2877,7 +2877,7 @@
       },
       "facebookAdLibrarySearch": {
         "label": "Facebook Ad Library Search",
-        "description": "Search Meta/Facebook ads by keyword. Costs ~20 credits (cached results free, failures never charged).",
+        "description": "Search Meta/Facebook ads by keyword. Costs ~70 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2894,7 +2894,7 @@
       },
       "facebookAdLibraryCompanyAds": {
         "label": "Facebook Company Ads",
-        "description": "Ads for a Facebook page or Meta Ad Library URL. Costs ~20 credits (cached results free, failures never charged).",
+        "description": "Ads for a Facebook page or Meta Ad Library URL. Costs ~70 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2911,7 +2911,7 @@
       },
       "facebookAdLibrarySearchCompanies": {
         "label": "Facebook Ad Library Search Companies",
-        "description": "Find advertisers/pages in the Meta Ad Library by name. Costs ~20 credits (cached results free, failures never charged).",
+        "description": "Find advertisers/pages in the Meta Ad Library by name. Costs ~70 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2928,7 +2928,7 @@
       },
       "facebookAdLibraryAdDetails": {
         "label": "Facebook Ad Details",
-        "description": "Meta/Facebook ad details. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Meta/Facebook ad details. Costs ~17 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2945,7 +2945,7 @@
       },
       "facebookAdLibraryAdTranscript": {
         "label": "Facebook Ad Transcript",
-        "description": "Extract creative text from a Meta/Facebook ad as transcript text. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Extract creative text from a Meta/Facebook ad as transcript text. Costs ~17 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2962,7 +2962,7 @@
       },
       "tiktokAdLibrarySearch": {
         "label": "TikTok Ad Library Search",
-        "description": "Search TikTok Ad Library and Creative Center. Costs ~20 credits (cached results free, failures never charged).",
+        "description": "Search TikTok Ad Library and Creative Center. Costs ~70 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2979,7 +2979,7 @@
       },
       "tiktokAdLibraryAdDetails": {
         "label": "TikTok Ad Details",
-        "description": "TikTok ad details by ad URL or ID. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "TikTok ad details by ad URL or ID. Costs ~17 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2996,7 +2996,7 @@
       },
       "googleAdLibraryCompanyAds": {
         "label": "Google Company Ads",
-        "description": "Google Ads Transparency Center ads for an advertiser. Costs ~20 credits (cached results free, failures never charged).",
+        "description": "Google Ads Transparency Center ads for an advertiser. Costs ~67 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -3013,7 +3013,7 @@
       },
       "googleAdLibraryAdDetails": {
         "label": "Google Ad Details",
-        "description": "Google ad details by Transparency Center URL. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Google ad details by Transparency Center URL. Costs ~17 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -3030,7 +3030,7 @@
       },
       "googleAdLibraryAdvertiserSearch": {
         "label": "Google Advertiser Search",
-        "description": "Search Google Ads advertisers. Costs ~10 credits (cached results free, failures never charged).",
+        "description": "Search Google Ads advertisers. Costs ~45 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -3047,7 +3047,7 @@
       },
       "linkedinAdLibrarySearchAds": {
         "label": "LinkedIn Ad Library Search",
-        "description": "Search LinkedIn Ad Library ads. Costs ~20 credits (cached results free, failures never charged).",
+        "description": "Search LinkedIn Ad Library ads. Costs ~70 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -3064,7 +3064,7 @@
       },
       "linkedinAdLibraryAdDetails": {
         "label": "LinkedIn Ad Details",
-        "description": "LinkedIn ad details by URL or ID. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "LinkedIn ad details by URL or ID. Costs ~17 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

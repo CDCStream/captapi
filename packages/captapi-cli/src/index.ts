@@ -93,7 +93,7 @@ function buildProgram(): Command {
     .command("list")
     .argument(
       "[platform]",
-      "Filter by platform: youtube | tiktok | instagram | facebook | twitter | reddit | threads | bluesky | pinterest | linkedin | rumble",
+      "Filter by platform, e.g. youtube, tiktok_shop, github, ad_library",
     )
     .description("List all available endpoints (commands)")
     .option("--json", "Output as JSON")
