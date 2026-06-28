@@ -22,13 +22,15 @@ const BASE_URL = (
 
 const VERSION = "0.1.0";
 
-type ToolArgs = Record<string, string | number | undefined>;
+type ToolArgs = Record<string, string | number | boolean | undefined>;
 
 /** Build a single Zod field for one declared parameter. */
 function fieldFor(p: ToolParam): z.ZodTypeAny {
   let base: z.ZodTypeAny;
   if (p.type === "number") {
     base = z.number().int().positive();
+  } else if (p.type === "boolean") {
+    base = z.boolean();
   } else if (p.name === "url") {
     base = z.string().url();
   } else {

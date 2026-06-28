@@ -96,9 +96,9 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `youtube_comments` | `/v1/youtube/comments` | `url` (string), `limit`? (number) | 20 |
 | `youtube_channel_details` | `/v1/youtube/channel-details` | `url` (string) | 1 |
 | `youtube_search` | `/v1/youtube/search` | `q` (string), `limit`? (number) | 20 |
-| `youtube_channel_videos` | `/v1/youtube/channel-videos` | `url` (string), `limit`? (number) | 20 |
-| `youtube_playlist_videos` | `/v1/youtube/playlist-videos` | `url` (string), `limit`? (number) | 50 |
-| `youtube_playlist` | `/v1/youtube/playlist` | `url` (string), `limit`? (number) | 50 |
+| `youtube_channel_videos` | `/v1/youtube/channel-videos` | `url` (string), `limit`? (number), `fast`? (boolean, RSS fast path) | 20 |
+| `youtube_playlist_videos` | `/v1/youtube/playlist-videos` | `url` (string), `limit`? (number), `fast`? (boolean, RSS fast path) | 50 |
+| `youtube_playlist` | `/v1/youtube/playlist` | `url` (string), `limit`? (number), `fast`? (boolean, RSS fast path) | 50 |
 | `youtube_video_download` | `/v1/youtube/video-download` | `url` (string) | 3 |
 | `youtube_shorts_transcript` | `/v1/youtube/shorts/transcript` | `url` (string), `language`? (string) | 2 |
 | `youtube_shorts_summarize` | `/v1/youtube/shorts/summarize` | `url` (string), `language`? (string) | 4 |

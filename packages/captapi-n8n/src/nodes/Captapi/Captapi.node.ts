@@ -108,9 +108,9 @@ function buildProperties(): INodeProperties[] {
 			props.push({
 				displayName: labelFor(param.name),
 				name: param.name,
-				type: param.type === 'number' ? 'number' : 'string',
+				type: param.type === 'number' ? 'number' : param.type === 'boolean' ? 'boolean' : 'string',
 				required: param.required,
-				default: param.type === 'number' ? 0 : '',
+				default: param.type === 'number' ? 0 : param.type === 'boolean' ? false : '',
 				description: param.description,
 				displayOptions: {
 					show: {
@@ -174,12 +174,13 @@ export class Captapi implements INodeType {
 
 				const qs: IDataObject = {};
 				for (const param of endpoint.params) {
-					const value = this.getNodeParameter(param.name, i, '') as string | number;
+					const value = this.getNodeParameter(param.name, i, '') as string | number | boolean;
 					const isEmpty =
 						value === '' ||
 						value === undefined ||
 						value === null ||
-						(param.type === 'number' && Number(value) === 0);
+						(param.type === 'number' && Number(value) === 0) ||
+						(param.type === 'boolean' && value === false);
 					if (!isEmpty) qs[param.name] = value;
 				}
 

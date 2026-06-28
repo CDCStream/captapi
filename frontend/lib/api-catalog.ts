@@ -1061,6 +1061,7 @@ const qp = (description = "Search query or keywords (min 2 characters)."): ApiPa
 const lp = (def: number, max: number): ApiParam => ({ name: "limit", type: "integer", required: false, description: `Max items to return (default ${def}, max ${max}). Billed per result.` });
 const lang = (): ApiParam => ({ name: "language", type: "string", required: false, description: 'Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.' });
 const cid = (): ApiParam => ({ name: "comment_id", type: "string", required: true, description: "ID of the parent comment to fetch replies for (from the comments endpoint)." });
+const fastRss = (): ApiParam => ({ name: "fast", type: "boolean", required: false, description: "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters." });
 
 const YT_VIDEO = "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL.";
 const YT_SHORTS = "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL.";
@@ -1097,9 +1098,9 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-comments": [up(YT_VIDEO), lp(50, 500)],
   "youtube-channel-details": [up(YT_CHANNEL)],
   "youtube-search": [qp(), lp(20, 200)],
-  "youtube-channel-videos": [up(YT_CHANNEL), lp(20, 200)],
-  "youtube-playlist-videos": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500)],
-  "youtube-playlist": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500)],
+  "youtube-channel-videos": [up(YT_CHANNEL), lp(20, 200), fastRss()],
+  "youtube-playlist-videos": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500), fastRss()],
+  "youtube-playlist": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500), fastRss()],
   "youtube-video-download": [up(YT_VIDEO)],
   "youtube-shorts-transcript": [up(YT_SHORTS), lang()],
   "youtube-shorts-summarizer": [up(YT_SHORTS), lang()],

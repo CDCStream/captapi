@@ -215,6 +215,42 @@ def _normalize(item: dict) -> dict:
     }
 
 
+def _tiktok_music_id(value: str) -> str | None:
+    match = re.search(r"(\d{6,})(?:\?|$)", value)
+    return match.group(1) if match else None
+
+
+def _tiktok_music_candidates(settings: Any, url: str, limit: int) -> list[tuple[str, dict[str, Any]]]:
+    music_id = _tiktok_music_id(url)
+    candidates: list[tuple[str, dict[str, Any]]] = []
+    if music_id:
+        candidates.append(
+            (
+                settings.APIFY_ACTOR_TIKTOK_MUSIC_POSTS,
+                {"music_id": music_id, "maxResults": limit},
+            )
+        )
+    candidates.extend(
+        [
+            (
+                settings.APIFY_ACTOR_TIKTOK_MUSIC,
+                {
+                    "sounds": [music_id or url],
+                    "maxVideosPerSound": limit,
+                    "includeSoundSummary": False,
+                    "includeVideoFields": True,
+                    "stopOnError": False,
+                },
+            ),
+            (
+                settings.APIFY_ACTOR_TIKTOK_MUSIC_FALLBACK,
+                {"musics": [url], "resultsPerPage": limit, "shouldDownloadVideos": False},
+            ),
+        ]
+    )
+    return candidates
+
+
 def _normalize_suggestion(item: dict, seed: str) -> dict:
     suggestion = (
         item.get("suggestion")
@@ -1133,9 +1169,8 @@ async def tiktok_music_posts(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_MUSIC,
-                {"musics": [url], "resultsPerPage": limit, "shouldDownloadVideos": False},
+            items, _actor = await apify.run_with_fallback(
+                _tiktok_music_candidates(settings, url, limit),
                 max_items=limit,
             )
             posts = [_normalize(i) for i in items[:limit]]
@@ -1282,11 +1317,14 @@ async def tiktok_song_details(
             url_id = m.group(1) if m else None
 
             # Fast path: apidojo music scraper (~9s, has duration + cover).
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_SONG,
-                {"startUrls": [url], "maxItems": 1},
-                max_items=1,
-            )
+            try:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_TIKTOK_SONG,
+                    {"startUrls": [url], "maxItems": 1},
+                    max_items=1,
+                )
+            except Exception:  # noqa: BLE001
+                items = []
             if items:
                 song = items[0].get("song") or {}
                 if song:
@@ -1338,27 +1376,46 @@ async def tiktok_song_details(
                     }
 
             # Fallback: clockworks sound scraper (slower, exposes playUrl).
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_MUSIC,
-                {"musics": [url], "resultsPerPage": 1, "shouldDownloadVideos": False},
+            items, _actor = await apify.run_with_fallback(
+                [
+                    (
+                        settings.APIFY_ACTOR_TIKTOK_MUSIC,
+                        {
+                            "sounds": [url_id or url],
+                            "maxVideosPerSound": 1,
+                            "includeSoundSummary": True,
+                            "includeVideoFields": False,
+                        },
+                    ),
+                    (
+                        settings.APIFY_ACTOR_TIKTOK_MUSIC_FALLBACK,
+                        {"musics": [url], "resultsPerPage": 1, "shouldDownloadVideos": False},
+                    ),
+                ],
                 max_items=1,
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Song not found")
-            music = items[0].get("musicMeta") or items[0].get("music") or {}
+            music = (
+                items[0].get("musicMeta")
+                or items[0].get("music")
+                or items[0].get("sound")
+                or items[0].get("summary")
+                or items[0]
+            )
             return {
                 "platform": "tiktok",
                 "url": url,
-                "id": url_id or safe_str(music.get("musicId") or music.get("id")),
-                "title": safe_str(music.get("musicName") or music.get("title")),
-                "author": safe_str(music.get("musicAuthor") or music.get("authorName")),
+                "id": url_id or safe_str(music.get("musicId") or music.get("soundId") or music.get("id")),
+                "title": safe_str(music.get("musicName") or music.get("title") or music.get("name")),
+                "author": safe_str(music.get("musicAuthor") or music.get("authorName") or music.get("artist") or music.get("author")),
                 "original": music.get("musicOriginal"),
                 "album": None,
-                "duration": safe_float(music.get("duration")),
+                "duration": safe_float(music.get("duration") or music.get("durationSeconds")),
                 "coverUrl": safe_str(
-                    music.get("coverLarge") or music.get("coverMedium") or music.get("coverMediumUrl")
+                    music.get("coverLarge") or music.get("coverMedium") or music.get("coverMediumUrl") or music.get("coverUrl") or music.get("cover")
                 ),
-                "playUrl": safe_str(music.get("playUrl")),
+                "playUrl": safe_str(music.get("playUrl") or music.get("audioUrl")),
             }
 
         data = await cached_or_run(
@@ -1459,29 +1516,38 @@ async def tiktok_popular_hashtags(
             # co-occurring hashtags on those videos and rank them by frequency
             # + total plays to surface related/trending hashtags.
             seed = query.lstrip("#").strip()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_TREND_DISCOVERY,
-                {
-                    "searchQueries": [],
-                    "hashtags": [seed],
-                    "resultsPerQuery": n_videos,
-                    "includeVideos": True,
-                    "includeHashtags": False,
-                    "sortBy": "popular",
-                    "proxyConfiguration": {"useApifyProxy": True},
-                },
+            items, _actor = await apify.run_with_fallback(
+                [
+                    (
+                        settings.APIFY_ACTOR_TIKTOK_TREND_DISCOVERY,
+                        {
+                            "searchQueries": [],
+                            "hashtags": [seed],
+                            "resultsPerQuery": n_videos,
+                            "includeVideos": True,
+                            "includeHashtags": False,
+                            "sortBy": "popular",
+                            "proxyConfiguration": {"useApifyProxy": True},
+                        },
+                    ),
+                    (
+                        settings.APIFY_ACTOR_TIKTOK,
+                        {"hashtags": [seed], "resultsPerPage": n_videos, "shouldDownloadVideos": False},
+                    ),
+                ],
                 max_items=n_videos,
             )
             agg: dict[str, dict[str, int]] = {}
             for v in items:
-                if v.get("recordType") != "video":
+                if v.get("recordType") and v.get("recordType") != "video":
                     continue
-                tags = v.get("hashtags")
+                tags = v.get("hashtags") or v.get("challenges")
                 if not isinstance(tags, list):
                     tags = []
-                plays = safe_int(v.get("playCount")) or 0
+                stats = v.get("stats") or {}
+                plays = safe_int(v.get("playCount") or stats.get("playCount")) or 0
                 for t in tags:
-                    name = safe_str(t)
+                    name = safe_str(t.get("name") if isinstance(t, dict) else t)
                     if not name:
                         continue
                     name = name.lstrip("#").lower()

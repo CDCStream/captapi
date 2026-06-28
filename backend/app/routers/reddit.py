@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import math
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -104,17 +105,27 @@ def _normalize_comment(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-async def _fetch_reddit_json_post(post_id: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    """Fetch a post and comments from Reddit's public JSON endpoint.
+def _reddit_json_url_variants(url: str, post_id: str) -> list[str]:
+    parsed = urlparse(url if "://" in url else f"https://www.reddit.com/comments/{post_id}")
+    path = parsed.path or f"/comments/{post_id}"
+    if not path.endswith(".json"):
+        path = path.rstrip("/") + ".json"
+    return [
+        f"https://www.reddit.com/comments/{post_id}.json",
+        f"https://www.reddit.com{path}",
+        f"https://old.reddit.com{path}",
+        f"https://oauth.reddit.com{path}",
+    ]
 
-    This is much faster than running a browser-based actor for single-post
-    details/transcripts, and the Apify actor remains as a fallback below.
-    """
-    url = f"https://www.reddit.com/comments/{post_id}.json"
+
+async def _fetch_reddit_json_url(url: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     headers = {"User-Agent": "CaptapiBot/1.0 (+https://captapi.com)"}
     params = {"raw_json": "1", "limit": max(limit, 1)}
-    async with httpx.AsyncClient(timeout=8.0, follow_redirects=True, headers=headers) as client:
-        resp = await client.get(url, params=params)
+    try:
+        async with httpx.AsyncClient(timeout=8.0, follow_redirects=True, headers=headers) as client:
+            resp = await client.get(url, params=params)
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail="Reddit upstream error") from exc
     if resp.status_code == 404:
         raise HTTPException(status_code=404, detail="Post not found")
     if resp.status_code >= 400:
@@ -163,6 +174,52 @@ async def _fetch_reddit_json_post(post_id: str, limit: int) -> tuple[dict[str, A
     comment_listing = data[1] if len(data) > 1 else {}
     walk(((comment_listing.get("data") or {}).get("children") or []))
     return _normalize_post(post), [_normalize_comment(c) for c in comments[:limit]]
+
+
+async def _fetch_reddit_json_post(url: str, post_id: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Fetch a post and comments from Reddit public JSON variants before actor fallback."""
+    last_error: HTTPException | None = None
+    seen: set[str] = set()
+    for candidate in _reddit_json_url_variants(url, post_id):
+        if candidate in seen:
+            continue
+        seen.add(candidate)
+        try:
+            return await _fetch_reddit_json_url(candidate, limit)
+        except HTTPException as exc:
+            if exc.status_code not in {502, 503, 504}:
+                raise
+            last_error = exc
+    raise last_error or HTTPException(status_code=502, detail="Reddit upstream error")
+
+
+async def _fetch_reddit_actor_post(url: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    settings = get_settings()
+    items = await get_apify().run_actor_sync(
+        settings.APIFY_ACTOR_REDDIT,
+        {
+            "startUrls": [{"url": url}],
+            "type": "posts",
+            "maxItems": max(limit, 1),
+        },
+        max_items=max(limit, 1),
+    )
+    post_items = [i for i in items if not _is_comment(i)]
+    comment_items = [i for i in items if _is_comment(i)]
+    if not post_items and not comment_items:
+        raise HTTPException(status_code=404, detail="Post not found")
+    post = _normalize_post(post_items[0] if post_items else items[0])
+    comments = [_normalize_comment(c) for c in comment_items[:limit]]
+    return post, comments
+
+
+async def _fetch_reddit_post_resilient(url: str, post_id: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    try:
+        return await _fetch_reddit_json_post(url, post_id, limit)
+    except HTTPException as exc:
+        if exc.status_code not in {502, 503, 504}:
+            raise
+    return await _fetch_reddit_actor_post(url, limit)
 
 
 async def _search_reddit_json(sub: str, q: str, limit: int) -> list[dict[str, Any]]:
@@ -225,9 +282,6 @@ async def subreddit_posts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            results = await _search_reddit_json(sub, q, limit)
-            if results:
-                return {"subreddit": sub, "query": q, "totalReturned": len(results), "results": results}
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_REDDIT,
@@ -328,7 +382,7 @@ async def post_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            post, _ = await _fetch_reddit_json_post(post_id, limit=1)
+            post, _ = await _fetch_reddit_post_resilient(url, post_id, limit=1)
             return post
 
         data = await cached_or_run(
@@ -356,7 +410,7 @@ async def post_comments(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            _, comments = await _fetch_reddit_json_post(post_id, limit=limit)
+            _, comments = await _fetch_reddit_post_resilient(url, post_id, limit=limit)
             return {"totalReturned": len(comments), "comments": comments}
 
         data = await cached_or_run(
@@ -385,7 +439,15 @@ async def post_transcript(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            post, comments = await _fetch_reddit_json_post(post_id, limit=max(limit, 1))
+            try:
+                post, comments = await _fetch_reddit_json_post(url, post_id, limit=max(limit, 1))
+            except HTTPException as exc:
+                if exc.status_code in {502, 503, 504}:
+                    raise HTTPException(
+                        status_code=422,
+                        detail="No transcript text available for this Reddit post",
+                    ) from exc
+                raise
             segments: list[dict[str, Any]] = []
             parts: list[str] = []
             title = (post.get("title") or "").strip()

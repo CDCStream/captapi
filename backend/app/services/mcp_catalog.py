@@ -15,7 +15,7 @@ Platform = str  # "youtube" | "tiktok" | "instagram" | "facebook"
 @dataclass(frozen=True)
 class ToolParam:
     name: str
-    type: str  # "string" | "number"
+    type: str  # "string" | "number" | "boolean"
     required: bool
     description: str
 
@@ -47,6 +47,15 @@ def _limit(default: int, maximum: int) -> ToolParam:
         "number",
         False,
         f"Max items to return. Default {default}, max {maximum}. Billed per result.",
+    )
+
+
+def _fast_rss() -> ToolParam:
+    return ToolParam(
+        "fast",
+        "boolean",
+        False,
+        "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters.",
     )
 
 
@@ -87,8 +96,8 @@ _YOUTUBE: tuple[tuple, ...] = (
     ("youtube_comments", "YouTube Comments", "/v1/youtube/comments", 20, "Comments on a YouTube video.", (_url(YT_VIDEO), _limit(50, 500))),
     ("youtube_channel_details", "YouTube Channel Details", "/v1/youtube/channel-details", 1, "Channel info & subscriber/stats for a YouTube channel.", (_url(YT_CHANNEL),)),
     ("youtube_search", "YouTube Search", "/v1/youtube/search", 20, "Search YouTube videos by keyword.", (_q(), _limit(20, 200))),
-    ("youtube_channel_videos", "YouTube Channel Videos", "/v1/youtube/channel-videos", 20, "List a channel's uploaded videos.", (_url(YT_CHANNEL), _limit(20, 200))),
-    ("youtube_playlist_videos", "YouTube Playlist Videos", "/v1/youtube/playlist-videos", 50, "List videos in a YouTube playlist.", (_url("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), _limit(50, 500))),
+    ("youtube_channel_videos", "YouTube Channel Videos", "/v1/youtube/channel-videos", 20, "List a channel's uploaded videos.", (_url(YT_CHANNEL), _limit(20, 200), _fast_rss())),
+    ("youtube_playlist_videos", "YouTube Playlist Videos", "/v1/youtube/playlist-videos", 50, "List videos in a YouTube playlist.", (_url("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), _limit(50, 500), _fast_rss())),
     ("youtube_video_download", "YouTube Video Download", "/v1/youtube/video-download", 3, "Direct download URLs for a YouTube video.", (_url(YT_VIDEO),)),
     ("youtube_shorts_transcript", "YouTube Shorts Transcript", "/v1/youtube/shorts/transcript", 2, "Transcript of a YouTube Short.", (_url(YT_SHORTS), _language())),
     ("youtube_shorts_summarize", "YouTube Shorts Summarizer", "/v1/youtube/shorts/summarize", 4, "AI summary of a YouTube Short.", (_url(YT_SHORTS), _language())),
@@ -196,6 +205,8 @@ def tool_input_schema(e: Endpoint) -> dict:
     for p in e.params:
         if p.type == "number":
             schema: dict = {"type": "integer", "minimum": 1, "description": p.description}
+        elif p.type == "boolean":
+            schema = {"type": "boolean", "description": p.description}
         else:
             schema = {"type": "string", "description": p.description}
             if p.name == "url":

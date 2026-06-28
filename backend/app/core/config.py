@@ -25,13 +25,13 @@ class Settings(BaseSettings):
     SUPABASE_ANON_KEY: str
 
     APIFY_TOKEN: str
-    # Keep user-facing API calls responsive. Most Apify-backed endpoints should
-    # either return quickly or fail as a retryable upstream error instead of
-    # holding the HTTP request open for minutes.
-    APIFY_SYNC_TIMEOUT_SECONDS: float = 45.0
+    # Let legitimate long-running actors finish. Endpoint code should use fast
+    # public paths or actor fallbacks for responsiveness instead of cutting off
+    # valid actor runs with an aggressive global timeout.
+    APIFY_SYNC_TIMEOUT_SECONDS: float = 120.0
     APIFY_SYNC_MAX_ATTEMPTS: int = 1
     APIFY_SYNC_RETRY_MAX_WAIT_SECONDS: float = 3.0
-    MCP_TOOL_TIMEOUT_SECONDS: float = 60.0
+    MCP_TOOL_TIMEOUT_SECONDS: float = 120.0
     # Legacy single transcript actor (kept for backward-compat env binding).
     APIFY_ACTOR_YOUTUBE_TRANSCRIPT: str = "pintostudio/youtube-transcript-scraper"
     # Primary + fallback timestamped transcript actors. The old pintostudio
@@ -43,6 +43,8 @@ class Settings(BaseSettings):
     APIFY_ACTOR_YOUTUBE_VIDEO: str = "streamers/youtube-scraper"
     APIFY_ACTOR_YOUTUBE_COMMENTS: str = "streamers/youtube-comments-scraper"
     APIFY_ACTOR_YOUTUBE_SEARCH: str = "streamers/youtube-scraper"
+    APIFY_ACTOR_YOUTUBE_PLAYLIST: str = "powerai/youtube-playlist-videos-scraper"
+    APIFY_ACTOR_YOUTUBE_PLAYLIST_FALLBACK: str = "streamers/youtube-scraper"
     APIFY_ACTOR_YOUTUBE_CHANNEL: str = "streamers/youtube-channel-scraper"
     APIFY_ACTOR_YOUTUBE_DOWNLOAD: str = "api-ninja/youtube-video-downloader"
     # Fallback downloader (used only if the primary returns no link), so a
@@ -64,7 +66,9 @@ class Settings(BaseSettings):
     # sound scraper.
     APIFY_ACTOR_TIKTOK_FOLLOWERS: str = "clockworks/tiktok-followers-scraper"
     APIFY_ACTOR_TIKTOK_FOLLOWINGS: str = "clockworks/tiktok-followers-scraper"
-    APIFY_ACTOR_TIKTOK_MUSIC: str = "clockworks/tiktok-sound-scraper"
+    APIFY_ACTOR_TIKTOK_MUSIC: str = "coregent/tiktok-sound-music-scraper"
+    APIFY_ACTOR_TIKTOK_MUSIC_POSTS: str = "powerai/tiktok-music-posts-video-scraper"
+    APIFY_ACTOR_TIKTOK_MUSIC_FALLBACK: str = "clockworks/tiktok-sound-scraper"
     # Song/sound metadata only. apidojo returns song details in ~9s vs ~40s for
     # the clockworks sound scraper (which crawls the sound's video feed); the
     # latter stays as the music-posts actor and a song-details fallback.
@@ -82,8 +86,10 @@ class Settings(BaseSettings):
     APIFY_ACTOR_TIKTOK_POPULAR_CREATORS_FALLBACK: str = "burbn/tiktok-trending-creators"
     APIFY_ACTOR_TIKTOK_AUDIENCE: str = ""
 
-    APIFY_ACTOR_INSTAGRAM: str = "apify/instagram-scraper"
-    APIFY_ACTOR_INSTAGRAM_REEL: str = "apify/instagram-scraper"
+    APIFY_ACTOR_INSTAGRAM: str = "spry_headset/instagram-page-post-scraper"
+    APIFY_ACTOR_INSTAGRAM_FALLBACK: str = "apify/instagram-scraper"
+    APIFY_ACTOR_INSTAGRAM_REEL: str = "spry_headset/instagram-page-post-scraper"
+    APIFY_ACTOR_INSTAGRAM_REEL_FALLBACK: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_PROFILE: str = "apify/instagram-profile-scraper"
     APIFY_ACTOR_INSTAGRAM_POST: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_COMMENT: str = "apify/instagram-comment-scraper"
@@ -109,6 +115,7 @@ class Settings(BaseSettings):
     # actor; input: searchQueries / startUrls + maxEvents.
     APIFY_ACTOR_FACEBOOK_MARKETPLACE: str = "unseenuser/fb-marketplace"
     APIFY_ACTOR_FACEBOOK_EVENTS: str = "apify/facebook-events-scraper"
+    APIFY_ACTOR_FACEBOOK_EVENT_DETAILS: str = "crawlerbros/facebook-events-scraper"
     APIFY_ACTOR_FACEBOOK_PHOTOS: str = "apify/facebook-photos-scraper"
 
     # YouTube community ("posts") tab. alpha-scraper is the cheapest rental
@@ -168,6 +175,8 @@ class Settings(BaseSettings):
     APIFY_ACTOR_SPOTIFY_DETAILS: str = "apiharvest/spotify-scraper-get-full-details"
     APIFY_ACTOR_SOUNDCLOUD: str = "automation-lab/soundcloud-scraper"
     APIFY_ACTOR_SNAPCHAT_PROFILE: str = "crawlerbros/snapchat-profile-scraper"
+    APIFY_ACTOR_TRUTH_SOCIAL: str = "simpleapi/truth-social-scraper"
+    APIFY_ACTOR_TRUTH_SOCIAL_FALLBACK: str = "automation-lab/truth-social-scraper"
     APIFY_ACTOR_KICK: str = "scrapestorm/kick-videos-clips-scraper-cheap"
     APIFY_ACTOR_AMAZON_SHOP: str = "piotrv1001/amazon-storefront-scraper"
     APIFY_ACTOR_AGE_GENDER: str = "parseforge/agify-name-demographics-scraper"
@@ -188,6 +197,7 @@ class Settings(BaseSettings):
     APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2: str = "unseenuser/google-ads"
     APIFY_ACTOR_LINKEDIN_AD_LIBRARY: str = "s-r/linkedin-ads-library"
     APIFY_ACTOR_LINKEDIN_AD_LIBRARY_DETAIL: str = "elliotpadfield/linkedin-ad-library-scraper"
+    APIFY_ACTOR_LINKEDIN_AD_LIBRARY_DETAIL_FALLBACK: str = "silentflow/linkedin-ads-scraper"
 
     # Optional GitHub token avoids low unauthenticated public API limits.
     GITHUB_TOKEN: str = ""

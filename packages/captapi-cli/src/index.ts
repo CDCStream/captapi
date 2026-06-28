@@ -39,6 +39,7 @@ function runEndpoint(e: Endpoint, opts: Record<string, unknown>): void {
 }
 
 function flagFor(p: ToolParam): string {
+  if (p.type === "boolean") return `--${p.name}`;
   return p.type === "number" ? `--${p.name} <number>` : `--${p.name} <value>`;
 }
 

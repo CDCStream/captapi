@@ -12,5 +12,12 @@
     "label": "Limit",
     "required": false,
     "help": "Max items to return. Default 20, max 200. Billed per result."
+  },
+  {
+    "name": "fast",
+    "type": "boolean",
+    "label": "Fast",
+    "required": false,
+    "help": "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters."
   }
 ]

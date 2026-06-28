@@ -170,32 +170,33 @@ def _normalize_event(item: dict) -> dict:
     loc = item.get("location") if isinstance(item.get("location"), dict) else {}
     tickets = item.get("ticketsInfo") if isinstance(item.get("ticketsInfo"), dict) else {}
     organizers = item.get("organizators") if isinstance(item.get("organizators"), list) else []
+    location_name = item.get("location_name") or item.get("venue") or item.get("locationName")
     return {
         "platform": "facebook",
-        "id": safe_str(item.get("id")),
-        "url": safe_str(item.get("url")),
-        "name": safe_str(item.get("name")),
+        "id": safe_str(item.get("id") or item.get("event_id") or item.get("eventId")),
+        "url": safe_str(item.get("url") or item.get("event_url") or item.get("eventUrl")),
+        "name": safe_str(item.get("name") or item.get("title")),
         "description": safe_str(item.get("description")),
-        "startDate": safe_str(item.get("utcStartDate")),
-        "startTime": safe_str(item.get("startTime") or item.get("dateTimeSentence")),
+        "startDate": safe_str(item.get("utcStartDate") or item.get("start_date") or item.get("startDate")),
+        "startTime": safe_str(item.get("startTime") or item.get("dateTimeSentence") or item.get("start_time")),
         "duration": safe_str(item.get("duration")),
-        "eventType": safe_str(item.get("eventType")),
-        "isOnline": item.get("isOnline"),
-        "isPast": item.get("isPast"),
-        "isCanceled": item.get("isCanceled"),
-        "address": safe_str(item.get("address")),
-        "image": safe_str(item.get("imageUrl")),
-        "usersGoing": safe_int(item.get("usersGoing")),
-        "usersInterested": safe_int(item.get("usersInterested")),
-        "usersResponded": safe_int(item.get("usersResponded")),
+        "eventType": safe_str(item.get("eventType") or item.get("event_type")),
+        "isOnline": item.get("isOnline") if item.get("isOnline") is not None else item.get("is_online"),
+        "isPast": item.get("isPast") if item.get("isPast") is not None else item.get("is_past"),
+        "isCanceled": item.get("isCanceled") if item.get("isCanceled") is not None else item.get("is_canceled"),
+        "address": safe_str(item.get("address") or item.get("location_address")),
+        "image": safe_str(item.get("imageUrl") or item.get("photo_url") or item.get("image")),
+        "usersGoing": safe_int(item.get("usersGoing") or item.get("going_count")),
+        "usersInterested": safe_int(item.get("usersInterested") or item.get("interested_count")),
+        "usersResponded": safe_int(item.get("usersResponded") or item.get("responded_count")),
         "location": {
-            "name": safe_str(loc.get("name")),
-            "city": safe_str(loc.get("city") or loc.get("contextualName")),
-            "latitude": loc.get("latitude"),
-            "longitude": loc.get("longitude"),
+            "name": safe_str(loc.get("name") or location_name),
+            "city": safe_str(loc.get("city") or loc.get("contextualName") or item.get("location_city")),
+            "latitude": loc.get("latitude") or item.get("latitude"),
+            "longitude": loc.get("longitude") or item.get("longitude"),
             "countryCode": safe_str(loc.get("countryCode")),
         },
-        "organizer": safe_str(item.get("organizedBy")),
+        "organizer": safe_str(item.get("organizedBy") or item.get("organizer") or item.get("host")),
         "organizers": [
             {
                 "id": safe_str(o.get("id")),
@@ -727,6 +728,31 @@ def _og_meta(page: str, key: str) -> str | None:
     return html.unescape(match.group(1)).strip() if match else None
 
 
+def _event_id(url: str) -> str | None:
+    match = re.search(r"/events/(\d+)", url)
+    return match.group(1) if match else None
+
+
+def _partial_event_from_page(url: str, page: str) -> dict[str, Any] | None:
+    title = _og_meta(page, "og:title")
+    description = _og_meta(page, "og:description")
+    image = _og_meta(page, "og:image")
+    if not (title or description or image):
+        return None
+    return {
+        "platform": "facebook",
+        "id": safe_str(_event_id(url)),
+        "url": safe_str(_og_meta(page, "og:url") or url),
+        "name": safe_str(title),
+        "description": safe_str(description),
+        "image": safe_str(image),
+        "startTime": None,
+        "endTime": None,
+        "location": None,
+        "hosts": [],
+    }
+
+
 @router.get("/marketplace-item", summary="Facebook Marketplace listing details")
 async def facebook_marketplace_item(
     url: str = Query(..., description="Facebook Marketplace item URL"),
@@ -971,43 +997,38 @@ async def facebook_event_details(
                     "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
                 )
             }
+            partial_event: dict[str, Any] | None = None
+            try:
+                resp = await fetch_via_residential(url, headers=headers, timeout=8)
+                if resp.status_code < 400:
+                    partial_event = _partial_event_from_page(url, resp.text)
+                    if partial_event:
+                        return partial_event
+            except Exception:  # noqa: BLE001
+                pass
             try:
                 async with httpx.AsyncClient(timeout=6, follow_redirects=True, headers=headers) as client:
                     resp = await client.get(url)
                 if resp.status_code < 400:
-                    title = _og_meta(resp.text, "og:title")
-                    description = _og_meta(resp.text, "og:description")
-                    image = _og_meta(resp.text, "og:image")
-                    if title or description or image:
-                        event_id = None
-                        match = re.search(r"/events/(\d+)", url)
-                        if match:
-                            event_id = match.group(1)
-                        return {
-                            "platform": "facebook",
-                            "id": safe_str(event_id),
-                            "url": safe_str(_og_meta(resp.text, "og:url") or url),
-                            "name": safe_str(title),
-                            "description": safe_str(description),
-                            "image": safe_str(image),
-                            "startTime": None,
-                            "endTime": None,
-                            "location": None,
-                            "hosts": [],
-                        }
+                    partial_event = _partial_event_from_page(url, resp.text)
+                    if partial_event:
+                        return partial_event
             except Exception:  # noqa: BLE001
                 pass
 
             apify = get_apify()
-            try:
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_FACEBOOK_EVENTS,
-                    {"startUrls": [url], "maxEvents": 1},
-                    max_items=1,
-                )
-            except Exception as exc:  # noqa: BLE001
-                raise HTTPException(status_code=502, detail="Event lookup failed upstream") from exc
+            items, _actor = await apify.run_with_fallback(
+                [
+                    (settings.APIFY_ACTOR_FACEBOOK_EVENT_DETAILS, {"eventUrls": [url]}),
+                    (settings.APIFY_ACTOR_FACEBOOK_EVENT_DETAILS, {"eventUrls": [_event_id(url) or url]}),
+                    (settings.APIFY_ACTOR_FACEBOOK_EVENTS, {"startUrls": [url], "maxEvents": 1}),
+                    (settings.APIFY_ACTOR_FACEBOOK_EVENTS, {"startUrls": [{"url": url}], "maxEvents": 1}),
+                ],
+                max_items=1,
+            )
             if not items or items[0].get("error"):
+                if partial_event:
+                    return partial_event
                 raise HTTPException(status_code=404, detail="Event not found")
             return _normalize_event(items[0])
 

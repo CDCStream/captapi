@@ -366,6 +366,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "fast",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Use YouTube's public RSS feed for faster but less detailed metadata.",
+              "default": false,
+              "title": "Fast"
+            },
+            "description": "Use YouTube's public RSS feed for faster but less detailed metadata."
           }
         ],
         "responses": {
@@ -423,6 +435,18 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "fast",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Use YouTube's public RSS feed for faster but less detailed metadata.",
+              "default": false,
+              "title": "Fast"
+            },
+            "description": "Use YouTube's public RSS feed for faster but less detailed metadata."
           }
         ],
         "responses": {
@@ -482,6 +506,18 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "fast",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Use YouTube's public RSS feed for faster but less detailed metadata.",
+              "default": false,
+              "title": "Fast"
+            },
+            "description": "Use YouTube's public RSS feed for faster but less detailed metadata."
           }
         ],
         "responses": {

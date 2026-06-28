@@ -157,7 +157,7 @@ for (const e of ENDPOINTS) {
   // Mappable parameters
   const mappable = e.params.map((p) => ({
     name: p.name,
-    type: p.type === "number" ? "number" : "text",
+    type: p.type === "number" ? "number" : p.type === "boolean" ? "boolean" : "text",
     label: paramLabel(p.name),
     required: !!p.required,
     help: p.description,

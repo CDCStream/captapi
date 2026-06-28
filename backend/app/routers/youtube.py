@@ -148,14 +148,36 @@ def _reply_payload(r: dict) -> dict:
 
 def _video_card(v: dict) -> dict:
     return {
-        "url": safe_str(v.get("url") or v.get("videoUrl")),
-        "title": safe_str(v.get("title")) or "",
-        "publishedAt": safe_str(v.get("date") or v.get("publishedAt")),
-        "viewCount": safe_int(v.get("viewCount") or v.get("views")),
-        "durationSeconds": safe_int(v.get("duration")),
-        "thumbnailUrl": safe_str(v.get("thumbnailUrl")),
-        "channelName": safe_str(v.get("channelName") or v.get("channel")),
+        "url": safe_str(v.get("url") or v.get("videoUrl") or v.get("video_url")),
+        "title": safe_str(v.get("title") or v.get("videoTitle") or v.get("video_title")) or "",
+        "publishedAt": safe_str(v.get("date") or v.get("publishedAt") or v.get("published_at")),
+        "viewCount": safe_int(v.get("viewCount") or v.get("views") or v.get("view_count")),
+        "durationSeconds": safe_int(v.get("duration") or v.get("durationSeconds") or v.get("duration_seconds")),
+        "thumbnailUrl": safe_str(v.get("thumbnailUrl") or v.get("thumbnail") or v.get("thumbnail_url")),
+        "channelName": safe_str(v.get("channelName") or v.get("channel") or v.get("channelTitle")),
     }
+
+
+def _playlist_actor_candidates(settings: Any, url: str, limit: int) -> list[tuple[str, dict[str, Any]]]:
+    playlist_id = _playlist_id(url)
+    dedicated_payload: dict[str, Any] = {
+        "playlistUrl": url,
+        # powerai actor schema currently enforces min 50; max_items trims output.
+        "maxResults": max(limit, 50),
+    }
+    if playlist_id:
+        dedicated_payload["playlistId"] = playlist_id
+    return [
+        (settings.APIFY_ACTOR_YOUTUBE_PLAYLIST, dedicated_payload),
+        (
+            settings.APIFY_ACTOR_YOUTUBE_PLAYLIST_FALLBACK,
+            {"startUrls": [{"url": url}], "maxResults": limit, "type": "playlist"},
+        ),
+        (
+            settings.APIFY_ACTOR_YOUTUBE_SEARCH,
+            {"startUrls": [{"url": url}], "maxResults": limit, "type": "playlist"},
+        ),
+    ]
 
 
 def _community_post(p: dict) -> dict:
@@ -575,6 +597,7 @@ async def youtube_channel_details(
 async def youtube_channel_videos(
     url: str = Query(...),
     limit: int = Query(20, ge=1, le=200),
+    fast: bool = Query(False, description="Use YouTube's public RSS feed for faster but less detailed metadata."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -588,9 +611,10 @@ async def youtube_channel_videos(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            feed_videos = await _youtube_channel_feed(url, limit)
-            if feed_videos:
-                return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
+            if fast:
+                feed_videos = await _youtube_channel_feed(url, limit)
+                if feed_videos:
+                    return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_SEARCH,
@@ -613,7 +637,7 @@ async def youtube_channel_videos(
 
         data = await cached_or_run(
             endpoint="youtube.channel-videos",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "fast": fast},
             runner=_run,
             ctx=ctx,
         )
@@ -626,6 +650,7 @@ async def youtube_channel_videos(
 async def youtube_playlist_videos(
     url: str = Query(...),
     limit: int = Query(50, ge=1, le=500),
+    fast: bool = Query(False, description="Use YouTube's public RSS feed for faster but less detailed metadata."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -639,32 +664,27 @@ async def youtube_playlist_videos(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            feed_videos = await _youtube_playlist_feed(url, limit)
-            if feed_videos:
-                return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
+            if fast:
+                feed_videos = await _youtube_playlist_feed(url, limit)
+                if feed_videos:
+                    return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_YOUTUBE_SEARCH,
-                {"startUrls": [{"url": url}], "maxResults": limit, "type": "playlist"},
+            items, _actor = await apify.run_with_fallback(
+                _playlist_actor_candidates(settings, url, limit),
                 max_items=limit,
             )
+            if not items:
+                feed_videos = await _youtube_playlist_feed(url, limit)
+                if feed_videos:
+                    return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
             videos = []
             for v in items[:limit]:
-                videos.append(
-                    {
-                        "url": safe_str(v.get("url")),
-                        "title": safe_str(v.get("title")) or "",
-                        "publishedAt": safe_str(v.get("date") or v.get("publishedAt")),
-                        "viewCount": safe_int(v.get("viewCount") or v.get("views")),
-                        "durationSeconds": safe_int(v.get("duration")),
-                        "channelName": safe_str(v.get("channelName") or v.get("channel")),
-                    }
-                )
+                videos.append(_video_card(v))
             return {"url": url, "totalReturned": len(videos), "videos": videos}
 
         data = await cached_or_run(
             endpoint="youtube.playlist-videos",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "fast": fast},
             runner=_run,
             ctx=ctx,
         )
@@ -676,6 +696,7 @@ async def youtube_playlist_videos(
 async def youtube_playlist(
     url: str = Query(..., description="YouTube playlist URL"),
     limit: int = Query(50, ge=1, le=500),
+    fast: bool = Query(False, description="Use YouTube's public RSS feed for faster but less detailed metadata."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -688,21 +709,32 @@ async def youtube_playlist(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            feed_videos = await _youtube_playlist_feed(url, limit)
-            if feed_videos:
-                return {
-                    "platform": "youtube",
-                    "url": url,
-                    "title": "",
-                    "channelName": feed_videos[0].get("channelName") if feed_videos else "",
-                    "totalReturned": len(feed_videos),
-                    "videos": feed_videos,
-                }
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_YOUTUBE_SEARCH,
-                {"startUrls": [{"url": url}], "maxResults": limit, "type": "playlist"},
+            if fast:
+                feed_videos = await _youtube_playlist_feed(url, limit)
+                if feed_videos:
+                    return {
+                        "platform": "youtube",
+                        "url": url,
+                        "title": "",
+                        "channelName": feed_videos[0].get("channelName") if feed_videos else "",
+                        "totalReturned": len(feed_videos),
+                        "videos": feed_videos,
+                    }
+            items, _actor = await get_apify().run_with_fallback(
+                _playlist_actor_candidates(settings, url, limit),
                 max_items=limit,
             )
+            if not items:
+                feed_videos = await _youtube_playlist_feed(url, limit)
+                if feed_videos:
+                    return {
+                        "platform": "youtube",
+                        "url": url,
+                        "title": "",
+                        "channelName": feed_videos[0].get("channelName") if feed_videos else "",
+                        "totalReturned": len(feed_videos),
+                        "videos": feed_videos,
+                    }
             videos = [_video_card(v) for v in items[:limit]]
             first = items[0] if items else {}
             return {
@@ -716,7 +748,7 @@ async def youtube_playlist(
 
         data = await cached_or_run(
             endpoint="youtube.playlist",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "fast": fast},
             runner=_run,
             ctx=ctx,
         )

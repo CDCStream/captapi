@@ -82,14 +82,14 @@ def _normalize_post(item: dict) -> dict:
     author = item.get("ownerUsername") or (item.get("owner") or {}).get("username")
     return {
         "platform": "instagram",
-        "url": safe_str(item.get("url") or item.get("permalink")),
-        "id": safe_str(item.get("id") or item.get("shortCode")),
-        "caption": safe_str(item.get("caption")),
-        "description": safe_str(item.get("caption")),
-        "publishedAt": safe_str(item.get("timestamp") or item.get("takenAt")),
-        "durationSeconds": safe_float(item.get("videoDuration") or item.get("duration")),
-        "thumbnailUrl": safe_str(item.get("displayUrl") or item.get("thumbnailUrl")),
-        "videoUrl": safe_str(item.get("videoUrl")),
+        "url": safe_str(item.get("url") or item.get("permalink") or item.get("shortcodeUrl")),
+        "id": safe_str(item.get("id") or item.get("shortCode") or item.get("shortcode")),
+        "caption": safe_str(item.get("caption") or item.get("text") or item.get("description")),
+        "description": safe_str(item.get("caption") or item.get("text") or item.get("description")),
+        "publishedAt": safe_str(item.get("timestamp") or item.get("takenAt") or item.get("taken_at")),
+        "durationSeconds": safe_float(item.get("videoDuration") or item.get("duration") or item.get("durationSeconds")),
+        "thumbnailUrl": safe_str(item.get("displayUrl") or item.get("thumbnailUrl") or item.get("thumbnail")),
+        "videoUrl": safe_str(item.get("videoUrl") or item.get("video_url") or item.get("downloadUrl")),
         "author": {
             "username": safe_str(author),
             "displayName": safe_str(item.get("ownerFullName") or (item.get("owner") or {}).get("fullName")),
@@ -105,6 +105,24 @@ def _normalize_post(item: dict) -> dict:
         },
         "hashtags": safe_list(item.get("hashtags")),
     }
+
+
+def _instagram_profile_candidates(settings: Any, profile_url: str, limit: int, results_type: str) -> list[tuple[str, dict[str, Any]]]:
+    payload = {"directUrls": [profile_url], "resultsLimit": limit, "resultsType": results_type}
+    return [
+        (settings.APIFY_ACTOR_INSTAGRAM, payload),
+        (settings.APIFY_ACTOR_INSTAGRAM_FALLBACK, payload),
+    ]
+
+
+def _instagram_reel_candidates(settings: Any, url: str, *, subtitles: bool = False) -> list[tuple[str, dict[str, Any]]]:
+    payload: dict[str, Any] = {"directUrls": [url], "resultsLimit": 1}
+    if subtitles:
+        payload["shouldDownloadSubtitles"] = True
+    return [
+        (settings.APIFY_ACTOR_INSTAGRAM_REEL, payload),
+        (settings.APIFY_ACTOR_INSTAGRAM_REEL_FALLBACK, payload),
+    ]
 
 
 def _meta(page: str, key: str) -> str:
@@ -195,9 +213,8 @@ async def _fetch_instagram_transcript(url: str) -> tuple[str, list[dict[str, Any
         if full:
             return full, segments
 
-    items = await apify.run_actor_sync(
-        settings.APIFY_ACTOR_INSTAGRAM_REEL,
-        {"directUrls": [url], "shouldDownloadSubtitles": True, "resultsLimit": 1},
+    items, _actor = await apify.run_with_fallback(
+        _instagram_reel_candidates(settings, url, subtitles=True),
         max_items=1,
     )
     if not items:
@@ -559,13 +576,8 @@ async def instagram_channel_posts(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM,
-                {
-                    "directUrls": [f"https://www.instagram.com/{handle}/"],
-                    "resultsLimit": limit,
-                    "resultsType": "posts",
-                },
+            items, _actor = await apify.run_with_fallback(
+                _instagram_profile_candidates(settings, f"https://www.instagram.com/{handle}/", limit, "posts"),
                 max_items=limit,
             )
             posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
@@ -599,13 +611,8 @@ async def instagram_channel_reels(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM,
-                {
-                    "directUrls": [f"https://www.instagram.com/{handle}/"],
-                    "resultsLimit": limit,
-                    "resultsType": "reels",
-                },
+            items, _actor = await apify.run_with_fallback(
+                _instagram_profile_candidates(settings, f"https://www.instagram.com/{handle}/", limit, "reels"),
                 max_items=limit,
             )
             reels = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
@@ -710,20 +717,22 @@ async def instagram_video_download(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM_REEL,
-                {"directUrls": [url], "resultsLimit": 1},
+            items, _actor = await apify.run_with_fallback(
+                _instagram_reel_candidates(settings, url),
                 max_items=1,
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Reel not found")
             v = items[0]
+            download_url = safe_str(v.get("videoUrl") or v.get("video_url") or v.get("downloadUrl"))
+            if not download_url:
+                raise HTTPException(status_code=404, detail="Video download URL not found")
             return {
                 "platform": "instagram",
                 "url": url,
-                "downloadUrl": safe_str(v.get("videoUrl")),
-                "thumbnailUrl": safe_str(v.get("displayUrl") or v.get("thumbnailUrl")),
-                "duration": safe_float(v.get("videoDuration")),
+                "downloadUrl": download_url,
+                "thumbnailUrl": safe_str(v.get("displayUrl") or v.get("thumbnailUrl") or v.get("thumbnail")),
+                "duration": safe_float(v.get("videoDuration") or v.get("duration") or v.get("durationSeconds")),
             }
 
         data = await cached_or_run(

@@ -36,7 +36,7 @@ export type Platform =
 
 export interface ToolParam {
   name: string;
-  type: "string" | "number";
+  type: "string" | "number" | "boolean";
   required: boolean;
   description: string;
 }
@@ -76,6 +76,12 @@ const limit = (def: number, max: number): ToolParam => ({
   type: "number",
   required: false,
   description: `Max items to return. Default ${def}, max ${max}. Billed per result.`,
+});
+const fastRss = (): ToolParam => ({
+  name: "fast",
+  type: "boolean",
+  required: false,
+  description: "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters.",
 });
 const language = (): ToolParam => ({
   name: "language",
@@ -124,9 +130,9 @@ const YOUTUBE: Omit<Endpoint, "platform">[] = [
   { tool: "youtube_comments", name: "YouTube Comments", path: "/v1/youtube/comments", credits: 20, summary: "Comments on a YouTube video.", params: [url(YT_VIDEO), limit(50, 500)] },
   { tool: "youtube_channel_details", name: "YouTube Channel Details", path: "/v1/youtube/channel-details", credits: 1, summary: "Channel info & subscriber/stats for a YouTube channel.", params: [url(YT_CHANNEL)] },
   { tool: "youtube_search", name: "YouTube Search", path: "/v1/youtube/search", credits: 20, summary: "Search YouTube videos by keyword.", params: [q(), limit(20, 200)] },
-  { tool: "youtube_channel_videos", name: "YouTube Channel Videos", path: "/v1/youtube/channel-videos", credits: 20, summary: "List a channel's uploaded videos.", params: [url(YT_CHANNEL), limit(20, 200)] },
-  { tool: "youtube_playlist_videos", name: "YouTube Playlist Videos", path: "/v1/youtube/playlist-videos", credits: 50, summary: "List videos in a YouTube playlist.", params: [url("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), limit(50, 500)] },
-  { tool: "youtube_playlist", name: "YouTube Playlist", path: "/v1/youtube/playlist", credits: 50, summary: "Playlist metadata plus videos from a YouTube playlist.", params: [url("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), limit(50, 500)] },
+  { tool: "youtube_channel_videos", name: "YouTube Channel Videos", path: "/v1/youtube/channel-videos", credits: 20, summary: "List a channel's uploaded videos.", params: [url(YT_CHANNEL), limit(20, 200), fastRss()] },
+  { tool: "youtube_playlist_videos", name: "YouTube Playlist Videos", path: "/v1/youtube/playlist-videos", credits: 50, summary: "List videos in a YouTube playlist.", params: [url("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), limit(50, 500), fastRss()] },
+  { tool: "youtube_playlist", name: "YouTube Playlist", path: "/v1/youtube/playlist", credits: 50, summary: "Playlist metadata plus videos from a YouTube playlist.", params: [url("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), limit(50, 500), fastRss()] },
   { tool: "youtube_video_download", name: "YouTube Video Download", path: "/v1/youtube/video-download", credits: 3, summary: "Direct download URLs for a YouTube video.", params: [url(YT_VIDEO)] },
   { tool: "youtube_shorts_transcript", name: "YouTube Shorts Transcript", path: "/v1/youtube/shorts/transcript", credits: 2, summary: "Transcript of a YouTube Short.", params: [url(YT_SHORTS), language()] },
   { tool: "youtube_shorts_summarize", name: "YouTube Shorts Summarizer", path: "/v1/youtube/shorts/summarize", credits: 4, summary: "AI summary of a YouTube Short.", params: [url(YT_SHORTS), language()] },

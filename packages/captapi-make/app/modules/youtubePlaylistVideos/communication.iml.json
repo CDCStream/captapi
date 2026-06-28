@@ -3,7 +3,8 @@
   "method": "GET",
   "qs": {
     "url": "{{parameters.url}}",
-    "limit": "{{parameters.limit}}"
+    "limit": "{{parameters.limit}}",
+    "fast": "{{parameters.fast}}"
   },
   "response": {
     "output": "{{body.data}}"

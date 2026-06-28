@@ -94,9 +94,17 @@ def _tiktok_ad_id(value: str) -> str:
     return match.group(1) if match else value.strip()
 
 
+def _tiktok_region(value: str) -> str:
+    region = (value or "DE").strip().upper()
+    return region or "DE"
+
+
 def _linkedin_ad_url(value: str) -> str:
     _reject_ad_platform_mismatch(value, "linkedin", "https://www.linkedin.com/ad-library/detail/123456789")
     value = value.strip()
+    urn = re.search(r"urn:li:sponsoredCreative:([0-9]+)", value)
+    if urn:
+        return f"https://www.linkedin.com/ad-library/detail/{urn.group(1)}"
     if value.isdigit():
         return f"https://www.linkedin.com/ad-library/detail/{value}"
     return value
@@ -459,27 +467,35 @@ async def tiktok_ad_details(
 ):
     settings = get_settings()
     ad_id = _tiktok_ad_id(url)
+    region = _tiktok_region(country)
     async with billed_call(caller=caller, endpoint="/v1/ad-library/tiktok/ad-details", platform="tiktok_ad_library", resource_url=ad_id, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
-            try:
-                items = await _run_actor(
-                    settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL,
-                    {"adIds": [ad_id], "country": country.upper(), "maxResults": 1, "quickSearch": False},
-                    1,
-                )
-            except Exception:  # noqa: BLE001
-                items = []
-            if not items:
-                items = await _run_actor(
-                    settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL_FALLBACK,
-                    {"ad_id": ad_id, "region": country.lower(), "limit": 1},
-                    1,
-                )
+            items, _actor = await get_apify().run_with_fallback(
+                [
+                    (
+                        settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL,
+                        {"adIds": [ad_id], "country": region, "maxResults": 1, "quickSearch": False},
+                    ),
+                    (
+                        settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL_FALLBACK,
+                        {"ad_id": ad_id, "region": region, "limit": 1},
+                    ),
+                    (
+                        settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL_FALLBACK,
+                        {"ad_id": ad_id, "region": "all", "limit": 1},
+                    ),
+                    (
+                        settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY,
+                        {"source": "both", "searchTerms": [ad_id], "countries": [region], "maxResults": 1},
+                    ),
+                ],
+                max_items=1,
+            )
             if not items:
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(items[0], "tiktok_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.tiktok.ad-details", {"ad_id": ad_id, "country": country}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.tiktok.ad-details", {"ad_id": ad_id, "country": region}, _run, ctx))
 
 
 @router.get("/google/company-ads", summary="Google Ads Transparency Center company ads")
@@ -572,7 +588,31 @@ async def linkedin_ad_details(
     ad_url = _linkedin_ad_url(url)
     async with billed_call(caller=caller, endpoint="/v1/ad-library/linkedin/ad-details", platform="linkedin_ad_library", resource_url=ad_url, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_LINKEDIN_AD_LIBRARY_DETAIL, {"adUrls": [ad_url], "maxResults": 1, "includeDetails": True}, 1)
+            items, _actor = await get_apify().run_with_fallback(
+                [
+                    (
+                        settings.APIFY_ACTOR_LINKEDIN_AD_LIBRARY_DETAIL,
+                        {"adUrls": [ad_url], "maxResults": 1, "includeDetails": False},
+                    ),
+                    (
+                        settings.APIFY_ACTOR_LINKEDIN_AD_LIBRARY,
+                        {"adUrls": [ad_url], "maxResults": 1, "includeDetails": False},
+                    ),
+                    (
+                        settings.APIFY_ACTOR_LINKEDIN_AD_LIBRARY_DETAIL_FALLBACK,
+                        {"adUrls": [ad_url], "limit": 1, "fetchDetails": False},
+                    ),
+                    (
+                        settings.APIFY_ACTOR_LINKEDIN_AD_LIBRARY_DETAIL_FALLBACK,
+                        {"adUrls": [ad_url], "limit": 1},
+                    ),
+                    (
+                        settings.APIFY_ACTOR_LINKEDIN_AD_LIBRARY,
+                        {"adUrls": [ad_url], "maxResults": 1, "includeDetails": True},
+                    ),
+                ],
+                max_items=1,
+            )
             if not items:
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(items[0], "linkedin_ad_library")
