@@ -739,6 +739,22 @@ export const ALL_ENDPOINTS: ApiEndpoint[] = PLATFORM_GROUPS.flatMap(
   (g) => g.endpoints,
 );
 
+/** Total number of REST endpoints in the public catalog. */
+export const ENDPOINT_COUNT = ALL_ENDPOINTS.length;
+
+/**
+ * Number of public data platforms. Excludes the internal "Account" group,
+ * which exposes usage/billing routes rather than a social platform.
+ */
+export const PLATFORM_COUNT = PLATFORM_GROUPS.filter(
+  (g) => g.id !== "account",
+).length;
+
+/** Stable anchor id for a platform group's section in the docs reference. */
+export function platformAnchorId(id: PlatformId): string {
+  return `api-${id.replace(/_/g, "-")}`;
+}
+
 export function getEndpoint(slug: string): ApiEndpoint | undefined {
   return ALL_ENDPOINTS.find((e) => e.slug === slug);
 }
@@ -1118,7 +1134,36 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "pillar-page": [up(PILLAR_PAGE)],
   "linkbio-page": [up(LINKBIO_PAGE)],
   "linkme-profile": [up(LINKME_PROFILE)],
+  // GitHub
+  "github-user": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL, e.g. vercel or https://github.com/vercel." }],
+  "github-repositories": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100)],
+  "github-repository": [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name, e.g. vercel/next.js." }],
+  "github-pull-requests": [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name, e.g. vercel/next.js." }, { name: "state", type: "string", required: false, description: "open, closed, or all. Default open." }, lp(30, 100)],
+  "github-activity": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100)],
+  "github-followers": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100)],
+  "github-following": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100)],
+  "github-contributions": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }],
+  "github-trending-repositories": [{ name: "q", type: "string", required: false, description: "GitHub search query. Default stars:>1000." }, lp(20, 100)],
+  "github-trending-developers": [{ name: "q", type: "string", required: false, description: "GitHub user search query. Default followers:>1000." }, lp(20, 100)],
+  // TikTok Shop
+  "tiktok-shop-search": [qp("Product search query (min 2 characters)."), { name: "region", type: "string", required: false, description: "Two-letter ISO region code. Default US." }, lp(20, 200)],
+  "tiktok-shop-products": [up("TikTok Shop store URL."), lp(20, 200)],
+  "tiktok-shop-product-details": [up("TikTok Shop product URL.")],
+  "tiktok-shop-product-reviews": [up("TikTok Shop product URL."), lp(20, 200)],
+  "tiktok-shop-user-showcase": [{ name: "username", type: "string", required: true, description: "TikTok username, with or without @." }, lp(20, 200)],
+  // Ad Library
+  "facebook-ad-library-search": [qp("Keyword, brand, or advertiser to search Meta Ad Library (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
+  "facebook-ad-library-company-ads": [up("Facebook page URL or Meta Ad Library URL."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
+  "facebook-ad-library-search-companies": [qp("Company or brand name to search for (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
+  "facebook-ad-library-ad-details": [up("Meta Ad Library ad URL or ad ID.")],
   "facebook-ad-library-ad-transcript": [up("Meta Ad Library ad URL or ad ID.")],
+  "tiktok-ad-library-search": [qp("Keyword or advertiser to search TikTok Ad Library (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default DE." }, lp(20, 200)],
+  "tiktok-ad-library-ad-details": [up("TikTok Ad Library URL or ad ID."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default DE." }],
+  "linkedin-ad-library-search-ads": [qp("Keyword, company, or advertiser to search LinkedIn Ad Library (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
+  "linkedin-ad-library-ad-details": [up("LinkedIn Ad Library URL or ad ID.")],
+  "google-ad-library-company-ads": [{ name: "advertiser", type: "string", required: true, description: "Advertiser name, domain, or Google advertiser ID." }, { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
+  "google-ad-library-ad-details": [{ name: "creative_id", type: "string", required: true, description: "Google Ads Transparency URL containing AR... advertiser and CR... creative IDs." }, { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }],
+  "google-ad-library-advertiser-search": [qp("Advertiser or brand to search for (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(10, 50)],
 };
 
 export function params(ep: ApiEndpoint): ApiParam[] {

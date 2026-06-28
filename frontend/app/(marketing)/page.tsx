@@ -15,7 +15,7 @@ import {
 import { CaptapiHero } from "@/components/marketing/captapi-hero";
 import { ApiCatalog } from "@/components/marketing/api-catalog";
 import { PricingPlans } from "@/components/marketing/pricing-plans";
-import { ALL_ENDPOINTS } from "@/lib/api-catalog";
+import { ENDPOINT_COUNT, PLATFORM_COUNT } from "@/lib/api-catalog";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -70,7 +70,7 @@ const useCases = [
 const faqs = [
   {
     q: "Do I need OAuth or each platform's API key?",
-    a: "No. One Captapi key gives you access to all 11 platforms. We handle authentication, proxies, rate limits, and retries for you.",
+    a: `No. One Captapi key gives you access to all ${PLATFORM_COUNT} platforms. We handle authentication, proxies, rate limits, and retries for you.`,
   },
   {
     q: "How is this different from the official YouTube/Instagram APIs?",
@@ -128,9 +128,10 @@ export default function LandingPage() {
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold">One API. Every platform.</h2>
             <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-              {ALL_ENDPOINTS.length} REST endpoints across 11 platforms — YouTube,
-              TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest,
-              LinkedIn, and Rumble. No more juggling separate scrapers or SDKs.
+              {ENDPOINT_COUNT} REST endpoints across {PLATFORM_COUNT} platforms —
+              from YouTube, TikTok, Instagram, and Facebook to X, Reddit, LinkedIn,
+              Threads, Pinterest, Twitch, Spotify, and more. No more juggling
+              separate scrapers or SDKs.
             </p>
           </div>
           <ApiCatalog />

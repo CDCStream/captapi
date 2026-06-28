@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:parity": "tsx ../scripts/check-catalog-parity.mts"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.1",
@@ -44,6 +45,7 @@
     "eslint-config-next": "^15.1.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.14",
+    "tsx": "^4.22.4",
     "typescript": "^5.6.3"
   }
 }

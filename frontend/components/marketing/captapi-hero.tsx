@@ -9,18 +9,22 @@ import {
 } from "@/components/ui/hero-designali";
 import { GoogleButton } from "@/components/auth/google-button";
 import { Button } from "@/components/ui/button";
-import { PLATFORM_GROUPS } from "@/lib/api-catalog";
-
-const ENDPOINT_COUNT = PLATFORM_GROUPS.reduce(
-  (n, g) => n + g.endpoints.length,
-  0,
-);
+import { ENDPOINT_COUNT, PLATFORM_COUNT } from "@/lib/api-catalog";
 
 const platformsTyped = [
   "YouTube",
   "TikTok",
   "Instagram",
   "Facebook",
+  "X / Twitter",
+  "Reddit",
+  "LinkedIn",
+  "Threads",
+  "Pinterest",
+  "Twitch",
+  "Spotify",
+  "Rumble",
+  "Bluesky",
   "Shorts",
   "Reels",
 ];
@@ -87,7 +91,7 @@ export function CaptapiHero() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
               </span>
               <p className="text-xs text-green-500">
-                {ENDPOINT_COUNT} endpoints live across 11 platforms
+                {ENDPOINT_COUNT} endpoints live across {PLATFORM_COUNT} platforms
               </p>
             </div>
           </div>

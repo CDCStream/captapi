@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "@/components/marketing/mobile-nav";
-import { SITE_URL } from "@/lib/api-catalog";
+import { SITE_URL, ENDPOINT_COUNT, PLATFORM_COUNT } from "@/lib/api-catalog";
 
 const STRUCTURED_DATA = {
   "@context": "https://schema.org",
@@ -70,8 +70,7 @@ const STRUCTURED_DATA = {
       "@type": "WebAPI",
       "@id": `${SITE_URL}/#webapi`,
       name: "Captapi REST API",
-      description:
-        "REST API for structured social-media data across 11 platforms — YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble. One Bearer key; 85 endpoints returning clean JSON. Connectable by AI agents via an MCP server (@captapi/mcp), a CLI (@captapi/cli), an n8n community node (n8n-nodes-captapi), a Make.com custom app, and an Apify Actor.",
+      description: `REST API for structured social-media data across ${PLATFORM_COUNT} platforms — YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Twitch, Spotify, and more. One Bearer key; ${ENDPOINT_COUNT} endpoints returning clean JSON. Connectable by AI agents via an MCP server (@captapi/mcp), a CLI (@captapi/cli), an n8n community node (n8n-nodes-captapi), a Make.com custom app, and an Apify Actor.`,
       documentation: `${SITE_URL}/docs`,
       termsOfService: `${SITE_URL}/legal/terms`,
       provider: { "@id": `${SITE_URL}/#organization` },

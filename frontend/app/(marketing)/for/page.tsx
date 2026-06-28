@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { USE_CASE_LIST } from "@/lib/use-cases";
+import { PLATFORM_COUNT } from "@/lib/api-catalog";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -52,7 +53,7 @@ export default function UseCasesHub() {
         <section className="mt-14 rounded-xl border bg-muted/30 p-8 text-center">
           <h2 className="text-2xl font-bold">Start building with Captapi</h2>
           <p className="mt-2 text-muted-foreground">
-            One API, 11 platforms, 100 free credits. No credit card required.
+            One API, {PLATFORM_COUNT} platforms, 100 free credits. No credit card required.
           </p>
           <div className="mt-6">
             <Button asChild size="lg">

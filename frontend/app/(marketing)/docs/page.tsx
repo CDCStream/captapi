@@ -4,13 +4,22 @@ import { CodeTabs } from "@/components/docs/code-tabs";
 import { IntegrationCards } from "@/components/docs/integration-cards";
 import {
   PLATFORM_GROUPS,
+  PLATFORM_COUNT,
   API_URL,
+  platformAnchorId,
   type ApiEndpoint,
 } from "@/lib/api-catalog";
 import { buildMetadata } from "@/lib/seo";
 
-const TOTAL_ENDPOINTS =
-  PLATFORM_GROUPS.reduce((n, g) => n + g.endpoints.length, 0) + 2;
+const CATALOG_ENDPOINTS = PLATFORM_GROUPS.reduce(
+  (n, g) => n + g.endpoints.length,
+  0,
+);
+// Integrations expose the catalog endpoints plus the 2 direct video-file routes.
+const TOTAL_ENDPOINTS = CATALOG_ENDPOINTS + 2;
+// The full API reference also documents the 2 cross-platform analytics routes.
+const REFERENCE_ENDPOINTS = CATALOG_ENDPOINTS + 4;
+const REFERENCE_GROUPS = PLATFORM_GROUPS.length + 2;
 
 export const metadata = buildMetadata({
   title: "Documentation — Captapi API Reference",
@@ -241,23 +250,6 @@ function refRows(eps: ApiEndpoint[]) {
   }));
 }
 
-const platformAnchor: Record<string, string> = {
-  youtube: "api-youtube",
-  tiktok: "api-tiktok",
-  instagram: "api-instagram",
-  facebook: "api-facebook",
-  twitter: "api-twitter",
-  reddit: "api-reddit",
-  threads: "api-threads",
-  bluesky: "api-bluesky",
-  pinterest: "api-pinterest",
-  linkedin: "api-linkedin",
-  rumble: "api-rumble",
-  tiktok_shop: "api-tiktok-shop",
-  github: "api-github",
-  ad_library: "api-ad-library",
-};
-
 export default function DocsPage() {
   return (
     <div className="prose-docs">
@@ -273,7 +265,7 @@ export default function DocsPage() {
         infrastructure to maintain.
       </p>
       <ul className="mt-4 space-y-2 text-sm text-muted-foreground max-w-3xl">
-        <li>• One API key works across all 11 platforms.</li>
+        <li>• One API key works across all {PLATFORM_COUNT} platforms.</li>
         <li>• Repeat calls are served from a shared cache for free (up to 24h; time-sensitive metrics refresh within ~1h).</li>
         <li>• You are only charged for successful requests.</li>
       </ul>
@@ -403,15 +395,14 @@ export default function DocsPage() {
       {/* API Reference */}
       <H2 id="api-reference">API Reference</H2>
       <p className="text-muted-foreground max-w-3xl mb-2">
-        {PLATFORM_GROUPS.reduce((n, g) => n + g.endpoints.length, 0) + 4} endpoints
-        across thirteen groups. Click any endpoint for full parameters, examples, and
-        FAQs.
+        {REFERENCE_ENDPOINTS} endpoints across {REFERENCE_GROUPS} groups. Click any
+        endpoint for full parameters, examples, and FAQs.
       </p>
 
       {PLATFORM_GROUPS.map((g) => (
         <ReferenceTable
           key={g.id}
-          id={platformAnchor[g.id]}
+          id={platformAnchorId(g.id)}
           title={g.name}
           endpoints={refRows(g.endpoints)}
         />

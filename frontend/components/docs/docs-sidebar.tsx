@@ -10,6 +10,7 @@ import {
   MakeIcon,
   ApifyIcon,
 } from "@/components/docs/integration-icons";
+import { PLATFORM_GROUPS, platformAnchorId } from "@/lib/api-catalog";
 
 const NAV_ICONS: Record<string, React.ReactNode> = {
   integrations: <Boxes className="size-4" />,
@@ -51,10 +52,12 @@ export const DOCS_NAV: NavSection[] = [
   {
     title: "API Reference",
     items: [
-      { id: "api-youtube", label: "YouTube", badge: "13" },
-      { id: "api-tiktok", label: "TikTok", badge: "7" },
-      { id: "api-instagram", label: "Instagram", badge: "9" },
-      { id: "api-facebook", label: "Facebook", badge: "5" },
+      ...PLATFORM_GROUPS.map((g) => ({
+        id: platformAnchorId(g.id),
+        label: g.name,
+        badge: String(g.endpoints.length),
+      })),
+      { id: "api-analytics", label: "Cross-platform Analytics", badge: "2" },
       { id: "api-video-files", label: "Video Files", badge: "2" },
     ],
   },

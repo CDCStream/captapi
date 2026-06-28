@@ -4,7 +4,7 @@ import { Bricolage_Grotesque, Caveat } from "next/font/google";
 import { Toaster } from "sonner";
 import { PageViewTracker } from "@/components/analytics/page-view-tracker";
 import { ThirdPartyScripts } from "@/components/analytics/third-party-scripts";
-import { SITE_URL } from "@/lib/api-catalog";
+import { SITE_URL, ENDPOINT_COUNT, PLATFORM_COUNT } from "@/lib/api-catalog";
 import "./globals.css";
 
 const handwritten = Caveat({
@@ -28,8 +28,7 @@ export const metadata: Metadata = {
     default: "Captapi — One API for Social Media videos, posts, comments & more",
     template: "%s — Captapi",
   },
-  description:
-    "Extract transcripts, AI summaries, comments, followers, and engagement metrics from YouTube, TikTok, Instagram, Facebook, X, Reddit, LinkedIn and more — 85 endpoints across 11 platforms, one API call.",
+  description: `Extract transcripts, AI summaries, comments, followers, and engagement metrics from YouTube, TikTok, Instagram, Facebook, X, Reddit, LinkedIn and more — ${ENDPOINT_COUNT} endpoints across ${PLATFORM_COUNT} platforms, one API call.`,
   metadataBase: new URL(SITE),
   applicationName: "Captapi",
   keywords: [

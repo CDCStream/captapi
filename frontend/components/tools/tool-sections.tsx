@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { absoluteUrl } from "@/lib/seo";
+import { ENDPOINT_COUNT, PLATFORM_COUNT } from "@/lib/api-catalog";
 
 /** WebApplication JSON-LD for a free tool. */
 export function webApplicationLd(input: {
@@ -106,7 +107,7 @@ export function ToolCTA({
 }) {
   const points = [
     "100 free credits, no card required",
-    "85 endpoints across 11 platforms",
+    `${ENDPOINT_COUNT} endpoints across ${PLATFORM_COUNT} platforms`,
     "Clean JSON — MCP, CLI, n8n, Make & Apify ready",
   ];
   return (

@@ -2,10 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ApiCatalog } from "@/components/marketing/api-catalog";
 import { Button } from "@/components/ui/button";
-import { ALL_ENDPOINTS, SITE_URL } from "@/lib/api-catalog";
+import {
+  ALL_ENDPOINTS,
+  ENDPOINT_COUNT,
+  PLATFORM_COUNT,
+  SITE_URL,
+} from "@/lib/api-catalog";
 
 const TITLE = "Social Media APIs — YouTube, TikTok, Instagram, Facebook & X";
-const DESCRIPTION = `One REST API for ${ALL_ENDPOINTS.length} endpoints across 11 social platforms — YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble. Transcripts, AI summaries, details, comments, search, and downloads — structured JSON, no OAuth.`;
+const DESCRIPTION = `One REST API for ${ENDPOINT_COUNT} endpoints across ${PLATFORM_COUNT} social platforms — YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Twitch, Spotify, and more. Transcripts, AI summaries, details, comments, search, and downloads — structured JSON, no OAuth.`;
 
 export const metadata: Metadata = {
   title: `${TITLE} | Captapi`,
@@ -70,9 +75,9 @@ export default function ApisIndexPage() {
             Our Social Media APIs
           </h1>
           <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-            Comprehensive social media analysis APIs across 11 platforms —
-            YouTube, TikTok, Instagram, Facebook, X, Reddit, and more —{" "}
-            {ALL_ENDPOINTS.length} endpoints, one consistent REST interface.
+            Comprehensive social media analysis APIs across {PLATFORM_COUNT}{" "}
+            platforms — YouTube, TikTok, Instagram, Facebook, X, Reddit, and more —{" "}
+            {ENDPOINT_COUNT} endpoints, one consistent REST interface.
           </p>
           <p className="mt-3 text-sm text-muted-foreground max-w-2xl mx-auto">
             Captapi is the <strong>data layer for social</strong>: the read-side
