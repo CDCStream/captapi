@@ -65,7 +65,7 @@ async def kick_clip(
         raise HTTPException(status_code=400, detail="Invalid Kick URL or username")
     wanted = _clip_key(url) if "/clips/" in url.lower() or "/clip/" in url.lower() else ""
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/kick/clip", platform="kick", resource_url=url, base_credits=max(2, limit // 10)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/kick/clip", platform="kick", resource_url=url, base_credits=34) as ctx:
         async def _run() -> dict[str, Any]:
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_KICK,

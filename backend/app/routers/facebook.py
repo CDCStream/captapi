@@ -34,7 +34,7 @@ RATE_FB_COMMENTS = 0.6
 # Posts / reels / group posts scrapers are billed per result (~$0.0015-0.002).
 RATE_FB_POSTS = 0.6
 # Marketplace listings billed at $4.50/1k = $0.0045/result -> 1 credit/listing.
-RATE_FB_MARKETPLACE = 1.0
+RATE_FB_MARKETPLACE = 1.4
 # Events billed at $13/1k = $0.013/event -> 2 credits/event.
 RATE_FB_EVENTS = 2.0
 
@@ -706,7 +706,7 @@ async def facebook_marketplace_item(
         endpoint="/v1/facebook/marketplace-item",
         platform="facebook",
         resource_url=url,
-        base_credits=CREDIT_DETAILS,
+        base_credits=17,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
@@ -837,7 +837,7 @@ async def facebook_marketplace_location_search(
         endpoint="/v1/facebook/marketplace-location-search",
         platform="facebook",
         resource_url=None,
-        base_credits=1,
+        base_credits=17,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             items = await get_apify().run_actor_sync(

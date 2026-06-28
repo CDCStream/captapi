@@ -54,7 +54,7 @@ async def user_profile(
     if not username:
         raise HTTPException(status_code=400, detail="Invalid Snapchat username")
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/snapchat/user-profile", platform="snapchat", resource_url=f"https://www.snapchat.com/@{username}", base_credits=2) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/snapchat/user-profile", platform="snapchat", resource_url=f"https://www.snapchat.com/@{username}", base_credits=11) as ctx:
         async def _run() -> dict[str, Any]:
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_SNAPCHAT_PROFILE,

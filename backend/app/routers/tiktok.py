@@ -46,6 +46,7 @@ RATE_USER_SEARCH = 0.4     # clockworks user search (per profile)
 # Trending/popular endpoints hit a third-party HTTP actor; cost not yet verified
 # in the Apify console, so rates are conservative until confirmed.
 RATE_TREND = 0.7
+RATE_TREND_MARGIN = 1.4
 
 # Reply scraper crawls a video's comments to find one comment's replies, and is
 # billed per ROW pushed (comment or reply) at $2.40/1k = $0.0024/row. We
@@ -477,7 +478,7 @@ async def tiktok_profile_region(
         endpoint="/v1/tiktok/profile-region",
         platform="tiktok",
         resource_url=f"https://www.tiktok.com/@{handle}",
-        base_credits=CREDIT_CHANNEL_DETAILS,
+        base_credits=7,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             items = await get_apify().run_actor_sync(
@@ -577,7 +578,7 @@ async def tiktok_live_info(
         endpoint="/v1/tiktok/live-info",
         platform="tiktok",
         resource_url=f"https://www.tiktok.com/@{handle}/live",
-        base_credits=CREDIT_CHANNEL_DETAILS,
+        base_credits=7,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             items = await get_apify().run_actor_sync(
@@ -620,7 +621,7 @@ async def tiktok_search_suggestions(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_TREND, 2)
+    cost = _scaled_credits(limit, RATE_TREND_MARGIN, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/search-suggestions",
@@ -652,7 +653,7 @@ async def tiktok_search_suggestions(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["suggestions"]), RATE_TREND, 2)
+        ctx["credits_override"] = _scaled_credits(len(data["suggestions"]), RATE_TREND_MARGIN, 2)
         return ApiResponse(data=data)
 
 
@@ -665,7 +666,7 @@ async def tiktok_popular_creators(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_TREND, 2)
+    cost = _scaled_credits(limit, RATE_TREND_MARGIN, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/popular-creators",
@@ -702,7 +703,7 @@ async def tiktok_popular_creators(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["creators"]), RATE_TREND, 2)
+        ctx["credits_override"] = _scaled_credits(len(data["creators"]), RATE_TREND_MARGIN, 2)
         return ApiResponse(data=data)
 
 
@@ -720,7 +721,7 @@ async def tiktok_audience_demographics(
         endpoint="/v1/tiktok/audience-demographics",
         platform="tiktok",
         resource_url=f"https://www.tiktok.com/@{handle}",
-        base_credits=4,
+        base_credits=7,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             profile_items = await get_apify().run_actor_sync(

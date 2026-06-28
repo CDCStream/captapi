@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "check:parity": "tsx ../scripts/check-catalog-parity.mts"
+    "check:parity": "tsx ../scripts/check-catalog-parity.mts",
+    "audit:credits": "tsx ../scripts/audit-endpoint-credits.mts"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.1",

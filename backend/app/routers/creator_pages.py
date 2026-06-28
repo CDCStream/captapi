@@ -169,7 +169,7 @@ async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
 
 async def _page(platform: str, url: str, caller: ApiCaller):
     profile = _url(platform, url)
-    async with billed_call(caller=caller, endpoint=f"/v1/{platform}/{'profile' if platform == 'linkme' else 'page'}", platform=platform, resource_url=profile, base_credits=1) as ctx:
+    async with billed_call(caller=caller, endpoint=f"/v1/{platform}/{'profile' if platform == 'linkme' else 'page'}", platform=platform, resource_url=profile, base_credits=4) as ctx:
         data = await cached_or_run(f"{platform}.page", {"url": profile}, lambda: _fetch_page(platform, profile), ctx)
         if not (data.get("username") or data.get("links")):
             raise HTTPException(status_code=404, detail=f"{platform.title()} page not found")

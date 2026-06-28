@@ -89,7 +89,7 @@ async def linktree_page(
     caller: ApiCaller = Depends(require_api_key),
 ):
     profile = _profile_url(url)
-    async with billed_call(caller=caller, endpoint="/v1/linktree/page", platform="linktree", resource_url=profile, base_credits=1) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/linktree/page", platform="linktree", resource_url=profile, base_credits=4) as ctx:
         async def _run() -> dict[str, Any]:
             headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
             async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:

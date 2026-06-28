@@ -23,12 +23,13 @@ type Cycle = "monthly" | "yearly" | "payg";
 //
 // Real cost per credit (estimate): ~1 Apify scrape (~$0.002) + small
 // OpenAI/infra overhead ≈ $0.0025 per credit.
-// Selling price = cost + 80% markup → cost × 1.8 ≈ $0.0045 per credit.
-// Adjust COST_PER_CREDIT / MARGIN_MARKUP here to re-price everything.
+// Selling price = cost + 80% markup -> cost x 1.8 ~= $0.0045 per credit.
+// This is markup, not 80% gross margin. Adjust COST_PER_CREDIT /
+// MARKUP here to re-price everything.
 // ---------------------------------------------------------------------------
 const COST_PER_CREDIT = 0.0025;
-const MARGIN_MARKUP = 0.8; // +80%
-const PRICE_PER_CREDIT = COST_PER_CREDIT * (1 + MARGIN_MARKUP); // $0.0045
+const MARKUP = 0.8; // +80%
+const PRICE_PER_CREDIT = COST_PER_CREDIT * (1 + MARKUP); // $0.0045
 
 /** Monthly price for a credit allowance, rounded to the nearest dollar. */
 const priceFor = (credits: number) => Math.round(credits * PRICE_PER_CREDIT);

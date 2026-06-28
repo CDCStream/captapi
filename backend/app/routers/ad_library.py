@@ -19,11 +19,13 @@ from app.utils.formatters import safe_int, safe_str
 
 router = APIRouter()
 
-RATE = 1.0
+RATE_AD_LIST = 3.5
+RATE_GOOGLE_COMPANY_ADS = 3.35
+RATE_GOOGLE_ADVERTISER = 4.5
 
 
-def _scaled(limit: int, minimum: int = 2) -> int:
-    return max(minimum, math.ceil(limit * RATE))
+def _scaled(limit: int, rate: float = RATE_AD_LIST, minimum: int = 2) -> int:
+    return max(minimum, math.ceil(limit * rate))
 
 
 def _first(*values: Any) -> Any:
@@ -359,7 +361,7 @@ async def facebook_ad_details(
 ):
     settings = get_settings()
     ad_url = _facebook_ad_url(url)
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/ad-details", platform="facebook_ad_library", resource_url=ad_url, base_credits=2) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/ad-details", platform="facebook_ad_library", resource_url=ad_url, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_actor(settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2, {"startUrls": [{"url": ad_url}], "resultsLimit": 1, "isDetailsPerAd": True}, 1)
             if not items:
@@ -376,7 +378,7 @@ async def facebook_ad_transcript(
 ):
     settings = get_settings()
     ad_url = _facebook_ad_url(url)
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/ad-transcript", platform="facebook_ad_library", resource_url=ad_url, base_credits=2) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/ad-transcript", platform="facebook_ad_library", resource_url=ad_url, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_actor(settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2, {"startUrls": [{"url": ad_url}], "resultsLimit": 1, "isDetailsPerAd": True}, 1)
             if not items:
@@ -439,7 +441,7 @@ async def tiktok_ad_details(
 ):
     settings = get_settings()
     ad_id = _tiktok_ad_id(url)
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/tiktok/ad-details", platform="tiktok_ad_library", resource_url=ad_id, base_credits=2) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/ad-library/tiktok/ad-details", platform="tiktok_ad_library", resource_url=ad_id, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_actor(
                 settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL,
@@ -461,14 +463,14 @@ async def google_company_ads(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/google/company-ads", platform="google_ad_library", resource_url=None, base_credits=_scaled(limit)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/ad-library/google/company-ads", platform="google_ad_library", resource_url=None, base_credits=_scaled(limit, RATE_GOOGLE_COMPANY_ADS)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_actor(settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2, {"advertisers": [advertiser], "region": country.upper(), "maxResults": limit}, limit)
             ads = [_normalize_ad(i, "google_ad_library") for i in items]
             return {"advertiser": advertiser, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
         data = await cached_or_run("ad-library.google.company-ads", {"advertiser": advertiser, "country": country, "limit": limit}, _run, ctx)
-        ctx["credits_override"] = _scaled(len(data["ads"]))
+        ctx["credits_override"] = _scaled(len(data["ads"]), RATE_GOOGLE_COMPANY_ADS)
         return ApiResponse(data=data)
 
 
@@ -482,7 +484,7 @@ async def google_ad_details(
     advertiser_id, creative = _google_ids(creative_id)
     if not advertiser_id or not creative:
         raise HTTPException(status_code=400, detail="Google ad details requires a Transparency Center URL containing both AR advertiser ID and CR creative ID")
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/google/ad-details", platform="google_ad_library", resource_url=creative_id, base_credits=2) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/ad-library/google/ad-details", platform="google_ad_library", resource_url=creative_id, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_actor(settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2, {"advertisers": [advertiser_id], "region": country.upper(), "maxResults": 50}, 50)
             for item in items:
@@ -501,7 +503,7 @@ async def google_advertiser_search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/google/advertiser-search", platform="google_ad_library", resource_url=None, base_credits=_scaled(limit)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/ad-library/google/advertiser-search", platform="google_ad_library", resource_url=None, base_credits=_scaled(limit, RATE_GOOGLE_ADVERTISER)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_actor(settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2, {"advertisers": [q], "region": country.upper(), "maxResults": limit}, limit)
             advertisers = {}
@@ -541,7 +543,7 @@ async def linkedin_ad_details(
 ):
     settings = get_settings()
     ad_url = _linkedin_ad_url(url)
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/linkedin/ad-details", platform="linkedin_ad_library", resource_url=ad_url, base_credits=2) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/ad-library/linkedin/ad-details", platform="linkedin_ad_library", resource_url=ad_url, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_actor(settings.APIFY_ACTOR_LINKEDIN_AD_LIBRARY_DETAIL, {"adUrls": [ad_url], "maxResults": 1, "includeDetails": True}, 1)
             if not items:

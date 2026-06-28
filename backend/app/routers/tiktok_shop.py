@@ -17,11 +17,12 @@ from app.utils.formatters import safe_int, safe_str
 
 router = APIRouter()
 
-RATE = 0.8
+RATE_SHOP = 2.8
+RATE_REVIEWS = 2.25
 
 
-def _scaled(limit: int, minimum: int = 2) -> int:
-    return max(minimum, math.ceil(limit * RATE))
+def _scaled(limit: int, rate: float, minimum: int = 2) -> int:
+    return max(minimum, math.ceil(limit * rate))
 
 
 def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
@@ -81,14 +82,14 @@ async def shop_search(
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/shop-search", platform="tiktok_shop", resource_url=None, base_credits=_scaled(limit)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/shop-search", platform="tiktok_shop", resource_url=None, base_credits=_scaled(limit, RATE_SHOP)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_shop("shop_search", {"searchKeywords": [q], "region": region.upper(), "maxResults": limit}, limit)
             products = [_normalize_product(i) for i in items]
             return {"query": q, "region": region.upper(), "totalReturned": len(products), "products": products}
 
         data = await cached_or_run("tiktok-shop.shop-search", {"q": q, "region": region, "limit": limit}, _run, ctx)
-        ctx["credits_override"] = _scaled(len(data["products"]))
+        ctx["credits_override"] = _scaled(len(data["products"]), RATE_SHOP)
         return ApiResponse(data=data)
 
 
@@ -100,14 +101,14 @@ async def shop_products(
 ):
     if "tiktok" not in url or "shop" not in url:
         raise HTTPException(status_code=400, detail="Invalid TikTok Shop URL")
-    async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/shop-products", platform="tiktok_shop", resource_url=url, base_credits=_scaled(limit)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/shop-products", platform="tiktok_shop", resource_url=url, base_credits=_scaled(limit, RATE_SHOP)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_shop("shop_catalog", {"shopUrls": [url], "maxResults": limit}, limit)
             products = [_normalize_product(i) for i in items]
             return {"url": url, "totalReturned": len(products), "products": products}
 
         data = await cached_or_run("tiktok-shop.shop-products", {"url": url, "limit": limit}, _run, ctx)
-        ctx["credits_override"] = _scaled(len(data["products"]))
+        ctx["credits_override"] = _scaled(len(data["products"]), RATE_SHOP)
         return ApiResponse(data=data)
 
 
@@ -118,7 +119,7 @@ async def product_details(
 ):
     if "tiktok" not in url or "shop" not in url:
         raise HTTPException(status_code=400, detail="Invalid TikTok Shop product URL")
-    async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/product-details", platform="tiktok_shop", resource_url=url, base_credits=2) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/product-details", platform="tiktok_shop", resource_url=url, base_credits=14) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_shop("product_details", {"productUrls": [url], "maxResults": 1}, 1)
             if not items:
@@ -139,14 +140,14 @@ async def product_reviews(
 ):
     if "tiktok" not in url or "shop" not in url:
         raise HTTPException(status_code=400, detail="Invalid TikTok Shop product URL")
-    async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/product-reviews", platform="tiktok_shop", resource_url=url, base_credits=_scaled(limit)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/product-reviews", platform="tiktok_shop", resource_url=url, base_credits=_scaled(limit, RATE_REVIEWS)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_shop("product_reviews", {"productUrls": [url], "maxReviews": limit, "maxResults": limit}, limit)
             reviews = [_normalize_review(i) for i in items]
             return {"url": url, "totalReturned": len(reviews), "reviews": reviews}
 
         data = await cached_or_run("tiktok-shop.product-reviews", {"url": url, "limit": limit}, _run, ctx)
-        ctx["credits_override"] = _scaled(len(data["reviews"]))
+        ctx["credits_override"] = _scaled(len(data["reviews"]), RATE_REVIEWS)
         return ApiResponse(data=data)
 
 
@@ -159,12 +160,12 @@ async def user_showcase(
     handle = username.strip().lstrip("@")
     if not handle:
         raise HTTPException(status_code=400, detail="Invalid TikTok username")
-    async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/user-showcase", platform="tiktok_shop", resource_url=f"https://www.tiktok.com/@{handle}", base_credits=_scaled(limit)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/user-showcase", platform="tiktok_shop", resource_url=f"https://www.tiktok.com/@{handle}", base_credits=_scaled(limit, RATE_REVIEWS)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_shop("creator_showcase", {"usernames": [handle], "maxResults": limit}, limit)
             products = [_normalize_product(i) for i in items]
             return {"username": handle, "totalReturned": len(products), "products": products}
 
         data = await cached_or_run("tiktok-shop.user-showcase", {"username": handle, "limit": limit}, _run, ctx)
-        ctx["credits_override"] = _scaled(len(data["products"]))
+        ctx["credits_override"] = _scaled(len(data["products"]), RATE_REVIEWS)
         return ApiResponse(data=data)

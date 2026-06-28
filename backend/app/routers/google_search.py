@@ -17,7 +17,7 @@ from app.utils.formatters import safe_int, safe_str
 
 router = APIRouter()
 
-RATE = 0.5
+RATE = 4.2
 
 
 def _scaled(n: int, rate: float = RATE, minimum: int = 2) -> int:

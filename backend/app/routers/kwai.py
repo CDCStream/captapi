@@ -109,7 +109,7 @@ async def profile(
     if not user_id:
         raise HTTPException(status_code=400, detail="Invalid Kwai profile URL or user ID")
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/kwai/profile", platform="kwai", resource_url=url, base_credits=2) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/kwai/profile", platform="kwai", resource_url=url, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_KWAI,
@@ -135,7 +135,7 @@ async def user_posts(
     if not user_id:
         raise HTTPException(status_code=400, detail="Invalid Kwai profile URL or user ID")
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/kwai/user-posts", platform="kwai", resource_url=url, base_credits=max(2, math.ceil(limit * 0.8))) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/kwai/user-posts", platform="kwai", resource_url=url, base_credits=max(2, math.ceil(limit * 2.25))) as ctx:
         async def _run() -> dict[str, Any]:
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_KWAI,
@@ -147,7 +147,7 @@ async def user_posts(
             return {"userId": user_id, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run("kwai.user-posts", {"user_id": user_id, "limit": limit}, _run, ctx)
-        ctx["credits_override"] = max(2, math.ceil(len(data["posts"]) * 0.8))
+        ctx["credits_override"] = max(2, math.ceil(len(data["posts"]) * 2.25))
         return ApiResponse(data=data)
 
 
@@ -160,7 +160,7 @@ async def post(
     if not video_id:
         raise HTTPException(status_code=400, detail="Invalid Kwai post URL or ID")
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/kwai/post", platform="kwai", resource_url=url, base_credits=2) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/kwai/post", platform="kwai", resource_url=url, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_KWAI,

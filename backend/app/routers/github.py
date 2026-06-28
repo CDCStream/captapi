@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import math
+
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -21,6 +23,12 @@ from app.utils.formatters import safe_int, safe_str
 router = APIRouter()
 
 GITHUB_API = "https://api.github.com"
+GITHUB_LIST_RATE = 0.4
+GITHUB_SEARCH_RATE = 0.6
+
+
+def _scaled(limit: int, rate: float, minimum: int = 3) -> int:
+    return max(minimum, math.ceil(limit * rate))
 
 
 def _repo_parts(value: str) -> tuple[str, str] | None:
@@ -140,7 +148,7 @@ async def github_user(
     login = _username(username)
     if not login:
         raise HTTPException(status_code=400, detail="Invalid GitHub username")
-    async with billed_call(caller=caller, endpoint="/v1/github/user", platform="github", resource_url=f"https://github.com/{login}", base_credits=1) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/github/user", platform="github", resource_url=f"https://github.com/{login}", base_credits=3) as ctx:
         async def _run() -> dict[str, Any]:
             return _user(await _get(f"/users/{login}"))
 
@@ -156,14 +164,14 @@ async def repositories(
     login = _username(username)
     if not login:
         raise HTTPException(status_code=400, detail="Invalid GitHub username")
-    async with billed_call(caller=caller, endpoint="/v1/github/repositories", platform="github", resource_url=f"https://github.com/{login}", base_credits=max(1, limit // 10)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/github/repositories", platform="github", resource_url=f"https://github.com/{login}", base_credits=_scaled(limit, GITHUB_LIST_RATE)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _get(f"/users/{login}/repos", {"per_page": limit, "sort": "updated"})
             repos = [_repo(i) for i in items[:limit]]
             return {"username": login, "totalReturned": len(repos), "repositories": repos}
 
         data = await cached_or_run("github.repositories", {"login": login, "limit": limit}, _run, ctx)
-        ctx["credits_override"] = max(1, len(data["repositories"]) // 10)
+        ctx["credits_override"] = _scaled(len(data["repositories"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
 
@@ -176,7 +184,7 @@ async def repository(
     if not parts:
         raise HTTPException(status_code=400, detail="Invalid GitHub repository")
     owner, name = parts
-    async with billed_call(caller=caller, endpoint="/v1/github/repository", platform="github", resource_url=f"https://github.com/{owner}/{name}", base_credits=1) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/github/repository", platform="github", resource_url=f"https://github.com/{owner}/{name}", base_credits=3) as ctx:
         async def _run() -> dict[str, Any]:
             return _repo(await _get(f"/repos/{owner}/{name}"))
 
@@ -194,14 +202,14 @@ async def pull_requests(
     if not parts:
         raise HTTPException(status_code=400, detail="Invalid GitHub repository")
     owner, name = parts
-    async with billed_call(caller=caller, endpoint="/v1/github/pull-requests", platform="github", resource_url=f"https://github.com/{owner}/{name}", base_credits=max(1, limit // 10)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/github/pull-requests", platform="github", resource_url=f"https://github.com/{owner}/{name}", base_credits=_scaled(limit, GITHUB_LIST_RATE)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _get(f"/repos/{owner}/{name}/pulls", {"state": state, "per_page": limit})
             pulls = [_pull(i) for i in items[:limit]]
             return {"repository": f"{owner}/{name}", "totalReturned": len(pulls), "pullRequests": pulls}
 
         data = await cached_or_run("github.pull-requests", {"repo": f"{owner}/{name}", "state": state, "limit": limit}, _run, ctx)
-        ctx["credits_override"] = max(1, len(data["pullRequests"]) // 10)
+        ctx["credits_override"] = _scaled(len(data["pullRequests"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
 
@@ -214,14 +222,14 @@ async def activity(
     login = _username(username)
     if not login:
         raise HTTPException(status_code=400, detail="Invalid GitHub username")
-    async with billed_call(caller=caller, endpoint="/v1/github/activity", platform="github", resource_url=f"https://github.com/{login}", base_credits=max(1, limit // 10)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/github/activity", platform="github", resource_url=f"https://github.com/{login}", base_credits=_scaled(limit, GITHUB_LIST_RATE)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _get(f"/users/{login}/events/public", {"per_page": limit})
             events = [_event(i) for i in items[:limit]]
             return {"username": login, "totalReturned": len(events), "events": events}
 
         data = await cached_or_run("github.activity", {"login": login, "limit": limit}, _run, ctx)
-        ctx["credits_override"] = max(1, len(data["events"]) // 10)
+        ctx["credits_override"] = _scaled(len(data["events"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
 
@@ -234,14 +242,14 @@ async def followers(
     login = _username(username)
     if not login:
         raise HTTPException(status_code=400, detail="Invalid GitHub username")
-    async with billed_call(caller=caller, endpoint="/v1/github/followers", platform="github", resource_url=f"https://github.com/{login}", base_credits=max(1, limit // 10)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/github/followers", platform="github", resource_url=f"https://github.com/{login}", base_credits=_scaled(limit, GITHUB_LIST_RATE)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _get(f"/users/{login}/followers", {"per_page": limit})
             users = [{"login": safe_str(i.get("login")), "url": safe_str(i.get("html_url")), "avatar": safe_str(i.get("avatar_url"))} for i in items[:limit]]
             return {"username": login, "totalReturned": len(users), "followers": users}
 
         data = await cached_or_run("github.followers", {"login": login, "limit": limit}, _run, ctx)
-        ctx["credits_override"] = max(1, len(data["followers"]) // 10)
+        ctx["credits_override"] = _scaled(len(data["followers"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
 
@@ -254,14 +262,14 @@ async def following(
     login = _username(username)
     if not login:
         raise HTTPException(status_code=400, detail="Invalid GitHub username")
-    async with billed_call(caller=caller, endpoint="/v1/github/following", platform="github", resource_url=f"https://github.com/{login}", base_credits=max(1, limit // 10)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/github/following", platform="github", resource_url=f"https://github.com/{login}", base_credits=_scaled(limit, GITHUB_LIST_RATE)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _get(f"/users/{login}/following", {"per_page": limit})
             users = [{"login": safe_str(i.get("login")), "url": safe_str(i.get("html_url")), "avatar": safe_str(i.get("avatar_url"))} for i in items[:limit]]
             return {"username": login, "totalReturned": len(users), "following": users}
 
         data = await cached_or_run("github.following", {"login": login, "limit": limit}, _run, ctx)
-        ctx["credits_override"] = max(1, len(data["following"]) // 10)
+        ctx["credits_override"] = _scaled(len(data["following"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
 
@@ -273,7 +281,7 @@ async def contributions(
     login = _username(username)
     if not login:
         raise HTTPException(status_code=400, detail="Invalid GitHub username")
-    async with billed_call(caller=caller, endpoint="/v1/github/contributions", platform="github", resource_url=f"https://github.com/{login}", base_credits=2) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/github/contributions", platform="github", resource_url=f"https://github.com/{login}", base_credits=3) as ctx:
         async def _run() -> dict[str, Any]:
             events = await _get(f"/users/{login}/events/public", {"per_page": 100})
             repos = await _get(f"/users/{login}/repos", {"per_page": 100, "sort": "updated"})
@@ -294,14 +302,14 @@ async def trending_repositories(
     limit: int = Query(20, ge=1, le=100),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    async with billed_call(caller=caller, endpoint="/v1/github/trending-repositories", platform="github", resource_url=None, base_credits=max(2, limit // 10)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/github/trending-repositories", platform="github", resource_url=None, base_credits=_scaled(limit, GITHUB_SEARCH_RATE)) as ctx:
         async def _run() -> dict[str, Any]:
             data = await _get("/search/repositories", {"q": q, "sort": "stars", "order": "desc", "per_page": limit})
             repos = [_repo(i) for i in (data.get("items") or [])[:limit]]
             return {"query": q, "totalReturned": len(repos), "repositories": repos}
 
         data = await cached_or_run("github.trending-repositories", {"q": q, "limit": limit}, _run, ctx)
-        ctx["credits_override"] = max(2, len(data["repositories"]) // 10)
+        ctx["credits_override"] = _scaled(len(data["repositories"]), GITHUB_SEARCH_RATE)
         return ApiResponse(data=data)
 
 
@@ -311,7 +319,7 @@ async def trending_developers(
     limit: int = Query(20, ge=1, le=100),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    async with billed_call(caller=caller, endpoint="/v1/github/trending-developers", platform="github", resource_url=None, base_credits=max(2, limit // 10)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/github/trending-developers", platform="github", resource_url=None, base_credits=_scaled(limit, GITHUB_SEARCH_RATE)) as ctx:
         async def _run() -> dict[str, Any]:
             data = await _get("/search/users", {"q": q, "sort": "followers", "order": "desc", "per_page": limit})
             users = [
@@ -321,5 +329,5 @@ async def trending_developers(
             return {"query": q, "totalReturned": len(users), "developers": users}
 
         data = await cached_or_run("github.trending-developers", {"q": q, "limit": limit}, _run, ctx)
-        ctx["credits_override"] = max(2, len(data["developers"]) // 10)
+        ctx["credits_override"] = _scaled(len(data["developers"]), GITHUB_SEARCH_RATE)
         return ApiResponse(data=data)

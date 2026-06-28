@@ -17,7 +17,7 @@ from app.utils.formatters import safe_int, safe_str
 
 router = APIRouter()
 
-RATE = 0.4
+RATE = 1.15
 
 
 def _scaled(n: int, rate: float = RATE, minimum: int = 2) -> int:
@@ -104,7 +104,7 @@ async def artist(
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "artist")
-    async with billed_call(caller=caller, endpoint="/v1/spotify/artist", platform="spotify", resource_url=uri, base_credits=2) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/spotify/artist", platform="spotify", resource_url=uri, base_credits=6) as ctx:
         data = await cached_or_run("spotify.artist", {"uri": uri}, lambda: _details("artist", uri), ctx)
         return ApiResponse(data=data)
 
@@ -115,7 +115,7 @@ async def track(
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "track")
-    async with billed_call(caller=caller, endpoint="/v1/spotify/track", platform="spotify", resource_url=uri, base_credits=1) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/spotify/track", platform="spotify", resource_url=uri, base_credits=6) as ctx:
         data = await cached_or_run("spotify.track", {"uri": uri}, lambda: _details("track", uri), ctx)
         return ApiResponse(data=data)
 
@@ -126,7 +126,7 @@ async def album(
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "album")
-    async with billed_call(caller=caller, endpoint="/v1/spotify/album", platform="spotify", resource_url=uri, base_credits=2) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/spotify/album", platform="spotify", resource_url=uri, base_credits=6) as ctx:
         data = await cached_or_run("spotify.album", {"uri": uri}, lambda: _details("album", uri), ctx)
         return ApiResponse(data=data)
 
@@ -138,7 +138,7 @@ async def podcast(
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "show")
-    async with billed_call(caller=caller, endpoint="/v1/spotify/podcast", platform="spotify", resource_url=uri, base_credits=2) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/spotify/podcast", platform="spotify", resource_url=uri, base_credits=6) as ctx:
         data = await cached_or_run("spotify.podcast", {"uri": uri, "limit": limit}, lambda: _details("podcast", uri, limit), ctx)
         return ApiResponse(data=data)
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import math
 import re
 from typing import Any
 
@@ -123,7 +124,7 @@ async def profile(
     username = _username(url)
     if not username:
         raise HTTPException(status_code=400, detail="Invalid Truth Social profile")
-    async with billed_call(caller=caller, endpoint="/v1/truth-social/profile", platform="truth_social", resource_url=f"{BASE}/@{username}", base_credits=1) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/truth-social/profile", platform="truth_social", resource_url=f"{BASE}/@{username}", base_credits=5) as ctx:
         async def _run() -> dict[str, Any]:
             data = await _get_json("/api/v1/accounts/lookup", {"acct": username})
             return _normalize_account(data)
@@ -141,7 +142,7 @@ async def user_posts(
     username = _username(url)
     if not username:
         raise HTTPException(status_code=400, detail="Invalid Truth Social profile")
-    async with billed_call(caller=caller, endpoint="/v1/truth-social/user-posts", platform="truth_social", resource_url=f"{BASE}/@{username}", base_credits=max(2, limit // 10)) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/truth-social/user-posts", platform="truth_social", resource_url=f"{BASE}/@{username}", base_credits=max(5, math.ceil(limit * 0.85))) as ctx:
         async def _run() -> dict[str, Any]:
             account = await _get_json("/api/v1/accounts/lookup", {"acct": username})
             account_id = account.get("id")
@@ -166,7 +167,7 @@ async def post(
     post_id = _post_id(url)
     if not post_id:
         raise HTTPException(status_code=400, detail="Invalid Truth Social post URL or ID")
-    async with billed_call(caller=caller, endpoint="/v1/truth-social/post", platform="truth_social", resource_url=f"{BASE}/api/v1/statuses/{post_id}", base_credits=1) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/truth-social/post", platform="truth_social", resource_url=f"{BASE}/api/v1/statuses/{post_id}", base_credits=5) as ctx:
         async def _run() -> dict[str, Any]:
             data = await _get_json(f"/api/v1/statuses/{post_id}")
             return _normalize_post(data)

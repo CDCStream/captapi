@@ -17,7 +17,7 @@ from app.utils.formatters import safe_int, safe_str
 
 router = APIRouter()
 
-RATE = 0.6
+RATE = 1.7
 
 
 def _scaled(n: int, rate: float = RATE, minimum: int = 2) -> int:
@@ -106,7 +106,7 @@ async def profile(
     username = _target(url)
     if not username:
         raise HTTPException(status_code=400, detail="Invalid Twitch channel")
-    async with billed_call(caller=caller, endpoint="/v1/twitch/profile", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=1) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/twitch/profile", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=9) as ctx:
         data = await cached_or_run("twitch.profile", {"username": username}, lambda: _channel(username), ctx)
         return ApiResponse(data=data)
 
@@ -145,7 +145,7 @@ async def user_schedule(
     username = _target(url)
     if not username:
         raise HTTPException(status_code=400, detail="Invalid Twitch channel")
-    async with billed_call(caller=caller, endpoint="/v1/twitch/user-schedule", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=1) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/twitch/user-schedule", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=34) as ctx:
         async def _run() -> dict[str, Any]:
             channel = await _channel(username)
             return {"platform": "twitch", "username": username, "schedule": channel.get("schedule")}
@@ -160,7 +160,7 @@ async def clip(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/twitch/clip", platform="twitch", resource_url=url, base_credits=1) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/twitch/clip", platform="twitch", resource_url=url, base_credits=9) as ctx:
         async def _run() -> dict[str, Any]:
             # The URL-capable actor handles direct clip URLs. If the input is a
             # channel, it returns that channel's top clip metadata.

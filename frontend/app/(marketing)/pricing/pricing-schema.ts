@@ -3,7 +3,7 @@
 import { absoluteUrl } from "@/lib/seo";
 
 const COST_PER_CREDIT = 0.0025;
-const PRICE_PER_CREDIT = COST_PER_CREDIT * 1.8; // +80% margin
+const PRICE_PER_CREDIT = COST_PER_CREDIT * 1.8; // +80% markup, not 80% gross margin
 const priceFor = (credits: number) => Math.round(credits * PRICE_PER_CREDIT);
 
 const PLANS = [

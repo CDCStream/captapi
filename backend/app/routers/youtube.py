@@ -40,6 +40,7 @@ CREDIT_DOWNLOAD = 5
 #   comments: 0.4 * $0.0045 = $0.0018 vs $0.0009 -> ~100%.
 # Charged via ctx["credits_override"] on the actual item count returned.
 RATE_YT_VIDEO = 1.0
+RATE_YT_MARGIN = 1.4
 RATE_YT_COMMENTS = 0.4
 # Community posts use a third-party HTTP actor; cost not yet verified, so the
 # rate is conservative until confirmed in the Apify console.
@@ -681,7 +682,7 @@ async def youtube_trending_shorts(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
+    cost = _scaled_credits(limit, RATE_YT_MARGIN, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/trending-shorts",
@@ -712,7 +713,7 @@ async def youtube_trending_shorts(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["shorts"]), RATE_YT_VIDEO, 2)
+        ctx["credits_override"] = _scaled_credits(len(data["shorts"]), RATE_YT_MARGIN, 2)
         return ApiResponse(data=data)
 
 
@@ -1123,7 +1124,7 @@ async def youtube_community_post_details(
         endpoint="/v1/youtube/community-post-details",
         platform="youtube",
         resource_url=url,
-        base_credits=1,
+        base_credits=7,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             items = await get_apify().run_actor_sync(

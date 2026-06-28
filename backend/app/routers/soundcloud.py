@@ -17,7 +17,7 @@ from app.utils.formatters import safe_int, safe_str
 
 router = APIRouter()
 
-RATE = 0.5
+RATE = 1.4
 
 
 def _scaled(n: int, rate: float = RATE, minimum: int = 2) -> int:
@@ -73,7 +73,7 @@ async def artist(
     caller: ApiCaller = Depends(require_api_key),
 ):
     profile = _profile_url(url)
-    async with billed_call(caller=caller, endpoint="/v1/soundcloud/artist", platform="soundcloud", resource_url=profile, base_credits=1) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/soundcloud/artist", platform="soundcloud", resource_url=profile, base_credits=7) as ctx:
         async def _run() -> dict[str, Any]:
             settings = get_settings()
             items = await get_apify().run_actor_sync(
@@ -120,7 +120,7 @@ async def track(
 ):
     if "soundcloud.com/" not in url:
         raise HTTPException(status_code=400, detail="Invalid SoundCloud track URL")
-    async with billed_call(caller=caller, endpoint="/v1/soundcloud/track", platform="soundcloud", resource_url=url, base_credits=1) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/soundcloud/track", platform="soundcloud", resource_url=url, base_credits=7) as ctx:
         async def _run() -> dict[str, Any]:
             settings = get_settings()
             items = await get_apify().run_actor_sync(

@@ -34,6 +34,7 @@ CREDIT_DOWNLOAD = 3
 # Charged via ctx["credits_override"] on the actual item count.
 RATE_IG_POSTS = 0.6
 RATE_IG_RICH = 0.9
+RATE_IG_MARGIN = 1.4
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -527,7 +528,7 @@ async def instagram_trending_reels(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_IG_POSTS, 2)
+    cost = _scaled_credits(limit, RATE_IG_MARGIN, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/trending-reels",
@@ -550,7 +551,7 @@ async def instagram_trending_reels(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_POSTS, 2)
+        ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_MARGIN, 2)
         return ApiResponse(data=data)
 
 
@@ -603,7 +604,7 @@ async def instagram_reels_by_audio_id(
 ):
     audio_url = audio_id if audio_id.startswith("http") else f"https://www.instagram.com/reels/audio/{audio_id}/"
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_IG_RICH, 2)
+    cost = _scaled_credits(limit, RATE_IG_MARGIN, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/reels-by-audio-id",
@@ -626,7 +627,7 @@ async def instagram_reels_by_audio_id(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_RICH, 2)
+        ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_MARGIN, 2)
         return ApiResponse(data=data)
 
 
