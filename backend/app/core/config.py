@@ -87,6 +87,11 @@ class Settings(BaseSettings):
     # reels actor needed -> trusted, no full-permission grant, no monthly rent).
     APIFY_ACTOR_FACEBOOK_REELS: str = "apify/facebook-posts-scraper"
     APIFY_ACTOR_FACEBOOK_GROUPS: str = "apify/facebook-groups-scraper"
+    # Marketplace: keyword + location search (no login). Input: queries +
+    # locationName (or lat/lng) + fetchItemDetails. Events: official Apify
+    # actor; input: searchQueries / startUrls + maxEvents.
+    APIFY_ACTOR_FACEBOOK_MARKETPLACE: str = "unseenuser/fb-marketplace"
+    APIFY_ACTOR_FACEBOOK_EVENTS: str = "apify/facebook-events-scraper"
 
     # YouTube community ("posts") tab. alpha-scraper is the cheapest rental
     # ($7.50/mo). Input: startUrls/usernames + maxposts.

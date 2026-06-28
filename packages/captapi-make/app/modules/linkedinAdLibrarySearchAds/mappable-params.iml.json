@@ -4,7 +4,7 @@
     "type": "text",
     "label": "Search Query",
     "required": true,
-    "help": "Search query or keywords."
+    "help": "Search query or keywords (min 2 chars)."
   },
   {
     "name": "country",
@@ -18,6 +18,6 @@
     "type": "number",
     "label": "Limit",
     "required": false,
-    "help": "Max ads to return. Default 20, max 200."
+    "help": "Max items to return. Default 20, max 200. Billed per result."
   }
 ]

@@ -1,0 +1,13 @@
+{
+  "url": "/v1/facebook/marketplace-search",
+  "method": "GET",
+  "qs": {
+    "q": "{{parameters.q}}",
+    "location": "{{parameters.location}}",
+    "limit": "{{parameters.limit}}",
+    "details": "{{parameters.details}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

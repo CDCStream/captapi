@@ -78,7 +78,10 @@
       "facebookProfilePosts",
       "facebookProfileReels",
       "facebookGroupPosts",
-      "facebookCommentReplies"
+      "facebookCommentReplies",
+      "facebookMarketplaceSearch",
+      "facebookEventSearch",
+      "facebookEventDetails"
     ]
   },
   {
@@ -144,7 +147,7 @@
     ]
   },
   {
-    "label": "TikTok Shop",
+    "label": "tiktok_shop",
     "modules": [
       "tiktokShopSearch",
       "tiktokShopProducts",
@@ -154,7 +157,7 @@
     ]
   },
   {
-    "label": "GitHub",
+    "label": "github",
     "modules": [
       "githubUser",
       "githubRepositories",
@@ -169,7 +172,7 @@
     ]
   },
   {
-    "label": "Ad Library",
+    "label": "ad_library",
     "modules": [
       "facebookAdLibrarySearch",
       "facebookAdLibraryCompanyAds",

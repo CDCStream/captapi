@@ -2,7 +2,7 @@
   {
     "name": "repo",
     "type": "text",
-    "label": "Repository",
+    "label": "Repo",
     "required": true,
     "help": "Repository URL or owner/name."
   }

@@ -2,7 +2,7 @@
   {
     "name": "url",
     "type": "text",
-    "label": "Shop URL",
+    "label": "URL",
     "required": true,
     "help": "TikTok Shop store URL."
   },

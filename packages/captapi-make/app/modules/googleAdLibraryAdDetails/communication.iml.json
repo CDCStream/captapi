@@ -2,7 +2,8 @@
   "url": "/v1/ad-library/google/ad-details",
   "method": "GET",
   "qs": {
-    "creative_id": "{{parameters.creative_id}}"
+    "creative_id": "{{parameters.creative_id}}",
+    "country": "{{parameters.country}}"
   },
   "response": {
     "output": "{{body.data}}"

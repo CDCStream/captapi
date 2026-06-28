@@ -29,6 +29,10 @@ CREDIT_PAGE_DETAILS = 1
 RATE_FB_COMMENTS = 0.6
 # Posts / reels / group posts scrapers are billed per result (~$0.0015-0.002).
 RATE_FB_POSTS = 0.6
+# Marketplace listings billed at $4.50/1k = $0.0045/result -> 1 credit/listing.
+RATE_FB_MARKETPLACE = 1.0
+# Events billed at $13/1k = $0.013/event -> 2 credits/event.
+RATE_FB_EVENTS = 2.0
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -82,6 +86,76 @@ def _normalize_post(item: dict) -> dict:
 def _is_reel(item: dict) -> bool:
     u = (item.get("url") or item.get("postUrl") or "").lower()
     return "/reel/" in u or "/reels/" in u
+
+
+def _normalize_listing(item: dict) -> dict:
+    return {
+        "platform": "facebook",
+        "id": safe_str(item.get("id")),
+        "title": safe_str(item.get("title")),
+        "url": safe_str(item.get("url")),
+        "price": item.get("price"),
+        "priceFormatted": safe_str(item.get("price_formatted")),
+        "currency": safe_str(item.get("currency")),
+        "location": safe_str(item.get("location_display") or item.get("city")),
+        "city": safe_str(item.get("city")),
+        "state": safe_str(item.get("state")),
+        "latitude": item.get("latitude"),
+        "longitude": item.get("longitude"),
+        "isSold": item.get("is_sold"),
+        "isLive": item.get("is_live"),
+        "deliveryTypes": item.get("delivery_types") or [],
+        "image": safe_str(item.get("primary_photo")),
+        "photos": item.get("photos") or [],
+        "description": safe_str(item.get("description")),
+        "createdAt": safe_str(item.get("creation_time")),
+    }
+
+
+def _normalize_event(item: dict) -> dict:
+    loc = item.get("location") if isinstance(item.get("location"), dict) else {}
+    tickets = item.get("ticketsInfo") if isinstance(item.get("ticketsInfo"), dict) else {}
+    organizers = item.get("organizators") if isinstance(item.get("organizators"), list) else []
+    return {
+        "platform": "facebook",
+        "id": safe_str(item.get("id")),
+        "url": safe_str(item.get("url")),
+        "name": safe_str(item.get("name")),
+        "description": safe_str(item.get("description")),
+        "startDate": safe_str(item.get("utcStartDate")),
+        "startTime": safe_str(item.get("startTime") or item.get("dateTimeSentence")),
+        "duration": safe_str(item.get("duration")),
+        "eventType": safe_str(item.get("eventType")),
+        "isOnline": item.get("isOnline"),
+        "isPast": item.get("isPast"),
+        "isCanceled": item.get("isCanceled"),
+        "address": safe_str(item.get("address")),
+        "image": safe_str(item.get("imageUrl")),
+        "usersGoing": safe_int(item.get("usersGoing")),
+        "usersInterested": safe_int(item.get("usersInterested")),
+        "usersResponded": safe_int(item.get("usersResponded")),
+        "location": {
+            "name": safe_str(loc.get("name")),
+            "city": safe_str(loc.get("city") or loc.get("contextualName")),
+            "latitude": loc.get("latitude"),
+            "longitude": loc.get("longitude"),
+            "countryCode": safe_str(loc.get("countryCode")),
+        },
+        "organizer": safe_str(item.get("organizedBy")),
+        "organizers": [
+            {
+                "id": safe_str(o.get("id")),
+                "name": safe_str(o.get("name")),
+                "url": safe_str(o.get("url")),
+                "verified": o.get("isVerified"),
+            }
+            for o in organizers
+            if isinstance(o, dict)
+        ],
+        "ticketsUrl": safe_str(tickets.get("buyUrl")),
+        "categories": item.get("discoveryCategories") or [],
+        "externalLinks": item.get("externalLinks") or [],
+    }
 
 
 @router.get("/details", summary="Facebook video/post details")
@@ -492,4 +566,117 @@ async def facebook_comment_replies(
             ctx=ctx,
         )
         ctx["credits_override"] = _scaled_credits(len(data["replies"]), RATE_FB_COMMENTS, 2)
+        return ApiResponse(data=data)
+
+
+@router.get("/marketplace-search", summary="Search Facebook Marketplace listings")
+async def facebook_marketplace_search(
+    q: str = Query(..., min_length=2, description="Product/keyword to search for"),
+    location: str = Query(..., min_length=2, description="City or place name, e.g. 'Austin, TX'"),
+    limit: int = Query(20, ge=1, le=200),
+    details: bool = Query(False, description="Fetch full description, photos & coordinates per listing (slower, costs more)"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    rate = RATE_FB_MARKETPLACE * (2 if details else 1)
+    cost = _scaled_credits(limit, rate, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/facebook/marketplace-search",
+        platform="facebook",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_FACEBOOK_MARKETPLACE,
+                {
+                    "queries": [q],
+                    "locationName": location,
+                    "maxResultsPerQuery": limit,
+                    "fetchItemDetails": details,
+                },
+                max_items=limit,
+            )
+            listings = [_normalize_listing(i) for i in items[:limit] if not i.get("error")]
+            return {"query": q, "location": location, "totalReturned": len(listings), "listings": listings}
+
+        data = await cached_or_run(
+            endpoint="facebook.marketplace-search",
+            params={"q": q, "location": location, "limit": limit, "details": details},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["listings"]), rate, 2)
+        return ApiResponse(data=data)
+
+
+@router.get("/event-search", summary="Search Facebook events by keyword/location")
+async def facebook_event_search(
+    q: str = Query(..., min_length=2, description="Topic and/or place, e.g. 'comedy Chicago'"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_FB_EVENTS, 4)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/facebook/event-search",
+        platform="facebook",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_FACEBOOK_EVENTS,
+                {"searchQueries": [q], "maxEvents": limit},
+                max_items=limit,
+            )
+            events = [_normalize_event(i) for i in items[:limit] if not i.get("error")]
+            return {"query": q, "totalReturned": len(events), "events": events}
+
+        data = await cached_or_run(
+            endpoint="facebook.event-search",
+            params={"q": q, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["events"]), RATE_FB_EVENTS, 4)
+        return ApiResponse(data=data)
+
+
+@router.get("/event-details", summary="Facebook event details")
+async def facebook_event_details(
+    url: str = Query(..., description="Facebook event URL, e.g. https://facebook.com/events/ID"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    if "/events/" not in url.lower():
+        raise HTTPException(status_code=400, detail="Invalid Facebook event URL")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/facebook/event-details",
+        platform="facebook",
+        resource_url=url,
+        base_credits=2,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_FACEBOOK_EVENTS,
+                {"startUrls": [{"url": url}], "maxEvents": 1},
+                max_items=1,
+            )
+            if not items or items[0].get("error"):
+                raise HTTPException(status_code=404, detail="Event not found")
+            return _normalize_event(items[0])
+
+        data = await cached_or_run(
+            endpoint="facebook.event-details",
+            params={"url": url},
+            runner=_run,
+            ctx=ctx,
+        )
         return ApiResponse(data=data)

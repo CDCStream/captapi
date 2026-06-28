@@ -11,6 +11,6 @@
     "type": "number",
     "label": "Limit",
     "required": false,
-    "help": "Max items to return. Default 30, max 100."
+    "help": "Max items to return. Default 30, max 100. Billed per result."
   }
 ]

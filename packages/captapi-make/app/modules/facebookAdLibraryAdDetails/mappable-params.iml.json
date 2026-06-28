@@ -2,7 +2,7 @@
   {
     "name": "url",
     "type": "text",
-    "label": "Ad URL",
+    "label": "URL",
     "required": true,
     "help": "Meta Ad Library ad URL."
   }

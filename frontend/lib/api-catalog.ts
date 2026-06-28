@@ -226,6 +226,9 @@ const FACEBOOK: Spec[] = [
   { slug: "facebook-profile-reels", name: "Facebook Profile Reels API", shortName: "Profile Reels", category: "list", method: "GET", path: "/v1/facebook/profile-reels", credits: 36, creditsPerResult: 1.8 },
   { slug: "facebook-group-posts", name: "Facebook Group Posts API", shortName: "Group Posts", category: "list", method: "GET", path: "/v1/facebook/group-posts", credits: 12, creditsPerResult: 0.6 },
   { slug: "facebook-comment-replies", name: "Facebook Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/facebook/comment-replies", credits: 30, creditsPerResult: 0.6 },
+  { slug: "facebook-marketplace-search", name: "Facebook Marketplace Search API", shortName: "Marketplace Search", category: "search", method: "GET", path: "/v1/facebook/marketplace-search", credits: 20, creditsPerResult: 1 },
+  { slug: "facebook-event-search", name: "Facebook Event Search API", shortName: "Event Search", category: "search", method: "GET", path: "/v1/facebook/event-search", credits: 40, creditsPerResult: 2 },
+  { slug: "facebook-event-details", name: "Facebook Event Details API", shortName: "Event Details", category: "details", method: "GET", path: "/v1/facebook/event-details", credits: 2 },
 ];
 
 const TWITTER: Spec[] = [
@@ -704,6 +707,9 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "facebook-profile-reels": [up("Facebook profile or page URL."), lp(20, 200)],
   "facebook-group-posts": [up("Public Facebook group URL, e.g. https://facebook.com/groups/ID."), lp(20, 200)],
   "facebook-comment-replies": [up("Facebook post URL the comment belongs to."), cid(), lp(50, 500)],
+  "facebook-marketplace-search": [qp("Product or keyword to search Facebook Marketplace for."), { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." }, lp(20, 200), { name: "details", type: "string", required: false, description: "Set true to fetch full description, photos and coordinates per listing (slower, costs more)." }],
+  "facebook-event-search": [qp("Topic and/or place, e.g. 'comedy Chicago'."), lp(20, 200)],
+  "facebook-event-details": [up("Facebook event URL, e.g. https://facebook.com/events/ID.")],
   // Twitter / X
   "twitter-tweet-details": [up("Public tweet URL, e.g. https://x.com/user/status/ID.")],
   "twitter-profile": [up("Twitter/X profile URL or @handle, e.g. https://x.com/username.")],
@@ -869,6 +875,10 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       return "open";
     case "sort":
       return "relevance";
+    case "location":
+      return "Austin, TX";
+    case "details":
+      return "false";
     case "advertiser":
       return "nike.com";
     case "creative_id":
@@ -887,6 +897,8 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
         return ep.platform === "tiktok"
           ? "https://www.tiktok.com/music/original-sound-7300000000000000000"
           : "https://www.instagram.com/reels/audio/1234567890123456/";
+      if (d.includes("event"))
+        return "https://www.facebook.com/events/1269179411830316";
       if (d.includes("group"))
         return "https://www.facebook.com/groups/123456789012345";
       if (d.includes("subreddit"))

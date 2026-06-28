@@ -4,7 +4,7 @@
     "type": "text",
     "label": "Search Query",
     "required": true,
-    "help": "Keyword to search in public LinkedIn posts."
+    "help": "Search query or keywords (min 2 chars)."
   },
   {
     "name": "sort",

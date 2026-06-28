@@ -2,15 +2,15 @@
   {
     "name": "url",
     "type": "text",
-    "label": "Video URL",
+    "label": "URL",
     "required": true,
-    "help": "Rumble video URL."
+    "help": "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html."
   },
   {
     "name": "limit",
     "type": "number",
     "label": "Limit",
     "required": false,
-    "help": "Max comments to return. Default 50, max 500. Billed per result."
+    "help": "Max items to return. Default 50, max 500. Billed per result."
   }
 ]

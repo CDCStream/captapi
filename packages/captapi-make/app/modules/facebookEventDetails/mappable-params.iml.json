@@ -4,6 +4,6 @@
     "type": "text",
     "label": "URL",
     "required": true,
-    "help": "LinkedIn Ad Library URL or ad ID."
+    "help": "Facebook event URL, e.g. https://facebook.com/events/ID."
   }
 ]

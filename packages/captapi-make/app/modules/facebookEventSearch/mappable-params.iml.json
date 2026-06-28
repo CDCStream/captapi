@@ -4,14 +4,7 @@
     "type": "text",
     "label": "Search Query",
     "required": true,
-    "help": "Search query or keywords (min 2 chars)."
-  },
-  {
-    "name": "country",
-    "type": "text",
-    "label": "Country",
-    "required": false,
-    "help": "ISO country code. Default US."
+    "help": "Topic and/or place, e.g. 'comedy Chicago' (min 2 chars)."
   },
   {
     "name": "limit",

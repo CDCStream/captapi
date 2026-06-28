@@ -2,7 +2,7 @@
   {
     "name": "url",
     "type": "text",
-    "label": "Ad URL or ID",
+    "label": "URL",
     "required": true,
     "help": "TikTok Ad Library URL or ad ID."
   },

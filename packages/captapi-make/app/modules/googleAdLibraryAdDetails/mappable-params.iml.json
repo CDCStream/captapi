@@ -2,8 +2,15 @@
   {
     "name": "creative_id",
     "type": "text",
-    "label": "Transparency Center URL",
+    "label": "Creative Id",
     "required": true,
     "help": "Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID."
+  },
+  {
+    "name": "country",
+    "type": "text",
+    "label": "Country",
+    "required": false,
+    "help": "ISO country code. Default US."
   }
 ]

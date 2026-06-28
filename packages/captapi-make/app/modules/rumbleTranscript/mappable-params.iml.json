@@ -2,15 +2,15 @@
   {
     "name": "url",
     "type": "text",
-    "label": "Video URL",
+    "label": "URL",
     "required": true,
-    "help": "Rumble video URL."
+    "help": "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html."
   },
   {
     "name": "language",
     "type": "text",
     "label": "Language",
     "required": false,
-    "help": "Preferred caption language as ISO code. Default en."
+    "help": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
   }
 ]

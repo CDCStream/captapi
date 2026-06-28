@@ -2,9 +2,9 @@
   {
     "name": "url",
     "type": "text",
-    "label": "Company URL",
+    "label": "URL",
     "required": true,
-    "help": "LinkedIn company URL."
+    "help": "LinkedIn company URL, e.g. https://linkedin.com/company/slug."
   },
   {
     "name": "limit",

@@ -1,0 +1,30 @@
+[
+  {
+    "name": "q",
+    "type": "text",
+    "label": "Search Query",
+    "required": true,
+    "help": "Product or keyword to search for (min 2 chars)."
+  },
+  {
+    "name": "location",
+    "type": "text",
+    "label": "Location",
+    "required": true,
+    "help": "City or place name, e.g. 'Austin, TX'."
+  },
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max items to return. Default 20, max 200. Billed per result."
+  },
+  {
+    "name": "details",
+    "type": "text",
+    "label": "Details",
+    "required": false,
+    "help": "Set true to fetch full description, photos and coordinates per listing (slower, costs more)."
+  }
+]

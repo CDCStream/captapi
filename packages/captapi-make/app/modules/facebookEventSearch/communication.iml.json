@@ -1,9 +1,8 @@
 {
-  "url": "/v1/ad-library/facebook/search",
+  "url": "/v1/facebook/event-search",
   "method": "GET",
   "qs": {
     "q": "{{parameters.q}}",
-    "country": "{{parameters.country}}",
     "limit": "{{parameters.limit}}"
   },
   "response": {

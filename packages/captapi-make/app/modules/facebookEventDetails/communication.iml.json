@@ -1,8 +1,8 @@
 {
-  "url": "/v1/github/user",
+  "url": "/v1/facebook/event-details",
   "method": "GET",
   "qs": {
-    "username": "{{parameters.username}}"
+    "url": "{{parameters.url}}"
   },
   "response": {
     "output": "{{body.data}}"

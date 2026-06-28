@@ -1256,6 +1256,78 @@
     ]
   },
   {
+    "tool": "facebook_marketplace_search",
+    "platform": "facebook",
+    "name": "Facebook Marketplace Search",
+    "path": "/v1/facebook/marketplace-search",
+    "credits": 20,
+    "summary": "Search Facebook Marketplace listings by keyword and location.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Product or keyword to search for (min 2 chars)."
+      },
+      {
+        "name": "location",
+        "type": "string",
+        "required": true,
+        "description": "City or place name, e.g. 'Austin, TX'."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "details",
+        "type": "string",
+        "required": false,
+        "description": "Set true to fetch full description, photos and coordinates per listing (slower, costs more)."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_event_search",
+    "platform": "facebook",
+    "name": "Facebook Event Search",
+    "path": "/v1/facebook/event-search",
+    "credits": 40,
+    "summary": "Search Facebook events by topic and/or location.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Topic and/or place, e.g. 'comedy Chicago' (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_event_details",
+    "platform": "facebook",
+    "name": "Facebook Event Details",
+    "path": "/v1/facebook/event-details",
+    "credits": 2,
+    "summary": "Details for a Facebook event (date, location, attendees, tickets).",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook event URL, e.g. https://facebook.com/events/ID."
+      }
+    ]
+  },
+  {
     "tool": "twitter_tweet_details",
     "platform": "twitter",
     "name": "Twitter/X Tweet Details",
