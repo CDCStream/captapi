@@ -1,0 +1,10 @@
+{
+  "url": "/v1/spotify/album",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

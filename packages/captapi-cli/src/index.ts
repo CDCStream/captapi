@@ -66,7 +66,7 @@ function buildProgram(): Command {
   program
     .name("captapi")
     .description(
-      "Captapi CLI — social media data from 11 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble) from your terminal.",
+      "Captapi CLI — social media data from 29 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop) from your terminal.",
     )
     .version(VERSION, "-v, --version", "Print the CLI version");
 

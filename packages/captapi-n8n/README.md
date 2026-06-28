@@ -2,7 +2,7 @@
 
 This is an [n8n](https://n8n.io) community node. It lets you use **[Captapi](https://captapi.com)** in your n8n workflows.
 
-Captapi turns YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn and Rumble URLs into clean, structured JSON — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups and downloads. One API key, **85 operations** across 11 platforms.
+Captapi turns YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme and Amazon Shop URLs into clean, structured JSON — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, commerce data, downloads and account usage. One API key, **180 operations** across 29 platforms.
 
 [Installation](#installation) · [Credentials](#credentials) · [Operations](#operations) · [Usage](#usage) · [Resources](#resources)
 

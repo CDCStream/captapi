@@ -1,0 +1,10 @@
+{
+  "url": "/v1/snapchat/user-profile",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

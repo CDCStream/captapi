@@ -1,0 +1,10 @@
+{
+  "url": "/v1/account/daily-usage",
+  "method": "GET",
+  "qs": {
+    "days": "{{parameters.days}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

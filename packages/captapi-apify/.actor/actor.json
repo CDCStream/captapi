@@ -1,8 +1,8 @@
 {
   "actorSpecification": 1,
   "name": "captapi",
-  "title": "Captapi - Social Media Data (11 platforms, BYO key)",
-  "description": "Bring your own Captapi API key. Calls the Captapi REST API (no scraping) for transcripts, AI summaries, comments, stats, search and downloads across 85 operations on 11 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble).",
+  "title": "Captapi - Social Media Data (29 platforms, BYO key)",
+  "description": "Bring your own Captapi API key. Calls the Captapi REST API (no scraping) for transcripts, AI summaries, comments, stats, search, downloads and account usage across 180 operations across 29 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop).",
   "version": "0.2",
   "buildTag": "latest",
   "dockerfile": "./Dockerfile",

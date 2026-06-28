@@ -1,0 +1,10 @@
+{
+  "url": "/v1/tiktok/live-info",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

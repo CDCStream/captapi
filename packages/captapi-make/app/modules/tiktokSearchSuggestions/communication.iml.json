@@ -1,0 +1,13 @@
+{
+  "url": "/v1/tiktok/search-suggestions",
+  "method": "GET",
+  "qs": {
+    "q": "{{parameters.q}}",
+    "country": "{{parameters.country}}",
+    "language": "{{parameters.language}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

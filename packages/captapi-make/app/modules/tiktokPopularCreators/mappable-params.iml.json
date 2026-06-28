@@ -1,0 +1,30 @@
+[
+  {
+    "name": "country",
+    "type": "text",
+    "label": "Country",
+    "required": false,
+    "help": "Two-letter ISO country code. Default US."
+  },
+  {
+    "name": "sort",
+    "type": "text",
+    "label": "Sort",
+    "required": false,
+    "help": "follower, engagement, or popularity. Default follower."
+  },
+  {
+    "name": "follower_count",
+    "type": "text",
+    "label": "Follower Count",
+    "required": false,
+    "help": "Optional range: 10k-100k, 100k-1m, 1m-10m, >10m."
+  },
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max items to return. Default 20, max 100. Billed per result."
+  }
+]

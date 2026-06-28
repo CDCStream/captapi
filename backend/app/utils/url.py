@@ -60,7 +60,12 @@ def extract_tiktok_id(url: str) -> str | None:
 
 def extract_tiktok_username(url: str) -> str | None:
     m = TIKTOK_USER_RE.search(url or "")
-    return m.group(1) if m else None
+    if m:
+        return m.group(1)
+    raw = (url or "").strip().lstrip("@")
+    if re.fullmatch(r"[\w.-]{2,24}", raw):
+        return raw
+    return None
 
 
 def extract_instagram_shortcode(url: str) -> str | None:

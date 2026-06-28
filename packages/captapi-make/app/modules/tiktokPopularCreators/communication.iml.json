@@ -1,0 +1,13 @@
+{
+  "url": "/v1/tiktok/popular-creators",
+  "method": "GET",
+  "qs": {
+    "country": "{{parameters.country}}",
+    "sort": "{{parameters.sort}}",
+    "follower_count": "{{parameters.follower_count}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

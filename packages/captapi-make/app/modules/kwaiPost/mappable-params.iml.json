@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Kwai/Kuaishou post URL or video/photo ID."
+  }
+]

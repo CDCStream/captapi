@@ -244,6 +244,83 @@ async def post_comments(
         return ApiResponse(data=data)
 
 
+@router.get("/post-transcript", summary="Reddit post transcript / discussion text")
+async def post_transcript(
+    url: str = Query(..., description="Reddit post URL"),
+    limit: int = Query(50, ge=0, le=200, description="Max comments to include in the transcript"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    if not extract_reddit_post_id(url):
+        raise HTTPException(status_code=400, detail="Invalid Reddit post URL")
+    settings = get_settings()
+    cost = _scaled(max(limit, 1), RATE, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/reddit/post-transcript",
+        platform="reddit",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_REDDIT,
+                {"startUrls": [{"url": url}], "type": "comments", "maxItems": max(limit, 1)},
+                max_items=max(limit, 1),
+            )
+            posts = [_normalize_post(i) for i in items if not _is_comment(i)]
+            comments = [_normalize_comment(i) for i in items if _is_comment(i)][:limit]
+            if not posts:
+                detail_items = await get_apify().run_actor_sync(
+                    settings.APIFY_ACTOR_REDDIT,
+                    {"startUrls": [{"url": url}], "type": "posts", "maxItems": 1},
+                    max_items=2,
+                )
+                posts = [_normalize_post(i) for i in detail_items if not _is_comment(i)]
+            if not posts:
+                raise HTTPException(status_code=404, detail="Post not found")
+            post = posts[0]
+            segments: list[dict[str, Any]] = []
+            parts: list[str] = []
+            title = (post.get("title") or "").strip()
+            body = (post.get("text") or "").strip()
+            if title:
+                parts.append(f"Title: {title}")
+                segments.append({"speaker": "post", "text": title, "start": 0, "duration": 0, "timestamp": "00:00"})
+            if body:
+                parts.append(body)
+                segments.append({"speaker": post.get("author") or "post", "text": body, "start": 0, "duration": 0, "timestamp": "00:00"})
+            for c in comments:
+                text = (c.get("text") or "").strip()
+                if not text:
+                    continue
+                speaker = c.get("author") or "comment"
+                line = f"{speaker}: {text}"
+                parts.append(line)
+                segments.append({"speaker": speaker, "text": text, "start": 0, "duration": 0, "timestamp": "00:00"})
+            transcript = "\n\n".join(parts).strip()
+            if not transcript:
+                raise HTTPException(status_code=422, detail="No transcript text available for this Reddit post")
+            return {
+                "platform": "reddit",
+                "url": post.get("url") or url,
+                "post": post,
+                "transcript": transcript,
+                "transcriptSegments": segments,
+                "wordCount": len(transcript.split()),
+                "segments": len(segments),
+                "commentsIncluded": len(comments),
+            }
+
+        data = await cached_or_run(
+            endpoint="reddit.post-transcript",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled(max(data.get("commentsIncluded", 0), 1), RATE, 2)
+        return ApiResponse(data=data)
+
+
 @router.get("/subreddit-search", summary="Search posts within a specific subreddit")
 async def subreddit_search(
     url: str = Query(..., description="Subreddit URL, r/name, or bare name"),

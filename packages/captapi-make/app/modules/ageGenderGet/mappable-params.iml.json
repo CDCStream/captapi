@@ -1,0 +1,16 @@
+[
+  {
+    "name": "name",
+    "type": "text",
+    "label": "Name",
+    "required": true,
+    "help": "First name, or fallback when names is omitted."
+  },
+  {
+    "name": "names",
+    "type": "text",
+    "label": "Names",
+    "required": false,
+    "help": "Optional comma-separated list of names."
+  }
+]

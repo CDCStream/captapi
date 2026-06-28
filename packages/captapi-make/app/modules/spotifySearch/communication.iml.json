@@ -1,0 +1,12 @@
+{
+  "url": "/v1/spotify/search",
+  "method": "GET",
+  "qs": {
+    "q": "{{parameters.q}}",
+    "type": "{{parameters.type}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

@@ -68,6 +68,9 @@ class Settings(BaseSettings):
     # no monthly rent. Input: searchQueries + includeHashtags.
     APIFY_ACTOR_TIKTOK_TREND_DISCOVERY: str = "coregent/tiktok-trend-discovery-scraper"
     APIFY_ACTOR_TIKTOK_LIVE: str = "unseenuser/tiktok-live-status-scraper"
+    APIFY_ACTOR_TIKTOK_SEARCH_SUGGESTIONS: str = "automation-lab/tiktok-keywords-discovery"
+    APIFY_ACTOR_TIKTOK_POPULAR_CREATORS: str = "scraperx/tiktok-trending-creator-scraper"
+    APIFY_ACTOR_TIKTOK_AUDIENCE: str = ""
 
     APIFY_ACTOR_INSTAGRAM: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_REEL: str = "apify/instagram-scraper"
@@ -80,6 +83,7 @@ class Settings(BaseSettings):
     APIFY_ACTOR_INSTAGRAM_AUDIO: str = "kinaesthetic_millionaire/instagram-reels-audio-scraper"
     # Story highlights (list + expanded items). Input: `usernames`.
     APIFY_ACTOR_INSTAGRAM_HIGHLIGHTS: str = "goat255/instagram-stories-highlights-scraper"
+    APIFY_ACTOR_INSTAGRAM_TRENDING: str = "agentx/instagram-trending-scraper"
 
     APIFY_ACTOR_FACEBOOK_POSTS: str = "apify/facebook-posts-scraper"
     APIFY_ACTOR_FACEBOOK_PAGES: str = "apify/facebook-pages-scraper"
@@ -98,6 +102,8 @@ class Settings(BaseSettings):
     # YouTube community ("posts") tab. alpha-scraper is the cheapest rental
     # ($7.50/mo). Input: startUrls/usernames + maxposts.
     APIFY_ACTOR_YOUTUBE_COMMUNITY: str = "alpha-scraper/youtube-community-posts-scraper"
+    APIFY_ACTOR_YOUTUBE_TRENDING: str = "app.tanalytics/youtube-trending-videos"
+    APIFY_ACTOR_YOUTUBE_SHORTS: str = "khadinakbar/youtube-shorts-scraper"
 
     # Twitter / X. apidojo "Tweet Scraper V2" handles tweets by URL, search
     # terms, and per-handle timelines (input: startUrls / searchTerms /
@@ -141,6 +147,19 @@ class Settings(BaseSettings):
     APIFY_ACTOR_RUMBLE: str = "kawsar/rumble-video-extractor"
     APIFY_ACTOR_RUMBLE_COMMENTS: str = "thescrapelab/apify-rumble-scraper"
     APIFY_ACTOR_RUMBLE_TRANSCRIPT: str = "bulletproof/rumble-transcript-extractor"
+
+    # Long-tail public platforms.
+    APIFY_ACTOR_GOOGLE_SEARCH: str = "apify/google-search-scraper"
+    APIFY_ACTOR_TWITCH: str = "maximedupre/twitch-scraper"
+    APIFY_ACTOR_TWITCH_URL: str = "abotapi/twitch-scraper"
+    APIFY_ACTOR_SPOTIFY_SEARCH: str = "apiharvest/spotify-search-all-types"
+    APIFY_ACTOR_SPOTIFY_DETAILS: str = "apiharvest/spotify-scraper-get-full-details"
+    APIFY_ACTOR_SOUNDCLOUD: str = "automation-lab/soundcloud-scraper"
+    APIFY_ACTOR_SNAPCHAT_PROFILE: str = "crawlerbros/snapchat-profile-scraper"
+    APIFY_ACTOR_KICK: str = "scrapestorm/kick-videos-clips-scraper-cheap"
+    APIFY_ACTOR_AMAZON_SHOP: str = "piotrv1001/amazon-storefront-scraper"
+    APIFY_ACTOR_AGE_GENDER: str = "parseforge/agify-name-demographics-scraper"
+    APIFY_ACTOR_KWAI: str = "sian.agency/kwai-kuaishou-scraper"
 
     # TikTok Shop. 5 modes: shop_search, shop_catalog, product_details,
     # product_reviews, creator_showcase.

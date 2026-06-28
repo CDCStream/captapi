@@ -1,0 +1,11 @@
+{
+  "url": "/v1/age-gender",
+  "method": "GET",
+  "qs": {
+    "name": "{{parameters.name}}",
+    "names": "{{parameters.names}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

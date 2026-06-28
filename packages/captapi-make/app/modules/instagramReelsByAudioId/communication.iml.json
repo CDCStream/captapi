@@ -1,0 +1,11 @@
+{
+  "url": "/v1/instagram/reels-by-audio-id",
+  "method": "GET",
+  "qs": {
+    "audio_id": "{{parameters.audio_id}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

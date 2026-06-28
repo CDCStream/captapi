@@ -16,6 +16,9 @@ import {
   ShoppingBag,
   Twitter,
   Video,
+  Search,
+  LinkIcon,
+  Ghost,
   Check,
   type LucideIcon,
 } from "lucide-react";
@@ -60,6 +63,11 @@ const PLATFORM_ICONS: Record<string, LucideIcon> = {
   github: Github,
   megaphone: Megaphone,
   shoppingBag: ShoppingBag,
+  video: Video,
+  cloud: Cloud,
+  search: Search,
+  link: LinkIcon,
+  ghost: Ghost,
 };
 
 export function generateStaticParams() {

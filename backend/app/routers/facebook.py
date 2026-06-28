@@ -116,6 +116,23 @@ def _normalize_listing(item: dict) -> dict:
     }
 
 
+def _normalize_marketplace_location(item: dict) -> dict | None:
+    city = safe_str(item.get("city"))
+    state = safe_str(item.get("state"))
+    label = safe_str(item.get("location_display") or ", ".join(p for p in [city, state] if p))
+    if not (label or city or state):
+        return None
+    key = "|".join(str(v or "").lower() for v in [label, city, state, item.get("latitude"), item.get("longitude")])
+    return {
+        "id": key,
+        "name": label or city or state,
+        "city": city,
+        "state": state,
+        "latitude": item.get("latitude"),
+        "longitude": item.get("longitude"),
+    }
+
+
 def _normalize_event(item: dict) -> dict:
     loc = item.get("location") if isinstance(item.get("location"), dict) else {}
     tickets = item.get("ticketsInfo") if isinstance(item.get("ticketsInfo"), dict) else {}
@@ -631,6 +648,42 @@ async def facebook_profile_photos(
         return ApiResponse(data=data)
 
 
+@router.get("/profile-events", summary="Events from a Facebook profile/page")
+async def facebook_profile_events(
+    url: str = Query(..., description="Facebook profile or page URL"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    if not extract_facebook_page(url):
+        raise HTTPException(status_code=400, detail="Invalid Facebook profile/page URL")
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_FB_EVENTS, 4)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/facebook/profile-events",
+        platform="facebook",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_FACEBOOK_EVENTS,
+                {"startUrls": [url], "maxEvents": limit},
+                max_items=limit,
+            )
+            events = [_normalize_event(i) for i in items[:limit] if not i.get("error")]
+            return {"platform": "facebook", "url": url, "totalReturned": len(events), "events": events}
+
+        data = await cached_or_run(
+            endpoint="facebook.profile-events",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["events"]), RATE_FB_EVENTS, 4)
+        return ApiResponse(data=data)
+
+
 def _og_meta(page: str, key: str) -> str | None:
     pattern = rf'<meta\s+(?:property|name)=["\']{re.escape(key)}["\']\s+content=["\']([^"\']*)["\']'
     match = re.search(pattern, page, flags=re.IGNORECASE)
@@ -769,6 +822,53 @@ async def facebook_marketplace_search(
             ctx=ctx,
         )
         ctx["credits_override"] = _scaled_credits(len(data["listings"]), rate, 2)
+        return ApiResponse(data=data)
+
+
+@router.get("/marketplace-location-search", summary="Search Facebook Marketplace locations")
+async def facebook_marketplace_location_search(
+    q: str = Query(..., min_length=2, description="City/place search query, e.g. Austin"),
+    limit: int = Query(10, ge=1, le=50),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/facebook/marketplace-location-search",
+        platform="facebook",
+        resource_url=None,
+        base_credits=1,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_FACEBOOK_MARKETPLACE,
+                {
+                    "queries": ["chair"],
+                    "locationName": q,
+                    "maxResultsPerQuery": min(max(limit, 5), 50),
+                    "fetchItemDetails": False,
+                },
+                max_items=min(max(limit, 5), 50),
+            )
+            locations: dict[str, dict] = {}
+            for item in items:
+                if item.get("error"):
+                    continue
+                loc = _normalize_marketplace_location(item)
+                if loc and loc["id"] not in locations:
+                    locations[loc["id"]] = loc
+            results = list(locations.values())[:limit]
+            if not results:
+                fallback = {"id": q.strip().lower(), "name": q.strip(), "city": q.strip(), "state": None, "latitude": None, "longitude": None}
+                results = [fallback]
+            return {"query": q, "totalReturned": len(results), "locations": results}
+
+        data = await cached_or_run(
+            endpoint="facebook.marketplace-location-search",
+            params={"q": q, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
         return ApiResponse(data=data)
 
 

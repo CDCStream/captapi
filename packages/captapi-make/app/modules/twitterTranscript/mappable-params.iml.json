@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Public tweet URL, e.g. https://x.com/user/status/ID."
+  }
+]

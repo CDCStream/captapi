@@ -1,0 +1,11 @@
+{
+  "url": "/v1/account/most-used-routes",
+  "method": "GET",
+  "qs": {
+    "days": "{{parameters.days}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

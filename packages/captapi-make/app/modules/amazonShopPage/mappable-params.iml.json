@@ -1,0 +1,23 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Amazon seller storefront URL, seller profile URL, or seller ID."
+  },
+  {
+    "name": "marketplace",
+    "type": "text",
+    "label": "Marketplace",
+    "required": false,
+    "help": "Amazon marketplace code. Default US."
+  },
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max items to return. Default 20, max 200. Billed per result."
+  }
+]

@@ -1,0 +1,9 @@
+[
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max items to return. Default 50, max 500. Billed per result."
+  }
+]

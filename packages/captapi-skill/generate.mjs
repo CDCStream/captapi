@@ -26,6 +26,25 @@ const PLATFORM_LABEL = {
   pinterest: "Pinterest",
   linkedin: "LinkedIn",
   rumble: "Rumble",
+  tiktok_shop: "TikTok Shop",
+  github: "GitHub",
+  google: "Google Search",
+  twitch: "Twitch",
+  spotify: "Spotify",
+  soundcloud: "SoundCloud",
+  linktree: "Linktree",
+  snapchat: "Snapchat",
+  truth_social: "Truth Social",
+  kick: "Kick",
+  amazon_shop: "Amazon Shop",
+  age_gender: "Age and Gender",
+  account: "Account",
+  kwai: "Kwai",
+  komi: "Komi",
+  pillar: "Pillar",
+  linkbio: "Linkbio",
+  linkme: "Linkme",
+  ad_library: "Public Ad Libraries",
 };
 
 const PLATFORM_ORDER = [
@@ -40,6 +59,25 @@ const PLATFORM_ORDER = [
   "pinterest",
   "linkedin",
   "rumble",
+  "tiktok_shop",
+  "github",
+  "google",
+  "twitch",
+  "spotify",
+  "soundcloud",
+  "linktree",
+  "snapchat",
+  "truth_social",
+  "kick",
+  "amazon_shop",
+  "age_gender",
+  "kwai",
+  "komi",
+  "pillar",
+  "linkbio",
+  "linkme",
+  "account",
+  "ad_library",
 ];
 
 function paramStr(p) {
@@ -64,16 +102,16 @@ ${endpointRows(platform)}`;
 }
 
 const total = ENDPOINTS.length;
-const platformCount = PLATFORM_ORDER.length;
+const platformCount = PLATFORM_ORDER.filter((platform) => platform !== "account").length;
 
 const body = `---
 name: captapi
-description: Use when extracting public social-media data from YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, or video downloads. Captapi is one REST API (and MCP server) covering all ${platformCount} platforms with a single key. Trigger on requests like "get this YouTube transcript", "scrape this TikTok profile", "fetch Instagram reel comments", or "summarize this video".
+description: Use when extracting public social-media and web data from YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Google Search, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, Age/Gender enrichment, public Ad Libraries, or Captapi account usage — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, commerce data, video downloads, credit balance, and request history. Captapi is one REST API (and MCP server) covering all ${platformCount} data platforms with a single key. Trigger on requests like "get this YouTube transcript", "scrape this TikTok profile", "fetch Instagram reel comments", or "summarize this video".
 ---
 
 # Captapi
 
-Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble**. One key works across all ${platformCount} platforms. No OAuth, no per-platform SDKs. Responses are clean JSON and cached for 24h (repeat calls cost 0 credits). ${total} endpoints total.
+Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Google Search, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, Age/Gender enrichment, public Ad Libraries, and account usage utilities**. One key works across all ${platformCount} data platforms. No OAuth, no per-platform SDKs. Responses are clean JSON and cached for 24h (repeat calls cost 0 credits). ${total} endpoints total.
 
 - Base URL: \`${API_URL}\`
 - Docs: ${SITE_URL}/docs · Full machine reference: ${SITE_URL}/llms-full.txt

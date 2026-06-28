@@ -10,17 +10,20 @@
       "youtubeSearch",
       "youtubeChannelVideos",
       "youtubePlaylistVideos",
+      "youtubePlaylist",
       "youtubeVideoDownload",
       "youtubeShortsTranscript",
       "youtubeShortsSummarize",
       "youtubeShortsDetails",
       "youtubeShortsComments",
       "youtubeChannelShorts",
+      "youtubeTrendingShorts",
       "youtubeChannelStreams",
       "youtubeHashtagSearch",
       "youtubeCommentReplies",
       "youtubeChannelPlaylists",
       "youtubeCommunityPosts",
+      "youtubeCommunityPostDetails",
       "youtubeVideoSponsors"
     ]
   },
@@ -32,7 +35,10 @@
       "tiktokVideoDetails",
       "tiktokComments",
       "tiktokChannelDetails",
+      "tiktokProfileRegion",
+      "tiktokAudienceDemographics",
       "tiktokSearch",
+      "tiktokSearchSuggestions",
       "tiktokVideoDownload",
       "tiktokChannelPosts",
       "tiktokCommentReplies",
@@ -45,7 +51,9 @@
       "tiktokSongDetails",
       "tiktokTrendingFeed",
       "tiktokPopularHashtags",
-      "tiktokLive"
+      "tiktokLive",
+      "tiktokLiveInfo",
+      "tiktokPopularCreators"
     ]
   },
   {
@@ -59,9 +67,11 @@
       "instagramChannelPosts",
       "instagramChannelReels",
       "instagramReelsSearch",
+      "instagramTrendingReels",
       "instagramVideoDownload",
       "instagramTaggedPosts",
       "instagramMusicPosts",
+      "instagramReelsByAudioId",
       "instagramHashtagSearch",
       "instagramProfileSearch",
       "instagramStoryHighlights",
@@ -83,9 +93,11 @@
       "facebookGroupPosts",
       "facebookCommentReplies",
       "facebookMarketplaceSearch",
+      "facebookMarketplaceLocationSearch",
       "facebookEventSearch",
       "facebookEventDetails",
       "facebookProfilePhotos",
+      "facebookProfileEvents",
       "facebookMarketplaceItem"
     ]
   },
@@ -93,6 +105,7 @@
     "label": "Twitter / X",
     "modules": [
       "twitterTweetDetails",
+      "twitterTranscript",
       "twitterProfile",
       "twitterUserTweets",
       "twitterSearch",
@@ -106,6 +119,7 @@
       "redditSubredditPosts",
       "redditPostDetails",
       "redditPostComments",
+      "redditPostTranscript",
       "redditSearch",
       "redditSubredditDetails",
       "redditSubredditSearch"
@@ -145,6 +159,7 @@
       "linkedinProfile",
       "linkedinCompany",
       "linkedinPostDetails",
+      "linkedinPostTranscript",
       "linkedinCompanyPosts",
       "linkedinSearchPosts"
     ]
@@ -160,7 +175,7 @@
     ]
   },
   {
-    "label": "tiktok_shop",
+    "label": "TikTok Shop",
     "modules": [
       "tiktokShopSearch",
       "tiktokShopProducts",
@@ -170,7 +185,7 @@
     ]
   },
   {
-    "label": "github",
+    "label": "GitHub",
     "modules": [
       "githubUser",
       "githubRepositories",
@@ -185,12 +200,126 @@
     ]
   },
   {
-    "label": "ad_library",
+    "label": "Google",
+    "modules": [
+      "googleSearch"
+    ]
+  },
+  {
+    "label": "Twitch",
+    "modules": [
+      "twitchProfile",
+      "twitchUserVideos",
+      "twitchUserSchedule",
+      "twitchClip"
+    ]
+  },
+  {
+    "label": "Spotify",
+    "modules": [
+      "spotifyArtist",
+      "spotifyTrack",
+      "spotifyAlbum",
+      "spotifySearch",
+      "spotifyPodcast",
+      "spotifyPodcastEpisodes"
+    ]
+  },
+  {
+    "label": "SoundCloud",
+    "modules": [
+      "soundcloudArtist",
+      "soundcloudArtistTracks",
+      "soundcloudTrack"
+    ]
+  },
+  {
+    "label": "Linktree",
+    "modules": [
+      "linktreePage"
+    ]
+  },
+  {
+    "label": "Snapchat",
+    "modules": [
+      "snapchatUserProfile"
+    ]
+  },
+  {
+    "label": "Truth Social",
+    "modules": [
+      "truthSocialProfile",
+      "truthSocialUserPosts",
+      "truthSocialPost"
+    ]
+  },
+  {
+    "label": "Kick",
+    "modules": [
+      "kickClip"
+    ]
+  },
+  {
+    "label": "Amazon Shop",
+    "modules": [
+      "amazonShopPage"
+    ]
+  },
+  {
+    "label": "Age and Gender",
+    "modules": [
+      "ageGenderGet"
+    ]
+  },
+  {
+    "label": "Account",
+    "modules": [
+      "accountBalance",
+      "accountRequestHistory",
+      "accountDailyUsage",
+      "accountMostUsedRoutes"
+    ]
+  },
+  {
+    "label": "Kwai",
+    "modules": [
+      "kwaiProfile",
+      "kwaiUserPosts",
+      "kwaiPost"
+    ]
+  },
+  {
+    "label": "Komi",
+    "modules": [
+      "komiPage"
+    ]
+  },
+  {
+    "label": "Pillar",
+    "modules": [
+      "pillarPage"
+    ]
+  },
+  {
+    "label": "Linkbio",
+    "modules": [
+      "linkbioPage"
+    ]
+  },
+  {
+    "label": "Linkme",
+    "modules": [
+      "linkmeProfile"
+    ]
+  },
+  {
+    "label": "Ad Library",
     "modules": [
       "facebookAdLibrarySearch",
       "facebookAdLibraryCompanyAds",
       "facebookAdLibrarySearchCompanies",
       "facebookAdLibraryAdDetails",
+      "facebookAdLibraryAdTranscript",
       "tiktokAdLibrarySearch",
       "tiktokAdLibraryAdDetails",
       "googleAdLibraryCompanyAds",

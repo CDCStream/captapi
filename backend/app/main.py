@@ -15,24 +15,37 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from app import __version__
 from app.core.config import get_settings
+from app.services.apify_client import ApifyError
 from app.routers import (
     account,
     ad_library,
+    age_gender,
     analytics,
+    amazon_shop,
     auth_keys,
     billing,
+    creator_pages,
     facebook,
     github,
+    google_search,
     instagram,
+    kick,
+    kwai,
     bluesky,
     linkedin,
+    linktree,
     mcp,
     pinterest,
     reddit,
     rumble,
+    snapchat,
+    soundcloud,
+    spotify,
     threads,
     tiktok,
     tiktok_shop,
+    truth_social,
+    twitch,
     twitter,
     video,
     youtube,
@@ -109,6 +122,19 @@ def create_app() -> FastAPI:
             }
         return {}
 
+    @app.exception_handler(ApifyError)
+    async def upstream_actor_error(request: Request, exc: ApifyError) -> JSONResponse:
+        # A third-party Apify actor failed (unrented/quota/timeout/upstream 4xx-5xx).
+        # This is an upstream dependency failure, not a bug in our service, so it
+        # must surface as 502 rather than falling through to the 500 catch-all.
+        logger = structlog.get_logger()
+        logger.warning("apify_actor_error", error=str(exc), path=request.url.path)
+        return JSONResponse(
+            status_code=502,
+            content={"success": False, "error": "upstream_actor_error"},
+            headers=_error_cors_headers(request),
+        )
+
     @app.exception_handler(Exception)
     async def unhandled(request: Request, exc: Exception) -> JSONResponse:
         # The catch-all handler "consumes" the exception, so report it to
@@ -151,9 +177,11 @@ def create_app() -> FastAPI:
     app.include_router(youtube.router, prefix="/v1/youtube", tags=["YouTube"])
     app.include_router(tiktok.router, prefix="/v1/tiktok", tags=["TikTok"])
     app.include_router(tiktok_shop.router, prefix="/v1/tiktok-shop", tags=["TikTok Shop"])
+    app.include_router(truth_social.router, prefix="/v1/truth-social", tags=["Truth Social"])
     app.include_router(instagram.router, prefix="/v1/instagram", tags=["Instagram"])
     app.include_router(facebook.router, prefix="/v1/facebook", tags=["Facebook"])
     app.include_router(ad_library.router, prefix="/v1/ad-library", tags=["Ad Library"])
+    app.include_router(google_search.router, prefix="/v1/google", tags=["Google"])
     app.include_router(github.router, prefix="/v1/github", tags=["GitHub"])
     app.include_router(twitter.router, prefix="/v1/twitter", tags=["Twitter"])
     app.include_router(reddit.router, prefix="/v1/reddit", tags=["Reddit"])
@@ -162,6 +190,16 @@ def create_app() -> FastAPI:
     app.include_router(pinterest.router, prefix="/v1/pinterest", tags=["Pinterest"])
     app.include_router(linkedin.router, prefix="/v1/linkedin", tags=["LinkedIn"])
     app.include_router(rumble.router, prefix="/v1/rumble", tags=["Rumble"])
+    app.include_router(kick.router, prefix="/v1/kick", tags=["Kick"])
+    app.include_router(kwai.router, prefix="/v1/kwai", tags=["Kwai"])
+    app.include_router(creator_pages.router, prefix="/v1", tags=["Creator Pages"])
+    app.include_router(twitch.router, prefix="/v1/twitch", tags=["Twitch"])
+    app.include_router(spotify.router, prefix="/v1/spotify", tags=["Spotify"])
+    app.include_router(soundcloud.router, prefix="/v1/soundcloud", tags=["SoundCloud"])
+    app.include_router(linktree.router, prefix="/v1/linktree", tags=["Linktree"])
+    app.include_router(snapchat.router, prefix="/v1/snapchat", tags=["Snapchat"])
+    app.include_router(amazon_shop.router, prefix="/v1/amazon-shop", tags=["Amazon Shop"])
+    app.include_router(age_gender.router, prefix="/v1/age-gender", tags=["Age and Gender"])
     app.include_router(analytics.router, prefix="/v1/analytics", tags=["Analytics"])
     app.include_router(video.router, prefix="/v1/video", tags=["Video Files"])
     app.include_router(account.router, prefix="/v1/account", tags=["Account"])

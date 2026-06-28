@@ -1,0 +1,30 @@
+[
+  {
+    "name": "q",
+    "type": "text",
+    "label": "Search Query",
+    "required": true,
+    "help": "Seed keyword for autocomplete suggestions."
+  },
+  {
+    "name": "country",
+    "type": "text",
+    "label": "Country",
+    "required": false,
+    "help": "Two-letter ISO country code. Default US."
+  },
+  {
+    "name": "language",
+    "type": "text",
+    "label": "Language",
+    "required": false,
+    "help": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+  },
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max items to return. Default 20, max 100. Billed per result."
+  }
+]

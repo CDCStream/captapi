@@ -29,6 +29,25 @@ const PLATFORM_LABELS = {
   pinterest: "Pinterest",
   linkedin: "LinkedIn",
   rumble: "Rumble",
+  google: "Google",
+  twitch: "Twitch",
+  spotify: "Spotify",
+  soundcloud: "SoundCloud",
+  linktree: "Linktree",
+  snapchat: "Snapchat",
+  truth_social: "Truth Social",
+  kick: "Kick",
+  amazon_shop: "Amazon Shop",
+  age_gender: "Age and Gender",
+  account: "Account",
+  kwai: "Kwai",
+  komi: "Komi",
+  pillar: "Pillar",
+  linkbio: "Linkbio",
+  linkme: "Linkme",
+  tiktok_shop: "TikTok Shop",
+  github: "GitHub",
+  ad_library: "Ad Library",
 };
 
 const PARAM_LABELS = {
@@ -207,9 +226,12 @@ writeText(
   "README.md",
   `# Captapi for Make.com
 
-Structured social media data from 11 platforms — YouTube, TikTok, Instagram,
-Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn & Rumble —
-transcripts, AI summaries, comments, stats, search and downloads.
+Structured social media data from 29 platforms — YouTube, TikTok, Instagram,
+Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble,
+GitHub, Google Search, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth
+Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop,
+Age/Gender and public Ad Libraries —
+transcripts, AI summaries, comments, stats, search, commerce data and downloads.
 
 - **${moduleCount} action modules**, one per Captapi endpoint.
 - **One connection**: paste your Captapi API key (Bearer auth).

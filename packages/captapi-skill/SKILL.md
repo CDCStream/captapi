@@ -1,11 +1,11 @@
 ---
 name: captapi
-description: Use when extracting public social-media data from YouTube, TikTok, TikTok Shop, Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, or public Ad Libraries — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, or video downloads. Captapi is one REST API (and MCP server) covering all supported platforms with a single key. Trigger on requests like "get this YouTube transcript", "scrape this TikTok profile", "fetch Instagram reel comments", or "summarize this video".
+description: Use when extracting public social-media and web data from YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Google Search, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, Age/Gender enrichment, public Ad Libraries, or Captapi account usage — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, commerce data, video downloads, credit balance, and request history. Captapi is one REST API (and MCP server) covering all 29 data platforms with a single key. Trigger on requests like "get this YouTube transcript", "scrape this TikTok profile", "fetch Instagram reel comments", or "summarize this video".
 ---
 
 # Captapi
 
-Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble**. One key works across all supported platforms. No OAuth, no per-platform SDKs. Responses are clean JSON and cached for 24h (repeat calls cost 0 credits). 131 endpoints total.
+Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Google Search, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, Age/Gender enrichment, public Ad Libraries, and account usage utilities**. One key works across all 29 data platforms. No OAuth, no per-platform SDKs. Responses are clean JSON and cached for 24h (repeat calls cost 0 credits). 180 endpoints total.
 
 - Base URL: `https://api.captapi.com`
 - Docs: https://captapi.com/docs · Full machine reference: https://captapi.com/llms-full.txt
@@ -41,7 +41,7 @@ For shell tasks, scripts, or when no MCP client is available, the official CLI c
 ```bash
 npx @captapi/cli login                 # save the human-provided key to ~/.captapi/config.json
 npx @captapi/cli balance               # remaining credits
-npx @captapi/cli list                  # all 114 commands
+npx @captapi/cli list                  # all 180 commands
 npx @captapi/cli youtube-transcript --url "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 npx @captapi/cli tiktok-comment-replies --url "<video>" --comment_id "<id>" --limit 20
 ```
@@ -50,15 +50,15 @@ The CLI reads the key from `~/.captapi/config.json` (via `login`) or the `CAPTAP
 
 ## Use in n8n workflows (n8n-nodes-captapi)
 
-For no-code/low-code automations, the official `n8n-nodes-captapi` community node exposes all 131 endpoints in n8n. Install it from **Settings → Community Nodes** (package `n8n-nodes-captapi`; self-hosted: `npm install n8n-nodes-captapi`, then restart). Create a **Captapi API** credential with the human-provided `capt_live_...` key, add the **Captapi** node, pick a **Platform** and **Operation**, and it returns the same structured JSON as the REST API for downstream nodes.
+For no-code/low-code automations, the official `n8n-nodes-captapi` community node exposes all 180 endpoints in n8n. Install it from **Settings → Community Nodes** (package `n8n-nodes-captapi`; self-hosted: `npm install n8n-nodes-captapi`, then restart). Create a **Captapi API** credential with the human-provided `capt_live_...` key, add the **Captapi** node, pick a **Platform** and **Operation**, and it returns the same structured JSON as the REST API for downstream nodes.
 
 ## Use in Make.com scenarios (custom app)
 
-For Make.com (Integromat), the Captapi custom app exposes all 131 endpoints as action modules grouped by platform. Create a **Captapi API Key** connection with the human-provided `capt_live_...` key (verified against `/v1/account/limits`), then drop the module you need into a scenario, fill in the `url` (or search query) and optional `limit`, and it returns the same structured JSON `data` as the REST API for downstream modules.
+For Make.com (Integromat), the Captapi custom app exposes all 180 endpoints as action modules grouped by platform. Create a **Captapi API Key** connection with the human-provided `capt_live_...` key (verified against `/v1/account/limits`), then drop the module you need into a scenario, fill in the `url` (or search query) and optional `limit`, and it returns the same structured JSON `data` as the REST API for downstream modules.
 
 ## Use on Apify (BYO-key Actor)
 
-On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API (no scraping). Set the `apiKey` input to the human-provided `capt_live_...` key, choose an `operation` (any of the 131 endpoints), fill the fields it needs (`url` / search query / `limit` / ...), and the Actor returns one dataset item with the same structured JSON `data` as the REST API. Credits are billed to the user's own Captapi account. The Actor is also callable through Apify's MCP server (mcp.apify.com), so agents already connected to Apify can run it by name.
+On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API (no scraping). Set the `apiKey` input to the human-provided `capt_live_...` key, choose an `operation` (any of the 180 endpoints), fill the fields it needs (`url` / search query / `limit` / ...), and the Actor returns one dataset item with the same structured JSON `data` as the REST API. Credits are billed to the user's own Captapi account. The Actor is also callable through Apify's MCP server (mcp.apify.com), so agents already connected to Apify can run it by name.
 
 ## Choosing the right endpoint
 
@@ -98,17 +98,20 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `youtube_search` | `/v1/youtube/search` | `q` (string), `limit`? (number) | 20 |
 | `youtube_channel_videos` | `/v1/youtube/channel-videos` | `url` (string), `limit`? (number) | 20 |
 | `youtube_playlist_videos` | `/v1/youtube/playlist-videos` | `url` (string), `limit`? (number) | 50 |
+| `youtube_playlist` | `/v1/youtube/playlist` | `url` (string), `limit`? (number) | 50 |
 | `youtube_video_download` | `/v1/youtube/video-download` | `url` (string) | 3 |
 | `youtube_shorts_transcript` | `/v1/youtube/shorts/transcript` | `url` (string), `language`? (string) | 2 |
 | `youtube_shorts_summarize` | `/v1/youtube/shorts/summarize` | `url` (string), `language`? (string) | 4 |
 | `youtube_shorts_details` | `/v1/youtube/shorts/video-details` | `url` (string) | 1 |
 | `youtube_shorts_comments` | `/v1/youtube/shorts/comments` | `url` (string), `limit`? (number) | 20 |
 | `youtube_channel_shorts` | `/v1/youtube/channel-shorts` | `url` (string), `limit`? (number) | 20 |
+| `youtube_trending_shorts` | `/v1/youtube/trending-shorts` | `q`? (string), `limit`? (number) | 20 |
 | `youtube_channel_streams` | `/v1/youtube/channel-streams` | `url` (string), `limit`? (number) | 20 |
 | `youtube_hashtag_search` | `/v1/youtube/hashtag-search` | `q` (string), `limit`? (number) | 20 |
 | `youtube_comment_replies` | `/v1/youtube/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number) | 20 |
 | `youtube_channel_playlists` | `/v1/youtube/channel-playlists` | `url` (string), `limit`? (number) | 20 |
 | `youtube_community_posts` | `/v1/youtube/community-posts` | `url` (string), `limit`? (number) | 10 |
+| `youtube_community_post_details` | `/v1/youtube/community-post-details` | `url` (string) | 1 |
 | `youtube_video_sponsors` | `/v1/youtube/video-sponsors` | `url` (string) | 1 |
 
 ### TikTok
@@ -120,7 +123,10 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `tiktok_video_details` | `/v1/tiktok/video-details` | `url` (string) | 1 |
 | `tiktok_comments` | `/v1/tiktok/comments` | `url` (string), `limit`? (number) | 10 |
 | `tiktok_channel_details` | `/v1/tiktok/channel-details` | `url` (string) | 1 |
+| `tiktok_profile_region` | `/v1/tiktok/profile-region` | `url` (string) | 1 |
+| `tiktok_audience_demographics` | `/v1/tiktok/audience-demographics` | `url` (string) | 4 |
 | `tiktok_search` | `/v1/tiktok/search` | `q` (string), `limit`? (number) | 14 |
+| `tiktok_search_suggestions` | `/v1/tiktok/search-suggestions` | `q` (string), `country`? (string), `language`? (string), `limit`? (number) | 14 |
 | `tiktok_video_download` | `/v1/tiktok/video-download` | `url` (string) | 3 |
 | `tiktok_channel_posts` | `/v1/tiktok/channel-posts` | `url` (string), `limit`? (number) | 14 |
 | `tiktok_comment_replies` | `/v1/tiktok/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number) | 50 |
@@ -134,6 +140,8 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `tiktok_trending_feed` | `/v1/tiktok/trending-feed` | `country`? (string), `limit`? (number) | 14 |
 | `tiktok_popular_hashtags` | `/v1/tiktok/popular-hashtags` | `query`? (string), `limit`? (number) | 14 |
 | `tiktok_live` | `/v1/tiktok/live` | `url` (string) | 1 |
+| `tiktok_live_info` | `/v1/tiktok/live-info` | `url` (string) | 1 |
+| `tiktok_popular_creators` | `/v1/tiktok/popular-creators` | `country`? (string), `sort`? (string), `follower_count`? (string), `limit`? (number) | 14 |
 
 ### Instagram
 
@@ -147,9 +155,11 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `instagram_channel_posts` | `/v1/instagram/channel-posts` | `url` (string), `limit`? (number) | 12 |
 | `instagram_channel_reels` | `/v1/instagram/channel-reels` | `url` (string), `limit`? (number) | 12 |
 | `instagram_reels_search` | `/v1/instagram/reels-search` | `q` (string), `limit`? (number) | 12 |
+| `instagram_trending_reels` | `/v1/instagram/trending-reels` | `country`? (string), `limit`? (number) | 12 |
 | `instagram_video_download` | `/v1/instagram/video-download` | `url` (string) | 3 |
 | `instagram_tagged_posts` | `/v1/instagram/tagged-posts` | `url` (string), `limit`? (number) | 18 |
 | `instagram_music_posts` | `/v1/instagram/music-posts` | `url` (string), `limit`? (number) | 18 |
+| `instagram_reels_by_audio_id` | `/v1/instagram/reels-by-audio-id` | `audio_id` (string), `limit`? (number) | 18 |
 | `instagram_hashtag_search` | `/v1/instagram/hashtag-search` | `q` (string), `limit`? (number) | 12 |
 | `instagram_profile_search` | `/v1/instagram/profile-search` | `q` (string), `limit`? (number) | 12 |
 | `instagram_story_highlights` | `/v1/instagram/story-highlights` | `url` (string) | 5 |
@@ -171,9 +181,11 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `facebook_group_posts` | `/v1/facebook/group-posts` | `url` (string), `limit`? (number) | 12 |
 | `facebook_comment_replies` | `/v1/facebook/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number) | 30 |
 | `facebook_marketplace_search` | `/v1/facebook/marketplace-search` | `q` (string), `location` (string), `limit`? (number), `details`? (string) | 20 |
+| `facebook_marketplace_location_search` | `/v1/facebook/marketplace-location-search` | `q` (string), `limit`? (number) | 1 |
 | `facebook_event_search` | `/v1/facebook/event-search` | `q` (string), `limit`? (number) | 40 |
 | `facebook_event_details` | `/v1/facebook/event-details` | `url` (string) | 2 |
 | `facebook_profile_photos` | `/v1/facebook/profile-photos` | `url` (string), `limit`? (number) | 12 |
+| `facebook_profile_events` | `/v1/facebook/profile-events` | `url` (string), `limit`? (number) | 40 |
 | `facebook_marketplace_item` | `/v1/facebook/marketplace-item` | `url` (string) | 1 |
 
 ### Twitter / X
@@ -181,6 +193,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
 | `twitter_tweet_details` | `/v1/twitter/tweet-details` | `url` (string) | 1 |
+| `twitter_transcript` | `/v1/twitter/transcript` | `url` (string) | 1 |
 | `twitter_profile` | `/v1/twitter/profile` | `url` (string) | 1 |
 | `twitter_user_tweets` | `/v1/twitter/user-tweets` | `url` (string), `limit`? (number) | 14 |
 | `twitter_search` | `/v1/twitter/search` | `q` (string), `limit`? (number) | 14 |
@@ -194,6 +207,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `reddit_subreddit_posts` | `/v1/reddit/subreddit-posts` | `url` (string), `limit`? (number) | 10 |
 | `reddit_post_details` | `/v1/reddit/post-details` | `url` (string) | 1 |
 | `reddit_post_comments` | `/v1/reddit/post-comments` | `url` (string), `limit`? (number) | 20 |
+| `reddit_post_transcript` | `/v1/reddit/post-transcript` | `url` (string), `limit`? (number) | 20 |
 | `reddit_search` | `/v1/reddit/search` | `q` (string), `limit`? (number) | 10 |
 | `reddit_subreddit_details` | `/v1/reddit/subreddit-details` | `url` (string) | 1 |
 | `reddit_subreddit_search` | `/v1/reddit/subreddit-search` | `url` (string), `q` (string), `limit`? (number) | 10 |
@@ -233,6 +247,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `linkedin_profile` | `/v1/linkedin/profile` | `url` (string) | 2 |
 | `linkedin_company` | `/v1/linkedin/company` | `url` (string) | 2 |
 | `linkedin_post_details` | `/v1/linkedin/post-details` | `url` (string) | 1 |
+| `linkedin_post_transcript` | `/v1/linkedin/post-transcript` | `url` (string) | 1 |
 | `linkedin_company_posts` | `/v1/linkedin/company-posts` | `url` (string), `limit`? (number) | 16 |
 | `linkedin_search_posts` | `/v1/linkedin/search-posts` | `q` (string), `sort`? (string), `limit`? (number) | 16 |
 
@@ -245,7 +260,6 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `rumble_search` | `/v1/rumble/search` | `q` (string), `limit`? (number) | 12 |
 | `rumble_transcript` | `/v1/rumble/transcript` | `url` (string), `language`? (string) | 3 |
 | `rumble_comments` | `/v1/rumble/comments` | `url` (string), `limit`? (number) | 30 |
-
 
 ### TikTok Shop
 
@@ -269,10 +283,123 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `github_followers` | `/v1/github/followers` | `username` (string), `limit`? (number) | 3 |
 | `github_following` | `/v1/github/following` | `username` (string), `limit`? (number) | 3 |
 | `github_contributions` | `/v1/github/contributions` | `username` (string) | 2 |
-| `github_trending_repositories` | `/v1/github/trending-repositories` | `q`? (string), `limit`? (number) | 2 |
-| `github_trending_developers` | `/v1/github/trending-developers` | `q`? (string), `limit`? (number) | 2 |
+| `github_trending_repositories` | `/v1/github/trending-repositories` | `q` (string), `limit`? (number) | 2 |
+| `github_trending_developers` | `/v1/github/trending-developers` | `q` (string), `limit`? (number) | 2 |
 
-### Ad Library
+### Google Search
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `google_search` | `/v1/google/search` | `q` (string), `country`? (string), `language`? (string), `limit`? (number) | 5 |
+
+### Twitch
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `twitch_profile` | `/v1/twitch/profile` | `url` (string) | 1 |
+| `twitch_user_videos` | `/v1/twitch/user-videos` | `url` (string), `limit`? (number) | 12 |
+| `twitch_user_schedule` | `/v1/twitch/user-schedule` | `url` (string) | 1 |
+| `twitch_clip` | `/v1/twitch/clip` | `url` (string) | 1 |
+
+### Spotify
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `spotify_artist` | `/v1/spotify/artist` | `url` (string) | 2 |
+| `spotify_track` | `/v1/spotify/track` | `url` (string) | 1 |
+| `spotify_album` | `/v1/spotify/album` | `url` (string) | 2 |
+| `spotify_search` | `/v1/spotify/search` | `q` (string), `type`? (string), `limit`? (number) | 8 |
+| `spotify_podcast` | `/v1/spotify/podcast` | `url` (string), `limit`? (number) | 2 |
+| `spotify_podcast_episodes` | `/v1/spotify/podcast-episodes` | `url` (string), `limit`? (number) | 8 |
+
+### SoundCloud
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `soundcloud_artist` | `/v1/soundcloud/artist` | `url` (string) | 1 |
+| `soundcloud_artist_tracks` | `/v1/soundcloud/artist-tracks` | `url` (string), `limit`? (number) | 10 |
+| `soundcloud_track` | `/v1/soundcloud/track` | `url` (string) | 1 |
+
+### Linktree
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `linktree_page` | `/v1/linktree/page` | `url` (string) | 1 |
+
+### Snapchat
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `snapchat_user_profile` | `/v1/snapchat/user-profile` | `url` (string) | 2 |
+
+### Truth Social
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `truth_social_profile` | `/v1/truth-social/profile` | `url` (string) | 1 |
+| `truth_social_user_posts` | `/v1/truth-social/user-posts` | `url` (string), `limit`? (number) | 2 |
+| `truth_social_post` | `/v1/truth-social/post` | `url` (string) | 1 |
+
+### Kick
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `kick_clip` | `/v1/kick/clip` | `url` (string), `limit`? (number) | 3 |
+
+### Amazon Shop
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `amazon_shop_page` | `/v1/amazon-shop/page` | `url` (string), `marketplace`? (string), `limit`? (number) | 20 |
+
+### Age and Gender
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `age_gender_get` | `/v1/age-gender` | `name` (string), `names`? (string) | 1 |
+
+### Kwai
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `kwai_profile` | `/v1/kwai/profile` | `url` (string) | 2 |
+| `kwai_user_posts` | `/v1/kwai/user-posts` | `url` (string), `limit`? (number) | 16 |
+| `kwai_post` | `/v1/kwai/post` | `url` (string) | 2 |
+
+### Komi
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `komi_page` | `/v1/komi/page` | `url` (string) | 1 |
+
+### Pillar
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `pillar_page` | `/v1/pillar/page` | `url` (string) | 1 |
+
+### Linkbio
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `linkbio_page` | `/v1/linkbio/page` | `url` (string) | 1 |
+
+### Linkme
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `linkme_profile` | `/v1/linkme/profile` | `url` (string) | 1 |
+
+### Account
+
+| Tool / endpoint | REST path | Parameters | Credits |
+| --- | --- | --- | --- |
+| `account_balance` | `/v1/account/balance` | none | 0 |
+| `account_request_history` | `/v1/account/request-history` | `limit`? (number) | 0 |
+| `account_daily_usage` | `/v1/account/daily-usage` | `days`? (number) | 0 |
+| `account_most_used_routes` | `/v1/account/most-used-routes` | `days`? (number), `limit`? (number) | 0 |
+
+### Public Ad Libraries
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
@@ -280,10 +407,11 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `facebook_ad_library_company_ads` | `/v1/ad-library/facebook/company-ads` | `url` (string), `country`? (string), `limit`? (number) | 20 |
 | `facebook_ad_library_search_companies` | `/v1/ad-library/facebook/search-companies` | `q` (string), `country`? (string), `limit`? (number) | 20 |
 | `facebook_ad_library_ad_details` | `/v1/ad-library/facebook/ad-details` | `url` (string) | 2 |
+| `facebook_ad_library_ad_transcript` | `/v1/ad-library/facebook/ad-transcript` | `url` (string) | 2 |
 | `tiktok_ad_library_search` | `/v1/ad-library/tiktok/search` | `q` (string), `country`? (string), `limit`? (number) | 20 |
 | `tiktok_ad_library_ad_details` | `/v1/ad-library/tiktok/ad-details` | `url` (string), `country`? (string) | 2 |
 | `google_ad_library_company_ads` | `/v1/ad-library/google/company-ads` | `advertiser` (string), `country`? (string), `limit`? (number) | 20 |
-| `google_ad_library_ad_details` | `/v1/ad-library/google/ad-details` | `creative_id` (Transparency Center URL with AR + CR), `country`? (string) | 2 |
+| `google_ad_library_ad_details` | `/v1/ad-library/google/ad-details` | `creative_id` (string), `country`? (string) | 2 |
 | `google_ad_library_advertiser_search` | `/v1/ad-library/google/advertiser-search` | `q` (string), `country`? (string), `limit`? (number) | 10 |
 | `linkedin_ad_library_search_ads` | `/v1/ad-library/linkedin/search-ads` | `q` (string), `country`? (string), `limit`? (number) | 20 |
 | `linkedin_ad_library_ad_details` | `/v1/ad-library/linkedin/ad-details` | `url` (string) | 2 |

@@ -1,0 +1,12 @@
+{
+  "url": "/v1/amazon-shop/page",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}",
+    "marketplace": "{{parameters.marketplace}}",
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

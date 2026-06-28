@@ -1,10 +1,13 @@
 # Captapi for Make.com
 
-Structured social media data from 11 platforms — YouTube, TikTok, Instagram,
-Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn & Rumble —
-transcripts, AI summaries, comments, stats, search and downloads.
+Structured social media data from 29 platforms — YouTube, TikTok, Instagram,
+Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble,
+GitHub, Google Search, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth
+Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop,
+Age/Gender and public Ad Libraries —
+transcripts, AI summaries, comments, stats, search, commerce data and downloads.
 
-- **131 action modules**, one per Captapi endpoint.
+- **180 action modules**, one per Captapi endpoint.
 - **One connection**: paste your Captapi API key (Bearer auth).
 - Every module returns the API `data` payload directly.
 

@@ -1,0 +1,10 @@
+{
+  "url": "/v1/linkedin/post-transcript",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

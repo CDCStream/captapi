@@ -520,6 +520,40 @@ async def instagram_reels_search(
         return ApiResponse(data=data)
 
 
+@router.get("/trending-reels", summary="Instagram trending Reels / Explore posts")
+async def instagram_trending_reels(
+    country: str = Query("United States", description="Country name for Explore localization"),
+    limit: int = Query(20, ge=10, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_IG_POSTS, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/instagram/trending-reels",
+        platform="instagram",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_INSTAGRAM_TRENDING,
+                {"max_results": limit, "download_medias": "none", "country": country},
+                max_items=limit,
+            )
+            reels = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+            return {"platform": "instagram", "country": country, "totalReturned": len(reels), "reels": reels}
+
+        data = await cached_or_run(
+            endpoint="instagram.trending-reels",
+            params={"country": country, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_POSTS, 2)
+        return ApiResponse(data=data)
+
+
 @router.get("/video-download", summary="Direct video URL for Instagram Reel")
 async def instagram_video_download(
     url: str = Query(...),
@@ -558,6 +592,41 @@ async def instagram_video_download(
             ctx=ctx,
             ttl=3600,
         )
+        return ApiResponse(data=data)
+
+
+@router.get("/reels-by-audio-id", summary="Instagram Reels by audio ID")
+async def instagram_reels_by_audio_id(
+    audio_id: str = Query(..., min_length=2, description="Instagram audio/music ID or full audio URL"),
+    limit: int = Query(20, ge=1, le=200),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    audio_url = audio_id if audio_id.startswith("http") else f"https://www.instagram.com/reels/audio/{audio_id}/"
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_IG_RICH, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/instagram/reels-by-audio-id",
+        platform="instagram",
+        resource_url=audio_url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_INSTAGRAM_AUDIO,
+                {"audioUrls": [audio_url], "maxResults": limit, "downloadVideos": False},
+                max_items=limit,
+            )
+            reels = [_normalize_audio_reel(i) for i in items[:limit] if not i.get("error")]
+            return {"platform": "instagram", "audioId": audio_id, "audioUrl": audio_url, "totalReturned": len(reels), "reels": reels}
+
+        data = await cached_or_run(
+            endpoint="instagram.reels-by-audio-id",
+            params={"audio_id": audio_id, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_RICH, 2)
         return ApiResponse(data=data)
 
 

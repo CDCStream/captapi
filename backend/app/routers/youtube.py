@@ -83,6 +83,22 @@ def _video_card(v: dict) -> dict:
     }
 
 
+def _community_post(p: dict) -> dict:
+    return {
+        "platform": "youtube",
+        "id": safe_str(p.get("id") or p.get("postId")),
+        "url": safe_str(p.get("url") or p.get("postUrl")),
+        "text": safe_str(p.get("text") or p.get("content") or p.get("message")),
+        "publishedAt": safe_str(p.get("publishedAt") or p.get("date")),
+        "channelName": safe_str(p.get("channelName") or p.get("channel")),
+        "channelUrl": safe_str(p.get("channelUrl")),
+        "likes": safe_int(p.get("likes") or p.get("likeCount")),
+        "comments": safe_int(p.get("comments") or p.get("commentCount")),
+        "images": p.get("images") or p.get("media") or [],
+        "raw": p,
+    }
+
+
 # ---------- helpers -------------------------------------------------------
 def _require_youtube_url(url: str) -> tuple[str, str]:
     vid = extract_youtube_id(url)
@@ -568,6 +584,48 @@ async def youtube_playlist_videos(
         return ApiResponse(data=data)
 
 
+@router.get("/playlist", summary="YouTube playlist metadata + videos")
+async def youtube_playlist(
+    url: str = Query(..., description="YouTube playlist URL"),
+    limit: int = Query(50, ge=1, le=500),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_YT_VIDEO, 5)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/youtube/playlist",
+        platform="youtube",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_YOUTUBE_SEARCH,
+                {"startUrls": [{"url": url}], "maxResults": limit, "type": "playlist"},
+                max_items=limit,
+            )
+            videos = [_video_card(v) for v in items[:limit]]
+            first = items[0] if items else {}
+            return {
+                "platform": "youtube",
+                "url": url,
+                "title": safe_str(first.get("playlistTitle") or first.get("playlistName")),
+                "channelName": safe_str(first.get("channelName") or first.get("channel")),
+                "totalReturned": len(videos),
+                "videos": videos,
+            }
+
+        data = await cached_or_run(
+            endpoint="youtube.playlist",
+            params={"url": url, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["videos"]), RATE_YT_VIDEO, 5)
+        return ApiResponse(data=data)
+
+
 # ---------- SEARCH --------------------------------------------------------
 @router.get("/search", summary="Search YouTube videos by keyword")
 async def youtube_search(
@@ -613,6 +671,48 @@ async def youtube_search(
             ctx=ctx,
         )
         ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_YT_VIDEO, 2)
+        return ApiResponse(data=data)
+
+
+@router.get("/trending-shorts", summary="Trending YouTube Shorts")
+async def youtube_trending_shorts(
+    q: str = Query("trending", min_length=2, description="Seed keyword for trending Shorts"),
+    limit: int = Query(20, ge=1, le=100),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/youtube/trending-shorts",
+        platform="youtube",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_YOUTUBE_SHORTS,
+                {
+                    "searchQuery": q,
+                    "searchQueries": [],
+                    "channelUrls": [],
+                    "hashtagUrls": [],
+                    "startUrls": [],
+                    "maxResults": limit,
+                    "proxyConfiguration": {"useApifyProxy": False},
+                },
+                max_items=limit,
+            )
+            shorts = [_video_card(v) for v in items[:limit]]
+            return {"platform": "youtube", "query": q, "totalReturned": len(shorts), "shorts": shorts}
+
+        data = await cached_or_run(
+            endpoint="youtube.trending-shorts",
+            params={"q": q, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["shorts"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
 
 
@@ -1009,6 +1109,38 @@ async def youtube_community_posts(
             ctx=ctx,
         )
         ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_YT_COMMUNITY, 2)
+        return ApiResponse(data=data)
+
+
+@router.get("/community-post-details", summary="YouTube community post details")
+async def youtube_community_post_details(
+    url: str = Query(..., description="YouTube community post URL"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/youtube/community-post-details",
+        platform="youtube",
+        resource_url=url,
+        base_credits=1,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_YOUTUBE_COMMUNITY,
+                {"startUrls": [{"url": url}], "maxposts": 1},
+                max_items=1,
+            )
+            if not items:
+                raise HTTPException(status_code=404, detail="Community post not found")
+            return _community_post(items[0])
+
+        data = await cached_or_run(
+            endpoint="youtube.community-post-details",
+            params={"url": url},
+            runner=_run,
+            ctx=ctx,
+        )
         return ApiResponse(data=data)
 
 

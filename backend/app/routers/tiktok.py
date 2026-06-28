@@ -109,6 +109,44 @@ def _normalize_user(item: dict) -> dict:
     }
 
 
+def _normalize_profile_region(item: dict, handle: str) -> dict:
+    user = item.get("user") or item.get("authorMeta") or item
+    stats = item.get("stats") or item.get("authorStats") or {}
+    return {
+        "platform": "tiktok",
+        "username": safe_str(user.get("uniqueId") or user.get("name") or handle),
+        "displayName": safe_str(user.get("nickname") or user.get("nickName")),
+        "url": safe_str(user.get("profileUrl")) or f"https://www.tiktok.com/@{handle}",
+        "region": safe_str(
+            user.get("region")
+            or user.get("country")
+            or user.get("countryCode")
+            or item.get("region")
+            or item.get("country")
+            or item.get("countryCode")
+        ),
+        "language": safe_str(
+            user.get("language")
+            or user.get("languageCode")
+            or item.get("language")
+            or item.get("languageCode")
+        ),
+        "followers": safe_int(
+            user.get("followerCount")
+            or user.get("fans")
+            or stats.get("followerCount")
+            or stats.get("followers")
+        ),
+        "following": safe_int(user.get("followingCount") or user.get("following")),
+        "likes": safe_int(user.get("heartCount") or user.get("likes") or stats.get("heartCount")),
+        "videos": safe_int(user.get("videoCount") or stats.get("videoCount")),
+        "verified": user.get("verified") or user.get("isVerified"),
+        "private": user.get("privateAccount") or user.get("isPrivate"),
+        "profileImage": safe_str(user.get("avatarLarger") or user.get("avatar") or user.get("avatarMedium")),
+        "raw": item,
+    }
+
+
 def _normalize(item: dict) -> dict:
     """Map raw TikTok actor output to our standard shape."""
     author = item.get("authorMeta") or item.get("author") or {}
@@ -141,6 +179,40 @@ def _normalize(item: dict) -> dict:
         },
         "hashtags": [h.get("name") if isinstance(h, dict) else h for h in safe_list(item.get("hashtags"))],
         "musicName": safe_str(music.get("musicName") or music.get("title")),
+    }
+
+
+def _normalize_suggestion(item: dict, seed: str) -> dict:
+    suggestion = (
+        item.get("suggestion")
+        or item.get("keyword")
+        or item.get("query")
+        or item.get("text")
+        or item.get("searchTerm")
+    )
+    return {
+        "seed": safe_str(item.get("seed") or item.get("sourceKeyword") or seed),
+        "suggestion": safe_str(suggestion),
+        "rank": safe_int(item.get("rank") or item.get("position")),
+        "region": safe_str(item.get("region")),
+        "language": safe_str(item.get("language")),
+    }
+
+
+def _normalize_creator(item: dict) -> dict:
+    user = item.get("user") or item.get("author") or item
+    return {
+        "username": safe_str(user.get("uniqueId") or user.get("username") or user.get("handle")),
+        "displayName": safe_str(user.get("nickname") or user.get("displayName") or user.get("name")),
+        "url": safe_str(user.get("profileUrl") or item.get("url")),
+        "bio": safe_str(user.get("signature") or user.get("bio")),
+        "followers": safe_int(user.get("followerCount") or item.get("followers") or item.get("followersCount")),
+        "engagementRate": item.get("engagementRate") or item.get("engagement_rate"),
+        "likes": safe_int(user.get("heartCount") or item.get("likes") or item.get("likesCount")),
+        "videos": safe_int(user.get("videoCount") or item.get("videoCount")),
+        "country": safe_str(item.get("countryCode") or item.get("country") or user.get("region")),
+        "verified": user.get("verified") or user.get("isVerified"),
+        "profileImage": safe_str(user.get("avatarLarger") or user.get("avatar") or item.get("avatar")),
     }
 
 
@@ -391,6 +463,41 @@ async def tiktok_channel_details(
         return ApiResponse(data=data)
 
 
+@router.get("/profile-region", summary="TikTok profile region/language signals")
+async def tiktok_profile_region(
+    url: str = Query(..., description="https://tiktok.com/@username or @handle"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    handle = extract_tiktok_username(url)
+    if not handle:
+        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/profile-region",
+        platform="tiktok",
+        resource_url=f"https://www.tiktok.com/@{handle}",
+        base_credits=CREDIT_CHANNEL_DETAILS,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_PROFILE,
+                {"profiles": [handle], "resultsPerPage": 1},
+                max_items=1,
+            )
+            if not items:
+                raise HTTPException(status_code=404, detail="Profile not found")
+            return _normalize_profile_region(items[0], handle)
+
+        data = await cached_or_run(
+            endpoint="tiktok.profile-region",
+            params={"handle": handle},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
 @router.get("/live", summary="TikTok live status + room info for a creator")
 async def tiktok_live(
     url: str = Query(..., description="https://tiktok.com/@username or @handle"),
@@ -446,6 +553,214 @@ async def tiktok_live(
 
         data = await cached_or_run(
             endpoint="tiktok.live",
+            params={"handle": handle},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/live-info", summary="TikTok live room info for a creator")
+async def tiktok_live_info(
+    url: str = Query(..., description="https://tiktok.com/@username or @handle"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    # ScrapeCreators exposes both Live and Live Info. Our live endpoint already
+    # returns status plus full room details, so this route is an explicit alias
+    # with its own billing/cache key for compatibility.
+    handle = extract_tiktok_username(url)
+    if not handle:
+        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/live-info",
+        platform="tiktok",
+        resource_url=f"https://www.tiktok.com/@{handle}/live",
+        base_credits=CREDIT_CHANNEL_DETAILS,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_LIVE,
+                {"handles": [handle], "include_stream_urls": True},
+                max_items=1,
+            )
+            if not items:
+                raise HTTPException(status_code=404, detail="Creator not found")
+            item = items[0]
+            if item.get("error"):
+                raise HTTPException(status_code=404, detail="Creator not found")
+            user = item.get("liveRoomUserInfo") or {}
+            room = item.get("liveRoom") or {}
+            return {
+                "platform": "tiktok",
+                "username": safe_str(user.get("uniqueId") or handle),
+                "isLive": bool(item.get("is_live")),
+                "room": room,
+                "creator": user,
+                "streamUrls": item.get("stream_urls") or item.get("streamUrls") or [],
+                "raw": item,
+            }
+
+        data = await cached_or_run(
+            endpoint="tiktok.live-info",
+            params={"handle": handle},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/search-suggestions", summary="TikTok search/autocomplete suggestions")
+async def tiktok_search_suggestions(
+    q: str = Query(..., min_length=1, description="Seed keyword"),
+    country: str = Query("US", min_length=2, max_length=2),
+    language: str = Query("en-US"),
+    limit: int = Query(20, ge=1, le=100),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_TREND, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/search-suggestions",
+        platform="tiktok",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_SEARCH_SUGGESTIONS,
+                {
+                    "keywords": [q],
+                    "maxSuggestionsPerKeyword": limit,
+                    "region": country.upper(),
+                    "language": language,
+                    "includeAlphabetExpansions": False,
+                },
+                max_items=limit,
+            )
+            suggestions = [
+                s for s in (_normalize_suggestion(i, q) for i in items[:limit])
+                if s.get("suggestion")
+            ]
+            return {"platform": "tiktok", "query": q, "totalReturned": len(suggestions), "suggestions": suggestions}
+
+        data = await cached_or_run(
+            endpoint="tiktok.search-suggestions",
+            params={"q": q, "country": country.upper(), "language": language, "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["suggestions"]), RATE_TREND, 2)
+        return ApiResponse(data=data)
+
+
+@router.get("/popular-creators", summary="Popular TikTok creators by country")
+async def tiktok_popular_creators(
+    country: str = Query("US", min_length=2, max_length=2),
+    sort: str = Query("follower", pattern="^(follower|engagement|popularity)$"),
+    follower_count: str | None = Query(None, description="Optional range: 10k-100k, 100k-1m, 1m-10m, >10m"),
+    limit: int = Query(20, ge=1, le=100),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_TREND, 2)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/popular-creators",
+        platform="tiktok",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            run_input: dict[str, Any] = {
+                "countryCode": country.upper(),
+                "sortBy": sort,
+                "maxItems": limit,
+                "proxyConfiguration": {"useApifyProxy": False, "apifyProxyGroups": []},
+            }
+            if follower_count:
+                run_input["followerCount"] = follower_count
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_POPULAR_CREATORS,
+                run_input,
+                max_items=limit,
+            )
+            creators = [_normalize_creator(i) for i in items[:limit]]
+            return {
+                "platform": "tiktok",
+                "country": country.upper(),
+                "sort": sort,
+                "totalReturned": len(creators),
+                "creators": creators,
+            }
+
+        data = await cached_or_run(
+            endpoint="tiktok.popular-creators",
+            params={"country": country.upper(), "sort": sort, "follower_count": follower_count or "", "limit": limit},
+            runner=_run,
+            ctx=ctx,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["creators"]), RATE_TREND, 2)
+        return ApiResponse(data=data)
+
+
+@router.get("/audience-demographics", summary="TikTok profile audience/demographic signals")
+async def tiktok_audience_demographics(
+    url: str = Query(..., description="https://tiktok.com/@username or @handle"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    handle = extract_tiktok_username(url)
+    if not handle:
+        raise HTTPException(status_code=400, detail="Invalid TikTok profile URL")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/audience-demographics",
+        platform="tiktok",
+        resource_url=f"https://www.tiktok.com/@{handle}",
+        base_credits=4,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            profile_items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK_PROFILE,
+                {"profiles": [handle], "resultsPerPage": 1},
+                max_items=1,
+            )
+            if not profile_items:
+                raise HTTPException(status_code=404, detail="Profile not found")
+            profile = _normalize_profile_region(profile_items[0], handle)
+            demographics: dict[str, Any] = {}
+            # Some third-party audience actors expose richer fields, but not all
+            # support a stable input. Keep this optional and always return the
+            # reliable public profile-derived signals.
+            if settings.APIFY_ACTOR_TIKTOK_AUDIENCE:
+                try:
+                    audience_items = await get_apify().run_actor_sync(
+                        settings.APIFY_ACTOR_TIKTOK_AUDIENCE,
+                        {"username": handle, "profileUrl": f"https://www.tiktok.com/@{handle}"},
+                        max_items=1,
+                    )
+                    demographics = audience_items[0] if audience_items else {}
+                except Exception:
+                    demographics = {}
+            return {
+                "platform": "tiktok",
+                "username": handle,
+                "profile": profile,
+                "region": profile.get("region"),
+                "language": profile.get("language"),
+                "audienceSize": profile.get("followers"),
+                "ageDistribution": demographics.get("age_distribution") or demographics.get("ageDistribution"),
+                "genderDistribution": demographics.get("gender_distribution") or demographics.get("genderDistribution"),
+                "geography": demographics.get("geography") or demographics.get("countries"),
+                "interests": demographics.get("interest_affinities") or demographics.get("interests"),
+                "raw": demographics or None,
+            }
+
+        data = await cached_or_run(
+            endpoint="tiktok.audience-demographics",
             params={"handle": handle},
             runner=_run,
             ctx=ctx,

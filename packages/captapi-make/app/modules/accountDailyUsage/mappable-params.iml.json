@@ -1,0 +1,9 @@
+[
+  {
+    "name": "days",
+    "type": "number",
+    "label": "Days",
+    "required": false,
+    "help": "Number of days to include. Default 30, max 365."
+  }
+]

@@ -16,7 +16,23 @@ export type Platform =
   | "rumble"
   | "tiktok_shop"
   | "github"
-  | "ad_library";
+  | "ad_library"
+  | "google"
+  | "twitch"
+  | "spotify"
+  | "soundcloud"
+  | "linktree"
+  | "snapchat"
+  | "truth_social"
+  | "kick"
+  | "amazon_shop"
+  | "age_gender"
+  | "account"
+  | "kwai"
+  | "komi"
+  | "pillar"
+  | "linkbio"
+  | "linkme";
 
 export interface ToolParam {
   name: string;
@@ -84,6 +100,22 @@ const IG_POST = "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/
 const IG_REEL = "Instagram Reel URL, e.g. https://instagram.com/reel/ID/.";
 const IG_PROFILE = "Instagram profile URL, e.g. https://instagram.com/username/.";
 const FB_VIDEO = "Public Facebook video or post URL.";
+const TWITCH_PROFILE = "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud.";
+const SPOTIFY_URL = "Spotify URL, URI, or ID.";
+const SC_PROFILE = "SoundCloud artist profile URL or username.";
+const SC_TRACK = "SoundCloud track URL.";
+const LINKTREE_PROFILE = "Linktree profile URL or username.";
+const SNAPCHAT_PROFILE = "Snapchat username or profile URL.";
+const TRUTH_PROFILE = "Truth Social profile URL or @username.";
+const TRUTH_POST = "Truth Social post URL or post ID.";
+const KICK_CLIP = "Kick clip URL, channel URL, or channel username.";
+const AMAZON_SHOP = "Amazon seller storefront URL, seller profile URL, or seller ID.";
+const KWAI_PROFILE = "Kwai/Kuaishou profile URL or user ID.";
+const KWAI_POST = "Kwai/Kuaishou post URL or video/photo ID.";
+const KOMI_PAGE = "Komi page URL or username.";
+const PILLAR_PAGE = "Pillar page URL or username.";
+const LINKBIO_PAGE = "Linkbio page URL or username.";
+const LINKME_PROFILE = "Linkme profile URL or username.";
 
 const YOUTUBE: Omit<Endpoint, "platform">[] = [
   { tool: "youtube_transcript", name: "YouTube Transcript", path: "/v1/youtube/transcript", credits: 2, summary: "Extract the full timestamped transcript of a YouTube video.", params: [url(YT_VIDEO), language()] },
@@ -94,17 +126,20 @@ const YOUTUBE: Omit<Endpoint, "platform">[] = [
   { tool: "youtube_search", name: "YouTube Search", path: "/v1/youtube/search", credits: 20, summary: "Search YouTube videos by keyword.", params: [q(), limit(20, 200)] },
   { tool: "youtube_channel_videos", name: "YouTube Channel Videos", path: "/v1/youtube/channel-videos", credits: 20, summary: "List a channel's uploaded videos.", params: [url(YT_CHANNEL), limit(20, 200)] },
   { tool: "youtube_playlist_videos", name: "YouTube Playlist Videos", path: "/v1/youtube/playlist-videos", credits: 50, summary: "List videos in a YouTube playlist.", params: [url("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), limit(50, 500)] },
+  { tool: "youtube_playlist", name: "YouTube Playlist", path: "/v1/youtube/playlist", credits: 50, summary: "Playlist metadata plus videos from a YouTube playlist.", params: [url("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), limit(50, 500)] },
   { tool: "youtube_video_download", name: "YouTube Video Download", path: "/v1/youtube/video-download", credits: 3, summary: "Direct download URLs for a YouTube video.", params: [url(YT_VIDEO)] },
   { tool: "youtube_shorts_transcript", name: "YouTube Shorts Transcript", path: "/v1/youtube/shorts/transcript", credits: 2, summary: "Transcript of a YouTube Short.", params: [url(YT_SHORTS), language()] },
   { tool: "youtube_shorts_summarize", name: "YouTube Shorts Summarizer", path: "/v1/youtube/shorts/summarize", credits: 4, summary: "AI summary of a YouTube Short.", params: [url(YT_SHORTS), language()] },
   { tool: "youtube_shorts_details", name: "YouTube Shorts Stats", path: "/v1/youtube/shorts/video-details", credits: 1, summary: "Metadata + stats for a YouTube Short.", params: [url(YT_SHORTS)] },
   { tool: "youtube_shorts_comments", name: "YouTube Shorts Comments", path: "/v1/youtube/shorts/comments", credits: 20, summary: "Comments on a YouTube Short.", params: [url(YT_SHORTS), limit(50, 500)] },
   { tool: "youtube_channel_shorts", name: "YouTube Channel Shorts", path: "/v1/youtube/channel-shorts", credits: 20, summary: "List a channel's Shorts.", params: [url(YT_CHANNEL), limit(20, 200)] },
+  { tool: "youtube_trending_shorts", name: "YouTube Trending Shorts", path: "/v1/youtube/trending-shorts", credits: 20, summary: "Discover trending YouTube Shorts by seed keyword.", params: [{ name: "q", type: "string", required: false, description: "Seed keyword for trending Shorts. Default trending." }, limit(20, 100)] },
   { tool: "youtube_channel_streams", name: "YouTube Channel Streams", path: "/v1/youtube/channel-streams", credits: 20, summary: "List a channel's live/past streams.", params: [url(YT_CHANNEL), limit(20, 200)] },
   { tool: "youtube_hashtag_search", name: "YouTube Hashtag Search", path: "/v1/youtube/hashtag-search", credits: 20, summary: "Search YouTube videos by hashtag.", params: [q("Hashtag with or without the # (min 2 chars)."), limit(20, 200)] },
   { tool: "youtube_comment_replies", name: "YouTube Comment Replies", path: "/v1/youtube/comment-replies", credits: 20, summary: "Replies to a specific YouTube comment.", params: [url(YT_VIDEO), commentId(), limit(50, 500)] },
   { tool: "youtube_channel_playlists", name: "YouTube Channel Playlists", path: "/v1/youtube/channel-playlists", credits: 20, summary: "List a channel's playlists.", params: [url(YT_CHANNEL), limit(20, 200)] },
   { tool: "youtube_community_posts", name: "YouTube Community Posts", path: "/v1/youtube/community-posts", credits: 10, summary: "List a channel's community (posts) tab.", params: [url(YT_CHANNEL), limit(20, 200)] },
+  { tool: "youtube_community_post_details", name: "YouTube Community Post Details", path: "/v1/youtube/community-post-details", credits: 1, summary: "Details for a single YouTube community post.", params: [url("YouTube community post URL.")] },
   { tool: "youtube_video_sponsors", name: "YouTube Video Sponsors", path: "/v1/youtube/video-sponsors", credits: 1, summary: "Sponsor / self-promo / interaction segments in a YouTube video (via SponsorBlock).", params: [url(YT_VIDEO)] },
 ];
 
@@ -114,7 +149,10 @@ const TIKTOK: Omit<Endpoint, "platform">[] = [
   { tool: "tiktok_video_details", name: "TikTok Video Details", path: "/v1/tiktok/video-details", credits: 1, summary: "Metadata + stats for a TikTok video.", params: [url(TT_VIDEO)] },
   { tool: "tiktok_comments", name: "TikTok Comments", path: "/v1/tiktok/comments", credits: 10, summary: "Comments on a TikTok video.", params: [url(TT_VIDEO), limit(50, 500)] },
   { tool: "tiktok_channel_details", name: "TikTok Channel Details", path: "/v1/tiktok/channel-details", credits: 1, summary: "Profile info & stats for a TikTok user.", params: [url(TT_PROFILE)] },
+  { tool: "tiktok_profile_region", name: "TikTok Profile Region", path: "/v1/tiktok/profile-region", credits: 1, summary: "Region and language signals for a TikTok profile.", params: [url(TT_PROFILE)] },
+  { tool: "tiktok_audience_demographics", name: "TikTok Audience Demographics", path: "/v1/tiktok/audience-demographics", credits: 4, summary: "Audience and demographic signals for a TikTok profile.", params: [url(TT_PROFILE)] },
   { tool: "tiktok_search", name: "TikTok Search", path: "/v1/tiktok/search", credits: 14, summary: "Search TikTok videos by keyword/hashtag.", params: [q(), limit(20, 200)] },
+  { tool: "tiktok_search_suggestions", name: "TikTok Search Suggestions", path: "/v1/tiktok/search-suggestions", credits: 14, summary: "TikTok search/autocomplete suggestions for a seed keyword.", params: [q("Seed keyword for autocomplete suggestions."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, language(), limit(20, 100)] },
   { tool: "tiktok_video_download", name: "TikTok Video Download", path: "/v1/tiktok/video-download", credits: 3, summary: "No-watermark download URL for a TikTok video.", params: [url(TT_VIDEO)] },
   { tool: "tiktok_channel_posts", name: "TikTok Channel Posts", path: "/v1/tiktok/channel-posts", credits: 14, summary: "Latest posts from a TikTok profile.", params: [url(TT_PROFILE), limit(20, 200)] },
   { tool: "tiktok_comment_replies", name: "TikTok Comment Replies", path: "/v1/tiktok/comment-replies", credits: 50, summary: "Replies to a specific TikTok comment.", params: [url(TT_VIDEO), commentId(), limit(50, 500)] },
@@ -128,6 +166,8 @@ const TIKTOK: Omit<Endpoint, "platform">[] = [
   { tool: "tiktok_trending_feed", name: "TikTok Trending Feed", path: "/v1/tiktok/trending-feed", credits: 14, summary: "TikTok trending (For You) videos by region.", params: [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code, e.g. US, GB, TR. Default US." }, limit(20, 200)] },
   { tool: "tiktok_popular_hashtags", name: "TikTok Popular Hashtags", path: "/v1/tiktok/popular-hashtags", credits: 14, summary: "Trending TikTok hashtags for a topic/keyword.", params: [{ name: "query", type: "string", required: false, description: 'Topic or keyword to discover trending hashtags for. Default "trending".' }, limit(20, 100)] },
   { tool: "tiktok_live", name: "TikTok Live", path: "/v1/tiktok/live", credits: 1, summary: "Live status & room info for a TikTok creator.", params: [url(TT_PROFILE)] },
+  { tool: "tiktok_live_info", name: "TikTok Live Info", path: "/v1/tiktok/live-info", credits: 1, summary: "Live room details for a TikTok creator.", params: [url(TT_PROFILE)] },
+  { tool: "tiktok_popular_creators", name: "TikTok Popular Creators", path: "/v1/tiktok/popular-creators", credits: 14, summary: "Popular TikTok creators by country and ranking mode.", params: [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, { name: "sort", type: "string", required: false, description: "follower, engagement, or popularity. Default follower." }, { name: "follower_count", type: "string", required: false, description: "Optional range: 10k-100k, 100k-1m, 1m-10m, >10m." }, limit(20, 100)] },
 ];
 
 const INSTAGRAM: Omit<Endpoint, "platform">[] = [
@@ -139,9 +179,11 @@ const INSTAGRAM: Omit<Endpoint, "platform">[] = [
   { tool: "instagram_channel_posts", name: "Instagram Channel Posts", path: "/v1/instagram/channel-posts", credits: 12, summary: "Latest posts from an Instagram profile.", params: [url(IG_PROFILE), limit(20, 200)] },
   { tool: "instagram_channel_reels", name: "Instagram Channel Reels", path: "/v1/instagram/channel-reels", credits: 12, summary: "Latest Reels from an Instagram profile.", params: [url(IG_PROFILE), limit(20, 200)] },
   { tool: "instagram_reels_search", name: "Instagram Reels Search", path: "/v1/instagram/reels-search", credits: 12, summary: "Search Instagram Reels by hashtag/keyword.", params: [q("Hashtag (without #) or keyword (min 2 chars)."), limit(20, 200)] },
+  { tool: "instagram_trending_reels", name: "Instagram Trending Reels", path: "/v1/instagram/trending-reels", credits: 12, summary: "Trending Instagram Reels / Explore posts by country.", params: [{ name: "country", type: "string", required: false, description: "Country name for Explore localization. Default United States." }, limit(20, 200)] },
   { tool: "instagram_video_download", name: "Instagram Video Download", path: "/v1/instagram/video-download", credits: 3, summary: "Direct video URL for an Instagram Reel.", params: [url(IG_REEL)] },
   { tool: "instagram_tagged_posts", name: "Instagram Tagged Posts", path: "/v1/instagram/tagged-posts", credits: 18, summary: "Posts an Instagram user is tagged in.", params: [url(IG_PROFILE), limit(20, 200)] },
   { tool: "instagram_music_posts", name: "Instagram Music Posts", path: "/v1/instagram/music-posts", credits: 18, summary: "Posts/Reels using an Instagram audio.", params: [url("Instagram audio/music page URL."), limit(20, 200)] },
+  { tool: "instagram_reels_by_audio_id", name: "Instagram Reels By Audio ID", path: "/v1/instagram/reels-by-audio-id", credits: 18, summary: "Posts/Reels using an Instagram audio ID.", params: [{ name: "audio_id", type: "string", required: true, description: "Instagram audio/music ID or full audio URL." }, limit(20, 200)] },
   { tool: "instagram_hashtag_search", name: "Instagram Hashtag Search", path: "/v1/instagram/hashtag-search", credits: 12, summary: "Search Instagram posts by hashtag.", params: [q("Hashtag without the # (min 2 chars)."), limit(20, 200)] },
   { tool: "instagram_profile_search", name: "Instagram Profile Search", path: "/v1/instagram/profile-search", credits: 12, summary: "Search Instagram profiles by keyword.", params: [q(), limit(20, 100)] },
   { tool: "instagram_story_highlights", name: "Instagram Story Highlights", path: "/v1/instagram/story-highlights", credits: 5, summary: "List a profile's story highlight covers.", params: [url(IG_PROFILE)] },
@@ -161,9 +203,11 @@ const FACEBOOK: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_group_posts", name: "Facebook Group Posts", path: "/v1/facebook/group-posts", credits: 12, summary: "Posts from a public Facebook group.", params: [url("Public Facebook group URL, e.g. https://facebook.com/groups/ID."), limit(20, 200)] },
   { tool: "facebook_comment_replies", name: "Facebook Comment Replies", path: "/v1/facebook/comment-replies", credits: 30, summary: "Replies to a specific Facebook comment.", params: [url("Facebook post URL the comment belongs to."), commentId(), limit(50, 500)] },
   { tool: "facebook_marketplace_search", name: "Facebook Marketplace Search", path: "/v1/facebook/marketplace-search", credits: 20, summary: "Search Facebook Marketplace listings by keyword and location.", params: [q("Product or keyword to search for (min 2 chars)."), { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." }, limit(20, 200), { name: "details", type: "string", required: false, description: "Set true to fetch full description, photos and coordinates per listing (slower, costs more)." }] },
+  { tool: "facebook_marketplace_location_search", name: "Facebook Marketplace Location Search", path: "/v1/facebook/marketplace-location-search", credits: 1, summary: "Find Facebook Marketplace location candidates for a city or place query.", params: [q("City/place search query, e.g. Austin."), limit(10, 50)] },
   { tool: "facebook_event_search", name: "Facebook Event Search", path: "/v1/facebook/event-search", credits: 40, summary: "Search Facebook events by topic and/or location.", params: [q("Topic and/or place, e.g. 'comedy Chicago' (min 2 chars)."), limit(20, 200)] },
   { tool: "facebook_event_details", name: "Facebook Event Details", path: "/v1/facebook/event-details", credits: 2, summary: "Details for a Facebook event (date, location, attendees, tickets).", params: [url("Facebook event URL, e.g. https://facebook.com/events/ID.")] },
   { tool: "facebook_profile_photos", name: "Facebook Profile Photos", path: "/v1/facebook/profile-photos", credits: 12, summary: "Photos from a Facebook profile or page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
+  { tool: "facebook_profile_events", name: "Facebook Profile Events", path: "/v1/facebook/profile-events", credits: 40, summary: "Events from a Facebook profile or page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
   { tool: "facebook_marketplace_item", name: "Facebook Marketplace Item", path: "/v1/facebook/marketplace-item", credits: 1, summary: "Details for a single Facebook Marketplace listing.", params: [url("Facebook Marketplace item URL.")] },
 ];
 
@@ -187,6 +231,7 @@ const RB_CHANNEL = "Rumble channel URL, e.g. https://rumble.com/c/name.";
 
 const TWITTER: Omit<Endpoint, "platform">[] = [
   { tool: "twitter_tweet_details", name: "Twitter/X Tweet Details", path: "/v1/twitter/tweet-details", credits: 1, summary: "Metadata + engagement stats for a tweet.", params: [url(TW_TWEET)] },
+  { tool: "twitter_transcript", name: "Twitter/X Transcript", path: "/v1/twitter/transcript", credits: 1, summary: "Extract tweet text as transcript text.", params: [url(TW_TWEET)] },
   { tool: "twitter_profile", name: "Twitter/X Profile", path: "/v1/twitter/profile", credits: 1, summary: "Profile info & stats for a Twitter/X account.", params: [url(TW_PROFILE)] },
   { tool: "twitter_user_tweets", name: "Twitter/X User Tweets", path: "/v1/twitter/user-tweets", credits: 14, summary: "Recent tweets from a Twitter/X profile.", params: [url(TW_PROFILE), limit(20, 200)] },
   { tool: "twitter_search", name: "Twitter/X Search", path: "/v1/twitter/search", credits: 14, summary: "Search tweets by keyword.", params: [q(), limit(20, 200)] },
@@ -198,6 +243,7 @@ const REDDIT: Omit<Endpoint, "platform">[] = [
   { tool: "reddit_subreddit_posts", name: "Reddit Subreddit Posts", path: "/v1/reddit/subreddit-posts", credits: 10, summary: "Recent posts in a subreddit.", params: [url(RD_SUB), limit(25, 200)] },
   { tool: "reddit_post_details", name: "Reddit Post Details", path: "/v1/reddit/post-details", credits: 1, summary: "Metadata + stats for a Reddit post.", params: [url(RD_POST)] },
   { tool: "reddit_post_comments", name: "Reddit Post Comments", path: "/v1/reddit/post-comments", credits: 20, summary: "Comments on a Reddit post.", params: [url(RD_POST), limit(50, 500)] },
+  { tool: "reddit_post_transcript", name: "Reddit Post Transcript", path: "/v1/reddit/post-transcript", credits: 20, summary: "Extract Reddit post text and top comments as a discussion transcript.", params: [url(RD_POST), limit(50, 200)] },
   { tool: "reddit_search", name: "Reddit Search", path: "/v1/reddit/search", credits: 10, summary: "Search Reddit posts by keyword.", params: [q(), limit(25, 200)] },
   { tool: "reddit_subreddit_details", name: "Reddit Subreddit Details", path: "/v1/reddit/subreddit-details", credits: 1, summary: "Info & member stats for a subreddit.", params: [url(RD_SUB)] },
   { tool: "reddit_subreddit_search", name: "Reddit Subreddit Search", path: "/v1/reddit/subreddit-search", credits: 10, summary: "Search posts within a specific subreddit.", params: [url(RD_SUB), q(), limit(25, 200)] },
@@ -229,6 +275,7 @@ const LINKEDIN: Omit<Endpoint, "platform">[] = [
   { tool: "linkedin_profile", name: "LinkedIn Profile", path: "/v1/linkedin/profile", credits: 2, summary: "Public LinkedIn person profile details.", params: [url(LI_PROFILE)] },
   { tool: "linkedin_company", name: "LinkedIn Company", path: "/v1/linkedin/company", credits: 2, summary: "Public LinkedIn company page details.", params: [url(LI_COMPANY)] },
   { tool: "linkedin_post_details", name: "LinkedIn Post Details", path: "/v1/linkedin/post-details", credits: 1, summary: "Metadata + engagement for a LinkedIn post.", params: [url(LI_POST)] },
+  { tool: "linkedin_post_transcript", name: "LinkedIn Post Transcript", path: "/v1/linkedin/post-transcript", credits: 1, summary: "Extract post text as a transcript for a LinkedIn post.", params: [url(LI_POST)] },
   { tool: "linkedin_company_posts", name: "LinkedIn Company Posts", path: "/v1/linkedin/company-posts", credits: 16, summary: "Recent public posts from a LinkedIn company page.", params: [url(LI_COMPANY), limit(20, 100)] },
   { tool: "linkedin_search_posts", name: "LinkedIn Search Posts", path: "/v1/linkedin/search-posts", credits: 16, summary: "Search public LinkedIn posts by keyword.", params: [q(), { name: "sort", type: "string", required: false, description: "relevance or date. Default relevance." }, limit(20, 50)] },
 ];
@@ -262,11 +309,94 @@ const GITHUB: Omit<Endpoint, "platform">[] = [
   { tool: "github_trending_developers", name: "GitHub Trending Developers", path: "/v1/github/trending-developers", credits: 2, summary: "Search popular GitHub developers.", params: [q("GitHub user search query. Default followers:>1000."), limit(20, 100)] },
 ];
 
+
+const GOOGLE: Omit<Endpoint, "platform">[] = [
+  { tool: "google_search", name: "Google Search", path: "/v1/google/search", credits: 5, summary: "Google SERP organic search results by keyword, country, and language.", params: [q(), { name: "country", type: "string", required: false, description: "Two-letter country code. Default us." }, { name: "language", type: "string", required: false, description: "Google language code. Default en." }, limit(10, 100)] },
+];
+
+const TWITCH: Omit<Endpoint, "platform">[] = [
+  { tool: "twitch_profile", name: "Twitch Profile", path: "/v1/twitch/profile", credits: 1, summary: "Twitch channel profile, followers, live status and recent metadata.", params: [url(TWITCH_PROFILE)] },
+  { tool: "twitch_user_videos", name: "Twitch User Videos", path: "/v1/twitch/user-videos", credits: 12, summary: "Recent Twitch VODs for a channel.", params: [url(TWITCH_PROFILE), limit(20, 30)] },
+  { tool: "twitch_user_schedule", name: "Twitch User Schedule", path: "/v1/twitch/user-schedule", credits: 1, summary: "Upcoming Twitch schedule data when exposed on the public channel.", params: [url(TWITCH_PROFILE)] },
+  { tool: "twitch_clip", name: "Twitch Clip", path: "/v1/twitch/clip", credits: 1, summary: "Twitch clip metadata from a clip URL or channel fallback.", params: [url("Twitch clip URL, channel URL, or username.")] },
+];
+
+const SPOTIFY: Omit<Endpoint, "platform">[] = [
+  { tool: "spotify_artist", name: "Spotify Artist", path: "/v1/spotify/artist", credits: 2, summary: "Spotify artist details, followers and listener metadata.", params: [url(SPOTIFY_URL)] },
+  { tool: "spotify_track", name: "Spotify Track", path: "/v1/spotify/track", credits: 1, summary: "Spotify track metadata, artists, album and play count when available.", params: [url(SPOTIFY_URL)] },
+  { tool: "spotify_album", name: "Spotify Album", path: "/v1/spotify/album", credits: 2, summary: "Spotify album metadata and track count.", params: [url(SPOTIFY_URL)] },
+  { tool: "spotify_search", name: "Spotify Search", path: "/v1/spotify/search", credits: 8, summary: "Search Spotify tracks, albums, artists, podcasts or episodes.", params: [q(), { name: "type", type: "string", required: false, description: "tracks, albums, artists, podcasts, or episodes. Default tracks." }, limit(20, 50)] },
+  { tool: "spotify_podcast", name: "Spotify Podcast", path: "/v1/spotify/podcast", credits: 2, summary: "Spotify podcast/show details and episode summary metadata.", params: [url(SPOTIFY_URL), limit(20, 50)] },
+  { tool: "spotify_podcast_episodes", name: "Spotify Podcast Episodes", path: "/v1/spotify/podcast-episodes", credits: 8, summary: "List episodes for a Spotify podcast/show.", params: [url(SPOTIFY_URL), limit(20, 50)] },
+];
+
+const SOUNDCLOUD: Omit<Endpoint, "platform">[] = [
+  { tool: "soundcloud_artist", name: "SoundCloud Artist", path: "/v1/soundcloud/artist", credits: 1, summary: "SoundCloud artist profile metadata.", params: [url(SC_PROFILE)] },
+  { tool: "soundcloud_artist_tracks", name: "SoundCloud Artist Tracks", path: "/v1/soundcloud/artist-tracks", credits: 10, summary: "Tracks from a SoundCloud artist profile.", params: [url(SC_PROFILE), limit(20, 100)] },
+  { tool: "soundcloud_track", name: "SoundCloud Track", path: "/v1/soundcloud/track", credits: 1, summary: "SoundCloud track metadata and engagement stats.", params: [url(SC_TRACK)] },
+];
+
+const LINKTREE: Omit<Endpoint, "platform">[] = [
+  { tool: "linktree_page", name: "Linktree Page", path: "/v1/linktree/page", credits: 1, summary: "Public Linktree profile links, socials and profile metadata.", params: [url(LINKTREE_PROFILE)] },
+];
+
+const SNAPCHAT: Omit<Endpoint, "platform">[] = [
+  { tool: "snapchat_user_profile", name: "Snapchat User Profile", path: "/v1/snapchat/user-profile", credits: 2, summary: "Public Snapchat profile metadata, subscriber count, avatar and highlights.", params: [url(SNAPCHAT_PROFILE)] },
+];
+
+const TRUTH_SOCIAL: Omit<Endpoint, "platform">[] = [
+  { tool: "truth_social_profile", name: "Truth Social Profile", path: "/v1/truth-social/profile", credits: 1, summary: "Public Truth Social profile metadata and stats.", params: [url(TRUTH_PROFILE)] },
+  { tool: "truth_social_user_posts", name: "Truth Social User Posts", path: "/v1/truth-social/user-posts", credits: 2, summary: "Recent public posts from a Truth Social profile.", params: [url(TRUTH_PROFILE), limit(20, 80)] },
+  { tool: "truth_social_post", name: "Truth Social Post", path: "/v1/truth-social/post", credits: 1, summary: "Truth Social post metadata, text, media and engagement.", params: [url(TRUTH_POST)] },
+];
+
+const KICK: Omit<Endpoint, "platform">[] = [
+  { tool: "kick_clip", name: "Kick Clip", path: "/v1/kick/clip", credits: 3, summary: "Kick clip metadata from a clip URL or recent channel clips.", params: [url(KICK_CLIP), limit(30, 100)] },
+];
+
+const AMAZON_SHOP_ENDPOINTS: Omit<Endpoint, "platform">[] = [
+  { tool: "amazon_shop_page", name: "Amazon Shop Page", path: "/v1/amazon-shop/page", credits: 20, summary: "Amazon seller storefront metadata and product listings.", params: [url(AMAZON_SHOP), { name: "marketplace", type: "string", required: false, description: "Amazon marketplace code. Default US." }, limit(20, 200)] },
+];
+
+const AGE_GENDER: Omit<Endpoint, "platform">[] = [
+  { tool: "age_gender_get", name: "Age and Gender", path: "/v1/age-gender", credits: 1, summary: "Predict age, gender and nationality signals from first names.", params: [{ name: "name", type: "string", required: true, description: "First name, or fallback when names is omitted." }, { name: "names", type: "string", required: false, description: "Optional comma-separated list of names." }] },
+];
+
+const ACCOUNT: Omit<Endpoint, "platform">[] = [
+  { tool: "account_balance", name: "Credit Balance", path: "/v1/account/balance", credits: 0, summary: "Get current Captapi credit balance and plan limits.", params: [] },
+  { tool: "account_request_history", name: "Request History", path: "/v1/account/request-history", credits: 0, summary: "List recent Captapi API requests for the current key owner.", params: [limit(50, 500)] },
+  { tool: "account_daily_usage", name: "Daily Usage", path: "/v1/account/daily-usage", credits: 0, summary: "Daily request and credit usage summary.", params: [{ name: "days", type: "number", required: false, description: "Number of days to include. Default 30, max 365." }] },
+  { tool: "account_most_used_routes", name: "Most Used Routes", path: "/v1/account/most-used-routes", credits: 0, summary: "Most used API routes by request count and credits.", params: [{ name: "days", type: "number", required: false, description: "Number of days to include. Default 30, max 365." }, limit(20, 100)] },
+];
+
+const KWAI: Omit<Endpoint, "platform">[] = [
+  { tool: "kwai_profile", name: "Kwai Profile", path: "/v1/kwai/profile", credits: 2, summary: "Kwai/Kuaishou public profile details and stats.", params: [url(KWAI_PROFILE)] },
+  { tool: "kwai_user_posts", name: "Kwai User Posts", path: "/v1/kwai/user-posts", credits: 16, summary: "Recent Kwai/Kuaishou videos from a profile.", params: [url(KWAI_PROFILE), limit(20, 200)] },
+  { tool: "kwai_post", name: "Kwai Post", path: "/v1/kwai/post", credits: 2, summary: "Kwai/Kuaishou post metadata and engagement.", params: [url(KWAI_POST)] },
+];
+
+const KOMI: Omit<Endpoint, "platform">[] = [
+  { tool: "komi_page", name: "Komi Page", path: "/v1/komi/page", credits: 1, summary: "Public Komi page links and profile metadata.", params: [url(KOMI_PAGE)] },
+];
+
+const PILLAR: Omit<Endpoint, "platform">[] = [
+  { tool: "pillar_page", name: "Pillar Page", path: "/v1/pillar/page", credits: 1, summary: "Public Pillar page links and profile metadata.", params: [url(PILLAR_PAGE)] },
+];
+
+const LINKBIO: Omit<Endpoint, "platform">[] = [
+  { tool: "linkbio_page", name: "Linkbio Page", path: "/v1/linkbio/page", credits: 1, summary: "Public Linkbio page links and profile metadata.", params: [url(LINKBIO_PAGE)] },
+];
+
+const LINKME: Omit<Endpoint, "platform">[] = [
+  { tool: "linkme_profile", name: "Linkme Profile", path: "/v1/linkme/profile", credits: 1, summary: "Public Linkme profile links and metadata.", params: [url(LINKME_PROFILE)] },
+];
+
 const AD_LIBRARY: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_ad_library_search", name: "Facebook Ad Library Search", path: "/v1/ad-library/facebook/search", credits: 20, summary: "Search Meta/Facebook ads by keyword.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
   { tool: "facebook_ad_library_company_ads", name: "Facebook Company Ads", path: "/v1/ad-library/facebook/company-ads", credits: 20, summary: "Ads for a Facebook page or Meta Ad Library URL.", params: [url("Facebook page URL or Meta Ad Library URL."), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
   { tool: "facebook_ad_library_search_companies", name: "Facebook Ad Library Search Companies", path: "/v1/ad-library/facebook/search-companies", credits: 20, summary: "Find advertisers/pages in the Meta Ad Library by name.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
   { tool: "facebook_ad_library_ad_details", name: "Facebook Ad Details", path: "/v1/ad-library/facebook/ad-details", credits: 2, summary: "Meta/Facebook ad details.", params: [url("Meta Ad Library ad URL.")] },
+  { tool: "facebook_ad_library_ad_transcript", name: "Facebook Ad Transcript", path: "/v1/ad-library/facebook/ad-transcript", credits: 2, summary: "Extract creative text from a Meta/Facebook ad as transcript text.", params: [url("Meta Ad Library ad URL or ad ID.")] },
   { tool: "tiktok_ad_library_search", name: "TikTok Ad Library Search", path: "/v1/ad-library/tiktok/search", credits: 20, summary: "Search TikTok Ad Library and Creative Center.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default DE." }, limit(20, 200)] },
   { tool: "tiktok_ad_library_ad_details", name: "TikTok Ad Details", path: "/v1/ad-library/tiktok/ad-details", credits: 2, summary: "TikTok ad details by ad URL or ID.", params: [url("TikTok Ad Library URL or ad ID."), { name: "country", type: "string", required: false, description: "ISO country code. Default DE." }] },
   { tool: "google_ad_library_company_ads", name: "Google Company Ads", path: "/v1/ad-library/google/company-ads", credits: 20, summary: "Google Ads Transparency Center ads for an advertiser.", params: [{ name: "advertiser", type: "string", required: true, description: "Advertiser name, domain, or Google advertiser ID." }, { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
@@ -297,6 +427,22 @@ export const ENDPOINTS: Endpoint[] = [
   ...withPlatform(RUMBLE, "rumble"),
   ...withPlatform(TIKTOK_SHOP, "tiktok_shop"),
   ...withPlatform(GITHUB, "github"),
+  ...withPlatform(GOOGLE, "google"),
+  ...withPlatform(TWITCH, "twitch"),
+  ...withPlatform(SPOTIFY, "spotify"),
+  ...withPlatform(SOUNDCLOUD, "soundcloud"),
+  ...withPlatform(LINKTREE, "linktree"),
+  ...withPlatform(SNAPCHAT, "snapchat"),
+  ...withPlatform(TRUTH_SOCIAL, "truth_social"),
+  ...withPlatform(KICK, "kick"),
+  ...withPlatform(AMAZON_SHOP_ENDPOINTS, "amazon_shop"),
+  ...withPlatform(AGE_GENDER, "age_gender"),
+  ...withPlatform(ACCOUNT, "account"),
+  ...withPlatform(KWAI, "kwai"),
+  ...withPlatform(KOMI, "komi"),
+  ...withPlatform(PILLAR, "pillar"),
+  ...withPlatform(LINKBIO, "linkbio"),
+  ...withPlatform(LINKME, "linkme"),
   ...withPlatform(AD_LIBRARY, "ad_library"),
 ];
 

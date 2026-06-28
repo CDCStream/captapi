@@ -1,0 +1,9 @@
+[
+  {
+    "name": "url",
+    "type": "text",
+    "label": "URL",
+    "required": true,
+    "help": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud."
+  }
+]

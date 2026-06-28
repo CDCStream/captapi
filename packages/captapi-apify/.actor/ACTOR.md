@@ -1,4 +1,4 @@
-# Captapi - Social Media Data (11 platforms, BYO key)
+# Captapi - Social Media Data (29 platforms, BYO key)
 
 Bring your own **Captapi** API key and pull structured social media data -
 transcripts, AI summaries, comments, video/profile stats, search results and
@@ -19,7 +19,7 @@ Create a free `capt_live_...` key at
 | Field | Required | Notes |
 | --- | --- | --- |
 | **Captapi API key** | yes | Your `capt_live_...` key (stored encrypted). |
-| **Operation** | yes | Which endpoint to call (85 options, grouped by platform). |
+| **Operation** | yes | Which endpoint to call (180 options, grouped by platform). |
 | **URL** | most ops | Video / reel / post / channel / profile / playlist / music URL. |
 | **Search query** | search ops | Keyword or hashtag (min 2 chars). |
 | **Limit** | list ops | Max items to return (billed per result). |

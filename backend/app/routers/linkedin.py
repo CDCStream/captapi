@@ -213,6 +213,51 @@ async def linkedin_post_details(
         return ApiResponse(data=data)
 
 
+@router.get("/post-transcript", summary="LinkedIn post transcript / text extraction")
+async def linkedin_post_transcript(
+    url: str = Query(..., description="LinkedIn post/activity URL"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    if "linkedin.com" not in (url or ""):
+        raise HTTPException(status_code=400, detail="Invalid LinkedIn post URL")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/linkedin/post-transcript",
+        platform="linkedin",
+        resource_url=url,
+        base_credits=CREDIT_DETAILS,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_LINKEDIN_POST,
+                {"post_urls": [url]},
+                max_items=1,
+            )
+            post = _normalize_post(_first(items))
+            text = (post.get("text") or "").strip()
+            if not text:
+                raise HTTPException(status_code=422, detail="No transcript text available for this LinkedIn post")
+            return {
+                "platform": "linkedin",
+                "url": post.get("url") or url,
+                "transcript": text,
+                "transcriptSegments": [{"text": text, "start": 0, "duration": 0, "timestamp": "00:00"}],
+                "wordCount": len(text.split()),
+                "segments": 1,
+                "author": post.get("author"),
+                "publishedAt": post.get("publishedAt"),
+            }
+
+        data = await cached_or_run(
+            endpoint="linkedin.post-transcript",
+            params={"url": url},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
 @router.get("/company-posts", summary="LinkedIn company posts")
 async def linkedin_company_posts(
     url: str = Query(..., description="LinkedIn company URL, e.g. https://linkedin.com/company/slug"),

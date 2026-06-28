@@ -138,6 +138,54 @@ async def twitter_tweet_details(
         return ApiResponse(data=data)
 
 
+@router.get("/transcript", summary="Twitter/X tweet transcript / text extraction")
+async def twitter_transcript(
+    url: str = Query(..., description="Public tweet URL, e.g. https://x.com/user/status/ID"),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    if not extract_tweet_id(url):
+        raise HTTPException(status_code=400, detail="Invalid tweet URL")
+    settings = get_settings()
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/twitter/transcript",
+        platform="twitter",
+        resource_url=url,
+        base_credits=CREDIT_TWEET_DETAILS,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_TWITTER_TWEET,
+                {"startUrls": [url], "maxItems": 1},
+                max_items=1,
+            )
+            if not items:
+                raise HTTPException(status_code=404, detail="Tweet not found")
+            tweet = _normalize_tweet(items[0])
+            text = (tweet.get("text") or "").strip()
+            if not text:
+                raise HTTPException(status_code=422, detail="No transcript text available for this tweet")
+            return {
+                "platform": "twitter",
+                "url": tweet.get("url") or url,
+                "tweetId": tweet.get("id"),
+                "transcript": text,
+                "transcriptSegments": [{"text": text, "start": 0, "duration": 0, "timestamp": "00:00"}],
+                "wordCount": len(text.split()),
+                "segments": 1,
+                "author": tweet.get("author"),
+                "publishedAt": tweet.get("publishedAt"),
+            }
+
+        data = await cached_or_run(
+            endpoint="twitter.transcript",
+            params={"url": url},
+            runner=_run,
+            ctx=ctx,
+        )
+        return ApiResponse(data=data)
+
+
 @router.get("/profile", summary="Twitter/X profile details & stats")
 async def twitter_profile(
     url: str = Query(..., description="Profile URL or @handle, e.g. https://x.com/username"),

@@ -164,6 +164,28 @@
     ]
   },
   {
+    "tool": "youtube_playlist",
+    "platform": "youtube",
+    "name": "YouTube Playlist",
+    "path": "/v1/youtube/playlist",
+    "credits": 50,
+    "summary": "Playlist metadata plus videos from a YouTube playlist.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
     "tool": "youtube_video_download",
     "platform": "youtube",
     "name": "YouTube Video Download",
@@ -284,6 +306,28 @@
     ]
   },
   {
+    "tool": "youtube_trending_shorts",
+    "platform": "youtube",
+    "name": "YouTube Trending Shorts",
+    "path": "/v1/youtube/trending-shorts",
+    "credits": 20,
+    "summary": "Discover trending YouTube Shorts by seed keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": false,
+        "description": "Seed keyword for trending Shorts. Default trending."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
     "tool": "youtube_channel_streams",
     "platform": "youtube",
     "name": "YouTube Channel Streams",
@@ -400,6 +444,22 @@
     ]
   },
   {
+    "tool": "youtube_community_post_details",
+    "platform": "youtube",
+    "name": "YouTube Community Post Details",
+    "path": "/v1/youtube/community-post-details",
+    "credits": 1,
+    "summary": "Details for a single YouTube community post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube community post URL."
+      }
+    ]
+  },
+  {
     "tool": "youtube_video_sponsors",
     "platform": "youtube",
     "name": "YouTube Video Sponsors",
@@ -502,6 +562,38 @@
     ]
   },
   {
+    "tool": "tiktok_profile_region",
+    "platform": "tiktok",
+    "name": "TikTok Profile Region",
+    "path": "/v1/tiktok/profile-region",
+    "credits": 1,
+    "summary": "Region and language signals for a TikTok profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_audience_demographics",
+    "platform": "tiktok",
+    "name": "TikTok Audience Demographics",
+    "path": "/v1/tiktok/audience-demographics",
+    "credits": 4,
+    "summary": "Audience and demographic signals for a TikTok profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+      }
+    ]
+  },
+  {
     "tool": "tiktok_search",
     "platform": "tiktok",
     "name": "TikTok Search",
@@ -520,6 +612,40 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_search_suggestions",
+    "platform": "tiktok",
+    "name": "TikTok Search Suggestions",
+    "path": "/v1/tiktok/search-suggestions",
+    "credits": 14,
+    "summary": "TikTok search/autocomplete suggestions for a seed keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Seed keyword for autocomplete suggestions."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "Two-letter ISO country code. Default US."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
       }
     ]
   },
@@ -798,6 +924,56 @@
     ]
   },
   {
+    "tool": "tiktok_live_info",
+    "platform": "tiktok",
+    "name": "TikTok Live Info",
+    "path": "/v1/tiktok/live-info",
+    "credits": 1,
+    "summary": "Live room details for a TikTok creator.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_popular_creators",
+    "platform": "tiktok",
+    "name": "TikTok Popular Creators",
+    "path": "/v1/tiktok/popular-creators",
+    "credits": 14,
+    "summary": "Popular TikTok creators by country and ranking mode.",
+    "params": [
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "Two-letter ISO country code. Default US."
+      },
+      {
+        "name": "sort",
+        "type": "string",
+        "required": false,
+        "description": "follower, engagement, or popularity. Default follower."
+      },
+      {
+        "name": "follower_count",
+        "type": "string",
+        "required": false,
+        "description": "Optional range: 10k-100k, 100k-1m, 1m-10m, >10m."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
     "tool": "instagram_transcript",
     "platform": "instagram",
     "name": "Instagram Transcript",
@@ -950,6 +1126,28 @@
     ]
   },
   {
+    "tool": "instagram_trending_reels",
+    "platform": "instagram",
+    "name": "Instagram Trending Reels",
+    "path": "/v1/instagram/trending-reels",
+    "credits": 12,
+    "summary": "Trending Instagram Reels / Explore posts by country.",
+    "params": [
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "Country name for Explore localization. Default United States."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
     "tool": "instagram_video_download",
     "platform": "instagram",
     "name": "Instagram Video Download",
@@ -1000,6 +1198,28 @@
         "type": "string",
         "required": true,
         "description": "Instagram audio/music page URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_reels_by_audio_id",
+    "platform": "instagram",
+    "name": "Instagram Reels By Audio ID",
+    "path": "/v1/instagram/reels-by-audio-id",
+    "credits": 18,
+    "summary": "Posts/Reels using an Instagram audio ID.",
+    "params": [
+      {
+        "name": "audio_id",
+        "type": "string",
+        "required": true,
+        "description": "Instagram audio/music ID or full audio URL."
       },
       {
         "name": "limit",
@@ -1338,6 +1558,28 @@
     ]
   },
   {
+    "tool": "facebook_marketplace_location_search",
+    "platform": "facebook",
+    "name": "Facebook Marketplace Location Search",
+    "path": "/v1/facebook/marketplace-location-search",
+    "credits": 1,
+    "summary": "Find Facebook Marketplace location candidates for a city or place query.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "City/place search query, e.g. Austin."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 10, max 50. Billed per result."
+      }
+    ]
+  },
+  {
     "tool": "facebook_event_search",
     "platform": "facebook",
     "name": "Facebook Event Search",
@@ -1398,6 +1640,28 @@
     ]
   },
   {
+    "tool": "facebook_profile_events",
+    "platform": "facebook",
+    "name": "Facebook Profile Events",
+    "path": "/v1/facebook/profile-events",
+    "credits": 40,
+    "summary": "Events from a Facebook profile or page.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook profile or page URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
     "tool": "facebook_marketplace_item",
     "platform": "facebook",
     "name": "Facebook Marketplace Item",
@@ -1420,6 +1684,22 @@
     "path": "/v1/twitter/tweet-details",
     "credits": 1,
     "summary": "Metadata + engagement stats for a tweet.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public tweet URL, e.g. https://x.com/user/status/ID."
+      }
+    ]
+  },
+  {
+    "tool": "twitter_transcript",
+    "platform": "twitter",
+    "name": "Twitter/X Transcript",
+    "path": "/v1/twitter/transcript",
+    "credits": 1,
+    "summary": "Extract tweet text as transcript text.",
     "params": [
       {
         "name": "url",
@@ -1584,6 +1864,28 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "reddit_post_transcript",
+    "platform": "reddit",
+    "name": "Reddit Post Transcript",
+    "path": "/v1/reddit/post-transcript",
+    "credits": 20,
+    "summary": "Extract Reddit post text and top comments as a discussion transcript.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/..."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 200. Billed per result."
       }
     ]
   },
@@ -1948,6 +2250,22 @@
     "path": "/v1/linkedin/post-details",
     "credits": 1,
     "summary": "Metadata + engagement for a LinkedIn post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "LinkedIn post or activity URL."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_post_transcript",
+    "platform": "linkedin",
+    "name": "LinkedIn Post Transcript",
+    "path": "/v1/linkedin/post-transcript",
+    "credits": 1,
+    "summary": "Extract post text as a transcript for a LinkedIn post.",
     "params": [
       {
         "name": "url",
@@ -2430,6 +2748,623 @@
     ]
   },
   {
+    "tool": "google_search",
+    "platform": "google",
+    "name": "Google Search",
+    "path": "/v1/google/search",
+    "credits": 5,
+    "summary": "Google SERP organic search results by keyword, country, and language.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "Two-letter country code. Default us."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Google language code. Default en."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 10, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "twitch_profile",
+    "platform": "twitch",
+    "name": "Twitch Profile",
+    "path": "/v1/twitch/profile",
+    "credits": 1,
+    "summary": "Twitch channel profile, followers, live status and recent metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud."
+      }
+    ]
+  },
+  {
+    "tool": "twitch_user_videos",
+    "platform": "twitch",
+    "name": "Twitch User Videos",
+    "path": "/v1/twitch/user-videos",
+    "credits": 12,
+    "summary": "Recent Twitch VODs for a channel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 30. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "twitch_user_schedule",
+    "platform": "twitch",
+    "name": "Twitch User Schedule",
+    "path": "/v1/twitch/user-schedule",
+    "credits": 1,
+    "summary": "Upcoming Twitch schedule data when exposed on the public channel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud."
+      }
+    ]
+  },
+  {
+    "tool": "twitch_clip",
+    "platform": "twitch",
+    "name": "Twitch Clip",
+    "path": "/v1/twitch/clip",
+    "credits": 1,
+    "summary": "Twitch clip metadata from a clip URL or channel fallback.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Twitch clip URL, channel URL, or username."
+      }
+    ]
+  },
+  {
+    "tool": "spotify_artist",
+    "platform": "spotify",
+    "name": "Spotify Artist",
+    "path": "/v1/spotify/artist",
+    "credits": 2,
+    "summary": "Spotify artist details, followers and listener metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Spotify URL, URI, or ID."
+      }
+    ]
+  },
+  {
+    "tool": "spotify_track",
+    "platform": "spotify",
+    "name": "Spotify Track",
+    "path": "/v1/spotify/track",
+    "credits": 1,
+    "summary": "Spotify track metadata, artists, album and play count when available.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Spotify URL, URI, or ID."
+      }
+    ]
+  },
+  {
+    "tool": "spotify_album",
+    "platform": "spotify",
+    "name": "Spotify Album",
+    "path": "/v1/spotify/album",
+    "credits": 2,
+    "summary": "Spotify album metadata and track count.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Spotify URL, URI, or ID."
+      }
+    ]
+  },
+  {
+    "tool": "spotify_search",
+    "platform": "spotify",
+    "name": "Spotify Search",
+    "path": "/v1/spotify/search",
+    "credits": 8,
+    "summary": "Search Spotify tracks, albums, artists, podcasts or episodes.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "required": false,
+        "description": "tracks, albums, artists, podcasts, or episodes. Default tracks."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 50. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "spotify_podcast",
+    "platform": "spotify",
+    "name": "Spotify Podcast",
+    "path": "/v1/spotify/podcast",
+    "credits": 2,
+    "summary": "Spotify podcast/show details and episode summary metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Spotify URL, URI, or ID."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 50. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "spotify_podcast_episodes",
+    "platform": "spotify",
+    "name": "Spotify Podcast Episodes",
+    "path": "/v1/spotify/podcast-episodes",
+    "credits": 8,
+    "summary": "List episodes for a Spotify podcast/show.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Spotify URL, URI, or ID."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 50. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "soundcloud_artist",
+    "platform": "soundcloud",
+    "name": "SoundCloud Artist",
+    "path": "/v1/soundcloud/artist",
+    "credits": 1,
+    "summary": "SoundCloud artist profile metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "SoundCloud artist profile URL or username."
+      }
+    ]
+  },
+  {
+    "tool": "soundcloud_artist_tracks",
+    "platform": "soundcloud",
+    "name": "SoundCloud Artist Tracks",
+    "path": "/v1/soundcloud/artist-tracks",
+    "credits": 10,
+    "summary": "Tracks from a SoundCloud artist profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "SoundCloud artist profile URL or username."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "soundcloud_track",
+    "platform": "soundcloud",
+    "name": "SoundCloud Track",
+    "path": "/v1/soundcloud/track",
+    "credits": 1,
+    "summary": "SoundCloud track metadata and engagement stats.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "SoundCloud track URL."
+      }
+    ]
+  },
+  {
+    "tool": "linktree_page",
+    "platform": "linktree",
+    "name": "Linktree Page",
+    "path": "/v1/linktree/page",
+    "credits": 1,
+    "summary": "Public Linktree profile links, socials and profile metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Linktree profile URL or username."
+      }
+    ]
+  },
+  {
+    "tool": "snapchat_user_profile",
+    "platform": "snapchat",
+    "name": "Snapchat User Profile",
+    "path": "/v1/snapchat/user-profile",
+    "credits": 2,
+    "summary": "Public Snapchat profile metadata, subscriber count, avatar and highlights.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Snapchat username or profile URL."
+      }
+    ]
+  },
+  {
+    "tool": "truth_social_profile",
+    "platform": "truth_social",
+    "name": "Truth Social Profile",
+    "path": "/v1/truth-social/profile",
+    "credits": 1,
+    "summary": "Public Truth Social profile metadata and stats.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Truth Social profile URL or @username."
+      }
+    ]
+  },
+  {
+    "tool": "truth_social_user_posts",
+    "platform": "truth_social",
+    "name": "Truth Social User Posts",
+    "path": "/v1/truth-social/user-posts",
+    "credits": 2,
+    "summary": "Recent public posts from a Truth Social profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Truth Social profile URL or @username."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 80. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "truth_social_post",
+    "platform": "truth_social",
+    "name": "Truth Social Post",
+    "path": "/v1/truth-social/post",
+    "credits": 1,
+    "summary": "Truth Social post metadata, text, media and engagement.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Truth Social post URL or post ID."
+      }
+    ]
+  },
+  {
+    "tool": "kick_clip",
+    "platform": "kick",
+    "name": "Kick Clip",
+    "path": "/v1/kick/clip",
+    "credits": 3,
+    "summary": "Kick clip metadata from a clip URL or recent channel clips.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Kick clip URL, channel URL, or channel username."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 30, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "amazon_shop_page",
+    "platform": "amazon_shop",
+    "name": "Amazon Shop Page",
+    "path": "/v1/amazon-shop/page",
+    "credits": 20,
+    "summary": "Amazon seller storefront metadata and product listings.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Amazon seller storefront URL, seller profile URL, or seller ID."
+      },
+      {
+        "name": "marketplace",
+        "type": "string",
+        "required": false,
+        "description": "Amazon marketplace code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "age_gender_get",
+    "platform": "age_gender",
+    "name": "Age and Gender",
+    "path": "/v1/age-gender",
+    "credits": 1,
+    "summary": "Predict age, gender and nationality signals from first names.",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": "First name, or fallback when names is omitted."
+      },
+      {
+        "name": "names",
+        "type": "string",
+        "required": false,
+        "description": "Optional comma-separated list of names."
+      }
+    ]
+  },
+  {
+    "tool": "account_balance",
+    "platform": "account",
+    "name": "Credit Balance",
+    "path": "/v1/account/balance",
+    "credits": 0,
+    "summary": "Get current Captapi credit balance and plan limits.",
+    "params": []
+  },
+  {
+    "tool": "account_request_history",
+    "platform": "account",
+    "name": "Request History",
+    "path": "/v1/account/request-history",
+    "credits": 0,
+    "summary": "List recent Captapi API requests for the current key owner.",
+    "params": [
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "account_daily_usage",
+    "platform": "account",
+    "name": "Daily Usage",
+    "path": "/v1/account/daily-usage",
+    "credits": 0,
+    "summary": "Daily request and credit usage summary.",
+    "params": [
+      {
+        "name": "days",
+        "type": "number",
+        "required": false,
+        "description": "Number of days to include. Default 30, max 365."
+      }
+    ]
+  },
+  {
+    "tool": "account_most_used_routes",
+    "platform": "account",
+    "name": "Most Used Routes",
+    "path": "/v1/account/most-used-routes",
+    "credits": 0,
+    "summary": "Most used API routes by request count and credits.",
+    "params": [
+      {
+        "name": "days",
+        "type": "number",
+        "required": false,
+        "description": "Number of days to include. Default 30, max 365."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "kwai_profile",
+    "platform": "kwai",
+    "name": "Kwai Profile",
+    "path": "/v1/kwai/profile",
+    "credits": 2,
+    "summary": "Kwai/Kuaishou public profile details and stats.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Kwai/Kuaishou profile URL or user ID."
+      }
+    ]
+  },
+  {
+    "tool": "kwai_user_posts",
+    "platform": "kwai",
+    "name": "Kwai User Posts",
+    "path": "/v1/kwai/user-posts",
+    "credits": 16,
+    "summary": "Recent Kwai/Kuaishou videos from a profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Kwai/Kuaishou profile URL or user ID."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "kwai_post",
+    "platform": "kwai",
+    "name": "Kwai Post",
+    "path": "/v1/kwai/post",
+    "credits": 2,
+    "summary": "Kwai/Kuaishou post metadata and engagement.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Kwai/Kuaishou post URL or video/photo ID."
+      }
+    ]
+  },
+  {
+    "tool": "komi_page",
+    "platform": "komi",
+    "name": "Komi Page",
+    "path": "/v1/komi/page",
+    "credits": 1,
+    "summary": "Public Komi page links and profile metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Komi page URL or username."
+      }
+    ]
+  },
+  {
+    "tool": "pillar_page",
+    "platform": "pillar",
+    "name": "Pillar Page",
+    "path": "/v1/pillar/page",
+    "credits": 1,
+    "summary": "Public Pillar page links and profile metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Pillar page URL or username."
+      }
+    ]
+  },
+  {
+    "tool": "linkbio_page",
+    "platform": "linkbio",
+    "name": "Linkbio Page",
+    "path": "/v1/linkbio/page",
+    "credits": 1,
+    "summary": "Public Linkbio page links and profile metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Linkbio page URL or username."
+      }
+    ]
+  },
+  {
+    "tool": "linkme_profile",
+    "platform": "linkme",
+    "name": "Linkme Profile",
+    "path": "/v1/linkme/profile",
+    "credits": 1,
+    "summary": "Public Linkme profile links and metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Linkme profile URL or username."
+      }
+    ]
+  },
+  {
     "tool": "facebook_ad_library_search",
     "platform": "ad_library",
     "name": "Facebook Ad Library Search",
@@ -2526,6 +3461,22 @@
         "type": "string",
         "required": true,
         "description": "Meta Ad Library ad URL."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_ad_transcript",
+    "platform": "ad_library",
+    "name": "Facebook Ad Transcript",
+    "path": "/v1/ad-library/facebook/ad-transcript",
+    "credits": 2,
+    "summary": "Extract creative text from a Meta/Facebook ad as transcript text.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Meta Ad Library ad URL or ad ID."
       }
     ]
   },

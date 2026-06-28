@@ -155,6 +155,23 @@
           "scope": null
         }
       },
+      "youtubePlaylist": {
+        "label": "YouTube Playlist",
+        "description": "Playlist metadata plus videos from a YouTube playlist. Costs ~50 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubePlaylist/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubePlaylist/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
       "youtubeVideoDownload": {
         "label": "YouTube Video Download",
         "description": "Direct download URLs for a YouTube video. Costs ~3 credits (cached results free, failures never charged).",
@@ -257,6 +274,23 @@
           "scope": null
         }
       },
+      "youtubeTrendingShorts": {
+        "label": "YouTube Trending Shorts",
+        "description": "Discover trending YouTube Shorts by seed keyword. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeTrendingShorts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeTrendingShorts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
       "youtubeChannelStreams": {
         "label": "YouTube Channel Streams",
         "description": "List a channel's live/past streams. Costs ~20 credits (cached results free, failures never charged).",
@@ -337,6 +371,23 @@
           "communication": "modules/youtubeCommunityPosts/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/youtubeCommunityPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "youtubeCommunityPostDetails": {
+        "label": "YouTube Community Post Details",
+        "description": "Details for a single YouTube community post. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/youtubeCommunityPostDetails/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/youtubeCommunityPostDetails/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null
@@ -444,6 +495,40 @@
           "scope": null
         }
       },
+      "tiktokProfileRegion": {
+        "label": "TikTok Profile Region",
+        "description": "Region and language signals for a TikTok profile. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokProfileRegion/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokProfileRegion/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokAudienceDemographics": {
+        "label": "TikTok Audience Demographics",
+        "description": "Audience and demographic signals for a TikTok profile. Costs ~4 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokAudienceDemographics/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokAudienceDemographics/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
       "tiktokSearch": {
         "label": "TikTok Search",
         "description": "Search TikTok videos by keyword/hashtag. Costs ~14 credits (cached results free, failures never charged).",
@@ -456,6 +541,23 @@
           "communication": "modules/tiktokSearch/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/tiktokSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokSearchSuggestions": {
+        "label": "TikTok Search Suggestions",
+        "description": "TikTok search/autocomplete suggestions for a seed keyword. Costs ~14 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokSearchSuggestions/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokSearchSuggestions/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null
@@ -682,6 +784,40 @@
           "scope": null
         }
       },
+      "tiktokLiveInfo": {
+        "label": "TikTok Live Info",
+        "description": "Live room details for a TikTok creator. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokLiveInfo/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokLiveInfo/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokPopularCreators": {
+        "label": "TikTok Popular Creators",
+        "description": "Popular TikTok creators by country and ranking mode. Costs ~14 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokPopularCreators/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokPopularCreators/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
       "instagramTranscript": {
         "label": "Instagram Transcript",
         "description": "Transcript of an Instagram Reel. Costs ~2 credits (cached results free, failures never charged).",
@@ -818,6 +954,23 @@
           "scope": null
         }
       },
+      "instagramTrendingReels": {
+        "label": "Instagram Trending Reels",
+        "description": "Trending Instagram Reels / Explore posts by country. Costs ~12 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramTrendingReels/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramTrendingReels/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
       "instagramVideoDownload": {
         "label": "Instagram Video Download",
         "description": "Direct video URL for an Instagram Reel. Costs ~3 credits (cached results free, failures never charged).",
@@ -864,6 +1017,23 @@
           "communication": "modules/instagramMusicPosts/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/instagramMusicPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "instagramReelsByAudioId": {
+        "label": "Instagram Reels By Audio ID",
+        "description": "Posts/Reels using an Instagram audio ID. Costs ~18 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/instagramReelsByAudioId/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/instagramReelsByAudioId/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null
@@ -1141,6 +1311,23 @@
           "scope": null
         }
       },
+      "facebookMarketplaceLocationSearch": {
+        "label": "Facebook Marketplace Location Search",
+        "description": "Find Facebook Marketplace location candidates for a city or place query. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookMarketplaceLocationSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookMarketplaceLocationSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
       "facebookEventSearch": {
         "label": "Facebook Event Search",
         "description": "Search Facebook events by topic and/or location. Costs ~40 credits (cached results free, failures never charged).",
@@ -1192,6 +1379,23 @@
           "scope": null
         }
       },
+      "facebookProfileEvents": {
+        "label": "Facebook Profile Events",
+        "description": "Events from a Facebook profile or page. Costs ~40 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookProfileEvents/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookProfileEvents/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
       "facebookMarketplaceItem": {
         "label": "Facebook Marketplace Item",
         "description": "Details for a single Facebook Marketplace listing. Costs ~1 credit (cached results free, failures never charged).",
@@ -1221,6 +1425,23 @@
           "communication": "modules/twitterTweetDetails/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/twitterTweetDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "twitterTranscript": {
+        "label": "Twitter/X Transcript",
+        "description": "Extract tweet text as transcript text. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/twitterTranscript/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/twitterTranscript/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null
@@ -1357,6 +1578,23 @@
           "communication": "modules/redditPostComments/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/redditPostComments/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "redditPostTranscript": {
+        "label": "Reddit Post Transcript",
+        "description": "Extract Reddit post text and top comments as a discussion transcript. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/redditPostTranscript/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/redditPostTranscript/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null
@@ -1680,6 +1918,23 @@
           "communication": "modules/linkedinPostDetails/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/linkedinPostDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "linkedinPostTranscript": {
+        "label": "LinkedIn Post Transcript",
+        "description": "Extract post text as a transcript for a LinkedIn post. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/linkedinPostTranscript/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/linkedinPostTranscript/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null
@@ -2059,6 +2314,567 @@
           "scope": null
         }
       },
+      "googleSearch": {
+        "label": "Google Search",
+        "description": "Google SERP organic search results by keyword, country, and language. Costs ~5 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/googleSearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/googleSearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "twitchProfile": {
+        "label": "Twitch Profile",
+        "description": "Twitch channel profile, followers, live status and recent metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/twitchProfile/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/twitchProfile/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "twitchUserVideos": {
+        "label": "Twitch User Videos",
+        "description": "Recent Twitch VODs for a channel. Costs ~12 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/twitchUserVideos/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/twitchUserVideos/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "twitchUserSchedule": {
+        "label": "Twitch User Schedule",
+        "description": "Upcoming Twitch schedule data when exposed on the public channel. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/twitchUserSchedule/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/twitchUserSchedule/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "twitchClip": {
+        "label": "Twitch Clip",
+        "description": "Twitch clip metadata from a clip URL or channel fallback. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/twitchClip/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/twitchClip/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "spotifyArtist": {
+        "label": "Spotify Artist",
+        "description": "Spotify artist details, followers and listener metadata. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/spotifyArtist/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/spotifyArtist/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "spotifyTrack": {
+        "label": "Spotify Track",
+        "description": "Spotify track metadata, artists, album and play count when available. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/spotifyTrack/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/spotifyTrack/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "spotifyAlbum": {
+        "label": "Spotify Album",
+        "description": "Spotify album metadata and track count. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/spotifyAlbum/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/spotifyAlbum/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "spotifySearch": {
+        "label": "Spotify Search",
+        "description": "Search Spotify tracks, albums, artists, podcasts or episodes. Costs ~8 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/spotifySearch/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/spotifySearch/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "spotifyPodcast": {
+        "label": "Spotify Podcast",
+        "description": "Spotify podcast/show details and episode summary metadata. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/spotifyPodcast/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/spotifyPodcast/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "spotifyPodcastEpisodes": {
+        "label": "Spotify Podcast Episodes",
+        "description": "List episodes for a Spotify podcast/show. Costs ~8 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/spotifyPodcastEpisodes/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/spotifyPodcastEpisodes/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "soundcloudArtist": {
+        "label": "SoundCloud Artist",
+        "description": "SoundCloud artist profile metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/soundcloudArtist/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/soundcloudArtist/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "soundcloudArtistTracks": {
+        "label": "SoundCloud Artist Tracks",
+        "description": "Tracks from a SoundCloud artist profile. Costs ~10 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/soundcloudArtistTracks/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/soundcloudArtistTracks/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "soundcloudTrack": {
+        "label": "SoundCloud Track",
+        "description": "SoundCloud track metadata and engagement stats. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/soundcloudTrack/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/soundcloudTrack/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "linktreePage": {
+        "label": "Linktree Page",
+        "description": "Public Linktree profile links, socials and profile metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/linktreePage/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/linktreePage/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "snapchatUserProfile": {
+        "label": "Snapchat User Profile",
+        "description": "Public Snapchat profile metadata, subscriber count, avatar and highlights. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/snapchatUserProfile/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/snapchatUserProfile/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "truthSocialProfile": {
+        "label": "Truth Social Profile",
+        "description": "Public Truth Social profile metadata and stats. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/truthSocialProfile/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/truthSocialProfile/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "truthSocialUserPosts": {
+        "label": "Truth Social User Posts",
+        "description": "Recent public posts from a Truth Social profile. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/truthSocialUserPosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/truthSocialUserPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "truthSocialPost": {
+        "label": "Truth Social Post",
+        "description": "Truth Social post metadata, text, media and engagement. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/truthSocialPost/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/truthSocialPost/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "kickClip": {
+        "label": "Kick Clip",
+        "description": "Kick clip metadata from a clip URL or recent channel clips. Costs ~3 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/kickClip/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/kickClip/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "amazonShopPage": {
+        "label": "Amazon Shop Page",
+        "description": "Amazon seller storefront metadata and product listings. Costs ~20 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/amazonShopPage/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/amazonShopPage/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "ageGenderGet": {
+        "label": "Age and Gender",
+        "description": "Predict age, gender and nationality signals from first names. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/ageGenderGet/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/ageGenderGet/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "accountBalance": {
+        "label": "Credit Balance",
+        "description": "Get current Captapi credit balance and plan limits. Costs ~0 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/accountBalance/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/accountBalance/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "accountRequestHistory": {
+        "label": "Request History",
+        "description": "List recent Captapi API requests for the current key owner. Costs ~0 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/accountRequestHistory/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/accountRequestHistory/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "accountDailyUsage": {
+        "label": "Daily Usage",
+        "description": "Daily request and credit usage summary. Costs ~0 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/accountDailyUsage/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/accountDailyUsage/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "accountMostUsedRoutes": {
+        "label": "Most Used Routes",
+        "description": "Most used API routes by request count and credits. Costs ~0 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/accountMostUsedRoutes/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/accountMostUsedRoutes/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "kwaiProfile": {
+        "label": "Kwai Profile",
+        "description": "Kwai/Kuaishou public profile details and stats. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/kwaiProfile/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/kwaiProfile/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "kwaiUserPosts": {
+        "label": "Kwai User Posts",
+        "description": "Recent Kwai/Kuaishou videos from a profile. Costs ~16 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/kwaiUserPosts/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/kwaiUserPosts/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "kwaiPost": {
+        "label": "Kwai Post",
+        "description": "Kwai/Kuaishou post metadata and engagement. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/kwaiPost/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/kwaiPost/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "komiPage": {
+        "label": "Komi Page",
+        "description": "Public Komi page links and profile metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/komiPage/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/komiPage/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "pillarPage": {
+        "label": "Pillar Page",
+        "description": "Public Pillar page links and profile metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/pillarPage/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/pillarPage/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "linkbioPage": {
+        "label": "Linkbio Page",
+        "description": "Public Linkbio page links and profile metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/linkbioPage/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/linkbioPage/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "linkmeProfile": {
+        "label": "Linkme Profile",
+        "description": "Public Linkme profile links and metadata. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/linkmeProfile/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/linkmeProfile/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
       "facebookAdLibrarySearch": {
         "label": "Facebook Ad Library Search",
         "description": "Search Meta/Facebook ads by keyword. Costs ~20 credits (cached results free, failures never charged).",
@@ -2122,6 +2938,23 @@
           "communication": "modules/facebookAdLibraryAdDetails/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/facebookAdLibraryAdDetails/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "facebookAdLibraryAdTranscript": {
+        "label": "Facebook Ad Transcript",
+        "description": "Extract creative text from a Meta/Facebook ad as transcript text. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/facebookAdLibraryAdTranscript/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/facebookAdLibraryAdTranscript/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null

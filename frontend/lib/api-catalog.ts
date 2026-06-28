@@ -26,7 +26,23 @@ export type PlatformId =
   | "rumble"
   | "tiktok_shop"
   | "github"
-  | "ad_library";
+  | "ad_library"
+  | "google"
+  | "twitch"
+  | "spotify"
+  | "soundcloud"
+  | "linktree"
+  | "snapchat"
+  | "truth_social"
+  | "kick"
+  | "amazon_shop"
+  | "age_gender"
+  | "account"
+  | "kwai"
+  | "komi"
+  | "pillar"
+  | "linkbio"
+  | "linkme";
 
 export type Category =
   | "transcript"
@@ -108,7 +124,12 @@ export interface PlatformGroup {
     | "rumble"
     | "shoppingBag"
     | "github"
-    | "megaphone";
+    | "megaphone"
+    | "video"
+    | "cloud"
+    | "search"
+    | "link"
+    | "ghost";
   /** brand color class for the icon */
   color: string;
   exampleUrl: string;
@@ -146,6 +167,22 @@ const PLATFORM_LABEL: Record<PlatformId, string> = {
   tiktok_shop: "TikTok Shop",
   github: "GitHub",
   ad_library: "Ad Library",
+  google: "Google",
+  twitch: "Twitch",
+  spotify: "Spotify",
+  soundcloud: "SoundCloud",
+  linktree: "Linktree",
+  snapchat: "Snapchat",
+  truth_social: "Truth Social",
+  kick: "Kick",
+  amazon_shop: "Amazon Shop",
+  age_gender: "Age and Gender",
+  account: "Account",
+  kwai: "Kwai",
+  komi: "Komi",
+  pillar: "Pillar",
+  linkbio: "Linkbio",
+  linkme: "Linkme",
 };
 
 // ---------------------------------------------------------------------------
@@ -163,17 +200,20 @@ const YOUTUBE: Spec[] = [
   { slug: "youtube-search", name: "YouTube Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/youtube/search", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-channel-videos", name: "YouTube Channel Videos API", shortName: "Channel Videos", category: "list", method: "GET", path: "/v1/youtube/channel-videos", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-playlist-videos", name: "YouTube Playlist Videos API", shortName: "Playlist Videos", category: "list", method: "GET", path: "/v1/youtube/playlist-videos", credits: 50, creditsPerResult: 1 },
+  { slug: "youtube-playlist", name: "YouTube Playlist API", shortName: "Playlist", category: "list", method: "GET", path: "/v1/youtube/playlist", credits: 50, creditsPerResult: 1 },
   { slug: "youtube-video-download", name: "YouTube Video Download API", shortName: "Video Download", category: "download", method: "GET", path: "/v1/youtube/video-download", credits: 3 },
   { slug: "youtube-shorts-transcript", name: "YouTube Shorts Transcript API", shortName: "Shorts Transcript", category: "transcript", method: "GET", path: "/v1/youtube/shorts/transcript", credits: 2 },
   { slug: "youtube-shorts-summarizer", name: "YouTube Shorts Summarizer API", shortName: "Shorts Summarizer", category: "summarize", method: "GET", path: "/v1/youtube/shorts/summarize", credits: 4 },
   { slug: "youtube-shorts-stats", name: "YouTube Shorts Stats API", shortName: "Shorts Stats", category: "details", method: "GET", path: "/v1/youtube/shorts/video-details", credits: 1 },
   { slug: "youtube-shorts-comments", name: "YouTube Shorts Comments API", shortName: "Shorts Comments", category: "comments", method: "GET", path: "/v1/youtube/shorts/comments", credits: 20, creditsPerResult: 0.4 },
   { slug: "youtube-channel-shorts", name: "YouTube Channel Shorts API", shortName: "Channel Shorts", category: "list", method: "GET", path: "/v1/youtube/channel-shorts", credits: 20, creditsPerResult: 1 },
+  { slug: "youtube-trending-shorts", name: "YouTube Trending Shorts API", shortName: "Trending Shorts", category: "list", method: "GET", path: "/v1/youtube/trending-shorts", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-channel-streams", name: "YouTube Channel Streams API", shortName: "Channel Streams", category: "list", method: "GET", path: "/v1/youtube/channel-streams", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-hashtag-search", name: "YouTube Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/youtube/hashtag-search", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-comment-replies", name: "YouTube Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/youtube/comment-replies", credits: 20, creditsPerResult: 0.4 },
   { slug: "youtube-channel-playlists", name: "YouTube Channel Playlists API", shortName: "Channel Playlists", category: "list", method: "GET", path: "/v1/youtube/channel-playlists", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-community-posts", name: "YouTube Community Posts API", shortName: "Community Posts", category: "list", method: "GET", path: "/v1/youtube/community-posts", credits: 10, creditsPerResult: 0.5 },
+  { slug: "youtube-community-post-details", name: "YouTube Community Post Details API", shortName: "Community Post Details", category: "details", method: "GET", path: "/v1/youtube/community-post-details", credits: 1 },
   { slug: "youtube-video-sponsors", name: "YouTube Video Sponsors API", shortName: "Video Sponsors", category: "details", method: "GET", path: "/v1/youtube/video-sponsors", credits: 1 },
 ];
 
@@ -183,7 +223,10 @@ const TIKTOK: Spec[] = [
   { slug: "tiktok-video-details", name: "TikTok Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/tiktok/video-details", credits: 1 },
   { slug: "tiktok-comments", name: "TikTok Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/tiktok/comments", credits: 10, creditsPerResult: 0.2 },
   { slug: "tiktok-channel-details", name: "TikTok Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/tiktok/channel-details", credits: 1 },
+  { slug: "tiktok-profile-region", name: "TikTok Profile Region API", shortName: "Profile Region", category: "channel", method: "GET", path: "/v1/tiktok/profile-region", credits: 1 },
+  { slug: "tiktok-audience-demographics", name: "TikTok Audience Demographics API", shortName: "Audience Demographics", category: "channel", method: "GET", path: "/v1/tiktok/audience-demographics", credits: 4 },
   { slug: "tiktok-search", name: "TikTok Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/tiktok/search", credits: 14, creditsPerResult: 0.7 },
+  { slug: "tiktok-search-suggestions", name: "TikTok Search Suggestions API", shortName: "Search Suggestions", category: "search", method: "GET", path: "/v1/tiktok/search-suggestions", credits: 14, creditsPerResult: 0.7 },
   { slug: "tiktok-video-download", name: "TikTok Video Download API", shortName: "Video Download", category: "download", method: "GET", path: "/v1/tiktok/video-download", credits: 3 },
   { slug: "tiktok-channel-posts", name: "TikTok Channel Posts API", shortName: "Channel Posts", category: "list", method: "GET", path: "/v1/tiktok/channel-posts", credits: 14, creditsPerResult: 0.7 },
   { slug: "tiktok-comment-replies", name: "TikTok Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/tiktok/comment-replies", credits: 50 },
@@ -197,6 +240,8 @@ const TIKTOK: Spec[] = [
   { slug: "tiktok-trending-feed", name: "TikTok Trending Feed API", shortName: "Trending Feed", category: "list", method: "GET", path: "/v1/tiktok/trending-feed", credits: 14, creditsPerResult: 0.7 },
   { slug: "tiktok-popular-hashtags", name: "TikTok Popular Hashtags API", shortName: "Popular Hashtags", category: "list", method: "GET", path: "/v1/tiktok/popular-hashtags", credits: 14, creditsPerResult: 0.7 },
   { slug: "tiktok-live", name: "TikTok Live API", shortName: "Live", category: "details", method: "GET", path: "/v1/tiktok/live", credits: 1 },
+  { slug: "tiktok-live-info", name: "TikTok Live Info API", shortName: "Live Info", category: "details", method: "GET", path: "/v1/tiktok/live-info", credits: 1 },
+  { slug: "tiktok-popular-creators", name: "TikTok Popular Creators API", shortName: "Popular Creators", category: "list", method: "GET", path: "/v1/tiktok/popular-creators", credits: 14, creditsPerResult: 0.7 },
 ];
 
 const INSTAGRAM: Spec[] = [
@@ -208,9 +253,11 @@ const INSTAGRAM: Spec[] = [
   { slug: "instagram-channel-posts", name: "Instagram Channel Posts API", shortName: "Channel Posts", category: "list", method: "GET", path: "/v1/instagram/channel-posts", credits: 12, creditsPerResult: 0.6 },
   { slug: "instagram-channel-reels", name: "Instagram Channel Reels API", shortName: "Channel Reels", category: "list", method: "GET", path: "/v1/instagram/channel-reels", credits: 12, creditsPerResult: 0.6 },
   { slug: "instagram-reels-search", name: "Instagram Reels Search API", shortName: "Reels Search", category: "search", method: "GET", path: "/v1/instagram/reels-search", credits: 12, creditsPerResult: 0.6 },
+  { slug: "instagram-trending-reels", name: "Instagram Trending Reels API", shortName: "Trending Reels", category: "list", method: "GET", path: "/v1/instagram/trending-reels", credits: 12, creditsPerResult: 0.6 },
   { slug: "instagram-video-download", name: "Instagram Video Download API", shortName: "Video Download", category: "download", method: "GET", path: "/v1/instagram/video-download", credits: 3 },
   { slug: "instagram-tagged-posts", name: "Instagram Tagged Posts API", shortName: "Tagged Posts", category: "list", method: "GET", path: "/v1/instagram/tagged-posts", credits: 18, creditsPerResult: 0.9 },
   { slug: "instagram-music-posts", name: "Instagram Music Posts API", shortName: "Music Posts", category: "list", method: "GET", path: "/v1/instagram/music-posts", credits: 18, creditsPerResult: 0.9 },
+  { slug: "instagram-reels-by-audio-id", name: "Instagram Reels By Audio ID API", shortName: "Reels By Audio ID", category: "list", method: "GET", path: "/v1/instagram/reels-by-audio-id", credits: 18, creditsPerResult: 0.9 },
   { slug: "instagram-hashtag-search", name: "Instagram Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/instagram/hashtag-search", credits: 12, creditsPerResult: 0.6 },
   { slug: "instagram-profile-search", name: "Instagram Profile Search API", shortName: "Profile Search", category: "search", method: "GET", path: "/v1/instagram/profile-search", credits: 12, creditsPerResult: 0.6 },
   { slug: "instagram-story-highlights", name: "Instagram Story Highlights API", shortName: "Story Highlights", category: "list", method: "GET", path: "/v1/instagram/story-highlights", credits: 5 },
@@ -230,14 +277,17 @@ const FACEBOOK: Spec[] = [
   { slug: "facebook-group-posts", name: "Facebook Group Posts API", shortName: "Group Posts", category: "list", method: "GET", path: "/v1/facebook/group-posts", credits: 12, creditsPerResult: 0.6 },
   { slug: "facebook-comment-replies", name: "Facebook Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/facebook/comment-replies", credits: 30, creditsPerResult: 0.6 },
   { slug: "facebook-marketplace-search", name: "Facebook Marketplace Search API", shortName: "Marketplace Search", category: "search", method: "GET", path: "/v1/facebook/marketplace-search", credits: 20, creditsPerResult: 1 },
+  { slug: "facebook-marketplace-location-search", name: "Facebook Marketplace Location Search API", shortName: "Marketplace Locations", category: "search", method: "GET", path: "/v1/facebook/marketplace-location-search", credits: 1 },
   { slug: "facebook-event-search", name: "Facebook Event Search API", shortName: "Event Search", category: "search", method: "GET", path: "/v1/facebook/event-search", credits: 40, creditsPerResult: 2 },
   { slug: "facebook-event-details", name: "Facebook Event Details API", shortName: "Event Details", category: "details", method: "GET", path: "/v1/facebook/event-details", credits: 2 },
   { slug: "facebook-profile-photos", name: "Facebook Profile Photos API", shortName: "Profile Photos", category: "list", method: "GET", path: "/v1/facebook/profile-photos", credits: 12, creditsPerResult: 0.6 },
+  { slug: "facebook-profile-events", name: "Facebook Profile Events API", shortName: "Profile Events", category: "list", method: "GET", path: "/v1/facebook/profile-events", credits: 40, creditsPerResult: 2 },
   { slug: "facebook-marketplace-item", name: "Facebook Marketplace Item API", shortName: "Marketplace Item", category: "details", method: "GET", path: "/v1/facebook/marketplace-item", credits: 1 },
 ];
 
 const TWITTER: Spec[] = [
   { slug: "twitter-tweet-details", name: "Twitter/X Tweet Details API", shortName: "Tweet Details", category: "details", method: "GET", path: "/v1/twitter/tweet-details", credits: 1 },
+  { slug: "twitter-transcript", name: "Twitter/X Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/twitter/transcript", credits: 1 },
   { slug: "twitter-profile", name: "Twitter/X Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/twitter/profile", credits: 1 },
   { slug: "twitter-user-tweets", name: "Twitter/X User Tweets API", shortName: "User Tweets", category: "list", method: "GET", path: "/v1/twitter/user-tweets", credits: 14, creditsPerResult: 0.7 },
   { slug: "twitter-search", name: "Twitter/X Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/twitter/search", credits: 14, creditsPerResult: 0.7 },
@@ -249,6 +299,7 @@ const REDDIT: Spec[] = [
   { slug: "reddit-subreddit-posts", name: "Reddit Subreddit Posts API", shortName: "Subreddit Posts", category: "list", method: "GET", path: "/v1/reddit/subreddit-posts", credits: 10, creditsPerResult: 0.4 },
   { slug: "reddit-post-details", name: "Reddit Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/reddit/post-details", credits: 1 },
   { slug: "reddit-post-comments", name: "Reddit Post Comments API", shortName: "Post Comments", category: "comments", method: "GET", path: "/v1/reddit/post-comments", credits: 20, creditsPerResult: 0.4 },
+  { slug: "reddit-post-transcript", name: "Reddit Post Transcript API", shortName: "Post Transcript", category: "transcript", method: "GET", path: "/v1/reddit/post-transcript", credits: 20, creditsPerResult: 0.4 },
   { slug: "reddit-search", name: "Reddit Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/reddit/search", credits: 10, creditsPerResult: 0.4 },
   { slug: "reddit-subreddit-details", name: "Reddit Subreddit Details API", shortName: "Subreddit Details", category: "details", method: "GET", path: "/v1/reddit/subreddit-details", credits: 1 },
   { slug: "reddit-subreddit-search", name: "Reddit Subreddit Search API", shortName: "Subreddit Search", category: "search", method: "GET", path: "/v1/reddit/subreddit-search", credits: 10, creditsPerResult: 0.4 },
@@ -280,6 +331,7 @@ const LINKEDIN: Spec[] = [
   { slug: "linkedin-profile", name: "LinkedIn Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/linkedin/profile", credits: 2 },
   { slug: "linkedin-company", name: "LinkedIn Company API", shortName: "Company", category: "channel", method: "GET", path: "/v1/linkedin/company", credits: 2 },
   { slug: "linkedin-post-details", name: "LinkedIn Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/linkedin/post-details", credits: 1 },
+  { slug: "linkedin-post-transcript", name: "LinkedIn Post Transcript API", shortName: "Post Transcript", category: "transcript", method: "GET", path: "/v1/linkedin/post-transcript", credits: 1 },
   { slug: "linkedin-company-posts", name: "LinkedIn Company Posts API", shortName: "Company Posts", category: "list", method: "GET", path: "/v1/linkedin/company-posts", credits: 16, creditsPerResult: 0.8 },
   { slug: "linkedin-search-posts", name: "LinkedIn Search Posts API", shortName: "Search Posts", category: "search", method: "GET", path: "/v1/linkedin/search-posts", credits: 16, creditsPerResult: 0.8 },
 ];
@@ -313,11 +365,94 @@ const GITHUB: Spec[] = [
   { slug: "github-trending-developers", name: "GitHub Trending Developers API", shortName: "Trending Developers", category: "search", method: "GET", path: "/v1/github/trending-developers", credits: 2, creditsPerResult: 0.1 },
 ];
 
+
+const GOOGLE: Spec[] = [
+  { slug: "google-search", name: "Google Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/google/search", credits: 5, creditsPerResult: 0.5 },
+];
+
+const TWITCH: Spec[] = [
+  { slug: "twitch-profile", name: "Twitch Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/twitch/profile", credits: 1 },
+  { slug: "twitch-user-videos", name: "Twitch User Videos API", shortName: "User Videos", category: "list", method: "GET", path: "/v1/twitch/user-videos", credits: 12, creditsPerResult: 0.6 },
+  { slug: "twitch-user-schedule", name: "Twitch User Schedule API", shortName: "User Schedule", category: "list", method: "GET", path: "/v1/twitch/user-schedule", credits: 1 },
+  { slug: "twitch-clip", name: "Twitch Clip API", shortName: "Clip", category: "details", method: "GET", path: "/v1/twitch/clip", credits: 1 },
+];
+
+const SPOTIFY: Spec[] = [
+  { slug: "spotify-artist", name: "Spotify Artist API", shortName: "Artist", category: "channel", method: "GET", path: "/v1/spotify/artist", credits: 2 },
+  { slug: "spotify-track", name: "Spotify Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/spotify/track", credits: 1 },
+  { slug: "spotify-album", name: "Spotify Album API", shortName: "Album", category: "details", method: "GET", path: "/v1/spotify/album", credits: 2 },
+  { slug: "spotify-search", name: "Spotify Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/spotify/search", credits: 8, creditsPerResult: 0.4 },
+  { slug: "spotify-podcast", name: "Spotify Podcast API", shortName: "Podcast", category: "details", method: "GET", path: "/v1/spotify/podcast", credits: 2 },
+  { slug: "spotify-podcast-episodes", name: "Spotify Podcast Episodes API", shortName: "Podcast Episodes", category: "list", method: "GET", path: "/v1/spotify/podcast-episodes", credits: 8, creditsPerResult: 0.4 },
+];
+
+const SOUNDCLOUD: Spec[] = [
+  { slug: "soundcloud-artist", name: "SoundCloud Artist API", shortName: "Artist", category: "channel", method: "GET", path: "/v1/soundcloud/artist", credits: 1 },
+  { slug: "soundcloud-artist-tracks", name: "SoundCloud Artist Tracks API", shortName: "Artist Tracks", category: "list", method: "GET", path: "/v1/soundcloud/artist-tracks", credits: 10, creditsPerResult: 0.5 },
+  { slug: "soundcloud-track", name: "SoundCloud Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/soundcloud/track", credits: 1 },
+];
+
+const LINKTREE: Spec[] = [
+  { slug: "linktree-page", name: "Linktree Page API", shortName: "Page", category: "details", method: "GET", path: "/v1/linktree/page", credits: 1 },
+];
+
+const SNAPCHAT: Spec[] = [
+  { slug: "snapchat-user-profile", name: "Snapchat User Profile API", shortName: "User Profile", category: "channel", method: "GET", path: "/v1/snapchat/user-profile", credits: 2 },
+];
+
+const TRUTH_SOCIAL: Spec[] = [
+  { slug: "truth-social-profile", name: "Truth Social Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/truth-social/profile", credits: 1 },
+  { slug: "truth-social-user-posts", name: "Truth Social User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/truth-social/user-posts", credits: 2, creditsPerResult: 0.1 },
+  { slug: "truth-social-post", name: "Truth Social Post API", shortName: "Post", category: "details", method: "GET", path: "/v1/truth-social/post", credits: 1 },
+];
+
+const KICK: Spec[] = [
+  { slug: "kick-clip", name: "Kick Clip API", shortName: "Clip", category: "details", method: "GET", path: "/v1/kick/clip", credits: 3 },
+];
+
+const AMAZON_SHOP: Spec[] = [
+  { slug: "amazon-shop-page", name: "Amazon Shop Page API", shortName: "Shop Page", category: "list", method: "GET", path: "/v1/amazon-shop/page", credits: 20, creditsPerResult: 1 },
+];
+
+const AGE_GENDER: Spec[] = [
+  { slug: "age-gender-get", name: "Age and Gender API", shortName: "Age and Gender", category: "details", method: "GET", path: "/v1/age-gender", credits: 1 },
+];
+
+const ACCOUNT: Spec[] = [
+  { slug: "account-balance", name: "Credit Balance API", shortName: "Credit Balance", category: "details", method: "GET", path: "/v1/account/balance", credits: 0 },
+  { slug: "account-request-history", name: "Request History API", shortName: "Request History", category: "list", method: "GET", path: "/v1/account/request-history", credits: 0 },
+  { slug: "account-daily-usage", name: "Daily Usage API", shortName: "Daily Usage", category: "list", method: "GET", path: "/v1/account/daily-usage", credits: 0 },
+  { slug: "account-most-used-routes", name: "Most Used Routes API", shortName: "Most Used Routes", category: "list", method: "GET", path: "/v1/account/most-used-routes", credits: 0 },
+];
+
+const KWAI: Spec[] = [
+  { slug: "kwai-profile", name: "Kwai Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/kwai/profile", credits: 2 },
+  { slug: "kwai-user-posts", name: "Kwai User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/kwai/user-posts", credits: 16, creditsPerResult: 0.8 },
+  { slug: "kwai-post", name: "Kwai Post API", shortName: "Post", category: "details", method: "GET", path: "/v1/kwai/post", credits: 2 },
+];
+
+const KOMI: Spec[] = [
+  { slug: "komi-page", name: "Komi Page API", shortName: "Page", category: "channel", method: "GET", path: "/v1/komi/page", credits: 1 },
+];
+
+const PILLAR: Spec[] = [
+  { slug: "pillar-page", name: "Pillar Page API", shortName: "Page", category: "channel", method: "GET", path: "/v1/pillar/page", credits: 1 },
+];
+
+const LINKBIO: Spec[] = [
+  { slug: "linkbio-page", name: "Linkbio Page API", shortName: "Page", category: "channel", method: "GET", path: "/v1/linkbio/page", credits: 1 },
+];
+
+const LINKME: Spec[] = [
+  { slug: "linkme-profile", name: "Linkme Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/linkme/profile", credits: 1 },
+];
+
 const AD_LIBRARY: Spec[] = [
   { slug: "facebook-ad-library-search", name: "Facebook Ad Library Search API", shortName: "Facebook Search", category: "search", method: "GET", path: "/v1/ad-library/facebook/search", credits: 20, creditsPerResult: 1 },
   { slug: "facebook-ad-library-company-ads", name: "Facebook Company Ads API", shortName: "Facebook Company Ads", category: "list", method: "GET", path: "/v1/ad-library/facebook/company-ads", credits: 20, creditsPerResult: 1 },
   { slug: "facebook-ad-library-search-companies", name: "Facebook Ad Library Search Companies API", shortName: "Facebook Search Companies", category: "search", method: "GET", path: "/v1/ad-library/facebook/search-companies", credits: 20, creditsPerResult: 1 },
   { slug: "facebook-ad-library-ad-details", name: "Facebook Ad Details API", shortName: "Facebook Ad Details", category: "details", method: "GET", path: "/v1/ad-library/facebook/ad-details", credits: 2 },
+  { slug: "facebook-ad-library-ad-transcript", name: "Facebook Ad Transcript API", shortName: "Facebook Ad Transcript", category: "transcript", method: "GET", path: "/v1/ad-library/facebook/ad-transcript", credits: 2 },
   { slug: "tiktok-ad-library-search", name: "TikTok Ad Library Search API", shortName: "TikTok Search", category: "search", method: "GET", path: "/v1/ad-library/tiktok/search", credits: 20, creditsPerResult: 1 },
   { slug: "tiktok-ad-library-ad-details", name: "TikTok Ad Details API", shortName: "TikTok Ad Details", category: "details", method: "GET", path: "/v1/ad-library/tiktok/ad-details", credits: 2 },
   { slug: "google-ad-library-company-ads", name: "Google Company Ads API", shortName: "Google Company Ads", category: "list", method: "GET", path: "/v1/ad-library/google/company-ads", credits: 20, creditsPerResult: 1 },
@@ -444,6 +579,150 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     color: "text-foreground",
     exampleUrl: "https://github.com/vercel/next.js",
     endpoints: GITHUB.map((s) => ({ ...s, platform: "github" as const })),
+  },
+  {
+    id: "google",
+    name: "Google Search",
+    blurb: "Extract public Google SERP results for SEO, rank tracking, and market research.",
+    icon: "search",
+    color: "text-blue-500",
+    exampleUrl: "https://www.google.com/search?q=best+social+media+api",
+    endpoints: GOOGLE.map((s) => ({ ...s, platform: "google" as const })),
+  },
+  {
+    id: "twitch",
+    name: "Twitch",
+    blurb: "Pull Twitch channel profiles, VOD lists, public schedules, and clip metadata.",
+    icon: "video",
+    color: "text-purple-500",
+    exampleUrl: "https://www.twitch.tv/shroud",
+    endpoints: TWITCH.map((s) => ({ ...s, platform: "twitch" as const })),
+  },
+  {
+    id: "spotify",
+    name: "Spotify",
+    blurb: "Extract Spotify artist, track, album, podcast, episode, and search metadata.",
+    icon: "music",
+    color: "text-green-500",
+    exampleUrl: "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02",
+    endpoints: SPOTIFY.map((s) => ({ ...s, platform: "spotify" as const })),
+  },
+  {
+    id: "soundcloud",
+    name: "SoundCloud",
+    blurb: "Fetch SoundCloud artist profiles, artist tracks, and track engagement metadata.",
+    icon: "cloud",
+    color: "text-orange-500",
+    exampleUrl: "https://soundcloud.com/nasa",
+    endpoints: SOUNDCLOUD.map((s) => ({ ...s, platform: "soundcloud" as const })),
+  },
+  {
+    id: "linktree",
+    name: "Linktree",
+    blurb: "Extract public Linktree profile links, socials, and profile metadata.",
+    icon: "link",
+    color: "text-lime-500",
+    exampleUrl: "https://linktr.ee/tonyhawk",
+    endpoints: LINKTREE.map((s) => ({ ...s, platform: "linktree" as const })),
+  },
+  {
+    id: "snapchat",
+    name: "Snapchat",
+    blurb: "Pull public Snapchat profile cards with subscriber counts, bios, and highlights.",
+    icon: "ghost",
+    color: "text-yellow-500",
+    exampleUrl: "https://www.snapchat.com/@nba",
+    endpoints: SNAPCHAT.map((s) => ({ ...s, platform: "snapchat" as const })),
+  },
+  {
+    id: "truth_social",
+    name: "Truth Social",
+    blurb: "Pull public Truth Social profiles, user posts, and post metadata for monitoring and research.",
+    icon: "threads",
+    color: "text-red-700",
+    exampleUrl: "https://truthsocial.com/@realDonaldTrump",
+    endpoints: TRUTH_SOCIAL.map((s) => ({ ...s, platform: "truth_social" as const })),
+  },
+  {
+    id: "kick",
+    name: "Kick",
+    blurb: "Extract Kick clip metadata from clip URLs or recent channel clips.",
+    icon: "video",
+    color: "text-green-500",
+    exampleUrl: "https://kick.com/xqc",
+    endpoints: KICK.map((s) => ({ ...s, platform: "kick" as const })),
+  },
+  {
+    id: "amazon_shop",
+    name: "Amazon Shop",
+    blurb: "Fetch Amazon seller storefront metadata and product listings for commerce research.",
+    icon: "shoppingBag",
+    color: "text-amber-500",
+    exampleUrl: "https://www.amazon.com/s?me=ATVPDKIKX0DER",
+    endpoints: AMAZON_SHOP.map((s) => ({ ...s, platform: "amazon_shop" as const })),
+  },
+  {
+    id: "age_gender",
+    name: "Age and Gender",
+    blurb: "Predict age, gender, and nationality signals from first names for enrichment workflows.",
+    icon: "search",
+    color: "text-violet-500",
+    exampleUrl: "michael",
+    endpoints: AGE_GENDER.map((s) => ({ ...s, platform: "age_gender" as const })),
+  },
+  {
+    id: "account",
+    name: "Account",
+    blurb: "Check credit balance, request history, daily usage, and most used API routes.",
+    icon: "search",
+    color: "text-emerald-600",
+    exampleUrl: "https://captapi.com/dashboard",
+    endpoints: ACCOUNT.map((s) => ({ ...s, platform: "account" as const })),
+  },
+  {
+    id: "kwai",
+    name: "Kwai",
+    blurb: "Extract Kwai/Kuaishou profile details, user posts, and post metadata.",
+    icon: "video",
+    color: "text-orange-500",
+    exampleUrl: "https://www.kuaishou.com/profile/2542916559",
+    endpoints: KWAI.map((s) => ({ ...s, platform: "kwai" as const })),
+  },
+  {
+    id: "komi",
+    name: "Komi",
+    blurb: "Extract public Komi page links and creator profile metadata.",
+    icon: "link",
+    color: "text-violet-500",
+    exampleUrl: "https://komi.io/example",
+    endpoints: KOMI.map((s) => ({ ...s, platform: "komi" as const })),
+  },
+  {
+    id: "pillar",
+    name: "Pillar",
+    blurb: "Extract public Pillar page links and creator profile metadata.",
+    icon: "link",
+    color: "text-cyan-600",
+    exampleUrl: "https://pillar.io/example",
+    endpoints: PILLAR.map((s) => ({ ...s, platform: "pillar" as const })),
+  },
+  {
+    id: "linkbio",
+    name: "Linkbio",
+    blurb: "Extract public Linkbio page links and profile metadata.",
+    icon: "link",
+    color: "text-pink-500",
+    exampleUrl: "https://lnk.bio/example",
+    endpoints: LINKBIO.map((s) => ({ ...s, platform: "linkbio" as const })),
+  },
+  {
+    id: "linkme",
+    name: "Linkme",
+    blurb: "Extract public Linkme profile links and metadata.",
+    icon: "link",
+    color: "text-blue-500",
+    exampleUrl: "https://link.me/example",
+    endpoints: LINKME.map((s) => ({ ...s, platform: "linkme" as const })),
   },
   {
     id: "ad_library",
@@ -653,6 +932,22 @@ const IG_POST = "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/
 const IG_REEL = "Instagram Reel URL, e.g. https://instagram.com/reel/ID/.";
 const IG_PROFILE = "Instagram profile URL, e.g. https://instagram.com/username/.";
 const FB_VIDEO = "Public Facebook video or post URL.";
+const TWITCH_PROFILE = "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud.";
+const SPOTIFY_URL = "Spotify URL, URI, or ID.";
+const SC_PROFILE = "SoundCloud artist profile URL or username.";
+const SC_TRACK = "SoundCloud track URL.";
+const LINKTREE_PROFILE = "Linktree profile URL or username.";
+const SNAPCHAT_PROFILE = "Snapchat username or profile URL.";
+const TRUTH_PROFILE = "Truth Social profile URL or @username.";
+const TRUTH_POST = "Truth Social post URL or post ID.";
+const KICK_CLIP = "Kick clip URL, channel URL, or channel username.";
+const AMAZON_SHOP_URL = "Amazon seller storefront URL, seller profile URL, or seller ID.";
+const KWAI_PROFILE = "Kwai/Kuaishou profile URL or user ID.";
+const KWAI_POST = "Kwai/Kuaishou post URL or video/photo ID.";
+const KOMI_PAGE = "Komi page URL or username.";
+const PILLAR_PAGE = "Pillar page URL or username.";
+const LINKBIO_PAGE = "Linkbio page URL or username.";
+const LINKME_PROFILE = "Linkme profile URL or username.";
 
 const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   // YouTube
@@ -664,17 +959,20 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-search": [qp(), lp(20, 200)],
   "youtube-channel-videos": [up(YT_CHANNEL), lp(20, 200)],
   "youtube-playlist-videos": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500)],
+  "youtube-playlist": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500)],
   "youtube-video-download": [up(YT_VIDEO)],
   "youtube-shorts-transcript": [up(YT_SHORTS), lang()],
   "youtube-shorts-summarizer": [up(YT_SHORTS), lang()],
   "youtube-shorts-stats": [up(YT_SHORTS)],
   "youtube-shorts-comments": [up(YT_SHORTS), lp(50, 500)],
   "youtube-channel-shorts": [up(YT_CHANNEL), lp(20, 200)],
+  "youtube-trending-shorts": [{ name: "q", type: "string", required: false, description: "Seed keyword for trending Shorts. Defaults to trending." }, lp(20, 100)],
   "youtube-channel-streams": [up(YT_CHANNEL), lp(20, 200)],
   "youtube-hashtag-search": [qp("Hashtag with or without the # (min 2 characters)."), lp(20, 200)],
   "youtube-comment-replies": [up(YT_VIDEO), cid(), lp(50, 500)],
   "youtube-channel-playlists": [up(YT_CHANNEL), lp(20, 200)],
   "youtube-community-posts": [up(YT_CHANNEL), lp(20, 200)],
+  "youtube-community-post-details": [up("YouTube community post URL.")],
   "youtube-video-sponsors": [up(YT_VIDEO)],
   // TikTok
   "tiktok-transcript": [up(TT_VIDEO)],
@@ -682,7 +980,10 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-video-details": [up(TT_VIDEO)],
   "tiktok-comments": [up(TT_VIDEO), lp(50, 500)],
   "tiktok-channel-details": [up(TT_PROFILE)],
+  "tiktok-profile-region": [up(TT_PROFILE)],
+  "tiktok-audience-demographics": [up(TT_PROFILE)],
   "tiktok-search": [qp(), lp(20, 200)],
+  "tiktok-search-suggestions": [qp("Seed keyword for autocomplete suggestions."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, { name: "language", type: "string", required: false, description: "Browser language, e.g. en-US. Default en-US." }, lp(20, 100)],
   "tiktok-video-download": [up(TT_VIDEO)],
   "tiktok-channel-posts": [up(TT_PROFILE), lp(20, 200)],
   "tiktok-comment-replies": [up(TT_VIDEO), cid(), lp(50, 500)],
@@ -696,6 +997,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-trending-feed": [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code, e.g. US, GB, TR. Default US." }, lp(20, 200)],
   "tiktok-popular-hashtags": [{ name: "query", type: "string", required: false, description: 'Topic or keyword to discover trending hashtags for. Default "trending".' }, lp(20, 100)],
   "tiktok-live": [up(TT_PROFILE)],
+  "tiktok-live-info": [up(TT_PROFILE)],
+  "tiktok-popular-creators": [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, { name: "sort", type: "string", required: false, description: "follower, engagement, or popularity. Default follower." }, { name: "follower_count", type: "string", required: false, description: "Optional range: 10k-100k, 100k-1m, 1m-10m, >10m." }, lp(20, 100)],
   // Instagram
   "instagram-transcript": [up(IG_REEL)],
   "instagram-summarizer": [up(IG_REEL)],
@@ -705,9 +1008,11 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "instagram-channel-posts": [up(IG_PROFILE), lp(20, 200)],
   "instagram-channel-reels": [up(IG_PROFILE), lp(20, 200)],
   "instagram-reels-search": [qp("Hashtag (without #) or keyword (min 2 characters)."), lp(20, 200)],
+  "instagram-trending-reels": [{ name: "country", type: "string", required: false, description: "Country name for Explore localization. Default United States." }, lp(20, 200)],
   "instagram-video-download": [up(IG_REEL)],
   "instagram-tagged-posts": [up(IG_PROFILE), lp(20, 200)],
   "instagram-music-posts": [up("Instagram audio/music page URL."), lp(20, 200)],
+  "instagram-reels-by-audio-id": [{ name: "audio_id", type: "string", required: true, description: "Instagram audio/music ID or full audio URL." }, lp(20, 200)],
   "instagram-hashtag-search": [qp("Hashtag without the # (min 2 characters)."), lp(20, 200)],
   "instagram-profile-search": [qp(), lp(20, 100)],
   "instagram-story-highlights": [up(IG_PROFILE)],
@@ -725,12 +1030,15 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "facebook-group-posts": [up("Public Facebook group URL, e.g. https://facebook.com/groups/ID."), lp(20, 200)],
   "facebook-comment-replies": [up("Facebook post URL the comment belongs to."), cid(), lp(50, 500)],
   "facebook-marketplace-search": [qp("Product or keyword to search Facebook Marketplace for."), { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." }, lp(20, 200), { name: "details", type: "string", required: false, description: "Set true to fetch full description, photos and coordinates per listing (slower, costs more)." }],
+  "facebook-marketplace-location-search": [qp("City/place search query, e.g. Austin."), lp(10, 50)],
   "facebook-event-search": [qp("Topic and/or place, e.g. 'comedy Chicago'."), lp(20, 200)],
   "facebook-event-details": [up("Facebook event URL, e.g. https://facebook.com/events/ID.")],
   "facebook-profile-photos": [up("Facebook profile or page URL."), lp(20, 200)],
+  "facebook-profile-events": [up("Facebook profile or page URL."), lp(20, 200)],
   "facebook-marketplace-item": [up("Facebook Marketplace item URL.")],
   // Twitter / X
   "twitter-tweet-details": [up("Public tweet URL, e.g. https://x.com/user/status/ID.")],
+  "twitter-transcript": [up("Public tweet URL, e.g. https://x.com/user/status/ID.")],
   "twitter-profile": [up("Twitter/X profile URL or @handle, e.g. https://x.com/username.")],
   "twitter-user-tweets": [up("Twitter/X profile URL or @handle."), lp(20, 200)],
   "twitter-search": [qp("Keywords or search query (min 2 characters)."), lp(20, 200)],
@@ -740,6 +1048,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "reddit-subreddit-posts": [up("Subreddit URL, r/name, or bare name, e.g. r/technology."), lp(25, 200)],
   "reddit-post-details": [up("Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/...")],
   "reddit-post-comments": [up("Reddit post URL."), lp(50, 500)],
+  "reddit-post-transcript": [up("Reddit post URL."), lp(50, 200)],
   "reddit-search": [qp("Keywords or search query (min 2 characters)."), lp(25, 200)],
   "reddit-subreddit-details": [up("Subreddit URL, r/name, or bare name, e.g. r/technology.")],
   "reddit-subreddit-search": [up("Subreddit URL, r/name, or bare name, e.g. r/technology."), qp("Keywords or search query (min 2 characters)."), lp(25, 200)],
@@ -763,10 +1072,53 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "linkedin-profile": [up("LinkedIn profile URL, e.g. https://linkedin.com/in/slug.")],
   "linkedin-company": [up("LinkedIn company URL, e.g. https://linkedin.com/company/slug.")],
   "linkedin-post-details": [up("LinkedIn post or activity URL.")],
+  "linkedin-post-transcript": [up("LinkedIn post or activity URL.")],
   // Rumble
   "rumble-video-details": [up("Rumble video URL, e.g. https://rumble.com/vXXXX-title.html.")],
   "rumble-channel-videos": [up("Rumble channel URL, e.g. https://rumble.com/c/name."), lp(20, 200)],
   "rumble-search": [qp("Keywords or search query (min 2 characters)."), lp(20, 200)],
+  // Google
+  "google-search": [qp(), { name: "country", type: "string", required: false, description: "Two-letter country code (default us)." }, { name: "language", type: "string", required: false, description: "Google language code (default en)." }, lp(10, 100)],
+  // Twitch
+  "twitch-profile": [up(TWITCH_PROFILE)],
+  "twitch-user-videos": [up(TWITCH_PROFILE), lp(20, 30)],
+  "twitch-user-schedule": [up(TWITCH_PROFILE)],
+  "twitch-clip": [up("Twitch clip URL, channel URL, or username.")],
+  // Spotify
+  "spotify-artist": [up(SPOTIFY_URL)],
+  "spotify-track": [up(SPOTIFY_URL)],
+  "spotify-album": [up(SPOTIFY_URL)],
+  "spotify-search": [qp(), { name: "type", type: "string", required: false, description: "tracks, albums, artists, podcasts, or episodes. Default tracks." }, lp(20, 50)],
+  "spotify-podcast": [up(SPOTIFY_URL), lp(20, 50)],
+  "spotify-podcast-episodes": [up(SPOTIFY_URL), lp(20, 50)],
+  // SoundCloud
+  "soundcloud-artist": [up(SC_PROFILE)],
+  "soundcloud-artist-tracks": [up(SC_PROFILE), lp(20, 100)],
+  "soundcloud-track": [up(SC_TRACK)],
+  // Linktree / Snapchat
+  "linktree-page": [up(LINKTREE_PROFILE)],
+  "snapchat-user-profile": [up(SNAPCHAT_PROFILE)],
+  // Truth Social / Kick / Amazon / Age-Gender
+  "truth-social-profile": [up(TRUTH_PROFILE)],
+  "truth-social-user-posts": [up(TRUTH_PROFILE), lp(20, 80)],
+  "truth-social-post": [up(TRUTH_POST)],
+  "kick-clip": [up(KICK_CLIP), lp(30, 100)],
+  "amazon-shop-page": [up(AMAZON_SHOP_URL), { name: "marketplace", type: "string", required: false, description: "Amazon marketplace code. Default US." }, lp(20, 200)],
+  "age-gender-get": [{ name: "name", type: "string", required: true, description: "First name, or fallback when names is omitted." }, { name: "names", type: "string", required: false, description: "Optional comma-separated list of names." }],
+  // Account
+  "account-balance": [],
+  "account-request-history": [lp(50, 500)],
+  "account-daily-usage": [{ name: "days", type: "integer", required: false, description: "Number of days to include (default 30, max 365)." }],
+  "account-most-used-routes": [{ name: "days", type: "integer", required: false, description: "Number of days to include (default 30, max 365)." }, lp(20, 100)],
+  // Kwai / small creator pages
+  "kwai-profile": [up(KWAI_PROFILE)],
+  "kwai-user-posts": [up(KWAI_PROFILE), lp(20, 200)],
+  "kwai-post": [up(KWAI_POST)],
+  "komi-page": [up(KOMI_PAGE)],
+  "pillar-page": [up(PILLAR_PAGE)],
+  "linkbio-page": [up(LINKBIO_PAGE)],
+  "linkme-profile": [up(LINKME_PROFILE)],
+  "facebook-ad-library-ad-transcript": [up("Meta Ad Library ad URL or ad ID.")],
 };
 
 export function params(ep: ApiEndpoint): ApiParam[] {
@@ -881,6 +1233,22 @@ const PROFILE_URL: Record<PlatformId, string> = {
   tiktok_shop: "https://shop.tiktok.com/us/pdp/example-product/1234567890",
   github: "https://github.com/vercel/next.js",
   ad_library: "https://adstransparency.google.com/",
+  google: "https://www.google.com/search?q=best+social+media+api",
+  twitch: "https://www.twitch.tv/shroud",
+  spotify: "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02",
+  soundcloud: "https://soundcloud.com/nasa",
+  linktree: "https://linktr.ee/tonyhawk",
+  snapchat: "https://www.snapchat.com/@nba",
+  truth_social: "https://truthsocial.com/@realDonaldTrump",
+  kick: "https://kick.com/xqc",
+  amazon_shop: "https://www.amazon.com/s?me=ATVPDKIKX0DER",
+  age_gender: "michael",
+  account: "https://captapi.com/dashboard",
+  kwai: "https://www.kuaishou.com/profile/2542916559",
+  komi: "https://komi.io/example",
+  pillar: "https://pillar.io/example",
+  linkbio: "https://lnk.bio/example",
+  linkme: "https://link.me/example",
 };
 
 /** A realistic example value for a single parameter of an endpoint. */

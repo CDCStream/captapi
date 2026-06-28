@@ -1,0 +1,10 @@
+{
+  "url": "/v1/account/request-history",
+  "method": "GET",
+  "qs": {
+    "limit": "{{parameters.limit}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

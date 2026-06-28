@@ -20,6 +20,8 @@ import {
   MessageCircle,
   Users,
   Search,
+  LinkIcon,
+  Ghost,
   Clapperboard,
   Download,
   type LucideIcon,
@@ -45,6 +47,11 @@ const PLATFORM_ICONS: Record<string, LucideIcon> = {
   github: Github,
   megaphone: Megaphone,
   shoppingBag: ShoppingBag,
+  video: Video,
+  cloud: Cloud,
+  search: Search,
+  link: LinkIcon,
+  ghost: Ghost,
 };
 
 const CATEGORY_ICONS: Record<Category, LucideIcon> = {
