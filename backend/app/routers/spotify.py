@@ -41,6 +41,8 @@ def _url(value: str, kind: str) -> str:
 
 
 def _names(items: Any) -> list[str]:
+    if isinstance(items, dict):
+        items = items.get("items")
     if isinstance(items, str):
         return [part.strip() for part in items.split(",") if part.strip()]
     if not isinstance(items, list):
@@ -59,9 +61,12 @@ def _names(items: Any) -> list[str]:
 def _image(item: dict[str, Any]) -> str | None:
     header = item.get("headerImage")
     header_sources = (header.get("data") or {}).get("sources") if isinstance(header, dict) else None
+    cover = item.get("coverArt")
+    cover_sources = cover.get("sources") if isinstance(cover, dict) else None
     images = (
         item.get("images")
         or item.get("visuals", {}).get("avatarImage", {}).get("sources")
+        or cover_sources
         or header_sources
     )
     if isinstance(images, list) and images:
@@ -71,12 +76,32 @@ def _image(item: dict[str, Any]) -> str | None:
     return safe_str(item.get("image") or item.get("thumbnail") or item.get("thumbnailUrl"))
 
 
+def _year_of(value: Any) -> int | None:
+    if isinstance(value, dict):
+        value = value.get("year") or value.get("isoString")
+    match = re.search(r"\b(\d{4})\b", str(value or ""))
+    return safe_int(match.group(1)) if match else None
+
+
+def _episodes_v2(item: dict[str, Any]) -> dict[str, Any]:
+    """Unwrap the podcast's episodes GraphQL envelope
+    (episodes.data.podcastUnionV2.episodesV2)."""
+    block = item.get("episodes")
+    if not isinstance(block, dict):
+        return {}
+    union = (block.get("data") or {}).get("podcastUnionV2") if isinstance(block.get("data"), dict) else None
+    v2 = (union or {}).get("episodesV2")
+    if isinstance(v2, dict):
+        return v2
+    return block
+
+
 def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
     stats = item.get("stats") or {}
     duration = item.get("duration") or {}
     album = item.get("albumOfTrack") or item.get("album") or {}
-    tracks = item.get("tracks") or item.get("content") or {}
-    episodes = item.get("episodes") or item.get("items") or tracks
+    tracks = item.get("tracksV2") or item.get("tracks") or item.get("content") or {}
+    episodes = _episodes_v2(item) or item.get("items") or tracks
 
     if isinstance(duration, dict):
         duration_ms = safe_int(duration.get("totalMilliseconds"))
@@ -84,25 +109,31 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
         duration_ms = safe_int(duration)
     duration_ms = duration_ms or safe_int(item.get("durationMs"))
 
-    release_year = safe_int((item.get("date") or {}).get("year") if isinstance(item.get("date"), dict) else None)
-    if not release_year:
-        release_date = safe_str(item.get("releaseDate"))
-        match = re.search(r"\b(\d{4})\b", release_date or "")
-        release_year = safe_int(match.group(1)) if match else None
+    release_year = _year_of(item.get("date")) or _year_of(item.get("releaseDate"))
 
     description = safe_str(item.get("description") or item.get("subtitle"))
     biography = item.get("biography")
     if not description and isinstance(biography, dict):
         description = safe_str(biography.get("text"))
 
+    artists = _names(item.get("artists"))
+    if not artists:
+        artists = _names(item.get("firstArtist")) + _names(item.get("otherArtists"))
+    if not artists:
+        publisher = item.get("publisher")
+        if isinstance(publisher, dict) and publisher.get("name"):
+            artists = [str(publisher["name"])]
+
+    sharing = item.get("sharingInfo") if isinstance(item.get("sharingInfo"), dict) else {}
+
     return {
         "platform": "spotify",
         "type": kind,
         "uri": safe_str(item.get("uri") or item.get("id")),
-        "url": safe_str(item.get("url") or item.get("externalUrl") or item.get("shareUrl")),
+        "url": safe_str(item.get("url") or item.get("externalUrl") or item.get("shareUrl") or sharing.get("shareUrl")),
         "name": safe_str(item.get("name") or item.get("title")),
         "description": description,
-        "artists": _names(item.get("artists")),
+        "artists": artists,
         "album": safe_str(album.get("name") if isinstance(album, dict) else None) or safe_str(item.get("albumName")),
         "durationMs": duration_ms,
         "playCount": safe_int(item.get("playcount") or item.get("playCount")),
@@ -180,7 +211,7 @@ async def artist(
 ):
     uri = _url(url, "artist")
     async with billed_call(caller=caller, endpoint="/v1/spotify/artist", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.artist", {"uri": uri, "v": 2}, lambda: _details("artist", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC)
+        data = await cached_or_run("spotify.artist", {"uri": uri, "v": 3}, lambda: _details("artist", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC)
         return ApiResponse(data=data)
 
 
@@ -191,7 +222,7 @@ async def track(
 ):
     uri = _url(url, "track")
     async with billed_call(caller=caller, endpoint="/v1/spotify/track", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.track", {"uri": uri, "v": 2}, lambda: _details("track", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC)
+        data = await cached_or_run("spotify.track", {"uri": uri, "v": 3}, lambda: _details("track", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC)
         return ApiResponse(data=data)
 
 
@@ -202,7 +233,7 @@ async def album(
 ):
     uri = _url(url, "album")
     async with billed_call(caller=caller, endpoint="/v1/spotify/album", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.album", {"uri": uri, "v": 2}, lambda: _details("album", uri, limit=1), ctx, ttl=get_settings().CACHE_TTL_STATIC)
+        data = await cached_or_run("spotify.album", {"uri": uri, "v": 3}, lambda: _details("album", uri, limit=1), ctx, ttl=get_settings().CACHE_TTL_STATIC)
         return ApiResponse(data=data)
 
 
@@ -214,7 +245,7 @@ async def podcast(
 ):
     uri = _url(url, "show")
     async with billed_call(caller=caller, endpoint="/v1/spotify/podcast", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.podcast", {"uri": uri, "limit": limit, "v": 2}, lambda: _details("podcast", uri, limit), ctx, ttl=get_settings().CACHE_TTL_STATIC)
+        data = await cached_or_run("spotify.podcast", {"uri": uri, "limit": limit, "v": 3}, lambda: _details("podcast", uri, limit), ctx, ttl=get_settings().CACHE_TTL_STATIC)
         return ApiResponse(data=data)
 
 
@@ -230,12 +261,19 @@ async def podcast_episodes(
         async def _run() -> dict[str, Any]:
             data = await _details("podcast", uri, limit)
             raw = data.get("raw") or {}
-            episodes = raw.get("episodes") or raw.get("items") or raw.get("content") or {}
+            episodes = _episodes_v2(raw) or raw.get("items") or raw.get("content") or {}
             items = episodes.get("items") if isinstance(episodes, dict) else episodes
-            normalized = [_normalize(i, "episode") for i in items if isinstance(i, dict)] if isinstance(items, list) else []
+            rows: list[dict[str, Any]] = []
+            for entry in items if isinstance(items, list) else []:
+                if not isinstance(entry, dict):
+                    continue
+                # episodesV2 wraps each episode as {entity: {data: {...}}}
+                entity = (entry.get("entity") or {}).get("data") if isinstance(entry.get("entity"), dict) else None
+                rows.append(entity if isinstance(entity, dict) else entry)
+            normalized = [_normalize(i, "episode") for i in rows]
             return {"platform": "spotify", "podcast": data, "totalReturned": len(normalized[:limit]), "episodes": normalized[:limit]}
 
-        data = await cached_or_run("spotify.podcast-episodes", {"uri": uri, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("spotify.podcast-episodes", {"uri": uri, "limit": limit, "v": 3}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["episodes"]))
         return ApiResponse(data=data)
 
@@ -276,6 +314,6 @@ async def search(
             results = [_normalize(i, kind) for i in items[:limit] if not i.get("error")]
             return {"platform": "spotify", "query": q, "type": type, "totalReturned": len(results), "results": results}
 
-        data = await cached_or_run("spotify.search", {"q": q, "type": type, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("spotify.search", {"q": q, "type": type, "limit": limit, "v": 3}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["results"]))
         return ApiResponse(data=data)

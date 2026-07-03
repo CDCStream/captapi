@@ -134,6 +134,23 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+async def _run_pinterest_actor(run_input: dict[str, Any], limit: int) -> list[dict[str, Any]]:
+    """Run the Pinterest actor with one retry: runs intermittently come back
+    empty when Pinterest blocks the proxy session."""
+    apify = get_apify()
+    items: list[dict[str, Any]] = []
+    for _attempt in range(2):
+        try:
+            items = await apify.run_actor_sync(
+                get_settings().APIFY_ACTOR_PINTEREST, run_input, max_items=limit
+            )
+        except Exception:  # noqa: BLE001
+            items = []
+        if items:
+            break
+    return items
+
+
 def _prefer_enriched(pins: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Push fully-enriched pins first; the actor occasionally emits bare
     id/url stubs when a pin's detail fetch fails mid-run."""
@@ -255,11 +272,8 @@ async def user_pins(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_PINTEREST,
-                {"mode": "userPins", "usernames": [username], "maxItems": limit},
-                max_items=limit,
+            items = await _run_pinterest_actor(
+                {"mode": "userPins", "usernames": [username], "maxItems": limit}, limit
             )
             pins = _prefer_enriched([_normalize_pin(i) for i in items if i.get("recordType") != "board"])[:limit]
             return {"username": username, "totalReturned": len(pins), "pins": pins}
@@ -325,11 +339,8 @@ async def pinterest_user_boards(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_PINTEREST,
-                {"mode": "userBoards", "usernames": [username], "maxItems": limit},
-                max_items=limit,
+            items = await _run_pinterest_actor(
+                {"mode": "userBoards", "usernames": [username], "maxItems": limit}, limit
             )
             boards = [_normalize_board(i, username) for i in items][:limit]
             return {"username": username, "totalReturned": len(boards), "boards": boards}
@@ -373,11 +384,8 @@ async def pinterest_board(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_PINTEREST,
-                {"mode": "boardPins", "boardUrls": [url], "maxItems": limit},
-                max_items=limit,
+            items = await _run_pinterest_actor(
+                {"mode": "boardPins", "boardUrls": [url], "maxItems": limit}, limit
             )
             pins = _prefer_enriched([_normalize_pin(i) for i in items if i.get("recordType") != "board"])[:limit]
             return {"board": url, "totalReturned": len(pins), "pins": pins}
@@ -408,11 +416,8 @@ async def pinterest_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_PINTEREST,
-                {"mode": "search", "keywords": [q], "maxItems": limit},
-                max_items=limit,
+            items = await _run_pinterest_actor(
+                {"mode": "search", "keywords": [q], "maxItems": limit}, limit
             )
             results = _prefer_enriched([_normalize_pin(i) for i in items if i.get("recordType") != "board"])[:limit]
             return {"query": q, "totalReturned": len(results), "results": results}
