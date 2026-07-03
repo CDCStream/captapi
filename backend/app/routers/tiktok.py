@@ -1383,7 +1383,9 @@ async def tiktok_song_details(
                     settings.APIFY_ACTOR_TIKTOK_SONG_FAST_FALLBACK,
                     {
                         "sounds": [url_id or url],
-                        "maxVideosPerSound": 0,
+                        # The actor rejects 0 ("must be >= 1"), so ask for the
+                        # minimum even though we only want the sound summary.
+                        "maxVideosPerSound": 1,
                         "includeSoundSummary": True,
                         "includeVideoFields": False,
                     },

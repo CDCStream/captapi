@@ -130,29 +130,29 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "facebook-details": {
     "platform": "facebook",
-    "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl",
-    "id": "1541753523986685",
-    "caption": "Soon.\n\nLater this year, our next space telescope will launch into orbit. The Nancy Grace Roman Space Telescope will capture both the big picture and the finer details of the cosmos—observing distant celestial bodies with a field of view at least 100 times wider than Hubble’s.\n\nGet the details on Roman and its mission: https://go.nasa.gov/4x5yDID\n\nAdd Roman to your phone—download this free poster: https://go.nasa.gov/4v4CfJH",
-    "description": "Soon.\n\nLater this year, our next space telescope will launch into orbit. The Nancy Grace Roman Space Telescope will capture both the big picture and the finer details of the cosmos—observing distant celestial bodies with a field of view at least 100 times wider than Hubble’s.\n\nGet the details on Roman and its mission: https://go.nasa.gov/4x5yDID\n\nAdd Roman to your phone—download this free poster: https://go.nasa.gov/4v4CfJH",
-    "publishedAt": "2026-06-02T19:07:37.000Z",
-    "durationSeconds": null,
-    "thumbnailUrl": "https://scontent-iad3-2.xx.fbcdn.net/v/t39.30808-6/713923507_1541753477320023_3532198732351889545_n.jpg?stp=dst-jpg_tt6&cstp=mx1384x2048&ctp=p526x296&_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_ohc=ejiAVvsUoWQQ7kNvwEyucXP&_nc_oc=Ado1fkEfd2oty-eu71qFJayEykD8-srJcqbGxSxlpscCK_cMoRR0dCWkUiz3cg2njY0&_nc_zt=23&_nc_ht=scontent-iad3-2.xx&_nc_gid=TD_QihQbLCui4KZn4Xi2DQ&_nc_ss=72289&oh=00_AQA5iAMH48e06uDOCTWuQ9hi4ntxIa5q9T6wjhuUuW0gAQ&oe=6A4DBE74",
-    "videoUrl": null,
+    "url": "https://www.facebook.com/reel/1376651124309650/",
+    "id": "1567272851434752",
+    "caption": "There will be more than just fireworks to see in the night sky this month!\n\nYou can look forward to these celestial sights in July:\n- A lunar-planetary alignment\n- A visiting comet\n- A good look at Saturn and the Milky Way\n\nHappy skywatching! https://go.nasa.gov/3QvQc4k",
+    "description": "There will be more than just fireworks to see in the night sky this month!\n\nYou can look forward to these celestial sights in July:\n- A lunar-planetary alignment\n- A visiting comet\n- A good look at Saturn and the Milky Way\n\nHappy skywatching! https://go.nasa.gov/3QvQc4k",
+    "publishedAt": "2026-07-02T15:05:43.000Z",
+    "durationSeconds": 200.016,
+    "thumbnailUrl": "https://scontent-det1-1.xx.fbcdn.net/v/t15.5256-10/735149954_4435586749988646_521208314578416779_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=111&ccb=1-7&_nc_sid=d2b52d&_nc_ohc=6MV2S-Q4fcMQ7kNvwGbawV4&_nc_oc=AdrwAO9ZhuXTmHMr4viaeljffHjZagFCri0xi94zB6H6Kxc2FnTVSOBcat-G6y0B-Gk&_nc_zt=23&_nc_ht=scontent-det1-1.xx&_nc_gid=gdHFfF-SlOlKFe6AQGz1xA&_nc_ss=72289&oh=00_AQBN8XAiA3L7O2gaH6l36mSn1-Qw6dxwtQBcLygVlyl0OQ&oe=6A4DBA2C",
+    "videoUrl": "https://video-det1-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQOh7ZLRZfB5SIGETu_uz2jbsqvY3dW7G3sGdKsNsX627DpYoTuCxs26FyYE4T4rDzRdvIV2tOCYJi5hs8Gs1EaQEL7_LhQnAXKuILiY508JFg.mp4?_nc_cat=103&_nc_sid=5e9851&_nc_ht=video-det1-1.xx.fbcdn.net&_nc_ohc=tWxbSmhPK1oQ7kNvwExZjab&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5GQUNFQk9PSy4uQzMuMTI4MC5kYXNoX2gyNjQtYmFzaWMtZ2VuMl83MjBwIiwieHB2X2Fzc2V0X2lkIjoxMzQ3ODY4NzYwMDA4MjE2LCJhc3NldF9hZ2VfZGF5cyI6MSwidmlfdXNlY2FzZV9pZCI6MTAxMjIsImR1cmF0aW9uX3MiOjIwMCwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=c53b4168a8d58285&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC80QjQyOEYzOTg3NDFDRkNGM0UzNzQ4QkZDMDY4QTU4QV9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50LzAxNEExNzM2QkY1RkU3NTNDMjU1QkUyMjg3RUMzOEE0X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACawmKfqpPjkBBUCKAJDMywXQGkBDlYEGJMYGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUCZZSeAQA&_nc_gid=gdHFfF-SlOlKFe6AQGz1xA&_nc_ss=72289&_nc_zt=28&oh=00_AQBynsrxaYttMfTqf-rAY38a1JdgUtJnhMf2FoNsrL2EJw&oe=6A4DA1B5&bitrate=733579&tag=dash_h264-basic-gen2_720p",
     "author": {
       "username": "NASA",
       "displayName": "NASA",
-      "url": "https://www.facebook.com/NASA/posts/pfbid02skzNsrLf5atYZfzvzHAK9gHwDnZC5u4pDZMLQ1u3iJmfoA8tNsGpT7Uj6WPs6K3Rl",
-      "profileImage": "https://scontent-iad3-2.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s50x50&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=ZOjc8KcuDOgQ7kNvwEBuAqg&_nc_oc=AdqeR1MRmRcq6nqyHfdAqN-oUo1hmX7i4dwgp9_Y8cQ5py5_YLZU47-nzOA6F7Ag6UI&_nc_zt=24&_nc_ht=scontent-iad3-2.xx&_nc_gid=TD_QihQbLCui4KZn4Xi2DQ&_nc_ss=72289&oh=00_AQC3C6OGRbwEx3dbvyW35tKrYMjYP1aCn4qBaJfQpbULCg&oe=6A4DA615",
+      "url": "https://www.facebook.com/100044561550831",
+      "profileImage": "https://scontent-det1-1.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s50x50&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=ZOjc8KcuDOgQ7kNvwFIXbrO&_nc_oc=AdqzxplBt3DB8nsV3jtve2NVLOx4BHm_8aUG9G-eMsxaXOCJoyiG2Xcjataf9hDxH0U&_nc_zt=24&_nc_ht=scontent-det1-1.xx&_nc_gid=gdHFfF-SlOlKFe6AQGz1xA&_nc_ss=72289&oh=00_AQAKVtgdWqT97Ju_YZr79jFJgBmnYl5Umm3vXzYGbjFVGw&oe=6A4DA615",
       "verified": null
     },
     "engagement": {
-      "views": null,
-      "likes": 2909,
-      "comments": 272,
-      "shares": 418
+      "views": 220730,
+      "likes": 2810,
+      "comments": 52,
+      "shares": 267
     },
-    "isVideo": false,
-    "link": "https://go.nasa.gov/4x5yDID"
+    "isVideo": true,
+    "link": "https://go.nasa.gov/3QvQc4k"
   },
   "facebook-group-posts": {
     "url": "https://www.facebook.com/groups/444075055796968",
@@ -1251,26 +1251,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "posts": []
   },
   "instagram-profile-search": {
-    "query": "nature",
-    "totalReturned": 10,
+    "query": "fitness",
+    "totalReturned": 2,
     "users": [
       {
-        "username": "ncc_cnc",
-        "displayName": "Nature Conservancy of Canada | Conservation de la nature Canada",
-        "url": "https://instagram.com/ncc_cnc",
-        "followers": 61940,
-        "verified": null,
+        "username": "planetfitness",
+        "displayName": "Planet Fitness",
+        "url": "https://instagram.com/planetfitness",
+        "followers": 558062,
+        "verified": true,
         "private": null,
-        "profileImage": "https://scontent-phl2-1.cdninstagram.com/v/t51.2885-19/166594668_103754221763556_2725053308824708161_n.jpg?stp=dst-jpg_e0_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby43MjAuYzIifQ&_nc_ht=scontent-phl2-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gG31OPp6rXczA5nEcRLSQWLuK8hG3uLS9oxheIJALzhBQKlfzXW1NkyeTP9FQZ3UqYl_lKaJfByEIVOTUm55a1Z&_nc_ohc=w4pVONmiD34Q7kNvwHAyigl&_nc_gid=k8wsiH8GsfykKJHxrrFHUw&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_Af-5i0Sr9OhZcmJkPdpfqdH3641KS4xleGpI ..."
+        "profileImage": "https://scontent-hou1-1.cdninstagram.com/v/t51.82787-19/571859215_18539690485033373_6920541618037746178_n.jpg?stp=dst-jpg_e0_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-hou1-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gH8dpLFyw4tklxYv8ukEz_fbGy-PnbwenWY-ThZpqoo-LTcO4ltlvgsNHhbXPbuRoI&_nc_ohc=dUBhpEyI3loQ7kNvwHc5jfx&_nc_gid=lNPFSH5wTz9QIGzl9jUa1A&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQAGRo_KZBhI20-LlzCQDKrH6jzhTWMmf8-pk3P0zP71vA&oe=6A4DA7E5&_nc_sid=8b3546"
       },
       {
-        "username": "naturequeenstore",
-        "displayName": "Naturequeenstore",
-        "url": "https://instagram.com/naturequeenstore",
-        "followers": 46043,
-        "verified": null,
+        "username": "zumba",
+        "displayName": "Zumba",
+        "url": "https://instagram.com/zumba",
+        "followers": 4695167,
+        "verified": true,
         "private": null,
-        "profileImage": "https://scontent-iad3-2.cdninstagram.com/v/t51.2885-19/474530162_1613687809521651_8446827958246387142_n.jpg?stp=dst-jpg_e0_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby42MDAuYzIifQ&_nc_ht=scontent-iad3-2.cdninstagram.com&_nc_cat=103&_nc_oc=Q6cZ2gFw2JsVYjbRZ8pZD-ks4kZoIxxZM479GOgFZr6BWYg3hd05YZ1ZxYfOBzSvhpu4VI4&_nc_ohc=w1-6MzVEUNgQ7kNvwHnGFZf&_nc_gid=2QLel14lCEffh1suz66k1g&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_Af9d3MFL5J1-q1xGUeUamt2ku5AaKcv7ZS8-ZiNC24WPmQ&oe=6A264090&_nc_sid=8b3546"
+        "profileImage": "https://scontent-mia5-2.cdninstagram.com/v/t51.82787-19/610891666_18547024492018724_6367250792129156891_n.jpg?stp=dst-jpg_e0_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-mia5-2.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gEI9RqFsUGWDBdjHW5Nf6q3nWd7RUkgHb5LAlFA7U_YvwfJtj9GwuxFhaTMAhNS03U&_nc_ohc=4fV4yjx0sRgQ7kNvwFEtvLn&_nc_gid=1K03h-9tj_ziF-dEAfTpBg&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQBZCgtVKxx0xbTBTJo_aumgj-A6PDTbL59Y4nFxXhfWKQ&oe=6A4DBC57&_nc_sid=8b3546"
       }
     ]
   },
@@ -2245,69 +2245,117 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     ]
   },
   "tiktok-hashtag-search": {
-    "query": "fyp",
-    "totalReturned": 10,
+    "query": "skincare",
+    "totalReturned": 3,
     "results": [
       {
         "platform": "tiktok",
-        "url": "https://www.tiktok.com/@leonidas60213/video/7632230154432941314",
-        "id": "7632230154432941314",
-        "caption": "l'effet michael Jackson 📀👑😎  ! #michaeljackson #fyp #pourtoi #legend #cinema 🔥💥",
-        "description": "l'effet michael Jackson 📀👑😎  ! #michaeljackson #fyp #pourtoi #legend #cinema 🔥💥",
-        "publishedAt": "2026-04-24T07:51:10.000Z",
-        "durationSeconds": 13,
-        "thumbnailUrl": null,
+        "url": "https://www.tiktok.com/@kiyokobeauty/video/7653529024362237205",
+        "id": "7653529024362237205",
+        "caption": "Not all skincare ingredients play well together 👀\n\nMixing the wrong actives can lead to irritation, dryness, and breakouts—even when the ingredients themselves are great.\n\n✨ In this reel:\n✔️ Vitamin C + Niacinamide = yes\n✔️ Retinol + Niacinamide = yes\n✔️ Hyaluronic Acid + everything = yes\n⚠️ Vitamin C + Retinol = use separately\n⚠️ Retinol + BHA = alternate nights\n\nSometimes it's not that your skincare isn't working—it's that you're layering it wrong.\n\nSave this for your next skincare routine check, and send it to a friend who's mixing all the actives 💌\n\n#kbeauty #serum #serumviral #retinol",
+        "description": "Not all skincare ingredients play well together 👀\n\nMixing the wrong actives can lead to irritation, dryness, and breakouts—even when the ingredients themselves are great.\n\n✨ In this reel:\n✔️ Vitamin C + Niacinamide = yes\n✔️ Retinol + Niacinamide = yes\n✔️ Hyaluronic Acid + everything = yes\n⚠️ Vitamin C + Retinol = use separately\n⚠️ Retinol + BHA = alternate nights\n\nSometimes it's not that your skincare isn't working—it's that you're layering it wrong.\n\nSave this for your next skincare routine check, and send it to a friend who's mixing all the actives 💌\n\n#kbeauty #serum #serumviral #retinol",
+        "publishedAt": "2026-06-20T17:21:36.000Z",
+        "durationSeconds": 46.0,
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/o84EbWFABZ1GTe6fAAAjD9egIoDLtmIUAIgQoz~tplv-tiktokx-origin.image?dr=9636&x-expires=1783267200&x-signature=X5LtS2EYdm6766uGn77A1pxHweg%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
         "videoUrl": null,
         "author": {
-          "username": "leonidas60213",
-          "displayName": "ciidyak10",
-          "url": "https://www.tiktok.com/@leonidas60213",
-          "followers": 5175,
+          "username": "kiyokobeauty",
+          "displayName": "Kiyoko Beauty",
+          "url": "https://www.tiktok.com/@kiyokobeauty",
+          "followers": 197400,
           "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/8b56b55eda6fe3b88c103b58efeb9dec~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=26e92830&x-expires=1780686000&x-signature=B2pwivZ3sqFulHcGcwnk1IE5OBc%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
+          "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/a5295edb170033395d63b8582a0c2b18~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=24d9f8a7&x-expires=1783267200&x-signature=kIZECYZ2vIovzwy5wUSklbelCkg%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5"
         },
         "engagement": {
-          "views": 20400000,
-          "likes": 2700000,
-          "comments": 16600,
-          "shares": 413600,
-          "saves": null
+          "views": 207700,
+          "likes": 14100,
+          "comments": 96,
+          "shares": 904,
+          "saves": 7196
         },
         "hashtags": [
-          "michaeljackson",
-          "fyp"
+          "kbeauty",
+          "serum",
+          "serumviral",
+          "retinol"
         ],
-        "musicName": "son original"
+        "musicName": "original sound"
       },
       {
         "platform": "tiktok",
-        "url": "https://www.tiktok.com/@cutecutepetpet44/video/7167688638464003370",
-        "id": "7167688638464003370",
-        "caption": "#fyp",
-        "description": "#fyp",
-        "publishedAt": "2022-11-19T11:32:54.000Z",
-        "durationSeconds": 57,
-        "thumbnailUrl": null,
+        "url": "https://www.tiktok.com/@itsedonna/video/7647568358941953301",
+        "id": "7647568358941953301",
+        "caption": "My skin after 7 days of targeting dark spots  #inaweek #glassskin #darkspots #skintransformation #tipsskincare @Redence",
+        "description": "My skin after 7 days of targeting dark spots  #inaweek #glassskin #darkspots #skintransformation #tipsskincare @Redence",
+        "publishedAt": "2026-06-04T15:51:11.000Z",
+        "durationSeconds": 19.0,
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/oIRC7FB3A4tfAfInuqdIAIUhNAEEIATNDZnXEg~tplv-tiktokx-origin.image?dr=9636&x-expires=1783267200&x-signature=W2r3YLMUxz1dtIMVCxkWs97SdAw%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
         "videoUrl": null,
         "author": {
-          "username": "cutecutepetpet44",
-          "displayName": "Pickme",
-          "url": "https://www.tiktok.com/@cutecutepetpet44",
-          "followers": 75500,
+          "username": "itsedonna",
+          "displayName": "Itsedonna | Skincare",
+          "url": "https://www.tiktok.com/@itsedonna",
+          "followers": 163600,
           "verified": false,
-          "profileImage": "https://p19-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/7311233640115994667~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=9865b2d1&x-expires=1780686000&x-signature=H7Oqgp7N3X7HFieCXXsLO%2Ft8vNM%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
+          "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/cc0a588649800a2c61ca8dba4a383f3f~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=8e5cdd97&x-expires=1783267200&x-signature=TrRI44hlANqwthHul0wDsh7w8lM%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5"
         },
         "engagement": {
-          "views": 49100000,
-          "likes": 2200000,
-          "comments": 8370,
-          "shares": 26300,
-          "saves": null
+          "views": 1300000,
+          "likes": 40600,
+          "comments": 269,
+          "shares": 4245,
+          "saves": 17070
         },
         "hashtags": [
-          "fyp"
+          "inaweek",
+          "glassskin",
+          "darkspots",
+          "skintransformation",
+          "tipsskincare",
+          ""
         ],
-        "musicName": "original sound"
+        "musicName": "Originalton"
+      },
+      {
+        "platform": "tiktok",
+        "url": "https://www.tiktok.com/@sasainseoul/video/7657573710349569300",
+        "id": "7657573710349569300",
+        "caption": "3 skincare tips for July\n\nThis is not sponsored my real recommendation\n\nSunscreen @VT Cosmetics US \nToner @Blanc Nature US Store \nSerum @TORRIDEN US @PURITO SEOUL \nCream @mixsoon global \nCleanser @ISNTREE US @beplain 비플레인 \n\n#glowup #skincare #koreanskincare #kbeauty #glowuptips",
+        "description": "3 skincare tips for July\n\nThis is not sponsored my real recommendation\n\nSunscreen @VT Cosmetics US \nToner @Blanc Nature US Store \nSerum @TORRIDEN US @PURITO SEOUL \nCream @mixsoon global \nCleanser @ISNTREE US @beplain 비플레인 \n\n#glowup #skincare #koreanskincare #kbeauty #glowuptips",
+        "publishedAt": "2026-07-01T14:57:01.000Z",
+        "durationSeconds": 152.0,
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/o0BqEUEDA8fBf4jAKqSFEPqIrAFd9RARP4CrBg~tplv-tiktokx-origin.image?dr=9636&x-expires=1783267200&x-signature=aBLZpW6POTethlq%2Bzcfngt14Lwg%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
+        "videoUrl": null,
+        "author": {
+          "username": "sasainseoul",
+          "displayName": "sasa",
+          "url": "https://www.tiktok.com/@sasainseoul",
+          "followers": 1300000,
+          "verified": false,
+          "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/165a20a765f3563b98bd486203099cd1~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=187ef417&x-expires=1783267200&x-signature=SgL9SrOe7MFBw4idP3k7wGYxVcQ%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5"
+        },
+        "engagement": {
+          "views": 425600,
+          "likes": 63200,
+          "comments": 732,
+          "shares": 1725,
+          "saves": 18106
+        },
+        "hashtags": [
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "glowup",
+          "skincare",
+          "koreanskincare",
+          "kbeauty",
+          "glowuptips"
+        ],
+        "musicName": "Idyllic jazz bossa nova with piano and guitar(1298871)"
       }
     ]
   },
@@ -2536,67 +2584,102 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "tiktok-top-search": {
     "query": "skincare",
-    "totalReturned": 10,
+    "totalReturned": 3,
     "results": [
       {
         "platform": "tiktok",
-        "url": "https://www.tiktok.com/@melaniseiffert/video/7593808338719132950",
-        "id": "7593808338719132950",
-        "caption": "@medicube global collagen mask 💗 ad #medicube\n#collagenwrappingmask #amazonkbeauty #amazonbestseller #glassskin",
-        "description": "@medicube global collagen mask 💗 ad #medicube\n#collagenwrappingmask #amazonkbeauty #amazonbestseller #glassskin",
-        "publishedAt": "2026-01-10T18:54:48.000Z",
-        "durationSeconds": 20,
-        "thumbnailUrl": null,
+        "url": "https://www.tiktok.com/@promakeuppro/video/7652684315989462290",
+        "id": "7652684315989462290",
+        "caption": "The key is the 5% niacinamide concentration. A lot of people think 10% is better — but for Filipino skin, 5% is the sweet spot. It's strong enough to deliver real results, yet gentle enough for long-term use.#Niacinamide #5PercentNiacinamide #DarkSpots #DullSkin #Pores #SkincarePH #TikTokShopPhilippines #GlowUp #BreakoutNoMore#teashell#Philippine#philippinesYXAJH145-CYX",
+        "description": "The key is the 5% niacinamide concentration. A lot of people think 10% is better — but for Filipino skin, 5% is the sweet spot. It's strong enough to deliver real results, yet gentle enough for long-term use.#Niacinamide #5PercentNiacinamide #DarkSpots #DullSkin #Pores #SkincarePH #TikTokShopPhilippines #GlowUp #BreakoutNoMore#teashell#Philippine#philippinesYXAJH145-CYX",
+        "publishedAt": "2026-06-18T10:43:42.000Z",
+        "durationSeconds": 31.0,
+        "thumbnailUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/osA0WBPuIylBYAupFvaaKEstkjz5yiizzQrdG~tplv-tiktokx-origin.image?dr=9636&x-expires=1783267200&x-signature=LOMsWtwAfKr4wuKhPER4S49PeOs%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
         "videoUrl": null,
         "author": {
-          "username": "melaniseiffert",
-          "displayName": "Melani Seiffert",
-          "url": "https://www.tiktok.com/@melaniseiffert",
-          "followers": 528000,
+          "username": "promakeuppro",
+          "displayName": "ProMakeupPro",
+          "url": "https://www.tiktok.com/@promakeuppro",
+          "followers": 84800,
           "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-no1a-avt-0068c001-no/578b5a247a466ec3e441fd159f1b7ff8~tplv-tiktokx-cropcenter:720:720.jpeg?dr=10399&refresh_token=901763df&x-expires=1780686000&x-signature=INnTVEBmSYIVblRYKkqZBhLMqQg%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=no1a"
+          "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/5210f334310430d66bce7a5ff2211c00~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=74e973ee&x-expires=1783267200&x-signature=OWXO6TGMIenpPwIHh%2BpJMq137qg%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5"
         },
         "engagement": {
-          "views": 1200000,
-          "likes": 39400,
-          "comments": 334,
-          "shares": 7202,
-          "saves": null
+          "views": 1000000,
+          "likes": 6253,
+          "comments": 16,
+          "shares": 566,
+          "saves": 1160
         },
-        "hashtags": [
-          "",
-          "medicube"
-        ],
-        "musicName": "Aeris"
+        "hashtags": [],
+        "musicName": "原声 - ProMakeupPro"
       },
       {
         "platform": "tiktok",
-        "url": "https://www.tiktok.com/@albina/video/7646788858876546324",
-        "id": "7646788858876546324",
-        "caption": "Yeah naturally 😁\n\n#skin #skincare #skincareroutine #asmr",
-        "description": "Yeah naturally 😁\n\n#skin #skincare #skincareroutine #asmr",
-        "publishedAt": "2026-06-02T13:26:16.000Z",
-        "durationSeconds": 14,
-        "thumbnailUrl": null,
+        "url": "https://www.tiktok.com/@dr.health888/video/7652317428352830733",
+        "id": "7652317428352830733",
+        "caption": "Triple Collagen Cream helps hydrate and refine skin from the inside out for radiance. It also increases skin elasticity for a firm, plumped and youthful look. #medicube #collagencream #moisturizer #antiaging #over40 *Limited time offer. Prices and promotions may vary and are subject to change at any time*",
+        "description": "Triple Collagen Cream helps hydrate and refine skin from the inside out for radiance. It also increases skin elasticity for a firm, plumped and youthful look. #medicube #collagencream #moisturizer #antiaging #over40 *Limited time offer. Prices and promotions may vary and are subject to change at any time*",
+        "publishedAt": "2026-06-17T11:00:57.000Z",
+        "durationSeconds": 32.0,
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-p-0068-tx/o8IIkLUJPEAYHnGbQelhAkAAIyfUIZeNzBzAjm~tplv-tiktokx-dmt-logom:tos-useast5-i-0068-tx/oUAQgEpAR5dIqAffkAiMBnmxsk0DECFiSpKDAl.image?dr=9634&x-expires=1783267200&x-signature=HBYQuso88OhBcXWzfwjTeKX5ETI%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
         "videoUrl": null,
         "author": {
-          "username": "albina",
-          "displayName": "Albina Mavriqi",
-          "url": "https://www.tiktok.com/@albina",
-          "followers": 160200,
+          "username": "dr.health888",
+          "displayName": "Dr.Health888",
+          "url": "https://www.tiktok.com/@dr.health888",
+          "followers": 126,
           "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/e8ff6eb5b1983575267d0987cd0b1a65~tplv-tiktokx-cropcenter:720:720.jpeg?dr=10399&refresh_token=27832b04&x-expires=1780686000&x-signature=RKMXPxhtj1ybQICd%2FdhqkY8qswY%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=no1a"
+          "profileImage": "https://p19-common-sign.tiktokcdn-us.com/tos-useast5-avt-0068-tx/bfd0795351a86eb5ba4a987fc5bf9970~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=9dd3cf87&x-expires=1783267200&x-signature=uQZH9GHe3L3Yf7%2FmWsaqs1%2BJMq8%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5"
         },
         "engagement": {
-          "views": 113500,
-          "likes": 5791,
-          "comments": 26,
-          "shares": 522,
-          "saves": null
+          "views": 116900,
+          "likes": 630,
+          "comments": 35,
+          "shares": 278,
+          "saves": 177
         },
         "hashtags": [
-          "skin",
-          "skincare"
+          "medicube",
+          "collagencream",
+          "moisturizer",
+          "antiaging",
+          "over40"
+        ],
+        "musicName": "original sound"
+      },
+      {
+        "platform": "tiktok",
+        "url": "https://www.tiktok.com/@manelparletrop/video/7656065157168237857",
+        "id": "7656065157168237857",
+        "caption": "it’s been a whileeee since i did a full face of @SKIN1004 US \nProducts: \nCentella Light Cleansing Oil\nCentella Ampoule Foam\nCentella Quick Calming Pad\nCentella Ampoule\nProbio-Cica Enrich Cream\nProbio-Cica Bakuchiol Eye Cream\nHyalu-Cica Water-Fit Sun Serum\n#grwm #SKIN1004 #Centella #Koreanskincare #kbeauty",
+        "description": "it’s been a whileeee since i did a full face of @SKIN1004 US \nProducts: \nCentella Light Cleansing Oil\nCentella Ampoule Foam\nCentella Quick Calming Pad\nCentella Ampoule\nProbio-Cica Enrich Cream\nProbio-Cica Bakuchiol Eye Cream\nHyalu-Cica Water-Fit Sun Serum\n#grwm #SKIN1004 #Centella #Koreanskincare #kbeauty",
+        "publishedAt": "2026-06-27T13:23:03.000Z",
+        "durationSeconds": 126.0,
+        "thumbnailUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-useast2a-p-0037-euttp/oc3f0U6EA6R2AQTItCFqAzBDQ6mAADErf8PE3q~tplv-tiktokx-origin.image?dr=9636&x-expires=1783267200&x-signature=owCd6rbtE1tGdmXFLqgzoE09DxA%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
+        "videoUrl": null,
+        "author": {
+          "username": "manelparletrop",
+          "displayName": "manel",
+          "url": "https://www.tiktok.com/@manelparletrop",
+          "followers": 1400000,
+          "verified": false,
+          "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/b56edd497a2fa4269f437a5f98cfcea1~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=abbf5f23&x-expires=1783267200&x-signature=FY0hRYdxNS9DNWn7lEvswfhbxc4%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5"
+        },
+        "engagement": {
+          "views": 3000000,
+          "likes": 163500,
+          "comments": 1368,
+          "shares": 6539,
+          "saves": 6773
+        },
+        "hashtags": [
+          "",
+          "grwm",
+          "skin1004",
+          "centella",
+          "koreanskincare",
+          "kbeauty"
         ],
         "musicName": "original sound"
       }
@@ -2786,20 +2869,38 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     ]
   },
   "youtube-channel-playlists": {
-    "url": "https://www.youtube.com/@MrBeast",
+    "url": "https://www.youtube.com/@NASA",
     "totalReturned": 5,
     "playlists": [
       {
-        "url": "https://www.youtube.com/watch?v=6Zy5VLcEbZc",
-        "title": "I Stranded 100 People In The Wilderness For $250,000",
-        "videoCount": null,
-        "thumbnailUrl": "https://i.ytimg.com/vi/6Zy5VLcEbZc/maxresdefault.jpg"
+        "url": "https://www.youtube.com/playlist?list=PL2aBZuCeDwlRaF6AIey7ulmW1X0SHI1mQ",
+        "title": "Artemis III",
+        "videoCount": 12,
+        "thumbnailUrl": "https://i.ytimg.com/vi/yMoGiIeDH9s/hqdefault.jpg?sqp=-oaymwEXCOADEI4CSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLDfsmBn0EzLglbGoa-Q9UCm9qS_kw"
       },
       {
-        "url": "https://www.youtube.com/watch?v=AaMdXZMvT3w",
-        "title": "Survive 30 Days On An Island With Your Ex, Win $250,000",
-        "videoCount": null,
-        "thumbnailUrl": "https://i.ytimg.com/vi/AaMdXZMvT3w/maxresdefault.jpg"
+        "url": "https://www.youtube.com/playlist?list=PL2aBZuCeDwlSZtPohs7riBBDIgl9D5ltA",
+        "title": "Artemis II Astronauts",
+        "videoCount": 6,
+        "thumbnailUrl": "https://i.ytimg.com/vi/7xz9s8cVFE4/hqdefault.jpg?sqp=-oaymwEXCOADEI4CSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLAve-rx2Knz3ddFvHSe-0zKEkPcwA"
+      },
+      {
+        "url": "https://www.youtube.com/playlist?list=PL2aBZuCeDwlQvNtHhNJtarm9OewQwVntv",
+        "title": "Artemis II Mission Coverage",
+        "videoCount": 23,
+        "thumbnailUrl": "https://i.ytimg.com/vi/DYY4nnfxKbU/hqdefault.jpg?sqp=-oaymwEXCOADEI4CSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLAi1OCwehE4YN4-jFbe-SlII4gyyw"
+      },
+      {
+        "url": "https://www.youtube.com/playlist?list=PL2aBZuCeDwlQ6QkWUpHkNy5N0z91wi4I_",
+        "title": "Popular NASA Videos",
+        "videoCount": 10,
+        "thumbnailUrl": "https://i.ytimg.com/vi/S9HdPi9Ikhk/hqdefault.jpg?sqp=-oaymwEXCOADEI4CSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLBQFhpPwYc0bW2e7f42SdtyP_TTNA"
+      },
+      {
+        "url": "https://www.youtube.com/playlist?list=PL2aBZuCeDwlTXR6kIe16j0h4lx--ZneRO",
+        "title": "Europa Clipper",
+        "videoCount": 9,
+        "thumbnailUrl": "https://i.ytimg.com/vi/uUpEEU7pplg/hqdefault.jpg?sqp=-oaymwEXCOADEI4CSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLB5oIiowEUNsPMnDXGxr5v_sj5E2Q"
       }
     ]
   },
@@ -2808,20 +2909,47 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "totalReturned": 5,
     "shorts": [
       {
-        "url": "https://www.youtube.com/watch?v=DXVHmGoCTco",
-        "title": "50 Streamers Fight for $1,000,000",
-        "publishedAt": "2026-04-04T16:00:01.000Z",
-        "viewCount": 108344796,
-        "durationSeconds": null,
-        "thumbnailUrl": "https://i.ytimg.com/vi/DXVHmGoCTco/maxresdefault.jpg",
+        "url": "https://www.youtube.com/watch?v=6Zy5VLcEbZc",
+        "title": "I Stranded 100 People In The Wilderness For $250,000",
+        "publishedAt": "2026-05-02T16:00:01.000Z",
+        "viewCount": 135166859,
+        "durationSeconds": 2220,
+        "thumbnailUrl": "https://i.ytimg.com/vi/6Zy5VLcEbZc/maxresdefault.jpg",
+        "channelName": "MrBeast"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=GpQSUjNsNm0",
+        "title": "7 Days Stranded in The Arctic",
+        "publishedAt": "2026-05-30T16:00:02.000Z",
+        "viewCount": 91519007,
+        "durationSeconds": 1935,
+        "thumbnailUrl": "https://i.ytimg.com/vi/GpQSUjNsNm0/maxresdefault.jpg",
+        "channelName": "MrBeast"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=iYlODtkyw_I",
+        "title": "Survive 30 Days Chained To A Stranger, Win $250,000",
+        "publishedAt": "2026-06-27T16:00:05.000Z",
+        "viewCount": 55908561,
+        "durationSeconds": 2104,
+        "thumbnailUrl": "https://i.ytimg.com/vi/iYlODtkyw_I/maxresdefault.jpg",
+        "channelName": "MrBeast"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=__fmDj0ZJ1Q",
+        "title": "50 YouTube Legends Fight For $1,000,000",
+        "publishedAt": "2026-06-13T16:00:00.000Z",
+        "viewCount": 69251098,
+        "durationSeconds": 1927,
+        "thumbnailUrl": "https://i.ytimg.com/vi/__fmDj0ZJ1Q/maxresdefault.jpg",
         "channelName": "MrBeast"
       },
       {
         "url": "https://www.youtube.com/watch?v=AaMdXZMvT3w",
         "title": "Survive 30 Days On An Island With Your Ex, Win $250,000",
         "publishedAt": "2026-05-16T16:00:01.000Z",
-        "viewCount": 77197599,
-        "durationSeconds": null,
+        "viewCount": 89925200,
+        "durationSeconds": 2349,
         "thumbnailUrl": "https://i.ytimg.com/vi/AaMdXZMvT3w/maxresdefault.jpg",
         "channelName": "MrBeast"
       }
@@ -2832,21 +2960,48 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "totalReturned": 5,
     "streams": [
       {
+        "url": "https://www.youtube.com/watch?v=AaMdXZMvT3w",
+        "title": "Survive 30 Days On An Island With Your Ex, Win $250,000",
+        "publishedAt": "2026-05-16T16:00:01.000Z",
+        "viewCount": 89925200,
+        "durationSeconds": 2349,
+        "thumbnailUrl": "https://i.ytimg.com/vi/AaMdXZMvT3w/maxresdefault.jpg",
+        "channelName": "MrBeast"
+      },
+      {
         "url": "https://www.youtube.com/watch?v=GpQSUjNsNm0",
         "title": "7 Days Stranded in The Arctic",
         "publishedAt": "2026-05-30T16:00:02.000Z",
-        "viewCount": 54861842,
-        "durationSeconds": null,
+        "viewCount": 91519007,
+        "durationSeconds": 1935,
         "thumbnailUrl": "https://i.ytimg.com/vi/GpQSUjNsNm0/maxresdefault.jpg",
         "channelName": "MrBeast"
       },
       {
-        "url": "https://www.youtube.com/watch?v=AaMdXZMvT3w",
-        "title": "Survive 30 Days On An Island With Your Ex, Win $250,000",
-        "publishedAt": "2026-05-16T16:00:01.000Z",
-        "viewCount": 77199785,
-        "durationSeconds": null,
-        "thumbnailUrl": "https://i.ytimg.com/vi/AaMdXZMvT3w/maxresdefault.jpg",
+        "url": "https://www.youtube.com/watch?v=iYlODtkyw_I",
+        "title": "Survive 30 Days Chained To A Stranger, Win $250,000",
+        "publishedAt": "2026-06-27T16:00:05.000Z",
+        "viewCount": 55908561,
+        "durationSeconds": 2104,
+        "thumbnailUrl": "https://i.ytimg.com/vi/iYlODtkyw_I/maxresdefault.jpg",
+        "channelName": "MrBeast"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=__fmDj0ZJ1Q",
+        "title": "50 YouTube Legends Fight For $1,000,000",
+        "publishedAt": "2026-06-13T16:00:00.000Z",
+        "viewCount": 69251098,
+        "durationSeconds": 1927,
+        "thumbnailUrl": "https://i.ytimg.com/vi/__fmDj0ZJ1Q/maxresdefault.jpg",
+        "channelName": "MrBeast"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=6Zy5VLcEbZc",
+        "title": "I Stranded 100 People In The Wilderness For $250,000",
+        "publishedAt": "2026-05-02T16:00:01.000Z",
+        "viewCount": 135166859,
+        "durationSeconds": 2220,
+        "thumbnailUrl": "https://i.ytimg.com/vi/6Zy5VLcEbZc/maxresdefault.jpg",
         "channelName": "MrBeast"
       }
     ]
@@ -2976,39 +3131,103 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "youtube-hashtag-search": {
     "query": "music",
-    "totalReturned": 10,
+    "totalReturned": 5,
     "results": [
+      {
+        "url": "https://www.youtube.com/watch?v=3iAiWIytqdw",
+        "title": "Forever Young - Music Travel Love ft. Bugoy Drilon",
+        "publishedAt": "2025-04-16T00:00:08.000Z",
+        "viewCount": 31307210,
+        "durationSeconds": 265,
+        "thumbnailUrl": "https://i.ytimg.com/vi/3iAiWIytqdw/maxresdefault.jpg",
+        "channelName": "Music Travel Love"
+      },
       {
         "url": "https://www.youtube.com/watch?v=WpYPeL-gF5U",
         "title": "Stay Royalty - Official Music Video of The Royalty Family (2020)",
         "publishedAt": "2020-12-27T16:12:50.000Z",
-        "viewCount": 14784097,
-        "durationSeconds": null,
+        "viewCount": 14883690,
+        "durationSeconds": 194,
         "thumbnailUrl": "https://i.ytimg.com/vi/WpYPeL-gF5U/maxresdefault.jpg",
         "channelName": "The Royalty Family"
       },
       {
-        "url": "https://www.youtube.com/watch?v=_3mBoOvnL_4",
-        "title": "Rutshelle Guillaume feat. Kaï - Tolere w (Official Music Video)",
-        "publishedAt": "2024-09-25T00:00:32.000Z",
-        "viewCount": 32595375,
-        "durationSeconds": null,
-        "thumbnailUrl": "https://i.ytimg.com/vi/_3mBoOvnL_4/maxresdefault.jpg",
-        "channelName": "Rutshelle Guillaume"
+        "url": "https://www.youtube.com/shorts/hwf0tDWlP7Q",
+        "title": "Ashnikko - stupid feat ।। Autotune Vs no autotune ।। #battleofsong #shorts #music #song #singer",
+        "publishedAt": "2022-12-14T08:29:38.000Z",
+        "viewCount": 64582461,
+        "durationSeconds": 19,
+        "thumbnailUrl": "https://i.ytimg.com/vi/hwf0tDWlP7Q/maxres2.jpg?sqp=-oaymwEoCIAKENAF8quKqQMcGADwAQH4AbYIgAKAD4oCDAgAEAEYFSBLKH8wDw==&rs=AOn4CLCkDkjFljIdMxNOOmrsKANlEOnqrQ",
+        "channelName": "Battle of song"
+      },
+      {
+        "url": "https://www.youtube.com/shorts/hAQcodpwsIA",
+        "title": "IS THIS THE HOTTEST NEW ROCKSTAR OF 2023?! #music #emo #punkrock #hardrock #rocksong #rock #rockstar",
+        "publishedAt": "2023-05-26T19:12:49.000Z",
+        "viewCount": 12286628,
+        "durationSeconds": 20,
+        "thumbnailUrl": "https://i.ytimg.com/vi/hAQcodpwsIA/maxresdefault.jpg?sqp=-oaymwEoCIAKENAF8quKqQMcGADwAQH4Ac4FgAKACooCDAgAEAEYXSBlKDgwDw==&rs=AOn4CLB1qp8scA6duDC5KhV4UHe1QqDhiw",
+        "channelName": "TX2 OFFICIAL"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=O40ruQpZogY",
+        "title": "Seriously This is One of The Most Beautiful Songs Ever Made 🥹😭",
+        "publishedAt": "2026-04-28T03:53:48.000Z",
+        "viewCount": 852851,
+        "durationSeconds": 274,
+        "thumbnailUrl": "https://i.ytimg.com/vi/O40ruQpZogY/maxresdefault.jpg",
+        "channelName": "Fearless Soul"
       }
     ]
   },
   "youtube-playlist-videos": {
-    "url": "https://www.youtube.com/watch?v=6Zy5VLcEbZc",
-    "totalReturned": 1,
+    "url": "https://www.youtube.com/playlist?list=PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj",
+    "totalReturned": 5,
     "videos": [
       {
-        "url": "https://www.youtube.com/watch?v=6Zy5VLcEbZc",
-        "title": "I Stranded 100 People In The Wilderness For $250,000",
-        "publishedAt": "2026-05-02T16:00:01.000Z",
-        "viewCount": 119504251,
+        "url": "https://www.youtube.com/watch?v=kPa7bsKwL-c",
+        "title": "Lady Gaga, Bruno Mars - Die With A Smile (Official Music Video)",
+        "publishedAt": "2024-11-29T18:59:11Z",
+        "viewCount": null,
         "durationSeconds": null,
-        "channelName": "MrBeast"
+        "thumbnailUrl": "https://i.ytimg.com/vi/kPa7bsKwL-c/maxresdefault.jpg",
+        "channelName": "LadyGagaVEVO"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=euCqAq6BRa4",
+        "title": "DJ Snake - Let Me Love You (Official Music Video) ft. Justin Bieber",
+        "publishedAt": "2020-01-30T07:07:12Z",
+        "viewCount": null,
+        "durationSeconds": null,
+        "thumbnailUrl": "https://i.ytimg.com/vi/euCqAq6BRa4/maxresdefault.jpg",
+        "channelName": "DJSnakeVEVO"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=4V90AmXnguw",
+        "title": "Michael Jackson - Thriller (Official Video - Shortened Version)",
+        "publishedAt": "2026-04-30T17:32:42Z",
+        "viewCount": null,
+        "durationSeconds": null,
+        "thumbnailUrl": "https://i.ytimg.com/vi/4V90AmXnguw/maxresdefault.jpg",
+        "channelName": "michaeljacksonVEVO"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=ekr2nIex040",
+        "title": "ROSÉ & Bruno Mars - APT. (Official Music Video)",
+        "publishedAt": "2024-10-21T19:54:39Z",
+        "viewCount": null,
+        "durationSeconds": null,
+        "thumbnailUrl": "https://i.ytimg.com/vi/ekr2nIex040/maxresdefault.jpg",
+        "channelName": "ROSÉ"
+      },
+      {
+        "url": "https://www.youtube.com/watch?v=q4lU1N3oqYQ",
+        "title": "Madison Beer - lovergirl (Official Music Video)",
+        "publishedAt": "2026-05-14T17:02:10Z",
+        "viewCount": null,
+        "durationSeconds": null,
+        "thumbnailUrl": "https://i.ytimg.com/vi/q4lU1N3oqYQ/maxresdefault.jpg",
+        "channelName": "MadisonBeerMusicVEVO"
       }
     ]
   },
@@ -3223,6 +3442,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "qualityOrdinal": "QUALITY_ORDINAL_360P"
       }
     ],
-    "expiresAt": null
+    "expiresAt": "2026-06-03T23:20:31+00:00"
   }
 };

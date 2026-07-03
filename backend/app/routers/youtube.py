@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import math
 import re
+from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 import xml.etree.ElementTree as ET
@@ -65,6 +67,112 @@ def _channel_tab_url(url: str, tab: str) -> str:
             base = base[: -len(suffix)]
             break
     return f"{base}/{tab}"
+
+
+_YT_BROWSER_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+    ),
+    "Accept-Language": "en-US,en;q=0.9",
+}
+
+
+async def _channel_playlists_native(url: str, limit: int) -> list[dict[str, Any]]:
+    """Parse a channel's /playlists tab straight from ytInitialData.
+
+    The scraping actor cannot handle the playlists tab (it falls back to the
+    videos tab and returns videos), while the page itself embeds every playlist
+    as a LOCKUP_CONTENT_TYPE_PLAYLIST lockup with id, title, thumbnail and a
+    "N videos" badge.
+    """
+    page_url = _channel_tab_url(url, "playlists")
+    # YouTube occasionally serves a page variant without the playlist lockups;
+    # one cheap retry avoids falling back to the slow (and wrong) actor.
+    data = None
+    for _ in range(2):
+        try:
+            async with httpx.AsyncClient(
+                timeout=10, follow_redirects=True, headers=_YT_BROWSER_HEADERS
+            ) as client:
+                resp = await client.get(page_url)
+        except httpx.HTTPError:
+            continue
+        if resp.status_code >= 400:
+            continue
+        m = re.search(r"var ytInitialData = (\{.*?\});</script>", resp.text, re.DOTALL)
+        if not m:
+            continue
+        try:
+            candidate = json.loads(m.group(1))
+        except ValueError:
+            continue
+        if "LOCKUP_CONTENT_TYPE_PLAYLIST" in m.group(1):
+            data = candidate
+            break
+        data = data or candidate
+    if data is None:
+        return []
+
+    lockups: list[dict[str, Any]] = []
+
+    def walk(node: Any) -> None:
+        if isinstance(node, dict):
+            lockup = node.get("lockupViewModel")
+            if isinstance(lockup, dict) and lockup.get("contentType") == "LOCKUP_CONTENT_TYPE_PLAYLIST":
+                lockups.append(lockup)
+            for v in node.values():
+                walk(v)
+        elif isinstance(node, list):
+            for v in node:
+                walk(v)
+
+    walk(data)
+
+    rows: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for lk in lockups:
+        pid = safe_str(lk.get("contentId"))
+        if not pid or pid in seen:
+            continue
+        seen.add(pid)
+        meta = (lk.get("metadata") or {}).get("lockupMetadataViewModel") or {}
+        title = safe_str((meta.get("title") or {}).get("content"))
+        badge = re.search(r'"text":\s*"([\d,.]+)\s+videos?"', json.dumps(lk))
+        # Playlist lockups nest the image under collectionThumbnailViewModel,
+        # so find the first image "sources" list wherever it lives.
+        thumbnail = None
+
+        def find_sources(node: Any) -> list | None:
+            if isinstance(node, dict):
+                srcs = node.get("sources")
+                if isinstance(srcs, list) and srcs and isinstance(srcs[0], dict) and srcs[0].get("url"):
+                    return srcs
+                for v in node.values():
+                    found = find_sources(v)
+                    if found:
+                        return found
+            elif isinstance(node, list):
+                for v in node:
+                    found = find_sources(v)
+                    if found:
+                        return found
+            return None
+
+        sources = find_sources(lk.get("contentImage")) or []
+        if sources:
+            thumbnail = safe_str(sources[-1].get("url"))
+        rows.append(
+            {
+                "url": f"https://www.youtube.com/playlist?list={pid}",
+                "title": title or "",
+                "videoCount": safe_int(badge.group(1).replace(",", "")) if badge else None,
+                "thumbnailUrl": thumbnail,
+            }
+        )
+        if len(rows) >= limit:
+            break
+    return rows
 
 
 def _playlist_id(url: str) -> str | None:
@@ -151,7 +259,31 @@ def _reply_payload(r: dict) -> dict:
     }
 
 
+def _best_snippet_thumbnail(snippet: dict) -> str | None:
+    thumbs = snippet.get("thumbnails") or {}
+    for key in ("maxres", "standard", "high", "medium", "default"):
+        entry = thumbs.get(key)
+        if isinstance(entry, dict) and entry.get("url"):
+            return safe_str(entry["url"])
+    return None
+
+
 def _video_card(v: dict) -> dict:
+    # powerai/youtube-playlist-videos-scraper emits YouTube Data API
+    # playlistItem objects with everything nested under `snippet`.
+    snippet = v.get("snippet")
+    if isinstance(snippet, dict) and (snippet.get("resourceId") or snippet.get("videoUrl")):
+        video_id = safe_str((snippet.get("resourceId") or {}).get("videoId"))
+        return {
+            "url": safe_str(snippet.get("videoUrl"))
+            or (f"https://www.youtube.com/watch?v={video_id}" if video_id else ""),
+            "title": safe_str(snippet.get("title")) or "",
+            "publishedAt": safe_str(snippet.get("publishedAt")),
+            "viewCount": safe_int(snippet.get("viewCount")),
+            "durationSeconds": _duration_seconds(snippet.get("duration")),
+            "thumbnailUrl": _best_snippet_thumbnail(snippet),
+            "channelName": safe_str(snippet.get("videoOwnerChannelTitle") or snippet.get("channelTitle")),
+        }
     video_id = safe_str(v.get("videoId") or v.get("video_id") or v.get("id"))
     url = safe_str(v.get("url") or v.get("videoUrl") or v.get("video_url") or v.get("link"))
     if not url and video_id:
@@ -172,6 +304,9 @@ def _video_card(v: dict) -> dict:
 def _has_video_card_data(v: dict[str, Any]) -> bool:
     if v.get("error"):
         return False
+    snippet = v.get("snippet")
+    if isinstance(snippet, dict) and (snippet.get("resourceId") or snippet.get("videoUrl")):
+        return True
     explicit_url = safe_str(v.get("url") or v.get("videoUrl") or v.get("video_url") or v.get("link"))
     title = safe_str(v.get("title") or v.get("videoTitle") or v.get("video_title") or v.get("name"))
     return bool(explicit_url or title)
@@ -800,7 +935,7 @@ async def youtube_playlist_videos(
 
         data = await cached_or_run(
             endpoint="youtube.playlist-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 4},
+            params={"url": url, "limit": limit, "fast": fast, "v": 5},
             runner=_run,
             ctx=ctx,
         )
@@ -866,7 +1001,7 @@ async def youtube_playlist(
 
         data = await cached_or_run(
             endpoint="youtube.playlist",
-            params={"url": url, "limit": limit, "fast": fast, "v": 4},
+            params={"url": url, "limit": limit, "fast": fast, "v": 5},
             runner=_run,
             ctx=ctx,
         )
@@ -1039,18 +1174,24 @@ async def youtube_video_download(
                 if synth:
                     formats_raw = synth
                     download_url = download_url or synth[0]["url"]
+            expires_at = safe_str(v.get("expiresAt"))
+            if not expires_at and download_url:
+                # googlevideo URLs carry their expiry as a unix `expire` param.
+                exp = parse_qs(urlparse(download_url).query).get("expire", [None])[0]
+                if exp and str(exp).isdigit():
+                    expires_at = datetime.fromtimestamp(int(exp), tz=timezone.utc).isoformat()
             return {
                 "url": norm_url,
                 "videoId": vid,
                 "title": safe_str(v.get("title")),
                 "downloadUrl": download_url,
                 "formats": formats_raw,
-                "expiresAt": safe_str(v.get("expiresAt")),
+                "expiresAt": expires_at,
             }
 
         data = await cached_or_run(
             endpoint="youtube.video-download",
-            params={"url": norm_url},
+            params={"url": norm_url, "v": 2},
             runner=_run,
             ctx=ctx,
             ttl=3600,
@@ -1278,27 +1419,32 @@ async def youtube_channel_playlists(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_YOUTUBE_SEARCH,
-                {"startUrls": [{"url": _channel_tab_url(url, "playlists")}], "maxResults": limit},
-                max_items=limit,
-            )
-            playlists = []
-            for p in items[:limit]:
-                playlists.append(
-                    {
-                        "url": safe_str(p.get("url") or p.get("playlistUrl")),
-                        "title": safe_str(p.get("title")) or "",
-                        "videoCount": safe_int(p.get("videoCount") or p.get("numberOfVideos")),
-                        "thumbnailUrl": safe_str(p.get("thumbnailUrl")),
-                    }
+            # Primary: parse the playlists tab directly (the scraping actor
+            # can't — it silently returns the videos tab instead).
+            playlists = await _channel_playlists_native(url, limit)
+            if not playlists:
+                apify = get_apify()
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_YOUTUBE_SEARCH,
+                    {"startUrls": [{"url": _channel_tab_url(url, "playlists")}], "maxResults": limit},
+                    max_items=limit,
                 )
+                for p in items[:limit]:
+                    if p.get("type") and p.get("type") != "playlist":
+                        continue
+                    playlists.append(
+                        {
+                            "url": safe_str(p.get("url") or p.get("playlistUrl")),
+                            "title": safe_str(p.get("title")) or "",
+                            "videoCount": safe_int(p.get("videoCount") or p.get("numberOfVideos")),
+                            "thumbnailUrl": safe_str(p.get("thumbnailUrl")),
+                        }
+                    )
             return {"url": url, "totalReturned": len(playlists), "playlists": playlists}
 
         data = await cached_or_run(
             endpoint="youtube.channel-playlists",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
