@@ -755,6 +755,24 @@ export function platformAnchorId(id: PlatformId): string {
   return `api-${id.replace(/_/g, "-")}`;
 }
 
+/** URL slug for a platform's landing page at /apis/[slug], e.g. "tiktok-api". */
+export function platformSlug(id: PlatformId): string {
+  return `${id.replace(/_/g, "-")}-api`;
+}
+
+/**
+ * Platform groups that get a public landing page and appear in the APIs nav
+ * dropdown. Excludes the internal "Account" group.
+ */
+export const PLATFORM_PAGES: PlatformGroup[] = PLATFORM_GROUPS.filter(
+  (g) => g.id !== "account",
+);
+
+/** Resolve a platform landing page from its URL slug (e.g. "truth-social-api"). */
+export function getPlatformBySlug(slug: string): PlatformGroup | undefined {
+  return PLATFORM_PAGES.find((g) => platformSlug(g.id) === slug);
+}
+
 export function getEndpoint(slug: string): ApiEndpoint | undefined {
   return ALL_ENDPOINTS.find((e) => e.slug === slug);
 }

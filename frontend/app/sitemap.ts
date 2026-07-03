@@ -1,5 +1,10 @@
 import type { MetadataRoute } from "next";
-import { ALL_ENDPOINTS, SITE_URL } from "@/lib/api-catalog";
+import {
+  ALL_ENDPOINTS,
+  PLATFORM_PAGES,
+  platformSlug,
+  SITE_URL,
+} from "@/lib/api-catalog";
 import { TOOL_SLUGS } from "@/lib/tools";
 import { MAKER_TOOL_SLUGS } from "@/lib/maker-tools";
 import { COMPETITOR_SLUGS } from "@/lib/competitors";
@@ -42,6 +47,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/legal/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/legal/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ];
+
+  const platformPages: MetadataRoute.Sitemap = PLATFORM_PAGES.map((g) => ({
+    url: `${base}/apis/${platformSlug(g.id)}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
 
   const apiPages: MetadataRoute.Sitemap = ALL_ENDPOINTS.map((ep) => ({
     url: `${base}/apis/${ep.slug}`,
@@ -87,5 +99,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const blogPages = await blogEntries(base);
 
-  return [...staticPages, ...apiPages, ...howToPages, ...toolPages, ...makerToolPages, ...alternativePages, ...useCasePages, ...blogPages];
+  return [...staticPages, ...platformPages, ...apiPages, ...howToPages, ...toolPages, ...makerToolPages, ...alternativePages, ...useCasePages, ...blogPages];
 }

@@ -3,24 +3,30 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const LINKS = [
-  { href: "/apis", label: "APIs" },
   { href: "/pricing", label: "Pricing" },
   { href: "/tools", label: "Free Tools" },
   { href: "/blog", label: "Blog" },
   { href: "/docs", label: "Docs" },
 ] as const;
 
-export function MobileNav() {
+export interface MobileNavPlatform {
+  label: string;
+  href: string;
+}
+
+export function MobileNav({ platforms = [] }: { platforms?: MobileNavPlatform[] }) {
   const [open, setOpen] = useState(false);
+  const [apisOpen, setApisOpen] = useState(false);
   const pathname = usePathname();
 
   // Close on navigation.
   useEffect(() => {
     setOpen(false);
+    setApisOpen(false);
   }, [pathname]);
 
   // Lock body scroll while the menu is open.
@@ -51,8 +57,42 @@ export function MobileNav() {
             onClick={() => setOpen(false)}
             className="fixed inset-x-0 bottom-0 top-16 z-40 cursor-default bg-black/20 backdrop-blur-sm"
           />
-          <div className="fixed inset-x-0 top-16 z-50 border-b bg-background p-4 shadow-lg">
+          <div className="fixed inset-x-0 top-16 z-50 max-h-[calc(100vh-4rem)] overflow-y-auto border-b bg-background p-4 shadow-lg">
             <nav className="flex flex-col gap-1">
+              <div className="flex items-center">
+                <Link
+                  href="/apis"
+                  className="flex-1 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  APIs
+                </Link>
+                {platforms.length > 0 && (
+                  <button
+                    type="button"
+                    aria-label={apisOpen ? "Collapse API list" : "Expand API list"}
+                    aria-expanded={apisOpen}
+                    onClick={() => setApisOpen((v) => !v)}
+                    className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                  >
+                    <ChevronDown
+                      className={`size-4 transition-transform ${apisOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                )}
+              </div>
+              {apisOpen && (
+                <div className="mb-1 ml-3 max-h-64 overflow-y-auto border-l pl-3">
+                  {platforms.map((p) => (
+                    <Link
+                      key={p.href}
+                      href={p.href}
+                      className="block rounded-md px-2 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      {p.label} API
+                    </Link>
+                  ))}
+                </div>
+              )}
               {LINKS.map((l) => (
                 <Link
                   key={l.href}

@@ -26,8 +26,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ALL_ENDPOINTS,
+  PLATFORM_PAGES,
   getEndpoint,
   getGroup,
+  getPlatformBySlug,
+  platformSlug,
   relatedEndpoints,
   platformLabel,
   tagline,
@@ -45,6 +48,7 @@ import {
 } from "@/lib/api-catalog";
 import { CodeTabs } from "@/components/docs/code-tabs";
 import { ApiPlayground } from "@/components/docs/api-playground";
+import { PlatformLanding } from "@/components/marketing/platform-landing";
 import { Tldr } from "@/components/marketing/tldr";
 import { CONTENT_UPDATED } from "@/lib/seo";
 
@@ -71,7 +75,10 @@ const PLATFORM_ICONS: Record<string, LucideIcon> = {
 };
 
 export function generateStaticParams() {
-  return ALL_ENDPOINTS.map((ep) => ({ slug: ep.slug }));
+  return [
+    ...PLATFORM_PAGES.map((g) => ({ slug: platformSlug(g.id) })),
+    ...ALL_ENDPOINTS.map((ep) => ({ slug: ep.slug })),
+  ];
 }
 
 export async function generateMetadata({
@@ -80,6 +87,28 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await routeParams;
+
+  const group = getPlatformBySlug(slug);
+  if (group) {
+    const title = `${group.name} API — Real-time ${group.name} Data via REST`;
+    const description = `${group.blurb} ${group.endpoints.length} endpoints, one Bearer key, clean JSON — no OAuth and no scrapers to maintain. Start free with 100 credits.`;
+    const url = `${SITE_URL}/apis/${slug}`;
+    return {
+      title: `${title} | Captapi`,
+      description,
+      keywords: [
+        `${group.name} API`,
+        `${group.name} data API`,
+        `${group.name} scraper API`,
+        `scrape ${group.name}`,
+        "social media API",
+      ],
+      alternates: { canonical: url },
+      openGraph: { title, description, url, type: "website" },
+      twitter: { card: "summary_large_image", title, description },
+    };
+  }
+
   const ep = getEndpoint(slug);
   if (!ep) return {};
   const title = `${ep.name} — ${platformLabel(ep.platform)} Data via REST`;
@@ -167,6 +196,10 @@ export default async function ApiDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await routeParams;
+
+  const platformGroup = getPlatformBySlug(slug);
+  if (platformGroup) return <PlatformLanding group={platformGroup} />;
+
   const ep = getEndpoint(slug);
   if (!ep) notFound();
 

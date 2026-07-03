@@ -2,7 +2,28 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "@/components/marketing/mobile-nav";
-import { SITE_URL, ENDPOINT_COUNT, PLATFORM_COUNT } from "@/lib/api-catalog";
+import {
+  ApisNavDropdown,
+  type NavPlatform,
+} from "@/components/marketing/apis-nav-dropdown";
+import {
+  SITE_URL,
+  ENDPOINT_COUNT,
+  PLATFORM_COUNT,
+  PLATFORM_PAGES,
+  platformSlug,
+} from "@/lib/api-catalog";
+
+const NAV_PLATFORMS: NavPlatform[] = PLATFORM_PAGES.map((g) => ({
+  label: g.name,
+  href: `/apis/${platformSlug(g.id)}`,
+  icon: g.icon,
+  color: g.color,
+  endpoints: g.endpoints.map((ep) => ({
+    name: ep.shortName,
+    href: `/apis/${ep.slug}`,
+  })),
+}));
 
 const STRUCTURED_DATA = {
   "@context": "https://schema.org",
@@ -92,7 +113,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm">
-            <Link href="/apis" className="text-muted-foreground hover:text-foreground">APIs</Link>
+            <ApisNavDropdown platforms={NAV_PLATFORMS} />
             <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
             <Link href="/tools" className="text-muted-foreground hover:text-foreground">Free Tools</Link>
             <Link href="/blog" className="text-muted-foreground hover:text-foreground">Blog</Link>
@@ -103,7 +124,9 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
               <Button asChild variant="ghost"><Link href="/login">Sign in</Link></Button>
               <Button asChild><Link href="/signup">Start Free</Link></Button>
             </div>
-            <MobileNav />
+            <MobileNav
+              platforms={NAV_PLATFORMS.map((p) => ({ label: p.label, href: p.href }))}
+            />
           </div>
         </div>
       </header>
