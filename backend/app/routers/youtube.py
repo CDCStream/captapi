@@ -467,6 +467,44 @@ async def youtube_summarize(
         return ApiResponse(data=data)
 
 
+def _duration_seconds(value: Any) -> int | None:
+    """Parse a video duration into whole seconds.
+
+    Actors return durations in mixed shapes: int/float seconds, digit strings,
+    "HH:MM:SS" / "M:SS" text (streamers/youtube-scraper), or ISO-8601
+    ("PT5M48S"). `safe_int` silently dropped the text shapes to null.
+    """
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        return int(value)
+    s = str(value).strip()
+    if not s:
+        return None
+    if s.isdigit():
+        return int(s)
+    m = re.fullmatch(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?", s, re.IGNORECASE)
+    if m and any(m.groups()):
+        hours = int(m.group(1) or 0)
+        minutes = int(m.group(2) or 0)
+        seconds = float(m.group(3) or 0)
+        return int(hours * 3600 + minutes * 60 + seconds)
+    if re.fullmatch(r"\d+(?::\d{1,2}){1,2}", s):
+        total = 0
+        for part in s.split(":"):
+            total = total * 60 + int(part)
+        return total
+    return None
+
+
+def _format_duration(seconds: int | None) -> str | None:
+    if seconds is None:
+        return None
+    h, rem = divmod(int(seconds), 3600)
+    m, s = divmod(rem, 60)
+    return f"{h:02d}:{m:02d}:{s:02d}"
+
+
 # ---------- VIDEO DETAILS -------------------------------------------------
 @router.get("/video-details", summary="YouTube video metadata + stats")
 async def youtube_video_details(
@@ -492,6 +530,14 @@ async def youtube_video_details(
             if not items:
                 raise HTTPException(status_code=404, detail="Video not found")
             v = items[0]
+            duration_seconds = _duration_seconds(
+                v.get("duration")
+                if v.get("duration") is not None
+                else v.get("durationSeconds") or v.get("lengthSeconds")
+            )
+            if duration_seconds is None:
+                ms = safe_int(v.get("durationMs"))
+                duration_seconds = int(ms / 1000) if ms else None
             return {
                 "url": norm_url,
                 "id": vid,
@@ -501,17 +547,19 @@ async def youtube_video_details(
                 "channelId": safe_str(v.get("channelId") or v.get("authorId")),
                 "channelUrl": safe_str(v.get("channelUrl")),
                 "publishedAt": safe_str(v.get("date") or v.get("publishedAt")),
-                "durationSeconds": safe_int(v.get("duration") or v.get("durationSeconds")),
+                "durationSeconds": duration_seconds,
+                "durationFormatted": _format_duration(duration_seconds),
                 "viewCount": safe_int(v.get("viewCount") or v.get("views")),
                 "likeCount": safe_int(v.get("likes") or v.get("likeCount")),
                 "commentCount": safe_int(v.get("commentsCount") or v.get("commentCount")),
                 "thumbnailUrl": safe_str(v.get("thumbnailUrl") or (v.get("thumbnails") or [{}])[-1].get("url")),
+                "genre": safe_str(v.get("genre") or v.get("category") or v.get("categoryName")),
                 "tags": safe_list(v.get("tags")),
             }
 
         data = await cached_or_run(
             endpoint="youtube.video-details",
-            params={"url": norm_url},
+            params={"url": norm_url, "v": 2},
             runner=_run,
             ctx=ctx,
         )

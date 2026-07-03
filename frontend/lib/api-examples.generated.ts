@@ -1510,11 +1510,13 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "channelId": "UCuAXFkgsw1L7xaCfnd5JJOw",
     "channelUrl": "https://www.youtube.com/@RickAstleyYT",
     "publishedAt": "2009-10-25T06:57:33.000Z",
-    "durationSeconds": null,
+    "durationSeconds": 213,
+    "durationFormatted": "00:03:33",
     "viewCount": 1779100458,
     "likeCount": 19000000,
     "commentCount": 2440329,
     "thumbnailUrl": "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+    "genre": "Music",
     "tags": []
   },
   "youtube-video-download": {
