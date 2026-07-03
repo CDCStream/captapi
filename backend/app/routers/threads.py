@@ -96,12 +96,20 @@ def _post_media(item: dict[str, Any]) -> list[str]:
 def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
     user = item.get("user") or item.get("author") or item
     code = item.get("code") or item.get("shortcode") or item.get("post_code")
+    author_name = (user.get("username") or user.get("userName")) if isinstance(user, dict) else None
+    # Prefer the @user/post/CODE canonical form: /t/CODE links are rejected by
+    # the media-downloader actor that post-details falls back to.
+    if code and author_name:
+        canonical = f"https://www.threads.net/@{author_name}/post/{code}"
+    elif code:
+        canonical = f"https://www.threads.net/t/{code}"
+    else:
+        canonical = None
     return {
         "platform": "threads",
         "id": safe_str(item.get("pk") or item.get("id") or item.get("post_id") or item.get("postId")),
         "code": safe_str(code),
-        "url": safe_str(item.get("url") or item.get("post_url"))
-        or (f"https://www.threads.net/t/{code}" if code else None),
+        "url": canonical or safe_str(item.get("url") or item.get("post_url")),
         "text": safe_str(item.get("caption") or item.get("text") or item.get("caption_text")),
         "publishedAt": safe_str(
             item.get("taken_at") or item.get("date") or item.get("published_on") or item.get("publishedAt")
@@ -225,7 +233,7 @@ async def threads_user_posts(
 
         data = await cached_or_run(
             endpoint="threads.user-posts",
-            params={"handle": handle, "limit": limit, "v": 2},
+            params={"handle": handle, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -260,7 +268,7 @@ async def threads_search(
 
         data = await cached_or_run(
             endpoint="threads.search",
-            params={"q": q, "limit": limit, "v": 2},
+            params={"q": q, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -286,20 +294,35 @@ async def threads_search_users(
         async def _run() -> dict[str, Any]:
             apify = get_apify()
             # No dedicated user-search; derive distinct authors from a keyword
-            # search over a wider post sample.
+            # search over a wider post sample. includeProfile adds separate
+            # profile rows with followers/bio/verified for each author found.
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_THREADS_SEARCH,
-                {"mode": "search", "searchQueries": [q], "maxPosts": limit * 4},
-                max_items=limit * 4,
+                {"mode": "search", "searchQueries": [q], "maxPosts": limit * 4, "includeProfile": True},
+                max_items=limit * 8,
             )
+            profiles: dict[str, dict[str, Any]] = {}
+            for item in items:
+                if item.get("type") == "profile":
+                    uname = item.get("username") or item.get("userName")
+                    if uname:
+                        profiles[uname] = item
             seen: set[str] = set()
             users: list[dict[str, Any]] = []
             for item in items:
+                if item.get("type") == "profile":
+                    continue
                 u = _user(item.get("user") or item.get("author") or item)
                 uname = u.get("username")
                 if not uname or uname in seen:
                     continue
                 seen.add(uname)
+                profile = profiles.get(uname)
+                if profile:
+                    enriched = _user(profile)
+                    for key, value in enriched.items():
+                        if u.get(key) is None and value is not None:
+                            u[key] = value
                 users.append(u)
                 if len(users) >= limit:
                     break
@@ -307,7 +330,7 @@ async def threads_search_users(
 
         data = await cached_or_run(
             endpoint="threads.search-users",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

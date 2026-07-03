@@ -45,7 +45,7 @@ def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
     if isinstance(price, dict):
         # cunning_soil details actor: {"min_price": "$18.99", "max_price": ..., "currency": "USD"}
         currency = currency or price.get("currency")
-        price = price.get("min_price") or price.get("price")
+        price = price.get("min_price") or price.get("price") or price.get("max_price")
     images = item.get("images")
     first_image = images[0] if isinstance(images, list) and images else None
     return {
@@ -156,14 +156,18 @@ async def product_details(
             apify = get_apify()
             # The mobile-API details actor returns title/price/images/stock; the
             # generic shop scraper's product_details mode often echoes the URL only.
-            try:
-                items = await apify.run_actor_sync(
-                    get_settings().APIFY_ACTOR_TIKTOK_SHOP_DETAILS,
-                    {"productInput": url, "region": "US", "outputMode": "formatted_filtered"},
-                    max_items=1,
-                )
-            except Exception:  # noqa: BLE001
-                items = []
+            items: list[dict[str, Any]] = []
+            for _attempt in range(2):
+                try:
+                    items = await apify.run_actor_sync(
+                        get_settings().APIFY_ACTOR_TIKTOK_SHOP_DETAILS,
+                        {"productInput": url, "region": "US", "outputMode": "formatted_filtered"},
+                        max_items=1,
+                    )
+                except Exception:  # noqa: BLE001
+                    items = []
+                if items and items[0].get("title"):
+                    break
             if not items or not items[0].get("title"):
                 items = await _run_shop("product_details", {"productUrls": [url], "maxResults": 1}, 1)
             if not items:
@@ -174,7 +178,7 @@ async def product_details(
             normalized["url"] = normalized["url"] or url
             return normalized
 
-        return ApiResponse(data=await cached_or_run("tiktok-shop.product-details", {"url": url, "v": 2}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("tiktok-shop.product-details", {"url": url, "v": 3}, _run, ctx))
 
 
 @router.get("/product-reviews", summary="TikTok Shop product reviews")
