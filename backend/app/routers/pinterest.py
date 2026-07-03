@@ -134,21 +134,29 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# The router's run-input format (mode/keywords/usernames/boardUrls) targets
+# this actor. If the deployment env pins APIFY_ACTOR_PINTEREST to an older
+# actor (e.g. thirdwatch), runs "succeed" with zero rows - so always fall back
+# to the actor the input schema was written for.
+_PINTEREST_ACTOR_FALLBACK = "crawlerbros/pinterest-scraper-pro"
+
+
 async def _run_pinterest_actor(run_input: dict[str, Any], limit: int) -> list[dict[str, Any]]:
-    """Run the Pinterest actor with one retry: runs intermittently come back
-    empty when Pinterest blocks the proxy session."""
+    """Run the Pinterest actor, retrying empty runs (intermittent proxy
+    blocks) and falling back to the schema-matching actor."""
     apify = get_apify()
-    items: list[dict[str, Any]] = []
-    for _attempt in range(2):
-        try:
-            items = await apify.run_actor_sync(
-                get_settings().APIFY_ACTOR_PINTEREST, run_input, max_items=limit
-            )
-        except Exception:  # noqa: BLE001
-            items = []
-        if items:
-            break
-    return items
+    actors = [get_settings().APIFY_ACTOR_PINTEREST]
+    if _PINTEREST_ACTOR_FALLBACK not in actors:
+        actors.append(_PINTEREST_ACTOR_FALLBACK)
+    for actor in actors:
+        for _attempt in range(2):
+            try:
+                items = await apify.run_actor_sync(actor, run_input, max_items=limit)
+            except Exception:  # noqa: BLE001
+                items = []
+            if items:
+                return items
+    return []
 
 
 def _prefer_enriched(pins: list[dict[str, Any]]) -> list[dict[str, Any]]:
