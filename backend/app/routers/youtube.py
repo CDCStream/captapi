@@ -160,7 +160,9 @@ def _video_card(v: dict) -> dict:
         "title": safe_str(v.get("title") or v.get("videoTitle") or v.get("video_title") or v.get("name")) or "",
         "publishedAt": safe_str(v.get("date") or v.get("publishedAt") or v.get("published_at") or v.get("published")),
         "viewCount": safe_int(v.get("viewCount") or v.get("views") or v.get("view_count") or v.get("view_count_text")),
-        "durationSeconds": safe_int(v.get("duration") or v.get("durationSeconds") or v.get("duration_seconds")),
+        "durationSeconds": _duration_seconds(
+            v.get("duration") or v.get("durationSeconds") or v.get("duration_seconds") or v.get("lengthSeconds")
+        ),
         "thumbnailUrl": safe_str(v.get("thumbnailUrl") or v.get("thumbnail") or v.get("thumbnail_url") or v.get("thumbnailUrlHigh")),
         "channelName": safe_str(v.get("channelName") or v.get("channel") or v.get("channelTitle") or v.get("channel_name")),
     }
@@ -670,22 +672,31 @@ async def youtube_channel_details(
             if not items:
                 raise HTTPException(status_code=404, detail="Channel not found")
             c = items[0]
+            links = [
+                {"text": safe_str(link.get("text")), "url": safe_str(link.get("url"))}
+                for link in safe_list(c.get("channelDescriptionLinks"))
+                if isinstance(link, dict) and link.get("url")
+            ]
             return {
-                "url": url,
+                "url": safe_str(c.get("channelUrl")) or url,
                 "id": safe_str(c.get("channelId") or c.get("id")),
                 "name": safe_str(c.get("channelName") or c.get("name")) or "",
+                "handle": safe_str(c.get("channelUsername")),
                 "description": safe_str(c.get("channelDescription") or c.get("description")),
                 "subscriberCount": safe_int(c.get("subscriberCount") or c.get("numberOfSubscribers")),
-                "videoCount": safe_int(c.get("videosCount") or c.get("videoCount")),
-                "viewCount": safe_int(c.get("viewCount") or c.get("totalViews")),
-                "thumbnailUrl": safe_str(c.get("avatarUrl") or c.get("thumbnailUrl")),
-                "bannerUrl": safe_str(c.get("bannerUrl")),
-                "country": safe_str(c.get("country")),
+                "videoCount": safe_int(c.get("channelTotalVideos") or c.get("videosCount") or c.get("videoCount")),
+                "viewCount": safe_int(c.get("channelTotalViews") or c.get("viewCount") or c.get("totalViews")),
+                "thumbnailUrl": safe_str(c.get("channelAvatarUrl") or c.get("avatarUrl") or c.get("thumbnailUrl")),
+                "bannerUrl": safe_str(c.get("channelBannerUrl") or c.get("bannerUrl")),
+                "country": safe_str(c.get("channelLocation") or c.get("country")),
+                "joinedDate": safe_str(c.get("channelJoinedDate")),
+                "verified": c.get("isChannelVerified"),
+                "links": links,
             }
 
         data = await cached_or_run(
             endpoint="youtube.channel-details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -729,7 +740,7 @@ async def youtube_channel_videos(
                         "title": safe_str(v.get("title")) or "",
                         "publishedAt": safe_str(v.get("date") or v.get("publishedAt")),
                         "viewCount": safe_int(v.get("viewCount") or v.get("views")),
-                        "durationSeconds": safe_int(v.get("duration")),
+                        "durationSeconds": _duration_seconds(v.get("duration") or v.get("lengthSeconds")),
                         "thumbnailUrl": safe_str(v.get("thumbnailUrl")),
                     }
                 )
@@ -737,7 +748,7 @@ async def youtube_channel_videos(
 
         data = await cached_or_run(
             endpoint="youtube.channel-videos",
-            params={"url": url, "limit": limit, "fast": fast},
+            params={"url": url, "limit": limit, "fast": fast, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -786,7 +797,7 @@ async def youtube_playlist_videos(
 
         data = await cached_or_run(
             endpoint="youtube.playlist-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 3},
+            params={"url": url, "limit": limit, "fast": fast, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -852,7 +863,7 @@ async def youtube_playlist(
 
         data = await cached_or_run(
             endpoint="youtube.playlist",
-            params={"url": url, "limit": limit, "fast": fast, "v": 3},
+            params={"url": url, "limit": limit, "fast": fast, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -893,14 +904,14 @@ async def youtube_search(
                         "viewCount": safe_int(v.get("viewCount") or v.get("views")),
                         "publishedAt": safe_str(v.get("date") or v.get("publishedAt")),
                         "thumbnailUrl": safe_str(v.get("thumbnailUrl")),
-                        "durationSeconds": safe_int(v.get("duration")),
+                        "durationSeconds": _duration_seconds(v.get("duration") or v.get("lengthSeconds")),
                     }
                 )
             return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="youtube.search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -942,7 +953,7 @@ async def youtube_trending_shorts(
 
         data = await cached_or_run(
             endpoint="youtube.trending-shorts",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1072,7 +1083,7 @@ async def youtube_channel_shorts(
 
         data = await cached_or_run(
             endpoint="youtube.channel-shorts",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1107,7 +1118,7 @@ async def youtube_channel_streams(
 
         data = await cached_or_run(
             endpoint="youtube.channel-streams",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1146,7 +1157,7 @@ async def youtube_hashtag_search(
 
         data = await cached_or_run(
             endpoint="youtube.hashtag-search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

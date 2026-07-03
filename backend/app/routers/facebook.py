@@ -87,6 +87,19 @@ def _reply_payload(r: dict) -> dict:
     }
 
 
+def _fb_username_from_url(value: str | None) -> str | None:
+    """Extract the vanity handle from a facebook.com profile/page URL."""
+    if not value:
+        return None
+    match = re.search(r"facebook\.com/([A-Za-z0-9.\-_]+)/?", value)
+    if not match:
+        return None
+    handle = match.group(1)
+    if handle in {"profile.php", "people", "pages", "watch", "reel", "groups"} or handle.isdigit():
+        return None
+    return handle
+
+
 def _normalize_post(item: dict) -> dict:
     raw_media = item.get("media")
     if isinstance(raw_media, list):
@@ -95,6 +108,23 @@ def _normalize_post(item: dict) -> dict:
         media = raw_media
     else:
         media = {}
+    user = item.get("user") or {}
+    delivery = media.get("videoDeliveryLegacyFields") or {}
+    duration_ms = media.get("playable_duration_in_ms")
+    thumbnail = (
+        item.get("thumbnailUrl")
+        or media.get("thumbnailUrl")
+        or media.get("thumbnail")
+        or ((media.get("thumbnailImage") or {}).get("uri"))
+        or (((media.get("preferred_thumbnail") or {}).get("image") or {}).get("uri"))
+        or ((media.get("image") or {}).get("uri"))
+    )
+    video_url = (
+        item.get("videoUrl")
+        or media.get("videoUrl")
+        or delivery.get("browser_native_hd_url")
+        or delivery.get("browser_native_sd_url")
+    )
     return {
         "platform": "facebook",
         "url": safe_str(item.get("url") or item.get("postUrl")),
@@ -102,21 +132,32 @@ def _normalize_post(item: dict) -> dict:
         "caption": safe_str(item.get("text") or item.get("description")),
         "description": safe_str(item.get("text")),
         "publishedAt": safe_str(item.get("time") or item.get("publishedAt")),
-        "durationSeconds": safe_float(item.get("videoDuration") or media.get("duration")),
-        "thumbnailUrl": safe_str(item.get("thumbnailUrl") or media.get("thumbnailUrl")),
-        "videoUrl": safe_str(item.get("videoUrl") or media.get("videoUrl")),
+        "durationSeconds": safe_float(
+            item.get("videoDuration")
+            or media.get("duration")
+            or (duration_ms / 1000 if isinstance(duration_ms, (int, float)) and duration_ms else None)
+        ),
+        "thumbnailUrl": safe_str(thumbnail),
+        "videoUrl": safe_str(video_url),
         "author": {
-            "username": safe_str(item.get("pageUsername") or item.get("author")),
-            "displayName": safe_str(item.get("pageName") or item.get("authorName")),
-            "url": safe_str(item.get("pageUrl") or item.get("authorUrl")),
+            "username": safe_str(
+                item.get("pageUsername")
+                or _fb_username_from_url(item.get("facebookUrl") or item.get("inputUrl"))
+                or item.get("author")
+            ),
+            "displayName": safe_str(item.get("pageName") or user.get("name") or item.get("authorName")),
+            "url": safe_str(item.get("pageUrl") or user.get("profileUrl") or item.get("facebookUrl") or item.get("authorUrl")),
+            "profileImage": safe_str(user.get("profilePic")),
             "verified": item.get("isPageVerified") or item.get("verified"),
         },
         "engagement": {
-            "views": safe_int(item.get("viewsCount") or item.get("videoViewCount")),
-            "likes": safe_int(item.get("likesCount") or item.get("reactionsCount")),
-            "comments": safe_int(item.get("commentsCount")),
-            "shares": safe_int(item.get("sharesCount")),
+            "views": safe_int(item.get("viewsCount") or item.get("videoViewCount") or item.get("videoPostViewCount")),
+            "likes": safe_int(item.get("likes") or item.get("likesCount") or item.get("reactionsCount")) or 0,
+            "comments": safe_int(item.get("comments") or item.get("commentsCount")) or 0,
+            "shares": safe_int(item.get("shares") or item.get("sharesCount")) or 0,
         },
+        "isVideo": bool(item.get("isVideo")),
+        "link": safe_str(item.get("link")),
     }
 
 
@@ -240,7 +281,7 @@ async def facebook_details(
 
         data = await cached_or_run(
             endpoint="facebook.details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -387,12 +428,15 @@ async def facebook_comments(
             for c in items[:limit]:
                 comments.append(
                     {
-                        "id": safe_str(c.get("id") or c.get("commentId")),
+                        "id": safe_str(c.get("commentId") or c.get("id")),
+                        "url": safe_str(c.get("commentUrl")),
                         "text": (c.get("text") or "").strip(),
                         "author": safe_str(c.get("profileName") or c.get("authorName")),
-                        "likeCount": safe_int(c.get("likesCount") or c.get("reactionsCount")),
+                        "authorUrl": safe_str(c.get("profileUrl")),
+                        "authorAvatarUrl": safe_str(c.get("profilePicture")),
+                        "likeCount": safe_int(c.get("likesCount") or c.get("reactionsCount")) or 0,
                         "publishedAt": safe_str(c.get("date") or c.get("publishedAt")),
-                        "replyCount": safe_int(c.get("repliesCount")),
+                        "replyCount": safe_int(c.get("repliesCount") or c.get("commentsCount")) or 0,
                     }
                 )
             return {
@@ -404,7 +448,7 @@ async def facebook_comments(
 
         data = await cached_or_run(
             endpoint="facebook.comments",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -436,23 +480,37 @@ async def facebook_page_details(
             if not items:
                 raise HTTPException(status_code=404, detail="Page not found")
             p = items[0]
+            verified = p.get("verified") or p.get("isPageVerified")
+            if verified is None and (p.get("confirmed_owner") or p.get("CONFIRMED_OWNER_LABEL")):
+                # The pages scraper has no blue-badge flag; a confirmed Page
+                # owner label is the closest verification signal it exposes.
+                verified = True
             return {
                 "platform": "facebook",
-                "url": url,
-                "username": safe_str(p.get("pageUsername") or p.get("username")),
+                "url": safe_str(p.get("pageUrl") or p.get("facebookUrl")) or url,
+                "username": safe_str(
+                    p.get("pageUsername")
+                    or p.get("username")
+                    or _fb_username_from_url(p.get("pageUrl") or p.get("facebookUrl"))
+                ),
                 "displayName": safe_str(p.get("pageName") or p.get("title")),
+                "fullName": safe_str(p.get("title")),
                 "bio": safe_str(p.get("intro") or p.get("about")),
                 "followers": safe_int(p.get("followersCount") or p.get("followers")),
+                "following": safe_int(p.get("followings")),
                 "likes": safe_int(p.get("likesCount") or p.get("likes")),
-                "verified": p.get("verified") or p.get("isPageVerified"),
+                "verified": verified,
                 "profileImage": safe_str(p.get("profilePictureUrl") or p.get("profilePicUrl")),
+                "coverImage": safe_str(p.get("coverPhotoUrl")),
                 "category": safe_str(p.get("category")),
                 "website": safe_str(p.get("website")),
+                "email": safe_str(p.get("email")),
+                "createdAt": safe_str(p.get("creation_date")),
             }
 
         data = await cached_or_run(
             endpoint="facebook.page-details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -487,7 +545,7 @@ async def facebook_profile_posts(
 
         data = await cached_or_run(
             endpoint="facebook.profile-posts",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -530,7 +588,7 @@ async def facebook_profile_reels(
 
         data = await cached_or_run(
             endpoint="facebook.profile-reels",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -566,7 +624,7 @@ async def facebook_group_posts(
 
         data = await cached_or_run(
             endpoint="facebook.group-posts",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

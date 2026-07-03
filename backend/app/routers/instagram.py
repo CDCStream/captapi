@@ -79,11 +79,16 @@ def _require_instagram_profile(value: str) -> str:
 
 
 def _normalize_post(item: dict) -> dict:
-    author = item.get("ownerUsername") or (item.get("owner") or {}).get("username")
+    owner = item.get("owner") or {}
+    author = item.get("ownerUsername") or owner.get("username")
+    post_type = safe_str(item.get("type"))
     return {
         "platform": "instagram",
         "url": safe_str(item.get("url") or item.get("permalink") or item.get("shortcodeUrl")),
         "id": safe_str(item.get("id") or item.get("shortCode") or item.get("shortcode")),
+        # "Image" | "Video" | "Sidecar" — video fields are null for images.
+        "type": post_type,
+        "productType": safe_str(item.get("productType")),
         "caption": safe_str(item.get("caption") or item.get("text") or item.get("description")),
         "description": safe_str(item.get("caption") or item.get("text") or item.get("description")),
         "publishedAt": safe_str(item.get("timestamp") or item.get("takenAt") or item.get("taken_at")),
@@ -92,18 +97,19 @@ def _normalize_post(item: dict) -> dict:
         "videoUrl": safe_str(item.get("videoUrl") or item.get("video_url") or item.get("downloadUrl")),
         "author": {
             "username": safe_str(author),
-            "displayName": safe_str(item.get("ownerFullName") or (item.get("owner") or {}).get("fullName")),
+            "displayName": safe_str(item.get("ownerFullName") or owner.get("fullName") or owner.get("full_name")),
             "url": f"https://instagram.com/{author}" if author else None,
-            "followers": safe_int((item.get("owner") or {}).get("followerCount")),
-            "verified": (item.get("owner") or {}).get("isVerified"),
-            "profileImage": safe_str((item.get("owner") or {}).get("profilePicUrl")),
+            "followers": safe_int(owner.get("followerCount") or owner.get("followersCount")),
+            "verified": owner.get("isVerified") if owner.get("isVerified") is not None else owner.get("is_verified"),
+            "profileImage": safe_str(owner.get("profilePicUrl") or owner.get("profile_pic_url")),
         },
         "engagement": {
             "views": safe_int(item.get("videoViewCount") or item.get("videoPlayCount")),
-            "likes": safe_int(item.get("likesCount") or item.get("likeCount")),
-            "comments": safe_int(item.get("commentsCount") or item.get("commentCount")),
+            "likes": safe_int(item.get("likesCount") or item.get("likeCount")) or 0,
+            "comments": safe_int(item.get("commentsCount") or item.get("commentCount")) or 0,
         },
         "hashtags": safe_list(item.get("hashtags")),
+        "mentions": safe_list(item.get("mentions")),
     }
 
 
@@ -304,7 +310,7 @@ async def instagram_details(
 
         data = await cached_or_run(
             endpoint="instagram.details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -407,14 +413,18 @@ async def instagram_comments(
             )
             comments = []
             for c in items[:limit]:
+                owner = c.get("owner") or {}
                 comments.append(
                     {
                         "id": safe_str(c.get("id")),
+                        "url": safe_str(c.get("commentUrl")),
                         "text": (c.get("text") or "").strip(),
-                        "author": safe_str(c.get("ownerUsername") or c.get("owner", {}).get("username")),
-                        "likeCount": safe_int(c.get("likesCount") or c.get("likeCount")),
+                        "author": safe_str(c.get("ownerUsername") or owner.get("username")),
+                        "authorAvatarUrl": safe_str(c.get("ownerProfilePicUrl") or owner.get("profile_pic_url")),
+                        "authorIsVerified": bool(owner.get("is_verified")),
+                        "likeCount": safe_int(c.get("likesCount") or c.get("likeCount")) or 0,
                         "publishedAt": safe_str(c.get("timestamp")),
-                        "replyCount": safe_int(c.get("replyCount") or c.get("repliesCount")),
+                        "replyCount": safe_int(c.get("replyCount") or c.get("repliesCount")) or 0,
                     }
                 )
             return {
@@ -426,7 +436,7 @@ async def instagram_comments(
 
         data = await cached_or_run(
             endpoint="instagram.comments",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -585,7 +595,7 @@ async def instagram_channel_posts(
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -620,7 +630,7 @@ async def instagram_channel_reels(
 
         data = await cached_or_run(
             endpoint="instagram.channel-reels",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -660,7 +670,7 @@ async def instagram_reels_search(
 
         data = await cached_or_run(
             endpoint="instagram.reels-search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -694,7 +704,7 @@ async def instagram_trending_reels(
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit},
+            params={"country": country, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -809,7 +819,7 @@ async def instagram_tagged_posts(
 
         data = await cached_or_run(
             endpoint="instagram.tagged-posts",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -889,7 +899,7 @@ async def instagram_hashtag_search(
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

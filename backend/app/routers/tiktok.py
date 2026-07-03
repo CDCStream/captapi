@@ -185,6 +185,9 @@ def _normalize(item: dict) -> dict:
     author = item.get("authorMeta") or item.get("author") or {}
     stats = item.get("stats") or {}
     music = item.get("musicMeta") or item.get("music") or {}
+    video_meta = item.get("videoMeta") or {}
+    covers = safe_list(item.get("covers"))
+    media_urls = safe_list(item.get("mediaUrls"))
     return {
         "platform": "tiktok",
         "url": safe_str(item.get("webVideoUrl") or item.get("url")),
@@ -192,9 +195,18 @@ def _normalize(item: dict) -> dict:
         "caption": safe_str(item.get("text") or item.get("desc")),
         "description": safe_str(item.get("text") or item.get("desc")),
         "publishedAt": safe_str(item.get("createTimeISO") or item.get("createTime")),
-        "durationSeconds": safe_float(item.get("videoMeta", {}).get("duration") or item.get("duration")),
-        "thumbnailUrl": safe_str(item.get("videoMeta", {}).get("coverUrl") or item.get("covers", [None])[0] if item.get("covers") else None),
-        "videoUrl": safe_str(item.get("videoUrl") or item.get("video", {}).get("downloadAddr")),
+        "durationSeconds": safe_float(video_meta.get("duration") or item.get("duration")),
+        "thumbnailUrl": safe_str(
+            video_meta.get("coverUrl")
+            or video_meta.get("originalCoverUrl")
+            or (covers[0] if covers else None)
+        ),
+        "videoUrl": safe_str(
+            item.get("videoUrl")
+            or video_meta.get("downloadAddr")
+            or (item.get("video") or {}).get("downloadAddr")
+            or (media_urls[0] if media_urls else None)
+        ),
         "author": {
             "username": safe_str(author.get("name") or author.get("uniqueId")),
             "displayName": safe_str(author.get("nickName") or author.get("nickname")),
@@ -208,7 +220,7 @@ def _normalize(item: dict) -> dict:
             "likes": safe_int(item.get("diggCount") or stats.get("diggCount")),
             "comments": safe_int(item.get("commentCount") or stats.get("commentCount")),
             "shares": safe_int(item.get("shareCount") or stats.get("shareCount")),
-            "saves": safe_int(stats.get("collectCount")),
+            "saves": safe_int(item.get("collectCount") or stats.get("collectCount")),
         },
         "hashtags": [h.get("name") if isinstance(h, dict) else h for h in safe_list(item.get("hashtags"))],
         "musicName": safe_str(music.get("musicName") or music.get("title")),
@@ -312,7 +324,7 @@ async def tiktok_video_details(
 
         data = await cached_or_run(
             endpoint="tiktok.video-details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -461,10 +473,11 @@ async def tiktok_comments(
                     {
                         "id": safe_str(c.get("cid") or c.get("id")),
                         "text": (c.get("text") or "").strip(),
-                        "author": safe_str(user.get("uniqueId") or c.get("authorName")),
-                        "likeCount": safe_int(c.get("diggCount") or c.get("likeCount")),
+                        "author": safe_str(c.get("uniqueId") or user.get("uniqueId") or c.get("authorName")),
+                        "authorAvatarUrl": safe_str(c.get("avatarThumbnail") or user.get("avatarThumb")),
+                        "likeCount": safe_int(c.get("diggCount") or c.get("likeCount")) or 0,
                         "publishedAt": safe_str(c.get("createTimeISO")),
-                        "replyCount": safe_int(c.get("replyCommentTotal")),
+                        "replyCount": safe_int(c.get("replyCommentTotal")) or 0,
                     }
                 )
             return {
@@ -476,7 +489,7 @@ async def tiktok_comments(
 
         data = await cached_or_run(
             endpoint="tiktok.comments",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -508,24 +521,33 @@ async def tiktok_channel_details(
             if not items:
                 raise HTTPException(status_code=404, detail="Profile not found")
             p = items[0]
+            # The profile scraper emits video items with the profile nested
+            # under `authorMeta`; older actor versions exposed it at top level.
+            a = p.get("authorMeta") or p
             stats = p.get("authorStats") or p.get("stats") or {}
+            bio_link = a.get("bioLink")
+            if isinstance(bio_link, dict):
+                bio_link = bio_link.get("link")
             return {
                 "platform": "tiktok",
-                "url": url,
-                "username": safe_str(p.get("uniqueId") or handle),
-                "displayName": safe_str(p.get("nickname") or p.get("nickName")),
-                "bio": safe_str(p.get("signature") or p.get("bio")),
-                "followers": safe_int(stats.get("followerCount") or p.get("fans")),
-                "following": safe_int(stats.get("followingCount")),
-                "postCount": safe_int(stats.get("videoCount")),
-                "verified": p.get("verified"),
-                "profileImage": safe_str(p.get("avatarLarger") or p.get("avatar")),
-                "externalUrl": safe_str(p.get("bioLink", {}).get("link") if isinstance(p.get("bioLink"), dict) else None),
+                "url": safe_str(a.get("profileUrl")) or url,
+                "username": safe_str(a.get("name") or a.get("uniqueId") or handle),
+                "displayName": safe_str(a.get("nickName") or a.get("nickname")),
+                "bio": safe_str(a.get("signature") or a.get("bio")),
+                "followers": safe_int(a.get("fans") or stats.get("followerCount")),
+                "following": safe_int(a.get("following") or stats.get("followingCount")),
+                "likes": safe_int(a.get("heart") or stats.get("heartCount")),
+                "postCount": safe_int(a.get("video") or stats.get("videoCount")),
+                "verified": a.get("verified"),
+                "private": a.get("privateAccount"),
+                "profileImage": safe_str(a.get("avatar") or a.get("avatarLarger") or a.get("originalAvatarUrl")),
+                "externalUrl": safe_str(bio_link),
+                "category": safe_str((a.get("commerceUserInfo") or {}).get("category")),
             }
 
         data = await cached_or_run(
             endpoint="tiktok.channel-details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -866,7 +888,7 @@ async def tiktok_search(
 
         data = await cached_or_run(
             endpoint="tiktok.search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -897,17 +919,29 @@ async def tiktok_video_download(
             if not items:
                 raise HTTPException(status_code=404, detail="Video not found")
             item = items[0]
+            video_meta = item.get("videoMeta") or {}
+            media_urls = safe_list(item.get("mediaUrls"))
+            # The actor stores the downloaded (watermark-free) MP4 in its
+            # key-value store and links it via videoMeta.downloadAddr/mediaUrls.
+            download_url = safe_str(
+                video_meta.get("downloadAddr")
+                or (media_urls[0] if media_urls else None)
+                or item.get("videoUrl")
+                or item.get("downloadUrl")
+            )
+            if not download_url:
+                raise HTTPException(status_code=422, detail="No downloadable video URL available for this TikTok")
             return {
                 "platform": "tiktok",
                 "url": url,
-                "downloadUrl": safe_str(item.get("videoUrl") or item.get("downloadUrl")),
-                "noWatermarkUrl": safe_str(item.get("videoUrlNoWaterMark")),
-                "duration": safe_float(item.get("videoMeta", {}).get("duration")),
+                "downloadUrl": download_url,
+                "noWatermarkUrl": safe_str(item.get("videoUrlNoWaterMark")) or download_url,
+                "duration": safe_float(video_meta.get("duration")),
             }
 
         data = await cached_or_run(
             endpoint="tiktok.video-download",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
             ttl=3600,
@@ -943,7 +977,7 @@ async def tiktok_channel_posts(
 
         data = await cached_or_run(
             endpoint="tiktok.channel-posts",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1178,7 +1212,7 @@ async def tiktok_music_posts(
 
         data = await cached_or_run(
             endpoint="tiktok.music-posts",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1213,7 +1247,7 @@ async def tiktok_hashtag_search(
 
         data = await cached_or_run(
             endpoint="tiktok.hashtag-search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1248,7 +1282,7 @@ async def tiktok_top_search(
 
         data = await cached_or_run(
             endpoint="tiktok.top-search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1484,7 +1518,7 @@ async def tiktok_trending_feed(
 
         data = await cached_or_run(
             endpoint="tiktok.trending-feed",
-            params={"country": country.upper(), "limit": limit},
+            params={"country": country.upper(), "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
