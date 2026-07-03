@@ -109,7 +109,11 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
         duration_ms = safe_int(duration)
     duration_ms = duration_ms or safe_int(item.get("durationMs"))
 
-    release_year = _year_of(item.get("date")) or _year_of(item.get("releaseDate"))
+    release_year = (
+        _year_of(item.get("date"))
+        or _year_of(item.get("releaseDate"))
+        or (_year_of(album.get("date")) if isinstance(album, dict) else None)
+    )
 
     description = safe_str(item.get("description") or item.get("subtitle"))
     biography = item.get("biography")
@@ -140,7 +144,9 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
         "followers": safe_int(stats.get("followers") or item.get("followers")),
         "monthlyListeners": safe_int(stats.get("monthlyListeners") or item.get("monthlyListeners")),
         "releaseYear": release_year,
-        "image": _image(item) or safe_str(item.get("albumArt")),
+        "image": _image(item)
+        or safe_str(item.get("albumArt"))
+        or (_image(album) if isinstance(album, dict) else None),
         "totalTracks": safe_int(tracks.get("totalCount") if isinstance(tracks, dict) else item.get("totalTracks")),
         "totalEpisodes": safe_int(episodes.get("totalCount") if isinstance(episodes, dict) else item.get("totalEpisodes")),
         "raw": item,
@@ -222,7 +228,7 @@ async def track(
 ):
     uri = _url(url, "track")
     async with billed_call(caller=caller, endpoint="/v1/spotify/track", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.track", {"uri": uri, "v": 3}, lambda: _details("track", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC)
+        data = await cached_or_run("spotify.track", {"uri": uri, "v": 4}, lambda: _details("track", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC)
         return ApiResponse(data=data)
 
 
