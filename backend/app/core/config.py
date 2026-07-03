@@ -86,9 +86,12 @@ class Settings(BaseSettings):
     APIFY_ACTOR_TIKTOK_POPULAR_CREATORS_FALLBACK: str = "burbn/tiktok-trending-creators"
     APIFY_ACTOR_TIKTOK_AUDIENCE: str = ""
 
-    APIFY_ACTOR_INSTAGRAM: str = "spry_headset/instagram-page-post-scraper"
+    # spry_headset/instagram-page-post-scraper was disabled by its author
+    # (every run now fails), so the official Apify scraper is primary and the
+    # profile scraper acts as a schema-compatible fallback.
+    APIFY_ACTOR_INSTAGRAM: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_FALLBACK: str = "apify/instagram-scraper"
-    APIFY_ACTOR_INSTAGRAM_REEL: str = "spry_headset/instagram-page-post-scraper"
+    APIFY_ACTOR_INSTAGRAM_REEL: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_REEL_FALLBACK: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_PROFILE: str = "apify/instagram-profile-scraper"
     APIFY_ACTOR_INSTAGRAM_POST: str = "apify/instagram-scraper"

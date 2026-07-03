@@ -499,7 +499,7 @@ async def tiktok_comments(
 
 @router.get("/channel-details", summary="TikTok profile / channel info")
 async def tiktok_channel_details(
-    url: str = Query(..., description="https://tiktok.com/@username"),
+    url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
@@ -556,7 +556,7 @@ async def tiktok_channel_details(
 
 @router.get("/profile-region", summary="TikTok profile region/language signals")
 async def tiktok_profile_region(
-    url: str = Query(..., description="https://tiktok.com/@username or @handle"),
+    url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
@@ -589,7 +589,7 @@ async def tiktok_profile_region(
 
 @router.get("/live", summary="TikTok live status + room info for a creator")
 async def tiktok_live(
-    url: str = Query(..., description="https://tiktok.com/@username or @handle"),
+    url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
@@ -649,7 +649,7 @@ async def tiktok_live(
 
 @router.get("/live-info", summary="TikTok live room info for a creator")
 async def tiktok_live_info(
-    url: str = Query(..., description="https://tiktok.com/@username or @handle"),
+    url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     caller: ApiCaller = Depends(require_api_key),
 ):
     # ScrapeCreators exposes both Live and Live Info. Our live endpoint already
@@ -803,7 +803,7 @@ async def tiktok_popular_creators(
 
 @router.get("/audience-demographics", summary="TikTok profile audience/demographic signals")
 async def tiktok_audience_demographics(
-    url: str = Query(..., description="https://tiktok.com/@username or @handle"),
+    url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
@@ -951,7 +951,7 @@ async def tiktok_video_download(
 
 @router.get("/channel-posts", summary="Latest posts from a TikTok profile")
 async def tiktok_channel_posts(
-    url: str = Query(..., description="https://tiktok.com/@username"),
+    url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -1100,7 +1100,7 @@ async def tiktok_comment_replies(
 
 @router.get("/user-followers", summary="List a TikTok user's followers")
 async def tiktok_user_followers(
-    url: str = Query(..., description="https://tiktok.com/@username"),
+    url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     limit: int = Query(50, ge=1, le=500),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -1144,7 +1144,7 @@ async def tiktok_user_followers(
 
 @router.get("/user-followings", summary="List who a TikTok user follows")
 async def tiktok_user_followings(
-    url: str = Query(..., description="https://tiktok.com/@username"),
+    url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     limit: int = Query(50, ge=1, le=500),
     caller: ApiCaller = Depends(require_api_key),
 ):

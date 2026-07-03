@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import math
 import re
 from typing import Any
@@ -113,22 +114,39 @@ def _normalize_post(item: dict) -> dict:
     }
 
 
+def _dedupe_candidates(candidates: list[tuple[str, dict[str, Any]]]) -> list[tuple[str, dict[str, Any]]]:
+    """Drop consecutive duplicate (actor, payload) pairs so a fallback that
+    matches the primary doesn't burn a second identical run."""
+    seen: set[str] = set()
+    unique = []
+    for actor, payload in candidates:
+        key = f"{actor}:{json.dumps(payload, sort_keys=True, default=str)}"
+        if key not in seen:
+            seen.add(key)
+            unique.append((actor, payload))
+    return unique
+
+
 def _instagram_profile_candidates(settings: Any, profile_url: str, limit: int, results_type: str) -> list[tuple[str, dict[str, Any]]]:
     payload = {"directUrls": [profile_url], "resultsLimit": limit, "resultsType": results_type}
-    return [
-        (settings.APIFY_ACTOR_INSTAGRAM, payload),
-        (settings.APIFY_ACTOR_INSTAGRAM_FALLBACK, payload),
-    ]
+    return _dedupe_candidates(
+        [
+            (settings.APIFY_ACTOR_INSTAGRAM, payload),
+            (settings.APIFY_ACTOR_INSTAGRAM_FALLBACK, payload),
+        ]
+    )
 
 
 def _instagram_reel_candidates(settings: Any, url: str, *, subtitles: bool = False) -> list[tuple[str, dict[str, Any]]]:
     payload: dict[str, Any] = {"directUrls": [url], "resultsLimit": 1}
     if subtitles:
         payload["shouldDownloadSubtitles"] = True
-    return [
-        (settings.APIFY_ACTOR_INSTAGRAM_REEL, payload),
-        (settings.APIFY_ACTOR_INSTAGRAM_REEL_FALLBACK, payload),
-    ]
+    return _dedupe_candidates(
+        [
+            (settings.APIFY_ACTOR_INSTAGRAM_REEL, payload),
+            (settings.APIFY_ACTOR_INSTAGRAM_REEL_FALLBACK, payload),
+        ]
+    )
 
 
 def _meta(page: str, key: str) -> str:
@@ -446,7 +464,7 @@ async def instagram_comments(
 
 @router.get("/channel-details", summary="Instagram profile info")
 async def instagram_channel_details(
-    url: str = Query(...),
+    url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -570,7 +588,7 @@ async def instagram_basic_profile(
 
 @router.get("/channel-posts", summary="Latest posts from an Instagram profile")
 async def instagram_channel_posts(
-    url: str = Query(...),
+    url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -605,7 +623,7 @@ async def instagram_channel_posts(
 
 @router.get("/channel-reels", summary="Latest Reels from an Instagram profile")
 async def instagram_channel_reels(
-    url: str = Query(...),
+    url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -793,7 +811,7 @@ async def instagram_reels_by_audio_id(
 
 @router.get("/tagged-posts", summary="Posts an Instagram user is tagged in")
 async def instagram_tagged_posts(
-    url: str = Query(..., description="Instagram profile URL"),
+    url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -966,7 +984,7 @@ def _highlight_payload(item: dict) -> dict:
 
 @router.get("/story-highlights", summary="List an Instagram profile's story highlights")
 async def instagram_story_highlights(
-    url: str = Query(..., description="Instagram profile URL"),
+    url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -1008,7 +1026,7 @@ async def instagram_story_highlights(
 
 @router.get("/highlights-details", summary="Items inside an Instagram profile's highlights")
 async def instagram_highlights_details(
-    url: str = Query(..., description="Instagram profile URL"),
+    url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(10, ge=1, le=50, description="Max highlights to expand"),
     caller: ApiCaller = Depends(require_api_key),
 ):

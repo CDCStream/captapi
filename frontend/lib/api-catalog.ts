@@ -1083,13 +1083,13 @@ const fastRss = (): ApiParam => ({ name: "fast", type: "boolean", required: fals
 
 const YT_VIDEO = "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL.";
 const YT_SHORTS = "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL.";
-const YT_CHANNEL = "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC...";
+const YT_CHANNEL = "YouTube channel URL, @handle, bare handle, or UC... channel ID, e.g. https://youtube.com/@handle or @mkbhd.";
 const TT_VIDEO = "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL.";
-const TT_PROFILE = "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL.";
+const TT_PROFILE = "TikTok profile URL, @handle, or username, e.g. https://tiktok.com/@username. Not a YouTube channel URL.";
 const TT_MUSIC = "TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID.";
 const IG_POST = "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/.";
 const IG_REEL = "Instagram Reel URL, e.g. https://instagram.com/reel/ID/.";
-const IG_PROFILE = "Instagram profile URL, e.g. https://instagram.com/username/.";
+const IG_PROFILE = "Instagram profile URL, @handle, or username, e.g. https://instagram.com/username/.";
 const FB_VIDEO = "Public Facebook video or post URL.";
 const TWITCH_PROFILE = "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud.";
 const SPOTIFY_URL = "Spotify URL, URI, or ID.";
@@ -1183,17 +1183,17 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "facebook-transcript": [up(FB_VIDEO)],
   "facebook-summarizer": [up(FB_VIDEO)],
   "facebook-comments": [up(FB_VIDEO), lp(50, 500)],
-  "facebook-page-details": [up("Facebook page URL, e.g. https://facebook.com/PageName.")],
-  "facebook-profile-posts": [up("Facebook profile or page URL."), lp(20, 200)],
-  "facebook-profile-reels": [up("Facebook profile or page URL."), lp(20, 200)],
+  "facebook-page-details": [up("Facebook page URL, @handle, or page name, e.g. https://facebook.com/PageName.")],
+  "facebook-profile-posts": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
+  "facebook-profile-reels": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
   "facebook-group-posts": [up("Public Facebook group URL, e.g. https://facebook.com/groups/ID."), lp(20, 200)],
   "facebook-comment-replies": [up("Facebook post URL the comment belongs to."), cid(), lp(50, 500)],
   "facebook-marketplace-search": [qp("Product or keyword to search Facebook Marketplace for."), { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." }, lp(20, 200), { name: "details", type: "string", required: false, description: "Set true to fetch full description, photos and coordinates per listing (slower, costs more)." }],
   "facebook-marketplace-location-search": [qp("City/place search query, e.g. Austin."), lp(10, 50)],
   "facebook-event-search": [qp("Topic and/or place, e.g. 'comedy Chicago'."), lp(20, 200)],
   "facebook-event-details": [up("Facebook event URL, e.g. https://facebook.com/events/ID.")],
-  "facebook-profile-photos": [up("Facebook profile or page URL."), lp(20, 200)],
-  "facebook-profile-events": [up("Facebook profile or page URL."), lp(20, 200)],
+  "facebook-profile-photos": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
+  "facebook-profile-events": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
   "facebook-marketplace-item": [up("Facebook Marketplace item URL.")],
   // Twitter / X
   "twitter-tweet-details": [up("Public tweet URL, e.g. https://x.com/user/status/ID.")],

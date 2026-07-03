@@ -22,6 +22,7 @@ from app.services.openai_client import summarize_transcript
 from app.utils.formatters import safe_int, safe_list, safe_str
 from app.utils.url import (
     extract_youtube_id,
+    normalize_youtube_channel_url,
     normalize_youtube_url,
     platform_mismatch_detail,
 )
@@ -651,9 +652,10 @@ async def youtube_comments(
 # ---------- CHANNEL DETAILS -----------------------------------------------
 @router.get("/channel-details", summary="YouTube channel info & stats")
 async def youtube_channel_details(
-    url: str = Query(..., description="Channel URL (youtube.com/@handle or /channel/UC...)"),
+    url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    url = normalize_youtube_channel_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -706,11 +708,12 @@ async def youtube_channel_details(
 # ---------- CHANNEL VIDEOS ------------------------------------------------
 @router.get("/channel-videos", summary="List videos for a YouTube channel")
 async def youtube_channel_videos(
-    url: str = Query(...),
+    url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     limit: int = Query(20, ge=1, le=200),
     fast: bool = Query(False, description="Use YouTube's public RSS feed for faster but less detailed metadata."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    url = normalize_youtube_channel_url(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
 
@@ -1058,10 +1061,11 @@ async def youtube_video_download(
 # ---------- SHORTS (alias to same actors with Short URL handling) ---------
 @router.get("/channel-shorts", summary="List Shorts for a YouTube channel")
 async def youtube_channel_shorts(
-    url: str = Query(..., description="Channel URL (youtube.com/@handle)"),
+    url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    url = normalize_youtube_channel_url(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
     async with billed_call(
@@ -1093,10 +1097,11 @@ async def youtube_channel_shorts(
 
 @router.get("/channel-streams", summary="List live/past streams for a YouTube channel")
 async def youtube_channel_streams(
-    url: str = Query(..., description="Channel URL (youtube.com/@handle)"),
+    url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    url = normalize_youtube_channel_url(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
     async with billed_call(
@@ -1258,10 +1263,11 @@ async def youtube_comment_replies(
 # ---------- CHANNEL PLAYLISTS ---------------------------------------------
 @router.get("/channel-playlists", summary="List a YouTube channel's playlists")
 async def youtube_channel_playlists(
-    url: str = Query(..., description="Channel URL (youtube.com/@handle)"),
+    url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    url = normalize_youtube_channel_url(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
     async with billed_call(
@@ -1303,10 +1309,11 @@ async def youtube_channel_playlists(
 # ---------- COMMUNITY POSTS -----------------------------------------------
 @router.get("/community-posts", summary="List a YouTube channel's community posts")
 async def youtube_community_posts(
-    url: str = Query(..., description="Channel URL (youtube.com/@handle)"),
+    url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    url = normalize_youtube_channel_url(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_YT_COMMUNITY, 2)
     async with billed_call(

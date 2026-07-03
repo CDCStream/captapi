@@ -59,13 +59,16 @@ def _reject_facebook_platform_mismatch(url: str, example: str) -> None:
 
 
 def _require_facebook_page(url: str) -> str:
+    """Validate a page URL, @handle, or bare page name; return a full URL."""
     page = extract_facebook_page(url)
     if not page:
         raise HTTPException(
             status_code=400,
             detail=platform_mismatch_detail(url, "facebook", "https://www.facebook.com/page"),
         )
-    return page
+    if "facebook.com" in (url or "") or "fb.watch" in (url or ""):
+        return url
+    return f"https://www.facebook.com/{page}"
 
 
 def _require_facebook_path(url: str, path: str, example: str, label: str) -> None:
@@ -458,10 +461,10 @@ async def facebook_comments(
 
 @router.get("/page-details", summary="Facebook page info & stats")
 async def facebook_page_details(
-    url: str = Query(...),
+    url: str = Query(..., description="Facebook page URL, @handle, or page name"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    _require_facebook_page(url)
+    url = _require_facebook_page(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -519,11 +522,11 @@ async def facebook_page_details(
 
 @router.get("/profile-posts", summary="Latest posts from a Facebook profile/page")
 async def facebook_profile_posts(
-    url: str = Query(..., description="Facebook profile or page URL"),
+    url: str = Query(..., description="Facebook profile/page URL, @handle, or page name"),
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    _require_facebook_page(url)
+    url = _require_facebook_page(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_FB_POSTS, 2)
     async with billed_call(
@@ -555,11 +558,11 @@ async def facebook_profile_posts(
 
 @router.get("/profile-reels", summary="Latest Reels from a Facebook profile/page")
 async def facebook_profile_reels(
-    url: str = Query(..., description="Facebook profile or page URL"),
+    url: str = Query(..., description="Facebook profile/page URL, @handle, or page name"),
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    _require_facebook_page(url)
+    url = _require_facebook_page(url)
     settings = get_settings()
     # Reels are a subset of the feed, so we over-fetch posts and filter. Cost is
     # driven by posts fetched, not reels returned.
@@ -708,11 +711,11 @@ def _normalize_photo(item: dict) -> dict:
 
 @router.get("/profile-photos", summary="Photos from a Facebook profile/page")
 async def facebook_profile_photos(
-    url: str = Query(..., description="Facebook profile or page URL"),
+    url: str = Query(..., description="Facebook profile/page URL, @handle, or page name"),
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    _require_facebook_page(url)
+    url = _require_facebook_page(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_FB_POSTS, 2)
     async with billed_call(
@@ -744,11 +747,11 @@ async def facebook_profile_photos(
 
 @router.get("/profile-events", summary="Events from a Facebook profile/page")
 async def facebook_profile_events(
-    url: str = Query(..., description="Facebook profile or page URL"),
+    url: str = Query(..., description="Facebook profile/page URL, @handle, or page name"),
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    _require_facebook_page(url)
+    url = _require_facebook_page(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_FB_EVENTS, 4)
     async with billed_call(

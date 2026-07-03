@@ -143,6 +143,36 @@ def is_youtube_short(url: str) -> bool:
     return "/shorts/" in (url or "")
 
 
+YOUTUBE_CHANNEL_ID_RE = re.compile(r"^UC[A-Za-z0-9_-]{22}$")
+
+
+def normalize_youtube_channel_url(value: str) -> str:
+    """Accept a channel URL, @handle, bare handle, or UC... channel ID.
+
+    Returns a canonical youtube.com URL the scraping actors understand;
+    anything unrecognized is passed through untouched.
+    """
+    raw = (value or "").strip()
+    if not raw:
+        return raw
+    if "youtube.com" in raw or "youtu.be" in raw:
+        return raw
+    if _is_foreign_platform(raw, "youtube"):
+        return raw
+    if YOUTUBE_CHANNEL_ID_RE.fullmatch(raw):
+        return f"https://www.youtube.com/channel/{raw}"
+    handle = raw.lstrip("@")
+    if re.fullmatch(r"[\w.-]{3,30}", handle):
+        return f"https://www.youtube.com/@{handle}"
+    return raw
+
+
+def _is_foreign_platform(value: str, expected: str) -> bool:
+    """True when the input is recognizably a URL for a different platform."""
+    detected = detect_url_platform(value)
+    return bool(detected and detected != expected)
+
+
 def extract_tiktok_id(url: str) -> str | None:
     m = TIKTOK_VIDEO_RE.search(url or "")
     return m.group(1) if m else None
@@ -152,7 +182,10 @@ def extract_tiktok_username(url: str) -> str | None:
     m = TIKTOK_USER_RE.search(url or "")
     if m:
         return m.group(1)
-    raw = (url or "").strip().lstrip("@")
+    raw = (url or "").strip()
+    if "/" in raw or _is_foreign_platform(raw, "tiktok"):
+        return None
+    raw = raw.lstrip("@")
     if re.fullmatch(r"[\w.-]{2,24}", raw):
         return raw
     return None
@@ -165,12 +198,19 @@ def extract_instagram_shortcode(url: str) -> str | None:
 
 def extract_instagram_username(url: str) -> str | None:
     m = INSTAGRAM_USER_RE.search(url or "")
-    if not m:
+    if m:
+        handle = m.group(1)
+        if handle in {"p", "reel", "tv", "explore"}:
+            return None
+        return handle
+    # Also accept a bare handle or @handle (AI agents often skip the URL).
+    raw = (url or "").strip()
+    if "/" in raw or _is_foreign_platform(raw, "instagram"):
         return None
-    handle = m.group(1)
-    if handle in {"p", "reel", "tv", "explore"}:
-        return None
-    return handle
+    raw = raw.lstrip("@")
+    if re.fullmatch(r"[A-Za-z0-9_.]{1,30}", raw):
+        return raw
+    return None
 
 
 def extract_facebook_video_id(url: str) -> str | None:
@@ -180,7 +220,24 @@ def extract_facebook_video_id(url: str) -> str | None:
 
 def extract_facebook_page(url: str) -> str | None:
     m = FACEBOOK_PAGE_RE.search(url or "")
-    return m.group(1) if m else None
+    if m:
+        return m.group(1)
+    raw = (url or "").strip()
+    if "/" in raw or _is_foreign_platform(raw, "facebook"):
+        return None
+    raw = raw.lstrip("@")
+    if re.fullmatch(r"[A-Za-z0-9.\-_]{3,60}", raw):
+        return raw
+    return None
+
+
+def normalize_facebook_page_url(value: str) -> str:
+    """Accept a page URL, @handle, or bare page name; return a full URL."""
+    raw = (value or "").strip()
+    if "facebook.com" in raw or "fb.watch" in raw:
+        return raw
+    page = extract_facebook_page(raw)
+    return f"https://www.facebook.com/{page}" if page else raw
 
 
 def extract_tweet_id(url: str) -> str | None:
@@ -203,7 +260,10 @@ def normalize_twitter_username(value: str) -> str | None:
     value = value.strip()
     if "twitter.com" in value or "x.com" in value:
         return extract_twitter_username(value)
-    return value.lstrip("@") or None
+    handle = value.lstrip("@")
+    if re.fullmatch(r"[A-Za-z0-9_]{1,15}", handle):
+        return handle
+    return None
 
 
 # --- Reddit ----------------------------------------------------------------
@@ -224,7 +284,12 @@ def extract_subreddit(value: str) -> str | None:
     m = REDDIT_SUBREDDIT_RE.search(value)
     if m:
         return m.group(1)
-    return value.strip().lstrip("/").removeprefix("r/").strip("/") or None
+    if _is_foreign_platform(value, "reddit"):
+        return None
+    name = value.strip().lstrip("/").removeprefix("r/").strip("/")
+    if re.fullmatch(r"[A-Za-z0-9_]{2,21}", name):
+        return name
+    return None
 
 
 # --- Threads ---------------------------------------------------------------
