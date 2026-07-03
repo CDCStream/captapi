@@ -1406,6 +1406,154 @@ export function exampleResponse(ep: ApiEndpoint): string {
   );
 }
 
+function article(label: string): string {
+  return /^[aeiou]/i.test(label) ? "an" : "a";
+}
+
+/**
+ * The exact 404 `detail` string the backend raises for this endpoint, taken
+ * from the router sources. Returns null when the endpoint doesn't 404 in
+ * practice (most searches return 200 with an empty list instead).
+ */
+function notFoundDetail(ep: ApiEndpoint): string | null {
+  const p = ep.platform;
+
+  if (ep.category === "search") {
+    return p === "google" ? "No Google results found" : null;
+  }
+  if (ep.category === "transcript" || ep.category === "summarize") {
+    return p === "rumble"
+      ? "Transcript not available for this Rumble video"
+      : "Transcript not available for this video";
+  }
+
+  const PROFILE_404: Partial<Record<PlatformId, string>> = {
+    youtube: "Channel not found",
+    twitch: "Twitch channel not found",
+    truth_social: "Truth Social profile not found",
+    snapchat: "Snapchat profile not found",
+    kwai: "Kwai profile not found",
+    linktree: "Linktree profile not found",
+    soundcloud: "SoundCloud artist not found",
+    github: "Not found on GitHub",
+    linkedin: "Not found on LinkedIn",
+    bluesky: "Not found on Bluesky",
+    reddit: "Subreddit not found",
+    facebook: "Page not found",
+  };
+  if (ep.category === "channel") return PROFILE_404[p] ?? "Profile not found";
+
+  const RESOURCE_404: Partial<Record<PlatformId, string>> = {
+    youtube: "Video not found",
+    tiktok: "Video not found",
+    rumble: "Video not found",
+    reddit: "Post not found",
+    facebook: "Post not found",
+    instagram: "Post not found",
+    threads: "Post not found",
+    bluesky: "Post not found",
+    twitter: "Tweet not found",
+    pinterest: "Pin not found",
+    ad_library: "Ad not found",
+    spotify: "Spotify item not found",
+    kick: "Kick clip not found",
+    kwai: "Kwai post not found",
+    truth_social: "Truth Social post not found",
+    github: "Not found on GitHub",
+    linkedin: "Not found on LinkedIn",
+    amazon_shop: "Amazon Shop page not found",
+  };
+  if (ep.category === "download") {
+    return p === "instagram" ? "Reel not found" : "Video not available";
+  }
+  return RESOURCE_404[p] ?? "Resource not found";
+}
+
+/**
+ * Realistic non-2xx response bodies for an endpoint, mirroring what the
+ * production API actually returns (FastAPI `detail` envelope, structured 429
+ * body, `upstream_actor_error` on 502). Shown as extra tabs next to "200 OK".
+ */
+export function errorExamples(ep: ApiEndpoint): { label: string; code: string }[] {
+  const platform = PLATFORM_LABEL[ep.platform];
+  const ps = params(ep);
+  const urlParam = ps.find((p) => p.name === "url" && p.required);
+  const firstRequired = ps.find((p) => p.required) ?? ps[0];
+
+  const list: { label: string; code: string }[] = [];
+
+  if (urlParam) {
+    // Platform-mismatch 400: the most common "wrong request" — passing a URL
+    // from another platform (e.g. an AI agent sending a TikTok URL here).
+    const wrong = ep.platform === "tiktok" ? "YouTube" : "TikTok";
+    list.push({
+      label: "400",
+      code: JSON.stringify(
+        {
+          detail: `Expected ${article(platform)} ${platform} URL, but received ${article(wrong)} ${wrong} URL. Use the ${wrong} endpoint for that URL, or pass ${article(platform)} ${platform} URL like ${exampleValue(ep, urlParam)}.`,
+        },
+        null,
+        2,
+      ),
+    });
+  } else if (firstRequired) {
+    // Missing required parameter -> FastAPI validation error (422).
+    list.push({
+      label: "422",
+      code: JSON.stringify(
+        {
+          detail: [
+            {
+              type: "missing",
+              loc: ["query", firstRequired.name],
+              msg: "Field required",
+              input: null,
+            },
+          ],
+        },
+        null,
+        2,
+      ),
+    });
+  }
+
+  list.push(
+    {
+      label: "401",
+      code: JSON.stringify({ detail: "Invalid or revoked API key" }, null, 2),
+    },
+  );
+
+  const nf = notFoundDetail(ep);
+  if (nf) {
+    list.push({ label: "404", code: JSON.stringify({ detail: nf }, null, 2) });
+  }
+
+  list.push(
+    {
+      label: "429",
+      code: JSON.stringify(
+        {
+          detail: {
+            error: "rate_limit_exceeded",
+            plan: "free",
+            limit_per_minute: 40,
+            retry_after_seconds: 60,
+          },
+        },
+        null,
+        2,
+      ),
+    },
+    {
+      label: "502",
+      code: JSON.stringify({ success: false, error: "upstream_actor_error" }, null, 2),
+    },
+  );
+
+  return list;
+}
+
 const PROFILE_URL: Record<PlatformId, string> = {
   youtube: "https://www.youtube.com/@MrBeast",
   tiktok: "https://www.tiktok.com/@khaby.lame",

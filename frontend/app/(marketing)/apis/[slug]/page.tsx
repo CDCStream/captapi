@@ -39,6 +39,7 @@ import {
   params,
   faqs,
   exampleResponse,
+  errorExamples,
   responseStructure,
   useCases,
   creditLabel,
@@ -306,7 +307,24 @@ export default async function ApiDetailPage({
         {/* Response */}
         <section className="mt-12">
           <h2 className="text-2xl font-semibold mb-4">Example response</h2>
-          <CodeTabs samples={[{ label: "200 OK", code: exampleResponse(ep) }]} />
+          <CodeTabs
+            samples={[
+              { label: "200 OK", code: exampleResponse(ep), lang: "json" },
+              ...errorExamples(ep).map((e) => ({
+                label: e.label,
+                code: e.code,
+                lang: "json",
+              })),
+            ]}
+          />
+          <p className="mt-3 text-sm text-muted-foreground">
+            Failed requests (4xx/5xx) are never charged. See the full list of
+            error codes in the{" "}
+            <Link href="/docs#errors" className="text-primary hover:underline">
+              error reference
+            </Link>
+            .
+          </p>
         </section>
 
         {/* Response structure */}
