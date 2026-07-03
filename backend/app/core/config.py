@@ -149,6 +149,12 @@ class Settings(BaseSettings):
     # maxItems). Slug is config-driven so it can be swapped without code edits.
     APIFY_ACTOR_REDDIT: str = "trudax/reddit-scraper-lite"
 
+    # Score-rich post search (input: {"queries": ["keyword" | "r/sub" |
+    # "r/sub keyword"], "maxItems": n}). Unlike the trudax lite actor its rows
+    # include score / num_comments / over_18 / created_utc, so the listing
+    # endpoints prefer it when Reddit public JSON is unavailable.
+    APIFY_ACTOR_REDDIT_SEARCH: str = "fatihtahta/reddit-scraper-search-fast"
+
     # Subreddit community profile (members, description, title, rules, flags).
     # Input: {"community": "<name>"}. The trudax lite actor returns empty
     # communities, so subreddit-details uses this dedicated profiler instead.

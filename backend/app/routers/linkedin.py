@@ -7,6 +7,7 @@ defensive across actor versions.
 from __future__ import annotations
 
 import math
+import re
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -72,62 +73,95 @@ def _first(items: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def _normalize_profile(p: dict[str, Any]) -> dict[str, Any]:
+    # apimaestro/linkedin-profile-detail nests everything under basic_info.
+    info = p.get("basic_info") if isinstance(p.get("basic_info"), dict) else p
+    location = info.get("location")
+    if isinstance(location, dict):
+        location = location.get("full") or location.get("city") or location.get("country")
+    verified = info.get("is_verified")
     return {
         "platform": "linkedin",
         "type": "person",
-        "url": safe_str(p.get("url") or p.get("profileUrl") or p.get("linkedinUrl")),
-        "name": safe_str(p.get("fullName") or p.get("name")
-                         or f"{p.get('firstName', '')} {p.get('lastName', '')}".strip()),
-        "headline": safe_str(p.get("headline") or p.get("occupation")),
-        "location": safe_str(p.get("location") or p.get("locationName")),
-        "about": safe_str(p.get("about") or p.get("summary")),
-        "followers": safe_int(p.get("followers") or p.get("followerCount")),
-        "connections": safe_int(p.get("connections") or p.get("connectionsCount")),
-        "profileImage": safe_str(p.get("profilePicture") or p.get("photoUrl") or p.get("avatar")),
-        "currentCompany": safe_str(p.get("companyName") or p.get("company")),
+        "url": safe_str(info.get("profile_url") or p.get("url") or p.get("profileUrl") or p.get("linkedinUrl")),
+        "username": safe_str(info.get("public_identifier")),
+        "name": safe_str(info.get("fullname") or p.get("fullName") or p.get("name")
+                         or f"{info.get('first_name', '')} {info.get('last_name', '')}".strip()),
+        "headline": safe_str(info.get("headline") or p.get("occupation")),
+        "location": safe_str(location or p.get("locationName")),
+        "about": safe_str(info.get("about") or p.get("summary")),
+        "followers": safe_int(info.get("follower_count") or p.get("followers") or p.get("followerCount")),
+        "connections": safe_int(info.get("connection_count") or p.get("connections") or p.get("connectionsCount")),
+        "verified": verified if isinstance(verified, bool) else None,
+        "profileImage": safe_str(
+            info.get("profile_picture_url") or p.get("profilePicture") or p.get("photoUrl") or p.get("avatar")
+        ),
+        "currentCompany": safe_str(info.get("current_company") or p.get("companyName") or p.get("company")),
     }
 
 
 def _normalize_company(c: dict[str, Any]) -> dict[str, Any]:
+    # apimaestro/linkedin-company-detail splits data across basic_info /
+    # stats / media / locations.
+    info = c.get("basic_info") if isinstance(c.get("basic_info"), dict) else c
+    stats = c.get("stats") if isinstance(c.get("stats"), dict) else {}
+    media = c.get("media") if isinstance(c.get("media"), dict) else {}
+    hq = ((c.get("locations") or {}).get("headquarters") or {}) if isinstance(c.get("locations"), dict) else {}
+    industries = info.get("industries")
+    industry = industries[0] if isinstance(industries, list) and industries else info.get("industry")
+    hq_text = ", ".join(x for x in [hq.get("city"), hq.get("state"), hq.get("country")] if x) or None
+    verified = info.get("is_verified")
     return {
         "platform": "linkedin",
         "type": "company",
-        "url": safe_str(c.get("url") or c.get("linkedinUrl")),
-        "name": safe_str(c.get("name") or c.get("companyName")),
-        "industry": safe_str(c.get("industry")),
-        "description": safe_str(c.get("description") or c.get("about")),
-        "website": safe_str(c.get("website") or c.get("websiteUrl")),
-        "followers": safe_int(c.get("followers") or c.get("followerCount")),
-        "employees": safe_int(c.get("employeeCount") or c.get("staffCount") or c.get("companySize")),
-        "headquarters": safe_str(c.get("headquarters") or c.get("location")),
-        "logo": safe_str(c.get("logo") or c.get("logoUrl")),
+        "url": safe_str(info.get("linkedin_url") or c.get("url") or c.get("linkedinUrl")),
+        "name": safe_str(info.get("name") or c.get("companyName")),
+        "industry": safe_str(industry),
+        "description": safe_str(info.get("description") or c.get("about") or c.get("tagline")),
+        "website": safe_str(info.get("website") or c.get("websiteUrl")),
+        "followers": safe_int(stats.get("follower_count") or c.get("followers") or c.get("followerCount")),
+        "employees": safe_int(
+            stats.get("employee_count") or c.get("employeeCount") or c.get("staffCount") or c.get("companySize")
+        ),
+        "headquarters": safe_str(hq_text or c.get("headquarters") or c.get("location")),
+        "verified": verified if isinstance(verified, bool) else None,
+        "logo": safe_str(media.get("logo_url") or c.get("logo") or c.get("logoUrl")),
+        "coverImage": safe_str(media.get("cover_url")),
     }
 
 
 def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
     post = p.get("post") if isinstance(p.get("post"), dict) else p
     author = p.get("author") or post.get("author") or {}
+    if not isinstance(author, dict):
+        author = {}
     created = post.get("created_at") if isinstance(post.get("created_at"), dict) else {}
+    # apimaestro search rows: posted_at {date, timestamp}; automation-lab
+    # company rows: flat datePublished.
+    posted_at = p.get("posted_at") if isinstance(p.get("posted_at"), dict) else {}
     stats = p.get("stats") if isinstance(p.get("stats"), dict) else p
     return {
         "platform": "linkedin",
         "type": "post",
-        "url": safe_str(post.get("url") or p.get("url") or p.get("postUrl")),
+        "url": safe_str(post.get("url") or p.get("url") or p.get("postUrl") or p.get("post_url")),
         "text": safe_str(post.get("text") or p.get("text") or p.get("content") or p.get("commentary")),
         "publishedAt": safe_str(
             created.get("date")
+            or posted_at.get("date")
             or post.get("postedAt")
             or post.get("publishedAt")
+            or p.get("datePublished")
             or p.get("date")
         ),
         "author": {
-            "name": safe_str(author.get("name") or p.get("authorName")),
-            "headline": safe_str(author.get("headline")),
-            "url": safe_str(author.get("url") or author.get("profile_url") or p.get("authorUrl")),
+            "name": safe_str(author.get("name") or p.get("authorName") or p.get("companyName")),
+            "headline": safe_str(author.get("headline") or p.get("headline")),
+            "url": safe_str(
+                author.get("url") or author.get("profile_url") or p.get("authorUrl") or p.get("companyUrl")
+            ),
         },
         "engagement": {
             "likes": safe_int(
-                stats.get("likes") or p.get("numLikes") or p.get("reactionsCount")
+                stats.get("likes") or stats.get("total_reactions") or p.get("numLikes") or p.get("reactionsCount")
             ),
             "comments": safe_int(
                 stats.get("comments") or p.get("numComments") or p.get("commentsCount")
@@ -139,10 +173,20 @@ def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+_LI_ACTIVITY_RE = re.compile(r"activity[:-](\d{10,25})")
+
+
 def _normalize_post_list_item(p: dict[str, Any]) -> dict[str, Any]:
     base = _normalize_post(p)
-    base["id"] = safe_str(p.get("id") or p.get("urn") or p.get("post_id"))
-    base["media"] = p.get("media") or p.get("images") or p.get("videos") or []
+    post_id = safe_str(p.get("id") or p.get("urn") or p.get("post_id") or p.get("activity_id"))
+    if not post_id:
+        m = _LI_ACTIVITY_RE.search(base.get("url") or "")
+        post_id = m.group(1) if m else None
+    base["id"] = post_id
+    media = p.get("media") or p.get("images") or p.get("videos") or []
+    if isinstance(media, dict):
+        media = [media]
+    base["media"] = media
     return base
 
 
@@ -171,7 +215,7 @@ async def linkedin_profile(
 
         data = await cached_or_run(
             endpoint="linkedin.profile",
-            params={"slug": slug},
+            params={"slug": slug, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -203,7 +247,7 @@ async def linkedin_company(
 
         data = await cached_or_run(
             endpoint="linkedin.company",
-            params={"slug": slug},
+            params={"slug": slug, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -237,7 +281,7 @@ async def linkedin_post_details(
 
         data = await cached_or_run(
             endpoint="linkedin.post-details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -317,7 +361,7 @@ async def linkedin_company_posts(
 
         data = await cached_or_run(
             endpoint="linkedin.company-posts",
-            params={"slug": slug, "limit": limit},
+            params={"slug": slug, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -357,7 +401,7 @@ async def linkedin_search_posts(
 
         data = await cached_or_run(
             endpoint="linkedin.search-posts",
-            params={"q": q, "sort": sort, "limit": limit},
+            params={"q": q, "sort": sort, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

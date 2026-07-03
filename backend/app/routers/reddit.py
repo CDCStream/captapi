@@ -7,6 +7,7 @@ actor returns mixed post/comment items; we split them by ``dataType``.
 from __future__ import annotations
 
 import math
+from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urlparse
 
@@ -19,7 +20,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
-from app.utils.formatters import safe_int, safe_str
+from app.utils.formatters import first_present, safe_int, safe_str
 from app.utils.url import (
     detect_url_platform,
     extract_reddit_post_id,
@@ -72,25 +73,47 @@ def _require_reddit_post_url(url: str) -> str:
 
 
 def _is_comment(item: dict[str, Any]) -> bool:
-    dt = (item.get("dataType") or item.get("type") or "").lower()
+    dt = (item.get("dataType") or item.get("type") or item.get("kind") or "").lower()
     return dt == "comment" or item.get("body") is not None and item.get("title") is None
 
 
+def _is_post(item: dict[str, Any]) -> bool:
+    """True only for real post rows.
+
+    The trudax actor also emits `dataType: "community"` rows (t5_...) for the
+    subreddit itself; those must not leak into post lists.
+    """
+    dt = (item.get("dataType") or item.get("type") or item.get("kind") or "").lower()
+    if dt:
+        return dt == "post"
+    return (safe_str(item.get("id")) or "").startswith("t3_") or (
+        item.get("title") is not None and not _is_comment(item)
+    )
+
+
+_THUMB_PLACEHOLDERS = {"self", "default", "nsfw", "spoiler", "image"}
+
+
 def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
+    thumbnail = safe_str(item.get("thumbnailUrl") or item.get("thumbnail"))
+    if thumbnail in _THUMB_PLACEHOLDERS:
+        thumbnail = None
     return {
         "platform": "reddit",
         "id": safe_str(item.get("id") or item.get("parsedId")),
-        "url": safe_str(item.get("url")),
+        "url": safe_str(item.get("canonical_url") or item.get("url")),
         "title": safe_str(item.get("title")),
         "text": safe_str(item.get("body") or item.get("text")),
         "subreddit": safe_str(item.get("communityName") or item.get("subreddit") or item.get("parsedCommunityName")),
         "author": safe_str(item.get("username") or item.get("author")),
-        "upvotes": safe_int(item.get("upVotes") or item.get("score") or item.get("ups")),
-        "comments": safe_int(item.get("numberOfComments") or item.get("numComments")),
-        "publishedAt": safe_str(item.get("createdAt") or item.get("created")),
+        "upvotes": safe_int(first_present(item.get("upVotes"), item.get("score"), item.get("ups"))),
+        "comments": safe_int(
+            first_present(item.get("numberOfComments"), item.get("numComments"), item.get("num_comments"))
+        ),
+        "publishedAt": safe_str(item.get("createdAt") or item.get("created") or item.get("created_utc")),
         "flair": safe_str(item.get("flair")),
-        "nsfw": item.get("over18") or item.get("nsfw"),
-        "thumbnail": safe_str(item.get("thumbnailUrl") or item.get("thumbnail")),
+        "nsfw": first_present(item.get("over18"), item.get("nsfw"), item.get("over_18")),
+        "thumbnail": thumbnail,
     }
 
 
@@ -99,7 +122,7 @@ def _normalize_comment(item: dict[str, Any]) -> dict[str, Any]:
         "id": safe_str(item.get("id")),
         "author": safe_str(item.get("username") or item.get("author")),
         "text": safe_str(item.get("body") or item.get("text")),
-        "upvotes": safe_int(item.get("upVotes") or item.get("score")),
+        "upvotes": safe_int(first_present(item.get("upVotes"), item.get("score"))),
         "publishedAt": safe_str(item.get("createdAt") or item.get("created")),
         "url": safe_str(item.get("url")),
     }
@@ -222,47 +245,74 @@ async def _fetch_reddit_post_resilient(url: str, post_id: str, limit: int) -> tu
     return await _fetch_reddit_actor_post(url, limit)
 
 
-async def _search_reddit_json(sub: str, q: str, limit: int) -> list[dict[str, Any]]:
-    url = f"https://www.reddit.com/r/{sub}/search.json"
+async def _reddit_listing_json(path: str, params: dict[str, Any], limit: int) -> list[dict[str, Any]]:
+    """Fetch a Reddit public JSON listing (search or subreddit feed) natively.
+
+    Returns [] on any upstream problem so callers can fall back to the actor.
+    Unlike the trudax lite actor, the public JSON includes scores and comment
+    counts, so posts come back with full engagement data.
+    """
     headers = {"User-Agent": "CaptapiBot/1.0 (+https://captapi.com)"}
-    params = {
-        "q": q,
-        "restrict_sr": "1",
-        "sort": "relevance",
-        "raw_json": "1",
-        "limit": max(limit, 1),
-    }
-    try:
-        async with httpx.AsyncClient(timeout=8.0, follow_redirects=True, headers=headers) as client:
-            resp = await client.get(url, params=params)
-    except httpx.HTTPError:
-        return []
-    if resp.status_code >= 400:
-        return []
-    payload = resp.json()
-    children = ((payload.get("data") or {}).get("children") or []) if isinstance(payload, dict) else []
-    posts: list[dict[str, Any]] = []
-    for child in children:
-        raw = child.get("data") if isinstance(child, dict) else None
-        if not isinstance(raw, dict):
+    query = {"raw_json": "1", "limit": max(limit, 1), **params}
+    for base in ("https://www.reddit.com", "https://old.reddit.com"):
+        try:
+            async with httpx.AsyncClient(timeout=8.0, follow_redirects=True, headers=headers) as client:
+                resp = await client.get(f"{base}{path}", params=query)
+        except httpx.HTTPError:
             continue
-        posts.append(
-            _normalize_post(
-                {
-                    "id": raw.get("id"),
-                    "url": f"https://www.reddit.com{raw.get('permalink')}" if raw.get("permalink") else raw.get("url"),
-                    "title": raw.get("title"),
-                    "body": raw.get("selftext"),
-                    "subreddit": raw.get("subreddit"),
-                    "author": raw.get("author"),
-                    "score": raw.get("score") or raw.get("ups"),
-                    "numComments": raw.get("num_comments"),
-                    "created": raw.get("created_utc"),
-                    "thumbnail": raw.get("thumbnail"),
-                }
+        if resp.status_code >= 400:
+            continue
+        try:
+            payload = resp.json()
+        except ValueError:
+            continue
+        children = ((payload.get("data") or {}).get("children") or []) if isinstance(payload, dict) else []
+        posts: list[dict[str, Any]] = []
+        for child in children:
+            raw = child.get("data") if isinstance(child, dict) else None
+            if not isinstance(raw, dict) or child.get("kind") != "t3":
+                continue
+            created = raw.get("created_utc")
+            if isinstance(created, (int, float)):
+                created = datetime.fromtimestamp(int(created), tz=timezone.utc).isoformat()
+            thumb = raw.get("thumbnail")
+            if thumb in {"self", "default", "nsfw", "spoiler", "image"}:
+                thumb = None
+            posts.append(
+                _normalize_post(
+                    {
+                        "id": raw.get("id"),
+                        "url": f"https://www.reddit.com{raw.get('permalink')}" if raw.get("permalink") else raw.get("url"),
+                        "title": raw.get("title"),
+                        "body": raw.get("selftext"),
+                        "subreddit": raw.get("subreddit"),
+                        "author": raw.get("author"),
+                        "score": raw.get("score") or raw.get("ups"),
+                        "numComments": raw.get("num_comments"),
+                        "created": created,
+                        "flair": raw.get("link_flair_text"),
+                        "nsfw": raw.get("over_18"),
+                        "thumbnail": thumb,
+                    }
+                )
             )
+        if posts:
+            return posts[:limit]
+    return []
+
+
+async def _reddit_search_actor(query: str, limit: int) -> list[dict[str, Any]]:
+    """Score-rich actor fallback for listing endpoints (see config)."""
+    settings = get_settings()
+    try:
+        items = await get_apify().run_actor_sync(
+            settings.APIFY_ACTOR_REDDIT_SEARCH,
+            {"queries": [query], "maxItems": limit},
+            max_items=limit,
         )
-    return posts[:limit]
+    except Exception:  # noqa: BLE001 — fall through to the trudax actor
+        return []
+    return [_normalize_post(i) for i in items if _is_post(i)][:limit]
 
 
 @router.get("/subreddit-posts", summary="List recent posts in a subreddit")
@@ -282,23 +332,27 @@ async def subreddit_posts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_REDDIT,
-                {
-                    "startUrls": [{"url": f"https://www.reddit.com/r/{sub}/"}],
-                    "type": "posts",
-                    "sort": "new",
-                    "maxItems": limit,
-                },
-                max_items=limit,
-            )
-            posts = [_normalize_post(i) for i in items if not _is_comment(i)][:limit]
+            posts = await _reddit_listing_json(f"/r/{sub}/new.json", {}, limit)
+            if not posts:
+                posts = await _reddit_search_actor(f"r/{sub}", limit)
+            if not posts:
+                apify = get_apify()
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_REDDIT,
+                    {
+                        "startUrls": [{"url": f"https://www.reddit.com/r/{sub}/"}],
+                        "type": "posts",
+                        "sort": "new",
+                        "maxItems": limit,
+                    },
+                    max_items=limit,
+                )
+                posts = [_normalize_post(i) for i in items if _is_post(i)][:limit]
             return {"subreddit": sub, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
             endpoint="reddit.subreddit-posts",
-            params={"sub": sub, "limit": limit},
+            params={"sub": sub, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -508,24 +562,30 @@ async def subreddit_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_REDDIT,
-                {
-                    "searches": [q],
-                    "searchCommunityName": sub,
-                    "type": "posts",
-                    "sort": "relevance",
-                    "maxItems": limit,
-                },
-                max_items=limit,
+            results = await _reddit_listing_json(
+                f"/r/{sub}/search.json", {"q": q, "restrict_sr": "1", "sort": "relevance"}, limit
             )
-            results = [_normalize_post(i) for i in items if not _is_comment(i)][:limit]
+            if not results:
+                results = await _reddit_search_actor(f"r/{sub} {q}", limit)
+            if not results:
+                apify = get_apify()
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_REDDIT,
+                    {
+                        "searches": [q],
+                        "searchCommunityName": sub,
+                        "type": "posts",
+                        "sort": "relevance",
+                        "maxItems": limit,
+                    },
+                    max_items=limit,
+                )
+                results = [_normalize_post(i) for i in items if _is_post(i)][:limit]
             return {"subreddit": sub, "query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="reddit.subreddit-search",
-            params={"sub": sub, "q": q, "limit": limit},
+            params={"sub": sub, "q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -549,18 +609,22 @@ async def reddit_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_REDDIT,
-                {"searches": [q], "type": "posts", "sort": "relevance", "maxItems": limit},
-                max_items=limit,
-            )
-            results = [_normalize_post(i) for i in items if not _is_comment(i)][:limit]
+            results = await _reddit_listing_json("/search.json", {"q": q, "sort": "relevance"}, limit)
+            if not results:
+                results = await _reddit_search_actor(q, limit)
+            if not results:
+                apify = get_apify()
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_REDDIT,
+                    {"searches": [q], "type": "posts", "sort": "relevance", "maxItems": limit},
+                    max_items=limit,
+                )
+                results = [_normalize_post(i) for i in items if _is_post(i)][:limit]
             return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="reddit.search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

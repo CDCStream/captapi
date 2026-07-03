@@ -39,3 +39,11 @@ def safe_list(v) -> list:
     if isinstance(v, list):
         return v
     return []
+
+
+def first_present(*values):
+    """First value that is not None — unlike `a or b`, keeps 0 / False / ''."""
+    for v in values:
+        if v is not None:
+            return v
+    return None

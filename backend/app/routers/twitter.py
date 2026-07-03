@@ -19,7 +19,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
-from app.utils.formatters import safe_int, safe_list, safe_str
+from app.utils.formatters import first_present, safe_int, safe_list, safe_str
 from app.utils.url import (
     detect_url_platform,
     extract_tweet_id,
@@ -83,29 +83,56 @@ def _author(a: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _as_bool(value: Any) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() == "true"
+    return None
+
+
 def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
     author = item.get("author") or item.get("user") or {}
+    if not author and item.get("username"):
+        # Community scraper rows are flat with user_* prefixed author fields.
+        author = {
+            "userName": item.get("username"),
+            "name": item.get("user_name"),
+            "followers": item.get("user_followers_count"),
+            "verified": bool(_as_bool(item.get("user_verified")) or _as_bool(item.get("user_is_blue_verified"))),
+            "profilePicture": item.get("user_profile_image_url"),
+        }
+    url = safe_str(item.get("url") or item.get("twitterUrl"))
+    if not url:
+        username = author.get("userName") if isinstance(author, dict) else None
+        tweet_id = item.get("id") or item.get("id_str")
+        if username and tweet_id:
+            url = f"https://x.com/{username}/status/{tweet_id}"
     return {
         "platform": "twitter",
-        "url": safe_str(item.get("url") or item.get("twitterUrl")),
+        "url": url,
         "id": safe_str(item.get("id") or item.get("id_str") or item.get("tweetId")),
         "text": safe_str(item.get("fullText") or item.get("text") or item.get("full_text")),
         "lang": safe_str(item.get("lang")),
         "publishedAt": safe_str(item.get("createdAt") or item.get("created_at")),
         "author": _author(author),
         "engagement": {
-            "views": safe_int(item.get("viewCount") or item.get("views")),
-            "likes": safe_int(item.get("likeCount") or item.get("favoriteCount") or item.get("favorite_count")),
-            "replies": safe_int(item.get("replyCount") or item.get("reply_count")),
-            "retweets": safe_int(item.get("retweetCount") or item.get("retweet_count")),
-            "quotes": safe_int(item.get("quoteCount")),
-            "bookmarks": safe_int(item.get("bookmarkCount")),
+            "views": safe_int(first_present(item.get("viewCount"), item.get("views"))),
+            "likes": safe_int(first_present(item.get("likeCount"), item.get("favoriteCount"), item.get("favorite_count"))),
+            "replies": safe_int(first_present(item.get("replyCount"), item.get("reply_count"))),
+            "retweets": safe_int(first_present(item.get("retweetCount"), item.get("retweet_count"))),
+            "quotes": safe_int(first_present(item.get("quoteCount"), item.get("quote_count"))),
+            "bookmarks": safe_int(first_present(item.get("bookmarkCount"), item.get("bookmark_count"))),
         },
-        "isReply": item.get("isReply"),
-        "isRetweet": item.get("isRetweet"),
+        "isReply": first_present(item.get("isReply"), _as_bool(item.get("is_reply"))),
+        "isRetweet": first_present(item.get("isRetweet"), _as_bool(item.get("is_retweet"))),
         "hashtags": [
-            (h.get("text") if isinstance(h, dict) else h)
-            for h in safe_list(item.get("hashtags") or (item.get("entities") or {}).get("hashtags"))
+            tag
+            for tag in (
+                (h.get("text") or h.get("tag") if isinstance(h, dict) else safe_str(h))
+                for h in safe_list(item.get("hashtags") or (item.get("entities") or {}).get("hashtags"))
+            )
+            if tag
         ],
         "media": [
             safe_str(m.get("media_url_https") or m.get("url") or m) if isinstance(m, dict) else safe_str(m)
@@ -162,7 +189,7 @@ async def twitter_tweet_details(
 
         data = await cached_or_run(
             endpoint="twitter.tweet-details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -278,7 +305,7 @@ async def twitter_user_tweets(
 
         data = await cached_or_run(
             endpoint="twitter.user-tweets",
-            params={"handle": handle, "limit": limit},
+            params={"handle": handle, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -313,7 +340,7 @@ async def twitter_search(
 
         data = await cached_or_run(
             endpoint="twitter.search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -358,6 +385,9 @@ async def twitter_community(
             if not items:
                 raise HTTPException(status_code=404, detail="Community not found")
             c = items[0]
+            banner = c.get("banner")
+            if isinstance(banner, dict):
+                banner = banner.get("url") or banner.get("media_url_https")
             return {
                 "platform": "twitter",
                 "id": safe_str(c.get("id") or c.get("community_id") or community_id),
@@ -366,14 +396,21 @@ async def twitter_community(
                 "description": safe_str(c.get("description")),
                 "memberCount": safe_int(c.get("memberCount") or c.get("member_count") or c.get("members")),
                 "moderatorCount": safe_int(c.get("moderatorCount") or c.get("moderator_count")),
-                "createdAt": safe_str(c.get("createdAt") or c.get("created_at")),
-                "bannerImage": safe_str(c.get("bannerUrl") or c.get("banner_url") or c.get("coverImage")),
+                "createdAt": safe_str(
+                    c.get("createdAt") or c.get("created_at_datetime") or c.get("created_at")
+                ),
+                "creator": safe_str(c.get("creator_username") or c.get("creatorUsername")),
+                "joinPolicy": safe_str(c.get("join_policy") or c.get("joinPolicy")),
+                "isNsfw": first_present(c.get("is_nsfw"), c.get("isNsfw")),
+                "bannerImage": safe_str(
+                    banner or c.get("bannerUrl") or c.get("banner_url") or c.get("coverImage")
+                ),
                 "rules": c.get("rules") or [],
             }
 
         data = await cached_or_run(
             endpoint="twitter.community",
-            params={"community_id": community_id},
+            params={"community_id": community_id, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -416,7 +453,7 @@ async def twitter_community_tweets(
 
         data = await cached_or_run(
             endpoint="twitter.community-tweets",
-            params={"community_id": community_id, "limit": limit},
+            params={"community_id": community_id, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

@@ -2743,6 +2743,597 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "thumbnailUrl": "https://scontent-atl3-2.cdninstagram.com/v/t51.82787-15/713685045_18583942372030593_722863052752067183_n.jpg?stp=dst-jpg_e15_fr_p1080x1080_tt6&_nc_ht=scontent-atl3-2.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gGxgK3ESwZweaIRokS4jQ_UO2MngdCVMo-T_XiXKlyLC2PYYHPMKE9tzcD_aB2lQQ4&_nc_ohc=dtgW6uMgdl0Q7kNvwH-3rDA&_nc_gid=7PxBw05EXtNsdJtKZDJWrA&edm=APs17CUBAAAA&ccb=7-5&oh=00_Af9HLX0odm1MMLH5EdJgpN8rl3lgTa8MIfqGlC1p-LF-tA&oe=6A26560C&_nc_sid=10d13b",
     "duration": 55.733
   },
+  "linkedin-ad-library-ad-details": {
+    "platform": "linkedin_ad_library",
+    "id": "1475728386",
+    "url": "https://www.linkedin.com/ad-library/detail/1475728386",
+    "text": "The apps you know go further with Copilot. Explore limited time offers today.",
+    "headline": "Microsoft Outlook with Copilot",
+    "cta": null,
+    "landingUrl": null,
+    "adFormat": "Single Image Ad",
+    "firstShown": null,
+    "lastShown": null,
+    "impressions": null,
+    "spend": null,
+    "country": null,
+    "advertiser": {
+      "id": null,
+      "name": "Microsoft 365",
+      "url": "https://www.linkedin.com/company/3509299",
+      "logo": null
+    },
+    "media": [
+      "https://media.licdn.com/dms/image/v2/D4D10AQFWrEKj4VaX3g/image-shrink_1280/B4DZ7vxdWJHgAc-/0/1782139180792/Copilot_LinkedIn-Theme4_USA_1200x1200_PHA_SubTheme4L-SU_SMB-EN_NA_Standard_SBAN_LEA_NA_1jpg?e=2147483647&v=beta&t=nrMFf9aBVU7jPCZrhg2A-V0VMOscElqrqWshkXp_r7Y"
+    ]
+  },
+  "linkedin-ad-library-search-ads": {
+    "query": "microsoft",
+    "country": "US",
+    "totalReturned": 3,
+    "ads": [
+      {
+        "platform": "linkedin_ad_library",
+        "id": "1475728386",
+        "url": "https://www.linkedin.com/ad-library/detail/1475728386",
+        "text": "The apps you know go further with Copilot. Explore limited time offers today.",
+        "headline": null,
+        "cta": null,
+        "landingUrl": null,
+        "adFormat": "Single Image Ad",
+        "firstShown": null,
+        "lastShown": null,
+        "impressions": null,
+        "spend": null,
+        "country": "US",
+        "advertiser": {
+          "id": null,
+          "name": "Microsoft 365",
+          "url": null,
+          "logo": "https://media.licdn.com/dms/image/v2/C560BAQGG-2Kb6o7o4A/company-logo_100_100/company-logo_100_100/0/1630592958709/microsoft_office_logo?e=1784764800&v=beta&t=McAvdsqf8HXtZyPU7nS-RGDY-98NHgoC_pwqOw5Gw7k"
+        },
+        "media": [
+          "https://media.licdn.com/dms/image/v2/D4D10AQFWrEKj4VaX3g/image-shrink_1280/B4DZ7vxdWJHgAc-/0/1782139180792/Copilot_LinkedIn-Theme4_USA_1200x1200_PHA_SubTheme4L-SU_SMB-EN_NA_Standard_SBAN_LEA_NA_1jpg?e=2147483647&v=beta&t=nrMFf9aBVU7jPCZrhg2A-V0VMOscElqrqWshkXp_r7Y"
+        ]
+      },
+      {
+        "platform": "linkedin_ad_library",
+        "id": "1480089046",
+        "url": "https://www.linkedin.com/ad-library/detail/1480089046",
+        "text": "Celebrate your work. Spotlight your impact. Submit your Microsoft Advertising Partner Award nomination by July 15. https…",
+        "headline": null,
+        "cta": null,
+        "landingUrl": null,
+        "adFormat": "Single Image Ad",
+        "firstShown": null,
+        "lastShown": null,
+        "impressions": null,
+        "spend": null,
+        "country": "US",
+        "advertiser": {
+          "id": null,
+          "name": "Microsoft Advertising",
+          "url": null,
+          "logo": "https://media.licdn.com/dms/image/v2/C560BAQGCzRbSOXB2wQ/company-logo_100_100/company-logo_100_100/0/1630567794734/bing_ads_logo?e=1784764800&v=beta&t=BzqkDTytrzFb_8OLsQQIBHuGqimMbzavRs88iErL0ck"
+        },
+        "media": [
+          "https://media.licdn.com/dms/image/v2/D5610AQFp6MVJQ_ELIQ/image-shrink_1280/B56Z8FkbnCGcAg-/0/1782504864563/PartnerAwards-Nominationcreative-squarepng?e=2147483647&v=beta&t=UQnA8QEX1N3wDgmKAiG32tPqtzJsUPha7xcw3hMBN_I"
+        ]
+      },
+      {
+        "platform": "linkedin_ad_library",
+        "id": "1480019596",
+        "url": "https://www.linkedin.com/ad-library/detail/1480019596",
+        "text": "Celebrate your work. Spotlight your impact. Submit your Microsoft Advertising Partner Award nomination by July 15. https…",
+        "headline": null,
+        "cta": null,
+        "landingUrl": null,
+        "adFormat": "Single Image Ad",
+        "firstShown": null,
+        "lastShown": null,
+        "impressions": null,
+        "spend": null,
+        "country": "US",
+        "advertiser": {
+          "id": null,
+          "name": "Microsoft Advertising",
+          "url": null,
+          "logo": "https://media.licdn.com/dms/image/v2/C560BAQGCzRbSOXB2wQ/company-logo_100_100/company-logo_100_100/0/1630567794734/bing_ads_logo?e=1784764800&v=beta&t=BzqkDTytrzFb_8OLsQQIBHuGqimMbzavRs88iErL0ck"
+        },
+        "media": [
+          "https://media.licdn.com/dms/image/v2/D5610AQFMsObBoXKilg/image_627_1200/B4DZ8AkxjpHQAQ-/0/1782421068868/PartnerAwardnominationpng?e=2147483647&v=beta&t=gCPJRZXnj1LOvGwC87qEbjzYvvDhHtfHA1xd9ZBTYe8"
+        ]
+      }
+    ]
+  },
+  "linkedin-company": {
+    "platform": "linkedin",
+    "type": "company",
+    "url": "https://www.linkedin.com/company/youtube/",
+    "name": "YouTube",
+    "industry": "Technology, Information and Internet",
+    "description": "YouTube is a team-oriented, creative workplace where every single employee has a voice in the choices we make and the features we implement. We work together in small teams to design, develop, and roll out key features and products in very short time frames. Which means something you write today could be seen by millions of viewers tomorrow. And even though we’re a part of Google and enjoy all of the corporate perks, it still feels like you’re working at a startup.\n\nYouTube is headquartered in San Bruno, California, 12 miles south of San Francisco. We also have many job openings in Mountain View, and across the globe",
+    "website": "http://www.youtube.com/jobs",
+    "followers": 2534873,
+    "employees": 122566,
+    "headquarters": "San Bruno, CA, US",
+    "verified": true,
+    "logo": "https://media.licdn.com/dms/image/v2/D4E0BAQGyUKaYgsO3cg/company-logo_400_400/B4EZb.zwGgGQAY-/0/1748031701722/youtube_logo?e=1784764800&v=beta&t=j6l5ThAPhonaFcpBfJDgNJ4VbLfbx2jdVlPUy8G7_QA",
+    "coverImage": "https://media.licdn.com/dms/image/v2/D561BAQFrNzwLjyhfIw/company-background_10000/B56Z4nzmk7HUAM-/0/1778784299774/youtube_cover?e=1783706400&v=beta&t=hfh_5pWwGKBZ_MQa0YfpruL087N67FWldu4VEj6B6T0"
+  },
+  "linkedin-company-posts": {
+    "company": "microsoft",
+    "totalReturned": 2,
+    "posts": [
+      {
+        "platform": "linkedin",
+        "type": "post",
+        "url": "https://www.linkedin.com/posts/microsoft_june-activity-7477715981667086336-BV_s",
+        "text": "The most meaningful breakthroughs happen when technology is built with people in mind.\n \nThat was the message at Microsoft Build this month, where we announced a host of new tools to help developers build, dream and create. \n \nIn June’s edition of The Monthly Tech-In, we’re sharing stories from Build and beyond about the developers, founders and communities who are using AI to tackle real-world challenges, from helping creators protect their work to advancing more inclusive AI systems.\n \nRead more about the people and innovations who are shaping what's next:",
+        "publishedAt": "2026-06-30T13:33:39.256Z",
+        "author": {
+          "name": "Microsoft",
+          "headline": "June",
+          "url": "https://www.linkedin.com/company/microsoft"
+        },
+        "engagement": {
+          "likes": null,
+          "comments": null,
+          "reposts": null
+        },
+        "id": "7477715981667086336",
+        "media": []
+      },
+      {
+        "platform": "linkedin",
+        "type": "post",
+        "url": "https://www.linkedin.com/posts/microsoft_cancer-care-has-become-more-precise-over-activity-7470150280601440256-3c8q",
+        "text": "Cancer care has become more precise over time, but outcomes can still vary widely. Now, researchers are looking beyond mutations to how tumors behave.  \n \nIn new findings published in Nature Methods, Microsoft researcher Lorin Crawford shares how the right data can help AI reveal patterns in cell behavior that may lead to better ways to match therapies to patients. Read more about what Project Ex Vivo could mean for the future of treatment: https://msft.it/6009vgDWX",
+        "publishedAt": "2026-06-09T16:30:15.550Z",
+        "author": {
+          "name": "Microsoft",
+          "headline": null,
+          "url": "https://www.linkedin.com/company/microsoft"
+        },
+        "engagement": {
+          "likes": null,
+          "comments": null,
+          "reposts": null
+        },
+        "id": "7470150280601440256",
+        "media": []
+      }
+    ]
+  },
+  "linkedin-post-details": {
+    "platform": "linkedin",
+    "type": "post",
+    "url": "https://www.linkedin.com/posts/activity-7478786553939488769-RXS2",
+    "text": "Excited to share that Argonove is building its investment talent pipeline.\n\nWe’re looking for an experienced Investment Associate with a background in infrastructure investing, project finance, investment banking, or digital infrastructure to help support our mission of developing university-anchored AI infrastructure across the United States.\n\nIf you're excited about building an entrepreneurial investment platform from the ground up, I'd love to hear from you.\n\nPlease apply through the LinkedIn posting or feel free to share it with someone who may be a great fit.\n\n#Hiring #Infrastructure #PrivateEquity #DigitalInfrastructure #DataCenters #AI #ProjectFinance #InvestmentBanking",
+    "publishedAt": "2026-07-03 14:57:31",
+    "author": {
+      "name": "Kadidia K.",
+      "headline": "Founder & Managing Partner, Argonove Capital | University-Based AI Data Centers | Digital Infrastructure & Energy | NACUBO | PE WIN",
+      "url": "https://www.linkedin.com/in/kadidia-konare-mpa?miniProfileUrn=urn%3Ali%3Afsd_profile%3AACoAAAAFUJQBlTyKwlGy6ux43DJOFhjpJyVYy8s"
+    },
+    "engagement": {
+      "likes": 17,
+      "comments": 2,
+      "reposts": 2
+    }
+  },
+  "linkedin-post-transcript": {
+    "platform": "linkedin",
+    "url": "https://www.linkedin.com/posts/activity-7478786553939488769-RXS2",
+    "transcript": "Excited to share that Argonove is building its investment talent pipeline.\n\nWe’re looking for an experienced Investment Associate with a background in infrastructure investing, project finance, investment banking, or digital infrastructure to help support our mission of developing university-anchored AI infrastructure across the United States.\n\nIf you're excited about building an entrepreneurial investment platform from the ground up, I'd love to hear from you.\n\nPlease apply through the LinkedIn posting or feel free to share it with someone who may be a great fit.\n\n#Hiring #Infrastructure #PrivateEquity #DigitalInfrastructure #DataCenters #AI #ProjectFinance #InvestmentBanking",
+    "transcriptSegments": [
+      {
+        "text": "Excited to share that Argonove is building its investment talent pipeline.\n\nWe’re looking for an experienced Investment Associate with a background in infrastructure investing, project finance, investment banking, or digital infrastructure to help support our mission of developing university-anchored AI infrastructure across the United States.\n\nIf you're excited about building an entrepreneurial investment platform from the ground up, I'd love to hear from you.\n\nPlease apply through the LinkedIn posting or feel free to share it with someone who may be a great fit.\n\n#Hiring #Infrastructure #PrivateEquity #DigitalInfrastructure #DataCenters #AI #ProjectFinance #InvestmentBanking",
+        "start": 0,
+        "duration": 0,
+        "timestamp": "00:00"
+      }
+    ],
+    "wordCount": 92,
+    "segments": 1,
+    "author": {
+      "name": "Kadidia K.",
+      "headline": "Founder & Managing Partner, Argonove Capital | University-Based AI Data Centers | Digital Infrastructure & Energy | NACUBO | PE WIN",
+      "url": "https://www.linkedin.com/in/kadidia-konare-mpa?miniProfileUrn=urn%3Ali%3Afsd_profile%3AACoAAAAFUJQBlTyKwlGy6ux43DJOFhjpJyVYy8s"
+    },
+    "publishedAt": "2026-07-03 14:57:31"
+  },
+  "linkedin-profile": {
+    "platform": "linkedin",
+    "type": "person",
+    "url": "https://linkedin.com/in/satyanadella",
+    "username": "satyanadella",
+    "name": "Satya Nadella",
+    "headline": "Chairman and CEO at Microsoft",
+    "location": "Redmond, Washington, United States",
+    "about": "As chairman and CEO of Microsoft, I define my mission and that of my company as empowering every person and every organization on the planet to achieve more.",
+    "followers": 12051202,
+    "connections": 831,
+    "verified": true,
+    "profileImage": "https://media.licdn.com/dms/image/v2/C5603AQHHUuOSlRVA1w/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1579726625483?e=1784764800&v=beta&t=7VP31YKWPD8fOz2x3jnSbNBAxMxqW_1KJUhKIJaV3yw",
+    "currentCompany": "Microsoft"
+  },
+  "linkedin-search-posts": {
+    "query": "artificial intelligence",
+    "sort": "relevance",
+    "totalReturned": 3,
+    "posts": [
+      {
+        "platform": "linkedin",
+        "type": "post",
+        "url": "https://www.linkedin.com/posts/activity-7478786553939488769-RXS2?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAAGq62dABn0w7ljjWV7evQTTajESZ2A6MvRw",
+        "text": "Excited to share that Argonove is building its investment talent pipeline.\n\nWe’re looking for an experienced Investment Associate with a background in infrastructure investing, project finance, investment banking, or digital infrastructure to help support our mission of developing university-anchored AI infrastructure across the United States.\n\nIf you're excited about building an entrepreneurial investment platform from the ground up, I'd love to hear from you.\n\nPlease apply through the LinkedIn posting or feel free to share it with someone who may be a great fit.\n\n#Hiring #Infrastructure #PrivateEquity #DigitalInfrastructure #DataCenters #AI #ProjectFinance #InvestmentBanking",
+        "publishedAt": "2026-07-03 14:27:43",
+        "author": {
+          "name": "Kadidia K.",
+          "headline": "Founder & Managing Partner, Argonove Capital | University-Based AI Data Centers | Digital Infrastructure & Energy | NACUBO | PE WIN",
+          "url": "https://www.linkedin.com/in/kadidia-konare-mpa?miniProfileUrn=urn%3Ali%3Afsd_profile%3AACoAAAAFUJQBlTyKwlGy6ux43DJOFhjpJyVYy8s"
+        },
+        "engagement": {
+          "likes": 17,
+          "comments": 2,
+          "reposts": 2
+        },
+        "id": "7478786553939488769",
+        "media": []
+      },
+      {
+        "platform": "linkedin",
+        "type": "post",
+        "url": "https://www.linkedin.com/posts/anthonyblatner_do-you-love-nerding-out-on-b2b-ads-if-youre-activity-7478812065768370176-tkXx?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAAGq62dABn0w7ljjWV7evQTTajESZ2A6MvRw",
+        "text": "Do you love nerding out on B2B ads? If you're such a regular LinkedIn pro that you're on over the holiday weekend -- we'd love to talk to you.\n\nWe're looking for more paid media ad experts to join our team. Start with a couple of ad accounts and grow into a full-time role, or stay part-time.\n\n+ Looking for experts in LinkedIn Ads and/or Google Ads\n+ Used to balancing multiple projects\n+ B2B tech experience preferred\n+ Not afraid of Claude Code ⚡️\n\nWe're a LinkedIn Ads Certified Agency and I created the LinkedIn Learning Course on B2B Marketing. Step into a well designed process and bring your creativity.\n\nInterested? Apply via this posting, or shortcut it and DM me a video of why you're interested (bonus points if you walk me through an ad account)",
+        "publishedAt": "2026-07-03 16:09:06",
+        "author": {
+          "name": "Anthony Blatner",
+          "headline": "LinkedIn Ads Expert + AI @ Speedwork.io | Top 50 LinkedIn Certified Marketing Expert | LinkedIn Learning Instructor | Ex-IBM | Host, LinkedIn Ads Radio Podcast",
+          "url": "https://www.linkedin.com/in/anthonyblatner?miniProfileUrn=urn%3Ali%3Afsd_profile%3AACoAAAPFpZQBjDDSxyZ_MvymTZ77NfF72tVBD0o"
+        },
+        "engagement": {
+          "likes": 16,
+          "comments": 1,
+          "reposts": 1
+        },
+        "id": "7478812065768370176",
+        "media": []
+      },
+      {
+        "platform": "linkedin",
+        "type": "post",
+        "url": "https://www.linkedin.com/posts/noah-f-salmeri_salmeri-development-is-looking-for-a-marketing-activity-7478836581336784896-QvaW?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAAGq62dABn0w7ljjWV7evQTTajESZ2A6MvRw",
+        "text": "Salmeri Development is looking for a Marketing Intern.\n\nThis is a 10 to 15 hour/week internship for a student or early-career candidate who wants hands-on experience in real estate marketing, social media, content creation, business development marketing, and basic performance tracking.\n\nThe role will support Salmeri Development and several connected projects, with the primary focus being Jefferson Hills Condo Development in Jefferson, Wisconsin.\n\nThe intern will help with things like:\n- Creating social media content\n- Drafting captions and simple marketing copy\n- Organizing project photos/videos\n- Supporting condo marketing for Jefferson Hills\n- Helping with LinkedIn, Facebook, Instagram, YouTube, and other platforms as needed\n- Tracking basic marketing performance\n- Turning real project updates into clear, useful content\n\nThis is primarily an unpaid internship, but coffees, lunches, or similar work-related meals may be covered when working in person with leadership.\n\nIdeal fit: someone organized, creative, dependable, and interested in learning how marketing connects to real projects, sales momentum, investor interest, and business growth.\n\nTo apply, send a resume and a short note explaining your interest to noah@salmeridevelopment.com.\n\nExamples of previous social media, writing, design, video, or marketing work are encouraged but not required.",
+        "publishedAt": "2026-07-03 17:46:31",
+        "author": {
+          "name": "Noah F Salmeri",
+          "headline": "Entrepreneur | Developer | IB 40 Under 40 Class of 2024",
+          "url": "https://www.linkedin.com/in/noah-f-salmeri?miniProfileUrn=urn%3Ali%3Afsd_profile%3AACoAAAvn74sBe4ajbGDcqtTLmq38imcNdCfFlFg"
+        },
+        "engagement": {
+          "likes": 8,
+          "comments": null,
+          "reposts": 1
+        },
+        "id": "7478836581336784896",
+        "media": []
+      }
+    ]
+  },
+  "reddit-post-comments": {
+    "totalReturned": 4,
+    "comments": [
+      {
+        "id": "t1_ovbnkri",
+        "author": "EffingWasps",
+        "text": "Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme",
+        "upvotes": null,
+        "publishedAt": "2026-07-03T14:19:44.000Z",
+        "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovbnkri/"
+      },
+      {
+        "id": "t1_ovbli62",
+        "author": "b407driver",
+        "text": "Become? It has always been the greatest (unsolved) challenge.",
+        "upvotes": null,
+        "publishedAt": "2026-07-03T14:09:40.000Z",
+        "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovbli62/"
+      },
+      {
+        "id": "t1_ovc0szx",
+        "author": "Waarm",
+        "text": "The current biggest challenge is funding.",
+        "upvotes": null,
+        "publishedAt": "2026-07-03T15:21:27.000Z",
+        "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovc0szx/"
+      },
+      {
+        "id": "t1_ovbmqa5",
+        "author": "degh555",
+        "text": "The OP is observing that future manned missions will require significantly longer durations beyond the protection of the magnetosphere. Apollo 11 lasted 8 days, a trip to mars would last 60-90 times longer.",
+        "upvotes": null,
+        "publishedAt": "2026-07-03T14:15:38.000Z",
+        "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovbmqa5/"
+      }
+    ]
+  },
+  "reddit-post-details": {
+    "platform": "reddit",
+    "id": "t3_1umfd43",
+    "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/",
+    "title": "Radiation exposure may become the biggest challenge for future Moon and Mars missions",
+    "text": "I&#39;ve been reading more about Artemis and future Mars mission planning, and one aspect that seems to receive surprisingly little public discussion is radiation exposure beyond low Earth orbit. NASA has published career radiation exposure limits, and it&#39;s clear that missions outside Earth&#39;s magnetosphere expose crews to significantly higher doses from galactic cosmic rays and solar particle events. Unlike many other engineering problems, there still doesn&#39;t seem to be a practical solution. Effective shielding is extremely heavy, and medical countermeasures are still being researched. It makes me wonder how these risks are balanced during mission planning. Astronauts obviously understand that spaceflight is dangerous, but long-duration missions introduce health risks that may not become apparent until decades later. As plans for lunar bases and eventual Mars missions continue to move forward, this seems like an issue that deserves more attention. I&#39;d be interested in hearing different perspectives on how agencies approach these tradeoffs today, especially from people familiar with space medicine, radiation research, or mission planning. Do you think current public discussions accurately reflect the scale of the challenge, or is this one of the least appreciated obstacles to long-duration human spaceflight?  &#32; submitted by &#32;  /u/Low-Mathematician137   [link] &#32; [comments]",
+    "subreddit": "r/space",
+    "author": "Low-Mathematician137",
+    "upvotes": null,
+    "comments": null,
+    "publishedAt": "2026-07-03T14:04:13.000Z",
+    "flair": null,
+    "nsfw": null,
+    "thumbnail": null
+  },
+  "reddit-search": {
+    "query": "james webb telescope",
+    "totalReturned": 5,
+    "results": [
+      {
+        "platform": "reddit",
+        "id": "vuhfl9",
+        "url": "https://www.reddit.com/r/nosleep/comments/vuhfl9/the_james_webb_telescope_discovered_something/",
+        "title": "The James Webb Telescope discovered something terrifying in deep space",
+        "text": "I work for NASA as an astronomer, and there are certain things we keep hidden from the public. No, the Earth isn't flat, and aliens don't control the government. Fuck, I wish those were the case, as the truth is much, much worse.\n\nIn 1993, the Hubble Space Telescope saw a star disappear. It didn't go supernova, or die naturally, it simply went dark, over the span of a few minutes. This star was already too faint to see with the naked eye, and ground-based telescopes had trouble picking it out from among the surrounding stars, so the event wasn't widely known to the public. At the time, we thought the most likely explanation was that a cloud of interstellar dust had drifted between Earth and the star, occluding it from view. It was noted and mostly forgotten about.\n\nIn 2007, two more stars vanished. Due to the circumstances of this event, this was much more concerning. The two stars in question were part of a binary system, orbiting each other at a fairly close distance. If a cloud of interstellar dust was the culprit again, they would have both seemed to disappear simultaneously, or very close to it. Instead, both stars faded individually over a period of minutes, separated by a span of about 8 hours. This binary system was also about 15 light-years closer to Earth than the star that had previously disappeared in 1993.\n\nAfter carefully reviewing millions of Hubble images, two more stars were identified which had 'gone out', in the years 1995 and 2002. These were all in the same stellar neighborhood, only a handful of light-years from each other. The only conclusion we could draw was that some unknown influence, traveling close to the speed of light, was shrouding (or destroying) these stars. Unfortunately, the Hubble wasn't sensitive enough to tell us any more than that.\n\nThe James Webb Space Telescope first came online a few months ago. Although official channels will tell you that it's still undergoing testing, we have been actively collecting data since early February. One of the first things we did was to aim the telescope at the regions of space occupied by the vanished stars. If they were being blocked by dust clouds (a hope some of us still held onto), the increased sensitivity of the JWST may have been able to see through them and confirm that the stars were still there. Unfortunately, we had no such luck. The first 3 stars that had disappeared were still completely dark. Gravitational wave detectors, though, soon found something odd. In all cases, not only were the stellar masses still present, but the amount of mass had actually increased. More sensitive observations had also detected a type of 'string', or 'web' stretching through space connecting these now-invisible stars.\n\nWhen we trained the telescope on the binary system that had vanished in 2007, which was the nearest point at which this phenomenon had so far been observed, there was finally enough ambient EM spectrum radiation left to try a mass spectrometer reading. If you're not aware, mass spectrometry is an incredibly useful process, where by measuring the patterns of light wavelengths emitted or reflected by an object, we can learn tons of useful information, such as its temperature, speed and direction of movement, and chemical composition. The readings we got from the binary stars didn't make any sense, though. First of all, they were cold - almost as cold as the surrounding interstellar medium. Whatever had happened to these stars had snuffed them out completely, or somehow prevented their light from escaping. What was truly puzzling, however, were the emission lines returned by the mass spectrometer. Several familiar elements, such as Hydrogen, Carbon, Nitrogen, Oxygen, and Magnesium were identified, but these were few and far between. Most of the readings didn't correspond to any known chemical elements, and even seemed to defy what we knew about the physics of light, matter, and chemistry. This massive, star-spanning structure was primarily composed of materials that we didn't even have names for, and may not even have been matter as we understand it.\n\nSpeculation ran rampant. Obviously, such a thing couldn't be a natural phenomenon. Finally, we had proof of extraterrestrial life! But what was this thing we had discovered, and for what purpose was it being built? The leading hypothesis was that we were looking at a series of Dyson Shells - massive solar collectors built to completely envelop stars, in order to capture 100% of their energy output. Such a concept had been envisioned in the early 20th century, as a potential source of energy for an interstellar civilization. Ever since then, the idea had found its way into popular science fiction. The construction of these massive structures had actually been theorized to be one of the first signs of intelligent extraterrestrial life that we may someday detect. It seemed that day was today.\n\nThe theory still didn't explain everything, though. First of all, there was the impossible speed with which the stars were covered. Constructing a Dyson shell from scratch in a matter of minutes was beyond even the wildest speculations of scientists and sci-fi writers. Then there were the mysterious 'filaments' that connected the shells over distances of light-years. No one had any idea what purpose these could serve, or how they could even be built.\n\nEveryone at NASA was fascinated by this mystery. In hindsight, we may have been better off if we had never discovered the truth.\n\nLess than a month ago, the JWST detected a series of unusual energy bursts emanating from interstellar space. These were occurring at the very edge of a star system approximately 12 light-years from the binary system that vanished in 2007. As we focused the telescope on this system, we soon determined that these were not natural phenomena either. The energy signatures, which were still flashing intermittently, matched what would be expected from thermonuclear and antimatter - based explosions, along with several other types of energies that we couldn't identify. These explosions, although still not visible to the naked eye on Earth from that distance, were absolutely tremendous in magnitude - easily billions of times more powerful than any nuke that humanity could conceivably build.  \n\n\nAfter experimenting with the telescope's settings, we were able to get a clearer picture of what was going on: The tip of one of the interstellar 'filaments' that linked the Dyson system was passing through the Oort Cloud of the distant star system, approaching its sun. And whoever lived there was fighting back. Their weapons were able to slow the thing's advance, shattering, breaking off, and vaporizing planet-sized chunks of the object, but it seemed to be rebuilding itself almost as fast as it was being destroyed. After less than a week, the explosions stopped. It seems that they had run out of ammunition. In the void between stars, we knew that these things traveled at nearly the speed of light, but as we watched it approach the inner star system, its pace slowed as it swelled in size, preparing to devour the system's star.\n\nWe quickly trained the telescope's mirrors on the doomed sun. We were about to watch whatever this thing was blot out another star, but in real time. We all held our breath as we watched the projected image of the main sequence star, slightly larger than our own sun. At first, nothing seemed to be happening, but soon a small shadow appeared on the edge of the luminous orb, soon followed by another shadow, and then a third. The shadows began to converge, forming a strange yet somehow familiar pattern as they blocked out the star's light.\n\n\"What... are those?\" One of my colleagues gasped. \"They almost look like...\" she paused, as if afraid to say the next word for fear of ridicule. I, however, had no such hesitancy.\n\n\"Leaves,\" I said, my voice monotone. The situation was far too incredible to express any emotional reaction, even that of pure shock. \"They look like leaves.\"\n\nWe watched as, over a period of minutes, a web of shadowy outlines, matching the familiar shapes of oblong leaves and thin vines, proceeded to blot out the remaining light from the distant star.\n\nBy that point, everyone in the room had realized the truth. The phenomenon we had been tracking for so many years wasn't some hyper-advanced alien megastructure. Hydrogen, Carbon, Nitrogen, Oxygen, and Magnesium, some of the few familiar elements we had detected? They were all components of chlorophyll.\n\nIt was a plant. An enormous plant that spanned across light-years. And, much like terrestrial plants, it sought out light to fuel itself. The filaments connecting the stars across interstellar space were stems - branches. It would grow in the direction of the nearest stars it sensed, completely enveloping them and then moving on. Any life inhabiting planets orbiting those stars would be left to freeze to death, or perhaps even worse, it was possible that the plant would devour those planets to add to its mass as well. \n\nEveryone was silent as the telescope continued to gather data. Eventually, after what seemed like an eternity, a young astronomer spoke up from the far end of the room, addressing our supervisor.\n\n\"Sir, we've begun to detect the formation of another tendril, leaving the system. Its vector is...\" he gulped. He didn't need to say any more, but he did anyway. \"It's heading directly for our sun.\"\n\n\"How much time do we have?\" the supervisor replied grimly.\n\n\"Judging by the time lag, distance, relativistic properties, and previously observed speeds of this... thing, I'd estimate no more than twenty-seven years, sir.\"\n\nTwenty-seven years. We had just watched this galactic weed overwhelm a civilization that was, at the very least, thousands of years ahead of us technologically, and we had less than three decades.\n\nI'll probably be found and silenced for posting this. But I don't care. I have to tell someone. I can't keep this a secret any longer. When the sun turns black and the world begins to freeze, at least you'll have some idea of what's going on, small comfort it may be.",
+        "subreddit": "nosleep",
+        "author": "Phonecloth",
+        "upvotes": 12457,
+        "comments": 1292,
+        "publishedAt": "2022-07-08T18:30:31.000Z",
+        "flair": null,
+        "nsfw": false,
+        "thumbnail": null
+      },
+      {
+        "platform": "reddit",
+        "id": "w10and",
+        "url": "https://www.reddit.com/r/nextfuckinglevel/comments/w10and/the_james_webb_space_telescope_jwst_simply_no/",
+        "title": "The James Webb Space Telescope (JWST)... Simply no words.",
+        "text": null,
+        "subreddit": "nextfuckinglevel",
+        "author": "Dan_Moreno",
+        "upvotes": 7302,
+        "comments": 209,
+        "publishedAt": "2022-07-17T05:52:35.000Z",
+        "flair": null,
+        "nsfw": false,
+        "thumbnail": "https://b.thumbs.redditmedia.com/X5Kn2aPG9ESLiiJtHq30GvPpmSnqw-Mtz0KrQurtmtU.jpg"
+      },
+      {
+        "platform": "reddit",
+        "id": "vxdrjs",
+        "url": "https://www.reddit.com/r/pics/comments/vxdrjs/the_first_fullcolor_images_from_the_james_webb/",
+        "title": "The first full-color images from the James Webb Space Telescope [OC]",
+        "text": null,
+        "subreddit": "pics",
+        "author": "nasa",
+        "upvotes": 130248,
+        "comments": 2884,
+        "publishedAt": "2022-07-12T15:21:41.000Z",
+        "flair": null,
+        "nsfw": false,
+        "thumbnail": "https://a.thumbs.redditmedia.com/8LtDCR8118gXbX6gnY-wfOrhxH3QRQdYchWQ2mtpeG0.jpg"
+      },
+      {
+        "platform": "reddit",
+        "id": "1ucll2e",
+        "url": "https://www.reddit.com/r/worldnews/comments/1ucll2e/james_webb_telescope_detects_galaxykilling_wind/",
+        "title": "James Webb telescope detects 'galaxy-killing wind' near the dawn of time",
+        "text": null,
+        "subreddit": "worldnews",
+        "author": "shdw_fght",
+        "upvotes": 1469,
+        "comments": 163,
+        "publishedAt": "2026-06-22T14:08:15.000Z",
+        "flair": null,
+        "nsfw": false,
+        "thumbnail": "https://external-preview.redd.it/MvcbMbmZOw99iMdDsy1JbsvZKf_5VGs-WQ1y5lrYGwo.jpeg?width=140&height=78&auto=webp&s=ff7d6360b316c1006ac4c27398dfc41df784e772"
+      },
+      {
+        "platform": "reddit",
+        "id": "1ldt0qj",
+        "url": "https://www.reddit.com/r/Astronomy/comments/1ldt0qj/pope_leo_james_webb_telescope_shows_us_what_the/",
+        "title": "Pope Leo: James Webb telescope shows us what the Bible couldn’t",
+        "text": null,
+        "subreddit": "Astronomy",
+        "author": "TimesandSundayTimes",
+        "upvotes": 10026,
+        "comments": 518,
+        "publishedAt": "2025-06-17T17:18:24.000Z",
+        "flair": "Other: [Topic]",
+        "nsfw": false,
+        "thumbnail": "https://external-preview.redd.it/MbjZD5otMaLYJE0tFCzb5LdzZb4-hDrsO9RKmgk-cww.jpeg?width=140&height=78&crop=140:78,smart&auto=webp&s=da110f507d5d9f182160a877e1860fa39f9b86a3"
+      }
+    ]
+  },
+  "reddit-subreddit-details": {
+    "platform": "reddit",
+    "name": "space",
+    "url": "https://www.reddit.com/r/space",
+    "title": "/r/space: news, articles and discussion",
+    "description": "Share & discuss informative content on:\n\n* Astrophysics\n* Cosmology\n* Space Exploration\n* Planetary Science\n* Astrobiology",
+    "members": 27924160,
+    "activeUsers": null,
+    "category": "Lifestyles",
+    "language": "en",
+    "type": "public",
+    "createdAt": "2008-01-26T06:07:54+00:00",
+    "nsfw": false,
+    "icon": "https://styles.redditmedia.com/t5_2qh87/styles/communityIcon_ub69d1lpjlf51.png?width=256&s=920c352b6d0c69518b6978ba8b456176a8d63c25",
+    "banner": "https://styles.redditmedia.com/t5_2qh87/styles/bannerBackgroundImage_n7bxapsg3kq81.png?width=4000&s=55d7d41785957e640ea6f207a2e688f6603d0d10"
+  },
+  "reddit-subreddit-posts": {
+    "subreddit": "space",
+    "totalReturned": 5,
+    "posts": [
+      {
+        "platform": "reddit",
+        "id": "17ujvgn",
+        "url": "https://www.reddit.com/r/space/comments/17ujvgn/how_likely_does_rspace_think_it_is_that_we_are/",
+        "title": "How likely does r/space think it is that we are the only extant technological civilization in the milky way? Would that disappoint you? Indifferent? Happy? What are your thoughts?",
+        "text": null,
+        "subreddit": "space",
+        "author": "geniusgrunt",
+        "upvotes": 326,
+        "comments": 653,
+        "publishedAt": "2023-11-13T20:23:24.000Z",
+        "flair": "Discussion",
+        "nsfw": false,
+        "thumbnail": null
+      },
+      {
+        "platform": "reddit",
+        "id": "1rmmm35",
+        "url": "https://www.reddit.com/r/interestingasfuck/comments/1rmmm35/when_king_richard_iii_was_found_he_was_found/",
+        "title": "When King Richard III was found, he was found under a parking lot and beneath the reserved parking space marked ‘R’",
+        "text": null,
+        "subreddit": "interestingasfuck",
+        "author": "clockman153",
+        "upvotes": 62832,
+        "comments": 1417,
+        "publishedAt": "2026-03-06T18:52:38.000Z",
+        "flair": null,
+        "nsfw": false,
+        "thumbnail": "https://preview.redd.it/yuev0xyf1hng1.jpg?width=140&height=93&auto=webp&s=479516ea49e8b2ed37e95cb0b9c76fd60146489b"
+      },
+      {
+        "platform": "reddit",
+        "id": "1oy0xfu",
+        "url": "https://www.reddit.com/r/space/comments/1oy0xfu/rspace_your_calls_have_been_answered_the/",
+        "title": "r/Space, your calls have been answered | The problematic partisan mod has been removed + putting an end to wrongful post/comment removals critical of the current US govt",
+        "text": "You read the title right - after a while of a large section of people calling out the blatantly biased post and comment removals on this subreddit, the\\_fungible\\_man has been removed from the mod team. I was semi-late on the scene to all of this drama, and I had my personal experiences with said removals so as a courtesy I reached out to see if there was any way I could offer the subreddit my help to fix all of this.\n\nFor context, you can see this post that hit r/all \\- [https://www.reddit.com/r/space/comments/1okntgt/mods\\_stop\\_removing\\_posts\\_calling\\_you\\_out\\_and/](https://www.reddit.com/r/space/comments/1okntgt/mods_stop_removing_posts_calling_you_out_and/)\n\nI'll be completely transparent and explain everything to the best of my ability:\n\nNow I will clear something right off the bat: yes, the callout post was 100% correct. **As soon as I got added as a mod recently, the first thing I did was to check the mod log and try to understand the pattern of removals that was mentioned by the OP of the callout post, and it all checked out. All the kind of removals people called out for their biased nature were from fungible. A lot of the times stuff like this might come off as conspiratorial, and believe me, I wasn't convinced either until I saw it in the logs myself and noticed this was definitely a thing that was happening, and a dangerous precedent to be set in a scientific subreddit of all places. I don't see this as a \"one party bad other party good\" thing - no matter what side you're on, regardless if you're left or right or whatever, you shouldn't push discourse in a way that shuts down stuff you don't like, period. Unfortunately, that was what was happening.**\n\nRegards to moderation...Long story short: as it turned out, apart from fungible only 2 mods were active - one of them wasn't even \"active\" per se, just occasionally moderating every few weeks or so. The other is one of the top mods, who wasn't really in tune with the moderation tools since the UI changes and so I had to support them in navigating through the different options in the mod list. Now all of this meant that fungible had basically unchecked free reign to remove things as they liked. But obviously as you are aware, it got to a boiling point with the callout posts becoming so popular that even the inactive mods noticed and started to question it. One of the mods even stepped down since the situation with fungible still wasn't getting resolved due to inactivity across the entire team. **I've been a long time user on this sub - I was kinda sad to see how all of this was panning out with the sub basically collapsing so I tried my luck at reaching out, conversing with and supporting the only other active mod -  peterabbit - to take some kind of definitive action. Thankfully, after a lot of troubleshooting and back & forth, he was able to bring me on the team as a mod, verify stuff for himself and help resolve all this.**\n\n# Conclusion (and future of the sub):\n\nSo where does that leave the sub? Well for now, the big thing is that you're no longer going to be seeing partisanship in post/comment removals about NASA/etc funding cuts/layoffs/other stuff that might appear critical of the current US gov. Science is inherently political, and discussion about the ramifications of governments' actions/inactions shouldn't be gatekept. This isn't just a US thing, it applies worldwide. One other aspect is certain sections of people that don't like seeing news critical of the US admin abusing the report button for an autoremoval - I'll be looking at a way to try to fix that in the automod, until then it'll be about manually approving as many of these posts/comments I see wrongfully removed as possible. Herein also comes the need maybe, for mods neutral in nature and preferably I think even with some sort of scientific background. When I stepped into the moderation team in this past week, it wasn't really with the aim in mind to be here in the longterm. It was mainly to sort out the pattern of wrongful removals and the whole drama surrounding it by checking the mod logs/etc. I would like to step down soon-ish, but at least I wanted to let you all know the situation right now with thos post for transparency's sake.\n\nIt also needs to be said that for people worried about the sub being overrun with politics - there's obviously still a balance that needs to be held, and that means this shouldn't become a full-blown political subreddit, so you can rest easy if you feared that was what's happening. Basically, it's going to be like it was before the partisan removals. But still, I think this post also serves as a good place to have constructive discussion about the problems with this sub as a whole, beyond just political posts.\n\n\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\n\nWhat do you think can change in the rules overall? Your thoughts on links/titles/sources etc and whether they should be moderated in a different way? You would have also noticed the nosedive this sub has taken in its activity/people that visit it compared to the past - What are some proposals you'd put forth about getting this sub back to the activity it was, 4-5 years ago - where there was MUCH more activity, obscure scientific findings getting 10s of thousands of upvotes and a community full of high-quality, constructive discussion? Feel free to speak your mind about what's missing, what can be done, what can be changed, and how you'd do it. We've never really had the opportunity to do this kind of conversation in this community, ever I think. I'll take the occasion to start it here, maybe make another separate post for it soon.\n\nP.S. - *Please do not harass any of the people mentioned here. Yes they might be problematic in how they've let their bias creep in and shaped discourse to their liking, but they should not be stalked/messaged around the site. Not simply because of Reddit TOS, but because it's not the right thing to do, period. They're gone, and everyone moves on to better tidings - let's leave it at that.*\n\n*-Chief*",
+        "subreddit": "space",
+        "author": "ChiefLeef22",
+        "upvotes": 13068,
+        "comments": 1146,
+        "publishedAt": "2025-11-15T19:43:26.000Z",
+        "flair": "ANNOUNCEMENT",
+        "nsfw": false,
+        "thumbnail": null
+      },
+      {
+        "platform": "reddit",
+        "id": "1oyi2rb",
+        "url": "https://www.reddit.com/r/SubredditDrama/comments/1oyi2rb/go_make_your_own_magasa_subreddit_then_the_rspace/",
+        "title": "\"go make your own MAGASA subreddit then. \" The r/space mod team ousts the partisan, pro-Trump mod removing posts critical of the admin, much to the chagrin of some users",
+        "text": "Source: https://www.reddit.com/r/space/comments/1oy0xfu/rspace_your_calls_have_been_answered_the/\n\n**HIGHLIGHTS**\n\n[Wonderful. Another subreddit that’s gonna be flooding with blue good red bad posts.  Delightful.  Your comment that “science is inherently political” tells me all I need to know about the future of this subreddit. What a fucking joke](https://www.reddit.com/r/space/comments/1oy0xfu/rspace_your_calls_have_been_answered_the/np12l7m/)\n>go make your own MAGASA subreddit then. \n>>Also this is the space subreddit, not nasa subreddit dummy\n>>>A good example of the kind of personal insult that should be deleted.\n\n[It would be nice to keep this sub as free from political posts as possible no matter who the post targets.  This sub should be a place we can come and enjoy our passion and escape all the political bs. I hate coming here and seeing political garbage, it just stresses me out. There are literally hundreds of other subs that are specifically for that kind of thing. Why can't we just keep this sub free from politics and enjoy space?](https://www.reddit.com/r/space/comments/1oy0xfu/rspace_your_calls_have_been_answered_the/np15257/)\n>Because NASA, ESA, Jaxxa and every space agency and company activity is inherently led directly or indirectly by politics. Always has been, always will be. The push for destroying any kind of public outreach at NASA for example deprives this sub of much content and directly impact your ability to \"simply enjoy space\". Not mentioning all the missions that are getting canceled.\n>>Private companies are the future of space. The era of government run space programs is over. We don't need 50 posts a day from die hard communists complaining about an economic inevitability. \n>>>Mods, look over here! I found him, he's right here!!\n>>>>See this attitude is EXACTLY what people are worried about taking over this subreddit. We don't want to see the subreddit destroyed by people like yourself.  Edit: And of course he blocks me after replying, and he presumably blocked the other person as well. Yeah this is what we need to prevent in this subreddit.\n>>>>>Found his shorter evil side kick! Better start running, I can hear the po-po around the corner!\n\n[Are you joking? Science and politics are inextricably linked. A science sub is not somewhere you can go to escape politics.](https://www.reddit.com/r/space/comments/1oy0xfu/rspace_your_calls_have_been_answered_the/np16m3g/)\n>They are only linked because you want to see everything through a political lens and believe everything relates to politics.\n>>Scientific research can't happen without funding from politicians, and the results of the aforementioned scientific research can't be acted upon without politicians deciding to.\n>>>This isn’t a funding subreddt or a nasa administration subreddit.  And scientific research absolutely can and does happen without funding from politicians.\n>>>>Then why has most space exploration missions by man has been executed by NASA? There really has not been any private organization that explored space as much as NASA.\n>>>>>Because nasa was founded in 1958. SpaceX was founded in 2002.\n>>>>>>...What does that have to do with anything?  SpaceX did not lead the development of the satellites used for exploring space theyre literally a taxi service. That's what everyone means by space exploration.  NASA developed Juno, JWST, Hubble, Chandra, and hundreds more. I'm just asking you to tell me which organization other than NASA/government that contributed this much to space exploration.\n>>>>>>>You must be dense. You asked why has most space exploration been done by nasa. It’s beside NASA is older than private companies. This isn’t rocket science, I’m sorry you’re not following this simple concept *(11 more comments of these two arguing)* \n\n[\"Science is inherently political\" I can't even being to express how sad this bit makes me. That belief is likely exactly what lead to /u/the_fungible_man doing this to begin with. Science isn't (or shouldn't) be political, that's the whole point. What IS political (and likely shouldn't be) is when people suppress or support science based on political beliefs and how that shapes how scientists interpret data due to them being concerned for their funding. Science is science. Anybody trying to insert politics into science isn't a scientist, but a politician in a lab coat.](https://www.reddit.com/r/space/comments/1oy0xfu/rspace_your_calls_have_been_answered_the/np1ktq0/)\n>Everything is inherently political bud.\n>>Only to those people who obsess about politics. You live a sad existence if you believe this\n>>>And sticking your head in the sand, failing to understand that politics affects everything, is a far, far sadder existence.\n>>>>Strongly disagree. But you do you boo. You cry and scream and think the sky is falling. You live a miserable existence and will likely die a young death from the stress of living\n>>>>>\"You live a miserable existence and will likely die a young death from the stress of living\"  The absolute irony of typing this sentence out. Yeah bud, you're *clearly* not the miserable one. LMAO  Projection is a hell of a drug\n\n[So this sub is just resigning to be completely a politics sub now? Once great sub, now worthless](https://www.reddit.com/r/space/comments/1oy0xfu/rspace_your_calls_have_been_answered_the/np1502r/)\n>When the current administration makes it political, such posts are warranted.\n>>Then go post about it in any of the million other politics subs\n>>>I didn't make NASA political. You know who did.\n>>>>This is r space not r NASA\n>>>>>NASA shoots things into space.\n\n[Welp, it looks like r/space will become another trump bad echo chamber like r/pics or r/science instead of anything worth reading.](https://www.reddit.com/r/space/comments/1oy0xfu/rspace_your_calls_have_been_answered_the/np14qm9/)\n>Need a safe space to protec your ego? :<\n>>The irony in asking this question when you all are celebrating this sub becoming a safe space lmao. So thick you can cut it with a knife doesn’t say enough\n>>>I thought you guys were all about the market place of ideas... but you want things hidden... MOST curious.\n>>>>Uh, I want a space sub to be about space and not politics\n\n\n[Looks like this is becoming another American politics infested sub. Regardless of what the mod here said. I foresee a grand deluge of articles that will overwhelm the genuine space related articles. All justified of course by saying that science is political. Un non Americans will have to subscribe to other subs. ](https://www.reddit.com/r/space/comments/1oy0xfu/rspace_your_calls_have_been_answered_the/np13do9/)\n>I'm an astronomer. I would love nothing more right now than to not have to discuss our current funding situation in the USA. But right now the USA spends more on space science than all other countries by a large margin- for example the NASA budget is about 3x all of the ESA budget. So yeah, if you care about space and discoveries there, what is happening now is really important.\n>>We're happy to discuss y'all's work, but keep the online lobbying for more money to yourself. Stop complaining every time there's a budget cut. \n>>>They were literally going to shut down one of the telescopes I use (Chandra X-ray Observatory) due to a budget cut, despite it being the best X-ray telescope humanity has in existence. The only thing that saved it was people becoming aware of this, and a public outcry that led to Congressional reps saving it in the budget. So fuck no, I'm not going to be silent- if I did there literally wouldn't be any work to discuss.\n>>>>I mean cool, so this sub will turn into yet another activism sub with a severe bias. Bummer, but given you contribute a lot to space related topics here are you aware of any other space related subreddits which won't be doing this? I'm interested in space, not funding, not politics. I'm not in the field. I just want to learn about cool space stuff.\n>>>>>I'm sure you enjoy the nice photos Juno provides of Jupiter right?  If this administration had it their way, Juno would've been decommissioned when it still has life in it. No more nice photos of Jupiter anymore.  Or if you wanted to learn more about dark energy and curvature of spacetime, you'd probably be interested in Roman right? But guess what? Roman was almost scrapped by this administration.  By ignoring the issue, you're indirectly contributing to the cancellation of space exploration missions.\n>>>>>>Not particularly, and no to dark energy and spacetime curvature. I've learned what I want to on those topics. I know you're thinking you're making a point right now, and it probably lands for some people. Don't pull me into this stuff. It's not my concern. Are you aware of other space related subreddits? This one doesn't suit me anymore.\n\n[RIP to this sub then, it's just going to become r politics but about space, in the same way r technology is just politics about technology.  \"Science is inherently political\"  No the fuck it's not  Bring that mod back and make an official no politics rule](https://www.reddit.com/r/space/comments/1oy0xfu/rspace_your_calls_have_been_answered_the/np17ehu/)\n>It shouldn't be political. But when the party that controls the 3 branches of government continues to attack science and education, then unfortunately you can't really separate the two as easy.  If both parties were pro science and academia, this wouldn't be a problem.\n>>Budget reductions are not an attack on science ffs.\n>>>Replacing scientists with biased politians.  Spreading propoganda that Universities are 'woke' mills that dont provide a valuable education.  Suing universities depending on what majors they offer.  Ignoring research and spreading misleading propaganda about topics such as climate change, vaccine research, and non fossil fuel energy.  Those are all direct attacks on science and education by the current government.\n>>>>\"Replacing scientists with biased politians\" What scientists have been replaced with biased politicians? Political appointments are just that, political. Scientists don't work in political appointmented positions.  \"Spreading propoganda that Universities are 'woke' mills that dont provide a valuable education\"  This isn't propaganda. This is well known fact at this point, as seen by many many many videos/documents. It's really unfortunate too as our schools have completely degraded to the point they care more about the appearance of action rathe than action.  \"Ignoring research and spreading misleading propaganda about topics such as climate change, vaccine research, and non fossil fuel energy.\"  That's not related this subreddit in the first place.\n\n[So more constant political complaining, no thanks. Im out. Only came here for the space discussions and news.](https://www.reddit.com/r/space/comments/1oy0xfu/rspace_your_calls_have_been_answered_the/np164qb/)\n>Exactly. Bring that mod back. He was the shield keeping this sub clean\n>>he was the shield keeping you guys from having to acknowledge what's happening in the real world. \n>>>But space isn't this world, kind of the point. It's literally \"out of this world\".",
+        "subreddit": "SubredditDrama",
+        "author": "CummingInTheNile",
+        "upvotes": 2222,
+        "comments": 543,
+        "publishedAt": "2025-11-16T10:08:26.000Z",
+        "flair": null,
+        "nsfw": false,
+        "thumbnail": null
+      },
+      {
+        "platform": "reddit",
+        "id": "1426j2b",
+        "url": "https://www.reddit.com/r/space/comments/1426j2b/rspace_should_join_other_major_subreddit_in_a/",
+        "title": "r/space should join other major subreddit in a blackout protesting Reddit's upcoming API changes. What do you think?",
+        "text": null,
+        "subreddit": "space",
+        "author": "chetanaik",
+        "upvotes": 30671,
+        "comments": 967,
+        "publishedAt": "2023-06-06T06:40:14.000Z",
+        "flair": "Meta",
+        "nsfw": false,
+        "thumbnail": null
+      }
+    ]
+  },
+  "reddit-subreddit-search": {
+    "subreddit": "space",
+    "query": "moon",
+    "totalReturned": 5,
+    "results": [
+      {
+        "platform": "reddit",
+        "id": "1shxxxy",
+        "url": "https://www.reddit.com/r/space/comments/1shxxxy/artemis_ii_is_returning_home_today_join_us_in_our/",
+        "title": "Artemis II is returning home today. Join us in our live r/space megathread (pinned to the top of our sub) as the crew re-enters Earth and splashes down in less than 4 hours from now, concluding their historic Moon mission",
+        "text": "The above is a real live pic as Orion speeds up in its return to a beautiful looking Earth. The Artemis II crew is estimated to splash down at 5:07 PM P.T.. Join us over on our live megathread! - [https://www.reddit.com/r/space/comments/1s9qfc7/megathread\\_artemis\\_ii\\_launch\\_to\\_the\\_moon/](https://www.reddit.com/r/space/comments/1s9qfc7/megathread_artemis_ii_launch_to_the_moon/)",
+        "subreddit": "space",
+        "author": "ChiefLeef22",
+        "upvotes": 6308,
+        "comments": 29,
+        "publishedAt": "2026-04-10T20:18:09.000Z",
+        "flair": "image/gif",
+        "nsfw": false,
+        "thumbnail": "https://preview.redd.it/x1ap8ibj8fug1.png?width=140&height=85&auto=webp&s=8ba84f4914a2409ca8f596f07eef17c7be7c3f9c"
+      },
+      {
+        "platform": "reddit",
+        "id": "1se3g83",
+        "url": "https://www.reddit.com/r/space/comments/1se3g83/reminder_in_just_1_hour_from_now_nasa_coverage_of/",
+        "title": "REMINDER: In just 1 hour from now, NASA coverage of Artemis II's historic Moon Flyby will begin. Join us all live in our r/space Artemis II MEGATHREAD (pinned at the top of the subreddit) to share in the discussion and excitement of this monumental occasion!",
+        "text": "Yes - the above is a real picture from just the last hour!  \n  \nIn just under an hour from now (1 PM Eastern Time), NASA will begin live coverage of the historic lunar flyby of Artemis II - and the farthest humans have ever gone in space (breaking Apollo 13's record).\n\nMake sure to join in as everyone follows and discusses this historic event live in our Artemis II MEGATHREAD - [https://www.reddit.com/r/space/comments/1s9qfc7/megathread\\_artemis\\_ii\\_launch\\_to\\_the\\_moon/](https://www.reddit.com/r/space/comments/1s9qfc7/megathread_artemis_ii_launch_to_the_moon/)",
+        "subreddit": "space",
+        "author": "ChiefLeef22",
+        "upvotes": 4964,
+        "comments": 24,
+        "publishedAt": "2026-04-06T16:17:09.000Z",
+        "flair": "image/gif",
+        "nsfw": false,
+        "thumbnail": "https://preview.redd.it/nd5tgjbzgltg1.png?width=140&height=70&auto=webp&s=799a1cabcc9b8fed2d7337bd280a521ff1a2e753"
+      },
+      {
+        "platform": "reddit",
+        "id": "3g2k8a",
+        "url": "https://www.reddit.com/r/space/comments/3g2k8a/a_photo_of_fallen_astronaut_an_aluminium/",
+        "title": "A photo of 'Fallen Astronaut' - an aluminium sculpture placed on the moon in 1971, to commemorate those who fell in the pursuit of the exploration of space. [X-post from /r/UnusualArt]",
+        "text": null,
+        "subreddit": "space",
+        "author": "KarmaNeutrino",
+        "upvotes": 8908,
+        "comments": 480,
+        "publishedAt": "2015-08-07T00:11:44.000Z",
+        "flair": "/r/all",
+        "nsfw": false,
+        "thumbnail": "https://b.thumbs.redditmedia.com/98wCjzuhn8VtpWkGnIM2CpE-vpRMEhAq-mUcLZZm8cs.jpg"
+      },
+      {
+        "platform": "reddit",
+        "id": "1s9qfc7",
+        "url": "https://www.reddit.com/r/space/comments/1s9qfc7/megathread_artemis_ii_launch_to_the_moon/",
+        "title": "[MEGATHREAD] Artemis II Launch To The Moon",
+        "text": "This is the official r/space live megathread for NASA's Artemis II mission - **the first crewed launch of NASA’s SLS (Space Launch System) rocket and Orion spacecraft.**\n\nFor the first time in more than 50 years, humans will travel around the moon to test deep-space life-support systems.\n\nLIVE VIEWING FEEDS:\n\n\\[OFFICIAL NASA\\] [ NASA’s Artemis II Crew Comes Home (Official Broadcast) ](https://m.youtube.com/watch?v=nfhDuOHMp0A)\n\n\\[NASASpaceflight\\] [ Artemis II Astronauts Return To Earth - Re-entry and Splashdown ](https://m.youtube.com/watch?v=_veRvxj-5VQ&pp=ygUPbmFzYXNwYWNlZmxpZ2h0)\n\n\\[SKY NEWS\\] [No Commentary Broadcast](https://www.youtube.com/watch?v=yByKVNdBDBw)\n\n\\---------------------\n\n**NOTE:** This thread will contain links to multiple different live viewing channels. The sub will remain in manual approval mode during the mission to limit spam. As such, you are welcome to redirect anything you want to post separately in this time period to the comment section in this megathread.\n\n\\---------------------\n\nARTEMIS LIVE TRACKER - [https://www.reddit.com/r/space/s/ROkGU4c5SD](https://www.reddit.com/r/space/s/ROkGU4c5SD) (courtesy of u/theneiljohnson)\n\n**MISSION INFO:** At 6:24pm EDT (22:24 GMT) on Wednesday, a two-hour window will open for the Artemis II mission to lift off from the Kennedy Space Center in Florida. The launch window will remain open until April 6 for two hours each day after sunset. The mission can launch only when the moon, orbital paths, weather and Earth’s rotation line up safely.\n\nThis is the third launch attempt for Artemis II, after the first attempt was scrubbed due to a liquid hydrogen leak during a practice countdown in early February, and the second attempt was cancelled when engineers discovered a helium flow issue in the rocket’s upper stage in early March\n\nThe four-person crew will not land on the moon but rather perform a lunar flyby, looping around the moon’s far side before returning to Earth. At its core, Artemis II is a systems validation mission. NASA will use the flight to test the Orion spacecraft’s life support systems, navigation, communication links and overall performance in deep space with a crew on board – conditions that cannot be fully replicated on Earth. If successful, Artemis II will pave the way for Artemis III, a crewed low Earth orbit mission; then Artemis IV, which aims to land astronauts on the moon; and future missions that could establish a sustained human presence beyond Earth.\n\n\\---------------------\n\n# UPDATES:\n\nT-1 hour 14 minutes: They have fixed an issue at the flight termination system, the range is a go!\n\nT-10 minutes: After some hold, it looks like its still a go!\n\nT-0: LIFTOFF! YOU WERE HERE! HISTORY IN THE MAKING\n\nLow earth orbit insertion successful! Happy monitoring to everyone over this 10 day journey\n\nNEXT UP: **Perigee Raise Burn**\n\nAfter a four-hour nap, the Artemis II crew will be awakened at 7 a.m. EDT on Thursday, April 2, to prepare for the perigee raise burn. This burn will lift the lowest point of Orion’s orbit around Earth. Together with the apogee raise burn completed earlier, these burns shape the spacecraft’s initial orbit and prepare it for later translunar operations. The crew then will resume their sleep period around 9:40 a.m.\n\n\\---PRB is now complete. Translunar Injection will begin no earlier than **7PM EDT**\n\n\\----TLI Is now also complete - we're on the way to moon!\n\nNext up - Lunar Flyby on Monday....\n\n\\----- Lunar flyby complete! What a monumental day in history. Apollo 13's distance record broken, and the dawn of a new era of space exploration\n\nOrion is set to splash down at 5:07 PM P.T., today\n\n\\---The crew are safely back home! A historic mission concludes. It feels a little surreal to think we could all witness this journey live, and this megathread has been an amazing example of that.",
+        "subreddit": "space",
+        "author": "ChiefLeef22",
+        "upvotes": 10319,
+        "comments": 17491,
+        "publishedAt": "2026-04-01T17:00:55.000Z",
+        "flair": "LIVE MEGATHREAD",
+        "nsfw": false,
+        "thumbnail": null
+      },
+      {
+        "platform": "reddit",
+        "id": "1f4quhp",
+        "url": "https://www.reddit.com/r/Damnthatsinteresting/comments/1f4quhp/japans_ispace_hakutor_lander_captured_this_photo/",
+        "title": "Japan’s iSpace HAKUTO-R lander captured this photo from the Moon while a solar eclipse was occurring.",
+        "text": "If  you look closely at Earth you can see the Moon’s shadow passing over Australia .",
+        "subreddit": "Damnthatsinteresting",
+        "author": "Same_Investigator_46",
+        "upvotes": 5002,
+        "comments": 57,
+        "publishedAt": "2024-08-30T09:18:02.000Z",
+        "flair": "Image",
+        "nsfw": false,
+        "thumbnail": "https://b.thumbs.redditmedia.com/So_ZpczWkTOMv2noNJLqPFrB1Op1wXuT5blK1oOHCuU.jpg"
+      }
+    ]
+  },
   "tiktok-channel-details": {
     "platform": "tiktok",
     "url": "https://www.tiktok.com/@khaby.lame",
@@ -3896,6 +4487,508 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "downloadUrl": "https://api.apify.com/v2/key-value-stores/XsAesczIHnIrglIRh/records/video-khabylame-20260602145635-7646812028874673439.mp4",
     "noWatermarkUrl": "https://api.apify.com/v2/key-value-stores/XsAesczIHnIrglIRh/records/video-khabylame-20260602145635-7646812028874673439.mp4",
     "duration": 29
+  },
+  "twitter-community": {
+    "platform": "twitter",
+    "id": "1493446837214187523",
+    "url": "https://x.com/i/communities/1493446837214187523",
+    "name": "Build in Public",
+    "description": "Share what you're working on. Get feedback. Help each other move forward. – Sponsored by bolt.new ⚡",
+    "memberCount": 261571,
+    "moderatorCount": null,
+    "createdAt": "2022-02-15T04:47:27.551000+00:00",
+    "creator": "marckohlbrugge",
+    "joinPolicy": "Open",
+    "isNsfw": false,
+    "bannerImage": null,
+    "rules": [
+      {
+        "name": "Share what you're working on"
+      },
+      {
+        "name": "Screenshots, screencasts, drafts, etc"
+      },
+      {
+        "name": "No self-promotion"
+      },
+      {
+        "name": "Stay on-topic"
+      },
+      {
+        "name": "No engagement farming"
+      }
+    ]
+  },
+  "twitter-community-tweets": {
+    "communityId": "1493446837214187523",
+    "totalReturned": 3,
+    "tweets": [
+      {
+        "platform": "twitter",
+        "url": "https://x.com/zub_ai_r/status/2073102434025521549",
+        "id": "2073102434025521549",
+        "text": "gpt-5.5 is way better than fable 5 in speed and UX. \n\nWhich one is working better for you gpt-5.5 or fable 5?",
+        "lang": "en",
+        "publishedAt": "Fri Jul 03 17:51:51 +0000 2026",
+        "author": {
+          "username": "zub_ai_r",
+          "displayName": "Zubair",
+          "url": "https://x.com/zub_ai_r",
+          "followers": 82,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/2048816927662039040/X5UCkpjd_normal.jpg"
+        },
+        "engagement": {
+          "views": null,
+          "likes": 0,
+          "replies": 0,
+          "retweets": 0,
+          "quotes": 0,
+          "bookmarks": 0
+        },
+        "isReply": null,
+        "isRetweet": false,
+        "hashtags": [],
+        "media": []
+      },
+      {
+        "platform": "twitter",
+        "url": "https://x.com/UtkarshVerma181/status/2073102322281144582",
+        "id": "2073102322281144582",
+        "text": "Gud night guys.. signing ✍️ off today. How’s was your day, mine full of chaos office and then late night classes ..🛌",
+        "lang": "en",
+        "publishedAt": "Fri Jul 03 17:51:24 +0000 2026",
+        "author": {
+          "username": "UtkarshVerma181",
+          "displayName": "Utkarsh Verma",
+          "url": "https://x.com/UtkarshVerma181",
+          "followers": 346,
+          "verified": false,
+          "profileImage": "https://pbs.twimg.com/profile_images/2007649156962385920/zNUP9pdb_normal.jpg"
+        },
+        "engagement": {
+          "views": null,
+          "likes": 1,
+          "replies": 0,
+          "retweets": 0,
+          "quotes": 0,
+          "bookmarks": 0
+        },
+        "isReply": null,
+        "isRetweet": false,
+        "hashtags": [],
+        "media": []
+      },
+      {
+        "platform": "twitter",
+        "url": "https://x.com/ThomasBurkhartB/status/2073102278316233182",
+        "id": "2073102278316233182",
+        "text": "Why I am still at $40MRR after 8 month\na 🧵",
+        "lang": "en",
+        "publishedAt": "Fri Jul 03 17:51:14 +0000 2026",
+        "author": {
+          "username": "ThomasBurkhartB",
+          "displayName": "Thomas Burkhart 💙",
+          "url": "https://x.com/ThomasBurkhartB",
+          "followers": 11545,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/2057862583667888128/D1IF0T6Q_normal.jpg"
+        },
+        "engagement": {
+          "views": null,
+          "likes": 1,
+          "replies": 1,
+          "retweets": 0,
+          "quotes": 0,
+          "bookmarks": 0
+        },
+        "isReply": null,
+        "isRetweet": false,
+        "hashtags": [],
+        "media": []
+      }
+    ]
+  },
+  "twitter-profile": {
+    "platform": "twitter",
+    "url": "https://x.com/NASA",
+    "id": "11348282",
+    "username": "NASA",
+    "name": "NASA",
+    "bio": "Making the seemingly impossible, possible. ✨",
+    "location": "Pale Blue Dot",
+    "verified": true,
+    "followers": 92152353,
+    "following": 119,
+    "tweetCount": 74181,
+    "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg",
+    "bannerImage": "https://pbs.twimg.com/profile_banners/11348282/1775567134",
+    "createdAt": "Wed Dec 19 20:20:32 +0000 2007"
+  },
+  "twitter-search": {
+    "query": "artificial intelligence",
+    "totalReturned": 5,
+    "results": [
+      {
+        "platform": "twitter",
+        "url": "https://x.com/jaynitx/status/2071555135445389620",
+        "id": "2071555135445389620",
+        "text": "Jensen Huang went on Joe Rogan and explained why the AI apocalypse everyone fears is extremely unlikely.\n\nHis argument is not what you would expect:\n\n1. There will not be one all-powerful AI that towers over everyone else. The fear of a single super AI that makes everyone else's https://t.co/KCTIbBRHtv",
+        "lang": "en",
+        "publishedAt": "Mon Jun 29 11:23:26 +0000 2026",
+        "author": {
+          "username": "jaynitx",
+          "displayName": "Jaynit",
+          "url": "https://x.com/jaynitx",
+          "followers": 55754,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/1871881199372914688/FKDqACyE_normal.jpg"
+        },
+        "engagement": {
+          "views": 12023,
+          "likes": 73,
+          "replies": 26,
+          "retweets": 23,
+          "quotes": 4,
+          "bookmarks": 53
+        },
+        "isReply": false,
+        "isRetweet": false,
+        "hashtags": [],
+        "media": [
+          "https://pbs.twimg.com/amplify_video_thumb/2071555008785772544/img/E6M4eCF73uVL1vEA.jpg"
+        ]
+      },
+      {
+        "platform": "twitter",
+        "url": "https://x.com/kimmonismus/status/2072587932494389654",
+        "id": "2072587932494389654",
+        "text": "Normally, I wouldn’t pay much attention to statements like this from Sam Altman. But given all the extraordinary developments we’re witnessing right now, I truly believe we’re at the forefront of an unprecedented revolution.\n\nSam Altman:\n\n\"In another year or two, we expect to https://t.co/lAf4THUuJd",
+        "lang": "en",
+        "publishedAt": "Thu Jul 02 07:47:24 +0000 2026",
+        "author": {
+          "username": "kimmonismus",
+          "displayName": "Chubby♨️",
+          "url": "https://x.com/kimmonismus",
+          "followers": 122993,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/1728327996375719936/RW7VBJfD_normal.jpg"
+        },
+        "engagement": {
+          "views": 143707,
+          "likes": 1361,
+          "replies": 78,
+          "retweets": 94,
+          "quotes": 13,
+          "bookmarks": 420
+        },
+        "isReply": false,
+        "isRetweet": false,
+        "hashtags": [],
+        "media": [
+          "https://pbs.twimg.com/media/HMNO_PNXgAA1WJ2.jpg"
+        ]
+      },
+      {
+        "platform": "twitter",
+        "url": "https://x.com/expertwith_AI/status/2070710732329726276",
+        "id": "2070710732329726276",
+        "text": "All Paid Courses (Free for First 4500 People)\n\n 𝗣𝗮𝗶𝗱 𝗖𝗼𝘂𝗿𝘀𝗲 𝗙𝗥𝗘𝗘 (PART - 1)\n 1. Artificial Intelligence\n 2. Machine Learning\n 3. Prompt Engineering\n 4. Claude,Chatgpt,Grok\n5. Data Analytics\n6. AWS Certified\n 7. Data Science\n8. BIG DATA\n9. Python\n 10. Ethical Hacking https://t.co/62jDodlzN0",
+        "lang": "en",
+        "publishedAt": "Sat Jun 27 03:28:05 +0000 2026",
+        "author": {
+          "username": "expertwith_AI",
+          "displayName": "Jami",
+          "url": "https://x.com/expertwith_AI",
+          "followers": 79691,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/2060806263454547968/gRdyv5Px_normal.jpg"
+        },
+        "engagement": {
+          "views": 141607,
+          "likes": 862,
+          "replies": 861,
+          "retweets": 414,
+          "quotes": 2,
+          "bookmarks": 251
+        },
+        "isReply": false,
+        "isRetweet": false,
+        "hashtags": [],
+        "media": [
+          "https://pbs.twimg.com/media/HLykbvJasAIToeO.jpg"
+        ]
+      },
+      {
+        "platform": "twitter",
+        "url": "https://x.com/Faheem_uh/status/2070801721253826989",
+        "id": "2070801721253826989",
+        "text": "FREE Courses for PhD Students.\n\nLinks to the courses are given below.\n\n1. Data Science: Machine Learning\n\nLink: https://t.co/nsb4EfTRYK\n\n2. Data Science: Probability\n\nLink: https://t.co/LmUEHCi0q3\n\n3. Data Science: Linear Regression\n\nLink: https://t.co/OeH64Y3SYj\n\n4. Data https://t.co/Kjbp11BwCL",
+        "lang": "en",
+        "publishedAt": "Sat Jun 27 09:29:38 +0000 2026",
+        "author": {
+          "username": "Faheem_uh",
+          "displayName": "Faheem Ullah",
+          "url": "https://x.com/Faheem_uh",
+          "followers": 21613,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/1546008913786523648/lHyzLJhq_normal.jpg"
+        },
+        "engagement": {
+          "views": 9106,
+          "likes": 184,
+          "replies": 1,
+          "retweets": 59,
+          "quotes": 2,
+          "bookmarks": 187
+        },
+        "isReply": false,
+        "isRetweet": false,
+        "hashtags": [],
+        "media": [
+          "https://pbs.twimg.com/media/HLz3K4cWgAAkdwj.jpg"
+        ]
+      },
+      {
+        "platform": "twitter",
+        "url": "https://x.com/ChinaNow24/status/2071197054039429385",
+        "id": "2071197054039429385",
+        "text": "Artificial intelligence cannot create surreal scenes like these in China. https://t.co/YNfZV6BoZr",
+        "lang": "en",
+        "publishedAt": "Sun Jun 28 11:40:33 +0000 2026",
+        "author": {
+          "username": "ChinaNow24",
+          "displayName": "China Now",
+          "url": "https://x.com/ChinaNow24",
+          "followers": 141589,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/2025486049066024960/4qAPIDoN_normal.jpg"
+        },
+        "engagement": {
+          "views": 3038,
+          "likes": 23,
+          "replies": 1,
+          "retweets": 2,
+          "quotes": 1,
+          "bookmarks": 3
+        },
+        "isReply": false,
+        "isRetweet": false,
+        "hashtags": [],
+        "media": [
+          "https://pbs.twimg.com/amplify_video_thumb/2071196787311030272/img/IG9C5cKa6ueR51vx.jpg"
+        ]
+      }
+    ]
+  },
+  "twitter-transcript": {
+    "platform": "twitter",
+    "url": "https://x.com/NASA/status/2073078061499617543",
+    "tweetId": "2073078061499617543",
+    "transcript": "Happy 250th, America! 🇺🇸\n\nRed (Mars), white (Moon), and blue (Earth) brought to you by the solar system. https://t.co/ggjzhkO596",
+    "transcriptSegments": [
+      {
+        "text": "Happy 250th, America! 🇺🇸\n\nRed (Mars), white (Moon), and blue (Earth) brought to you by the solar system. https://t.co/ggjzhkO596",
+        "start": 0,
+        "duration": 0,
+        "timestamp": "00:00"
+      }
+    ],
+    "wordCount": 19,
+    "segments": 1,
+    "author": {
+      "username": "NASA",
+      "displayName": "NASA",
+      "url": "https://x.com/NASA",
+      "followers": 92152455,
+      "verified": true,
+      "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
+    },
+    "publishedAt": "Fri Jul 03 16:15:00 +0000 2026"
+  },
+  "twitter-tweet-details": {
+    "platform": "twitter",
+    "url": "https://x.com/NASA/status/2073078061499617543",
+    "id": "2073078061499617543",
+    "text": "Happy 250th, America! 🇺🇸\n\nRed (Mars), white (Moon), and blue (Earth) brought to you by the solar system. https://t.co/ggjzhkO596",
+    "lang": "en",
+    "publishedAt": "Fri Jul 03 16:15:00 +0000 2026",
+    "author": {
+      "username": "NASA",
+      "displayName": "NASA",
+      "url": "https://x.com/NASA",
+      "followers": 92152455,
+      "verified": true,
+      "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
+    },
+    "engagement": {
+      "views": 234393,
+      "likes": 3954,
+      "replies": 237,
+      "retweets": 678,
+      "quotes": 38,
+      "bookmarks": 171
+    },
+    "isReply": false,
+    "isRetweet": false,
+    "hashtags": [],
+    "media": [
+      "https://pbs.twimg.com/media/HMQs7G_X0AA523_.jpg",
+      "https://pbs.twimg.com/media/HMQs7YSW0AA5xkZ.jpg",
+      "https://pbs.twimg.com/media/HMQs72tXsAAbFWb.jpg"
+    ]
+  },
+  "twitter-user-tweets": {
+    "handle": "nasa",
+    "totalReturned": 5,
+    "tweets": [
+      {
+        "platform": "twitter",
+        "url": "https://x.com/NASA/status/2073078061499617543",
+        "id": "2073078061499617543",
+        "text": "Happy 250th, America! 🇺🇸\n\nRed (Mars), white (Moon), and blue (Earth) brought to you by the solar system. https://t.co/ggjzhkO596",
+        "lang": "en",
+        "publishedAt": "Fri Jul 03 16:15:00 +0000 2026",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA",
+          "url": "https://x.com/NASA",
+          "followers": 92152455,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
+        },
+        "engagement": {
+          "views": 234393,
+          "likes": 3954,
+          "replies": 237,
+          "retweets": 678,
+          "quotes": 38,
+          "bookmarks": 171
+        },
+        "isReply": false,
+        "isRetweet": false,
+        "hashtags": [],
+        "media": [
+          "https://pbs.twimg.com/media/HMQs7G_X0AA523_.jpg",
+          "https://pbs.twimg.com/media/HMQs7YSW0AA5xkZ.jpg",
+          "https://pbs.twimg.com/media/HMQs72tXsAAbFWb.jpg"
+        ]
+      },
+      {
+        "platform": "twitter",
+        "url": "https://x.com/NASA/status/2073093132984479786",
+        "id": "2073093132984479786",
+        "text": "RT @NASAArmstrong: In honor of @Freedom250, two of our most iconic aircraft are getting a fresh coat of red, white, and blue! ✈️🇺🇸\n\nNASA Ar…",
+        "lang": "en",
+        "publishedAt": "Fri Jul 03 17:14:53 +0000 2026",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA",
+          "url": "https://x.com/NASA",
+          "followers": 92152455,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
+        },
+        "engagement": {
+          "views": 126668,
+          "likes": 2689,
+          "replies": 64,
+          "retweets": 415,
+          "quotes": 37,
+          "bookmarks": 166
+        },
+        "isReply": false,
+        "isRetweet": true,
+        "hashtags": [],
+        "media": []
+      },
+      {
+        "platform": "twitter",
+        "url": "https://x.com/NASA/status/2073074361339150663",
+        "id": "2073074361339150663",
+        "text": "RT @NASASpox: On America’s 250th birthday, @NASA is helping write the next chapter of exploration 🇺🇸\n\n🌕 New Moon Base missions announced\n🤝…",
+        "lang": "en",
+        "publishedAt": "Fri Jul 03 16:00:18 +0000 2026",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA",
+          "url": "https://x.com/NASA",
+          "followers": 92152455,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
+        },
+        "engagement": {
+          "views": 76908,
+          "likes": 278,
+          "replies": 29,
+          "retweets": 37,
+          "quotes": 3,
+          "bookmarks": 12
+        },
+        "isReply": false,
+        "isRetweet": true,
+        "hashtags": [],
+        "media": []
+      },
+      {
+        "platform": "twitter",
+        "url": "https://x.com/NASA/status/2072697624101105737",
+        "id": "2072697624101105737",
+        "text": "There will be more than just fireworks to see in the night sky this month!\n\nYou can look forward to these celestial sights in July:\n- A lunar-planetary alignment\n- A visiting comet\n- A good look at Saturn and the Milky Way\n\nHappy skywatching! https://t.co/6EP5GpvAQw https://t.co/y0O5qsNf1j",
+        "lang": "en",
+        "publishedAt": "Thu Jul 02 15:03:17 +0000 2026",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA",
+          "url": "https://x.com/NASA",
+          "followers": 92152455,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
+        },
+        "engagement": {
+          "views": 504063,
+          "likes": 4069,
+          "replies": 140,
+          "retweets": 839,
+          "quotes": 46,
+          "bookmarks": 335
+        },
+        "isReply": false,
+        "isRetweet": false,
+        "hashtags": [],
+        "media": [
+          "https://pbs.twimg.com/media/HMOzgOzX0AAhkJy.jpg"
+        ]
+      },
+      {
+        "platform": "twitter",
+        "url": "https://x.com/NASA/status/2072395277219016738",
+        "id": "2072395277219016738",
+        "text": "When Artemis II flew around the Moon, it carried a small piece of the Wright Flyer with it.\n\nNow, the swatch is back home at @airandspace. Learn more about the mementos that Artemis II carried: https://t.co/mfOGjlmj5O",
+        "lang": "en",
+        "publishedAt": "Wed Jul 01 19:01:51 +0000 2026",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA",
+          "url": "https://x.com/NASA",
+          "followers": 92152455,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
+        },
+        "engagement": {
+          "views": 581191,
+          "likes": 2170,
+          "replies": 97,
+          "retweets": 312,
+          "quotes": 11,
+          "bookmarks": 72
+        },
+        "isReply": false,
+        "isRetweet": false,
+        "hashtags": [],
+        "media": []
+      }
+    ]
   },
   "youtube-channel-details": {
     "url": "https://www.youtube.com/channel/UCX6OQ3DkcsbYNE6H8uQQuVA",
