@@ -282,6 +282,25 @@ def _transcript_run_input(actor: str, norm_url: str, language: str | None) -> di
     return {"videoUrls": [norm_url]}
 
 
+async def _oembed_title(norm_url: str) -> str | None:
+    """Fetch the video title from YouTube's free oEmbed endpoint.
+
+    Transcript actors often omit the title; oEmbed needs no API key and
+    answers in ~100ms, so it fills the gap without another actor run.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            resp = await client.get(
+                "https://www.youtube.com/oembed",
+                params={"url": norm_url, "format": "json"},
+            )
+        if resp.status_code == 200:
+            return safe_str(resp.json().get("title"))
+    except Exception:
+        pass
+    return None
+
+
 async def _fetch_transcript_item(norm_url: str, language: str | None) -> dict[str, Any]:
     """Fetch a timestamped transcript, falling back across independent actors.
 
@@ -361,6 +380,7 @@ async def youtube_transcript(
                             "text": text,
                             "start": start,
                             "duration": duration,
+                            "end": round(start + duration, 3),
                             "timestamp": f"{mm:02d}:{ss:02d}",
                         }
                     )
@@ -371,10 +391,11 @@ async def youtube_transcript(
                     detail="Transcript not available for this video",
                 )
             full = " ".join(text_parts)
+            title = safe_str(item.get("title")) or await _oembed_title(norm_url)
             return {
                 "url": norm_url,
                 "videoId": vid,
-                "title": safe_str(item.get("title")),
+                "title": title,
                 "transcript": full,
                 "transcriptSegments": segments,
                 "wordCount": len(full.split()),
@@ -384,7 +405,7 @@ async def youtube_transcript(
 
         data = await cached_or_run(
             endpoint="youtube.transcript",
-            params={"url": norm_url, "language": language or "", "v": 2},
+            params={"url": norm_url, "language": language or "", "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -413,7 +434,7 @@ async def youtube_summarize(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             item = await _fetch_transcript_item(norm_url, language)
-            title = safe_str(item.get("title")) or ""
+            title = safe_str(item.get("title")) or await _oembed_title(norm_url) or ""
             seg_raw = _transcript_segments(item)
             transcript_text = " ".join(
                 (s.get("text") or "").strip() for s in seg_raw
@@ -439,7 +460,7 @@ async def youtube_summarize(
 
         data = await cached_or_run(
             endpoint="youtube.summarize",
-            params={"url": norm_url, "language": language or "", "v": 2},
+            params={"url": norm_url, "language": language or "", "v": 3},
             runner=_run,
             ctx=ctx,
         )

@@ -1922,6 +1922,9 @@ export function responseStructure(ep: ApiEndpoint): ResponseGroup[] {
             { name: "text", desc: "The spoken text for this segment." },
             { name: "start", desc: "Start time in seconds." },
             { name: "duration", desc: "Duration of the segment in seconds." },
+            ...(ep.platform === "youtube"
+              ? [{ name: "end", desc: "End time in seconds (start + duration)." }]
+              : []),
             { name: "timestamp", desc: "Human-readable timestamp (MM:SS format)." },
           ],
         },

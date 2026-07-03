@@ -1464,7 +1464,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "youtube-summarizer": {
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "videoId": "dQw4w9WgXcQ",
-    "title": null,
+    "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
     "summary": "The transcript captures the essence of a well-known song that expresses themes of love, commitment, and emotional honesty. The lyrics convey a strong message about loyalty and the importance of being truthful in a relationship. The speaker reassures their partner that they will never betray or abandon them, emphasizing a deep understanding of each other's feelings despite the challenges they face. The repetitive nature of the phrases reinforces the sincerity of the speaker's  ...",
     "keyPoints": [
       "The song emphasizes themes of love and commitment.",
@@ -1479,19 +1479,21 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "youtube-transcript": {
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "videoId": "dQw4w9WgXcQ",
-    "title": null,
+    "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
     "transcript": "[Music] We're no strangers to love. You know the rules and so do I. I feel commitments from what I'm thinking of. You wouldn't get this from any other guy. I just want to tell you how I'm feeling. Got to make you understand. Never going to give you up. I'm going to let you down. I'm going to run around and desert you. I'm going to make you say goodbye. Tell a lie and hurt you. We've known each other for so long. Your heart's been aching, but you're too shy to say we don't kno ...",
     "transcriptSegments": [
       {
         "text": "[Music]",
         "start": 0.32,
         "duration": 14.26,
+        "end": 14.58,
         "timestamp": "00:00"
       },
       {
         "text": "We're no strangers to",
         "start": 18.8,
         "duration": 7.16,
+        "end": 25.96,
         "timestamp": "00:18"
       }
     ],
