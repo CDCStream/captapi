@@ -1705,6 +1705,52 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
   return list;
 }
 
+/**
+ * Platform-level FAQs for the /apis/[platform]-api landing pages.
+ * Answer-first copy so SEO snippets and AI answer engines (GEO/AEO) can quote
+ * a complete, self-contained answer for each question.
+ */
+export function platformFaqs(group: PlatformGroup): FaqItem[] {
+  const name = group.name;
+  const count = group.endpoints.length;
+  const creditValues = group.endpoints.map((e) => e.credits);
+  const minCredits = Math.min(...creditValues);
+  const maxCredits = Math.max(...creditValues);
+  const capabilities = Array.from(
+    new Set(group.endpoints.map((e) => e.shortName)),
+  );
+  const capabilityList =
+    capabilities.slice(0, 6).join(", ") +
+    (capabilities.length > 6 ? ", and more" : "");
+
+  return [
+    {
+      q: `What is the ${name} API?`,
+      a: `The ${name} API is a REST API from Captapi that returns public ${name} data as clean, structured JSON. It covers ${count} endpoint${count === 1 ? "" : "s"} — ${capabilityList} — behind one Bearer API key, with no OAuth flow and no scrapers to build or maintain.`,
+    },
+    {
+      q: `What data can I get from the ${name} API?`,
+      a: `${group.blurb} Each endpoint is a single GET request that responds with predictable JSON fields, so the data is ready for dashboards, AI pipelines, and automations.`,
+    },
+    {
+      q: `Do I need a ${name} developer account or OAuth?`,
+      a: `No. You only need a Captapi key (capt_live_...), sent as an Authorization: Bearer header. The same key works across all ${PLATFORM_COUNT} platforms Captapi supports. We handle proxies, rate limits, retries, and parsing for you.`,
+    },
+    {
+      q: `How much does the ${name} API cost?`,
+      a: `${name} endpoints cost between ${minCredits} and ${maxCredits} credits per call, depending on the endpoint${maxCredits !== minCredits ? " and how many results you request" : ""}. New accounts start with 100 free credits (no credit card), and repeat calls are served from a 24-hour cache for 0 credits.`,
+    },
+    {
+      q: `Can AI agents use the ${name} API?`,
+      a: `Yes. Every ${name} endpoint is exposed as a tool in the official MCP server (@captapi/mcp) for Claude, Cursor, and VS Code, and is also available through the @captapi/cli CLI, an n8n community node, a Make.com app, and an Apify Actor.`,
+    },
+    {
+      q: `Is the ${name} API suitable for production use?`,
+      a: `Yes. It is a stable REST API with predictable JSON, automatic retries, upstream fallbacks, and a shared 24-hour cache. Only successful responses consume credits — failed or empty results are never charged.`,
+    },
+  ];
+}
+
 // ---------------------------------------------------------------------------
 // Response structure (per category)
 // ---------------------------------------------------------------------------

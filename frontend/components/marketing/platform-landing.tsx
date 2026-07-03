@@ -27,12 +27,14 @@ import {
   SITE_URL,
   PLATFORM_PAGES,
   platformSlug,
+  platformFaqs,
   tagline,
   params,
   creditLabel,
   type PlatformGroup,
   type ApiEndpoint,
 } from "@/lib/api-catalog";
+import { Tldr } from "@/components/marketing/tldr";
 import { CONTENT_UPDATED } from "@/lib/seo";
 
 const PLATFORM_ICONS: Record<string, LucideIcon> = {
@@ -151,7 +153,34 @@ function jsonLd(group: PlatformGroup) {
     },
   };
 
-  return [breadcrumb, itemList, webApi];
+  const faqPage = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: platformFaqs(group).map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
+  const techArticle = {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    headline: `${group.name} API — real-time ${group.name} data via REST`,
+    description: group.blurb,
+    datePublished: CONTENT_UPDATED,
+    dateModified: CONTENT_UPDATED,
+    author: { "@type": "Organization", name: "Captapi", url: SITE_URL },
+    publisher: {
+      "@type": "Organization",
+      name: "Captapi",
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    proficiencyLevel: "Beginner",
+  };
+
+  return [breadcrumb, itemList, webApi, faqPage, techArticle];
 }
 
 export function PlatformLanding({ group }: { group: PlatformGroup }) {
@@ -237,8 +266,33 @@ export function PlatformLanding({ group }: { group: PlatformGroup }) {
           <CodeTabs samples={heroSamples(group)} />
         </div>
 
+        {/* Answer-first overview (AEO) */}
+        <section className="mt-16">
+          <Tldr>
+            The <strong>{group.name} API</strong> returns public {group.name}{" "}
+            data as clean, structured JSON — {group.endpoints.length} REST
+            endpoint{group.endpoints.length === 1 ? "" : "s"} behind one Bearer
+            key. No OAuth, no scrapers to maintain, results cached for 24 hours
+            (repeat calls are free). Start with 100 free credits — no credit
+            card.
+          </Tldr>
+          <h2 className="text-2xl font-semibold">
+            What is the {group.name} API?
+          </h2>
+          <p className="mt-3 max-w-3xl leading-relaxed text-muted-foreground">
+            {group.blurb} Every endpoint is a single authenticated GET request
+            that responds with predictable JSON, so the data drops straight
+            into dashboards, AI pipelines, RAG systems, and no-code automations.
+            AI agents can call the same endpoints as MCP tools via{" "}
+            <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+              @captapi/mcp
+            </code>
+            .
+          </p>
+        </section>
+
         {/* Endpoint grid */}
-        <section className="mt-20">
+        <section className="mt-16">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">
             Endpoints
           </p>
@@ -294,6 +348,29 @@ export function PlatformLanding({ group }: { group: PlatformGroup }) {
               for free.
             </li>
           </ol>
+        </section>
+
+        {/* FAQ */}
+        <section className="mt-16">
+          <h2 className="text-2xl font-semibold">Frequently asked questions</h2>
+          <div className="mt-4 space-y-3">
+            {platformFaqs(group).map((f) => (
+              <details
+                key={f.q}
+                className="group rounded-lg border bg-card p-5 [&_summary::-webkit-details-marker]:hidden"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between font-medium">
+                  <span>{f.q}</span>
+                  <span className="ml-4 text-xl leading-none text-muted-foreground transition-transform group-open:rotate-45">
+                    +
+                  </span>
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                  {f.a}
+                </p>
+              </details>
+            ))}
+          </div>
         </section>
 
         {/* Other platforms */}
