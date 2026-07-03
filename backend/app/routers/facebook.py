@@ -81,11 +81,20 @@ def _require_facebook_path(url: str, path: str, example: str, label: str) -> Non
 
 
 def _reply_payload(r: dict) -> dict:
+    # On flat nested rows `commentId` is the parent's id; the reply's own
+    # numeric id only lives in the commentUrl's reply_comment_id param.
+    reply_id = None
+    m = re.search(r"[?&]reply_comment_id=(\d+)", r.get("commentUrl") or "")
+    if m:
+        reply_id = m.group(1)
     return {
-        "id": safe_str(r.get("id") or r.get("commentId")),
+        "id": safe_str(reply_id or r.get("id") or r.get("commentId")),
+        "url": safe_str(r.get("commentUrl")),
         "text": (r.get("text") or "").strip(),
         "author": safe_str(r.get("profileName") or r.get("authorName")),
-        "likeCount": safe_int(r.get("likesCount") or r.get("reactionsCount")),
+        "authorUrl": safe_str(r.get("profileUrl")),
+        "authorAvatarUrl": safe_str(r.get("profilePicture")),
+        "likeCount": safe_int(r.get("likesCount") or r.get("reactionsCount")) or 0,
         "publishedAt": safe_str(r.get("date") or r.get("publishedAt")),
     }
 
@@ -104,7 +113,8 @@ def _fb_username_from_url(value: str | None) -> str | None:
 
 
 def _normalize_post(item: dict) -> dict:
-    raw_media = item.get("media")
+    # Group posts carry their photos under `attachments` instead of `media`.
+    raw_media = item.get("media") or item.get("attachments")
     if isinstance(raw_media, list):
         media = raw_media[0] if raw_media and isinstance(raw_media[0], dict) else {}
     elif isinstance(raw_media, dict):
@@ -114,13 +124,17 @@ def _normalize_post(item: dict) -> dict:
     user = item.get("user") or {}
     delivery = media.get("videoDeliveryLegacyFields") or {}
     duration_ms = media.get("playable_duration_in_ms")
+    media_thumb = media.get("thumbnail")
+    if isinstance(media_thumb, dict):
+        media_thumb = media_thumb.get("uri")
     thumbnail = (
         item.get("thumbnailUrl")
         or media.get("thumbnailUrl")
-        or media.get("thumbnail")
+        or media_thumb
         or ((media.get("thumbnailImage") or {}).get("uri"))
         or (((media.get("preferred_thumbnail") or {}).get("image") or {}).get("uri"))
         or ((media.get("image") or {}).get("uri"))
+        or ((media.get("photo_image") or {}).get("uri"))
     )
     video_url = (
         item.get("videoUrl")
@@ -307,30 +321,53 @@ async def facebook_transcript(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_FACEBOOK_POSTS,
-                {"startUrls": [{"url": url}], "shouldDownloadSubtitles": True, "resultsLimit": 1},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Post not found")
-            item = items[0]
-            subs = item.get("subtitles") or item.get("captions") or []
-            segments = []
-            parts = []
-            if isinstance(subs, list):
-                for s in subs:
-                    text = ((s.get("text") if isinstance(s, dict) else str(s)) or "").strip()
-                    start = float((s.get("start") if isinstance(s, dict) else 0) or 0)
-                    dur = float((s.get("duration") if isinstance(s, dict) else 0) or 0)
-                    if text:
-                        mm = int(start // 60)
-                        ss = int(start % 60)
-                        segments.append(
-                            {"text": text, "start": start, "duration": dur, "timestamp": f"{mm:02d}:{ss:02d}"}
-                        )
-                        parts.append(text)
-            full = " ".join(parts) or safe_str(item.get("text")) or ""
+            language = None
+            # Primary: AI transcript extractor (works for /watch, /reel and
+            # video post URLs; returns Whisper segments with timestamps).
+            items: list[dict[str, Any]] = []
+            try:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_FACEBOOK_TRANSCRIPT,
+                    {"facebookUrl": url},
+                    max_items=1,
+                )
+            except Exception:  # noqa: BLE001
+                items = []
+            segments: list[dict[str, Any]] = []
+            full = ""
+            if items:
+                item = items[0]
+                for s in item.get("normalizedSegments") or []:
+                    if not isinstance(s, dict):
+                        continue
+                    text = safe_str(s.get("text")).strip()
+                    if not text:
+                        continue
+                    start = float(s.get("start") or 0)
+                    end = float(s.get("end") or 0)
+                    mm, ss = int(start // 60), int(start % 60)
+                    segments.append(
+                        {
+                            "text": text,
+                            "start": start,
+                            "duration": round(max(end - start, 0), 3),
+                            "timestamp": f"{mm:02d}:{ss:02d}",
+                        }
+                    )
+                full = (safe_str(item.get("transcript")) or " ".join(s["text"] for s in segments)).strip()
+                language = safe_str(item.get("detected_language"))
+
+            if not full:
+                # Fallback for text-only posts: use the post body.
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_FACEBOOK_POSTS,
+                    {"startUrls": [{"url": url}], "resultsLimit": 1},
+                    max_items=1,
+                )
+                if not items:
+                    raise HTTPException(status_code=404, detail="Post not found")
+                full = safe_str(items[0].get("text")) or ""
+                segments = []
             if not full:
                 raise HTTPException(status_code=422, detail="No transcript available")
             return {
@@ -340,11 +377,12 @@ async def facebook_transcript(
                 "transcriptSegments": segments,
                 "wordCount": len(full.split()),
                 "segments": len(segments),
+                "language": language,
             }
 
         data = await cached_or_run(
             endpoint="facebook.transcript",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -627,7 +665,7 @@ async def facebook_group_posts(
 
         data = await cached_or_run(
             endpoint="facebook.group-posts",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -661,12 +699,22 @@ async def facebook_comment_replies(
             )
             replies = []
             for c in items:
-                parent = safe_str(c.get("parentCommentId") or c.get("replyToId") or c.get("commentParentId"))
+                # apify/facebook-comments-scraper emits nested comments as flat
+                # rows: threadingDepth > 0, replyToCommentId points at the
+                # parent, and commentId is also the top-level parent's id.
+                depth = safe_int(c.get("threadingDepth")) or 0
+                parent = safe_str(
+                    c.get("parentCommentId")
+                    or c.get("replyToId")
+                    or c.get("commentParentId")
+                    or c.get("replyToCommentId")
+                    or (c.get("commentId") if depth > 0 else None)
+                )
                 nested = c.get("replies") or c.get("nestedComments")
                 if isinstance(nested, list) and safe_str(c.get("id") or c.get("commentId")) == comment_id:
                     for r in nested:
                         replies.append(_reply_payload(r))
-                elif parent == comment_id:
+                elif parent == comment_id and depth > 0:
                     replies.append(_reply_payload(c))
                 if len(replies) >= limit:
                     break
@@ -680,7 +728,7 @@ async def facebook_comment_replies(
 
         data = await cached_or_run(
             endpoint="facebook.comment-replies",
-            params={"url": url, "comment_id": comment_id, "limit": limit},
+            params={"url": url, "comment_id": comment_id, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

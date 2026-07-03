@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     APIFY_ACTOR_YOUTUBE_DOWNLOAD_FALLBACK: str = "streamers/youtube-video-downloader"
 
     APIFY_ACTOR_TIKTOK: str = "clockworks/tiktok-scraper"
+    # Dedicated transcript actor: native TikTok captions with timestamped
+    # segments, Whisper fallback for videos without captions.
+    APIFY_ACTOR_TIKTOK_TRANSCRIPT: str = "crawlerbros/tiktok-transcript-scraper"
     APIFY_ACTOR_TIKTOK_COMMENTS: str = "clockworks/tiktok-comments-scraper"
     # Dedicated comment+reply scraper with a real reply API (parentCommentId
     # linking); far more reliable for fetching replies than the base comments
@@ -97,7 +100,10 @@ class Settings(BaseSettings):
     APIFY_ACTOR_INSTAGRAM_POST: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_COMMENT: str = "apify/instagram-comment-scraper"
     APIFY_ACTOR_INSTAGRAM_TRANSCRIPT: str = "crawlerbros/instagram-transcript-scraper"
-    APIFY_INSTAGRAM_TRANSCRIPT_METHOD: str = "native"
+    # "auto" tries native Instagram captions first, then falls back to Whisper
+    # speech-to-text (with timestamped segments). "native" alone returns
+    # nothing for most reels because IG rarely exposes captions.
+    APIFY_INSTAGRAM_TRANSCRIPT_METHOD: str = "auto"
     APIFY_ACTOR_INSTAGRAM_TAGGED: str = "apify/instagram-tagged-scraper"
     # Dedicated reels-by-audio scraper (input: audioUrls). The generic
     # apify/instagram-scraper does not reliably resolve audio pages.
@@ -107,6 +113,10 @@ class Settings(BaseSettings):
     APIFY_ACTOR_INSTAGRAM_TRENDING: str = "agentx/instagram-trending-scraper"
 
     APIFY_ACTOR_FACEBOOK_POSTS: str = "apify/facebook-posts-scraper"
+    # AI transcript extractor for FB videos/reels (Whisper): returns full
+    # transcript + timestamped normalizedSegments. The posts scraper never
+    # returns subtitles, so it only serves as a text-post fallback.
+    APIFY_ACTOR_FACEBOOK_TRANSCRIPT: str = "sian.agency/facebook-ai-transcript-extractor"
     APIFY_ACTOR_FACEBOOK_PAGES: str = "apify/facebook-pages-scraper"
     APIFY_ACTOR_FACEBOOK_COMMENTS: str = "apify/facebook-comments-scraper"
     # Reels are filtered out of the official posts scraper's feed (no separate

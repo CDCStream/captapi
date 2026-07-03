@@ -198,7 +198,10 @@ def _transcript_from_item(item: dict[str, Any]) -> tuple[str, list[dict[str, Any
             if isinstance(seg, dict):
                 text = safe_str(seg.get("text") or seg.get("caption") or seg.get("sentence")).strip()
                 start = safe_float(seg.get("start") or seg.get("startTime") or seg.get("startMs")) or 0
-                duration = safe_float(seg.get("duration") or seg.get("dur") or seg.get("end")) or 0
+                duration = safe_float(seg.get("duration") or seg.get("dur")) or 0
+                if not duration:
+                    end = safe_float(seg.get("end")) or 0
+                    duration = round(max(end - start, 0), 3)
             else:
                 text = str(seg).strip()
                 start = 0
@@ -209,8 +212,9 @@ def _transcript_from_item(item: dict[str, Any]) -> tuple[str, list[dict[str, Any
                 segments.append({"text": text, "start": start, "duration": duration, "timestamp": f"{mm:02d}:{ss:02d}"})
                 parts.append(text)
     full = (
-        " ".join(parts)
-        or safe_str(item.get("transcript"))
+        safe_str(item.get("transcript"))
+        or safe_str(item.get("fullText"))
+        or " ".join(parts)
         or safe_str(item.get("text"))
         or safe_str(item.get("caption"))
         or ""
@@ -227,6 +231,7 @@ async def _fetch_instagram_transcript(url: str) -> tuple[str, list[dict[str, Any
             {
                 "videoUrls": [url],
                 "transcriptionMethod": settings.APIFY_INSTAGRAM_TRANSCRIPT_METHOD,
+                "includeSegments": True,
             },
             max_items=1,
         )
@@ -362,7 +367,7 @@ async def instagram_transcript(
 
         data = await cached_or_run(
             endpoint="instagram.transcript",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -977,7 +982,7 @@ def _highlight_payload(item: dict) -> dict:
     return {
         "id": safe_str(item.get("id") or item.get("highlightId")),
         "title": safe_str(item.get("title") or item.get("name")),
-        "coverUrl": safe_str(item.get("coverUrl") or item.get("cover") or item.get("coverMediaUrl")),
+        "coverUrl": safe_str(item.get("coverUrl") or item.get("cover") or item.get("coverMediaUrl") or item.get("coverImageUrl")),
         "itemCount": safe_int(item.get("itemCount") or item.get("mediaCount")),
     }
 
@@ -1017,7 +1022,7 @@ async def instagram_story_highlights(
 
         data = await cached_or_run(
             endpoint="instagram.story-highlights",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1073,12 +1078,14 @@ async def instagram_highlights_details(
                         for m in (media if isinstance(media, list) else [])
                         if isinstance(m, dict)
                     ]
+                    if payload.get("itemCount") is None and payload["items"]:
+                        payload["itemCount"] = len(payload["items"])
                     highlights.append(payload)
             return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
 
         data = await cached_or_run(
             endpoint="instagram.highlights-details",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

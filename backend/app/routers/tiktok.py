@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import re
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -185,6 +186,10 @@ def _normalize(item: dict) -> dict:
     author = item.get("authorMeta") or item.get("author") or {}
     stats = item.get("stats") or {}
     music = item.get("musicMeta") or item.get("music") or {}
+    if not isinstance(music, dict):  # aweme rows carry a plain mp3 URL here
+        music = {}
+    if not isinstance(author, dict):
+        author = {}
     video_meta = item.get("videoMeta") or {}
     covers = safe_list(item.get("covers"))
     media_urls = safe_list(item.get("mediaUrls"))
@@ -225,6 +230,54 @@ def _normalize(item: dict) -> dict:
         "hashtags": [h.get("name") if isinstance(h, dict) else h for h in safe_list(item.get("hashtags"))],
         "musicName": safe_str(music.get("musicName") or music.get("title")),
     }
+
+
+def _normalize_aweme(item: dict) -> dict:
+    """Map raw TikTok API "aweme" rows (powerai music-posts scraper) to our shape.
+
+    These rows use snake_case TikTok-internal fields (digg_count, play_count,
+    author.unique_id ...) instead of the clockworks shape `_normalize` expects.
+    """
+    author = item.get("author") or {}
+    username = safe_str(author.get("unique_id"))
+    video_id = safe_str(item.get("video_id"))
+    create_time = item.get("create_time")
+    published = None
+    if isinstance(create_time, (int, float)) and create_time > 0:
+        published = datetime.fromtimestamp(int(create_time), tz=timezone.utc).isoformat()
+    return {
+        "platform": "tiktok",
+        "url": f"https://www.tiktok.com/@{username}/video/{video_id}" if username and video_id else None,
+        "id": video_id or safe_str(item.get("aweme_id")),
+        "caption": safe_str(item.get("title")),
+        "description": safe_str(item.get("title")),
+        "publishedAt": published,
+        "durationSeconds": safe_float(item.get("duration")),
+        "thumbnailUrl": safe_str(item.get("cover") or item.get("origin_cover")),
+        "videoUrl": safe_str(item.get("play") or item.get("wmplay")),
+        "author": {
+            "username": username,
+            "displayName": safe_str(author.get("nickname")),
+            "url": f"https://www.tiktok.com/@{username}" if username else None,
+            "followers": None,
+            "verified": None,
+            "profileImage": safe_str(author.get("avatar")),
+        },
+        "engagement": {
+            "views": safe_int(item.get("play_count")),
+            "likes": safe_int(item.get("digg_count")),
+            "comments": safe_int(item.get("comment_count")),
+            "shares": safe_int(item.get("share_count")),
+            "saves": safe_int(item.get("collect_count")),
+        },
+        "hashtags": [],
+        "musicName": None,
+    }
+
+
+def _normalize_music_post(item: dict) -> dict:
+    is_aweme = bool(item.get("aweme_id") or ("digg_count" in item and "play_count" in item))
+    return _normalize_aweme(item) if is_aweme else _normalize(item)
 
 
 def _tiktok_music_id(value: str) -> str | None:
@@ -331,13 +384,67 @@ async def tiktok_video_details(
         return ApiResponse(data=data)
 
 
+async def _fetch_tiktok_transcript(url: str) -> tuple[str, list[dict[str, Any]], str | None]:
+    """Return (full transcript, timestamped segments, language).
+
+    Primary: dedicated transcript actor (native captions + Whisper fallback,
+    per-segment timestamps). Fallback: base scraper's caption text.
+    """
+    settings = get_settings()
+    apify = get_apify()
+    try:
+        items = await apify.run_actor_sync(
+            settings.APIFY_ACTOR_TIKTOK_TRANSCRIPT,
+            {"postUrls": [url], "useWhisperFallback": True},
+            max_items=1,
+        )
+    except Exception:  # noqa: BLE001
+        items = []
+    if items:
+        item = items[0]
+        segments = []
+        parts = []
+        for s in item.get("segments") or []:
+            if not isinstance(s, dict):
+                continue
+            text = safe_str(s.get("text")).strip()
+            if not text:
+                continue
+            start = safe_float(s.get("start")) or 0
+            end = safe_float(s.get("end")) or 0
+            mm, ss = int(start // 60), int(start % 60)
+            segments.append(
+                {
+                    "text": text,
+                    "start": start,
+                    "duration": round(max(end - start, 0), 3),
+                    "timestamp": f"{mm:02d}:{ss:02d}",
+                }
+            )
+            parts.append(text)
+        full = (safe_str(item.get("transcript")) or " ".join(parts)).strip()
+        if full:
+            return full, segments, safe_str(item.get("languageCode"))
+
+    items = await apify.run_actor_sync(
+        settings.APIFY_ACTOR_TIKTOK,
+        {"postURLs": [url], "resultsPerPage": 1, "shouldDownloadSubtitles": True},
+        max_items=1,
+    )
+    if not items:
+        raise HTTPException(status_code=404, detail="Video not found")
+    full = safe_str(items[0].get("text")) or ""
+    if not full:
+        raise HTTPException(status_code=422, detail="No transcript available for this TikTok")
+    return full, [], safe_str(items[0].get("textLanguage"))
+
+
 @router.get("/transcript", summary="TikTok video transcript (via auto-captions)")
 async def tiktok_transcript(
     url: str = Query(...),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_tiktok_video_url(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/transcript",
@@ -346,32 +453,7 @@ async def tiktok_transcript(
         base_credits=CREDIT_TRANSCRIPT,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK,
-                {"postURLs": [url], "resultsPerPage": 1, "shouldDownloadSubtitles": True},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Video not found")
-            item = items[0]
-            subs = item.get("subtitles") or item.get("captions") or []
-            segments = []
-            parts = []
-            for s in subs if isinstance(subs, list) else []:
-                text = (s.get("text") if isinstance(s, dict) else str(s)).strip()
-                start = float((s.get("start") if isinstance(s, dict) else 0) or 0)
-                dur = float((s.get("duration") if isinstance(s, dict) else 0) or 0)
-                if text:
-                    mm = int(start // 60)
-                    ss = int(start % 60)
-                    segments.append(
-                        {"text": text, "start": start, "duration": dur, "timestamp": f"{mm:02d}:{ss:02d}"}
-                    )
-                    parts.append(text)
-            full = " ".join(parts) or safe_str(item.get("text")) or ""
-            if not full:
-                raise HTTPException(status_code=422, detail="No transcript available for this TikTok")
+            full, segments, language = await _fetch_tiktok_transcript(url)
             return {
                 "platform": "tiktok",
                 "url": url,
@@ -379,11 +461,12 @@ async def tiktok_transcript(
                 "transcriptSegments": segments,
                 "wordCount": len(full.split()),
                 "segments": len(segments),
+                "language": language,
             }
 
         data = await cached_or_run(
             endpoint="tiktok.transcript",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -405,26 +488,8 @@ async def tiktok_summarize(
         base_credits=CREDIT_SUMMARIZE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK,
-                {"postURLs": [url], "resultsPerPage": 1, "shouldDownloadSubtitles": True},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Video not found")
-            item = items[0]
-            text = (
-                " ".join(
-                    (s.get("text") if isinstance(s, dict) else "")
-                    for s in (item.get("subtitles") or [])
-                )
-                or safe_str(item.get("text"))
-                or ""
-            ).strip()
-            if not text:
-                raise HTTPException(status_code=422, detail="No transcript/caption available")
-            ai = await summarize_transcript(text, title=safe_str(item.get("text")))
+            text, _segments, _language = await _fetch_tiktok_transcript(url)
+            ai = await summarize_transcript(text)
             return {
                 "platform": "tiktok",
                 "url": url,
@@ -436,7 +501,7 @@ async def tiktok_summarize(
 
         data = await cached_or_run(
             endpoint="tiktok.summarize",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1064,14 +1129,16 @@ async def tiktok_comment_replies(
                     continue
                 replies.append(
                     {
+                        # automation-lab rows: `authorId` is the @username and
+                        # `author` is the display name.
                         "id": safe_str(r.get("replyId") or r.get("cid") or r.get("id")),
                         "text": (r.get("replyText") or r.get("text") or r.get("body") or "").strip(),
-                        "author": safe_str(r.get("replyAuthorUsername") or r.get("author") or r.get("uniqueId")),
-                        "authorName": safe_str(r.get("replyAuthorNickname") or r.get("authorName") or r.get("nickname")),
-                        "likeCount": safe_int(r.get("replyLikeCount") or r.get("likeCount") or r.get("likes")),
+                        "author": safe_str(r.get("replyAuthorUsername") or r.get("uniqueId") or r.get("authorId") or r.get("author")),
+                        "authorName": safe_str(r.get("replyAuthorNickname") or r.get("authorName") or r.get("nickname") or r.get("author")),
+                        "likeCount": safe_int(r.get("replyLikeCount") or r.get("likeCount") or r.get("likes")) or 0,
                         "publishedAt": safe_str(r.get("replyCreateTime") or r.get("createdAt") or r.get("createTimeISO")),
                         "verified": r.get("replyAuthorVerified") or r.get("verified"),
-                        "profileImage": safe_str(r.get("replyAuthorAvatar") or r.get("avatar")),
+                        "profileImage": safe_str(r.get("replyAuthorAvatar") or r.get("avatar") or r.get("authorAvatarUrl")),
                     }
                 )
                 if len(replies) >= limit:
@@ -1086,7 +1153,7 @@ async def tiktok_comment_replies(
 
         data = await cached_or_run(
             endpoint="tiktok.comment-replies",
-            params={"url": url, "comment_id": comment_id, "limit": limit},
+            params={"url": url, "comment_id": comment_id, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1207,12 +1274,12 @@ async def tiktok_music_posts(
                 _tiktok_music_candidates(settings, url, limit),
                 max_items=limit,
             )
-            posts = [_normalize(i) for i in items[:limit]]
+            posts = [_normalize_music_post(i) for i in items[:limit]]
             return {"url": url, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
             endpoint="tiktok.music-posts",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
