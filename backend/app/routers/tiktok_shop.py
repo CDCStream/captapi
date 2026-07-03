@@ -36,23 +36,43 @@ def _reject_non_tiktok_url(value: str, example: str) -> None:
 
 
 def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
-    seller = item.get("seller") or item.get("shop") or item.get("store") or {}
-    price = item.get("price") or item.get("salePrice") or item.get("currentPrice")
+    # Sellers come nested (seller/shop/store/store_info) or flat (shopId/shopName).
+    seller = item.get("seller") or item.get("shop") or item.get("store") or item.get("store_info") or {}
+    if not isinstance(seller, dict):
+        seller = {}
+    price = item.get("price") or item.get("salePrice") or item.get("currentPrice") or item.get("productPrice")
+    currency = item.get("currency") or item.get("productCurrency")
+    if isinstance(price, dict):
+        # cunning_soil details actor: {"min_price": "$18.99", "max_price": ..., "currency": "USD"}
+        currency = currency or price.get("currency")
+        price = price.get("min_price") or price.get("price")
+    images = item.get("images")
+    first_image = images[0] if isinstance(images, list) and images else None
     return {
         "platform": "tiktok_shop",
         "id": safe_str(item.get("id") or item.get("productId") or item.get("product_id")),
         "url": safe_str(item.get("url") or item.get("productUrl") or item.get("product_url")),
-        "title": safe_str(item.get("title") or item.get("name") or item.get("productName")),
+        "title": safe_str(item.get("title") or item.get("name") or item.get("productName") or item.get("productTitle")),
         "description": safe_str(item.get("description")),
         "price": price,
-        "currency": safe_str(item.get("currency")),
+        "originalPrice": item.get("originalPrice"),
+        "currency": safe_str(currency),
+        "discount": safe_str(item.get("discountPercent") or item.get("discount")),
         "rating": item.get("rating") or item.get("reviewRating"),
         "reviews": safe_int(item.get("reviews") or item.get("reviewCount")),
-        "sold": safe_int(item.get("sold") or item.get("soldCount") or item.get("unitsSold")),
-        "image": safe_str(item.get("image") or item.get("imageUrl") or item.get("thumbnail")),
+        "sold": safe_int(item.get("sold") or item.get("soldCount") or item.get("unitsSold") or item.get("sales_count")),
+        "stock": safe_int(item.get("stock")),
+        "image": safe_str(
+            item.get("image")
+            or item.get("imageUrl")
+            or item.get("thumbnail")
+            or item.get("primaryImage")
+            or item.get("productImage")
+            or first_image
+        ),
         "seller": {
-            "id": safe_str(seller.get("id") or seller.get("sellerId")),
-            "name": safe_str(seller.get("name") or seller.get("sellerName") or seller.get("shopName")),
+            "id": safe_str(seller.get("id") or seller.get("sellerId") or item.get("shopId")),
+            "name": safe_str(seller.get("name") or seller.get("sellerName") or seller.get("shopName") or item.get("shopName")),
             "url": safe_str(seller.get("url") or seller.get("shopUrl")),
             "rating": seller.get("rating"),
         },
@@ -98,7 +118,7 @@ async def shop_search(
             products = [_normalize_product(i) for i in items]
             return {"query": q, "region": region.upper(), "totalReturned": len(products), "products": products}
 
-        data = await cached_or_run("tiktok-shop.shop-search", {"q": q, "region": region, "limit": limit}, _run, ctx)
+        data = await cached_or_run("tiktok-shop.shop-search", {"q": q, "region": region, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["products"]), RATE_SHOP)
         return ApiResponse(data=data)
 
@@ -118,7 +138,7 @@ async def shop_products(
             products = [_normalize_product(i) for i in items]
             return {"url": url, "totalReturned": len(products), "products": products}
 
-        data = await cached_or_run("tiktok-shop.shop-products", {"url": url, "limit": limit}, _run, ctx)
+        data = await cached_or_run("tiktok-shop.shop-products", {"url": url, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["products"]), RATE_SHOP)
         return ApiResponse(data=data)
 
@@ -133,15 +153,28 @@ async def product_details(
         raise HTTPException(status_code=400, detail="Invalid TikTok Shop product URL. Pass a TikTok Shop product URL like https://www.tiktok.com/shop/pdp/product/123.")
     async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/product-details", platform="tiktok_shop", resource_url=url, base_credits=14) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_shop("product_details", {"productUrls": [url], "maxResults": 1}, 1)
+            apify = get_apify()
+            # The mobile-API details actor returns title/price/images/stock; the
+            # generic shop scraper's product_details mode often echoes the URL only.
+            try:
+                items = await apify.run_actor_sync(
+                    get_settings().APIFY_ACTOR_TIKTOK_SHOP_DETAILS,
+                    {"productInput": url, "region": "US", "outputMode": "formatted_filtered"},
+                    max_items=1,
+                )
+            except Exception:  # noqa: BLE001
+                items = []
+            if not items or not items[0].get("title"):
+                items = await _run_shop("product_details", {"productUrls": [url], "maxResults": 1}, 1)
             if not items:
-                # Some TikTok Shop detail lookups return no enriched payload for
-                # valid PDP URLs; keep the endpoint useful with canonical basics.
+                # Keep the endpoint useful with canonical basics for valid PDP URLs.
                 product_id = url.rstrip("/").split("/")[-1]
                 return _normalize_product({"productUrl": url, "productId": product_id})
-            return _normalize_product(items[0])
+            normalized = _normalize_product(items[0])
+            normalized["url"] = normalized["url"] or url
+            return normalized
 
-        return ApiResponse(data=await cached_or_run("tiktok-shop.product-details", {"url": url}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("tiktok-shop.product-details", {"url": url, "v": 2}, _run, ctx))
 
 
 @router.get("/product-reviews", summary="TikTok Shop product reviews")
@@ -180,6 +213,6 @@ async def user_showcase(
             products = [_normalize_product(i) for i in items]
             return {"username": handle, "totalReturned": len(products), "products": products}
 
-        data = await cached_or_run("tiktok-shop.user-showcase", {"username": handle, "limit": limit}, _run, ctx)
+        data = await cached_or_run("tiktok-shop.user-showcase", {"username": handle, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["products"]), RATE_REVIEWS)
         return ApiResponse(data=data)

@@ -85,7 +85,11 @@ class Settings(BaseSettings):
     APIFY_ACTOR_TIKTOK_TREND_DISCOVERY: str = "coregent/tiktok-trend-discovery-scraper"
     APIFY_ACTOR_TIKTOK_LIVE: str = "unseenuser/tiktok-live-status-scraper"
     APIFY_ACTOR_TIKTOK_SEARCH_SUGGESTIONS: str = "automation-lab/tiktok-keywords-discovery"
-    APIFY_ACTOR_TIKTOK_POPULAR_CREATORS: str = "scraperx/tiktok-trending-creator-scraper"
+    # Creative Center trending creators (input: {"trendType": "creator",
+    # "countryCode": "US", "maxResults": n}). The scraperx actor is a paid
+    # rental we don't have, and burbn returns empty datasets — kept only as
+    # last-resort fallbacks.
+    APIFY_ACTOR_TIKTOK_POPULAR_CREATORS: str = "automation-lab/tiktok-trends-scraper"
     APIFY_ACTOR_TIKTOK_POPULAR_CREATORS_FALLBACK: str = "burbn/tiktok-trending-creators"
     APIFY_ACTOR_TIKTOK_AUDIENCE: str = ""
 
@@ -204,6 +208,11 @@ class Settings(BaseSettings):
     # TikTok Shop. 5 modes: shop_search, shop_catalog, product_details,
     # product_reviews, creator_showcase.
     APIFY_ACTOR_TIKTOK_SHOP: str = "unseenuser/tiktok-shop-scraper"
+
+    # Product-detail lookups via TikTok's mobile API (input: {"productInput":
+    # url_or_id, "region": "US"}). Returns title/price/images/stock/store_info
+    # where the generic scraper's product_details mode only echoes the URL.
+    APIFY_ACTOR_TIKTOK_SHOP_DETAILS: str = "cunning_soil/tiktok-shop-product-scraper-mobile-api"
 
     # Public ad libraries. Kept separate because each platform has a different
     # public transparency surface and actor input schema.

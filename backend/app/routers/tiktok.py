@@ -16,7 +16,7 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
-from app.utils.formatters import safe_float, safe_int, safe_list, safe_str
+from app.utils.formatters import first_present, safe_float, safe_int, safe_list, safe_str
 from app.utils.url import (
     extract_tiktok_id,
     extract_tiktok_username,
@@ -164,6 +164,9 @@ def _normalize_profile_region(item: dict, handle: str) -> dict:
             or user.get("languageCode")
             or item.get("language")
             or item.get("languageCode")
+            # Language of the sampled video caption — best public signal the
+            # profile actor exposes.
+            or item.get("textLanguage")
         ),
         "followers": safe_int(
             user.get("followerCount")
@@ -172,10 +175,12 @@ def _normalize_profile_region(item: dict, handle: str) -> dict:
             or stats.get("followers")
         ),
         "following": safe_int(user.get("followingCount") or user.get("following")),
-        "likes": safe_int(user.get("heartCount") or user.get("likes") or stats.get("heartCount")),
-        "videos": safe_int(user.get("videoCount") or stats.get("videoCount")),
-        "verified": user.get("verified") or user.get("isVerified"),
-        "private": user.get("privateAccount") or user.get("isPrivate"),
+        "likes": safe_int(
+            first_present(user.get("heartCount"), user.get("heart"), user.get("likes"), stats.get("heartCount"))
+        ),
+        "videos": safe_int(first_present(user.get("videoCount"), user.get("video"), stats.get("videoCount"))),
+        "verified": first_present(user.get("verified"), user.get("isVerified")),
+        "private": first_present(user.get("privateAccount"), user.get("isPrivate")),
         "profileImage": safe_str(user.get("avatarLarger") or user.get("avatar") or user.get("avatarMedium")),
         "raw": item,
     }
@@ -335,18 +340,32 @@ def _normalize_suggestion(item: dict, seed: str) -> dict:
 
 def _normalize_creator(item: dict) -> dict:
     user = item.get("user") or item.get("author") or item
+    handle = safe_str(
+        user.get("uniqueId") or user.get("username") or user.get("handle") or item.get("creatorHandle")
+    )
+    if handle:
+        handle = handle.lstrip("@")
+    # Creative Center trending rows report 0 for counts they don't publish;
+    # surface those as unknown instead of a literal zero.
+    followers = safe_int(user.get("followerCount") or item.get("followers") or item.get("followersCount"))
+    likes = safe_int(user.get("heartCount") or item.get("likes") or item.get("likesCount") or item.get("likeCount"))
+    videos = safe_int(user.get("videoCount") or item.get("videoCount"))
     return {
-        "username": safe_str(user.get("uniqueId") or user.get("username") or user.get("handle")),
+        "rank": safe_int(item.get("rank")),
+        "username": handle,
         "displayName": safe_str(user.get("nickname") or user.get("displayName") or user.get("name")),
-        "url": safe_str(user.get("profileUrl") or item.get("url")),
+        "url": safe_str(user.get("profileUrl") or item.get("url"))
+        or (f"https://www.tiktok.com/@{handle}" if handle else None),
         "bio": safe_str(user.get("signature") or user.get("bio")),
-        "followers": safe_int(user.get("followerCount") or item.get("followers") or item.get("followersCount")),
+        "followers": followers or None,
         "engagementRate": item.get("engagementRate") or item.get("engagement_rate"),
-        "likes": safe_int(user.get("heartCount") or item.get("likes") or item.get("likesCount")),
-        "videos": safe_int(user.get("videoCount") or item.get("videoCount")),
+        "likes": likes or None,
+        "videos": videos or None,
         "country": safe_str(item.get("countryCode") or item.get("country") or user.get("region")),
         "verified": user.get("verified") or user.get("isVerified"),
-        "profileImage": safe_str(user.get("avatarLarger") or user.get("avatar") or item.get("avatar")),
+        "profileImage": safe_str(
+            user.get("avatarLarger") or user.get("avatar") or item.get("avatar") or item.get("creatorAvatarUrl")
+        ),
     }
 
 
@@ -645,7 +664,7 @@ async def tiktok_profile_region(
 
         data = await cached_or_run(
             endpoint="tiktok.profile-region",
-            params={"handle": handle},
+            params={"handle": handle, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -794,11 +813,14 @@ async def tiktok_search_suggestions(
                 s for s in (_normalize_suggestion(i, q) for i in items[:limit])
                 if s.get("suggestion")
             ]
+            for idx, s in enumerate(suggestions, start=1):
+                if s.get("rank") is None:
+                    s["rank"] = idx
             return {"platform": "tiktok", "query": q, "totalReturned": len(suggestions), "suggestions": suggestions}
 
         data = await cached_or_run(
             endpoint="tiktok.search-suggestions",
-            params={"q": q, "country": country.upper(), "language": language, "limit": limit},
+            params={"q": q, "country": country.upper(), "language": language, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -824,11 +846,12 @@ async def tiktok_popular_creators(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Creative Center trends actor: only trendType/countryCode/maxResults
+            # are supported; sort/follower filters apply to fallback actors only.
             run_input: dict[str, Any] = {
+                "trendType": "creator",
                 "countryCode": country.upper(),
-                "sortBy": sort,
-                "maxItems": limit,
-                "proxyConfiguration": {"useApifyProxy": False, "apifyProxyGroups": []},
+                "maxResults": limit,
             }
             fallback_input: dict[str, Any] = {
                 "creator_country": country.upper(),
@@ -837,7 +860,6 @@ async def tiktok_popular_creators(
                 "limit": min(limit, 50),
             }
             if follower_count:
-                run_input["followerCount"] = follower_count
                 range_map = {"10k-100k": "1", "100k-1m": "2", "1m-10m": "3", ">10m": "4"}
                 fallback_input["audience_count"] = range_map.get(follower_count.lower(), follower_count)
             items, _actor = await get_apify().run_with_fallback(
@@ -858,7 +880,7 @@ async def tiktok_popular_creators(
 
         data = await cached_or_run(
             endpoint="tiktok.popular-creators",
-            params={"country": country.upper(), "sort": sort, "follower_count": follower_count or "", "limit": limit},
+            params={"country": country.upper(), "sort": sort, "follower_count": follower_count or "", "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -919,7 +941,7 @@ async def tiktok_audience_demographics(
 
         data = await cached_or_run(
             endpoint="tiktok.audience-demographics",
-            params={"handle": handle},
+            params={"handle": handle, "v": 2},
             runner=_run,
             ctx=ctx,
         )

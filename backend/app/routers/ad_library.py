@@ -207,6 +207,8 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
     )
     if platform == "facebook_ad_library" and not url and ad_id:
         url = _facebook_ad_url(ad_id)
+    if platform == "tiktok_ad_library" and not url and ad_id:
+        url = f"https://library.tiktok.com/ads/detail/?ad_id={ad_id}"
 
     text = safe_str(
         _first(
@@ -229,10 +231,41 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             item.get("adTitle"),
             item.get("ctaHeadline"),
             snapshot.get("title"),
+            next(
+                (c.get("title") for c in _listify(snapshot.get("cards")) if isinstance(c, dict) and c.get("title")),
+                None,
+            ),
         )
     )
 
-    return {
+    ad_format = safe_str(
+        _first(
+            item.get("adFormat"),
+            item.get("ad_format"),
+            item.get("ad_type"),
+            item.get("format"),
+            item.get("type"),
+            item.get("creativeType"),
+            snapshot.get("displayFormat"),
+        )
+    )
+    if not ad_format:
+        # Derive from creative assets when the actor has no explicit format.
+        if item.get("videoUrl") or item.get("adVideoUrl") or _listify(snapshot.get("videos")):
+            ad_format = "video"
+        elif _listify(item.get("imageUrls")) or _listify(item.get("images")) or _listify(snapshot.get("images")):
+            ad_format = "image"
+
+    country_value = _first(
+        item.get("country"),
+        item.get("region"),
+        item.get("regions"),
+        item.get("targetCountries"),
+    )
+    if isinstance(country_value, list):
+        country_value = ", ".join(str(c) for c in country_value if c) or None
+
+    normalized = {
         "platform": platform,
         "id": ad_id,
         "url": url,
@@ -257,12 +290,12 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
                 snapshot.get("linkUrl"),
             )
         ),
-        "adFormat": safe_str(_first(item.get("adFormat"), item.get("ad_format"), item.get("ad_type"), item.get("format"), item.get("type"), item.get("creativeType"), snapshot.get("displayFormat"))),
-        "firstShown": safe_str(_first(item.get("firstShown"), item.get("first_shown_date"), item.get("startDateFormatted"), item.get("startDate"), item.get("adStartDate"))),
-        "lastShown": safe_str(_first(item.get("lastShown"), item.get("last_shown_date"), item.get("endDateFormatted"), item.get("endDate"), item.get("adEndDate"))),
-        "impressions": _first(item.get("impressions"), item.get("impressionsRange"), item.get("reach"), item.get("impressionRange"), item.get("totalImpressionsInterval"), item.get("impressionsMin")),
+        "adFormat": ad_format,
+        "firstShown": safe_str(_first(item.get("firstShown"), item.get("first_shown_date"), item.get("firstShownDate"), item.get("startDateFormatted"), item.get("startDate"), item.get("adStartDate"))),
+        "lastShown": safe_str(_first(item.get("lastShown"), item.get("last_shown_date"), item.get("lastShownDate"), item.get("endDateFormatted"), item.get("endDate"), item.get("adEndDate"))),
+        "impressions": _first(item.get("impressions"), item.get("impressionsRange"), item.get("reach"), item.get("impressionRange"), item.get("totalImpressionsInterval"), item.get("impressionsMin"), item.get("uniqueUsersSeen")),
         "spend": _first(item.get("spend"), item.get("spendRange"), item.get("adSpent")),
-        "country": safe_str(_first(item.get("country"), item.get("region"), item.get("regions"))),
+        "country": safe_str(country_value),
         "advertiser": {
             "id": safe_str(_first(advertiser.get("id") if isinstance(advertiser, dict) else None, item.get("advertiserId"), item.get("advertiser_id"), item.get("advertiserBusinessId"), item.get("pageID"), item.get("pageId"))),
             "name": safe_str(
@@ -299,6 +332,10 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
         },
         "media": media,
     }
+    adv = normalized["advertiser"]
+    if platform == "google_ad_library" and not adv["url"] and adv["id"]:
+        adv["url"] = f"https://adstransparency.google.com/advertiser/{adv['id']}"
+    return normalized
 
 
 async def _run_actor(actor: str, payload: dict[str, Any], limit: int) -> list[dict[str, Any]]:
@@ -327,7 +364,7 @@ async def facebook_search(
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.facebook.search", {"q": q, "country": country, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("ad-library.facebook.search", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
@@ -351,7 +388,7 @@ async def facebook_company_ads(
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
             return {"url": url, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.facebook.company-ads", {"url": url, "country": country, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("ad-library.facebook.company-ads", {"url": url, "country": country, "limit": limit, "v": 3}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
@@ -381,7 +418,7 @@ async def facebook_search_companies(
             companies = list(advertisers.values())
             return {"query": q, "country": country.upper(), "totalReturned": len(companies), "companies": companies}
 
-        data = await cached_or_run("ad-library.facebook.search-companies", {"q": q, "country": country, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("ad-library.facebook.search-companies", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["companies"]))
         return ApiResponse(data=data)
 
@@ -400,7 +437,7 @@ async def facebook_ad_details(
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(items[0], "facebook_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.facebook.ad-details", {"url": ad_url, "v": 2}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.facebook.ad-details", {"url": ad_url, "v": 3}, _run, ctx))
 
 
 @router.get("/facebook/ad-transcript", summary="Meta/Facebook ad transcript / creative text")
@@ -443,7 +480,7 @@ async def facebook_ad_transcript(
                 "advertiser": ad.get("advertiser"),
             }
 
-        return ApiResponse(data=await cached_or_run("ad-library.facebook.ad-transcript", {"url": ad_url, "v": 2}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.facebook.ad-transcript", {"url": ad_url, "v": 3}, _run, ctx))
 
 
 @router.get("/tiktok/search", summary="Search TikTok Ad Library")
@@ -460,7 +497,7 @@ async def tiktok_search(
             ads = [_normalize_ad(i, "tiktok_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.tiktok.search", {"q": q, "country": country, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("ad-library.tiktok.search", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
@@ -476,32 +513,50 @@ async def tiktok_ad_details(
     region = _tiktok_region(country)
     async with billed_call(caller=caller, endpoint="/v1/ad-library/tiktok/ad-details", platform="tiktok_ad_library", resource_url=ad_id, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
-            items, _actor = await get_apify().run_with_fallback(
-                [
-                    (
-                        settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL,
-                        {"adIds": [ad_id], "country": region, "maxResults": 1, "quickSearch": False},
-                    ),
-                    (
-                        settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL_FALLBACK,
-                        {"ad_id": ad_id, "region": region, "limit": 1},
-                    ),
-                    (
-                        settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL_FALLBACK,
-                        {"ad_id": ad_id, "region": "all", "limit": 1},
-                    ),
-                    (
-                        settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY,
-                        {"source": "both", "searchTerms": [ad_id], "countries": [region], "maxResults": 1},
-                    ),
-                ],
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Ad not found")
-            return _normalize_ad(items[0], "tiktok_ad_library")
+            candidates: list[tuple[str, dict[str, Any]]] = [
+                (
+                    settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL,
+                    {"adIds": [ad_id], "country": region, "maxResults": 1, "quickSearch": False},
+                ),
+                (
+                    settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL_FALLBACK,
+                    {"ad_id": ad_id, "region": region, "limit": 1},
+                ),
+                (
+                    settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL_FALLBACK,
+                    {"ad_id": ad_id, "region": "all", "limit": 1},
+                ),
+                (
+                    settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY,
+                    {"source": "both", "searchTerms": [ad_id], "countries": [region], "maxResults": 1},
+                ),
+            ]
 
-        return ApiResponse(data=await cached_or_run("ad-library.tiktok.ad-details", {"ad_id": ad_id, "country": region, "v": 2}, _run, ctx))
+            def _has_substance(row: dict[str, Any]) -> bool:
+                # Some detail actors return a placeholder row (e.g. adTitle "Ad
+                # summary" with empty fields) for ads they can't resolve.
+                return any(
+                    row.get(key) for key in ("adText", "text", "body", "advertiserName", "videoUrl", "adVideoUrl")
+                )
+
+            best: dict[str, Any] | None = None
+            for actor, payload in candidates:
+                try:
+                    items = await get_apify().run_actor_sync(actor, payload, max_items=1)
+                except Exception:  # noqa: BLE001
+                    continue
+                if not items:
+                    continue
+                if best is None:
+                    best = items[0]
+                if _has_substance(items[0]):
+                    best = items[0]
+                    break
+            if best is None:
+                raise HTTPException(status_code=404, detail="Ad not found")
+            return _normalize_ad(best, "tiktok_ad_library")
+
+        return ApiResponse(data=await cached_or_run("ad-library.tiktok.ad-details", {"ad_id": ad_id, "country": region, "v": 3}, _run, ctx))
 
 
 @router.get("/google/company-ads", summary="Google Ads Transparency Center company ads")
@@ -518,7 +573,7 @@ async def google_company_ads(
             ads = [_normalize_ad(i, "google_ad_library") for i in items]
             return {"advertiser": advertiser, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.google.company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("ad-library.google.company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "v": 3}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["ads"]), RATE_GOOGLE_COMPANY_ADS)
         return ApiResponse(data=data)
 
@@ -541,7 +596,7 @@ async def google_ad_details(
                     return _normalize_ad(item, "google_ad_library")
             raise HTTPException(status_code=404, detail="Ad not found")
 
-        return ApiResponse(data=await cached_or_run("ad-library.google.ad-details", {"creative_id": creative_id, "country": country, "v": 2}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.google.ad-details", {"creative_id": creative_id, "country": country, "v": 3}, _run, ctx))
 
 
 @router.get("/google/advertiser-search", summary="Search Google Ads advertisers")
@@ -563,7 +618,7 @@ async def google_advertiser_search(
                     advertisers[name] = ad["advertiser"]
             return {"query": q, "country": country.upper(), "totalReturned": len(advertisers), "advertisers": list(advertisers.values())}
 
-        return ApiResponse(data=await cached_or_run("ad-library.google.advertiser-search", {"q": q, "country": country, "limit": limit, "v": 2}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.google.advertiser-search", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx))
 
 
 @router.get("/linkedin/search-ads", summary="Search LinkedIn Ad Library")
@@ -580,7 +635,7 @@ async def linkedin_search_ads(
             ads = [_normalize_ad(i, "linkedin_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.linkedin.search-ads", {"q": q, "country": country, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("ad-library.linkedin.search-ads", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
@@ -614,4 +669,4 @@ async def linkedin_ad_details(
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(items[0], "linkedin_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.linkedin.ad-details", {"url": ad_url, "v": 2}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.linkedin.ad-details", {"url": ad_url, "v": 3}, _run, ctx))

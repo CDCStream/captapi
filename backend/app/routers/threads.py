@@ -7,6 +7,7 @@ Threads payloads vary across actor versions (snake_case and camelCase aliases).
 from __future__ import annotations
 
 import math
+import re
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -77,18 +78,33 @@ def _user(u: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _post_media(item: dict[str, Any]) -> list[str]:
+    urls: list[str] = []
+    media = item.get("media")
+    if isinstance(media, list):
+        for m in media:
+            if isinstance(m, dict) and m.get("url"):
+                urls.append(m["url"])
+            elif isinstance(m, str):
+                urls.append(m)
+    for key in ("video_url", "image_url"):
+        if item.get(key) and item[key] not in urls:
+            urls.append(item[key])
+    return urls
+
+
 def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
     user = item.get("user") or item.get("author") or item
     code = item.get("code") or item.get("shortcode") or item.get("post_code")
     return {
         "platform": "threads",
-        "id": safe_str(item.get("pk") or item.get("id") or item.get("post_id")),
+        "id": safe_str(item.get("pk") or item.get("id") or item.get("post_id") or item.get("postId")),
         "code": safe_str(code),
         "url": safe_str(item.get("url") or item.get("post_url"))
         or (f"https://www.threads.net/t/{code}" if code else None),
         "text": safe_str(item.get("caption") or item.get("text") or item.get("caption_text")),
         "publishedAt": safe_str(
-            item.get("taken_at") or item.get("published_on") or item.get("publishedAt")
+            item.get("taken_at") or item.get("date") or item.get("published_on") or item.get("publishedAt")
         ),
         "author": _user(user),
         "engagement": {
@@ -102,6 +118,7 @@ def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
             "reposts": safe_int(item.get("repost_count") or item.get("repostCount") or item.get("reposts")),
             "quotes": safe_int(item.get("quote_count") or item.get("quoteCount")),
         },
+        "media": _post_media(item),
     }
 
 
@@ -112,7 +129,7 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
         "username": safe_str(username),
         "url": safe_str(item.get("url"))
         or (f"https://www.threads.net/@{username}" if username else None),
-        "id": safe_str(item.get("pk") or item.get("id")),
+        "id": safe_str(item.get("pk") or item.get("id") or item.get("userId") or item.get("user_id")),
         "name": safe_str(item.get("full_name") or item.get("fullName") or item.get("name")),
         "bio": safe_str(item.get("biography") or item.get("bio")),
         "verified": item.get("is_verified") or item.get("isVerified"),
@@ -160,9 +177,11 @@ async def threads_profile(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
+            # The automation-lab scraper has a dedicated profile mode with
+            # followers/bio/verified; the user-media actor only emits posts.
             items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_THREADS,
-                {"username": handle, "maxPosts": 1},
+                settings.APIFY_ACTOR_THREADS_SEARCH,
+                {"mode": "profile", "usernames": [handle]},
                 max_items=1,
             )
             if not items:
@@ -171,7 +190,7 @@ async def threads_profile(
 
         data = await cached_or_run(
             endpoint="threads.profile",
-            params={"handle": handle},
+            params={"handle": handle, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -206,7 +225,7 @@ async def threads_user_posts(
 
         data = await cached_or_run(
             endpoint="threads.user-posts",
-            params={"handle": handle, "limit": limit},
+            params={"handle": handle, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -241,7 +260,7 @@ async def threads_search(
 
         data = await cached_or_run(
             endpoint="threads.search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -296,13 +315,18 @@ async def threads_search_users(
         return ApiResponse(data=data)
 
 
+_POST_AUTHOR_RE = re.compile(r"@([A-Za-z0-9._]+)/post/")
+
+
 @router.get("/post-details", summary="Threads post metadata + engagement")
 async def threads_post_details(
     url: str = Query(..., description="Threads post URL"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    _require_threads_post_url(url)
+    code = _require_threads_post_url(url)
     settings = get_settings()
+    author_match = _POST_AUTHOR_RE.search(url or "")
+    author = author_match.group(1) if author_match else None
     async with billed_call(
         caller=caller,
         endpoint="/v1/threads/post-details",
@@ -312,18 +336,38 @@ async def threads_post_details(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
+            # When the URL names the author, the posts-mode scraper gives full
+            # engagement + text; the downloader fallback only has media.
+            if author:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_THREADS,
+                    {"username": author, "maxPosts": 25},
+                    max_items=25,
+                )
+                match = next(
+                    (
+                        i
+                        for i in items
+                        if (i.get("post_code") or i.get("code") or i.get("shortcode")) == code
+                    ),
+                    None,
+                )
+                if match:
+                    return _normalize_post(match)
+            dl_url = f"https://www.threads.com/@{author}/post/{code}" if author else url
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_THREADS_POST,
-                {"links": [url], "proxyConfiguration": {"useApifyProxy": False}},
+                {"links": [dl_url], "proxyConfiguration": {"useApifyProxy": False}},
                 max_items=1,
             )
-            if not items:
+            result = (items[0].get("result") or {}) if items else {}
+            if not items or (isinstance(result, dict) and result.get("error")):
                 raise HTTPException(status_code=404, detail="Post not found")
             return _normalize_post_download(items[0])
 
         data = await cached_or_run(
             endpoint="threads.post-details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )

@@ -130,7 +130,96 @@ def batch1_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
     return tests
 
 
-BATCHES = {"batch1": (batch1_phase1, batch1_phase2)}
+def batch2_phase1() -> list[tuple[str, str, dict]]:
+    return [
+        ("tiktok-profile-region", "/v1/tiktok/profile-region", {"url": "https://www.tiktok.com/@khaby.lame"}),
+        ("tiktok-audience-demographics", "/v1/tiktok/audience-demographics", {"url": "https://www.tiktok.com/@khaby.lame"}),
+        ("tiktok-search-suggestions", "/v1/tiktok/search-suggestions", {"q": "skincare", "limit": 5}),
+        ("tiktok-live", "/v1/tiktok/live", {"url": "https://www.tiktok.com/@espn"}),
+        ("tiktok-live-info", "/v1/tiktok/live-info", {"url": "https://www.tiktok.com/@espn"}),
+        ("tiktok-popular-creators", "/v1/tiktok/popular-creators", {"country": "US", "limit": 5}),
+        ("tiktok-shop-search", "/v1/tiktok-shop/shop-search", {"q": "phone case", "region": "US", "limit": 5}),
+        ("tiktok-shop-user-showcase", "/v1/tiktok-shop/user-showcase", {"username": "jeffreestar", "limit": 5}),
+        ("tiktok-ad-library-search", "/v1/ad-library/tiktok/search", {"q": "fashion", "limit": 5}),
+        ("facebook-ad-library-search", "/v1/ad-library/facebook/search", {"q": "nike", "country": "US", "limit": 5}),
+        ("facebook-ad-library-search-companies", "/v1/ad-library/facebook/search-companies", {"q": "nike", "limit": 5}),
+        ("facebook-ad-library-company-ads", "/v1/ad-library/facebook/company-ads", {"url": "https://www.facebook.com/nike", "limit": 5}),
+        ("google-ad-library-company-ads", "/v1/ad-library/google/company-ads", {"advertiser": "nike", "country": "US", "limit": 5}),
+        ("google-ad-library-advertiser-search", "/v1/ad-library/google/advertiser-search", {"q": "nike", "limit": 5}),
+        ("google-search", "/v1/google/search", {"q": "best project management software", "limit": 5}),
+        ("threads-profile", "/v1/threads/profile", {"url": "@zuck"}),
+        ("threads-user-posts", "/v1/threads/user-posts", {"url": "@zuck", "limit": 5}),
+        ("threads-search", "/v1/threads/search", {"q": "artificial intelligence", "limit": 5}),
+        ("threads-search-users", "/v1/threads/search-users", {"q": "tech", "limit": 5}),
+        ("snapchat-user-profile", "/v1/snapchat/user-profile", {"url": "kyliejenner"}),
+    ]
+
+
+def batch2_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
+    tests: list[tuple[str, str, dict]] = []
+
+    def data_of(slug: str) -> dict:
+        body = p1.get(slug, {}).get("body") or {}
+        return body.get("data") or {}
+
+    def first_of(slug: str, *list_keys: str) -> dict:
+        d = data_of(slug)
+        for key in list_keys:
+            rows = d.get(key)
+            if isinstance(rows, list) and rows:
+                return next((r for r in rows if isinstance(r, dict)), {})
+        return {}
+
+    product = first_of("tiktok-shop-search", "products", "results")
+    product_url = product.get("url") or product.get("productUrl")
+    if product_url:
+        tests.append(("tiktok-shop-product-details", "/v1/tiktok-shop/product-details", {"url": product_url}))
+        tests.append(("tiktok-shop-product-reviews", "/v1/tiktok-shop/product-reviews", {"url": product_url, "limit": 5}))
+    else:
+        print("!! no tiktok shop product url")
+    seller = product.get("seller") or {}
+    store_url = (seller.get("url") if isinstance(seller, dict) else None) or product.get("shopUrl") or product.get("storeUrl")
+    if store_url:
+        tests.append(("tiktok-shop-products", "/v1/tiktok-shop/shop-products", {"url": store_url, "limit": 5}))
+    else:
+        print("!! no tiktok shop store url")
+
+    tt_ad = first_of("tiktok-ad-library-search", "ads", "results")
+    tt_ad_ref = tt_ad.get("url") or tt_ad.get("id")
+    if tt_ad_ref:
+        tests.append(("tiktok-ad-library-ad-details", "/v1/ad-library/tiktok/ad-details", {"url": str(tt_ad_ref)}))
+    else:
+        print("!! no tiktok ad id")
+
+    fb_ad = first_of("facebook-ad-library-search", "ads", "results")
+    fb_ad_ref = fb_ad.get("url") or fb_ad.get("id")
+    if fb_ad_ref:
+        tests.append(("facebook-ad-library-ad-details", "/v1/ad-library/facebook/ad-details", {"url": str(fb_ad_ref)}))
+        tests.append(("facebook-ad-library-ad-transcript", "/v1/ad-library/facebook/ad-transcript", {"url": str(fb_ad_ref)}))
+    else:
+        print("!! no facebook ad id")
+
+    g_ad = first_of("google-ad-library-company-ads", "ads", "results")
+    g_ref = g_ad.get("url") or g_ad.get("adTransparencyUrl") or g_ad.get("id")
+    if g_ref:
+        tests.append(("google-ad-library-ad-details", "/v1/ad-library/google/ad-details", {"creative_id": str(g_ref)}))
+    else:
+        print("!! no google creative url")
+
+    th_post = first_of("threads-user-posts", "posts", "threads")
+    th_url = th_post.get("url") or th_post.get("postUrl")
+    if th_url:
+        tests.append(("threads-post-details", "/v1/threads/post-details", {"url": th_url}))
+    else:
+        print("!! no threads post url")
+
+    return tests
+
+
+BATCHES = {
+    "batch1": (batch1_phase1, batch1_phase2),
+    "batch2": (batch2_phase1, batch2_phase2),
+}
 
 
 async def main() -> None:
