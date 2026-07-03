@@ -1267,22 +1267,33 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "videoId": "dQw4w9WgXcQ",
     "totalReturned": 10,
+    "totalComments": 2440329,
     "comments": [
       {
         "id": "Ugzge340dBgB75hWBm54AaABAg",
         "author": "@YouTube",
+        "authorAvatarUrl": "https://yt3.ggpht.com/ytc/AIdro_kGrq2ESLGCrvGKMsFcW-hnMJb0tqmQlpBLQI2sMac9vzE=s88-c-k-c0x00ffffff-no-rj",
+        "authorIsVerified": true,
+        "authorIsChannelOwner": false,
         "text": "can confirm: he never gave us up",
         "likeCount": 249000,
-        "publishedAt": "1 year ago",
-        "replyCount": 1000
+        "replyCount": 1000,
+        "hasCreatorHeart": false,
+        "publishedTimeText": "1 year ago",
+        "replyToId": null
       },
       {
         "id": "Ugw7WhzhWF8NenpDXyd4AaABAg",
         "author": "@Purpleguy6f7e",
+        "authorAvatarUrl": "https://yt3.ggpht.com/ytc/AIdro_default=s88-c-k-c0x00ffffff-no-rj",
+        "authorIsVerified": false,
+        "authorIsChannelOwner": false,
         "text": "Someone linked me here :/",
         "likeCount": 1,
-        "publishedAt": "10 minutes ago",
-        "replyCount": null
+        "replyCount": 0,
+        "hasCreatorHeart": false,
+        "publishedTimeText": "10 minutes ago",
+        "replyToId": null
       }
     ]
   },

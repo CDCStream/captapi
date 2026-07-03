@@ -140,9 +140,13 @@ def _reply_payload(r: dict) -> dict:
     return {
         "id": safe_str(r.get("cid") or r.get("commentId") or r.get("id")),
         "author": safe_str(r.get("author") or r.get("authorName")),
+        "authorAvatarUrl": safe_str(r.get("avatar") or r.get("authorThumbnail")),
+        "authorIsVerified": bool(r.get("isVerified")),
+        "authorIsChannelOwner": bool(r.get("authorIsChannelOwner")),
         "text": (r.get("comment") or r.get("text") or r.get("content") or "").strip(),
-        "likeCount": safe_int(r.get("voteCount") or r.get("votes") or r.get("likeCount")),
-        "publishedAt": safe_str(r.get("publishedAt") or r.get("publishedTimeText")),
+        "likeCount": safe_int(r.get("voteCount") or r.get("votes") or r.get("likeCount")) or 0,
+        "hasCreatorHeart": bool(r.get("hasCreatorHeart")),
+        "publishedTimeText": safe_str(r.get("publishedTimeText") or r.get("publishedAt")),
     }
 
 
@@ -597,6 +601,11 @@ async def youtube_comments(
                     {
                         "id": safe_str(c.get("cid") or c.get("commentId") or c.get("id")),
                         "author": safe_str(c.get("author") or c.get("authorName")),
+                        "authorAvatarUrl": safe_str(
+                            c.get("avatar") or c.get("authorThumbnail")
+                        ),
+                        "authorIsVerified": bool(c.get("isVerified")),
+                        "authorIsChannelOwner": bool(c.get("authorIsChannelOwner")),
                         "text": (
                             c.get("comment")
                             or c.get("text")
@@ -605,25 +614,31 @@ async def youtube_comments(
                         ).strip(),
                         "likeCount": safe_int(
                             c.get("voteCount") or c.get("votes") or c.get("likeCount")
-                        ),
-                        "publishedAt": safe_str(
-                            c.get("publishedAt") or c.get("publishedTimeText")
-                        ),
+                        )
+                        or 0,
                         "replyCount": safe_int(
                             c.get("replyCount") or c.get("replies")
+                        )
+                        or 0,
+                        "hasCreatorHeart": bool(c.get("hasCreatorHeart")),
+                        "publishedTimeText": safe_str(
+                            c.get("publishedTimeText") or c.get("publishedAt")
                         ),
+                        "replyToId": safe_str(c.get("replyToCid")),
                     }
                 )
+            total_comments = safe_int(items[0].get("commentsCount")) if items else None
             return {
                 "url": norm_url,
                 "videoId": vid,
                 "totalReturned": len(comments),
+                "totalComments": total_comments,
                 "comments": comments,
             }
 
         data = await cached_or_run(
             endpoint="youtube.comments",
-            params={"url": norm_url, "limit": limit},
+            params={"url": norm_url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1221,7 +1236,7 @@ async def youtube_comment_replies(
 
         data = await cached_or_run(
             endpoint="youtube.comment-replies",
-            params={"url": norm_url, "comment_id": comment_id, "limit": limit},
+            params={"url": norm_url, "comment_id": comment_id, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
