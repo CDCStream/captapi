@@ -105,6 +105,7 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
             or item.get("repinCount")
             or item.get("save_count")
             or item.get("saves")
+            or item.get("reactionCount")
         ),
         "comments": safe_int(item.get("comment_count") or item.get("commentCount")),
         "publishedAt": safe_str(item.get("created_at") or item.get("createdAt")),
@@ -131,6 +132,14 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
             ),
         },
     }
+
+
+def _prefer_enriched(pins: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Push fully-enriched pins first; the actor occasionally emits bare
+    id/url stubs when a pin's detail fetch fails mid-run."""
+    enriched = [p for p in pins if p.get("title") or p.get("image")]
+    sparse = [p for p in pins if not (p.get("title") or p.get("image"))]
+    return enriched + sparse
 
 
 def _meta(page: str, key: str) -> str | None:
@@ -252,7 +261,7 @@ async def user_pins(
                 {"mode": "userPins", "usernames": [username], "maxItems": limit},
                 max_items=limit,
             )
-            pins = [_normalize_pin(i) for i in items if i.get("recordType") != "board"][:limit]
+            pins = _prefer_enriched([_normalize_pin(i) for i in items if i.get("recordType") != "board"])[:limit]
             return {"username": username, "totalReturned": len(pins), "pins": pins}
 
         data = await cached_or_run(
@@ -327,7 +336,7 @@ async def pinterest_user_boards(
 
         data = await cached_or_run(
             endpoint="pinterest.user-boards",
-            params={"username": username, "limit": limit},
+            params={"username": username, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -370,7 +379,7 @@ async def pinterest_board(
                 {"mode": "boardPins", "boardUrls": [url], "maxItems": limit},
                 max_items=limit,
             )
-            pins = [_normalize_pin(i) for i in items if i.get("recordType") != "board"][:limit]
+            pins = _prefer_enriched([_normalize_pin(i) for i in items if i.get("recordType") != "board"])[:limit]
             return {"board": url, "totalReturned": len(pins), "pins": pins}
 
         data = await cached_or_run(
@@ -405,12 +414,12 @@ async def pinterest_search(
                 {"mode": "search", "keywords": [q], "maxItems": limit},
                 max_items=limit,
             )
-            results = [_normalize_pin(i) for i in items if i.get("recordType") != "board"][:limit]
+            results = _prefer_enriched([_normalize_pin(i) for i in items if i.get("recordType") != "board"])[:limit]
             return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="pinterest.search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

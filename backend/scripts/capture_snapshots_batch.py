@@ -216,9 +216,82 @@ def batch2_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
     return tests
 
 
+def batch3_phase1() -> list[tuple[str, str, dict]]:
+    return [
+        ("github-user", "/v1/github/user", {"username": "torvalds"}),
+        ("github-repositories", "/v1/github/repositories", {"username": "torvalds", "limit": 5}),
+        ("github-repository", "/v1/github/repository", {"repo": "torvalds/linux"}),
+        ("github-pull-requests", "/v1/github/pull-requests", {"repo": "facebook/react", "state": "open", "limit": 5}),
+        ("github-activity", "/v1/github/activity", {"username": "torvalds", "limit": 5}),
+        ("github-followers", "/v1/github/followers", {"username": "torvalds", "limit": 5}),
+        ("github-following", "/v1/github/following", {"username": "gaearon", "limit": 5}),
+        ("github-contributions", "/v1/github/contributions", {"username": "torvalds"}),
+        ("github-trending-repositories", "/v1/github/trending-repositories", {"limit": 5}),
+        ("github-trending-developers", "/v1/github/trending-developers", {"limit": 5}),
+        ("facebook-marketplace-search", "/v1/facebook/marketplace-search", {"q": "desk chair", "location": "Austin, TX", "limit": 5}),
+        ("facebook-marketplace-location-search", "/v1/facebook/marketplace-location-search", {"q": "Austin", "limit": 5}),
+        ("facebook-event-search", "/v1/facebook/event-search", {"q": "comedy Chicago", "limit": 5}),
+        ("facebook-profile-photos", "/v1/facebook/profile-photos", {"url": "https://www.facebook.com/nasa", "limit": 5}),
+        ("facebook-profile-events", "/v1/facebook/profile-events", {"url": "https://www.facebook.com/MadisonSquareGarden", "limit": 5}),
+        ("pinterest-search", "/v1/pinterest/search", {"q": "living room decor", "limit": 5}),
+        ("pinterest-user-pins", "/v1/pinterest/user-pins", {"url": "https://www.pinterest.com/potterybarn/", "limit": 5}),
+        ("pinterest-user-boards", "/v1/pinterest/user-boards", {"url": "https://www.pinterest.com/potterybarn/", "limit": 5}),
+        ("spotify-artist", "/v1/spotify/artist", {"url": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02"}),
+        ("spotify-track", "/v1/spotify/track", {"url": "https://open.spotify.com/track/0V3wPSX9ygBnCm8psDIegu"}),
+        ("spotify-album", "/v1/spotify/album", {"url": "https://open.spotify.com/album/151w1FgRZfnKZA9FEcg9Z3"}),
+        ("spotify-search", "/v1/spotify/search", {"q": "lofi beats", "type": "tracks", "limit": 5}),
+        ("spotify-podcast", "/v1/spotify/podcast", {"url": "https://open.spotify.com/show/4rOoJ6Egrf8K2IrywzwOMk", "limit": 5}),
+        ("spotify-podcast-episodes", "/v1/spotify/podcast-episodes", {"url": "https://open.spotify.com/show/4rOoJ6Egrf8K2IrywzwOMk", "limit": 5}),
+    ]
+
+
+def batch3_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
+    tests: list[tuple[str, str, dict]] = []
+
+    def first_of(slug: str, *list_keys: str) -> dict:
+        body = p1.get(slug, {}).get("body") or {}
+        d = body.get("data") or {}
+        for key in list_keys:
+            rows = d.get(key)
+            if isinstance(rows, list) and rows:
+                return next((r for r in rows if isinstance(r, dict)), {})
+        return {}
+
+    event = first_of("facebook-event-search", "events", "results")
+    event_url = event.get("url") or event.get("eventUrl")
+    if event_url:
+        tests.append(("facebook-event-details", "/v1/facebook/event-details", {"url": event_url}))
+    else:
+        print("!! no facebook event url")
+
+    listing = first_of("facebook-marketplace-search", "listings", "results")
+    listing_url = listing.get("url") or listing.get("listingUrl")
+    if listing_url:
+        tests.append(("facebook-marketplace-item", "/v1/facebook/marketplace-item", {"url": listing_url}))
+    else:
+        print("!! no marketplace listing url")
+
+    pin = first_of("pinterest-search", "results", "pins")
+    pin_url = pin.get("url") or pin.get("pinUrl")
+    if pin_url:
+        tests.append(("pinterest-pin-details", "/v1/pinterest/pin-details", {"url": pin_url}))
+    else:
+        print("!! no pinterest pin url")
+
+    board = first_of("pinterest-user-boards", "boards")
+    board_url = board.get("url") or board.get("boardUrl")
+    if board_url:
+        tests.append(("pinterest-board", "/v1/pinterest/board", {"url": board_url, "limit": 5}))
+    else:
+        print("!! no pinterest board url")
+
+    return tests
+
+
 BATCHES = {
     "batch1": (batch1_phase1, batch1_phase2),
     "batch2": (batch2_phase1, batch2_phase2),
+    "batch3": (batch3_phase1, batch3_phase2),
 }
 
 

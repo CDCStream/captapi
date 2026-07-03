@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import re
 from typing import Any
 
 import httpx
@@ -40,6 +41,8 @@ def _url(value: str, kind: str) -> str:
 
 
 def _names(items: Any) -> list[str]:
+    if isinstance(items, str):
+        return [part.strip() for part in items.split(",") if part.strip()]
     if not isinstance(items, list):
         return []
     out: list[str] = []
@@ -48,11 +51,19 @@ def _names(items: Any) -> list[str]:
             name = item.get("name") or (item.get("profile") or {}).get("name")
             if name:
                 out.append(str(name))
+        elif isinstance(item, str) and item.strip():
+            out.append(item.strip())
     return out
 
 
 def _image(item: dict[str, Any]) -> str | None:
-    images = item.get("images") or item.get("visuals", {}).get("avatarImage", {}).get("sources")
+    header = item.get("headerImage")
+    header_sources = (header.get("data") or {}).get("sources") if isinstance(header, dict) else None
+    images = (
+        item.get("images")
+        or item.get("visuals", {}).get("avatarImage", {}).get("sources")
+        or header_sources
+    )
     if isinstance(images, list) and images:
         first = images[0]
         if isinstance(first, dict):
@@ -66,21 +77,39 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
     album = item.get("albumOfTrack") or item.get("album") or {}
     tracks = item.get("tracks") or item.get("content") or {}
     episodes = item.get("episodes") or item.get("items") or tracks
+
+    if isinstance(duration, dict):
+        duration_ms = safe_int(duration.get("totalMilliseconds"))
+    else:
+        duration_ms = safe_int(duration)
+    duration_ms = duration_ms or safe_int(item.get("durationMs"))
+
+    release_year = safe_int((item.get("date") or {}).get("year") if isinstance(item.get("date"), dict) else None)
+    if not release_year:
+        release_date = safe_str(item.get("releaseDate"))
+        match = re.search(r"\b(\d{4})\b", release_date or "")
+        release_year = safe_int(match.group(1)) if match else None
+
+    description = safe_str(item.get("description") or item.get("subtitle"))
+    biography = item.get("biography")
+    if not description and isinstance(biography, dict):
+        description = safe_str(biography.get("text"))
+
     return {
         "platform": "spotify",
         "type": kind,
         "uri": safe_str(item.get("uri") or item.get("id")),
         "url": safe_str(item.get("url") or item.get("externalUrl") or item.get("shareUrl")),
         "name": safe_str(item.get("name") or item.get("title")),
-        "description": safe_str(item.get("description") or item.get("subtitle")),
+        "description": description,
         "artists": _names(item.get("artists")),
-        "album": safe_str(album.get("name") if isinstance(album, dict) else None),
-        "durationMs": safe_int(duration.get("totalMilliseconds") if isinstance(duration, dict) else item.get("durationMs")),
+        "album": safe_str(album.get("name") if isinstance(album, dict) else None) or safe_str(item.get("albumName")),
+        "durationMs": duration_ms,
         "playCount": safe_int(item.get("playcount") or item.get("playCount")),
         "followers": safe_int(stats.get("followers") or item.get("followers")),
-        "monthlyListeners": safe_int(stats.get("monthlyListeners")),
-        "releaseYear": safe_int((item.get("date") or {}).get("year") if isinstance(item.get("date"), dict) else None),
-        "image": _image(item),
+        "monthlyListeners": safe_int(stats.get("monthlyListeners") or item.get("monthlyListeners")),
+        "releaseYear": release_year,
+        "image": _image(item) or safe_str(item.get("albumArt")),
         "totalTracks": safe_int(tracks.get("totalCount") if isinstance(tracks, dict) else item.get("totalTracks")),
         "totalEpisodes": safe_int(episodes.get("totalCount") if isinstance(episodes, dict) else item.get("totalEpisodes")),
         "raw": item,
@@ -116,8 +145,10 @@ async def _oembed_details(kind: str, uri: str) -> dict[str, Any]:
 
 async def _details(kind: str, uri: str, limit: int | None = None) -> dict[str, Any]:
     settings = get_settings()
-    album_limit = limit if kind == "album" else 0
-    podcast_limit = limit if kind == "podcast" else 0
+    # The actor's *_get_limit fields require a minimum of 1 - passing 0 fails
+    # input validation and every call used to drop to the bare oembed fallback.
+    album_limit = max(1, limit or 1) if kind == "album" else 1
+    podcast_limit = max(1, limit or 1) if kind == "podcast" else 1
     run_input: dict[str, Any] = {
         "getDetailsType": kind,
         "spotifyUris": [uri],
@@ -137,7 +168,7 @@ async def _details(kind: str, uri: str, limit: int | None = None) -> dict[str, A
         )
     except (ApifyError, httpx.HTTPError):
         return await _oembed_details(kind, uri)
-    if not items:
+    if not items or items[0].get("error"):
         return await _oembed_details(kind, uri)
     return _normalize(items[0], kind)
 
@@ -149,7 +180,7 @@ async def artist(
 ):
     uri = _url(url, "artist")
     async with billed_call(caller=caller, endpoint="/v1/spotify/artist", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.artist", {"uri": uri}, lambda: _details("artist", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC)
+        data = await cached_or_run("spotify.artist", {"uri": uri, "v": 2}, lambda: _details("artist", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC)
         return ApiResponse(data=data)
 
 
@@ -160,7 +191,7 @@ async def track(
 ):
     uri = _url(url, "track")
     async with billed_call(caller=caller, endpoint="/v1/spotify/track", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.track", {"uri": uri}, lambda: _details("track", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC)
+        data = await cached_or_run("spotify.track", {"uri": uri, "v": 2}, lambda: _details("track", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC)
         return ApiResponse(data=data)
 
 
@@ -171,7 +202,7 @@ async def album(
 ):
     uri = _url(url, "album")
     async with billed_call(caller=caller, endpoint="/v1/spotify/album", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.album", {"uri": uri}, lambda: _details("album", uri, limit=1), ctx, ttl=get_settings().CACHE_TTL_STATIC)
+        data = await cached_or_run("spotify.album", {"uri": uri, "v": 2}, lambda: _details("album", uri, limit=1), ctx, ttl=get_settings().CACHE_TTL_STATIC)
         return ApiResponse(data=data)
 
 
@@ -183,7 +214,7 @@ async def podcast(
 ):
     uri = _url(url, "show")
     async with billed_call(caller=caller, endpoint="/v1/spotify/podcast", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.podcast", {"uri": uri, "limit": limit}, lambda: _details("podcast", uri, limit), ctx, ttl=get_settings().CACHE_TTL_STATIC)
+        data = await cached_or_run("spotify.podcast", {"uri": uri, "limit": limit, "v": 2}, lambda: _details("podcast", uri, limit), ctx, ttl=get_settings().CACHE_TTL_STATIC)
         return ApiResponse(data=data)
 
 
@@ -204,7 +235,7 @@ async def podcast_episodes(
             normalized = [_normalize(i, "episode") for i in items if isinstance(i, dict)] if isinstance(items, list) else []
             return {"platform": "spotify", "podcast": data, "totalReturned": len(normalized[:limit]), "episodes": normalized[:limit]}
 
-        data = await cached_or_run("spotify.podcast-episodes", {"uri": uri, "limit": limit}, _run, ctx)
+        data = await cached_or_run("spotify.podcast-episodes", {"uri": uri, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["episodes"]))
         return ApiResponse(data=data)
 
@@ -217,33 +248,34 @@ async def search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    search_type = {
-        "tracks": "searchTracks",
-        "albums": "searchAlbums",
-        "artists": "searchArtists",
-        "podcasts": "searchPodcasts",
-        "episodes": "searchFullEpisodes",
-    }[type]
     cost = _scaled(limit)
     async with billed_call(caller=caller, endpoint="/v1/spotify/search", platform="spotify", resource_url=f"spotify:search:{q}", base_credits=cost) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_SPOTIFY_SEARCH,
-                {
-                    "searchType": search_type,
-                    "keyword": [q],
-                    "proxyCountry": "US",
-                    "tracks_search_limit": limit,
-                    "albums_search_limit": limit,
-                    "artists_search_limit": limit,
-                    "podcasts_search_limit": limit,
-                    "episodes_search_limit": limit,
-                },
-                max_items=limit,
-            )
-            results = [_normalize(i, type[:-1] if type.endswith("s") else type) for i in items[:limit]]
+            apify = get_apify()
+            if type in ("tracks", "albums", "artists"):
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_SPOTIFY_SEARCH,
+                    {"mode": "search", "searchTerms": [q], "searchType": type, "maxResults": limit},
+                    max_items=limit,
+                )
+            else:
+                # Podcast/episode search is only offered by the apiharvest
+                # all-types actor.
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_SPOTIFY_SEARCH_ALL,
+                    {
+                        "searchType": "searchPodcasts" if type == "podcasts" else "searchFullEpisodes",
+                        "keyword": [q],
+                        "proxyCountry": "US",
+                        "podcasts_search_limit": limit,
+                        "episodes_search_limit": limit,
+                    },
+                    max_items=limit,
+                )
+            kind = type[:-1] if type.endswith("s") else type
+            results = [_normalize(i, kind) for i in items[:limit] if not i.get("error")]
             return {"platform": "spotify", "query": q, "type": type, "totalReturned": len(results), "results": results}
 
-        data = await cached_or_run("spotify.search", {"q": q, "type": type, "limit": limit}, _run, ctx)
+        data = await cached_or_run("spotify.search", {"q": q, "type": type, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["results"]))
         return ApiResponse(data=data)

@@ -60,7 +60,9 @@ async def _get(path: str, params: dict[str, Any] | None = None) -> Any:
     token = get_settings().GITHUB_TOKEN
     if token:
         headers["Authorization"] = f"Bearer {token}"
-    async with httpx.AsyncClient(timeout=30, headers=headers) as client:
+    # follow_redirects: GitHub 301s renamed/transferred repos (e.g.
+    # facebook/react) and returns a JSON stub instead of the data otherwise.
+    async with httpx.AsyncClient(timeout=30, headers=headers, follow_redirects=True) as client:
         resp = await client.get(f"{GITHUB_API}{path}", params=params)
     if resp.status_code == 404:
         raise HTTPException(status_code=404, detail="Not found on GitHub")

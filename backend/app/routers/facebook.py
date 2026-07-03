@@ -5,6 +5,7 @@ from __future__ import annotations
 import html
 import math
 import re
+from datetime import datetime, timezone
 from typing import Any
 
 import httpx
@@ -14,7 +15,7 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
-from app.services.apify_client import ApifyError, get_apify
+from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
@@ -204,6 +205,50 @@ def _normalize_listing(item: dict) -> dict:
         "photos": item.get("photos") or [],
         "description": safe_str(item.get("description")),
         "createdAt": safe_str(item.get("creation_time")),
+    }
+
+
+def _normalize_marketplace_detail(item: dict, url: str) -> dict:
+    """Map the raw GraphQL listing entity from the per-item details actor."""
+    price = item.get("listing_price") if isinstance(item.get("listing_price"), dict) else {}
+    desc = item.get("redacted_description") if isinstance(item.get("redacted_description"), dict) else {}
+    loc_text = item.get("location_text") if isinstance(item.get("location_text"), dict) else {}
+    coords = item.get("location") if isinstance(item.get("location"), dict) else {}
+    condition = next(
+        (
+            a.get("label") or a.get("value")
+            for a in item.get("attribute_data") or []
+            if isinstance(a, dict) and a.get("attribute_name") == "Condition"
+        ),
+        None,
+    )
+    created = safe_int(item.get("creation_time"))
+    created_iso = (
+        datetime.fromtimestamp(created, tz=timezone.utc).isoformat() if created else None
+    )
+    try:
+        amount = float(price.get("amount")) if price.get("amount") is not None else None
+    except (TypeError, ValueError):
+        amount = None
+    return {
+        "platform": "facebook",
+        "id": safe_str(item.get("id")),
+        "url": safe_str(item.get("share_uri")) or url,
+        "title": safe_str(item.get("marketplace_listing_title") or item.get("base_marketplace_listing_title")),
+        "description": safe_str(desc.get("text")),
+        "image": None,
+        "price": amount,
+        "priceFormatted": safe_str(price.get("formatted_amount_zeros_stripped")),
+        "currency": safe_str(price.get("currency")),
+        "condition": safe_str(condition),
+        "location": safe_str(loc_text.get("text")),
+        "latitude": coords.get("latitude"),
+        "longitude": coords.get("longitude"),
+        "isSold": item.get("is_sold"),
+        "isLive": item.get("is_live"),
+        "deliveryTypes": item.get("delivery_types") or [],
+        "photos": [],
+        "createdAt": created_iso,
     }
 
 
@@ -810,9 +855,13 @@ async def facebook_profile_events(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await get_apify().run_actor_sync(
+            # The actor needs the page's /events listing (a bare page URL
+            # yields nothing) and, being browser-based, can outlive the global
+            # 120s sync timeout.
+            events_url = url.rstrip("/") + "/events"
+            items = await ApifyClient(timeout=280).run_actor_sync(
                 settings.APIFY_ACTOR_FACEBOOK_EVENTS,
-                {"startUrls": [url], "maxEvents": limit},
+                {"startUrls": [events_url], "maxEvents": limit},
                 max_items=limit,
             )
             events = [_normalize_event(i) for i in items[:limit] if not i.get("error")]
@@ -820,7 +869,7 @@ async def facebook_profile_events(
 
         data = await cached_or_run(
             endpoint="facebook.profile-events",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -914,12 +963,13 @@ async def facebook_marketplace_item(
                     resp = await client.get(url)
                 if resp.status_code < 400:
                     title, description, image = _og_fields(resp.text)
+            item_id = None
+            m = re.search(r"/marketplace/item/(\d+)", url)
+            if m:
+                item_id = m.group(1)
+
             if title or description or image:
                 page = resp.text if resp is not None else ""
-                item_id = None
-                m = re.search(r"/marketplace/item/(\d+)", url)
-                if m:
-                    item_id = m.group(1)
                 return {
                     "platform": "facebook",
                     "id": safe_str(item_id),
@@ -932,18 +982,21 @@ async def facebook_marketplace_item(
                     "photos": [image] if image else [],
                 }
 
-            # Fallback: run the marketplace actor when public metadata is blocked.
+            # Fallback: per-item details actor (the search actor has no
+            # single-listing mode - it requires keyword queries).
             apify = get_apify()
-            try:
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_FACEBOOK_MARKETPLACE,
-                    {"startUrls": [{"url": url}], "fetchItemDetails": True, "maxResultsPerQuery": 1},
-                    max_items=1,
-                )
-            except (ApifyError, httpx.HTTPError):
-                items = []
+            items = []
+            if item_id:
+                try:
+                    items = await apify.run_actor_sync(
+                        settings.APIFY_ACTOR_FACEBOOK_MARKETPLACE_ITEM,
+                        {"listingId": item_id},
+                        max_items=1,
+                    )
+                except (ApifyError, httpx.HTTPError):
+                    items = []
             if items and not items[0].get("error"):
-                return _normalize_listing(items[0])
+                return _normalize_marketplace_detail(items[0], url)
             raise HTTPException(status_code=404, detail="Listing not found")
 
         data = await cached_or_run(
@@ -1061,7 +1114,9 @@ async def facebook_event_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
+            # The official events scraper is browser-based and routinely needs
+            # ~2-3 minutes; the global sync timeout (120s) cut it off mid-run.
+            apify = ApifyClient(timeout=280)
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_FACEBOOK_EVENTS,
                 {"searchQueries": [q], "maxEvents": limit},

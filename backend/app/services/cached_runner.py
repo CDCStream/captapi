@@ -37,6 +37,17 @@ async def cached_or_run(
             return cached
 
     result = await runner()
-    if effective_ttl > 0:
+    if effective_ttl > 0 and not _looks_empty(result):
         await cache_set(key, result, ttl=effective_ttl)
     return result
+
+
+def _looks_empty(result: Any) -> bool:
+    """True for list-endpoint payloads with zero rows.
+
+    Upstream actors occasionally return an empty dataset on a transient
+    block/proxy failure; caching that would pin the endpoint to an empty
+    response for the whole TTL. Skipping the cache write only costs a re-run
+    on the next call.
+    """
+    return isinstance(result, dict) and result.get("totalReturned") == 0

@@ -131,6 +131,9 @@ class Settings(BaseSettings):
     # locationName (or lat/lng) + fetchItemDetails. Events: official Apify
     # actor; input: searchQueries / startUrls + maxEvents.
     APIFY_ACTOR_FACEBOOK_MARKETPLACE: str = "unseenuser/fb-marketplace"
+    # Single-listing details by listingId (the search actor above has no
+    # per-item mode). Returns FB's raw GraphQL listing entity.
+    APIFY_ACTOR_FACEBOOK_MARKETPLACE_ITEM: str = "data-slayer/facebook-marketplace-details"
     APIFY_ACTOR_FACEBOOK_EVENTS: str = "apify/facebook-events-scraper"
     APIFY_ACTOR_FACEBOOK_EVENT_DETAILS: str = "crawlerbros/facebook-events-scraper"
     APIFY_ACTOR_FACEBOOK_PHOTOS: str = "apify/facebook-photos-scraper"
@@ -194,7 +197,11 @@ class Settings(BaseSettings):
     APIFY_ACTOR_GOOGLE_SEARCH: str = "apify/google-search-scraper"
     APIFY_ACTOR_TWITCH: str = "maximedupre/twitch-scraper"
     APIFY_ACTOR_TWITCH_URL: str = "abotapi/twitch-scraper"
-    APIFY_ACTOR_SPOTIFY_SEARCH: str = "apiharvest/spotify-search-all-types"
+    # Search: automation-lab covers tracks/artists/albums reliably; the
+    # apiharvest all-types actor (often returns "No results") is kept only for
+    # podcast/episode search which automation-lab does not support.
+    APIFY_ACTOR_SPOTIFY_SEARCH: str = "automation-lab/spotify-scraper"
+    APIFY_ACTOR_SPOTIFY_SEARCH_ALL: str = "apiharvest/spotify-search-all-types"
     APIFY_ACTOR_SPOTIFY_DETAILS: str = "apiharvest/spotify-scraper-get-full-details"
     APIFY_ACTOR_SOUNDCLOUD: str = "automation-lab/soundcloud-scraper"
     APIFY_ACTOR_SNAPCHAT_PROFILE: str = "crawlerbros/snapchat-profile-scraper"
