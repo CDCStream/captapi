@@ -7,7 +7,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const TITLE = "API Status - Live Endpoint Health & Incident History";
 const DESCRIPTION =
-  "Live health for every Captapi platform: success rates, request volumes, and response times over the last 24 hours, plus a full incident history. If something goes sideways, it shows up here first.";
+  "Live health for every Captapi platform, judged by the most recent responses. If something goes sideways, it shows up here first — and clears the moment it is fixed.";
 
 export const metadata: Metadata = {
   title: `${TITLE} | Captapi`,
@@ -32,7 +32,7 @@ interface PlatformHealth {
 }
 
 interface StatusData {
-  overall: { status: string; success_rate: number | null; requests_24h: number };
+  overall: { status: string; requests_24h: number };
   platforms: PlatformHealth[];
   window_hours: number;
   generated_at: string;
@@ -165,9 +165,9 @@ export default async function StatusPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold tracking-tight">API Status</h1>
           <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-            Live health for every Captapi platform, computed from real production
-            traffic over the last 24 hours. If something goes sideways, it shows
-            up here first.
+            Live health for every Captapi platform, judged by the most recent
+            responses — not a daily average. If something goes sideways, it
+            shows up here first and clears the moment it is fixed.
           </p>
         </div>
 
@@ -219,7 +219,7 @@ export default async function StatusPage() {
                       </span>
                     </div>
                     <p className="mt-2 text-sm text-muted-foreground">
-                      Last 24 hours · refreshes every 2 minutes
+                      Live status · refreshes every 2 minutes
                     </p>
                   </div>
 
@@ -251,9 +251,11 @@ export default async function StatusPage() {
             })()}
 
             <p className="mt-6 text-xs text-muted-foreground text-center">
-              Health is computed from real production traffic; only server-side
-              failures (HTTP 5xx) count against a platform. Client errors such
-              as invalid URLs or insufficient credits do not affect health.
+              Health reflects each platform’s most recent responses: a platform
+              only shows an issue while its latest requests are failing, and turns
+              green again as soon as a request succeeds. Only server-side failures
+              (HTTP 5xx) count — client errors such as invalid URLs or wrong query
+              parameters never affect health.
               Last updated{" "}
               {new Date(data.generated_at).toLocaleString("en-US", {
                 timeZone: "UTC",
