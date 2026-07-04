@@ -122,9 +122,14 @@ def _normalize_comment(item: dict[str, Any]) -> dict[str, Any]:
         "id": safe_str(item.get("id")),
         "author": safe_str(item.get("username") or item.get("author")),
         "text": safe_str(item.get("body") or item.get("text")),
-        "upvotes": safe_int(first_present(item.get("upVotes"), item.get("score"))),
-        "publishedAt": safe_str(item.get("createdAt") or item.get("created")),
-        "url": safe_str(item.get("url")),
+        "upvotes": safe_int(first_present(item.get("upVotes"), item.get("score"), item.get("ups"))),
+        "publishedAt": safe_str(item.get("createdAt") or item.get("created") or item.get("created_utc")),
+        "url": safe_str(item.get("url") or item.get("permalink")),
+        "parentId": safe_str(item.get("parentId") or item.get("parent_id")),
+        "depth": safe_int(item.get("depth")),
+        "isSubmitter": first_present(item.get("isSubmitter"), item.get("is_submitter")),
+        "edited": bool(item.get("edited")) or None,
+        "stickied": bool(item.get("stickied")) or None,
     }
 
 
@@ -188,6 +193,11 @@ async def _fetch_reddit_json_url(url: str, limit: int) -> tuple[dict[str, Any], 
                 "score": raw.get("score") or raw.get("ups"),
                 "created": raw.get("created_utc"),
                 "url": f"https://www.reddit.com{raw.get('permalink')}" if raw.get("permalink") else None,
+                "parent_id": raw.get("parent_id"),
+                "depth": raw.get("depth"),
+                "is_submitter": raw.get("is_submitter"),
+                "edited": raw.get("edited"),
+                "stickied": raw.get("stickied"),
             })
             replies = raw.get("replies")
             reply_children = ((replies or {}).get("data") or {}).get("children") if isinstance(replies, dict) else []
@@ -469,7 +479,7 @@ async def post_comments(
 
         data = await cached_or_run(
             endpoint="reddit.post-comments",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

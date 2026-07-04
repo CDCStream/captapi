@@ -141,6 +141,16 @@ def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _entities_website(item: dict[str, Any]) -> str | None:
+    entities = item.get("entities")
+    if not isinstance(entities, dict):
+        return None
+    urls = (entities.get("url") or {}).get("urls")
+    if isinstance(urls, list) and urls and isinstance(urls[0], dict):
+        return safe_str(urls[0].get("expanded_url") or urls[0].get("url"))
+    return None
+
+
 def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
     username = item.get("userName") or item.get("screen_name") or item.get("username")
     return {
@@ -156,6 +166,11 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
         "followers": safe_int(item.get("followers") or item.get("followersCount")),
         "following": safe_int(item.get("following") or item.get("followingCount") or item.get("friendsCount")),
         "tweetCount": safe_int(item.get("statusesCount") or item.get("tweetsCount") or item.get("statuses_count")),
+        "likesCount": safe_int(item.get("favouritesCount") or item.get("favourites_count") or item.get("likesCount")),
+        "mediaCount": safe_int(item.get("mediaCount") or item.get("media_count")),
+        "listedCount": safe_int(item.get("listedCount") or item.get("listed_count")),
+        "isBlueVerified": bool(item.get("isBlueVerified")) or None,
+        "website": safe_str(item.get("website")) or _entities_website(item),
         "profileImage": safe_str(item.get("profilePicture") or item.get("profile_image_url_https")),
         "bannerImage": safe_str(item.get("coverPicture") or item.get("profile_banner_url")),
         "createdAt": safe_str(item.get("createdAt") or item.get("created_at")),
@@ -270,7 +285,7 @@ async def twitter_profile(
 
         data = await cached_or_run(
             endpoint="twitter.profile",
-            params={"handle": handle},
+            params={"handle": handle, "v": 2},
             runner=_run,
             ctx=ctx,
         )

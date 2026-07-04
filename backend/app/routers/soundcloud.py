@@ -46,14 +46,29 @@ def _track(item: dict[str, Any]) -> dict[str, Any]:
         "url": safe_str(item.get("url") or item.get("permalinkUrl") or item.get("permalink_url")),
         "title": safe_str(item.get("title") or item.get("name")),
         "description": safe_str(item.get("description")),
-        "artist": safe_str(user.get("username") or user.get("name") or item.get("artistName")),
-        "artistUrl": safe_str(user.get("permalinkUrl") or user.get("permalink_url") or item.get("artistUrl")),
+        "genre": safe_str(item.get("genre")),
+        "artist": safe_str(user.get("username") or user.get("name") or item.get("userName") or item.get("artistName")),
+        "artistUrl": safe_str(
+            user.get("permalinkUrl") or user.get("permalink_url") or item.get("userUrl") or item.get("artistUrl")
+        ),
+        "artistAvatar": safe_str(user.get("avatarUrl") or user.get("avatar_url") or item.get("userAvatarUrl")),
+        "artistFollowers": safe_int(user.get("followersCount") or item.get("userFollowersCount")),
+        "artistVerified": bool(user.get("verified") or item.get("userVerified")) or None,
         "durationMs": safe_int(item.get("duration") or item.get("durationMs")),
         "plays": safe_int(item.get("playbackCount") or item.get("playback_count") or item.get("plays")),
         "likes": safe_int(item.get("likesCount") or item.get("likes_count") or item.get("likes")),
+        "reposts": safe_int(item.get("repostsCount") or item.get("reposts_count")),
+        "downloads": safe_int(item.get("downloadCount") or item.get("download_count")),
         "comments": safe_int(item.get("commentCount") or item.get("comment_count") or item.get("comments")),
         "publishedAt": safe_str(item.get("createdAt") or item.get("created_at") or item.get("publishedAt")),
+        "releaseDate": safe_str(item.get("releaseDate") or item.get("release_date")),
+        "license": safe_str(item.get("license")),
+        "isrc": safe_str(item.get("isrc")),
+        "downloadable": bool(item.get("downloadable")) or None,
+        "streamable": bool(item.get("streamable")) or None,
+        "waveformUrl": safe_str(item.get("waveformUrl") or item.get("waveform_url")),
         "artwork": safe_str(item.get("artworkUrl") or item.get("artwork_url") or item.get("thumbnail")),
+        "tags": [t for t in (item.get("tagList") or []) if isinstance(t, str)],
     }
 
 
@@ -67,10 +82,15 @@ def _artist(item: dict[str, Any], url: str) -> dict[str, Any]:
         "name": safe_str(user.get("fullName") or user.get("full_name") or user.get("name") or user.get("username")),
         "description": safe_str(user.get("description") or user.get("bio")),
         "avatar": safe_str(user.get("avatarUrl") or user.get("avatar_url")),
+        "city": safe_str(user.get("city")),
+        "countryCode": safe_str(user.get("countryCode") or user.get("country_code")),
+        "verified": bool(user.get("verified")) or None,
         "followers": safe_int(user.get("followersCount") or user.get("followers_count")),
         "followings": safe_int(user.get("followingsCount") or user.get("followings_count")),
         "trackCount": safe_int(user.get("trackCount") or user.get("track_count")),
+        "playlistCount": safe_int(user.get("playlistCount") or user.get("playlist_count")),
         "likesCount": safe_int(user.get("likesCount") or user.get("likes_count")),
+        "createdAt": safe_str(user.get("createdAt") or user.get("created_at")),
     }
 
 
@@ -92,7 +112,7 @@ async def artist(
                 raise HTTPException(status_code=404, detail="SoundCloud artist not found")
             return _artist(items[0], profile)
 
-        data = await cached_or_run("soundcloud.artist", {"url": profile}, _run, ctx)
+        data = await cached_or_run("soundcloud.artist", {"url": profile, "v": 2}, _run, ctx)
         return ApiResponse(data=data)
 
 
@@ -117,7 +137,7 @@ async def artist_tracks(
             tracks = [_track(i) for i in items if i.get("title") or i.get("name")][:limit]
             return {"platform": "soundcloud", "artistUrl": profile, "totalReturned": len(tracks), "tracks": tracks}
 
-        data = await cached_or_run("soundcloud.artist-tracks", {"url": profile, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("soundcloud.artist-tracks", {"url": profile, "limit": limit, "v": 3}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["tracks"]))
         return ApiResponse(data=data)
 
@@ -147,5 +167,5 @@ async def track(
                 raise HTTPException(status_code=404, detail="SoundCloud track not found")
             return _track(items[0])
 
-        data = await cached_or_run("soundcloud.track", {"url": url}, _run, ctx)
+        data = await cached_or_run("soundcloud.track", {"url": url, "v": 2}, _run, ctx)
         return ApiResponse(data=data)

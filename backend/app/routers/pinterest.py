@@ -191,6 +191,87 @@ def _json_string(page: str, key: str) -> str | None:
         return html.unescape(match.group(1)).strip()
 
 
+async def _fetch_pin_pidgets(pin_id: str) -> dict[str, Any] | None:
+    """Pinterest's public widget API returns full pin metadata (stats, pinner,
+    board, images) without auth; use it before falling back to OG scraping."""
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
+    async with httpx.AsyncClient(timeout=20, headers=headers) as client:
+        try:
+            resp = await client.get(
+                "https://widgets.pinterest.com/v3/pidgets/pins/info/",
+                params={"pin_ids": pin_id},
+            )
+        except httpx.HTTPError:
+            return None
+    if resp.status_code != 200:
+        return None
+    try:
+        rows = (resp.json() or {}).get("data") or []
+    except ValueError:
+        return None
+    if not rows or not isinstance(rows[0], dict):
+        return None
+    pin = rows[0]
+    pinner = pin.get("pinner") or {}
+    board = pin.get("board") or {}
+    stats = ((pin.get("aggregated_pin_data") or {}).get("aggregated_stats")) or {}
+    images = pin.get("images") or {}
+    image = None
+    for key in ("originals", "orig", "736x", "564x", "474x", "237x"):
+        entry = images.get(key)
+        if isinstance(entry, dict) and entry.get("url"):
+            image = entry["url"]
+            break
+    if not image:
+        # story pins keep images inside story_pin_data pages
+        for page in ((pin.get("story_pin_data") or {}).get("pages")) or []:
+            for block in (page.get("blocks") or []) if isinstance(page, dict) else []:
+                block_images = ((block.get("image") or {}).get("images")) if isinstance(block, dict) else None
+                if isinstance(block_images, dict):
+                    for key in ("originals", "736x", "474x"):
+                        entry = block_images.get(key)
+                        if isinstance(entry, dict) and entry.get("url"):
+                            image = entry["url"]
+                            break
+                if image:
+                    break
+            if image:
+                break
+    username = None
+    profile_url = safe_str(pinner.get("profile_url"))
+    if profile_url:
+        username = profile_url.rstrip("/").rsplit("/", 1)[-1]
+    board_url = safe_str(board.get("url"))
+    return {
+        "platform": "pinterest",
+        "id": safe_str(pin.get("id") or pin_id),
+        "url": f"https://www.pinterest.com/pin/{pin_id}/",
+        "title": safe_str((pin.get("rich_metadata") or {}).get("title")) or None,
+        "description": safe_str(pin.get("description")),
+        "destinationUrl": safe_str(pin.get("link")),
+        "image": safe_str(image),
+        "isVideo": bool(pin.get("is_video")),
+        "dominantColor": safe_str(pin.get("dominant_color")),
+        "saves": safe_int(stats.get("saves") or pin.get("repin_count")),
+        "comments": safe_int(pin.get("comment_count")),
+        "publishedAt": safe_str(pin.get("created_at")),
+        "board": {
+            "name": safe_str(board.get("name")),
+            "url": f"https://www.pinterest.com{board_url}" if board_url and board_url.startswith("/") else board_url,
+            "pinCount": safe_int(board.get("pin_count")),
+            "followers": safe_int(board.get("follower_count")),
+        },
+        "author": {
+            "username": safe_str(username),
+            "displayName": safe_str(pinner.get("full_name")),
+            "url": profile_url,
+            "followers": safe_int(pinner.get("follower_count")),
+            "pinCount": safe_int(pinner.get("pin_count")),
+            "avatar": safe_str(pinner.get("image_small_url")),
+        },
+    }
+
+
 async def _fetch_pin_page(url: str) -> dict[str, Any]:
     headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
     async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
@@ -241,6 +322,11 @@ async def pin_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            pin_id = extract_pinterest_pin_id(url)
+            if pin_id:
+                pidgets = await _fetch_pin_pidgets(pin_id)
+                if pidgets:
+                    return pidgets
             apify = get_apify()
             try:
                 items = await apify.run_actor_sync(
@@ -256,7 +342,7 @@ async def pin_details(
 
         data = await cached_or_run(
             endpoint="pinterest.pin-details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )

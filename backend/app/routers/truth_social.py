@@ -85,7 +85,9 @@ def _normalize_account(item: dict[str, Any]) -> dict[str, Any]:
         "followers": safe_int(item.get("followers_count") or item.get("followersCount")),
         "following": safe_int(item.get("following_count") or item.get("followingCount")),
         "postCount": safe_int(item.get("statuses_count") or item.get("statusesCount")),
+        "website": safe_str(item.get("website")),
         "createdAt": safe_str(item.get("created_at") or item.get("createdAt") or item.get("authorCreatedAt")),
+        "lastStatusAt": safe_str(item.get("last_status_at") or item.get("lastStatusAt")),
         "fields": [
             {
                 "name": safe_str(f.get("name")),
@@ -218,7 +220,7 @@ async def profile(
                     raise
             return await _actor_account(username)
 
-        data = await cached_or_run("truth-social.profile", {"username": username}, _run, ctx)
+        data = await cached_or_run("truth-social.profile", {"username": username, "v": 2}, _run, ctx)
         return ApiResponse(data=data)
 
 
@@ -249,7 +251,7 @@ async def user_posts(
             posts = [_normalize_post(i) for i in items[:limit] if isinstance(i, dict)]
             return {"username": username, "totalReturned": len(posts), "posts": posts}
 
-        data = await cached_or_run("truth-social.user-posts", {"username": username, "limit": limit}, _run, ctx)
+        data = await cached_or_run("truth-social.user-posts", {"username": username, "limit": limit, "v": 2}, _run, ctx)
         return ApiResponse(data=data)
 
 

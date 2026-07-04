@@ -52,17 +52,29 @@ def _run_input(mode: str, targets: list[str], limit: int = 30) -> dict[str, Any]
 
 
 def _video(item: dict[str, Any]) -> dict[str, Any]:
+    slug = safe_str(item.get("slug") or item.get("clipSlug"))
+    url = safe_str(item.get("url") or item.get("videoUrl") or item.get("clipUrl") or item.get("sourceUrl"))
+    if not url and slug:
+        url = f"https://clips.twitch.tv/{slug}"
     return {
         "platform": "twitch",
-        "id": safe_str(item.get("id") or item.get("videoId")),
-        "url": safe_str(item.get("url") or item.get("videoUrl") or item.get("sourceUrl")),
-        "title": safe_str(item.get("title")),
+        "id": safe_str(item.get("id") or item.get("videoId") or item.get("clipId")),
+        "slug": slug,
+        "url": url,
+        "embedUrl": safe_str(item.get("embedUrl") or item.get("embedURL"))
+        or (f"https://clips.twitch.tv/embed?clip={slug}" if slug else None),
+        "title": safe_str(item.get("title") or item.get("clipTitle")),
         "createdAt": safe_str(item.get("createdAt") or item.get("publishedAt")),
-        "durationSeconds": safe_int(item.get("durationSeconds") or item.get("lengthSeconds")),
-        "views": safe_int(item.get("viewCount") or item.get("views")),
+        "durationSeconds": safe_int(
+            item.get("durationSeconds") or item.get("lengthSeconds") or item.get("duration")
+        ),
+        "views": safe_int(item.get("viewCount") or item.get("views") or item.get("clipViewCount")),
         "thumbnail": safe_str(item.get("thumbnailUrl") or item.get("thumbnailURL") or item.get("thumbnail")),
-        "game": safe_str(item.get("gameName") or item.get("currentGame")),
+        "videoUrl": safe_str(item.get("videoMp4Url") or item.get("mp4Url") or item.get("sourceURL") or item.get("videoQualitiesUrl")),
+        "game": safe_str(item.get("gameName") or item.get("game") or item.get("currentGame")),
+        "language": safe_str(item.get("language") or item.get("broadcastLanguage")),
         "broadcaster": safe_str(item.get("broadcasterName") or item.get("displayName") or item.get("login")),
+        "broadcasterProfileImage": safe_str(item.get("broadcasterProfileImageUrl") or item.get("profileImageUrl")),
     }
 
 
@@ -81,10 +93,16 @@ def _profile(item: dict[str, Any]) -> dict[str, Any]:
         "isAffiliate": bool(item.get("isAffiliate")),
         "isLive": bool(item.get("isLive")),
         "stream": {
-            "title": safe_str(item.get("streamTitle")),
-            "game": safe_str(item.get("currentGame")),
-            "viewers": safe_int(item.get("currentViewers")),
-            "startedAt": safe_str(item.get("startedAt")),
+            "title": safe_str(item.get("streamTitle") or item.get("broadcastTitle")),
+            "game": safe_str(item.get("currentGame") or item.get("broadcastGameName")),
+            "viewers": safe_int(item.get("currentViewers") or item.get("viewersCount")),
+            "startedAt": safe_str(item.get("startedAt") or item.get("streamStartedAt")),
+            "thumbnail": safe_str(item.get("thumbnailUrl")),
+        },
+        "lastBroadcast": {
+            "title": safe_str(item.get("lastBroadcastTitle")),
+            "game": safe_str(item.get("lastBroadcastGame")),
+            "startedAt": safe_str(item.get("lastBroadcastDate") or item.get("lastBroadcastStartedAt")),
         },
         "recentVideos": [_video(v) for v in item.get("recentVideos", []) if isinstance(v, dict)],
         "topClips": [_video(v) for v in item.get("topClips", []) if isinstance(v, dict)],
@@ -114,7 +132,7 @@ async def profile(
     if not username:
         raise HTTPException(status_code=400, detail="Invalid Twitch channel")
     async with billed_call(caller=caller, endpoint="/v1/twitch/profile", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=9) as ctx:
-        data = await cached_or_run("twitch.profile", {"username": username}, lambda: _channel(username), ctx)
+        data = await cached_or_run("twitch.profile", {"username": username, "v": 2}, lambda: _channel(username), ctx)
         return ApiResponse(data=data)
 
 
@@ -139,7 +157,7 @@ async def user_videos(
             videos = [_video(v) for v in (items[0].get("recentVideos") if items else []) or [] if isinstance(v, dict)]
             return {"platform": "twitch", "username": username, "totalReturned": len(videos), "videos": videos[:limit]}
 
-        data = await cached_or_run("twitch.user-videos", {"username": username, "limit": limit}, _run, ctx)
+        data = await cached_or_run("twitch.user-videos", {"username": username, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["videos"]))
         return ApiResponse(data=data)
 
@@ -187,5 +205,5 @@ async def clip(
                 raise HTTPException(status_code=404, detail="Twitch clip not found")
             return _video(items[0])
 
-        data = await cached_or_run("twitch.clip", {"url": url}, _run, ctx)
+        data = await cached_or_run("twitch.clip", {"url": url, "v": 2}, _run, ctx)
         return ApiResponse(data=data)

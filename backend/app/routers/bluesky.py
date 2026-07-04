@@ -102,6 +102,39 @@ def _web_url(post: dict[str, Any]) -> str | None:
     return None
 
 
+def _post_embed(post: dict[str, Any]) -> dict[str, Any] | None:
+    """Surface external-link and image embeds (SC-parity: link/thumb/title)."""
+    embed = post.get("embed")
+    if not isinstance(embed, dict):
+        return None
+    etype = safe_str(embed.get("$type"))
+    external = embed.get("external")
+    if isinstance(external, dict):
+        return {
+            "type": "external",
+            "url": safe_str(external.get("uri")),
+            "title": safe_str(external.get("title")),
+            "description": safe_str(external.get("description")),
+            "thumb": safe_str(external.get("thumb")),
+        }
+    images = embed.get("images")
+    if isinstance(images, list) and images:
+        return {
+            "type": "images",
+            "images": [
+                {
+                    "url": safe_str(i.get("fullsize") or i.get("thumb")),
+                    "alt": safe_str(i.get("alt")),
+                }
+                for i in images
+                if isinstance(i, dict)
+            ],
+        }
+    if etype:
+        return {"type": etype}
+    return None
+
+
 def _normalize_post(post: dict[str, Any]) -> dict[str, Any]:
     record = post.get("record") or {}
     author = post.get("author") or {}
@@ -112,6 +145,7 @@ def _normalize_post(post: dict[str, Any]) -> dict[str, Any]:
         "cid": safe_str(post.get("cid")),
         "text": safe_str(record.get("text")),
         "publishedAt": safe_str(record.get("createdAt") or post.get("indexedAt")),
+        "indexedAt": safe_str(post.get("indexedAt")),
         "author": _author(author),
         "engagement": {
             "likes": safe_int(post.get("likeCount")),
@@ -119,6 +153,7 @@ def _normalize_post(post: dict[str, Any]) -> dict[str, Any]:
             "replies": safe_int(post.get("replyCount")),
             "quotes": safe_int(post.get("quoteCount")),
         },
+        "embed": _post_embed(post),
     }
 
 
@@ -136,6 +171,8 @@ def _normalize_profile(p: dict[str, Any]) -> dict[str, Any]:
         "posts": safe_int(p.get("postsCount")),
         "avatar": safe_str(p.get("avatar")),
         "banner": safe_str(p.get("banner")),
+        "createdAt": safe_str(p.get("createdAt")),
+        "indexedAt": safe_str(p.get("indexedAt")),
     }
 
 
@@ -158,7 +195,7 @@ async def bluesky_profile(
 
         result = await cached_or_run(
             endpoint="bluesky.profile",
-            params={"actor": actor},
+            params={"actor": actor, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -190,7 +227,7 @@ async def bluesky_user_posts(
 
         result = await cached_or_run(
             endpoint="bluesky.user-posts",
-            params={"actor": actor, "limit": limit, "v": 2},
+            params={"actor": actor, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -226,7 +263,7 @@ async def bluesky_post_details(
 
         result = await cached_or_run(
             endpoint="bluesky.post-details",
-            params={"handle": handle, "rkey": rkey, "v": 2},
+            params={"handle": handle, "rkey": rkey, "v": 3},
             runner=_run,
             ctx=ctx,
         )

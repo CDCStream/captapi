@@ -87,9 +87,12 @@ def _user(u: dict[str, Any]) -> dict[str, Any]:
         "bio": safe_str(u.get("bio")),
         "avatar": safe_str(u.get("avatar_url")),
         "publicRepos": safe_int(u.get("public_repos")),
+        "publicGists": safe_int(u.get("public_gists")),
         "followers": safe_int(u.get("followers")),
         "following": safe_int(u.get("following")),
+        "twitterUsername": safe_str(u.get("twitter_username")),
         "createdAt": safe_str(u.get("created_at")),
+        "updatedAt": safe_str(u.get("updated_at")),
     }
 
 
@@ -110,8 +113,15 @@ def _repo(r: dict[str, Any]) -> dict[str, Any]:
         "watchers": safe_int(r.get("watchers_count")),
         "openIssues": safe_int(r.get("open_issues_count")),
         "defaultBranch": safe_str(r.get("default_branch")),
+        "homepage": safe_str(r.get("homepage")),
+        "license": safe_str((r.get("license") or {}).get("spdx_id")) if isinstance(r.get("license"), dict) else None,
+        "topics": [t for t in (r.get("topics") or []) if isinstance(t, str)],
+        "isFork": bool(r.get("fork")) or None,
+        "isArchived": bool(r.get("archived")) or None,
+        "ownerAvatar": safe_str(owner.get("avatar_url")),
         "pushedAt": safe_str(r.get("pushed_at")),
         "createdAt": safe_str(r.get("created_at")),
+        "updatedAt": safe_str(r.get("updated_at")),
     }
 
 
@@ -154,7 +164,7 @@ async def github_user(
         async def _run() -> dict[str, Any]:
             return _user(await _get(f"/users/{login}"))
 
-        return ApiResponse(data=await cached_or_run("github.user", {"login": login}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("github.user", {"login": login, "v": 2}, _run, ctx))
 
 
 @router.get("/repositories", summary="List a GitHub user's repositories")
@@ -172,7 +182,7 @@ async def repositories(
             repos = [_repo(i) for i in items[:limit]]
             return {"username": login, "totalReturned": len(repos), "repositories": repos}
 
-        data = await cached_or_run("github.repositories", {"login": login, "limit": limit}, _run, ctx)
+        data = await cached_or_run("github.repositories", {"login": login, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["repositories"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
@@ -190,7 +200,7 @@ async def repository(
         async def _run() -> dict[str, Any]:
             return _repo(await _get(f"/repos/{owner}/{name}"))
 
-        return ApiResponse(data=await cached_or_run("github.repository", {"owner": owner, "name": name}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("github.repository", {"owner": owner, "name": name, "v": 2}, _run, ctx))
 
 
 @router.get("/pull-requests", summary="List repository pull requests")
@@ -310,7 +320,7 @@ async def trending_repositories(
             repos = [_repo(i) for i in (data.get("items") or [])[:limit]]
             return {"query": q, "totalReturned": len(repos), "repositories": repos}
 
-        data = await cached_or_run("github.trending-repositories", {"q": q, "limit": limit}, _run, ctx)
+        data = await cached_or_run("github.trending-repositories", {"q": q, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["repositories"]), GITHUB_SEARCH_RATE)
         return ApiResponse(data=data)
 

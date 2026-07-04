@@ -50,6 +50,54 @@ _NAV_HOSTS = (
     "link.me",
 )
 
+# Detected social-account keys, matched against link URLs (first match wins).
+_SOCIAL_HOSTS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("instagram", ("instagram.com",)),
+    ("tiktok", ("tiktok.com",)),
+    ("youtube", ("youtube.com", "youtu.be")),
+    ("twitter", ("twitter.com", "x.com")),
+    ("facebook", ("facebook.com", "fb.com")),
+    ("snapchat", ("snapchat.com",)),
+    ("spotify", ("open.spotify.com", "spotify.com")),
+    ("soundcloud", ("soundcloud.com",)),
+    ("appleMusic", ("music.apple.com",)),
+    ("linkedin", ("linkedin.com",)),
+    ("twitch", ("twitch.tv",)),
+    ("pinterest", ("pinterest.com",)),
+    ("threads", ("threads.net", "threads.com")),
+    ("discord", ("discord.gg", "discord.com")),
+    ("telegram", ("t.me", "telegram.me")),
+    ("whatsapp", ("wa.me", "whatsapp.com")),
+)
+
+_EMAIL_RE = re.compile(r"mailto:([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})", re.IGNORECASE)
+
+
+def _detect_socials(links: list[dict[str, Any]]) -> dict[str, str]:
+    """Map link URLs to well-known social platforms (SC-parity `socials` block)."""
+    socials: dict[str, str] = {}
+    for link in links:
+        url = (link.get("url") or "").lower()
+        if not url:
+            continue
+        for key, hosts in _SOCIAL_HOSTS:
+            if key not in socials and any(h in url for h in hosts):
+                socials[key] = link["url"]
+                break
+    return socials
+
+
+def _detect_email(page: str, links: list[dict[str, Any]]) -> str | None:
+    match = _EMAIL_RE.search(page or "")
+    if match:
+        return match.group(1)
+    for link in links:
+        url = link.get("url") or ""
+        m = _EMAIL_RE.search(url)
+        if m:
+            return m.group(1)
+    return None
+
 
 def _url(platform: str, value: str) -> str:
     value = (value or "").strip().rstrip("/")
@@ -171,10 +219,14 @@ async def _fetch_komi(value: str) -> dict[str, Any] | None:
         "url": f"https://komi.io/{data.get('username') or username}",
         "username": safe_str(data.get("username")),
         "name": safe_str(profile.get("displayName")) or safe_str(data.get("username")),
+        "firstName": safe_str(data.get("firstName") or profile.get("firstName")),
+        "lastName": safe_str(data.get("lastName") or profile.get("lastName")),
         "description": safe_str(profile.get("bio")),
         "avatar": safe_str(data.get("avatar") or profile.get("avatar")),
         "linkCount": len(links),
         "links": links,
+        "socials": _detect_socials(links),
+        "email": safe_str(data.get("email") or profile.get("email")) or _detect_email("", links),
     }
 
 
@@ -205,10 +257,14 @@ async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
         "url": safe_str(str(resp.url)),
         "username": safe_str(username),
         "name": safe_str(title),
+        "firstName": _first_string(data, ("firstName", "first_name")),
+        "lastName": _first_string(data, ("lastName", "last_name")),
         "description": safe_str(description),
         "avatar": safe_str(avatar),
         "linkCount": len(links),
         "links": links,
+        "socials": _detect_socials(links),
+        "email": _detect_email(page, links),
     }
 
 
@@ -221,7 +277,7 @@ async def _page(platform: str, url: str, caller: ApiCaller):
         )
     profile = _url(platform, url)
     async with billed_call(caller=caller, endpoint=f"/v1/{platform}/{'profile' if platform == 'linkme' else 'page'}", platform=platform, resource_url=profile, base_credits=4) as ctx:
-        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 2}, lambda: _fetch_page(platform, profile), ctx)
+        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 3}, lambda: _fetch_page(platform, profile), ctx)
         if not (data.get("username") or data.get("links")):
             raise HTTPException(status_code=404, detail=f"{platform.title()} page not found")
         return ApiResponse(data=data)

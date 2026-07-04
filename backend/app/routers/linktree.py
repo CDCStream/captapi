@@ -58,6 +58,42 @@ def _page_props(data: dict[str, Any]) -> dict[str, Any]:
     return page_props
 
 
+_SOCIAL_HOSTS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("instagram", ("instagram.com",)),
+    ("tiktok", ("tiktok.com",)),
+    ("youtube", ("youtube.com", "youtu.be")),
+    ("twitter", ("twitter.com", "x.com")),
+    ("facebook", ("facebook.com", "fb.com")),
+    ("snapchat", ("snapchat.com",)),
+    ("spotify", ("open.spotify.com", "spotify.com")),
+    ("soundcloud", ("soundcloud.com",)),
+    ("appleMusic", ("music.apple.com",)),
+    ("linkedin", ("linkedin.com",)),
+    ("twitch", ("twitch.tv",)),
+    ("pinterest", ("pinterest.com",)),
+    ("threads", ("threads.net", "threads.com")),
+)
+
+
+def _social_accounts(social_links: list[Any], links: list[dict[str, Any]]) -> dict[str, str]:
+    """Resolve well-known platforms to URLs (SC-parity: instagram/tiktok/... keys)."""
+    accounts: dict[str, str] = {}
+    candidates: list[str] = []
+    for item in social_links:
+        if isinstance(item, dict) and item.get("url"):
+            candidates.append(str(item["url"]))
+        elif isinstance(item, str):
+            candidates.append(item)
+    candidates.extend(link.get("url") or "" for link in links)
+    for url in candidates:
+        low = url.lower()
+        for key, hosts in _SOCIAL_HOSTS:
+            if key not in accounts and any(h in low for h in hosts):
+                accounts[key] = url
+                break
+    return accounts
+
+
 def _normalize(data: dict[str, Any], url: str) -> dict[str, Any]:
     page = _page_props(data)
     account = page.get("account") or page.get("profile") or {}
@@ -76,17 +112,23 @@ def _normalize(data: dict[str, Any], url: str) -> dict[str, Any]:
                 "thumbnail": safe_str(item.get("thumbnail") or item.get("thumbnailUrl")),
             }
         )
+    social_list = socials if isinstance(socials, list) else []
     return {
         "platform": "linktree",
         "url": safe_str(url),
+        "id": account.get("id"),
         "username": safe_str(account.get("username") or account.get("profile") or page.get("username")),
         "name": safe_str(account.get("name") or account.get("displayName")),
         "description": safe_str(account.get("description") or account.get("bio")),
         "avatar": safe_str(account.get("avatarUrl") or account.get("profilePictureUrl")),
         "verified": bool(account.get("isVerified") or account.get("verified")),
+        "verticals": [v for v in (account.get("verticals") or []) if isinstance(v, str)]
+        or ([account["pageMeta"]["vertical"]] if isinstance(account.get("pageMeta"), dict) and account["pageMeta"].get("vertical") else []),
+        "timezone": safe_str(account.get("timezone")),
         "linkCount": len(normalized_links),
         "links": normalized_links,
-        "socials": socials if isinstance(socials, list) else [],
+        "socials": social_list,
+        "socialAccounts": _social_accounts(social_list, normalized_links),
     }
 
 
@@ -110,5 +152,5 @@ async def linktree_page(
                 raise HTTPException(status_code=404, detail="Linktree profile not found")
             return data
 
-        data = await cached_or_run("linktree.page", {"url": profile}, _run, ctx)
+        data = await cached_or_run("linktree.page", {"url": profile, "v": 2}, _run, ctx)
         return ApiResponse(data=data)

@@ -104,14 +104,19 @@ def _normalize_az_video(item: dict[str, Any]) -> dict[str, Any]:
     by = item.get("by") if isinstance(item.get("by"), dict) else {}
     votes = item.get("rumble_votes") if isinstance(item.get("rumble_votes"), dict) else {}
     comments = item.get("comments") if isinstance(item.get("comments"), dict) else {}
+    video_id = safe_str(item.get("permalink_id") or item.get("id"))
+    streams = [v for v in item.get("videos") or [] if isinstance(v, dict) and v.get("url")]
     return {
         "platform": "rumble",
-        "id": safe_str(item.get("permalink_id") or item.get("id")),
+        "id": video_id,
         "url": _clean_url(item.get("url")),
+        "embedUrl": f"https://rumble.com/embed/{video_id}/" if video_id else None,
         "title": safe_str(item.get("title")),
         "description": safe_str(item.get("description")),
         "channel": safe_str(by.get("name") or by.get("title")),
         "channelUrl": _clean_url(by.get("url")),
+        "channelFollowers": safe_int(by.get("followers")),
+        "channelVerified": bool(by.get("verified_badge")) or None,
         "views": safe_int(item.get("views")),
         "likes": safe_int(votes.get("num_votes_up")),
         "dislikes": safe_int(votes.get("num_votes_down")),
@@ -119,20 +124,35 @@ def _normalize_az_video(item: dict[str, Any]) -> dict[str, Any]:
         "publishedAt": safe_str(item.get("upload_date")),
         "thumbnail": safe_str(item.get("thumb")),
         "comments": safe_int(comments.get("count")),
+        "isLive": bool(item.get("is_live") or item.get("livestream_status")) or None,
+        "streams": [
+            {
+                "url": safe_str(v.get("url")),
+                "type": safe_str(v.get("type")),
+                "quality": safe_str(v.get("quality_text") or v.get("resolution")),
+            }
+            for v in streams[:10]
+        ],
     }
 
 
 def _normalize_comment(item: dict[str, Any]) -> dict[str, Any]:
     author = item.get("author") or item.get("user") or {}
+    replies = item.get("replies") if isinstance(item.get("replies"), list) else []
     return {
         "platform": "rumble",
         "id": safe_str(item.get("id") or item.get("commentId")),
         "text": safe_str(item.get("text") or item.get("comment") or item.get("body")),
         "author": {
-            "name": safe_str(author.get("name") or item.get("authorName") or item.get("username")),
+            "name": safe_str(
+                author.get("name") or author.get("title") or author.get("slug")
+                or item.get("authorName") or item.get("username")
+            ),
             "url": safe_str(author.get("url") or item.get("authorUrl")),
+            "verified": bool(author.get("verified_badge")) or None,
         },
-        "likes": safe_int(item.get("likes") or item.get("upvotes")),
+        "likes": safe_int(item.get("likes") or item.get("upvotes") or item.get("comment_score")),
+        "replyCount": len(replies) or safe_int(item.get("replyCount")),
         "createdAt": safe_str(item.get("createdAt") or item.get("date") or item.get("publishedAt")),
         "videoUrl": safe_str(item.get("videoUrl") or item.get("sourceUrl")),
     }
@@ -220,7 +240,7 @@ async def video_details(
 
         data = await cached_or_run(
             endpoint="rumble.video-details",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -262,7 +282,7 @@ async def channel_videos(
 
         data = await cached_or_run(
             endpoint="rumble.channel-videos",
-            params={"channel": channel, "limit": limit, "v": 3},
+            params={"channel": channel, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -287,26 +307,44 @@ async def comments(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_RUMBLE_COMMENTS,
-                {
-                    "queries": [url],
-                    "contentTypes": ["videos"],
-                    "maxItems": 1,
-                    "includeComments": True,
-                },
-                max_items=limit + 1,
-            )
-            comments = [
-                _normalize_comment(i)
-                for i in items
-                if (i.get("type") == "comment" or i.get("comment") or i.get("commentId"))
-            ][:limit]
+            apify = get_apify()
+            # The all-inclusive scraper embeds the comment thread on the video
+            # row itself; prefer it since the keyword actor often returns none.
+            try:
+                rows = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_RUMBLE_DETAILS,
+                    {"startUrls": [_canonical_video_url(url)]},
+                    max_items=1,
+                )
+            except Exception:
+                rows = []
+            comment_items: list[dict[str, Any]] = []
+            for row in rows:
+                if isinstance(row, dict) and isinstance(row.get("comments"), dict):
+                    comment_items = [c for c in row["comments"].get("items") or [] if isinstance(c, dict)]
+                    break
+            if not comment_items:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_RUMBLE_COMMENTS,
+                    {
+                        "queries": [url],
+                        "contentTypes": ["videos"],
+                        "maxItems": 1,
+                        "includeComments": True,
+                    },
+                    max_items=limit + 1,
+                )
+                comment_items = [
+                    i
+                    for i in items
+                    if (i.get("type") == "comment" or i.get("comment") or i.get("commentId"))
+                ]
+            comments = [_normalize_comment(i) for i in comment_items][:limit]
             return {"url": url, "totalReturned": len(comments), "comments": comments}
 
         data = await cached_or_run(
             endpoint="rumble.comments",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
