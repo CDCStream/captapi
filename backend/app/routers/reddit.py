@@ -494,7 +494,10 @@ async def post_transcript(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             try:
-                post, comments = await _fetch_reddit_json_post(url, post_id, limit=max(limit, 1))
+                # Resilient variant: falls back to the actor when Reddit's
+                # public JSON blocks the datacenter IP (as other reddit
+                # endpoints already do).
+                post, comments = await _fetch_reddit_post_resilient(url, post_id, limit=max(limit, 1))
             except HTTPException as exc:
                 if exc.status_code in {502, 503, 504}:
                     raise HTTPException(
@@ -536,7 +539,7 @@ async def post_transcript(
 
         data = await cached_or_run(
             endpoint="reddit.post-transcript",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

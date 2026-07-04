@@ -717,19 +717,30 @@ async def instagram_trending_reels(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Explore scraping regularly needs >120s; the default sync timeout
-            # turns those runs into 502s.
-            items = await ApifyClient(timeout=280).run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM_TRENDING,
-                {"max_results": limit, "download_medias": "none", "country": country},
-                max_items=limit,
-            )
+            # Explore scraping regularly needs >120s (sometimes >10 min); try a
+            # live run first, then fall back to the actor's latest successful
+            # run - trending content stays relevant for hours.
+            client = ApifyClient(timeout=280, max_attempts=1)
+            try:
+                items = await client.run_actor_sync(
+                    settings.APIFY_ACTOR_INSTAGRAM_TRENDING,
+                    {"max_results": limit, "download_medias": "none", "country": country},
+                    max_items=limit,
+                )
+            except ApifyError:
+                items = await client.last_succeeded_items(
+                    settings.APIFY_ACTOR_INSTAGRAM_TRENDING,
+                    max_age_secs=24 * 3600,
+                    max_items=limit,
+                )
+                if not items:
+                    raise
             reels = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
             return {"platform": "instagram", "country": country, "totalReturned": len(reels), "reels": reels}
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit, "v": 2},
+            params={"country": country, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )

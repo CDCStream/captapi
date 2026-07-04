@@ -341,8 +341,19 @@ def batch4_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
                 return next((r for r in rows if isinstance(r, dict)), {})
         return {}
 
-    video = first_of("rumble-search", "results", "videos") or first_of("rumble-channel-videos", "videos")
-    video_url = video.get("url") or video.get("videoUrl")
+    def rumble_video_url() -> str | None:
+        for slug, keys in (("rumble-search", ("results", "videos")), ("rumble-channel-videos", ("videos",))):
+            body = p1.get(slug, {}).get("body") or {}
+            d = body.get("data") or {}
+            for key in keys:
+                for row in d.get(key) or []:
+                    u = row.get("url") if isinstance(row, dict) else None
+                    # Shorts pages lack og-meta/transcripts; stick to regular videos.
+                    if u and "/shorts/" not in u:
+                        return u
+        return None
+
+    video_url = rumble_video_url()
     if video_url:
         tests.append(("rumble-video-details", "/v1/rumble/video-details", {"url": video_url}))
         tests.append(("rumble-transcript", "/v1/rumble/transcript", {"url": video_url}))
@@ -350,7 +361,9 @@ def batch4_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
     else:
         print("!! no rumble video url")
 
-    track = first_of("soundcloud-artist-tracks", "tracks", "results")
+    body = p1.get("soundcloud-artist-tracks", {}).get("body") or {}
+    sc_tracks = (body.get("data") or {}).get("tracks") or []
+    track = next((t for t in sc_tracks if isinstance(t, dict) and t.get("title")), {})
     track_url = track.get("url") or track.get("permalink")
     if track_url:
         tests.append(("soundcloud-track", "/v1/soundcloud/track", {"url": track_url}))

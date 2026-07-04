@@ -112,10 +112,12 @@ async def artist_tracks(
                 {"mode": "userUrl", "startUrls": [profile], "maxResults": limit, "includeUserDetails": True},
                 max_items=limit,
             )
-            tracks = [_track(i) for i in items[:limit]]
+            # includeUserDetails prepends the artist's user row to the dataset;
+            # keep only real tracks (they always carry a title).
+            tracks = [_track(i) for i in items if i.get("title") or i.get("name")][:limit]
             return {"platform": "soundcloud", "artistUrl": profile, "totalReturned": len(tracks), "tracks": tracks}
 
-        data = await cached_or_run("soundcloud.artist-tracks", {"url": profile, "limit": limit}, _run, ctx)
+        data = await cached_or_run("soundcloud.artist-tracks", {"url": profile, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["tracks"]))
         return ApiResponse(data=data)
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import datetime, timezone
 from typing import Any
 
 import httpx
@@ -97,6 +98,43 @@ class ApifyClient:
     ) -> dict[str, Any] | None:
         items = await self.run_actor_sync(actor_id, run_input, max_items=1)
         return items[0] if items else None
+
+    async def last_succeeded_items(
+        self,
+        actor_id: str,
+        max_age_secs: float,
+        max_items: int | None = None,
+    ) -> list[dict[str, Any]]:
+        """Dataset items from the actor's most recent SUCCEEDED run, if it
+        finished within ``max_age_secs``. Lets slow actors (runs > sync
+        timeout) serve slightly stale data instead of failing."""
+        actor_path = actor_id.replace("/", "~")
+        try:
+            async with httpx.AsyncClient(timeout=30) as client:
+                resp = await client.get(
+                    f"{self.BASE}/acts/{actor_path}/runs",
+                    params={"token": self.token, "desc": 1, "limit": 10, "status": "SUCCEEDED"},
+                )
+                resp.raise_for_status()
+                runs = (resp.json().get("data") or {}).get("items") or []
+                for run in runs:
+                    finished = run.get("finishedAt")
+                    dataset_id = run.get("defaultDatasetId")
+                    if not (finished and dataset_id):
+                        continue
+                    finished_dt = datetime.fromisoformat(finished.replace("Z", "+00:00"))
+                    if (datetime.now(timezone.utc) - finished_dt).total_seconds() > max_age_secs:
+                        return []
+                    items_resp = await client.get(
+                        f"{self.BASE}/datasets/{dataset_id}/items",
+                        params={"token": self.token, "clean": "1", **({"limit": max_items} if max_items else {})},
+                    )
+                    items_resp.raise_for_status()
+                    items = items_resp.json()
+                    return items if isinstance(items, list) else []
+        except httpx.HTTPError:
+            return []
+        return []
 
     async def run_with_fallback(
         self,

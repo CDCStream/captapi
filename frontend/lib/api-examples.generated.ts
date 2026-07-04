@@ -7,33 +7,130 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "account-balance": {
     "plan": "free",
     "monthly_quota": 100,
-    "subscription_credits": 100,
-    "topup_credits": 0,
-    "total_credits": 100,
+    "subscription_credits": 0,
+    "topup_credits": 1996,
+    "total_credits": 1996,
     "subscription_renews_at": null
   },
   "account-daily-usage": {
     "days": 7,
-    "totalRequests": 10,
-    "totalCreditsUsed": 59,
+    "totalRequests": 36,
+    "totalCreditsUsed": 164,
     "usage": [
       {
         "date": "2026-07-04",
-        "requests": 10,
-        "credits_used": 59,
-        "successful_requests": 9,
-        "failed_requests": 1
+        "requests": 36,
+        "credits_used": 164,
+        "successful_requests": 18,
+        "failed_requests": 18
       }
     ]
   },
   "account-most-used-routes": {
     "days": 30,
-    "totalReturned": 0,
-    "routes": []
+    "totalReturned": 5,
+    "routes": [
+      {
+        "endpoint": "/v1/kick/clip",
+        "platform": "kick",
+        "requests": 1,
+        "credits_used": 34,
+        "successful_requests": 1,
+        "failed_requests": 0
+      },
+      {
+        "endpoint": "/v1/amazon-shop/page",
+        "platform": "amazon_shop",
+        "requests": 1,
+        "credits_used": 23,
+        "successful_requests": 1,
+        "failed_requests": 0
+      },
+      {
+        "endpoint": "/v1/kwai/profile",
+        "platform": "kwai",
+        "requests": 1,
+        "credits_used": 17,
+        "successful_requests": 0,
+        "failed_requests": 1
+      },
+      {
+        "endpoint": "/v1/kwai/post",
+        "platform": "kwai",
+        "requests": 1,
+        "credits_used": 17,
+        "successful_requests": 0,
+        "failed_requests": 1
+      },
+      {
+        "endpoint": "/v1/instagram/trending-reels",
+        "platform": "instagram",
+        "requests": 1,
+        "credits_used": 14,
+        "successful_requests": 0,
+        "failed_requests": 1
+      }
+    ]
   },
   "account-request-history": {
-    "totalReturned": 0,
-    "requests": []
+    "totalReturned": 5,
+    "requests": [
+      {
+        "endpoint": "/v1/youtube/video-sponsors",
+        "platform": "youtube",
+        "resource_url": "https://www.youtube.com/watch?v=Wdjh81uH6FU",
+        "credits_used": 0,
+        "cache_hit": true,
+        "status_code": 200,
+        "response_time_ms": 1227,
+        "error_message": null,
+        "created_at": "2026-07-04T07:58:32.871193+00:00"
+      },
+      {
+        "endpoint": "/v1/youtube/playlist",
+        "platform": "youtube",
+        "resource_url": "https://www.youtube.com/playlist?list=PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj",
+        "credits_used": 0,
+        "cache_hit": true,
+        "status_code": 200,
+        "response_time_ms": 1227,
+        "error_message": null,
+        "created_at": "2026-07-04T07:58:32.162156+00:00"
+      },
+      {
+        "endpoint": "/v1/truth-social/profile",
+        "platform": "truth_social",
+        "resource_url": "https://truthsocial.com/@realDonaldTrump",
+        "credits_used": 0,
+        "cache_hit": true,
+        "status_code": 200,
+        "response_time_ms": 1513,
+        "error_message": null,
+        "created_at": "2026-07-04T07:58:32.003227+00:00"
+      },
+      {
+        "endpoint": "/v1/instagram/basic-profile",
+        "platform": "instagram",
+        "resource_url": "https://instagram.com/cristiano",
+        "credits_used": 0,
+        "cache_hit": true,
+        "status_code": 200,
+        "response_time_ms": 1063,
+        "error_message": null,
+        "created_at": "2026-07-04T07:58:31.462248+00:00"
+      },
+      {
+        "endpoint": "/v1/instagram/trending-reels",
+        "platform": "instagram",
+        "resource_url": null,
+        "credits_used": 14,
+        "cache_hit": false,
+        "status_code": 500,
+        "response_time_ms": 121490,
+        "error_message": "Actor timeout after 120s",
+        "created_at": "2026-07-04T07:35:32.037829+00:00"
+      }
+    ]
   },
   "age-gender-get": {
     "platform": "age_gender",
@@ -91,20 +188,110 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "amazon-shop-page": {
     "platform": "amazon_shop",
-    "url": "https://www.amazon.com/shop/mkbhd",
+    "url": "https://www.amazon.com/sp?seller=A294P4X9EWVXLJ",
     "marketplace": "US",
     "seller": {
-      "id": "",
-      "name": "MKBHD&#39;s Amazon Page",
-      "url": "https://www.amazon.com/shop/mkbhd",
-      "rating": 0.0,
-      "reviewCount": 0
+      "id": "A294P4X9EWVXLJ",
+      "name": null,
+      "url": null,
+      "rating": null,
+      "reviewCount": null
     },
-    "totalReturned": 0,
-    "products": [],
+    "totalReturned": 5,
+    "products": [
+      {
+        "asin": "B0H6PHHQRZ",
+        "title": "Anker 30W&45W 20,000mAh Power Bank with Built-in USB-C Cable (Bundle)",
+        "url": "https://www.amazon.com/Anker-000mAh-Power-Built-Bundle/dp/B0H6PHHQRZ/ref=sr_1_1?dib=eyJ2IjoiMSJ9.Q1sUfBucz_N39UXCjMts-Wuv7Iz0mSNcjfxbcndj7to-XxKuyOSYMTf10DeP59KApmnYqIJXobq6HGqwHixZOLoNpd-eoG0MT53DXQSj-oCI0DEpTAfeclqhiH1ij58PpCX42cGw-OIx4wmRBolg2WjlAYKoZ_O6nVd-p3-j09a_rs9aM0_NsP3AESEeNxIwT8yWhxPKOVctsshnFSojVD2bwMfRffK50yMmWJuCpps.52dhaNSJhO8Tte2yTu8j-Wj2cZ4zW8oq0SZqRlQnqBk&dib_tag=se&m=A294P4X9EWVXLJ&marketplaceID=ATVPDKIKX0DER&nsdOptOutParam=true&qid=1783151919&s=merchant-items&sr=1-1",
+        "image": "https://m.media-amazon.com/images/I/51lNJoN9+3L._AC_UY218_.jpg",
+        "price": 64.06,
+        "priceFormatted": null,
+        "rating": null,
+        "reviews": null,
+        "availability": null
+      },
+      {
+        "asin": "B0H6MR7P8Q",
+        "title": "Anker 30W&45W 20,000mAh Power Bank with Built-in USB-C Cable (Bundle)",
+        "url": "https://www.amazon.com/Anker-000mAh-Power-Built-Bundle/dp/B0H6MR7P8Q/ref=sr_1_2?dib=eyJ2IjoiMSJ9.Q1sUfBucz_N39UXCjMts-Wuv7Iz0mSNcjfxbcndj7to-XxKuyOSYMTf10DeP59KApmnYqIJXobq6HGqwHixZOLoNpd-eoG0MT53DXQSj-oCI0DEpTAfeclqhiH1ij58PpCX42cGw-OIx4wmRBolg2WjlAYKoZ_O6nVd-p3-j09a_rs9aM0_NsP3AESEeNxIwT8yWhxPKOVctsshnFSojVD2bwMfRffK50yMmWJuCpps.52dhaNSJhO8Tte2yTu8j-Wj2cZ4zW8oq0SZqRlQnqBk&dib_tag=se&m=A294P4X9EWVXLJ&marketplaceID=ATVPDKIKX0DER&nsdOptOutParam=true&qid=1783151919&s=merchant-items&sr=1-2",
+        "image": "https://m.media-amazon.com/images/I/51pawyDEZJL._AC_UY218_.jpg",
+        "price": 64.06,
+        "priceFormatted": null,
+        "rating": null,
+        "reviews": null,
+        "availability": null
+      },
+      {
+        "asin": "B0H6MD7VSS",
+        "title": "Anker Nano USB C Cable Car Carplay Cable",
+        "url": "https://www.amazon.com/Anker-Nano-USB-Cable-Carplay/dp/B0H6MD7VSS/ref=sr_1_3?dib=eyJ2IjoiMSJ9.Q1sUfBucz_N39UXCjMts-Wuv7Iz0mSNcjfxbcndj7to-XxKuyOSYMTf10DeP59KApmnYqIJXobq6HGqwHixZOLoNpd-eoG0MT53DXQSj-oCI0DEpTAfeclqhiH1ij58PpCX42cGw-OIx4wmRBolg2WjlAYKoZ_O6nVd-p3-j09a_rs9aM0_NsP3AESEeNxIwT8yWhxPKOVctsshnFSojVD2bwMfRffK50yMmWJuCpps.52dhaNSJhO8Tte2yTu8j-Wj2cZ4zW8oq0SZqRlQnqBk&dib_tag=se&m=A294P4X9EWVXLJ&marketplaceID=ATVPDKIKX0DER&nsdOptOutParam=true&qid=1783151919&s=merchant-items&sr=1-3",
+        "image": "https://m.media-amazon.com/images/I/319yaesE+AL._AC_UY218_.jpg",
+        "price": 40.57,
+        "priceFormatted": null,
+        "rating": null,
+        "reviews": null,
+        "availability": null
+      },
+      {
+        "asin": "B0H6MGH17T",
+        "title": "Anker USB C to USB C Cable Car Carplay Cable",
+        "url": "https://www.amazon.com/Anker-USB-Cable-Car-Carplay/dp/B0H6MGH17T/ref=sr_1_4?dib=eyJ2IjoiMSJ9.Q1sUfBucz_N39UXCjMts-Wuv7Iz0mSNcjfxbcndj7to-XxKuyOSYMTf10DeP59KApmnYqIJXobq6HGqwHixZOLoNpd-eoG0MT53DXQSj-oCI0DEpTAfeclqhiH1ij58PpCX42cGw-OIx4wmRBolg2WjlAYKoZ_O6nVd-p3-j09a_rs9aM0_NsP3AESEeNxIwT8yWhxPKOVctsshnFSojVD2bwMfRffK50yMmWJuCpps.52dhaNSJhO8Tte2yTu8j-Wj2cZ4zW8oq0SZqRlQnqBk&dib_tag=se&m=A294P4X9EWVXLJ&marketplaceID=ATVPDKIKX0DER&nsdOptOutParam=true&qid=1783151919&s=merchant-items&sr=1-4",
+        "image": "https://m.media-amazon.com/images/I/61dNUz9gOOL._AC_UY218_.jpg",
+        "price": 26.71,
+        "priceFormatted": null,
+        "rating": null,
+        "reviews": null,
+        "availability": null
+      },
+      {
+        "asin": "B0H6MJN97J",
+        "title": "Anker Nano USB C Cable Car Carplay Cable",
+        "url": "https://www.amazon.com/Anker-Nano-USB-Cable-Carplay/dp/B0H6MJN97J/ref=sr_1_5?dib=eyJ2IjoiMSJ9.Q1sUfBucz_N39UXCjMts-Wuv7Iz0mSNcjfxbcndj7to-XxKuyOSYMTf10DeP59KApmnYqIJXobq6HGqwHixZOLoNpd-eoG0MT53DXQSj-oCI0DEpTAfeclqhiH1ij58PpCX42cGw-OIx4wmRBolg2WjlAYKoZ_O6nVd-p3-j09a_rs9aM0_NsP3AESEeNxIwT8yWhxPKOVctsshnFSojVD2bwMfRffK50yMmWJuCpps.52dhaNSJhO8Tte2yTu8j-Wj2cZ4zW8oq0SZqRlQnqBk&dib_tag=se&m=A294P4X9EWVXLJ&marketplaceID=ATVPDKIKX0DER&nsdOptOutParam=true&qid=1783151919&s=merchant-items&sr=1-5",
+        "image": "https://m.media-amazon.com/images/I/51ppQBmTEZL._AC_UY218_.jpg",
+        "price": 34.63,
+        "priceFormatted": null,
+        "rating": null,
+        "reviews": null,
+        "availability": null
+      }
+    ],
     "rawFirstItem": {
-      "title": "MKBHD&#39;s Amazon Page",
-      "image": "https://m.media-amazon.com/images/S/influencer-profile-image-prod/influencer-0bfe542e_991ec6e0-ac3a-46f8-b396-656c1edd22de._US500_SCLZZZZZZZ_.png"
+      "asin": "B0H6PHHQRZ",
+      "title": "Anker 30W&45W 20,000mAh Power Bank with Built-in USB-C Cable (Bundle)",
+      "price": 64.06,
+      "currency": "USD",
+      "rating": null,
+      "ratingText": null,
+      "reviewCount": null,
+      "imageUrl": "https://m.media-amazon.com/images/I/51lNJoN9+3L._AC_UY218_.jpg",
+      "productUrl": "https://www.amazon.com/Anker-000mAh-Power-Built-Bundle/dp/B0H6PHHQRZ/ref=sr_1_1?dib=eyJ2IjoiMSJ9.Q1sUfBucz_N39UXCjMts-Wuv7Iz0mSNcjfxbcndj7to-XxKuyOSYMTf10DeP59KApmnYqIJXobq6HGqwHixZOLoNpd-eoG0MT53DXQSj-oCI0DEpTAfeclqhiH1ij58PpCX42cGw-OIx4wmRBolg2WjlAYKoZ_O6nVd-p3-j09a_rs9aM0_NsP3AESEeNxIwT8yWhxPKOVctsshnFSojVD2bwMfRffK50yMmWJuCpps.52dhaNSJhO8Tte2yTu8j-Wj2cZ4zW8oq0SZqRlQnqBk&dib_tag=se&m=A294P4X9EWVXLJ&marketplaceID=ATVPDKIKX0DER&nsdOptOutParam=true&qid=1783151919&s=merchant-items&sr=1-1",
+      "isPrime": false,
+      "isBestSeller": false,
+      "bestSellerCategory": null,
+      "isSponsored": false,
+      "sellerId": "A294P4X9EWVXLJ",
+      "marketplace": "US",
+      "scrapedAt": "2026-07-04T07:58:40.451Z"
+    }
+  },
+  "bluesky-post-details": {
+    "platform": "bluesky",
+    "uri": "at://did:plc:oky5czdrnfjpqslsw2a5iclo/app.bsky.feed.post/3mp75kuens22h",
+    "url": "https://bsky.app/profile/jay.bsky.team/post/3mp75kuens22h",
+    "cid": "bafyreiheoivsjwscc5duma6373lcrwycerg4mzcjpvgopozhipayaib5qy",
+    "text": "It really is. I hear Baltic reserve is a real thing, but the people I met were wonderfully warm and welcoming",
+    "publishedAt": "2026-06-26T14:25:33.024Z",
+    "author": {
+      "handle": "jay.bsky.team",
+      "displayName": "Jay 🦋",
+      "did": "did:plc:oky5czdrnfjpqslsw2a5iclo",
+      "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:oky5czdrnfjpqslsw2a5iclo/bafkreihxtnc37g7jqdcgidtkknwuswtjiijcdnc6cx4imc4oq33cnsc5da"
+    },
+    "engagement": {
+      "likes": 13,
+      "reposts": 0,
+      "replies": 1,
+      "quotes": 0
     }
   },
   "bluesky-profile": {
@@ -127,6 +314,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "bluesky",
         "uri": "at://did:plc:oky5czdrnfjpqslsw2a5iclo/app.bsky.feed.post/3mp75kuens22h",
+        "url": "https://bsky.app/profile/jay.bsky.team/post/3mp75kuens22h",
         "cid": "bafyreiheoivsjwscc5duma6373lcrwycerg4mzcjpvgopozhipayaib5qy",
         "text": "It really is. I hear Baltic reserve is a real thing, but the people I met were wonderfully warm and welcoming",
         "publishedAt": "2026-06-26T14:25:33.024Z",
@@ -146,6 +334,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "bluesky",
         "uri": "at://did:plc:oky5czdrnfjpqslsw2a5iclo/app.bsky.feed.post/3mp75ej5tx22h",
+        "url": "https://bsky.app/profile/jay.bsky.team/post/3mp75ej5tx22h",
         "cid": "bafyreifqe2drqtxh7vwngrhlslefghe3sfner5n7wmenf5e32s7sh4qiey",
         "text": "It was a truly special experience.\n\n“Jaunas takas ejot, veco saknes neaizmirst”\n\nWalking new paths, don’t forget the old roots.",
         "publishedAt": "2026-06-26T14:21:59.940Z",
@@ -165,6 +354,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "bluesky",
         "uri": "at://did:plc:oky5czdrnfjpqslsw2a5iclo/app.bsky.feed.post/3mp757evhts2h",
+        "url": "https://bsky.app/profile/jay.bsky.team/post/3mp757evhts2h",
         "cid": "bafyreicygvwwtlnyuqualwmgjo7x2qdykvrio56rhgssejhdbfe2duyove",
         "text": "Yes! Saule = sol = sun. Latvian and Lithuanian retain a lot of ancient roots in both the language and the mythology",
         "publishedAt": "2026-06-26T14:19:07.700Z",
@@ -184,6 +374,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "bluesky",
         "uri": "at://did:plc:oky5czdrnfjpqslsw2a5iclo/app.bsky.feed.post/3mp74z72lxc2h",
+        "url": "https://bsky.app/profile/jay.bsky.team/post/3mp74z72lxc2h",
         "cid": "bafyreiggj5tozi2auwdj7niz2jlsvgh4uykwe7m2fbohbix2jikzt3acam",
         "text": "Yes! It was amazing!",
         "publishedAt": "2026-06-26T14:15:40.245Z",
@@ -203,6 +394,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "bluesky",
         "uri": "at://did:plc:oky5czdrnfjpqslsw2a5iclo/app.bsky.feed.post/3mp5hivvpi227",
+        "url": "https://bsky.app/profile/jay.bsky.team/post/3mp5hivvpi227",
         "cid": "bafyreiaqayrcjwn5wvmrsv3slv5usxwatkhj42hj5m4d5f4sfts25h2asu",
         "text": "Celebrated Jāņi (midsummer) in Latvia this year! Bonfires and dancing till dawn, flower and oak wreaths, songs about Saule, the sun goddess, that are older than the churches. The Baltics hold a surviving piece of old Europe in living tradition.",
         "publishedAt": "2026-06-25T22:18:05.455Z",
@@ -5224,11 +5416,384 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "platform": "komi",
     "url": "https://komi.io/ksi",
     "username": "ksi",
-    "name": null,
+    "name": "KSI",
     "description": null,
-    "avatar": null,
-    "linkCount": 0,
-    "links": []
+    "avatar": "https://komi-production-assets.s3.amazonaws.com/photos/OsqFjkXZxCB6vsUAyuLtm.jpeg",
+    "linkCount": 7,
+    "links": [
+      {
+        "id": null,
+        "title": "INSTAGRAM",
+        "url": "https://www.instagram.com/ksi",
+        "type": "INSTAGRAM",
+        "thumbnail": null
+      },
+      {
+        "id": null,
+        "title": "FACEBOOK",
+        "url": "https://www.facebook.com/KSIOlajidebt",
+        "type": "FACEBOOK",
+        "thumbnail": null
+      },
+      {
+        "id": null,
+        "title": "TWITTER",
+        "url": "https://twitter.com/KSI",
+        "type": "TWITTER",
+        "thumbnail": null
+      },
+      {
+        "id": null,
+        "title": "YOUTUBE",
+        "url": "https://www.youtube.com/c/ksi",
+        "type": "YOUTUBE",
+        "thumbnail": null
+      },
+      {
+        "id": null,
+        "title": "SPOTIFY",
+        "url": "https://open.spotify.com/artist/1nzgtKYFckznkcVMR3Gg4z?si=0pADGmEwS1iluryfgiIy8Q",
+        "type": "SPOTIFY",
+        "thumbnail": null
+      }
+    ]
+  },
+  "kwai-post": {
+    "platform": "kwai",
+    "id": "5241627202658372579",
+    "url": "https://www.kuaishou.com/short-video/5241627202658372579",
+    "text": "This game try with your students 🤣🤣🤣#非洲搞笑视频 #game #fyp",
+    "publishedAt": "2026-01-24 21:27:45",
+    "durationSeconds": 183,
+    "thumbnailUrl": "https://p66-plat.wsukwai.com/upic/2026/01/24/21/BMjAyNjAxMjQyMTI3MDFfMjU0MjkxNjU1OV8xODU4NzA5ODQ2MzFfMl8z_low_B879758970dc882bc60a83708ada7f2bc.webp?tag=1-1783151921-bsp-0-veyjvrxpkt-f6f11af396f2eae1&clientCacheKey=3xa2gbvyix5jiwi_low.webp&di=76b761c6&bp=10001",
+    "videoUrl": "https://ucmov.a.kwimgs.com/upic/2026/01/24/21/BMjAyNjAxMjQyMTI3MDFfMjU0MjkxNjU1OV8xODU4NzA5ODQ2MzFfMl8z_b_B826f89ab24eecb496bd19618644388ca.mp4?tag=1-1783151921-bsp-0-sctbd1a7wu-d8b0e4ba3c7dfd8a&clientCacheKey=3xa2gbvyix5jiwi_b.mp4&tt=b&di=76b761c6&bp=10001",
+    "author": {
+      "id": "2542916559",
+      "username": "Mr_pasang",
+      "displayName": "Pasang大卫🇳🇵",
+      "avatar": "https://p4.a.yximgs.com/uhead/AB/2022/02/20/09/BMjAyMjAyMjAwOTQyNTBfMjU0MjkxNjU1OV8yX2hkMTY5XzI0Nw==_s.jpg",
+      "url": "https://www.kuaishou.com/profile/2542916559"
+    },
+    "engagement": {
+      "views": 5171,
+      "likes": 70,
+      "comments": 9,
+      "shares": 48
+    },
+    "raw": {
+      "longVideo": true,
+      "editInfo": {},
+      "supportType": 0,
+      "fastCommentType": 1,
+      "inputPromptGuide": "帮我找搞笑的视频",
+      "enableFullScreenPlay": false,
+      "sourcePhotoPage": "bsp",
+      "collect_count": 13,
+      "hasVote": false,
+      "commentInfo": {
+        "permissions": 191,
+        "commentCountSpecialEffect": true,
+        "commentIconType": 0,
+        "enableAIPresetGuide": false
+      },
+      "videoColdStartType": 0,
+      "savePlayProgressStrategy": 0,
+      "feedSwitches": {
+        "disableCommentLikeAnimation": false,
+        "disable61ActivityAnimation": true,
+        "enablePlayerPanel": false,
+        "enablePictureCommentForPhoto": true
+      },
+      "type": 1,
+      "duration": 182700,
+      "plcFeatureEntryAbFlag": 0,
+      "noNeedToRequestPLCApi": true,
+      "plcResponseTime": 0,
+      "plcHighPriorityThanBottomEntry": false,
+      "liked": 0,
+      "streamManifest": {
+        "version": "1.0.0",
+        "businessType": 1,
+        "mediaType": 1,
+        "videoId": "afb85df71cf9d8ad",
+        "hideAuto": false,
+        "manualDefaultSelect": false,
+        "adaptationSet": [
+          {
+            "id": 1,
+            "duration": 182700,
+            "representation": [
+              {
+                "id": 1,
+                "url": "https://v23-vod-3.kwaicdn.com/bs3/video-hls/5241627202658372579_afb85df71cf9d8ad_9163_hlsfsl200hd15.m3u8?x-kcdn-pid=12021&kwai-not-alloc=40&pkey=AAVPje3yNc3guclvzTNP033FBMKfbXmo6pE_xBEaK2kyFoQbV0BUy2N7U19jAi2GdBndmaAc4q6nT0BvGb9sxjLNghhVwZsjLivv0B52fe32JkypKtbx29JG41k7gGj2Ujg&tt=hlsfsl200hd15&m3u8ClientCacheKey=823851cca57bd15d3c01ef3b9aa68a04&ss=vp",
+                "backupUrl": [
+                  "http://v4-vod.kwaicdn.com/bs3/video-hls/5241627202658372579_afb85df71cf9d8ad_9163_hlsfsl200hd15.m3u8?x-kcdn-pid=12021&kwai-not-alloc=40&pkey=AAWF4-1QnFsqi5VnE0oxLJWO3rx8OOPTwD_PN8GTXPGedPqLcyYIzEYQKBEmFZw9rynH_ug7MkAA-QN_7Bip51Hj8FzlBBXGtcTAHnEyNFKXn7FsvRPmaaxUg1kWarWA7aU&tt=hlsfsl200hd15&m3u8ClientCacheKey=823851cca57bd15d3c01ef3b9aa68a04&ss=vp"
+                ],
+                "maxBitrate": 1058,
+                "avgBitrate": 970,
+                "width": 720,
+                "height": 1280,
+                "frameRate": 30,
+                "quality": 1,
+                "qualityType": "720p",
+                "qualityLabel": "高清",
+                "featureP2sp": false,
+                "p2spCode": "{\"fRsn\":0,\"fixOpt\":-1,\"schTask\":\"\",\"schCode\":-1,\"schRes\":\"\",\"pushTask\":\"v=0&p=0&s=0&d=0\",\"pushCode\":-1}",
+                "hidden": false,
+                "disableAdaptive": false,
+                "defaultSelect": false,
+                "comment": "videoId=afb85df71cf9d8ad/tt=hlsfsl200hd15",
+                "hdrType": 0,
+                "agc": false,
+                "mute": false,
+                "oriLoudness": 0,
+                "makeupGain": 0,
+                "realLoudness": 0,
+                "realNormalizeGain": 0,
+                "normalizeGain": 0
+              }
+            ]
+          }
+        ]
+      },
+      "main_mv_urls": [
+        {
+          "cdn": "ucmov.a.kwimgs.com",
+          "url": "https://ucmov.a.kwimgs.com/upic/2026/01/24/21/BMjAyNjAxMjQyMTI3MDFfMjU0MjkxNjU1OV8xODU4NzA5ODQ2MzFfMl8z_b_B826f89ab24eecb496bd19618644388ca.mp4?tag=1-1783151921-bsp-0-sctbd1a7wu-d8b0e4ba3c7dfd8a&clientCacheKey=3xa2gbvyix5jiwi_b.mp4&tt=b&di=76b761c6&bp=10001"
+        },
+        {
+          "cdn": "hwmov.a.kwimgs.com",
+          "url": "https://hwmov.a.kwimgs.com/upic/2026/01/24/21/BMjAyNjAxMjQyMTI3MDFfMjU0MjkxNjU1OV8xODU4NzA5ODQ2MzFfMl8z_b_B826f89ab24eecb496bd19618644388ca.mp4?tag=1-1783151921-bsp-1-plrtu669aq-5cd9cd08e7d6d4ec&clientCacheKey=3xa2gbvyix5jiwi_b.mp4&tt=b&di=76b761c6&bp=10001"
+        }
+      ],
+      "cover_thumbnail_urls": [
+        {
+          "cdn": "p66-plat.wsukwai.com",
+          "url": "https://p66-plat.wsukwai.com/upic/2026/01/24/21/BMjAyNjAxMjQyMTI3MDFfMjU0MjkxNjU1OV8xODU4NzA5ODQ2MzFfMl8z_low_B879758970dc882bc60a83708ada7f2bc.webp?tag=1-1783151921-bsp-0-veyjvrxpkt-f6f11af396f2eae1&clientCacheKey=3xa2gbvyix5jiwi_low.webp&di=76b761c6&bp=10001"
+        },
+        {
+          "cdn": "ali2.a.kwimgs.com",
+          "url": "https://ali2.a.kwimgs.com/upic/2026/01/24/21/BMjAyNjAxMjQyMTI3MDFfMjU0MjkxNjU1OV8xODU4NzA5ODQ2MzFfMl8z_low_B879758970dc882bc60a83708ada7f2bc.webp?tag=1-1783151921-bsp-1-rqlxhgym47-be1308edc3b51c19&clientCacheKey=3xa2gbvyix5jiwi_low.webp&di=76b761c6&bp=10001"
+        }
+      ],
+      "ff_cover_thumbnail_urls": [
+        {
+          "cdn": "p66-plat.wsukwai.com",
+          "url": "https://p66-plat.wsukwai.com/upic/2026/01/24/21/BMjAyNjAxMjQyMTI3MDFfMjU0MjkxNjU1OV8xODU4NzA5ODQ2MzFfMl8z_ff_Bb46d91b39349fd238a2ad4a37f20e568.kpg?tag=1-1783151921-bsp-0-u1ip3pjhnh-ea968646d8c795e8&clientCacheKey=3xa2gbvyix5jiwi_ff.kpg&di=76b761c6&bp=10001"
+        },
+        {
+          "cdn": "ali2.a.kwimgs.com",
+          "url": "https://ali2.a.kwimgs.com/upic/2026/01/24/21/BMjAyNjAxMjQyMTI3MDFfMjU0MjkxNjU1OV8xODU4NzA5ODQ2MzFfMl8z_ff_Bb46d91b39349fd238a2ad4a37f20e568.kpg?tag=1-1783151921-bsp-1-yo5vwjmikc-918146efad721767&clientCacheKey=3xa2gbvyix5jiwi_ff.kpg&di=76b761c6&bp=10001"
+        }
+      ],
+      "us_c": 0,
+      "comment_count": 9,
+      "slideCommentEntryDisabled": false,
+      "frameStyle": 0,
+      "verified": false,
+      "kwaiId": "Mr_pasang",
+      "following": false,
+      "user_name": "Pasang大卫🇳🇵",
+      "headurls": [
+        {
+          "cdn": "p4.a.yximgs.com",
+          "url": "https://p4.a.yximgs.com/uhead/AB/2022/02/20/09/BMjAyMjAyMjAwOTQyNTBfMjU0MjkxNjU1OV8yX2hkMTY5XzI0Nw==_s.jpg"
+        },
+        {
+          "cdn": "p2.a.yximgs.com",
+          "url": "https://p2.a.yximgs.com/uhead/AB/2022/02/20/09/BMjAyMjAyMjAwOTQyNTBfMjU0MjkxNjU1OV8yX2hkMTY5XzI0Nw==_s.jpg"
+        }
+      ],
+      "user_sex": "M",
+      "location": {},
+      "timestamp": 1769261265488,
+      "time": "2026-01-24 21:27:45",
+      "like_count": 70,
+      "caption": "This game try with your students 🤣🤣🤣#非洲搞笑视频 #game #fyp",
+      "forward_count": 0,
+      "view_count": 5171,
+      "share_count": 48,
+      "photo_id": "5241627202658372579",
+      "photo_status": 0,
+      "shareGuide": {
+        "photoShareGuide": false,
+        "playTimes": 2,
+        "textDisplayDurationInSeconds": 4,
+        "minPlayDurationInSeconds": 15
+      },
+      "us_d": 0,
+      "share_info": "userId=3x6xayd8ayup97g&photoId=3xa2gbvyix5jiwi",
+      "forward_stats_params": {
+        "et": "1_a/2006017633665337842_bsp0"
+      },
+      "recoTags": [],
+      "soundTrack": {
+        "name": "Pasang大卫🇳🇵的作品原声",
+        "duration": 182,
+        "user": {
+          "following": false,
+          "kwaiId": "Mr_pasang",
+          "user_id": 2542916559,
+          "user_name": "Pasang大卫🇳🇵",
+          "eid": "3x6xayd8ayup97g",
+          "profilePagePrefetchInfo": {
+            "profilePageType": 1
+          },
+          "headurl": "https://p4.a.yximgs.com/uhead/AB/2022/02/20/09/BMjAyMjAyMjAwOTQyNTBfMjU0MjkxNjU1OV8yX2hkMTY5XzI0Nw==_s.jpg",
+          "user_sex": "M",
+          "headurls": [
+            {
+              "cdn": "p4.a.yximgs.com",
+              "url": "https://p4.a.yximgs.com/uhead/AB/2022/02/20/09/BMjAyMjAyMjAwOTQyNTBfMjU0MjkxNjU1OV8yX2hkMTY5XzI0Nw==_s.jpg"
+            },
+            {
+              "cdn": "p2.a.yximgs.com",
+              "url": "https://p2.a.yximgs.com/uhead/AB/2022/02/20/09/BMjAyMjAyMjAwOTQyNTBfMjU0MjkxNjU1OV8yX2hkMTY5XzI0Nw==_s.jpg"
+            }
+          ],
+          "visitorBeFollowed": false
+        },
+        "artist": "Pasang大卫🇳🇵",
+        "photoId": "5241627202658372579",
+        "imageUrls": [
+          {
+            "cdn": "hw.a.yximgs.com",
+            "url": "https://hw.a.yximgs.com/bs2/ost/MTg1ODcwOTg0NjMxXzI1NDI5MTY1NTk.jpg"
+          },
+          {
+            "cdn": "ali2.a.yximgs.com",
+            "url": "https://ali2.a.yximgs.com/bs2/ost/MTg1ODcwOTg0NjMxXzI1NDI5MTY1NTk.jpg"
+          }
+        ],
+        "avatarUrls": [
+          {
+            "cdn": "hw.a.yximgs.com",
+            "url": "https://hw.a.yximgs.com/bs2/ost/MTg1ODcwOTg0NjMxXzI1NDI5MTY1NTk.jpg"
+          },
+          {
+            "cdn": "ali2.a.yximgs.com",
+            "url": "https://ali2.a.yximgs.com/bs2/ost/MTg1ODcwOTg0NjMxXzI1NDI5MTY1NTk.jpg"
+          }
+        ],
+        "audioUrls": [
+          {
+            "cdn": "hw.a.yximgs.com",
+            "url": "https://hw.a.yximgs.com/bs2/ost/MTg1ODcwOTg0NjMxXzI1NDI5MTY1NTk.m4a"
+          },
+          {
+            "cdn": "ali2.a.yximgs.com",
+            "url": "https://ali2.a.yximgs.com/bs2/ost/MTg1ODcwOTg0NjMxXzI1NDI5MTY1NTk.m4a"
+          }
+        ],
+        "id": "5xrurwhm5s8xaea",
+        "type": 9,
+        "loudness": -15,
+        "finalStatus": 0,
+        "genreId": 0,
+        "audioType": 1,
+        "isOffline": false,
+        "hasCopyright": true,
+        "disableEnhancedEntry": true
+      },
+      "tags": [],
+      "tag_hash_type": 1,
+      "sameFrame": {
+        "allow": true,
+        "availableDepth": 7
+      },
+      "adminTags": [],
+      "photoTextLocationInfo": {
+        "leftRatio": 0.48611,
+        "topRatio": 0.2,
+        "widthRatio": 0.04583,
+        "heightRatio": 0.00859
+      },
+      "user_id": 2542916559,
+      "ext_params": {
+        "mtype": 3,
+        "color": "A49E91",
+        "w": 720,
+        "sound": 182672,
+        "h": 1280,
+        "interval": 30,
+        "video": 182700
+      },
+      "serverExpTag": "feed_photo|5241627202658372579|2542916559|1_a/2006017633665337842_bsp0",
+      "reco_reason": "bsp0",
+      "profilePagePrefetchInfo": {
+        "profilePageType": 1
+      },
+      "exp_tag": "1_a/2006017633665337842_bsp0",
+      "followShoot": {
+        "isLipsSyncPhoto": false
+      },
+      "feedLogCtx": {
+        "stidContainer": "CkQxfDIwMDYwMTc2MzM2NjUzMzc4NDJ8cGhvdG86NTI0MTYyNzIwMjY1ODM3MjU3OXx7InBnIjoiYnNwIn18eyJyIjowfQ==",
+        "stExParams": "",
+        "logParams": "{}"
+      },
+      "videoId": "5241627202658372579",
+      "userId": "2542916559",
+      "userName": "Pasang大卫🇳🇵",
+      "userSex": "M",
+      "userVerified": false,
+      "durationMs": 182700,
+      "viewCount": 5171,
+      "likeCount": 70,
+      "shareCount": 48,
+      "forwardCount": 0,
+      "commentCount": 9,
+      "collectCount": 13,
+      "postedAt": "2026-01-24 21:27:45",
+      "timestampMs": 1769261265488,
+      "videoUrl": "https://ucmov.a.kwimgs.com/upic/2026/01/24/21/BMjAyNjAxMjQyMTI3MDFfMjU0MjkxNjU1OV8xODU4NzA5ODQ2MzFfMl8z_b_B826f89ab24eecb496bd19618644388ca.mp4?tag=1-1783151921-bsp-0-sctbd1a7wu-d8b0e4ba3c7dfd8a&clientCacheKey=3xa2gbvyix5jiwi_b.mp4&tt=b&di=76b761c6&bp=10001",
+      "videoUrlList": [
+        "https://ucmov.a.kwimgs.com/upic/2026/01/24/21/BMjAyNjAxMjQyMTI3MDFfMjU0MjkxNjU1OV8xODU4NzA5ODQ2MzFfMl8z_b_B826f89ab24eecb496bd19618644388ca.mp4?tag=1-1783151921-bsp-0-sctbd1a7wu-d8b0e4ba3c7dfd8a&clientCacheKey=3xa2gbvyix5jiwi_b.mp4&tt=b&di=76b761c6&bp=10001",
+        "https://hwmov.a.kwimgs.com/upic/2026/01/24/21/BMjAyNjAxMjQyMTI3MDFfMjU0MjkxNjU1OV8xODU4NzA5ODQ2MzFfMl8z_b_B826f89ab24eecb496bd19618644388ca.mp4?tag=1-1783151921-bsp-1-plrtu669aq-5cd9cd08e7d6d4ec&clientCacheKey=3xa2gbvyix5jiwi_b.mp4&tt=b&di=76b761c6&bp=10001"
+      ],
+      "coverUrl": "https://p66-plat.wsukwai.com/upic/2026/01/24/21/BMjAyNjAxMjQyMTI3MDFfMjU0MjkxNjU1OV8xODU4NzA5ODQ2MzFfMl8z_low_B879758970dc882bc60a83708ada7f2bc.webp?tag=1-1783151921-bsp-0-veyjvrxpkt-f6f11af396f2eae1&clientCacheKey=3xa2gbvyix5jiwi_low.webp&di=76b761c6&bp=10001",
+      "coverThumbnails": [
+        "https://p66-plat.wsukwai.com/upic/2026/01/24/21/BMjAyNjAxMjQyMTI3MDFfMjU0MjkxNjU1OV8xODU4NzA5ODQ2MzFfMl8z_low_B879758970dc882bc60a83708ada7f2bc.webp?tag=1-1783151921-bsp-0-veyjvrxpkt-f6f11af396f2eae1&clientCacheKey=3xa2gbvyix5jiwi_low.webp&di=76b761c6&bp=10001",
+        "https://ali2.a.kwimgs.com/upic/2026/01/24/21/BMjAyNjAxMjQyMTI3MDFfMjU0MjkxNjU1OV8xODU4NzA5ODQ2MzFfMl8z_low_B879758970dc882bc60a83708ada7f2bc.webp?tag=1-1783151921-bsp-1-rqlxhgym47-be1308edc3b51c19&clientCacheKey=3xa2gbvyix5jiwi_low.webp&di=76b761c6&bp=10001"
+      ],
+      "avatarUrl": "https://p4.a.yximgs.com/uhead/AB/2022/02/20/09/BMjAyMjAyMjAwOTQyNTBfMjU0MjkxNjU1OV8yX2hkMTY5XzI0Nw==_s.jpg",
+      "avatarUrls": [
+        "https://p4.a.yximgs.com/uhead/AB/2022/02/20/09/BMjAyMjAyMjAwOTQyNTBfMjU0MjkxNjU1OV8yX2hkMTY5XzI0Nw==_s.jpg",
+        "https://p2.a.yximgs.com/uhead/AB/2022/02/20/09/BMjAyMjAyMjAwOTQyNTBfMjU0MjkxNjU1OV8yX2hkMTY5XzI0Nw==_s.jpg"
+      ],
+      "videoPageUrl": "https://www.kuaishou.com/short-video/5241627202658372579",
+      "userPageUrl": "https://www.kuaishou.com/profile/2542916559",
+      "_operation": "userVideos",
+      "_fetchedAt": "2026-07-04T07:58:42.392Z",
+      "_page": 1,
+      "_sourceUserId": "2542916559",
+      "status": "success"
+    }
+  },
+  "kwai-profile": {
+    "platform": "kwai",
+    "id": "2542916559",
+    "url": "https://www.kuaishou.com/profile/2542916559",
+    "username": "Mr_pasang",
+    "displayName": "Pasang大卫🇳🇵",
+    "bio": "尼泊尔旅游专业地接\n\n尼泊尔国际旅行社\n\n精通中文让你旅行无忧\n\n任何到尼泊尔旅行需求帮助请留言联系\n\n不用担心语言不通,直接到机场接您",
+    "avatar": "https://p4.a.yximgs.com/uhead/AB/2022/02/20/09/BMjAyMjAyMjAwOTQyNTBfMjU0MjkxNjU1OV8yX2hkMTY5XzI0Nw==_s.jpg",
+    "banner": null,
+    "followers": 52010,
+    "following": null,
+    "postCount": null,
+    "likedCount": 427,
+    "verified": false,
+    "location": null,
+    "raw": {
+      "kwaiId": "Mr_pasang",
+      "userId": "2542916559",
+      "userName": "Pasang大卫🇳🇵",
+      "userSex": "M",
+      "userVerified": false,
+      "avatarUrl": "https://p4.a.yximgs.com/uhead/AB/2022/02/20/09/BMjAyMjAyMjAwOTQyNTBfMjU0MjkxNjU1OV8yX2hkMTY5XzI0Nw==_s.jpg",
+      "userPageUrl": "https://www.kuaishou.com/profile/2542916559"
+    }
   },
   "kwai-user-posts": {
     "userId": "2542916559",
@@ -7994,18 +8559,23 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "totalReturned": 0,
     "videos": []
   },
+  "rumble-comments": {
+    "url": "https://rumble.com/shorts/v7c6kd6",
+    "totalReturned": 0,
+    "comments": []
+  },
   "rumble-search": {
     "query": "space",
     "totalReturned": 5,
     "results": [
       {
         "platform": "rumble",
-        "id": null,
-        "url": "https://rumble.com/shorts/v7c6kd6?e9s=src_v1_s%2Csrc_v1_s_o&sci=dbbab394-0f50-4027-a260-c29d919a9f22",
+        "id": "v7c6kd6",
+        "url": "https://rumble.com/shorts/v7c6kd6",
         "title": "SPACE FORCE",
         "description": null,
         "channel": "The Fall Of The Cabal Series.",
-        "channelUrl": "https://rumble.com/c/TheFallOftheCabalSeries?e9s=src_v1_cmd",
+        "channelUrl": "https://rumble.com/c/TheFallOftheCabalSeries",
         "views": null,
         "likes": 37,
         "dislikes": 4,
@@ -8016,12 +8586,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       },
       {
         "platform": "rumble",
-        "id": null,
-        "url": "https://rumble.com/v7c2pio-space-revolution-ep.-25.html?e9s=src_v1_s%2Csrc_v1_s_o&sci=dbbab394-0f50-4027-a260-c29d919a9f22",
+        "id": "v7c2pio",
+        "url": "https://rumble.com/v7c2pio-space-revolution-ep.-25.html",
         "title": "Space Revolution Ep. 25: Independence Day, the Shape & Pattern of Truth",
         "description": null,
         "channel": "Badlands Media",
-        "channelUrl": "https://rumble.com/c/BadlandsMedia?e9s=src_v1_cmd",
+        "channelUrl": "https://rumble.com/c/BadlandsMedia",
         "views": null,
         "likes": 348,
         "dislikes": 7,
@@ -8032,12 +8602,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       },
       {
         "platform": "rumble",
-        "id": null,
-        "url": "https://rumble.com/v7c4ivc-the-truth-about-birthright-citizenship-xtwitter-space.html?e9s=src_v1_s%2Csrc_v1_s_o&sci=dbbab394-0f50-4027-a260-c29d919a9f22",
+        "id": "v7c4ivc",
+        "url": "https://rumble.com/v7c4ivc-the-truth-about-birthright-citizenship-xtwitter-space.html",
         "title": "The Truth About Birthright Citizenship! X/Twitter Space",
         "description": null,
         "channel": "Freedomain",
-        "channelUrl": "https://rumble.com/c/freedomain?e9s=src_v1_cmd",
+        "channelUrl": "https://rumble.com/c/freedomain",
         "views": 866,
         "likes": 13,
         "dislikes": null,
@@ -8048,12 +8618,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       },
       {
         "platform": "rumble",
-        "id": null,
-        "url": "https://rumble.com/v7c5whs-air-and-space.html?e9s=src_v1_s%2Csrc_v1_s_o&sci=dbbab394-0f50-4027-a260-c29d919a9f22",
+        "id": "v7c5whs",
+        "url": "https://rumble.com/v7c5whs-air-and-space.html",
         "title": "Air and Space",
         "description": null,
         "channel": "Just the News",
-        "channelUrl": "https://rumble.com/c/JustTheNews?e9s=src_v1_cmd",
+        "channelUrl": "https://rumble.com/c/JustTheNews",
         "views": null,
         "likes": 15,
         "dislikes": null,
@@ -8064,12 +8634,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       },
       {
         "platform": "rumble",
-        "id": null,
-        "url": "https://rumble.com/shorts/v7c0kcc?e9s=src_v1_s%2Csrc_v1_s_o&sci=dbbab394-0f50-4027-a260-c29d919a9f22",
+        "id": "v7c0kcc",
+        "url": "https://rumble.com/shorts/v7c0kcc",
         "title": "Our Home in Space Part 2: \"Leaks\" from Deep Space",
         "description": null,
         "channel": "Science Fictions",
-        "channelUrl": "https://rumble.com/c/Sciencefictions?e9s=src_v1_cmd",
+        "channelUrl": "https://rumble.com/c/Sciencefictions",
         "views": null,
         "likes": 13,
         "dislikes": 1,
@@ -19316,9 +19886,120 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "reviews": []
   },
   "tiktok-shop-products": {
-    "url": "https://www.tiktok.com/@jeffreestarcosmetics/shop",
-    "totalReturned": 0,
-    "products": []
+    "url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079",
+    "totalReturned": 5,
+    "products": [
+      {
+        "platform": "tiktok_shop",
+        "id": "1729527313880355335",
+        "url": "https://www.tiktok.com/shop/pdp/1729527313880355335",
+        "title": "Goli Ashwagandha & Vitamin D Gummy - Mixed Berry, KSM-66, Vegan, Plant Based, Non-GMO, Gluten-Free & Gelatin Free. America's #1 Ashwagandha Brand",
+        "description": null,
+        "price": 14.98,
+        "originalPrice": 24.99,
+        "currency": "USD",
+        "discount": "40%",
+        "rating": 4.5,
+        "reviews": 94118,
+        "sold": 1292873,
+        "stock": null,
+        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/27ecee8e289b49ab907cef6980b9f768~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
+        "seller": {
+          "id": null,
+          "name": null,
+          "url": null,
+          "rating": null
+        }
+      },
+      {
+        "platform": "tiktok_shop",
+        "id": "1731194857673101831",
+        "url": "https://www.tiktok.com/shop/pdp/1731194857673101831",
+        "title": "Zero Sugar Best Seller Trio - World's First 3-in-1 Pre, Post, Probiotic, Apple Cider Vinegar with Vitamin B12 and Probiotics To Address Bloating, Ashwagandha & L-Theanine, Vitamin D gummies. Gluten-Free, Vegan, Non-GMO & Gelatin-Free",
+        "description": null,
+        "price": 29.8,
+        "originalPrice": 105,
+        "currency": "USD",
+        "discount": "72%",
+        "rating": 4.5,
+        "reviews": 44145,
+        "sold": 956158,
+        "stock": null,
+        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/c347c31449564ea4a0300adb2d0cdaa9~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
+        "seller": {
+          "id": null,
+          "name": null,
+          "url": null,
+          "rating": null
+        }
+      },
+      {
+        "platform": "tiktok_shop",
+        "id": "1729587769570529799",
+        "url": "https://www.tiktok.com/shop/pdp/1729587769570529799",
+        "title": "3 Bottles of Goli Ashwagandha & Vitamin D Gummy - Mixed Berry, KSM-66, Vegan, Plant Based, Non-GMO, Gluten & Gelatin Free",
+        "description": null,
+        "price": 44.98,
+        "originalPrice": 74.94,
+        "currency": "USD",
+        "discount": "40%",
+        "rating": 4.7,
+        "reviews": 71510,
+        "sold": 859865,
+        "stock": null,
+        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/b0d9acd7ae184c8d89e2e498941485b6~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
+        "seller": {
+          "id": null,
+          "name": null,
+          "url": null,
+          "rating": null
+        }
+      },
+      {
+        "platform": "tiktok_shop",
+        "id": "1729589345444205063",
+        "url": "https://www.tiktok.com/shop/pdp/1729589345444205063",
+        "title": "3 Bottles of Goli Best Seller Bundle: Ashwagandha KSM-66, Apple Cider Vinegar, Matcha Mind supplement with Cognizin, Vitamins D2 and B12",
+        "description": null,
+        "price": 29.8,
+        "originalPrice": 74.97,
+        "currency": "USD",
+        "discount": "60%",
+        "rating": 4.6,
+        "reviews": 39752,
+        "sold": 540001,
+        "stock": null,
+        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/7a85d8aa9e2c4faab75a09fd9e5bff42~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
+        "seller": {
+          "id": null,
+          "name": null,
+          "url": null,
+          "rating": null
+        }
+      },
+      {
+        "platform": "tiktok_shop",
+        "id": "1729527774874997255",
+        "url": "https://www.tiktok.com/shop/pdp/1729527774874997255",
+        "title": "Goli Pre, Post, Probiotics Gummy - World's First 3-in-1 Gluten-Free, Vegan, Non-GMO, and Gelatin-Free.",
+        "description": null,
+        "price": 13.09,
+        "originalPrice": 24.97,
+        "currency": "USD",
+        "discount": "48%",
+        "rating": 4.5,
+        "reviews": 11645,
+        "sold": 203984,
+        "stock": null,
+        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/3939c5be64484010b5c2a3183ecfbec3~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
+        "seller": {
+          "id": null,
+          "name": null,
+          "url": null,
+          "rating": null
+        }
+      }
+    ]
   },
   "tiktok-shop-search": {
     "query": "phone case",
@@ -19868,6 +20549,44 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "noWatermarkUrl": "https://api.apify.com/v2/key-value-stores/XsAesczIHnIrglIRh/records/video-khabylame-20260602145635-7646812028874673439.mp4",
     "duration": 29
   },
+  "truth-social-post": {
+    "platform": "truth_social",
+    "id": "116860253399741841",
+    "url": "https://truthsocial.com/@realDonaldTrump/116860253399741841",
+    "text": "",
+    "publishedAt": "2026-07-04T06:19:16.417Z",
+    "author": {
+      "platform": "truth_social",
+      "id": "107780257626128497",
+      "username": "realDonaldTrump",
+      "url": "https://truthsocial.com/@realDonaldTrump",
+      "displayName": "Donald J. Trump",
+      "bio": "",
+      "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
+      "banner": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
+      "verified": true,
+      "followers": 12861450,
+      "following": 69,
+      "postCount": 34642,
+      "createdAt": "2022-02-11T16:16:57.705Z",
+      "fields": []
+    },
+    "engagement": {
+      "replies": 307,
+      "reblogs": 369,
+      "likes": 1529
+    },
+    "language": null,
+    "sensitive": false,
+    "media": [
+      {
+        "type": "image",
+        "url": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/files/116/860/253/266/133/776/original/03c1b1e690a70de2.jpg",
+        "previewUrl": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/files/116/860/253/266/133/776/small/03c1b1e690a70de2.jpg",
+        "description": null
+      }
+    ]
+  },
   "truth-social-profile": {
     "platform": "truth_social",
     "id": "107780257626128497",
@@ -20172,7 +20891,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "twitch-user-schedule": {
     "platform": "twitch",
-    "username": "shroud",
+    "username": "criticalrole",
     "schedule": []
   },
   "twitch-user-videos": {
@@ -21484,6 +22203,58 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "wordCount": 291,
     "segments": 52,
     "language": "English"
+  },
+  "youtube-trending-shorts": {
+    "platform": "youtube",
+    "query": "trending",
+    "totalReturned": 10,
+    "shorts": [
+      {
+        "url": "https://www.youtube.com/shorts/A24QBJr3qRE",
+        "title": "*THAT GIRL* glow up morning routine | tips + habits to level up mentally and physically",
+        "publishedAt": null,
+        "viewCount": 575000,
+        "durationSeconds": null,
+        "thumbnailUrl": "https://i.ytimg.com/vi/A24QBJr3qRE/hq720.jpg?sqp=-oaymwErCNAFEJQDSFryq4qpAx0IARUAAIhCGAHYAQHiAQoIGBACGAY4AUABuAL3GA==&rs=AOn4CLDQ_kWDJ1LoVmvMgRQpSxRevb3FdA",
+        "channelName": "kelly"
+      },
+      {
+        "url": "https://www.youtube.com/shorts/DVMBkX5w4wo",
+        "title": "guide to a productive morning routine for teens 💫 morning routine tips",
+        "publishedAt": null,
+        "viewCount": 251000,
+        "durationSeconds": null,
+        "thumbnailUrl": "https://i.ytimg.com/vi/DVMBkX5w4wo/hq720.jpg?sqp=-oaymwErCNAFEJQDSFryq4qpAx0IARUAAIhCGAHYAQHiAQoIGBACGAY4AUABuAL3GA==&rs=AOn4CLAJzkWnysdrxkPPsRvKGQrESTlrAw",
+        "channelName": "tipzzcore"
+      },
+      {
+        "url": "https://www.youtube.com/shorts/1QgC0xhSIF8",
+        "title": "The ONLY morning routine that ACTUALLY changed my life",
+        "publishedAt": null,
+        "viewCount": 876000,
+        "durationSeconds": null,
+        "thumbnailUrl": "https://yt3.ggpht.com/ayAaCsdT2qIRCJJGUxGkGDwfsqmEYSJBRGROlWWIVsopvAnFtxS8Zku208D59apsUpvYiLoQ-A=s176-c-k-c0x00ffffff-no-rj",
+        "channelName": null
+      },
+      {
+        "url": "https://www.youtube.com/shorts/ABuFOn1PJ-M",
+        "title": "Productive Weekend routine for 10 to 18 years old (Perfect guide) ⋆.𐙚 ̊💗",
+        "publishedAt": null,
+        "viewCount": 344000,
+        "durationSeconds": null,
+        "thumbnailUrl": "https://yt3.ggpht.com/5Xox0wQ0PhqqzzCZf6nXFQEzYvWnOpAaSYlNvwOZGThnen4OaJPSHpWRtIxImuxn7rYaWxPo=s176-c-k-c0x00ffffff-no-rj",
+        "channelName": null
+      },
+      {
+        "url": "https://www.youtube.com/shorts/9pLk3OU6bOs",
+        "title": "This morning routine is scientifically proven to make you limitless.",
+        "publishedAt": null,
+        "viewCount": 1200000,
+        "durationSeconds": null,
+        "thumbnailUrl": "https://yt3.ggpht.com/D9Uqx9E6K74wjm81UCk_8V33NWK3ZuNKN_8IjAosE2DOHlJ9lRGl-dKjaI6jEH-LAxKzT2aoZg=s176-c-k-c0x00ffffff-no-rj",
+        "channelName": null
+      }
+    ]
   },
   "youtube-video-details": {
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
