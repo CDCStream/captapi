@@ -11,6 +11,7 @@ import {
   getEndpoint,
   AGENT_ROUTING_EXAMPLES,
 } from "@/lib/api-catalog";
+import { MAKER_TOOLS } from "@/lib/maker-tools";
 
 export const dynamic = "force-static";
 
@@ -22,6 +23,7 @@ const TOOLS: { slug: string; name: string; desc: string }[] = [
   { slug: "instagram-transcript", name: "Instagram Transcript Generator", desc: "Free Instagram Reel transcript." },
   { slug: "instagram-summarizer", name: "Instagram Summarizer", desc: "Free AI summary of any Instagram Reel." },
   { slug: "facebook-transcript", name: "Facebook Transcript Generator", desc: "Free Facebook video transcript." },
+  ...MAKER_TOOLS.map((t) => ({ slug: t.slug, name: t.name, desc: t.blurb })),
 ];
 
 export async function GET() {

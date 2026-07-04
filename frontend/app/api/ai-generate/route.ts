@@ -95,6 +95,16 @@ const TOOLS: Record<string, ToolSpec> = {
       }).filter((x) => x.value),
     }),
   },
+  "instagram-username-generator": {
+    prompt: (i) =>
+      `Generate 15 Instagram username ideas for someone into "${i.interest}". Vibe: ${i.style || "any"}. Each must be <= 30 characters, no spaces, only letters/numbers/underscores/periods, must not start or end with a period. Return JSON: {"usernames":[string]}.`,
+    normalize: (j) => ({
+      items: arr((j as { usernames?: unknown }).usernames).map((u) => {
+        const value = clip(u).replace(/\s+/g, "");
+        return { value, meta: `${value.length}/30 chars${value.length > 30 ? " — too long" : ""}` };
+      }).filter((x) => x.value),
+    }),
+  },
   "tiktok-hashtag-generator": {
     prompt: (i) =>
       `Generate TikTok hashtags for a video about: "${i.topic}". Return JSON: {"viral":[8 broad viral hashtags],"niche":[14 niche-specific hashtags],"fyp":["#fyp","#foryou","#foryoupage","#viral"]}. Each starts with # and has no spaces.`,

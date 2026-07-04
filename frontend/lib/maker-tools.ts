@@ -3,14 +3,14 @@
 // the data-driven /tools/[slug] transcript tools in lib/tools.ts).
 // Used by the tools hub, the tools layout footer, the sitemap, and the nav.
 
-export type MakerToolType = "canvas" | "ai" | "converter" | "viewer" | "downloader" | "reference";
+export type MakerToolType = "canvas" | "ai" | "converter" | "viewer" | "downloader" | "reference" | "calculator";
 
 export interface MakerTool {
   slug: string;
   name: string;
   /** Short card blurb. */
   blurb: string;
-  platform: "YouTube" | "TikTok" | "Instagram" | "General";
+  platform: "YouTube" | "TikTok" | "Instagram" | "Facebook" | "Snapchat" | "Discord" | "General";
   type: MakerToolType;
 }
 
@@ -139,6 +139,76 @@ export const MAKER_TOOLS: MakerTool[] = [
     name: "Social Media Bio Generator",
     blurb: "6 on-brand bios for YouTube, TikTok, Instagram, or X — within each platform's limit.",
     platform: "General",
+    type: "ai",
+  },
+  {
+    slug: "tiktok-coin-calculator",
+    name: "TikTok Coin Calculator",
+    blurb: "Convert TikTok coins to USD and back, see gift values, and estimate what creators earn from any gift. Free, always current.",
+    platform: "TikTok",
+    type: "calculator",
+  },
+  {
+    slug: "best-time-to-post-on-tiktok",
+    name: "Best Time to Post on TikTok",
+    blurb: "Day-by-day posting schedule in your local time zone, backed by engagement data. Includes today's best slots.",
+    platform: "TikTok",
+    type: "reference",
+  },
+  {
+    slug: "best-time-to-post-on-instagram",
+    name: "Best Time to Post on Instagram",
+    blurb: "The best times to post Reels, photos, and Stories every day of the week — shown in your local time zone.",
+    platform: "Instagram",
+    type: "reference",
+  },
+  {
+    slug: "best-time-to-post-on-facebook",
+    name: "Best Time to Post on Facebook",
+    blurb: "Data-backed posting times for Facebook Pages and Reels, adjusted to your local time zone.",
+    platform: "Facebook",
+    type: "reference",
+  },
+  {
+    slug: "best-time-to-post-on-youtube",
+    name: "Best Time to Post on YouTube",
+    blurb: "The best days and hours to upload videos and Shorts, shown in your local time zone.",
+    platform: "YouTube",
+    type: "reference",
+  },
+  {
+    slug: "snapchat-planets",
+    name: "Snapchat Planets Order & Meaning",
+    blurb: "What each Snapchat Plus friend planet means, in order from Mercury to Neptune, with visuals.",
+    platform: "Snapchat",
+    type: "reference",
+  },
+  {
+    slug: "discord-fonts",
+    name: "Discord Fonts & Text Generator",
+    blurb: "Turn text into bold, cursive, gothic, and 20+ styles you can paste into Discord, plus a markdown formatting cheat sheet.",
+    platform: "Discord",
+    type: "converter",
+  },
+  {
+    slug: "youtube-thumbnail-downloader",
+    name: "YouTube Thumbnail Downloader",
+    blurb: "Grab any video's thumbnail in HD (1280×720) and every other size — plus the exact thumbnail dimensions YouTube uses.",
+    platform: "YouTube",
+    type: "downloader",
+  },
+  {
+    slug: "engagement-rate-calculator",
+    name: "Engagement Rate Calculator",
+    blurb: "Calculate TikTok, Instagram, or YouTube engagement rate from likes, comments, and followers — with benchmarks by follower size.",
+    platform: "General",
+    type: "calculator",
+  },
+  {
+    slug: "instagram-username-generator",
+    name: "Instagram Username Generator",
+    blurb: "15 available-style Instagram name ideas in your niche — aesthetic, minimal, or funny. AI-powered, no sign-up.",
+    platform: "Instagram",
     type: "ai",
   },
 ];

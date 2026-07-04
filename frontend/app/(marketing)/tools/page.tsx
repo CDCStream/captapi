@@ -12,6 +12,7 @@ const MAKER_BADGES: Record<MakerToolType, string> = {
   downloader: "Downloader",
   reference: "Reference",
   canvas: "Maker",
+  calculator: "Calculator",
 };
 
 type HubTool = {
@@ -22,14 +23,16 @@ type HubTool = {
   badge: string;
 };
 
-const PLATFORM_ORDER = ["YouTube", "TikTok", "Instagram", "Facebook", "General"];
+const PLATFORM_ORDER = ["YouTube", "TikTok", "Instagram", "Facebook", "Snapchat", "Discord", "General"];
 
 const PLATFORM_DESCRIPTIONS: Record<string, string> = {
-  YouTube: "Transcript, summary, thumbnail, banner, title, description, hashtag, converter, and Shorts downloader tools for YouTube creators.",
-  TikTok: "Transcript, summary, username, hashtag, video idea, and secret emoji tools for TikTok content workflows.",
-  Instagram: "Free transcript, summarizer, profile viewer, highlights viewer, and photo downloader tools for Instagram.",
-  Facebook: "Free transcript tools for public Facebook videos.",
-  General: "Cross-platform creator utilities for bios and reusable social media assets.",
+  YouTube: "Transcript, summary, thumbnail, banner, title, description, hashtag, converter, best-time, and Shorts downloader tools for YouTube creators.",
+  TikTok: "Transcript, summary, username, hashtag, video idea, coin calculator, best-time, and secret emoji tools for TikTok content workflows.",
+  Instagram: "Free transcript, summarizer, profile viewer, highlights viewer, photo downloader, username, and best-time tools for Instagram.",
+  Facebook: "Free transcript and best-time-to-post tools for public Facebook content.",
+  Snapchat: "Reference guides for Snapchat Plus features like the friend solar system planets.",
+  Discord: "Font generators and markdown formatting tools for Discord messages and bios.",
+  General: "Cross-platform creator utilities: bios, engagement rate benchmarks, and reusable social media assets.",
 };
 
 const tools: HubTool[] = [
