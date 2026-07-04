@@ -144,9 +144,10 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(PostgrestAPIError)
     async def postgrest_error(request: Request, exc: PostgrestAPIError) -> JSONResponse:
-        # 42P01 = relation does not exist: a feature table (monitors,
-        # metric_history, ...) whose migration has not been applied yet.
-        if getattr(exc, "code", "") == "42P01":
+        # 42P01 = relation does not exist, PGRST205 = table missing from the
+        # PostgREST schema cache: a feature table (monitors, metric_history,
+        # ...) whose migration has not been applied yet.
+        if getattr(exc, "code", "") in ("42P01", "PGRST205"):
             return JSONResponse(
                 status_code=503,
                 content={
