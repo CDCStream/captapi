@@ -41,6 +41,7 @@ from app.routers import (
     snapchat,
     soundcloud,
     spotify,
+    status,
     threads,
     tiktok,
     tiktok_shop,
@@ -205,6 +206,7 @@ def create_app() -> FastAPI:
     app.include_router(account.router, prefix="/v1/account", tags=["Account"])
     app.include_router(auth_keys.router, prefix="/v1/auth/keys", tags=["API Keys"])
     app.include_router(billing.router, prefix="/v1/billing", tags=["Billing"])
+    app.include_router(status.router, prefix="/v1/status", tags=["Status"])
     app.include_router(mcp.router, prefix="/mcp", tags=["MCP"], include_in_schema=False)
 
     return app
