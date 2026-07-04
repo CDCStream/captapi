@@ -491,6 +491,19 @@ BATCHES = {
         lambda p1: [],
     ),
     "batch5": (batch5_phase1, batch5_phase2),
+    # Actor swaps: reddit comment scores (clearpath), twitch schedule
+    # (easyapi), tiktok shop reviews (web_wanderer). The reddit post is an
+    # older thread so comment scores are public (fresh posts hide them).
+    "batch6": (
+        lambda: [
+            ("reddit-post-details", "/v1/reddit/post-details", {"url": "https://www.reddit.com/r/Astronomy/comments/1ldt0qj/pope_leo_james_webb_telescope_shows_us_what_the/"}),
+            ("reddit-post-comments", "/v1/reddit/post-comments", {"url": "https://www.reddit.com/r/Astronomy/comments/1ldt0qj/pope_leo_james_webb_telescope_shows_us_what_the/", "limit": 5}),
+            ("reddit-post-transcript", "/v1/reddit/post-transcript", {"url": "https://www.reddit.com/r/Astronomy/comments/1ldt0qj/pope_leo_james_webb_telescope_shows_us_what_the/", "limit": 5}),
+            ("twitch-user-schedule", "/v1/twitch/user-schedule", {"url": "https://www.twitch.tv/criticalrole"}),
+            ("tiktok-shop-product-reviews", "/v1/tiktok-shop/product-reviews", {"url": "https://www.tiktok.com/shop/pdp/1731962298839634826", "limit": 5}),
+        ],
+        lambda p1: [],
+    ),
 }
 
 

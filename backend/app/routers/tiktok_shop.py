@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -79,19 +80,34 @@ def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _review_timestamp(item: dict[str, Any]) -> str | None:
+    raw = item.get("createdAt") or item.get("date") or item.get("review_time")
+    if isinstance(raw, str) and raw.isdigit():
+        raw = int(raw)
+    if isinstance(raw, (int, float)) and raw > 0:
+        seconds = raw / 1000 if raw > 10_000_000_000 else raw
+        return datetime.fromtimestamp(seconds, tz=timezone.utc).isoformat()
+    return safe_str(raw)
+
+
 def _normalize_review(item: dict[str, Any]) -> dict[str, Any]:
     user = item.get("user") or item.get("author") or {}
     return {
         "platform": "tiktok_shop",
-        "id": safe_str(item.get("id") or item.get("reviewId")),
-        "rating": item.get("rating") or item.get("stars"),
-        "text": safe_str(item.get("text") or item.get("content") or item.get("review")),
-        "createdAt": safe_str(item.get("createdAt") or item.get("date")),
+        "id": safe_str(item.get("id") or item.get("reviewId") or item.get("review_id")),
+        "rating": item.get("rating") or item.get("stars") or item.get("review_rating"),
+        "text": safe_str(item.get("text") or item.get("content") or item.get("review") or item.get("review_text")),
+        "createdAt": _review_timestamp(item),
         "author": {
-            "name": safe_str(user.get("name") or user.get("nickname") or item.get("authorName")),
+            "name": safe_str(
+                user.get("name") or user.get("nickname") or item.get("authorName") or item.get("reviewer_name")
+            ),
             "avatar": safe_str(user.get("avatar") or user.get("avatarUrl")),
         },
-        "images": item.get("images") or [],
+        "images": item.get("images") or item.get("review_images") or [],
+        "verifiedPurchase": item.get("is_verified_purchase"),
+        "sku": safe_str(item.get("sku_specification") or item.get("sku")),
+        "country": safe_str(item.get("review_country") or item.get("country")),
     }
 
 
@@ -192,11 +208,23 @@ async def product_reviews(
         raise HTTPException(status_code=400, detail="Invalid TikTok Shop product URL. Pass a TikTok Shop product URL like https://www.tiktok.com/shop/pdp/product/123.")
     async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/product-reviews", platform="tiktok_shop", resource_url=url, base_credits=_scaled(limit, RATE_REVIEWS)) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_shop("product_reviews", {"productUrls": [url], "maxReviews": limit, "maxResults": limit}, limit)
-            reviews = [_normalize_review(i) for i in items]
+            # Dedicated review actor first: the generic scraper's
+            # product_reviews mode usually returns 0 rows.
+            items: list[dict[str, Any]] = []
+            try:
+                items = await get_apify().run_actor_sync(
+                    get_settings().APIFY_ACTOR_TIKTOK_SHOP_REVIEWS,
+                    {"region": "US", "product_ids": [url], "reviews_limit": limit},
+                    max_items=limit,
+                )
+            except Exception:  # noqa: BLE001 — fall through to the generic scraper
+                items = []
+            if not items:
+                items = await _run_shop("product_reviews", {"productUrls": [url], "maxReviews": limit, "maxResults": limit}, limit)
+            reviews = [_normalize_review(i) for i in items[:limit]]
             return {"url": url, "totalReturned": len(reviews), "reviews": reviews}
 
-        data = await cached_or_run("tiktok-shop.product-reviews", {"url": url, "limit": limit}, _run, ctx)
+        data = await cached_or_run("tiktok-shop.product-reviews", {"url": url, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["reviews"]), RATE_REVIEWS)
         return ApiResponse(data=data)
 

@@ -167,6 +167,12 @@ class Settings(BaseSettings):
     # communities, so subreddit-details uses this dedicated profiler instead.
     APIFY_ACTOR_REDDIT_COMMUNITY: str = "truefetch/reddit-community-profile"
 
+    # Post + full comment tree with real scores, threading (parentId/depth),
+    # and permalinks (input: {"postUrl", "maxCommentsPerPost", "sort"}). Used
+    # when Reddit's public JSON blocks our IPs, before the sparser trudax
+    # fallback which lacks comment scores entirely.
+    APIFY_ACTOR_REDDIT_COMMENTS: str = "clearpath/reddit-post-comments-bulk-scraper"
+
     # Threads (Meta). User media actor accepts username + maxPosts; post media
     # actor accepts direct post links.
     APIFY_ACTOR_THREADS: str = "igview-owner/threads-user-media-scraper"
@@ -198,6 +204,10 @@ class Settings(BaseSettings):
     APIFY_ACTOR_GOOGLE_SEARCH: str = "apify/google-search-scraper"
     APIFY_ACTOR_TWITCH: str = "maximedupre/twitch-scraper"
     APIFY_ACTOR_TWITCH_URL: str = "abotapi/twitch-scraper"
+    # Upcoming broadcast schedule (nextSchedule) per channel; the actors above
+    # never return schedule segments. Input: {"keywords": [login],
+    # "maxItems": 20} (actor-enforced minimum of 20).
+    APIFY_ACTOR_TWITCH_SCHEDULE: str = "easyapi/twitch-channel-scraper"
     # Search: automation-lab covers tracks/artists/albums reliably; the
     # apiharvest all-types actor (often returns "No results") is kept only for
     # podcast/episode search which automation-lab does not support.
@@ -221,6 +231,11 @@ class Settings(BaseSettings):
     # url_or_id, "region": "US"}). Returns title/price/images/stock/store_info
     # where the generic scraper's product_details mode only echoes the URL.
     APIFY_ACTOR_TIKTOK_SHOP_DETAILS: str = "cunning_soil/tiktok-shop-product-scraper-mobile-api"
+
+    # Dedicated review scraper (input: {"region", "product_ids": [url|id],
+    # "reviews_limit"}). Returns rating/text/date/images/verified-purchase
+    # where the generic scraper's product_reviews mode usually returns 0 rows.
+    APIFY_ACTOR_TIKTOK_SHOP_REVIEWS: str = "web_wanderer/tiktok-reviews-scraper"
 
     # Public ad libraries. Kept separate because each platform has a different
     # public transparency surface and actor input schema.

@@ -106,9 +106,48 @@ def _profile(item: dict[str, Any]) -> dict[str, Any]:
         },
         "recentVideos": [_video(v) for v in item.get("recentVideos", []) if isinstance(v, dict)],
         "topClips": [_video(v) for v in item.get("topClips", []) if isinstance(v, dict)],
-        "schedule": item.get("nextSchedule") or item.get("schedule") or [],
+        "schedule": _schedule_segments(item.get("nextSchedule") or item.get("schedule")),
         "createdAt": safe_str(item.get("createdAt")),
     }
+
+
+def _schedule_segments(value: Any) -> list[dict[str, Any]]:
+    segments = value if isinstance(value, list) else [value] if isinstance(value, dict) else []
+    out: list[dict[str, Any]] = []
+    for seg in segments:
+        if not isinstance(seg, dict):
+            continue
+        game = seg.get("game") or seg.get("category")
+        out.append(
+            {
+                "title": safe_str(seg.get("title")),
+                "startAt": safe_str(seg.get("startAt") or seg.get("startTime")),
+                "endAt": safe_str(seg.get("endAt") or seg.get("endTime")),
+                "game": safe_str(game.get("name") if isinstance(game, dict) else game),
+            }
+        )
+    return out
+
+
+async def _schedule_actor(username: str) -> list[dict[str, Any]]:
+    """The primary channel actor never returns schedule segments; this
+    dedicated actor exposes the channel's nextSchedule."""
+    settings = get_settings()
+    items = await get_apify().run_actor_sync(
+        settings.APIFY_ACTOR_TWITCH_SCHEDULE,
+        # The actor enforces maxItems >= 20; it does a keyword search, so
+        # filter for the exact login afterwards.
+        {"keywords": [username], "maxItems": 20},
+        max_items=20,
+    )
+    uname = username.lower()
+    match = next(
+        (i for i in items if isinstance(i, dict) and (i.get("login") or "").lower() == uname),
+        None,
+    )
+    if match is None:
+        return []
+    return _schedule_segments(match.get("nextSchedule") or match.get("schedule"))
 
 
 async def _channel(username: str) -> dict[str, Any]:
@@ -172,10 +211,13 @@ async def user_schedule(
         raise HTTPException(status_code=400, detail="Invalid Twitch channel")
     async with billed_call(caller=caller, endpoint="/v1/twitch/user-schedule", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=34) as ctx:
         async def _run() -> dict[str, Any]:
-            channel = await _channel(username)
-            return {"platform": "twitch", "username": username, "schedule": channel.get("schedule")}
+            schedule = await _schedule_actor(username)
+            if not schedule:
+                channel = await _channel(username)
+                schedule = _schedule_segments(channel.get("schedule"))
+            return {"platform": "twitch", "username": username, "schedule": schedule}
 
-        data = await cached_or_run("twitch.user-schedule", {"username": username}, _run, ctx)
+        data = await cached_or_run("twitch.user-schedule", {"username": username, "v": 2}, _run, ctx)
         return ApiResponse(data=data)
 
 

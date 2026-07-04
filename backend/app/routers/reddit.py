@@ -285,6 +285,66 @@ async def _fetch_reddit_json_post(url: str, post_id: str, limit: int) -> tuple[d
     raise last_error or HTTPException(status_code=502, detail="Reddit upstream error")
 
 
+def _epoch_to_iso(value: Any) -> Any:
+    if isinstance(value, (int, float)) and value > 0:
+        return datetime.fromtimestamp(int(value), tz=timezone.utc).isoformat()
+    return value
+
+
+async def _fetch_reddit_comments_actor_post(url: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Post + comment tree via the clearpath actor: real scores, parentId,
+    depth, and permalinks — everything the trudax lite actor drops."""
+    settings = get_settings()
+    items = await get_apify().run_actor_sync(
+        settings.APIFY_ACTOR_REDDIT_COMMENTS,
+        {"postUrl": url, "maxCommentsPerPost": max(limit, 1), "sort": "top"},
+        max_items=max(limit, 1) + 1,
+    )
+    post_raw = next(
+        (i for i in items if isinstance(i, dict) and i.get("_type") != "comment" and i.get("title") is not None),
+        None,
+    )
+    comment_raws = [i for i in items if isinstance(i, dict) and i.get("_type") == "comment"]
+    if not post_raw and not comment_raws:
+        raise HTTPException(status_code=404, detail="Post not found")
+    post_raw = post_raw or {}
+    post = _normalize_post(
+        {
+            "id": post_raw.get("id") or post_raw.get("_post_id"),
+            "url": f"https://www.reddit.com{post_raw.get('permalink')}" if post_raw.get("permalink") else post_raw.get("url") or url,
+            "title": post_raw.get("title"),
+            "body": post_raw.get("selftext"),
+            "subreddit": post_raw.get("subreddit"),
+            "author": post_raw.get("author"),
+            "score": post_raw.get("score") or post_raw.get("ups"),
+            "numComments": post_raw.get("num_comments") or post_raw.get("commentCount"),
+            "created": _epoch_to_iso(post_raw.get("created_utc")),
+            "flair": post_raw.get("link_flair_text"),
+            "nsfw": post_raw.get("over_18"),
+            "thumbnail": post_raw.get("thumbnail"),
+        }
+    )
+    comments = [
+        _normalize_comment(
+            {
+                "id": raw.get("id"),
+                "author": raw.get("author"),
+                "body": raw.get("body"),
+                "score": raw.get("score"),
+                "createdAt": raw.get("createdAt"),
+                "url": f"https://www.reddit.com{raw.get('permalink')}" if raw.get("permalink") else None,
+                "parentId": raw.get("parentId"),
+                "depth": raw.get("depth"),
+                "isSubmitter": raw.get("isSubmitter"),
+                "edited": bool(raw.get("editedAt")),
+                "stickied": raw.get("isStickied"),
+            }
+        )
+        for raw in comment_raws[:limit]
+    ]
+    return post, comments
+
+
 async def _fetch_reddit_actor_post(url: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     settings = get_settings()
     items = await get_apify().run_actor_sync(
@@ -311,6 +371,10 @@ async def _fetch_reddit_post_resilient(url: str, post_id: str, limit: int) -> tu
     except HTTPException as exc:
         if exc.status_code not in {502, 503, 504}:
             raise
+    try:
+        return await _fetch_reddit_comments_actor_post(url, limit)
+    except Exception:  # noqa: BLE001 — any failure falls through to trudax
+        pass
     return await _fetch_reddit_actor_post(url, limit)
 
 
@@ -510,7 +574,7 @@ async def post_details(
 
         data = await cached_or_run(
             endpoint="reddit.post-details",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -538,7 +602,7 @@ async def post_comments(
 
         data = await cached_or_run(
             endpoint="reddit.post-comments",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -608,7 +672,7 @@ async def post_transcript(
 
         data = await cached_or_run(
             endpoint="reddit.post-transcript",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
         )
