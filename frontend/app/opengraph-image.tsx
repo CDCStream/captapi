@@ -80,7 +80,7 @@ export default async function OpengraphImage() {
             One API for structured social data across 29 platforms
           </div>
           <div style={{ fontSize: 30, color: "#94a3b8", maxWidth: 940, lineHeight: 1.35 }}>
-            180 endpoints for transcripts, AI summaries, comments, search, ads,
+            179 endpoints for transcripts, AI summaries, comments, search, ads,
             commerce &amp; engagement — clean JSON.
           </div>
         </div>

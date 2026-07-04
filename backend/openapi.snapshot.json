@@ -305,10 +305,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Channel URL (youtube.com/@handle or /channel/UC...)",
+              "description": "Channel URL, @handle, bare handle, or UC... channel ID",
               "title": "Url"
             },
-            "description": "Channel URL (youtube.com/@handle or /channel/UC...)"
+            "description": "Channel URL, @handle, bare handle, or UC... channel ID"
           }
         ],
         "responses": {
@@ -352,8 +352,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "description": "Channel URL, @handle, bare handle, or UC... channel ID",
               "title": "Url"
-            }
+            },
+            "description": "Channel URL, @handle, bare handle, or UC... channel ID"
           },
           {
             "name": "limit",
@@ -725,10 +727,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Channel URL (youtube.com/@handle)",
+              "description": "Channel URL, @handle, bare handle, or UC... channel ID",
               "title": "Url"
             },
-            "description": "Channel URL (youtube.com/@handle)"
+            "description": "Channel URL, @handle, bare handle, or UC... channel ID"
           },
           {
             "name": "limit",
@@ -784,10 +786,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Channel URL (youtube.com/@handle)",
+              "description": "Channel URL, @handle, bare handle, or UC... channel ID",
               "title": "Url"
             },
-            "description": "Channel URL (youtube.com/@handle)"
+            "description": "Channel URL, @handle, bare handle, or UC... channel ID"
           },
           {
             "name": "limit",
@@ -1199,10 +1201,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Channel URL (youtube.com/@handle)",
+              "description": "Channel URL, @handle, bare handle, or UC... channel ID",
               "title": "Url"
             },
-            "description": "Channel URL (youtube.com/@handle)"
+            "description": "Channel URL, @handle, bare handle, or UC... channel ID"
           },
           {
             "name": "limit",
@@ -1258,10 +1260,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Channel URL (youtube.com/@handle)",
+              "description": "Channel URL, @handle, bare handle, or UC... channel ID",
               "title": "Url"
             },
-            "description": "Channel URL (youtube.com/@handle)"
+            "description": "Channel URL, @handle, bare handle, or UC... channel ID"
           },
           {
             "name": "limit",
@@ -1603,10 +1605,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "https://tiktok.com/@username",
+              "description": "TikTok profile URL, @handle, or username",
               "title": "Url"
             },
-            "description": "https://tiktok.com/@username"
+            "description": "TikTok profile URL, @handle, or username"
           }
         ],
         "responses": {
@@ -1650,10 +1652,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "https://tiktok.com/@username or @handle",
+              "description": "TikTok profile URL, @handle, or username",
               "title": "Url"
             },
-            "description": "https://tiktok.com/@username or @handle"
+            "description": "TikTok profile URL, @handle, or username"
           }
         ],
         "responses": {
@@ -1697,10 +1699,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "https://tiktok.com/@username or @handle",
+              "description": "TikTok profile URL, @handle, or username",
               "title": "Url"
             },
-            "description": "https://tiktok.com/@username or @handle"
+            "description": "TikTok profile URL, @handle, or username"
           }
         ],
         "responses": {
@@ -1744,10 +1746,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "https://tiktok.com/@username or @handle",
+              "description": "TikTok profile URL, @handle, or username",
               "title": "Url"
             },
-            "description": "https://tiktok.com/@username or @handle"
+            "description": "TikTok profile URL, @handle, or username"
           }
         ],
         "responses": {
@@ -1962,10 +1964,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "https://tiktok.com/@username or @handle",
+              "description": "TikTok profile URL, @handle, or username",
               "title": "Url"
             },
-            "description": "https://tiktok.com/@username or @handle"
+            "description": "TikTok profile URL, @handle, or username"
           }
         ],
         "responses": {
@@ -2112,10 +2114,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "https://tiktok.com/@username",
+              "description": "TikTok profile URL, @handle, or username",
               "title": "Url"
             },
-            "description": "https://tiktok.com/@username"
+            "description": "TikTok profile URL, @handle, or username"
           },
           {
             "name": "limit",
@@ -2241,10 +2243,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "https://tiktok.com/@username",
+              "description": "TikTok profile URL, @handle, or username",
               "title": "Url"
             },
-            "description": "https://tiktok.com/@username"
+            "description": "TikTok profile URL, @handle, or username"
           },
           {
             "name": "limit",
@@ -2300,10 +2302,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "https://tiktok.com/@username",
+              "description": "TikTok profile URL, @handle, or username",
               "title": "Url"
             },
-            "description": "https://tiktok.com/@username"
+            "description": "TikTok profile URL, @handle, or username"
           },
           {
             "name": "limit",
@@ -3407,8 +3409,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "description": "Instagram profile URL, @handle, or username",
               "title": "Url"
-            }
+            },
+            "description": "Instagram profile URL, @handle, or username"
           }
         ],
         "responses": {
@@ -3499,8 +3503,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "description": "Instagram profile URL, @handle, or username",
               "title": "Url"
-            }
+            },
+            "description": "Instagram profile URL, @handle, or username"
           },
           {
             "name": "limit",
@@ -3556,8 +3562,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "description": "Instagram profile URL, @handle, or username",
               "title": "Url"
-            }
+            },
+            "description": "Instagram profile URL, @handle, or username"
           },
           {
             "name": "limit",
@@ -3838,10 +3846,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Instagram profile URL",
+              "description": "Instagram profile URL, @handle, or username",
               "title": "Url"
             },
-            "description": "Instagram profile URL"
+            "description": "Instagram profile URL, @handle, or username"
           },
           {
             "name": "limit",
@@ -4074,10 +4082,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Instagram profile URL",
+              "description": "Instagram profile URL, @handle, or username",
               "title": "Url"
             },
-            "description": "Instagram profile URL"
+            "description": "Instagram profile URL, @handle, or username"
           }
         ],
         "responses": {
@@ -4121,10 +4129,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Instagram profile URL",
+              "description": "Instagram profile URL, @handle, or username",
               "title": "Url"
             },
-            "description": "Instagram profile URL"
+            "description": "Instagram profile URL, @handle, or username"
           },
           {
             "name": "limit",
@@ -4421,8 +4429,10 @@
             "required": true,
             "schema": {
               "type": "string",
+              "description": "Facebook page URL, @handle, or page name",
               "title": "Url"
-            }
+            },
+            "description": "Facebook page URL, @handle, or page name"
           }
         ],
         "responses": {
@@ -4466,10 +4476,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Facebook profile or page URL",
+              "description": "Facebook profile/page URL, @handle, or page name",
               "title": "Url"
             },
-            "description": "Facebook profile or page URL"
+            "description": "Facebook profile/page URL, @handle, or page name"
           },
           {
             "name": "limit",
@@ -4525,10 +4535,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Facebook profile or page URL",
+              "description": "Facebook profile/page URL, @handle, or page name",
               "title": "Url"
             },
-            "description": "Facebook profile or page URL"
+            "description": "Facebook profile/page URL, @handle, or page name"
           },
           {
             "name": "limit",
@@ -4713,10 +4723,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Facebook profile or page URL",
+              "description": "Facebook profile/page URL, @handle, or page name",
               "title": "Url"
             },
-            "description": "Facebook profile or page URL"
+            "description": "Facebook profile/page URL, @handle, or page name"
           },
           {
             "name": "limit",
@@ -4772,10 +4782,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Facebook profile or page URL",
+              "description": "Facebook profile/page URL, @handle, or page name",
               "title": "Url"
             },
-            "description": "Facebook profile or page URL"
+            "description": "Facebook profile/page URL, @handle, or page name"
           },
           {
             "name": "limit",
@@ -8394,65 +8404,6 @@
               "minimum": 1,
               "default": 20,
               "title": "Limit"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/rumble/transcript": {
-      "get": {
-        "tags": [
-          "Rumble"
-        ],
-        "summary": "Rumble video transcript",
-        "operationId": "transcript_v1_rumble_transcript_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "url",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Rumble video URL",
-              "title": "Url"
-            },
-            "description": "Rumble video URL"
-          },
-          {
-            "name": "language",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "minLength": 2,
-              "maxLength": 8,
-              "default": "en",
-              "title": "Language"
             }
           }
         ],

@@ -356,7 +356,6 @@ def batch4_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
     video_url = rumble_video_url()
     if video_url:
         tests.append(("rumble-video-details", "/v1/rumble/video-details", {"url": video_url}))
-        tests.append(("rumble-transcript", "/v1/rumble/transcript", {"url": video_url}))
         tests.append(("rumble-comments", "/v1/rumble/comments", {"url": video_url, "limit": 5}))
     else:
         print("!! no rumble video url")

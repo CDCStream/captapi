@@ -2025,23 +2025,6 @@
           "scope": null
         }
       },
-      "rumbleTranscript": {
-        "label": "Rumble Transcript",
-        "description": "Extract a timestamped Rumble video transcript. Costs ~3 credits (cached results free, failures never charged).",
-        "connection": "captapi",
-        "altConnection": null,
-        "webhook": null,
-        "moduleType": "action",
-        "actionCrud": "read",
-        "codeFiles": {
-          "communication": "modules/rumbleTranscript/communication.iml.json",
-          "staticParams": null,
-          "mappableParams": "modules/rumbleTranscript/mappable-params.iml.json",
-          "interface": null,
-          "samples": null,
-          "scope": null
-        }
-      },
       "rumbleComments": {
         "label": "Rumble Comments",
         "description": "Comments on a Rumble video. Costs ~30 credits (cached results free, failures never charged).",

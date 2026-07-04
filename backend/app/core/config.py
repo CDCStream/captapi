@@ -194,8 +194,6 @@ class Settings(BaseSettings):
     # listings directly (the keyword actor above can't).
     APIFY_ACTOR_RUMBLE_DETAILS: str = "azzouzana/rumble-all-inclusive-scraper"
     APIFY_ACTOR_RUMBLE_COMMENTS: str = "thescrapelab/apify-rumble-scraper"
-    APIFY_ACTOR_RUMBLE_TRANSCRIPT: str = "bulletproof/rumble-transcript-extractor"
-
     # Long-tail public platforms.
     APIFY_ACTOR_GOOGLE_SEARCH: str = "apify/google-search-scraper"
     APIFY_ACTOR_TWITCH: str = "maximedupre/twitch-scraper"

@@ -2404,28 +2404,6 @@
     ]
   },
   {
-    "tool": "rumble_transcript",
-    "platform": "rumble",
-    "name": "Rumble Transcript",
-    "path": "/v1/rumble/transcript",
-    "credits": 3,
-    "summary": "Extract a timestamped Rumble video transcript.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html."
-      },
-      {
-        "name": "language",
-        "type": "string",
-        "required": false,
-        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
-      }
-    ]
-  },
-  {
     "tool": "rumble_comments",
     "platform": "rumble",
     "name": "Rumble Comments",

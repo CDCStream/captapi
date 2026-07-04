@@ -17,7 +17,7 @@ npx @captapi/cli list
 ```bash
 captapi login                 # paste your capt_live_… key (saved to ~/.captapi/config.json)
 captapi balance               # credits + recent requests
-captapi list                  # every endpoint (180 commands)
+captapi list                  # every endpoint (179 commands)
 captapi youtube-transcript --url "https://youtube.com/watch?v=dQw4w9WgXcQ"
 ```
 
@@ -42,7 +42,7 @@ Override the API host with `CAPTAPI_BASE_URL` (default `https://api.captapi.com`
 | `captapi balance [--json]` | Credit balance + recent requests |
 | `captapi list [platform] [--json]` | List endpoints, optionally by platform |
 | `captapi agent add <claude\|cursor>` | Add the Captapi MCP server to an agent |
-| `captapi <endpoint> [flags]` | Call any of the 180 data endpoints |
+| `captapi <endpoint> [flags]` | Call any of the 179 data endpoints |
 
 ### Calling endpoints
 
@@ -70,7 +70,7 @@ captapi agent add cursor --print  # print the snippet instead of writing
 ```
 
 Restart the agent afterwards to load the [`@captapi/mcp`](https://www.npmjs.com/package/@captapi/mcp)
-server (180 tools).
+server (179 tools).
 
 ## License
 

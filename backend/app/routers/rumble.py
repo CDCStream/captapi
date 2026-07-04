@@ -138,24 +138,6 @@ def _normalize_comment(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _normalize_transcript(item: dict[str, Any]) -> dict[str, Any]:
-    segments = item.get("segments") or item.get("transcript") or item.get("captions") or []
-    text = item.get("text") or item.get("plainText") or item.get("transcriptText")
-    if not text and isinstance(segments, list):
-        text = " ".join(
-            safe_str(s.get("text") if isinstance(s, dict) else s) or ""
-            for s in segments
-        ).strip()
-    return {
-        "platform": "rumble",
-        "url": safe_str(item.get("url") or item.get("videoUrl") or item.get("sourceUrl")),
-        "language": safe_str(item.get("language")),
-        "title": safe_str(item.get("title") or item.get("videoTitle")),
-        "text": safe_str(text),
-        "segments": segments if isinstance(segments, list) else [],
-    }
-
-
 def _meta(page: str, key: str) -> str | None:
     pattern = rf'<meta\s+(?:property|name)=["\']{re.escape(key)}["\']\s+content=["\']([^"\']+)["\']'
     match = re.search(pattern, page, flags=re.IGNORECASE)
@@ -285,43 +267,6 @@ async def channel_videos(
             ctx=ctx,
         )
         ctx["credits_override"] = _scaled(len(data["videos"]), RATE, 2)
-        return ApiResponse(data=data)
-
-
-@router.get("/transcript", summary="Rumble video transcript")
-async def transcript(
-    url: str = Query(..., description="Rumble video URL"),
-    language: str = Query("en", min_length=2, max_length=8),
-    caller: ApiCaller = Depends(require_api_key),
-):
-    _require_rumble_video_url(url)
-    settings = get_settings()
-    async with billed_call(
-        caller=caller,
-        endpoint="/v1/rumble/transcript",
-        platform="rumble",
-        resource_url=url,
-        base_credits=3,
-    ) as ctx:
-        async def _run() -> dict[str, Any]:
-            try:
-                items = await get_apify().run_actor_sync(
-                    settings.APIFY_ACTOR_RUMBLE_TRANSCRIPT,
-                    {"url": _canonical_video_url(url), "language": language, "format": "json"},
-                    max_items=1,
-                )
-            except Exception as exc:
-                raise HTTPException(status_code=404, detail="Transcript not available for this Rumble video") from exc
-            if not items:
-                raise HTTPException(status_code=404, detail="Transcript not found")
-            return _normalize_transcript(items[0])
-
-        data = await cached_or_run(
-            endpoint="rumble.transcript",
-            params={"url": url, "language": language},
-            runner=_run,
-            ctx=ctx,
-        )
         return ApiResponse(data=data)
 
 

@@ -290,7 +290,6 @@ const RUMBLE: Omit<Endpoint, "platform">[] = [
   { tool: "rumble_video_details", name: "Rumble Video Details", path: "/v1/rumble/video-details", credits: 1, summary: "Metadata + stats for a Rumble video.", params: [url(RB_VIDEO)] },
   { tool: "rumble_channel_videos", name: "Rumble Channel Videos", path: "/v1/rumble/channel-videos", credits: 12, summary: "List videos from a Rumble channel.", params: [url(RB_CHANNEL), limit(20, 200)] },
   { tool: "rumble_search", name: "Rumble Search", path: "/v1/rumble/search", credits: 12, summary: "Search Rumble videos by keyword.", params: [q(), limit(20, 200)] },
-  { tool: "rumble_transcript", name: "Rumble Transcript", path: "/v1/rumble/transcript", credits: 3, summary: "Extract a timestamped Rumble video transcript.", params: [url(RB_VIDEO), language()] },
   { tool: "rumble_comments", name: "Rumble Comments", path: "/v1/rumble/comments", credits: 30, summary: "Comments on a Rumble video.", params: [url(RB_VIDEO), limit(50, 500)] },
 ];
 

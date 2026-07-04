@@ -340,7 +340,6 @@ const RUMBLE: Spec[] = [
   { slug: "rumble-video-details", name: "Rumble Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/rumble/video-details", credits: 1 },
   { slug: "rumble-channel-videos", name: "Rumble Channel Videos API", shortName: "Channel Videos", category: "list", method: "GET", path: "/v1/rumble/channel-videos", credits: 12, creditsPerResult: 0.6 },
   { slug: "rumble-search", name: "Rumble Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/rumble/search", credits: 12, creditsPerResult: 0.6 },
-  { slug: "rumble-transcript", name: "Rumble Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/rumble/transcript", credits: 3 },
   { slug: "rumble-comments", name: "Rumble Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/rumble/comments", credits: 30, creditsPerResult: 0.6 },
 ];
 

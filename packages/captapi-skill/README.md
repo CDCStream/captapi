@@ -19,7 +19,7 @@ Works with Claude Code, Cursor, Codex, GitHub Copilot, Gemini CLI, Windsurf, and
 - Endpoint selection guidance per platform.
 - Parameter rules (`url`, `q`, `limit`, `language`, `comment_id`) and gotchas.
 - Credits, caching, and error handling (401/402/422/429).
-- A full table of all 180 endpoints (tool name, REST path, params, credits).
+- A full table of all 179 endpoints (tool name, REST path, params, credits).
 
 ## Publishing
 

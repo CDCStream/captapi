@@ -1,7 +1,7 @@
 {
   "name": "n8n-nodes-captapi",
   "version": "0.2.0",
-  "description": "n8n community node for Captapi — structured social media data from 29 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop): transcripts, AI summaries, comments, stats, search, downloads, and account usage. 180 operations, one API key.",
+  "description": "n8n community node for Captapi — structured social media data from 29 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop): transcripts, AI summaries, comments, stats, search, downloads, and account usage. 179 operations, one API key.",
   "keywords": [
     "n8n-community-node-package",
     "n8n",
