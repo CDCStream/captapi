@@ -1520,12 +1520,94 @@ async def youtube_community_posts(
         return ApiResponse(data=data)
 
 
+def _runs_text(node: Any) -> str | None:
+    if not isinstance(node, dict):
+        return None
+    if node.get("simpleText"):
+        return str(node["simpleText"])
+    runs = node.get("runs") or []
+    text = "".join(str(r.get("text") or "") for r in runs if isinstance(r, dict))
+    return text or None
+
+
+def _find_backstage_post(obj: Any):
+    if isinstance(obj, dict):
+        if "backstagePostRenderer" in obj:
+            yield obj["backstagePostRenderer"]
+        for value in obj.values():
+            yield from _find_backstage_post(value)
+    elif isinstance(obj, list):
+        for value in obj:
+            yield from _find_backstage_post(value)
+
+
+async def _fetch_community_post_page(url: str) -> dict[str, Any]:
+    """Parse a single community post from the public post page's
+    ytInitialData (the community actor only accepts channel URLs)."""
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+        ),
+        "Accept-Language": "en-US,en;q=0.9",
+    }
+    cookies = {"CONSENT": "YES+1", "SOCS": "CAI"}
+    async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers, cookies=cookies) as client:
+        resp = await client.get(url)
+    if resp.status_code >= 400:
+        raise HTTPException(status_code=404, detail="Community post not found")
+    match = re.search(r"var ytInitialData = (\{.*?\});</script>", resp.text, flags=re.DOTALL)
+    if not match:
+        raise HTTPException(status_code=404, detail="Community post not found")
+    try:
+        data = json.loads(match.group(1))
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=502, detail="Failed to parse community post page") from exc
+    post = next(_find_backstage_post(data), None)
+    if not post:
+        raise HTTPException(status_code=404, detail="Community post not found")
+
+    post_id = safe_str(post.get("postId"))
+    author = post.get("authorText") or {}
+    author_browse = (
+        ((post.get("authorEndpoint") or {}).get("browseEndpoint") or {}).get("canonicalBaseUrl")
+    )
+    attachment = post.get("backstageAttachment") or {}
+    images = []
+    for renderer in _find_images(attachment):
+        thumbs = (renderer.get("image") or {}).get("thumbnails") or []
+        if thumbs:
+            images.append(safe_str(thumbs[-1].get("url")))
+    return {
+        "platform": "youtube",
+        "id": post_id,
+        "url": f"https://www.youtube.com/post/{post_id}" if post_id else url,
+        "text": safe_str(_runs_text(post.get("contentText"))),
+        "publishedAt": safe_str(_runs_text(post.get("publishedTimeText"))),
+        "channelName": safe_str(_runs_text(author)),
+        "channelUrl": f"https://www.youtube.com{author_browse}" if author_browse else None,
+        "likes": safe_str(_runs_text(post.get("voteCount"))),
+        "comments": None,
+        "images": [i for i in images if i],
+    }
+
+
+def _find_images(obj: Any):
+    if isinstance(obj, dict):
+        if "backstageImageRenderer" in obj:
+            yield obj["backstageImageRenderer"]
+        for value in obj.values():
+            yield from _find_images(value)
+    elif isinstance(obj, list):
+        for value in obj:
+            yield from _find_images(value)
+
+
 @router.get("/community-post-details", summary="YouTube community post details")
 async def youtube_community_post_details(
     url: str = Query(..., description="YouTube community post URL"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/community-post-details",
@@ -1534,18 +1616,11 @@ async def youtube_community_post_details(
         base_credits=7,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_YOUTUBE_COMMUNITY,
-                {"startUrls": [{"url": url}], "maxposts": 1},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Community post not found")
-            return _community_post(items[0])
+            return await _fetch_community_post_page(url)
 
         data = await cached_or_run(
             endpoint="youtube.community-post-details",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
         )
