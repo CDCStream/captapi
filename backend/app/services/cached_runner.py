@@ -39,6 +39,12 @@ async def cached_or_run(
     result = await runner()
     if effective_ttl > 0 and not _looks_empty(result):
         await cache_set(key, result, ttl=effective_ttl)
+
+    # Free by-product: fresh fetches of tracked profile/post endpoints feed
+    # the /v1/history time series (fire-and-forget, never blocks).
+    from app.services.metric_history import maybe_record
+
+    maybe_record(endpoint, params, result)
     return result
 
 

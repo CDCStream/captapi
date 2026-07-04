@@ -29,6 +29,7 @@ from app.routers import (
     facebook,
     github,
     google_search,
+    history,
     instagram,
     kick,
     kwai,
@@ -209,6 +210,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_keys.router, prefix="/v1/auth/keys", tags=["API Keys"])
     app.include_router(billing.router, prefix="/v1/billing", tags=["Billing"])
     app.include_router(monitors.router, prefix="/v1/monitors", tags=["Monitors"])
+    app.include_router(history.router, prefix="/v1/history", tags=["History"])
     app.include_router(status.router, prefix="/v1/status", tags=["Status"])
     app.include_router(mcp.router, prefix="/mcp", tags=["MCP"], include_in_schema=False)
 
