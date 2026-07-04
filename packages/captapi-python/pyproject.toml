@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "captapi"
+version = "0.1.0"
+description = "Official typed Python SDK for the Captapi social media API - 179 endpoints across 29 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Twitch, Spotify, and more)."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+authors = [{ name = "Captapi", email = "support@captapi.com" }]
+keywords = [
+    "captapi",
+    "sdk",
+    "social-media",
+    "scraping",
+    "api-client",
+    "youtube",
+    "tiktok",
+    "instagram",
+    "reddit",
+    "twitter",
+    "transcript",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = ["httpx>=0.24"]
+
+[project.urls]
+Homepage = "https://captapi.com"
+Documentation = "https://captapi.com/docs"
+Repository = "https://github.com/CDCStream/captapi"
+
+[tool.hatch.build.targets.wheel]
+packages = ["captapi"]

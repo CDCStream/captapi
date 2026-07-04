@@ -1,0 +1,51 @@
+{
+  "name": "@captapi/sdk",
+  "version": "0.1.0",
+  "description": "Official typed TypeScript SDK for the Captapi social media API — 179 endpoints across 29 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Twitch, Spotify, and more). Zero dependencies, built on fetch.",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false,
+  "keywords": [
+    "captapi",
+    "sdk",
+    "typescript",
+    "social-media",
+    "scraping",
+    "api-client",
+    "youtube",
+    "tiktok",
+    "instagram",
+    "reddit",
+    "twitter",
+    "transcript"
+  ],
+  "homepage": "https://captapi.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CDCStream/captapi.git",
+    "directory": "packages/captapi-sdk"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}

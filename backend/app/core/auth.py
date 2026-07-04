@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import structlog
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.security import hash_api_key
@@ -104,19 +104,23 @@ async def _resolve_session_jwt(jwt: str) -> ApiCaller:
 
 
 async def require_api_key(
+    request: Request,
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ) -> ApiCaller:
-    if credentials is None or not credentials.credentials:
+    # `x-api-key: capt_live_...` is accepted as an alias for the Bearer header
+    # so integrations written for other social scraping APIs work unchanged.
+    plain = (credentials.credentials if credentials else "") or request.headers.get("x-api-key", "")
+    plain = plain.strip()
+    if not plain:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=(
                 "Missing Authorization header. Send 'Authorization: Bearer "
-                "capt_live_...'. Create a key at "
+                "capt_live_...' (or 'x-api-key: capt_live_...'). Create a key at "
                 "https://captapi.com/dashboard/api-keys"
             ),
             headers={"WWW-Authenticate": "Bearer"},
         )
-    plain = credentials.credentials.strip()
 
     if plain.startswith(("capt_live_", "capt_test_", "sk_live_", "sk_test_")):
         caller = await _resolve_api_key(plain)
