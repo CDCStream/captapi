@@ -11,7 +11,7 @@ import {
 
 export const dynamic = "force-static";
 
-const VERSION = "0.2.0";
+const VERSION = "0.4.0"; // keep in sync with packages/captapi-mcp/package.json
 
 export async function GET() {
   const manifest = {
