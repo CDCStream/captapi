@@ -204,14 +204,7 @@ export default async function StatusPage() {
                 </span>
               </div>
               <div className="text-sm text-muted-foreground">
-                {data.overall.success_rate !== null && (
-                  <span className="mr-4">
-                    {data.overall.success_rate}% success rate
-                  </span>
-                )}
-                <span>
-                  {data.overall.requests_24h.toLocaleString()} requests / 24h
-                </span>
+                Last 24 hours · refreshes every 2 minutes
               </div>
             </div>
 
@@ -229,19 +222,9 @@ export default async function StatusPage() {
                         {prettyPlatform(p.platform)}
                       </span>
                     </div>
-                    <div className="flex items-center gap-6 text-sm text-muted-foreground shrink-0">
-                      <span className="hidden sm:inline">
-                        {p.requests_24h.toLocaleString()} req
-                      </span>
-                      {p.avg_response_ms !== null && (
-                        <span className="hidden md:inline">
-                          {(p.avg_response_ms / 1000).toFixed(2)}s avg
-                        </span>
-                      )}
-                      <span className={`font-medium ${style.text}`}>
-                        {p.success_rate !== null ? `${p.success_rate}%` : "—"}
-                      </span>
-                    </div>
+                    <span className={`text-sm font-medium shrink-0 ${style.text}`}>
+                      {style.label}
+                    </span>
                   </div>
                 );
               })}
@@ -253,19 +236,16 @@ export default async function StatusPage() {
             </div>
 
             <p className="mt-6 text-xs text-muted-foreground text-center">
-              Success rate counts server-side failures only (HTTP 5xx). Client
-              errors such as invalid URLs or insufficient credits do not affect
-              platform health. Generated{" "}
+              Health is computed from real production traffic; only server-side
+              failures (HTTP 5xx) count against a platform. Client errors such
+              as invalid URLs or insufficient credits do not affect health.
+              Last updated{" "}
               {new Date(data.generated_at).toLocaleString("en-US", {
                 timeZone: "UTC",
                 dateStyle: "medium",
                 timeStyle: "short",
               })}{" "}
-              UTC. Raw JSON:{" "}
-              <a className="underline" href={`${API_URL}/v1/status`}>
-                /v1/status
-              </a>
-              .
+              UTC.
             </p>
           </>
         )}
