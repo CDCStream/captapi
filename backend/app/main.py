@@ -24,6 +24,7 @@ from app.routers import (
     analytics,
     amazon_shop,
     auth_keys,
+    batch,
     billing,
     creator_pages,
     facebook,
@@ -211,6 +212,7 @@ def create_app() -> FastAPI:
     app.include_router(billing.router, prefix="/v1/billing", tags=["Billing"])
     app.include_router(monitors.router, prefix="/v1/monitors", tags=["Monitors"])
     app.include_router(history.router, prefix="/v1/history", tags=["History"])
+    app.include_router(batch.router, prefix="/v1/batch", tags=["Batch"])
     app.include_router(status.router, prefix="/v1/status", tags=["Status"])
     app.include_router(mcp.router, prefix="/mcp", tags=["MCP"], include_in_schema=False)
 
