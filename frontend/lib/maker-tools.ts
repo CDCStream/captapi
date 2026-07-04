@@ -267,6 +267,62 @@ export const MAKER_TOOLS: MakerTool[] = [
     platform: "Discord",
     type: "ai",
   },
+  {
+    slug: "who-viewed-my-profile",
+    name: "Who Viewed My Profile?",
+    blurb: "Can you see who viewed your Instagram, TikTok, Snapchat, Facebook, or LinkedIn? Instant answer per platform and content type.",
+    platform: "General",
+    type: "reference",
+  },
+  {
+    slug: "social-media-character-counter",
+    name: "Social Media Character Counter",
+    blurb: "Type once, check every limit — Instagram captions, X posts, TikTok bios, YouTube titles, and Discord messages, live.",
+    platform: "General",
+    type: "calculator",
+  },
+  {
+    slug: "creator-monetization-checker",
+    name: "Creator Monetization Checker",
+    blurb: "Enter your followers and views to see which monetization programs you qualify for on TikTok, YouTube, Instagram, and Twitch.",
+    platform: "General",
+    type: "calculator",
+  },
+  {
+    slug: "twitch-gifted-sub-calculator",
+    name: "Twitch Gifted Sub Calculator",
+    blurb: "How much is 5, 50, or 100 gifted subs? Calculate the exact cost by tier and what the streamer actually earns.",
+    platform: "Twitch",
+    type: "calculator",
+  },
+  {
+    slug: "snapchat-streaks",
+    name: "Snapchat Streaks Guide",
+    blurb: "How streaks work, what the hourglass means, how to restore a lost streak for free, and the longest streaks ever.",
+    platform: "Snapchat",
+    type: "reference",
+  },
+  {
+    slug: "twitch-name-generator",
+    name: "Twitch Name Generator",
+    blurb: "15 available-style Twitch username ideas for your niche — within the 4-25 character rules. AI-powered, no sign-up.",
+    platform: "Twitch",
+    type: "ai",
+  },
+  {
+    slug: "discord-formatting-generator",
+    name: "Discord Formatting Generator",
+    blurb: "Type once and copy Discord markdown — bold, italic, strikethrough, spoilers, code blocks, headers, and colored text.",
+    platform: "Discord",
+    type: "converter",
+  },
+  {
+    slug: "snapchat-emoji-meanings",
+    name: "Snapchat Emoji Meanings",
+    blurb: "What every Snapchat friend emoji, symbol, and icon means — the yellow heart, fire, green dot, hourglass, and more.",
+    platform: "Snapchat",
+    type: "reference",
+  },
 ];
 
 export const MAKER_TOOL_SLUGS = MAKER_TOOLS.map((t) => t.slug);

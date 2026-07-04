@@ -105,6 +105,16 @@ const TOOLS: Record<string, ToolSpec> = {
       }).filter((x) => x.value),
     }),
   },
+  "twitch-name-generator": {
+    prompt: (i) =>
+      `Generate 15 Twitch username ideas for a streamer who plays/streams "${i.interest}". Vibe: ${i.style || "any"}. Each must be 4-25 characters, only letters, numbers, and underscores, no spaces. Return JSON: {"usernames":[string]}.`,
+    normalize: (j) => ({
+      items: arr((j as { usernames?: unknown }).usernames).map((u) => {
+        const value = clip(u).replace(/[^A-Za-z0-9_]/g, "");
+        return { value, meta: `${value.length}/25 chars${value.length < 4 || value.length > 25 ? " — out of range" : ""}` };
+      }).filter((x) => x.value),
+    }),
+  },
   "instagram-caption-generator": {
     prompt: (i) =>
       `Write 10 Instagram captions about "${i.topic}". Vibe: ${i.style || "any"}. Each caption should be 1-3 sentences, may include 1-3 fitting emoji, and end with 3-5 relevant hashtags. Keep each under 300 characters. Return JSON: {"captions":[string]}.`,
