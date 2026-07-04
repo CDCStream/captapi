@@ -323,6 +323,27 @@ export const MAKER_TOOLS: MakerTool[] = [
     platform: "Snapchat",
     type: "reference",
   },
+  {
+    slug: "snapchat-plus-checker",
+    name: "Snapchat+ Checker",
+    blurb: "How to tell if someone has Snapchat+ — every visible sign, from the badge to story rewatch counts, explained.",
+    platform: "Snapchat",
+    type: "reference",
+  },
+  {
+    slug: "what-happens-when-you-block",
+    name: "What Happens When You Block?",
+    blurb: "Will they know? What can they still see? Every blocking rule for Instagram, Facebook, Snapchat, WhatsApp, and TikTok.",
+    platform: "General",
+    type: "reference",
+  },
+  {
+    slug: "youtube-money-calculator",
+    name: "YouTube Money Calculator",
+    blurb: "Estimate YouTube earnings from views with real RPM ranges by niche — long-form ads, Shorts, and channel projections.",
+    platform: "YouTube",
+    type: "calculator",
+  },
 ];
 
 export const MAKER_TOOL_SLUGS = MAKER_TOOLS.map((t) => t.slug);

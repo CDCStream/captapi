@@ -28,6 +28,7 @@ export const SNAP_EMOJIS: SnapEmoji[] = [
   { emoji: "👻", name: "Ghost (Snapcode)", meaning: "The Snapchat logo / your Snapcode — scan it to add friends.", category: "Symbol" },
   { emoji: "⭐", name: "Star", meaning: "This person has replayed one of your snaps in the last 24 hours.", category: "Symbol" },
   { emoji: "🚫", name: "Grey / no-entry", meaning: "A pending friend request or a snap that couldn't be delivered (they haven't added you back).", category: "Symbol" },
+  { emoji: "🔒", name: "Lock", meaning: "A Private Story \u2014 the friend added you to a story only selected people can see. On stories in Discover, it can also mark subscriber-only content.", category: "Symbol" },
   // Send/receive status arrows
   { emoji: "➡️", name: "Filled red arrow", meaning: "You sent a Snap without audio.", category: "Symbol" },
   { emoji: "🟪", name: "Filled purple arrow", meaning: "You sent a Snap with audio.", category: "Symbol" },
