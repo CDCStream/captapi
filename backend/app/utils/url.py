@@ -346,7 +346,7 @@ def extract_linkedin_company(url: str) -> str | None:
 
 
 # --- Rumble ----------------------------------------------------------------
-RUMBLE_VIDEO_RE = re.compile(r"rumble\.com/(v[A-Za-z0-9]+)")
+RUMBLE_VIDEO_RE = re.compile(r"rumble\.com/(?:shorts/)?(v[A-Za-z0-9]+)")
 RUMBLE_CHANNEL_RE = re.compile(r"rumble\.com/(?:c|user)/([A-Za-z0-9_\-]+)")
 
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import math
 import re
 from typing import Any
@@ -30,7 +31,7 @@ def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
         "price": item.get("price") or item.get("priceValue"),
         "priceFormatted": safe_str(item.get("priceFormatted") or item.get("priceText")),
         "rating": safe_float(item.get("rating") or item.get("stars")),
-        "reviews": safe_int(item.get("reviews") or item.get("reviewsCount")),
+        "reviews": safe_int(item.get("reviews") or item.get("reviewsCount") or item.get("reviewCount")),
         "availability": safe_str(item.get("availability")),
     }
 
@@ -60,7 +61,7 @@ def _meta(page: str, key: str) -> str:
     if key == "title":
         match = re.search(r"<title[^>]*>(.*?)</title>", page, flags=re.IGNORECASE | re.DOTALL)
         if match:
-            return re.sub(r"\s+", " ", match.group(1)).strip()
+            return html.unescape(re.sub(r"\s+", " ", match.group(1)).strip())
     patterns = [
         rf'<meta[^>]+property=["\']{re.escape(key)}["\'][^>]+content=["\']([^"\']+)["\']',
         rf'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']{re.escape(key)}["\']',
@@ -69,7 +70,7 @@ def _meta(page: str, key: str) -> str:
     for pattern in patterns:
         match = re.search(pattern, page, flags=re.IGNORECASE)
         if match:
-            return match.group(1).strip()
+            return html.unescape(match.group(1).strip())
     return ""
 
 
@@ -140,5 +141,5 @@ async def amazon_shop_page(
                 raise HTTPException(status_code=404, detail="Amazon Shop page not found")
             return _normalize_shop(items[:max_products], url, marketplace)
 
-        data = await cached_or_run("amazon-shop.page", {"url": url, "marketplace": marketplace.upper(), "limit": limit}, _run, ctx)
+        data = await cached_or_run("amazon-shop.page", {"url": url, "marketplace": marketplace.upper(), "limit": limit, "v": 2}, _run, ctx)
         return ApiResponse(data=data)

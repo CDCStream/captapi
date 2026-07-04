@@ -144,7 +144,45 @@ def _first_string(data: dict[str, Any], keys: tuple[str, ...]) -> str | None:
     return None
 
 
+async def _fetch_komi(value: str) -> dict[str, Any] | None:
+    """Komi pages are a client-rendered Next.js shell with no hydration data,
+    but the public talent API serves the full profile by username."""
+    username = value.rstrip("/").rsplit("/", 1)[-1].lstrip("@")
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
+    async with httpx.AsyncClient(timeout=30, headers=headers) as client:
+        resp = await client.get(f"https://api.komi.io/api/talent/usernames/{username}")
+    if resp.status_code != 200:
+        return None
+    data = resp.json()
+    profile = data.get("talentProfile") or {}
+    links = [
+        {
+            "id": safe_str(link.get("id")),
+            "title": safe_str(link.get("type")),
+            "url": safe_str(link.get("link")),
+            "type": safe_str(link.get("type")),
+            "thumbnail": None,
+        }
+        for link in profile.get("socialProfileLinks") or []
+        if isinstance(link, dict) and link.get("link")
+    ]
+    return {
+        "platform": "komi",
+        "url": f"https://komi.io/{data.get('username') or username}",
+        "username": safe_str(data.get("username")),
+        "name": safe_str(profile.get("displayName")) or safe_str(data.get("username")),
+        "description": safe_str(profile.get("bio")),
+        "avatar": safe_str(data.get("avatar") or profile.get("avatar")),
+        "linkCount": len(links),
+        "links": links,
+    }
+
+
 async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
+    if platform == "komi":
+        komi = await _fetch_komi(value)
+        if komi:
+            return komi
     profile = _url(platform, value)
     headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
     async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
@@ -183,7 +221,7 @@ async def _page(platform: str, url: str, caller: ApiCaller):
         )
     profile = _url(platform, url)
     async with billed_call(caller=caller, endpoint=f"/v1/{platform}/{'profile' if platform == 'linkme' else 'page'}", platform=platform, resource_url=profile, base_credits=4) as ctx:
-        data = await cached_or_run(f"{platform}.page", {"url": profile}, lambda: _fetch_page(platform, profile), ctx)
+        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 2}, lambda: _fetch_page(platform, profile), ctx)
         if not (data.get("username") or data.get("links")):
             raise HTTPException(status_code=404, detail=f"{platform.title()} page not found")
         return ApiResponse(data=data)

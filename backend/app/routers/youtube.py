@@ -18,7 +18,7 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
-from app.services.apify_client import get_apify
+from app.services.apify_client import ApifyClient, get_apify
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
 from app.utils.formatters import safe_int, safe_list, safe_str
@@ -1073,7 +1073,9 @@ async def youtube_trending_shorts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await get_apify().run_actor_sync(
+            # Browser-based actor regularly needs >120s; the default sync
+            # timeout turns those runs into 502s.
+            items = await ApifyClient(timeout=280).run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_SHORTS,
                 {
                     "searchQuery": q,

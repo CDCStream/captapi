@@ -288,10 +288,97 @@ def batch3_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
     return tests
 
 
+def batch4_phase1() -> list[tuple[str, str, dict]]:
+    return [
+        ("rumble-search", "/v1/rumble/search", {"q": "space", "limit": 5}),
+        ("rumble-channel-videos", "/v1/rumble/channel-videos", {"url": "https://rumble.com/c/Bongino", "limit": 5}),
+        ("youtube-playlist", "/v1/youtube/playlist", {"url": "https://www.youtube.com/playlist?list=PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj", "limit": 5}),
+        ("youtube-trending-shorts", "/v1/youtube/trending-shorts", {"limit": 10}),
+        ("youtube-community-post-details", "/v1/youtube/community-post-details", {"url": "https://www.youtube.com/post/UgkxfMvMnSnV3Ww9HwAY2wFGmVevmhRaYAYO"}),
+        ("youtube-video-sponsors", "/v1/youtube/video-sponsors", {"url": "https://www.youtube.com/watch?v=Wdjh81uH6FU"}),
+        ("twitch-profile", "/v1/twitch/profile", {"url": "https://www.twitch.tv/shroud"}),
+        ("twitch-user-videos", "/v1/twitch/user-videos", {"url": "https://www.twitch.tv/shroud", "limit": 5}),
+        ("twitch-user-schedule", "/v1/twitch/user-schedule", {"url": "https://www.twitch.tv/criticalrole"}),
+        ("twitch-clip", "/v1/twitch/clip", {"url": "https://www.twitch.tv/xqc", "limit": 10}),
+        ("account-balance", "/v1/account/balance", {}),
+        ("account-request-history", "/v1/account/request-history", {"limit": 5}),
+        ("account-daily-usage", "/v1/account/daily-usage", {"days": 7}),
+        ("account-most-used-routes", "/v1/account/most-used-routes", {"days": 30, "limit": 5}),
+        ("instagram-basic-profile", "/v1/instagram/basic-profile", {"url": "https://www.instagram.com/cristiano"}),
+        ("instagram-trending-reels", "/v1/instagram/trending-reels", {"country": "United States", "limit": 10}),
+        ("instagram-reels-by-audio-id", "/v1/instagram/reels-by-audio-id", {"audio_id": "27919946310946207", "limit": 5}),
+        ("bluesky-profile", "/v1/bluesky/profile", {"url": "https://bsky.app/profile/jay.bsky.team"}),
+        ("bluesky-user-posts", "/v1/bluesky/user-posts", {"url": "https://bsky.app/profile/jay.bsky.team", "limit": 5}),
+        ("soundcloud-artist", "/v1/soundcloud/artist", {"url": "https://soundcloud.com/flume"}),
+        ("soundcloud-artist-tracks", "/v1/soundcloud/artist-tracks", {"url": "https://soundcloud.com/flume", "limit": 5}),
+        ("truth-social-profile", "/v1/truth-social/profile", {"url": "@realDonaldTrump"}),
+        ("truth-social-user-posts", "/v1/truth-social/user-posts", {"url": "@realDonaldTrump", "limit": 5}),
+        ("kwai-profile", "/v1/kwai/profile", {"url": "https://www.kuaishou.com/profile/2542916559"}),
+        ("kwai-user-posts", "/v1/kwai/user-posts", {"url": "https://www.kuaishou.com/profile/2542916559", "limit": 5}),
+        ("kwai-post", "/v1/kwai/post", {"url": "https://www.kuaishou.com/short-video/5241627202658372579?authorId=2542916559"}),
+        ("reddit-post-transcript", "/v1/reddit/post-transcript", {"url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/", "limit": 5}),
+        ("tiktok-shop-products", "/v1/tiktok-shop/shop-products", {"url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079", "limit": 5}),
+        ("linktree-page", "/v1/linktree/page", {"url": "https://linktr.ee/selenagomez"}),
+        ("kick-clip", "/v1/kick/clip", {"url": "https://kick.com/xqc", "limit": 10}),
+        ("amazon-shop-page", "/v1/amazon-shop/page", {"url": "https://www.amazon.com/sp?seller=A294P4X9EWVXLJ", "limit": 5}),
+        ("age-gender-get", "/v1/age-gender", {"name": "Emma"}),
+        ("komi-page", "/v1/komi/page", {"url": "https://komi.io/ksi"}),
+        ("pillar-page", "/v1/pillar/page", {"url": "https://pillar.io/jayshetty"}),
+        ("linkbio-page", "/v1/linkbio/page", {"url": "https://lnk.bio/nasa"}),
+        ("linkme-profile", "/v1/linkme/profile", {"url": "https://link.me/kevinhart"}),
+    ]
+
+
+def batch4_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
+    tests: list[tuple[str, str, dict]] = []
+
+    def first_of(slug: str, *list_keys: str) -> dict:
+        body = p1.get(slug, {}).get("body") or {}
+        d = body.get("data") or {}
+        for key in list_keys:
+            rows = d.get(key)
+            if isinstance(rows, list) and rows:
+                return next((r for r in rows if isinstance(r, dict)), {})
+        return {}
+
+    video = first_of("rumble-search", "results", "videos") or first_of("rumble-channel-videos", "videos")
+    video_url = video.get("url") or video.get("videoUrl")
+    if video_url:
+        tests.append(("rumble-video-details", "/v1/rumble/video-details", {"url": video_url}))
+        tests.append(("rumble-transcript", "/v1/rumble/transcript", {"url": video_url}))
+        tests.append(("rumble-comments", "/v1/rumble/comments", {"url": video_url, "limit": 5}))
+    else:
+        print("!! no rumble video url")
+
+    track = first_of("soundcloud-artist-tracks", "tracks", "results")
+    track_url = track.get("url") or track.get("permalink")
+    if track_url:
+        tests.append(("soundcloud-track", "/v1/soundcloud/track", {"url": track_url}))
+    else:
+        print("!! no soundcloud track url")
+
+    bsky_post = first_of("bluesky-user-posts", "posts")
+    bsky_url = bsky_post.get("url")
+    if bsky_url:
+        tests.append(("bluesky-post-details", "/v1/bluesky/post-details", {"url": bsky_url}))
+    else:
+        print("!! no bluesky post url")
+
+    truth_post = first_of("truth-social-user-posts", "posts")
+    truth_url = truth_post.get("url") or truth_post.get("id")
+    if truth_url:
+        tests.append(("truth-social-post", "/v1/truth-social/post", {"url": truth_url}))
+    else:
+        print("!! no truth social post url")
+
+    return tests
+
+
 BATCHES = {
     "batch1": (batch1_phase1, batch1_phase2),
     "batch2": (batch2_phase1, batch2_phase2),
     "batch3": (batch3_phase1, batch3_phase2),
+    "batch4": (batch4_phase1, batch4_phase2),
 }
 
 

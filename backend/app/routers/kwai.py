@@ -39,6 +39,10 @@ def _id(value: str) -> str | None:
     return None
 
 
+def _good_rows(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [i for i in items if isinstance(i, dict) and i.get("status") != "error"]
+
+
 def _check_rows(items: list[dict[str, Any]], not_found_detail: str) -> list[dict[str, Any]]:
     """The actor emits ``{"status": "error", "errorMessage": ...}`` rows instead of
     failing the run. Surface those as proper HTTP errors rather than returning
@@ -118,17 +122,50 @@ async def profile(
     settings = get_settings()
     async with billed_call(caller=caller, endpoint="/v1/kwai/profile", platform="kwai", resource_url=url, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await get_apify().run_actor_sync(
+            apify = get_apify()
+            items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_KWAI,
                 {"operation": "userDetail", "userId": user_id},
                 max_items=1,
             )
-            if not items:
-                raise HTTPException(status_code=404, detail="Kwai profile not found")
-            good = _check_rows(items, "Kwai profile not found")
-            return _normalize_profile(good[0])
+            good = _good_rows(items)
+            if good:
+                return _normalize_profile(good[0])
+            # The actor's userDetail op is frequently broken while userVideos
+            # keeps working; synthesize the profile from the newest video row,
+            # enriched with follower counts via searchUser when possible.
+            videos = _good_rows(
+                await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_KWAI,
+                    {"operation": "userVideos", "userId": user_id, "maxPages": 1},
+                    max_items=5,
+                )
+            )
+            if not videos:
+                _check_rows(items, "Kwai profile not found")  # raises with actor's error
+            base = videos[0]
+            profile = _normalize_profile(base)
+            profile["id"] = profile["id"] or safe_str(user_id)
+            profile["url"] = profile["url"] or f"https://www.kuaishou.com/profile/{user_id}"
+            user_name = base.get("userName") or base.get("user_name")
+            if user_name:
+                matches = _good_rows(
+                    await apify.run_actor_sync(
+                        settings.APIFY_ACTOR_KWAI,
+                        {"operation": "searchUser", "keyword": str(user_name), "maxPages": 1},
+                        max_items=20,
+                    )
+                )
+                match = next((m for m in matches if str(m.get("userId") or m.get("user_id")) == str(user_id)), None)
+                if match:
+                    profile["followers"] = profile["followers"] or safe_int(match.get("fansCount") or match.get("fanCount"))
+                    profile["bio"] = profile["bio"] or safe_str(match.get("userBio"))
+                    profile["verified"] = profile["verified"] or bool(match.get("userVerified") or match.get("verified"))
+                    profile["avatar"] = profile["avatar"] or safe_str(match.get("avatarUrl") or match.get("headurl"))
+            profile["raw"] = {k: v for k, v in base.items() if k in ("userId", "userName", "kwaiId", "userSex", "userVerified", "avatarUrl", "userPageUrl")}
+            return profile
 
-        data = await cached_or_run("kwai.profile", {"user_id": user_id}, _run, ctx)
+        data = await cached_or_run("kwai.profile", {"user_id": user_id, "v": 2}, _run, ctx)
         return ApiResponse(data=data)
 
 
@@ -166,18 +203,39 @@ async def post(
     video_id = _id(url)
     if not video_id:
         raise HTTPException(status_code=400, detail="Invalid Kwai post URL or ID")
+    author_match = re.search(r"[?&](?:authorId|userId)=(\w+)", url or "")
+    author_id = author_match.group(1) if author_match else None
     settings = get_settings()
     async with billed_call(caller=caller, endpoint="/v1/kwai/post", platform="kwai", resource_url=url, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await get_apify().run_actor_sync(
+            apify = get_apify()
+            items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_KWAI,
                 {"operation": "videoDetail", "videoId": video_id},
                 max_items=1,
             )
-            if not items:
-                raise HTTPException(status_code=404, detail="Kwai post not found")
-            good = _check_rows(items, "Kwai post not found")
-            return _normalize_post(good[0])
+            good = _good_rows(items)
+            if good:
+                return _normalize_post(good[0])
+            # videoDetail is frequently broken in the actor. When the URL
+            # carries the author (kuaishou share links include ?authorId=...),
+            # find the video in the author's recent uploads instead.
+            if author_id:
+                videos = _good_rows(
+                    await apify.run_actor_sync(
+                        settings.APIFY_ACTOR_KWAI,
+                        {"operation": "userVideos", "userId": author_id, "maxPages": 3},
+                        max_items=100,
+                    )
+                )
+                match = next(
+                    (v for v in videos if str(v.get("videoId") or v.get("photo_id") or v.get("photoId")) == str(video_id)),
+                    None,
+                )
+                if match:
+                    return _normalize_post(match)
+            _check_rows(items, "Kwai post not found")  # raises with actor's error
+            raise HTTPException(status_code=404, detail="Kwai post not found")
 
-        data = await cached_or_run("kwai.post", {"video_id": video_id}, _run, ctx)
+        data = await cached_or_run("kwai.post", {"video_id": video_id, "author_id": author_id, "v": 2}, _run, ctx)
         return ApiResponse(data=data)

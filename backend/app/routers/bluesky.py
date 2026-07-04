@@ -92,12 +92,23 @@ def _author(a: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _web_url(post: dict[str, Any]) -> str | None:
+    """Build the bsky.app permalink from the AT-URI rkey + author handle."""
+    uri = post.get("uri") or ""
+    handle = (post.get("author") or {}).get("handle")
+    rkey = uri.rsplit("/", 1)[-1] if "/" in uri else None
+    if handle and rkey:
+        return f"https://bsky.app/profile/{handle}/post/{rkey}"
+    return None
+
+
 def _normalize_post(post: dict[str, Any]) -> dict[str, Any]:
     record = post.get("record") or {}
     author = post.get("author") or {}
     return {
         "platform": "bluesky",
         "uri": safe_str(post.get("uri")),
+        "url": _web_url(post),
         "cid": safe_str(post.get("cid")),
         "text": safe_str(record.get("text")),
         "publishedAt": safe_str(record.get("createdAt") or post.get("indexedAt")),
@@ -179,7 +190,7 @@ async def bluesky_user_posts(
 
         result = await cached_or_run(
             endpoint="bluesky.user-posts",
-            params={"actor": actor, "limit": limit},
+            params={"actor": actor, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -215,7 +226,7 @@ async def bluesky_post_details(
 
         result = await cached_or_run(
             endpoint="bluesky.post-details",
-            params={"handle": handle, "rkey": rkey},
+            params={"handle": handle, "rkey": rkey, "v": 2},
             runner=_run,
             ctx=ctx,
         )

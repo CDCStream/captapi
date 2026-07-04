@@ -57,15 +57,26 @@ def _require_rumble_channel_url(url: str) -> str:
     return channel
 
 
+def _clean_url(value: Any) -> str | None:
+    """Strip Rumble's tracking query params (e9s/sci) so returned URLs are
+    canonical and reusable as inputs to the detail endpoints."""
+    url = safe_str(value)
+    if not url:
+        return url
+    parts = urlsplit(url)
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
+
+
 def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
+    url = _clean_url(item.get("url") or item.get("videoUrl") or item.get("sourceUrl"))
     return {
         "platform": "rumble",
-        "id": safe_str(item.get("id") or item.get("videoId") or item.get("videoSlug")),
-        "url": safe_str(item.get("url") or item.get("videoUrl") or item.get("sourceUrl")),
+        "id": safe_str(item.get("id") or item.get("videoId") or item.get("videoSlug")) or extract_rumble_video_id(url or ""),
+        "url": url,
         "title": safe_str(item.get("title") or item.get("videoTitle")),
         "description": safe_str(item.get("description")),
         "channel": safe_str(item.get("channel") or item.get("channelName") or item.get("author")),
-        "channelUrl": safe_str(item.get("channelUrl")),
+        "channelUrl": _clean_url(item.get("channelUrl")),
         "views": safe_int(item.get("views") or item.get("viewCount") or item.get("viewsCount")),
         "likes": safe_int(
             item.get("likes")
@@ -255,7 +266,7 @@ async def channel_videos(
 
         data = await cached_or_run(
             endpoint="rumble.channel-videos",
-            params={"channel": channel, "limit": limit},
+            params={"channel": channel, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -371,7 +382,7 @@ async def rumble_search(
 
         data = await cached_or_run(
             endpoint="rumble.search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
