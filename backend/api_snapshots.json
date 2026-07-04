@@ -6127,18 +6127,18 @@
     "credits": null,
     "data": {
       "platform": "reddit",
-      "id": "t3_1umfd43",
-      "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/",
-      "title": "Radiation exposure may become the biggest challenge for future Moon and Mars missions",
-      "text": "I&#39;ve been reading more about Artemis and future Mars mission planning, and one aspect that seems to receive surprisingly little public discussion is radiation exposure beyond low Earth orbit. NASA has published career radiation exposure limits, and it&#39;s clear that missions outside Earth&#39;s magnetosphere expose crews to significantly higher doses from galactic cosmic rays and solar particle events. Unlike many other engineering problems, there still doesn&#39;t seem to be a practical solution. Effective shielding is extremely heavy, and medical countermeasures are still being researched. It makes me wonder how these risks are balanced during mission planning. Astronauts obviously understand that spaceflight is dangerous, but long-duration missions introduce health risks that may not become apparent until decades later. As plans for lunar bases and eventual Mars missions continue to move forward, this seems like an issue that deserves more attention. I&#39;d be interested in hearing different perspectives on how agencies approach these tradeoffs today, especially from people familiar with space medicine, radiation research, or mission planning. Do you think current public discussions accurately reflect the scale of the challenge, or is this one of the least appreciated obstacles to long-duration human spaceflight?  &#32; submitted by &#32;  /u/Low-Mathematician137   [link] &#32; [comments]",
-      "subreddit": "r/space",
-      "author": "Low-Mathematician137",
-      "upvotes": null,
-      "comments": null,
-      "publishedAt": "2026-07-03T14:04:13.000Z",
-      "flair": null,
-      "nsfw": null,
-      "thumbnail": null
+      "id": "1ldt0qj",
+      "url": "https://www.reddit.com/r/Astronomy/comments/1ldt0qj/pope_leo_james_webb_telescope_shows_us_what_the/",
+      "title": "Pope Leo: James Webb telescope shows us what the Bible couldn’t",
+      "text": null,
+      "subreddit": "Astronomy",
+      "author": "TimesandSundayTimes",
+      "upvotes": 10033,
+      "comments": 518,
+      "publishedAt": "2025-06-17T17:18:24+00:00",
+      "flair": "Other: [Topic]",
+      "nsfw": false,
+      "thumbnail": "https://external-preview.redd.it/MbjZD5otMaLYJE0tFCzb5LdzZb4-hDrsO9RKmgk-cww.jpeg?width=140&height=78&crop=140:78,smart&auto=webp&s=da110f507d5d9f182160a877e1860fa39f9b86a3"
     }
   },
   "reddit-post-comments": {
@@ -6146,58 +6146,71 @@
     "status": 200,
     "credits": null,
     "data": {
-      "totalReturned": 4,
+      "totalReturned": 5,
       "comments": [
         {
-          "id": "t1_ovbnkri",
-          "author": "EffingWasps",
-          "text": "Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme",
-          "upvotes": null,
-          "publishedAt": "2026-07-03T14:19:44.000Z",
-          "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovbnkri/",
+          "id": "t1_myap7vg",
+          "author": "TimesandSundayTimes",
+          "text": "Scientists using the James Webb space telescope are seeing the “seeds God has sown in the universe”, the Pope has said, saying it was “an exciting time to be an astronomer”.\n\nHe said the telescope revealed wonders of which the authors of biblical scriptures could only dream, and its images of the oldest and most distant galaxies in the cosmos filled people with a sense of “mysterious joy”.\n\nThe Pope held an audience for young astronomers attending a summer school at the Vatican Observatory outside Rome this week, focusing on the telescope’s work.\n\nHe told them it was a “truly remarkable instrument” that meant that “for the first time, we are able to peer deeply into the atmosphere of exoplanets where life may be developing and study the nebulae where planetary systems themselves are forming”",
+          "upvotes": 2608,
+          "publishedAt": "2025-06-17T17:18:38.997000+0000",
+          "url": "https://www.reddit.com/r/Astronomy/comments/1ldt0qj/pope_leo_james_webb_telescope_shows_us_what_the/myap7vg/",
           "parentId": null,
-          "depth": null,
+          "depth": 0,
           "isSubmitter": null,
           "edited": null,
           "stickied": null
         },
         {
-          "id": "t1_ovbli62",
-          "author": "b407driver",
-          "text": "Become? It has always been the greatest (unsolved) challenge.",
-          "upvotes": null,
-          "publishedAt": "2026-07-03T14:09:40.000Z",
-          "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovbli62/",
-          "parentId": null,
-          "depth": null,
+          "id": "t1_myay1kt",
+          "author": "Andromeda321",
+          "text": "Astronomer here! I had a friend who made it into this summer school back in undergrad. Only two people get in from every country and it’s very prestigious, but always sounded like an amazing experience for students out there who are interested! (Like, you go to Italy for the summer and live in a castle and learn about astronomy for free. And you meet the Pope!)\n\nLink for any students reading who might want to apply: https://www.vaticanobservatory.org/education/summer-school/",
+          "upvotes": 1121,
+          "publishedAt": "2025-06-17T17:58:03.725000+0000",
+          "url": "https://www.reddit.com/r/Astronomy/comments/1ldt0qj/pope_leo_james_webb_telescope_shows_us_what_the/myay1kt/",
+          "parentId": "t1_myap7vg",
+          "depth": 1,
+          "isSubmitter": null,
+          "edited": true,
+          "stickied": null
+        },
+        {
+          "id": "t1_mycacrk",
+          "author": "sabrinapak",
+          "text": "What class were you? I was in the class of 2003, the last to meet Pope John Paul. It was a great program and experience!",
+          "upvotes": 165,
+          "publishedAt": "2025-06-17T21:48:12.917000+0000",
+          "url": "https://www.reddit.com/r/Astronomy/comments/1ldt0qj/pope_leo_james_webb_telescope_shows_us_what_the/mycacrk/",
+          "parentId": "t1_myay1kt",
+          "depth": 2,
           "isSubmitter": null,
           "edited": null,
           "stickied": null
         },
         {
-          "id": "t1_ovc0szx",
-          "author": "Waarm",
-          "text": "The current biggest challenge is funding.",
-          "upvotes": null,
-          "publishedAt": "2026-07-03T15:21:27.000Z",
-          "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovc0szx/",
-          "parentId": null,
-          "depth": null,
+          "id": "t1_myce37w",
+          "author": "Andromeda321",
+          "text": "I wasn’t in it, my friend was, she went in 2007. :)",
+          "upvotes": 104,
+          "publishedAt": "2025-06-17T22:07:34.654000+0000",
+          "url": "https://www.reddit.com/r/Astronomy/comments/1ldt0qj/pope_leo_james_webb_telescope_shows_us_what_the/myce37w/",
+          "parentId": "t1_mycacrk",
+          "depth": 3,
           "isSubmitter": null,
           "edited": null,
           "stickied": null
         },
         {
-          "id": "t1_ovbmqa5",
-          "author": "degh555",
-          "text": "The OP is observing that future manned missions will require significantly longer durations beyond the protection of the magnetosphere. Apollo 11 lasted 8 days, a trip to mars would last 60-90 times longer.",
-          "upvotes": null,
-          "publishedAt": "2026-07-03T14:15:38.000Z",
-          "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovbmqa5/",
-          "parentId": null,
-          "depth": null,
+          "id": "t1_mycwe3c",
+          "author": "_thenotsodarkknight_",
+          "text": "I attended one too, and highly highly recommend it to any and every astro student!!!! They do one every 2 years, on various astronomy topics, with a different theme every time. The lecturers are all experts from the field, and it's all secular (which may be a worry for some people), with no talk of religion whatsoever. \n\nApplications are due in November generally, so very early for a program in June. The next should be ~ November 2026!",
+          "upvotes": 56,
+          "publishedAt": "2025-06-17T23:46:39.556000+0000",
+          "url": "https://www.reddit.com/r/Astronomy/comments/1ldt0qj/pope_leo_james_webb_telescope_shows_us_what_the/mycwe3c/",
+          "parentId": "t1_myay1kt",
+          "depth": 2,
           "isSubmitter": null,
-          "edited": null,
+          "edited": true,
           "stickied": null
         }
       ]
@@ -7990,9 +8003,85 @@
     "status": 200,
     "credits": null,
     "data": {
-      "url": "https://www.tiktok.com/shop/pdp/1732453741759992293",
-      "totalReturned": 0,
-      "reviews": []
+      "url": "https://www.tiktok.com/shop/pdp/1731962298839634826",
+      "totalReturned": 5,
+      "reviews": [
+        {
+          "platform": "tiktok_shop",
+          "id": "7640239119020558093",
+          "rating": 5,
+          "text": "I love it. It’s cute. Fits in both my small Mini Cooper and Mini Countryman cup holders. It does fit a small drink like a freeze or shake from bk,if you take off the lid.",
+          "createdAt": "2026-05-15T21:49:56.991000+00:00",
+          "author": {
+            "name": null,
+            "avatar": null
+          },
+          "images": [],
+          "verifiedPurchase": true,
+          "sku": "Thicc 16oz | Ice Cream",
+          "country": "US"
+        },
+        {
+          "platform": "tiktok_shop",
+          "id": "7599033354029254413",
+          "rating": 4,
+          "text": "This cup is indeed visually appealing. Although it does exhibit some minor flaws, specifically where the 'frost buddy' wording is engraved into the cup and the logo is not included on the engraving on the opposite side, overall it is a well-made cup. I am satisfied with my purchase.",
+          "createdAt": "2026-01-24T20:50:51.887000+00:00",
+          "author": {
+            "name": null,
+            "avatar": null
+          },
+          "images": [],
+          "verifiedPurchase": true,
+          "sku": "To-Go | Duck-It",
+          "country": "US"
+        },
+        {
+          "platform": "tiktok_shop",
+          "id": "7643464524599723789",
+          "rating": 5,
+          "text": "Fast delivery! Purchased as a gift! Love the lilac color!",
+          "createdAt": "2026-05-24T14:26:17.644000+00:00",
+          "author": {
+            "name": null,
+            "avatar": null
+          },
+          "images": [],
+          "verifiedPurchase": true,
+          "sku": "Thicc 40oz | Lavender Fields",
+          "country": "US"
+        },
+        {
+          "platform": "tiktok_shop",
+          "id": "7637664681263646477",
+          "rating": 3,
+          "text": "I love frost buddy cup and use them  but this one has some issues. I haven't even had it a week and has only been hand washed and it's chipping off in multiple places. I'm very disappointed because I absolutely love this design.",
+          "createdAt": "2026-05-08T23:19:53.797000+00:00",
+          "author": {
+            "name": null,
+            "avatar": null
+          },
+          "images": [],
+          "verifiedPurchase": true,
+          "sku": "Bottle Buddy 24oz | I Scream 4 Ice Cream",
+          "country": "US"
+        },
+        {
+          "platform": "tiktok_shop",
+          "id": "7604624285583410957",
+          "rating": 5,
+          "text": "I love this “cup holder”. It’s amazing. Works on all size drink cups. Keeps your drink cold longer. I can’t wait to buy my next one.",
+          "createdAt": "2026-02-08T22:26:41.623000+00:00",
+          "author": {
+            "name": null,
+            "avatar": null
+          },
+          "images": [],
+          "verifiedPurchase": true,
+          "sku": "To-Go | White *Lid Not Included",
+          "country": "US"
+        }
+      ]
     }
   },
   "tiktok-ad-library-ad-details": {
@@ -20094,7 +20183,14 @@
     "data": {
       "platform": "twitch",
       "username": "criticalrole",
-      "schedule": []
+      "schedule": [
+        {
+          "title": "Age of Umbra: Sallowlands",
+          "startAt": "2026-07-10T02:00:00Z",
+          "endAt": "2026-07-10T06:00:00Z",
+          "game": null
+        }
+      ]
     }
   },
   "twitch-clip": {
@@ -23919,63 +24015,63 @@
     "credits": null,
     "data": {
       "platform": "reddit",
-      "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/",
+      "url": "https://www.reddit.com/r/Astronomy/comments/1ldt0qj/pope_leo_james_webb_telescope_shows_us_what_the/",
       "post": {
         "platform": "reddit",
-        "id": "t3_1umfd43",
-        "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/",
-        "title": "Radiation exposure may become the biggest challenge for future Moon and Mars missions",
-        "text": "I&#39;ve been reading more about Artemis and future Mars mission planning, and one aspect that seems to receive surprisingly little public discussion is radiation exposure beyond low Earth orbit. NASA has published career radiation exposure limits, and it&#39;s clear that missions outside Earth&#39;s magnetosphere expose crews to significantly higher doses from galactic cosmic rays and solar particle events. Unlike many other engineering problems, there still doesn&#39;t seem to be a practical solution. Effective shielding is extremely heavy, and medical countermeasures are still being researched. It makes me wonder how these risks are balanced during mission planning. Astronauts obviously understand that spaceflight is dangerous, but long-duration missions introduce health risks that may not become apparent until decades later. As plans for lunar bases and eventual Mars missions continue to move forward, this seems like an issue that deserves more attention. I&#39;d be interested in hearing different perspectives on how agencies approach these tradeoffs today, especially from people familiar with space medicine, radiation research, or mission planning. Do you think current public discussions accurately reflect the scale of the challenge, or is this one of the least appreciated obstacles to long-duration human spaceflight?  &#32; submitted by &#32;  /u/Low-Mathematician137   [link] &#32; [comments]",
-        "subreddit": "r/space",
-        "author": "Low-Mathematician137",
-        "upvotes": null,
-        "comments": null,
-        "publishedAt": "2026-07-03T14:04:13.000Z",
-        "flair": null,
-        "nsfw": null,
-        "thumbnail": null
+        "id": "1ldt0qj",
+        "url": "https://www.reddit.com/r/Astronomy/comments/1ldt0qj/pope_leo_james_webb_telescope_shows_us_what_the/",
+        "title": "Pope Leo: James Webb telescope shows us what the Bible couldn’t",
+        "text": null,
+        "subreddit": "Astronomy",
+        "author": "TimesandSundayTimes",
+        "upvotes": 10038,
+        "comments": 518,
+        "publishedAt": "2025-06-17T17:18:24+00:00",
+        "flair": "Other: [Topic]",
+        "nsfw": false,
+        "thumbnail": "https://external-preview.redd.it/MbjZD5otMaLYJE0tFCzb5LdzZb4-hDrsO9RKmgk-cww.jpeg?width=140&height=78&crop=140:78,smart&auto=webp&s=da110f507d5d9f182160a877e1860fa39f9b86a3"
       },
-      "transcript": "Title: Radiation exposure may become the biggest challenge for future Moon and Mars missions\n\nI&#39;ve been reading more about Artemis and future Mars mission planning, and one aspect that seems to receive surprisingly little public discussion is radiation exposure beyond low Earth orbit. NASA has published career radiation exposure limits, and it&#39;s clear that missions outside Earth&#39;s magnetosphere expose crews to significantly higher doses from galactic cosmic rays and solar particle events. Unlike many other engineering problems, there still doesn&#39;t seem to be a practical solution. Effective shielding is extremely heavy, and medical countermeasures are still being researched. It makes me wonder how these risks are balanced during mission planning. Astronauts obviously understand that spaceflight is dangerous, but long-duration missions introduce health risks that may not become apparent until decades later. As plans for lunar bases and eventual Mars missions continue to move forward, this seems like an issue that deserves more attention. I&#39;d be interested in hearing different perspectives on how agencies approach these tradeoffs today, especially from people familiar with space medicine, radiation research, or mission planning. Do you think current public discussions accurately reflect the scale of the challenge, or is this one of the least appreciated obstacles to long-duration human spaceflight?  &#32; submitted by &#32;  /u/Low-Mathematician137   [link] &#32; [comments]\n\nEffingWasps: Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme\n\nb407driver: Become? It has always been the greatest (unsolved) challenge.\n\nWaarm: The current biggest challenge is funding.\n\ndegh555: The OP is observing that future manned missions will require significantly longer durations beyond the protection of the magnetosphere. Apollo 11 lasted 8 days, a trip to mars would last 60-90 times longer.",
+      "transcript": "Title: Pope Leo: James Webb telescope shows us what the Bible couldn’t\n\nTimesandSundayTimes: Scientists using the James Webb space telescope are seeing the “seeds God has sown in the universe”, the Pope has said, saying it was “an exciting time to be an astronomer”.\n\nHe said the telescope revealed wonders of which the authors of biblical scriptures could only dream, and its images of the oldest and most distant galaxies in the cosmos filled people with a sense of “mysterious joy”.\n\nThe Pope held an audience for young astronomers attending a summer school at the Vatican Observatory outside Rome this week, focusing on the telescope’s work.\n\nHe told them it was a “truly remarkable instrument” that meant that “for the first time, we are able to peer deeply into the atmosphere of exoplanets where life may be developing and study the nebulae where planetary systems themselves are forming”\n\nAndromeda321: Astronomer here! I had a friend who made it into this summer school back in undergrad. Only two people get in from every country and it’s very prestigious, but always sounded like an amazing experience for students out there who are interested! (Like, you go to Italy for the summer and live in a castle and learn about astronomy for free. And you meet the Pope!)\n\nLink for any students reading who might want to apply: https://www.vaticanobservatory.org/education/summer-school/\n\nsabrinapak: What class were you? I was in the class of 2003, the last to meet Pope John Paul. It was a great program and experience!\n\nAndromeda321: I wasn’t in it, my friend was, she went in 2007. :)\n\n_thenotsodarkknight_: I attended one too, and highly highly recommend it to any and every astro student!!!! They do one every 2 years, on various astronomy topics, with a different theme every time. The lecturers are all experts from the field, and it's all secular (which may be a worry for some people), with no talk of religion whatsoever. \n\nApplications are due in November generally, so very early for a program in June. The next should be ~ November 2026!",
       "transcriptSegments": [
         {
           "speaker": "post",
-          "text": "Radiation exposure may become the biggest challenge for future Moon and Mars missions",
+          "text": "Pope Leo: James Webb telescope shows us what the Bible couldn’t",
           "start": 0,
           "duration": 0,
           "timestamp": "00:00"
         },
         {
-          "speaker": "Low-Mathematician137",
-          "text": "I&#39;ve been reading more about Artemis and future Mars mission planning, and one aspect that seems to receive surprisingly little public discussion is radiation exposure beyond low Earth orbit. NASA has published career radiation exposure limits, and it&#39;s clear that missions outside Earth&#39;s magnetosphere expose crews to significantly higher doses from galactic cosmic rays and solar particle events. Unlike many other engineering problems, there still doesn&#39;t seem to be a practical solution. Effective shielding is extremely heavy, and medical countermeasures are still being researched. It makes me wonder how these risks are balanced during mission planning. Astronauts obviously understand that spaceflight is dangerous, but long-duration missions introduce health risks that may not become apparent until decades later. As plans for lunar bases and eventual Mars missions continue to move forward, this seems like an issue that deserves more attention. I&#39;d be interested in hearing different perspectives on how agencies approach these tradeoffs today, especially from people familiar with space medicine, radiation research, or mission planning. Do you think current public discussions accurately reflect the scale of the challenge, or is this one of the least appreciated obstacles to long-duration human spaceflight?  &#32; submitted by &#32;  /u/Low-Mathematician137   [link] &#32; [comments]",
+          "speaker": "TimesandSundayTimes",
+          "text": "Scientists using the James Webb space telescope are seeing the “seeds God has sown in the universe”, the Pope has said, saying it was “an exciting time to be an astronomer”.\n\nHe said the telescope revealed wonders of which the authors of biblical scriptures could only dream, and its images of the oldest and most distant galaxies in the cosmos filled people with a sense of “mysterious joy”.\n\nThe Pope held an audience for young astronomers attending a summer school at the Vatican Observatory outside Rome this week, focusing on the telescope’s work.\n\nHe told them it was a “truly remarkable instrument” that meant that “for the first time, we are able to peer deeply into the atmosphere of exoplanets where life may be developing and study the nebulae where planetary systems themselves are forming”",
           "start": 0,
           "duration": 0,
           "timestamp": "00:00"
         },
         {
-          "speaker": "EffingWasps",
-          "text": "Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme",
+          "speaker": "Andromeda321",
+          "text": "Astronomer here! I had a friend who made it into this summer school back in undergrad. Only two people get in from every country and it’s very prestigious, but always sounded like an amazing experience for students out there who are interested! (Like, you go to Italy for the summer and live in a castle and learn about astronomy for free. And you meet the Pope!)\n\nLink for any students reading who might want to apply: https://www.vaticanobservatory.org/education/summer-school/",
           "start": 0,
           "duration": 0,
           "timestamp": "00:00"
         },
         {
-          "speaker": "b407driver",
-          "text": "Become? It has always been the greatest (unsolved) challenge.",
+          "speaker": "sabrinapak",
+          "text": "What class were you? I was in the class of 2003, the last to meet Pope John Paul. It was a great program and experience!",
           "start": 0,
           "duration": 0,
           "timestamp": "00:00"
         },
         {
-          "speaker": "Waarm",
-          "text": "The current biggest challenge is funding.",
+          "speaker": "Andromeda321",
+          "text": "I wasn’t in it, my friend was, she went in 2007. :)",
           "start": 0,
           "duration": 0,
           "timestamp": "00:00"
         }
       ],
-      "wordCount": 283,
+      "wordCount": 344,
       "segments": 6,
-      "commentsIncluded": 4
+      "commentsIncluded": 5
     }
   },
   "instagram-trending-reels": {
