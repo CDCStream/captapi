@@ -186,54 +186,69 @@ export default async function StatusPage() {
           </div>
         ) : (
           <>
-            <div className="rounded-xl border bg-card p-6 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <span
-                  className={`h-3 w-3 rounded-full ${
-                    activeIncidents.length > 0
-                      ? "bg-amber-500"
-                      : STATUS_STYLE[data.overall.status]?.dot ?? "bg-muted-foreground/40"
-                  }`}
-                />
-                <span className="text-lg font-semibold">
-                  {activeIncidents.length > 0
-                    ? "Active incident — see below"
-                    : data.overall.status === "operational"
-                      ? "All systems running normally"
-                      : STATUS_STYLE[data.overall.status]?.label ?? data.overall.status}
-                </span>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                Last 24 hours · refreshes every 2 minutes
-              </div>
-            </div>
-
-            <div className="rounded-xl border bg-card divide-y">
-              {data.platforms.map((p) => {
-                const style = STATUS_STYLE[p.status] ?? STATUS_STYLE.no_data;
-                return (
+            {(() => {
+              const issues = data.platforms.filter(
+                (p) => p.status === "degraded" || p.status === "outage",
+              );
+              const allGood = issues.length === 0 && activeIncidents.length === 0;
+              return (
+                <>
                   <div
-                    key={p.platform}
-                    className="flex items-center justify-between gap-4 px-6 py-4"
+                    className={`rounded-xl border p-8 text-center ${
+                      allGood
+                        ? "border-emerald-500/25 bg-emerald-500/5"
+                        : "border-amber-500/25 bg-amber-500/5"
+                    }`}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${style.dot}`} />
-                      <span className="font-medium truncate">
-                        {prettyPlatform(p.platform)}
+                    <div className="flex items-center justify-center gap-3">
+                      <span
+                        className={`flex size-8 items-center justify-center rounded-full ${
+                          allGood ? "bg-emerald-500/15" : "bg-amber-500/15"
+                        }`}
+                      >
+                        <span
+                          className={`size-3 rounded-full ${allGood ? "bg-emerald-500" : "bg-amber-500"}`}
+                        />
+                      </span>
+                      <span className="text-xl font-semibold">
+                        {allGood
+                          ? "All systems running normally"
+                          : activeIncidents.length > 0
+                            ? "Active incident — see below"
+                            : "Some platforms are having issues"}
                       </span>
                     </div>
-                    <span className={`text-sm font-medium shrink-0 ${style.text}`}>
-                      {style.label}
-                    </span>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Last 24 hours · refreshes every 2 minutes
+                    </p>
                   </div>
-                );
-              })}
-              {data.platforms.length === 0 && (
-                <div className="px-6 py-8 text-center text-muted-foreground">
-                  No traffic in the last {data.window_hours} hours.
-                </div>
-              )}
-            </div>
+
+                  {issues.length > 0 && (
+                    <div className="mt-6 rounded-xl border bg-card divide-y">
+                      {issues.map((p) => {
+                        const style = STATUS_STYLE[p.status] ?? STATUS_STYLE.no_data;
+                        return (
+                          <div
+                            key={p.platform}
+                            className="flex items-center justify-between gap-4 px-6 py-4"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${style.dot}`} />
+                              <span className="font-medium truncate">
+                                {prettyPlatform(p.platform)}
+                              </span>
+                            </div>
+                            <span className={`text-sm font-medium shrink-0 ${style.text}`}>
+                              {style.label}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
             <p className="mt-6 text-xs text-muted-foreground text-center">
               Health is computed from real production traffic; only server-side
