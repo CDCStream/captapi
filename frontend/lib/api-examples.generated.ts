@@ -8763,8 +8763,89 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "rumble-channel-videos": {
     "channel": "Bongino",
-    "totalReturned": 0,
-    "videos": []
+    "totalReturned": 5,
+    "videos": [
+      {
+        "platform": "rumble",
+        "id": "v7c38nq",
+        "url": "https://rumble.com/v7c38nq-dont-ignore-these-warnings-ep.-2545-07012026.html",
+        "title": "Don't Ignore These Warnings (Ep. 2545) - 07/01/2026",
+        "description": null,
+        "channel": "The Dan Bongino Show",
+        "channelUrl": "https://rumble.com/c/bongino",
+        "views": 451541,
+        "likes": 7890,
+        "dislikes": 102,
+        "duration": "5459",
+        "publishedAt": "2026-07-01T12:20:50+00:00",
+        "thumbnail": "https://1a-1791.com/video/fwe2/9c/s8/1/w/A/f/C/wAfCA.OvCc-small-Dont-Ignore-These-Warnings-..jpg",
+        "comments": 794
+      },
+      {
+        "platform": "rumble",
+        "id": "v7c06lw",
+        "url": "https://rumble.com/shorts/v7c06lw",
+        "title": "GOP Senator Sounds Like Chuck Schumer!! Pathetic",
+        "description": null,
+        "channel": "The Dan Bongino Show",
+        "channelUrl": "https://rumble.com/c/bongino",
+        "views": 18724,
+        "likes": 367,
+        "dislikes": 12,
+        "duration": "49",
+        "publishedAt": "2026-06-29T17:52:08+00:00",
+        "thumbnail": "https://1a-1791.com/video/fwe2/f5/s8/6/0/L/I/B/0LIBA.O-xb.jpg",
+        "comments": 28
+      },
+      {
+        "platform": "rumble",
+        "id": "v7bzpb2",
+        "url": "https://rumble.com/v7bzpb2-beset-on-all-sides-ep.-2544-06292026.html",
+        "title": "Beset On All Sides (Ep. 2544) - 06/29/2026",
+        "description": null,
+        "channel": "The Dan Bongino Show",
+        "channelUrl": "https://rumble.com/c/bongino",
+        "views": 553547,
+        "likes": 8676,
+        "dislikes": 95,
+        "duration": "3756",
+        "publishedAt": "2026-06-29T12:14:26+00:00",
+        "thumbnail": "https://1a-1791.com/video/fwe2/e2/s8/1/E/h/D/B/EhDBA.OvCc-small-Beset-On-All-Sides-Ep.-2544..jpg",
+        "comments": 598
+      },
+      {
+        "platform": "rumble",
+        "id": "v7bvrxg",
+        "url": "https://rumble.com/shorts/v7bvrxg",
+        "title": "Left Melts Down Over MAJOR SCOTUS Victories",
+        "description": null,
+        "channel": "The Dan Bongino Show",
+        "channelUrl": "https://rumble.com/c/bongino",
+        "views": 28794,
+        "likes": 500,
+        "dislikes": 15,
+        "duration": "81",
+        "publishedAt": "2026-06-27T00:11:05+00:00",
+        "thumbnail": "https://1a-1791.com/video/fwe2/1e/s8/6/K/y/W/A/KyWAA.O-xb.jpg",
+        "comments": 19
+      },
+      {
+        "platform": "rumble",
+        "id": "v7bvoey",
+        "url": "https://rumble.com/shorts/v7bvoey",
+        "title": "Rep. Brandon Gill Renders Lib Utterly SPEECHLESS",
+        "description": null,
+        "channel": "The Dan Bongino Show",
+        "channelUrl": "https://rumble.com/c/bongino",
+        "views": 22148,
+        "likes": 488,
+        "dislikes": 7,
+        "duration": "80",
+        "publishedAt": "2026-06-26T22:54:28+00:00",
+        "thumbnail": "https://1a-1791.com/video/fww1/12/s8/1/A/r/V/A/ArVAA.OvCc-small-Rep.-Brandon-Gill-Renders-L..jpg",
+        "comments": 48
+      }
+    ]
   },
   "rumble-comments": {
     "url": "https://rumble.com/v7c2pio-space-revolution-ep.-25.html",
@@ -8856,6 +8937,22 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "comments": null
       }
     ]
+  },
+  "rumble-video-details": {
+    "platform": "rumble",
+    "id": "v7c2pio",
+    "url": "https://rumble.com/v7c2pio-space-revolution-ep.-25.html",
+    "title": "Space Revolution Ep. 25: Independence Day, the Shape & Pattern of Truth",
+    "description": null,
+    "channel": "Badlands Media",
+    "channelUrl": "https://rumble.com/c/BadlandsMedia",
+    "views": 36668,
+    "likes": 348,
+    "dislikes": 7,
+    "duration": "4054",
+    "publishedAt": "2026-07-01T02:46:28+00:00",
+    "thumbnail": "https://1a-1791.com/video/fwe2/fd/s8/1/W/w/_/B/Ww_BA.OvCc-small-Space-Revolution-Ep.-25..jpg",
+    "comments": 13
   },
   "snapchat-user-profile": {
     "platform": "snapchat",

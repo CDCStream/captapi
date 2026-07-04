@@ -43,20 +43,27 @@ def _clip_key(value: str) -> str:
 
 def _normalize_clip(item: dict[str, Any]) -> dict[str, Any]:
     channel = item.get("channel") if isinstance(item.get("channel"), dict) else {}
+    clip_id = safe_str(item.get("id") or item.get("clipId") or item.get("slug"))
+    slug = safe_str(channel.get("slug") or channel.get("username") or item.get("channelSlug") or item.get("username"))
+    web_url = safe_str(item.get("url") or item.get("clipUrl"))
+    if not web_url and slug and clip_id:
+        web_url = f"https://kick.com/{slug}/clips/{clip_id}"
     return {
         "platform": "kick",
-        "id": safe_str(item.get("id") or item.get("clipId") or item.get("slug")),
-        "url": safe_str(item.get("url") or item.get("clipUrl")),
+        "id": clip_id,
+        "url": web_url,
         "title": safe_str(item.get("title")),
         "createdAt": safe_str(item.get("createdAt") or item.get("created_at")),
         "durationSeconds": safe_int(item.get("duration") or item.get("durationSeconds")),
-        "views": safe_int(item.get("views") or item.get("viewCount")),
-        "thumbnailUrl": safe_str(item.get("thumbnail") or item.get("thumbnailUrl")),
-        "videoUrl": safe_str(item.get("videoUrl") or item.get("sourceUrl")),
+        "views": safe_int(item.get("view_count") or item.get("views") or item.get("viewCount")),
+        "likes": safe_int(item.get("likes_count") or item.get("likes")),
+        "thumbnailUrl": safe_str(item.get("thumbnail") or item.get("thumbnailUrl") or item.get("thumbnail_url")),
+        "videoUrl": safe_str(item.get("videoUrl") or item.get("sourceUrl") or item.get("video_url") or item.get("clip_url")),
+        "category": safe_str((item.get("category") or {}).get("name") if isinstance(item.get("category"), dict) else item.get("category")),
         "channel": {
-            "username": safe_str(channel.get("slug") or item.get("channelSlug") or item.get("username")),
-            "name": safe_str(channel.get("name") or item.get("channelName")),
-            "url": safe_str(channel.get("url") or item.get("channelUrl")),
+            "username": slug,
+            "name": safe_str(channel.get("name") or channel.get("username") or item.get("channelName")) or slug,
+            "url": safe_str(channel.get("url") or item.get("channelUrl")) or (f"https://kick.com/{slug}" if slug else None),
         },
         "raw": item,
     }
@@ -117,5 +124,5 @@ async def kick_clip(
                 raise HTTPException(status_code=404, detail="Kick clip not found")
             return {"channelUrl": channel, "clip": selected, "totalReturned": len(clips), "clips": clips}
 
-        data = await cached_or_run("kick.clip", {"url": url, "limit": limit}, _run, ctx)
+        data = await cached_or_run("kick.clip", {"url": url, "limit": limit, "v": 2}, _run, ctx)
         return ApiResponse(data=data)

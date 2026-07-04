@@ -339,17 +339,25 @@ def _playlist_actor_candidates(settings: Any, url: str, limit: int) -> list[tupl
 
 
 def _community_post(p: dict) -> dict:
+    # The community actor emits snake_case fields (post_id, author_name,
+    # content_text, media_urls, likes as a display string like "330K").
+    post_id = safe_str(p.get("id") or p.get("postId") or p.get("post_id"))
+    url = safe_str(p.get("url") or p.get("postUrl") or p.get("post_url"))
+    if not url and post_id:
+        url = f"https://www.youtube.com/post/{post_id}"
+    media = p.get("images") or p.get("media") or p.get("media_urls") or []
+    images = [safe_str(i) for i in media if isinstance(i, str) and i]
     return {
         "platform": "youtube",
-        "id": safe_str(p.get("id") or p.get("postId")),
-        "url": safe_str(p.get("url") or p.get("postUrl")),
-        "text": safe_str(p.get("text") or p.get("content") or p.get("message")),
-        "publishedAt": safe_str(p.get("publishedAt") or p.get("date")),
-        "channelName": safe_str(p.get("channelName") or p.get("channel")),
-        "channelUrl": safe_str(p.get("channelUrl")),
-        "likes": safe_int(p.get("likes") or p.get("likeCount")),
-        "comments": safe_int(p.get("comments") or p.get("commentCount")),
-        "images": p.get("images") or p.get("media") or [],
+        "id": post_id,
+        "url": url,
+        "text": safe_str(p.get("text") or p.get("content") or p.get("message") or p.get("content_text")),
+        "publishedAt": safe_str(p.get("publishedAt") or p.get("date") or p.get("published_time_text")),
+        "channelName": safe_str(p.get("channelName") or p.get("channel") or p.get("author_name")),
+        "channelUrl": safe_str(p.get("channelUrl") or p.get("author_url")),
+        "likes": safe_int(p.get("likes") or p.get("likeCount")) or safe_str(p.get("likes")),
+        "comments": safe_int(p.get("comments") or p.get("commentCount") or p.get("comments_count")),
+        "images": images,
         "raw": p,
     }
 
@@ -1537,7 +1545,7 @@ async def youtube_community_post_details(
 
         data = await cached_or_run(
             endpoint="youtube.community-post-details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )

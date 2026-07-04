@@ -410,6 +410,13 @@ BATCHES = {
         ],
         batch4_phase2,
     ),
+    "batch4d": (
+        lambda: [
+            ("kick-clip", "/v1/kick/clip", {"url": "https://kick.com/xqc", "limit": 10}),
+            ("youtube-community-post-details", "/v1/youtube/community-post-details", {"url": "https://www.youtube.com/post/UgkxfMvMnSnV3Ww9HwAY2wFGmVevmhRaYAYO"}),
+        ],
+        lambda p1: [],
+    ),
 }
 
 
