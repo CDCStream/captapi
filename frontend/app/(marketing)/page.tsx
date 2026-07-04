@@ -15,11 +15,15 @@ import {
 import { CaptapiHero } from "@/components/marketing/captapi-hero";
 import { ApiCatalog } from "@/components/marketing/api-catalog";
 import { PricingPlans } from "@/components/marketing/pricing-plans";
+import { WallOfLove } from "@/components/marketing/wall-of-love";
 import { ENDPOINT_COUNT, PLATFORM_COUNT } from "@/lib/api-catalog";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
+
+// Revalidate so new testimonials/reviews appear without a redeploy.
+export const revalidate = 3600;
 
 const features = [
   {
@@ -249,6 +253,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* SOCIAL PROOF — renders only when testimonials exist */}
+      <WallOfLove />
 
       {/* PRICING PREVIEW */}
       <section className="py-16 border-t" id="pricing-preview">
