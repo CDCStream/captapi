@@ -146,6 +146,7 @@ Machine-readable manifest: ${base}/.well-known/mcp.json (also at ${base}/mcp.jso
 Full machine-readable endpoint reference: ${base}/llms-full.txt
 OpenAPI 3 spec (all endpoints, schemas, params): ${API_URL}/v1/openapi.json
 Full integration guide: ${base}/docs/integrations
+Integrations overview (MCP, SDKs, CLI, n8n, Make.com, Apify): ${base}/integrations
 
 ## Connect via SDK (TypeScript & Python)
 

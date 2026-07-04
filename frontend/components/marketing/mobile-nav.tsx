@@ -7,6 +7,7 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const LINKS = [
+  { href: "/integrations", label: "Integrations" },
   { href: "/pricing", label: "Pricing" },
   { href: "/tools", label: "Free Tools" },
   { href: "/blog", label: "Blog" },

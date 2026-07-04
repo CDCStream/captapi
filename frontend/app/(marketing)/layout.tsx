@@ -121,6 +121,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm">
             <ApisNavDropdown platforms={NAV_PLATFORMS} />
+            <Link href="/integrations" className="text-muted-foreground hover:text-foreground">Integrations</Link>
             <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
             <Link href="/tools" className="text-muted-foreground hover:text-foreground">Free Tools</Link>
             <Link href="/blog" className="text-muted-foreground hover:text-foreground">Blog</Link>
@@ -156,6 +157,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
               <h3 className="font-semibold mb-3">Product</h3>
               <ul className="space-y-2 text-muted-foreground">
                 <li><Link href="/apis" className="hover:text-foreground">APIs</Link></li>
+                <li><Link href="/integrations" className="hover:text-foreground">Integrations</Link></li>
                 <li><Link href="/#features" className="hover:text-foreground">Features</Link></li>
                 <li><Link href="/pricing" className="hover:text-foreground">Pricing</Link></li>
                 <li><Link href="/tools" className="hover:text-foreground">Free Tools</Link></li>
