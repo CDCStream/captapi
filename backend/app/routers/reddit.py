@@ -19,6 +19,7 @@ from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
+from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import first_present, safe_int, safe_str
 from app.utils.url import (
@@ -149,11 +150,24 @@ def _reddit_json_url_variants(url: str, post_id: str) -> list[str]:
 async def _fetch_reddit_json_url(url: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     headers = {"User-Agent": "CaptapiBot/1.0 (+https://captapi.com)"}
     params = {"raw_json": "1", "limit": max(limit, 1)}
+    resp: httpx.Response | None = None
     try:
         async with httpx.AsyncClient(timeout=8.0, follow_redirects=True, headers=headers) as client:
             resp = await client.get(url, params=params)
-    except httpx.HTTPError as exc:
-        raise HTTPException(status_code=502, detail="Reddit upstream error") from exc
+    except httpx.HTTPError:
+        resp = None
+    if resp is None or resp.status_code in {403, 429} or resp.status_code >= 500:
+        # Reddit blocks datacenter IPs; the residential proxy usually gets
+        # through and keeps the richer public-JSON path (scores, threading)
+        # instead of the sparser actor fallback.
+        joiner = "&" if "?" in url else "?"
+        prox = await fetch_via_residential(
+            f"{url}{joiner}raw_json=1&limit={max(limit, 1)}", headers=headers
+        )
+        if prox is not None:
+            resp = prox
+    if resp is None:
+        raise HTTPException(status_code=502, detail="Reddit upstream error")
     if resp.status_code == 404:
         raise HTTPException(status_code=404, detail="Post not found")
     if resp.status_code >= 400:
@@ -451,7 +465,7 @@ async def post_details(
 
         data = await cached_or_run(
             endpoint="reddit.post-details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -479,7 +493,7 @@ async def post_comments(
 
         data = await cached_or_run(
             endpoint="reddit.post-comments",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -549,7 +563,7 @@ async def post_transcript(
 
         data = await cached_or_run(
             endpoint="reddit.post-transcript",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )

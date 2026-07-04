@@ -187,23 +187,39 @@ async def clip(
     settings = get_settings()
     async with billed_call(caller=caller, endpoint="/v1/twitch/clip", platform="twitch", resource_url=url, base_credits=9) as ctx:
         async def _run() -> dict[str, Any]:
-            # The URL-capable actor handles direct clip URLs. If the input is a
-            # channel, it returns that channel's top clip metadata.
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_TWITCH_URL,
-                {"mode": "url", "urls": [url], "includeMediaUrls": True, "maxResults": 1, "maxPages": 1},
-                max_items=1,
-            )
+            is_clip_url = "clips.twitch.tv" in url or "/clip/" in url
+
+            def _clip_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+                # Channel inputs make the URL actor emit a channel record; only
+                # keep rows that are actually clips/videos.
+                return [
+                    r
+                    for r in rows
+                    if isinstance(r, dict)
+                    and (r.get("recordType") or r.get("rowType") or "clip") not in ("channel", "stream")
+                ]
+
+            items: list[dict[str, Any]] = []
+            if is_clip_url:
+                items = _clip_rows(
+                    await get_apify().run_actor_sync(
+                        settings.APIFY_ACTOR_TWITCH_URL,
+                        {"mode": "url", "urls": [url], "includeMediaUrls": True, "maxResults": 1, "maxPages": 1},
+                        max_items=1,
+                    )
+                )
             if not items:
                 target = _target(url)
-                items = await get_apify().run_actor_sync(
-                    settings.APIFY_ACTOR_TWITCH,
-                    _run_input("clips", [target], 1),
-                    max_items=1,
+                items = _clip_rows(
+                    await get_apify().run_actor_sync(
+                        settings.APIFY_ACTOR_TWITCH,
+                        _run_input("clips", [target], 1),
+                        max_items=1,
+                    )
                 )
             if not items:
                 raise HTTPException(status_code=404, detail="Twitch clip not found")
             return _video(items[0])
 
-        data = await cached_or_run("twitch.clip", {"url": url, "v": 2}, _run, ctx)
+        data = await cached_or_run("twitch.clip", {"url": url, "v": 3}, _run, ctx)
         return ApiResponse(data=data)
