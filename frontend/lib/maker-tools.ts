@@ -10,7 +10,7 @@ export interface MakerTool {
   name: string;
   /** Short card blurb. */
   blurb: string;
-  platform: "YouTube" | "TikTok" | "Instagram" | "Facebook" | "Snapchat" | "Discord" | "General";
+  platform: "YouTube" | "TikTok" | "Instagram" | "Facebook" | "Snapchat" | "Discord" | "Twitch" | "General";
   type: MakerToolType;
 }
 
@@ -209,6 +209,62 @@ export const MAKER_TOOLS: MakerTool[] = [
     name: "Instagram Username Generator",
     blurb: "15 available-style Instagram name ideas in your niche — aesthetic, minimal, or funny. AI-powered, no sign-up.",
     platform: "Instagram",
+    type: "ai",
+  },
+  {
+    slug: "screenshot-notification-checker",
+    name: "Screenshot Notification Checker",
+    blurb: "Does Instagram, Snapchat, TikTok, Facebook, or WhatsApp notify screenshots? Pick a platform and action for an instant answer.",
+    platform: "General",
+    type: "reference",
+  },
+  {
+    slug: "tiktok-money-calculator",
+    name: "TikTok Money Calculator",
+    blurb: "Estimate what TikTok pays per view and per video from Creator Rewards, plus brand deal rates by follower count.",
+    platform: "TikTok",
+    type: "calculator",
+  },
+  {
+    slug: "am-i-blocked",
+    name: "Am I Blocked? Checker",
+    blurb: "Answer a few quick questions to find out if someone blocked you on Instagram, Snapchat, or WhatsApp.",
+    platform: "General",
+    type: "reference",
+  },
+  {
+    slug: "social-media-slang",
+    name: "Social Media Slang Dictionary",
+    blurb: "What does PMO, NFS, or the green dot mean? Search 60+ TikTok, Snapchat, Instagram, and Discord slang terms.",
+    platform: "General",
+    type: "reference",
+  },
+  {
+    slug: "social-media-image-sizes",
+    name: "Social Media Image Sizes",
+    blurb: "Every 2026 dimension in one cheat sheet — Instagram posts and Stories, TikTok ratios, YouTube thumbnails and banners, and more.",
+    platform: "General",
+    type: "reference",
+  },
+  {
+    slug: "twitch-emote-resizer",
+    name: "Twitch Emote Resizer",
+    blurb: "Resize any image to Twitch's 112, 56, and 28 px emote sizes plus Discord's 128 px — right in your browser, free.",
+    platform: "Twitch",
+    type: "converter",
+  },
+  {
+    slug: "instagram-caption-generator",
+    name: "Instagram Caption Generator",
+    blurb: "10 scroll-stopping captions in your vibe — funny, aesthetic, short, or hard — with hashtags and emoji. AI, no sign-up.",
+    platform: "Instagram",
+    type: "ai",
+  },
+  {
+    slug: "discord-bio-generator",
+    name: "Discord Bio Generator",
+    blurb: "6 About Me bios that fit Discord's 190-character limit, in your style — aesthetic, funny, edgy, or minimal.",
+    platform: "Discord",
     type: "ai",
   },
 ];

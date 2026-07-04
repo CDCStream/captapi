@@ -23,7 +23,7 @@ type HubTool = {
   badge: string;
 };
 
-const PLATFORM_ORDER = ["YouTube", "TikTok", "Instagram", "Facebook", "Snapchat", "Discord", "General"];
+const PLATFORM_ORDER = ["YouTube", "TikTok", "Instagram", "Facebook", "Snapchat", "Discord", "Twitch", "General"];
 
 const PLATFORM_DESCRIPTIONS: Record<string, string> = {
   YouTube: "Transcript, summary, thumbnail, banner, title, description, hashtag, converter, best-time, and Shorts downloader tools for YouTube creators.",
@@ -31,8 +31,9 @@ const PLATFORM_DESCRIPTIONS: Record<string, string> = {
   Instagram: "Free transcript, summarizer, profile viewer, highlights viewer, photo downloader, username, and best-time tools for Instagram.",
   Facebook: "Free transcript and best-time-to-post tools for public Facebook content.",
   Snapchat: "Reference guides for Snapchat Plus features like the friend solar system planets.",
-  Discord: "Font generators and markdown formatting tools for Discord messages and bios.",
-  General: "Cross-platform creator utilities: bios, engagement rate benchmarks, and reusable social media assets.",
+  Discord: "Font generators, bio generators, and markdown formatting tools for Discord messages and profiles.",
+  Twitch: "Emote resizing and creator utilities for Twitch streamers.",
+  General: "Cross-platform creator utilities: screenshot rules, slang dictionary, image sizes, engagement benchmarks, and bios.",
 };
 
 const tools: HubTool[] = [

@@ -105,6 +105,27 @@ const TOOLS: Record<string, ToolSpec> = {
       }).filter((x) => x.value),
     }),
   },
+  "instagram-caption-generator": {
+    prompt: (i) =>
+      `Write 10 Instagram captions about "${i.topic}". Vibe: ${i.style || "any"}. Each caption should be 1-3 sentences, may include 1-3 fitting emoji, and end with 3-5 relevant hashtags. Keep each under 300 characters. Return JSON: {"captions":[string]}.`,
+    normalize: (j) => ({
+      items: arr((j as { captions?: unknown }).captions)
+        .map((c) => ({ value: clip(c) }))
+        .filter((x) => x.value),
+    }),
+  },
+  "discord-bio-generator": {
+    prompt: (i) =>
+      `Write 6 Discord "About Me" bios for someone into "${i.interest}". Style: ${i.style || "any"}. Each bio must be under 190 characters (Discord's limit), can use line breaks (\\n), emoji, and kaomoji sparingly. Return JSON: {"bios":[string]}.`,
+    normalize: (j) => ({
+      items: arr((j as { bios?: unknown }).bios)
+        .map((b) => {
+          const value = clip(b);
+          return { value, meta: `${value.length}/190 chars${value.length > 190 ? " — too long" : ""}` };
+        })
+        .filter((x) => x.value),
+    }),
+  },
   "tiktok-hashtag-generator": {
     prompt: (i) =>
       `Generate TikTok hashtags for a video about: "${i.topic}". Return JSON: {"viral":[8 broad viral hashtags],"niche":[14 niche-specific hashtags],"fyp":["#fyp","#foryou","#foryoupage","#viral"]}. Each starts with # and has no spaces.`,
