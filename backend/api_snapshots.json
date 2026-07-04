@@ -19503,19 +19503,17 @@
     "credits": null,
     "data": {
       "platform": "youtube",
-      "id": null,
-      "url": null,
-      "text": null,
-      "publishedAt": null,
-      "channelName": null,
-      "channelUrl": null,
-      "likes": null,
+      "id": "UgkxfMvMnSnV3Ww9HwAY2wFGmVevmhRaYAYO",
+      "url": "https://www.youtube.com/post/UgkxfMvMnSnV3Ww9HwAY2wFGmVevmhRaYAYO",
+      "text": "Inside this box is the world's FIRST 500M Play Button. We're 10M away from 500M and I cannot wait to see what’s in here so help me out.",
+      "publishedAt": "1 month ago (edited)",
+      "channelName": "MrBeast",
+      "channelUrl": "https://www.youtube.com/@MrBeast",
+      "likes": "722K",
       "comments": null,
-      "images": [],
-      "raw": {
-        "error": "Failed to fetch channel page https://www.youtube.com/post/UgkxfMvMnSnV3Ww9HwAY2wFGmVevmhRaYAYO/posts",
-        "exception": "404 Client Error: Not Found for url: https://www.youtube.com/post/UgkxfMvMnSnV3Ww9HwAY2wFGmVevmhRaYAYO/posts"
-      }
+      "images": [
+        "https://yt3.ggpht.com/BgBr4f_nvLm84HY2JVaPiDZRLZXJsqA7Q29CJkAksrwRFNXN1GgQJxzjYfzWUYR6ZekKBXCVwxPQKw=s1000-rw-nd-v1"
+      ]
     }
   },
   "youtube-video-sponsors": {
