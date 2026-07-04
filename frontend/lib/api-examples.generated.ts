@@ -281,6 +281,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "cid": "bafyreiheoivsjwscc5duma6373lcrwycerg4mzcjpvgopozhipayaib5qy",
     "text": "It really is. I hear Baltic reserve is a real thing, but the people I met were wonderfully warm and welcoming",
     "publishedAt": "2026-06-26T14:25:33.024Z",
+    "indexedAt": "2026-06-26T14:25:34.266Z",
     "author": {
       "handle": "jay.bsky.team",
       "displayName": "Jay 🦋",
@@ -292,7 +293,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "reposts": 0,
       "replies": 1,
       "quotes": 0
-    }
+    },
+    "embed": null
   },
   "bluesky-profile": {
     "platform": "bluesky",
@@ -301,11 +303,13 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "did": "did:plc:oky5czdrnfjpqslsw2a5iclo",
     "name": "Jay 🦋",
     "bio": "Founder & Chief Innovation Officer @ Bluesky\n\nWorking on @attie.ai\n\n🌱 🪴 🌳",
-    "followers": 595574,
+    "followers": 595575,
     "following": 3967,
     "posts": 4103,
     "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:oky5czdrnfjpqslsw2a5iclo/bafkreihxtnc37g7jqdcgidtkknwuswtjiijcdnc6cx4imc4oq33cnsc5da",
-    "banner": "https://cdn.bsky.app/img/banner/plain/did:plc:oky5czdrnfjpqslsw2a5iclo/bafkreicgnmvhtmj4arcvwhueygbwvkucd3odvom3lxtfmn6wlqbh3yf7p4"
+    "banner": "https://cdn.bsky.app/img/banner/plain/did:plc:oky5czdrnfjpqslsw2a5iclo/bafkreicgnmvhtmj4arcvwhueygbwvkucd3odvom3lxtfmn6wlqbh3yf7p4",
+    "createdAt": "2022-11-17T06:31:40.296Z",
+    "indexedAt": "2026-03-29T21:16:33.460Z"
   },
   "bluesky-user-posts": {
     "handle": "jay.bsky.team",
@@ -318,6 +322,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "cid": "bafyreiheoivsjwscc5duma6373lcrwycerg4mzcjpvgopozhipayaib5qy",
         "text": "It really is. I hear Baltic reserve is a real thing, but the people I met were wonderfully warm and welcoming",
         "publishedAt": "2026-06-26T14:25:33.024Z",
+        "indexedAt": "2026-06-26T14:25:34.266Z",
         "author": {
           "handle": "jay.bsky.team",
           "displayName": "Jay 🦋",
@@ -329,7 +334,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "reposts": 0,
           "replies": 1,
           "quotes": 0
-        }
+        },
+        "embed": null
       },
       {
         "platform": "bluesky",
@@ -338,6 +344,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "cid": "bafyreifqe2drqtxh7vwngrhlslefghe3sfner5n7wmenf5e32s7sh4qiey",
         "text": "It was a truly special experience.\n\n“Jaunas takas ejot, veco saknes neaizmirst”\n\nWalking new paths, don’t forget the old roots.",
         "publishedAt": "2026-06-26T14:21:59.940Z",
+        "indexedAt": "2026-06-26T14:22:01.064Z",
         "author": {
           "handle": "jay.bsky.team",
           "displayName": "Jay 🦋",
@@ -349,7 +356,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "reposts": 0,
           "replies": 2,
           "quotes": 0
-        }
+        },
+        "embed": null
       },
       {
         "platform": "bluesky",
@@ -358,6 +366,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "cid": "bafyreicygvwwtlnyuqualwmgjo7x2qdykvrio56rhgssejhdbfe2duyove",
         "text": "Yes! Saule = sol = sun. Latvian and Lithuanian retain a lot of ancient roots in both the language and the mythology",
         "publishedAt": "2026-06-26T14:19:07.700Z",
+        "indexedAt": "2026-06-26T14:19:08.270Z",
         "author": {
           "handle": "jay.bsky.team",
           "displayName": "Jay 🦋",
@@ -369,7 +378,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "reposts": 0,
           "replies": 0,
           "quotes": 0
-        }
+        },
+        "embed": null
       },
       {
         "platform": "bluesky",
@@ -378,6 +388,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "cid": "bafyreiggj5tozi2auwdj7niz2jlsvgh4uykwe7m2fbohbix2jikzt3acam",
         "text": "Yes! It was amazing!",
         "publishedAt": "2026-06-26T14:15:40.245Z",
+        "indexedAt": "2026-06-26T14:15:40.670Z",
         "author": {
           "handle": "jay.bsky.team",
           "displayName": "Jay 🦋",
@@ -389,7 +400,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "reposts": 0,
           "replies": 0,
           "quotes": 0
-        }
+        },
+        "embed": null
       },
       {
         "platform": "bluesky",
@@ -398,6 +410,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "cid": "bafyreiaqayrcjwn5wvmrsv3slv5usxwatkhj42hj5m4d5f4sfts25h2asu",
         "text": "Celebrated Jāņi (midsummer) in Latvia this year! Bonfires and dancing till dawn, flower and oak wreaths, songs about Saule, the sun goddess, that are older than the churches. The Baltics hold a surviving piece of old Europe in living tradition.",
         "publishedAt": "2026-06-25T22:18:05.455Z",
+        "indexedAt": "2026-06-25T22:18:24.060Z",
         "author": {
           "handle": "jay.bsky.team",
           "displayName": "Jay 🦋",
@@ -409,6 +422,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "reposts": 72,
           "replies": 37,
           "quotes": 17
+        },
+        "embed": {
+          "type": "app.bsky.embed.gallery#view"
         }
       }
     ]
@@ -2590,13 +2606,95 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "owner": "torvalds",
         "ownerUrl": "https://github.com/torvalds",
         "language": "C",
-        "stars": 238232,
-        "forks": 63057,
-        "watchers": 238232,
+        "stars": 238305,
+        "forks": 63076,
+        "watchers": 238305,
         "openIssues": 3,
         "defaultBranch": "master",
-        "pushedAt": "2026-07-03T15:54:14Z",
-        "createdAt": "2011-09-04T22:48:12Z"
+        "homepage": null,
+        "license": "NOASSERTION",
+        "topics": [],
+        "isFork": null,
+        "isArchived": null,
+        "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
+        "pushedAt": "2026-07-04T04:59:43Z",
+        "createdAt": "2011-09-04T22:48:12Z",
+        "updatedAt": "2026-07-04T10:15:42Z"
+      },
+      {
+        "platform": "github",
+        "type": "repository",
+        "name": "GuitarPedal",
+        "fullName": "torvalds/GuitarPedal",
+        "url": "https://github.com/torvalds/GuitarPedal",
+        "description": "Linus learns analog circuits",
+        "owner": "torvalds",
+        "ownerUrl": "https://github.com/torvalds",
+        "language": "C",
+        "stars": 2064,
+        "forks": 83,
+        "watchers": 2064,
+        "openIssues": 4,
+        "defaultBranch": "main",
+        "homepage": null,
+        "license": "GPL-2.0",
+        "topics": [],
+        "isFork": null,
+        "isArchived": null,
+        "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
+        "pushedAt": "2026-06-27T04:04:58Z",
+        "createdAt": "2025-09-17T01:01:29Z",
+        "updatedAt": "2026-07-04T08:56:34Z"
+      },
+      {
+        "platform": "github",
+        "type": "repository",
+        "name": "AudioNoise",
+        "fullName": "torvalds/AudioNoise",
+        "url": "https://github.com/torvalds/AudioNoise",
+        "description": "Random digital audio effects",
+        "owner": "torvalds",
+        "ownerUrl": "https://github.com/torvalds",
+        "language": "C",
+        "stars": 4413,
+        "forks": 206,
+        "watchers": 4413,
+        "openIssues": 34,
+        "defaultBranch": "main",
+        "homepage": null,
+        "license": "GPL-2.0",
+        "topics": [],
+        "isFork": null,
+        "isArchived": null,
+        "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
+        "pushedAt": "2026-05-08T17:20:22Z",
+        "createdAt": "2026-01-09T02:33:29Z",
+        "updatedAt": "2026-07-04T07:49:58Z"
+      },
+      {
+        "platform": "github",
+        "type": "repository",
+        "name": "uemacs",
+        "fullName": "torvalds/uemacs",
+        "url": "https://github.com/torvalds/uemacs",
+        "description": "Random version of microemacs with my private modificatons",
+        "owner": "torvalds",
+        "ownerUrl": "https://github.com/torvalds",
+        "language": "C",
+        "stars": 2071,
+        "forks": 312,
+        "watchers": 2071,
+        "openIssues": 16,
+        "defaultBranch": "master",
+        "homepage": null,
+        "license": null,
+        "topics": [],
+        "isFork": null,
+        "isArchived": null,
+        "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
+        "pushedAt": "2026-02-25T19:15:47Z",
+        "createdAt": "2018-01-17T22:32:21Z",
+        "updatedAt": "2026-07-04T02:22:43Z"
       },
       {
         "platform": "github",
@@ -2613,62 +2711,15 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "watchers": 567,
         "openIssues": 6,
         "defaultBranch": "master",
+        "homepage": null,
+        "license": null,
+        "topics": [],
+        "isFork": null,
+        "isArchived": null,
+        "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
         "pushedAt": "2022-12-22T10:46:37Z",
-        "createdAt": "2017-12-04T21:58:56Z"
-      },
-      {
-        "platform": "github",
-        "type": "repository",
-        "name": "test-tlb",
-        "fullName": "torvalds/test-tlb",
-        "url": "https://github.com/torvalds/test-tlb",
-        "description": "Stupid memory latency and TLB tester",
-        "owner": "torvalds",
-        "ownerUrl": "https://github.com/torvalds",
-        "language": "C",
-        "stars": 1026,
-        "forks": 218,
-        "watchers": 1026,
-        "openIssues": 13,
-        "defaultBranch": "master",
-        "pushedAt": "2024-08-19T21:13:36Z",
-        "createdAt": "2017-03-24T20:06:37Z"
-      },
-      {
-        "platform": "github",
-        "type": "repository",
-        "name": "HunspellColorize",
-        "fullName": "torvalds/HunspellColorize",
-        "url": "https://github.com/torvalds/HunspellColorize",
-        "description": "Wrapper around 'less' to colorize spelling mistakes using Hunspell",
-        "owner": "torvalds",
-        "ownerUrl": "https://github.com/torvalds",
-        "language": "C",
-        "stars": 350,
-        "forks": 15,
-        "watchers": 350,
-        "openIssues": 2,
-        "defaultBranch": "main",
-        "pushedAt": "2026-01-19T20:23:09Z",
-        "createdAt": "2026-01-18T19:57:03Z"
-      },
-      {
-        "platform": "github",
-        "type": "repository",
-        "name": "uemacs",
-        "fullName": "torvalds/uemacs",
-        "url": "https://github.com/torvalds/uemacs",
-        "description": "Random version of microemacs with my private modificatons",
-        "owner": "torvalds",
-        "ownerUrl": "https://github.com/torvalds",
-        "language": "C",
-        "stars": 2069,
-        "forks": 312,
-        "watchers": 2069,
-        "openIssues": 16,
-        "defaultBranch": "master",
-        "pushedAt": "2026-02-25T19:15:47Z",
-        "createdAt": "2018-01-17T22:32:21Z"
+        "createdAt": "2017-12-04T21:58:56Z",
+        "updatedAt": "2026-07-03T19:22:22Z"
       }
     ]
   },
@@ -2682,13 +2733,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "owner": "torvalds",
     "ownerUrl": "https://github.com/torvalds",
     "language": "C",
-    "stars": 238232,
-    "forks": 63057,
-    "watchers": 238232,
+    "stars": 238305,
+    "forks": 63076,
+    "watchers": 238305,
     "openIssues": 3,
     "defaultBranch": "master",
-    "pushedAt": "2026-07-03T15:54:14Z",
-    "createdAt": "2011-09-04T22:48:12Z"
+    "homepage": null,
+    "license": "NOASSERTION",
+    "topics": [],
+    "isFork": null,
+    "isArchived": null,
+    "ownerAvatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
+    "pushedAt": "2026-07-04T04:59:43Z",
+    "createdAt": "2011-09-04T22:48:12Z",
+    "updatedAt": "2026-07-04T10:15:42Z"
   },
   "github-trending-developers": {
     "query": "followers:>1000",
@@ -2740,13 +2798,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "owner": "codecrafters-io",
         "ownerUrl": "https://github.com/codecrafters-io",
         "language": "Markdown",
-        "stars": 522167,
-        "forks": 49396,
-        "watchers": 522167,
-        "openIssues": 517,
+        "stars": 522278,
+        "forks": 49409,
+        "watchers": 522278,
+        "openIssues": 518,
         "defaultBranch": "master",
+        "homepage": "https://codecrafters.io",
+        "license": null,
+        "topics": [
+          "awesome-list",
+          "free",
+          "programming",
+          "tutorial-code",
+          "tutorial-exercises"
+        ],
+        "isFork": null,
+        "isArchived": null,
+        "ownerAvatar": "https://avatars.githubusercontent.com/u/58904235?v=4",
         "pushedAt": "2026-06-25T14:41:09Z",
-        "createdAt": "2018-05-09T12:03:18Z"
+        "createdAt": "2018-05-09T12:03:18Z",
+        "updatedAt": "2026-07-04T10:25:06Z"
       },
       {
         "platform": "github",
@@ -2758,13 +2829,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "owner": "sindresorhus",
         "ownerUrl": "https://github.com/sindresorhus",
         "language": null,
-        "stars": 481186,
-        "forks": 35659,
-        "watchers": 481186,
-        "openIssues": 88,
+        "stars": 481337,
+        "forks": 35667,
+        "watchers": 481337,
+        "openIssues": 89,
         "defaultBranch": "main",
+        "homepage": null,
+        "license": "CC0-1.0",
+        "topics": [
+          "awesome",
+          "awesome-list",
+          "lists",
+          "resources",
+          "unicorns"
+        ],
+        "isFork": null,
+        "isArchived": null,
+        "ownerAvatar": "https://avatars.githubusercontent.com/u/170270?v=4",
         "pushedAt": "2026-06-30T18:21:16Z",
-        "createdAt": "2014-07-11T13:42:37Z"
+        "createdAt": "2014-07-11T13:42:37Z",
+        "updatedAt": "2026-07-04T10:23:28Z"
       },
       {
         "platform": "github",
@@ -2776,13 +2860,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "owner": "freeCodeCamp",
         "ownerUrl": "https://github.com/freeCodeCamp",
         "language": "TypeScript",
-        "stars": 450989,
-        "forks": 45350,
-        "watchers": 450989,
-        "openIssues": 215,
+        "stars": 451026,
+        "forks": 45351,
+        "watchers": 451026,
+        "openIssues": 208,
         "defaultBranch": "main",
-        "pushedAt": "2026-07-03T14:34:51Z",
-        "createdAt": "2014-12-24T17:49:19Z"
+        "homepage": "https://contribute.freecodecamp.org",
+        "license": "BSD-3-Clause",
+        "topics": [
+          "careers",
+          "certification",
+          "community",
+          "curriculum",
+          "d3"
+        ],
+        "isFork": null,
+        "isArchived": null,
+        "ownerAvatar": "https://avatars.githubusercontent.com/u/9892522?v=4",
+        "pushedAt": "2026-07-04T09:56:40Z",
+        "createdAt": "2014-12-24T17:49:19Z",
+        "updatedAt": "2026-07-04T10:11:39Z"
       },
       {
         "platform": "github",
@@ -2794,13 +2891,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "owner": "public-apis",
         "ownerUrl": "https://github.com/public-apis",
         "language": "Python",
-        "stars": 446311,
-        "forks": 48989,
-        "watchers": 446311,
-        "openIssues": 1491,
+        "stars": 446424,
+        "forks": 49005,
+        "watchers": 446424,
+        "openIssues": 1495,
         "defaultBranch": "master",
+        "homepage": "https://APILayer.com/?utm_source=Github&utm_medium=Referral&utm_campaign=Public-apis-repo",
+        "license": "MIT",
+        "topics": [
+          "api",
+          "apis",
+          "dataset",
+          "development",
+          "free"
+        ],
+        "isFork": null,
+        "isArchived": null,
+        "ownerAvatar": "https://avatars.githubusercontent.com/u/51121562?v=4",
         "pushedAt": "2026-06-30T20:55:54Z",
-        "createdAt": "2016-03-20T23:49:42Z"
+        "createdAt": "2016-03-20T23:49:42Z",
+        "updatedAt": "2026-07-04T10:23:40Z"
       },
       {
         "platform": "github",
@@ -2812,13 +2922,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "owner": "EbookFoundation",
         "ownerUrl": "https://github.com/EbookFoundation",
         "language": "Python",
-        "stars": 391222,
-        "forks": 66472,
-        "watchers": 391222,
-        "openIssues": 80,
+        "stars": 391245,
+        "forks": 66474,
+        "watchers": 391245,
+        "openIssues": 81,
         "defaultBranch": "main",
-        "pushedAt": "2026-06-30T19:47:56Z",
-        "createdAt": "2013-10-11T06:50:37Z"
+        "homepage": "https://ebookfoundation.github.io/free-programming-books/",
+        "license": "CC-BY-4.0",
+        "topics": [
+          "books",
+          "education",
+          "hacktoberfest",
+          "list",
+          "resource"
+        ],
+        "isFork": null,
+        "isArchived": null,
+        "ownerAvatar": "https://avatars.githubusercontent.com/u/14127308?v=4",
+        "pushedAt": "2026-07-03T21:24:08Z",
+        "createdAt": "2013-10-11T06:50:37Z",
+        "updatedAt": "2026-07-04T10:17:12Z"
       }
     ]
   },
@@ -2835,9 +2958,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "bio": null,
     "avatar": "https://avatars.githubusercontent.com/u/1024025?v=4",
     "publicRepos": 12,
-    "followers": 309944,
+    "publicGists": 1,
+    "followers": 310090,
     "following": 0,
-    "createdAt": "2011-09-03T15:26:22Z"
+    "twitterUsername": null,
+    "createdAt": "2011-09-03T15:26:22Z",
+    "updatedAt": "2026-06-29T07:26:01Z"
   },
   "google-ad-library-ad-details": {
     "platform": "google_ad_library",
@@ -5576,6 +5702,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://komi.io/ksi",
     "username": "ksi",
     "name": "KSI",
+    "firstName": "KSI",
+    "lastName": "Olatunji",
     "description": null,
     "avatar": "https://komi-production-assets.s3.amazonaws.com/photos/OsqFjkXZxCB6vsUAyuLtm.jpeg",
     "linkCount": 7,
@@ -5615,7 +5743,16 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "type": "SPOTIFY",
         "thumbnail": null
       }
-    ]
+    ],
+    "socials": {
+      "instagram": "https://www.instagram.com/ksi",
+      "facebook": "https://www.facebook.com/KSIOlajidebt",
+      "twitter": "https://twitter.com/KSI",
+      "youtube": "https://www.youtube.com/c/ksi",
+      "spotify": "https://open.spotify.com/artist/1nzgtKYFckznkcVMR3Gg4z?si=0pADGmEwS1iluryfgiIy8Q",
+      "appleMusic": "https://music.apple.com/gb/artist/ksi/489704062"
+    },
+    "email": null
   },
   "kwai-post": {
     "platform": "kwai",
@@ -7546,6 +7683,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://lnk.bio/nasa",
     "username": "nasa",
     "name": "@propertiesbystephen Lnk.Bio · link in bio",
+    "firstName": null,
+    "lastName": null,
     "description": "@propertiesbystephen Lnk.Bio · link in bio - Profile and social media links for propertiesbystephen",
     "avatar": "https://s3.us-west-2.amazonaws.com/cdn.lnk.bio/profilepics/-1277863_20210902892.jpg",
     "linkCount": 7,
@@ -7585,7 +7724,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "type": null,
         "thumbnail": null
       }
-    ]
+    ],
+    "socials": {
+      "instagram": "https://www.instagram.com/propertiesbystephen"
+    },
+    "email": null
   },
   "linkedin-ad-library-ad-details": {
     "platform": "linkedin_ad_library",
@@ -7871,19 +8014,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://link.me/kevinhart",
     "username": "kevinhart",
     "name": "Check out Kevin Hart (@kevinhart) on Linkme",
+    "firstName": "Kevin",
+    "lastName": "Hart",
     "description": "Discover Kevin Hart on LinkMe: Connect and see what they're passionate about.",
     "avatar": "https://media.link.me/_resize/image/quality=90,format=webp/images/default/profile/avatar-2.png",
     "linkCount": 0,
-    "links": []
+    "links": [],
+    "socials": {},
+    "email": null
   },
   "linktree-page": {
     "platform": "linktree",
     "url": "https://linktr.ee/selenagomez",
+    "id": 4274511,
     "username": "selenagomez",
     "name": null,
     "description": "“In The Dark” & “I Said I Love You First...And You Said It Back” Out Now",
     "avatar": "https://ugc.production.linktr.ee/2be337b1-59dd-41e2-9c2d-9ecd765d1a76_506310332-18609160939019724-3952420009186030627-n.jpeg",
     "verified": false,
+    "verticals": [],
+    "timezone": "America/Los_Angeles",
     "linkCount": 67,
     "links": [
       {
@@ -7948,17 +8098,30 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://youtube.com/selenagomez",
         "position": 0
       }
-    ]
+    ],
+    "socialAccounts": {
+      "facebook": "https://facebook.com/Selena",
+      "instagram": "https://instagram.com/selenagomez",
+      "tiktok": "https://tiktok.com/@selenagomez",
+      "spotify": "https://open.spotify.com/artist/0C8ZW7ezQVs4URX5aX7Kqx?si=vLUeKsFuTSKqHn7JJIr2Eg",
+      "youtube": "https://youtube.com/selenagomez",
+      "appleMusic": "https://music.apple.com/us/artist/selena-gomez/280215834",
+      "twitter": "https://x.com/selenagomez"
+    }
   },
   "pillar-page": {
     "platform": "pillar",
     "url": "https://pillar.io/jayshetty",
     "username": "jayshetty",
     "name": "Pillar - The All-In-One Toolkit for Creators & Managers",
+    "firstName": null,
+    "lastName": null,
     "description": "Monetize your business with an all-in-one creator store, live media kit, brand database, and more",
     "avatar": "https://athlane-cdn-prod.s3.amazonaws.com/img/default-preview-thumbnail.png",
     "linkCount": 0,
-    "links": []
+    "links": [],
+    "socials": {},
+    "email": null
   },
   "pinterest-board": {
     "board": "https://www.pinterest.com/potterybarn/the-kittles-cozy-cabin-transformation/",
@@ -8075,17 +8238,28 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "platform": "pinterest",
     "id": "422281212828530",
     "url": "https://www.pinterest.com/pin/422281212828530/",
-    "title": "Brown leather sofa eclectic modern room | Living room with brown leather sofa, Modern and eclectic decor, Art deco apartments",
+    "title": null,
     "description": null,
     "destinationUrl": null,
-    "image": null,
-    "saves": 0,
-    "comments": 0,
+    "image": "https://i.pinimg.com/564x/51/a2/0e/51a20efe23e50376920012d832a191a2.jpg",
+    "isVideo": false,
+    "dominantColor": "#a87147",
+    "saves": 7999,
+    "comments": null,
     "publishedAt": null,
+    "board": {
+      "name": "Sala",
+      "url": "https://www.pinterest.com/camilarmoutinho/sala/",
+      "pinCount": 5,
+      "followers": 6
+    },
     "author": {
-      "username": null,
-      "displayName": null,
-      "followers": 0
+      "username": "camilarmoutinho",
+      "displayName": "Camila Moutinho",
+      "url": "https://www.pinterest.com/camilarmoutinho/",
+      "followers": 7,
+      "pinCount": 263,
+      "avatar": "https://i.pinimg.com/60x60_RS/80/48/e0/8048e086101e0b18790160b4251d00bc.jpg"
     }
   },
   "pinterest-search": {
@@ -8410,7 +8584,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme",
         "upvotes": null,
         "publishedAt": "2026-07-03T14:19:44.000Z",
-        "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovbnkri/"
+        "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovbnkri/",
+        "parentId": null,
+        "depth": null,
+        "isSubmitter": null,
+        "edited": null,
+        "stickied": null
       },
       {
         "id": "t1_ovbli62",
@@ -8418,7 +8597,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "Become? It has always been the greatest (unsolved) challenge.",
         "upvotes": null,
         "publishedAt": "2026-07-03T14:09:40.000Z",
-        "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovbli62/"
+        "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovbli62/",
+        "parentId": null,
+        "depth": null,
+        "isSubmitter": null,
+        "edited": null,
+        "stickied": null
       },
       {
         "id": "t1_ovc0szx",
@@ -8426,7 +8610,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "The current biggest challenge is funding.",
         "upvotes": null,
         "publishedAt": "2026-07-03T15:21:27.000Z",
-        "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovc0szx/"
+        "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovc0szx/",
+        "parentId": null,
+        "depth": null,
+        "isSubmitter": null,
+        "edited": null,
+        "stickied": null
       },
       {
         "id": "t1_ovbmqa5",
@@ -8434,7 +8623,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "The OP is observing that future manned missions will require significantly longer durations beyond the protection of the magnetosphere. Apollo 11 lasted 8 days, a trip to mars would last 60-90 times longer.",
         "upvotes": null,
         "publishedAt": "2026-07-03T14:15:38.000Z",
-        "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovbmqa5/"
+        "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/ovbmqa5/",
+        "parentId": null,
+        "depth": null,
+        "isSubmitter": null,
+        "edited": null,
+        "stickied": null
       }
     ]
   },
@@ -8781,88 +8975,299 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "rumble",
         "id": "v7c38nq",
         "url": "https://rumble.com/v7c38nq-dont-ignore-these-warnings-ep.-2545-07012026.html",
+        "embedUrl": "https://rumble.com/embed/v7c38nq/",
         "title": "Don't Ignore These Warnings (Ep. 2545) - 07/01/2026",
         "description": null,
         "channel": "The Dan Bongino Show",
         "channelUrl": "https://rumble.com/c/bongino",
-        "views": 451541,
-        "likes": 7890,
+        "channelFollowers": 3656884,
+        "channelVerified": true,
+        "views": 451994,
+        "likes": 7899,
         "dislikes": 102,
         "duration": "5459",
         "publishedAt": "2026-07-01T12:20:50+00:00",
         "thumbnail": "https://1a-1791.com/video/fwe2/9c/s8/1/w/A/f/C/wAfCA.OvCc-small-Dont-Ignore-These-Warnings-..jpg",
-        "comments": 794
+        "comments": 795,
+        "isLive": null,
+        "streams": [
+          {
+            "url": "https://1a-1791.com/video/fwe2/9c/s8/2/w/A/f/C/wAfCA.aaa.rec.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "1080p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fwe2/9c/s8/2/w/A/f/C/wAfCA.haa.rec.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "1080p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fwe2/9c/s8/2/w/A/f/C/wAfCA.gaa.rec.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "720p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fwe2/9c/s8/2/w/A/f/C/wAfCA.caa.rec.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "480p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fwe2/9c/s8/2/w/A/f/C/wAfCA.baa.rec.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "360p"
+          }
+        ]
       },
       {
         "platform": "rumble",
         "id": "v7c06lw",
         "url": "https://rumble.com/shorts/v7c06lw",
+        "embedUrl": "https://rumble.com/embed/v7c06lw/",
         "title": "GOP Senator Sounds Like Chuck Schumer!! Pathetic",
         "description": null,
         "channel": "The Dan Bongino Show",
         "channelUrl": "https://rumble.com/c/bongino",
-        "views": 18724,
-        "likes": 367,
+        "channelFollowers": 3656884,
+        "channelVerified": true,
+        "views": 18747,
+        "likes": 368,
         "dislikes": 12,
         "duration": "49",
         "publishedAt": "2026-06-29T17:52:08+00:00",
         "thumbnail": "https://1a-1791.com/video/fwe2/f5/s8/6/0/L/I/B/0LIBA.O-xb.jpg",
-        "comments": 28
+        "comments": 28,
+        "isLive": null,
+        "streams": [
+          {
+            "url": "https://1a-1791.com/video/fwe2/f5/s8/2/0/L/I/B/0LIBA.haa.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "1080p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fwe2/f5/s8/2/0/L/I/B/0LIBA.gaa.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "720p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fwe2/f5/s8/2/0/L/I/B/0LIBA.caa.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "480p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fwe2/f5/s8/2/0/L/I/B/0LIBA.baa.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "360p"
+          }
+        ]
       },
       {
         "platform": "rumble",
         "id": "v7bzpb2",
         "url": "https://rumble.com/v7bzpb2-beset-on-all-sides-ep.-2544-06292026.html",
+        "embedUrl": "https://rumble.com/embed/v7bzpb2/",
         "title": "Beset On All Sides (Ep. 2544) - 06/29/2026",
         "description": null,
         "channel": "The Dan Bongino Show",
         "channelUrl": "https://rumble.com/c/bongino",
-        "views": 553547,
+        "channelFollowers": 3656884,
+        "channelVerified": true,
+        "views": 553693,
         "likes": 8676,
         "dislikes": 95,
         "duration": "3756",
         "publishedAt": "2026-06-29T12:14:26+00:00",
         "thumbnail": "https://1a-1791.com/video/fwe2/e2/s8/1/E/h/D/B/EhDBA.OvCc-small-Beset-On-All-Sides-Ep.-2544..jpg",
-        "comments": 598
+        "comments": 598,
+        "isLive": null,
+        "streams": [
+          {
+            "url": "https://1a-1791.com/video/fwe2/e2/s8/2/E/h/D/B/EhDBA.aaa.rec.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "1080p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fwe2/e2/s8/2/E/h/D/B/EhDBA.haa.rec.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "1080p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fwe2/e2/s8/2/E/h/D/B/EhDBA.gaa.rec.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "720p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fwe2/e2/s8/2/E/h/D/B/EhDBA.caa.rec.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "480p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fwe2/e2/s8/2/E/h/D/B/EhDBA.baa.rec.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "360p"
+          }
+        ]
       },
       {
         "platform": "rumble",
         "id": "v7bvrxg",
         "url": "https://rumble.com/shorts/v7bvrxg",
+        "embedUrl": "https://rumble.com/embed/v7bvrxg/",
         "title": "Left Melts Down Over MAJOR SCOTUS Victories",
         "description": null,
         "channel": "The Dan Bongino Show",
         "channelUrl": "https://rumble.com/c/bongino",
-        "views": 28794,
-        "likes": 500,
+        "channelFollowers": 3656884,
+        "channelVerified": true,
+        "views": 28838,
+        "likes": 501,
         "dislikes": 15,
         "duration": "81",
         "publishedAt": "2026-06-27T00:11:05+00:00",
         "thumbnail": "https://1a-1791.com/video/fwe2/1e/s8/6/K/y/W/A/KyWAA.O-xb.jpg",
-        "comments": 19
+        "comments": 19,
+        "isLive": null,
+        "streams": [
+          {
+            "url": "https://1a-1791.com/video/fwe2/1e/s8/2/K/y/W/A/KyWAA.haa.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "1080p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fwe2/1e/s8/2/K/y/W/A/KyWAA.gaa.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "720p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fwe2/1e/s8/2/K/y/W/A/KyWAA.caa.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "480p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fwe2/1e/s8/2/K/y/W/A/KyWAA.baa.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "360p"
+          }
+        ]
       },
       {
         "platform": "rumble",
         "id": "v7bvoey",
         "url": "https://rumble.com/shorts/v7bvoey",
+        "embedUrl": "https://rumble.com/embed/v7bvoey/",
         "title": "Rep. Brandon Gill Renders Lib Utterly SPEECHLESS",
         "description": null,
         "channel": "The Dan Bongino Show",
         "channelUrl": "https://rumble.com/c/bongino",
-        "views": 22148,
+        "channelFollowers": 3656884,
+        "channelVerified": true,
+        "views": 22180,
         "likes": 488,
         "dislikes": 7,
         "duration": "80",
         "publishedAt": "2026-06-26T22:54:28+00:00",
         "thumbnail": "https://1a-1791.com/video/fww1/12/s8/1/A/r/V/A/ArVAA.OvCc-small-Rep.-Brandon-Gill-Renders-L..jpg",
-        "comments": 48
+        "comments": 48,
+        "isLive": null,
+        "streams": [
+          {
+            "url": "https://1a-1791.com/video/fww1/12/s8/2/A/r/V/A/ArVAA.haa.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "1080p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fww1/12/s8/2/A/r/V/A/ArVAA.gaa.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "720p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fww1/12/s8/2/A/r/V/A/ArVAA.caa.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "480p"
+          },
+          {
+            "url": "https://1a-1791.com/video/fww1/12/s8/2/A/r/V/A/ArVAA.baa.mp4?b=1&u=6",
+            "type": "mp4",
+            "quality": "360p"
+          }
+        ]
       }
     ]
   },
   "rumble-comments": {
-    "url": "https://rumble.com/v7c2pio-space-revolution-ep.-25.html",
-    "totalReturned": 0,
-    "comments": []
+    "url": "https://rumble.com/v7c38nq-dont-ignore-these-warnings-ep.-2545-07012026.html",
+    "totalReturned": 5,
+    "comments": [
+      {
+        "platform": "rumble",
+        "id": "613644696",
+        "text": "Great show Shawn!",
+        "author": {
+          "name": "MFitzger",
+          "url": null,
+          "verified": null
+        },
+        "likes": 0,
+        "replyCount": null,
+        "createdAt": "2026-07-04T09:52:18+00:00",
+        "videoUrl": null
+      },
+      {
+        "platform": "rumble",
+        "id": "613642072",
+        "text": "GOD Bless America ~~ GOD Bless Donald J. Trump (who does NOT have a NAZI tattoo)\nI Stand AGAINST Socialist / Marxist / Communist ... WE the People WILL FIGHT for OUR Country \n #2ABlackRiflesMatter #FuckIslamicTerrorist",
+        "author": {
+          "name": "anonLoneRanger",
+          "url": null,
+          "verified": true
+        },
+        "likes": 0,
+        "replyCount": null,
+        "createdAt": "2026-07-04T08:04:46+00:00",
+        "videoUrl": null
+      },
+      {
+        "platform": "rumble",
+        "id": "613635864",
+        "text": "🇺🇸🇺🇸🇺🇸🇺🇸🇺🇸🇺🇸",
+        "author": {
+          "name": "misterflipster",
+          "url": null,
+          "verified": null
+        },
+        "likes": 0,
+        "replyCount": null,
+        "createdAt": "2026-07-04T03:49:38+00:00",
+        "videoUrl": null
+      },
+      {
+        "platform": "rumble",
+        "id": "613635740",
+        "text": "Great show you have a new follower Shawn!",
+        "author": {
+          "name": "misterflipster",
+          "url": null,
+          "verified": null
+        },
+        "likes": 0,
+        "replyCount": null,
+        "createdAt": "2026-07-04T03:45:51+00:00",
+        "videoUrl": null
+      },
+      {
+        "platform": "rumble",
+        "id": "613635438",
+        "text": "joke about European soccer fans bein parasites was wack. Do better FARRISH.",
+        "author": {
+          "name": "Schlum",
+          "url": null,
+          "verified": null
+        },
+        "likes": 0,
+        "replyCount": null,
+        "createdAt": "2026-07-04T03:35:50+00:00",
+        "videoUrl": null
+      }
+    ]
   },
   "rumble-search": {
     "query": "space",
@@ -8952,19 +9357,50 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "rumble-video-details": {
     "platform": "rumble",
-    "id": "v7c2pio",
-    "url": "https://rumble.com/v7c2pio-space-revolution-ep.-25.html",
-    "title": "Space Revolution Ep. 25: Independence Day, the Shape & Pattern of Truth",
+    "id": "v7c38nq",
+    "url": "https://rumble.com/v7c38nq-dont-ignore-these-warnings-ep.-2545-07012026.html",
+    "embedUrl": "https://rumble.com/embed/v7c38nq/",
+    "title": "Don't Ignore These Warnings (Ep. 2545) - 07/01/2026",
     "description": null,
-    "channel": "Badlands Media",
-    "channelUrl": "https://rumble.com/c/BadlandsMedia",
-    "views": 36668,
-    "likes": 348,
-    "dislikes": 7,
-    "duration": "4054",
-    "publishedAt": "2026-07-01T02:46:28+00:00",
-    "thumbnail": "https://1a-1791.com/video/fwe2/fd/s8/1/W/w/_/B/Ww_BA.OvCc-small-Space-Revolution-Ep.-25..jpg",
-    "comments": 13
+    "channel": "The Dan Bongino Show",
+    "channelUrl": "https://rumble.com/c/bongino",
+    "channelFollowers": 3656884,
+    "channelVerified": true,
+    "views": 451994,
+    "likes": 7899,
+    "dislikes": 102,
+    "duration": "5459",
+    "publishedAt": "2026-07-01T12:20:50+00:00",
+    "thumbnail": "https://1a-1791.com/video/fwe2/9c/s8/1/w/A/f/C/wAfCA.OvCc-small-Dont-Ignore-These-Warnings-..jpg",
+    "comments": 795,
+    "isLive": null,
+    "streams": [
+      {
+        "url": "https://1a-1791.com/video/fwe2/9c/s8/2/w/A/f/C/wAfCA.aaa.rec.mp4?b=1&u=6",
+        "type": "mp4",
+        "quality": "1080p"
+      },
+      {
+        "url": "https://1a-1791.com/video/fwe2/9c/s8/2/w/A/f/C/wAfCA.haa.rec.mp4?b=1&u=6",
+        "type": "mp4",
+        "quality": "1080p"
+      },
+      {
+        "url": "https://1a-1791.com/video/fwe2/9c/s8/2/w/A/f/C/wAfCA.gaa.rec.mp4?b=1&u=6",
+        "type": "mp4",
+        "quality": "720p"
+      },
+      {
+        "url": "https://1a-1791.com/video/fwe2/9c/s8/2/w/A/f/C/wAfCA.caa.rec.mp4?b=1&u=6",
+        "type": "mp4",
+        "quality": "480p"
+      },
+      {
+        "url": "https://1a-1791.com/video/fwe2/9c/s8/2/w/A/f/C/wAfCA.baa.rec.mp4?b=1&u=6",
+        "type": "mp4",
+        "quality": "360p"
+      }
+    ]
   },
   "snapchat-user-profile": {
     "platform": "snapchat",
@@ -9076,10 +9512,15 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "name": "Flume",
     "description": "Management: flume@threesixzero.com",
     "avatar": "https://i1.sndcdn.com/avatars-sAZPcKyZpXJ0J0u5-JHfNSg-large.jpg",
-    "followers": 2227408,
+    "city": "Sydney",
+    "countryCode": "AU",
+    "verified": true,
+    "followers": 2227409,
     "followings": 203,
     "trackCount": 231,
-    "likesCount": 149
+    "playlistCount": 46,
+    "likesCount": 149,
+    "createdAt": null
   },
   "soundcloud-artist-tracks": {
     "platform": "soundcloud",
@@ -9092,14 +9533,27 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://soundcloud.com/flume/all-of-the-worlds",
         "title": "All Of The Worlds",
         "description": null,
-        "artist": null,
-        "artistUrl": null,
+        "genre": "Electronic",
+        "artist": "Flume",
+        "artistUrl": "https://soundcloud.com/flume",
+        "artistAvatar": "https://i1.sndcdn.com/avatars-sAZPcKyZpXJ0J0u5-JHfNSg-large.jpg",
+        "artistFollowers": 2227409,
+        "artistVerified": true,
         "durationMs": 125780,
-        "plays": 31217,
+        "plays": 31219,
         "likes": 929,
+        "reposts": 72,
+        "downloads": null,
         "comments": 24,
         "publishedAt": "2025-06-26T13:01:21Z",
-        "artwork": "https://i1.sndcdn.com/artworks-bvBQ1BhZQSM2-0-large.jpg"
+        "releaseDate": "2025-08-22T00:00:00Z",
+        "license": "all-rights-reserved",
+        "isrc": "US38Y2548239",
+        "downloadable": null,
+        "streamable": true,
+        "waveformUrl": "https://wave.sndcdn.com/0AX3G8zwAkiV_m.json",
+        "artwork": "https://i1.sndcdn.com/artworks-bvBQ1BhZQSM2-0-large.jpg",
+        "tags": []
       },
       {
         "platform": "soundcloud",
@@ -9107,14 +9561,27 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://soundcloud.com/flume/feel-ur-love",
         "title": "Feel Ur Love",
         "description": null,
-        "artist": null,
-        "artistUrl": null,
+        "genre": "Electronic",
+        "artist": "Flume",
+        "artistUrl": "https://soundcloud.com/flume",
+        "artistAvatar": "https://i1.sndcdn.com/avatars-sAZPcKyZpXJ0J0u5-JHfNSg-large.jpg",
+        "artistFollowers": 2227409,
+        "artistVerified": true,
         "durationMs": 251651,
-        "plays": 22307,
+        "plays": 22308,
         "likes": 565,
+        "reposts": 17,
+        "downloads": null,
         "comments": 6,
         "publishedAt": "2025-06-26T13:00:44Z",
-        "artwork": "https://i1.sndcdn.com/artworks-wu5UUJhLSWSO-0-large.jpg"
+        "releaseDate": "2025-08-22T00:00:00Z",
+        "license": "all-rights-reserved",
+        "isrc": "US38Y2548242",
+        "downloadable": null,
+        "streamable": true,
+        "waveformUrl": "https://wave.sndcdn.com/YLJYjhEwU6KR_m.json",
+        "artwork": "https://i1.sndcdn.com/artworks-wu5UUJhLSWSO-0-large.jpg",
+        "tags": []
       },
       {
         "platform": "soundcloud",
@@ -9122,14 +9589,27 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://soundcloud.com/flume/whenever-you-want",
         "title": "Whenever You Want",
         "description": null,
-        "artist": null,
-        "artistUrl": null,
+        "genre": "Electronic",
+        "artist": "Flume",
+        "artistUrl": "https://soundcloud.com/flume",
+        "artistAvatar": "https://i1.sndcdn.com/avatars-sAZPcKyZpXJ0J0u5-JHfNSg-large.jpg",
+        "artistFollowers": 2227409,
+        "artistVerified": true,
         "durationMs": 151152,
-        "plays": 27431,
+        "plays": 27432,
         "likes": 957,
+        "reposts": 42,
+        "downloads": null,
         "comments": 17,
         "publishedAt": "2025-06-26T12:59:27Z",
-        "artwork": "https://i1.sndcdn.com/artworks-Q9IHaLfQvfvn-0-large.jpg"
+        "releaseDate": "2025-08-22T00:00:00Z",
+        "license": "all-rights-reserved",
+        "isrc": "US38Y2548245",
+        "downloadable": null,
+        "streamable": true,
+        "waveformUrl": "https://wave.sndcdn.com/oVaJ5ZfqvJSB_m.json",
+        "artwork": "https://i1.sndcdn.com/artworks-Q9IHaLfQvfvn-0-large.jpg",
+        "tags": []
       },
       {
         "platform": "soundcloud",
@@ -9137,14 +9617,27 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://soundcloud.com/flume/truce",
         "title": "Truce",
         "description": null,
-        "artist": null,
-        "artistUrl": null,
+        "genre": "Electronic",
+        "artist": "Flume",
+        "artistUrl": "https://soundcloud.com/flume",
+        "artistAvatar": "https://i1.sndcdn.com/avatars-sAZPcKyZpXJ0J0u5-JHfNSg-large.jpg",
+        "artistFollowers": 2227409,
+        "artistVerified": true,
         "durationMs": 142565,
-        "plays": 11125,
+        "plays": 11126,
         "likes": 395,
+        "reposts": 11,
+        "downloads": null,
         "comments": 10,
         "publishedAt": "2025-06-26T12:59:16Z",
-        "artwork": "https://i1.sndcdn.com/artworks-YionK4qqubr0-0-large.jpg"
+        "releaseDate": "2025-08-22T00:00:00Z",
+        "license": "all-rights-reserved",
+        "isrc": "US38Y2548248",
+        "downloadable": null,
+        "streamable": true,
+        "waveformUrl": "https://wave.sndcdn.com/xvNXFSHOzWXV_m.json",
+        "artwork": "https://i1.sndcdn.com/artworks-YionK4qqubr0-0-large.jpg",
+        "tags": []
       }
     ]
   },
@@ -9154,14 +9647,27 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://soundcloud.com/flume/all-of-the-worlds",
     "title": "All Of The Worlds",
     "description": null,
-    "artist": null,
-    "artistUrl": null,
+    "genre": "Electronic",
+    "artist": "Flume",
+    "artistUrl": "https://soundcloud.com/flume",
+    "artistAvatar": "https://i1.sndcdn.com/avatars-sAZPcKyZpXJ0J0u5-JHfNSg-large.jpg",
+    "artistFollowers": 2227409,
+    "artistVerified": true,
     "durationMs": 125780,
-    "plays": 31217,
+    "plays": 31219,
     "likes": 929,
+    "reposts": 72,
+    "downloads": null,
     "comments": 24,
     "publishedAt": "2025-06-26T13:01:21Z",
-    "artwork": "https://i1.sndcdn.com/artworks-bvBQ1BhZQSM2-0-large.jpg"
+    "releaseDate": "2025-08-22T00:00:00Z",
+    "license": "all-rights-reserved",
+    "isrc": "US38Y2548239",
+    "downloadable": null,
+    "streamable": true,
+    "waveformUrl": "https://wave.sndcdn.com/0AX3G8zwAkiV_m.json",
+    "artwork": "https://i1.sndcdn.com/artworks-bvBQ1BhZQSM2-0-large.jpg",
+    "tags": []
   },
   "spotify-album": {
     "platform": "spotify",
@@ -20881,16 +21387,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
       "banner": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
       "verified": true,
-      "followers": 12861450,
+      "followers": 12861659,
       "following": 69,
       "postCount": 34642,
+      "website": "www.DonaldJTrump.com",
       "createdAt": "2022-02-11T16:16:57.705Z",
+      "lastStatusAt": "2026-07-04",
       "fields": []
     },
     "engagement": {
-      "replies": 307,
-      "reblogs": 369,
-      "likes": 1529
+      "replies": 506,
+      "reblogs": 720,
+      "likes": 3124
     },
     "language": null,
     "sensitive": false,
@@ -20913,10 +21421,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
     "banner": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
     "verified": true,
-    "followers": 12861418,
+    "followers": 12861654,
     "following": 69,
     "postCount": 34642,
+    "website": "www.DonaldJTrump.com",
     "createdAt": "2022-02-11T16:16:57.705Z",
+    "lastStatusAt": "2026-07-04",
     "fields": []
   },
   "truth-social-user-posts": {
@@ -20939,16 +21449,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
           "banner": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
           "verified": true,
-          "followers": 12861418,
+          "followers": 12861654,
           "following": 69,
           "postCount": 34642,
+          "website": "www.DonaldJTrump.com",
           "createdAt": "2022-02-11T16:16:57.705Z",
+          "lastStatusAt": "2026-07-04",
           "fields": []
         },
         "engagement": {
-          "replies": 270,
-          "reblogs": 315,
-          "likes": 1259
+          "replies": 506,
+          "reblogs": 716,
+          "likes": 3109
         },
         "language": null,
         "sensitive": false,
@@ -20977,16 +21489,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
           "banner": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
           "verified": true,
-          "followers": 12861418,
+          "followers": 12861654,
           "following": 69,
           "postCount": 34642,
+          "website": "www.DonaldJTrump.com",
           "createdAt": "2022-02-11T16:16:57.705Z",
+          "lastStatusAt": "2026-07-04",
           "fields": []
         },
         "engagement": {
-          "replies": 144,
-          "reblogs": 291,
-          "likes": 1226
+          "replies": 264,
+          "reblogs": 659,
+          "likes": 2889
         },
         "language": null,
         "sensitive": false,
@@ -21015,16 +21529,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
           "banner": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
           "verified": true,
-          "followers": 12861418,
+          "followers": 12861654,
           "following": 69,
           "postCount": 34642,
+          "website": "www.DonaldJTrump.com",
           "createdAt": "2022-02-11T16:16:57.705Z",
+          "lastStatusAt": "2026-07-04",
           "fields": []
         },
         "engagement": {
-          "replies": 513,
-          "reblogs": 1205,
-          "likes": 4393
+          "replies": 661,
+          "reblogs": 1765,
+          "likes": 6858
         },
         "language": null,
         "sensitive": false,
@@ -21053,16 +21569,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
           "banner": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
           "verified": true,
-          "followers": 12861418,
+          "followers": 12861654,
           "following": 69,
           "postCount": 34642,
+          "website": "www.DonaldJTrump.com",
           "createdAt": "2022-02-11T16:16:57.705Z",
+          "lastStatusAt": "2026-07-04",
           "fields": []
         },
         "engagement": {
-          "replies": 1453,
-          "reblogs": 2607,
-          "likes": 12938
+          "replies": 1518,
+          "reblogs": 2828,
+          "likes": 14359
         },
         "language": "en",
         "sensitive": false,
@@ -21084,16 +21602,18 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "avatar": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg",
           "banner": "https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg",
           "verified": true,
-          "followers": 12861418,
+          "followers": 12861654,
           "following": 69,
           "postCount": 34642,
+          "website": "www.DonaldJTrump.com",
           "createdAt": "2022-02-11T16:16:57.705Z",
+          "lastStatusAt": "2026-07-04",
           "fields": []
         },
         "engagement": {
-          "replies": 660,
-          "reblogs": 2530,
-          "likes": 9195
+          "replies": 719,
+          "reblogs": 2794,
+          "likes": 10323
         },
         "language": null,
         "sensitive": false,
@@ -21110,15 +21630,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "twitch-clip": {
     "platform": "twitch",
-    "id": "71092938",
-    "url": "https://www.twitch.tv/xqc",
-    "title": "💙LIVE💙CLICK💙HERE💙LOCK IN💙DRAMA💙NEWS💙VIDEOS💙GAMES💙THINGS💙IMPORTANT💙PUL UP💙",
-    "createdAt": "2014-09-12T23:50:05.989719Z",
-    "durationSeconds": null,
-    "views": null,
-    "thumbnail": "https://static-cdn.jtvnw.net/previews-ttv/live_user_xqc-1280x720.jpg",
-    "game": "Deadlock",
-    "broadcaster": "xQc"
+    "id": "1028673417",
+    "slug": null,
+    "url": "https://www.twitch.tv/xqc/clip/CredulousAmusedHorseradishKappaRoss-SSmlOpnDNeA-666x",
+    "embedUrl": null,
+    "title": "forsenCD",
+    "createdAt": "2026-06-29T15:31:57Z",
+    "durationSeconds": 30,
+    "views": 86953,
+    "thumbnail": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/a8fb64ea-bda0-4f67-9e67-b65cb78d6017/landscape/thumb/thumb-0000000000-1920x1080.jpg",
+    "videoUrl": null,
+    "game": "MECCHA CHAMELEON",
+    "language": null,
+    "broadcaster": null,
+    "broadcasterProfileImage": null
   },
   "twitch-profile": {
     "platform": "twitch",
@@ -21127,7 +21652,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "displayName": "shroud",
     "url": "https://www.twitch.tv/shroud",
     "description": "I'm back baby",
-    "followers": 11300302,
+    "followers": 11300281,
     "profileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-150x150.png",
     "bannerImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/dbee25e8-55b7-4565-87f0-e9d4661dcc66-profile_banner-480.jpeg",
     "isPartner": true,
@@ -21137,68 +21662,99 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "title": null,
       "game": null,
       "viewers": null,
-      "startedAt": null
+      "startedAt": null,
+      "thumbnail": null
+    },
+    "lastBroadcast": {
+      "title": "help sophie is being raided",
+      "game": "Sand: Raiders Of Sophie",
+      "startedAt": "2026-07-03T21:02:07.023252Z"
     },
     "recentVideos": [
       {
         "platform": "twitch",
         "id": "2811314176",
+        "slug": null,
         "url": "https://www.twitch.tv/videos/2811314176",
+        "embedUrl": null,
         "title": "help sophie is being raided",
         "createdAt": "2026-07-03T16:52:37Z",
         "durationSeconds": 14967,
-        "views": 176479,
+        "views": 176857,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/f5f35ad47e531849fe88_shroud_319235652830_1783097552//thumb/thumb0-320x180.jpg",
-        "game": null,
-        "broadcaster": null
+        "videoUrl": null,
+        "game": "Sand: Raiders Of Sophie",
+        "language": null,
+        "broadcaster": null,
+        "broadcasterProfileImage": null
       },
       {
         "platform": "twitch",
         "id": "2808988529",
+        "slug": null,
         "url": "https://www.twitch.tv/videos/2808988529",
+        "embedUrl": null,
         "title": "raiders of the lost sophie",
         "createdAt": "2026-06-30T16:47:59Z",
         "durationSeconds": 43106,
-        "views": 440536,
+        "views": 440556,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d1m7jfoe9zdc1j/1870559a240a483b0b0a_shroud_320060756185_1782838074//thumb/thumb0-320x180.jpg",
-        "game": null,
-        "broadcaster": null
+        "videoUrl": null,
+        "game": "Sand: Raiders Of Sophie",
+        "language": null,
+        "broadcaster": null,
+        "broadcasterProfileImage": null
       },
       {
         "platform": "twitch",
         "id": "2808273128",
+        "slug": null,
         "url": "https://www.twitch.tv/videos/2808273128",
+        "embedUrl": null,
         "title": "sophie needs a ladder",
         "createdAt": "2026-06-29T17:47:11Z",
         "durationSeconds": 21917,
-        "views": 265982,
+        "views": 265991,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/c64f57d6409c2e460a9d_shroud_319184439262_1782755225//thumb/thumb0-320x180.jpg",
-        "game": null,
-        "broadcaster": null
+        "videoUrl": null,
+        "game": "Sand: Raiders Of Sophie",
+        "language": null,
+        "broadcaster": null,
+        "broadcasterProfileImage": null
       },
       {
         "platform": "twitch",
         "id": "2806817861",
+        "slug": null,
         "url": "https://www.twitch.tv/videos/2806817861",
+        "embedUrl": null,
         "title": "people like sand, go try sand. i man of people.",
         "createdAt": "2026-06-27T19:23:14Z",
         "durationSeconds": 16831,
-        "views": 282378,
+        "views": 282391,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/b6b3436ea0a815a067ef_shroud_318272053719_1782588190//thumb/thumb0-320x180.jpg",
-        "game": null,
-        "broadcaster": null
+        "videoUrl": null,
+        "game": "Sand: Raiders Of Sophie",
+        "language": null,
+        "broadcaster": null,
+        "broadcasterProfileImage": null
       },
       {
         "platform": "twitch",
         "id": "2805967936",
+        "slug": null,
         "url": "https://www.twitch.tv/videos/2805967936",
+        "embedUrl": null,
         "title": "VALORANT CAPTAINS DRAFT HELP ME PICK MY SQUAD",
         "createdAt": "2026-06-26T18:19:37Z",
         "durationSeconds": 14995,
-        "views": 143915,
+        "views": 143925,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/e7b09b000ec2681323e0_shroud_319200009820_1782497972//thumb/thumb0-320x180.jpg",
-        "game": null,
-        "broadcaster": null
+        "videoUrl": null,
+        "game": "VALORANT",
+        "language": null,
+        "broadcaster": null,
+        "broadcasterProfileImage": null
       }
     ],
     "topClips": [],
@@ -21218,62 +21774,87 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "twitch",
         "id": "2811314176",
+        "slug": null,
         "url": "https://www.twitch.tv/videos/2811314176",
+        "embedUrl": null,
         "title": "help sophie is being raided",
         "createdAt": "2026-07-03T16:52:37Z",
         "durationSeconds": 14967,
-        "views": 176479,
+        "views": 176857,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/f5f35ad47e531849fe88_shroud_319235652830_1783097552//thumb/thumb0-320x180.jpg",
-        "game": null,
-        "broadcaster": null
+        "videoUrl": null,
+        "game": "Sand: Raiders Of Sophie",
+        "language": null,
+        "broadcaster": null,
+        "broadcasterProfileImage": null
       },
       {
         "platform": "twitch",
         "id": "2808988529",
+        "slug": null,
         "url": "https://www.twitch.tv/videos/2808988529",
+        "embedUrl": null,
         "title": "raiders of the lost sophie",
         "createdAt": "2026-06-30T16:47:59Z",
         "durationSeconds": 43106,
-        "views": 440536,
+        "views": 440556,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d1m7jfoe9zdc1j/1870559a240a483b0b0a_shroud_320060756185_1782838074//thumb/thumb0-320x180.jpg",
-        "game": null,
-        "broadcaster": null
+        "videoUrl": null,
+        "game": "Sand: Raiders Of Sophie",
+        "language": null,
+        "broadcaster": null,
+        "broadcasterProfileImage": null
       },
       {
         "platform": "twitch",
         "id": "2808273128",
+        "slug": null,
         "url": "https://www.twitch.tv/videos/2808273128",
+        "embedUrl": null,
         "title": "sophie needs a ladder",
         "createdAt": "2026-06-29T17:47:11Z",
         "durationSeconds": 21917,
-        "views": 265982,
+        "views": 265991,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/c64f57d6409c2e460a9d_shroud_319184439262_1782755225//thumb/thumb0-320x180.jpg",
-        "game": null,
-        "broadcaster": null
+        "videoUrl": null,
+        "game": "Sand: Raiders Of Sophie",
+        "language": null,
+        "broadcaster": null,
+        "broadcasterProfileImage": null
       },
       {
         "platform": "twitch",
         "id": "2806817861",
+        "slug": null,
         "url": "https://www.twitch.tv/videos/2806817861",
+        "embedUrl": null,
         "title": "people like sand, go try sand. i man of people.",
         "createdAt": "2026-06-27T19:23:14Z",
         "durationSeconds": 16831,
-        "views": 282378,
+        "views": 282391,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/b6b3436ea0a815a067ef_shroud_318272053719_1782588190//thumb/thumb0-320x180.jpg",
-        "game": null,
-        "broadcaster": null
+        "videoUrl": null,
+        "game": "Sand: Raiders Of Sophie",
+        "language": null,
+        "broadcaster": null,
+        "broadcasterProfileImage": null
       },
       {
         "platform": "twitch",
         "id": "2805967936",
+        "slug": null,
         "url": "https://www.twitch.tv/videos/2805967936",
+        "embedUrl": null,
         "title": "VALORANT CAPTAINS DRAFT HELP ME PICK MY SQUAD",
         "createdAt": "2026-06-26T18:19:37Z",
         "durationSeconds": 14995,
-        "views": 143915,
+        "views": 143925,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/e7b09b000ec2681323e0_shroud_319200009820_1782497972//thumb/thumb0-320x180.jpg",
-        "game": null,
-        "broadcaster": null
+        "videoUrl": null,
+        "game": "VALORANT",
+        "language": null,
+        "broadcaster": null,
+        "broadcasterProfileImage": null
       }
     ]
   },
@@ -21407,9 +21988,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "bio": "Making the seemingly impossible, possible. ✨",
     "location": "Pale Blue Dot",
     "verified": true,
-    "followers": 92152353,
+    "followers": 92152972,
     "following": 119,
-    "tweetCount": 74181,
+    "tweetCount": 74183,
+    "likesCount": 16859,
+    "mediaCount": 28029,
+    "listedCount": 97069,
+    "isBlueVerified": null,
+    "website": "http://www.nasa.gov/",
     "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg",
     "bannerImage": "https://pbs.twimg.com/profile_banners/11348282/1775567134",
     "createdAt": "Wed Dec 19 20:20:32 +0000 2007"

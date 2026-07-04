@@ -238,6 +238,12 @@ class Settings(BaseSettings):
     # Optional GitHub token avoids low unauthenticated public API limits.
     GITHUB_TOKEN: str = ""
 
+    # Optional Reddit OAuth app (script/client-credentials). When set, comment
+    # fetches use oauth.reddit.com, which works from datacenter IPs and keeps
+    # vote counts + threading that the actor fallback lacks.
+    REDDIT_CLIENT_ID: str = ""
+    REDDIT_CLIENT_SECRET: str = ""
+
     # Bluesky uses the public AT-Protocol AppView API directly (no actor).
     BLUESKY_API_BASE: str = "https://public.api.bsky.app"
 

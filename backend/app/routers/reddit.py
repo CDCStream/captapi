@@ -147,17 +147,56 @@ def _reddit_json_url_variants(url: str, post_id: str) -> list[str]:
     ]
 
 
+_reddit_oauth_token: str | None = None
+_reddit_oauth_expiry: float = 0.0
+
+
+async def _reddit_oauth_headers() -> dict[str, str] | None:
+    """Application-only OAuth token for oauth.reddit.com (works from
+    datacenter IPs). Returns None when no app credentials are configured."""
+    global _reddit_oauth_token, _reddit_oauth_expiry
+    settings = get_settings()
+    if not (settings.REDDIT_CLIENT_ID and settings.REDDIT_CLIENT_SECRET):
+        return None
+    import time
+
+    if _reddit_oauth_token and time.time() < _reddit_oauth_expiry - 60:
+        return {"Authorization": f"Bearer {_reddit_oauth_token}", "User-Agent": "CaptapiBot/1.0 (+https://captapi.com)"}
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp = await client.post(
+                "https://www.reddit.com/api/v1/access_token",
+                auth=(settings.REDDIT_CLIENT_ID, settings.REDDIT_CLIENT_SECRET),
+                data={"grant_type": "client_credentials"},
+                headers={"User-Agent": "CaptapiBot/1.0 (+https://captapi.com)"},
+            )
+        payload = resp.json()
+        token = payload.get("access_token")
+        if not token:
+            return None
+        _reddit_oauth_token = token
+        _reddit_oauth_expiry = time.time() + float(payload.get("expires_in") or 3600)
+        return {"Authorization": f"Bearer {token}", "User-Agent": "CaptapiBot/1.0 (+https://captapi.com)"}
+    except (httpx.HTTPError, ValueError):
+        return None
+
+
 async def _fetch_reddit_json_url(url: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     headers = {"User-Agent": "CaptapiBot/1.0 (+https://captapi.com)"}
+    if "oauth.reddit.com" in url:
+        oauth = await _reddit_oauth_headers()
+        if not oauth:
+            raise HTTPException(status_code=502, detail="Reddit upstream error")
+        headers = oauth
     params = {"raw_json": "1", "limit": max(limit, 1)}
     resp: httpx.Response | None = None
     try:
-        async with httpx.AsyncClient(timeout=8.0, follow_redirects=True, headers=headers) as client:
+        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True, headers=headers) as client:
             resp = await client.get(url, params=params)
     except httpx.HTTPError:
         resp = None
     if resp is None or resp.status_code in {403, 429} or resp.status_code >= 500:
-        # Reddit blocks datacenter IPs; the residential proxy usually gets
+        # Reddit blocks datacenter IPs; the residential proxy sometimes gets
         # through and keeps the richer public-JSON path (scores, threading)
         # instead of the sparser actor fallback.
         joiner = "&" if "?" in url else "?"
@@ -227,7 +266,13 @@ async def _fetch_reddit_json_post(url: str, post_id: str, limit: int) -> tuple[d
     """Fetch a post and comments from Reddit public JSON variants before actor fallback."""
     last_error: HTTPException | None = None
     seen: set[str] = set()
-    for candidate in _reddit_json_url_variants(url, post_id):
+    variants = _reddit_json_url_variants(url, post_id)
+    settings = get_settings()
+    if settings.REDDIT_CLIENT_ID and settings.REDDIT_CLIENT_SECRET:
+        # OAuth works reliably from datacenter IPs; try it first to avoid
+        # burning time on the blocked anonymous variants.
+        variants.sort(key=lambda u: 0 if "oauth.reddit.com" in u else 1)
+    for candidate in variants:
         if candidate in seen:
             continue
         seen.add(candidate)
