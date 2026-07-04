@@ -387,11 +387,29 @@ def batch4_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
     return tests
 
 
+def batch4b_phase1() -> list[tuple[str, str, dict]]:
+    """Retry set for the endpoints that failed in the first batch-4 pass."""
+    return [
+        ("rumble-channel-videos", "/v1/rumble/channel-videos", {"url": "https://rumble.com/c/Bongino", "limit": 5}),
+        ("soundcloud-artist-tracks", "/v1/soundcloud/artist-tracks", {"url": "https://soundcloud.com/flume", "limit": 5}),
+        ("reddit-post-transcript", "/v1/reddit/post-transcript", {"url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/", "limit": 5}),
+        ("instagram-trending-reels", "/v1/instagram/trending-reels", {"country": "United States", "limit": 10}),
+    ]
+
+
 BATCHES = {
     "batch1": (batch1_phase1, batch1_phase2),
     "batch2": (batch2_phase1, batch2_phase2),
     "batch3": (batch3_phase1, batch3_phase2),
     "batch4": (batch4_phase1, batch4_phase2),
+    "batch4b": (batch4b_phase1, batch4_phase2),
+    "batch4c": (
+        lambda: [
+            ("rumble-search", "/v1/rumble/search", {"q": "space", "limit": 5}),
+            ("rumble-channel-videos", "/v1/rumble/channel-videos", {"url": "https://rumble.com/c/Bongino", "limit": 5}),
+        ],
+        batch4_phase2,
+    ),
 }
 
 
@@ -425,6 +443,10 @@ async def main() -> None:
     for slug, res in {**p1, **p2}.items():
         body = res["body"]
         if not (200 <= res["status"] < 300) or not isinstance(body, dict) or not isinstance(body.get("data"), dict):
+            continue
+        # Don't clobber a populated example with a transiently-empty run.
+        if body["data"].get("totalReturned") == 0 and (snap.get(slug) or {}).get("data", {}).get("totalReturned"):
+            print(f"skip {slug}: empty result, keeping existing snapshot")
             continue
         snap[slug] = {
             "ok": True,

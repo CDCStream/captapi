@@ -20101,23 +20101,8 @@
     "data": {
       "platform": "soundcloud",
       "artistUrl": "https://soundcloud.com/flume",
-      "totalReturned": 5,
+      "totalReturned": 4,
       "tracks": [
-        {
-          "platform": "soundcloud",
-          "id": "2976616",
-          "url": "https://soundcloud.com/flume",
-          "title": null,
-          "description": "Management: flume@threesixzero.com",
-          "artist": null,
-          "artistUrl": null,
-          "durationMs": null,
-          "plays": null,
-          "likes": 149,
-          "comments": null,
-          "publishedAt": null,
-          "artwork": null
-        },
         {
           "platform": "soundcloud",
           "id": "2119863225",
@@ -20127,7 +20112,7 @@
           "artist": null,
           "artistUrl": null,
           "durationMs": 125780,
-          "plays": 31216,
+          "plays": 31217,
           "likes": 929,
           "comments": 24,
           "publishedAt": "2025-06-26T13:01:21Z",
@@ -23222,7 +23207,7 @@
     "status": 200,
     "credits": null,
     "data": {
-      "url": "https://rumble.com/shorts/v7c6kd6",
+      "url": "https://rumble.com/v7c2pio-space-revolution-ep.-25.html",
       "totalReturned": 0,
       "comments": []
     }
@@ -23293,6 +23278,243 @@
           "description": null
         }
       ]
+    }
+  },
+  "reddit-post-transcript": {
+    "ok": true,
+    "status": 200,
+    "credits": null,
+    "data": {
+      "platform": "reddit",
+      "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/",
+      "post": {
+        "platform": "reddit",
+        "id": "t3_1umfd43",
+        "url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/",
+        "title": "Radiation exposure may become the biggest challenge for future Moon and Mars missions",
+        "text": "I&#39;ve been reading more about Artemis and future Mars mission planning, and one aspect that seems to receive surprisingly little public discussion is radiation exposure beyond low Earth orbit. NASA has published career radiation exposure limits, and it&#39;s clear that missions outside Earth&#39;s magnetosphere expose crews to significantly higher doses from galactic cosmic rays and solar particle events. Unlike many other engineering problems, there still doesn&#39;t seem to be a practical solution. Effective shielding is extremely heavy, and medical countermeasures are still being researched. It makes me wonder how these risks are balanced during mission planning. Astronauts obviously understand that spaceflight is dangerous, but long-duration missions introduce health risks that may not become apparent until decades later. As plans for lunar bases and eventual Mars missions continue to move forward, this seems like an issue that deserves more attention. I&#39;d be interested in hearing different perspectives on how agencies approach these tradeoffs today, especially from people familiar with space medicine, radiation research, or mission planning. Do you think current public discussions accurately reflect the scale of the challenge, or is this one of the least appreciated obstacles to long-duration human spaceflight?  &#32; submitted by &#32;  /u/Low-Mathematician137   [link] &#32; [comments]",
+        "subreddit": "r/space",
+        "author": "Low-Mathematician137",
+        "upvotes": null,
+        "comments": null,
+        "publishedAt": "2026-07-03T14:04:13.000Z",
+        "flair": null,
+        "nsfw": null,
+        "thumbnail": null
+      },
+      "transcript": "Title: Radiation exposure may become the biggest challenge for future Moon and Mars missions\n\nI&#39;ve been reading more about Artemis and future Mars mission planning, and one aspect that seems to receive surprisingly little public discussion is radiation exposure beyond low Earth orbit. NASA has published career radiation exposure limits, and it&#39;s clear that missions outside Earth&#39;s magnetosphere expose crews to significantly higher doses from galactic cosmic rays and solar particle events. Unlike many other engineering problems, there still doesn&#39;t seem to be a practical solution. Effective shielding is extremely heavy, and medical countermeasures are still being researched. It makes me wonder how these risks are balanced during mission planning. Astronauts obviously understand that spaceflight is dangerous, but long-duration missions introduce health risks that may not become apparent until decades later. As plans for lunar bases and eventual Mars missions continue to move forward, this seems like an issue that deserves more attention. I&#39;d be interested in hearing different perspectives on how agencies approach these tradeoffs today, especially from people familiar with space medicine, radiation research, or mission planning. Do you think current public discussions accurately reflect the scale of the challenge, or is this one of the least appreciated obstacles to long-duration human spaceflight?  &#32; submitted by &#32;  /u/Low-Mathematician137   [link] &#32; [comments]\n\nEffingWasps: Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme\n\nb407driver: Become? It has always been the greatest (unsolved) challenge.\n\nWaarm: The current biggest challenge is funding.\n\ndegh555: The OP is observing that future manned missions will require significantly longer durations beyond the protection of the magnetosphere. Apollo 11 lasted 8 days, a trip to mars would last 60-90 times longer.",
+      "transcriptSegments": [
+        {
+          "speaker": "post",
+          "text": "Radiation exposure may become the biggest challenge for future Moon and Mars missions",
+          "start": 0,
+          "duration": 0,
+          "timestamp": "00:00"
+        },
+        {
+          "speaker": "Low-Mathematician137",
+          "text": "I&#39;ve been reading more about Artemis and future Mars mission planning, and one aspect that seems to receive surprisingly little public discussion is radiation exposure beyond low Earth orbit. NASA has published career radiation exposure limits, and it&#39;s clear that missions outside Earth&#39;s magnetosphere expose crews to significantly higher doses from galactic cosmic rays and solar particle events. Unlike many other engineering problems, there still doesn&#39;t seem to be a practical solution. Effective shielding is extremely heavy, and medical countermeasures are still being researched. It makes me wonder how these risks are balanced during mission planning. Astronauts obviously understand that spaceflight is dangerous, but long-duration missions introduce health risks that may not become apparent until decades later. As plans for lunar bases and eventual Mars missions continue to move forward, this seems like an issue that deserves more attention. I&#39;d be interested in hearing different perspectives on how agencies approach these tradeoffs today, especially from people familiar with space medicine, radiation research, or mission planning. Do you think current public discussions accurately reflect the scale of the challenge, or is this one of the least appreciated obstacles to long-duration human spaceflight?  &#32; submitted by &#32;  /u/Low-Mathematician137   [link] &#32; [comments]",
+          "start": 0,
+          "duration": 0,
+          "timestamp": "00:00"
+        },
+        {
+          "speaker": "EffingWasps",
+          "text": "Insert that very recent but weirdly broadly applicable “this has been talked about extensively you’re just 21” meme",
+          "start": 0,
+          "duration": 0,
+          "timestamp": "00:00"
+        },
+        {
+          "speaker": "b407driver",
+          "text": "Become? It has always been the greatest (unsolved) challenge.",
+          "start": 0,
+          "duration": 0,
+          "timestamp": "00:00"
+        },
+        {
+          "speaker": "Waarm",
+          "text": "The current biggest challenge is funding.",
+          "start": 0,
+          "duration": 0,
+          "timestamp": "00:00"
+        }
+      ],
+      "wordCount": 283,
+      "segments": 6,
+      "commentsIncluded": 4
+    }
+  },
+  "instagram-trending-reels": {
+    "ok": true,
+    "status": 200,
+    "credits": null,
+    "data": {
+      "platform": "instagram",
+      "country": "United States",
+      "totalReturned": 10,
+      "reels": [
+        {
+          "platform": "instagram",
+          "url": "https://www.instagram.com/p/DYH6umnjyK8/",
+          "id": "3893338692144538300_41765305898",
+          "type": "carousel_container",
+          "productType": null,
+          "caption": "5 anime movies that will stay with you forever.\nYour Name — two souls connected across time who spend their whole lives searching for each other without knowing why.\nSpirited Away — a young girl who enters a world beyond imagination and discovers who she truly is.\nGrave of the Fireflies — a brother who gave everything to protect his little sister during the darkest chapter of history.\nA Silent Voice — a story about the weight of words and the courage to face what you've done\nPrincess Mononoke — a battle between humanity and nature told through some of the most breathtaking animation ever created.\n\nFollow @senpai_clipz for more recommendations \n\n#animerecommendation #anime #movies #animemovie",
+          "description": "5 anime movies that will stay with you forever.\nYour Name — two souls connected across time who spend their whole lives searching for each other without knowing why.\nSpirited Away — a young girl who enters a world beyond imagination and discovers who she truly is.\nGrave of the Fireflies — a brother who gave everything to protect his little sister during the darkest chapter of history.\nA Silent Voice — a story about the weight of words and the courage to face what you've done\nPrincess Mononoke — a battle between humanity and nature told through some of the most breathtaking animation ever created.\n\nFollow @senpai_clipz for more recommendations \n\n#animerecommendation #anime #movies #animemovie",
+          "publishedAt": "1778342161",
+          "durationSeconds": null,
+          "thumbnailUrl": null,
+          "videoUrl": null,
+          "author": {
+            "username": null,
+            "displayName": null,
+            "url": null,
+            "followers": null,
+            "verified": null,
+            "profileImage": null
+          },
+          "engagement": {
+            "views": null,
+            "likes": 0,
+            "comments": 0
+          },
+          "hashtags": [],
+          "mentions": []
+        },
+        {
+          "platform": "instagram",
+          "url": "https://www.instagram.com/p/DR92bM5kdZq/",
+          "id": "3782418625849316970_4459707876",
+          "type": "feed",
+          "productType": null,
+          "caption": "Lasting 7 Seasons, 152 Episodes and 2 TV Movies, “Fantasy Island” Was an Award Winning Fantasy Drama Series Starring Ricardo Montalban as Mr. Roarke Who Oversaw a Mysterious Island and Granted Wishes to Guests “For a Price.” \n\n#fantasyisland #television #tv",
+          "description": "Lasting 7 Seasons, 152 Episodes and 2 TV Movies, “Fantasy Island” Was an Award Winning Fantasy Drama Series Starring Ricardo Montalban as Mr. Roarke Who Oversaw a Mysterious Island and Granted Wishes to Guests “For a Price.” \n\n#fantasyisland #television #tv",
+          "publishedAt": "1765119458",
+          "durationSeconds": null,
+          "thumbnailUrl": null,
+          "videoUrl": null,
+          "author": {
+            "username": null,
+            "displayName": null,
+            "url": null,
+            "followers": null,
+            "verified": null,
+            "profileImage": null
+          },
+          "engagement": {
+            "views": null,
+            "likes": 0,
+            "comments": 0
+          },
+          "hashtags": [],
+          "mentions": []
+        },
+        {
+          "platform": "instagram",
+          "url": "https://www.instagram.com/p/DZRi0Fjvq8R/",
+          "id": "3914062664124247825_35355265666",
+          "type": "feed",
+          "productType": null,
+          "caption": "🎬 𝐓𝐨𝐩 60 𝐌𝐢𝐥𝐢𝐭𝐚𝐫𝐲 𝐌𝐨𝐯𝐢𝐞𝐬📽️🍿",
+          "description": "🎬 𝐓𝐨𝐩 60 𝐌𝐢𝐥𝐢𝐭𝐚𝐫𝐲 𝐌𝐨𝐯𝐢𝐞𝐬📽️🍿",
+          "publishedAt": "1780812655",
+          "durationSeconds": null,
+          "thumbnailUrl": null,
+          "videoUrl": null,
+          "author": {
+            "username": null,
+            "displayName": null,
+            "url": null,
+            "followers": null,
+            "verified": null,
+            "profileImage": null
+          },
+          "engagement": {
+            "views": null,
+            "likes": 0,
+            "comments": 0
+          },
+          "hashtags": [],
+          "mentions": []
+        },
+        {
+          "platform": "instagram",
+          "url": "https://www.instagram.com/p/DY_mecpsUxU/",
+          "id": "3909012219696860244_440457624",
+          "type": "feed",
+          "productType": null,
+          "caption": "From the loyal Circuit to the intense Kabir Singh, there’s a Bollywood character that matches your vibe 🎬✨ Share this and ask your friends who you remind them of 🔥\n\n#IIFA #Bollywood #BollywoodCharacters\n\n[IIFA, Bollywood, Bollywood Characters, Bollywood Movies, Relatable, viral]",
+          "description": "From the loyal Circuit to the intense Kabir Singh, there’s a Bollywood character that matches your vibe 🎬✨ Share this and ask your friends who you remind them of 🔥\n\n#IIFA #Bollywood #BollywoodCharacters\n\n[IIFA, Bollywood, Bollywood Characters, Bollywood Movies, Relatable, viral]",
+          "publishedAt": "1780210607",
+          "durationSeconds": null,
+          "thumbnailUrl": null,
+          "videoUrl": null,
+          "author": {
+            "username": null,
+            "displayName": null,
+            "url": null,
+            "followers": null,
+            "verified": null,
+            "profileImage": null
+          },
+          "engagement": {
+            "views": null,
+            "likes": 0,
+            "comments": 0
+          },
+          "hashtags": [],
+          "mentions": []
+        },
+        {
+          "platform": "instagram",
+          "url": "https://www.instagram.com/p/DYZxoehoSko/",
+          "id": "3898365238300453160_46977791697",
+          "type": "feed",
+          "productType": null,
+          "caption": "𝐓𝐡𝐢𝐬 𝐖𝐞𝐞𝐤 𝐎𝐓𝐓 𝐑𝐞𝐥𝐞𝐚𝐬𝐞 - Streaming Now 🤩🍿\n\n𝐓𝐚𝐦𝐢𝐥 \n#MrX (Tamil, Telugu, Kannada, Malayalam) - JioHotstar & SimplySouth\n\n#Kaalidas2 (Tamil) - PrimeVideo, Sunnxt, ShortFlix, SimplySouth, AhaTamil, Tentkotta & LionsGatePlay\n\n𝐓𝐞𝐥𝐮𝐠𝐮\n#Anaganaga (Telugu, Tamil, Kannada, Malayalam, Hindi) - ETvWin \n\n#ThimmarajupalliTV (Telugu, Tamil) - AhaVideo\n\n𝐌𝐚𝐥𝐚𝐲𝐚𝐥𝐚𝐦\n#OruDuroohaSaahacharyathil (Malayalam) - Netflix\n\nDerby (Malayalam) - PrimeVideo, SimplySouth\n\n𝐇𝐢𝐧𝐝𝐢\nD-h-u-r-a-n-d-h-a-r : The Revenge (Hindi, Tamil, Telugu, Kannada, Malayalam) - Netflix (Outside India)\n\nKartavya (Hindi, Tamil, Telugu, English) - Netflix\n\n𝐌𝐚𝐫𝐚𝐭𝐡𝐢\nTighee (Marathi) - Zee5\n\n𝐄𝐧𝐠𝐥𝐢𝐬𝐡\nMartySupreme (English, Tamil, Telugu, Hindi) - PrimeVideo\n\nOffCampus 🥵 (English, Tamil, Telugu, Kannada, Malayalam, Hindi) [Series] - PrimeVideo\n\nThePunisher: One Last Kill (English) - JioHotstar",
+          "description": "𝐓𝐡𝐢𝐬 𝐖𝐞𝐞𝐤 𝐎𝐓𝐓 𝐑𝐞𝐥𝐞𝐚𝐬𝐞 - Streaming Now 🤩🍿\n\n𝐓𝐚𝐦𝐢𝐥 \n#MrX (Tamil, Telugu, Kannada, Malayalam) - JioHotstar & SimplySouth\n\n#Kaalidas2 (Tamil) - PrimeVideo, Sunnxt, ShortFlix, SimplySouth, AhaTamil, Tentkotta & LionsGatePlay\n\n𝐓𝐞𝐥𝐮𝐠𝐮\n#Anaganaga (Telugu, Tamil, Kannada, Malayalam, Hindi) - ETvWin \n\n#ThimmarajupalliTV (Telugu, Tamil) - AhaVideo\n\n𝐌𝐚𝐥𝐚𝐲𝐚𝐥𝐚𝐦\n#OruDuroohaSaahacharyathil (Malayalam) - Netflix\n\nDerby (Malayalam) - PrimeVideo, SimplySouth\n\n𝐇𝐢𝐧𝐝𝐢\nD-h-u-r-a-n-d-h-a-r : The Revenge (Hindi, Tamil, Telugu, Kannada, Malayalam) - Netflix (Outside India)\n\nKartavya (Hindi, Tamil, Telugu, English) - Netflix\n\n𝐌𝐚𝐫𝐚𝐭𝐡𝐢\nTighee (Marathi) - Zee5\n\n𝐄𝐧𝐠𝐥𝐢𝐬𝐡\nMartySupreme (English, Tamil, Telugu, Hindi) - PrimeVideo\n\nOffCampus 🥵 (English, Tamil, Telugu, Kannada, Malayalam, Hindi) [Series] - PrimeVideo\n\nThePunisher: One Last Kill (English) - JioHotstar",
+          "publishedAt": "1778941420",
+          "durationSeconds": null,
+          "thumbnailUrl": null,
+          "videoUrl": null,
+          "author": {
+            "username": null,
+            "displayName": null,
+            "url": null,
+            "followers": null,
+            "verified": null,
+            "profileImage": null
+          },
+          "engagement": {
+            "views": null,
+            "likes": 0,
+            "comments": 0
+          },
+          "hashtags": [],
+          "mentions": []
+        }
+      ]
+    }
+  },
+  "soundcloud-track": {
+    "ok": true,
+    "status": 200,
+    "credits": null,
+    "data": {
+      "platform": "soundcloud",
+      "id": "2119863225",
+      "url": "https://soundcloud.com/flume/all-of-the-worlds",
+      "title": "All Of The Worlds",
+      "description": null,
+      "artist": null,
+      "artistUrl": null,
+      "durationMs": 125780,
+      "plays": 31217,
+      "likes": 929,
+      "comments": 24,
+      "publishedAt": "2025-06-26T13:01:21Z",
+      "artwork": "https://i1.sndcdn.com/artworks-bvBQ1BhZQSM2-0-large.jpg"
     }
   }
 }

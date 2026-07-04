@@ -190,6 +190,9 @@ class Settings(BaseSettings):
 
     # Rumble. Input: searchQueries + maxItems.
     APIFY_ACTOR_RUMBLE: str = "kawsar/rumble-video-extractor"
+    # All-inclusive scraper: resolves single video URLs and channel video
+    # listings directly (the keyword actor above can't).
+    APIFY_ACTOR_RUMBLE_DETAILS: str = "azzouzana/rumble-all-inclusive-scraper"
     APIFY_ACTOR_RUMBLE_COMMENTS: str = "thescrapelab/apify-rumble-scraper"
     APIFY_ACTOR_RUMBLE_TRANSCRIPT: str = "bulletproof/rumble-transcript-extractor"
 

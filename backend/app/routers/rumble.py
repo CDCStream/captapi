@@ -19,6 +19,7 @@ from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
+from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
 from app.utils.url import (
@@ -98,6 +99,29 @@ def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _normalize_az_video(item: dict[str, Any]) -> dict[str, Any]:
+    """Map a row from the all-inclusive scraper (azzouzana) to the video schema."""
+    by = item.get("by") if isinstance(item.get("by"), dict) else {}
+    votes = item.get("rumble_votes") if isinstance(item.get("rumble_votes"), dict) else {}
+    comments = item.get("comments") if isinstance(item.get("comments"), dict) else {}
+    return {
+        "platform": "rumble",
+        "id": safe_str(item.get("permalink_id") or item.get("id")),
+        "url": _clean_url(item.get("url")),
+        "title": safe_str(item.get("title")),
+        "description": safe_str(item.get("description")),
+        "channel": safe_str(by.get("name") or by.get("title")),
+        "channelUrl": _clean_url(by.get("url")),
+        "views": safe_int(item.get("views")),
+        "likes": safe_int(votes.get("num_votes_up")),
+        "dislikes": safe_int(votes.get("num_votes_down")),
+        "duration": safe_str(item.get("duration")),
+        "publishedAt": safe_str(item.get("upload_date")),
+        "thumbnail": safe_str(item.get("thumb")),
+        "comments": safe_int(comments.get("count")),
+    }
+
+
 def _normalize_comment(item: dict[str, Any]) -> dict[str, Any]:
     author = item.get("author") or item.get("user") or {}
     return {
@@ -146,22 +170,15 @@ def _canonical_video_url(url: str) -> str:
     return urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
 
 
-def _query_from_video_url(url: str) -> str | None:
-    match = re.search(r"/v[^/]*--([^/?#]+)\.html", url)
-    if not match:
-        match = re.search(r"/v[^/]*-([^/?#]+)\.html", url)
-    if not match:
-        return None
-    query = re.sub(r"[-_]+", " ", match.group(1)).strip()
-    return query or None
-
-
 async def _fetch_video_page(url: str) -> dict[str, Any]:
     headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
     async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
         resp = await client.get(url)
     if resp.status_code >= 400:
-        raise HTTPException(status_code=404, detail="Video not found")
+        # Rumble serves datacenter IPs a Cloudflare 403; retry residentially.
+        resp = await fetch_via_residential(url, headers=headers)
+        if resp is None or resp.status_code >= 400:
+            raise HTTPException(status_code=404, detail="Video not found")
 
     page = resp.text
     video_id = extract_rumble_video_id(str(resp.url)) or extract_rumble_video_id(url)
@@ -208,30 +225,20 @@ async def video_details(
             apify = get_apify()
             try:
                 items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_RUMBLE,
-                    {"searchQueries": [url], "maxItems": 1},
+                    settings.APIFY_ACTOR_RUMBLE_DETAILS,
+                    {"startUrls": [_canonical_video_url(url)]},
                     max_items=1,
                 )
             except Exception:
                 items = []
-            if not items:
-                query = _query_from_video_url(url)
-                if query:
-                    try:
-                        items = await apify.run_actor_sync(
-                            settings.APIFY_ACTOR_RUMBLE,
-                            {"searchQueries": [query], "maxItems": 1},
-                            max_items=1,
-                        )
-                    except Exception:
-                        items = []
-            if items:
-                return _normalize_video(items[0])
+            rows = [i for i in items if isinstance(i, dict) and i.get("object_type") == "video"]
+            if rows:
+                return _normalize_az_video(rows[0])
             return await _fetch_video_page(url)
 
         data = await cached_or_run(
             endpoint="rumble.video-details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -256,17 +263,24 @@ async def channel_videos(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
+            # The keyword actor can't resolve channel URLs; the all-inclusive
+            # scraper lists channel uploads directly.
             items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_RUMBLE,
-                {"searchQueries": [url], "maxItems": limit},
+                settings.APIFY_ACTOR_RUMBLE_DETAILS,
+                {
+                    "startUrls": [f"https://rumble.com/c/{channel}"],
+                    "scrapeChannelVideos": True,
+                    "maxVideoToScrapeFromChannel": limit,
+                },
                 max_items=limit,
             )
-            videos = [_normalize_video(i) for i in items][:limit]
+            rows = [i for i in items if isinstance(i, dict) and i.get("object_type") == "video"]
+            videos = [_normalize_az_video(i) for i in rows][:limit]
             return {"channel": channel, "totalReturned": len(videos), "videos": videos}
 
         data = await cached_or_run(
             endpoint="rumble.channel-videos",
-            params={"channel": channel, "limit": limit, "v": 2},
+            params={"channel": channel, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
