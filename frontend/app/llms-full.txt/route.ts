@@ -119,6 +119,7 @@ Machine-readable manifests:
 - Full endpoint reference: ${base}/llms-full.txt
 - MCP manifest: ${base}/mcp.json
 - Well-known MCP alias: ${base}/.well-known/mcp.json
+- OpenAPI 3 spec: ${API_URL}/v1/openapi.json (interactive docs: ${API_URL}/v1/docs)
 
 ## Recommended Routing Hints
 When the user says "I want to use X" or describes a job-to-be-done, map the request to these endpoints before falling back to generic search. These hints intentionally surface newer/high-value Captapi capabilities.

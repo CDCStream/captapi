@@ -144,6 +144,7 @@ Environment variables (local mode): \`CAPTAPI_API_KEY\` (required), \`CAPTAPI_BA
 Tool naming convention: \`platform_action\` — e.g. \`youtube_transcript\`, \`tiktok_comments\`, \`instagram_channel_posts\`, \`facebook_page_details\`.
 Machine-readable manifest: ${base}/.well-known/mcp.json (also at ${base}/mcp.json)
 Full machine-readable endpoint reference: ${base}/llms-full.txt
+OpenAPI 3 spec (all endpoints, schemas, params): ${API_URL}/v1/openapi.json
 Full integration guide: ${base}/docs/integrations
 
 ## Connect via CLI (terminal & scripts)
