@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import sys
 from pathlib import Path
@@ -35,6 +36,7 @@ from app.routers import (
     linkedin,
     linktree,
     mcp,
+    monitors,
     pinterest,
     reddit,
     rumble,
@@ -206,8 +208,21 @@ def create_app() -> FastAPI:
     app.include_router(account.router, prefix="/v1/account", tags=["Account"])
     app.include_router(auth_keys.router, prefix="/v1/auth/keys", tags=["API Keys"])
     app.include_router(billing.router, prefix="/v1/billing", tags=["Billing"])
+    app.include_router(monitors.router, prefix="/v1/monitors", tags=["Monitors"])
     app.include_router(status.router, prefix="/v1/status", tags=["Status"])
     app.include_router(mcp.router, prefix="/mcp", tags=["MCP"], include_in_schema=False)
+
+    @app.on_event("startup")
+    async def start_monitor_loop() -> None:
+        from app.services.monitor_runner import monitor_loop
+
+        app.state.monitor_task = asyncio.create_task(monitor_loop(app))
+
+    @app.on_event("shutdown")
+    async def stop_monitor_loop() -> None:
+        task = getattr(app.state, "monitor_task", None)
+        if task is not None:
+            task.cancel()
 
     return app
 

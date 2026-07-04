@@ -122,7 +122,22 @@ async def require_api_key(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    if plain.startswith(("capt_live_", "capt_test_", "sk_live_", "sk_test_")):
+    if plain.startswith("capt_mon_"):
+        # Internal token minted by the monitor scheduler (never issued to users).
+        from app.core.internal_token import verify_monitor_token
+
+        user_id = verify_monitor_token(plain)
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid internal token")
+        b = _load_credits(user_id)
+        caller = ApiCaller(
+            user_id=user_id,
+            api_key_id=None,
+            plan=b.get("plan", "free"),
+            subscription_credits=int(b.get("subscription_credits", 0)),
+            topup_credits=int(b.get("topup_credits", 0)),
+        )
+    elif plain.startswith(("capt_live_", "capt_test_", "sk_live_", "sk_test_")):
         caller = await _resolve_api_key(plain)
     else:
         caller = await _resolve_session_jwt(plain)
