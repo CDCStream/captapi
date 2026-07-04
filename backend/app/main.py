@@ -140,6 +140,33 @@ def create_app() -> FastAPI:
             headers=_error_cors_headers(request),
         )
 
+    from postgrest.exceptions import APIError as PostgrestAPIError
+
+    @app.exception_handler(PostgrestAPIError)
+    async def postgrest_error(request: Request, exc: PostgrestAPIError) -> JSONResponse:
+        # 42P01 = relation does not exist: a feature table (monitors,
+        # metric_history, ...) whose migration has not been applied yet.
+        if getattr(exc, "code", "") == "42P01":
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "success": False,
+                    "error": "not_provisioned",
+                    "detail": (
+                        "A required database table is missing. Apply the latest "
+                        "files in supabase/migrations/ to enable this feature."
+                    ),
+                },
+                headers=_error_cors_headers(request),
+            )
+        sentry_sdk.capture_exception(exc)
+        structlog.get_logger().exception("postgrest_error", error=str(exc))
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": "internal_server_error"},
+            headers=_error_cors_headers(request),
+        )
+
     @app.exception_handler(Exception)
     async def unhandled(request: Request, exc: Exception) -> JSONResponse:
         # The catch-all handler "consumes" the exception, so report it to
