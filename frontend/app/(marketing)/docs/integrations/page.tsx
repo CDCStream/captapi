@@ -243,7 +243,11 @@ export default function IntegrationsPage() {
         .
       </p>
       <p className="mt-3 text-muted-foreground max-w-3xl">
-        Not using MCP? The same {TOTAL} endpoints are also available as a{" "}
+        Not using MCP? The same {TOTAL} endpoints are also available as{" "}
+        <a href="#sdk" className="text-primary hover:underline">
+          typed TypeScript &amp; Python SDKs
+        </a>
+        , a{" "}
         <a href="#cli" className="text-primary hover:underline">
           CLI
         </a>
@@ -413,6 +417,83 @@ export default function IntegrationsPage() {
           </div>
         </div>
       ))}
+
+      <H2 id="sdk">Typed SDKs (TypeScript &amp; Python)</H2>
+      <p className="text-muted-foreground max-w-3xl">
+        Writing code? The official SDKs cover every endpoint with typed,
+        namespaced methods — great autocomplete for humans and AI coding
+        agents — and errors always throw, never silently return empty data.
+        TypeScript:{" "}
+        <a
+          href="https://www.npmjs.com/package/@captapi/sdk"
+          className="text-primary hover:underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">@captapi/sdk</code>
+        </a>{" "}
+        (zero dependencies, Node 18+/Deno/Bun/edge). Python:{" "}
+        <a
+          href="https://pypi.org/project/captapi/"
+          className="text-primary hover:underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">pip install captapi</code>
+        </a>{" "}
+        (sync + async clients on httpx).
+      </p>
+      <div className="mt-4 overflow-hidden rounded-lg border bg-muted/20">
+        <pre className="overflow-x-auto p-4 text-xs leading-relaxed">
+          <code>{`// TypeScript — npm install @captapi/sdk
+import { Captapi } from "@captapi/sdk";
+const client = new Captapi({ apiKey: "capt_live_..." });
+const res = await client.youtube.transcript({ url: "https://youtube.com/watch?v=..." });
+
+# Python — pip install captapi
+from captapi import Captapi
+client = Captapi(api_key="capt_live_...")
+res = client.youtube.transcript(url="https://youtube.com/watch?v=...")`}</code>
+        </pre>
+      </div>
+
+      <H2 id="platform-features">Platform features (batch, monitors, history, status)</H2>
+      <p className="text-muted-foreground max-w-3xl">
+        Beyond single calls, the API ships building blocks competitors make you
+        assemble yourself:
+      </p>
+      <ul className="mt-3 max-w-3xl space-y-2 text-sm text-muted-foreground list-disc pl-5">
+        <li>
+          <strong className="text-foreground">Batch</strong> —{" "}
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">POST /v1/batch</code>{" "}
+          runs up to 20 endpoint calls concurrently in one request, with
+          per-item status and billing (cached items stay free).
+        </li>
+        <li>
+          <strong className="text-foreground">Monitors + webhooks</strong> —{" "}
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">POST /v1/monitors</code>{" "}
+          watches any list endpoint (subreddit posts, channel videos, ad-library
+          searches…) on your schedule and POSTs only <em>new</em> items to your
+          webhook, HMAC-signed. Test deliveries with{" "}
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">POST /v1/monitors/&#123;id&#125;/test</code>.
+        </li>
+        <li>
+          <strong className="text-foreground">Metric history</strong> —{" "}
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">GET /v1/history</code>{" "}
+          returns follower/view/like time series that accumulate automatically
+          whenever tracked profile or post endpoints are fetched fresh.
+        </li>
+        <li>
+          <strong className="text-foreground">Live status</strong> —{" "}
+          <code className="rounded bg-muted px-1.5 py-0.5 text-xs">GET /v1/status</code>{" "}
+          (no auth) exposes per-platform success rates from real traffic; the
+          human view lives at{" "}
+          <Link href="/status" className="text-primary hover:underline">
+            /status
+          </Link>
+          .
+        </li>
+      </ul>
 
       <H2 id="cli">Command-line (CLI)</H2>
       <p className="text-muted-foreground max-w-3xl">

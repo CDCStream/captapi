@@ -139,11 +139,19 @@ Local (npx / stdio):
 - Tools are named \`platform_action\` (e.g. \`youtube_transcript\`). Manifest: ${base}/mcp.json
 
 ## Other ways to connect
+- TypeScript SDK: \`npm install @captapi/sdk\` — typed, namespaced methods for every endpoint (\`client.youtube.transcript({ url })\`), zero dependencies. https://www.npmjs.com/package/@captapi/sdk
+- Python SDK: \`pip install captapi\` — sync + async clients (\`client.youtube.transcript(url=...)\` / \`AsyncCaptapi\`). https://pypi.org/project/captapi/
 - CLI: \`npx @captapi/cli <command>\` — every endpoint as a terminal subcommand (flags = params, JSON to stdout). https://www.npmjs.com/package/@captapi/cli
 - n8n: install the \`n8n-nodes-captapi\` community node (Settings -> Community Nodes), add a "Captapi API" credential, then use the Captapi node (Platform -> Operation). https://www.npmjs.com/package/n8n-nodes-captapi
 - Make.com: add the Captapi custom app, create a "Captapi API Key" connection, then use any module (grouped by platform) in a scenario — returns the same JSON as the REST API.
 - Apify: the Captapi Actor (BYO key) wraps the REST API — set your key, pick an operation, get one dataset item with the same JSON. No scraping.
 - Full integration guide: ${base}/docs/integrations
+
+## Platform Features (beyond single calls)
+- Batch: \`POST ${API_URL}/v1/batch\` body \`{"requests": [{"path": "/v1/...", "params": {...}}]}\` (max 20, concurrent, per-item billing/status, order preserved).
+- Monitors + Webhooks: \`POST ${API_URL}/v1/monitors\` body \`{"endpoint": "/v1/reddit/subreddit-posts", "params": {"url": "...", "limit": 25}, "interval_minutes": 60, "webhook_url": "https://..."}\` — Captapi re-runs the endpoint on schedule and POSTs only NEW items to the webhook, signed with \`X-Captapi-Signature: sha256=HMAC_SHA256(secret, "{timestamp}.{body}")\` (+ \`X-Captapi-Timestamp\`, \`X-Captapi-Monitor-Id\` headers). Manage via GET/PATCH/DELETE \`/v1/monitors/{id}\`, test with \`POST /v1/monitors/{id}/test\`. Runs bill like direct calls; first run baselines without firing; monitors auto-pause on 402.
+- Metric history: \`GET ${API_URL}/v1/history?endpoint=/v1/youtube/channel-details&url=...&days=30&limit=200\` — automatic time series of followers/views/likes recorded on every fresh fetch of tracked profile/post endpoints (18 endpoints across YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, LinkedIn, Pinterest, Rumble).
+- Status: \`GET ${API_URL}/v1/status\` (no auth) — per-platform success rate, request volume, and avg response time over the last 24h. Human view: ${base}/status
 
 ## Full Endpoint Reference
 

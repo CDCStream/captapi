@@ -147,6 +147,35 @@ Full machine-readable endpoint reference: ${base}/llms-full.txt
 OpenAPI 3 spec (all endpoints, schemas, params): ${API_URL}/v1/openapi.json
 Full integration guide: ${base}/docs/integrations
 
+## Connect via SDK (TypeScript & Python)
+
+Official typed SDKs cover every endpoint with autocomplete-friendly, namespaced methods. Errors always throw/raise (never silent empty results).
+
+TypeScript (\`npm install @captapi/sdk\`, zero dependencies, Node 18+/Deno/Bun/edge):
+\`\`\`ts
+import { Captapi } from "@captapi/sdk";
+const client = new Captapi({ apiKey: "capt_live_..." }); // or CAPTAPI_API_KEY env
+const res = await client.youtube.transcript({ url: "https://youtube.com/watch?v=..." });
+console.log(res.data);
+\`\`\`
+
+Python (\`pip install captapi\`, sync + async clients):
+\`\`\`python
+from captapi import Captapi
+client = Captapi(api_key="capt_live_...")  # or CAPTAPI_API_KEY env
+res = client.youtube.transcript(url="https://youtube.com/watch?v=...")
+print(res["data"])
+\`\`\`
+
+Method naming: \`client.<platform>.<action>\` — camelCase in TS (\`client.tiktok.channelDetails\`), snake_case in Python (\`client.tiktok.channel_details\`).
+
+## Platform Features (beyond single calls)
+
+- **Batch** — \`POST ${API_URL}/v1/batch\` with \`{"requests": [{"path": "/v1/...", "params": {...}}, ...]}\` (max 20). Items run concurrently server-side; each is billed/cached like a direct call; response preserves order with per-item status.
+- **Monitors + Webhooks** — \`POST ${API_URL}/v1/monitors\` with \`{"endpoint": "/v1/reddit/subreddit-posts", "params": {"url": "...", "limit": 25}, "interval_minutes": 60, "webhook_url": "https://..."}\`. Captapi re-runs the endpoint on schedule and POSTs only NEW items to your webhook, HMAC-signed (\`X-Captapi-Signature: sha256=HMAC_SHA256(secret, "{timestamp}.{body}")\`). Manage with GET/PATCH/DELETE \`/v1/monitors/{id}\`; test delivery with \`POST /v1/monitors/{id}/test\`. Turns the pull API into push alerts (brand mentions, new videos, new ads).
+- **Metric history** — \`GET ${API_URL}/v1/history?endpoint=/v1/youtube/channel-details&url=...&days=30\`. Captapi automatically snapshots followers/views/likes each time a tracked profile/post endpoint is fetched fresh, so growth time series accumulate for free.
+- **Status** — \`GET ${API_URL}/v1/status\` (no auth): live per-platform success rates and response times from the last 24h of production traffic. Human view: ${base}/status
+
 ## Connect via CLI (terminal & scripts)
 
 For shell tasks, CI, or when no MCP client is available, the official \`@captapi/cli\` package calls the same API from the terminal. Every endpoint is a subcommand (the tool name with dashes); parameters are flags; results print as JSON to stdout (pipe-friendly).
