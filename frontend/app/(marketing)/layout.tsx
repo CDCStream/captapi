@@ -6,6 +6,7 @@ import {
   ApisNavDropdown,
   type NavPlatform,
 } from "@/components/marketing/apis-nav-dropdown";
+import { IntegrationsNavDropdown } from "@/components/marketing/integrations-nav-dropdown";
 import {
   SITE_URL,
   ENDPOINT_COUNT,
@@ -121,7 +122,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm">
             <ApisNavDropdown platforms={NAV_PLATFORMS} />
-            <Link href="/integrations" className="text-muted-foreground hover:text-foreground">Integrations</Link>
+            <IntegrationsNavDropdown />
             <Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link>
             <Link href="/tools" className="text-muted-foreground hover:text-foreground">Free Tools</Link>
             <Link href="/blog" className="text-muted-foreground hover:text-foreground">Blog</Link>

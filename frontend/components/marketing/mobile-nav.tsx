@@ -5,9 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { INTEGRATION_NAV_ITEMS } from "@/components/marketing/integrations-nav-dropdown";
 
 const LINKS = [
-  { href: "/integrations", label: "Integrations" },
   { href: "/pricing", label: "Pricing" },
   { href: "/tools", label: "Free Tools" },
   { href: "/blog", label: "Blog" },
@@ -22,12 +22,14 @@ export interface MobileNavPlatform {
 export function MobileNav({ platforms = [] }: { platforms?: MobileNavPlatform[] }) {
   const [open, setOpen] = useState(false);
   const [apisOpen, setApisOpen] = useState(false);
+  const [integrationsOpen, setIntegrationsOpen] = useState(false);
   const pathname = usePathname();
 
   // Close on navigation.
   useEffect(() => {
     setOpen(false);
     setApisOpen(false);
+    setIntegrationsOpen(false);
   }, [pathname]);
 
   // Lock body scroll while the menu is open.
@@ -90,6 +92,40 @@ export function MobileNav({ platforms = [] }: { platforms?: MobileNavPlatform[] 
                       className="block rounded-md px-2 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                     >
                       {p.label} API
+                    </Link>
+                  ))}
+                </div>
+              )}
+              <div className="flex items-center">
+                <Link
+                  href="/integrations"
+                  className="flex-1 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  Integrations
+                </Link>
+                <button
+                  type="button"
+                  aria-label={
+                    integrationsOpen ? "Collapse integrations list" : "Expand integrations list"
+                  }
+                  aria-expanded={integrationsOpen}
+                  onClick={() => setIntegrationsOpen((v) => !v)}
+                  className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                >
+                  <ChevronDown
+                    className={`size-4 transition-transform ${integrationsOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+              </div>
+              {integrationsOpen && (
+                <div className="mb-1 ml-3 max-h-64 overflow-y-auto border-l pl-3">
+                  {INTEGRATION_NAV_ITEMS.map((it) => (
+                    <Link
+                      key={it.label}
+                      href={it.href}
+                      className="block rounded-md px-2 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      {it.label}
                     </Link>
                   ))}
                 </div>
