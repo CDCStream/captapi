@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SITE_URL } from "@/lib/api-catalog";
+import { getServiceClient } from "@/lib/supabase/admin";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-const TITLE = "API Status - Live Endpoint Health";
+const TITLE = "API Status - Live Endpoint Health & Incident History";
 const DESCRIPTION =
-  "Live health for every Captapi platform: success rates, request volumes, and response times over the last 24 hours. If something goes sideways, it shows up here first.";
+  "Live health for every Captapi platform: success rates, request volumes, and response times over the last 24 hours, plus a full incident history. If something goes sideways, it shows up here first.";
 
 export const metadata: Metadata = {
   title: `${TITLE} | Captapi`,
@@ -37,11 +38,33 @@ interface StatusData {
   generated_at: string;
 }
 
+interface IncidentUpdate {
+  at: string;
+  status: string;
+  message: string;
+}
+
+interface Incident {
+  id: string;
+  title: string;
+  severity: "minor" | "major";
+  status: "investigating" | "monitoring" | "resolved";
+  started_at: string;
+  resolved_at: string | null;
+  updates: IncidentUpdate[];
+}
+
 const STATUS_STYLE: Record<string, { label: string; dot: string; text: string }> = {
   operational: { label: "Operational", dot: "bg-emerald-500", text: "text-emerald-600 dark:text-emerald-400" },
   degraded: { label: "Degraded", dot: "bg-amber-500", text: "text-amber-600 dark:text-amber-400" },
   outage: { label: "Outage", dot: "bg-red-500", text: "text-red-600 dark:text-red-400" },
   no_data: { label: "No data", dot: "bg-muted-foreground/40", text: "text-muted-foreground" },
+};
+
+const UPDATE_LABELS: Record<string, string> = {
+  investigating: "Investigating",
+  monitoring: "Monitoring",
+  resolved: "Resolved",
 };
 
 function prettyPlatform(slug: string): string {
@@ -98,8 +121,43 @@ async function fetchStatus(): Promise<StatusData | null> {
   }
 }
 
+async function fetchIncidents(): Promise<Incident[]> {
+  const sb = getServiceClient();
+  if (!sb) return [];
+  const { data, error } = await sb
+    .from("status_incidents")
+    .select("*")
+    .order("started_at", { ascending: false })
+    .limit(50);
+  if (error || !data) return [];
+  return (data as Incident[]).map((row) => ({
+    ...row,
+    updates: Array.isArray(row.updates) ? row.updates : [],
+  }));
+}
+
+function formatDay(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+function formatTime(iso: string): string {
+  return new Date(iso).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+  });
+}
+
 export default async function StatusPage() {
-  const data = await fetchStatus();
+  const [data, incidents] = await Promise.all([fetchStatus(), fetchIncidents()]);
+  const activeIncidents = incidents.filter((i) => i.status !== "resolved");
 
   return (
     <div className="py-16">
@@ -108,7 +166,8 @@ export default async function StatusPage() {
           <h1 className="text-4xl font-bold tracking-tight">API Status</h1>
           <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
             Live health for every Captapi platform, computed from real production
-            traffic over the last 24 hours. Refreshes every 2 minutes.
+            traffic over the last 24 hours. If something goes sideways, it shows
+            up here first.
           </p>
         </div>
 
@@ -130,12 +189,18 @@ export default async function StatusPage() {
             <div className="rounded-xl border bg-card p-6 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <span
-                  className={`h-3 w-3 rounded-full ${STATUS_STYLE[data.overall.status]?.dot ?? "bg-muted-foreground/40"}`}
+                  className={`h-3 w-3 rounded-full ${
+                    activeIncidents.length > 0
+                      ? "bg-amber-500"
+                      : STATUS_STYLE[data.overall.status]?.dot ?? "bg-muted-foreground/40"
+                  }`}
                 />
                 <span className="text-lg font-semibold">
-                  {data.overall.status === "operational"
-                    ? "All systems operational"
-                    : STATUS_STYLE[data.overall.status]?.label ?? data.overall.status}
+                  {activeIncidents.length > 0
+                    ? "Active incident — see below"
+                    : data.overall.status === "operational"
+                      ? "All systems running normally"
+                      : STATUS_STYLE[data.overall.status]?.label ?? data.overall.status}
                 </span>
               </div>
               <div className="text-sm text-muted-foreground">
@@ -205,6 +270,70 @@ export default async function StatusPage() {
           </>
         )}
 
+        <div className="mt-16">
+          <div className="mb-6">
+            <p className="text-sm font-medium text-primary">History</p>
+            <h2 className="text-2xl font-bold tracking-tight">Past incidents</h2>
+            {incidents.length > 0 && (
+              <p className="mt-1 text-sm text-muted-foreground">
+                {incidents.length} total
+              </p>
+            )}
+          </div>
+
+          {incidents.length === 0 ? (
+            <div className="rounded-xl border border-dashed p-10 text-center text-muted-foreground">
+              No incidents reported yet — smooth sailing so far. When something
+              breaks, the full timeline lands here.
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {incidents.map((inc) => (
+                <article key={inc.id} className="rounded-xl border bg-card p-6">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <h3 className="font-semibold">{inc.title}</h3>
+                    {inc.severity === "major" && (
+                      <span className="inline-flex items-center rounded-full border border-red-500/20 bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-600 dark:text-red-400">
+                        Major incident
+                      </span>
+                    )}
+                    <span
+                      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                        inc.status === "resolved"
+                          ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                          : "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                      }`}
+                    >
+                      {UPDATE_LABELS[inc.status] ?? inc.status}
+                    </span>
+                    <time
+                      dateTime={inc.started_at}
+                      className="ml-auto text-xs text-muted-foreground"
+                    >
+                      {formatDay(inc.started_at)}
+                    </time>
+                  </div>
+                  {inc.updates.length > 0 && (
+                    <div className="mt-4 space-y-3 border-l pl-4">
+                      {[...inc.updates].reverse().map((u, i) => (
+                        <div key={i} className="text-sm">
+                          <p className="font-medium">
+                            {UPDATE_LABELS[u.status] ?? u.status}
+                            <span className="ml-2 font-normal text-xs text-muted-foreground">
+                              {formatTime(u.at)} UTC
+                            </span>
+                          </p>
+                          <p className="mt-0.5 text-muted-foreground">{u.message}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="mt-12 rounded-xl border bg-card p-8 text-center">
           <h2 className="text-2xl font-bold">Seeing an issue we missed?</h2>
           <p className="mt-2 text-muted-foreground">
@@ -215,8 +344,8 @@ export default async function StatusPage() {
             and a human will look at it — usually within hours.
           </p>
           <p className="mt-4 text-sm">
-            <Link className="underline text-muted-foreground" href="/docs">
-              Back to the docs
+            <Link className="underline text-muted-foreground" href="/changelog">
+              View changelog →
             </Link>
           </p>
         </div>

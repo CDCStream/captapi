@@ -127,6 +127,8 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <Link href="/tools" className="text-muted-foreground hover:text-foreground">Free Tools</Link>
             <Link href="/blog" className="text-muted-foreground hover:text-foreground">Blog</Link>
             <Link href="/docs" className="text-muted-foreground hover:text-foreground">Docs</Link>
+            <Link href="/status" className="text-muted-foreground hover:text-foreground">Status</Link>
+            <Link href="/changelog" className="text-muted-foreground hover:text-foreground">Changelog</Link>
           </nav>
           <div className="flex items-center gap-2">
             <div className="hidden md:flex items-center gap-2">

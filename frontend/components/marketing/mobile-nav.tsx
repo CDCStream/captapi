@@ -12,6 +12,8 @@ const LINKS = [
   { href: "/tools", label: "Free Tools" },
   { href: "/blog", label: "Blog" },
   { href: "/docs", label: "Docs" },
+  { href: "/status", label: "Status" },
+  { href: "/changelog", label: "Changelog" },
 ] as const;
 
 export interface MobileNavPlatform {
