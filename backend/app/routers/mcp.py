@@ -35,8 +35,11 @@ LATEST_PROTOCOL_VERSION = "2025-06-18"
 SERVER_INFO = {"name": "captapi", "title": "Captapi", "version": __version__}
 
 INSTRUCTIONS = (
-    "Captapi exposes structured data from YouTube, TikTok, Instagram and "
-    "Facebook (transcripts, AI summaries, comments, stats, downloads, search). "
+    "Captapi exposes structured data from 29 platforms — YouTube, TikTok, "
+    "Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, "
+    "LinkedIn, Rumble, Twitch, Spotify, GitHub, TikTok Shop, ad libraries, "
+    "link-in-bio pages and more (transcripts, AI summaries, comments, stats, "
+    "downloads, search). "
     "Authenticate by sending your Captapi API key in the 'Authorization: Bearer "
     "capt_live_...' header. Create a key at https://captapi.com/dashboard/api-keys. "
     "Each tool maps 1:1 to a REST endpoint and costs credits (cached results are "

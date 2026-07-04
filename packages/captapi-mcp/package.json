@@ -1,6 +1,6 @@
 {
   "name": "@captapi/mcp",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "mcpName": "io.github.CDCStream/captapi",
   "description": "Official Captapi MCP server — give Claude, Cursor, and any MCP-compatible AI agent access to 179 social, web, and account endpoints across 29 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop).",
   "license": "MIT",

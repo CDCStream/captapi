@@ -1,0 +1,3651 @@
+[
+  {
+    "tool": "youtube_transcript",
+    "platform": "youtube",
+    "name": "YouTube Transcript",
+    "path": "/v1/youtube/transcript",
+    "credits": 2,
+    "summary": "Extract the full timestamped transcript of a YouTube video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_summarize",
+    "platform": "youtube",
+    "name": "YouTube Summarizer",
+    "path": "/v1/youtube/summarize",
+    "credits": 4,
+    "summary": "AI summary (key points, topics, sentiment) of a YouTube video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_video_details",
+    "platform": "youtube",
+    "name": "YouTube Video Details",
+    "path": "/v1/youtube/video-details",
+    "credits": 1,
+    "summary": "Metadata + engagement stats for a YouTube video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_comments",
+    "platform": "youtube",
+    "name": "YouTube Comments",
+    "path": "/v1/youtube/comments",
+    "credits": 20,
+    "summary": "Comments on a YouTube video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_channel_details",
+    "platform": "youtube",
+    "name": "YouTube Channel Details",
+    "path": "/v1/youtube/channel-details",
+    "credits": 1,
+    "summary": "Channel info & subscriber/stats for a YouTube channel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_search",
+    "platform": "youtube",
+    "name": "YouTube Search",
+    "path": "/v1/youtube/search",
+    "credits": 20,
+    "summary": "Search YouTube videos by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_channel_videos",
+    "platform": "youtube",
+    "name": "YouTube Channel Videos",
+    "path": "/v1/youtube/channel-videos",
+    "credits": 20,
+    "summary": "List a channel's uploaded videos.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "fast",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_playlist_videos",
+    "platform": "youtube",
+    "name": "YouTube Playlist Videos",
+    "path": "/v1/youtube/playlist-videos",
+    "credits": 50,
+    "summary": "List videos in a YouTube playlist.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "fast",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_playlist",
+    "platform": "youtube",
+    "name": "YouTube Playlist",
+    "path": "/v1/youtube/playlist",
+    "credits": 50,
+    "summary": "Playlist metadata plus videos from a YouTube playlist.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "fast",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_video_download",
+    "platform": "youtube",
+    "name": "YouTube Video Download",
+    "path": "/v1/youtube/video-download",
+    "credits": 3,
+    "summary": "Direct download URLs for a YouTube video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_shorts_transcript",
+    "platform": "youtube",
+    "name": "YouTube Shorts Transcript",
+    "path": "/v1/youtube/shorts/transcript",
+    "credits": 2,
+    "summary": "Transcript of a YouTube Short.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_shorts_summarize",
+    "platform": "youtube",
+    "name": "YouTube Shorts Summarizer",
+    "path": "/v1/youtube/shorts/summarize",
+    "credits": 4,
+    "summary": "AI summary of a YouTube Short.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_shorts_details",
+    "platform": "youtube",
+    "name": "YouTube Shorts Stats",
+    "path": "/v1/youtube/shorts/video-details",
+    "credits": 1,
+    "summary": "Metadata + stats for a YouTube Short.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_shorts_comments",
+    "platform": "youtube",
+    "name": "YouTube Shorts Comments",
+    "path": "/v1/youtube/shorts/comments",
+    "credits": 20,
+    "summary": "Comments on a YouTube Short.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_channel_shorts",
+    "platform": "youtube",
+    "name": "YouTube Channel Shorts",
+    "path": "/v1/youtube/channel-shorts",
+    "credits": 20,
+    "summary": "List a channel's Shorts.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_trending_shorts",
+    "platform": "youtube",
+    "name": "YouTube Trending Shorts",
+    "path": "/v1/youtube/trending-shorts",
+    "credits": 28,
+    "summary": "Discover trending YouTube Shorts by seed keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": false,
+        "description": "Seed keyword for trending Shorts. Default trending."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_channel_streams",
+    "platform": "youtube",
+    "name": "YouTube Channel Streams",
+    "path": "/v1/youtube/channel-streams",
+    "credits": 20,
+    "summary": "List a channel's live/past streams.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_hashtag_search",
+    "platform": "youtube",
+    "name": "YouTube Hashtag Search",
+    "path": "/v1/youtube/hashtag-search",
+    "credits": 20,
+    "summary": "Search YouTube videos by hashtag.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Hashtag with or without the # (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_comment_replies",
+    "platform": "youtube",
+    "name": "YouTube Comment Replies",
+    "path": "/v1/youtube/comment-replies",
+    "credits": 20,
+    "summary": "Replies to a specific YouTube comment.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "comment_id",
+        "type": "string",
+        "required": true,
+        "description": "ID of the parent comment to fetch replies for (from the comments endpoint)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_channel_playlists",
+    "platform": "youtube",
+    "name": "YouTube Channel Playlists",
+    "path": "/v1/youtube/channel-playlists",
+    "credits": 20,
+    "summary": "List a channel's playlists.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_community_posts",
+    "platform": "youtube",
+    "name": "YouTube Community Posts",
+    "path": "/v1/youtube/community-posts",
+    "credits": 10,
+    "summary": "List a channel's community (posts) tab.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_community_post_details",
+    "platform": "youtube",
+    "name": "YouTube Community Post Details",
+    "path": "/v1/youtube/community-post-details",
+    "credits": 7,
+    "summary": "Details for a single YouTube community post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "YouTube community post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "youtube_video_sponsors",
+    "platform": "youtube",
+    "name": "YouTube Video Sponsors",
+    "path": "/v1/youtube/video-sponsors",
+    "credits": 1,
+    "summary": "Sponsor / self-promo / interaction segments in a YouTube video (via SponsorBlock).",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_transcript",
+    "platform": "tiktok",
+    "name": "TikTok Transcript",
+    "path": "/v1/tiktok/transcript",
+    "credits": 2,
+    "summary": "Transcript of a TikTok video (via captions).",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_summarize",
+    "platform": "tiktok",
+    "name": "TikTok Summarizer",
+    "path": "/v1/tiktok/summarize",
+    "credits": 4,
+    "summary": "AI summary of a TikTok video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_video_details",
+    "platform": "tiktok",
+    "name": "TikTok Video Details",
+    "path": "/v1/tiktok/video-details",
+    "credits": 1,
+    "summary": "Metadata + stats for a TikTok video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_comments",
+    "platform": "tiktok",
+    "name": "TikTok Comments",
+    "path": "/v1/tiktok/comments",
+    "credits": 10,
+    "summary": "Comments on a TikTok video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_channel_details",
+    "platform": "tiktok",
+    "name": "TikTok Channel Details",
+    "path": "/v1/tiktok/channel-details",
+    "credits": 1,
+    "summary": "Profile info & stats for a TikTok user.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_profile_region",
+    "platform": "tiktok",
+    "name": "TikTok Profile Region",
+    "path": "/v1/tiktok/profile-region",
+    "credits": 7,
+    "summary": "Region and language signals for a TikTok profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_audience_demographics",
+    "platform": "tiktok",
+    "name": "TikTok Audience Demographics",
+    "path": "/v1/tiktok/audience-demographics",
+    "credits": 7,
+    "summary": "Audience and demographic signals for a TikTok profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_search",
+    "platform": "tiktok",
+    "name": "TikTok Search",
+    "path": "/v1/tiktok/search",
+    "credits": 14,
+    "summary": "Search TikTok videos by keyword/hashtag.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_search_suggestions",
+    "platform": "tiktok",
+    "name": "TikTok Search Suggestions",
+    "path": "/v1/tiktok/search-suggestions",
+    "credits": 28,
+    "summary": "TikTok search/autocomplete suggestions for a seed keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Seed keyword for autocomplete suggestions."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "Two-letter ISO country code. Default US."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_video_download",
+    "platform": "tiktok",
+    "name": "TikTok Video Download",
+    "path": "/v1/tiktok/video-download",
+    "credits": 3,
+    "summary": "No-watermark download URL for a TikTok video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_channel_posts",
+    "platform": "tiktok",
+    "name": "TikTok Channel Posts",
+    "path": "/v1/tiktok/channel-posts",
+    "credits": 14,
+    "summary": "Latest posts from a TikTok profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_comment_replies",
+    "platform": "tiktok",
+    "name": "TikTok Comment Replies",
+    "path": "/v1/tiktok/comment-replies",
+    "credits": 50,
+    "summary": "Replies to a specific TikTok comment.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "comment_id",
+        "type": "string",
+        "required": true,
+        "description": "ID of the parent comment to fetch replies for (from the comments endpoint)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_user_followers",
+    "platform": "tiktok",
+    "name": "TikTok User Followers",
+    "path": "/v1/tiktok/user-followers",
+    "credits": 20,
+    "summary": "List a TikTok user's followers.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_user_followings",
+    "platform": "tiktok",
+    "name": "TikTok User Followings",
+    "path": "/v1/tiktok/user-followings",
+    "credits": 20,
+    "summary": "List who a TikTok user follows.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_music_posts",
+    "platform": "tiktok",
+    "name": "TikTok Music Posts",
+    "path": "/v1/tiktok/music-posts",
+    "credits": 32,
+    "summary": "Posts using a specific TikTok sound/music.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_hashtag_search",
+    "platform": "tiktok",
+    "name": "TikTok Hashtag Search",
+    "path": "/v1/tiktok/hashtag-search",
+    "credits": 14,
+    "summary": "Search TikTok videos by hashtag.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Hashtag with or without the # (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_top_search",
+    "platform": "tiktok",
+    "name": "TikTok Top Search",
+    "path": "/v1/tiktok/top-search",
+    "credits": 14,
+    "summary": "Top mixed TikTok results for a keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_user_search",
+    "platform": "tiktok",
+    "name": "TikTok User Search",
+    "path": "/v1/tiktok/user-search",
+    "credits": 8,
+    "summary": "Search TikTok users/creators by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_song_details",
+    "platform": "tiktok",
+    "name": "TikTok Song Details",
+    "path": "/v1/tiktok/song-details",
+    "credits": 2,
+    "summary": "Details of a TikTok sound/song.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_trending_feed",
+    "platform": "tiktok",
+    "name": "TikTok Trending Feed",
+    "path": "/v1/tiktok/trending-feed",
+    "credits": 14,
+    "summary": "TikTok trending (For You) videos by region.",
+    "params": [
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "Two-letter ISO country code, e.g. US, GB, TR. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_popular_hashtags",
+    "platform": "tiktok",
+    "name": "TikTok Popular Hashtags",
+    "path": "/v1/tiktok/popular-hashtags",
+    "credits": 14,
+    "summary": "Trending TikTok hashtags for a topic/keyword.",
+    "params": [
+      {
+        "name": "query",
+        "type": "string",
+        "required": false,
+        "description": "Topic or keyword to discover trending hashtags for. Default \"trending\"."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_live",
+    "platform": "tiktok",
+    "name": "TikTok Live",
+    "path": "/v1/tiktok/live",
+    "credits": 1,
+    "summary": "Live status & room info for a TikTok creator.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_live_info",
+    "platform": "tiktok",
+    "name": "TikTok Live Info",
+    "path": "/v1/tiktok/live-info",
+    "credits": 7,
+    "summary": "Live room details for a TikTok creator.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_popular_creators",
+    "platform": "tiktok",
+    "name": "TikTok Popular Creators",
+    "path": "/v1/tiktok/popular-creators",
+    "credits": 28,
+    "summary": "Popular TikTok creators by country and ranking mode.",
+    "params": [
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "Two-letter ISO country code. Default US."
+      },
+      {
+        "name": "sort",
+        "type": "string",
+        "required": false,
+        "description": "follower, engagement, or popularity. Default follower."
+      },
+      {
+        "name": "follower_count",
+        "type": "string",
+        "required": false,
+        "description": "Optional range: 10k-100k, 100k-1m, 1m-10m, >10m."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_transcript",
+    "platform": "instagram",
+    "name": "Instagram Transcript",
+    "path": "/v1/instagram/transcript",
+    "credits": 2,
+    "summary": "Transcript of an Instagram Reel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_summarize",
+    "platform": "instagram",
+    "name": "Instagram Summarizer",
+    "path": "/v1/instagram/summarize",
+    "credits": 4,
+    "summary": "AI summary of an Instagram Reel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_details",
+    "platform": "instagram",
+    "name": "Instagram Details",
+    "path": "/v1/instagram/details",
+    "credits": 1,
+    "summary": "Details for an Instagram post or reel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_comments",
+    "platform": "instagram",
+    "name": "Instagram Comments",
+    "path": "/v1/instagram/comments",
+    "credits": 45,
+    "summary": "Comments on an Instagram post or reel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_channel_details",
+    "platform": "instagram",
+    "name": "Instagram Channel Details",
+    "path": "/v1/instagram/channel-details",
+    "credits": 1,
+    "summary": "Profile info & stats for an Instagram account.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_channel_posts",
+    "platform": "instagram",
+    "name": "Instagram Channel Posts",
+    "path": "/v1/instagram/channel-posts",
+    "credits": 12,
+    "summary": "Latest posts from an Instagram profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_channel_reels",
+    "platform": "instagram",
+    "name": "Instagram Channel Reels",
+    "path": "/v1/instagram/channel-reels",
+    "credits": 12,
+    "summary": "Latest Reels from an Instagram profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_reels_search",
+    "platform": "instagram",
+    "name": "Instagram Reels Search",
+    "path": "/v1/instagram/reels-search",
+    "credits": 12,
+    "summary": "Search Instagram Reels by hashtag/keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Hashtag (without #) or keyword (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_trending_reels",
+    "platform": "instagram",
+    "name": "Instagram Trending Reels",
+    "path": "/v1/instagram/trending-reels",
+    "credits": 28,
+    "summary": "Trending Instagram Reels / Explore posts by country.",
+    "params": [
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "Country name for Explore localization. Default United States."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_video_download",
+    "platform": "instagram",
+    "name": "Instagram Video Download",
+    "path": "/v1/instagram/video-download",
+    "credits": 3,
+    "summary": "Direct video URL for an Instagram Reel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_tagged_posts",
+    "platform": "instagram",
+    "name": "Instagram Tagged Posts",
+    "path": "/v1/instagram/tagged-posts",
+    "credits": 18,
+    "summary": "Posts an Instagram user is tagged in.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_music_posts",
+    "platform": "instagram",
+    "name": "Instagram Music Posts",
+    "path": "/v1/instagram/music-posts",
+    "credits": 18,
+    "summary": "Posts/Reels using an Instagram audio.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram audio/music page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_reels_by_audio_id",
+    "platform": "instagram",
+    "name": "Instagram Reels By Audio ID",
+    "path": "/v1/instagram/reels-by-audio-id",
+    "credits": 28,
+    "summary": "Posts/Reels using an Instagram audio ID.",
+    "params": [
+      {
+        "name": "audio_id",
+        "type": "string",
+        "required": true,
+        "description": "Instagram audio/music ID or full audio URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_hashtag_search",
+    "platform": "instagram",
+    "name": "Instagram Hashtag Search",
+    "path": "/v1/instagram/hashtag-search",
+    "credits": 12,
+    "summary": "Search Instagram posts by hashtag.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Hashtag without the # (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_profile_search",
+    "platform": "instagram",
+    "name": "Instagram Profile Search",
+    "path": "/v1/instagram/profile-search",
+    "credits": 12,
+    "summary": "Search Instagram profiles by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_story_highlights",
+    "platform": "instagram",
+    "name": "Instagram Story Highlights",
+    "path": "/v1/instagram/story-highlights",
+    "credits": 5,
+    "summary": "List a profile's story highlight covers.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_highlights_details",
+    "platform": "instagram",
+    "name": "Instagram Highlights Details",
+    "path": "/v1/instagram/highlights-details",
+    "credits": 9,
+    "summary": "Items inside a profile's story highlights.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max highlights to expand. Default 10, max 50."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_embed",
+    "platform": "instagram",
+    "name": "Instagram Embed",
+    "path": "/v1/instagram/embed",
+    "credits": 1,
+    "summary": "Embed HTML for an Instagram post/reel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "instagram_basic_profile",
+    "platform": "instagram",
+    "name": "Instagram Basic Profile",
+    "path": "/v1/instagram/basic-profile",
+    "credits": 1,
+    "summary": "Lightweight Instagram profile lookup (core fields).",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_details",
+    "platform": "facebook",
+    "name": "Facebook Details",
+    "path": "/v1/facebook/details",
+    "credits": 1,
+    "summary": "Details for a Facebook video or post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_transcript",
+    "platform": "facebook",
+    "name": "Facebook Transcript",
+    "path": "/v1/facebook/transcript",
+    "credits": 2,
+    "summary": "Transcript of a Facebook video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_summarize",
+    "platform": "facebook",
+    "name": "Facebook Summarizer",
+    "path": "/v1/facebook/summarize",
+    "credits": 4,
+    "summary": "AI summary of a Facebook video or post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_comments",
+    "platform": "facebook",
+    "name": "Facebook Comments",
+    "path": "/v1/facebook/comments",
+    "credits": 30,
+    "summary": "Comments on a Facebook post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_page_details",
+    "platform": "facebook",
+    "name": "Facebook Page Details",
+    "path": "/v1/facebook/page-details",
+    "credits": 1,
+    "summary": "Info & stats for a Facebook page.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook page URL, e.g. https://facebook.com/PageName. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_profile_posts",
+    "platform": "facebook",
+    "name": "Facebook Profile Posts",
+    "path": "/v1/facebook/profile-posts",
+    "credits": 12,
+    "summary": "Latest posts from a Facebook profile/page.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_profile_reels",
+    "platform": "facebook",
+    "name": "Facebook Profile Reels",
+    "path": "/v1/facebook/profile-reels",
+    "credits": 36,
+    "summary": "Latest Reels from a Facebook profile/page.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_group_posts",
+    "platform": "facebook",
+    "name": "Facebook Group Posts",
+    "path": "/v1/facebook/group-posts",
+    "credits": 12,
+    "summary": "Posts from a public Facebook group.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public Facebook group URL, e.g. https://facebook.com/groups/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_comment_replies",
+    "platform": "facebook",
+    "name": "Facebook Comment Replies",
+    "path": "/v1/facebook/comment-replies",
+    "credits": 30,
+    "summary": "Replies to a specific Facebook comment.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook post URL the comment belongs to. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "comment_id",
+        "type": "string",
+        "required": true,
+        "description": "ID of the parent comment to fetch replies for (from the comments endpoint)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_marketplace_search",
+    "platform": "facebook",
+    "name": "Facebook Marketplace Search",
+    "path": "/v1/facebook/marketplace-search",
+    "credits": 28,
+    "summary": "Search Facebook Marketplace listings by keyword and location.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Product or keyword to search for (min 2 chars)."
+      },
+      {
+        "name": "location",
+        "type": "string",
+        "required": true,
+        "description": "City or place name, e.g. 'Austin, TX'."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "details",
+        "type": "string",
+        "required": false,
+        "description": "Set true to fetch full description, photos and coordinates per listing (slower, costs more)."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_marketplace_location_search",
+    "platform": "facebook",
+    "name": "Facebook Marketplace Location Search",
+    "path": "/v1/facebook/marketplace-location-search",
+    "credits": 17,
+    "summary": "Find Facebook Marketplace location candidates for a city or place query.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "City/place search query, e.g. Austin."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 10, max 50. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_event_search",
+    "platform": "facebook",
+    "name": "Facebook Event Search",
+    "path": "/v1/facebook/event-search",
+    "credits": 40,
+    "summary": "Search Facebook events by topic and/or location.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Topic and/or place, e.g. 'comedy Chicago' (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_event_details",
+    "platform": "facebook",
+    "name": "Facebook Event Details",
+    "path": "/v1/facebook/event-details",
+    "credits": 2,
+    "summary": "Details for a Facebook event (date, location, attendees, tickets).",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook event URL, e.g. https://facebook.com/events/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_profile_photos",
+    "platform": "facebook",
+    "name": "Facebook Profile Photos",
+    "path": "/v1/facebook/profile-photos",
+    "credits": 12,
+    "summary": "Photos from a Facebook profile or page.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_profile_events",
+    "platform": "facebook",
+    "name": "Facebook Profile Events",
+    "path": "/v1/facebook/profile-events",
+    "credits": 40,
+    "summary": "Events from a Facebook profile or page.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_marketplace_item",
+    "platform": "facebook",
+    "name": "Facebook Marketplace Item",
+    "path": "/v1/facebook/marketplace-item",
+    "credits": 17,
+    "summary": "Details for a single Facebook Marketplace listing.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "twitter_tweet_details",
+    "platform": "twitter",
+    "name": "Twitter/X Tweet Details",
+    "path": "/v1/twitter/tweet-details",
+    "credits": 1,
+    "summary": "Metadata + engagement stats for a tweet.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public tweet URL, e.g. https://x.com/user/status/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "twitter_transcript",
+    "platform": "twitter",
+    "name": "Twitter/X Transcript",
+    "path": "/v1/twitter/transcript",
+    "credits": 7,
+    "summary": "Extract tweet text as transcript text.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Public tweet URL, e.g. https://x.com/user/status/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "twitter_profile",
+    "platform": "twitter",
+    "name": "Twitter/X Profile",
+    "path": "/v1/twitter/profile",
+    "credits": 1,
+    "summary": "Profile info & stats for a Twitter/X account.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "twitter_user_tweets",
+    "platform": "twitter",
+    "name": "Twitter/X User Tweets",
+    "path": "/v1/twitter/user-tweets",
+    "credits": 14,
+    "summary": "Recent tweets from a Twitter/X profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "twitter_search",
+    "platform": "twitter",
+    "name": "Twitter/X Search",
+    "path": "/v1/twitter/search",
+    "credits": 14,
+    "summary": "Search tweets by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "twitter_community",
+    "platform": "twitter",
+    "name": "Twitter/X Community",
+    "path": "/v1/twitter/community",
+    "credits": 1,
+    "summary": "Details for an X (Twitter) community.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "X community URL (x.com/i/communities/ID) or community ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "twitter_community_tweets",
+    "platform": "twitter",
+    "name": "Twitter/X Community Tweets",
+    "path": "/v1/twitter/community-tweets",
+    "credits": 18,
+    "summary": "Tweets posted in an X community.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "X community URL (x.com/i/communities/ID) or community ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "reddit_subreddit_posts",
+    "platform": "reddit",
+    "name": "Reddit Subreddit Posts",
+    "path": "/v1/reddit/subreddit-posts",
+    "credits": 10,
+    "summary": "Recent posts in a subreddit.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "reddit_post_details",
+    "platform": "reddit",
+    "name": "Reddit Post Details",
+    "path": "/v1/reddit/post-details",
+    "credits": 1,
+    "summary": "Metadata + stats for a Reddit post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "reddit_post_comments",
+    "platform": "reddit",
+    "name": "Reddit Post Comments",
+    "path": "/v1/reddit/post-comments",
+    "credits": 20,
+    "summary": "Comments on a Reddit post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "reddit_post_transcript",
+    "platform": "reddit",
+    "name": "Reddit Post Transcript",
+    "path": "/v1/reddit/post-transcript",
+    "credits": 20,
+    "summary": "Extract Reddit post text and top comments as a discussion transcript.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "reddit_search",
+    "platform": "reddit",
+    "name": "Reddit Search",
+    "path": "/v1/reddit/search",
+    "credits": 10,
+    "summary": "Search Reddit posts by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "reddit_subreddit_details",
+    "platform": "reddit",
+    "name": "Reddit Subreddit Details",
+    "path": "/v1/reddit/subreddit-details",
+    "credits": 1,
+    "summary": "Info & member stats for a subreddit.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "reddit_subreddit_search",
+    "platform": "reddit",
+    "name": "Reddit Subreddit Search",
+    "path": "/v1/reddit/subreddit-search",
+    "credits": 10,
+    "summary": "Search posts within a specific subreddit.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "threads_profile",
+    "platform": "threads",
+    "name": "Threads Profile",
+    "path": "/v1/threads/profile",
+    "credits": 1,
+    "summary": "Profile info & stats for a Threads account.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Threads profile URL or @handle, e.g. https://threads.net/@username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "threads_user_posts",
+    "platform": "threads",
+    "name": "Threads User Posts",
+    "path": "/v1/threads/user-posts",
+    "credits": 14,
+    "summary": "Recent posts from a Threads profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Threads profile URL or @handle, e.g. https://threads.net/@username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "threads_post_details",
+    "platform": "threads",
+    "name": "Threads Post Details",
+    "path": "/v1/threads/post-details",
+    "credits": 1,
+    "summary": "Metadata + engagement for a Threads post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Threads post URL, e.g. https://threads.net/@user/post/CODE. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "threads_search",
+    "platform": "threads",
+    "name": "Threads Search",
+    "path": "/v1/threads/search",
+    "credits": 18,
+    "summary": "Search Threads posts by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "threads_search_users",
+    "platform": "threads",
+    "name": "Threads Search Users",
+    "path": "/v1/threads/search-users",
+    "credits": 14,
+    "summary": "Find Threads users matching a keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "bluesky_profile",
+    "platform": "bluesky",
+    "name": "Bluesky Profile",
+    "path": "/v1/bluesky/profile",
+    "credits": 1,
+    "summary": "Profile info & stats for a Bluesky account.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "bluesky_user_posts",
+    "platform": "bluesky",
+    "name": "Bluesky User Posts",
+    "path": "/v1/bluesky/user-posts",
+    "credits": 3,
+    "summary": "Recent posts from a Bluesky profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "bluesky_post_details",
+    "platform": "bluesky",
+    "name": "Bluesky Post Details",
+    "path": "/v1/bluesky/post-details",
+    "credits": 1,
+    "summary": "Metadata + engagement for a Bluesky post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "pinterest_pin_details",
+    "platform": "pinterest",
+    "name": "Pinterest Pin Details",
+    "path": "/v1/pinterest/pin-details",
+    "credits": 1,
+    "summary": "Metadata + saves for a Pinterest pin.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Pinterest pin URL, e.g. https://pinterest.com/pin/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "pinterest_user_pins",
+    "platform": "pinterest",
+    "name": "Pinterest User Pins",
+    "path": "/v1/pinterest/user-pins",
+    "credits": 13,
+    "summary": "Pins from a Pinterest profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Pinterest profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "pinterest_search",
+    "platform": "pinterest",
+    "name": "Pinterest Search",
+    "path": "/v1/pinterest/search",
+    "credits": 13,
+    "summary": "Search Pinterest pins by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "pinterest_board",
+    "platform": "pinterest",
+    "name": "Pinterest Board",
+    "path": "/v1/pinterest/board",
+    "credits": 13,
+    "summary": "List pins inside a Pinterest board.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Pinterest board URL, e.g. https://pinterest.com/username/board-name/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "pinterest_user_boards",
+    "platform": "pinterest",
+    "name": "Pinterest User Boards",
+    "path": "/v1/pinterest/user-boards",
+    "credits": 13,
+    "summary": "List the boards on a Pinterest profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Pinterest profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 25, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_profile",
+    "platform": "linkedin",
+    "name": "LinkedIn Profile",
+    "path": "/v1/linkedin/profile",
+    "credits": 2,
+    "summary": "Public LinkedIn person profile details.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "LinkedIn profile URL, e.g. https://linkedin.com/in/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_company",
+    "platform": "linkedin",
+    "name": "LinkedIn Company",
+    "path": "/v1/linkedin/company",
+    "credits": 2,
+    "summary": "Public LinkedIn company page details.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "LinkedIn company URL, e.g. https://linkedin.com/company/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_post_details",
+    "platform": "linkedin",
+    "name": "LinkedIn Post Details",
+    "path": "/v1/linkedin/post-details",
+    "credits": 1,
+    "summary": "Metadata + engagement for a LinkedIn post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "LinkedIn post or activity URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_post_transcript",
+    "platform": "linkedin",
+    "name": "LinkedIn Post Transcript",
+    "path": "/v1/linkedin/post-transcript",
+    "credits": 7,
+    "summary": "Extract post text as a transcript for a LinkedIn post.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "LinkedIn post or activity URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_company_posts",
+    "platform": "linkedin",
+    "name": "LinkedIn Company Posts",
+    "path": "/v1/linkedin/company-posts",
+    "credits": 16,
+    "summary": "Recent public posts from a LinkedIn company page.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "LinkedIn company URL, e.g. https://linkedin.com/company/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_search_posts",
+    "platform": "linkedin",
+    "name": "LinkedIn Search Posts",
+    "path": "/v1/linkedin/search-posts",
+    "credits": 16,
+    "summary": "Search public LinkedIn posts by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "sort",
+        "type": "string",
+        "required": false,
+        "description": "relevance or date. Default relevance."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 50. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "rumble_video_details",
+    "platform": "rumble",
+    "name": "Rumble Video Details",
+    "path": "/v1/rumble/video-details",
+    "credits": 1,
+    "summary": "Metadata + stats for a Rumble video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "rumble_channel_videos",
+    "platform": "rumble",
+    "name": "Rumble Channel Videos",
+    "path": "/v1/rumble/channel-videos",
+    "credits": 12,
+    "summary": "List videos from a Rumble channel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Rumble channel URL, e.g. https://rumble.com/c/name. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "rumble_search",
+    "platform": "rumble",
+    "name": "Rumble Search",
+    "path": "/v1/rumble/search",
+    "credits": 12,
+    "summary": "Search Rumble videos by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "rumble_comments",
+    "platform": "rumble",
+    "name": "Rumble Comments",
+    "path": "/v1/rumble/comments",
+    "credits": 30,
+    "summary": "Comments on a Rumble video.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_shop_search",
+    "platform": "tiktok_shop",
+    "name": "TikTok Shop Search",
+    "path": "/v1/tiktok-shop/shop-search",
+    "credits": 56,
+    "summary": "Search TikTok Shop products by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Product search query."
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "required": false,
+        "description": "Two-letter TikTok Shop region. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_shop_products",
+    "platform": "tiktok_shop",
+    "name": "TikTok Shop Products",
+    "path": "/v1/tiktok-shop/shop-products",
+    "credits": 56,
+    "summary": "List products from a TikTok Shop store.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok Shop store URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_shop_product_details",
+    "platform": "tiktok_shop",
+    "name": "TikTok Shop Product Details",
+    "path": "/v1/tiktok-shop/product-details",
+    "credits": 14,
+    "summary": "Full TikTok Shop product details, seller and price metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_shop_product_reviews",
+    "platform": "tiktok_shop",
+    "name": "TikTok Shop Product Reviews",
+    "path": "/v1/tiktok-shop/product-reviews",
+    "credits": 45,
+    "summary": "Customer reviews for a TikTok Shop product.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_shop_user_showcase",
+    "platform": "tiktok_shop",
+    "name": "TikTok Shop User Showcase",
+    "path": "/v1/tiktok-shop/user-showcase",
+    "credits": 45,
+    "summary": "Products promoted in a TikTok creator showcase.",
+    "params": [
+      {
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "TikTok username with or without @."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "github_user",
+    "platform": "github",
+    "name": "GitHub User",
+    "path": "/v1/github/user",
+    "credits": 3,
+    "summary": "Public GitHub user profile details.",
+    "params": [
+      {
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "GitHub username or profile URL."
+      }
+    ]
+  },
+  {
+    "tool": "github_repositories",
+    "platform": "github",
+    "name": "GitHub Repositories",
+    "path": "/v1/github/repositories",
+    "credits": 12,
+    "summary": "List a GitHub user's repositories.",
+    "params": [
+      {
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "GitHub username or profile URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 30, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "github_repository",
+    "platform": "github",
+    "name": "GitHub Repository",
+    "path": "/v1/github/repository",
+    "credits": 3,
+    "summary": "Repository details, stars, forks and metadata.",
+    "params": [
+      {
+        "name": "repo",
+        "type": "string",
+        "required": true,
+        "description": "Repository URL or owner/name."
+      }
+    ]
+  },
+  {
+    "tool": "github_pull_requests",
+    "platform": "github",
+    "name": "GitHub Pull Requests",
+    "path": "/v1/github/pull-requests",
+    "credits": 12,
+    "summary": "List repository pull requests.",
+    "params": [
+      {
+        "name": "repo",
+        "type": "string",
+        "required": true,
+        "description": "Repository URL or owner/name."
+      },
+      {
+        "name": "state",
+        "type": "string",
+        "required": false,
+        "description": "open, closed, or all. Default open."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 30, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "github_activity",
+    "platform": "github",
+    "name": "GitHub Activity",
+    "path": "/v1/github/activity",
+    "credits": 12,
+    "summary": "Recent public activity for a GitHub user.",
+    "params": [
+      {
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "GitHub username or profile URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 30, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "github_followers",
+    "platform": "github",
+    "name": "GitHub Followers",
+    "path": "/v1/github/followers",
+    "credits": 12,
+    "summary": "List GitHub followers.",
+    "params": [
+      {
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "GitHub username or profile URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 30, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "github_following",
+    "platform": "github",
+    "name": "GitHub Following",
+    "path": "/v1/github/following",
+    "credits": 12,
+    "summary": "List accounts a GitHub user follows.",
+    "params": [
+      {
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "GitHub username or profile URL."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 30, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "github_contributions",
+    "platform": "github",
+    "name": "GitHub Contributions",
+    "path": "/v1/github/contributions",
+    "credits": 3,
+    "summary": "Summary of recent public GitHub contributions.",
+    "params": [
+      {
+        "name": "username",
+        "type": "string",
+        "required": true,
+        "description": "GitHub username or profile URL."
+      }
+    ]
+  },
+  {
+    "tool": "github_trending_repositories",
+    "platform": "github",
+    "name": "GitHub Trending Repositories",
+    "path": "/v1/github/trending-repositories",
+    "credits": 12,
+    "summary": "Search trending repositories by stars or query.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "GitHub repository search query. Default stars:>1000."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "github_trending_developers",
+    "platform": "github",
+    "name": "GitHub Trending Developers",
+    "path": "/v1/github/trending-developers",
+    "credits": 12,
+    "summary": "Search popular GitHub developers.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "GitHub user search query. Default followers:>1000."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "google_search",
+    "platform": "google",
+    "name": "Google Search",
+    "path": "/v1/google/search",
+    "credits": 42,
+    "summary": "Google SERP organic search results by keyword, country, and language.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "Two-letter country code. Default us."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Google language code. Default en."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 10, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "twitch_profile",
+    "platform": "twitch",
+    "name": "Twitch Profile",
+    "path": "/v1/twitch/profile",
+    "credits": 9,
+    "summary": "Twitch channel profile, followers, live status and recent metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "twitch_user_videos",
+    "platform": "twitch",
+    "name": "Twitch User Videos",
+    "path": "/v1/twitch/user-videos",
+    "credits": 34,
+    "summary": "Recent Twitch VODs for a channel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 30. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "twitch_user_schedule",
+    "platform": "twitch",
+    "name": "Twitch User Schedule",
+    "path": "/v1/twitch/user-schedule",
+    "credits": 34,
+    "summary": "Upcoming Twitch schedule data when exposed on the public channel.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "twitch_clip",
+    "platform": "twitch",
+    "name": "Twitch Clip",
+    "path": "/v1/twitch/clip",
+    "credits": 9,
+    "summary": "Twitch clip metadata from a clip URL or channel fallback.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Twitch clip URL, channel URL, or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "spotify_artist",
+    "platform": "spotify",
+    "name": "Spotify Artist",
+    "path": "/v1/spotify/artist",
+    "credits": 6,
+    "summary": "Spotify artist details, followers and listener metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "spotify_track",
+    "platform": "spotify",
+    "name": "Spotify Track",
+    "path": "/v1/spotify/track",
+    "credits": 6,
+    "summary": "Spotify track metadata, artists, album and play count when available.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "spotify_album",
+    "platform": "spotify",
+    "name": "Spotify Album",
+    "path": "/v1/spotify/album",
+    "credits": 6,
+    "summary": "Spotify album metadata and track count.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "spotify_search",
+    "platform": "spotify",
+    "name": "Spotify Search",
+    "path": "/v1/spotify/search",
+    "credits": 23,
+    "summary": "Search Spotify tracks, albums, artists, podcasts or episodes.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "required": false,
+        "description": "tracks, albums, artists, podcasts, or episodes. Default tracks."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 50. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "spotify_podcast",
+    "platform": "spotify",
+    "name": "Spotify Podcast",
+    "path": "/v1/spotify/podcast",
+    "credits": 6,
+    "summary": "Spotify podcast/show details and episode summary metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 50. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "spotify_podcast_episodes",
+    "platform": "spotify",
+    "name": "Spotify Podcast Episodes",
+    "path": "/v1/spotify/podcast-episodes",
+    "credits": 23,
+    "summary": "List episodes for a Spotify podcast/show.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 50. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "soundcloud_artist",
+    "platform": "soundcloud",
+    "name": "SoundCloud Artist",
+    "path": "/v1/soundcloud/artist",
+    "credits": 7,
+    "summary": "SoundCloud artist profile metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "soundcloud_artist_tracks",
+    "platform": "soundcloud",
+    "name": "SoundCloud Artist Tracks",
+    "path": "/v1/soundcloud/artist-tracks",
+    "credits": 28,
+    "summary": "Tracks from a SoundCloud artist profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "soundcloud_track",
+    "platform": "soundcloud",
+    "name": "SoundCloud Track",
+    "path": "/v1/soundcloud/track",
+    "credits": 7,
+    "summary": "SoundCloud track metadata and engagement stats.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "SoundCloud track URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "linktree_page",
+    "platform": "linktree",
+    "name": "Linktree Page",
+    "path": "/v1/linktree/page",
+    "credits": 4,
+    "summary": "Public Linktree profile links, socials and profile metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Linktree profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "snapchat_user_profile",
+    "platform": "snapchat",
+    "name": "Snapchat User Profile",
+    "path": "/v1/snapchat/user-profile",
+    "credits": 11,
+    "summary": "Public Snapchat profile metadata, subscriber count, avatar and highlights.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Snapchat username or profile URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "truth_social_profile",
+    "platform": "truth_social",
+    "name": "Truth Social Profile",
+    "path": "/v1/truth-social/profile",
+    "credits": 5,
+    "summary": "Public Truth Social profile metadata and stats.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Truth Social profile URL or @username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "truth_social_user_posts",
+    "platform": "truth_social",
+    "name": "Truth Social User Posts",
+    "path": "/v1/truth-social/user-posts",
+    "credits": 17,
+    "summary": "Recent public posts from a Truth Social profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Truth Social profile URL or @username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 80. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "truth_social_post",
+    "platform": "truth_social",
+    "name": "Truth Social Post",
+    "path": "/v1/truth-social/post",
+    "credits": 5,
+    "summary": "Truth Social post metadata, text, media and engagement.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Truth Social post URL or post ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "kick_clip",
+    "platform": "kick",
+    "name": "Kick Clip",
+    "path": "/v1/kick/clip",
+    "credits": 34,
+    "summary": "Kick clip metadata from a clip URL or recent channel clips.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Kick clip URL, channel URL, or channel username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 30, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "amazon_shop_page",
+    "platform": "amazon_shop",
+    "name": "Amazon Shop Page",
+    "path": "/v1/amazon-shop/page",
+    "credits": 89,
+    "summary": "Amazon seller storefront metadata and product listings.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "marketplace",
+        "type": "string",
+        "required": false,
+        "description": "Amazon marketplace code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "age_gender_get",
+    "platform": "age_gender",
+    "name": "Age and Gender",
+    "path": "/v1/age-gender",
+    "credits": 4,
+    "summary": "Predict age, gender and nationality signals from first names.",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true,
+        "description": "First name, or fallback when names is omitted."
+      },
+      {
+        "name": "names",
+        "type": "string",
+        "required": false,
+        "description": "Optional comma-separated list of names."
+      }
+    ]
+  },
+  {
+    "tool": "account_balance",
+    "platform": "account",
+    "name": "Credit Balance",
+    "path": "/v1/account/balance",
+    "credits": 0,
+    "summary": "Get current Captapi credit balance and plan limits.",
+    "params": []
+  },
+  {
+    "tool": "account_request_history",
+    "platform": "account",
+    "name": "Request History",
+    "path": "/v1/account/request-history",
+    "credits": 0,
+    "summary": "List recent Captapi API requests for the current key owner.",
+    "params": [
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 50, max 500. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "account_daily_usage",
+    "platform": "account",
+    "name": "Daily Usage",
+    "path": "/v1/account/daily-usage",
+    "credits": 0,
+    "summary": "Daily request and credit usage summary.",
+    "params": [
+      {
+        "name": "days",
+        "type": "number",
+        "required": false,
+        "description": "Number of days to include. Default 30, max 365."
+      }
+    ]
+  },
+  {
+    "tool": "account_most_used_routes",
+    "platform": "account",
+    "name": "Most Used Routes",
+    "path": "/v1/account/most-used-routes",
+    "credits": 0,
+    "summary": "Most used API routes by request count and credits.",
+    "params": [
+      {
+        "name": "days",
+        "type": "number",
+        "required": false,
+        "description": "Number of days to include. Default 30, max 365."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "kwai_profile",
+    "platform": "kwai",
+    "name": "Kwai Profile",
+    "path": "/v1/kwai/profile",
+    "credits": 17,
+    "summary": "Kwai/Kuaishou public profile details and stats.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "kwai_user_posts",
+    "platform": "kwai",
+    "name": "Kwai User Posts",
+    "path": "/v1/kwai/user-posts",
+    "credits": 45,
+    "summary": "Recent Kwai/Kuaishou videos from a profile.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "kwai_post",
+    "platform": "kwai",
+    "name": "Kwai Post",
+    "path": "/v1/kwai/post",
+    "credits": 17,
+    "summary": "Kwai/Kuaishou post metadata and engagement.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Kwai/Kuaishou post URL or video/photo ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "komi_page",
+    "platform": "komi",
+    "name": "Komi Page",
+    "path": "/v1/komi/page",
+    "credits": 4,
+    "summary": "Public Komi page links and profile metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Komi page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "pillar_page",
+    "platform": "pillar",
+    "name": "Pillar Page",
+    "path": "/v1/pillar/page",
+    "credits": 4,
+    "summary": "Public Pillar page links and profile metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Pillar page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "linkbio_page",
+    "platform": "linkbio",
+    "name": "Linkbio Page",
+    "path": "/v1/linkbio/page",
+    "credits": 4,
+    "summary": "Public Linkbio page links and profile metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Linkbio page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "linkme_profile",
+    "platform": "linkme",
+    "name": "Linkme Profile",
+    "path": "/v1/linkme/profile",
+    "credits": 4,
+    "summary": "Public Linkme profile links and metadata.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Linkme profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_search",
+    "platform": "ad_library",
+    "name": "Facebook Ad Library Search",
+    "path": "/v1/ad-library/facebook/search",
+    "credits": 70,
+    "summary": "Search Meta/Facebook ads by keyword.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_company_ads",
+    "platform": "ad_library",
+    "name": "Facebook Company Ads",
+    "path": "/v1/ad-library/facebook/company-ads",
+    "credits": 70,
+    "summary": "Ads for a Facebook page or Meta Ad Library URL.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook page URL or Meta Ad Library URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_search_companies",
+    "platform": "ad_library",
+    "name": "Facebook Ad Library Search Companies",
+    "path": "/v1/ad-library/facebook/search-companies",
+    "credits": 70,
+    "summary": "Find advertisers/pages in the Meta Ad Library by name.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_ad_details",
+    "platform": "ad_library",
+    "name": "Facebook Ad Details",
+    "path": "/v1/ad-library/facebook/ad-details",
+    "credits": 17,
+    "summary": "Meta/Facebook ad details.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_ad_transcript",
+    "platform": "ad_library",
+    "name": "Facebook Ad Transcript",
+    "path": "/v1/ad-library/facebook/ad-transcript",
+    "credits": 17,
+    "summary": "Extract creative text from a Meta/Facebook ad as transcript text.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Meta Ad Library ad URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_ad_library_search",
+    "platform": "ad_library",
+    "name": "TikTok Ad Library Search",
+    "path": "/v1/ad-library/tiktok/search",
+    "credits": 70,
+    "summary": "Search TikTok Ad Library and Creative Center.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default DE."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_ad_library_ad_details",
+    "platform": "ad_library",
+    "name": "TikTok Ad Details",
+    "path": "/v1/ad-library/tiktok/ad-details",
+    "credits": 17,
+    "summary": "TikTok ad details by ad URL or ID.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default DE."
+      }
+    ]
+  },
+  {
+    "tool": "google_ad_library_company_ads",
+    "platform": "ad_library",
+    "name": "Google Company Ads",
+    "path": "/v1/ad-library/google/company-ads",
+    "credits": 67,
+    "summary": "Google Ads Transparency Center ads for an advertiser.",
+    "params": [
+      {
+        "name": "advertiser",
+        "type": "string",
+        "required": true,
+        "description": "Advertiser name, domain, or Google advertiser ID."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "google_ad_library_ad_details",
+    "platform": "ad_library",
+    "name": "Google Ad Details",
+    "path": "/v1/ad-library/google/ad-details",
+    "credits": 17,
+    "summary": "Google ad details by Transparency Center URL.",
+    "params": [
+      {
+        "name": "creative_id",
+        "type": "string",
+        "required": true,
+        "description": "Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      }
+    ]
+  },
+  {
+    "tool": "google_ad_library_advertiser_search",
+    "platform": "ad_library",
+    "name": "Google Advertiser Search",
+    "path": "/v1/ad-library/google/advertiser-search",
+    "credits": 45,
+    "summary": "Search Google Ads advertisers.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 10, max 50. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_ad_library_search_ads",
+    "platform": "ad_library",
+    "name": "LinkedIn Ad Library Search",
+    "path": "/v1/ad-library/linkedin/search-ads",
+    "credits": 70,
+    "summary": "Search LinkedIn Ad Library ads.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_ad_library_ad_details",
+    "platform": "ad_library",
+    "name": "LinkedIn Ad Details",
+    "path": "/v1/ad-library/linkedin/ad-details",
+    "credits": 17,
+    "summary": "LinkedIn ad details by URL or ID.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      }
+    ]
+  }
+]
