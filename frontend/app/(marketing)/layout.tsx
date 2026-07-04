@@ -164,6 +164,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
                 <li><Link href="/tools" className="hover:text-foreground">Free Tools</Link></li>
                 <li><Link href="/docs" className="hover:text-foreground">Documentation</Link></li>
                 <li><Link href="/status" className="hover:text-foreground">Status</Link></li>
+                <li><Link href="/changelog" className="hover:text-foreground">Changelog</Link></li>
               </ul>
             </div>
             <div>
