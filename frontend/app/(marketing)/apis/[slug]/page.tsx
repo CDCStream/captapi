@@ -20,6 +20,7 @@ import {
   LinkIcon,
   Ghost,
   Check,
+  Coins,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -254,6 +255,12 @@ export default async function ApiDetailPage({
         <p className="mt-4 max-w-3xl text-lg text-muted-foreground">
           {tagline(ep)}
         </p>
+        <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-3.5 py-1.5 text-sm font-medium text-amber-600 dark:text-amber-400">
+          <Coins className="size-4" />
+          {ep.creditsPerResult
+            ? `${creditLabel(ep)} per request (${ep.creditsPerResult} per result)`
+            : `${creditLabel(ep)} per request`}
+        </div>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button asChild size="lg">
             <Link href="/signup">Get your API key — free</Link>

@@ -74,6 +74,9 @@ function EndpointCell({ ep }: { ep: ApiEndpoint }) {
     >
       <Icon className="size-4 shrink-0 text-muted-foreground/70" />
       <span className="leading-tight">{ep.name}</span>
+      <span className="ml-auto shrink-0 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium tabular-nums text-amber-600 dark:text-amber-400">
+        {ep.credits} {ep.credits === 1 ? "credit" : "credits"}
+      </span>
     </Link>
   );
 }
