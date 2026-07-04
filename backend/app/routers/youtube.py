@@ -18,7 +18,7 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
-from app.services.apify_client import ApifyClient, get_apify
+from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
 from app.utils.formatters import safe_int, safe_list, safe_str
@@ -1082,20 +1082,32 @@ async def youtube_trending_shorts(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Browser-based actor regularly needs >120s; the default sync
-            # timeout turns those runs into 502s.
-            items = await ApifyClient(timeout=280).run_actor_sync(
-                settings.APIFY_ACTOR_YOUTUBE_SHORTS,
-                {
-                    "searchQuery": q,
-                    "searchQueries": [],
-                    "channelUrls": [],
-                    "hashtagUrls": [],
-                    "startUrls": [],
-                    "maxResults": limit,
-                    "proxyConfiguration": {"useApifyProxy": False},
-                },
-                max_items=limit,
-            )
+            # timeout turns those runs into 502s. When even 280s is not
+            # enough, reuse the actor's latest successful run instead of
+            # failing -- trending content stays relevant for hours.
+            client = ApifyClient(timeout=280, max_attempts=1)
+            try:
+                items = await client.run_actor_sync(
+                    settings.APIFY_ACTOR_YOUTUBE_SHORTS,
+                    {
+                        "searchQuery": q,
+                        "searchQueries": [],
+                        "channelUrls": [],
+                        "hashtagUrls": [],
+                        "startUrls": [],
+                        "maxResults": limit,
+                        "proxyConfiguration": {"useApifyProxy": False},
+                    },
+                    max_items=limit,
+                )
+            except ApifyError:
+                items = await client.last_succeeded_items(
+                    settings.APIFY_ACTOR_YOUTUBE_SHORTS,
+                    max_age_secs=48 * 3600,
+                    max_items=limit,
+                )
+                if not items:
+                    raise
             shorts = [_video_card(v) for v in items[:limit]]
             return {"platform": "youtube", "query": q, "totalReturned": len(shorts), "shorts": shorts}
 

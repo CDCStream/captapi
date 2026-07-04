@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import math
 import re
 from typing import Any
@@ -41,6 +42,28 @@ def _id(value: str) -> str | None:
 
 def _good_rows(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [i for i in items if isinstance(i, dict) and i.get("status") != "error"]
+
+
+_TRANSIENT_HINTS = ("temporarily unavailable", "please retry", "timeout", "unknown")
+
+
+async def _run_kwai(run_input: dict[str, Any], max_items: int) -> list[dict[str, Any]]:
+    """Run the Kwai actor, retrying once when the run only produced transient
+    error rows -- the upstream data source flaps regularly and a second attempt
+    a couple of seconds later usually succeeds."""
+    settings = get_settings()
+    apify = get_apify()
+    items = await apify.run_actor_sync(settings.APIFY_ACTOR_KWAI, run_input, max_items=max_items)
+    if items and not _good_rows(items):
+        messages = " ".join(
+            str(i.get("errorMessage") or "").lower() for i in items if isinstance(i, dict)
+        )
+        if any(hint in messages for hint in _TRANSIENT_HINTS):
+            await asyncio.sleep(2)
+            retry = await apify.run_actor_sync(settings.APIFY_ACTOR_KWAI, run_input, max_items=max_items)
+            if _good_rows(retry):
+                return retry
+    return items
 
 
 def _check_rows(items: list[dict[str, Any]], not_found_detail: str) -> list[dict[str, Any]]:
@@ -123,11 +146,7 @@ async def profile(
     async with billed_call(caller=caller, endpoint="/v1/kwai/profile", platform="kwai", resource_url=url, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_KWAI,
-                {"operation": "userDetail", "userId": user_id},
-                max_items=1,
-            )
+            items = await _run_kwai({"operation": "userDetail", "userId": user_id}, max_items=1)
             good = _good_rows(items)
             if good:
                 return _normalize_profile(good[0])
@@ -181,8 +200,7 @@ async def user_posts(
     settings = get_settings()
     async with billed_call(caller=caller, endpoint="/v1/kwai/user-posts", platform="kwai", resource_url=url, base_credits=max(2, math.ceil(limit * 2.25))) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_KWAI,
+            items = await _run_kwai(
                 {"operation": "userVideos", "userId": user_id, "maxPages": max(1, math.ceil(limit / 10))},
                 max_items=limit,
             )
@@ -209,11 +227,7 @@ async def post(
     async with billed_call(caller=caller, endpoint="/v1/kwai/post", platform="kwai", resource_url=url, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_KWAI,
-                {"operation": "videoDetail", "videoId": video_id},
-                max_items=1,
-            )
+            items = await _run_kwai({"operation": "videoDetail", "videoId": video_id}, max_items=1)
             good = _good_rows(items)
             if good:
                 return _normalize_post(good[0])

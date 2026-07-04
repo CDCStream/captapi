@@ -730,7 +730,7 @@ async def instagram_trending_reels(
             except ApifyError:
                 items = await client.last_succeeded_items(
                     settings.APIFY_ACTOR_INSTAGRAM_TRENDING,
-                    max_age_secs=24 * 3600,
+                    max_age_secs=48 * 3600,
                     max_items=limit,
                 )
                 if not items:

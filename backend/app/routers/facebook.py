@@ -1116,12 +1116,23 @@ async def facebook_event_search(
         async def _run() -> dict[str, Any]:
             # The official events scraper is browser-based and routinely needs
             # ~2-3 minutes; the global sync timeout (120s) cut it off mid-run.
-            apify = ApifyClient(timeout=280)
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_FACEBOOK_EVENTS,
-                {"searchQueries": [q], "maxEvents": limit},
-                max_items=limit,
-            )
+            # When even 280s is not enough, reuse the latest successful run
+            # instead of failing.
+            apify = ApifyClient(timeout=280, max_attempts=1)
+            try:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_FACEBOOK_EVENTS,
+                    {"searchQueries": [q], "maxEvents": limit},
+                    max_items=limit,
+                )
+            except ApifyError:
+                items = await apify.last_succeeded_items(
+                    settings.APIFY_ACTOR_FACEBOOK_EVENTS,
+                    max_age_secs=48 * 3600,
+                    max_items=limit,
+                )
+                if not items:
+                    raise
             events = [_normalize_event(i) for i in items[:limit] if not i.get("error")]
             return {"query": q, "totalReturned": len(events), "events": events}
 

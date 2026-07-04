@@ -73,6 +73,19 @@ async def _get(path: str, params: dict[str, Any] | None = None) -> Any:
     return resp.json()
 
 
+async def _get_list(path: str, params: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    """Like ``_get`` but guarantees a list. GitHub occasionally answers list
+    endpoints with a JSON object (rate-limit notice, redirect stub); slicing
+    that dict used to crash with an opaque 500."""
+    payload = await _get(path, params)
+    if isinstance(payload, list):
+        return payload
+    message = str(payload.get("message", "")) if isinstance(payload, dict) else ""
+    if "rate limit" in message.lower():
+        raise HTTPException(status_code=429, detail="GitHub public API rate limit reached")
+    raise HTTPException(status_code=502, detail="GitHub API returned an unexpected payload")
+
+
 def _user(u: dict[str, Any]) -> dict[str, Any]:
     return {
         "platform": "github",
@@ -178,7 +191,7 @@ async def repositories(
         raise HTTPException(status_code=400, detail="Invalid GitHub username")
     async with billed_call(caller=caller, endpoint="/v1/github/repositories", platform="github", resource_url=f"https://github.com/{login}", base_credits=_scaled(limit, GITHUB_LIST_RATE)) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _get(f"/users/{login}/repos", {"per_page": limit, "sort": "updated"})
+            items = await _get_list(f"/users/{login}/repos", {"per_page": limit, "sort": "updated"})
             repos = [_repo(i) for i in items[:limit]]
             return {"username": login, "totalReturned": len(repos), "repositories": repos}
 
@@ -216,7 +229,7 @@ async def pull_requests(
     owner, name = parts
     async with billed_call(caller=caller, endpoint="/v1/github/pull-requests", platform="github", resource_url=f"https://github.com/{owner}/{name}", base_credits=_scaled(limit, GITHUB_LIST_RATE)) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _get(f"/repos/{owner}/{name}/pulls", {"state": state, "per_page": limit})
+            items = await _get_list(f"/repos/{owner}/{name}/pulls", {"state": state, "per_page": limit})
             pulls = [_pull(i) for i in items[:limit]]
             return {"repository": f"{owner}/{name}", "totalReturned": len(pulls), "pullRequests": pulls}
 
@@ -236,7 +249,7 @@ async def activity(
         raise HTTPException(status_code=400, detail="Invalid GitHub username")
     async with billed_call(caller=caller, endpoint="/v1/github/activity", platform="github", resource_url=f"https://github.com/{login}", base_credits=_scaled(limit, GITHUB_LIST_RATE)) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _get(f"/users/{login}/events/public", {"per_page": limit})
+            items = await _get_list(f"/users/{login}/events/public", {"per_page": limit})
             events = [_event(i) for i in items[:limit]]
             return {"username": login, "totalReturned": len(events), "events": events}
 
@@ -256,7 +269,7 @@ async def followers(
         raise HTTPException(status_code=400, detail="Invalid GitHub username")
     async with billed_call(caller=caller, endpoint="/v1/github/followers", platform="github", resource_url=f"https://github.com/{login}", base_credits=_scaled(limit, GITHUB_LIST_RATE)) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _get(f"/users/{login}/followers", {"per_page": limit})
+            items = await _get_list(f"/users/{login}/followers", {"per_page": limit})
             users = [{"login": safe_str(i.get("login")), "url": safe_str(i.get("html_url")), "avatar": safe_str(i.get("avatar_url"))} for i in items[:limit]]
             return {"username": login, "totalReturned": len(users), "followers": users}
 
@@ -276,7 +289,7 @@ async def following(
         raise HTTPException(status_code=400, detail="Invalid GitHub username")
     async with billed_call(caller=caller, endpoint="/v1/github/following", platform="github", resource_url=f"https://github.com/{login}", base_credits=_scaled(limit, GITHUB_LIST_RATE)) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _get(f"/users/{login}/following", {"per_page": limit})
+            items = await _get_list(f"/users/{login}/following", {"per_page": limit})
             users = [{"login": safe_str(i.get("login")), "url": safe_str(i.get("html_url")), "avatar": safe_str(i.get("avatar_url"))} for i in items[:limit]]
             return {"username": login, "totalReturned": len(users), "following": users}
 

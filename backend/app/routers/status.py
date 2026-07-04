@@ -81,12 +81,24 @@ def _sampled_stats(sb: Any) -> list[dict[str, Any]]:
     ]
 
 
-def _health_label(success_rate: float | None) -> str:
-    if success_rate is None:
+# Low-traffic guard: with only a handful of requests in the window, one or two
+# stray failures would otherwise flip a platform straight to "outage". We add
+# pseudo-successes (Bayesian shrinkage toward healthy) so the label only
+# degrades when failures are statistically meaningful, and we never degrade on
+# fewer than MIN_ERRORS server errors.
+PSEUDO_SUCCESSES = 50
+MIN_ERRORS = 3
+
+
+def _health_label(total: int, errors: int) -> str:
+    if total <= 0:
         return "no_data"
-    if success_rate >= 99.0:
+    if errors < MIN_ERRORS:
         return "operational"
-    if success_rate >= 90.0:
+    smoothed = (total - errors + PSEUDO_SUCCESSES) / (total + PSEUDO_SUCCESSES) * 100
+    if smoothed >= 99.0:
+        return "operational"
+    if smoothed >= 90.0:
         return "degraded"
     return "outage"
 
@@ -115,7 +127,7 @@ async def api_status() -> dict[str, Any]:
         platforms.append(
             {
                 "platform": row.get("platform") or "other",
-                "status": _health_label(rate),
+                "status": _health_label(total, errors),
                 "success_rate": rate,
                 "requests_24h": total,
                 "avg_response_ms": int(avg_ms) if avg_ms is not None else None,
@@ -129,7 +141,7 @@ async def api_status() -> dict[str, Any]:
         "success": True,
         "data": {
             "overall": {
-                "status": _health_label(overall_rate),
+                "status": _health_label(total_all, errors_all),
                 "success_rate": overall_rate,
                 "requests_24h": total_all,
             },

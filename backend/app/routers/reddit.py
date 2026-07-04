@@ -6,6 +6,7 @@ actor returns mixed post/comment items; we split them by ``dataType``.
 
 from __future__ import annotations
 
+import asyncio
 import math
 from datetime import datetime, timezone
 from typing import Any
@@ -375,7 +376,22 @@ async def _fetch_reddit_post_resilient(url: str, post_id: str, limit: int) -> tu
         return await _fetch_reddit_comments_actor_post(url, limit)
     except Exception:  # noqa: BLE001 — any failure falls through to trudax
         pass
-    return await _fetch_reddit_actor_post(url, limit)
+    # Final fallback. Upstream 504s here are transient, so retry once and map
+    # any leftover failure to a clean 502 instead of an opaque 500.
+    last_exc: Exception | None = None
+    for attempt in (1, 2):
+        try:
+            return await _fetch_reddit_actor_post(url, limit)
+        except HTTPException:
+            raise
+        except Exception as exc:  # noqa: BLE001
+            last_exc = exc
+            if attempt == 1:
+                await asyncio.sleep(2)
+    raise HTTPException(
+        status_code=502,
+        detail=f"Reddit upstream error, please retry ({str(last_exc)[:120]})",
+    )
 
 
 async def _reddit_listing_json(path: str, params: dict[str, Any], limit: int) -> list[dict[str, Any]]:
