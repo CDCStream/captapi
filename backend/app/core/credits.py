@@ -34,23 +34,27 @@ def log_request(
     status_code: int,
     response_time_ms: int,
     error_message: str | None = None,
+    source: str | None = None,
 ) -> None:
     sb = get_supabase()
     try:
-        sb.table("requests").insert(
-            {
-                "user_id": caller.user_id,
-                "api_key_id": caller.api_key_id,
-                "endpoint": endpoint,
-                "platform": platform,
-                "resource_url": resource_url,
-                "credits_used": credits_used,
-                "cache_hit": cache_hit,
-                "status_code": status_code,
-                "response_time_ms": response_time_ms,
-                "error_message": error_message,
-            }
-        ).execute()
+        row: dict[str, Any] = {
+            "user_id": caller.user_id,
+            "api_key_id": caller.api_key_id,
+            "endpoint": endpoint,
+            "platform": platform,
+            "resource_url": resource_url,
+            "credits_used": credits_used,
+            "cache_hit": cache_hit,
+            "status_code": status_code,
+            "response_time_ms": response_time_ms,
+            "error_message": error_message,
+        }
+        # Only sent when set, so logging keeps working if the 0015 migration
+        # (requests.source column) hasn't been applied yet.
+        if source:
+            row["source"] = source
+        sb.table("requests").insert(row).execute()
 
         if credits_used > 0 and not cache_hit:
             sb.table("credit_transactions").insert(
@@ -97,7 +101,7 @@ async def billed_call(
         )
 
     started = time.perf_counter()
-    ctx: dict[str, Any] = {"cache_hit": False, "credits_override": None}
+    ctx: dict[str, Any] = {"cache_hit": False, "credits_override": None, "source": None}
     status_code = 200
     error: str | None = None
     try:
@@ -131,4 +135,5 @@ async def billed_call(
             status_code=status_code,
             response_time_ms=elapsed_ms,
             error_message=error,
+            source=None if cache_hit else ctx.get("source"),
         )

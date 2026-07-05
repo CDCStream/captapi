@@ -20,6 +20,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
+from app.services.http_fetch import fetch as proxy_fetch
 from app.services.openai_client import summarize_transcript
 from app.utils.formatters import safe_int, safe_list, safe_str
 from app.utils.url import (
@@ -76,6 +77,32 @@ _YT_BROWSER_HEADERS = {
     ),
     "Accept-Language": "en-US,en;q=0.9",
 }
+
+_JSON_DECODER = json.JSONDecoder()
+
+
+def _extract_initial_json(html: str, var_name: str) -> dict[str, Any] | None:
+    """Pull an embedded ``var X = {...};`` blob out of a YouTube page.
+
+    The objects (ytInitialData / ytInitialPlayerResponse) are megabytes long and
+    followed by more script on the same line, so a lazy/greedy regex can't find
+    the matching brace. We locate the opening ``{`` and let ``raw_decode`` read
+    exactly one JSON value, ignoring whatever trails it.
+    """
+    for anchor in (f"var {var_name} = ", f"{var_name} = "):
+        idx = html.find(anchor)
+        if idx == -1:
+            continue
+        start = html.find("{", idx)
+        if start == -1:
+            continue
+        try:
+            obj, _ = _JSON_DECODER.raw_decode(html, start)
+        except ValueError:
+            continue
+        if isinstance(obj, dict):
+            return obj
+    return None
 
 
 async def _channel_playlists_native(url: str, limit: int) -> list[dict[str, Any]]:
@@ -656,6 +683,82 @@ def _format_duration(seconds: int | None) -> str | None:
 
 
 # ---------- VIDEO DETAILS -------------------------------------------------
+_LIKE_LABEL_RES = [
+    # "like this video along with 1,234,567 other people"
+    re.compile(r"along with ([\d.,]+) other", re.IGNORECASE),
+    # "1,234,567 likes"
+    re.compile(r'"([\d.,]+) likes"', re.IGNORECASE),
+]
+
+
+def _parse_like_count(html: str) -> int | None:
+    """Best-effort like count from the watch page's embedded JSON.
+
+    YouTube exposes likes only as a localized accessibility label, so this is
+    inherently fuzzy; returns None when no known pattern matches (caller then
+    falls back to the Apify actor which reports likes directly)."""
+    for rx in _LIKE_LABEL_RES:
+        m = rx.search(html)
+        if m:
+            digits = re.sub(r"[.,]", "", m.group(1))
+            if digits.isdigit():
+                return int(digits)
+    return None
+
+
+async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | None:
+    """Fetch video metadata straight from the watch page (no Apify).
+
+    Parses ``ytInitialPlayerResponse`` for core metadata/stats and the like
+    count from the page JSON. Returns None if the page can't be fetched or the
+    core fields are missing, so the caller can fall back to the actor.
+    """
+    try:
+        resp = await proxy_fetch(
+            norm_url,
+            tier="datacenter",
+            headers=_YT_BROWSER_HEADERS,
+            cookies={"CONSENT": "YES+1", "SOCS": "CAI"},
+            timeout=12,
+        )
+    except httpx.HTTPError:
+        return None
+    if resp.status_code >= 400:
+        return None
+
+    player = _extract_initial_json(resp.text, "ytInitialPlayerResponse")
+    if player is None:
+        return None
+
+    details = player.get("videoDetails") or {}
+    if not details.get("title"):
+        return None  # age-gated / unavailable -> let actor try
+
+    micro = (player.get("microformat") or {}).get("playerMicroformatRenderer") or {}
+    thumbs = (details.get("thumbnail") or {}).get("thumbnails") or []
+    duration_seconds = _duration_seconds(details.get("lengthSeconds"))
+    channel_id = safe_str(details.get("channelId"))
+
+    return {
+        "url": norm_url,
+        "id": vid,
+        "title": safe_str(details.get("title")) or "",
+        "description": safe_str(details.get("shortDescription")),
+        "channelName": safe_str(details.get("author") or micro.get("ownerChannelName")),
+        "channelId": channel_id,
+        "channelUrl": (f"https://www.youtube.com/channel/{channel_id}" if channel_id else None),
+        "publishedAt": safe_str(micro.get("publishDate") or micro.get("uploadDate")),
+        "durationSeconds": duration_seconds,
+        "durationFormatted": _format_duration(duration_seconds),
+        "viewCount": safe_int(details.get("viewCount")),
+        "likeCount": _parse_like_count(resp.text),
+        "commentCount": None,  # not exposed in page JSON; enrich via actor only if requested
+        "thumbnailUrl": safe_str(thumbs[-1].get("url")) if thumbs else None,
+        "genre": safe_str(micro.get("category")),
+        "tags": safe_list(details.get("keywords")),
+    }
+
+
 @router.get("/video-details", summary="YouTube video metadata + stats")
 async def youtube_video_details(
     url: str = Query(...),
@@ -672,6 +775,13 @@ async def youtube_video_details(
         base_credits=CREDIT_VIDEO_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Primary: parse the watch page ourselves (no actor cost, ~1-2s).
+            native = await _video_details_native(vid, norm_url)
+            if native is not None and native.get("viewCount") is not None:
+                ctx["source"] = "direct"
+                return native
+
+            # Fallback: Apify actor (also fills likeCount/commentCount).
             apify = get_apify()
             run_input = {"startUrls": [{"url": norm_url}], "maxResults": 1}
             items = await apify.run_actor_sync(
@@ -680,6 +790,7 @@ async def youtube_video_details(
             if not items:
                 raise HTTPException(status_code=404, detail="Video not found")
             v = items[0]
+            ctx["source"] = "apify"
             duration_seconds = _duration_seconds(
                 v.get("duration")
                 if v.get("duration") is not None

@@ -259,6 +259,15 @@ class Settings(BaseSettings):
     REDDIT_CLIENT_ID: str = ""
     REDDIT_CLIENT_SECRET: str = ""
 
+    # Self-scraping proxy pool. When set, direct HTTP scrapers (YouTube,
+    # Reddit, ...) route through these instead of hitting upstreams from the
+    # datacenter IP, which gets blocked. Order = preference:
+    #   PROXY_DATACENTER_URL  -> cheap, for lenient targets (YouTube, Reddit)
+    #   PROXY_RESIDENTIAL_URL -> pricier, for strict targets / on block
+    # Format: http://user:pass@host:port  (rotating gateway recommended)
+    PROXY_DATACENTER_URL: str = ""
+    PROXY_RESIDENTIAL_URL: str = ""
+
     # Bluesky uses the public AT-Protocol AppView API directly (no actor).
     BLUESKY_API_BASE: str = "https://public.api.bsky.app"
 

@@ -21,6 +21,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.apify_proxy import fetch_via_residential
+from app.services.http_fetch import fetch as proxy_fetch
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import first_present, safe_int, safe_str
 from app.utils.url import (
@@ -534,6 +535,78 @@ def _normalize_community(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _clean_reddit_image(value: Any) -> str | None:
+    """Reddit image URLs in about.json are HTML-escaped and carry query junk."""
+    s = safe_str(value)
+    if not s:
+        return None
+    s = s.replace("&amp;", "&")
+    return s.split("?")[0] if s.startswith("http") else s
+
+
+async def _subreddit_details_native(sub: str) -> dict[str, Any] | None:
+    """Fetch subreddit info from public ``about.json`` (no Apify).
+
+    Tries the datacenter proxy first, then OAuth (if configured), then the
+    residential proxy — the same escalation the post endpoints already use.
+    Returns None on failure so the caller falls back to the actor.
+    """
+    about_url = f"https://www.reddit.com/r/{sub}/about.json"
+    headers = {"User-Agent": "CaptapiBot/1.0 (+https://captapi.com)"}
+    resp: httpx.Response | None = None
+
+    try:
+        resp = await proxy_fetch(
+            about_url, tier="datacenter", headers=headers,
+            params={"raw_json": "1"}, timeout=10,
+        )
+    except httpx.HTTPError:
+        resp = None
+
+    if resp is None or resp.status_code in {403, 429} or resp.status_code >= 500:
+        oauth = await _reddit_oauth_headers()
+        if oauth:
+            try:
+                resp = await proxy_fetch(
+                    f"https://oauth.reddit.com/r/{sub}/about",
+                    tier="datacenter", headers=oauth,
+                    params={"raw_json": "1"}, timeout=10,
+                )
+            except httpx.HTTPError:
+                resp = None
+
+    if resp is None or resp.status_code in {403, 429} or resp.status_code >= 500:
+        prox = await fetch_via_residential(f"{about_url}?raw_json=1", headers=headers)
+        if prox is not None:
+            resp = prox
+
+    if resp is None or resp.status_code >= 400:
+        return None
+    try:
+        data = (resp.json() or {}).get("data") or {}
+    except ValueError:
+        return None
+    if not (data.get("display_name") or data.get("subscribers") is not None):
+        return None
+
+    return {
+        "platform": "reddit",
+        "name": safe_str(data.get("display_name")),
+        "url": f"https://www.reddit.com/r/{data.get('display_name')}",
+        "title": safe_str(data.get("title")),
+        "description": safe_str(data.get("public_description") or data.get("description")),
+        "members": safe_int(data.get("subscribers")),
+        "activeUsers": safe_int(data.get("accounts_active") or data.get("active_user_count")),
+        "category": safe_str(data.get("advertiser_category")),
+        "language": safe_str(data.get("lang")),
+        "type": safe_str(data.get("subreddit_type")),
+        "createdAt": safe_str(data.get("created_utc")),
+        "nsfw": bool(data.get("over18")),
+        "icon": _clean_reddit_image(data.get("community_icon") or data.get("icon_img")),
+        "banner": _clean_reddit_image(data.get("banner_background_image") or data.get("banner_img")),
+    }
+
+
 @router.get("/subreddit-details", summary="Subreddit info & member stats")
 async def subreddit_details(
     url: str = Query(..., description="Subreddit URL, r/name, or bare name"),
@@ -549,6 +622,13 @@ async def subreddit_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Primary: public about.json (no actor cost, ~1s).
+            native = await _subreddit_details_native(sub)
+            if native is not None:
+                ctx["source"] = "direct"
+                return native
+
+            # Fallback: Apify community actor.
             apify = get_apify()
             try:
                 items = await apify.run_actor_sync(
@@ -560,6 +640,7 @@ async def subreddit_details(
                 raise HTTPException(status_code=502, detail="Subreddit lookup failed upstream") from exc
             if not items or not (items[0].get("name") or items[0].get("subscribers")):
                 raise HTTPException(status_code=404, detail="Subreddit not found")
+            ctx["source"] = "apify"
             return _normalize_community(items[0])
 
         data = await cached_or_run(
