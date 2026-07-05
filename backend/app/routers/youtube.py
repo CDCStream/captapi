@@ -22,6 +22,16 @@ from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.openai_client import summarize_transcript
+from app.services.youtube_native import (
+    channel_details_native,
+    channel_tab_native,
+    comment_replies_native,
+    comments_native,
+    hashtag_native,
+    playlist_native,
+    search_native,
+    transcript_native,
+)
 from app.utils.formatters import safe_int, safe_list, safe_str
 from app.utils.url import (
     extract_youtube_id,
@@ -486,6 +496,10 @@ async def _fetch_transcript_item(norm_url: str, language: str | None) -> dict[st
     specific non-English language is requested we lead with the language-aware
     actor. Returns a normalized item ``{segments, title, language}``.
     """
+    native = await transcript_native(norm_url, language)
+    if native and native.get("segments"):
+        return {**native, "source": "direct"}
+
     apify = get_apify()
     settings = get_settings()
     a1 = settings.APIFY_ACTOR_YT_TRANSCRIPT_1
@@ -513,6 +527,7 @@ async def _fetch_transcript_item(norm_url: str, language: str | None) -> dict[st
                         "segments": segs,
                         "title": title,
                         "language": safe_str(rec.get("language") or rec.get("selectedLanguage") or language),
+                        "source": "apify",
                     }
                 last = {"segments": [], "title": title, "language": language}
             if attempt == 0:
@@ -542,6 +557,7 @@ async def youtube_transcript(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             item = await _fetch_transcript_item(norm_url, language)
+            ctx["source"] = item.get("source")
             segments_raw = _transcript_segments(item)
             segments = []
             text_parts = []
@@ -611,6 +627,7 @@ async def youtube_summarize(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             item = await _fetch_transcript_item(norm_url, language)
+            ctx["source"] = item.get("source")
             title = safe_str(item.get("title")) or await _oembed_title(norm_url) or ""
             seg_raw = _transcript_segments(item)
             transcript_text = " ".join(
@@ -846,6 +863,18 @@ async def youtube_comments(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await comments_native(norm_url, limit)
+            if native and native.get("comments"):
+                ctx["source"] = "direct"
+                comments = native["comments"]
+                return {
+                    "url": norm_url,
+                    "videoId": vid,
+                    "totalReturned": len(comments),
+                    "totalComments": native.get("totalComments"),
+                    "comments": comments,
+                }
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_COMMENTS,
@@ -885,6 +914,7 @@ async def youtube_comments(
                     }
                 )
             total_comments = safe_int(items[0].get("commentsCount")) if items else None
+            ctx["source"] = "apify"
             return {
                 "url": norm_url,
                 "videoId": vid,
@@ -919,6 +949,11 @@ async def youtube_channel_details(
         base_credits=CREDIT_CHANNEL_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await channel_details_native(url)
+            if native and native.get("id"):
+                ctx["source"] = "direct"
+                return native
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_CHANNEL,
@@ -928,6 +963,7 @@ async def youtube_channel_details(
             if not items:
                 raise HTTPException(status_code=404, detail="Channel not found")
             c = items[0]
+            ctx["source"] = "apify"
             links = [
                 {"text": safe_str(link.get("text")), "url": safe_str(link.get("url"))}
                 for link in safe_list(c.get("channelDescriptionLinks"))
@@ -982,7 +1018,13 @@ async def youtube_channel_videos(
             if fast:
                 feed_videos = await _youtube_channel_feed(url, limit)
                 if feed_videos:
+                    ctx["source"] = "direct"
                     return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
+            native_videos = await channel_tab_native(_channel_tab_url(url, "videos"), limit)
+            if native_videos:
+                ctx["source"] = "direct"
+                return {"url": url, "totalReturned": len(native_videos), "videos": native_videos}
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_SEARCH,
@@ -1001,6 +1043,7 @@ async def youtube_channel_videos(
                         "thumbnailUrl": safe_str(v.get("thumbnailUrl")),
                     }
                 )
+            ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(videos), "videos": videos}
 
         data = await cached_or_run(
@@ -1032,10 +1075,17 @@ async def youtube_playlist_videos(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # RSS is instant but caps at 15 items with no view/duration data,
+            # so it only serves the explicit fast mode.
             if fast:
                 feed_videos = await _youtube_playlist_feed(url, limit)
                 if feed_videos:
+                    ctx["source"] = "direct"
                     return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
+            native = await playlist_native(url, limit)
+            if native and native.get("videos"):
+                ctx["source"] = "direct"
+                return {"url": url, "totalReturned": len(native["videos"]), "videos": native["videos"]}
             apify = get_apify()
             items, _actor = await apify.run_with_fallback(
                 _playlist_actor_candidates(settings, url, limit),
@@ -1046,10 +1096,12 @@ async def youtube_playlist_videos(
             if not items:
                 feed_videos = await _youtube_playlist_feed(url, limit)
                 if feed_videos:
+                    ctx["source"] = "direct"
                     return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
             videos = []
             for v in items[:limit]:
                 videos.append(_video_card(v))
+            ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(videos), "videos": videos}
 
         data = await cached_or_run(
@@ -1082,6 +1134,7 @@ async def youtube_playlist(
             if fast:
                 feed_videos = await _youtube_playlist_feed(url, limit)
                 if feed_videos:
+                    ctx["source"] = "direct"
                     return {
                         "platform": "youtube",
                         "url": url,
@@ -1090,6 +1143,17 @@ async def youtube_playlist(
                         "totalReturned": len(feed_videos),
                         "videos": feed_videos,
                     }
+            native = await playlist_native(url, limit)
+            if native and native.get("videos"):
+                ctx["source"] = "direct"
+                return {
+                    "platform": "youtube",
+                    "url": url,
+                    "title": safe_str(native.get("title")) or "",
+                    "channelName": safe_str(native.get("channelName")) or "",
+                    "totalReturned": len(native["videos"]),
+                    "videos": native["videos"],
+                }
             items, _actor = await get_apify().run_with_fallback(
                 _playlist_actor_candidates(settings, url, limit),
                 max_items=limit,
@@ -1099,6 +1163,7 @@ async def youtube_playlist(
             if not items:
                 feed_videos = await _youtube_playlist_feed(url, limit)
                 if feed_videos:
+                    ctx["source"] = "direct"
                     return {
                         "platform": "youtube",
                         "url": url,
@@ -1109,6 +1174,7 @@ async def youtube_playlist(
                     }
             videos = [_video_card(v) for v in items[:limit]]
             first = items[0] if items else {}
+            ctx["source"] = "apify"
             return {
                 "platform": "youtube",
                 "url": url,
@@ -1145,6 +1211,11 @@ async def youtube_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native_results = await search_native(q, limit)
+            if native_results:
+                ctx["source"] = "direct"
+                return {"query": q, "totalReturned": len(native_results), "results": native_results}
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_SEARCH,
@@ -1164,6 +1235,7 @@ async def youtube_search(
                         "durationSeconds": _duration_seconds(v.get("duration") or v.get("lengthSeconds")),
                     }
                 )
+            ctx["source"] = "apify"
             return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
@@ -1219,6 +1291,7 @@ async def youtube_trending_shorts(
                 )
                 if not items:
                     raise
+            ctx["source"] = "apify"
             shorts = [_video_card(v) for v in items[:limit]]
             return {"platform": "youtube", "query": q, "totalReturned": len(shorts), "shorts": shorts}
 
@@ -1286,6 +1359,7 @@ async def youtube_video_download(
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Video not available")
+            ctx["source"] = "apify"
             v = items[0]
             formats_raw = v.get("formats") or v.get("downloads") or []
             download_url = safe_str(
@@ -1350,6 +1424,11 @@ async def youtube_channel_shorts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native_shorts = await channel_tab_native(_channel_tab_url(url, "shorts"), limit, shorts=True)
+            if native_shorts:
+                ctx["source"] = "direct"
+                return {"url": url, "totalReturned": len(native_shorts), "shorts": native_shorts}
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_SEARCH,
@@ -1357,6 +1436,7 @@ async def youtube_channel_shorts(
                 max_items=limit,
             )
             shorts = [_video_card(v) for v in items[:limit]]
+            ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(shorts), "shorts": shorts}
 
         data = await cached_or_run(
@@ -1386,6 +1466,11 @@ async def youtube_channel_streams(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native_streams = await channel_tab_native(_channel_tab_url(url, "streams"), limit)
+            if native_streams:
+                ctx["source"] = "direct"
+                return {"url": url, "totalReturned": len(native_streams), "streams": native_streams}
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_SEARCH,
@@ -1393,6 +1478,7 @@ async def youtube_channel_streams(
                 max_items=limit,
             )
             streams = [_video_card(v) for v in items[:limit]]
+            ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(streams), "streams": streams}
 
         data = await cached_or_run(
@@ -1421,8 +1507,13 @@ async def youtube_hashtag_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
             tag = q.lstrip("#")
+            native_results = await hashtag_native(tag, limit)
+            if native_results:
+                ctx["source"] = "direct"
+                return {"query": q, "totalReturned": len(native_results), "results": native_results}
+
+            apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_SEARCH,
                 {
@@ -1432,6 +1523,7 @@ async def youtube_hashtag_search(
                 max_items=limit,
             )
             results = [_video_card(v) for v in items[:limit]]
+            ctx["source"] = "apify"
             return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
@@ -1498,6 +1590,17 @@ async def youtube_comment_replies(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native_replies = await comment_replies_native(norm_url, comment_id, limit) if limit <= 20 else []
+            if native_replies:
+                ctx["source"] = "direct"
+                return {
+                    "url": norm_url,
+                    "videoId": vid,
+                    "commentId": comment_id,
+                    "totalReturned": len(native_replies),
+                    "replies": native_replies,
+                }
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_COMMENTS,
@@ -1516,6 +1619,7 @@ async def youtube_comment_replies(
                     replies.append(_reply_payload(c))
                 if len(replies) >= limit:
                     break
+            ctx["source"] = "apify"
             return {
                 "url": norm_url,
                 "videoId": vid,
@@ -1573,6 +1677,10 @@ async def youtube_channel_playlists(
                             "thumbnailUrl": safe_str(p.get("thumbnailUrl")),
                         }
                     )
+                if playlists:
+                    ctx["source"] = "apify"
+            else:
+                ctx["source"] = "direct"
             return {"url": url, "totalReturned": len(playlists), "playlists": playlists}
 
         data = await cached_or_run(
@@ -1631,6 +1739,7 @@ async def youtube_community_posts(
                         "sourceUrl": safe_str(p.get("post_url")) or url,
                     }
                 )
+            ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
@@ -1739,7 +1848,9 @@ async def youtube_community_post_details(
         base_credits=7,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            return await _fetch_community_post_page(url)
+            item = await _fetch_community_post_page(url)
+            ctx["source"] = "direct"  # parsed from the public post page, no actor
+            return item
 
         data = await cached_or_run(
             endpoint="youtube.community-post-details",
@@ -1808,6 +1919,7 @@ async def youtube_video_sponsors(
             if resp.status_code >= 400:
                 raise HTTPException(status_code=502, detail="Sponsor lookup failed upstream")
             raw = resp.json()
+            ctx["source"] = "direct"  # SponsorBlock public API, no actor
             segments = [_normalize_sponsor_segment(s) for s in raw if isinstance(s, dict)]
             video_duration = next(
                 (s.get("videoDuration") for s in raw if isinstance(s, dict) and s.get("videoDuration")),

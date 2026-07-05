@@ -83,3 +83,21 @@ async def fetch_json(
     resp = await fetch(url, tier=tier, headers=headers, params=params, timeout=timeout)
     resp.raise_for_status()
     return resp.json()
+
+
+async def post_json(
+    url: str,
+    json_body: dict[str, object],
+    *,
+    tier: ProxyTier = "datacenter",
+    headers: dict[str, str] | None = None,
+    params: dict[str, object] | None = None,
+    timeout: float = 15.0,
+) -> httpx.Response:
+    """POST a JSON body through the proxy tier (e.g. YouTube InnerTube)."""
+    merged = {**DEFAULT_HEADERS, "Content-Type": "application/json", **(headers or {})}
+    proxy = proxy_for(tier)
+    async with httpx.AsyncClient(
+        timeout=timeout, follow_redirects=True, headers=merged, proxy=proxy
+    ) as client:
+        return await client.post(url, json=json_body, params=params)
