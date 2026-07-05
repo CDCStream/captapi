@@ -13,6 +13,11 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
+from app.services.twitch_native import (
+    channel_native,
+    clip_native,
+    schedule_native,
+)
 from app.utils.formatters import safe_int, safe_str
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
@@ -36,6 +41,23 @@ def _target(value: str) -> str:
     if "twitch.tv/" in value:
         value = value.split("twitch.tv/", 1)[1].split("/", 1)[0]
     return value.lstrip("@")
+
+
+def _clip_slug(value: str) -> str | None:
+    """Extract a clip slug from clips.twitch.tv/<slug> or
+    twitch.tv/<channel>/clip/<slug> URLs. Returns None for non-clip inputs."""
+    v = (value or "").strip().rstrip("/")
+    if not v:
+        return None
+    if "clips.twitch.tv/" in v:
+        tail = v.split("clips.twitch.tv/", 1)[1]
+    elif "/clip/" in v:
+        tail = v.split("/clip/", 1)[1]
+    else:
+        return None
+    # Drop any query string / embed params.
+    slug = tail.split("?", 1)[0].split("/", 1)[0]
+    return slug or None
 
 
 def _run_input(mode: str, targets: list[str], limit: int = 30) -> dict[str, Any]:
@@ -171,7 +193,15 @@ async def profile(
     if not username:
         raise HTTPException(status_code=400, detail="Invalid Twitch channel")
     async with billed_call(caller=caller, endpoint="/v1/twitch/profile", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=9) as ctx:
-        data = await cached_or_run("twitch.profile", {"username": username, "v": 2}, lambda: _channel(username), ctx)
+        async def _run() -> dict[str, Any]:
+            native = await channel_native(username)
+            if native is not None:
+                ctx["source"] = "direct"
+                return native
+            ctx["source"] = "apify"
+            return await _channel(username)
+
+        data = await cached_or_run("twitch.profile", {"username": username, "v": 2}, _run, ctx)
         return ApiResponse(data=data)
 
 
@@ -187,6 +217,12 @@ async def user_videos(
     cost = _scaled(limit)
     async with billed_call(caller=caller, endpoint="/v1/twitch/user-videos", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=cost) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await channel_native(username, video_limit=limit)
+            if native is not None:
+                ctx["source"] = "direct"
+                videos = native.get("recentVideos") or []
+                return {"platform": "twitch", "username": username, "totalReturned": len(videos[:limit]), "videos": videos[:limit]}
+
             settings = get_settings()
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_TWITCH,
@@ -194,6 +230,7 @@ async def user_videos(
                 max_items=1,
             )
             videos = [_video(v) for v in (items[0].get("recentVideos") if items else []) or [] if isinstance(v, dict)]
+            ctx["source"] = "apify"
             return {"platform": "twitch", "username": username, "totalReturned": len(videos), "videos": videos[:limit]}
 
         data = await cached_or_run("twitch.user-videos", {"username": username, "limit": limit, "v": 2}, _run, ctx)
@@ -211,6 +248,12 @@ async def user_schedule(
         raise HTTPException(status_code=400, detail="Invalid Twitch channel")
     async with billed_call(caller=caller, endpoint="/v1/twitch/user-schedule", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=34) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await schedule_native(username)
+            if native is not None:
+                ctx["source"] = "direct"
+                return {"platform": "twitch", "username": username, "schedule": native}
+
+            ctx["source"] = "apify"
             schedule = await _schedule_actor(username)
             if not schedule:
                 channel = await _channel(username)
@@ -230,6 +273,14 @@ async def clip(
     async with billed_call(caller=caller, endpoint="/v1/twitch/clip", platform="twitch", resource_url=url, base_credits=9) as ctx:
         async def _run() -> dict[str, Any]:
             is_clip_url = "clips.twitch.tv" in url or "/clip/" in url
+
+            # Primary: public GraphQL clip lookup by slug (no actor cost).
+            slug = _clip_slug(url)
+            if slug:
+                native = await clip_native(slug)
+                if native is not None:
+                    ctx["source"] = "direct"
+                    return native
 
             def _clip_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 # Channel inputs make the URL actor emit a channel record; only
@@ -261,6 +312,7 @@ async def clip(
                 )
             if not items:
                 raise HTTPException(status_code=404, detail="Twitch clip not found")
+            ctx["source"] = "apify"
             return _video(items[0])
 
         data = await cached_or_run("twitch.clip", {"url": url, "v": 3}, _run, ctx)
