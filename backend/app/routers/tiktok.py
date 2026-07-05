@@ -16,6 +16,11 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
+from app.services.tiktok_native import (
+    channel_details_native,
+    profile_region_native,
+    video_details_native,
+)
 from app.utils.formatters import first_present, safe_float, safe_int, safe_list, safe_str
 from app.utils.url import (
     extract_tiktok_id,
@@ -384,6 +389,12 @@ async def tiktok_video_details(
         base_credits=CREDIT_VIDEO_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Primary: parse the video page's embedded JSON (no actor cost, ~2s).
+            native = await video_details_native(url)
+            if native is not None and native["engagement"].get("views") is not None:
+                ctx["source"] = "direct"
+                return native
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK,
@@ -392,6 +403,7 @@ async def tiktok_video_details(
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Video not found")
+            ctx["source"] = "apify"
             return _normalize(items[0])
 
         data = await cached_or_run(
@@ -596,6 +608,12 @@ async def tiktok_channel_details(
         base_credits=CREDIT_CHANNEL_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Primary: parse the profile page's embedded JSON (no actor cost).
+            native = await channel_details_native(handle, url)
+            if native is not None and native.get("followers") is not None:
+                ctx["source"] = "direct"
+                return native
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK_PROFILE,
@@ -604,6 +622,7 @@ async def tiktok_channel_details(
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Profile not found")
+            ctx["source"] = "apify"
             p = items[0]
             # The profile scraper emits video items with the profile nested
             # under `authorMeta`; older actor versions exposed it at top level.
@@ -653,6 +672,14 @@ async def tiktok_profile_region(
         base_credits=7,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Primary: profile page JSON. Returns None when it exposes neither
+            # region nor language, in which case the actor's caption-language
+            # sampling is still worth the cost.
+            native = await profile_region_native(handle)
+            if native is not None:
+                ctx["source"] = "direct"
+                return native
+
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK_PROFILE,
                 {"profiles": [handle], "resultsPerPage": 1},
@@ -660,6 +687,7 @@ async def tiktok_profile_region(
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Profile not found")
+            ctx["source"] = "apify"
             return _normalize_profile_region(items[0], handle)
 
         data = await cached_or_run(
