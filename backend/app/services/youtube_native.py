@@ -9,13 +9,15 @@ Approach:
   one continuation via InnerTube when the caller wants more than one page.
 - Channel metadata comes from the channel page (``channelMetadataRenderer``)
   plus the About popup fetched through InnerTube ``browse``.
-- Transcripts come from the watch page's caption tracks (timedtext json3).
+- Transcripts come from InnerTube ANDROID player caption tracks (the web watch
+  page's timedtext URLs need a proof-of-origin token and return empty bodies).
 """
 
 from __future__ import annotations
 
 import json
 import re
+import xml.etree.ElementTree as ET
 from typing import Any, Iterator
 
 import httpx
@@ -223,15 +225,24 @@ def _normalize_video_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
             if txt:
                 parts.append(txt)
 
-    channel_name = parts[0] if parts else None
+    # Metadata parts vary by page variant: ["Channel", "1.1M views", "2 days ago"]
+    # or the compact form ["Channel", "1.7M", "5d ago"] without the word "views".
+    channel_name = None
     view_count = None
     published_at = None
-    for txt in parts[1:]:
+    for txt in parts:
         low = txt.lower()
-        if "view" in low:
+        stripped = txt.strip()
+        if view_count is None and (
+            "view" in low or re.fullmatch(r"[\d.,]+\s*[KMB]?", stripped, re.IGNORECASE)
+        ):
             view_count = parse_count_text(txt)
-        elif any(word in low for word in ("ago", "premiered", "streamed", "scheduled")):
+        elif published_at is None and any(
+            word in low for word in ("ago", "premiere", "streamed", "scheduled")
+        ):
             published_at = txt
+        elif channel_name is None:
+            channel_name = txt
 
     duration = None
     for badge in walk_find(lk.get("contentImage"), "thumbnailBadgeViewModel"):
@@ -526,22 +537,106 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
 
 
 # ------------------------------------------------------------- transcript --
-async def transcript_native(norm_url: str, language: str | None) -> dict[str, Any] | None:
-    """Transcript via the watch page's caption tracks (timedtext json3).
+# Caption URLs served on the web watch page require a proof-of-origin token
+# since ~2025 and return empty bodies to plain HTTP clients. The ANDROID
+# InnerTube client still hands out working (signed) timedtext URLs.
+_ANDROID_CONTEXT = {
+    "client": {
+        "clientName": "ANDROID",
+        "clientVersion": "20.10.38",
+        "androidSdkVersion": 30,
+        "hl": "en",
+        "gl": "US",
+    }
+}
+_ANDROID_HEADERS = {
+    "User-Agent": "com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip",
+    "X-Youtube-Client-Name": "3",
+    "X-Youtube-Client-Version": "20.10.38",
+}
 
-    Returns ``{segments: [{text, start, duration}], title, language}`` or None
-    (no captions / fetch failed) so the caller can fall back to actors.
-    """
+
+async def _player_android(video_id: str) -> dict[str, Any] | None:
     try:
-        resp = await proxy_fetch(
-            norm_url, tier="datacenter", headers=YT_HEADERS, cookies=YT_COOKIES, timeout=12
+        resp = await post_json(
+            "https://www.youtube.com/youtubei/v1/player",
+            {
+                "context": _ANDROID_CONTEXT,
+                "videoId": video_id,
+                "contentCheckOk": True,
+                "racyCheckOk": True,
+            },
+            tier="datacenter",
+            headers=_ANDROID_HEADERS,
+            params={"prettyPrint": "false"},
+            timeout=12,
         )
     except httpx.HTTPError:
         return None
     if resp.status_code >= 400:
         return None
-    player = extract_initial_json(resp.text, "ytInitialPlayerResponse")
+    try:
+        data = resp.json()
+    except ValueError:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _parse_timedtext(body: str) -> list[dict[str, Any]]:
+    """Parse a timedtext payload: json3 events or srv3 XML ``<p t= d=>``."""
+    stripped = body.strip()
+    segments: list[dict[str, Any]] = []
+    if stripped.startswith("{"):
+        try:
+            payload = json.loads(stripped)
+        except ValueError:
+            return []
+        for ev in payload.get("events") or []:
+            segs = ev.get("segs")
+            if not segs:
+                continue
+            text = "".join(s.get("utf8") or "" for s in segs).replace("\n", " ").strip()
+            if not text:
+                continue
+            segments.append(
+                {
+                    "text": text,
+                    "start": float(ev.get("tStartMs") or 0) / 1000.0,
+                    "duration": float(ev.get("dDurationMs") or 0) / 1000.0,
+                }
+            )
+        return segments
+    try:
+        root = ET.fromstring(stripped)
+    except ET.ParseError:
+        return []
+    for p in root.iter("p"):
+        text = "".join(p.itertext()).replace("\n", " ").strip()
+        if not text:
+            continue
+        segments.append(
+            {
+                "text": text,
+                "start": float(p.get("t") or 0) / 1000.0,
+                "duration": float(p.get("d") or 0) / 1000.0,
+            }
+        )
+    return segments
+
+
+async def transcript_native(norm_url: str, language: str | None) -> dict[str, Any] | None:
+    """Transcript via InnerTube ANDROID caption tracks (timedtext).
+
+    Returns ``{segments: [{text, start, duration}], title, language}`` or None
+    (no captions / fetch failed) so the caller can fall back to actors.
+    """
+    m = re.search(r"(?:v=|shorts/|youtu\.be/)([\w-]{11})", norm_url)
+    if not m:
+        return None
+    player = await _player_android(m.group(1))
     if not player:
+        return None
+    if ((player.get("playabilityStatus") or {}).get("status")) != "OK":
         return None
 
     tracks = (
@@ -569,29 +664,13 @@ async def transcript_native(norm_url: str, language: str | None) -> dict[str, An
         base_url += f"&tlang={language}"
 
     try:
-        cap = await proxy_fetch(
-            base_url + "&fmt=json3", tier="datacenter", headers=YT_HEADERS, timeout=12
-        )
+        cap = await proxy_fetch(base_url, tier="datacenter", headers=_ANDROID_HEADERS, timeout=12)
     except httpx.HTTPError:
         return None
     if cap.status_code >= 400 or not cap.text.strip():
         return None
-    try:
-        payload = cap.json()
-    except ValueError:
-        return None
 
-    segments: list[dict[str, Any]] = []
-    for ev in payload.get("events") or []:
-        segs = ev.get("segs")
-        if not segs:
-            continue
-        text = "".join(s.get("utf8") or "" for s in segs).replace("\n", " ").strip()
-        if not text:
-            continue
-        start = float(ev.get("tStartMs") or 0) / 1000.0
-        duration = float(ev.get("dDurationMs") or 0) / 1000.0
-        segments.append({"text": text, "start": start, "duration": duration})
+    segments = _parse_timedtext(cap.text)
     if not segments:
         return None
 
