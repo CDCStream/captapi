@@ -555,25 +555,19 @@ async def _subreddit_details_native(sub: str) -> dict[str, Any] | None:
     headers = {"User-Agent": "CaptapiBot/1.0 (+https://captapi.com)"}
     resp: httpx.Response | None = None
 
-    try:
-        resp = await proxy_fetch(
-            about_url, tier="datacenter", headers=headers,
-            params={"raw_json": "1"}, timeout=10,
-        )
-    except httpx.HTTPError:
-        resp = None
-
-    if resp is None or resp.status_code in {403, 429} or resp.status_code >= 500:
-        oauth = await _reddit_oauth_headers()
-        if oauth:
-            try:
-                resp = await proxy_fetch(
-                    f"https://oauth.reddit.com/r/{sub}/about",
-                    tier="datacenter", headers=oauth,
-                    params={"raw_json": "1"}, timeout=10,
-                )
-            except httpx.HTTPError:
-                resp = None
+    # Reddit blocks datacenter IPs (incl. shared proxies) with 403, so we skip
+    # the datacenter tier entirely here. OAuth (oauth.reddit.com) works from
+    # datacenter IPs; residential proxy is the last resort before the actor.
+    oauth = await _reddit_oauth_headers()
+    if oauth:
+        try:
+            resp = await proxy_fetch(
+                f"https://oauth.reddit.com/r/{sub}/about",
+                tier="none", headers=oauth,
+                params={"raw_json": "1"}, timeout=10,
+            )
+        except httpx.HTTPError:
+            resp = None
 
     if resp is None or resp.status_code in {403, 429} or resp.status_code >= 500:
         prox = await fetch_via_residential(f"{about_url}?raw_json=1", headers=headers)
