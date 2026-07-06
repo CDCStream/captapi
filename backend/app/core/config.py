@@ -268,6 +268,18 @@ class Settings(BaseSettings):
     PROXY_DATACENTER_URL: str = ""
     PROXY_RESIDENTIAL_URL: str = ""
 
+    # Temporary response-body sampling for correctness auditing. When enabled,
+    # a fraction of endpoint responses is copied into public.response_samples
+    # (separate from the hot `requests` table) so we can later evaluate scraper
+    # output quality (optionally with AI). The write is fire-and-forget on a
+    # background task, so it does NOT add latency to the client response.
+    #   LOG_RESPONSE_BODIES       -> master switch (off by default)
+    #   LOG_RESPONSE_SAMPLE_RATE  -> 0.0-1.0 probability a response is captured
+    #   LOG_RESPONSE_MAX_BYTES    -> skip bodies larger than this (marked truncated)
+    LOG_RESPONSE_BODIES: bool = False
+    LOG_RESPONSE_SAMPLE_RATE: float = 0.25
+    LOG_RESPONSE_MAX_BYTES: int = 262144
+
     # Bluesky uses the public AT-Protocol AppView API directly (no actor).
     BLUESKY_API_BASE: str = "https://public.api.bsky.app"
 

@@ -34,9 +34,13 @@ async def cached_or_run(
         cached = await cache_get(key)
         if cached is not None:
             ctx["cache_hit"] = True
+            # Expose payload for optional response-body sampling (see
+            # response_sampler.maybe_capture, called from billed_call).
+            ctx["data"] = cached
             return cached
 
     result = await runner()
+    ctx["data"] = result
     if effective_ttl > 0 and not _looks_empty(result):
         await cache_set(key, result, ttl=effective_ttl)
 

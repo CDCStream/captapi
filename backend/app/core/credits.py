@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import time
 from contextlib import asynccontextmanager
 from typing import Any
@@ -10,9 +11,23 @@ import structlog
 from fastapi import HTTPException
 
 from app.core.auth import ApiCaller
+from app.services.response_sampler import maybe_capture
 from app.services.supabase_client import get_supabase
 
 log = structlog.get_logger(__name__)
+
+# Keep references to in-flight background log tasks so they aren't GC'd early.
+_log_tasks: set[asyncio.Task[Any]] = set()
+
+
+def _schedule_background(coro: Any) -> None:
+    """Run a coroutine fire-and-forget on the current loop, or inline if none."""
+    try:
+        task = asyncio.get_running_loop().create_task(coro)
+    except RuntimeError:
+        return
+    _log_tasks.add(task)
+    task.add_done_callback(_log_tasks.discard)
 
 
 def deduct_credits(user_id: str, amount: int) -> bool:
@@ -125,15 +140,37 @@ async def billed_call(
                 credits_used = 0
                 status_code = 402
 
-        log_request(
-            caller=caller,
+        source = None if cache_hit else ctx.get("source")
+
+        # Offload the request/credit inserts to a background task so the DB
+        # round-trips don't block the response the client is waiting on.
+        _schedule_background(
+            asyncio.to_thread(
+                log_request,
+                caller=caller,
+                endpoint=endpoint,
+                platform=platform,
+                resource_url=resource_url,
+                credits_used=credits_used,
+                cache_hit=cache_hit,
+                status_code=status_code,
+                response_time_ms=elapsed_ms,
+                error_message=error,
+                source=source,
+            )
+        )
+
+        # Optional, sampled response-body capture for correctness auditing.
+        # Also fire-and-forget; no-op unless LOG_RESPONSE_BODIES is set.
+        maybe_capture(
+            user_id=caller.user_id,
+            api_key_id=caller.api_key_id,
             endpoint=endpoint,
             platform=platform,
             resource_url=resource_url,
-            credits_used=credits_used,
-            cache_hit=cache_hit,
+            source=source,
             status_code=status_code,
             response_time_ms=elapsed_ms,
-            error_message=error,
-            source=None if cache_hit else ctx.get("source"),
+            cache_hit=cache_hit,
+            data=ctx.get("data"),
         )
