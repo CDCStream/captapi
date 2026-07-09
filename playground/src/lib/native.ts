@@ -30,12 +30,15 @@ const YT_APIFY_ONLY = new Set<string>([
   "/v1/youtube/community-posts",
 ]);
 
-// Instagram via HikerAPI when key is set; these stay on Apify.
-const IG_APIFY_ONLY = new Set<string>([
-  "/v1/instagram/details",
-  "/v1/instagram/transcript",
-  "/v1/instagram/summarize",
-  "/v1/instagram/trending-reels",
+// Instagram endpoints supported by Decodo's managed GraphQL targets.
+const IG_DECODO_PATHS = new Set<string>([
+  "/v1/instagram/channel-details",
+  "/v1/instagram/basic-profile",
+  "/v1/instagram/channel-posts",
+  "/v1/instagram/channel-reels",
+  "/v1/instagram/reels-search",
+  "/v1/instagram/video-download",
+  "/v1/instagram/hashtag-search",
 ]);
 
 export function guessSource(e: Endpoint): SourceGuess {
@@ -43,7 +46,8 @@ export function guessSource(e: Endpoint): SourceGuess {
     return YT_APIFY_ONLY.has(e.path) ? "apify" : "direct";
   }
   if (e.platform === "instagram") {
-    return IG_APIFY_ONLY.has(e.path) ? "apify" : "direct";
+    if (e.path === "/v1/instagram/embed") return "direct";
+    return IG_DECODO_PATHS.has(e.path) ? "direct" : "apify";
   }
   if (NATIVE_PLATFORMS.has(e.platform)) return "direct";
   if (NATIVE_PATHS.has(e.path)) return "direct";

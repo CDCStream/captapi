@@ -15,7 +15,7 @@ from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import ApifyClient, ApifyError, get_apify
-from app.services import instagram_hiker as hiker
+from app.services import instagram_decodo as decodo
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
 from app.utils.formatters import safe_float, safe_int, safe_list, safe_str
@@ -128,14 +128,14 @@ def _dedupe_candidates(candidates: list[tuple[str, dict[str, Any]]]) -> list[tup
     return unique
 
 
-async def _try_hiker(
+async def _try_decodo(
     ctx: dict[str, Any],
-    hiker_fn: Any,
+    decodo_fn: Any,
     apify_fn: Any,
 ) -> Any:
-    """Prefer HikerAPI when configured; fall back to Apify and stamp source."""
-    if hiker.enabled():
-        result = await hiker_fn()
+    """Prefer Decodo when configured; fall back to Apify and stamp source."""
+    if decodo.enabled():
+        result = await decodo_fn()
         if result is not None:
             ctx["source"] = "direct"
             return result
@@ -477,22 +477,12 @@ async def instagram_comments(
                     "comments": comments,
                 }
 
-            async def _hiker() -> dict[str, Any] | None:
-                rows = await hiker.comments(url, limit)
-                if rows is None:
-                    return None
-                return {
-                    "platform": "instagram",
-                    "url": url,
-                    "totalReturned": len(rows),
-                    "comments": rows,
-                }
-
-            return await _try_hiker(ctx, _hiker, _apify)
+            ctx["source"] = "apify"
+            return await _apify()
 
         data = await cached_or_run(
             endpoint="instagram.comments",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -557,11 +547,11 @@ async def instagram_channel_details(
                     "externalUrl": safe_str(p.get("externalUrl")),
                 }
 
-            return await _try_hiker(ctx, lambda: hiker.channel_details(handle), _apify)
+            return await _try_decodo(ctx, lambda: decodo.channel_details(handle), _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-details",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -619,11 +609,11 @@ async def instagram_basic_profile(
                     "followers": safe_int(p.get("followersCount")),
                 }
 
-            return await _try_hiker(ctx, lambda: hiker.basic_profile(handle), _apify)
+            return await _try_decodo(ctx, lambda: decodo.basic_profile(handle), _apify)
 
         data = await cached_or_run(
             endpoint="instagram.basic-profile",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -656,17 +646,17 @@ async def instagram_channel_posts(
                 posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
                 return {"url": url, "totalReturned": len(posts), "posts": posts}
 
-            async def _hiker_run() -> dict[str, Any] | None:
-                posts = await hiker.channel_posts(handle, limit)
+            async def _decodo_run() -> dict[str, Any] | None:
+                posts = await decodo.channel_posts(handle, limit)
                 if posts is None:
                     return None
                 return {"url": url, "totalReturned": len(posts), "posts": posts}
 
-            return await _try_hiker(ctx, _hiker_run, _apify)
+            return await _try_decodo(ctx, _decodo_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -700,17 +690,17 @@ async def instagram_channel_reels(
                 reels = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
                 return {"url": url, "totalReturned": len(reels), "reels": reels}
 
-            async def _hiker_run() -> dict[str, Any] | None:
-                reels = await hiker.channel_reels(handle, limit)
+            async def _decodo_run() -> dict[str, Any] | None:
+                reels = await decodo.channel_reels(handle, limit)
                 if reels is None:
                     return None
                 return {"url": url, "totalReturned": len(reels), "reels": reels}
 
-            return await _try_hiker(ctx, _hiker_run, _apify)
+            return await _try_decodo(ctx, _decodo_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-reels",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -749,17 +739,17 @@ async def instagram_reels_search(
                 results = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
                 return {"query": q, "totalReturned": len(results), "results": results}
 
-            async def _hiker_run() -> dict[str, Any] | None:
-                results = await hiker.hashtag_medias(q, limit, reels_only=True)
+            async def _decodo_run() -> dict[str, Any] | None:
+                results = await decodo.hashtag_medias(q, limit, reels_only=True)
                 if results is None:
                     return None
                 return {"query": q, "totalReturned": len(results), "results": results}
 
-            return await _try_hiker(ctx, _hiker_run, _apify)
+            return await _try_decodo(ctx, _decodo_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.reels-search",
-            params={"q": q, "limit": limit, "v": 3},
+            params={"q": q, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -849,11 +839,11 @@ async def instagram_video_download(
                     "duration": safe_float(v.get("videoDuration") or v.get("duration") or v.get("durationSeconds")),
                 }
 
-            return await _try_hiker(ctx, lambda: hiker.video_download(url), _apify)
+            return await _try_decodo(ctx, lambda: decodo.video_download(url), _apify)
 
         data = await cached_or_run(
             endpoint="instagram.video-download",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             ttl=3600,
@@ -894,23 +884,12 @@ async def instagram_reels_by_audio_id(
                     "reels": reels,
                 }
 
-            async def _hiker_run() -> dict[str, Any] | None:
-                reels = await hiker.reels_by_audio(audio_id, limit)
-                if reels is None:
-                    return None
-                return {
-                    "platform": "instagram",
-                    "audioId": audio_id,
-                    "audioUrl": audio_url,
-                    "totalReturned": len(reels),
-                    "reels": reels,
-                }
-
-            return await _try_hiker(ctx, _hiker_run, _apify)
+            ctx["source"] = "apify"
+            return await _apify()
 
         data = await cached_or_run(
             endpoint="instagram.reels-by-audio-id",
-            params={"audio_id": audio_id, "limit": limit, "v": 3},
+            params={"audio_id": audio_id, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -945,17 +924,12 @@ async def instagram_tagged_posts(
                 posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
                 return {"url": url, "totalReturned": len(posts), "posts": posts}
 
-            async def _hiker_run() -> dict[str, Any] | None:
-                posts = await hiker.tagged_posts(handle, limit)
-                if posts is None:
-                    return None
-                return {"url": url, "totalReturned": len(posts), "posts": posts}
-
-            return await _try_hiker(ctx, _hiker_run, _apify)
+            ctx["source"] = "apify"
+            return await _apify()
 
         data = await cached_or_run(
             endpoint="instagram.tagged-posts",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -990,17 +964,12 @@ async def instagram_music_posts(
                 posts = [_normalize_audio_reel(i) for i in items[:limit] if not i.get("error")]
                 return {"url": url, "totalReturned": len(posts), "posts": posts}
 
-            async def _hiker_run() -> dict[str, Any] | None:
-                posts = await hiker.music_posts(url, limit)
-                if posts is None:
-                    return None
-                return {"url": url, "totalReturned": len(posts), "posts": posts}
-
-            return await _try_hiker(ctx, _hiker_run, _apify)
+            ctx["source"] = "apify"
+            return await _apify()
 
         data = await cached_or_run(
             endpoint="instagram.music-posts",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -1039,17 +1008,17 @@ async def instagram_hashtag_search(
                 results = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
                 return {"query": q, "totalReturned": len(results), "results": results}
 
-            async def _hiker_run() -> dict[str, Any] | None:
-                results = await hiker.hashtag_medias(q, limit, reels_only=False)
+            async def _decodo_run() -> dict[str, Any] | None:
+                results = await decodo.hashtag_medias(q, limit, reels_only=False)
                 if results is None:
                     return None
                 return {"query": q, "totalReturned": len(results), "results": results}
 
-            return await _try_hiker(ctx, _hiker_run, _apify)
+            return await _try_decodo(ctx, _decodo_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",
-            params={"q": q, "limit": limit, "v": 3},
+            params={"q": q, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -1096,17 +1065,12 @@ async def instagram_profile_search(
                 users = [_normalize_ig_profile(i) for i in items[:limit] if i.get("username") or i.get("ownerUsername")]
                 return {"query": q, "totalReturned": len(users), "users": users}
 
-            async def _hiker_run() -> dict[str, Any] | None:
-                users = await hiker.profile_search(q, limit)
-                if users is None:
-                    return None
-                return {"query": q, "totalReturned": len(users), "users": users}
-
-            return await _try_hiker(ctx, _hiker_run, _apify)
+            ctx["source"] = "apify"
+            return await _apify()
 
         data = await cached_or_run(
             endpoint="instagram.profile-search",
-            params={"q": q, "limit": limit, "v": 3},
+            params={"q": q, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -1157,17 +1121,12 @@ async def instagram_story_highlights(
                         highlights.extend(_highlight_payload(h) for h in raw if isinstance(h, dict))
                 return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
 
-            async def _hiker_run() -> dict[str, Any] | None:
-                highlights = await hiker.story_highlights(handle)
-                if highlights is None:
-                    return None
-                return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
-
-            return await _try_hiker(ctx, _hiker_run, _apify)
+            ctx["source"] = "apify"
+            return await _apify()
 
         data = await cached_or_run(
             endpoint="instagram.story-highlights",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -1229,17 +1188,12 @@ async def instagram_highlights_details(
                         highlights.append(payload)
                 return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
 
-            async def _hiker_run() -> dict[str, Any] | None:
-                highlights = await hiker.highlights_details(handle, limit)
-                if highlights is None:
-                    return None
-                return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
-
-            return await _try_hiker(ctx, _hiker_run, _apify)
+            ctx["source"] = "apify"
+            return await _apify()
 
         data = await cached_or_run(
             endpoint="instagram.highlights-details",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -1277,17 +1231,12 @@ async def instagram_embed(
                     "html": html,
                 }
 
-            if hiker.enabled():
-                out = await hiker.embed_html(url)
-                if out:
-                    ctx["source"] = "direct"
-                    return out
             ctx["source"] = "direct"
             return await _local()
 
         data = await cached_or_run(
             endpoint="instagram.embed",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
         )

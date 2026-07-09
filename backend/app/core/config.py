@@ -116,9 +116,13 @@ class Settings(BaseSettings):
     APIFY_ACTOR_INSTAGRAM_HIGHLIGHTS: str = "goat255/instagram-stories-highlights-scraper"
     APIFY_ACTOR_INSTAGRAM_TRENDING: str = "agentx/instagram-trending-scraper"
 
-    # HikerAPI — primary Instagram data path when key is set (pay-per-request).
-    HIKERAPI_KEY: str = ""
-    HIKERAPI_BASE: str = "https://api.hikerapi.com"
+    # Decodo Social Media Scraping API — managed Instagram GraphQL scraping.
+    # When credentials are absent, Instagram routes use their Apify fallback.
+    DECODO_USERNAME: str = ""
+    DECODO_PASSWORD: str = ""
+    DECODO_BASE: str = "https://scraper-api.decodo.com/v2"
+    DECODO_LOCALE: str = "en-us"
+    DECODO_GEO: str = ""
 
     APIFY_ACTOR_FACEBOOK_POSTS: str = "apify/facebook-posts-scraper"
     # AI transcript extractor for FB videos/reels (Whisper): returns full
