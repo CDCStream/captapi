@@ -11,6 +11,7 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
+from app.services import soundcloud_native as native
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
@@ -102,6 +103,11 @@ async def artist(
     profile = _profile_url(url)
     async with billed_call(caller=caller, endpoint="/v1/soundcloud/artist", platform="soundcloud", resource_url=profile, base_credits=7) as ctx:
         async def _run() -> dict[str, Any]:
+            resolved = await native.resolve(profile)
+            if isinstance(resolved, dict) and resolved.get("kind") == "user":
+                ctx["source"] = "direct"
+                return _artist(resolved, profile)
+
             settings = get_settings()
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_SOUNDCLOUD,
@@ -110,9 +116,10 @@ async def artist(
             )
             if not items:
                 raise HTTPException(status_code=404, detail="SoundCloud artist not found")
+            ctx["source"] = "apify"
             return _artist(items[0], profile)
 
-        data = await cached_or_run("soundcloud.artist", {"url": profile, "v": 2}, _run, ctx)
+        data = await cached_or_run("soundcloud.artist", {"url": profile, "v": 3}, _run, ctx)
         return ApiResponse(data=data)
 
 
@@ -126,6 +133,14 @@ async def artist_tracks(
     cost = _scaled(limit)
     async with billed_call(caller=caller, endpoint="/v1/soundcloud/artist-tracks", platform="soundcloud", resource_url=profile, base_credits=cost) as ctx:
         async def _run() -> dict[str, Any]:
+            resolved = await native.resolve(profile)
+            if isinstance(resolved, dict) and resolved.get("kind") == "user" and resolved.get("id"):
+                rows = await native.user_tracks(resolved["id"], limit)
+                if rows:
+                    tracks = [_track(native.prep_track_row(r)) for r in rows][:limit]
+                    ctx["source"] = "direct"
+                    return {"platform": "soundcloud", "artistUrl": profile, "totalReturned": len(tracks), "tracks": tracks}
+
             settings = get_settings()
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_SOUNDCLOUD,
@@ -135,9 +150,10 @@ async def artist_tracks(
             # includeUserDetails prepends the artist's user row to the dataset;
             # keep only real tracks (they always carry a title).
             tracks = [_track(i) for i in items if i.get("title") or i.get("name")][:limit]
+            ctx["source"] = "apify"
             return {"platform": "soundcloud", "artistUrl": profile, "totalReturned": len(tracks), "tracks": tracks}
 
-        data = await cached_or_run("soundcloud.artist-tracks", {"url": profile, "limit": limit, "v": 3}, _run, ctx)
+        data = await cached_or_run("soundcloud.artist-tracks", {"url": profile, "limit": limit, "v": 4}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["tracks"]))
         return ApiResponse(data=data)
 
@@ -157,6 +173,11 @@ async def track(
         raise HTTPException(status_code=400, detail="Invalid SoundCloud track URL. Pass a SoundCloud URL like https://soundcloud.com/artist/track.")
     async with billed_call(caller=caller, endpoint="/v1/soundcloud/track", platform="soundcloud", resource_url=url, base_credits=7) as ctx:
         async def _run() -> dict[str, Any]:
+            resolved = await native.resolve(url)
+            if isinstance(resolved, dict) and resolved.get("kind") == "track":
+                ctx["source"] = "direct"
+                return _track(native.prep_track_row(resolved))
+
             settings = get_settings()
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_SOUNDCLOUD,
@@ -165,7 +186,8 @@ async def track(
             )
             if not items:
                 raise HTTPException(status_code=404, detail="SoundCloud track not found")
+            ctx["source"] = "apify"
             return _track(items[0])
 
-        data = await cached_or_run("soundcloud.track", {"url": url, "v": 2}, _run, ctx)
+        data = await cached_or_run("soundcloud.track", {"url": url, "v": 3}, _run, ctx)
         return ApiResponse(data=data)

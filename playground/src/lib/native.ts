@@ -11,6 +11,8 @@ const NATIVE_PLATFORMS = new Set<string>([
   "github",
   "bluesky",
   "linktree",
+  // SoundCloud: all endpoints try the public api-v2 first (Apify fallback).
+  "soundcloud",
 ]);
 
 // Specific native-first paths on otherwise-Apify platforms.
@@ -19,6 +21,8 @@ const NATIVE_PATHS = new Set<string>([
   "/v1/tiktok/video-details",
   "/v1/tiktok/channel-details",
   "/v1/tiktok/profile-region",
+  // Twitter transcript uses the free syndication API (Apify fallback).
+  "/v1/twitter/transcript",
   // YouTube is native-first for everything except these Apify-only paths
   // (handled by the exclusion set below).
 ]);

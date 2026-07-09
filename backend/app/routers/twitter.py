@@ -17,6 +17,7 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
+from app.services import twitter_native as native
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import first_present, safe_int, safe_list, safe_str
@@ -216,7 +217,7 @@ async def twitter_transcript(
     url: str = Query(..., description="Public tweet URL, e.g. https://x.com/user/status/ID"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    _require_tweet_url(url)
+    tweet_id = _require_tweet_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -225,7 +226,37 @@ async def twitter_transcript(
         resource_url=url,
         base_credits=CREDIT_TWEET_DETAILS,
     ) as ctx:
+        def _payload(text: str, tweet_url: str, tid: str | None, author: dict[str, Any] | None, published: str | None) -> dict[str, Any]:
+            return {
+                "platform": "twitter",
+                "url": tweet_url or url,
+                "tweetId": tid,
+                "transcript": text,
+                "transcriptSegments": [{"text": text, "start": 0, "duration": 0, "timestamp": "00:00"}],
+                "wordCount": len(text.split()),
+                "segments": 1,
+                "author": author,
+                "publishedAt": published,
+            }
+
         async def _run() -> dict[str, Any]:
+            # Transcript is text-only, so the free public syndication API is a
+            # perfect fit; only fall back to the paid actor if it misses.
+            syn = await native.tweet_result(tweet_id)
+            if syn:
+                text = (syn.get("text") or "").strip()
+                if text:
+                    u = syn.get("user") or {}
+                    username = u.get("screen_name")
+                    ctx["source"] = "direct"
+                    return _payload(
+                        text,
+                        f"https://x.com/{username}/status/{tweet_id}" if username else url,
+                        safe_str(syn.get("id_str")) or tweet_id,
+                        _author(u),
+                        safe_str(syn.get("created_at")),
+                    )
+
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_TWITTER_TWEET,
                 {"startUrls": [url], "maxItems": 1},
@@ -237,21 +268,12 @@ async def twitter_transcript(
             text = (tweet.get("text") or "").strip()
             if not text:
                 raise HTTPException(status_code=422, detail="No transcript text available for this tweet")
-            return {
-                "platform": "twitter",
-                "url": tweet.get("url") or url,
-                "tweetId": tweet.get("id"),
-                "transcript": text,
-                "transcriptSegments": [{"text": text, "start": 0, "duration": 0, "timestamp": "00:00"}],
-                "wordCount": len(text.split()),
-                "segments": 1,
-                "author": tweet.get("author"),
-                "publishedAt": tweet.get("publishedAt"),
-            }
+            ctx["source"] = "apify"
+            return _payload(text, tweet.get("url") or url, tweet.get("id"), tweet.get("author"), tweet.get("publishedAt"))
 
         data = await cached_or_run(
             endpoint="twitter.transcript",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
         )
