@@ -339,6 +339,7 @@ async def facebook_details(
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Post not found")
+            ctx["source"] = "apify"
             return _normalize_post(items[0])
 
         data = await cached_or_run(
@@ -415,6 +416,7 @@ async def facebook_transcript(
                 segments = []
             if not full:
                 raise HTTPException(status_code=422, detail="No transcript available")
+            ctx["source"] = "apify"
             return {
                 "platform": "facebook",
                 "url": url,
@@ -469,6 +471,7 @@ async def facebook_summarize(
             if not text:
                 raise HTTPException(status_code=422, detail="No content to summarize")
             ai = await summarize_transcript(text, title=safe_str(item.get("text")))
+            ctx["source"] = "apify"
             return {
                 "platform": "facebook",
                 "url": url,
@@ -525,6 +528,7 @@ async def facebook_comments(
                         "replyCount": safe_int(c.get("repliesCount") or c.get("commentsCount")) or 0,
                     }
                 )
+            ctx["source"] = "apify"
             return {
                 "platform": "facebook",
                 "url": url,
@@ -571,16 +575,29 @@ async def facebook_page_details(
                 # The pages scraper has no blue-badge flag; a confirmed Page
                 # owner label is the closest verification signal it exposes.
                 verified = True
+            username = safe_str(
+                p.get("pageUsername")
+                or p.get("username")
+                or _fb_username_from_url(p.get("pageUrl") or p.get("facebookUrl"))
+            )
+            display_name = safe_str(
+                p.get("pageName") or p.get("title") or p.get("name")
+            )
+            if not display_name:
+                # Safety net: the first info line reads "<Page name>. N likes".
+                info = p.get("info")
+                first_line = safe_str(info[0]) if isinstance(info, list) and info else None
+                if first_line:
+                    display_name = first_line.rsplit(".", 1)[0].strip() or None
+            display_name = display_name or username
+            ctx["source"] = "apify"
             return {
                 "platform": "facebook",
                 "url": safe_str(p.get("pageUrl") or p.get("facebookUrl")) or url,
-                "username": safe_str(
-                    p.get("pageUsername")
-                    or p.get("username")
-                    or _fb_username_from_url(p.get("pageUrl") or p.get("facebookUrl"))
-                ),
-                "displayName": safe_str(p.get("pageName") or p.get("title")),
-                "fullName": safe_str(p.get("title")),
+                "username": username,
+                "name": display_name,
+                "displayName": display_name,
+                "fullName": safe_str(p.get("title")) or display_name,
                 "bio": safe_str(p.get("intro") or p.get("about")),
                 "followers": safe_int(p.get("followersCount") or p.get("followers")),
                 "following": safe_int(p.get("followings")),
@@ -596,7 +613,7 @@ async def facebook_page_details(
 
         data = await cached_or_run(
             endpoint="facebook.page-details",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -627,6 +644,7 @@ async def facebook_profile_posts(
                 max_items=limit,
             )
             posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+            ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
@@ -670,6 +688,7 @@ async def facebook_profile_reels(
                 for i in items
                 if not i.get("error") and _is_reel(i)
             ][:limit]
+            ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(reels), "reels": reels}
 
         data = await cached_or_run(
@@ -706,6 +725,7 @@ async def facebook_group_posts(
                 max_items=limit,
             )
             posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+            ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
@@ -763,6 +783,7 @@ async def facebook_comment_replies(
                     replies.append(_reply_payload(c))
                 if len(replies) >= limit:
                     break
+            ctx["source"] = "apify"
             return {
                 "platform": "facebook",
                 "url": url,
@@ -826,6 +847,7 @@ async def facebook_profile_photos(
                 max_items=limit,
             )
             photos = [_normalize_photo(i) for i in items[:limit] if not i.get("error")]
+            ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(photos), "photos": photos}
 
         data = await cached_or_run(
@@ -865,6 +887,7 @@ async def facebook_profile_events(
                 max_items=limit,
             )
             events = [_normalize_event(i) for i in items[:limit] if not i.get("error")]
+            ctx["source"] = "apify"
             return {"platform": "facebook", "url": url, "totalReturned": len(events), "events": events}
 
         data = await cached_or_run(
@@ -973,6 +996,7 @@ async def facebook_marketplace_item(
 
             if title or description or image:
                 page = resp.text if resp is not None else ""
+                ctx["source"] = "direct"
                 return {
                     "platform": "facebook",
                     "id": safe_str(item_id),
@@ -999,6 +1023,7 @@ async def facebook_marketplace_item(
                 except (ApifyError, httpx.HTTPError):
                     items = []
             if items and not items[0].get("error"):
+                ctx["source"] = "apify"
                 return _normalize_marketplace_detail(items[0], url)
             raise HTTPException(status_code=404, detail="Listing not found")
 
@@ -1042,6 +1067,7 @@ async def facebook_marketplace_search(
                 max_items=limit,
             )
             listings = [_normalize_listing(i) for i in items[:limit] if not i.get("error")]
+            ctx["source"] = "apify"
             return {"query": q, "location": location, "totalReturned": len(listings), "listings": listings}
 
         data = await cached_or_run(
@@ -1090,6 +1116,7 @@ async def facebook_marketplace_location_search(
             if not results:
                 fallback = {"id": q.strip().lower(), "name": q.strip(), "city": q.strip(), "state": None, "latitude": None, "longitude": None}
                 results = [fallback]
+            ctx["source"] = "apify"
             return {"query": q, "totalReturned": len(results), "locations": results}
 
         data = await cached_or_run(
@@ -1137,6 +1164,7 @@ async def facebook_event_search(
                 if not items:
                     raise
             events = [_normalize_event(i) for i in items[:limit] if not i.get("error")]
+            ctx["source"] = "apify"
             return {"query": q, "totalReturned": len(events), "events": events}
 
         data = await cached_or_run(
@@ -1181,6 +1209,7 @@ async def facebook_event_details(
                 if resp.status_code < 400:
                     partial_event = _partial_event_from_page(url, resp.text)
                     if partial_event:
+                        ctx["source"] = "direct"
                         return partial_event
             except Exception:  # noqa: BLE001
                 pass
@@ -1190,6 +1219,7 @@ async def facebook_event_details(
                 if resp.status_code < 400:
                     partial_event = _partial_event_from_page(url, resp.text)
                     if partial_event:
+                        ctx["source"] = "direct"
                         return partial_event
             except Exception:  # noqa: BLE001
                 pass
@@ -1206,8 +1236,10 @@ async def facebook_event_details(
             )
             if not items or items[0].get("error"):
                 if partial_event:
+                    ctx["source"] = "direct"
                     return partial_event
                 raise HTTPException(status_code=404, detail="Event not found")
+            ctx["source"] = "apify"
             return _normalize_event(items[0])
 
         data = await cached_or_run(

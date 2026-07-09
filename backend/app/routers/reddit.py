@@ -360,14 +360,25 @@ async def _fetch_reddit_actor_post(url: str, limit: int) -> tuple[dict[str, Any]
     return post, comments
 
 
-async def _fetch_reddit_post_resilient(url: str, post_id: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+async def _fetch_reddit_post_resilient(
+    url: str,
+    post_id: str,
+    limit: int,
+    ctx: dict[str, Any] | None = None,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     try:
-        return await _fetch_reddit_json_post(url, post_id, limit)
+        result = await _fetch_reddit_json_post(url, post_id, limit)
+        if ctx is not None:
+            ctx["source"] = "direct"
+        return result
     except HTTPException as exc:
         if exc.status_code not in {502, 503, 504}:
             raise
     try:
-        return await _fetch_reddit_comments_actor_post(url, limit)
+        result = await _fetch_reddit_comments_actor_post(url, limit)
+        if ctx is not None:
+            ctx["source"] = "apify"
+        return result
     except Exception:  # noqa: BLE001 — any failure falls through to trudax
         pass
     # Final fallback. Upstream 504s here are transient, so retry once and map
@@ -375,7 +386,10 @@ async def _fetch_reddit_post_resilient(url: str, post_id: str, limit: int) -> tu
     last_exc: Exception | None = None
     for attempt in (1, 2):
         try:
-            return await _fetch_reddit_actor_post(url, limit)
+            result = await _fetch_reddit_actor_post(url, limit)
+            if ctx is not None:
+                ctx["source"] = "apify"
+            return result
         except HTTPException:
             raise
         except Exception as exc:  # noqa: BLE001
@@ -476,8 +490,12 @@ async def subreddit_posts(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             posts = await _reddit_listing_json(f"/r/{sub}/new.json", {}, limit)
+            if posts:
+                ctx["source"] = "direct"
             if not posts:
                 posts = await _reddit_search_actor(f"r/{sub}", limit)
+                if posts:
+                    ctx["source"] = "apify"
             if not posts:
                 apify = get_apify()
                 items = await apify.run_actor_sync(
@@ -491,6 +509,7 @@ async def subreddit_posts(
                     max_items=limit,
                 )
                 posts = [_normalize_post(i) for i in items if _is_post(i)][:limit]
+                ctx["source"] = "apify"
             return {"subreddit": sub, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
@@ -644,7 +663,7 @@ async def post_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            post, _ = await _fetch_reddit_post_resilient(url, post_id, limit=1)
+            post, _ = await _fetch_reddit_post_resilient(url, post_id, limit=1, ctx=ctx)
             return post
 
         data = await cached_or_run(
@@ -672,7 +691,7 @@ async def post_comments(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            _, comments = await _fetch_reddit_post_resilient(url, post_id, limit=limit)
+            _, comments = await _fetch_reddit_post_resilient(url, post_id, limit=limit, ctx=ctx)
             return {"totalReturned": len(comments), "comments": comments}
 
         data = await cached_or_run(
@@ -705,7 +724,7 @@ async def post_transcript(
                 # Resilient variant: falls back to the actor when Reddit's
                 # public JSON blocks the datacenter IP (as other reddit
                 # endpoints already do).
-                post, comments = await _fetch_reddit_post_resilient(url, post_id, limit=max(limit, 1))
+                post, comments = await _fetch_reddit_post_resilient(url, post_id, limit=max(limit, 1), ctx=ctx)
             except HTTPException as exc:
                 if exc.status_code in {502, 503, 504}:
                     raise HTTPException(
@@ -776,8 +795,12 @@ async def subreddit_search(
             results = await _reddit_listing_json(
                 f"/r/{sub}/search.json", {"q": q, "restrict_sr": "1", "sort": "relevance"}, limit
             )
+            if results:
+                ctx["source"] = "direct"
             if not results:
                 results = await _reddit_search_actor(f"r/{sub} {q}", limit)
+                if results:
+                    ctx["source"] = "apify"
             if not results:
                 apify = get_apify()
                 items = await apify.run_actor_sync(
@@ -792,6 +815,7 @@ async def subreddit_search(
                     max_items=limit,
                 )
                 results = [_normalize_post(i) for i in items if _is_post(i)][:limit]
+                ctx["source"] = "apify"
             return {"subreddit": sub, "query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
@@ -821,8 +845,12 @@ async def reddit_search(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             results = await _reddit_listing_json("/search.json", {"q": q, "sort": "relevance"}, limit)
+            if results:
+                ctx["source"] = "direct"
             if not results:
                 results = await _reddit_search_actor(q, limit)
+                if results:
+                    ctx["source"] = "apify"
             if not results:
                 apify = get_apify()
                 items = await apify.run_actor_sync(
@@ -831,6 +859,7 @@ async def reddit_search(
                     max_items=limit,
                 )
                 results = [_normalize_post(i) for i in items if _is_post(i)][:limit]
+                ctx["source"] = "apify"
             return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
