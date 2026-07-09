@@ -42,21 +42,23 @@ def _auth_header() -> str | None:
     return None
 
 
-async def _scrape(target: str, url: str) -> Any | None:
+async def _scrape(target: str, params: dict[str, Any]) -> Any | None:
+    """POST to Decodo /v2/scrape. ``params`` holds target-specific input
+    (v2 GraphQL targets take ``query``; URL-based targets take ``url``)."""
     if not enabled():
         return None
     settings = get_settings()
+    auth_header = _auth_header()
+    if not auth_header:
+        return None
     body: dict[str, Any] = {
         "target": target,
-        "url": url,
         "locale": settings.DECODO_LOCALE,
+        **params,
     }
     if settings.DECODO_GEO:
         body["geo"] = settings.DECODO_GEO
     try:
-        auth_header = _auth_header()
-        if not auth_header:
-            return None
         async with httpx.AsyncClient(timeout=75.0) as client:
             response = await client.post(
                 f"{settings.DECODO_BASE.rstrip('/')}/scrape",
@@ -77,13 +79,18 @@ async def _scrape(target: str, url: str) -> Any | None:
     except ValueError:
         return None
     if isinstance(payload, dict):
-        parsed_status = (
-            payload.get("data", {}).get("status_code")
-            if isinstance(payload.get("data"), dict)
-            else None
-        )
-        if parsed_status not in (None, 12000, 12004, 12005, 12007):
-            return None
+        # v2 envelope: {"results": [{"content": ...}]}
+        results = payload.get("results")
+        if isinstance(results, list) and results and isinstance(results[0], dict):
+            content = results[0].get("content")
+            if isinstance(content, str):
+                try:
+                    return json.loads(content)
+                except ValueError:
+                    return None
+            if content is not None:
+                return content
+        # legacy envelope: {"data": {"content": ...}}
         data = payload.get("data")
         if isinstance(data, dict) and data.get("content") is not None:
             content = data["content"]
@@ -217,8 +224,10 @@ def _post(node: dict[str, Any]) -> dict[str, Any]:
 
 
 async def _profile(handle: str) -> dict[str, Any] | None:
-    url = f"https://www.instagram.com/{handle.strip().lstrip('@')}/"
-    data = await _scrape("instagram_graphql_profile", url)
+    data = await _scrape(
+        "instagram_graphql_profile",
+        {"query": handle.strip().lstrip("@")},
+    )
     user = _first_dict(data, "user")
     if user and (user.get("username") or user.get("id")):
         return user
@@ -286,10 +295,7 @@ async def hashtag_medias(tag: str, limit: int, *, reels_only: bool = False) -> l
     name = tag.lstrip("#").strip()
     if not name:
         return None
-    data = await _scrape(
-        "instagram_graphql_hashtag",
-        f"https://www.instagram.com/explore/tags/{name}/",
-    )
+    data = await _scrape("instagram_graphql_hashtag", {"query": name})
     nodes = _edge_nodes(data, "edge_hashtag_to_top_posts", "edge_hashtag_to_media")
     if reels_only:
         nodes = [node for node in nodes if bool(node.get("is_video")) or node.get("__typename") == "GraphVideo"]
@@ -297,7 +303,7 @@ async def hashtag_medias(tag: str, limit: int, *, reels_only: bool = False) -> l
 
 
 async def video_download(url: str) -> dict[str, Any] | None:
-    data = await _scrape("instagram_graphql_post", url)
+    data = await _scrape("instagram_graphql_post", {"url": url})
     media = _first_dict(data, "shortcode_media", "xdt_shortcode_media")
     if not media:
         return None

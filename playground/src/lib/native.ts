@@ -30,15 +30,15 @@ const YT_APIFY_ONLY = new Set<string>([
   "/v1/youtube/community-posts",
 ]);
 
-// Instagram endpoints supported by Decodo's managed GraphQL targets.
+// Instagram endpoints served by Decodo's instagram_graphql_profile target.
+// hashtag/post targets are currently disabled on Decodo's side, so
+// hashtag-search and video-download fall back to Apify.
 const IG_DECODO_PATHS = new Set<string>([
   "/v1/instagram/channel-details",
   "/v1/instagram/basic-profile",
   "/v1/instagram/channel-posts",
   "/v1/instagram/channel-reels",
   "/v1/instagram/reels-search",
-  "/v1/instagram/video-download",
-  "/v1/instagram/hashtag-search",
 ]);
 
 export function guessSource(e: Endpoint): SourceGuess {

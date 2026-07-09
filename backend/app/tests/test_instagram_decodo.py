@@ -67,7 +67,7 @@ def test_post_mapper_preserves_public_contract() -> None:
 
 
 def test_profile_and_timeline_functions(monkeypatch) -> None:
-    async def fake_scrape(target: str, url: str):
+    async def fake_scrape(target: str, params: dict):
         assert target == "instagram_graphql_profile"
         assert url.endswith("/captapi/")
         return PROFILE
@@ -93,7 +93,7 @@ def test_hashtag_deduplicates_top_and_recent(monkeypatch) -> None:
         }
     }
 
-    async def fake_scrape(target: str, url: str):
+    async def fake_scrape(target: str, params: dict):
         return response
 
     monkeypatch.setattr(decodo, "_scrape", fake_scrape)
