@@ -72,5 +72,5 @@ async def user_profile(
                 raise HTTPException(status_code=404, detail="Snapchat profile not found")
             return _normalize(items[0])
 
-        data = await cached_or_run("snapchat.user-profile", {"username": username}, _run, ctx)
+        data = await cached_or_run("snapchat.user-profile", {"username": username, "v": 2}, _run, ctx)
         return ApiResponse(data=data)

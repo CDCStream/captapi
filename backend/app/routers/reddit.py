@@ -639,7 +639,7 @@ async def subreddit_details(
 
         data = await cached_or_run(
             endpoint="reddit.subreddit-details",
-            params={"sub": sub},
+            params={"sub": sub, "v": 2},
             runner=_run,
             ctx=ctx,
         )

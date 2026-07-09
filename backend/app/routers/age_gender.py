@@ -62,7 +62,7 @@ async def get_age_gender(
 ):
     parsed = _names(name, names)
     async with billed_call(caller=caller, endpoint="/v1/age-gender", platform="age_gender", resource_url=None, base_credits=max(4, len(parsed) * 4)) as ctx:
-        data = await cached_or_run("age-gender.get", {"names": ",".join(parsed)}, lambda: _run_lookup(name, names), ctx)
+        data = await cached_or_run("age-gender.get", {"names": ",".join(parsed), "v": 2}, lambda: _run_lookup(name, names), ctx)
         return ApiResponse(data=data)
 
 

@@ -752,7 +752,7 @@ async def tiktok_live(
 
         data = await cached_or_run(
             endpoint="tiktok.live",
-            params={"handle": handle},
+            params={"handle": handle, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -801,7 +801,7 @@ async def tiktok_live_info(
 
         data = await cached_or_run(
             endpoint="tiktok.live-info",
-            params={"handle": handle},
+            params={"handle": handle, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1251,7 +1251,7 @@ async def tiktok_user_followers(
 
         data = await cached_or_run(
             endpoint="tiktok.user-followers",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1295,7 +1295,7 @@ async def tiktok_user_followings(
 
         data = await cached_or_run(
             endpoint="tiktok.user-followings",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1439,7 +1439,7 @@ async def tiktok_user_search(
 
         data = await cached_or_run(
             endpoint="tiktok.user-search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1724,7 +1724,7 @@ async def tiktok_popular_hashtags(
 
         data = await cached_or_run(
             endpoint="tiktok.popular-hashtags",
-            params={"query": query, "limit": limit},
+            params={"query": query, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

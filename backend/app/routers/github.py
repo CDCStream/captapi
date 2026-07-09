@@ -233,7 +233,7 @@ async def pull_requests(
             pulls = [_pull(i) for i in items[:limit]]
             return {"repository": f"{owner}/{name}", "totalReturned": len(pulls), "pullRequests": pulls}
 
-        data = await cached_or_run("github.pull-requests", {"repo": f"{owner}/{name}", "state": state, "limit": limit}, _run, ctx)
+        data = await cached_or_run("github.pull-requests", {"repo": f"{owner}/{name}", "state": state, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["pullRequests"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
@@ -253,7 +253,7 @@ async def activity(
             events = [_event(i) for i in items[:limit]]
             return {"username": login, "totalReturned": len(events), "events": events}
 
-        data = await cached_or_run("github.activity", {"login": login, "limit": limit}, _run, ctx)
+        data = await cached_or_run("github.activity", {"login": login, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["events"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
@@ -273,7 +273,7 @@ async def followers(
             users = [{"login": safe_str(i.get("login")), "url": safe_str(i.get("html_url")), "avatar": safe_str(i.get("avatar_url"))} for i in items[:limit]]
             return {"username": login, "totalReturned": len(users), "followers": users}
 
-        data = await cached_or_run("github.followers", {"login": login, "limit": limit}, _run, ctx)
+        data = await cached_or_run("github.followers", {"login": login, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["followers"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
@@ -293,7 +293,7 @@ async def following(
             users = [{"login": safe_str(i.get("login")), "url": safe_str(i.get("html_url")), "avatar": safe_str(i.get("avatar_url"))} for i in items[:limit]]
             return {"username": login, "totalReturned": len(users), "following": users}
 
-        data = await cached_or_run("github.following", {"login": login, "limit": limit}, _run, ctx)
+        data = await cached_or_run("github.following", {"login": login, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["following"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
@@ -318,7 +318,7 @@ async def contributions(
                 "starsAcrossSampledRepos": sum(safe_int(r.get("stargazers_count")) for r in repos),
             }
 
-        return ApiResponse(data=await cached_or_run("github.contributions", {"login": login}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("github.contributions", {"login": login, "v": 2}, _run, ctx))
 
 
 @router.get("/trending-repositories", summary="Trending GitHub repositories")
@@ -353,6 +353,6 @@ async def trending_developers(
             ]
             return {"query": q, "totalReturned": len(users), "developers": users}
 
-        data = await cached_or_run("github.trending-developers", {"q": q, "limit": limit}, _run, ctx)
+        data = await cached_or_run("github.trending-developers", {"q": q, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = _scaled(len(data["developers"]), GITHUB_SEARCH_RATE)
         return ApiResponse(data=data)

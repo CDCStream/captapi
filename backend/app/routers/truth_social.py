@@ -273,5 +273,5 @@ async def post(
                     raise
             return await _actor_post(post_id, url)
 
-        data = await cached_or_run("truth-social.post", {"post_id": post_id}, _run, ctx)
+        data = await cached_or_run("truth-social.post", {"post_id": post_id, "v": 2}, _run, ctx)
         return ApiResponse(data=data)

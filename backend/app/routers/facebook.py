@@ -480,7 +480,7 @@ async def facebook_summarize(
 
         data = await cached_or_run(
             endpoint="facebook.summarize",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -830,7 +830,7 @@ async def facebook_profile_photos(
 
         data = await cached_or_run(
             endpoint="facebook.profile-photos",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1001,7 +1001,7 @@ async def facebook_marketplace_item(
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-item",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1043,7 +1043,7 @@ async def facebook_marketplace_search(
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-search",
-            params={"q": q, "location": location, "limit": limit, "details": details},
+            params={"q": q, "location": location, "limit": limit, "details": details, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1091,7 +1091,7 @@ async def facebook_marketplace_location_search(
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-location-search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1138,7 +1138,7 @@ async def facebook_event_search(
 
         data = await cached_or_run(
             endpoint="facebook.event-search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1209,7 +1209,7 @@ async def facebook_event_details(
 
         data = await cached_or_run(
             endpoint="facebook.event-details",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )

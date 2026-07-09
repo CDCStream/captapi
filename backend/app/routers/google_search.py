@@ -97,7 +97,7 @@ async def google_search(
 
         data = await cached_or_run(
             endpoint="google.search",
-            params={"q": q, "country": country, "language": language, "limit": limit},
+            params={"q": q, "country": country, "language": language, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

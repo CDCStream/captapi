@@ -374,7 +374,7 @@ async def user_pins(
 
         data = await cached_or_run(
             endpoint="pinterest.user-pins",
-            params={"username": username, "limit": limit},
+            params={"username": username, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -486,7 +486,7 @@ async def pinterest_board(
 
         data = await cached_or_run(
             endpoint="pinterest.board",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )

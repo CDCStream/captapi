@@ -327,7 +327,7 @@ async def linkedin_post_transcript(
 
         data = await cached_or_run(
             endpoint="linkedin.post-transcript",
-            params={"url": url},
+            params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
         )

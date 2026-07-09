@@ -1048,7 +1048,7 @@ async def youtube_channel_videos(
 
         data = await cached_or_run(
             endpoint="youtube.channel-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 2},
+            params={"url": url, "limit": limit, "fast": fast, "v": 5},
             runner=_run,
             ctx=ctx,
         )
@@ -1744,7 +1744,7 @@ async def youtube_community_posts(
 
         data = await cached_or_run(
             endpoint="youtube.community-posts",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
         )
@@ -1934,7 +1934,7 @@ async def youtube_video_sponsors(
 
         data = await cached_or_run(
             endpoint="youtube.video-sponsors",
-            params={"vid": vid},
+            params={"vid": vid, "v": 2},
             runner=_run,
             ctx=ctx,
         )
