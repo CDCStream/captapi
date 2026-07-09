@@ -17,7 +17,7 @@ class Settings(BaseSettings):
 
     APP_ENV: Literal["development", "staging", "production"] = "development"
     APP_PORT: int = 8000
-    APP_CORS_ORIGINS: str = "http://localhost:3000"
+    APP_CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173,http://localhost:5273"
     APP_BASE_URL: str = "http://localhost:8000"
 
     SUPABASE_URL: str
@@ -115,6 +115,10 @@ class Settings(BaseSettings):
     # Story highlights (list + expanded items). Input: `usernames`.
     APIFY_ACTOR_INSTAGRAM_HIGHLIGHTS: str = "goat255/instagram-stories-highlights-scraper"
     APIFY_ACTOR_INSTAGRAM_TRENDING: str = "agentx/instagram-trending-scraper"
+
+    # HikerAPI — primary Instagram data path when key is set (pay-per-request).
+    HIKERAPI_KEY: str = ""
+    HIKERAPI_BASE: str = "https://api.hikerapi.com"
 
     APIFY_ACTOR_FACEBOOK_POSTS: str = "apify/facebook-posts-scraper"
     # AI transcript extractor for FB videos/reels (Whisper): returns full

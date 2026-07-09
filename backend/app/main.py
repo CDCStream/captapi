@@ -57,6 +57,45 @@ from app.routers import (
 )
 
 
+class BillingHeaderMiddleware:
+    """Stamp per-request billing metadata onto the response as headers.
+
+    Pure-ASGI (no task hop) so it shares the async context with the endpoint;
+    billed_call publishes into `request_meta` in its finally, which runs before
+    the response is sent, so the values are available on http.response.start.
+    Lets clients (e.g. the playground) read how a call was served without a DB
+    lookup.
+    """
+
+    def __init__(self, app):  # noqa: ANN001 - ASGI app
+        self.app = app
+
+    async def __call__(self, scope, receive, send):  # noqa: ANN001
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        from app.core.credits import request_meta
+
+        request_meta.set(None)
+
+        async def send_wrapper(message):  # noqa: ANN001
+            if message["type"] == "http.response.start":
+                meta = request_meta.get()
+                if meta:
+                    cache_hit = bool(meta.get("cache_hit"))
+                    source = "cache" if cache_hit else (meta.get("source") or "unknown")
+                    extra = [
+                        (b"x-captapi-source", str(source).encode()),
+                        (b"x-captapi-credits", str(meta.get("credits", 0)).encode()),
+                        (b"x-captapi-cache", b"1" if cache_hit else b"0"),
+                    ]
+                    message.setdefault("headers", [])
+                    message["headers"].extend(extra)
+            await send(message)
+
+        await self.app(scope, receive, send_wrapper)
+
+
 def configure_logging(level: str) -> None:
     logging.basicConfig(
         stream=sys.stdout,
@@ -111,7 +150,14 @@ def create_app() -> FastAPI:
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=[
+            "X-Captapi-Source",
+            "X-Captapi-Credits",
+            "X-Captapi-Cache",
+        ],
     )
+    # Stamps X-Captapi-Source/Credits/Cache onto every response (see class doc).
+    app.add_middleware(BillingHeaderMiddleware)
 
     def _error_cors_headers(request: Request) -> dict[str, str]:
         # Starlette runs this catch-all via ServerErrorMiddleware, which sits

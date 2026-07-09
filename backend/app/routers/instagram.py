@@ -15,6 +15,7 @@ from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import ApifyClient, ApifyError, get_apify
+from app.services import instagram_hiker as hiker
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
 from app.utils.formatters import safe_float, safe_int, safe_list, safe_str
@@ -125,6 +126,21 @@ def _dedupe_candidates(candidates: list[tuple[str, dict[str, Any]]]) -> list[tup
             seen.add(key)
             unique.append((actor, payload))
     return unique
+
+
+async def _try_hiker(
+    ctx: dict[str, Any],
+    hiker_fn: Any,
+    apify_fn: Any,
+) -> Any:
+    """Prefer HikerAPI when configured; fall back to Apify and stamp source."""
+    if hiker.enabled():
+        result = await hiker_fn()
+        if result is not None:
+            ctx["source"] = "direct"
+            return result
+    ctx["source"] = "apify"
+    return await apify_fn()
 
 
 def _instagram_profile_candidates(settings: Any, profile_url: str, limit: int, results_type: str) -> list[tuple[str, dict[str, Any]]]:
@@ -329,6 +345,7 @@ async def instagram_details(
                     }
             if not items:
                 raise HTTPException(status_code=404, detail="Post not found")
+            ctx["source"] = "apify"
             return _normalize_post(items[0])
 
         data = await cached_or_run(
@@ -355,6 +372,7 @@ async def instagram_transcript(
         base_credits=CREDIT_TRANSCRIPT,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            ctx["source"] = "apify"
             full, segments = await _fetch_instagram_transcript(url)
             return {
                 "platform": "instagram",
@@ -367,7 +385,7 @@ async def instagram_transcript(
 
         data = await cached_or_run(
             endpoint="instagram.transcript",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -389,6 +407,7 @@ async def instagram_summarize(
         base_credits=CREDIT_SUMMARIZE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            ctx["source"] = "apify"
             text, _segments = await _fetch_instagram_transcript(url)
             if not text:
                 raise HTTPException(status_code=422, detail="No content to summarize")
@@ -428,38 +447,52 @@ async def instagram_comments(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM_COMMENT,
-                {"directUrls": [url], "resultsLimit": limit},
-                max_items=limit,
-            )
-            comments = []
-            for c in items[:limit]:
-                owner = c.get("owner") or {}
-                comments.append(
-                    {
-                        "id": safe_str(c.get("id")),
-                        "url": safe_str(c.get("commentUrl")),
-                        "text": (c.get("text") or "").strip(),
-                        "author": safe_str(c.get("ownerUsername") or owner.get("username")),
-                        "authorAvatarUrl": safe_str(c.get("ownerProfilePicUrl") or owner.get("profile_pic_url")),
-                        "authorIsVerified": bool(owner.get("is_verified")),
-                        "likeCount": safe_int(c.get("likesCount") or c.get("likeCount")) or 0,
-                        "publishedAt": safe_str(c.get("timestamp")),
-                        "replyCount": safe_int(c.get("replyCount") or c.get("repliesCount")) or 0,
-                    }
+            async def _apify() -> dict[str, Any]:
+                apify = get_apify()
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_INSTAGRAM_COMMENT,
+                    {"directUrls": [url], "resultsLimit": limit},
+                    max_items=limit,
                 )
-            return {
-                "platform": "instagram",
-                "url": url,
-                "totalReturned": len(comments),
-                "comments": comments,
-            }
+                comments = []
+                for c in items[:limit]:
+                    owner = c.get("owner") or {}
+                    comments.append(
+                        {
+                            "id": safe_str(c.get("id")),
+                            "url": safe_str(c.get("commentUrl")),
+                            "text": (c.get("text") or "").strip(),
+                            "author": safe_str(c.get("ownerUsername") or owner.get("username")),
+                            "authorAvatarUrl": safe_str(c.get("ownerProfilePicUrl") or owner.get("profile_pic_url")),
+                            "authorIsVerified": bool(owner.get("is_verified")),
+                            "likeCount": safe_int(c.get("likesCount") or c.get("likeCount")) or 0,
+                            "publishedAt": safe_str(c.get("timestamp")),
+                            "replyCount": safe_int(c.get("replyCount") or c.get("repliesCount")) or 0,
+                        }
+                    )
+                return {
+                    "platform": "instagram",
+                    "url": url,
+                    "totalReturned": len(comments),
+                    "comments": comments,
+                }
+
+            async def _hiker() -> dict[str, Any] | None:
+                rows = await hiker.comments(url, limit)
+                if rows is None:
+                    return None
+                return {
+                    "platform": "instagram",
+                    "url": url,
+                    "totalReturned": len(rows),
+                    "comments": rows,
+                }
+
+            return await _try_hiker(ctx, _hiker, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.comments",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -482,50 +515,53 @@ async def instagram_channel_details(
         base_credits=CREDIT_CHANNEL,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            try:
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_INSTAGRAM_PROFILE,
-                    {"usernames": [handle]},
-                    max_items=1,
-                )
-            except (ApifyError, httpx.HTTPError):
-                items = []
-            if not items:
-                meta = await _public_instagram_meta(f"https://www.instagram.com/{handle}/")
-                if not meta:
-                    raise HTTPException(status_code=404, detail="Profile not found")
+            async def _apify() -> dict[str, Any]:
+                apify = get_apify()
+                try:
+                    items = await apify.run_actor_sync(
+                        settings.APIFY_ACTOR_INSTAGRAM_PROFILE,
+                        {"usernames": [handle]},
+                        max_items=1,
+                    )
+                except (ApifyError, httpx.HTTPError):
+                    items = []
+                if not items:
+                    meta = await _public_instagram_meta(f"https://www.instagram.com/{handle}/")
+                    if not meta:
+                        raise HTTPException(status_code=404, detail="Profile not found")
+                    return {
+                        "platform": "instagram",
+                        "url": meta["url"] or f"https://instagram.com/{handle}",
+                        "username": handle,
+                        "displayName": meta["title"],
+                        "bio": meta["description"],
+                        "followers": 0,
+                        "following": 0,
+                        "postCount": 0,
+                        "verified": None,
+                        "profileImage": meta["image"],
+                        "externalUrl": "",
+                    }
+                p = items[0]
                 return {
                     "platform": "instagram",
-                    "url": meta["url"] or f"https://instagram.com/{handle}",
-                    "username": handle,
-                    "displayName": meta["title"],
-                    "bio": meta["description"],
-                    "followers": 0,
-                    "following": 0,
-                    "postCount": 0,
-                    "verified": None,
-                    "profileImage": meta["image"],
-                    "externalUrl": "",
+                    "url": f"https://instagram.com/{handle}",
+                    "username": safe_str(p.get("username") or handle),
+                    "displayName": safe_str(p.get("fullName")),
+                    "bio": safe_str(p.get("biography")),
+                    "followers": safe_int(p.get("followersCount")),
+                    "following": safe_int(p.get("followsCount")),
+                    "postCount": safe_int(p.get("postsCount")),
+                    "verified": p.get("verified"),
+                    "profileImage": safe_str(p.get("profilePicUrl") or p.get("profilePicUrlHD")),
+                    "externalUrl": safe_str(p.get("externalUrl")),
                 }
-            p = items[0]
-            return {
-                "platform": "instagram",
-                "url": f"https://instagram.com/{handle}",
-                "username": safe_str(p.get("username") or handle),
-                "displayName": safe_str(p.get("fullName")),
-                "bio": safe_str(p.get("biography")),
-                "followers": safe_int(p.get("followersCount")),
-                "following": safe_int(p.get("followsCount")),
-                "postCount": safe_int(p.get("postsCount")),
-                "verified": p.get("verified"),
-                "profileImage": safe_str(p.get("profilePicUrl") or p.get("profilePicUrlHD")),
-                "externalUrl": safe_str(p.get("externalUrl")),
-            }
+
+            return await _try_hiker(ctx, lambda: hiker.channel_details(handle), _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-details",
-            params={"url": url},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -547,44 +583,47 @@ async def instagram_basic_profile(
         base_credits=CREDIT_CHANNEL,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            try:
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_INSTAGRAM_PROFILE,
-                    {"usernames": [handle]},
-                    max_items=1,
-                )
-            except (ApifyError, httpx.HTTPError):
-                items = []
-            if not items:
-                meta = await _public_instagram_meta(f"https://www.instagram.com/{handle}/")
-                if not meta:
-                    raise HTTPException(status_code=404, detail="Profile not found")
+            async def _apify() -> dict[str, Any]:
+                apify = get_apify()
+                try:
+                    items = await apify.run_actor_sync(
+                        settings.APIFY_ACTOR_INSTAGRAM_PROFILE,
+                        {"usernames": [handle]},
+                        max_items=1,
+                    )
+                except (ApifyError, httpx.HTTPError):
+                    items = []
+                if not items:
+                    meta = await _public_instagram_meta(f"https://www.instagram.com/{handle}/")
+                    if not meta:
+                        raise HTTPException(status_code=404, detail="Profile not found")
+                    return {
+                        "platform": "instagram",
+                        "id": "",
+                        "username": handle,
+                        "displayName": meta["title"],
+                        "profileImage": meta["image"],
+                        "verified": None,
+                        "private": None,
+                        "followers": 0,
+                    }
+                p = items[0]
                 return {
                     "platform": "instagram",
-                    "id": "",
-                    "username": handle,
-                    "displayName": meta["title"],
-                    "profileImage": meta["image"],
-                    "verified": None,
-                    "private": None,
-                    "followers": 0,
+                    "id": safe_str(p.get("id") or p.get("pk")),
+                    "username": safe_str(p.get("username") or handle),
+                    "displayName": safe_str(p.get("fullName")),
+                    "profileImage": safe_str(p.get("profilePicUrl") or p.get("profilePicUrlHD")),
+                    "verified": p.get("verified"),
+                    "private": p.get("private") or p.get("isPrivate"),
+                    "followers": safe_int(p.get("followersCount")),
                 }
-            p = items[0]
-            return {
-                "platform": "instagram",
-                "id": safe_str(p.get("id") or p.get("pk")),
-                "username": safe_str(p.get("username") or handle),
-                "displayName": safe_str(p.get("fullName")),
-                "profileImage": safe_str(p.get("profilePicUrl") or p.get("profilePicUrlHD")),
-                "verified": p.get("verified"),
-                "private": p.get("private") or p.get("isPrivate"),
-                "followers": safe_int(p.get("followersCount")),
-            }
+
+            return await _try_hiker(ctx, lambda: hiker.basic_profile(handle), _apify)
 
         data = await cached_or_run(
             endpoint="instagram.basic-profile",
-            params={"url": url},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -608,17 +647,26 @@ async def instagram_channel_posts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items, _actor = await apify.run_with_fallback(
-                _instagram_profile_candidates(settings, f"https://www.instagram.com/{handle}/", limit, "posts"),
-                max_items=limit,
-            )
-            posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
-            return {"url": url, "totalReturned": len(posts), "posts": posts}
+            async def _apify() -> dict[str, Any]:
+                apify = get_apify()
+                items, _actor = await apify.run_with_fallback(
+                    _instagram_profile_candidates(settings, f"https://www.instagram.com/{handle}/", limit, "posts"),
+                    max_items=limit,
+                )
+                posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+                return {"url": url, "totalReturned": len(posts), "posts": posts}
+
+            async def _hiker_run() -> dict[str, Any] | None:
+                posts = await hiker.channel_posts(handle, limit)
+                if posts is None:
+                    return None
+                return {"url": url, "totalReturned": len(posts), "posts": posts}
+
+            return await _try_hiker(ctx, _hiker_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -643,17 +691,26 @@ async def instagram_channel_reels(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items, _actor = await apify.run_with_fallback(
-                _instagram_profile_candidates(settings, f"https://www.instagram.com/{handle}/", limit, "reels"),
-                max_items=limit,
-            )
-            reels = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
-            return {"url": url, "totalReturned": len(reels), "reels": reels}
+            async def _apify() -> dict[str, Any]:
+                apify = get_apify()
+                items, _actor = await apify.run_with_fallback(
+                    _instagram_profile_candidates(settings, f"https://www.instagram.com/{handle}/", limit, "reels"),
+                    max_items=limit,
+                )
+                reels = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+                return {"url": url, "totalReturned": len(reels), "reels": reels}
+
+            async def _hiker_run() -> dict[str, Any] | None:
+                reels = await hiker.channel_reels(handle, limit)
+                if reels is None:
+                    return None
+                return {"url": url, "totalReturned": len(reels), "reels": reels}
+
+            return await _try_hiker(ctx, _hiker_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-reels",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -677,23 +734,32 @@ async def instagram_reels_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            tag = q.lstrip("#")
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM,
-                {
-                    "directUrls": [f"https://www.instagram.com/explore/tags/{tag}/"],
-                    "resultsLimit": limit,
-                    "resultsType": "posts",
-                },
-                max_items=limit,
-            )
-            results = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
-            return {"query": q, "totalReturned": len(results), "results": results}
+            async def _apify() -> dict[str, Any]:
+                apify = get_apify()
+                tag = q.lstrip("#")
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_INSTAGRAM,
+                    {
+                        "directUrls": [f"https://www.instagram.com/explore/tags/{tag}/"],
+                        "resultsLimit": limit,
+                        "resultsType": "posts",
+                    },
+                    max_items=limit,
+                )
+                results = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+                return {"query": q, "totalReturned": len(results), "results": results}
+
+            async def _hiker_run() -> dict[str, Any] | None:
+                results = await hiker.hashtag_medias(q, limit, reels_only=True)
+                if results is None:
+                    return None
+                return {"query": q, "totalReturned": len(results), "results": results}
+
+            return await _try_hiker(ctx, _hiker_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.reels-search",
-            params={"q": q, "limit": limit, "v": 2},
+            params={"q": q, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -736,6 +802,7 @@ async def instagram_trending_reels(
                 if not items:
                     raise
             reels = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+            ctx["source"] = "apify"
             return {"platform": "instagram", "country": country, "totalReturned": len(reels), "reels": reels}
 
         data = await cached_or_run(
@@ -762,28 +829,31 @@ async def instagram_video_download(
         base_credits=CREDIT_DOWNLOAD,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items, _actor = await apify.run_with_fallback(
-                _instagram_reel_candidates(settings, url),
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Reel not found")
-            v = items[0]
-            download_url = safe_str(v.get("videoUrl") or v.get("video_url") or v.get("downloadUrl"))
-            if not download_url:
-                raise HTTPException(status_code=404, detail="Video download URL not found")
-            return {
-                "platform": "instagram",
-                "url": url,
-                "downloadUrl": download_url,
-                "thumbnailUrl": safe_str(v.get("displayUrl") or v.get("thumbnailUrl") or v.get("thumbnail")),
-                "duration": safe_float(v.get("videoDuration") or v.get("duration") or v.get("durationSeconds")),
-            }
+            async def _apify() -> dict[str, Any]:
+                apify = get_apify()
+                items, _actor = await apify.run_with_fallback(
+                    _instagram_reel_candidates(settings, url),
+                    max_items=1,
+                )
+                if not items:
+                    raise HTTPException(status_code=404, detail="Reel not found")
+                v = items[0]
+                download_url = safe_str(v.get("videoUrl") or v.get("video_url") or v.get("downloadUrl"))
+                if not download_url:
+                    raise HTTPException(status_code=404, detail="Video download URL not found")
+                return {
+                    "platform": "instagram",
+                    "url": url,
+                    "downloadUrl": download_url,
+                    "thumbnailUrl": safe_str(v.get("displayUrl") or v.get("thumbnailUrl") or v.get("thumbnail")),
+                    "duration": safe_float(v.get("videoDuration") or v.get("duration") or v.get("durationSeconds")),
+                }
+
+            return await _try_hiker(ctx, lambda: hiker.video_download(url), _apify)
 
         data = await cached_or_run(
             endpoint="instagram.video-download",
-            params={"url": url},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             ttl=3600,
@@ -809,17 +879,38 @@ async def instagram_reels_by_audio_id(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM_AUDIO,
-                {"audioUrls": [audio_url], "maxResults": limit, "downloadVideos": False},
-                max_items=limit,
-            )
-            reels = [_normalize_audio_reel(i) for i in items[:limit] if not i.get("error")]
-            return {"platform": "instagram", "audioId": audio_id, "audioUrl": audio_url, "totalReturned": len(reels), "reels": reels}
+            async def _apify() -> dict[str, Any]:
+                items = await get_apify().run_actor_sync(
+                    settings.APIFY_ACTOR_INSTAGRAM_AUDIO,
+                    {"audioUrls": [audio_url], "maxResults": limit, "downloadVideos": False},
+                    max_items=limit,
+                )
+                reels = [_normalize_audio_reel(i) for i in items[:limit] if not i.get("error")]
+                return {
+                    "platform": "instagram",
+                    "audioId": audio_id,
+                    "audioUrl": audio_url,
+                    "totalReturned": len(reels),
+                    "reels": reels,
+                }
+
+            async def _hiker_run() -> dict[str, Any] | None:
+                reels = await hiker.reels_by_audio(audio_id, limit)
+                if reels is None:
+                    return None
+                return {
+                    "platform": "instagram",
+                    "audioId": audio_id,
+                    "audioUrl": audio_url,
+                    "totalReturned": len(reels),
+                    "reels": reels,
+                }
+
+            return await _try_hiker(ctx, _hiker_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.reels-by-audio-id",
-            params={"audio_id": audio_id, "limit": limit},
+            params={"audio_id": audio_id, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -844,18 +935,27 @@ async def instagram_tagged_posts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM_TAGGED,
-                {"username": [handle], "resultsLimit": limit},
-                max_items=limit,
-            )
-            posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
-            return {"url": url, "totalReturned": len(posts), "posts": posts}
+            async def _apify() -> dict[str, Any]:
+                apify = get_apify()
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_INSTAGRAM_TAGGED,
+                    {"username": [handle], "resultsLimit": limit},
+                    max_items=limit,
+                )
+                posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+                return {"url": url, "totalReturned": len(posts), "posts": posts}
+
+            async def _hiker_run() -> dict[str, Any] | None:
+                posts = await hiker.tagged_posts(handle, limit)
+                if posts is None:
+                    return None
+                return {"url": url, "totalReturned": len(posts), "posts": posts}
+
+            return await _try_hiker(ctx, _hiker_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.tagged-posts",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -880,22 +980,27 @@ async def instagram_music_posts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM_AUDIO,
-                {"audioUrls": [url], "maxResults": limit, "downloadVideos": False},
-                max_items=limit,
-            )
-            posts = [
-                _normalize_audio_reel(i)
-                for i in items[:limit]
-                if not i.get("error")
-            ]
-            return {"url": url, "totalReturned": len(posts), "posts": posts}
+            async def _apify() -> dict[str, Any]:
+                apify = get_apify()
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_INSTAGRAM_AUDIO,
+                    {"audioUrls": [url], "maxResults": limit, "downloadVideos": False},
+                    max_items=limit,
+                )
+                posts = [_normalize_audio_reel(i) for i in items[:limit] if not i.get("error")]
+                return {"url": url, "totalReturned": len(posts), "posts": posts}
+
+            async def _hiker_run() -> dict[str, Any] | None:
+                posts = await hiker.music_posts(url, limit)
+                if posts is None:
+                    return None
+                return {"url": url, "totalReturned": len(posts), "posts": posts}
+
+            return await _try_hiker(ctx, _hiker_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.music-posts",
-            params={"url": url, "limit": limit},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -919,23 +1024,32 @@ async def instagram_hashtag_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            tag = q.lstrip("#")
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM,
-                {
-                    "directUrls": [f"https://www.instagram.com/explore/tags/{tag}/"],
-                    "resultsLimit": limit,
-                    "resultsType": "posts",
-                },
-                max_items=limit,
-            )
-            results = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
-            return {"query": q, "totalReturned": len(results), "results": results}
+            async def _apify() -> dict[str, Any]:
+                apify = get_apify()
+                tag = q.lstrip("#")
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_INSTAGRAM,
+                    {
+                        "directUrls": [f"https://www.instagram.com/explore/tags/{tag}/"],
+                        "resultsLimit": limit,
+                        "resultsType": "posts",
+                    },
+                    max_items=limit,
+                )
+                results = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
+                return {"query": q, "totalReturned": len(results), "results": results}
+
+            async def _hiker_run() -> dict[str, Any] | None:
+                results = await hiker.hashtag_medias(q, limit, reels_only=False)
+                if results is None:
+                    return None
+                return {"query": q, "totalReturned": len(results), "results": results}
+
+            return await _try_hiker(ctx, _hiker_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",
-            params={"q": q, "limit": limit, "v": 2},
+            params={"q": q, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -972,18 +1086,27 @@ async def instagram_profile_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM,
-                {"search": q, "searchType": "user", "searchLimit": limit, "resultsType": "details"},
-                max_items=limit,
-            )
-            users = [_normalize_ig_profile(i) for i in items[:limit] if i.get("username") or i.get("ownerUsername")]
-            return {"query": q, "totalReturned": len(users), "users": users}
+            async def _apify() -> dict[str, Any]:
+                apify = get_apify()
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_INSTAGRAM,
+                    {"search": q, "searchType": "user", "searchLimit": limit, "resultsType": "details"},
+                    max_items=limit,
+                )
+                users = [_normalize_ig_profile(i) for i in items[:limit] if i.get("username") or i.get("ownerUsername")]
+                return {"query": q, "totalReturned": len(users), "users": users}
+
+            async def _hiker_run() -> dict[str, Any] | None:
+                users = await hiker.profile_search(q, limit)
+                if users is None:
+                    return None
+                return {"query": q, "totalReturned": len(users), "users": users}
+
+            return await _try_hiker(ctx, _hiker_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.profile-search",
-            params={"q": q, "limit": limit},
+            params={"q": q, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -1015,27 +1138,36 @@ async def instagram_story_highlights(
         base_credits=CREDIT_CHANNEL + 4,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM_HIGHLIGHTS,
-                {
-                    "usernames": [handle],
-                    "includeStories": False,
-                    "includeHighlights": True,
-                    "expandHighlightItems": False,
-                },
-                max_items=1,
-            )
-            highlights: list[dict[str, Any]] = []
-            for row in items:
-                raw = row.get("highlights") or row.get("highlightsList") or []
-                if isinstance(raw, list):
-                    highlights.extend(_highlight_payload(h) for h in raw if isinstance(h, dict))
-            return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
+            async def _apify() -> dict[str, Any]:
+                apify = get_apify()
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_INSTAGRAM_HIGHLIGHTS,
+                    {
+                        "usernames": [handle],
+                        "includeStories": False,
+                        "includeHighlights": True,
+                        "expandHighlightItems": False,
+                    },
+                    max_items=1,
+                )
+                highlights: list[dict[str, Any]] = []
+                for row in items:
+                    raw = row.get("highlights") or row.get("highlightsList") or []
+                    if isinstance(raw, list):
+                        highlights.extend(_highlight_payload(h) for h in raw if isinstance(h, dict))
+                return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
+
+            async def _hiker_run() -> dict[str, Any] | None:
+                highlights = await hiker.story_highlights(handle)
+                if highlights is None:
+                    return None
+                return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
+
+            return await _try_hiker(ctx, _hiker_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.story-highlights",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -1059,46 +1191,55 @@ async def instagram_highlights_details(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_INSTAGRAM_HIGHLIGHTS,
-                {
-                    "usernames": [handle],
-                    "includeStories": False,
-                    "includeHighlights": True,
-                    "expandHighlightItems": True,
-                    "maxHighlightsPerUser": limit,
-                },
-                max_items=limit,
-            )
-            highlights: list[dict[str, Any]] = []
-            for row in items:
-                raw = row.get("highlights") or row.get("highlightsList") or []
-                if not isinstance(raw, list):
-                    continue
-                for h in raw:
-                    if not isinstance(h, dict):
+            async def _apify() -> dict[str, Any]:
+                apify = get_apify()
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_INSTAGRAM_HIGHLIGHTS,
+                    {
+                        "usernames": [handle],
+                        "includeStories": False,
+                        "includeHighlights": True,
+                        "expandHighlightItems": True,
+                        "maxHighlightsPerUser": limit,
+                    },
+                    max_items=limit,
+                )
+                highlights: list[dict[str, Any]] = []
+                for row in items:
+                    raw = row.get("highlights") or row.get("highlightsList") or []
+                    if not isinstance(raw, list):
                         continue
-                    payload = _highlight_payload(h)
-                    media = h.get("items") or h.get("media") or []
-                    payload["items"] = [
-                        {
-                            "type": safe_str(m.get("type") or m.get("mediaType")),
-                            "url": safe_str(m.get("url") or m.get("mediaUrl") or m.get("videoUrl") or m.get("imageUrl")),
-                            "thumbnailUrl": safe_str(m.get("thumbnailUrl") or m.get("displayUrl")),
-                            "takenAt": safe_str(m.get("takenAt") or m.get("timestamp")),
-                        }
-                        for m in (media if isinstance(media, list) else [])
-                        if isinstance(m, dict)
-                    ]
-                    if payload.get("itemCount") is None and payload["items"]:
-                        payload["itemCount"] = len(payload["items"])
-                    highlights.append(payload)
-            return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
+                    for h in raw:
+                        if not isinstance(h, dict):
+                            continue
+                        payload = _highlight_payload(h)
+                        media = h.get("items") or h.get("media") or []
+                        payload["items"] = [
+                            {
+                                "type": safe_str(m.get("type") or m.get("mediaType")),
+                                "url": safe_str(m.get("url") or m.get("mediaUrl") or m.get("videoUrl") or m.get("imageUrl")),
+                                "thumbnailUrl": safe_str(m.get("thumbnailUrl") or m.get("displayUrl")),
+                                "takenAt": safe_str(m.get("takenAt") or m.get("timestamp")),
+                            }
+                            for m in (media if isinstance(media, list) else [])
+                            if isinstance(m, dict)
+                        ]
+                        if payload.get("itemCount") is None and payload["items"]:
+                            payload["itemCount"] = len(payload["items"])
+                        highlights.append(payload)
+                return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
+
+            async def _hiker_run() -> dict[str, Any] | None:
+                highlights = await hiker.highlights_details(handle, limit)
+                if highlights is None:
+                    return None
+                return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
+
+            return await _try_hiker(ctx, _hiker_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.highlights-details",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -1121,23 +1262,32 @@ async def instagram_embed(
         base_credits=1,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            permalink = f"https://www.instagram.com/p/{shortcode}/"
-            html = (
-                '<blockquote class="instagram-media" '
-                f'data-instgrm-permalink="{permalink}" data-instgrm-version="14"></blockquote>'
-                '<script async src="//www.instagram.com/embed.js"></script>'
-            )
-            return {
-                "platform": "instagram",
-                "url": url,
-                "shortcode": shortcode,
-                "permalink": permalink,
-                "html": html,
-            }
+            async def _local() -> dict[str, Any]:
+                permalink = f"https://www.instagram.com/p/{shortcode}/"
+                html = (
+                    '<blockquote class="instagram-media" '
+                    f'data-instgrm-permalink="{permalink}" data-instgrm-version="14"></blockquote>'
+                    '<script async src="//www.instagram.com/embed.js"></script>'
+                )
+                return {
+                    "platform": "instagram",
+                    "url": url,
+                    "shortcode": shortcode,
+                    "permalink": permalink,
+                    "html": html,
+                }
+
+            if hiker.enabled():
+                out = await hiker.embed_html(url)
+                if out:
+                    ctx["source"] = "direct"
+                    return out
+            ctx["source"] = "direct"
+            return await _local()
 
         data = await cached_or_run(
             endpoint="instagram.embed",
-            params={"url": url},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
         )

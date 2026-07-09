@@ -1,0 +1,5 @@
+node_modules
+dist
+src/catalog.generated.ts
+*.local
+.DS_Store

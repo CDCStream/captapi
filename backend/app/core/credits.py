@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import time
 from contextlib import asynccontextmanager
+from contextvars import ContextVar
 from typing import Any
 
 import structlog
@@ -15,6 +16,14 @@ from app.services.response_sampler import maybe_capture
 from app.services.supabase_client import get_supabase
 
 log = structlog.get_logger(__name__)
+
+# Per-request billing metadata, published by billed_call and read by the
+# response-header middleware (app/main.py) so clients (e.g. the playground) can
+# see how a call was served without a DB round-trip. Set once per request in
+# the same async context that produces the response.
+request_meta: ContextVar[dict[str, Any] | None] = ContextVar(
+    "captapi_request_meta", default=None
+)
 
 # Keep references to in-flight background log tasks so they aren't GC'd early.
 _log_tasks: set[asyncio.Task[Any]] = set()
@@ -141,6 +150,18 @@ async def billed_call(
                 status_code = 402
 
         source = None if cache_hit else ctx.get("source")
+
+        # Publish billing metadata for the response-header middleware. Runs in
+        # the same context that serializes the response, so the middleware sees
+        # it on http.response.start.
+        request_meta.set(
+            {
+                "source": source,
+                "credits": credits_used,
+                "cache_hit": cache_hit,
+                "status": status_code,
+            }
+        )
 
         # Offload the request/credit inserts to a background task so the DB
         # round-trips don't block the response the client is waiting on.
