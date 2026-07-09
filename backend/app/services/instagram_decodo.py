@@ -7,6 +7,7 @@ quality failure so the router can safely fall back to Apify.
 
 from __future__ import annotations
 
+import base64
 import json
 from datetime import datetime, timezone
 from typing import Any, Iterable
@@ -22,7 +23,23 @@ log = structlog.get_logger(__name__)
 
 def enabled() -> bool:
     settings = get_settings()
+    if settings.DECODO_AUTH_TOKEN.strip():
+        return True
     return bool(settings.DECODO_USERNAME.strip() and settings.DECODO_PASSWORD.strip())
+
+
+def _auth_header() -> str | None:
+    """Decodo accepts a single Basic token or base64(user:pass)."""
+    settings = get_settings()
+    token = settings.DECODO_AUTH_TOKEN.strip()
+    if token:
+        return token if token.lower().startswith("basic ") else f"Basic {token}"
+    user = settings.DECODO_USERNAME.strip()
+    password = settings.DECODO_PASSWORD.strip()
+    if user and password:
+        encoded = base64.b64encode(f"{user}:{password}".encode()).decode()
+        return f"Basic {encoded}"
+    return None
 
 
 async def _scrape(target: str, url: str) -> Any | None:
@@ -37,14 +54,17 @@ async def _scrape(target: str, url: str) -> Any | None:
     if settings.DECODO_GEO:
         body["geo"] = settings.DECODO_GEO
     try:
-        async with httpx.AsyncClient(
-            timeout=75.0,
-            auth=(settings.DECODO_USERNAME, settings.DECODO_PASSWORD),
-        ) as client:
+        auth_header = _auth_header()
+        if not auth_header:
+            return None
+        async with httpx.AsyncClient(timeout=75.0) as client:
             response = await client.post(
                 f"{settings.DECODO_BASE.rstrip('/')}/scrape",
                 json=body,
-                headers={"Accept": "application/json"},
+                headers={
+                    "Accept": "application/json",
+                    "Authorization": auth_header,
+                },
             )
     except httpx.HTTPError as exc:
         log.warning("decodo_transport_error", target=target, error=str(exc))

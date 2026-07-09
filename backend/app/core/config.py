@@ -117,7 +117,10 @@ class Settings(BaseSettings):
     APIFY_ACTOR_INSTAGRAM_TRENDING: str = "agentx/instagram-trending-scraper"
 
     # Decodo Social Media Scraping API — managed Instagram GraphQL scraping.
-    # When credentials are absent, Instagram routes use their Apify fallback.
+    # Auth is either a single Basic token (DECODO_AUTH_TOKEN, from the API
+    # Playground) or username/password. When neither is set, Instagram routes
+    # use their Apify fallback.
+    DECODO_AUTH_TOKEN: str = ""
     DECODO_USERNAME: str = ""
     DECODO_PASSWORD: str = ""
     DECODO_BASE: str = "https://scraper-api.decodo.com/v2"
