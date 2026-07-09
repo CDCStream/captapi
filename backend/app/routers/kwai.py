@@ -1,8 +1,13 @@
-"""Kwai / Kuaishou endpoints."""
+"""Kwai endpoints.
+
+Backed by the ``natanielsantos/kwai-scraper`` Apify actor, which works off
+Kwai's international web model: profile URLs (``https://www.kwai.com/@handle``)
+and video URLs (``.../@handle/video/<id>``). The actor returns video rows; a
+profile is synthesised from the ``authorMeta`` block carried on each row.
+"""
 
 from __future__ import annotations
 
-import asyncio
 import math
 import re
 from typing import Any
@@ -20,22 +25,39 @@ from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
 
+_PROFILE_EXAMPLE = "https://www.kwai.com/@easycashindonesia"
+_HANDLE_RE = re.compile(r"[A-Za-z0-9._-]{2,}")
 
-def _id(value: str) -> str | None:
+
+def _guard_platform(value: str) -> None:
     detected = detect_url_platform(value)
     if detected and detected != "kwai":
         raise HTTPException(
             status_code=400,
-            detail=platform_mismatch_detail(value, "kwai", "https://www.kuaishou.com/profile/2542916559"),
+            detail=platform_mismatch_detail(value, "kwai", _PROFILE_EXAMPLE),
         )
+
+
+def _profile_url(value: str) -> str | None:
+    """Canonical ``https://www.kwai.com/@handle`` from a URL or bare handle."""
     value = (value or "").strip().rstrip("/")
-    match = re.search(r"(?:profile|user)/([A-Za-z0-9_-]+)", value)
+    _guard_platform(value)
+    match = re.search(r"kwai\.com/@([A-Za-z0-9._-]+)", value)
     if match:
-        return match.group(1)
-    match = re.search(r"(?:short-video|photo)/([A-Za-z0-9_-]+)", value)
-    if match:
-        return match.group(1)
-    if re.fullmatch(r"[A-Za-z0-9_-]{4,}", value):
+        return f"https://www.kwai.com/@{match.group(1)}"
+    if _HANDLE_RE.fullmatch(value.lstrip("@")):
+        return f"https://www.kwai.com/@{value.lstrip('@')}"
+    return None
+
+
+def _video_url(value: str) -> str | None:
+    """Canonical Kwai video URL. Requires a full share URL (the actor needs the
+    handle in the path, so a bare video id can't be reconstructed)."""
+    value = (value or "").strip().rstrip("/")
+    _guard_platform(value)
+    if not value.startswith("http"):
+        value = f"https://{value}"
+    if re.search(r"kwai\.com/(?:@[A-Za-z0-9._-]+/video|photo)/[A-Za-z0-9_-]+", value):
         return value
     return None
 
@@ -44,91 +66,60 @@ def _good_rows(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [i for i in items if isinstance(i, dict) and i.get("status") != "error"]
 
 
-_TRANSIENT_HINTS = ("temporarily unavailable", "please retry", "timeout", "unknown")
-
-
 async def _run_kwai(run_input: dict[str, Any], max_items: int) -> list[dict[str, Any]]:
-    """Run the Kwai actor, retrying once when the run only produced transient
-    error rows -- the upstream data source flaps regularly and a second attempt
-    a couple of seconds later usually succeeds."""
     settings = get_settings()
     apify = get_apify()
-    items = await apify.run_actor_sync(settings.APIFY_ACTOR_KWAI, run_input, max_items=max_items)
-    if items and not _good_rows(items):
-        messages = " ".join(
-            str(i.get("errorMessage") or "").lower() for i in items if isinstance(i, dict)
-        )
-        if any(hint in messages for hint in _TRANSIENT_HINTS):
-            await asyncio.sleep(2)
-            retry = await apify.run_actor_sync(settings.APIFY_ACTOR_KWAI, run_input, max_items=max_items)
-            if _good_rows(retry):
-                return retry
-    return items
+    return await apify.run_actor_sync(settings.APIFY_ACTOR_KWAI, run_input, max_items=max_items)
 
 
-def _check_rows(items: list[dict[str, Any]], not_found_detail: str) -> list[dict[str, Any]]:
-    """The actor emits ``{"status": "error", "errorMessage": ...}`` rows instead of
-    failing the run. Surface those as proper HTTP errors rather than returning
-    empty/garbage payloads to the caller."""
-    good = [i for i in items if isinstance(i, dict) and i.get("status") != "error"]
-    if good:
-        return good
-    errs = [str(i.get("errorMessage") or "") for i in items if isinstance(i, dict)]
-    message = next((e for e in errs if e), "")
-    if message and ("invalid" in message.lower() or "not found" in message.lower() or "private" in message.lower()):
-        raise HTTPException(status_code=404, detail=not_found_detail)
-    if message:
-        raise HTTPException(status_code=502, detail=f"Kwai upstream error: {message}")
-    raise HTTPException(status_code=404, detail=not_found_detail)
+def _author(item: dict[str, Any]) -> dict[str, Any]:
+    meta = item.get("authorMeta")
+    return meta if isinstance(meta, dict) else {}
 
 
 def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
-    owner = item.get("ownerCount") if isinstance(item.get("ownerCount"), dict) else {}
-    user_id = item.get("userId") or item.get("user_id")
-    page_url = item.get("userPageUrl") or (f"https://www.kuaishou.com/profile/{user_id}" if user_id else None)
+    author = _author(item)
+    handle = author.get("username") or author.get("name")
+    page_url = author.get("url") or (f"https://www.kwai.com/@{handle}" if handle else None)
     return {
         "platform": "kwai",
-        "id": safe_str(user_id),
+        "id": safe_str(author.get("id")),
         "url": safe_str(page_url),
-        "username": safe_str(item.get("kwaiId") or item.get("userName") or item.get("user_name")),
-        "displayName": safe_str(item.get("userName") or item.get("user_name")),
-        "bio": safe_str(item.get("userBio") or item.get("user_text")),
-        "avatar": safe_str(item.get("avatarUrl") or item.get("headurl")),
-        "banner": safe_str(item.get("bannerUrl") or item.get("user_profile_bg_url")),
-        "followers": safe_int(item.get("fanCount") or owner.get("fan")),
-        "following": safe_int(item.get("followCount") or owner.get("follow")),
-        "postCount": safe_int(item.get("photoCount") or owner.get("photo")),
-        "likedCount": safe_int(item.get("likeCount") or owner.get("like")),
-        "verified": bool(item.get("userVerified") or item.get("verified")),
-        "location": safe_str(item.get("cityName")),
-        "raw": item,
+        "username": safe_str(handle),
+        "displayName": safe_str(author.get("name")),
+        "avatar": safe_str(author.get("avatar")),
+        "followers": safe_int(author.get("followersCount")),
+        "likedCount": safe_int(author.get("likesCount")),
+        "postCount": safe_int(author.get("videosCount")),
+        "raw": author,
     }
 
 
 def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
-    video_id = item.get("videoId") or item.get("photo_id") or item.get("photoId")
-    duration_ms = item.get("durationMs") or item.get("duration")
+    author = _author(item)
+    duration = item.get("duration")
     return {
         "platform": "kwai",
-        "id": safe_str(video_id),
-        "url": safe_str(item.get("videoPageUrl") or (f"https://www.kuaishou.com/short-video/{video_id}" if video_id else None)),
+        "id": safe_str(item.get("id")),
+        "url": safe_str(item.get("url")),
         "text": safe_str(item.get("caption")),
-        "publishedAt": safe_str(item.get("postedAt") or item.get("time")),
-        "durationSeconds": safe_int(round(duration_ms / 1000)) if isinstance(duration_ms, (int, float)) and duration_ms else None,
-        "thumbnailUrl": safe_str(item.get("coverUrl")),
-        "videoUrl": safe_str(item.get("videoUrl")),
+        "transcript": safe_str(item.get("transcript")),
+        "publishedAt": safe_str(item.get("createTime")),
+        "durationSeconds": safe_int(duration) if isinstance(duration, (int, float)) else None,
+        "thumbnailUrl": safe_str(item.get("thumb")),
+        "videoUrl": safe_str(item.get("playUrl")),
         "author": {
-            "id": safe_str(item.get("userId") or item.get("user_id")),
-            "username": safe_str(item.get("kwaiId") or item.get("userName") or item.get("user_name")),
-            "displayName": safe_str(item.get("userName") or item.get("user_name")),
-            "avatar": safe_str(item.get("avatarUrl")),
-            "url": safe_str(item.get("userPageUrl")),
+            "id": safe_str(author.get("id")),
+            "username": safe_str(author.get("username")),
+            "displayName": safe_str(author.get("name")),
+            "avatar": safe_str(author.get("avatar")),
+            "url": safe_str(author.get("url")),
         },
         "engagement": {
-            "views": safe_int(item.get("viewCount") or item.get("view_count")),
-            "likes": safe_int(item.get("likeCount") or item.get("like_count")),
-            "comments": safe_int(item.get("commentCount") or item.get("comment_count")),
-            "shares": safe_int(item.get("shareCount") or item.get("share_count")),
+            "views": safe_int(item.get("viewCount")),
+            "likes": safe_int(item.get("likeCount")),
+            "comments": safe_int(item.get("commentCount")),
+            "shares": safe_int(item.get("shareCount")),
         },
         "raw": item,
     }
@@ -136,120 +127,59 @@ def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
 
 @router.get("/profile", summary="Kwai profile")
 async def profile(
-    url: str = Query(..., description="Kuaishou profile URL or numeric user ID (e.g. .../profile/2542916559)"),
+    url: str = Query(..., description="Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    user_id = _id(url)
-    if not user_id:
-        raise HTTPException(status_code=400, detail="Invalid Kwai profile URL or user ID")
-    settings = get_settings()
+    profile_url = _profile_url(url)
+    if not profile_url:
+        raise HTTPException(status_code=400, detail="Invalid Kwai profile URL or handle")
     async with billed_call(caller=caller, endpoint="/v1/kwai/profile", platform="kwai", resource_url=url, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await _run_kwai({"operation": "userDetail", "userId": user_id}, max_items=1)
-            good = _good_rows(items)
-            if good:
-                return _normalize_profile(good[0])
-            # The actor's userDetail op is frequently broken while userVideos
-            # keeps working; synthesize the profile from the newest video row,
-            # enriched with follower counts via searchUser when possible.
-            videos = _good_rows(
-                await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_KWAI,
-                    {"operation": "userVideos", "userId": user_id, "maxPages": 1},
-                    max_items=5,
-                )
-            )
-            if not videos:
-                _check_rows(items, "Kwai profile not found")  # raises with actor's error
-            base = videos[0]
-            profile = _normalize_profile(base)
-            profile["id"] = profile["id"] or safe_str(user_id)
-            profile["url"] = profile["url"] or f"https://www.kuaishou.com/profile/{user_id}"
-            user_name = base.get("userName") or base.get("user_name")
-            if user_name:
-                matches = _good_rows(
-                    await apify.run_actor_sync(
-                        settings.APIFY_ACTOR_KWAI,
-                        {"operation": "searchUser", "keyword": str(user_name), "maxPages": 1},
-                        max_items=20,
-                    )
-                )
-                match = next((m for m in matches if str(m.get("userId") or m.get("user_id")) == str(user_id)), None)
-                if match:
-                    profile["followers"] = profile["followers"] or safe_int(match.get("fansCount") or match.get("fanCount"))
-                    profile["bio"] = profile["bio"] or safe_str(match.get("userBio"))
-                    profile["verified"] = profile["verified"] or bool(match.get("userVerified") or match.get("verified"))
-                    profile["avatar"] = profile["avatar"] or safe_str(match.get("avatarUrl") or match.get("headurl"))
-            profile["raw"] = {k: v for k, v in base.items() if k in ("userId", "userName", "kwaiId", "userSex", "userVerified", "avatarUrl", "userPageUrl")}
-            return profile
+            items = _good_rows(await _run_kwai({"urls": [profile_url], "maxItems": 1}, max_items=1))
+            if not items:
+                raise HTTPException(status_code=404, detail="Kwai profile not found")
+            return _normalize_profile(items[0])
 
-        data = await cached_or_run("kwai.profile", {"user_id": user_id, "v": 2}, _run, ctx)
+        data = await cached_or_run("kwai.profile", {"url": profile_url, "v": 3}, _run, ctx)
         return ApiResponse(data=data)
 
 
 @router.get("/user-posts", summary="Kwai user posts")
 async def user_posts(
-    url: str = Query(..., description="Kuaishou profile URL or numeric user ID (e.g. .../profile/2542916559)"),
+    url: str = Query(..., description="Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)"),
     limit: int = Query(20, ge=1, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    user_id = _id(url)
-    if not user_id:
-        raise HTTPException(status_code=400, detail="Invalid Kwai profile URL or user ID")
-    settings = get_settings()
+    profile_url = _profile_url(url)
+    if not profile_url:
+        raise HTTPException(status_code=400, detail="Invalid Kwai profile URL or handle")
     async with billed_call(caller=caller, endpoint="/v1/kwai/user-posts", platform="kwai", resource_url=url, base_credits=max(2, math.ceil(limit * 2.25))) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_kwai(
-                {"operation": "userVideos", "userId": user_id, "maxPages": max(1, math.ceil(limit / 10))},
-                max_items=limit,
-            )
-            good = _check_rows(items, "Kwai profile not found")
-            posts = [_normalize_post(i) for i in good[:limit]]
-            return {"userId": user_id, "totalReturned": len(posts), "posts": posts}
+            items = _good_rows(await _run_kwai({"urls": [profile_url], "maxItems": limit}, max_items=limit))
+            if not items:
+                raise HTTPException(status_code=404, detail="Kwai profile not found")
+            posts = [_normalize_post(i) for i in items[:limit]]
+            return {"profileUrl": profile_url, "totalReturned": len(posts), "posts": posts}
 
-        data = await cached_or_run("kwai.user-posts", {"user_id": user_id, "limit": limit}, _run, ctx)
+        data = await cached_or_run("kwai.user-posts", {"url": profile_url, "limit": limit, "v": 2}, _run, ctx)
         ctx["credits_override"] = max(2, math.ceil(len(data["posts"]) * 2.25))
         return ApiResponse(data=data)
 
 
 @router.get("/post", summary="Kwai post")
 async def post(
-    url: str = Query(..., description="Kuaishou video URL or numeric video/photo ID (e.g. .../short-video/5241627202658372579)"),
+    url: str = Query(..., description="Kwai video URL (e.g. https://www.kwai.com/@handle/video/5238962376325675745)"),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    video_id = _id(url)
-    if not video_id:
-        raise HTTPException(status_code=400, detail="Invalid Kwai post URL or ID")
-    author_match = re.search(r"[?&](?:authorId|userId)=(\w+)", url or "")
-    author_id = author_match.group(1) if author_match else None
-    settings = get_settings()
+    video_url = _video_url(url)
+    if not video_url:
+        raise HTTPException(status_code=400, detail="Invalid Kwai post URL")
     async with billed_call(caller=caller, endpoint="/v1/kwai/post", platform="kwai", resource_url=url, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await _run_kwai({"operation": "videoDetail", "videoId": video_id}, max_items=1)
-            good = _good_rows(items)
-            if good:
-                return _normalize_post(good[0])
-            # videoDetail is frequently broken in the actor. When the URL
-            # carries the author (kuaishou share links include ?authorId=...),
-            # find the video in the author's recent uploads instead.
-            if author_id:
-                videos = _good_rows(
-                    await apify.run_actor_sync(
-                        settings.APIFY_ACTOR_KWAI,
-                        {"operation": "userVideos", "userId": author_id, "maxPages": 3},
-                        max_items=100,
-                    )
-                )
-                match = next(
-                    (v for v in videos if str(v.get("videoId") or v.get("photo_id") or v.get("photoId")) == str(video_id)),
-                    None,
-                )
-                if match:
-                    return _normalize_post(match)
-            _check_rows(items, "Kwai post not found")  # raises with actor's error
-            raise HTTPException(status_code=404, detail="Kwai post not found")
+            items = _good_rows(await _run_kwai({"urls": [video_url], "maxItems": 1}, max_items=1))
+            if not items:
+                raise HTTPException(status_code=404, detail="Kwai post not found")
+            return _normalize_post(items[0])
 
-        data = await cached_or_run("kwai.post", {"video_id": video_id, "author_id": author_id, "v": 2}, _run, ctx)
+        data = await cached_or_run("kwai.post", {"url": video_url, "v": 3}, _run, ctx)
         return ApiResponse(data=data)

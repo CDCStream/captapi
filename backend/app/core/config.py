@@ -232,7 +232,7 @@ class Settings(BaseSettings):
     APIFY_ACTOR_KICK: str = "scrapestorm/kick-videos-clips-scraper-cheap"
     APIFY_ACTOR_AMAZON_SHOP: str = "piotrv1001/amazon-storefront-scraper"
     APIFY_ACTOR_AGE_GENDER: str = "parseforge/agify-name-demographics-scraper"
-    APIFY_ACTOR_KWAI: str = "sian.agency/kwai-kuaishou-scraper"
+    APIFY_ACTOR_KWAI: str = "natanielsantos/kwai-scraper"
 
     # TikTok Shop. 5 modes: shop_search, shop_catalog, product_details,
     # product_reviews, creator_showcase.
