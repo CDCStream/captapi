@@ -67,6 +67,19 @@ async def cache_set(key: str, value: dict[str, Any], ttl: int | None = None) -> 
         log.warning("cache_set_failed", error=str(e), key=key)
 
 
+async def cache_try_lock(key: str, ttl_seconds: int) -> bool:
+    """Best-effort distributed lock (SET NX). True if this caller won the lock.
+
+    On Redis failure returns True so the caller proceeds — worst case is a
+    duplicate background refresh, which is preferable to never refreshing.
+    """
+    try:
+        return bool(await get_redis().set(key, "1", nx=True, ex=ttl_seconds))
+    except Exception as e:
+        log.warning("cache_lock_failed", error=str(e), key=key)
+        return True
+
+
 async def rate_limit_hit(scope: str, limit: int, window_seconds: int = 60) -> bool:
     """Sliding window rate limit using Redis INCR + EXPIRE.
     Returns True if request should be blocked (limit exceeded)."""

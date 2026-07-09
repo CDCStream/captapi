@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import math
 import re
 from datetime import datetime, timezone
@@ -931,28 +932,37 @@ async def tiktok_audience_demographics(
         base_credits=7,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            profile_items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_PROFILE,
-                {"profiles": [handle], "resultsPerPage": 1},
-                max_items=1,
-            )
-            if not profile_items:
-                raise HTTPException(status_code=404, detail="Profile not found")
-            profile = _normalize_profile_region(profile_items[0], handle)
-            demographics: dict[str, Any] = {}
-            # Some third-party audience actors expose richer fields, but not all
-            # support a stable input. Keep this optional and always return the
-            # reliable public profile-derived signals.
-            if settings.APIFY_ACTOR_TIKTOK_AUDIENCE:
+            apify = get_apify()
+
+            async def _audience() -> dict[str, Any]:
+                # Some third-party audience actors expose richer fields, but not
+                # all support a stable input. Keep this optional and always
+                # return the reliable public profile-derived signals.
+                if not settings.APIFY_ACTOR_TIKTOK_AUDIENCE:
+                    return {}
                 try:
-                    audience_items = await get_apify().run_actor_sync(
+                    audience_items = await apify.run_actor_sync(
                         settings.APIFY_ACTOR_TIKTOK_AUDIENCE,
                         {"username": handle, "profileUrl": f"https://www.tiktok.com/@{handle}"},
                         max_items=1,
                     )
-                    demographics = audience_items[0] if audience_items else {}
+                    return audience_items[0] if audience_items else {}
                 except Exception:
-                    demographics = {}
+                    return {}
+
+            # Both actors are independent; running them concurrently saves a
+            # full actor run (~10-120s) per uncached request.
+            profile_items, demographics = await asyncio.gather(
+                apify.run_actor_sync(
+                    settings.APIFY_ACTOR_TIKTOK_PROFILE,
+                    {"profiles": [handle], "resultsPerPage": 1},
+                    max_items=1,
+                ),
+                _audience(),
+            )
+            if not profile_items:
+                raise HTTPException(status_code=404, detail="Profile not found")
+            profile = _normalize_profile_region(profile_items[0], handle)
             return {
                 "platform": "tiktok",
                 "username": handle,
@@ -1493,83 +1503,101 @@ async def tiktok_song_details(
                         "playUrl": None,
                     }
 
-            # Fast fallback: summary-only sound scraper. Avoid crawling videos
-            # for a simple song-details lookup when possible.
-            try:
-                summary_items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_TIKTOK_SONG_FAST_FALLBACK,
-                    {
-                        "sounds": [url_id or url],
-                        # The actor rejects 0 ("must be >= 1"), so ask for the
-                        # minimum even though we only want the sound summary.
-                        "maxVideosPerSound": 1,
-                        "includeSoundSummary": True,
-                        "includeVideoFields": False,
-                    },
-                    max_items=1,
-                )
-            except Exception:  # noqa: BLE001
-                summary_items = []
-            if summary_items:
-                item = summary_items[0]
-                music = item.get("sound") or item.get("music") or item.get("summary") or item
-                title = safe_str(music.get("title") or music.get("musicName") or music.get("name"))
-                if title:
-                    return {
-                        "platform": "tiktok",
-                        "url": url,
-                        "id": url_id or safe_str(music.get("id") or music.get("musicId") or music.get("soundId")),
-                        "title": title,
-                        "author": safe_str(music.get("artist") or music.get("authorName") or music.get("author")),
-                        "original": bool(title) and title.lower().startswith("original sound"),
-                        "album": safe_str(music.get("album")),
-                        "duration": safe_float(music.get("duration") or music.get("durationSeconds")),
-                        "coverUrl": safe_str(music.get("cover") or music.get("coverUrl") or music.get("coverLarge")),
-                        "playUrl": safe_str(music.get("playUrl") or music.get("audioUrl")),
-                    }
-
-            # Fallback: clockworks sound scraper (slower, exposes playUrl).
-            items, _actor = await apify.run_with_fallback(
-                [
-                    (
-                        settings.APIFY_ACTOR_TIKTOK_MUSIC,
+            # apidojo failed: the remaining fallbacks are independent actors, so
+            # race them concurrently instead of cascading (worst case used to be
+            # 3 more sequential actor runs). Costs one possibly-redundant run
+            # only on this already-failing path.
+            async def _summary_fallback() -> dict[str, Any] | None:
+                # Summary-only sound scraper: no video crawling.
+                try:
+                    summary_items = await apify.run_actor_sync(
+                        settings.APIFY_ACTOR_TIKTOK_SONG_FAST_FALLBACK,
                         {
                             "sounds": [url_id or url],
+                            # The actor rejects 0 ("must be >= 1"), so ask for
+                            # the minimum even though we only want the summary.
                             "maxVideosPerSound": 1,
                             "includeSoundSummary": True,
                             "includeVideoFields": False,
                         },
+                        max_items=1,
+                    )
+                except Exception:  # noqa: BLE001
+                    return None
+                if not summary_items:
+                    return None
+                item = summary_items[0]
+                music = item.get("sound") or item.get("music") or item.get("summary") or item
+                title = safe_str(music.get("title") or music.get("musicName") or music.get("name"))
+                if not title:
+                    return None
+                return {
+                    "platform": "tiktok",
+                    "url": url,
+                    "id": url_id or safe_str(music.get("id") or music.get("musicId") or music.get("soundId")),
+                    "title": title,
+                    "author": safe_str(music.get("artist") or music.get("authorName") or music.get("author")),
+                    "original": bool(title) and title.lower().startswith("original sound"),
+                    "album": safe_str(music.get("album")),
+                    "duration": safe_float(music.get("duration") or music.get("durationSeconds")),
+                    "coverUrl": safe_str(music.get("cover") or music.get("coverUrl") or music.get("coverLarge")),
+                    "playUrl": safe_str(music.get("playUrl") or music.get("audioUrl")),
+                }
+
+            async def _clockworks_fallback() -> dict[str, Any] | None:
+                # Clockworks sound scraper (slower, exposes playUrl).
+                try:
+                    items, _actor = await apify.run_with_fallback(
+                        [
+                            (
+                                settings.APIFY_ACTOR_TIKTOK_MUSIC,
+                                {
+                                    "sounds": [url_id or url],
+                                    "maxVideosPerSound": 1,
+                                    "includeSoundSummary": True,
+                                    "includeVideoFields": False,
+                                },
+                            ),
+                            (
+                                settings.APIFY_ACTOR_TIKTOK_MUSIC_FALLBACK,
+                                {"musics": [url], "resultsPerPage": 1, "shouldDownloadVideos": False},
+                            ),
+                        ],
+                        max_items=1,
+                    )
+                except Exception:  # noqa: BLE001
+                    return None
+                if not items:
+                    return None
+                music = (
+                    items[0].get("musicMeta")
+                    or items[0].get("music")
+                    or items[0].get("sound")
+                    or items[0].get("summary")
+                    or items[0]
+                )
+                return {
+                    "platform": "tiktok",
+                    "url": url,
+                    "id": url_id or safe_str(music.get("musicId") or music.get("soundId") or music.get("id")),
+                    "title": safe_str(music.get("musicName") or music.get("title") or music.get("name")),
+                    "author": safe_str(music.get("musicAuthor") or music.get("authorName") or music.get("artist") or music.get("author")),
+                    "original": music.get("musicOriginal"),
+                    "album": None,
+                    "duration": safe_float(music.get("duration") or music.get("durationSeconds")),
+                    "coverUrl": safe_str(
+                        music.get("coverLarge") or music.get("coverMedium") or music.get("coverMediumUrl") or music.get("coverUrl") or music.get("cover")
                     ),
-                    (
-                        settings.APIFY_ACTOR_TIKTOK_MUSIC_FALLBACK,
-                        {"musics": [url], "resultsPerPage": 1, "shouldDownloadVideos": False},
-                    ),
-                ],
-                max_items=1,
+                    "playUrl": safe_str(music.get("playUrl") or music.get("audioUrl")),
+                }
+
+            summary_result, clockworks_result = await asyncio.gather(
+                _summary_fallback(), _clockworks_fallback()
             )
-            if not items:
+            result = summary_result or clockworks_result
+            if not result:
                 raise HTTPException(status_code=404, detail="Song not found")
-            music = (
-                items[0].get("musicMeta")
-                or items[0].get("music")
-                or items[0].get("sound")
-                or items[0].get("summary")
-                or items[0]
-            )
-            return {
-                "platform": "tiktok",
-                "url": url,
-                "id": url_id or safe_str(music.get("musicId") or music.get("soundId") or music.get("id")),
-                "title": safe_str(music.get("musicName") or music.get("title") or music.get("name")),
-                "author": safe_str(music.get("musicAuthor") or music.get("authorName") or music.get("artist") or music.get("author")),
-                "original": music.get("musicOriginal"),
-                "album": None,
-                "duration": safe_float(music.get("duration") or music.get("durationSeconds")),
-                "coverUrl": safe_str(
-                    music.get("coverLarge") or music.get("coverMedium") or music.get("coverMediumUrl") or music.get("coverUrl") or music.get("cover")
-                ),
-                "playUrl": safe_str(music.get("playUrl") or music.get("audioUrl")),
-            }
+            return result
 
         data = await cached_or_run(
             endpoint="tiktok.song-details",

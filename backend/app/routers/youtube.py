@@ -509,29 +509,30 @@ async def _fetch_transcript_item(norm_url: str, language: str | None) -> dict[st
     else:
         chain = [a1, a2]
 
+    # One attempt per actor: an actor that just returned empty/errored almost
+    # never succeeds on an immediate retry, and each retry risked another full
+    # actor run (~2 min worst case). Two independent actors are redundancy
+    # enough; worst case is now 2 runs instead of 4.
     last: dict[str, Any] = {"segments": [], "title": None, "language": language}
     for actor in chain:
-        for attempt in range(2):
-            try:
-                items = await apify.run_actor_sync(
-                    actor, _transcript_run_input(actor, norm_url, language), max_items=1
-                )
-            except Exception:
-                items = []
-            if items:
-                rec = items[0]
-                segs = _normalize_segments(rec)
-                title = safe_str(rec.get("videoTitle") or rec.get("video_title") or rec.get("title"))
-                if segs:
-                    return {
-                        "segments": segs,
-                        "title": title,
-                        "language": safe_str(rec.get("language") or rec.get("selectedLanguage") or language),
-                        "source": "apify",
-                    }
-                last = {"segments": [], "title": title, "language": language}
-            if attempt == 0:
-                await asyncio.sleep(1.0)
+        try:
+            items = await apify.run_actor_sync(
+                actor, _transcript_run_input(actor, norm_url, language), max_items=1
+            )
+        except Exception:
+            items = []
+        if items:
+            rec = items[0]
+            segs = _normalize_segments(rec)
+            title = safe_str(rec.get("videoTitle") or rec.get("video_title") or rec.get("title"))
+            if segs:
+                return {
+                    "segments": segs,
+                    "title": title,
+                    "language": safe_str(rec.get("language") or rec.get("selectedLanguage") or language),
+                    "source": "apify",
+                }
+            last = {"segments": [], "title": title, "language": language}
     return last
 
 
@@ -1300,6 +1301,9 @@ async def youtube_trending_shorts(
             params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            # Trending actor runs take minutes; serve the last list instantly
+            # after TTL expiry and refresh in the background.
+            stale_while_revalidate=True,
         )
         ctx["credits_override"] = _scaled_credits(len(data["shorts"]), RATE_YT_MARGIN, 2)
         return ApiResponse(data=data)

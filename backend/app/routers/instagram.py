@@ -800,6 +800,9 @@ async def instagram_trending_reels(
             params={"country": country, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
+            # Trending actor runs take minutes; serve the last list instantly
+            # after TTL expiry and refresh in the background.
+            stale_while_revalidate=True,
         )
         ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_MARGIN, 2)
         return ApiResponse(data=data)

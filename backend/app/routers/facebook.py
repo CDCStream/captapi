@@ -872,6 +872,9 @@ async def facebook_profile_events(
             params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            # Events actor runs take minutes (280s timeout); serve the last
+            # list instantly after TTL expiry and refresh in the background.
+            stale_while_revalidate=True,
         )
         ctx["credits_override"] = _scaled_credits(len(data["events"]), RATE_FB_EVENTS, 4)
         return ApiResponse(data=data)
