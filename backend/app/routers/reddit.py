@@ -20,7 +20,6 @@ from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
-from app.services.apify_proxy import fetch_via_residential
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import first_present, safe_int, safe_str
@@ -197,16 +196,10 @@ async def _fetch_reddit_json_url(url: str, limit: int) -> tuple[dict[str, Any], 
             resp = await client.get(url, params=params)
     except httpx.HTTPError:
         resp = None
-    if resp is None or resp.status_code in {403, 429} or resp.status_code >= 500:
-        # Reddit blocks datacenter IPs; the residential proxy sometimes gets
-        # through and keeps the richer public-JSON path (scores, threading)
-        # instead of the sparser actor fallback.
-        joiner = "&" if "?" in url else "?"
-        prox = await fetch_via_residential(
-            f"{url}{joiner}raw_json=1&limit={max(limit, 1)}", headers=headers
-        )
-        if prox is not None:
-            resp = prox
+    # No proxy retry: Reddit 403s both datacenter and residential proxies
+    # (fingerprint-based blocking, measured 0/16 success), so a failed direct
+    # attempt goes straight to the Apify actor fallback instead of burning
+    # seconds on doomed proxied retries.
     if resp is None:
         raise HTTPException(status_code=502, detail="Reddit upstream error")
     if resp.status_code == 404:
@@ -545,19 +538,15 @@ def _clean_reddit_image(value: Any) -> str | None:
 
 
 async def _subreddit_details_native(sub: str) -> dict[str, Any] | None:
-    """Fetch subreddit info from public ``about.json`` (no Apify).
+    """Fetch subreddit info from public ``about.json`` (no Apify actor).
 
-    Tries the datacenter proxy first, then OAuth (if configured), then the
-    residential proxy — the same escalation the post endpoints already use.
-    Returns None on failure so the caller falls back to the actor.
+    Only the OAuth path (oauth.reddit.com, works from datacenter IPs) is
+    tried: Reddit 403-blocks anonymous requests from datacenter AND
+    residential proxies alike (fingerprint-based, measured 0/16 success), so
+    proxied retries are pure wasted latency. Returns None on failure so the
+    caller falls back to the actor.
     """
-    about_url = f"https://www.reddit.com/r/{sub}/about.json"
-    headers = {"User-Agent": "CaptapiBot/1.0 (+https://captapi.com)"}
     resp: httpx.Response | None = None
-
-    # Reddit blocks datacenter IPs (incl. shared proxies) with 403, so we skip
-    # the datacenter tier entirely here. OAuth (oauth.reddit.com) works from
-    # datacenter IPs; residential proxy is the last resort before the actor.
     oauth = await _reddit_oauth_headers()
     if oauth:
         try:
@@ -568,11 +557,6 @@ async def _subreddit_details_native(sub: str) -> dict[str, Any] | None:
             )
         except httpx.HTTPError:
             resp = None
-
-    if resp is None or resp.status_code in {403, 429} or resp.status_code >= 500:
-        prox = await fetch_via_residential(f"{about_url}?raw_json=1", headers=headers)
-        if prox is not None:
-            resp = prox
 
     if resp is None or resp.status_code >= 400:
         return None
