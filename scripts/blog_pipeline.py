@@ -2,8 +2,8 @@
 
 The agent imports Ahrefs CSV exports, optionally verifies metrics with
 DataForSEO, researches the live SERP through Serper, writes an HTML article
-with inline AI illustrations, assigns a permanent branded cover, and upserts
-the result into ``blog_posts``.
+with inline AI illustrations plus one sourced CC web photo, assigns a
+permanent branded cover, and upserts the result into ``blog_posts``.
 
 Examples:
   python scripts/blog_pipeline.py --import-ahrefs exports/keywords.csv
@@ -91,6 +91,9 @@ competitors with false claims; be factual about trade-offs.
 [[IMAGE: detailed description of a helpful illustration]] - one right after \
 the intro section and one mid-article. Never place them inside tables, \
 lists, code blocks, or the FAQ.
+- Insert exactly 1 photo placeholder on its own line, formatted as \
+[[PHOTO: 2-4 word English stock-photo search query]], in a section that \
+has no illustration placeholder.
 - Output valid, semantic HTML only (h2/h3/p/table/pre/code/ul/ol). \
 NO <html>, <head>, <body>, <h1> tags. No markdown.
 - 1200-1800 words."""
@@ -122,6 +125,8 @@ IMAGE_STYLE = (
 )
 
 IMAGE_MARKER = re.compile(r"(?:<p>\s*)?\[\[IMAGE:\s*(.*?)\]\](?:\s*</p>)?", re.S)
+PHOTO_MARKER = re.compile(r"(?:<p>\s*)?\[\[PHOTO:\s*(.*?)\]\](?:\s*</p>)?", re.S)
+PHOTO_EXTENSIONS = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"}
 
 
 def read_bank() -> list[dict]:
@@ -501,6 +506,98 @@ def embed_images(content: str, slug: str, generate: bool) -> str:
     return IMAGE_MARKER.sub(replace, content)
 
 
+def search_web_photo(query: str) -> dict[str, str] | None:
+    """Find one commercially usable CC-licensed photo on Openverse."""
+    params = urllib.parse.urlencode(
+        {
+            "q": query,
+            "license_type": "commercial",
+            "page_size": "20",
+            "filter_dead": "true",
+        }
+    )
+    body = http_request(
+        f"https://api.openverse.org/v1/images/?{params}",
+        headers={"User-Agent": "captapi-blog-agent/1.0", "Accept": "application/json"},
+        timeout=45,
+    )
+    for item in json.loads(body).get("results", []):
+        url = str(item.get("url") or "")
+        if not url.lower().split("?")[0].endswith((".jpg", ".jpeg", ".png", ".webp")):
+            continue
+        if (item.get("width") or 0) < 640:
+            continue
+        return {
+            "url": url,
+            "title": str(item.get("title") or "Photo"),
+            "creator": str(item.get("creator") or "Unknown"),
+            "license": str(item.get("license") or "").upper(),
+            "license_version": str(item.get("license_version") or ""),
+            "source_url": str(item.get("foreign_landing_url") or url),
+        }
+    return None
+
+
+def download_photo(url: str) -> tuple[bytes, str] | None:
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        content_type = (r.headers.get_content_type() or "").lower()
+        data = r.read()
+    if content_type not in PHOTO_EXTENSIONS or not data or len(data) > 7_000_000:
+        return None
+    return data, content_type
+
+
+def embed_web_photos(content: str, slug: str, generate: bool) -> str:
+    """Replace [[PHOTO: ...]] markers with sourced CC photos (max 1)."""
+    count = 0
+
+    def replace(match: re.Match[str]) -> str:
+        nonlocal count
+        query = match.group(1).strip()
+        if not generate or count >= 1 or not query:
+            return ""
+        try:
+            photo = search_web_photo(query)
+            if not photo:
+                print(f"  no usable CC photo found for '{query}'")
+                return ""
+            downloaded = download_photo(photo["url"])
+            if not downloaded:
+                print(f"  photo download rejected for '{query}'")
+                return ""
+            image, content_type = downloaded
+            count += 1
+            ext = PHOTO_EXTENSIONS[content_type]
+            url = upload_image(f"{slug}-photo-{count}.{ext}", image, content_type)
+        except Exception as exc:
+            print(f"  web photo failed ({exc}); skipping")
+            return ""
+        if not url:
+            return ""
+        if photo["license"] in {"CC0", "PDM"}:
+            license_label = "Public Domain" if photo["license"] == "PDM" else "CC0"
+        else:
+            license_label = " ".join(
+                part
+                for part in (f"CC {photo['license']}", photo["license_version"])
+                if part.strip()
+            )
+        source = html.escape(photo["source_url"], quote=True)
+        title = html.escape(photo["title"][:80])
+        creator = html.escape(photo["creator"][:60])
+        alt = html.escape(query[:150], quote=True)
+        print(f"  web photo -> {url}")
+        return (
+            f'<figure><img src="{url}" alt="{alt}" loading="lazy" />'
+            f'<figcaption>Source: <a href="{source}" rel="noopener nofollow" '
+            f'target="_blank">{title} by {creator}</a> ({license_label})'
+            f"</figcaption></figure>"
+        )
+
+    return PHOTO_MARKER.sub(replace, content)
+
+
 def existing_posts() -> dict[str, str]:
     secret = os.environ.get("BLOG_ADMIN_SECRET", "").strip()
     if not secret:
@@ -612,6 +709,9 @@ def main() -> None:
         validate_article(article, kw, row.get("internal_links", ""))
         slug = row.get("target_slug") or slugify(kw)
         article["content"] = embed_images(
+            article["content"], slug, generate=not args.dry_run
+        )
+        article["content"] = embed_web_photos(
             article["content"], slug, generate=not args.dry_run
         )
 

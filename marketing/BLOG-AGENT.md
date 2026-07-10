@@ -10,6 +10,9 @@ The agent turns an Ahrefs keyword export into scheduled, SERP-aware articles:
 5. The article LLM marks two [[IMAGE: ...]] spots; the agent renders them with
    OpenAI images (gpt-image-1, dall-e-3 fallback), uploads them to Supabase
    Storage via /api/blog/upload-image, and embeds them as <figure> blocks.
+   One extra [[PHOTO: ...]] spot is filled with a commercially usable
+   CC-licensed photo from Openverse, re-hosted on Supabase and credited with
+   a "Source: title by creator (license)" figcaption linking to the origin.
 6. Automated checks reject short articles, missing headings, bad metadata,
    and missing internal links.
 7. `/api/blog/save` upserts the post into Supabase `blog_posts`.
