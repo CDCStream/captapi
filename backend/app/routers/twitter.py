@@ -325,6 +325,11 @@ async def twitter_profile(
             params={"handle": handle, "v": 3},
             runner=_run,
             ctx=ctx,
+            # The apidojo actor cold-starts at ~14s. Profiles are polled
+            # repeatedly (monitoring dashboards) and follower counts drift
+            # slowly, so serve the last copy instantly after the 1h TTL and
+            # refresh in the background instead of making every caller wait.
+            stale_while_revalidate=True,
         )
         return ApiResponse(data=data)
 

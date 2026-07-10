@@ -6,7 +6,6 @@ actor returns mixed post/comment items; we split them by ``dataType``.
 
 from __future__ import annotations
 
-import asyncio
 import math
 from datetime import datetime, timezone
 from typing import Any
@@ -19,7 +18,7 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
-from app.services.apify_client import get_apify
+from app.services.apify_client import ApifyClient, get_apify
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import first_present, safe_int, safe_str
@@ -286,11 +285,24 @@ def _epoch_to_iso(value: Any) -> Any:
     return value
 
 
+# Reddit's public JSON is datacenter-blocked, so post endpoints always land on
+# an actor. The two actors run back-to-back in the resilient cascade; with the
+# global 120s sync timeout a deleted/blocked post could burn ~250s before
+# failing (measured). Cap each actor so the whole cascade stays well under a
+# typical client timeout, while still allowing genuinely large comment threads
+# (~70s observed) to finish.
+_REDDIT_ACTOR_TIMEOUT = 75.0
+
+
+def _reddit_actor_client() -> ApifyClient:
+    return ApifyClient(timeout=_REDDIT_ACTOR_TIMEOUT, max_attempts=1)
+
+
 async def _fetch_reddit_comments_actor_post(url: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Post + comment tree via the clearpath actor: real scores, parentId,
     depth, and permalinks — everything the trudax lite actor drops."""
     settings = get_settings()
-    items = await get_apify().run_actor_sync(
+    items = await _reddit_actor_client().run_actor_sync(
         settings.APIFY_ACTOR_REDDIT_COMMENTS,
         {"postUrl": url, "maxCommentsPerPost": max(limit, 1), "sort": "top"},
         max_items=max(limit, 1) + 1,
@@ -342,7 +354,7 @@ async def _fetch_reddit_comments_actor_post(url: str, limit: int) -> tuple[dict[
 
 async def _fetch_reddit_actor_post(url: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     settings = get_settings()
-    items = await get_apify().run_actor_sync(
+    items = await _reddit_actor_client().run_actor_sync(
         settings.APIFY_ACTOR_REDDIT,
         {
             "startUrls": [{"url": url}],
@@ -381,25 +393,21 @@ async def _fetch_reddit_post_resilient(
         return result
     except Exception:  # noqa: BLE001 — any failure falls through to trudax
         pass
-    # Final fallback. Upstream 504s here are transient, so retry once and map
-    # any leftover failure to a clean 502 instead of an opaque 500.
-    last_exc: Exception | None = None
-    for attempt in (1, 2):
-        try:
-            result = await _fetch_reddit_actor_post(url, limit)
-            if ctx is not None:
-                ctx["source"] = "apify"
-            return result
-        except HTTPException:
-            raise
-        except Exception as exc:  # noqa: BLE001
-            last_exc = exc
-            if attempt == 1:
-                await asyncio.sleep(2)
-    raise HTTPException(
-        status_code=502,
-        detail=f"Reddit upstream error, please retry ({str(last_exc)[:120]})",
-    )
+    # Final fallback: the lite actor. Single bounded attempt — the previous
+    # retry-with-sleep stacked another ~120s onto already-slow deleted-post
+    # cascades for no real gain (both actors fail the same way on a dead post).
+    try:
+        result = await _fetch_reddit_actor_post(url, limit)
+        if ctx is not None:
+            ctx["source"] = "apify"
+        return result
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(
+            status_code=502,
+            detail=f"Reddit upstream error, please retry ({str(exc)[:120]})",
+        ) from exc
 
 
 async def _reddit_listing_json(path: str, params: dict[str, Any], limit: int) -> list[dict[str, Any]]:

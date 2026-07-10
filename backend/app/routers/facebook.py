@@ -1180,6 +1180,10 @@ async def facebook_event_search(
             params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            # Browser-based events actor takes 2-3 min (p95 ~101s); serve the
+            # last result set instantly after TTL and refresh in the background
+            # rather than making the caller wait minutes, same as profile-events.
+            stale_while_revalidate=True,
         )
         ctx["credits_override"] = _scaled_credits(len(data["events"]), RATE_FB_EVENTS, 4)
         return ApiResponse(data=data)
