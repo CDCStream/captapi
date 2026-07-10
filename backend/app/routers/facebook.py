@@ -570,6 +570,11 @@ async def facebook_page_details(
             if not items:
                 raise HTTPException(status_code=404, detail="Page not found")
             p = items[0]
+            if p.get("error"):
+                # The actor reports deleted/restricted pages as an error row
+                # ({"error": "not_available", ...}); returning it would produce
+                # an all-null 200 that then gets cached.
+                raise HTTPException(status_code=404, detail="Page not found or not public")
             verified = p.get("verified") or p.get("isPageVerified")
             if verified is None and (p.get("confirmed_owner") or p.get("CONFIRMED_OWNER_LABEL")):
                 # The pages scraper has no blue-badge flag; a confirmed Page
@@ -580,9 +585,12 @@ async def facebook_page_details(
                 or p.get("username")
                 or _fb_username_from_url(p.get("pageUrl") or p.get("facebookUrl"))
             )
-            display_name = safe_str(
-                p.get("pageName") or p.get("title") or p.get("name")
-            )
+            page_name = safe_str(p.get("pageName"))
+            if page_name and page_name.lower() in {"people", "pages", "profile", "home"}:
+                # profile.php-style pages come back with a junk pageName (the
+                # site section, e.g. "people"); the real name lives in title.
+                page_name = None
+            display_name = page_name or safe_str(p.get("title") or p.get("name"))
             if not display_name:
                 # Safety net: the first info line reads "<Page name>. N likes".
                 info = p.get("info")
@@ -613,7 +621,7 @@ async def facebook_page_details(
 
         data = await cached_or_run(
             endpoint="facebook.page-details",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
         )

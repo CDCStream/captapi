@@ -152,8 +152,22 @@ def _entities_website(item: dict[str, Any]) -> str | None:
     return None
 
 
+def _verified_flag(item: dict[str, Any]) -> bool | None:
+    """True/False when the actor reports verification, None when unknown.
+
+    Must not use `a or b` chains: `False or None` collapses a real
+    "not verified" answer into null.
+    """
+    value = first_present(item.get("isVerified"), item.get("isBlueVerified"), item.get("verified"))
+    return bool(value) if value is not None else None
+
+
 def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
     username = item.get("userName") or item.get("screen_name") or item.get("username")
+    verified = _verified_flag(item)
+    # apidojo/twitter-user-scraper dropped the isBlueVerified key; on today's X
+    # the isVerified flag IS the blue checkmark, so mirror it when absent.
+    blue = first_present(item.get("isBlueVerified"), item.get("isVerified"))
     return {
         "platform": "twitter",
         "url": safe_str(item.get("url"))
@@ -163,14 +177,14 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
         "name": safe_str(item.get("name") or item.get("fullName")),
         "bio": safe_str(item.get("description") or item.get("bio")),
         "location": safe_str(item.get("location")),
-        "verified": item.get("isVerified") or item.get("isBlueVerified") or item.get("verified"),
-        "followers": safe_int(item.get("followers") or item.get("followersCount")),
-        "following": safe_int(item.get("following") or item.get("followingCount") or item.get("friendsCount")),
-        "tweetCount": safe_int(item.get("statusesCount") or item.get("tweetsCount") or item.get("statuses_count")),
-        "likesCount": safe_int(item.get("favouritesCount") or item.get("favourites_count") or item.get("likesCount")),
-        "mediaCount": safe_int(item.get("mediaCount") or item.get("media_count")),
-        "listedCount": safe_int(item.get("listedCount") or item.get("listed_count")),
-        "isBlueVerified": bool(item.get("isBlueVerified")) or None,
+        "verified": verified,
+        "followers": safe_int(first_present(item.get("followers"), item.get("followersCount"))),
+        "following": safe_int(first_present(item.get("following"), item.get("followingCount"), item.get("friendsCount"))),
+        "tweetCount": safe_int(first_present(item.get("statusesCount"), item.get("tweetsCount"), item.get("statuses_count"))),
+        "likesCount": safe_int(first_present(item.get("favouritesCount"), item.get("favourites_count"), item.get("likesCount"))),
+        "mediaCount": safe_int(first_present(item.get("mediaCount"), item.get("media_count"))),
+        "listedCount": safe_int(first_present(item.get("listedCount"), item.get("listed_count"))),
+        "isBlueVerified": bool(blue) if blue is not None else None,
         "website": safe_str(item.get("website")) or _entities_website(item),
         "profileImage": safe_str(item.get("profilePicture") or item.get("profile_image_url_https")),
         "bannerImage": safe_str(item.get("coverPicture") or item.get("profile_banner_url")),
@@ -303,11 +317,12 @@ async def twitter_profile(
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Profile not found")
+            ctx["source"] = "apify"
             return _normalize_profile(items[0])
 
         data = await cached_or_run(
             endpoint="twitter.profile",
-            params={"handle": handle, "v": 2},
+            params={"handle": handle, "v": 3},
             runner=_run,
             ctx=ctx,
         )
