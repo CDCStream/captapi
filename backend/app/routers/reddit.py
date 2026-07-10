@@ -9,7 +9,7 @@ from __future__ import annotations
 import math
 from datetime import datetime, timezone
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import urlencode, urlparse
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -18,6 +18,7 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
+from app.services import decodo_fetch
 from app.services.apify_client import ApifyClient, get_apify
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.cached_runner import cached_or_run
@@ -206,7 +207,12 @@ async def _fetch_reddit_json_url(url: str, limit: int) -> tuple[dict[str, Any], 
     if resp.status_code >= 400:
         raise HTTPException(status_code=502, detail="Reddit upstream error")
 
-    data = resp.json()
+    return _parse_reddit_post_payload(resp.json(), limit)
+
+
+def _parse_reddit_post_payload(data: Any, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Normalize a ``/comments/<id>.json`` payload (shared by the direct and
+    Decodo fetch paths)."""
     if not isinstance(data, list) or not data:
         raise HTTPException(status_code=404, detail="Post not found")
     post_children = (data[0].get("data") or {}).get("children") or []
@@ -372,6 +378,49 @@ async def _fetch_reddit_actor_post(url: str, limit: int) -> tuple[dict[str, Any]
     return post, comments
 
 
+async def _reddit_post_exists_decodo(post_id: str) -> bool | None:
+    """Authoritative existence probe via ``api/info.json`` through Decodo
+    (~3s measured). Returns None when the probe itself failed.
+
+    This matters for dead posts: ``comments/<id>.json`` 404s make Decodo
+    retry internally for ~35s, and the Apify actors burn ~75s each before
+    timing out — but info.json returns 200 with an empty listing instantly.
+    """
+    fetched = await decodo_fetch.fetch_json(
+        f"https://www.reddit.com/api/info.json?id=t3_{post_id}&raw_json=1",
+        timeout=20.0,
+    )
+    if fetched is None or fetched[0] != 200 or not isinstance(fetched[1], dict):
+        return None
+    children = ((fetched[1].get("data") or {}).get("children")) or []
+    return len(children) > 0
+
+
+async def _fetch_reddit_post_decodo(post_id: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Post + comments via Decodo's scraping pool (~1-3s measured; Reddit
+    doesn't fingerprint-block it, unlike our datacenter/residential proxies).
+
+    Raises 404 fast for dead/deleted posts (info.json probe) so the cascade
+    exits in seconds as a client error instead of burning ~150s of doomed
+    actor runs that surface as 5xx on the status page.
+    """
+    exists = await _reddit_post_exists_decodo(post_id)
+    if exists is False:
+        raise HTTPException(status_code=404, detail="Post not found")
+    fetched = await decodo_fetch.fetch_json(
+        f"https://www.reddit.com/comments/{post_id}.json?raw_json=1&limit={max(limit, 1)}",
+        timeout=15.0,
+    )
+    if fetched is None:
+        raise HTTPException(status_code=502, detail="Reddit upstream error")
+    status, payload = fetched
+    if status == 404:
+        raise HTTPException(status_code=404, detail="Post not found")
+    if status >= 400 or payload is None:
+        raise HTTPException(status_code=502, detail="Reddit upstream error")
+    return _parse_reddit_post_payload(payload, limit)
+
+
 async def _fetch_reddit_post_resilient(
     url: str,
     post_id: str,
@@ -386,6 +435,18 @@ async def _fetch_reddit_post_resilient(
     except HTTPException as exc:
         if exc.status_code not in {502, 503, 504}:
             raise
+    # Decodo second: fast, cheap, and its 404 is authoritative (dead post →
+    # fail in ~2s as a client error instead of ~150s of actor timeouts that
+    # show up as 5xx on the status page).
+    if decodo_fetch.enabled():
+        try:
+            result = await _fetch_reddit_post_decodo(post_id, limit)
+            if ctx is not None:
+                ctx["source"] = "direct"
+            return result
+        except HTTPException as exc:
+            if exc.status_code not in {502, 503, 504}:
+                raise
     try:
         result = await _fetch_reddit_comments_actor_post(url, limit)
         if ctx is not None:
@@ -419,17 +480,39 @@ async def _reddit_listing_json(path: str, params: dict[str, Any], limit: int) ->
     """
     headers = {"User-Agent": "CaptapiBot/1.0 (+https://captapi.com)"}
     query = {"raw_json": "1", "limit": max(limit, 1), **params}
-    for base in ("https://www.reddit.com", "https://old.reddit.com"):
+
+    async def _attempt_direct(base: str) -> Any | None:
         try:
             async with httpx.AsyncClient(timeout=8.0, follow_redirects=True, headers=headers) as client:
                 resp = await client.get(f"{base}{path}", params=query)
         except httpx.HTTPError:
-            continue
+            return None
         if resp.status_code >= 400:
-            continue
+            return None
         try:
-            payload = resp.json()
+            return resp.json()
         except ValueError:
+            return None
+
+    async def _attempt_decodo() -> Any | None:
+        if not decodo_fetch.enabled():
+            return None
+        qs = urlencode(query)
+        fetched = await decodo_fetch.fetch_json(f"https://www.reddit.com{path}?{qs}", timeout=25.0)
+        if fetched is None or fetched[0] >= 400:
+            return None
+        return fetched[1]
+
+    attempts = [
+        lambda: _attempt_direct("https://www.reddit.com"),
+        lambda: _attempt_direct("https://old.reddit.com"),
+        # Decodo's pool isn't fingerprint-blocked by Reddit (direct requests
+        # from Railway usually are), so it rescues listings before the actor.
+        _attempt_decodo,
+    ]
+    for attempt in attempts:
+        payload = await attempt()
+        if payload is None:
             continue
         children = ((payload.get("data") or {}).get("children") or []) if isinstance(payload, dict) else []
         posts: list[dict[str, Any]] = []
@@ -573,7 +656,7 @@ async def _subreddit_details_native(sub: str) -> dict[str, Any] | None:
     proxied retries are pure wasted latency. Returns None on failure so the
     caller falls back to the actor.
     """
-    resp: httpx.Response | None = None
+    payload: Any = None
     oauth = await _reddit_oauth_headers()
     if oauth:
         try:
@@ -582,15 +665,21 @@ async def _subreddit_details_native(sub: str) -> dict[str, Any] | None:
                 tier="none", headers=oauth,
                 params={"raw_json": "1"}, timeout=10,
             )
-        except httpx.HTTPError:
-            resp = None
+            if resp.status_code < 400:
+                payload = resp.json()
+        except (httpx.HTTPError, ValueError):
+            payload = None
 
-    if resp is None or resp.status_code >= 400:
+    if payload is None and decodo_fetch.enabled():
+        fetched = await decodo_fetch.fetch_json(
+            f"https://www.reddit.com/r/{sub}/about.json?raw_json=1", timeout=25.0,
+        )
+        if fetched is not None and fetched[0] < 400:
+            payload = fetched[1]
+
+    if not isinstance(payload, dict):
         return None
-    try:
-        data = (resp.json() or {}).get("data") or {}
-    except ValueError:
-        return None
+    data = payload.get("data") or {}
     if not (data.get("display_name") or data.get("subscribers") is not None):
         return None
 
