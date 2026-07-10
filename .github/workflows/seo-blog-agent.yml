@@ -44,6 +44,7 @@ jobs:
           DATAFORSEO_PASSWORD: ${{ secrets.DATAFORSEO_PASSWORD }}
           BLOG_ADMIN_SECRET: ${{ secrets.BLOG_ADMIN_SECRET }}
           BLOG_MODEL: ${{ vars.BLOG_MODEL }}
+          BLOG_IMAGE_MODEL: ${{ vars.BLOG_IMAGE_MODEL }}
           BLOG_STATUS: ${{ github.event.inputs.status || vars.BLOG_STATUS || 'draft' }}
         run: >-
           python scripts/blog_pipeline.py

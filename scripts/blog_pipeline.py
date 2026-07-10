@@ -1,8 +1,9 @@
 """Scheduled SEO blog agent for captapi.com.
 
 The agent imports Ahrefs CSV exports, optionally verifies metrics with
-DataForSEO, researches the live SERP through Serper, writes an HTML article,
-assigns a permanent branded cover, and upserts the result into ``blog_posts``.
+DataForSEO, researches the live SERP through Serper, writes an HTML article
+with inline AI illustrations, assigns a permanent branded cover, and upserts
+the result into ``blog_posts``.
 
 Examples:
   python scripts/blog_pipeline.py --import-ahrefs exports/keywords.csv
@@ -23,6 +24,7 @@ Recommended:
 
 Optional:
   BLOG_MODEL          default gpt-4o-mini
+  BLOG_IMAGE_MODEL    default gpt-image-1 (dall-e-3 fallback is automatic)
   BLOG_SITE_URL       default https://captapi.com
   BLOG_STATUS         draft or published; default draft
   BLOG_AUTHOR         default Captapi
@@ -50,8 +52,10 @@ ROOT = Path(__file__).resolve().parents[1]
 BANK = ROOT / "marketing" / "keyword-bank.csv"
 DRAFTS_DIR = ROOT / "marketing" / "blog-drafts"
 
+# "or" instead of get() default: CI may set these to empty strings.
 SITE = (os.environ.get("BLOG_SITE_URL") or "https://captapi.com").rstrip("/")
 MODEL = os.environ.get("BLOG_MODEL") or "gpt-4o-mini"
+IMAGE_MODEL = os.environ.get("BLOG_IMAGE_MODEL") or "gpt-image-1"
 DEFAULT_STATUS = (os.environ.get("BLOG_STATUS") or "draft").strip().lower()
 AUTHOR = os.environ.get("BLOG_AUTHOR", "Captapi").strip() or "Captapi"
 
@@ -83,6 +87,10 @@ or a real JSON response snippet.
 - Mention Captapi naturally where relevant (1-3 times max). Never trash \
 competitors with false claims; be factual about trade-offs.
 - End with an FAQ section (3-5 questions) using <h3> per question.
+- Insert exactly 2 image placeholders on their own lines, each formatted as \
+[[IMAGE: detailed description of a helpful illustration]] - one right after \
+the intro section and one mid-article. Never place them inside tables, \
+lists, code blocks, or the FAQ.
 - Output valid, semantic HTML only (h2/h3/p/table/pre/code/ul/ol). \
 NO <html>, <head>, <body>, <h1> tags. No markdown.
 - 1200-1800 words."""
@@ -105,6 +113,15 @@ Return a JSON object with exactly these keys:
 - "description": meta description, <= 155 chars
 - "tags": array of 3-5 short topic tags
 - "content": the full article HTML per the system rules"""
+
+IMAGE_STYLE = (
+    "Minimal flat vector illustration for a developer blog. Dark navy "
+    "background (#0b1220), cyan (#22d3ee) and indigo (#6366f1) accents, soft "
+    "glow, clean geometric shapes, no text, no words, no letters, no logos, "
+    "no watermarks. Scene: {scene}"
+)
+
+IMAGE_MARKER = re.compile(r"(?:<p>\s*)?\[\[IMAGE:\s*(.*?)\]\](?:\s*</p>)?", re.S)
 
 
 def read_bank() -> list[dict]:
@@ -237,8 +254,12 @@ def http_request(
         headers=headers or {"User-Agent": "Mozilla/5.0"},
         method=method,
     )
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read().decode("utf-8", errors="replace")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return r.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")[:500]
+        raise RuntimeError(f"HTTP {exc.code} from {url.split('?')[0]}: {detail}") from exc
 
 
 def research_serp(keyword: str) -> tuple[list[dict[str, str]], list[str]]:
@@ -345,20 +366,17 @@ def call_openai(
             {"role": "user", "content": user},
         ],
     }
-    req = urllib.request.Request(
+    body = http_request(
         "https://api.openai.com/v1/chat/completions",
-        data=json.dumps(payload).encode(),
+        method="POST",
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         },
+        payload=payload,
+        timeout=300,
     )
-    try:
-        with urllib.request.urlopen(req, timeout=300) as r:
-            data = json.loads(r.read())
-    except urllib.error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")[:500]
-        raise RuntimeError(f"OpenAI HTTP {exc.code}: {detail}") from exc
+    data = json.loads(body)
     out = json.loads(data["choices"][0]["message"]["content"])
     for key in ("title", "description", "content"):
         if not out.get(key):
@@ -398,6 +416,91 @@ def cover_url(slug: str) -> str:
     return f"{SITE}/blog/{slug}/opengraph-image"
 
 
+def generate_image(description: str) -> tuple[bytes, str] | None:
+    """Render one inline illustration; returns (bytes, content_type) or None."""
+    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    prompt = IMAGE_STYLE.format(scene=description)
+    for model in dict.fromkeys((IMAGE_MODEL, "dall-e-3")):
+        if model.startswith("gpt-image"):
+            payload: dict[str, Any] = {
+                "model": model,
+                "prompt": prompt,
+                "size": "1536x1024",
+                "quality": "medium",
+                "output_format": "webp",
+            }
+            content_type = "image/webp"
+        else:
+            payload = {
+                "model": model,
+                "prompt": prompt,
+                "size": "1792x1024",
+                "response_format": "b64_json",
+            }
+            content_type = "image/png"
+        try:
+            body = http_request(
+                "https://api.openai.com/v1/images/generations",
+                method="POST",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                payload=payload,
+                timeout=240,
+            )
+            b64 = json.loads(body)["data"][0]["b64_json"]
+            return base64.b64decode(b64), content_type
+        except Exception as exc:
+            print(f"  image model {model} failed ({exc})")
+    return None
+
+
+def upload_image(name: str, image: bytes, content_type: str) -> str:
+    secret = os.environ.get("BLOG_ADMIN_SECRET", "").strip()
+    body = http_request(
+        f"{SITE}/api/blog/upload-image",
+        method="POST",
+        headers={"Content-Type": "application/json", "x-admin-secret": secret},
+        payload={
+            "name": name,
+            "b64": base64.b64encode(image).decode(),
+            "contentType": content_type,
+        },
+        timeout=120,
+    )
+    return str(json.loads(body).get("url") or "")
+
+
+def embed_images(content: str, slug: str, generate: bool) -> str:
+    """Replace [[IMAGE: ...]] markers with hosted illustrations (max 2)."""
+    count = 0
+
+    def replace(match: re.Match[str]) -> str:
+        nonlocal count
+        description = match.group(1).strip()
+        if not generate or count >= 2 or not description:
+            return ""
+        rendered = generate_image(description)
+        if not rendered:
+            return ""
+        image, content_type = rendered
+        count += 1
+        ext = "webp" if content_type == "image/webp" else "png"
+        try:
+            url = upload_image(f"{slug}-{count}.{ext}", image, content_type)
+        except Exception as exc:
+            print(f"  image upload failed ({exc}); skipping illustration")
+            return ""
+        if not url:
+            return ""
+        alt = html.escape(description[:150], quote=True)
+        print(f"  illustration {count} -> {url}")
+        return f'<figure><img src="{url}" alt="{alt}" loading="lazy" /></figure>'
+
+    return IMAGE_MARKER.sub(replace, content)
+
+
 def existing_posts() -> dict[str, str]:
     secret = os.environ.get("BLOG_ADMIN_SECRET", "").strip()
     if not secret:
@@ -431,13 +534,14 @@ def upload_article(slug: str, article: dict, status: str) -> str:
         "author": AUTHOR,
         "status": status,
     }
-    req = urllib.request.Request(
+    response = http_request(
         f"{SITE}/api/blog/save",
-        data=json.dumps(body).encode(),
+        method="POST",
         headers={"Content-Type": "application/json", "x-admin-secret": secret},
+        payload=body,
+        timeout=60,
     )
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return json.loads(r.read()).get("slug", slug)
+    return json.loads(response).get("slug", slug)
 
 
 def main() -> None:
@@ -507,6 +611,9 @@ def main() -> None:
         )
         validate_article(article, kw, row.get("internal_links", ""))
         slug = row.get("target_slug") or slugify(kw)
+        article["content"] = embed_images(
+            article["content"], slug, generate=not args.dry_run
+        )
 
         preview = DRAFTS_DIR / f"{slug}.html"
         preview.write_text(

@@ -7,10 +7,13 @@ The agent turns an Ahrefs keyword export into scheduled, SERP-aware articles:
 3. Serper supplies current Google results, snippets, People Also Ask, and
    related searches.
 4. The configured LLM writes a 1,200-1,800 word developer-focused HTML post.
-5. Automated checks reject short articles, missing headings, bad metadata,
+5. The article LLM marks two [[IMAGE: ...]] spots; the agent renders them with
+   OpenAI images (gpt-image-1, dall-e-3 fallback), uploads them to Supabase
+   Storage via /api/blog/upload-image, and embeds them as <figure> blocks.
+6. Automated checks reject short articles, missing headings, bad metadata,
    and missing internal links.
-6. `/api/blog/save` upserts the post into Supabase `blog_posts`.
-7. `/blog/[slug]/opengraph-image` renders a permanent 1200x630 Captapi cover.
+7. `/api/blog/save` upserts the post into Supabase `blog_posts`.
+8. `/blog/[slug]/opengraph-image` renders a permanent 1200x630 Captapi cover.
 
 ## Import an Ahrefs export
 
@@ -75,6 +78,7 @@ Add these repository secrets:
 Optional repository variables:
 
 - `BLOG_MODEL` (default `gpt-4o-mini`)
+- `BLOG_IMAGE_MODEL` (default `gpt-image-1`)
 - `BLOG_STATUS` (`draft` while validating quality; later `published`)
 
 Use **Actions → SEO blog agent → Run workflow** for a manual test.
@@ -86,4 +90,6 @@ Use **Actions → SEO blog agent → Run workflow** for a manual test.
 - Serper is preferred for live research; DuckDuckGo is the no-key fallback.
 - Existing posts are read through the authenticated blog admin endpoint.
 - The cover is rendered by the site and has no per-image generation cost.
+- Inline illustrations cost roughly $0.08-0.15 per article; if image generation
+  fails the article still publishes without them.
 - Publishing triggers the existing IndexNow integration.
