@@ -416,14 +416,57 @@ async def tiktok_video_details(
         return ApiResponse(data=data)
 
 
+def _tiktok_transcript_segments(item: dict[str, Any]) -> tuple[str, list[dict[str, Any]]]:
+    """Normalize a transcript actor item's ``segments`` (start/end shape)."""
+    segments = []
+    parts = []
+    for s in item.get("segments") or []:
+        if not isinstance(s, dict):
+            continue
+        text = safe_str(s.get("text")).strip()
+        if not text:
+            continue
+        start = safe_float(s.get("start")) or 0
+        end = safe_float(s.get("end")) or 0
+        mm, ss = int(start // 60), int(start % 60)
+        segments.append(
+            {
+                "text": text,
+                "start": start,
+                "duration": round(max(end - start, 0), 3),
+                "timestamp": f"{mm:02d}:{ss:02d}",
+            }
+        )
+        parts.append(text)
+    full = (safe_str(item.get("transcript")) or " ".join(parts)).strip()
+    return full, segments
+
+
 async def _fetch_tiktok_transcript(url: str) -> tuple[str, list[dict[str, Any]], str | None]:
     """Return (full transcript, timestamped segments, language).
 
-    Primary: dedicated transcript actor (native captions + Whisper fallback,
-    per-segment timestamps). Fallback: base scraper's caption text.
+    Cascade: fast native-caption actor (~5-9s) -> Whisper-capable actor
+    (~35-80s, handles caption-less videos) -> base scraper's caption text.
     """
     settings = get_settings()
     apify = get_apify()
+
+    # Fast path: native caption track over plain HTTP. Measured 8.8s vs 33.6s
+    # for identical text on the same video. Fails/returns hasCaption=false for
+    # caption-less videos, in which case we fall through to Whisper.
+    try:
+        items = await apify.run_actor_sync(
+            settings.APIFY_ACTOR_TIKTOK_TRANSCRIPT_FAST,
+            {"videoUrls": [url], "proxyConfiguration": {"useApifyProxy": True}},
+            max_items=1,
+        )
+    except Exception:  # noqa: BLE001
+        items = []
+    if items and items[0].get("hasCaption"):
+        full, segments = _tiktok_transcript_segments(items[0])
+        if full:
+            return full, segments, safe_str(items[0].get("language"))
+
     try:
         items = await apify.run_actor_sync(
             settings.APIFY_ACTOR_TIKTOK_TRANSCRIPT,
@@ -433,30 +476,9 @@ async def _fetch_tiktok_transcript(url: str) -> tuple[str, list[dict[str, Any]],
     except Exception:  # noqa: BLE001
         items = []
     if items:
-        item = items[0]
-        segments = []
-        parts = []
-        for s in item.get("segments") or []:
-            if not isinstance(s, dict):
-                continue
-            text = safe_str(s.get("text")).strip()
-            if not text:
-                continue
-            start = safe_float(s.get("start")) or 0
-            end = safe_float(s.get("end")) or 0
-            mm, ss = int(start // 60), int(start % 60)
-            segments.append(
-                {
-                    "text": text,
-                    "start": start,
-                    "duration": round(max(end - start, 0), 3),
-                    "timestamp": f"{mm:02d}:{ss:02d}",
-                }
-            )
-            parts.append(text)
-        full = (safe_str(item.get("transcript")) or " ".join(parts)).strip()
+        full, segments = _tiktok_transcript_segments(items[0])
         if full:
-            return full, segments, safe_str(item.get("languageCode"))
+            return full, segments, safe_str(items[0].get("languageCode"))
 
     items = await apify.run_actor_sync(
         settings.APIFY_ACTOR_TIKTOK,

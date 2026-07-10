@@ -241,6 +241,24 @@ def _transcript_from_item(item: dict[str, Any]) -> tuple[str, list[dict[str, Any
 async def _fetch_instagram_transcript(url: str) -> tuple[str, list[dict[str, Any]]]:
     settings = get_settings()
     apify = get_apify()
+
+    # Primary: sian.agency extractor with fastProcessing — measured ~16-18s vs
+    # ~86s for the crawlerbros actor on the same reel, identical transcript
+    # text. Error rows come back as status="error" with a placeholder
+    # transcript, so guard before trusting the text.
+    try:
+        items = await apify.run_actor_sync(
+            settings.APIFY_ACTOR_INSTAGRAM_TRANSCRIPT_FAST,
+            {"instagramUrl": url, "wordLevelTimestamps": False, "fastProcessing": True},
+            max_items=1,
+        )
+    except Exception:  # noqa: BLE001
+        items = []
+    if items and safe_str(items[0].get("status")) != "error":
+        full, segments = _transcript_from_item(items[0])
+        if full:
+            return full, segments
+
     try:
         items = await apify.run_actor_sync(
             settings.APIFY_ACTOR_INSTAGRAM_TRANSCRIPT,

@@ -53,8 +53,13 @@ class Settings(BaseSettings):
     APIFY_ACTOR_YOUTUBE_DOWNLOAD_FALLBACK: str = "streamers/youtube-video-downloader"
 
     APIFY_ACTOR_TIKTOK: str = "clockworks/tiktok-scraper"
-    # Dedicated transcript actor: native TikTok captions with timestamped
-    # segments, Whisper fallback for videos without captions.
+    # Fast-first transcript actor: pulls TikTok's native caption track over
+    # plain HTTP (~5-9s, $1/1k, caption-less rows free). Young actor, so any
+    # failure/empty result falls through to the Whisper-capable actor below.
+    APIFY_ACTOR_TIKTOK_TRANSCRIPT_FAST: str = "aticode/tiktok-transcript-scraper"
+    # Whisper-capable transcript actor: native captions + speech-to-text
+    # fallback for caption-less videos (~35-80s, $3/1k). Kept as the quality
+    # fallback behind the fast actor.
     APIFY_ACTOR_TIKTOK_TRANSCRIPT: str = "crawlerbros/tiktok-transcript-scraper"
     APIFY_ACTOR_TIKTOK_COMMENTS: str = "clockworks/tiktok-comments-scraper"
     # Dedicated comment+reply scraper with a real reply API (parentCommentId
@@ -103,6 +108,10 @@ class Settings(BaseSettings):
     APIFY_ACTOR_INSTAGRAM_PROFILE: str = "apify/instagram-profile-scraper"
     APIFY_ACTOR_INSTAGRAM_POST: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_COMMENT: str = "apify/instagram-comment-scraper"
+    # Primary transcript actor: mature (2.4k users, 99.6% success), Whisper
+    # with speaker labels; fastProcessing mode measured ~16-18s vs ~86s for
+    # the crawlerbros actor on the same reel, identical transcript text.
+    APIFY_ACTOR_INSTAGRAM_TRANSCRIPT_FAST: str = "sian.agency/instagram-ai-transcript-extractor"
     APIFY_ACTOR_INSTAGRAM_TRANSCRIPT: str = "crawlerbros/instagram-transcript-scraper"
     # "auto" tries native Instagram captions first, then falls back to Whisper
     # speech-to-text (with timestamped segments). "native" alone returns
