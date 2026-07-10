@@ -6,12 +6,34 @@ import { normalizeImageUrl, pingSearchEngines, slugify, type BlogPostRow } from 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function POST(req: NextRequest) {
+function authorized(req: NextRequest): boolean {
   const secret = process.env.BLOG_ADMIN_SECRET;
-  if (!secret) {
-    return NextResponse.json({ error: "admin disabled" }, { status: 403 });
+  return Boolean(secret && req.headers.get("x-admin-secret") === secret);
+}
+
+export async function GET(req: NextRequest) {
+  if (!authorized(req)) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
-  if (req.headers.get("x-admin-secret") !== secret) {
+  const sb = getServiceClient();
+  if (!sb) {
+    return NextResponse.json(
+      { error: "Supabase service role not configured" },
+      { status: 500 },
+    );
+  }
+  const { data, error } = await sb
+    .from("blog_posts")
+    .select("slug,status,updated_at")
+    .order("updated_at", { ascending: false });
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  return NextResponse.json({ posts: data ?? [] });
+}
+
+export async function POST(req: NextRequest) {
+  if (!authorized(req)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

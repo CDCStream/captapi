@@ -38,3 +38,7 @@ next-env.d.ts.bak
 Thumbs.db
 *.log
 .commitmsg.tmp
+
+# Generated marketing-agent artifacts
+marketing/blog-drafts/
+marketing/instagram-runs/

@@ -1,0 +1,45 @@
+{
+  "brand": {
+    "name": "Captapi",
+    "website": "https://captapi.com",
+    "positioning": "One REST API for structured public social-media data",
+    "audience": [
+      "software developers",
+      "AI agent builders",
+      "social analytics SaaS founders",
+      "automation builders"
+    ],
+    "voice": "technical, concise, candid, lightly witty"
+  },
+  "verified_product_facts": [
+    "Captapi returns clean JSON through a REST API.",
+    "One API key covers multiple social platforms.",
+    "Available data includes profiles, posts, comments, transcripts, and AI summaries, depending on platform.",
+    "Captapi has TypeScript and Python SDKs.",
+    "Captapi has an MCP server, CLI, n8n node, Apify Actor, and Make integration.",
+    "The free tier includes 100 credits and does not require a card.",
+    "Shared caching can make repeated requests free when a cached response is available.",
+    "Documentation is available at captapi.com/docs."
+  ],
+  "approved_ctas": [
+    "Try 100 free credits at captapi.com.",
+    "Test the endpoint without a card.",
+    "Read the quickstart at captapi.com/docs.",
+    "Replace one brittle scraper and compare the result."
+  ],
+  "prohibited_claims": [
+    "Do not claim Captapi is an official partner of any social network.",
+    "Do not promise a specific latency unless it is supplied as campaign data.",
+    "Do not invent customer, request, revenue, accuracy, or uptime numbers.",
+    "Do not claim every endpoint is native or proxy-free.",
+    "Do not disparage a competitor or imply its service is broken."
+  ],
+  "visual_direction": {
+    "avatar_name": "Mara",
+    "role": "Captapi AI CMO",
+    "disclosure": "The account bio and every Reel caption must clearly say Mara is an AI avatar.",
+    "background": "dark navy Captapi brand background",
+    "format": "9:16 vertical Reel with burned-in captions",
+    "target_duration_seconds": "15-25"
+  }
+}

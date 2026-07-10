@@ -1,0 +1,51 @@
+name: SEO blog agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      count:
+        description: Number of articles to generate
+        required: false
+        default: "1"
+      status:
+        description: Save as draft or published
+        required: false
+        type: choice
+        options:
+          - draft
+          - published
+        default: draft
+  schedule:
+    # Four posts per week at 06:15 UTC.
+    - cron: "15 6 * * 1,2,4,6"
+
+concurrency:
+  group: seo-blog-agent
+  cancel-in-progress: false
+
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate and save next article
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+          DATAFORSEO_LOGIN: ${{ secrets.DATAFORSEO_LOGIN }}
+          DATAFORSEO_PASSWORD: ${{ secrets.DATAFORSEO_PASSWORD }}
+          BLOG_ADMIN_SECRET: ${{ secrets.BLOG_ADMIN_SECRET }}
+          BLOG_MODEL: ${{ vars.BLOG_MODEL }}
+          BLOG_STATUS: ${{ github.event.inputs.status || vars.BLOG_STATUS || 'draft' }}
+        run: >-
+          python scripts/blog_pipeline.py
+          --count "${{ github.event.inputs.count || '1' }}"
+          --enrich
