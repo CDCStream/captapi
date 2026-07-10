@@ -39,6 +39,7 @@ import os
 import re
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import UTC, datetime
@@ -49,9 +50,9 @@ ROOT = Path(__file__).resolve().parents[1]
 BANK = ROOT / "marketing" / "keyword-bank.csv"
 DRAFTS_DIR = ROOT / "marketing" / "blog-drafts"
 
-SITE = os.environ.get("BLOG_SITE_URL", "https://captapi.com").rstrip("/")
-MODEL = os.environ.get("BLOG_MODEL", "gpt-4o-mini")
-DEFAULT_STATUS = os.environ.get("BLOG_STATUS", "draft").strip().lower()
+SITE = (os.environ.get("BLOG_SITE_URL") or "https://captapi.com").rstrip("/")
+MODEL = os.environ.get("BLOG_MODEL") or "gpt-4o-mini"
+DEFAULT_STATUS = (os.environ.get("BLOG_STATUS") or "draft").strip().lower()
 AUTHOR = os.environ.get("BLOG_AUTHOR", "Captapi").strip() or "Captapi"
 
 BANK_FIELDS = [
@@ -352,8 +353,12 @@ def call_openai(
             "Content-Type": "application/json",
         },
     )
-    with urllib.request.urlopen(req, timeout=300) as r:
-        data = json.loads(r.read())
+    try:
+        with urllib.request.urlopen(req, timeout=300) as r:
+            data = json.loads(r.read())
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")[:500]
+        raise RuntimeError(f"OpenAI HTTP {exc.code}: {detail}") from exc
     out = json.loads(data["choices"][0]["message"]["content"])
     for key in ("title", "description", "content"):
         if not out.get(key):

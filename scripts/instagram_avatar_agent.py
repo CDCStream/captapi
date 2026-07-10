@@ -29,6 +29,7 @@ import json
 import os
 import re
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import UTC, date, datetime
@@ -39,8 +40,8 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "marketing" / "instagram-agent-config.json"
 RUNS_DIR = ROOT / "marketing" / "instagram-runs"
 
-OPENAI_MODEL = os.environ.get("INSTAGRAM_SCRIPT_MODEL", "gpt-4o-mini")
-GRAPH_VERSION = os.environ.get("META_GRAPH_VERSION", "v25.0")
+OPENAI_MODEL = os.environ.get("INSTAGRAM_SCRIPT_MODEL") or "gpt-4o-mini"
+GRAPH_VERSION = os.environ.get("META_GRAPH_VERSION") or "v25.0"
 
 PILLARS = {
     0: "developer pain point",
@@ -112,8 +113,12 @@ def http_json(
         headers=request_headers,
         method=method,
     )
-    with urllib.request.urlopen(req, timeout=timeout) as response:
-        return json.loads(response.read())
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            return json.loads(response.read())
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")[:500]
+        raise RuntimeError(f"HTTP {exc.code} from {url.split('?')[0]}: {detail}") from exc
 
 
 def load_config() -> dict[str, Any]:
