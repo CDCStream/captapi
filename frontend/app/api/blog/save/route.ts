@@ -55,6 +55,35 @@ export async function POST(req: NextRequest) {
   const title = String(body.title ?? "").trim();
   const content = String(body.content ?? "").trim();
   const rawSlug = String(body.slug ?? "").trim();
+
+  // Status-only update: {slug, status} flips a draft live (or back) without
+  // resending the article body.
+  if (rawSlug && !title && !content && body.status) {
+    const nextStatus = String(body.status);
+    const update: Record<string, unknown> = {
+      status: nextStatus,
+      updated_at: new Date().toISOString(),
+    };
+    if (nextStatus === "published") {
+      update.published_at = new Date().toISOString();
+    }
+    const { data, error } = await sb
+      .from("blog_posts")
+      .update(update)
+      .eq("slug", slugify(rawSlug))
+      .select("slug");
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    if (!data?.length) {
+      return NextResponse.json({ error: "post not found" }, { status: 404 });
+    }
+    if (nextStatus === "published") {
+      await pingSearchEngines([`${SITE_URL}/blog/${slugify(rawSlug)}`]);
+    }
+    return NextResponse.json({ ok: true, slug: slugify(rawSlug), status: nextStatus });
+  }
+
   if (!title || !content) {
     return NextResponse.json(
       { error: "title and content are required" },
