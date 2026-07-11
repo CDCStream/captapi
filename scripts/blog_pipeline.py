@@ -610,7 +610,7 @@ def validate_article(article: dict[str, Any], keyword: str, internal_links: str)
 
 
 def cover_url(slug: str) -> str:
-    return f"{SITE}/blog/{slug}/opengraph-image"
+    return f"{SITE}/api/blog/cover/{slug}"
 
 
 def generate_image(description: str) -> tuple[bytes, str] | None:

@@ -67,6 +67,12 @@ export function normalizeImageUrl(value: string | null | undefined): string {
     if (url.origin === SITE_URL && url.pathname === "/opengraph-image") {
       return DEFAULT_BLOG_IMAGE;
     }
+    // Metadata opengraph-image files are not directly fetchable; serve the
+    // identical cover from the real API route instead.
+    const cover = url.pathname.match(/^\/blog\/([^/]+)\/opengraph-image$/);
+    if (url.origin === SITE_URL && cover) {
+      return `${SITE_URL}/api/blog/cover/${cover[1]}`;
+    }
     return url.toString();
   } catch {
     return "";

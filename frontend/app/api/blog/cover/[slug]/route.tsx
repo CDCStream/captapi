@@ -1,15 +1,15 @@
 import { ImageResponse } from "next/og";
 import { getServiceClient } from "@/lib/supabase/admin";
 
-export const alt = "Captapi blog cover";
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+export const runtime = "nodejs";
 
-export default async function BlogCover({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+const WIDTH = 1200;
+const HEIGHT = 630;
+
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ slug: string }> },
+) {
   const { slug } = await params;
   const sb = getServiceClient();
   const { data } = sb
@@ -173,6 +173,12 @@ export default async function BlogCover({
         </div>
       </div>
     ),
-    size,
+    {
+      width: WIDTH,
+      height: HEIGHT,
+      headers: {
+        "Cache-Control": "public, max-age=86400, s-maxage=86400",
+      },
+    },
   );
 }
