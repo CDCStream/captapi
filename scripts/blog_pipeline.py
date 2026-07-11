@@ -23,7 +23,7 @@ Recommended:
   DATAFORSEO_PASSWORD
 
 Optional:
-  BLOG_MODEL          default gpt-4o-mini
+  BLOG_MODEL          default gpt-4o
   BLOG_IMAGE_MODEL    default gpt-image-1 (dall-e-3 fallback is automatic)
   BLOG_SITE_URL       default https://captapi.com
   BLOG_STATUS         draft or published; default draft
@@ -54,7 +54,7 @@ DRAFTS_DIR = ROOT / "marketing" / "blog-drafts"
 
 # "or" instead of get() default: CI may set these to empty strings.
 SITE = (os.environ.get("BLOG_SITE_URL") or "https://captapi.com").rstrip("/")
-MODEL = os.environ.get("BLOG_MODEL") or "gpt-4o-mini"
+MODEL = os.environ.get("BLOG_MODEL") or "gpt-4o"
 IMAGE_MODEL = os.environ.get("BLOG_IMAGE_MODEL") or "gpt-image-1"
 DEFAULT_STATUS = (os.environ.get("BLOG_STATUS") or "draft").strip().lower()
 AUTHOR = os.environ.get("BLOG_AUTHOR", "Captapi").strip() or "Captapi"
@@ -369,7 +369,8 @@ def call_openai(
         user += (
             "\n\nYour previous attempt was rejected by automated checks: "
             + feedback
-            + ". Fix every issue and return the full corrected JSON."
+            + ". Fix every issue and return the full corrected JSON. Expand every"
+            " section with concrete detail; target 1400-1600 words of body text."
         )
     payload = {
         "model": MODEL,
