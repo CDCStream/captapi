@@ -56,16 +56,21 @@ export async function POST(req: NextRequest) {
   const content = String(body.content ?? "").trim();
   const rawSlug = String(body.slug ?? "").trim();
 
-  // Status-only update: {slug, status} flips a draft live (or back) without
-  // resending the article body.
-  if (rawSlug && !title && !content && body.status) {
-    const nextStatus = String(body.status);
+  // Partial update: {slug, status?} and/or {slug, image?} adjusts an existing
+  // post without resending the article body.
+  if (rawSlug && !title && !content && (body.status || body.image)) {
+    const nextStatus = body.status ? String(body.status) : "";
     const update: Record<string, unknown> = {
-      status: nextStatus,
       updated_at: new Date().toISOString(),
     };
-    if (nextStatus === "published") {
-      update.published_at = new Date().toISOString();
+    if (nextStatus) {
+      update.status = nextStatus;
+      if (nextStatus === "published") {
+        update.published_at = new Date().toISOString();
+      }
+    }
+    if (body.image) {
+      update.image = normalizeImageUrl(String(body.image));
     }
     const { data, error } = await sb
       .from("blog_posts")
@@ -81,7 +86,7 @@ export async function POST(req: NextRequest) {
     if (nextStatus === "published") {
       await pingSearchEngines([`${SITE_URL}/blog/${slugify(rawSlug)}`]);
     }
-    return NextResponse.json({ ok: true, slug: slugify(rawSlug), status: nextStatus });
+    return NextResponse.json({ ok: true, slug: slugify(rawSlug) });
   }
 
   if (!title || !content) {

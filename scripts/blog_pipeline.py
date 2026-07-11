@@ -155,6 +155,19 @@ IMAGE_STYLE = (
     "no watermarks. Scene: {scene}"
 )
 
+# Outrank-style cover: white paper, big black serif headline, blue ink doodles.
+COVER_STYLE = (
+    "Editorial blog cover illustration in a hand-drawn sketch style. Clean "
+    "white paper background. In the center, a large bold black serif "
+    'headline that reads exactly: "{title}". Around the headline, loose '
+    "blue ballpoint-pen doodles, scribbles, arrows, stars, underlines and "
+    "small sketch illustrations related to {topic}. Use only three colors: "
+    "white background, black typography, blue ink sketches. Lots of white "
+    "space, flat, minimal, no photorealism, no gradients, no logos, no "
+    "watermarks. The headline text must be spelled exactly as given, with "
+    "no extra words."
+)
+
 IMAGE_MARKER = re.compile(r"(?:<p>\s*)?\[\[IMAGE:\s*(.*?)\]\](?:\s*</p>)?", re.S)
 PHOTO_MARKER = re.compile(r"(?:<p>\s*)?\[\[PHOTO:\s*(.*?)\]\](?:\s*</p>)?", re.S)
 PHOTO_EXTENSIONS = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp"}
@@ -613,17 +626,21 @@ def cover_url(slug: str) -> str:
     return f"{SITE}/api/blog/cover/{slug}"
 
 
-def generate_image(description: str) -> tuple[bytes, str] | None:
-    """Render one inline illustration; returns (bytes, content_type) or None."""
+def generate_image(
+    description: str,
+    prompt: str | None = None,
+    quality: str = "medium",
+) -> tuple[bytes, str] | None:
+    """Render one illustration; returns (bytes, content_type) or None."""
     api_key = os.environ.get("OPENAI_API_KEY", "").strip()
-    prompt = IMAGE_STYLE.format(scene=description)
+    prompt = prompt or IMAGE_STYLE.format(scene=description)
     for model in dict.fromkeys((IMAGE_MODEL, "dall-e-3")):
         if model.startswith("gpt-image"):
             payload: dict[str, Any] = {
                 "model": model,
                 "prompt": prompt,
                 "size": "1536x1024",
-                "quality": "medium",
+                "quality": quality,
                 "output_format": "webp",
             }
             content_type = "image/webp"
@@ -651,6 +668,23 @@ def generate_image(description: str) -> tuple[bytes, str] | None:
         except Exception as exc:
             print(f"  image model {model} failed ({exc})")
     return None
+
+
+def generate_cover(slug: str, title: str, keyword: str) -> str:
+    """Generate an Outrank-style sketch cover; fall back to the branded card."""
+    prompt = COVER_STYLE.format(title=title, topic=keyword)
+    rendered = generate_image(title, prompt=prompt, quality="high")
+    if rendered:
+        image, content_type = rendered
+        ext = "webp" if content_type == "image/webp" else "png"
+        try:
+            url = upload_image(f"{slug}-cover.{ext}", image, content_type)
+            if url:
+                print(f"  cover -> {url}")
+                return url
+        except Exception as exc:
+            print(f"  cover upload failed ({exc}); using branded card")
+    return cover_url(slug)
 
 
 def upload_image(name: str, image: bytes, content_type: str) -> str:
@@ -818,7 +852,7 @@ def upload_article(slug: str, article: dict, status: str) -> str:
         "title": article["title"],
         "description": article["description"],
         "content": article["content"],
-        "image": cover_url(slug),
+        "image": article.get("image") or cover_url(slug),
         "tags": article.get("tags", []),
         "author": AUTHOR,
         "status": status,
@@ -919,6 +953,8 @@ def main() -> None:
         article["content"] = embed_web_photos(
             article["content"], slug, generate=not args.dry_run
         )
+        if not args.dry_run:
+            article["image"] = generate_cover(slug, article["title"], kw)
 
         preview = DRAFTS_DIR / f"{slug}.html"
         preview.write_text(
