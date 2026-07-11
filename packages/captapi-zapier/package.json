@@ -1,0 +1,22 @@
+{
+  "name": "captapi-zapier",
+  "version": "1.0.0",
+  "description": "Captapi integration for Zapier: structured social media data from 29 platforms with one API key.",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "generate": "node --experimental-strip-types generate.mjs",
+    "validate": "zapier validate",
+    "push": "zapier push"
+  },
+  "engines": {
+    "node": ">=18",
+    "npm": ">=9"
+  },
+  "dependencies": {
+    "zapier-platform-core": "19.0.0"
+  },
+  "devDependencies": {
+    "zapier-platform-cli": "19.0.0"
+  }
+}
