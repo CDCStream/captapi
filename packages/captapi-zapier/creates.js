@@ -99,6 +99,22 @@ function makePerform(tool) {
   };
 }
 
+// Only these actions are visible in the Zap editor. Zapier''s publishing checks
+// require a live Zap per visible action, so the launch set is kept small;
+// everything else stays available through Custom API Request and gets unhidden
+// as usage grows.
+const VISIBLE = new Set([
+  "youtube_transcript",
+  "youtube_video_details",
+  "youtube_comments",
+  "tiktok_transcript",
+  "tiktok_video_details",
+  "instagram_transcript",
+  "instagram_details",
+  "twitter_tweet_details",
+  "linkedin_profile",
+]);
+
 function makeCreate(endpoint) {
   const creditNote =
     endpoint.credits > 0
@@ -110,6 +126,7 @@ function makeCreate(endpoint) {
     display: {
       label: endpoint.name,
       description: `${endpoint.summary}${creditNote}`,
+      hidden: !VISIBLE.has(endpoint.tool),
     },
     operation: {
       inputFields: endpoint.params.map(toInputField),
