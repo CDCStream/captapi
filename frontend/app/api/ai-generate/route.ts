@@ -105,6 +105,21 @@ const TOOLS: Record<string, ToolSpec> = {
       }).filter((x) => x.value),
     }),
   },
+  "linkedin-headline-generator": {
+    prompt: (i) =>
+      `Write 10 LinkedIn headline ideas for this person. Role/title: "${i.role}". Key skills or niche: "${i.skills || "not specified"}". Goal: ${i.goal || "attract recruiters"}. Style: ${i.style || "professional"}. Each headline must be <= 220 characters (LinkedIn's limit), specific and credible, lead with value or outcome, and avoid buzzwords like "guru", "ninja", "rockstar", "passionate", and "results-driven". Mix formats: some keyword-rich (Role | Specialty | Outcome), some value-proposition sentences. Return JSON: {"headlines":[{"headline":string,"angle":a short label for the approach, max 5 words}]}.`,
+    normalize: (j) => ({
+      items: arr((j as { headlines?: unknown }).headlines).map((h) => {
+        const o = h as { headline?: string; angle?: string };
+        const value = clip(o.headline);
+        return {
+          value,
+          title: clip(o.angle) || undefined,
+          meta: `${value.length}/220 chars${value.length > 220 ? " — too long" : ""}`,
+        };
+      }).filter((x) => x.value),
+    }),
+  },
   "twitch-name-generator": {
     prompt: (i) =>
       `Generate 15 Twitch username ideas for a streamer who plays/streams "${i.interest}". Vibe: ${i.style || "any"}. Each must be 4-25 characters, only letters, numbers, and underscores, no spaces. Return JSON: {"usernames":[string]}.`,

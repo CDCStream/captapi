@@ -10,7 +10,7 @@ export interface MakerTool {
   name: string;
   /** Short card blurb. */
   blurb: string;
-  platform: "YouTube" | "TikTok" | "Instagram" | "Facebook" | "Snapchat" | "Discord" | "Twitch" | "General";
+  platform: "YouTube" | "TikTok" | "Instagram" | "Facebook" | "Snapchat" | "Threads" | "LinkedIn" | "Discord" | "Twitch" | "General";
   type: MakerToolType;
 }
 
@@ -336,6 +336,34 @@ export const MAKER_TOOLS: MakerTool[] = [
     blurb: "Will they know? What can they still see? Every blocking rule for Instagram, Facebook, Snapchat, WhatsApp, and TikTok.",
     platform: "General",
     type: "reference",
+  },
+  {
+    slug: "tiktok-viewer",
+    name: "TikTok Viewer",
+    blurb: "Enter any public username to watch TikTok videos, stories, and profiles anonymously. Free, no account, no app.",
+    platform: "TikTok",
+    type: "viewer",
+  },
+  {
+    slug: "snapchat-story-viewer",
+    name: "Snapchat Story Viewer",
+    blurb: "Enter any public username to watch Snapchat stories and spotlight anonymously in your browser. Free, no login.",
+    platform: "Snapchat",
+    type: "viewer",
+  },
+  {
+    slug: "threads-viewer",
+    name: "Threads Viewer",
+    blurb: "Enter any public username to browse Threads posts, replies, and profiles anonymously. Free, no Instagram login.",
+    platform: "Threads",
+    type: "viewer",
+  },
+  {
+    slug: "linkedin-headline-generator",
+    name: "LinkedIn Headline Generator",
+    blurb: "10 recruiter-friendly LinkedIn headline ideas from your role and skills — within the 220-character limit. AI, no sign-up.",
+    platform: "LinkedIn",
+    type: "ai",
   },
   {
     slug: "youtube-money-calculator",

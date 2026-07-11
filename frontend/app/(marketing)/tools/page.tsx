@@ -23,14 +23,16 @@ type HubTool = {
   badge: string;
 };
 
-const PLATFORM_ORDER = ["YouTube", "TikTok", "Instagram", "Facebook", "Snapchat", "Discord", "Twitch", "General"];
+const PLATFORM_ORDER = ["YouTube", "TikTok", "Instagram", "Facebook", "Snapchat", "Threads", "LinkedIn", "Discord", "Twitch", "General"];
 
 const PLATFORM_DESCRIPTIONS: Record<string, string> = {
   YouTube: "Transcript, summary, thumbnail, banner, title, description, hashtag, converter, best-time, and Shorts downloader tools for YouTube creators.",
-  TikTok: "Transcript, summary, username, hashtag, video idea, coin calculator, best-time, and secret emoji tools for TikTok content workflows.",
+  TikTok: "Anonymous viewer, transcript, summary, username, hashtag, video idea, coin calculator, best-time, and secret emoji tools for TikTok content workflows.",
   Instagram: "Free transcript, summarizer, profile viewer, highlights viewer, photo downloader, username, and best-time tools for Instagram.",
   Facebook: "Free transcript and best-time-to-post tools for public Facebook content.",
-  Snapchat: "Reference guides for Snapchat Plus features like the friend solar system planets.",
+  Snapchat: "Anonymous story viewer and reference guides for Snapchat streaks, emojis, planets, and Snapchat Plus.",
+  Threads: "Anonymous profile and post viewer for Meta's Threads.",
+  LinkedIn: "AI headline generator and profile utilities for LinkedIn.",
   Discord: "Font generators, bio generators, and markdown formatting tools for Discord messages and profiles.",
   Twitch: "Emote resizing and creator utilities for Twitch streamers.",
   General: "Cross-platform creator utilities: screenshot rules, slang dictionary, image sizes, engagement benchmarks, and bios.",
