@@ -96,7 +96,8 @@ lists, code blocks, or the FAQ.
 has no illustration placeholder.
 - Output valid, semantic HTML only (h2/h3/p/table/pre/code/ul/ol). \
 NO <html>, <head>, <body>, <h1> tags. No markdown.
-- 1200-1800 words."""
+- 1200-1800 words of body text. Articles under 1200 words are rejected \
+automatically, so write complete, deep sections rather than summaries."""
 
 USER_PROMPT_TEMPLATE = """Target keyword: "{keyword}"
 
@@ -348,6 +349,7 @@ def call_openai(
     questions: list[str],
     internal_links: str,
     notes: str,
+    feedback: str = "",
 ) -> dict:
     api_key = os.environ.get("OPENAI_API_KEY", "").strip()
     if not api_key:
@@ -363,6 +365,12 @@ def call_openai(
         internal_links=links or "(none)",
         notes=notes or "(none)",
     )
+    if feedback:
+        user += (
+            "\n\nYour previous attempt was rejected by automated checks: "
+            + feedback
+            + ". Fix every issue and return the full corrected JSON."
+        )
     payload = {
         "model": MODEL,
         "response_format": {"type": "json_object"},
@@ -699,14 +707,26 @@ def main() -> None:
                 print(f"  DataForSEO enrichment failed ({exc}); using Ahrefs values")
 
         results, questions = research_serp(kw)
-        article = call_openai(
-            kw,
-            results,
-            questions,
-            row.get("internal_links", ""),
-            row.get("notes", ""),
-        )
-        validate_article(article, kw, row.get("internal_links", ""))
+        article: dict | None = None
+        feedback = ""
+        for attempt in range(1, 4):
+            candidate = call_openai(
+                kw,
+                results,
+                questions,
+                row.get("internal_links", ""),
+                row.get("notes", ""),
+                feedback=feedback,
+            )
+            try:
+                validate_article(candidate, kw, row.get("internal_links", ""))
+                article = candidate
+                break
+            except ValueError as exc:
+                feedback = str(exc)
+                print(f"  attempt {attempt} rejected: {feedback}")
+        if article is None:
+            sys.exit(f"could not produce a valid article for {kw!r}: {feedback}")
         slug = row.get("target_slug") or slugify(kw)
         article["content"] = embed_images(
             article["content"], slug, generate=not args.dry_run
