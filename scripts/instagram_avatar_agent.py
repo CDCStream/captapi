@@ -225,40 +225,27 @@ def create_heygen_video(creative: dict[str, Any], run_date: date) -> str:
             "HEYGEN_API_KEY, HEYGEN_AVATAR_ID, and HEYGEN_VOICE_ID are required"
         )
 
+    # v3 avatar video: correct photo-avatar pipeline with proper lip-sync,
+    # motion prompt, expressiveness, and burned-in captions.
     payload = {
+        "type": "avatar",
         "title": f"Captapi Mara {run_date.isoformat()} - {creative['hook']}",
-        "caption_mode": "burn_in",
-        "use_avatar_iv_model": True,
-        "model": "4.3",
+        "avatar_id": avatar_id,
+        "script": creative["spoken_script"],
+        "voice_id": voice_id,
+        "voice_settings": {"speed": 1.0},
         "resolution": "1080p",
-        "prompt": (
-            "Casual UGC creator talking to their phone camera: relaxed posture, "
+        "aspect_ratio": "9:16",
+        "caption": {"style": "default", "file_format": "srt"},
+        "motion_prompt": (
+            "Casual creator talking to their phone camera: relaxed posture, "
             "natural eye contact, small authentic hand gestures, slight head "
             "movement, friendly and candid, not a polished presenter."
         ),
-        "dimension": {"width": 1080, "height": 1920},
-        "video_inputs": [
-            {
-                "character": {
-                    "type": "avatar",
-                    "avatar_id": avatar_id,
-                    "avatar_style": "closeUp",
-                },
-                "voice": {
-                    "type": "text",
-                    "voice_id": voice_id,
-                    "input_text": creative["spoken_script"],
-                    "speed": 1.02,
-                },
-                "background": {
-                    "type": "color",
-                    "value": "#07111f",
-                },
-            }
-        ],
+        "expressiveness": "medium",
     }
     data = http_json(
-        "https://api.heygen.com/v2/video/generate",
+        "https://api.heygen.com/v3/videos",
         method="POST",
         headers={"X-Api-Key": api_key},
         payload=payload,
