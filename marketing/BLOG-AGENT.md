@@ -16,7 +16,10 @@ The agent turns an Ahrefs keyword export into scheduled, SERP-aware articles:
 6. Automated checks reject short articles, missing headings, bad metadata,
    and missing internal links.
 7. `/api/blog/save` upserts the post into Supabase `blog_posts`.
-8. `/blog/[slug]/opengraph-image` renders a permanent 1200x630 Captapi cover.
+8. The agent generates an Outrank-style sketch cover (white paper, black serif
+   headline, blue ink doodles) with `gpt-image-1` at high quality and uploads it
+   to Supabase Storage. If generation fails it falls back to the branded card at
+   `/api/blog/cover/[slug]`.
 
 ## Import an Ahrefs export
 
@@ -92,7 +95,8 @@ Use **Actions → SEO blog agent → Run workflow** for a manual test.
 - DataForSEO errors do not block an article; Ahrefs metrics remain the fallback.
 - Serper is preferred for live research; DuckDuckGo is the no-key fallback.
 - Existing posts are read through the authenticated blog admin endpoint.
-- The cover is rendered by the site and has no per-image generation cost.
+- The AI cover costs roughly $0.25 per post at high quality (gpt-image-1); the
+  branded card fallback is free.
 - Inline illustrations cost roughly $0.08-0.15 per article; if image generation
   fails the article still publishes without them.
 - Publishing triggers the existing IndexNow integration.
