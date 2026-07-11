@@ -2,6 +2,7 @@
 
 The agent imports Ahrefs CSV exports, optionally verifies metrics with
 DataForSEO, researches the live SERP through Serper, writes an HTML article
+section by section (outline -> sections -> FAQ -> metadata), decorates it
 with inline AI illustrations plus one sourced CC web photo, assigns a
 permanent branded cover, and upserts the result into ``blog_posts``.
 
@@ -73,33 +74,20 @@ BANK_FIELDS = [
     "last_checked_at",
 ]
 
-SYSTEM_PROMPT = """You are the technical content writer for Captapi (captapi.com), \
+STYLE_RULES = """You are the technical content writer for Captapi (captapi.com), \
 a REST API that returns social media data (profiles, posts, comments, transcripts, \
 AI summaries) from 29 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, \
 Threads, Bluesky, Pinterest, LinkedIn and more) as clean JSON with one API key. \
 Free tier: 100 credits, no card. Docs: captapi.com/docs.
 
-Write for developers. Rules:
-- Answer the search intent in the FIRST 100 words, before any background.
-- Use plain, direct language. No fluff, no "in today's digital landscape".
-- Include at least one of: a comparison table, a code example (curl + Python), \
-or a real JSON response snippet.
-- Mention Captapi naturally where relevant (1-3 times max). Never trash \
-competitors with false claims; be factual about trade-offs.
-- End with an FAQ section (3-5 questions) using <h3> per question.
-- Insert exactly 2 image placeholders on their own lines, each formatted as \
-[[IMAGE: detailed description of a helpful illustration]] - one right after \
-the intro section and one mid-article. Never place them inside tables, \
-lists, code blocks, or the FAQ.
-- Insert exactly 1 photo placeholder on its own line, formatted as \
-[[PHOTO: 2-4 word English stock-photo search query]], in a section that \
-has no illustration placeholder.
-- Output valid, semantic HTML only (h2/h3/p/table/pre/code/ul/ol). \
-NO <html>, <head>, <body>, <h1> tags. No markdown.
-- 1200-1800 words of body text. Articles under 1200 words are rejected \
-automatically, so write complete, deep sections rather than summaries."""
+Style rules:
+- Plain, direct developer language. No fluff, no "in today's digital landscape".
+- Never invent numbers, customers, or claims. Be factual about competitors and \
+trade-offs; mention Captapi only where genuinely relevant.
+- Output semantic HTML only (h2/h3/p/table/pre/code/ul/ol). No <h1>, no \
+markdown, no commentary outside the HTML."""
 
-USER_PROMPT_TEMPLATE = """Target keyword: "{keyword}"
+OUTLINE_PROMPT_TEMPLATE = """Plan a developer article targeting: "{keyword}"
 
 Current Google results (differentiate; do not copy unsupported claims):
 {serp_context}
@@ -107,13 +95,48 @@ Current Google results (differentiate; do not copy unsupported claims):
 People also ask / related searches:
 {questions}
 
-Internal links you MUST weave in naturally (anchor text should be descriptive):
-{internal_links}
+Notes from our marketing plan: {notes}
 
-Extra context/notes from our marketing plan: {notes}
+Return a JSON object with exactly these keys:
+- "sections": array of 6-7 objects, each {{"heading": string, "goal": one \
+sentence, "format": "text" or "table" or "code"}}. Section 1 must directly \
+answer the search intent. Include exactly one "table" section and exactly \
+one "code" section.
+- "faq": array of 4 real questions searchers ask about this topic
+- "image_ideas": array of exactly 2 short illustration scene descriptions
+- "photo_query": a 2-4 word English stock-photo search query"""
 
-Write the article now. Output ONLY the raw article HTML - no JSON, no
-markdown code fences, no commentary before or after."""
+SECTION_PROMPT_TEMPLATE = """Article keyword: "{keyword}"
+Full outline (for context, do NOT write these other sections): {headings}
+
+Write ONLY section {index} of {total}: "{heading}"
+Section goal: {goal}
+
+Requirements:
+- Start with <h2>{heading}</h2>.
+- {min_words}-{max_words} words of body text. This is a hard requirement; \
+short sections are rejected.
+- {format_note}
+{link_note}- No intro/outro phrases about the rest of the article, no summary of other \
+sections.
+- Output raw HTML only, no code fences."""
+
+FORMAT_NOTES = {
+    "text": "Use paragraphs; at most one short <ul> list.",
+    "table": "Include a comparison <table> with a header row and 3-6 data rows.",
+    "code": "Include a <pre><code> example showing both curl and Python for the "
+    "same request, plus a short JSON response snippet.",
+}
+
+FAQ_PROMPT_TEMPLATE = """Article keyword: "{keyword}"
+
+Write the FAQ section of the article as raw HTML, no code fences:
+- Start with <h2>Frequently asked questions</h2>
+- For each question below add <h3>the question</h3> followed by a concise \
+2-4 sentence <p> answer.
+
+Questions:
+{questions}"""
 
 META_PROMPT_TEMPLATE = """Target keyword: "{keyword}"
 
@@ -191,6 +214,15 @@ def as_number(value: str, default: float = 0) -> float:
         return float((value or "").replace(",", "").strip() or default)
     except ValueError:
         return default
+
+
+def count_words(markup: str) -> int:
+    plain = re.sub(r"<[^>]+>", " ", markup)
+    return len(re.findall(r"\b[\w'-]+\b", plain))
+
+
+def strip_fences(markup: str) -> str:
+    return re.sub(r"^```(?:html)?\s*|\s*```$", "", markup.strip()).strip()
 
 
 def priority_for(kd: str, volume: str) -> str:
@@ -370,7 +402,96 @@ def chat_completion(messages: list[dict[str, str]], *, json_mode: bool = False) 
     return str(json.loads(body)["choices"][0]["message"]["content"] or "")
 
 
-def call_openai(
+def build_outline(
+    keyword: str,
+    results: list[dict[str, str]],
+    questions: list[str],
+    notes: str,
+) -> dict[str, Any]:
+    prompt = OUTLINE_PROMPT_TEMPLATE.format(
+        keyword=keyword,
+        serp_context="\n".join(
+            f"- {item['title']} | {item['snippet']} | {item['link']}" for item in results
+        )
+        or "(none found)",
+        questions="\n".join(f"- {question}" for question in questions) or "(none found)",
+        notes=notes or "(none)",
+    )
+    outline = json.loads(
+        chat_completion(
+            [
+                {"role": "system", "content": STYLE_RULES},
+                {"role": "user", "content": prompt},
+            ],
+            json_mode=True,
+        )
+    )
+    sections = [
+        {
+            "heading": str(section.get("heading", "")).strip(),
+            "goal": str(section.get("goal", "")).strip(),
+            "format": str(section.get("format", "text")).strip().lower(),
+        }
+        for section in outline.get("sections", [])
+        if isinstance(section, dict) and str(section.get("heading", "")).strip()
+    ][:7]
+    if len(sections) < 5:
+        raise ValueError(f"outline produced only {len(sections)} sections")
+    outline["sections"] = sections
+    return outline
+
+
+def write_section(
+    keyword: str,
+    section: dict[str, str],
+    index: int,
+    total: int,
+    headings: str,
+    link: str,
+    min_words: int,
+    max_words: int,
+) -> str:
+    format_note = FORMAT_NOTES.get(section["format"], FORMAT_NOTES["text"])
+    link_note = (
+        f'- You MUST include this exact link naturally with a descriptive anchor: '
+        f'<a href="{link}">...</a>.\n'
+        if link
+        else ""
+    )
+    prompt = SECTION_PROMPT_TEMPLATE.format(
+        keyword=keyword,
+        headings=headings,
+        index=index,
+        total=total,
+        heading=section["heading"],
+        goal=section["goal"] or "Cover this sub-topic in practical depth.",
+        min_words=min_words,
+        max_words=max_words,
+        format_note=format_note,
+        link_note=link_note,
+    )
+    messages = [
+        {"role": "system", "content": STYLE_RULES},
+        {"role": "user", "content": prompt},
+    ]
+    part = strip_fences(chat_completion(messages))
+    if count_words(part) < min_words - 60:
+        messages.append({"role": "assistant", "content": part})
+        messages.append(
+            {
+                "role": "user",
+                "content": f"Too short ({count_words(part)} words). Rewrite this "
+                f"section with {min_words}-{max_words} words of body text. "
+                "Output raw HTML only.",
+            }
+        )
+        retry = strip_fences(chat_completion(messages))
+        if count_words(retry) > count_words(part):
+            part = retry
+    return part
+
+
+def generate_article(
     keyword: str,
     results: list[dict[str, str]],
     questions: list[str],
@@ -378,36 +499,56 @@ def call_openai(
     notes: str,
     feedback: str = "",
 ) -> dict:
-    links = "\n".join(f"- {SITE}{p.strip()}" for p in internal_links.split(";") if p.strip())
-    user = USER_PROMPT_TEMPLATE.format(
-        keyword=keyword,
-        serp_context="\n".join(
-            f"- {item['title']} | {item['snippet']} | {item['link']}" for item in results
+    outline = build_outline(keyword, results, questions, notes)
+    sections: list[dict[str, str]] = outline["sections"]
+    total = len(sections)
+    headings = " | ".join(section["heading"] for section in sections)
+    links = [f"{SITE}{p.strip()}" for p in internal_links.split(";") if p.strip()]
+    # A rejected attempt usually means "too short": raise per-section targets.
+    min_words, max_words = (250, 330) if feedback else (190, 280)
+
+    parts: list[str] = []
+    for i, section in enumerate(sections):
+        # Sections 2..n carry the mandatory internal links, one per section.
+        link = links[i - 1] if 1 <= i <= len(links) else ""
+        part = write_section(
+            keyword, section, i + 1, total, headings, link, min_words, max_words
         )
-        or "(none found)",
-        questions="\n".join(f"- {question}" for question in questions) or "(none found)",
-        internal_links=links or "(none)",
-        notes=notes or "(none)",
-    )
-    if feedback:
-        user += (
-            "\n\nYour previous attempt was rejected by automated checks: "
-            + feedback
-            + ". Fix every issue and rewrite the complete article. Expand every"
-            " section with concrete detail; target 1400-1600 words of body text."
+        parts.append(part)
+        print(f"  section {i + 1}/{total}: {count_words(part)} words")
+
+    faq_questions = [str(q).strip() for q in outline.get("faq", []) if str(q).strip()]
+    faq_html = ""
+    if faq_questions:
+        faq_html = strip_fences(
+            chat_completion(
+                [
+                    {"role": "system", "content": STYLE_RULES},
+                    {
+                        "role": "user",
+                        "content": FAQ_PROMPT_TEMPLATE.format(
+                            keyword=keyword,
+                            questions="\n".join(f"- {q}" for q in faq_questions[:5]),
+                        ),
+                    },
+                ]
+            )
         )
 
-    # The article is requested as raw HTML (not JSON-wrapped): models compress
-    # long content dramatically when it has to live inside a JSON string.
-    content = chat_completion(
-        [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user},
-        ]
-    ).strip()
-    content = re.sub(r"^```(?:html)?\s*|\s*```$", "", content).strip()
-    if not content:
-        raise ValueError("LLM returned an empty article")
+    # Markers are placed in code, not by the LLM, so placement is guaranteed.
+    ideas = [str(idea).strip() for idea in outline.get("image_ideas", []) if idea][:2]
+    photo_query = str(outline.get("photo_query") or keyword).strip()
+    mid = total // 2
+    photo_at = total - 2 if total - 2 not in (0, mid) else total - 1
+    for position, marker in (
+        (0, f"[[IMAGE: {ideas[0]}]]" if ideas else ""),
+        (mid, f"[[IMAGE: {ideas[1]}]]" if len(ideas) > 1 else ""),
+        (photo_at, f"[[PHOTO: {photo_query}]]" if photo_query else ""),
+    ):
+        if marker and 0 <= position < len(parts):
+            parts[position] = f"{parts[position]}\n{marker}"
+
+    content = "\n".join(part for part in parts + [faq_html] if part)
 
     excerpt = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", content))[:4000]
     meta = json.loads(
@@ -445,7 +586,7 @@ def validate_article(article: dict[str, Any], keyword: str, internal_links: str)
     description = str(article.get("description", "")).strip()
     content = str(article.get("content", "")).strip()
     plain = re.sub(r"<[^>]+>", " ", content)
-    words = len(re.findall(r"\b[\w'-]+\b", plain))
+    words = count_words(content)
     errors: list[str] = []
     if not title or len(title) > 65:
         errors.append("title must be 1-65 characters")
@@ -752,8 +893,8 @@ def main() -> None:
         results, questions = research_serp(kw)
         article: dict | None = None
         feedback = ""
-        for attempt in range(1, 4):
-            candidate = call_openai(
+        for attempt in range(1, 3):
+            candidate = generate_article(
                 kw,
                 results,
                 questions,
