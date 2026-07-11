@@ -112,11 +112,18 @@ Internal links you MUST weave in naturally (anchor text should be descriptive):
 
 Extra context/notes from our marketing plan: {notes}
 
+Write the article now. Output ONLY the raw article HTML - no JSON, no
+markdown code fences, no commentary before or after."""
+
+META_PROMPT_TEMPLATE = """Target keyword: "{keyword}"
+
+Article (plain-text excerpt):
+{excerpt}
+
 Return a JSON object with exactly these keys:
 - "title": SEO title, <= 60 chars, contains the keyword or a close variant
 - "description": meta description, <= 155 chars
-- "tags": array of 3-5 short topic tags
-- "content": the full article HTML per the system rules"""
+- "tags": array of 3-5 short topic tags"""
 
 IMAGE_STYLE = (
     "Minimal flat vector illustration for a developer blog. Dark navy "
@@ -343,6 +350,26 @@ def dataforseo_metrics(keyword: str) -> dict[str, str]:
     }
 
 
+def chat_completion(messages: list[dict[str, str]], *, json_mode: bool = False) -> str:
+    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        sys.exit("OPENAI_API_KEY is not set")
+    payload: dict[str, Any] = {"model": MODEL, "messages": messages}
+    if json_mode:
+        payload["response_format"] = {"type": "json_object"}
+    body = http_request(
+        "https://api.openai.com/v1/chat/completions",
+        method="POST",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        payload=payload,
+        timeout=300,
+    )
+    return str(json.loads(body)["choices"][0]["message"]["content"] or "")
+
+
 def call_openai(
     keyword: str,
     results: list[dict[str, str]],
@@ -351,9 +378,6 @@ def call_openai(
     notes: str,
     feedback: str = "",
 ) -> dict:
-    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
-    if not api_key:
-        sys.exit("OPENAI_API_KEY is not set")
     links = "\n".join(f"- {SITE}{p.strip()}" for p in internal_links.split(";") if p.strip())
     user = USER_PROMPT_TEMPLATE.format(
         keyword=keyword,
@@ -369,29 +393,47 @@ def call_openai(
         user += (
             "\n\nYour previous attempt was rejected by automated checks: "
             + feedback
-            + ". Fix every issue and return the full corrected JSON. Expand every"
+            + ". Fix every issue and rewrite the complete article. Expand every"
             " section with concrete detail; target 1400-1600 words of body text."
         )
-    payload = {
-        "model": MODEL,
-        "response_format": {"type": "json_object"},
-        "messages": [
+
+    # The article is requested as raw HTML (not JSON-wrapped): models compress
+    # long content dramatically when it has to live inside a JSON string.
+    content = chat_completion(
+        [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user},
-        ],
-    }
-    body = http_request(
-        "https://api.openai.com/v1/chat/completions",
-        method="POST",
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        payload=payload,
-        timeout=300,
+        ]
+    ).strip()
+    content = re.sub(r"^```(?:html)?\s*|\s*```$", "", content).strip()
+    if not content:
+        raise ValueError("LLM returned an empty article")
+
+    excerpt = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", content))[:4000]
+    meta = json.loads(
+        chat_completion(
+            [
+                {
+                    "role": "system",
+                    "content": "You write SEO metadata for developer articles. "
+                    "Return JSON only.",
+                },
+                {
+                    "role": "user",
+                    "content": META_PROMPT_TEMPLATE.format(
+                        keyword=keyword, excerpt=excerpt
+                    ),
+                },
+            ],
+            json_mode=True,
+        )
     )
-    data = json.loads(body)
-    out = json.loads(data["choices"][0]["message"]["content"])
+    out = {
+        "title": str(meta.get("title", "")).strip(),
+        "description": str(meta.get("description", "")).strip(),
+        "tags": meta.get("tags") or [],
+        "content": content,
+    }
     for key in ("title", "description", "content"):
         if not out.get(key):
             raise ValueError(f"LLM output missing '{key}'")
@@ -728,6 +770,7 @@ def main() -> None:
                 print(f"  attempt {attempt} rejected: {feedback}")
         if article is None:
             sys.exit(f"could not produce a valid article for {kw!r}: {feedback}")
+
         slug = row.get("target_slug") or slugify(kw)
         article["content"] = embed_images(
             article["content"], slug, generate=not args.dry_run
