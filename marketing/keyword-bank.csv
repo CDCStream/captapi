@@ -1,54 +1,54 @@
 keyword,bucket,kd,volume,priority,target_slug,internal_links,status,notes
+tiktok transcript,informational,3,6400,1,tiktok-transcript,/tools/tiktok-transcript;/apis/tiktok,queued,Ahrefs 2026-07: Head term for the existing tool; broader how-to angle
+youtube automation,informational,10,4100,1,youtube-automation,/apis/youtube;/tools/youtube-transcript,queued,Ahrefs 2026-07: Popular niche; transcripts and data power automation channels
+instagram api,informational,4,3500,1,instagram-api-guide,/apis/instagram,queued,"Ahrefs 2026-07: Head term; explain official vs third-party, position Captapi"
+tiktok ad library,informational,18,3000,1,tiktok-ad-library,/apis/ad-library,queued,Ahrefs 2026-07: CPC $30; we have TikTok ad library endpoints; priority bumped for USD30 CPC
+linkedin ad library,informational,2,2800,1,linkedin-ad-library,/apis/ad-library,queued,"Ahrefs 2026-07: CPC $30, KD 2; we have LinkedIn ad library endpoints"
+instagram automation,informational,9,2200,1,instagram-automation,/apis/instagram,queued,Ahrefs 2026-07: Automation cluster; API-driven workflows angle
+ig follower export tool,informational,4,1400,1,ig-follower-export-tool,/apis/instagram,queued,Ahrefs 2026-07: High intent; exporting follower data via API
+reddit api,informational,5,1300,1,reddit-api-guide,/apis/reddit,queued,Ahrefs 2026-07: Head term; cover pricing changes and alternatives
+what is youtube automation,informational,9,1300,1,what-is-youtube-automation,/apis/youtube,queued,Ahrefs 2026-07: Long-tail of youtube automation cluster
+extract audio from youtube,informational,2,1200,1,extract-audio-from-youtube,/tools/youtube-to-mp3,queued,Ahrefs 2026-07: Supports the YouTube to MP3 tool
+linkedin analytics tools,informational,9,1200,1,linkedin-analytics-tools,/apis/linkedin,queued,Ahrefs 2026-07: CPC $5 listicle; include Captapi as data source
+instagram transcript,informational,2,1000,1,instagram-transcript-guide,/tools/instagram-transcript;/apis/instagram,queued,Ahrefs 2026-07: Tool page exists; blog answers the how-to
 tiktok transcript api,informational,,,1,tiktok-transcript-api-guide,/tools/tiktok-transcript;/apis/tiktok,queued,High buy intent; we answer with real latency numbers
 how to get tiktok transcript,informational,,,1,how-to-get-tiktok-transcript,/tools/tiktok-transcript,queued,Tool page exists; blog answers the long-tail how-to
 youtube transcript api free,informational,,,1,free-youtube-transcript-api,/tools/youtube-transcript;/apis/youtube,queued,Mention 100 free credits angle
 instagram api without login,informational,,,1,instagram-api-without-login,/apis/instagram,queued,Big pain point; no OAuth story
-scrape instagram without api,informational,,,2,scrape-instagram-without-api,/apis/instagram;/tools/instagram-profile-viewer,queued,
-scrape reddit without api,informational,,,2,scrape-reddit-without-api,/apis/reddit,queued,Reddit API pricing drama = evergreen traffic
 reddit api alternatives,comparison,,,1,reddit-api-alternatives,/apis/reddit,queued,
-how to get youtube comments data,informational,,,2,get-youtube-comments-data,/apis/youtube,queued,Include Python + JS snippet
 instagram scraper api,informational,,,1,instagram-scraper-api,/apis/instagram,queued,
-tiktok api for developers,informational,,,2,tiktok-api-for-developers,/apis/tiktok,queued,Official API vs unofficial vs managed comparison table
-youtube data api quota exceeded,informational,,,2,youtube-data-api-quota-workarounds,/apis/youtube,queued,Rank for the error message itself
-twitter api pricing,informational,,,2,twitter-api-pricing-alternatives,/apis/twitter,queued,X API cost pain -> our flat credits
-is web scraping legal social media,informational,,,3,social-media-scraping-legal-guide,/legal/terms,queued,E-E-A-T builder; cite hiQ v LinkedIn
-how to get instagram comments,informational,,,2,get-instagram-comments,/apis/instagram,queued,
-facebook page scraper,informational,,,2,facebook-page-scraper,/apis/facebook,queued,
-youtube channel statistics api,informational,,,2,youtube-channel-statistics-api,/apis/youtube,queued,
-tiktok trending videos api,informational,,,3,tiktok-trending-videos-api,/apis/tiktok,queued,
 social media data for ai agents,informational,,,1,social-media-data-for-ai-agents,/docs/integrations,queued,MCP angle; growing search
-youtube comments sentiment analysis,informational,,,3,youtube-comments-sentiment-analysis,/apis/youtube,queued,Tutorial with real code
-tiktok video download api,informational,,,3,tiktok-video-download-api,/apis/tiktok;/tools/youtube-to-mp4,queued,
 apify alternatives,comparison,,,1,apify-alternatives,/alternatives,queued,Alternatives hub exists; blog post targets long-tail
 tikapi alternative,comparison,,,1,tikapi-alternative,/alternatives,queued,TikTok-only weakness
 ensembledata alternative,comparison,,,1,ensembledata-alternative,/alternatives,queued,Per-platform pricing weakness
 scrapecreators alternative,comparison,,,1,scrapecreators-alternative,/alternatives,queued,No transcripts weakness
 hikerapi alternative,comparison,,,1,hikerapi-alternative,/alternatives,queued,Instagram-only + payment issues
-brightdata vs apify,comparison,,,2,brightdata-vs-apify,/alternatives,queued,Comparison of two competitors; we are the third option
 best social media api,comparison,,,1,best-social-media-api,/apis,queued,Listicle including honest competitor entries
-social blade api,comparison,,,3,social-blade-api-guide,/apis,queued,High volume brand keyword; their API is invite-only
-phyllo alternative,comparison,,,3,phyllo-alternative,/alternatives,queued,
-rapidapi social media api,comparison,,,3,rapidapi-social-media-apis,/apis,queued,
 best time to post on tiktok,tool-support,,,1,best-time-to-post-on-tiktok-data-study,/tools/best-time-to-post-on-tiktok,queued,Data study from our own API = unique content
 best time to post on instagram,tool-support,,,1,best-time-to-post-on-instagram-data-study,/tools/best-time-to-post-on-instagram,queued,
+linkedin api,informational,20,3100,2,linkedin-api-guide,/apis/linkedin,queued,"Ahrefs 2026-07: Head term; official API access is restrictive, we solve it"
+scrape instagram without api,informational,,,2,scrape-instagram-without-api,/apis/instagram;/tools/instagram-profile-viewer,queued,
+scrape reddit without api,informational,,,2,scrape-reddit-without-api,/apis/reddit,queued,Reddit API pricing drama = evergreen traffic
+how to get youtube comments data,informational,,,2,get-youtube-comments-data,/apis/youtube,queued,Include Python + JS snippet
+tiktok api for developers,informational,,,2,tiktok-api-for-developers,/apis/tiktok,queued,Official API vs unofficial vs managed comparison table
+youtube data api quota exceeded,informational,,,2,youtube-data-api-quota-workarounds,/apis/youtube,queued,Rank for the error message itself
+twitter api pricing,informational,,,2,twitter-api-pricing-alternatives,/apis/twitter,queued,X API cost pain -> our flat credits
+how to get instagram comments,informational,,,2,get-instagram-comments,/apis/instagram,queued,
+facebook page scraper,informational,,,2,facebook-page-scraper,/apis/facebook,queued,
+youtube channel statistics api,informational,,,2,youtube-channel-statistics-api,/apis/youtube,queued,
+brightdata vs apify,comparison,,,2,brightdata-vs-apify,/alternatives,queued,Comparison of two competitors; we are the third option
 how much does tiktok pay,tool-support,,,2,how-much-does-tiktok-pay,/tools/tiktok-money-calculator,queued,
 how much does youtube pay per view,tool-support,,,2,how-much-does-youtube-pay-per-view,/tools/youtube-money-calculator,queued,
 instagram engagement rate benchmarks,tool-support,,,2,instagram-engagement-rate-benchmarks,/tools/engagement-rate-calculator,queued,
+is web scraping legal social media,informational,,,3,social-media-scraping-legal-guide,/legal/terms,queued,E-E-A-T builder; cite hiQ v LinkedIn
+tiktok trending videos api,informational,,,3,tiktok-trending-videos-api,/apis/tiktok,queued,
+youtube comments sentiment analysis,informational,,,3,youtube-comments-sentiment-analysis,/apis/youtube,queued,Tutorial with real code
+tiktok video download api,informational,,,3,tiktok-video-download-api,/apis/tiktok;/tools/youtube-to-mp4,queued,
+social blade api,comparison,,,3,social-blade-api-guide,/apis,queued,High volume brand keyword; their API is invite-only
+phyllo alternative,comparison,,,3,phyllo-alternative,/alternatives,queued,
+rapidapi social media api,comparison,,,3,rapidapi-social-media-apis,/apis,queued,
 tiktok coins to usd,tool-support,,,3,tiktok-coins-to-usd,/tools/tiktok-coin-calculator,queued,
 snapchat planets order,tool-support,,,3,snapchat-planets-order-explained,/tools/snapchat-planets,queued,Huge volume; low KD historically
 youtube shorts algorithm,tool-support,,,3,youtube-shorts-algorithm-data,/tools/youtube-shorts-idea-generator,queued,Data study angle
 instagram highlights viewer,tool-support,,,3,instagram-highlights-viewer-guide,/tools/instagram-highlights-viewer,queued,
 discord text formatting,tool-support,,,3,discord-text-formatting-guide,/tools/discord-formatting-generator,queued,
-tiktok transcript,informational,3,6400,1,tiktok-transcript,/tools/tiktok-transcript;/apis/tiktok,queued,Ahrefs 2026-07: Head term for the existing tool; broader how-to angle
-instagram api,informational,4,3500,1,instagram-api-guide,/apis/instagram,queued,"Ahrefs 2026-07: Head term; explain official vs third-party, position Captapi"
-reddit api,informational,5,1300,1,reddit-api-guide,/apis/reddit,queued,Ahrefs 2026-07: Head term; cover pricing changes and alternatives
-linkedin api,informational,20,3100,2,linkedin-api-guide,/apis/linkedin,queued,"Ahrefs 2026-07: Head term; official API access is restrictive, we solve it"
-tiktok ad library,informational,18,3000,2,tiktok-ad-library,/apis/ad-library,queued,Ahrefs 2026-07: CPC $30; we have TikTok ad library endpoints
-linkedin ad library,informational,2,2800,1,linkedin-ad-library,/apis/ad-library,queued,"Ahrefs 2026-07: CPC $30, KD 2; we have LinkedIn ad library endpoints"
-youtube automation,informational,10,4100,1,youtube-automation,/apis/youtube;/tools/youtube-transcript,queued,Ahrefs 2026-07: Popular niche; transcripts and data power automation channels
-what is youtube automation,informational,9,1300,1,what-is-youtube-automation,/apis/youtube,queued,Ahrefs 2026-07: Long-tail of youtube automation cluster
-instagram automation,informational,9,2200,1,instagram-automation,/apis/instagram,queued,Ahrefs 2026-07: Automation cluster; API-driven workflows angle
-ig follower export tool,informational,4,1400,1,ig-follower-export-tool,/apis/instagram,queued,Ahrefs 2026-07: High intent; exporting follower data via API
-instagram transcript,informational,2,1000,1,instagram-transcript-guide,/tools/instagram-transcript;/apis/instagram,queued,Ahrefs 2026-07: Tool page exists; blog answers the how-to
-extract audio from youtube,informational,2,1200,1,extract-audio-from-youtube,/tools/youtube-to-mp3,queued,Ahrefs 2026-07: Supports the YouTube to MP3 tool
-linkedin analytics tools,informational,9,1200,1,linkedin-analytics-tools,/apis/linkedin,queued,Ahrefs 2026-07: CPC $5 listicle; include Captapi as data source
