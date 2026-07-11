@@ -40,6 +40,7 @@ const handleErrors = (response, z) => {
 module.exports = {
   version: packageJson.version,
   platformVersion: zapier.version,
+  flags: { cleanInputData: false },
   authentication,
   beforeRequest: [addBearerHeader],
   afterResponse: [handleErrors],

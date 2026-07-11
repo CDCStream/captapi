@@ -61,7 +61,9 @@ function toInputField(p) {
     label: paramLabel(p.name),
     type: p.type === "number" ? "integer" : p.type === "boolean" ? "boolean" : "string",
     required: !!p.required,
-    helpText: p.description,
+    // Zapier D008 check rejects bare URLs in help text; keep examples readable
+    // without the scheme instead of forcing markdown links onto placeholders.
+    helpText: p.description.replace(/https?:\/\//g, ""),
   };
 }
 
@@ -149,7 +151,7 @@ const customRequest = {
         required: true,
         choices: endpointChoices,
         altersDynamicFields: true,
-        helpText: "The Captapi endpoint to call. See https://captapi.com/docs for details.",
+        helpText: "The Captapi endpoint to call. See [captapi.com/docs](https://captapi.com/docs) for details.",
       },
       dynamicEndpointFields,
     ],
