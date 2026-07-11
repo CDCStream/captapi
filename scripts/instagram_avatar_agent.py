@@ -216,6 +216,22 @@ def validate_creative(creative: dict[str, Any]) -> None:
         raise ValueError("; ".join(errors))
 
 
+def best_engine(api_key: str, avatar_id: str) -> str:
+    """Pick the highest-quality engine the avatar look supports."""
+    try:
+        data = http_json(
+            f"https://api.heygen.com/v3/avatars/looks/{avatar_id}",
+            headers={"X-Api-Key": api_key},
+            timeout=30,
+        )
+        engines = (data.get("data") or {}).get("supported_api_engines") or []
+        if "avatar_v" in engines:
+            return "avatar_v"
+    except Exception as exc:
+        print(f"engine lookup failed ({exc}); defaulting to avatar_iv")
+    return "avatar_iv"
+
+
 def create_heygen_video(creative: dict[str, Any], run_date: date) -> str:
     api_key = os.environ.get("HEYGEN_API_KEY", "").strip()
     avatar_id = os.environ.get("HEYGEN_AVATAR_ID", "").strip()
@@ -224,10 +240,13 @@ def create_heygen_video(creative: dict[str, Any], run_date: date) -> str:
         raise RuntimeError(
             "HEYGEN_API_KEY, HEYGEN_AVATAR_ID, and HEYGEN_VOICE_ID are required"
         )
+    engine = best_engine(api_key, avatar_id)
+    print(f"HeyGen engine: {engine}")
 
-    # v3 avatar video: correct photo-avatar pipeline with proper lip-sync,
-    # motion prompt, expressiveness, and burned-in captions.
-    payload = {
+    # v3 avatar video: photo-avatar pipeline with proper lip-sync, motion
+    # prompt, and burned-in captions. Avatar V is preferred when the look
+    # supports it (best lip-sync); expressiveness is Avatar IV-only.
+    payload: dict[str, Any] = {
         "type": "avatar",
         "title": f"Captapi Mara {run_date.isoformat()} - {creative['hook']}",
         "avatar_id": avatar_id,
@@ -244,8 +263,10 @@ def create_heygen_video(creative: dict[str, Any], run_date: date) -> str:
             "natural eye contact, small authentic hand gestures, slight head "
             "movement, friendly and candid, not a polished presenter."
         ),
-        "expressiveness": "medium",
+        "engine": {"type": engine},
     }
+    if engine == "avatar_iv":
+        payload["expressiveness"] = "medium"
     data = http_json(
         "https://api.heygen.com/v3/videos",
         method="POST",
