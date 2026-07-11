@@ -233,7 +233,9 @@ def create_heygen_video(creative: dict[str, Any], run_date: date) -> str:
         "avatar_id": avatar_id,
         "script": creative["spoken_script"],
         "voice_id": voice_id,
-        "voice_settings": {"speed": 1.0},
+        # Slightly slower speech gives the photo-avatar engine more room to
+        # match mouth shapes to phonemes.
+        "voice_settings": {"speed": float(os.environ.get("HEYGEN_VOICE_SPEED") or "0.92")},
         "resolution": "1080p",
         "aspect_ratio": "9:16",
         "caption": {"style": "default", "file_format": "srt"},
