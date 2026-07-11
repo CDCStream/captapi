@@ -125,6 +125,28 @@ export function CaptapiHero() {
             No credit card required.
           </p>
 
+          {/* social proof */}
+          <div className="mt-5 flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
+            <div className="flex -space-x-2.5">
+              {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={i}
+                  src={`/avatars/dev-${i}.webp`}
+                  alt=""
+                  aria-hidden="true"
+                  width={32}
+                  height={32}
+                  loading="lazy"
+                  className="size-8 rounded-full border-2 border-background object-cover shadow-sm"
+                />
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Used by <span className="font-semibold text-primary">10,000+</span> developers
+            </p>
+          </div>
+
           {/* API client mockup */}
           <div className="relative mx-auto mt-6 sm:mt-8 w-full max-w-2xl text-left">
             <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-blue-500/20 to-sky-400/10 blur-2xl" />
