@@ -39,6 +39,7 @@ jobs:
           META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
           INSTAGRAM_SCRIPT_MODEL: ${{ vars.INSTAGRAM_SCRIPT_MODEL }}
           HEYGEN_VOICE_SPEED: ${{ vars.HEYGEN_VOICE_SPEED }}
+          META_GRAPH_HOST: ${{ vars.META_GRAPH_HOST }}
           INSTAGRAM_AUTO_PUBLISH: ${{ vars.INSTAGRAM_AUTO_PUBLISH }}
         run: >-
           python scripts/instagram_avatar_agent.py

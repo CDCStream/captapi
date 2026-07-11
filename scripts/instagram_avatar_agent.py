@@ -42,6 +42,10 @@ RUNS_DIR = ROOT / "marketing" / "instagram-runs"
 
 OPENAI_MODEL = os.environ.get("INSTAGRAM_SCRIPT_MODEL") or "gpt-4o-mini"
 GRAPH_VERSION = os.environ.get("META_GRAPH_VERSION") or "v25.0"
+# "Instagram API with Instagram Login" tokens use graph.instagram.com;
+# classic Facebook-login page tokens use graph.facebook.com.
+GRAPH_HOST = os.environ.get("META_GRAPH_HOST") or "graph.instagram.com"
+GRAPH_BASE = f"https://{GRAPH_HOST}/{GRAPH_VERSION}"
 
 PILLARS = {
     0: "developer pain point",
@@ -146,7 +150,7 @@ def recent_instagram_captions(limit: int = 8) -> list[str]:
     )
     try:
         data = http_json(
-            f"https://graph.facebook.com/{GRAPH_VERSION}/{ig_user}/media?{query}"
+            f"{GRAPH_BASE}/{ig_user}/media?{query}"
         )
         return [
             str(item["caption"])[:500]
@@ -321,7 +325,7 @@ def publish_reel(video_url: str, creative: dict[str, Any]) -> str:
         raise RuntimeError("META_IG_USER_ID and META_ACCESS_TOKEN are required")
 
     created = http_json(
-        f"https://graph.facebook.com/{GRAPH_VERSION}/{ig_user}/media",
+        f"{GRAPH_BASE}/{ig_user}/media",
         method="POST",
         form={
             "media_type": "REELS",
@@ -341,7 +345,7 @@ def publish_reel(video_url: str, creative: dict[str, Any]) -> str:
             {"fields": "status_code,status", "access_token": token}
         )
         status = http_json(
-            f"https://graph.facebook.com/{GRAPH_VERSION}/{container_id}?{query}"
+            f"{GRAPH_BASE}/{container_id}?{query}"
         )
         code = str(status.get("status_code", "")).upper()
         if code == "FINISHED":
@@ -354,7 +358,7 @@ def publish_reel(video_url: str, creative: dict[str, Any]) -> str:
         raise TimeoutError("Meta Reel container processing timed out")
 
     published = http_json(
-        f"https://graph.facebook.com/{GRAPH_VERSION}/{ig_user}/media_publish",
+        f"{GRAPH_BASE}/{ig_user}/media_publish",
         method="POST",
         form={"creation_id": container_id, "access_token": token},
     )
