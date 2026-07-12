@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import base64
 import json
+import re
 from datetime import datetime, timezone
 from typing import Any, Iterable
 
@@ -183,14 +184,23 @@ def _owner(node: dict[str, Any]) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
-def _post(node: dict[str, Any]) -> dict[str, Any]:
+_HASHTAG_RE = re.compile(r"#(\w+)", re.UNICODE)
+_MENTION_RE = re.compile(r"@([A-Za-z0-9_.]+)")
+
+
+def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[str, Any]:
+    # Per-post nodes only carry a minimal owner ({id, username}); the full
+    # author (name, verified, avatar, followers) lives on the profile object,
+    # which is the same for every post in a channel listing. `profile` fills
+    # those gaps when the caller knows the owning profile.
     owner = _owner(node)
-    username = safe_str(owner.get("username") or node.get("user_posted"))
+    author = {**(profile or {}), **owner}
+    username = safe_str(author.get("username") or node.get("user_posted"))
     shortcode = safe_str(node.get("shortcode") or node.get("code"))
     typename = safe_str(node.get("__typename"))
     is_video = bool(node.get("is_video")) or typename == "GraphVideo"
     is_sidecar = typename == "GraphSidecar"
-    caption = _caption(node)
+    caption = _caption(node) or ""
     video_url = safe_str(node.get("video_url")) or None
     return {
         "platform": "instagram",
@@ -198,7 +208,7 @@ def _post(node: dict[str, Any]) -> dict[str, Any]:
         or (f"https://www.instagram.com/{'reel' if is_video else 'p'}/{shortcode}/" if shortcode else None),
         "id": safe_str(node.get("id")),
         "type": "Sidecar" if is_sidecar else ("Video" if is_video else "Image"),
-        "productType": "clips" if is_video else "",
+        "productType": safe_str(node.get("product_type")) or ("clips" if is_video else ""),
         "caption": caption,
         "description": caption,
         "publishedAt": _iso_timestamp(node.get("taken_at_timestamp") or node.get("date_posted")),
@@ -207,19 +217,19 @@ def _post(node: dict[str, Any]) -> dict[str, Any]:
         "videoUrl": video_url,
         "author": {
             "username": username,
-            "displayName": safe_str(owner.get("full_name")),
+            "displayName": safe_str(author.get("full_name")),
             "url": f"https://instagram.com/{username}" if username else None,
-            "followers": _count(owner.get("edge_followed_by")),
-            "verified": owner.get("is_verified"),
-            "profileImage": _image_url(owner),
+            "followers": _count(author.get("edge_followed_by")),
+            "verified": author.get("is_verified"),
+            "profileImage": _image_url(author),
         },
         "engagement": {
             "views": safe_int(node.get("video_view_count") or node.get("video_play_count") or node.get("views")),
             "likes": _count(node.get("edge_media_preview_like")) or safe_int(node.get("likes")) or 0,
             "comments": _count(node.get("edge_media_to_comment")) or safe_int(node.get("num_comments")) or 0,
         },
-        "hashtags": [],
-        "mentions": [],
+        "hashtags": _HASHTAG_RE.findall(caption),
+        "mentions": _MENTION_RE.findall(caption),
     }
 
 
@@ -278,7 +288,7 @@ async def channel_posts(handle: str, limit: int) -> list[dict[str, Any]] | None:
     if not user:
         return None
     nodes = _edge_nodes(user, "edge_owner_to_timeline_media")
-    posts = [_post(node) for node in nodes if not bool(node.get("is_video"))]
+    posts = [_post(node, profile=user) for node in nodes if not bool(node.get("is_video"))]
     return posts[:limit] or None
 
 
@@ -287,7 +297,11 @@ async def channel_reels(handle: str, limit: int) -> list[dict[str, Any]] | None:
     if not user:
         return None
     nodes = _edge_nodes(user, "edge_felix_video_timeline", "edge_owner_to_timeline_media")
-    reels = [_post(node) for node in nodes if bool(node.get("is_video")) or node.get("__typename") == "GraphVideo"]
+    reels = [
+        _post(node, profile=user)
+        for node in nodes
+        if bool(node.get("is_video")) or node.get("__typename") == "GraphVideo"
+    ]
     return reels[:limit] or None
 
 
