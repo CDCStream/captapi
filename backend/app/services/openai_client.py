@@ -100,7 +100,12 @@ _WHISPER_HALLUCINATIONS = {
     "applause",
     "alkis",
     "laughter",
+    "go to beadaholique.com for all of your beading supply needs",
 }
+
+# Whisper segments below this decode confidence are garbage (hallucinated
+# URLs/credits over music score around -2.5; real speech stays above ~-0.9).
+_MIN_AVG_LOGPROB = -1.2
 
 _HALLUCINATION_TRANSLATION = str.maketrans("ıİçÇşŞğĞüÜöÖéê", "iiccssgguuooee")
 
@@ -244,6 +249,8 @@ def _parse_verbose(resp: Any) -> dict[str, Any]:
         seg_text = (getattr(seg, "text", "") or "").strip()
         if not seg_text or _is_hallucinated_segment(seg_text):
             continue
+        if float(getattr(seg, "avg_logprob", 0.0)) < _MIN_AVG_LOGPROB:
+            continue  # decoder was guessing (music/silence), not transcribing
         start = float(getattr(seg, "start", 0.0))
         end = float(getattr(seg, "end", start))
         mm = int(start // 60)

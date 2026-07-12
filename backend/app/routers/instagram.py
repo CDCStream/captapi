@@ -1,4 +1,4 @@
-"""Instagram endpoints (Reels, Posts, Profiles)."""
+﻿"""Instagram endpoints (Reels, Posts, Profiles)."""
 
 from __future__ import annotations
 
@@ -89,7 +89,7 @@ def _normalize_post(item: dict) -> dict:
         "platform": "instagram",
         "url": safe_str(item.get("url") or item.get("permalink") or item.get("shortcodeUrl")),
         "id": safe_str(item.get("id") or item.get("shortCode") or item.get("shortcode")),
-        # "Image" | "Video" | "Sidecar" — video fields are null for images.
+        # "Image" | "Video" | "Sidecar" â€” video fields are null for images.
         "type": post_type,
         "productType": safe_str(item.get("productType")),
         "caption": safe_str(item.get("caption") or item.get("text") or item.get("description")),
@@ -469,7 +469,7 @@ async def instagram_transcript(
 
         data = await cached_or_run(
             endpoint="instagram.transcript",
-            params={"url": url, "language": lang, "v": 6},
+            params={"url": url, "language": lang, "v": 7},
             runner=_run,
             ctx=ctx,
         )
@@ -507,7 +507,7 @@ async def instagram_summarize(
 
         data = await cached_or_run(
             endpoint="instagram.summarize",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 6},
             runner=_run,
             ctx=ctx,
         )
@@ -939,7 +939,7 @@ async def instagram_video_download(
 
         data = await cached_or_run(
             endpoint="instagram.video-download",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 6},
             runner=_run,
             ctx=ctx,
             ttl=3600,
@@ -1303,7 +1303,7 @@ async def instagram_embed(
     caller: ApiCaller = Depends(require_api_key),
 ):
     shortcode = _require_instagram_post_url(url)
-    # Pure string build — no Apify call, so this is a flat 1-credit endpoint.
+    # Pure string build â€” no Apify call, so this is a flat 1-credit endpoint.
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/embed",
