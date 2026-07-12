@@ -16,6 +16,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services import instagram_decodo as decodo
+from app.services import instagram_native
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript, transcribe_video_url
 from app.utils.formatters import safe_float, safe_int, safe_list, safe_str
@@ -254,11 +255,11 @@ async def _fetch_instagram_transcript(
 ) -> tuple[str, list[dict[str, Any]], str]:
     """Return (full transcript, segments, source).
 
-    Primary: resolve the reel's MP4 (Decodo ~3s, Apify scraper fallback) and
-    Whisper-transcribe it ourselves. This always yields actual SPEECH, with
-    timestamps, and is faster + cheaper than the transcript actors. Actors
-    remain as a fallback, but their output is rejected when it merely echoes
-    the post caption.
+    Primary: resolve the reel's MP4 natively (~1-2s, Apify scraper fallback)
+    and Whisper-transcribe it ourselves. This always yields actual SPEECH,
+    with timestamps, and is faster + cheaper than the transcript actors.
+    Actors remain as a fallback, but their output is rejected when it merely
+    echoes the post caption.
 
     `language` pins Whisper's language (ISO-639-1) instead of auto-detection.
     """
@@ -279,16 +280,13 @@ async def _fetch_instagram_transcript(
         # Whisper ran fine and heard nothing -> genuinely no speech.
         raise HTTPException(status_code=422, detail="No speech found in this Reel")
 
-    # Fast path: Decodo resolves the MP4 in ~1-3s.
+    # Fast path: native GraphQL resolver gets the MP4 URL in ~1-2s.
     reel_item: dict[str, Any] | None = None
-    try:
-        dl = await decodo.video_download(url)
-    except Exception:  # noqa: BLE001
-        dl = None
-    if dl and safe_str(dl.get("downloadUrl")):
-        result = await _whisper(safe_str(dl.get("downloadUrl")))
+    native = await instagram_native.fetch_reel_media(_require_instagram_post_url(url))
+    if native and safe_str(native.get("videoUrl")):
+        result = await _whisper(safe_str(native.get("videoUrl")))
         if result:
-            return result[0], result[1], "openai"
+            return result[0], result[1], "direct"
 
     # Decodo failed or the MP4 was too large for Whisper's 25 MB cap: the reel
     # scraper also exposes an audio-only track (~30x smaller), so long reels
@@ -340,7 +338,7 @@ async def _fetch_instagram_transcript(
         if full and not _looks_like_caption(full, items[0]):
             return full, segments, "apify"
 
-    if reel_item is None and not dl:
+    if reel_item is None and native is None:
         raise HTTPException(status_code=404, detail="Reel not found")
     raise HTTPException(status_code=422, detail="No transcript available")
 
@@ -908,31 +906,40 @@ async def instagram_video_download(
         base_credits=CREDIT_DOWNLOAD,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            async def _apify() -> dict[str, Any]:
-                apify = get_apify()
-                items, _actor = await apify.run_with_fallback(
-                    _instagram_reel_candidates(settings, url),
-                    max_items=1,
-                )
-                if not items:
-                    raise HTTPException(status_code=404, detail="Reel not found")
-                v = items[0]
-                download_url = safe_str(v.get("videoUrl") or v.get("video_url") or v.get("downloadUrl"))
-                if not download_url:
-                    raise HTTPException(status_code=404, detail="Video download URL not found")
+            native = await instagram_native.fetch_reel_media(_require_instagram_post_url(url))
+            if native and safe_str(native.get("videoUrl")):
+                ctx["source"] = "direct"
                 return {
                     "platform": "instagram",
                     "url": url,
-                    "downloadUrl": download_url,
-                    "thumbnailUrl": safe_str(v.get("displayUrl") or v.get("thumbnailUrl") or v.get("thumbnail")),
-                    "duration": safe_float(v.get("videoDuration") or v.get("duration") or v.get("durationSeconds")),
+                    "downloadUrl": safe_str(native.get("videoUrl")),
+                    "thumbnailUrl": safe_str(native.get("thumbnailUrl")),
+                    "duration": safe_float(native.get("duration")),
                 }
 
-            return await _try_decodo(ctx, lambda: decodo.video_download(url), _apify)
+            ctx["source"] = "apify"
+            apify = get_apify()
+            items, _actor = await apify.run_with_fallback(
+                _instagram_reel_candidates(settings, url),
+                max_items=1,
+            )
+            if not items:
+                raise HTTPException(status_code=404, detail="Reel not found")
+            v = items[0]
+            download_url = safe_str(v.get("videoUrl") or v.get("video_url") or v.get("downloadUrl"))
+            if not download_url:
+                raise HTTPException(status_code=404, detail="Video download URL not found")
+            return {
+                "platform": "instagram",
+                "url": url,
+                "downloadUrl": download_url,
+                "thumbnailUrl": safe_str(v.get("displayUrl") or v.get("thumbnailUrl") or v.get("thumbnail")),
+                "duration": safe_float(v.get("videoDuration") or v.get("duration") or v.get("durationSeconds")),
+            }
 
         data = await cached_or_run(
             endpoint="instagram.video-download",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             ttl=3600,
