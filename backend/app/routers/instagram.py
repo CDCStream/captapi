@@ -442,11 +442,17 @@ async def instagram_details(
             # `followers` was dropped from this endpoint: neither source
             # reliably provides it on a post lookup (use channel-details).
             data["author"].pop("followers", None)
+            if native:
+                # The actor was only consulted for the hidden view count; the
+                # native result is richer (verified, profile image, shortcode
+                # id), so keep it and graft the views on.
+                native["engagement"]["views"] = data["engagement"].get("views")
+                return native
             return data
 
         data = await cached_or_run(
             endpoint="instagram.details",
-            params={"url": url, "v": 6},
+            params={"url": url, "v": 7},
             runner=_run,
             ctx=ctx,
         )
