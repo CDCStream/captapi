@@ -390,6 +390,15 @@ async def instagram_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Primary: Instagram's own GraphQL (~3-4s, no actor cost). Same
+            # upstream numbers as the actor; actor stays as fallback.
+            shortcode = extract_instagram_shortcode(url)
+            if shortcode:
+                native = await instagram_native.fetch_post_details(shortcode)
+                if native:
+                    ctx["source"] = "direct"
+                    return native
+
             apify = get_apify()
             try:
                 items = await apify.run_actor_sync(
@@ -412,18 +421,22 @@ async def instagram_details(
                         "durationSeconds": 0,
                         "thumbnailUrl": meta["image"],
                         "videoUrl": "",
-                        "author": {"username": "", "displayName": meta["title"], "url": None, "followers": 0, "verified": None, "profileImage": ""},
+                        "author": {"username": "", "displayName": meta["title"], "url": None, "verified": None, "profileImage": ""},
                         "engagement": {"views": 0, "likes": 0, "comments": 0},
                         "hashtags": [],
                     }
             if not items:
                 raise HTTPException(status_code=404, detail="Post not found")
             ctx["source"] = "apify"
-            return _normalize_post(items[0])
+            data = _normalize_post(items[0])
+            # `followers` was dropped from this endpoint: neither source
+            # reliably provides it on a post lookup (use channel-details).
+            data["author"].pop("followers", None)
+            return data
 
         data = await cached_or_run(
             endpoint="instagram.details",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
         )

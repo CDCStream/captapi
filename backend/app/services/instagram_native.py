@@ -13,13 +13,15 @@ this doc_id is its replacement.
 from __future__ import annotations
 
 import json
+import re
+from datetime import datetime, timezone
 from typing import Any
 
 import httpx
 import structlog
 
 from app.services.http_fetch import proxy_for
-from app.utils.formatters import safe_float, safe_str
+from app.utils.formatters import safe_float, safe_int, safe_str
 
 log = structlog.get_logger(__name__)
 
@@ -40,6 +42,102 @@ async def fetch_reel_media(shortcode: str) -> dict[str, Any] | None:
     Returns {"videoUrl", "thumbnailUrl", "duration", "caption", "username"}
     or None (caller falls back to Apify).
     """
+    media = await _fetch_item(shortcode)
+    if media is None:
+        return None
+    videos = media.get("video_versions") or []
+    images = (media.get("image_versions2") or {}).get("candidates") or []
+    caption = media.get("caption")
+    return {
+        "videoUrl": safe_str(videos[0].get("url")) if videos else None,
+        "thumbnailUrl": safe_str(images[0].get("url")) if images else None,
+        "duration": safe_float(media.get("video_duration")),
+        "caption": safe_str(caption.get("text")) if isinstance(caption, dict) else None,
+        "username": safe_str((media.get("user") or {}).get("username")),
+    }
+
+
+_MEDIA_TYPE_NAMES = {1: "Image", 2: "Video", 8: "Sidecar"}
+_HASHTAG_RE = re.compile(r"#(\w+)", re.UNICODE)
+_MENTION_RE = re.compile(r"@([A-Za-z0-9_.]+)")
+# DASH manifest carries the duration when `video_duration` is absent,
+# e.g. mediaPresentationDuration="PT0H0M30.033S".
+_MPD_DURATION_RE = re.compile(
+    r'mediaPresentationDuration="PT(?:(\d+)H)?(?:(\d+)M)?([\d.]+)S"'
+)
+
+
+def _video_duration(media: dict[str, Any], cover: dict[str, Any]) -> float | None:
+    direct = safe_float(media.get("video_duration") or cover.get("video_duration"))
+    if direct:
+        return direct
+    m = _MPD_DURATION_RE.search(
+        safe_str(media.get("video_dash_manifest") or cover.get("video_dash_manifest")) or ""
+    )
+    if not m:
+        return None
+    hours, minutes, seconds = int(m.group(1) or 0), int(m.group(2) or 0), float(m.group(3))
+    return round(hours * 3600 + minutes * 60 + seconds, 3)
+
+
+async def fetch_post_details(shortcode: str) -> dict[str, Any] | None:
+    """Full post/reel/carousel details in the /v1/instagram/details shape.
+
+    Same upstream numbers as the Apify actor (both read Instagram's own
+    data) at ~3-4s instead of an actor run. Returns None so the caller can
+    fall back to Apify.
+    """
+    media = await _fetch_item(shortcode)
+    if media is None:
+        return None
+
+    caption_obj = media.get("caption")
+    caption = safe_str(caption_obj.get("text")) if isinstance(caption_obj, dict) else None
+    user = media.get("user") or {}
+    username = safe_str(user.get("username"))
+
+    # For carousels the media lives on the children; lead with the cover item.
+    cover = (media.get("carousel_media") or [media])[0]
+    videos = cover.get("video_versions") or []
+    images = (cover.get("image_versions2") or {}).get("candidates") or []
+
+    taken_at = safe_int(media.get("taken_at"))
+    published = (
+        datetime.fromtimestamp(taken_at, tz=timezone.utc).isoformat().replace("+00:00", "Z")
+        if taken_at
+        else None
+    )
+
+    return {
+        "platform": "instagram",
+        "url": f"https://www.instagram.com/p/{shortcode}/",
+        "id": safe_str(media.get("code")) or shortcode,
+        "type": _MEDIA_TYPE_NAMES.get(safe_int(media.get("media_type")) or 0),
+        "productType": safe_str(media.get("product_type")),
+        "caption": caption,
+        "description": caption,
+        "publishedAt": published,
+        "durationSeconds": _video_duration(media, cover),
+        "thumbnailUrl": safe_str(images[0].get("url")) if images else None,
+        "videoUrl": safe_str(videos[0].get("url")) if videos else None,
+        "author": {
+            "username": username,
+            "displayName": safe_str(user.get("full_name")),
+            "url": f"https://instagram.com/{username}" if username else None,
+            "verified": user.get("is_verified"),
+            "profileImage": safe_str(user.get("profile_pic_url")),
+        },
+        "engagement": {
+            "views": safe_int(media.get("play_count") or media.get("view_count")),
+            "likes": safe_int(media.get("like_count")) or 0,
+            "comments": safe_int(media.get("comment_count")) or 0,
+        },
+        "hashtags": _HASHTAG_RE.findall(caption or ""),
+        "mentions": _MENTION_RE.findall(caption or ""),
+    }
+
+
+async def _fetch_item(shortcode: str) -> dict[str, Any] | None:
     for tier in _TIERS:
         try:
             media = await _fetch_via(tier, shortcode)
@@ -90,16 +188,4 @@ async def _fetch_via(tier: str, shortcode: str) -> dict[str, Any] | None:
     items = info.get("items") or []
     if not items:
         return None
-    media = items[0]
-
-    videos = media.get("video_versions") or []
-    video_url = safe_str(videos[0].get("url")) if videos else None
-    images = (media.get("image_versions2") or {}).get("candidates") or []
-    caption = media.get("caption")
-    return {
-        "videoUrl": video_url,
-        "thumbnailUrl": safe_str(images[0].get("url")) if images else None,
-        "duration": safe_float(media.get("video_duration")),
-        "caption": safe_str(caption.get("text")) if isinstance(caption, dict) else None,
-        "username": safe_str((media.get("user") or {}).get("username")),
-    }
+    return items[0]
