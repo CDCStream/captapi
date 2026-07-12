@@ -241,7 +241,7 @@ def _transcript_from_item(item: dict[str, Any]) -> tuple[str, list[dict[str, Any
 
 def _looks_like_caption(full: str, item: dict[str, Any]) -> bool:
     """True when an actor stuffed the post caption into its transcript field."""
-    caption = safe_str(item.get("caption") or item.get("text")).strip()
+    caption = (safe_str(item.get("caption") or item.get("text")) or "").strip()
     if not caption or not full:
         return False
     a = " ".join(full.lower().split())
@@ -269,7 +269,7 @@ async def _fetch_instagram_transcript(url: str) -> tuple[str, list[dict[str, Any
             return None
         if tx is None:
             return None
-        full = safe_str(tx.get("transcript")).strip()
+        full = (safe_str(tx.get("transcript")) or "").strip()
         if full:
             return full, tx.get("transcriptSegments") or []
         # Whisper ran fine and heard nothing -> genuinely no speech.
