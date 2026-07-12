@@ -67,7 +67,8 @@ YOUTUBE_RE = re.compile(
 TIKTOK_VIDEO_RE = re.compile(r"tiktok\.com/(?:@[\w.-]+/video|v)/(\d+)")
 TIKTOK_USER_RE = re.compile(r"tiktok\.com/@([\w.-]+)")
 
-INSTAGRAM_POST_RE = re.compile(r"instagram\.com/(?:p|reel|tv)/([A-Za-z0-9_-]+)")
+# `reels` (plural) is the URL Instagram's web reels viewer produces.
+INSTAGRAM_POST_RE = re.compile(r"instagram\.com/(?:p|reel|reels|tv)/([A-Za-z0-9_-]+)")
 INSTAGRAM_USER_RE = re.compile(r"instagram\.com/([A-Za-z0-9_.]+)(?:/|$)")
 
 FACEBOOK_VIDEO_RE = re.compile(
@@ -200,7 +201,7 @@ def extract_instagram_username(url: str) -> str | None:
     m = INSTAGRAM_USER_RE.search(url or "")
     if m:
         handle = m.group(1)
-        if handle in {"p", "reel", "tv", "explore"}:
+        if handle in {"p", "reel", "reels", "tv", "explore", "stories"}:
             return None
         return handle
     # Also accept a bare handle or @handle (AI agents often skip the URL).
