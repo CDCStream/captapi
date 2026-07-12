@@ -559,10 +559,15 @@ async def tiktok_transcript(
 @router.get("/summarize", summary="AI summary of a TikTok video")
 async def tiktok_summarize(
     url: str = Query(...),
+    language: str | None = Query(
+        None,
+        description="Optional ISO-639-1 code (e.g. 'tr'): pins the speech language and sets the summary output language",
+        max_length=8,
+    ),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_tiktok_video_url(url)
-    settings = get_settings()
+    lang = (language or "").strip().lower() or None
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/summarize",
@@ -571,8 +576,8 @@ async def tiktok_summarize(
         base_credits=CREDIT_SUMMARIZE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            text, _segments, _language = await _fetch_tiktok_transcript(url)
-            ai = await summarize_transcript(text)
+            text, _segments, _detected = await _fetch_tiktok_transcript(url, language=lang)
+            ai = await summarize_transcript(text, language=lang or "en")
             return {
                 "platform": "tiktok",
                 "url": url,
@@ -584,7 +589,7 @@ async def tiktok_summarize(
 
         data = await cached_or_run(
             endpoint="tiktok.summarize",
-            params={"url": url, "v": 4},
+            params={"url": url, "language": lang, "v": 5},
             runner=_run,
             ctx=ctx,
         )

@@ -28,6 +28,9 @@ Given a transcript, produce JSON with:
 - "topics": array of 3-8 short topic/keyword tags
 - "sentiment": "positive" | "neutral" | "negative" | "mixed"
 
+Write "summary", "keyPoints" and "topics" in the output language given by the
+user (the transcript itself may be in a different language).
+
 Respond ONLY with valid JSON, no markdown fencing."""
 
 
@@ -42,7 +45,7 @@ async def summarize_transcript(
     truncated = transcript[:60_000]
     user_prompt = (
         f"Title: {title or 'Unknown'}\n"
-        f"Language: {language}\n\n"
+        f"Output language: {language}\n\n"
         f"Transcript:\n{truncated}"
     )
 

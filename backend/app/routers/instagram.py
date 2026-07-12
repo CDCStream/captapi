@@ -479,10 +479,19 @@ async def instagram_transcript(
 @router.get("/summarize", summary="AI summary of Instagram Reel")
 async def instagram_summarize(
     url: str = Query(...),
+    language: str | None = Query(
+        None,
+        min_length=2,
+        max_length=5,
+        description=(
+            "Optional ISO-639-1 code (e.g. 'tr'): pins the speech language "
+            "and sets the summary output language."
+        ),
+    ),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_instagram_post_url(url)
-    settings = get_settings()
+    lang = (language or "").strip().lower()[:2] or None
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/summarize",
@@ -491,11 +500,11 @@ async def instagram_summarize(
         base_credits=CREDIT_SUMMARIZE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            text, _segments, source = await _fetch_instagram_transcript(url)
+            text, _segments, source = await _fetch_instagram_transcript(url, language=lang)
             ctx["source"] = source
             if not text:
                 raise HTTPException(status_code=422, detail="No content to summarize")
-            ai = await summarize_transcript(text)
+            ai = await summarize_transcript(text, language=lang or "en")
             return {
                 "platform": "instagram",
                 "url": url,
@@ -507,7 +516,7 @@ async def instagram_summarize(
 
         data = await cached_or_run(
             endpoint="instagram.summarize",
-            params={"url": url, "v": 7},
+            params={"url": url, "language": lang, "v": 8},
             runner=_run,
             ctx=ctx,
         )
