@@ -77,6 +77,28 @@ async def summarize_transcript(
 # whisper-1 rejects uploads over 25 MB; short-form videos are well under this.
 WHISPER_MAX_BYTES = 25 * 1024 * 1024
 
+# Phrases Whisper hallucinates on silence/music-only audio (learned from
+# subtitle credits in its training data). Segments matching these are noise,
+# not speech.
+_WHISPER_HALLUCINATIONS = {
+    "altyazi m.k.",
+    "altyazi: m.k.",
+    "izlediginiz icin tesekkurler",
+    "izlediginiz icin tesekkur ederim",
+    "thanks for watching",
+    "thank you for watching",
+    "subtitles by the amara.org community",
+    "sous-titres realises para la communaute d'amara.org",
+    "you",
+}
+
+_HALLUCINATION_TRANSLATION = str.maketrans("ıİçÇşŞğĞüÜöÖéê", "iiccssgguuooee")
+
+
+def _is_hallucinated_segment(text: str) -> bool:
+    normalized = " ".join(text.translate(_HALLUCINATION_TRANSLATION).lower().split())
+    return normalized.rstrip(".!") in _WHISPER_HALLUCINATIONS or normalized in _WHISPER_HALLUCINATIONS
+
 
 async def transcribe_video_url(video_url: str) -> dict[str, Any] | None:
     """Download a video by URL and Whisper-transcribe its audio.
@@ -108,20 +130,31 @@ async def transcribe_audio(file_bytes: bytes, filename: str) -> dict[str, Any]:
     )
     segments = []
     for seg in (resp.segments or []):
+        seg_text = (getattr(seg, "text", "") or "").strip()
+        if not seg_text or _is_hallucinated_segment(seg_text):
+            continue
         start = float(getattr(seg, "start", 0.0))
         end = float(getattr(seg, "end", start))
         mm = int(start // 60)
         ss = int(start % 60)
         segments.append(
             {
-                "text": (getattr(seg, "text", "") or "").strip(),
+                "text": seg_text,
                 "start": start,
                 "duration": max(end - start, 0.0),
                 "timestamp": f"{mm:02d}:{ss:02d}",
             }
         )
 
-    text = resp.text or ""
+    # Rebuild the full text from the kept segments so filtered hallucinations
+    # don't linger in the transcript. Empty -> genuinely no speech.
+    if segments:
+        text = " ".join(s["text"] for s in segments)
+    elif resp.segments:
+        text = ""  # everything was hallucination noise
+    else:
+        raw = (resp.text or "").strip()
+        text = "" if _is_hallucinated_segment(raw) else raw
     return {
         "transcript": text,
         "transcriptSegments": segments,
