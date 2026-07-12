@@ -109,13 +109,32 @@ _MIN_AVG_LOGPROB = -1.2
 
 _HALLUCINATION_TRANSLATION = str.maketrans("ıİçÇşŞğĞüÜöÖéê", "iiccssgguuooee")
 
+_MUSIC_SYMBOLS = "♪♫♬♩🎵🎶🎼"
+
+# Whisper labels non-speech audio with annotations like "[Music Outro and
+# Credits]" or "(intro music)". A segment whose words all come from this
+# vocabulary is an annotation, not speech.
+_MUSIC_LABEL_WORDS = {
+    "music", "musik", "muzik", "musica", "musique",
+    "intro", "outro", "credits", "credit", "theme", "song", "instrumental",
+    "playing", "plays", "sound", "sounds", "audio", "background", "beat",
+    "applause", "alkis", "laughter", "silence", "sings", "singing", "humming",
+    "starts", "ends", "continues", "fades", "upbeat", "dramatic", "soft",
+    "and", "the", "of", "in", "on", "a", "an", "ve",
+}
+
 
 def _is_hallucinated_segment(text: str) -> bool:
+    if any(ch in _MUSIC_SYMBOLS for ch in text):
+        return True  # Whisper only emits note symbols for music, never speech
     if not any(ch.isalpha() for ch in text):
-        return True  # music notes / symbols only
+        return True  # symbols only
     normalized = " ".join(text.translate(_HALLUCINATION_TRANSLATION).lower().split())
-    normalized = normalized.strip("♪♫[]() ").rstrip(".!")
-    return normalized in _WHISPER_HALLUCINATIONS
+    normalized = normalized.strip("[]() ").rstrip(".!")
+    if normalized in _WHISPER_HALLUCINATIONS:
+        return True
+    words = [w.strip(".,!?:;[]()") for w in normalized.split()]
+    return all(w in _MUSIC_LABEL_WORDS for w in words if w)
 
 
 # Whisper's verbose_json reports the detected language as a full name; the

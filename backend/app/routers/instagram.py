@@ -469,7 +469,7 @@ async def instagram_transcript(
 
         data = await cached_or_run(
             endpoint="instagram.transcript",
-            params={"url": url, "language": lang, "v": 7},
+            params={"url": url, "language": lang, "v": 8},
             runner=_run,
             ctx=ctx,
         )
@@ -507,7 +507,7 @@ async def instagram_summarize(
 
         data = await cached_or_run(
             endpoint="instagram.summarize",
-            params={"url": url, "v": 6},
+            params={"url": url, "v": 7},
             runner=_run,
             ctx=ctx,
         )
@@ -939,7 +939,7 @@ async def instagram_video_download(
 
         data = await cached_or_run(
             endpoint="instagram.video-download",
-            params={"url": url, "v": 6},
+            params={"url": url, "v": 7},
             runner=_run,
             ctx=ctx,
             ttl=3600,
