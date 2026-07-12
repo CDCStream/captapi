@@ -80,9 +80,10 @@ WHISPER_MAX_BYTES = 25 * 1024 * 1024
 # Phrases Whisper hallucinates on silence/music-only audio (learned from
 # subtitle credits in its training data). Segments matching these are noise,
 # not speech.
+# Stored pre-normalized: lowercase, ASCII-folded, trailing ".!" stripped.
 _WHISPER_HALLUCINATIONS = {
-    "altyazi m.k.",
-    "altyazi: m.k.",
+    "altyazi m.k",
+    "altyazi: m.k",
     "izlediginiz icin tesekkurler",
     "izlediginiz icin tesekkur ederim",
     "thanks for watching",
@@ -90,6 +91,15 @@ _WHISPER_HALLUCINATIONS = {
     "subtitles by the amara.org community",
     "sous-titres realises para la communaute d'amara.org",
     "you",
+    # Sound-effect labels, usually wrapped in music notes ("(müzik)").
+    "muzik",
+    "music",
+    "musica",
+    "musique",
+    "intro music",
+    "applause",
+    "alkis",
+    "laughter",
 }
 
 _HALLUCINATION_TRANSLATION = str.maketrans("ıİçÇşŞğĞüÜöÖéê", "iiccssgguuooee")
@@ -99,7 +109,8 @@ def _is_hallucinated_segment(text: str) -> bool:
     if not any(ch.isalpha() for ch in text):
         return True  # music notes / symbols only
     normalized = " ".join(text.translate(_HALLUCINATION_TRANSLATION).lower().split())
-    return normalized.rstrip(".!") in _WHISPER_HALLUCINATIONS or normalized in _WHISPER_HALLUCINATIONS
+    normalized = normalized.strip("♪♫[]() ").rstrip(".!")
+    return normalized in _WHISPER_HALLUCINATIONS
 
 
 # Whisper's verbose_json reports the detected language as a full name; the
@@ -153,17 +164,62 @@ async def transcribe_audio(file_bytes: bytes, filename: str) -> dict[str, Any]:
 
     resp = await _request()
     result = _parse_verbose(resp)
-    if not result["transcript"]:
-        # Whisper sometimes bails out after hallucinating on a music/silence
-        # intro and misses speech that starts later. A retry with the detected
-        # language pinned and a slightly raised temperature recovers it.
-        iso = _LANG_NAME_TO_ISO.get((getattr(resp, "language", None) or "").lower())
+    if _is_valid_transcript(result):
+        return result
+
+    # Whisper sometimes bails out after hallucinating on a music/silence
+    # intro and misses speech that starts later; retries with the detected
+    # language pinned and a raised temperature recover it. A retry can itself
+    # degenerate into a repetition loop ("Ben de." x29), so each attempt is
+    # validated before being trusted.
+    iso = _LANG_NAME_TO_ISO.get((getattr(resp, "language", None) or "").lower())
+    for temperature in (0.2, 0.4):
+        extra: dict[str, Any] = {"temperature": temperature}
         if iso:
-            retry = _parse_verbose(await _request(language=iso, temperature=0.2))
-            if retry["transcript"]:
-                log.info("whisper_retry_recovered_speech", language=iso)
-                return retry
+            extra["language"] = iso
+        retry = _parse_verbose(await _request(**extra))
+        if _is_valid_transcript(retry):
+            log.info("whisper_retry_recovered_speech", language=iso, temperature=temperature)
+            return retry
+
+    # Last resort: gpt-4o-mini-transcribe is far more robust on clips whose
+    # speech starts after a music intro. No segment timestamps, text only.
+    try:
+        alt = await client.audio.transcriptions.create(
+            model="gpt-4o-mini-transcribe",
+            file=(filename, file_bytes),
+        )
+        alt_text = (getattr(alt, "text", None) or "").strip()
+    except Exception:  # noqa: BLE001
+        alt_text = ""
+    if alt_text and not _is_hallucinated_segment(alt_text):
+        log.info("whisper_fallback_4o_mini_recovered_speech")
+        return {
+            "transcript": alt_text,
+            "transcriptSegments": [],
+            "wordCount": len(alt_text.split()),
+            "segments": 0,
+            "language": getattr(resp, "language", None),
+            "duration": float(getattr(resp, "duration", 0.0)),
+        }
+
+    # Nothing trustworthy: report no speech rather than hallucinated text.
+    result["transcript"] = ""
+    result["transcriptSegments"] = []
+    result["wordCount"] = 0
+    result["segments"] = 0
     return result
+
+
+def _is_valid_transcript(result: dict[str, Any]) -> bool:
+    if not result["transcript"]:
+        return False
+    segments = result["transcriptSegments"]
+    if len(segments) >= 5:
+        texts = [s["text"].lower() for s in segments]
+        if len(set(texts)) / len(texts) < 0.34:
+            return False  # repetition loop, not real speech
+    return True
 
 
 def _parse_verbose(resp: Any) -> dict[str, Any]:

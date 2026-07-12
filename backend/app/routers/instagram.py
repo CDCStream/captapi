@@ -456,7 +456,7 @@ async def instagram_transcript(
 
         data = await cached_or_run(
             endpoint="instagram.transcript",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 6},
             runner=_run,
             ctx=ctx,
         )
@@ -494,7 +494,7 @@ async def instagram_summarize(
 
         data = await cached_or_run(
             endpoint="instagram.summarize",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
         )
