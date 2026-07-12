@@ -127,8 +127,9 @@ async def fetch_post_details(shortcode: str) -> dict[str, Any] | None:
             "verified": user.get("is_verified"),
             "profileImage": safe_str(user.get("profile_pic_url")),
         },
+        # No "views": Instagram hides play counts from the logged-out API for
+        # clips, so the field can't be served consistently across post types.
         "engagement": {
-            "views": safe_int(media.get("play_count") or media.get("view_count")),
             "likes": safe_int(media.get("like_count")) or 0,
             "comments": safe_int(media.get("comment_count")) or 0,
         },

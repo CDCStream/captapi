@@ -392,16 +392,10 @@ async def instagram_details(
         async def _run() -> dict[str, Any]:
             # Primary: Instagram's own GraphQL (~3-4s, no actor cost). Same
             # upstream numbers as the actor; actor stays as fallback.
-            # Exception: clips reels hide play counts from the logged-out
-            # API, so a video with no view count goes to the actor (the only
-            # source that has it); the native result is kept as a safety net.
-            native: dict[str, Any] | None = None
             shortcode = extract_instagram_shortcode(url)
             if shortcode:
                 native = await instagram_native.fetch_post_details(shortcode)
-                if native and not (
-                    native["type"] == "Video" and native["engagement"]["views"] is None
-                ):
+                if native:
                     ctx["source"] = "direct"
                     return native
 
@@ -414,10 +408,6 @@ async def instagram_details(
                 )
             except (ApifyError, httpx.HTTPError):
                 items = []
-            if not items and native:
-                # Actor failed but we do have the native result minus views.
-                ctx["source"] = "direct"
-                return native
             if not items:
                 meta = await _public_instagram_meta(url)
                 if meta:
@@ -432,27 +422,24 @@ async def instagram_details(
                         "thumbnailUrl": meta["image"],
                         "videoUrl": "",
                         "author": {"username": "", "displayName": meta["title"], "url": None, "verified": None, "profileImage": ""},
-                        "engagement": {"views": 0, "likes": 0, "comments": 0},
+                        "engagement": {"likes": 0, "comments": 0},
                         "hashtags": [],
                     }
             if not items:
                 raise HTTPException(status_code=404, detail="Post not found")
             ctx["source"] = "apify"
             data = _normalize_post(items[0])
-            # `followers` was dropped from this endpoint: neither source
-            # reliably provides it on a post lookup (use channel-details).
+            # Shape parity with the native result: `followers` isn't reliably
+            # available on a post lookup and `views` is hidden for clips, so
+            # neither is part of this endpoint (use channel-details for
+            # followers).
             data["author"].pop("followers", None)
-            if native:
-                # The actor was only consulted for the hidden view count; the
-                # native result is richer (verified, profile image, shortcode
-                # id), so keep it and graft the views on.
-                native["engagement"]["views"] = data["engagement"].get("views")
-                return native
+            data["engagement"].pop("views", None)
             return data
 
         data = await cached_or_run(
             endpoint="instagram.details",
-            params={"url": url, "v": 7},
+            params={"url": url, "v": 8},
             runner=_run,
             ctx=ctx,
         )
