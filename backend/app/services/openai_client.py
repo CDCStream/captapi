@@ -96,8 +96,27 @@ _HALLUCINATION_TRANSLATION = str.maketrans("ıİçÇşŞğĞüÜöÖéê", "iicc
 
 
 def _is_hallucinated_segment(text: str) -> bool:
+    if not any(ch.isalpha() for ch in text):
+        return True  # music notes / symbols only
     normalized = " ".join(text.translate(_HALLUCINATION_TRANSLATION).lower().split())
     return normalized.rstrip(".!") in _WHISPER_HALLUCINATIONS or normalized in _WHISPER_HALLUCINATIONS
+
+
+# Whisper's verbose_json reports the detected language as a full name; the
+# `language` request parameter wants an ISO-639-1 code.
+_LANG_NAME_TO_ISO = {
+    "english": "en", "turkish": "tr", "spanish": "es", "french": "fr",
+    "german": "de", "italian": "it", "portuguese": "pt", "dutch": "nl",
+    "russian": "ru", "arabic": "ar", "hindi": "hi", "urdu": "ur",
+    "japanese": "ja", "korean": "ko", "chinese": "zh", "indonesian": "id",
+    "vietnamese": "vi", "thai": "th", "polish": "pl", "ukrainian": "uk",
+    "romanian": "ro", "greek": "el", "czech": "cs", "swedish": "sv",
+    "danish": "da", "norwegian": "no", "finnish": "fi", "hungarian": "hu",
+    "hebrew": "he", "persian": "fa", "malay": "ms", "tagalog": "tl",
+    "bulgarian": "bg", "croatian": "hr", "serbian": "sr", "slovak": "sk",
+    "azerbaijani": "az", "kazakh": "kk", "bengali": "bn", "tamil": "ta",
+    "telugu": "te", "marathi": "mr", "swahili": "sw", "catalan": "ca",
+}
 
 
 async def transcribe_video_url(video_url: str) -> dict[str, Any] | None:
@@ -122,12 +141,32 @@ async def transcribe_video_url(video_url: str) -> dict[str, Any] | None:
 async def transcribe_audio(file_bytes: bytes, filename: str) -> dict[str, Any]:
     settings = get_settings()
     client = get_openai()
-    resp = await client.audio.transcriptions.create(
-        model=settings.OPENAI_MODEL_TRANSCRIPTION,
-        file=(filename, file_bytes),
-        response_format="verbose_json",
-        timestamp_granularities=["segment"],
-    )
+
+    async def _request(**extra: Any):
+        return await client.audio.transcriptions.create(
+            model=settings.OPENAI_MODEL_TRANSCRIPTION,
+            file=(filename, file_bytes),
+            response_format="verbose_json",
+            timestamp_granularities=["segment"],
+            **extra,
+        )
+
+    resp = await _request()
+    result = _parse_verbose(resp)
+    if not result["transcript"]:
+        # Whisper sometimes bails out after hallucinating on a music/silence
+        # intro and misses speech that starts later. A retry with the detected
+        # language pinned and a slightly raised temperature recovers it.
+        iso = _LANG_NAME_TO_ISO.get((getattr(resp, "language", None) or "").lower())
+        if iso:
+            retry = _parse_verbose(await _request(language=iso, temperature=0.2))
+            if retry["transcript"]:
+                log.info("whisper_retry_recovered_speech", language=iso)
+                return retry
+    return result
+
+
+def _parse_verbose(resp: Any) -> dict[str, Any]:
     segments = []
     for seg in (resp.segments or []):
         seg_text = (getattr(seg, "text", "") or "").strip()
