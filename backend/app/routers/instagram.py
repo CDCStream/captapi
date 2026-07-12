@@ -17,7 +17,7 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services import instagram_decodo as decodo
 from app.services.cached_runner import cached_or_run
-from app.services.openai_client import summarize_transcript
+from app.services.openai_client import summarize_transcript, transcribe_video_url
 from app.utils.formatters import safe_float, safe_int, safe_list, safe_str
 from app.utils.url import (
     detect_url_platform,
@@ -227,38 +227,85 @@ def _transcript_from_item(item: dict[str, Any]) -> tuple[str, list[dict[str, Any
                 ss = int(start % 60)
                 segments.append({"text": text, "start": start, "duration": duration, "timestamp": f"{mm:02d}:{ss:02d}"})
                 parts.append(text)
+    # Deliberately NOT falling back to item["text"]/item["caption"]: those are
+    # the post caption, not speech. Returning them as "transcript" is wrong
+    # (a talking reel would get its description back).
     full = (
         safe_str(item.get("transcript"))
         or safe_str(item.get("fullText"))
         or " ".join(parts)
-        or safe_str(item.get("text"))
-        or safe_str(item.get("caption"))
         or ""
     ).strip()
     return full, segments
 
 
-async def _fetch_instagram_transcript(url: str) -> tuple[str, list[dict[str, Any]]]:
+def _looks_like_caption(full: str, item: dict[str, Any]) -> bool:
+    """True when an actor stuffed the post caption into its transcript field."""
+    caption = safe_str(item.get("caption") or item.get("text")).strip()
+    if not caption or not full:
+        return False
+    a = " ".join(full.lower().split())
+    b = " ".join(caption.lower().split())
+    return a == b or (len(a) > 40 and (a in b or b in a))
+
+
+async def _fetch_instagram_transcript(url: str) -> tuple[str, list[dict[str, Any]], str]:
+    """Return (full transcript, segments, source).
+
+    Primary: resolve the reel's MP4 (Decodo ~3s, Apify scraper fallback) and
+    Whisper-transcribe it ourselves. This always yields actual SPEECH, with
+    timestamps, and is faster + cheaper than the transcript actors. Actors
+    remain as a fallback, but their output is rejected when it merely echoes
+    the post caption.
+    """
     settings = get_settings()
     apify = get_apify()
 
-    # Primary: sian.agency extractor with fastProcessing — measured ~16-18s vs
-    # ~86s for the crawlerbros actor on the same reel, identical transcript
-    # text. Error rows come back as status="error" with a placeholder
-    # transcript, so guard before trusting the text.
+    async def _whisper(media_url: str) -> tuple[str, list[dict[str, Any]]] | None:
+        """Whisper a media URL; None = fetch failed / too large (try next)."""
+        try:
+            tx = await transcribe_video_url(media_url)
+        except Exception:  # noqa: BLE001
+            return None
+        if tx is None:
+            return None
+        full = safe_str(tx.get("transcript")).strip()
+        if full:
+            return full, tx.get("transcriptSegments") or []
+        # Whisper ran fine and heard nothing -> genuinely no speech.
+        raise HTTPException(status_code=422, detail="No speech found in this Reel")
+
+    # Fast path: Decodo resolves the MP4 in ~1-3s.
+    reel_item: dict[str, Any] | None = None
     try:
-        items = await apify.run_actor_sync(
-            settings.APIFY_ACTOR_INSTAGRAM_TRANSCRIPT_FAST,
-            {"instagramUrl": url, "wordLevelTimestamps": False, "fastProcessing": True},
-            max_items=1,
+        dl = await decodo.video_download(url)
+    except Exception:  # noqa: BLE001
+        dl = None
+    if dl and safe_str(dl.get("downloadUrl")):
+        result = await _whisper(safe_str(dl.get("downloadUrl")))
+        if result:
+            return result[0], result[1], "openai"
+
+    # Decodo failed or the MP4 was too large for Whisper's 25 MB cap: the reel
+    # scraper also exposes an audio-only track (~30x smaller), so long reels
+    # still fit.
+    try:
+        items, _actor = await apify.run_with_fallback(
+            _instagram_reel_candidates(settings, url), max_items=1
         )
     except Exception:  # noqa: BLE001
         items = []
-    if items and safe_str(items[0].get("status")) != "error":
-        full, segments = _transcript_from_item(items[0])
-        if full:
-            return full, segments
+    if items:
+        reel_item = items[0]
+        for key in ("audioUrl", "videoUrl", "video_url", "downloadUrl"):
+            media_url = safe_str(reel_item.get(key))
+            if not media_url:
+                continue
+            result = await _whisper(media_url)
+            if result:
+                return result[0], result[1], "openai"
 
+    # Fallback: transcript actors (video URL could not be resolved/downloaded).
     try:
         items = await apify.run_actor_sync(
             settings.APIFY_ACTOR_INSTAGRAM_TRANSCRIPT,
@@ -273,19 +320,25 @@ async def _fetch_instagram_transcript(url: str) -> tuple[str, list[dict[str, Any
         items = []
     if items:
         full, segments = _transcript_from_item(items[0])
-        if full:
-            return full, segments
+        if full and not _looks_like_caption(full, items[0]):
+            return full, segments, "apify"
 
-    items, _actor = await apify.run_with_fallback(
-        _instagram_reel_candidates(settings, url, subtitles=True),
-        max_items=1,
-    )
-    if not items:
+    try:
+        items = await apify.run_actor_sync(
+            settings.APIFY_ACTOR_INSTAGRAM_TRANSCRIPT_FAST,
+            {"instagramUrl": url, "wordLevelTimestamps": False, "fastProcessing": True},
+            max_items=1,
+        )
+    except Exception:  # noqa: BLE001
+        items = []
+    if items and safe_str(items[0].get("status")) != "error":
+        full, segments = _transcript_from_item(items[0])
+        if full and not _looks_like_caption(full, items[0]):
+            return full, segments, "apify"
+
+    if reel_item is None and not dl:
         raise HTTPException(status_code=404, detail="Reel not found")
-    full, segments = _transcript_from_item(items[0])
-    if not full:
-        raise HTTPException(status_code=422, detail="No transcript available")
-    return full, segments
+    raise HTTPException(status_code=422, detail="No transcript available")
 
 
 def _normalize_audio_reel(item: dict) -> dict:
@@ -390,8 +443,8 @@ async def instagram_transcript(
         base_credits=CREDIT_TRANSCRIPT,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            ctx["source"] = "apify"
-            full, segments = await _fetch_instagram_transcript(url)
+            full, segments, source = await _fetch_instagram_transcript(url)
+            ctx["source"] = source
             return {
                 "platform": "instagram",
                 "url": url,
@@ -403,7 +456,7 @@ async def instagram_transcript(
 
         data = await cached_or_run(
             endpoint="instagram.transcript",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -425,8 +478,8 @@ async def instagram_summarize(
         base_credits=CREDIT_SUMMARIZE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            ctx["source"] = "apify"
-            text, _segments = await _fetch_instagram_transcript(url)
+            text, _segments, source = await _fetch_instagram_transcript(url)
+            ctx["source"] = source
             if not text:
                 raise HTTPException(status_code=422, detail="No content to summarize")
             ai = await summarize_transcript(text)
@@ -441,7 +494,7 @@ async def instagram_summarize(
 
         data = await cached_or_run(
             endpoint="instagram.summarize",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
         )

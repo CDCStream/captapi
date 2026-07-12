@@ -6,6 +6,7 @@ import json
 from functools import lru_cache
 from typing import Any
 
+import httpx
 import structlog
 from openai import AsyncOpenAI
 
@@ -71,6 +72,29 @@ async def summarize_transcript(
         "topics": parsed.get("topics", []) or [],
         "sentiment": parsed.get("sentiment"),
     }
+
+
+# whisper-1 rejects uploads over 25 MB; short-form videos are well under this.
+WHISPER_MAX_BYTES = 25 * 1024 * 1024
+
+
+async def transcribe_video_url(video_url: str) -> dict[str, Any] | None:
+    """Download a video by URL and Whisper-transcribe its audio.
+
+    Returns the transcribe_audio dict, or None when the file can't be
+    fetched / is too large (callers fall back to their actor cascade).
+    """
+    try:
+        async with httpx.AsyncClient(timeout=60, follow_redirects=True) as client:
+            resp = await client.get(video_url)
+            if resp.status_code >= 400 or len(resp.content) > WHISPER_MAX_BYTES:
+                return None
+            raw = resp.content
+    except httpx.HTTPError:
+        return None
+    if not raw:
+        return None
+    return await transcribe_audio(raw, filename="video.mp4")
 
 
 async def transcribe_audio(file_bytes: bytes, filename: str) -> dict[str, Any]:

@@ -480,6 +480,9 @@ async def _fetch_tiktok_transcript(url: str) -> tuple[str, list[dict[str, Any]],
         if full:
             return full, segments, safe_str(items[0].get("languageCode"))
 
+    # Confirm the video exists to give an accurate 404 vs 422. The base
+    # scraper's `text` field is the post CAPTION, not speech, so it is
+    # deliberately NOT returned as a transcript.
     items = await apify.run_actor_sync(
         settings.APIFY_ACTOR_TIKTOK,
         {"postURLs": [url], "resultsPerPage": 1, "shouldDownloadSubtitles": True},
@@ -487,10 +490,7 @@ async def _fetch_tiktok_transcript(url: str) -> tuple[str, list[dict[str, Any]],
     )
     if not items:
         raise HTTPException(status_code=404, detail="Video not found")
-    full = safe_str(items[0].get("text")) or ""
-    if not full:
-        raise HTTPException(status_code=422, detail="No transcript available for this TikTok")
-    return full, [], safe_str(items[0].get("textLanguage"))
+    raise HTTPException(status_code=422, detail="No speech/captions available for this TikTok")
 
 
 @router.get("/transcript", summary="TikTok video transcript (via auto-captions)")
@@ -520,7 +520,7 @@ async def tiktok_transcript(
 
         data = await cached_or_run(
             endpoint="tiktok.transcript",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
         )
@@ -555,7 +555,7 @@ async def tiktok_summarize(
 
         data = await cached_or_run(
             endpoint="tiktok.summarize",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
         )
