@@ -67,8 +67,12 @@ YOUTUBE_RE = re.compile(
 TIKTOK_VIDEO_RE = re.compile(r"tiktok\.com/(?:@[\w.-]+/video|v)/(\d+)")
 TIKTOK_USER_RE = re.compile(r"tiktok\.com/@([\w.-]+)")
 
-# `reels` (plural) is the URL Instagram's web reels viewer produces.
-INSTAGRAM_POST_RE = re.compile(r"instagram\.com/(?:p|reel|reels|tv)/([A-Za-z0-9_-]+)")
+# `reels` (plural) is the URL Instagram's web reels viewer produces; an
+# optional leading username segment covers profile-scoped permalinks like
+# instagram.com/hbomax/reel/CODE/.
+INSTAGRAM_POST_RE = re.compile(
+    r"instagram\.com/(?:[A-Za-z0-9_.]+/)?(?:p|reel|reels|tv)/([A-Za-z0-9_-]+)"
+)
 INSTAGRAM_USER_RE = re.compile(r"instagram\.com/([A-Za-z0-9_.]+)(?:/|$)")
 
 FACEBOOK_VIDEO_RE = re.compile(
