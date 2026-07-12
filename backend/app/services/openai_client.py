@@ -130,7 +130,9 @@ _LANG_NAME_TO_ISO = {
 }
 
 
-async def transcribe_video_url(video_url: str) -> dict[str, Any] | None:
+async def transcribe_video_url(
+    video_url: str, language: str | None = None
+) -> dict[str, Any] | None:
     """Download a video by URL and Whisper-transcribe its audio.
 
     Returns the transcribe_audio dict, or None when the file can't be
@@ -146,14 +148,24 @@ async def transcribe_video_url(video_url: str) -> dict[str, Any] | None:
         return None
     if not raw:
         return None
-    return await transcribe_audio(raw, filename="video.mp4")
+    return await transcribe_audio(raw, filename="video.mp4", language=language)
 
 
-async def transcribe_audio(file_bytes: bytes, filename: str) -> dict[str, Any]:
+async def transcribe_audio(
+    file_bytes: bytes, filename: str, language: str | None = None
+) -> dict[str, Any]:
+    """Whisper-transcribe audio/video bytes.
+
+    `language` (ISO-639-1, e.g. "tr") pins Whisper's language instead of
+    auto-detection — important for short clips where detection is unreliable
+    (a toddler shouting "Baba!" is phonetically Spanish "Papa!").
+    """
     settings = get_settings()
     client = get_openai()
 
     async def _request(**extra: Any):
+        if language:
+            extra.setdefault("language", language)
         return await client.audio.transcriptions.create(
             model=settings.OPENAI_MODEL_TRANSCRIPTION,
             file=(filename, file_bytes),
@@ -172,7 +184,7 @@ async def transcribe_audio(file_bytes: bytes, filename: str) -> dict[str, Any]:
     # language pinned and a raised temperature recover it. A retry can itself
     # degenerate into a repetition loop ("Ben de." x29), so each attempt is
     # validated before being trusted.
-    iso = _LANG_NAME_TO_ISO.get((getattr(resp, "language", None) or "").lower())
+    iso = language or _LANG_NAME_TO_ISO.get((getattr(resp, "language", None) or "").lower())
     for temperature in (0.2, 0.4):
         extra: dict[str, Any] = {"temperature": temperature}
         if iso:
@@ -185,9 +197,13 @@ async def transcribe_audio(file_bytes: bytes, filename: str) -> dict[str, Any]:
     # Last resort: gpt-4o-mini-transcribe is far more robust on clips whose
     # speech starts after a music intro. No segment timestamps, text only.
     try:
+        alt_kwargs: dict[str, Any] = {}
+        if iso:
+            alt_kwargs["language"] = iso
         alt = await client.audio.transcriptions.create(
             model="gpt-4o-mini-transcribe",
             file=(filename, file_bytes),
+            **alt_kwargs,
         )
         alt_text = (getattr(alt, "text", None) or "").strip()
     except Exception:  # noqa: BLE001

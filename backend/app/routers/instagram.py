@@ -249,7 +249,9 @@ def _looks_like_caption(full: str, item: dict[str, Any]) -> bool:
     return a == b or (len(a) > 40 and (a in b or b in a))
 
 
-async def _fetch_instagram_transcript(url: str) -> tuple[str, list[dict[str, Any]], str]:
+async def _fetch_instagram_transcript(
+    url: str, language: str | None = None
+) -> tuple[str, list[dict[str, Any]], str]:
     """Return (full transcript, segments, source).
 
     Primary: resolve the reel's MP4 (Decodo ~3s, Apify scraper fallback) and
@@ -257,6 +259,8 @@ async def _fetch_instagram_transcript(url: str) -> tuple[str, list[dict[str, Any
     timestamps, and is faster + cheaper than the transcript actors. Actors
     remain as a fallback, but their output is rejected when it merely echoes
     the post caption.
+
+    `language` pins Whisper's language (ISO-639-1) instead of auto-detection.
     """
     settings = get_settings()
     apify = get_apify()
@@ -264,7 +268,7 @@ async def _fetch_instagram_transcript(url: str) -> tuple[str, list[dict[str, Any
     async def _whisper(media_url: str) -> tuple[str, list[dict[str, Any]]] | None:
         """Whisper a media URL; None = fetch failed / too large (try next)."""
         try:
-            tx = await transcribe_video_url(media_url)
+            tx = await transcribe_video_url(media_url, language=language)
         except Exception:  # noqa: BLE001
             return None
         if tx is None:
@@ -431,10 +435,21 @@ async def instagram_details(
 @router.get("/transcript", summary="Instagram Reel transcript")
 async def instagram_transcript(
     url: str = Query(...),
+    language: str | None = Query(
+        None,
+        min_length=2,
+        max_length=5,
+        description=(
+            "Optional ISO-639-1 language hint (e.g. 'tr', 'en'). Pins the "
+            "transcription language instead of auto-detection; recommended "
+            "for short clips with little speech."
+        ),
+    ),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_instagram_post_url(url)
     settings = get_settings()
+    lang = (language or "").strip().lower()[:2] or None
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/transcript",
@@ -443,7 +458,7 @@ async def instagram_transcript(
         base_credits=CREDIT_TRANSCRIPT,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            full, segments, source = await _fetch_instagram_transcript(url)
+            full, segments, source = await _fetch_instagram_transcript(url, language=lang)
             ctx["source"] = source
             return {
                 "platform": "instagram",
@@ -456,7 +471,7 @@ async def instagram_transcript(
 
         data = await cached_or_run(
             endpoint="instagram.transcript",
-            params={"url": url, "v": 6},
+            params={"url": url, "language": lang, "v": 6},
             runner=_run,
             ctx=ctx,
         )

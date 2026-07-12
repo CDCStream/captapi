@@ -177,7 +177,7 @@ const TIKTOK: Omit<Endpoint, "platform">[] = [
 ];
 
 const INSTAGRAM: Omit<Endpoint, "platform">[] = [
-  { tool: "instagram_transcript", name: "Instagram Transcript", path: "/v1/instagram/transcript", credits: 2, summary: "Transcript of an Instagram Reel.", params: [url(IG_REEL)] },
+  { tool: "instagram_transcript", name: "Instagram Transcript", path: "/v1/instagram/transcript", credits: 2, summary: "Transcript of an Instagram Reel.", params: [url(IG_REEL), language()] },
   { tool: "instagram_summarize", name: "Instagram Summarizer", path: "/v1/instagram/summarize", credits: 4, summary: "AI summary of an Instagram Reel.", params: [url(IG_REEL)] },
   { tool: "instagram_details", name: "Instagram Details", path: "/v1/instagram/details", credits: 1, summary: "Details for an Instagram post or reel.", params: [url(IG_POST)] },
   { tool: "instagram_comments", name: "Instagram Comments", path: "/v1/instagram/comments", credits: 45, summary: "Comments on an Instagram post or reel.", params: [url(IG_POST), limit(50, 500)] },
