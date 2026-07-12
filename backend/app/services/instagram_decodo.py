@@ -185,24 +185,45 @@ def _owner(node: dict[str, Any]) -> dict[str, Any]:
 
 
 _HASHTAG_RE = re.compile(r"#(\w+)", re.UNICODE)
-_MENTION_RE = re.compile(r"@([A-Za-z0-9_.]+)")
+# Usernames may contain dots but never end with one, so "@kyliejenner." in a
+# caption must capture "kyliejenner" without the trailing punctuation.
+_MENTION_RE = re.compile(r"@([A-Za-z0-9_](?:[A-Za-z0-9_.]*[A-Za-z0-9_])?)")
+
+
+def strip_null_video_fields(post: dict[str, Any]) -> dict[str, Any]:
+    """Video-only fields (videoUrl, durationSeconds, views) don't exist for
+    images/carousels; drop them instead of returning nulls."""
+    if not post.get("videoUrl"):
+        post.pop("videoUrl", None)
+    if post.get("durationSeconds") is None:
+        post.pop("durationSeconds", None)
+    engagement = post.get("engagement")
+    if isinstance(engagement, dict) and engagement.get("views") is None:
+        engagement.pop("views", None)
+    return post
 
 
 def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[str, Any]:
     # Per-post nodes only carry a minimal owner ({id, username}); the full
     # author (name, verified, avatar, followers) lives on the profile object,
     # which is the same for every post in a channel listing. `profile` fills
-    # those gaps when the caller knows the owning profile.
+    # those gaps when the caller knows the owning profile — but only when the
+    # node is actually owned by that profile (collab posts can be owned by a
+    # different account).
     owner = _owner(node)
-    author = {**(profile or {}), **owner}
+    owner_username = safe_str(owner.get("username"))
+    profile_username = safe_str((profile or {}).get("username"))
+    if profile and (not owner_username or owner_username == profile_username):
+        author = {**profile, **owner}
+    else:
+        author = owner
     username = safe_str(author.get("username") or node.get("user_posted"))
     shortcode = safe_str(node.get("shortcode") or node.get("code"))
     typename = safe_str(node.get("__typename"))
     is_video = bool(node.get("is_video")) or typename == "GraphVideo"
     is_sidecar = typename == "GraphSidecar"
     caption = _caption(node) or ""
-    video_url = safe_str(node.get("video_url")) or None
-    return {
+    result = {
         "platform": "instagram",
         "url": safe_str(node.get("url"))
         or (f"https://www.instagram.com/{'reel' if is_video else 'p'}/{shortcode}/" if shortcode else None),
@@ -214,7 +235,7 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         "publishedAt": _iso_timestamp(node.get("taken_at_timestamp") or node.get("date_posted")),
         "durationSeconds": safe_float(node.get("video_duration") or node.get("length")),
         "thumbnailUrl": _image_url(node),
-        "videoUrl": video_url,
+        "videoUrl": safe_str(node.get("video_url")) or None,
         "author": {
             "username": username,
             "displayName": safe_str(author.get("full_name")),
@@ -231,6 +252,7 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         "hashtags": _HASHTAG_RE.findall(caption),
         "mentions": _MENTION_RE.findall(caption),
     }
+    return strip_null_video_fields(result)
 
 
 async def _profile(handle: str) -> dict[str, Any] | None:
