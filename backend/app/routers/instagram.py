@@ -392,10 +392,16 @@ async def instagram_details(
         async def _run() -> dict[str, Any]:
             # Primary: Instagram's own GraphQL (~3-4s, no actor cost). Same
             # upstream numbers as the actor; actor stays as fallback.
+            # Exception: clips reels hide play counts from the logged-out
+            # API, so a video with no view count goes to the actor (the only
+            # source that has it); the native result is kept as a safety net.
+            native: dict[str, Any] | None = None
             shortcode = extract_instagram_shortcode(url)
             if shortcode:
                 native = await instagram_native.fetch_post_details(shortcode)
-                if native:
+                if native and not (
+                    native["type"] == "Video" and native["engagement"]["views"] is None
+                ):
                     ctx["source"] = "direct"
                     return native
 
@@ -408,6 +414,10 @@ async def instagram_details(
                 )
             except (ApifyError, httpx.HTTPError):
                 items = []
+            if not items and native:
+                # Actor failed but we do have the native result minus views.
+                ctx["source"] = "direct"
+                return native
             if not items:
                 meta = await _public_instagram_meta(url)
                 if meta:
@@ -436,7 +446,7 @@ async def instagram_details(
 
         data = await cached_or_run(
             endpoint="instagram.details",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 6},
             runner=_run,
             ctx=ctx,
         )
