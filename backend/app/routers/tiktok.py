@@ -16,7 +16,12 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
-from app.services.openai_client import summarize_transcript
+from app.services.openai_client import (
+    WHISPER_MAX_BYTES,
+    summarize_transcript,
+    transcribe_audio,
+)
+from app.services import tiktok_native
 from app.services.tiktok_native import (
     channel_details_native,
     profile_region_native,
@@ -442,14 +447,32 @@ def _tiktok_transcript_segments(item: dict[str, Any]) -> tuple[str, list[dict[st
     return full, segments
 
 
-async def _fetch_tiktok_transcript(url: str) -> tuple[str, list[dict[str, Any]], str | None]:
+async def _fetch_tiktok_transcript(
+    url: str, language: str | None = None
+) -> tuple[str, list[dict[str, Any]], str | None]:
     """Return (full transcript, timestamped segments, language).
 
-    Cascade: fast native-caption actor (~5-9s) -> Whisper-capable actor
-    (~35-80s, handles caption-less videos) -> base scraper's caption text.
+    Cascade: native download + our Whisper (hallucination-filtered, language
+    retries) -> fast native-caption actor -> Whisper-capable actor.
     """
     settings = get_settings()
     apify = get_apify()
+
+    # Primary: fetch the media ourselves and run our own Whisper pipeline.
+    # The actors' Whisper has no language handling and mislabels e.g. Turkish
+    # speech over music as Russian; ours retries with the detected/pinned
+    # language and filters hallucinations.
+    raw = await tiktok_native.fetch_video_bytes(url, max_bytes=WHISPER_MAX_BYTES)
+    if raw:
+        result = await transcribe_audio(raw, filename="tiktok.mp4", language=language)
+        if result["transcript"]:
+            return (
+                result["transcript"],
+                result["transcriptSegments"],
+                safe_str(result.get("language")),
+            )
+        # Our Whisper heard no speech; trust that over the actors' output
+        # only when a language wasn't forced (actors may still have captions).
 
     # Fast path: native caption track over plain HTTP. Measured 8.8s vs 33.6s
     # for identical text on the same video. Fails/returns hasCaption=false for
@@ -496,9 +519,15 @@ async def _fetch_tiktok_transcript(url: str) -> tuple[str, list[dict[str, Any]],
 @router.get("/transcript", summary="TikTok video transcript (via auto-captions)")
 async def tiktok_transcript(
     url: str = Query(...),
+    language: str | None = Query(
+        None,
+        description="Optional ISO-639-1 hint (e.g. 'tr') to pin the speech language",
+        max_length=8,
+    ),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_tiktok_video_url(url)
+    lang = (language or "").strip().lower() or None
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/transcript",
@@ -507,7 +536,7 @@ async def tiktok_transcript(
         base_credits=CREDIT_TRANSCRIPT,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            full, segments, language = await _fetch_tiktok_transcript(url)
+            full, segments, detected = await _fetch_tiktok_transcript(url, language=lang)
             return {
                 "platform": "tiktok",
                 "url": url,
@@ -515,12 +544,12 @@ async def tiktok_transcript(
                 "transcriptSegments": segments,
                 "wordCount": len(full.split()),
                 "segments": len(segments),
-                "language": language,
+                "language": detected,
             }
 
         data = await cached_or_run(
             endpoint="tiktok.transcript",
-            params={"url": url, "v": 3},
+            params={"url": url, "language": lang, "v": 4},
             runner=_run,
             ctx=ctx,
         )
@@ -555,7 +584,7 @@ async def tiktok_summarize(
 
         data = await cached_or_run(
             endpoint="tiktok.summarize",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
         )

@@ -135,6 +135,47 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
     }
 
 
+async def fetch_video_bytes(url: str, max_bytes: int) -> bytes | None:
+    """Download a TikTok video's media (watermarked) for transcription.
+
+    The page's ``playAddr`` CDN URL only works with the cookies set by the
+    page response (``tt_chain_token`` et al.) and from the same IP, so both
+    requests must share one client + proxy connection.
+    """
+    from app.services.http_fetch import proxy_for
+
+    proxy = proxy_for("datacenter")
+    try:
+        async with httpx.AsyncClient(
+            timeout=30, follow_redirects=True, headers=TT_HEADERS, proxy=proxy
+        ) as client:
+            resp = await client.get(url)
+            if resp.status_code >= 400:
+                return None
+            m = _UNIVERSAL_RE.search(resp.text)
+            if not m:
+                return None
+            try:
+                scope = json.loads(m.group(1)).get("__DEFAULT_SCOPE__") or {}
+            except ValueError:
+                return None
+            item = ((scope.get("webapp.video-detail") or {}).get("itemInfo") or {}).get(
+                "itemStruct"
+            ) or {}
+            video = item.get("video") or {}
+            play = safe_str(video.get("playAddr") or video.get("downloadAddr"))
+            if not play:
+                return None
+            media = await client.get(play, headers={**TT_HEADERS, "Range": "bytes=0-"})
+            if media.status_code >= 400 or not media.content:
+                return None
+            if len(media.content) > max_bytes:
+                return None
+            return media.content
+    except httpx.HTTPError:
+        return None
+
+
 async def _user_info(handle: str) -> dict[str, Any] | None:
     scope = await _fetch_scope(f"https://www.tiktok.com/@{handle}")
     if not scope:

@@ -214,7 +214,12 @@ async def transcribe_audio(
         if iso:
             extra["language"] = iso
         retry = _parse_verbose(await _request(**extra))
-        if _is_valid_transcript(retry):
+        # Raised temperature can itself hallucinate a tiny fragment on silent
+        # clips, so an unpinned-language retry must find substantial speech
+        # (a real recovery yields multiple words); a caller-pinned language is
+        # trusted for short exclamations.
+        substantial = language is not None or retry["wordCount"] >= 6
+        if _is_valid_transcript(retry) and substantial:
             log.info("whisper_retry_recovered_speech", language=iso, temperature=temperature)
             return retry
 
@@ -259,6 +264,10 @@ def _is_valid_transcript(result: dict[str, Any]) -> bool:
         texts = [s["text"].lower() for s in segments]
         if len(set(texts)) / len(texts) < 0.34:
             return False  # repetition loop, not real speech
+    # Word-level loop within a single segment ("???? 2. ???? 2. ...").
+    words = result["transcript"].lower().split()
+    if len(words) >= 10 and len(set(words)) / len(words) < 0.3:
+        return False
     return True
 
 
