@@ -1077,6 +1077,7 @@ const up = (description: string): ApiParam => ({
 const qp = (description = "Search query or keywords (min 2 characters)."): ApiParam => ({ name: "q", type: "string", required: true, description });
 const lp = (def: number, max: number): ApiParam => ({ name: "limit", type: "integer", required: false, description: `Max items to return (default ${def}, max ${max}). Billed per result.` });
 const lang = (): ApiParam => ({ name: "language", type: "string", required: false, description: 'Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.' });
+const langOut = (): ApiParam => ({ name: "language", type: "string", required: false, description: 'ISO code, e.g. "tr": pins the speech language and sets the summary output language. Defaults to auto-detect + English summary.' });
 const cid = (): ApiParam => ({ name: "comment_id", type: "string", required: true, description: "ID of the parent comment to fetch replies for (from the comments endpoint)." });
 const fastRss = (): ApiParam => ({ name: "fast", type: "boolean", required: false, description: "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters." });
 
@@ -1133,8 +1134,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-community-post-details": [up("YouTube community post URL.")],
   "youtube-video-sponsors": [up(YT_VIDEO)],
   // TikTok
-  "tiktok-transcript": [up(TT_VIDEO)],
-  "tiktok-summarizer": [up(TT_VIDEO)],
+  "tiktok-transcript": [up(TT_VIDEO), lang()],
+  "tiktok-summarizer": [up(TT_VIDEO), langOut()],
   "tiktok-video-details": [up(TT_VIDEO)],
   "tiktok-comments": [up(TT_VIDEO), lp(50, 500)],
   "tiktok-channel-details": [up(TT_PROFILE)],
@@ -1158,8 +1159,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-live-info": [up(TT_PROFILE)],
   "tiktok-popular-creators": [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, { name: "sort", type: "string", required: false, description: "follower, engagement, or popularity. Default follower." }, { name: "follower_count", type: "string", required: false, description: "Optional range: 10k-100k, 100k-1m, 1m-10m, >10m." }, lp(20, 100)],
   // Instagram
-  "instagram-transcript": [up(IG_REEL)],
-  "instagram-summarizer": [up(IG_REEL)],
+  "instagram-transcript": [up(IG_REEL), lang()],
+  "instagram-summarizer": [up(IG_REEL), langOut()],
   "instagram-details": [up(IG_POST)],
   "instagram-comments": [up(IG_POST), lp(50, 500)],
   "instagram-channel-details": [up(IG_PROFILE)],
