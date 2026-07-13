@@ -91,6 +91,7 @@ def _normalize_post(item: dict) -> dict:
         "id": safe_str(item.get("id") or item.get("shortCode") or item.get("shortcode")),
         # "Image" | "Video" | "Sidecar" â€” video fields are null for images.
         "type": post_type,
+        "isVideo": post_type == "Video",
         "productType": safe_str(item.get("productType")),
         "caption": safe_str(item.get("caption") or item.get("text") or item.get("description")),
         "description": safe_str(item.get("caption") or item.get("text") or item.get("description")),
@@ -439,7 +440,7 @@ async def instagram_details(
 
         data = await cached_or_run(
             endpoint="instagram.details",
-            params={"url": url, "v": 8},
+            params={"url": url, "v": 9},
             runner=_run,
             ctx=ctx,
         )
@@ -765,7 +766,7 @@ async def instagram_channel_posts(
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            params={"url": url, "limit": limit, "v": 6},
+            params={"url": url, "limit": limit, "v": 7},
             runner=_run,
             ctx=ctx,
         )
@@ -809,7 +810,7 @@ async def instagram_channel_reels(
 
         data = await cached_or_run(
             endpoint="instagram.channel-reels",
-            params={"url": url, "limit": limit, "v": 6},
+            params={"url": url, "limit": limit, "v": 7},
             runner=_run,
             ctx=ctx,
         )
@@ -858,7 +859,7 @@ async def instagram_reels_search(
 
         data = await cached_or_run(
             endpoint="instagram.reels-search",
-            params={"q": q, "limit": limit, "v": 6},
+            params={"q": q, "limit": limit, "v": 7},
             runner=_run,
             ctx=ctx,
         )
@@ -906,7 +907,7 @@ async def instagram_trending_reels(
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit, "v": 4},
+            params={"country": country, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             # Trending actor runs take minutes; serve the last list instantly
@@ -1050,7 +1051,7 @@ async def instagram_tagged_posts(
 
         data = await cached_or_run(
             endpoint="instagram.tagged-posts",
-            params={"url": url, "limit": limit, "v": 5},
+            params={"url": url, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
         )
@@ -1139,7 +1140,7 @@ async def instagram_hashtag_search(
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",
-            params={"q": q, "limit": limit, "v": 6},
+            params={"q": q, "limit": limit, "v": 7},
             runner=_run,
             ctx=ctx,
         )
