@@ -1,4 +1,4 @@
-"""Native Instagram reel media resolver.
+﻿"""Native Instagram reel media resolver.
 
 Uses Instagram's public PolarisPostRootQuery GraphQL endpoint (the one the
 logged-out web player calls), which returns v1-format media incl.
@@ -140,7 +140,7 @@ async def fetch_post_details(shortcode: str) -> dict[str, Any] | None:
 
 def map_feed_post(media: dict[str, Any], followers: int | None = None) -> dict[str, Any]:
     """Map an api/v1 feed item to the channel-posts/reels list shape."""
-    from app.services.instagram_decodo import strip_null_video_fields
+    from app.services.instagram_decodo import strip_null_post_fields
 
     caption_obj = media.get("caption")
     caption = (safe_str(caption_obj.get("text")) if isinstance(caption_obj, dict) else "") or ""
@@ -171,7 +171,7 @@ def map_feed_post(media: dict[str, Any], followers: int | None = None) -> dict[s
     if followers is not None:
         author["followers"] = followers
 
-    return strip_null_video_fields(
+    return strip_null_post_fields(
         {
             "platform": "instagram",
             "url": f"https://www.instagram.com/{'reel' if is_video else 'p'}/{shortcode}/" if shortcode else None,

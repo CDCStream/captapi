@@ -3232,10 +3232,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "goodmorningamerica",
           "displayName": "Good Morning America",
-          "url": "https://instagram.com/goodmorningamerica",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/goodmorningamerica"
         },
         "engagement": {
           "views": 44369,
@@ -3264,10 +3261,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "natgeo",
           "displayName": "National Geographic",
-          "url": "https://instagram.com/natgeo",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/natgeo"
         },
         "engagement": {
           "likes": 16631,
@@ -3293,10 +3287,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "natgeo",
           "displayName": "National Geographic",
-          "url": "https://instagram.com/natgeo",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/natgeo"
         },
         "engagement": {
           "views": 911049,
@@ -3325,10 +3316,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "natgeo",
           "displayName": "National Geographic",
-          "url": "https://instagram.com/natgeo",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/natgeo"
         },
         "engagement": {
           "likes": 38840,
@@ -3352,10 +3340,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "natgeo",
           "displayName": "National Geographic",
-          "url": "https://instagram.com/natgeo",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/natgeo"
         },
         "engagement": {
           "views": 1187974,
@@ -3393,10 +3378,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "goodmorningamerica",
           "displayName": "Good Morning America",
-          "url": "https://instagram.com/goodmorningamerica",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/goodmorningamerica"
         },
         "engagement": {
           "views": 68782,
@@ -3427,10 +3409,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "natgeo",
           "displayName": "National Geographic",
-          "url": "https://instagram.com/natgeo",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/natgeo"
         },
         "engagement": {
           "views": 186121,
@@ -3457,10 +3436,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "natgeo",
           "displayName": "National Geographic",
-          "url": "https://instagram.com/natgeo",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/natgeo"
         },
         "engagement": {
           "views": 677279,
@@ -3488,10 +3464,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "natgeo",
           "displayName": "National Geographic",
-          "url": "https://instagram.com/natgeo",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/natgeo"
         },
         "engagement": {
           "views": 14642,
@@ -3521,10 +3494,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "natgeo",
           "displayName": "National Geographic",
-          "url": "https://instagram.com/natgeo",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/natgeo"
         },
         "engagement": {
           "views": 425234,
@@ -3668,10 +3638,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "author": {
       "username": "natgeo",
       "displayName": "National Geographic",
-      "url": "https://instagram.com/natgeo",
-      "followers": null,
-      "verified": null,
-      "profileImage": null
+      "url": "https://instagram.com/natgeo"
     },
     "engagement": {
       "likes": 237870,
@@ -3706,10 +3673,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "mentor.bajramii",
           "displayName": "Mentor",
-          "url": "https://instagram.com/mentor.bajramii",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/mentor.bajramii"
         },
         "engagement": {
           "likes": 0,
@@ -3737,10 +3701,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "destination.de.rev",
           "displayName": "Destination de Rev'",
-          "url": "https://instagram.com/destination.de.rev",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/destination.de.rev"
         },
         "engagement": {
           "likes": 0,
@@ -3773,10 +3734,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "koinazarovaa",
           "displayName": "Aruzhan Koinazarova",
-          "url": "https://instagram.com/koinazarovaa",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/koinazarovaa"
         },
         "engagement": {
           "likes": 0,
@@ -3802,10 +3760,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "pinkdancer99",
           "displayName": "Taylor Renee Emmersen",
-          "url": "https://instagram.com/pinkdancer99",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/pinkdancer99"
         },
         "engagement": {
           "likes": 0,
@@ -3833,10 +3788,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "sybilecucerdean",
           "displayName": "Sybile Cucerdean",
-          "url": "https://instagram.com/sybilecucerdean",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/sybilecucerdean"
         },
         "engagement": {
           "likes": 0,
@@ -3864,10 +3816,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "im_surjo_sen",
           "displayName": "RUDRA_SISH",
-          "url": "https://instagram.com/im_surjo_sen",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/im_surjo_sen"
         },
         "engagement": {
           "likes": 0,
@@ -3895,10 +3844,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "timeefortravel",
           "displayName": "time for travel",
-          "url": "https://instagram.com/timeefortravel",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/timeefortravel"
         },
         "engagement": {
           "likes": 0,
@@ -3926,10 +3872,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "nis_mit_92",
           "displayName": "NAッ",
-          "url": "https://instagram.com/nis_mit_92",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/nis_mit_92"
         },
         "engagement": {
           "likes": 0,
@@ -3957,10 +3900,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "tedka___",
           "displayName": "Миткова Тодорова",
-          "url": "https://instagram.com/tedka___",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/tedka___"
         },
         "engagement": {
           "likes": 0,
@@ -3988,10 +3928,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "corinaaaaaaa",
           "displayName": "Corina",
-          "url": "https://instagram.com/corinaaaaaaa",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/corinaaaaaaa"
         },
         "engagement": {
           "likes": 2,
@@ -4415,10 +4352,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "mentor.bajramii",
           "displayName": "Mentor",
-          "url": "https://instagram.com/mentor.bajramii",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/mentor.bajramii"
         },
         "engagement": {
           "likes": 0,
@@ -4446,10 +4380,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "destination.de.rev",
           "displayName": "Destination de Rev'",
-          "url": "https://instagram.com/destination.de.rev",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/destination.de.rev"
         },
         "engagement": {
           "likes": 0,
@@ -4482,10 +4413,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "koinazarovaa",
           "displayName": "Aruzhan Koinazarova",
-          "url": "https://instagram.com/koinazarovaa",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/koinazarovaa"
         },
         "engagement": {
           "likes": 0,
@@ -4511,10 +4439,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "pinkdancer99",
           "displayName": "Taylor Renee Emmersen",
-          "url": "https://instagram.com/pinkdancer99",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/pinkdancer99"
         },
         "engagement": {
           "likes": 0,
@@ -4542,10 +4467,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "sybilecucerdean",
           "displayName": "Sybile Cucerdean",
-          "url": "https://instagram.com/sybilecucerdean",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/sybilecucerdean"
         },
         "engagement": {
           "likes": 0,
@@ -4573,10 +4495,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "im_surjo_sen",
           "displayName": "RUDRA_SISH",
-          "url": "https://instagram.com/im_surjo_sen",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/im_surjo_sen"
         },
         "engagement": {
           "likes": 0,
@@ -4604,10 +4523,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "timeefortravel",
           "displayName": "time for travel",
-          "url": "https://instagram.com/timeefortravel",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/timeefortravel"
         },
         "engagement": {
           "likes": 0,
@@ -4635,10 +4551,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "nis_mit_92",
           "displayName": "NAッ",
-          "url": "https://instagram.com/nis_mit_92",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/nis_mit_92"
         },
         "engagement": {
           "likes": 0,
@@ -4666,10 +4579,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "tedka___",
           "displayName": "Миткова Тодорова",
-          "url": "https://instagram.com/tedka___",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/tedka___"
         },
         "engagement": {
           "likes": 0,
@@ -4697,10 +4607,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "corinaaaaaaa",
           "displayName": "Corina",
-          "url": "https://instagram.com/corinaaaaaaa",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/corinaaaaaaa"
         },
         "engagement": {
           "likes": 2,
@@ -4778,10 +4685,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "hynecheck",
           "displayName": "Hynek Hampl",
-          "url": "https://instagram.com/hynecheck",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/hynecheck"
         },
         "engagement": {
           "likes": 14043,
@@ -4859,10 +4763,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "samuellemieux",
           "displayName": "Samuel Lemieux",
-          "url": "https://instagram.com/samuellemieux",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/samuellemieux"
         },
         "engagement": {
           "likes": 6190,
@@ -4915,10 +4816,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "canusatouristik",
           "displayName": "CANUSA TOURISTIK 🇺🇸 & 🇨🇦",
-          "url": "https://instagram.com/canusatouristik",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/canusatouristik"
         },
         "engagement": {
           "likes": 5586,
@@ -4947,10 +4845,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "samuelartlife_",
           "displayName": "SΔMUEL LEMIEUX",
-          "url": "https://instagram.com/samuelartlife_",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/samuelartlife_"
         },
         "engagement": {
           "likes": 5777,
@@ -5003,10 +4898,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "samuellemieux",
           "displayName": "Samuel Lemieux",
-          "url": "https://instagram.com/samuellemieux",
-          "followers": null,
-          "verified": null,
-          "profileImage": null
+          "url": "https://instagram.com/samuellemieux"
         },
         "engagement": {
           "likes": 5611,
@@ -5126,14 +5018,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "description": "5 anime movies that will stay with you forever.\nYour Name — two souls connected across time who spend their whole lives searching for each other without knowing why.\nSpirited Away — a young girl who enters a world beyond imagination and discovers who she truly is.\nGrave of the Fireflies — a brother who gave everything to protect his little sister during the darkest chapter of history.\nA Silent Voice — a story about the weight of words and the courage to face what you've done\nPrincess Mononoke — a battle between humanity and nature told through some of the most breathtaking animation ever created.\n\nFollow @senpai_clipz for more recommendations \n\n#animerecommendation #anime #movies #animemovie",
         "publishedAt": "1778342161",
         "thumbnailUrl": null,
-        "author": {
-          "username": null,
-          "displayName": null,
-          "url": null,
-          "followers": null,
-          "verified": null,
-          "profileImage": null
-        },
+        "author": {},
         "engagement": {
           "likes": 0,
           "comments": 0
@@ -5151,14 +5036,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "description": "Lasting 7 Seasons, 152 Episodes and 2 TV Movies, “Fantasy Island” Was an Award Winning Fantasy Drama Series Starring Ricardo Montalban as Mr. Roarke Who Oversaw a Mysterious Island and Granted Wishes to Guests “For a Price.” \n\n#fantasyisland #television #tv",
         "publishedAt": "1765119458",
         "thumbnailUrl": null,
-        "author": {
-          "username": null,
-          "displayName": null,
-          "url": null,
-          "followers": null,
-          "verified": null,
-          "profileImage": null
-        },
+        "author": {},
         "engagement": {
           "likes": 0,
           "comments": 0
@@ -5176,14 +5054,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "description": "🎬 𝐓𝐨𝐩 60 𝐌𝐢𝐥𝐢𝐭𝐚𝐫𝐲 𝐌𝐨𝐯𝐢𝐞𝐬📽️🍿",
         "publishedAt": "1780812655",
         "thumbnailUrl": null,
-        "author": {
-          "username": null,
-          "displayName": null,
-          "url": null,
-          "followers": null,
-          "verified": null,
-          "profileImage": null
-        },
+        "author": {},
         "engagement": {
           "likes": 0,
           "comments": 0
@@ -5201,14 +5072,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "description": "From the loyal Circuit to the intense Kabir Singh, there’s a Bollywood character that matches your vibe 🎬✨ Share this and ask your friends who you remind them of 🔥\n\n#IIFA #Bollywood #BollywoodCharacters\n\n[IIFA, Bollywood, Bollywood Characters, Bollywood Movies, Relatable, viral]",
         "publishedAt": "1780210607",
         "thumbnailUrl": null,
-        "author": {
-          "username": null,
-          "displayName": null,
-          "url": null,
-          "followers": null,
-          "verified": null,
-          "profileImage": null
-        },
+        "author": {},
         "engagement": {
           "likes": 0,
           "comments": 0
@@ -5226,14 +5090,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "description": "𝐓𝐡𝐢𝐬 𝐖𝐞𝐞𝐤 𝐎𝐓𝐓 𝐑𝐞𝐥𝐞𝐚𝐬𝐞 - Streaming Now 🤩🍿\n\n𝐓𝐚𝐦𝐢𝐥 \n#MrX (Tamil, Telugu, Kannada, Malayalam) - JioHotstar & SimplySouth\n\n#Kaalidas2 (Tamil) - PrimeVideo, Sunnxt, ShortFlix, SimplySouth, AhaTamil, Tentkotta & LionsGatePlay\n\n𝐓𝐞𝐥𝐮𝐠𝐮\n#Anaganaga (Telugu, Tamil, Kannada, Malayalam, Hindi) - ETvWin \n\n#ThimmarajupalliTV (Telugu, Tamil) - AhaVideo\n\n𝐌𝐚𝐥𝐚𝐲𝐚𝐥𝐚𝐦\n#OruDuroohaSaahacharyathil (Malayalam) - Netflix\n\nDerby (Malayalam) - PrimeVideo, SimplySouth\n\n𝐇𝐢𝐧𝐝𝐢\nD-h-u-r-a-n-d-h-a-r : The Revenge (Hindi, Tamil, Telugu, Kannada, Malayalam) - Netflix (Outside India)\n\nKartavya (Hindi, Tamil, Telugu, English) - Netflix\n\n𝐌𝐚𝐫𝐚𝐭𝐡𝐢\nTighee (Marathi) - Zee5\n\n𝐄𝐧𝐠𝐥𝐢𝐬𝐡\nMartySupreme (English, Tamil, Telugu, Hindi) - PrimeVideo\n\nOffCampus 🥵 (English, Tamil, Telugu, Kannada, Malayalam, Hindi) [Series] - PrimeVideo\n\nThePunisher: One Last Kill (English) - JioHotstar",
         "publishedAt": "1778941420",
         "thumbnailUrl": null,
-        "author": {
-          "username": null,
-          "displayName": null,
-          "url": null,
-          "followers": null,
-          "verified": null,
-          "profileImage": null
-        },
+        "author": {},
         "engagement": {
           "likes": 0,
           "comments": 0

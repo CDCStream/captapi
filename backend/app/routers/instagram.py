@@ -436,7 +436,7 @@ async def instagram_details(
             # followers).
             data["author"].pop("followers", None)
             data["engagement"].pop("views", None)
-            return data
+            return decodo.strip_null_post_fields(data)
 
         data = await cached_or_run(
             endpoint="instagram.details",
@@ -783,7 +783,7 @@ def _ig_channel_page(
 async def instagram_channel_posts(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
-    cursor: str | None = Query(None, description="Pagination cursor from the previous response's nextCursor"),
+    cursor: str | None = Query(None, description="Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296"),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -814,7 +814,7 @@ async def instagram_channel_posts(
                     _instagram_profile_candidates(settings, f"https://www.instagram.com/{handle}/", limit, "posts"),
                     max_items=limit,
                 )
-                posts = [decodo.strip_null_video_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
+                posts = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
                 return {"url": url, "totalReturned": len(posts), "posts": posts, "nextCursor": None}
 
             async def _decodo_run() -> dict[str, Any] | None:
@@ -833,7 +833,7 @@ async def instagram_channel_posts(
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 9},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 10},
             runner=_run,
             ctx=ctx,
         )
@@ -845,7 +845,7 @@ async def instagram_channel_posts(
 async def instagram_channel_reels(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
-    cursor: str | None = Query(None, description="Pagination cursor from the previous response's nextCursor"),
+    cursor: str | None = Query(None, description="Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296"),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -876,7 +876,7 @@ async def instagram_channel_reels(
                     _instagram_profile_candidates(settings, f"https://www.instagram.com/{handle}/", limit, "reels"),
                     max_items=limit,
                 )
-                reels = [decodo.strip_null_video_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
+                reels = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
                 return {"url": url, "totalReturned": len(reels), "reels": reels, "nextCursor": None}
 
             async def _decodo_run() -> dict[str, Any] | None:
@@ -897,7 +897,7 @@ async def instagram_channel_reels(
 
         data = await cached_or_run(
             endpoint="instagram.channel-reels",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 9},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 10},
             runner=_run,
             ctx=ctx,
         )
@@ -933,7 +933,7 @@ async def instagram_reels_search(
                     },
                     max_items=limit,
                 )
-                results = [decodo.strip_null_video_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
+                results = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
                 return {"query": q, "totalReturned": len(results), "results": results}
 
             async def _decodo_run() -> dict[str, Any] | None:
@@ -946,7 +946,7 @@ async def instagram_reels_search(
 
         data = await cached_or_run(
             endpoint="instagram.reels-search",
-            params={"q": q, "limit": limit, "v": 8},
+            params={"q": q, "limit": limit, "v": 9},
             runner=_run,
             ctx=ctx,
         )
@@ -988,13 +988,13 @@ async def instagram_trending_reels(
                 )
                 if not items:
                     raise
-            reels = [decodo.strip_null_video_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
+            reels = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
             ctx["source"] = "apify"
             return {"platform": "instagram", "country": country, "totalReturned": len(reels), "reels": reels}
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit, "v": 6},
+            params={"country": country, "limit": limit, "v": 7},
             runner=_run,
             ctx=ctx,
             # Trending actor runs take minutes; serve the last list instantly
@@ -1130,7 +1130,7 @@ async def instagram_tagged_posts(
                     {"username": [handle], "resultsLimit": limit},
                     max_items=limit,
                 )
-                posts = [decodo.strip_null_video_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
+                posts = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
                 return {"url": url, "totalReturned": len(posts), "posts": posts}
 
             ctx["source"] = "apify"
@@ -1138,7 +1138,7 @@ async def instagram_tagged_posts(
 
         data = await cached_or_run(
             endpoint="instagram.tagged-posts",
-            params={"url": url, "limit": limit, "v": 7},
+            params={"url": url, "limit": limit, "v": 8},
             runner=_run,
             ctx=ctx,
         )
@@ -1214,7 +1214,7 @@ async def instagram_hashtag_search(
                     },
                     max_items=limit,
                 )
-                results = [decodo.strip_null_video_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
+                results = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
                 return {"query": q, "totalReturned": len(results), "results": results}
 
             async def _decodo_run() -> dict[str, Any] | None:
@@ -1227,7 +1227,7 @@ async def instagram_hashtag_search(
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",
-            params={"q": q, "limit": limit, "v": 8},
+            params={"q": q, "limit": limit, "v": 9},
             runner=_run,
             ctx=ctx,
         )

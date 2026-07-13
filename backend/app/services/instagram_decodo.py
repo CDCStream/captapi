@@ -1,4 +1,4 @@
-"""Instagram data through Decodo's managed Social Media Scraping API.
+﻿"""Instagram data through Decodo's managed Social Media Scraping API.
 
 Only Decodo targets with a documented Instagram GraphQL equivalent are used.
 Every public function returns ``None`` on transport, auth, parsing, or data
@@ -190,9 +190,11 @@ _HASHTAG_RE = re.compile(r"#(\w+)", re.UNICODE)
 _MENTION_RE = re.compile(r"@([A-Za-z0-9_](?:[A-Za-z0-9_.]*[A-Za-z0-9_])?)")
 
 
-def strip_null_video_fields(post: dict[str, Any]) -> dict[str, Any]:
-    """Video-only fields (videoUrl, durationSeconds, views) don't exist for
-    images/carousels; drop them instead of returning nulls."""
+def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
+    """Drop fields we can't fill instead of returning nulls: video-only
+    fields (videoUrl, durationSeconds, views) on images/carousels, and
+    author fields the source doesn't provide (e.g. Apify post listings
+    carry no owner object)."""
     if not post.get("videoUrl"):
         post.pop("videoUrl", None)
     if post.get("durationSeconds") is None:
@@ -200,6 +202,9 @@ def strip_null_video_fields(post: dict[str, Any]) -> dict[str, Any]:
     engagement = post.get("engagement")
     if isinstance(engagement, dict) and engagement.get("views") is None:
         engagement.pop("views", None)
+    author = post.get("author")
+    if isinstance(author, dict):
+        post["author"] = {k: v for k, v in author.items() if v is not None}
     return post
 
 
@@ -207,7 +212,7 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
     # Per-post nodes only carry a minimal owner ({id, username}); the full
     # author (name, verified, avatar, followers) lives on the profile object,
     # which is the same for every post in a channel listing. `profile` fills
-    # those gaps when the caller knows the owning profile — but only when the
+    # those gaps when the caller knows the owning profile â€” but only when the
     # node is actually owned by that profile (collab posts can be owned by a
     # different account).
     owner = _owner(node)
@@ -252,7 +257,7 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         "hashtags": _HASHTAG_RE.findall(caption),
         "mentions": _MENTION_RE.findall(caption),
     }
-    return strip_null_video_fields(result)
+    return strip_null_post_fields(result)
 
 
 async def _profile(handle: str) -> dict[str, Any] | None:
