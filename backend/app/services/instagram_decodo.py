@@ -228,8 +228,7 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         "url": safe_str(node.get("url"))
         or (f"https://www.instagram.com/{'reel' if is_video else 'p'}/{shortcode}/" if shortcode else None),
         "id": safe_str(node.get("id")),
-        "type": "Sidecar" if is_sidecar else ("Video" if is_video else "Image"),
-        "isVideo": is_video,
+        "postType": "Sidecar" if is_sidecar else ("Video" if is_video else "Image"),
         "productType": safe_str(node.get("product_type")) or ("clips" if is_video else ""),
         "caption": caption,
         "description": caption,

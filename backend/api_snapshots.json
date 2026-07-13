@@ -572,7 +572,7 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVXKcLgUwl/",
           "id": "3933151722100313125",
-          "type": "Video",
+          "postType": "Video",
           "productType": "clips",
           "caption": "Can you guess Diane Sawyer's location? 🤫🦌 \n\n@dianesawyer and @natgeo Explorer @gabbyrsalazar were awestruck by wildlife while hiking this location on our \"7 Natural Wonders of America\" list. \n\nThey can't wait to show you exactly what got them so excited, when they reveal their destination during the 24-hour #DisneyCelebratesAmerica live event.\n\nCoverage begins the night of July 3rd and continues all day July 4th on ABC, Disney+, Hulu, ESPN, Nat Geo, FX, and Freeform.",
           "description": "Can you guess Diane Sawyer's location? 🤫🦌 \n\n@dianesawyer and @natgeo Explorer @gabbyrsalazar were awestruck by wildlife while hiking this location on our \"7 Natural Wonders of America\" list. \n\nThey can't wait to show you exactly what got them so excited, when they reveal their destination during the 24-hour #DisneyCelebratesAmerica live event.\n\nCoverage begins the night of July 3rd and continues all day July 4th on ABC, Disney+, Hulu, ESPN, Nat Geo, FX, and Freeform.",
@@ -606,14 +606,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaTKjfoDnc0/",
           "id": "3932533319229404980",
-          "type": "Image",
+          "postType": "Image",
           "productType": "feed",
           "caption": "Photo by Keith Ladzinski @ladzinski | Broadly found throughout North America, Europe, and Asia, ravens are highly adaptable birds known for remarkable intelligence. Ravens can solve puzzles, communicate complex information, and adapt to changing conditions with a level of cognitive ability rarely seen outside mammals. I photographed this beautiful bird in Yellowstone National Park, Wyoming.",
           "description": "Photo by Keith Ladzinski @ladzinski | Broadly found throughout North America, Europe, and Asia, ravens are highly adaptable birds known for remarkable intelligence. Ravens can solve puzzles, communicate complex information, and adapt to changing conditions with a level of cognitive ability rarely seen outside mammals. I photographed this beautiful bird in Yellowstone National Park, Wyoming.",
           "publishedAt": "2026-07-03T13:00:01.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-bos5-1.cdninstagram.com/v/t51.82787-15/730723620_18672574966019133_6123456185574725791_n.jpg?stp=dst-jpg_e35_p1080x1080_sh2.08_tt6&_nc_ht=scontent-bos5-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gFedb1gnV_NWOJCOff_E76duggqHddfIc2PN2NGvQ79g3QVKwLryP6Zs7IAqY90uIE&_nc_ohc=l_fgARONGlYQ7kNvwHvUHuo&_nc_gid=-kkHJloWt34jOAFl26f39A&edm=ADp7STQBAAAA&ccb=7-5&oh=00_AQAa0n0L2UeTVoI5xLyCYWI_Uawda_4hIHpP8vkDClQ_Sw&oe=6A4DA92D&_nc_sid=c6f216",
-          "videoUrl": null,
           "author": {
             "username": "natgeo",
             "displayName": "National Geographic",
@@ -623,7 +621,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 16631,
             "comments": 79
           },
@@ -636,7 +633,7 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DYhkH24lf3j/",
           "id": "3900557621921709539",
-          "type": "Video",
+          "postType": "Video",
           "productType": "clips",
           "caption": "@antoni is on a quest to find the best sights, tastes, and experiences the world has to offer, and you're invited. \n\n#BestOfTheWorld with Antoni Porowski premieres Sunday, June 7 at 9/8c on National Geographic. Stream on @DisneyPlus and @hulu",
           "description": "@antoni is on a quest to find the best sights, tastes, and experiences the world has to offer, and you're invited. \n\n#BestOfTheWorld with Antoni Porowski premieres Sunday, June 7 at 9/8c on National Geographic. Stream on @DisneyPlus and @hulu",
@@ -670,14 +667,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaS2aNDkm9v/",
           "id": "3932444719884431215",
-          "type": "Image",
+          "postType": "Image",
           "productType": "feed",
           "caption": "Photographed by Emily Whitney, two Eriskay ponies embrace each other in Eriskay, Scotland. Known for their fine gray coat that develops as they age, these ponies are an ancient breed native to the Outer Hebrides of western Scotland. With only around 400 remaining, locals care for them as they roam the village, and the Eriskay Pony Society works with the Rare Breeds Survival Trust to bolster the population.\n\nSee more Photos of the Day at the link in bio.",
           "description": "Photographed by Emily Whitney, two Eriskay ponies embrace each other in Eriskay, Scotland. Known for their fine gray coat that develops as they age, these ponies are an ancient breed native to the Outer Hebrides of western Scotland. With only around 400 remaining, locals care for them as they roam the village, and the Eriskay Pony Society works with the Rare Breeds Survival Trust to bolster the population.\n\nSee more Photos of the Day at the link in bio.",
           "publishedAt": "2026-07-02T22:00:02.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-den2-1.cdninstagram.com/v/t51.82787-15/730176822_18672530071019133_2686456498035725282_n.jpg?stp=dst-jpg_e35_s1080x1080_sh2.08_tt6&_nc_ht=scontent-den2-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gHoSngTqTmkfyg-nv61_IFh5rLveWKlX6V_ptFsLJfrPBuYTf4hTg_4AhCcnfmpAR4&_nc_ohc=RhO-4OrTKYUQ7kNvwE7Cxz7&_nc_gid=IjrwrCu48KBu8SxGH6zy6Q&edm=ADp7STQBAAAA&ccb=7-5&oh=00_AQAxYKVRdK3yMbDy4DQCQ-VhIFBHkcCBdEcPDdljJbvNDg&oe=6A4DC53A&_nc_sid=c6f216",
-          "videoUrl": null,
           "author": {
             "username": "natgeo",
             "displayName": "National Geographic",
@@ -687,7 +682,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 38840,
             "comments": 159
           },
@@ -698,7 +692,7 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DZpQwxqimz2/",
           "id": "3920738671208852726",
-          "type": "Video",
+          "postType": "Video",
           "productType": "clips",
           "caption": "There's more to the story of Pompeii than just destruction. Join Tom Hiddleston as he traces the stories of those who experienced the eruption and those who survived.\n\n#PompeiiOutOfTime with @twhiddleston premieres July 22 on @NatGeoTV. Streaming on @DisneyPlus and @hulu.",
           "description": "There's more to the story of Pompeii than just destruction. Join Tom Hiddleston as he traces the stories of those who experienced the eruption and those who survived.\n\n#PompeiiOutOfTime with @twhiddleston premieres July 22 on @NatGeoTV. Streaming on @DisneyPlus and @hulu.",
@@ -745,7 +739,7 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVXKcLgUwl/",
           "id": "3933151722100313125",
-          "type": "Video",
+          "postType": "Video",
           "productType": "clips",
           "caption": "Can you guess Diane Sawyer's location? 🤫🦌 \n\n@dianesawyer and @natgeo Explorer @gabbyrsalazar were awestruck by wildlife while hiking this location on our \"7 Natural Wonders of America\" list. \n\nThey can't wait to show you exactly what got them so excited, when they reveal their destination during the 24-hour #DisneyCelebratesAmerica live event.\n\nCoverage begins the night of July 3rd and continues all day July 4th on ABC, Disney+, Hulu, ESPN, Nat Geo, FX, and Freeform.",
           "description": "Can you guess Diane Sawyer's location? 🤫🦌 \n\n@dianesawyer and @natgeo Explorer @gabbyrsalazar were awestruck by wildlife while hiking this location on our \"7 Natural Wonders of America\" list. \n\nThey can't wait to show you exactly what got them so excited, when they reveal their destination during the 24-hour #DisneyCelebratesAmerica live event.\n\nCoverage begins the night of July 3rd and continues all day July 4th on ABC, Disney+, Hulu, ESPN, Nat Geo, FX, and Freeform.",
@@ -779,7 +773,7 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaOJX0wguzY/",
           "id": "3931120744356048088",
-          "type": "Video",
+          "postType": "Video",
           "productType": "clips",
           "caption": "After sunset, thousands of stars emerge across the sky above Big Bend National Park. Darkness is hard to measure definitively, but Texas’s largest national park sits within the world’s biggest certified dark sky area—the 15,000-square-mile (38,850 square-kilometer) Greater Big Bend International Dark Sky Reserve. This is one of the finest places in the country to see the Milky Way, offering nighttime visitors a star-spangled sky much as it looked 250 years ago. \n\nWith the 250th anniversary of U.S. independence quickly approaching, we're celebrating the grandest, wildest, and strangest bits of American geography and culture across every state and territory. Explore more Wonders of America at the link in bio.\n\nVideo by Brian Stevens (@iso160)",
           "description": "After sunset, thousands of stars emerge across the sky above Big Bend National Park. Darkness is hard to measure definitively, but Texas’s largest national park sits within the world’s biggest certified dark sky area—the 15,000-square-mile (38,850 square-kilometer) Greater Big Bend International Dark Sky Reserve. This is one of the finest places in the country to see the Milky Way, offering nighttime visitors a star-spangled sky much as it looked 250 years ago. \n\nWith the 250th anniversary of U.S. independence quickly approaching, we're celebrating the grandest, wildest, and strangest bits of American geography and culture across every state and territory. Explore more Wonders of America at the link in bio.\n\nVideo by Brian Stevens (@iso160)",
@@ -809,7 +803,7 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaSip_jgfgL/",
           "id": "3932357843969243147",
-          "type": "Video",
+          "postType": "Video",
           "productType": "clips",
           "caption": "A moment of awe. While searching for the Seven Natural Wonders of America, @debrobertsabc and National Geographic Explorer James Edward Mills (@thejoytripproject) captured this beautiful view. Can you guess where they are? \n\nDiscover more beauty and nature in the final Wonders of America list, revealed during the 24-hour “Disney Celebrates America” live event special on July 4th on ABC, Disney+ and Nat Geo.",
           "description": "A moment of awe. While searching for the Seven Natural Wonders of America, @debrobertsabc and National Geographic Explorer James Edward Mills (@thejoytripproject) captured this beautiful view. Can you guess where they are? \n\nDiscover more beauty and nature in the final Wonders of America list, revealed during the 24-hour “Disney Celebrates America” live event special on July 4th on ABC, Disney+ and Nat Geo.",
@@ -840,7 +834,7 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaLlCbfAClk/",
           "id": "3930397994481887588",
-          "type": "Video",
+          "postType": "Video",
           "productType": "clips",
           "caption": "Those first steps may be stumbles, but this elephant calf has a lot of potential—even the mightiest matriarch was once this small. 🐘\n\n#SecretsOfTheElephants is now streaming on @DisneyPlus and @hulu.",
           "description": "Those first steps may be stumbles, but this elephant calf has a lot of potential—even the mightiest matriarch was once this small. 🐘\n\n#SecretsOfTheElephants is now streaming on @DisneyPlus and @hulu.",
@@ -873,7 +867,7 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaREV4MAKKV/",
           "id": "3931943045297119893",
-          "type": "Video",
+          "postType": "Video",
           "productType": "clips",
           "caption": "A fish has been documented appearing to hold its breath—but it's not the only marine animal to do it. Hammerhead sharks also hold their breath to conserve heat while hunting, and National Geographic Explorer Arzucan Askin (@zuzu_askin) says this unique ability could be useful in other ways.",
           "description": "A fish has been documented appearing to hold its breath—but it's not the only marine animal to do it. Hammerhead sharks also hold their breath to conserve heat while hunting, and National Geographic Explorer Arzucan Askin (@zuzu_askin) says this unique ability could be useful in other ways.",
@@ -1179,14 +1173,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/BrGHMHIF8Kz/",
           "id": "1929261108986102451",
-          "type": "Image",
+          "postType": "Image",
           "productType": "feed",
           "caption": "Vardzia is a cave monastery site located in southern Georgia. It is excavated from the slopes of the Erusheti Mountain on the left side of the Kura River. Oh Georgia, I miss you when I look at these images 😭 #georgia #exploregeorgia #MavicPro\n.\n.\n.\n.\n.\n#mymavic #awesome_earthpix #collectivelycreate #exploretocreate #livefolk #beautifuldestinations #iglifecz #folkcreative #exklusive_shot #AGameOfTones #igerscz #discoverglobe #QueekyGrams #ourplanetdaily #adventureculture #welivetoexplore #stayandwander #dnescestujem #droneofficial #droneoftheday #dronesdaily #dji #fromwhereidrone #earthofficial #natgeo #MavicPro @beautifuldestinations @roamtheplanet @earthofficial @earthpix @folkmagazine @liveoutdoor.s @awesomeglobe @awesome.earth @djiglobal @fromwhereidrone @dronestagr.am @droneoftheday @droneofficial @earthstoke @livefolk @global_hotshotz @vzcomood @artofvisuals @majestic_earth_ @folkvibe @welivetoexplore @lastingvisuals @mountainsphoto @theglobewanderer @tentree @awesome.earth @awesomeglobe @ourplanetdaily",
           "description": "Vardzia is a cave monastery site located in southern Georgia. It is excavated from the slopes of the Erusheti Mountain on the left side of the Kura River. Oh Georgia, I miss you when I look at these images 😭 #georgia #exploregeorgia #MavicPro\n.\n.\n.\n.\n.\n#mymavic #awesome_earthpix #collectivelycreate #exploretocreate #livefolk #beautifuldestinations #iglifecz #folkcreative #exklusive_shot #AGameOfTones #igerscz #discoverglobe #QueekyGrams #ourplanetdaily #adventureculture #welivetoexplore #stayandwander #dnescestujem #droneofficial #droneoftheday #dronesdaily #dji #fromwhereidrone #earthofficial #natgeo #MavicPro @beautifuldestinations @roamtheplanet @earthofficial @earthpix @folkmagazine @liveoutdoor.s @awesomeglobe @awesome.earth @djiglobal @fromwhereidrone @dronestagr.am @droneoftheday @droneofficial @earthstoke @livefolk @global_hotshotz @vzcomood @artofvisuals @majestic_earth_ @folkvibe @welivetoexplore @lastingvisuals @mountainsphoto @theglobewanderer @tentree @awesome.earth @awesomeglobe @ourplanetdaily",
           "publishedAt": "2018-12-07T18:04:27.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-lga3-3.cdninstagram.com/v/t51.82787-15/640956567_18562047613037433_6822966074348684895_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=102&ig_cache_key=MTkyOTI2MTEwODk4NjEwMjQ1MQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuMTA4MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=TfUAM8Tr7XAQ7kNvwEwlMYK&_nc_oc=AdqqDcRCvrqa1HGTLUiFoyXiV6KsOCJE0YGr1vvFrbRxSfaLJU20GFNpZM54wmVgMdI&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&se=8&_nc_ht=scontent-lga3-3.cdninstagram.com&_nc_gid=ohigOeE1RgfQo8OHHmvncg&_nc_ss=7a3ba&oh=00_AQCDCOpzk3_z_QghnSStgFUFrsbzM3ub_nygxDE0K44EKQ&oe=6A4DC662",
-          "videoUrl": null,
           "author": {
             "username": "hynecheck",
             "displayName": "Hynek Hampl",
@@ -1196,7 +1188,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 14043,
             "comments": 580
           },
@@ -1263,14 +1254,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/BrGAGBxFvn7/",
           "id": "1929229904589027835",
-          "type": "Image",
+          "postType": "Image",
           "productType": "feed",
           "caption": "No helmet needed once your on Cát Bà Island.\n.\nCát Bà Island || Vietnam\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\nShot on EOS T3i and SIGMA 85mm F1.4 EX DG HSM\nISO 100 | f/1.4 | 1/2000\n——\n#vietnam #vietnamese #vietnamesefood #vietnamflashback #vietnamesegirl #vietnamtravel #vietnamtrip #vietnamesehair #vietnamwar #vietnamesecuisine #vietnamflashbacks #vietnamesecoffee #vietnamfood #Canon #canonphotography #canonphoto #canon6d #canoneos #canonusa #canon70d #canon5dmarkiii #canon5d #canonaustralia #canonphotos #canon7d #canon60d #canon700d #canon5dmarkiv #canonphotographer #canoncanada",
           "description": "No helmet needed once your on Cát Bà Island.\n.\nCát Bà Island || Vietnam\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\nShot on EOS T3i and SIGMA 85mm F1.4 EX DG HSM\nISO 100 | f/1.4 | 1/2000\n——\n#vietnam #vietnamese #vietnamesefood #vietnamflashback #vietnamesegirl #vietnamtravel #vietnamtrip #vietnamesehair #vietnamwar #vietnamesecuisine #vietnamflashbacks #vietnamesecoffee #vietnamfood #Canon #canonphotography #canonphoto #canon6d #canoneos #canonusa #canon70d #canon5dmarkiii #canon5d #canonaustralia #canonphotos #canon7d #canon60d #canon700d #canon5dmarkiv #canonphotographer #canoncanada",
           "publishedAt": "2018-12-07T17:02:28.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-lga3-1.cdninstagram.com/v/t51.82787-15/630462428_18409600975125917_7503154876014188463_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=103&ig_cache_key=MTkyOTIyOTkwNDU4OTAyNzgzNQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuMTA4MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=acwz4VpEx7oQ7kNvwELzvox&_nc_oc=AdpVssiPONKpbLgHX1ASn1KG56APmy4WpVEiyrm0JGm2cWk3pCdGnzLOR27dO4VxhXo&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&se=8&_nc_ht=scontent-lga3-1.cdninstagram.com&_nc_gid=ohigOeE1RgfQo8OHHmvncg&_nc_ss=7a3ba&oh=00_AQBvxVItUsHr0p3RASEhqmQIhx-ixvRAfh3iPZuIm0N-1w&oe=6A4DA904",
-          "videoUrl": null,
           "author": {
             "username": "samuellemieux",
             "displayName": "Samuel Lemieux",
@@ -1280,7 +1269,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 6190,
             "comments": 182
           },
@@ -1322,14 +1310,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/BrF5A8wADke/",
           "id": "1929198769279088926",
-          "type": "Image",
+          "postType": "Image",
           "productType": "feed",
           "caption": "☀️Warme Sonnenstrahlen, herrliche Seeluft und weicher Sandstrand - erlebt den ewigen Sommer in Florida😍 Die rund 700 Kilometer lange Landzunge zwischen dem Atlantik und dem Golf von Mexiko wird auch Sunshine State genannt und wird seinem Namen auf jeden Fall gerecht - rund 300 Sonnentage im Jahr kann man in dem US-Bundeststaat genießen.🏝#mycanusa #sunshinestate #visitflorida #florida #exploremore #visittheusa",
           "description": "☀️Warme Sonnenstrahlen, herrliche Seeluft und weicher Sandstrand - erlebt den ewigen Sommer in Florida😍 Die rund 700 Kilometer lange Landzunge zwischen dem Atlantik und dem Golf von Mexiko wird auch Sunshine State genannt und wird seinem Namen auf jeden Fall gerecht - rund 300 Sonnentage im Jahr kann man in dem US-Bundeststaat genießen.🏝#mycanusa #sunshinestate #visitflorida #florida #exploremore #visittheusa",
           "publishedAt": "2018-12-07T16:00:36.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-lga3-2.cdninstagram.com/v/t51.82787-15/639492080_18437172370118532_7460465766046979666_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=101&ig_cache_key=MTkyOTE5ODc2OTI3OTA4ODkyNg%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuMTA4MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=O5UL_zIJgNMQ7kNvwEcwPca&_nc_oc=Adogj3Hgaq3-zqVanm8B3hcB0guKJuS01V_ated28EtLYN9m9-tIafKZBIsjfRxxfyo&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&se=8&_nc_ht=scontent-lga3-2.cdninstagram.com&_nc_gid=ohigOeE1RgfQo8OHHmvncg&_nc_ss=7a3ba&oh=00_AQCXW8phah-MT3r27O0Z2TGE-9nS_4IA2DTVbWEHLGw6vw&oe=6A4DC837",
-          "videoUrl": null,
           "author": {
             "username": "canusatouristik",
             "displayName": "CANUSA TOURISTIK 🇺🇸 & 🇨🇦",
@@ -1339,7 +1325,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 5586,
             "comments": 205
           },
@@ -1357,14 +1342,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/BrFki51gwSc/",
           "id": "1929108743635797148",
-          "type": "Image",
+          "postType": "Image",
           "productType": "feed",
           "caption": "The way to the lovely hot springs, where you can clear your head from the fact that your tent is getting soaked from the lightest rain you’ve ever experience. This was one of the \"best\" night I ever had.\n.\n.\nLandmannalaugar || Iceland\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\nShot on EOS T3i and CANON EF-S 18-200mm f/3.5-5.6\nISO 100 | f/5.0 | 1/320\n——\n#canon_photos #justgoshoot #keepitwild #artofvisuals #places_wow #natgeotravel #stayandwander #feedbacknation #mobilefolk #mycapture #mytinyatlas #worldshotz #wildernessculture #ig_shotz #earthofficial #travelstoke #theglobewanderer #earthpix #iceland #icelandic #icelandtravel #Icelandair #icelandtrip #icelandichorse #icelandicnature #iceland2017 #icelandsecret #icelandadventure #icelandichorses #icelandroadtrip",
           "description": "The way to the lovely hot springs, where you can clear your head from the fact that your tent is getting soaked from the lightest rain you’ve ever experience. This was one of the \"best\" night I ever had.\n.\n.\nLandmannalaugar || Iceland\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\nShot on EOS T3i and CANON EF-S 18-200mm f/3.5-5.6\nISO 100 | f/5.0 | 1/320\n——\n#canon_photos #justgoshoot #keepitwild #artofvisuals #places_wow #natgeotravel #stayandwander #feedbacknation #mobilefolk #mycapture #mytinyatlas #worldshotz #wildernessculture #ig_shotz #earthofficial #travelstoke #theglobewanderer #earthpix #iceland #icelandic #icelandtravel #Icelandair #icelandtrip #icelandichorse #icelandicnature #iceland2017 #icelandsecret #icelandadventure #icelandichorses #icelandroadtrip",
           "publishedAt": "2018-12-07T13:01:44.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-lga3-1.cdninstagram.com/v/t51.82787-15/628223649_18362369407162104_3515121541442060181_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=103&ig_cache_key=MTkyOTEwODc0MzYzNTc5NzE0OA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuMTA4MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=RDdL_NeZMg0Q7kNvwFpqENm&_nc_oc=AdrKUcGqgs3JidVWGD2VWO2ybidLvdjdBzCjKHUCxa4lIsI36yeqdfAFM6zzpeFb7e8&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&se=8&_nc_ht=scontent-lga3-1.cdninstagram.com&_nc_gid=ohigOeE1RgfQo8OHHmvncg&_nc_ss=7a3ba&oh=00_AQCGRSFqtjlXHU9bzilFYPakxH7DpXfHa4X4eKXL9V_vRw&oe=6A4DB153",
-          "videoUrl": null,
           "author": {
             "username": "samuelartlife_",
             "displayName": "SΔMUEL LEMIEUX",
@@ -1374,7 +1357,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 5777,
             "comments": 158
           },
@@ -1416,14 +1398,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/BrFd0J3l30D/",
           "id": "1929079142756089091",
-          "type": "Image",
+          "postType": "Image",
           "productType": "feed",
           "caption": "Morning breakfast on Cát Bà Island\n.\nCát Bà Island || Vietnam\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\nShot on EOS T3i and SIGMA 85mm F1.4 EX DG HSM\nISO 100 | f/1.8 | 1/200\n——\n#vietnam #vietnamese #vietnamesefood #vietnamflashback #vietnamesegirl #vietnamtravel #vietnamtrip #vietnamesehair #vietnamwar #vietnamesecuisine #vietnamflashbacks #vietnamesecoffee #vietnamfood #Canon #canonphotography #canonphoto #canon6d #canoneos #canonusa #canon70d #canon5dmarkiii #canon5d #canonaustralia #canonphotos #canon7d #canon60d #canon700d #canon5dmarkiv #canonphotographer #canoncanada",
           "description": "Morning breakfast on Cát Bà Island\n.\nCát Bà Island || Vietnam\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\nShot on EOS T3i and SIGMA 85mm F1.4 EX DG HSM\nISO 100 | f/1.8 | 1/200\n——\n#vietnam #vietnamese #vietnamesefood #vietnamflashback #vietnamesegirl #vietnamtravel #vietnamtrip #vietnamesehair #vietnamwar #vietnamesecuisine #vietnamflashbacks #vietnamesecoffee #vietnamfood #Canon #canonphotography #canonphoto #canon6d #canoneos #canonusa #canon70d #canon5dmarkiii #canon5d #canonaustralia #canonphotos #canon7d #canon60d #canon700d #canon5dmarkiv #canonphotographer #canoncanada",
           "publishedAt": "2018-12-07T12:02:55.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-lga3-1.cdninstagram.com/v/t51.82787-15/625982221_18408165580133600_1702365915333103984_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=111&ig_cache_key=MTkyOTA3OTE0Mjc1NjA4OTA5MQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuMTA4MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=-S-oUSOZ6xUQ7kNvwFzFQt0&_nc_oc=Adpik6lrkFsAJwfVuWuGeWR0Kp38s06qMJo_gOHa7bODHkqd5ehDe4nCVryYlqdbUrg&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&se=8&_nc_ht=scontent-lga3-1.cdninstagram.com&_nc_gid=ohigOeE1RgfQo8OHHmvncg&_nc_ss=7a3ba&oh=00_AQAgycj3O5zAhQBekmf5FvGEUEIMvt6SfMo8yqoZ25_0HQ&oe=6A4DBCA9",
-          "videoUrl": null,
           "author": {
             "username": "samuellemieux",
             "displayName": "Samuel Lemieux",
@@ -1433,7 +1413,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 5611,
             "comments": 151
           },
@@ -2509,14 +2488,12 @@
       "platform": "instagram",
       "url": "https://www.instagram.com/p/DZFqdAxlkUG/",
       "id": "3910718563091367174",
-      "type": "Image",
+      "postType": "Image",
       "productType": "feed",
       "caption": "After decades of recovery efforts, the wild giant panda population has nearly doubled since the species was listed as endangered in 1990. In this photograph by @amivitale, a keeper wearing a panda suit performs a health check in Wolong, China, reflecting one of the many measures used to prepare captive-bred pandas for life in the wild.\n\nSee what other stories our Nat Geo archive images have to tell at the link in bio.",
       "description": "After decades of recovery efforts, the wild giant panda population has nearly doubled since the species was listed as endangered in 1990. In this photograph by @amivitale, a keeper wearing a panda suit performs a health check in Wolong, China, reflecting one of the many measures used to prepare captive-bred pandas for life in the wild.\n\nSee what other stories our Nat Geo archive images have to tell at the link in bio.",
       "publishedAt": "2026-06-03T13:00:01.000Z",
-      "durationSeconds": null,
       "thumbnailUrl": "https://scontent-dfw6-2.cdninstagram.com/v/t51.82787-15/712483886_18663141787019133_915376241070987040_n.jpg?stp=dst-jpg_e35_s1080x1080_sh2.08_tt6&_nc_ht=scontent-dfw6-2.cdninstagram.com&_nc_cat=109&_nc_oc=Q6cZ2gGWrTviZKLqUp9nVG-dal-Mz1Q1rmPG_BzosAxFWG6ymUp5J7nr2f73r9WZVj3h1z4&_nc_ohc=VkMi-o9ULacQ7kNvwFL8qLc&_nc_gid=Gb5svf0mcuhndKh43Ujhng&edm=ADp7STQBAAAA&ccb=7-5&oh=00_AQAjdElHFyKbhAakuORE7_ktz1-E7tdAIa1uXOzCLLUKWg&oe=6A4DB33A&_nc_sid=c6f216",
-      "videoUrl": null,
       "author": {
         "username": "natgeo",
         "displayName": "National Geographic",
@@ -2526,7 +2503,6 @@
         "profileImage": null
       },
       "engagement": {
-        "views": null,
         "likes": 237870,
         "comments": 1137
       },
@@ -4046,14 +4022,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjhCnjNXW/",
           "id": "3933206051759642070",
-          "type": "Sidecar",
+          "postType": "Sidecar",
           "productType": "carousel_container",
           "caption": "La bella Sardegna🇮🇹\n_______\n.\n.\n#sardegna #italy #travel #fyp #photography",
           "description": "La bella Sardegna🇮🇹\n_______\n.\n.\n#sardegna #italy #travel #fyp #photography",
           "publishedAt": "2026-07-03T16:05:20.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/732706640_18603614689009838_6695587078282084276_n.jpg?stp=dst-jpg_e35_p1080x1080_sh2.08_tt6&_nc_cat=100&ig_cache_key=MzkzMzIwNTMzODAwODk2MDM5Nw%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMzAyNC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=KViLx3k3jKsQ7kNvwHAZrp9&_nc_oc=Adoc6Dgs1st-lu0nv9UOoLQQkXESmdbrOS04A7cK7fvt9sTmk2PNol5WFeUKruMIyXM&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQBoPEbbFI76SipZySDRWAPe6-03xfBqEJmJLcpbN9sRmQ&oe=6A4DBD0B",
-          "videoUrl": null,
           "author": {
             "username": "mentor.bajramii",
             "displayName": "Mentor",
@@ -4063,7 +4037,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4080,14 +4053,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjgdKCg1q/",
           "id": "3933206011536084330",
-          "type": "Sidecar",
+          "postType": "Sidecar",
           "productType": "carousel_container",
           "caption": "7 choses à savoir avant de visiter les Maldives\n\n#DestinationDeRêv' #AgenceDeVoyage #Bangkok #Thailand #Voyage #Travel #Tourisme #Asie #Découverte #Vacances",
           "description": "7 choses à savoir avant de visiter les Maldives\n\n#DestinationDeRêv' #AgenceDeVoyage #Bangkok #Thailand #Voyage #Travel #Tourisme #Asie #Découverte #Vacances",
           "publishedAt": "2026-07-03T16:05:16.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t39.30808-6/738552657_1793418221835239_8221009045143906805_n.jpg?stp=dst-jpg_e35_s1080x1080_sh2.08_tt6&_nc_cat=111&ig_cache_key=MzkzMzIwNTk1MTE2MzI3ODE5OA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMjA0OC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=4qWs1WTcnZ4Q7kNvwGAzMy1&_nc_oc=Adp6w1TlpkjBFNLYaBF51HEd4SW92Bf2mQ_xhFnqo-6sGJHMgx_0EhRBJTEQmwtvjls&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQAYSGzhMeOCXt0CqTySpZ-CTkRPt1otoY-zu1wKsn_FHw&oe=6A4D9DEE",
-          "videoUrl": null,
           "author": {
             "username": "destination.de.rev",
             "displayName": "Destination de Rev'",
@@ -4097,7 +4068,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4119,14 +4089,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjgWOiISR/",
           "id": "3933206004095288465",
-          "type": "Sidecar",
+          "postType": "Sidecar",
           "productType": "carousel_container",
           "caption": "First layover. ✈️🤍\nA moment I’ll always remember. #larnaka #layover #travel",
           "description": "First layover. ✈️🤍\nA moment I’ll always remember. #larnaka #layover #travel",
           "publishedAt": "2026-07-03T16:05:15.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/731702794_18439574476193601_8670792928318335020_n.jpg?stp=dst-jpegr_e35_p1080x1080_tt6&_nc_cat=105&ig_cache_key=MzkzMzIwNDEyODQ1NDYwMDQ4MA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMzA3Mi5oZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=hULX7WKqCCcQ7kNvwFMHbT7&_nc_oc=AdplVXrboxO69YQ4LqNx77T5xvkCZPlrIUktWMOU2-yG70uGsodUVsgueyb1h5_11JE&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&se=-1&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQC1qqcpVH6ZvBh1QAIn28S5dTQZFmS6VPnkFvwzmwb5qQ&oe=6A4DC950",
-          "videoUrl": null,
           "author": {
             "username": "koinazarovaa",
             "displayName": "Aruzhan Koinazarova",
@@ -4136,7 +4104,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4151,14 +4118,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjgT5GhYe/",
           "id": "3933206001588246046",
-          "type": "Sidecar",
+          "postType": "Sidecar",
           "productType": "carousel_container",
           "caption": "Our week in Switzerland went like ☀️🏔️🫕🍫🍷🛥️🐄🪂\n\n#switzerland #momdaughter #eurosummer #swiss #travel",
           "description": "Our week in Switzerland went like ☀️🏔️🫕🍫🍷🛥️🐄🪂\n\n#switzerland #momdaughter #eurosummer #swiss #travel",
           "publishedAt": "2026-07-03T16:05:14.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/731791676_18606900667035893_1440425656920310125_n.jpg?stp=dst-jpg_e35_p1080x1080_sh2.08_tt6&_nc_cat=102&ig_cache_key=MzkzMzIwNTg5NjUyMzA0MDc2OQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMzA3Mi5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=-vwqG2_CGUkQ7kNvwFEG-oM&_nc_oc=AdpluMzfSngaZuhUyp0U1cFnCaaIjcSQgnxr8t1Pg4B_kIAxyoMwj8SU1LcuHZYoszw&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQAU0oC85gXhEUSqaquceO7W-EvBz3iRFmhiJzeGDhuU8A&oe=6A4DC95B",
-          "videoUrl": null,
           "author": {
             "username": "pinkdancer99",
             "displayName": "Taylor Renee Emmersen",
@@ -4168,7 +4133,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4185,14 +4149,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjf2uu6Kc/",
           "id": "3933205970275771036",
-          "type": "Image",
+          "postType": "Image",
           "productType": "feed",
           "caption": "Frankfurt 🩵✈️\n#germany #Skyscrapers #travel #dreamcometrue #happylife",
           "description": "Frankfurt 🩵✈️\n#germany #Skyscrapers #travel #dreamcometrue #happylife",
           "publishedAt": "2026-07-03T16:05:13.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/731769794_18206958946350004_1320444949229244483_n.jpg?stp=dst-jpegr_e35_p1080x1080_tt6&_nc_cat=109&ig_cache_key=MzkzMzIwNTk3MDI3NTc3MTAzNg%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuMTQ0MC5oZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=f9wTOTHbivwQ7kNvwFBxsbw&_nc_oc=AdqzZZbnMg09er2JCQAr1bdDpQhOrVb9zVHoNKOstE5AVm2hxsbd3zY2mnlR4tTAsUM&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&se=-1&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQBypHpTwHob8hgVom6-q2APTMw3B2AucgNm0DchcW0euQ&oe=6A4DC8F8",
-          "videoUrl": null,
           "author": {
             "username": "sybilecucerdean",
             "displayName": "Sybile Cucerdean",
@@ -4202,7 +4164,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4219,14 +4180,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjfN-Snpl/",
           "id": "3933205926513375845",
-          "type": "Image",
+          "postType": "Image",
           "productType": "feed",
           "caption": "\"Where the water flows, peace follows\"🏔🍃🌊\n.\n.\n.\n.\n\n.\n#syhlet #jaflong #travel #explore #instagram",
           "description": "\"Where the water flows, peace follows\"🏔🍃🌊\n.\n.\n.\n.\n\n.\n#syhlet #jaflong #travel #explore #instagram",
           "publishedAt": "2026-07-03T16:05:08.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/731808242_18102496379268044_6033786898678360301_n.webp?stp=dst-webp_p1080x1080_sh2.08&_nc_cat=105&ig_cache_key=MzkzMzIwNTkyNjUxMzM3NTg0NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuMTQ0MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=4WZA3JwndJ4Q7kNvwE2bD0g&_nc_oc=AdqtcXeLqva8e4jAmP97Eno7-jlJP2jpjeU1RJhUcBdHvOiACHkn5ZOKHiCLHKEArps&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQB0i7EXctXzG06Jn09xnzuqszbQGj4s8lNqUV3tAsMfmQ&oe=6A4D9891",
-          "videoUrl": null,
           "author": {
             "username": "im_surjo_sen",
             "displayName": "RUDRA_SISH",
@@ -4236,7 +4195,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4253,14 +4211,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVje3kEcNp/",
           "id": "3933205902451131241",
-          "type": "Sidecar",
+          "postType": "Sidecar",
           "productType": "carousel_container",
           "caption": "Bangkok, Thailand 🥭🌺🧘‍♀️🛺🐉🏯\n\n#explore #thailand #bangkok #travel #travelgram",
           "description": "Bangkok, Thailand 🥭🌺🧘‍♀️🛺🐉🏯\n\n#explore #thailand #bangkok #travel #travelgram",
           "publishedAt": "2026-07-03T16:05:03.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/731652947_18108429946964421_4842513019354246574_n.jpg?stp=dst-jpg_e35_p1080x1080_sh2.08_tt6&_nc_cat=101&ig_cache_key=MzkzMzIwNTQxOTM4NDAyMzAyNw%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMzAyNC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=kIhzNJLZeUsQ7kNvwHmD9cG&_nc_oc=AdpI53n6mNqjVG8QMI4Nk3jC9I_kxuDlt6tmEc7WwvNA9sGqCvhWXilr3HSgUPWTdXg&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQA5d0h99hDGMQCT0x4qJwmQp8ZUo3hAayNAs5HJPE-_pw&oe=6A4DBBBE",
-          "videoUrl": null,
           "author": {
             "username": "timeefortravel",
             "displayName": "time for travel",
@@ -4270,7 +4226,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4287,14 +4242,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjefAAhQ8/",
           "id": "3933205876076319804",
-          "type": "Sidecar",
+          "postType": "Sidecar",
           "productType": "carousel_container",
           "caption": "Safar💗 #photo #photography #instatravel #traveling #travel",
           "description": "Safar💗 #photo #photography #instatravel #traveling #travel",
           "publishedAt": "2026-07-03T16:04:59.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/728950817_18105621170096467_9076509932850589387_n.jpg?stp=dst-jpegr_e35_p1080x1080_tt6&_nc_cat=107&ig_cache_key=MzkzMzIwNDc1NjQ2NjEwNzIxNQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTQ0MC5oZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=4VarJT6ImuoQ7kNvwEXFDHr&_nc_oc=AdoWxrKTh9pjYxRGWUc1c5f4W5D2nY4qljzCbegLalTCOW7RL4HDjGYStNx7SxiFiDc&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&se=-1&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQDvd3YLWwzMshBdMPyQgwYnn2Gl1GDXqkBnHOKxflWdBw&oe=6A4D9AF0",
-          "videoUrl": null,
           "author": {
             "username": "nis_mit_92",
             "displayName": "NAッ",
@@ -4304,7 +4257,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4321,14 +4273,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjdu3Mtwn/",
           "id": "3933205824388914215",
-          "type": "Image",
+          "postType": "Image",
           "productType": "feed",
           "caption": "Proof that fairytales really do exist.✨️🏰💫\n#latvia #latvija #travelphotography #travelgram #travel",
           "description": "Proof that fairytales really do exist.✨️🏰💫\n#latvia #latvija #travelphotography #travelgram #travel",
           "publishedAt": "2026-07-03T16:04:55.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/732493936_17881946022612004_2526695386566562282_n.heic?stp=dst-jpg_e35_s1080x1080_sh2.08_tt6&_nc_cat=108&ig_cache_key=MzkzMzIwNTgyNDM4ODkxNDIxNQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuMTQ0MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=dgK4W20GLn0Q7kNvwEkNyxN&_nc_oc=AdpSAUICl7qiO5EXGDJHsiRni-fjDre3grtpbOXRnFt-ltuRapMRFecyZB8G5tmXkgU&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQACRFaEyi9RI5NcJWypQ8txMCPuzF5JlJs0iTi2vETsmg&oe=6A4DA4EC",
-          "videoUrl": null,
           "author": {
             "username": "tedka___",
             "displayName": "Миткова Тодорова",
@@ -4338,7 +4288,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4355,14 +4304,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjcidl1TI/",
           "id": "3933205742354912456",
-          "type": "Sidecar",
+          "postType": "Sidecar",
           "productType": "carousel_container",
           "caption": "just me and London. 🤍🇬🇧\n\n#ootd #pinterest #travel #london #vibes",
           "description": "just me and London. 🤍🇬🇧\n\n#ootd #pinterest #travel #london #vibes",
           "publishedAt": "2026-07-03T16:04:43.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/731541141_18360732637208098_5465076539630860481_n.jpg?stp=dst-jpg_e35_p1080x1080_sh2.08_tt6&_nc_cat=103&ig_cache_key=MzkzMzIwMzgzNDU5NDM1NTY2MQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMzAyNC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=u1UJz7wVBmkQ7kNvwHqkY6m&_nc_oc=Adp5yYCN45zirSX4YyOxkrkD_cA9SjExkFjpUCG0F861PqIHwXEfdzxKlIcIVSQN944&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQCUfzhw8GBx93GaUiKOSGpD4BXIXUE_yoCiJuxsyGKmCw&oe=6A4D9CF7",
-          "videoUrl": null,
           "author": {
             "username": "corinaaaaaaa",
             "displayName": "Corina",
@@ -4372,7 +4319,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 2,
             "comments": 0
           },
@@ -4401,14 +4347,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjhCnjNXW/",
           "id": "3933206051759642070",
-          "type": "Sidecar",
+          "postType": "Sidecar",
           "productType": "carousel_container",
           "caption": "La bella Sardegna🇮🇹\n_______\n.\n.\n#sardegna #italy #travel #fyp #photography",
           "description": "La bella Sardegna🇮🇹\n_______\n.\n.\n#sardegna #italy #travel #fyp #photography",
           "publishedAt": "2026-07-03T16:05:20.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/732706640_18603614689009838_6695587078282084276_n.jpg?stp=dst-jpg_e35_p1080x1080_sh2.08_tt6&_nc_cat=100&ig_cache_key=MzkzMzIwNTMzODAwODk2MDM5Nw%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMzAyNC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=KViLx3k3jKsQ7kNvwHAZrp9&_nc_oc=Adoc6Dgs1st-lu0nv9UOoLQQkXESmdbrOS04A7cK7fvt9sTmk2PNol5WFeUKruMIyXM&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQBoPEbbFI76SipZySDRWAPe6-03xfBqEJmJLcpbN9sRmQ&oe=6A4DBD0B",
-          "videoUrl": null,
           "author": {
             "username": "mentor.bajramii",
             "displayName": "Mentor",
@@ -4418,7 +4362,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4435,14 +4378,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjgdKCg1q/",
           "id": "3933206011536084330",
-          "type": "Sidecar",
+          "postType": "Sidecar",
           "productType": "carousel_container",
           "caption": "7 choses à savoir avant de visiter les Maldives\n\n#DestinationDeRêv' #AgenceDeVoyage #Bangkok #Thailand #Voyage #Travel #Tourisme #Asie #Découverte #Vacances",
           "description": "7 choses à savoir avant de visiter les Maldives\n\n#DestinationDeRêv' #AgenceDeVoyage #Bangkok #Thailand #Voyage #Travel #Tourisme #Asie #Découverte #Vacances",
           "publishedAt": "2026-07-03T16:05:16.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t39.30808-6/738552657_1793418221835239_8221009045143906805_n.jpg?stp=dst-jpg_e35_s1080x1080_sh2.08_tt6&_nc_cat=111&ig_cache_key=MzkzMzIwNTk1MTE2MzI3ODE5OA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMjA0OC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=4qWs1WTcnZ4Q7kNvwGAzMy1&_nc_oc=Adp6w1TlpkjBFNLYaBF51HEd4SW92Bf2mQ_xhFnqo-6sGJHMgx_0EhRBJTEQmwtvjls&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQAYSGzhMeOCXt0CqTySpZ-CTkRPt1otoY-zu1wKsn_FHw&oe=6A4D9DEE",
-          "videoUrl": null,
           "author": {
             "username": "destination.de.rev",
             "displayName": "Destination de Rev'",
@@ -4452,7 +4393,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4474,14 +4414,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjgWOiISR/",
           "id": "3933206004095288465",
-          "type": "Sidecar",
+          "postType": "Sidecar",
           "productType": "carousel_container",
           "caption": "First layover. ✈️🤍\nA moment I’ll always remember. #larnaka #layover #travel",
           "description": "First layover. ✈️🤍\nA moment I’ll always remember. #larnaka #layover #travel",
           "publishedAt": "2026-07-03T16:05:15.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/731702794_18439574476193601_8670792928318335020_n.jpg?stp=dst-jpegr_e35_p1080x1080_tt6&_nc_cat=105&ig_cache_key=MzkzMzIwNDEyODQ1NDYwMDQ4MA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMzA3Mi5oZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=hULX7WKqCCcQ7kNvwFMHbT7&_nc_oc=AdplVXrboxO69YQ4LqNx77T5xvkCZPlrIUktWMOU2-yG70uGsodUVsgueyb1h5_11JE&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&se=-1&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQC1qqcpVH6ZvBh1QAIn28S5dTQZFmS6VPnkFvwzmwb5qQ&oe=6A4DC950",
-          "videoUrl": null,
           "author": {
             "username": "koinazarovaa",
             "displayName": "Aruzhan Koinazarova",
@@ -4491,7 +4429,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4506,14 +4443,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjgT5GhYe/",
           "id": "3933206001588246046",
-          "type": "Sidecar",
+          "postType": "Sidecar",
           "productType": "carousel_container",
           "caption": "Our week in Switzerland went like ☀️🏔️🫕🍫🍷🛥️🐄🪂\n\n#switzerland #momdaughter #eurosummer #swiss #travel",
           "description": "Our week in Switzerland went like ☀️🏔️🫕🍫🍷🛥️🐄🪂\n\n#switzerland #momdaughter #eurosummer #swiss #travel",
           "publishedAt": "2026-07-03T16:05:14.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/731791676_18606900667035893_1440425656920310125_n.jpg?stp=dst-jpg_e35_p1080x1080_sh2.08_tt6&_nc_cat=102&ig_cache_key=MzkzMzIwNTg5NjUyMzA0MDc2OQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMzA3Mi5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=-vwqG2_CGUkQ7kNvwFEG-oM&_nc_oc=AdpluMzfSngaZuhUyp0U1cFnCaaIjcSQgnxr8t1Pg4B_kIAxyoMwj8SU1LcuHZYoszw&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQAU0oC85gXhEUSqaquceO7W-EvBz3iRFmhiJzeGDhuU8A&oe=6A4DC95B",
-          "videoUrl": null,
           "author": {
             "username": "pinkdancer99",
             "displayName": "Taylor Renee Emmersen",
@@ -4523,7 +4458,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4540,14 +4474,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjf2uu6Kc/",
           "id": "3933205970275771036",
-          "type": "Image",
+          "postType": "Image",
           "productType": "feed",
           "caption": "Frankfurt 🩵✈️\n#germany #Skyscrapers #travel #dreamcometrue #happylife",
           "description": "Frankfurt 🩵✈️\n#germany #Skyscrapers #travel #dreamcometrue #happylife",
           "publishedAt": "2026-07-03T16:05:13.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/731769794_18206958946350004_1320444949229244483_n.jpg?stp=dst-jpegr_e35_p1080x1080_tt6&_nc_cat=109&ig_cache_key=MzkzMzIwNTk3MDI3NTc3MTAzNg%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuMTQ0MC5oZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=f9wTOTHbivwQ7kNvwFBxsbw&_nc_oc=AdqzZZbnMg09er2JCQAr1bdDpQhOrVb9zVHoNKOstE5AVm2hxsbd3zY2mnlR4tTAsUM&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&se=-1&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQBypHpTwHob8hgVom6-q2APTMw3B2AucgNm0DchcW0euQ&oe=6A4DC8F8",
-          "videoUrl": null,
           "author": {
             "username": "sybilecucerdean",
             "displayName": "Sybile Cucerdean",
@@ -4557,7 +4489,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4574,14 +4505,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjfN-Snpl/",
           "id": "3933205926513375845",
-          "type": "Image",
+          "postType": "Image",
           "productType": "feed",
           "caption": "\"Where the water flows, peace follows\"🏔🍃🌊\n.\n.\n.\n.\n\n.\n#syhlet #jaflong #travel #explore #instagram",
           "description": "\"Where the water flows, peace follows\"🏔🍃🌊\n.\n.\n.\n.\n\n.\n#syhlet #jaflong #travel #explore #instagram",
           "publishedAt": "2026-07-03T16:05:08.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/731808242_18102496379268044_6033786898678360301_n.webp?stp=dst-webp_p1080x1080_sh2.08&_nc_cat=105&ig_cache_key=MzkzMzIwNTkyNjUxMzM3NTg0NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuMTQ0MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=4WZA3JwndJ4Q7kNvwE2bD0g&_nc_oc=AdqtcXeLqva8e4jAmP97Eno7-jlJP2jpjeU1RJhUcBdHvOiACHkn5ZOKHiCLHKEArps&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQB0i7EXctXzG06Jn09xnzuqszbQGj4s8lNqUV3tAsMfmQ&oe=6A4D9891",
-          "videoUrl": null,
           "author": {
             "username": "im_surjo_sen",
             "displayName": "RUDRA_SISH",
@@ -4591,7 +4520,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4608,14 +4536,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVje3kEcNp/",
           "id": "3933205902451131241",
-          "type": "Sidecar",
+          "postType": "Sidecar",
           "productType": "carousel_container",
           "caption": "Bangkok, Thailand 🥭🌺🧘‍♀️🛺🐉🏯\n\n#explore #thailand #bangkok #travel #travelgram",
           "description": "Bangkok, Thailand 🥭🌺🧘‍♀️🛺🐉🏯\n\n#explore #thailand #bangkok #travel #travelgram",
           "publishedAt": "2026-07-03T16:05:03.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/731652947_18108429946964421_4842513019354246574_n.jpg?stp=dst-jpg_e35_p1080x1080_sh2.08_tt6&_nc_cat=101&ig_cache_key=MzkzMzIwNTQxOTM4NDAyMzAyNw%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMzAyNC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=kIhzNJLZeUsQ7kNvwHmD9cG&_nc_oc=AdpI53n6mNqjVG8QMI4Nk3jC9I_kxuDlt6tmEc7WwvNA9sGqCvhWXilr3HSgUPWTdXg&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQA5d0h99hDGMQCT0x4qJwmQp8ZUo3hAayNAs5HJPE-_pw&oe=6A4DBBBE",
-          "videoUrl": null,
           "author": {
             "username": "timeefortravel",
             "displayName": "time for travel",
@@ -4625,7 +4551,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4642,14 +4567,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjefAAhQ8/",
           "id": "3933205876076319804",
-          "type": "Sidecar",
+          "postType": "Sidecar",
           "productType": "carousel_container",
           "caption": "Safar💗 #photo #photography #instatravel #traveling #travel",
           "description": "Safar💗 #photo #photography #instatravel #traveling #travel",
           "publishedAt": "2026-07-03T16:04:59.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/728950817_18105621170096467_9076509932850589387_n.jpg?stp=dst-jpegr_e35_p1080x1080_tt6&_nc_cat=107&ig_cache_key=MzkzMzIwNDc1NjQ2NjEwNzIxNQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTQ0MC5oZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=4VarJT6ImuoQ7kNvwEXFDHr&_nc_oc=AdoWxrKTh9pjYxRGWUc1c5f4W5D2nY4qljzCbegLalTCOW7RL4HDjGYStNx7SxiFiDc&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&se=-1&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQDvd3YLWwzMshBdMPyQgwYnn2Gl1GDXqkBnHOKxflWdBw&oe=6A4D9AF0",
-          "videoUrl": null,
           "author": {
             "username": "nis_mit_92",
             "displayName": "NAッ",
@@ -4659,7 +4582,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4676,14 +4598,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjdu3Mtwn/",
           "id": "3933205824388914215",
-          "type": "Image",
+          "postType": "Image",
           "productType": "feed",
           "caption": "Proof that fairytales really do exist.✨️🏰💫\n#latvia #latvija #travelphotography #travelgram #travel",
           "description": "Proof that fairytales really do exist.✨️🏰💫\n#latvia #latvija #travelphotography #travelgram #travel",
           "publishedAt": "2026-07-03T16:04:55.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/732493936_17881946022612004_2526695386566562282_n.heic?stp=dst-jpg_e35_s1080x1080_sh2.08_tt6&_nc_cat=108&ig_cache_key=MzkzMzIwNTgyNDM4ODkxNDIxNQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuMTQ0MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=dgK4W20GLn0Q7kNvwEkNyxN&_nc_oc=AdpSAUICl7qiO5EXGDJHsiRni-fjDre3grtpbOXRnFt-ltuRapMRFecyZB8G5tmXkgU&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQACRFaEyi9RI5NcJWypQ8txMCPuzF5JlJs0iTi2vETsmg&oe=6A4DA4EC",
-          "videoUrl": null,
           "author": {
             "username": "tedka___",
             "displayName": "Миткова Тодорова",
@@ -4693,7 +4613,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -4710,14 +4629,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DaVjcidl1TI/",
           "id": "3933205742354912456",
-          "type": "Sidecar",
+          "postType": "Sidecar",
           "productType": "carousel_container",
           "caption": "just me and London. 🤍🇬🇧\n\n#ootd #pinterest #travel #london #vibes",
           "description": "just me and London. 🤍🇬🇧\n\n#ootd #pinterest #travel #london #vibes",
           "publishedAt": "2026-07-03T16:04:43.000Z",
-          "durationSeconds": null,
           "thumbnailUrl": "https://scontent-vie1-1.cdninstagram.com/v/t51.82787-15/731541141_18360732637208098_5465076539630860481_n.jpg?stp=dst-jpg_e35_p1080x1080_sh2.08_tt6&_nc_cat=103&ig_cache_key=MzkzMzIwMzgzNDU5NDM1NTY2MQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMzAyNC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=u1UJz7wVBmkQ7kNvwHqkY6m&_nc_oc=Adp5yYCN45zirSX4YyOxkrkD_cA9SjExkFjpUCG0F861PqIHwXEfdzxKlIcIVSQN944&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-vie1-1.cdninstagram.com&_nc_gid=9fUq-4GBIm5-djlsK0WEAQ&_nc_ss=7a3ba&oh=00_AQCUfzhw8GBx93GaUiKOSGpD4BXIXUE_yoCiJuxsyGKmCw&oe=6A4D9CF7",
-          "videoUrl": null,
           "author": {
             "username": "corinaaaaaaa",
             "displayName": "Corina",
@@ -4727,7 +4644,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 2,
             "comments": 0
           },
@@ -24087,14 +24003,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DYH6umnjyK8/",
           "id": "3893338692144538300_41765305898",
-          "type": "carousel_container",
+          "postType": "carousel_container",
           "productType": null,
           "caption": "5 anime movies that will stay with you forever.\nYour Name — two souls connected across time who spend their whole lives searching for each other without knowing why.\nSpirited Away — a young girl who enters a world beyond imagination and discovers who she truly is.\nGrave of the Fireflies — a brother who gave everything to protect his little sister during the darkest chapter of history.\nA Silent Voice — a story about the weight of words and the courage to face what you've done\nPrincess Mononoke — a battle between humanity and nature told through some of the most breathtaking animation ever created.\n\nFollow @senpai_clipz for more recommendations \n\n#animerecommendation #anime #movies #animemovie",
           "description": "5 anime movies that will stay with you forever.\nYour Name — two souls connected across time who spend their whole lives searching for each other without knowing why.\nSpirited Away — a young girl who enters a world beyond imagination and discovers who she truly is.\nGrave of the Fireflies — a brother who gave everything to protect his little sister during the darkest chapter of history.\nA Silent Voice — a story about the weight of words and the courage to face what you've done\nPrincess Mononoke — a battle between humanity and nature told through some of the most breathtaking animation ever created.\n\nFollow @senpai_clipz for more recommendations \n\n#animerecommendation #anime #movies #animemovie",
           "publishedAt": "1778342161",
-          "durationSeconds": null,
           "thumbnailUrl": null,
-          "videoUrl": null,
           "author": {
             "username": null,
             "displayName": null,
@@ -24104,7 +24018,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -24115,14 +24028,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DR92bM5kdZq/",
           "id": "3782418625849316970_4459707876",
-          "type": "feed",
+          "postType": "feed",
           "productType": null,
           "caption": "Lasting 7 Seasons, 152 Episodes and 2 TV Movies, “Fantasy Island” Was an Award Winning Fantasy Drama Series Starring Ricardo Montalban as Mr. Roarke Who Oversaw a Mysterious Island and Granted Wishes to Guests “For a Price.” \n\n#fantasyisland #television #tv",
           "description": "Lasting 7 Seasons, 152 Episodes and 2 TV Movies, “Fantasy Island” Was an Award Winning Fantasy Drama Series Starring Ricardo Montalban as Mr. Roarke Who Oversaw a Mysterious Island and Granted Wishes to Guests “For a Price.” \n\n#fantasyisland #television #tv",
           "publishedAt": "1765119458",
-          "durationSeconds": null,
           "thumbnailUrl": null,
-          "videoUrl": null,
           "author": {
             "username": null,
             "displayName": null,
@@ -24132,7 +24043,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -24143,14 +24053,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DZRi0Fjvq8R/",
           "id": "3914062664124247825_35355265666",
-          "type": "feed",
+          "postType": "feed",
           "productType": null,
           "caption": "🎬 𝐓𝐨𝐩 60 𝐌𝐢𝐥𝐢𝐭𝐚𝐫𝐲 𝐌𝐨𝐯𝐢𝐞𝐬📽️🍿",
           "description": "🎬 𝐓𝐨𝐩 60 𝐌𝐢𝐥𝐢𝐭𝐚𝐫𝐲 𝐌𝐨𝐯𝐢𝐞𝐬📽️🍿",
           "publishedAt": "1780812655",
-          "durationSeconds": null,
           "thumbnailUrl": null,
-          "videoUrl": null,
           "author": {
             "username": null,
             "displayName": null,
@@ -24160,7 +24068,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -24171,14 +24078,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DY_mecpsUxU/",
           "id": "3909012219696860244_440457624",
-          "type": "feed",
+          "postType": "feed",
           "productType": null,
           "caption": "From the loyal Circuit to the intense Kabir Singh, there’s a Bollywood character that matches your vibe 🎬✨ Share this and ask your friends who you remind them of 🔥\n\n#IIFA #Bollywood #BollywoodCharacters\n\n[IIFA, Bollywood, Bollywood Characters, Bollywood Movies, Relatable, viral]",
           "description": "From the loyal Circuit to the intense Kabir Singh, there’s a Bollywood character that matches your vibe 🎬✨ Share this and ask your friends who you remind them of 🔥\n\n#IIFA #Bollywood #BollywoodCharacters\n\n[IIFA, Bollywood, Bollywood Characters, Bollywood Movies, Relatable, viral]",
           "publishedAt": "1780210607",
-          "durationSeconds": null,
           "thumbnailUrl": null,
-          "videoUrl": null,
           "author": {
             "username": null,
             "displayName": null,
@@ -24188,7 +24093,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
@@ -24199,14 +24103,12 @@
           "platform": "instagram",
           "url": "https://www.instagram.com/p/DYZxoehoSko/",
           "id": "3898365238300453160_46977791697",
-          "type": "feed",
+          "postType": "feed",
           "productType": null,
           "caption": "𝐓𝐡𝐢𝐬 𝐖𝐞𝐞𝐤 𝐎𝐓𝐓 𝐑𝐞𝐥𝐞𝐚𝐬𝐞 - Streaming Now 🤩🍿\n\n𝐓𝐚𝐦𝐢𝐥 \n#MrX (Tamil, Telugu, Kannada, Malayalam) - JioHotstar & SimplySouth\n\n#Kaalidas2 (Tamil) - PrimeVideo, Sunnxt, ShortFlix, SimplySouth, AhaTamil, Tentkotta & LionsGatePlay\n\n𝐓𝐞𝐥𝐮𝐠𝐮\n#Anaganaga (Telugu, Tamil, Kannada, Malayalam, Hindi) - ETvWin \n\n#ThimmarajupalliTV (Telugu, Tamil) - AhaVideo\n\n𝐌𝐚𝐥𝐚𝐲𝐚𝐥𝐚𝐦\n#OruDuroohaSaahacharyathil (Malayalam) - Netflix\n\nDerby (Malayalam) - PrimeVideo, SimplySouth\n\n𝐇𝐢𝐧𝐝𝐢\nD-h-u-r-a-n-d-h-a-r : The Revenge (Hindi, Tamil, Telugu, Kannada, Malayalam) - Netflix (Outside India)\n\nKartavya (Hindi, Tamil, Telugu, English) - Netflix\n\n𝐌𝐚𝐫𝐚𝐭𝐡𝐢\nTighee (Marathi) - Zee5\n\n𝐄𝐧𝐠𝐥𝐢𝐬𝐡\nMartySupreme (English, Tamil, Telugu, Hindi) - PrimeVideo\n\nOffCampus 🥵 (English, Tamil, Telugu, Kannada, Malayalam, Hindi) [Series] - PrimeVideo\n\nThePunisher: One Last Kill (English) - JioHotstar",
           "description": "𝐓𝐡𝐢𝐬 𝐖𝐞𝐞𝐤 𝐎𝐓𝐓 𝐑𝐞𝐥𝐞𝐚𝐬𝐞 - Streaming Now 🤩🍿\n\n𝐓𝐚𝐦𝐢𝐥 \n#MrX (Tamil, Telugu, Kannada, Malayalam) - JioHotstar & SimplySouth\n\n#Kaalidas2 (Tamil) - PrimeVideo, Sunnxt, ShortFlix, SimplySouth, AhaTamil, Tentkotta & LionsGatePlay\n\n𝐓𝐞𝐥𝐮𝐠𝐮\n#Anaganaga (Telugu, Tamil, Kannada, Malayalam, Hindi) - ETvWin \n\n#ThimmarajupalliTV (Telugu, Tamil) - AhaVideo\n\n𝐌𝐚𝐥𝐚𝐲𝐚𝐥𝐚𝐦\n#OruDuroohaSaahacharyathil (Malayalam) - Netflix\n\nDerby (Malayalam) - PrimeVideo, SimplySouth\n\n𝐇𝐢𝐧𝐝𝐢\nD-h-u-r-a-n-d-h-a-r : The Revenge (Hindi, Tamil, Telugu, Kannada, Malayalam) - Netflix (Outside India)\n\nKartavya (Hindi, Tamil, Telugu, English) - Netflix\n\n𝐌𝐚𝐫𝐚𝐭𝐡𝐢\nTighee (Marathi) - Zee5\n\n𝐄𝐧𝐠𝐥𝐢𝐬𝐡\nMartySupreme (English, Tamil, Telugu, Hindi) - PrimeVideo\n\nOffCampus 🥵 (English, Tamil, Telugu, Kannada, Malayalam, Hindi) [Series] - PrimeVideo\n\nThePunisher: One Last Kill (English) - JioHotstar",
           "publishedAt": "1778941420",
-          "durationSeconds": null,
           "thumbnailUrl": null,
-          "videoUrl": null,
           "author": {
             "username": null,
             "displayName": null,
@@ -24216,7 +24118,6 @@
             "profileImage": null
           },
           "engagement": {
-            "views": null,
             "likes": 0,
             "comments": 0
           },
