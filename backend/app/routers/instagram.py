@@ -730,14 +730,66 @@ async def instagram_basic_profile(
         return ApiResponse(data=data)
 
 
+_IG_CURSOR_RE = re.compile(r"^\d+_(\d+)$")
+_IG_FEED_MAX_PAGES = 8
+
+
+async def _ig_feed_collect(
+    user_id: str,
+    cursor: str | None,
+    limit: int,
+    *,
+    reels_only: bool = False,
+    followers: int | None = None,
+) -> tuple[list[dict[str, Any]], str | None] | None:
+    """Collect up to ``limit`` posts from the native api/v1 feed starting at
+    ``cursor``. Returns (posts, next_cursor) or None if the feed is
+    unreachable."""
+    collected: list[dict[str, Any]] = []
+    next_cursor = cursor
+    for _ in range(_IG_FEED_MAX_PAGES):
+        page = await instagram_native.fetch_user_feed_page(user_id, next_cursor, count=33)
+        if page is None:
+            return None if not collected else (collected[:limit], next_cursor)
+        items, next_max_id, more = page
+        for raw in items:
+            if reels_only and safe_int(raw.get("media_type")) != 2:
+                continue
+            collected.append(instagram_native.map_feed_post(raw, followers=followers))
+        next_cursor = next_max_id if more and next_max_id else None
+        if len(collected) >= limit or next_cursor is None:
+            break
+    return collected[:limit], next_cursor
+
+
+def _ig_channel_page(
+    first_page: dict[str, Any] | None, limit: int
+) -> tuple[list[dict[str, Any]], str | None, str | None, int | None] | None:
+    """Unpack a Decodo first page into (posts, next_cursor, user_id, followers)."""
+    if not first_page:
+        return None
+    posts = first_page["items"]
+    user_id = first_page.get("userId")
+    followers = None
+    if posts:
+        followers = posts[0].get("author", {}).get("followers")
+    next_cursor = None
+    if first_page.get("hasMore") and posts and user_id and posts[-1].get("id"):
+        next_cursor = f"{posts[-1]['id']}_{user_id}"
+    return posts, next_cursor, user_id, followers
+
+
 @router.get("/channel-posts", summary="Latest posts from an Instagram profile")
 async def instagram_channel_posts(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
+    cursor: str | None = Query(None, description="Pagination cursor from the previous response's nextCursor"),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
     settings = get_settings()
+    if cursor and not _IG_CURSOR_RE.match(cursor):
+        raise HTTPException(status_code=400, detail="Invalid cursor. Pass the nextCursor value from a previous response.")
     cost = _scaled_credits(limit, RATE_IG_POSTS, 2)
     async with billed_call(
         caller=caller,
@@ -747,6 +799,15 @@ async def instagram_channel_posts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            if cursor:
+                user_id = _IG_CURSOR_RE.match(cursor).group(1)
+                result = await _ig_feed_collect(user_id, cursor, limit)
+                if result is None:
+                    raise HTTPException(status_code=502, detail="Failed to fetch the next page. Retry shortly.")
+                posts, next_cursor = result
+                ctx["source"] = "direct"
+                return {"url": url, "totalReturned": len(posts), "posts": posts, "nextCursor": next_cursor}
+
             async def _apify() -> dict[str, Any]:
                 apify = get_apify()
                 items, _actor = await apify.run_with_fallback(
@@ -754,19 +815,25 @@ async def instagram_channel_posts(
                     max_items=limit,
                 )
                 posts = [decodo.strip_null_video_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
-                return {"url": url, "totalReturned": len(posts), "posts": posts}
+                return {"url": url, "totalReturned": len(posts), "posts": posts, "nextCursor": None}
 
             async def _decodo_run() -> dict[str, Any] | None:
-                posts = await decodo.channel_posts(handle, limit)
-                if posts is None:
+                page = _ig_channel_page(await decodo.channel_posts(handle, limit), limit)
+                if page is None:
                     return None
-                return {"url": url, "totalReturned": len(posts), "posts": posts}
+                posts, next_cursor, user_id, followers = page
+                if len(posts) < limit and next_cursor and user_id:
+                    extra = await _ig_feed_collect(user_id, next_cursor, limit - len(posts), followers=followers)
+                    if extra is not None:
+                        more_posts, next_cursor = extra
+                        posts = posts + more_posts
+                return {"url": url, "totalReturned": len(posts), "posts": posts, "nextCursor": next_cursor}
 
             return await _try_decodo(ctx, _decodo_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            params={"url": url, "limit": limit, "v": 8},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 9},
             runner=_run,
             ctx=ctx,
         )
@@ -778,10 +845,13 @@ async def instagram_channel_posts(
 async def instagram_channel_reels(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
+    cursor: str | None = Query(None, description="Pagination cursor from the previous response's nextCursor"),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
     settings = get_settings()
+    if cursor and not _IG_CURSOR_RE.match(cursor):
+        raise HTTPException(status_code=400, detail="Invalid cursor. Pass the nextCursor value from a previous response.")
     cost = _scaled_credits(limit, RATE_IG_POSTS, 2)
     async with billed_call(
         caller=caller,
@@ -791,6 +861,15 @@ async def instagram_channel_reels(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            if cursor:
+                user_id = _IG_CURSOR_RE.match(cursor).group(1)
+                result = await _ig_feed_collect(user_id, cursor, limit, reels_only=True)
+                if result is None:
+                    raise HTTPException(status_code=502, detail="Failed to fetch the next page. Retry shortly.")
+                reels, next_cursor = result
+                ctx["source"] = "direct"
+                return {"url": url, "totalReturned": len(reels), "reels": reels, "nextCursor": next_cursor}
+
             async def _apify() -> dict[str, Any]:
                 apify = get_apify()
                 items, _actor = await apify.run_with_fallback(
@@ -798,19 +877,27 @@ async def instagram_channel_reels(
                     max_items=limit,
                 )
                 reels = [decodo.strip_null_video_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
-                return {"url": url, "totalReturned": len(reels), "reels": reels}
+                return {"url": url, "totalReturned": len(reels), "reels": reels, "nextCursor": None}
 
             async def _decodo_run() -> dict[str, Any] | None:
-                reels = await decodo.channel_reels(handle, limit)
-                if reels is None:
+                page = _ig_channel_page(await decodo.channel_reels(handle, limit), limit)
+                if page is None:
                     return None
-                return {"url": url, "totalReturned": len(reels), "reels": reels}
+                reels, next_cursor, user_id, followers = page
+                if len(reels) < limit and next_cursor and user_id:
+                    extra = await _ig_feed_collect(
+                        user_id, next_cursor, limit - len(reels), reels_only=True, followers=followers
+                    )
+                    if extra is not None:
+                        more_reels, next_cursor = extra
+                        reels = reels + more_reels
+                return {"url": url, "totalReturned": len(reels), "reels": reels, "nextCursor": next_cursor}
 
             return await _try_decodo(ctx, _decodo_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-reels",
-            params={"url": url, "limit": limit, "v": 8},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 9},
             runner=_run,
             ctx=ctx,
         )

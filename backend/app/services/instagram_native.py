@@ -138,6 +138,106 @@ async def fetch_post_details(shortcode: str) -> dict[str, Any] | None:
     }
 
 
+def map_feed_post(media: dict[str, Any], followers: int | None = None) -> dict[str, Any]:
+    """Map an api/v1 feed item to the channel-posts/reels list shape."""
+    from app.services.instagram_decodo import strip_null_video_fields
+
+    caption_obj = media.get("caption")
+    caption = (safe_str(caption_obj.get("text")) if isinstance(caption_obj, dict) else "") or ""
+    user = media.get("user") or {}
+    username = safe_str(user.get("username"))
+    shortcode = safe_str(media.get("code"))
+    media_type = safe_int(media.get("media_type"))
+    is_video = media_type == 2
+
+    cover = (media.get("carousel_media") or [media])[0]
+    videos = cover.get("video_versions") or []
+    images = (cover.get("image_versions2") or {}).get("candidates") or []
+
+    taken_at = safe_int(media.get("taken_at"))
+    published = (
+        datetime.fromtimestamp(taken_at, tz=timezone.utc).isoformat().replace("+00:00", "Z")
+        if taken_at
+        else None
+    )
+
+    author: dict[str, Any] = {
+        "username": username,
+        "displayName": safe_str(user.get("full_name")),
+        "url": f"https://instagram.com/{username}" if username else None,
+        "verified": user.get("is_verified"),
+        "profileImage": safe_str(user.get("profile_pic_url")) or None,
+    }
+    if followers is not None:
+        author["followers"] = followers
+
+    return strip_null_video_fields(
+        {
+            "platform": "instagram",
+            "url": f"https://www.instagram.com/{'reel' if is_video else 'p'}/{shortcode}/" if shortcode else None,
+            "id": safe_str(media.get("pk") or media.get("id")),
+            "postType": _MEDIA_TYPE_NAMES.get(media_type or 0),
+            "productType": safe_str(media.get("product_type")),
+            "caption": caption,
+            "description": caption,
+            "publishedAt": published,
+            "durationSeconds": _video_duration(media, cover),
+            "thumbnailUrl": safe_str(images[0].get("url")) if images else None,
+            "videoUrl": safe_str(videos[0].get("url")) if videos else None,
+            "author": author,
+            "engagement": {
+                "views": safe_int(media.get("play_count") or media.get("view_count")),
+                "likes": safe_int(media.get("like_count")) or 0,
+                "comments": safe_int(media.get("comment_count")) or 0,
+            },
+            "hashtags": _HASHTAG_RE.findall(caption),
+            "mentions": _MENTION_RE.findall(caption),
+        }
+    )
+
+
+async def fetch_user_feed_page(
+    user_id: str, max_id: str | None = None, count: int = 12
+) -> tuple[list[dict[str, Any]], str | None, bool] | None:
+    """One page of a profile's timeline via the logged-out api/v1 feed
+    endpoint. Datacenter IPs get a flat 401 here, so this goes straight to
+    the residential tier. Returns (raw items, next_max_id, more_available)
+    or None on failure.
+    """
+    params: dict[str, Any] = {"count": max(1, min(count, 33))}
+    if max_id:
+        params["max_id"] = max_id
+    try:
+        async with httpx.AsyncClient(
+            timeout=12, proxy=proxy_for("residential"), follow_redirects=True
+        ) as client:
+            await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
+            resp = await client.get(
+                f"https://www.instagram.com/api/v1/feed/user/{user_id}/",
+                params=params,
+                headers={
+                    "User-Agent": _UA,
+                    "X-IG-App-ID": "936619743392459",
+                    "X-CSRFToken": client.cookies.get("csrftoken") or "",
+                    "Referer": "https://www.instagram.com/",
+                },
+            )
+    except httpx.HTTPError as exc:
+        log.info("ig_feed_transport_error", error=str(exc)[:120])
+        return None
+    if resp.status_code != 200:
+        log.info("ig_feed_http_error", status=resp.status_code)
+        return None
+    try:
+        payload = resp.json()
+    except ValueError:
+        return None
+    items = payload.get("items")
+    if not isinstance(items, list):
+        return None
+    return items, safe_str(payload.get("next_max_id")) or None, bool(payload.get("more_available"))
+
+
 async def _fetch_item(shortcode: str) -> dict[str, Any] | None:
     for tier in _TIERS:
         try:

@@ -305,16 +305,23 @@ async def basic_profile(handle: str) -> dict[str, Any] | None:
     }
 
 
-async def channel_posts(handle: str, limit: int) -> list[dict[str, Any]] | None:
+async def channel_posts(handle: str, limit: int) -> dict[str, Any] | None:
+    """First timeline page. Returns {"items", "userId", "hasMore"} so the
+    router can build a feed cursor (``<media pk>_<user id>``) and continue
+    through Instagram's api/v1 feed endpoint."""
     user = await _profile(handle)
     if not user:
         return None
     nodes = _edge_nodes(user, "edge_owner_to_timeline_media")
-    posts = [_post(node, profile=user) for node in nodes if not bool(node.get("is_video"))]
-    return posts[:limit] or None
+    posts = [_post(node, profile=user) for node in nodes]
+    if not posts:
+        return None
+    timeline = user.get("edge_owner_to_timeline_media") or {}
+    has_more = bool((timeline.get("page_info") or {}).get("has_next_page")) or len(posts) > limit
+    return {"items": posts[:limit], "userId": safe_str(user.get("id")), "hasMore": has_more}
 
 
-async def channel_reels(handle: str, limit: int) -> list[dict[str, Any]] | None:
+async def channel_reels(handle: str, limit: int) -> dict[str, Any] | None:
     user = await _profile(handle)
     if not user:
         return None
@@ -324,7 +331,11 @@ async def channel_reels(handle: str, limit: int) -> list[dict[str, Any]] | None:
         for node in nodes
         if bool(node.get("is_video")) or node.get("__typename") == "GraphVideo"
     ]
-    return reels[:limit] or None
+    if not reels:
+        return None
+    timeline = user.get("edge_owner_to_timeline_media") or {}
+    has_more = bool((timeline.get("page_info") or {}).get("has_next_page")) or len(reels) > limit
+    return {"items": reels[:limit], "userId": safe_str(user.get("id")), "hasMore": has_more}
 
 
 async def hashtag_medias(tag: str, limit: int, *, reels_only: bool = False) -> list[dict[str, Any]] | None:
