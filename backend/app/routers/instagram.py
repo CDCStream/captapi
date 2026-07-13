@@ -38,13 +38,17 @@ CREDIT_DOWNLOAD = 3
 
 # Per-result rates calibrated to ~80% markup (rate = cost_per_result * 400 at a
 # $0.0045/credit sell price) over verified Apify prices:
-#   apify/instagram-scraper          $1.50/1k ($0.0015) -> posts/reels/search
+#   apify/instagram-scraper          $1.50/1k ($0.0015) -> reels/hashtag search
 #   apify/instagram-comment-scraper  $2.30/1k ($0.0023) -> comments
 #   apify/instagram-tagged-scraper / reels-audio ~$0.0023 -> tagged / music
 # Charged via ctx["credits_override"] on the actual item count.
 RATE_IG_POSTS = 0.6
 RATE_IG_RICH = 0.9
 RATE_IG_MARGIN = 1.4
+# channel-posts / channel-reels are served natively (Decodo profile scrape +
+# Instagram's own feed API), which is far cheaper than an Apify run, so they
+# get their own reduced per-result rate.
+RATE_IG_CHANNEL = 0.3
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -790,7 +794,7 @@ async def instagram_channel_posts(
     settings = get_settings()
     if cursor and not _IG_CURSOR_RE.match(cursor):
         raise HTTPException(status_code=400, detail="Invalid cursor. Pass the nextCursor value from a previous response.")
-    cost = _scaled_credits(limit, RATE_IG_POSTS, 2)
+    cost = _scaled_credits(limit, RATE_IG_CHANNEL, 1)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/channel-posts",
@@ -837,7 +841,7 @@ async def instagram_channel_posts(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_POSTS, 2)
+        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_CHANNEL, 1)
         return ApiResponse(data=data)
 
 
@@ -852,7 +856,7 @@ async def instagram_channel_reels(
     settings = get_settings()
     if cursor and not _IG_CURSOR_RE.match(cursor):
         raise HTTPException(status_code=400, detail="Invalid cursor. Pass the nextCursor value from a previous response.")
-    cost = _scaled_credits(limit, RATE_IG_POSTS, 2)
+    cost = _scaled_credits(limit, RATE_IG_CHANNEL, 1)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/channel-reels",
@@ -901,7 +905,7 @@ async def instagram_channel_reels(
             runner=_run,
             ctx=ctx,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_POSTS, 2)
+        ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_CHANNEL, 1)
         return ApiResponse(data=data)
 
 

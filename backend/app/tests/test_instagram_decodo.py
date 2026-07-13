@@ -62,14 +62,18 @@ def test_post_mapper_preserves_public_contract() -> None:
     assert post["platform"] == "instagram"
     assert post["id"] == "p1"
     assert post["caption"] == "hello"
+    assert post["postType"] == "Image"
     assert post["author"]["username"] == "captapi"
-    assert post["engagement"] == {"views": None, "likes": 12, "comments": 3}
+    # Image posts carry no video-only fields, and null engagement counts are
+    # dropped rather than returned as null.
+    assert post["engagement"] == {"likes": 12, "comments": 3}
+    assert "videoUrl" not in post
 
 
 def test_profile_and_timeline_functions(monkeypatch) -> None:
     async def fake_scrape(target: str, params: dict):
         assert target == "instagram_graphql_profile"
-        assert url.endswith("/captapi/")
+        assert params["query"] == "captapi"
         return PROFILE
 
     monkeypatch.setattr(decodo, "_scrape", fake_scrape)
@@ -80,8 +84,11 @@ def test_profile_and_timeline_functions(monkeypatch) -> None:
 
     assert details and details["followers"] == 1234
     assert details["postCount"] == 2
-    assert posts and [post["id"] for post in posts] == ["p1"]
-    assert reels and [reel["id"] for reel in reels] == ["r1"]
+    # channel_posts returns a page envelope covering every post type; reels
+    # keeps only videos.
+    assert posts and [post["id"] for post in posts["items"]] == ["p1", "r1"]
+    assert posts["userId"] == "42"
+    assert reels and [reel["id"] for reel in reels["items"]] == ["r1"]
 
 
 def test_hashtag_deduplicates_top_and_recent(monkeypatch) -> None:
