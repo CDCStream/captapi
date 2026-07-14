@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BugReportDialog } from "@/components/bug-report-dialog";
 import { LogoutButton } from "@/components/logout-button";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { WelcomePing } from "@/components/dashboard/welcome-ping";
@@ -25,6 +26,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <SidebarNav />
         </div>
         <div className="mt-4 pt-4 border-t">
+          <BugReportDialog
+            loggedIn
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-3 px-2 text-muted-foreground hover:text-foreground"
+          />
           <Link
             href="/dashboard/account"
             className="flex items-center gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-muted"

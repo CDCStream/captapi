@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { BugReportDialog } from "@/components/bug-report-dialog";
 import {
   ALL_ENDPOINTS,
   PLATFORM_PAGES,
@@ -268,6 +269,7 @@ export default async function ApiDetailPage({
           <Button asChild size="lg" variant="outline">
             <Link href="/docs">Read the docs</Link>
           </Button>
+          <BugReportDialog defaultEndpointSlug={ep.slug} size="lg" />
         </div>
 
         {/* Answer-first overview (AEO) */}
