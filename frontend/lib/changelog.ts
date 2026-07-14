@@ -49,6 +49,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 /** Static mirror of the migration seed — used only when the table is unavailable. */
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
+    publishedAt: "2026-07-14",
+    category: "feature",
+    title: "Report a bug from any API page",
+    description:
+      "A Report a bug button on every API docs page and in the dashboard lets you flag a wrong response, an error, or something slow in a couple of clicks.",
+    items: [
+      "Modal form with an endpoint picker (prefilled on API pages), a description field, and an optional email for logged-out users",
+      "Reports are linked to your account automatically when you're signed in — no need to type your details",
+      "Sits next to \"Try it\" on each API page and in the dashboard sidebar",
+    ],
+  },
+  {
     publishedAt: "2026-07-04",
     category: "feature",
     title: "Integrations hub at /integrations",
