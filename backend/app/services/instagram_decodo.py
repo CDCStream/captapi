@@ -152,7 +152,11 @@ def _count(value: Any) -> int | None:
 
 def _iso_timestamp(value: Any) -> str | None:
     if isinstance(value, (int, float)):
-        return datetime.fromtimestamp(value, tz=timezone.utc).isoformat()
+        return (
+            datetime.fromtimestamp(value, tz=timezone.utc)
+            .isoformat()
+            .replace("+00:00", "Z")
+        )
     return safe_str(value) or None
 
 

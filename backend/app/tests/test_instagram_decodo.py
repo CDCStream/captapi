@@ -63,6 +63,9 @@ def test_post_mapper_preserves_public_contract() -> None:
     assert post["id"] == "p1"
     assert post["caption"] == "hello"
     assert post["postType"] == "Image"
+    # Timestamps use the ISO "Z" suffix, matching the native feed mapper so a
+    # mixed Decodo+native page never returns two datetime formats.
+    assert post["publishedAt"] == "2023-11-14T22:13:20Z"
     assert post["author"]["username"] == "captapi"
     # Image posts carry no video-only fields, and null engagement counts are
     # dropped rather than returned as null.

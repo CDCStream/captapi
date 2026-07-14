@@ -863,7 +863,7 @@ async def instagram_channel_posts(
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 10},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 11},
             runner=_run,
             ctx=ctx,
         )
@@ -927,7 +927,7 @@ async def instagram_channel_reels(
 
         data = await cached_or_run(
             endpoint="instagram.channel-reels",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 10},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 11},
             runner=_run,
             ctx=ctx,
         )
