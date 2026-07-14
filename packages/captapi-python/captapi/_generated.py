@@ -9,21 +9,23 @@ class YoutubeApi:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
 
-    def transcript(self, *, url: str, language: str | None = None) -> dict[str, Any]:
+    def transcript(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Transcript — Extract the full timestamped transcript of a YouTube video. (2 credits)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/youtube/transcript", {"url": url, "language": language})
+        return self._t.get("/v1/youtube/transcript", {"url": url, "language": language, "cache": cache})
 
-    def summarize(self, *, url: str, language: str | None = None) -> dict[str, Any]:
+    def summarize(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Summarizer — AI summary (key points, topics, sentiment) of a YouTube video. (4 credits)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/youtube/summarize", {"url": url, "language": language})
+        return self._t.get("/v1/youtube/summarize", {"url": url, "language": language, "cache": cache})
 
     def video_details(self, *, url: str) -> dict[str, Any]:
         """YouTube Video Details — Metadata + engagement stats for a YouTube video. (1 credit)
@@ -89,21 +91,23 @@ class YoutubeApi:
         """
         return self._t.get("/v1/youtube/video-download", {"url": url})
 
-    def shorts_transcript(self, *, url: str, language: str | None = None) -> dict[str, Any]:
+    def shorts_transcript(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Shorts Transcript — Transcript of a YouTube Short. (2 credits)
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/youtube/shorts/transcript", {"url": url, "language": language})
+        return self._t.get("/v1/youtube/shorts/transcript", {"url": url, "language": language, "cache": cache})
 
-    def shorts_summarize(self, *, url: str, language: str | None = None) -> dict[str, Any]:
+    def shorts_summarize(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Shorts Summarizer — AI summary of a YouTube Short. (4 credits)
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/youtube/shorts/summarize", {"url": url, "language": language})
+        return self._t.get("/v1/youtube/shorts/summarize", {"url": url, "language": language, "cache": cache})
 
     def shorts_details(self, *, url: str) -> dict[str, Any]:
         """YouTube Shorts Stats — Metadata + stats for a YouTube Short. (1 credit)
@@ -196,21 +200,23 @@ class AsyncYoutubeApi:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
 
-    async def transcript(self, *, url: str, language: str | None = None) -> dict[str, Any]:
+    async def transcript(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Transcript — Extract the full timestamped transcript of a YouTube video. (2 credits)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/youtube/transcript", {"url": url, "language": language})
+        return await self._t.get("/v1/youtube/transcript", {"url": url, "language": language, "cache": cache})
 
-    async def summarize(self, *, url: str, language: str | None = None) -> dict[str, Any]:
+    async def summarize(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Summarizer — AI summary (key points, topics, sentiment) of a YouTube video. (4 credits)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/youtube/summarize", {"url": url, "language": language})
+        return await self._t.get("/v1/youtube/summarize", {"url": url, "language": language, "cache": cache})
 
     async def video_details(self, *, url: str) -> dict[str, Any]:
         """YouTube Video Details — Metadata + engagement stats for a YouTube video. (1 credit)
@@ -276,21 +282,23 @@ class AsyncYoutubeApi:
         """
         return await self._t.get("/v1/youtube/video-download", {"url": url})
 
-    async def shorts_transcript(self, *, url: str, language: str | None = None) -> dict[str, Any]:
+    async def shorts_transcript(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Shorts Transcript — Transcript of a YouTube Short. (2 credits)
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/youtube/shorts/transcript", {"url": url, "language": language})
+        return await self._t.get("/v1/youtube/shorts/transcript", {"url": url, "language": language, "cache": cache})
 
-    async def shorts_summarize(self, *, url: str, language: str | None = None) -> dict[str, Any]:
+    async def shorts_summarize(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Shorts Summarizer — AI summary of a YouTube Short. (4 credits)
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/youtube/shorts/summarize", {"url": url, "language": language})
+        return await self._t.get("/v1/youtube/shorts/summarize", {"url": url, "language": language, "cache": cache})
 
     async def shorts_details(self, *, url: str) -> dict[str, Any]:
         """YouTube Shorts Stats — Metadata + stats for a YouTube Short. (1 credit)
@@ -383,19 +391,23 @@ class TiktokApi:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
 
-    def transcript(self, *, url: str) -> dict[str, Any]:
+    def transcript(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Transcript — Transcript of a TikTok video (via captions). (2 credits)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/tiktok/transcript", {"url": url})
+        return self._t.get("/v1/tiktok/transcript", {"url": url, "language": language, "cache": cache})
 
-    def summarize(self, *, url: str) -> dict[str, Any]:
+    def summarize(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Summarizer — AI summary of a TikTok video. (4 credits)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/tiktok/summarize", {"url": url})
+        return self._t.get("/v1/tiktok/summarize", {"url": url, "language": language, "cache": cache})
 
     def video_details(self, *, url: str) -> dict[str, Any]:
         """TikTok Video Details — Metadata + stats for a TikTok video. (1 credit)
@@ -575,19 +587,23 @@ class AsyncTiktokApi:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
 
-    async def transcript(self, *, url: str) -> dict[str, Any]:
+    async def transcript(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Transcript — Transcript of a TikTok video (via captions). (2 credits)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/tiktok/transcript", {"url": url})
+        return await self._t.get("/v1/tiktok/transcript", {"url": url, "language": language, "cache": cache})
 
-    async def summarize(self, *, url: str) -> dict[str, Any]:
+    async def summarize(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Summarizer — AI summary of a TikTok video. (4 credits)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/tiktok/summarize", {"url": url})
+        return await self._t.get("/v1/tiktok/summarize", {"url": url, "language": language, "cache": cache})
 
     async def video_details(self, *, url: str) -> dict[str, Any]:
         """TikTok Video Details — Metadata + stats for a TikTok video. (1 credit)
@@ -767,22 +783,26 @@ class InstagramApi:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
 
-    def transcript(self, *, url: str) -> dict[str, Any]:
+    def transcript(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Transcript — Transcript of an Instagram Reel. (2 credits)
 
         :param url: Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/instagram/transcript", {"url": url})
+        return self._t.get("/v1/instagram/transcript", {"url": url, "language": language, "cache": cache})
 
-    def summarize(self, *, url: str) -> dict[str, Any]:
+    def summarize(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Summarizer — AI summary of an Instagram Reel. (4 credits)
 
         :param url: Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/instagram/summarize", {"url": url})
+        return self._t.get("/v1/instagram/summarize", {"url": url, "language": language, "cache": cache})
 
     def details(self, *, url: str) -> dict[str, Any]:
-        """Instagram Details — Details for an Instagram post or reel. (1 credit)
+        """Instagram Post Details — Details for an Instagram post or reel. (1 credit)
 
         :param url: Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         """
@@ -803,21 +823,23 @@ class InstagramApi:
         """
         return self._t.get("/v1/instagram/channel-details", {"url": url})
 
-    def channel_posts(self, *, url: str, limit: float | None = None) -> dict[str, Any]:
-        """Instagram Channel Posts — Latest posts from an Instagram profile. (12 credits)
+    def channel_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None) -> dict[str, Any]:
+        """Instagram Channel Posts — Latest posts from an Instagram profile. (6 credits)
 
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         """
-        return self._t.get("/v1/instagram/channel-posts", {"url": url, "limit": limit})
+        return self._t.get("/v1/instagram/channel-posts", {"url": url, "limit": limit, "cursor": cursor})
 
-    def channel_reels(self, *, url: str, limit: float | None = None) -> dict[str, Any]:
-        """Instagram Channel Reels — Latest Reels from an Instagram profile. (12 credits)
+    def channel_reels(self, *, url: str, limit: float | None = None, cursor: str | None = None) -> dict[str, Any]:
+        """Instagram Channel Reels — Latest Reels from an Instagram profile. (6 credits)
 
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         """
-        return self._t.get("/v1/instagram/channel-reels", {"url": url, "limit": limit})
+        return self._t.get("/v1/instagram/channel-reels", {"url": url, "limit": limit, "cursor": cursor})
 
     def reels_search(self, *, q: str, limit: float | None = None) -> dict[str, Any]:
         """Instagram Reels Search — Search Instagram Reels by hashtag/keyword. (12 credits)
@@ -916,22 +938,26 @@ class AsyncInstagramApi:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
 
-    async def transcript(self, *, url: str) -> dict[str, Any]:
+    async def transcript(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Transcript — Transcript of an Instagram Reel. (2 credits)
 
         :param url: Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/instagram/transcript", {"url": url})
+        return await self._t.get("/v1/instagram/transcript", {"url": url, "language": language, "cache": cache})
 
-    async def summarize(self, *, url: str) -> dict[str, Any]:
+    async def summarize(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Summarizer — AI summary of an Instagram Reel. (4 credits)
 
         :param url: Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/instagram/summarize", {"url": url})
+        return await self._t.get("/v1/instagram/summarize", {"url": url, "language": language, "cache": cache})
 
     async def details(self, *, url: str) -> dict[str, Any]:
-        """Instagram Details — Details for an Instagram post or reel. (1 credit)
+        """Instagram Post Details — Details for an Instagram post or reel. (1 credit)
 
         :param url: Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         """
@@ -952,21 +978,23 @@ class AsyncInstagramApi:
         """
         return await self._t.get("/v1/instagram/channel-details", {"url": url})
 
-    async def channel_posts(self, *, url: str, limit: float | None = None) -> dict[str, Any]:
-        """Instagram Channel Posts — Latest posts from an Instagram profile. (12 credits)
+    async def channel_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None) -> dict[str, Any]:
+        """Instagram Channel Posts — Latest posts from an Instagram profile. (6 credits)
 
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         """
-        return await self._t.get("/v1/instagram/channel-posts", {"url": url, "limit": limit})
+        return await self._t.get("/v1/instagram/channel-posts", {"url": url, "limit": limit, "cursor": cursor})
 
-    async def channel_reels(self, *, url: str, limit: float | None = None) -> dict[str, Any]:
-        """Instagram Channel Reels — Latest Reels from an Instagram profile. (12 credits)
+    async def channel_reels(self, *, url: str, limit: float | None = None, cursor: str | None = None) -> dict[str, Any]:
+        """Instagram Channel Reels — Latest Reels from an Instagram profile. (6 credits)
 
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         """
-        return await self._t.get("/v1/instagram/channel-reels", {"url": url, "limit": limit})
+        return await self._t.get("/v1/instagram/channel-reels", {"url": url, "limit": limit, "cursor": cursor})
 
     async def reels_search(self, *, q: str, limit: float | None = None) -> dict[str, Any]:
         """Instagram Reels Search — Search Instagram Reels by hashtag/keyword. (12 credits)
@@ -1072,19 +1100,21 @@ class FacebookApi:
         """
         return self._t.get("/v1/facebook/details", {"url": url})
 
-    def transcript(self, *, url: str) -> dict[str, Any]:
+    def transcript(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Transcript — Transcript of a Facebook video. (2 credits)
 
         :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/facebook/transcript", {"url": url})
+        return self._t.get("/v1/facebook/transcript", {"url": url, "cache": cache})
 
-    def summarize(self, *, url: str) -> dict[str, Any]:
+    def summarize(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Summarizer — AI summary of a Facebook video or post. (4 credits)
 
         :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/facebook/summarize", {"url": url})
+        return self._t.get("/v1/facebook/summarize", {"url": url, "cache": cache})
 
     def comments(self, *, url: str, limit: float | None = None) -> dict[str, Any]:
         """Facebook Comments — Comments on a Facebook post. (30 credits)
@@ -1202,19 +1232,21 @@ class AsyncFacebookApi:
         """
         return await self._t.get("/v1/facebook/details", {"url": url})
 
-    async def transcript(self, *, url: str) -> dict[str, Any]:
+    async def transcript(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Transcript — Transcript of a Facebook video. (2 credits)
 
         :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/facebook/transcript", {"url": url})
+        return await self._t.get("/v1/facebook/transcript", {"url": url, "cache": cache})
 
-    async def summarize(self, *, url: str) -> dict[str, Any]:
+    async def summarize(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Summarizer — AI summary of a Facebook video or post. (4 credits)
 
         :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/facebook/summarize", {"url": url})
+        return await self._t.get("/v1/facebook/summarize", {"url": url, "cache": cache})
 
     async def comments(self, *, url: str, limit: float | None = None) -> dict[str, Any]:
         """Facebook Comments — Comments on a Facebook post. (30 credits)
@@ -1332,12 +1364,13 @@ class TwitterApi:
         """
         return self._t.get("/v1/twitter/tweet-details", {"url": url})
 
-    def transcript(self, *, url: str) -> dict[str, Any]:
+    def transcript(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Twitter/X Transcript — Extract tweet text as transcript text. (7 credits)
 
         :param url: Public tweet URL, e.g. https://x.com/user/status/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/twitter/transcript", {"url": url})
+        return self._t.get("/v1/twitter/transcript", {"url": url, "cache": cache})
 
     def profile(self, *, url: str) -> dict[str, Any]:
         """Twitter/X Profile — Profile info & stats for a Twitter/X account. (1 credit)
@@ -1389,12 +1422,13 @@ class AsyncTwitterApi:
         """
         return await self._t.get("/v1/twitter/tweet-details", {"url": url})
 
-    async def transcript(self, *, url: str) -> dict[str, Any]:
+    async def transcript(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Twitter/X Transcript — Extract tweet text as transcript text. (7 credits)
 
         :param url: Public tweet URL, e.g. https://x.com/user/status/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/twitter/transcript", {"url": url})
+        return await self._t.get("/v1/twitter/transcript", {"url": url, "cache": cache})
 
     async def profile(self, *, url: str) -> dict[str, Any]:
         """Twitter/X Profile — Profile info & stats for a Twitter/X account. (1 credit)
@@ -2313,26 +2347,29 @@ class SpotifyApi:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
 
-    def artist(self, *, url: str) -> dict[str, Any]:
+    def artist(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Spotify Artist — Spotify artist details, followers and listener metadata. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/spotify/artist", {"url": url})
+        return self._t.get("/v1/spotify/artist", {"url": url, "cache": cache})
 
-    def track(self, *, url: str) -> dict[str, Any]:
+    def track(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Spotify Track — Spotify track metadata, artists, album and play count when available. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/spotify/track", {"url": url})
+        return self._t.get("/v1/spotify/track", {"url": url, "cache": cache})
 
-    def album(self, *, url: str) -> dict[str, Any]:
+    def album(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Spotify Album — Spotify album metadata and track count. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/spotify/album", {"url": url})
+        return self._t.get("/v1/spotify/album", {"url": url, "cache": cache})
 
     def search(self, *, q: str, type_: str | None = None, limit: float | None = None) -> dict[str, Any]:
         """Spotify Search — Search Spotify tracks, albums, artists, podcasts or episodes. (23 credits)
@@ -2343,13 +2380,14 @@ class SpotifyApi:
         """
         return self._t.get("/v1/spotify/search", {"q": q, "type": type_, "limit": limit})
 
-    def podcast(self, *, url: str, limit: float | None = None) -> dict[str, Any]:
+    def podcast(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Spotify Podcast — Spotify podcast/show details and episode summary metadata. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 50. Billed per result.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/spotify/podcast", {"url": url, "limit": limit})
+        return self._t.get("/v1/spotify/podcast", {"url": url, "limit": limit, "cache": cache})
 
     def podcast_episodes(self, *, url: str, limit: float | None = None) -> dict[str, Any]:
         """Spotify Podcast Episodes — List episodes for a Spotify podcast/show. (23 credits)
@@ -2364,26 +2402,29 @@ class AsyncSpotifyApi:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
 
-    async def artist(self, *, url: str) -> dict[str, Any]:
+    async def artist(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Spotify Artist — Spotify artist details, followers and listener metadata. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/spotify/artist", {"url": url})
+        return await self._t.get("/v1/spotify/artist", {"url": url, "cache": cache})
 
-    async def track(self, *, url: str) -> dict[str, Any]:
+    async def track(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Spotify Track — Spotify track metadata, artists, album and play count when available. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/spotify/track", {"url": url})
+        return await self._t.get("/v1/spotify/track", {"url": url, "cache": cache})
 
-    async def album(self, *, url: str) -> dict[str, Any]:
+    async def album(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Spotify Album — Spotify album metadata and track count. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/spotify/album", {"url": url})
+        return await self._t.get("/v1/spotify/album", {"url": url, "cache": cache})
 
     async def search(self, *, q: str, type_: str | None = None, limit: float | None = None) -> dict[str, Any]:
         """Spotify Search — Search Spotify tracks, albums, artists, podcasts or episodes. (23 credits)
@@ -2394,13 +2435,14 @@ class AsyncSpotifyApi:
         """
         return await self._t.get("/v1/spotify/search", {"q": q, "type": type_, "limit": limit})
 
-    async def podcast(self, *, url: str, limit: float | None = None) -> dict[str, Any]:
+    async def podcast(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Spotify Podcast — Spotify podcast/show details and episode summary metadata. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 50. Billed per result.
+        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/spotify/podcast", {"url": url, "limit": limit})
+        return await self._t.get("/v1/spotify/podcast", {"url": url, "limit": limit, "cache": cache})
 
     async def podcast_episodes(self, *, url: str, limit: float | None = None) -> dict[str, Any]:
         """Spotify Podcast Episodes — List episodes for a Spotify podcast/show. (23 credits)

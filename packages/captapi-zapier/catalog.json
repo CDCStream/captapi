@@ -18,6 +18,12 @@
         "type": "string",
         "required": false,
         "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -40,6 +46,12 @@
         "type": "string",
         "required": false,
         "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -238,6 +250,12 @@
         "type": "string",
         "required": false,
         "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -260,6 +278,12 @@
         "type": "string",
         "required": false,
         "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -506,6 +530,18 @@
         "type": "string",
         "required": true,
         "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -522,6 +558,18 @@
         "type": "string",
         "required": true,
         "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1004,6 +1052,18 @@
         "type": "string",
         "required": true,
         "description": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1020,13 +1080,25 @@
         "type": "string",
         "required": true,
         "description": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "required": false,
+        "description": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
   {
     "tool": "instagram_details",
     "platform": "Instagram",
-    "name": "Instagram Details",
+    "name": "Instagram Post Details",
     "path": "/v1/instagram/details",
     "credits": 1,
     "summary": "Details for an Instagram post or reel.",
@@ -1082,7 +1154,7 @@
     "platform": "Instagram",
     "name": "Instagram Channel Posts",
     "path": "/v1/instagram/channel-posts",
-    "credits": 12,
+    "credits": 6,
     "summary": "Latest posts from an Instagram profile.",
     "params": [
       {
@@ -1096,6 +1168,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       }
     ]
   },
@@ -1104,7 +1182,7 @@
     "platform": "Instagram",
     "name": "Instagram Channel Reels",
     "path": "/v1/instagram/channel-reels",
-    "credits": 12,
+    "credits": 6,
     "summary": "Latest Reels from an Instagram profile.",
     "params": [
       {
@@ -1118,6 +1196,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       }
     ]
   },
@@ -1390,6 +1474,12 @@
         "type": "string",
         "required": true,
         "description": "Public Facebook video or post URL."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1406,6 +1496,12 @@
         "type": "string",
         "required": true,
         "description": "Public Facebook video or post URL."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1724,6 +1820,12 @@
         "type": "string",
         "required": true,
         "description": "Public tweet URL, e.g. https://x.com/user/status/ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2860,6 +2962,12 @@
         "type": "string",
         "required": true,
         "description": "Spotify URL, URI, or ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2876,6 +2984,12 @@
         "type": "string",
         "required": true,
         "description": "Spotify URL, URI, or ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2892,6 +3006,12 @@
         "type": "string",
         "required": true,
         "description": "Spotify URL, URI, or ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2942,6 +3062,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 50. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },

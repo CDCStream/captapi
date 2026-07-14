@@ -6,6 +6,8 @@ export interface YoutubeTranscriptParams {
   url: string;
   /** Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect. */
   language?: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeSummarizeParams {
@@ -13,6 +15,8 @@ export interface YoutubeSummarizeParams {
   url: string;
   /** Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect. */
   language?: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeVideoDetailsParams {
@@ -76,6 +80,8 @@ export interface YoutubeShortsTranscriptParams {
   url: string;
   /** Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect. */
   language?: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeShortsSummarizeParams {
@@ -83,6 +89,8 @@ export interface YoutubeShortsSummarizeParams {
   url: string;
   /** Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect. */
   language?: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeShortsDetailsParams {
@@ -257,11 +265,19 @@ export class YoutubeApi {
 export interface TiktokTranscriptParams {
   /** Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect. */
+  language?: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokSummarizeParams {
   /** Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect. */
+  language?: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokVideoDetailsParams {
@@ -515,11 +531,19 @@ export class TiktokApi {
 export interface InstagramTranscriptParams {
   /** Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect. */
+  language?: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramSummarizeParams {
   /** Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect. */
+  language?: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramDetailsParams {
@@ -544,6 +568,8 @@ export interface InstagramChannelPostsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
 }
 
 export interface InstagramChannelReelsParams {
@@ -551,6 +577,8 @@ export interface InstagramChannelReelsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
 }
 
 export interface InstagramReelsSearchParams {
@@ -639,7 +667,7 @@ export class InstagramApi {
   summarize(params: InstagramSummarizeParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/summarize", params);
   }
-  /** Instagram Details — Details for an Instagram post or reel. (1 credit) */
+  /** Instagram Post Details — Details for an Instagram post or reel. (1 credit) */
   details(params: InstagramDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/details", params);
   }
@@ -651,11 +679,11 @@ export class InstagramApi {
   channelDetails(params: InstagramChannelDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/channel-details", params);
   }
-  /** Instagram Channel Posts — Latest posts from an Instagram profile. (12 credits) */
+  /** Instagram Channel Posts — Latest posts from an Instagram profile. (6 credits) */
   channelPosts(params: InstagramChannelPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/channel-posts", params);
   }
-  /** Instagram Channel Reels — Latest Reels from an Instagram profile. (12 credits) */
+  /** Instagram Channel Reels — Latest Reels from an Instagram profile. (6 credits) */
   channelReels(params: InstagramChannelReelsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/channel-reels", params);
   }
@@ -717,11 +745,15 @@ export interface FacebookDetailsParams {
 export interface FacebookTranscriptParams {
   /** Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookSummarizeParams {
   /** Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookCommentsParams {
@@ -891,6 +923,8 @@ export interface TwitterTweetDetailsParams {
 export interface TwitterTranscriptParams {
   /** Public tweet URL, e.g. https://x.com/user/status/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TwitterProfileParams {
@@ -1523,16 +1557,22 @@ export class TwitchApi {
 export interface SpotifyArtistParams {
   /** Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface SpotifyTrackParams {
   /** Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface SpotifyAlbumParams {
   /** Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface SpotifySearchParams {
@@ -1549,6 +1589,8 @@ export interface SpotifyPodcastParams {
   url: string;
   /** Max items to return. Default 20, max 50. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface SpotifyPodcastEpisodesParams {

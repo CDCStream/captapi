@@ -853,7 +853,7 @@
         }
       },
       "instagramDetails": {
-        "label": "Instagram Details",
+        "label": "Instagram Post Details",
         "description": "Details for an Instagram post or reel. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
@@ -905,7 +905,7 @@
       },
       "instagramChannelPosts": {
         "label": "Instagram Channel Posts",
-        "description": "Latest posts from an Instagram profile. Costs ~12 credits (cached results free, failures never charged).",
+        "description": "Latest posts from an Instagram profile. Costs ~6 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -922,7 +922,7 @@
       },
       "instagramChannelReels": {
         "label": "Instagram Channel Reels",
-        "description": "Latest Reels from an Instagram profile. Costs ~12 credits (cached results free, failures never charged).",
+        "description": "Latest Reels from an Instagram profile. Costs ~6 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

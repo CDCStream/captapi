@@ -2,7 +2,9 @@
   "url": "/v1/tiktok/transcript",
   "method": "GET",
   "qs": {
-    "url": "{{parameters.url}}"
+    "url": "{{parameters.url}}",
+    "language": "{{parameters.language}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"

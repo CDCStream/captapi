@@ -12,5 +12,12 @@
     "label": "Limit",
     "required": false,
     "help": "Max items to return. Default 20, max 200. Billed per result."
+  },
+  {
+    "name": "cursor",
+    "type": "text",
+    "label": "Cursor",
+    "required": false,
+    "help": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
   }
 ]

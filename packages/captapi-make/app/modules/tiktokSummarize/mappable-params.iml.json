@@ -5,5 +5,19 @@
     "label": "URL",
     "required": true,
     "help": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+  },
+  {
+    "name": "language",
+    "type": "text",
+    "label": "Language",
+    "required": false,
+    "help": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+  },
+  {
+    "name": "cache",
+    "type": "boolean",
+    "label": "Cache",
+    "required": false,
+    "help": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
   }
 ]
