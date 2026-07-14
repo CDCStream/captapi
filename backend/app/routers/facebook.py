@@ -354,6 +354,7 @@ async def facebook_details(
 @router.get("/transcript", summary="Facebook video transcript")
 async def facebook_transcript(
     url: str = Query(...),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/watch/?v=123")
@@ -432,6 +433,7 @@ async def facebook_transcript(
             params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -439,6 +441,7 @@ async def facebook_transcript(
 @router.get("/summarize", summary="AI summary of Facebook video/post")
 async def facebook_summarize(
     url: str = Query(...),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/watch/?v=123")
@@ -486,6 +489,7 @@ async def facebook_summarize(
             params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 

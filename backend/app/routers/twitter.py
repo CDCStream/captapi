@@ -229,6 +229,7 @@ async def twitter_tweet_details(
 @router.get("/transcript", summary="Twitter/X tweet transcript / text extraction")
 async def twitter_transcript(
     url: str = Query(..., description="Public tweet URL, e.g. https://x.com/user/status/ID"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     tweet_id = _require_tweet_url(url)
@@ -290,6 +291,7 @@ async def twitter_transcript(
             params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 

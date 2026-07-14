@@ -1080,6 +1080,7 @@ const lang = (): ApiParam => ({ name: "language", type: "string", required: fals
 const langOut = (): ApiParam => ({ name: "language", type: "string", required: false, description: 'ISO code, e.g. "tr": pins the speech language and sets the summary output language. Defaults to auto-detect + English summary.' });
 const cid = (): ApiParam => ({ name: "comment_id", type: "string", required: true, description: "ID of the parent comment to fetch replies for (from the comments endpoint)." });
 const fastRss = (): ApiParam => ({ name: "fast", type: "boolean", required: false, description: "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters." });
+const cacheP = (): ApiParam => ({ name: "cache", type: "boolean", required: false, description: "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)." });
 
 const YT_VIDEO = "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL.";
 const YT_SHORTS = "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL.";
@@ -1110,8 +1111,8 @@ const LINKME_PROFILE = "Linkme profile URL or username.";
 
 const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   // YouTube
-  "youtube-transcript": [up(YT_VIDEO), lang()],
-  "youtube-summarizer": [up(YT_VIDEO), lang()],
+  "youtube-transcript": [up(YT_VIDEO), lang(), cacheP()],
+  "youtube-summarizer": [up(YT_VIDEO), lang(), cacheP()],
   "youtube-video-details": [up(YT_VIDEO)],
   "youtube-comments": [up(YT_VIDEO), lp(50, 500)],
   "youtube-channel-details": [up(YT_CHANNEL)],
@@ -1120,8 +1121,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-playlist-videos": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500), fastRss()],
   "youtube-playlist": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500), fastRss()],
   "youtube-video-download": [up(YT_VIDEO)],
-  "youtube-shorts-transcript": [up(YT_SHORTS), lang()],
-  "youtube-shorts-summarizer": [up(YT_SHORTS), lang()],
+  "youtube-shorts-transcript": [up(YT_SHORTS), lang(), cacheP()],
+  "youtube-shorts-summarizer": [up(YT_SHORTS), lang(), cacheP()],
   "youtube-shorts-stats": [up(YT_SHORTS)],
   "youtube-shorts-comments": [up(YT_SHORTS), lp(50, 500)],
   "youtube-channel-shorts": [up(YT_CHANNEL), lp(20, 200)],
@@ -1134,8 +1135,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-community-post-details": [up("YouTube community post URL.")],
   "youtube-video-sponsors": [up(YT_VIDEO)],
   // TikTok
-  "tiktok-transcript": [up(TT_VIDEO), lang()],
-  "tiktok-summarizer": [up(TT_VIDEO), langOut()],
+  "tiktok-transcript": [up(TT_VIDEO), lang(), cacheP()],
+  "tiktok-summarizer": [up(TT_VIDEO), langOut(), cacheP()],
   "tiktok-video-details": [up(TT_VIDEO)],
   "tiktok-comments": [up(TT_VIDEO), lp(50, 500)],
   "tiktok-channel-details": [up(TT_PROFILE)],
@@ -1159,8 +1160,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-live-info": [up(TT_PROFILE)],
   "tiktok-popular-creators": [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, { name: "sort", type: "string", required: false, description: "follower, engagement, or popularity. Default follower." }, { name: "follower_count", type: "string", required: false, description: "Optional range: 10k-100k, 100k-1m, 1m-10m, >10m." }, lp(20, 100)],
   // Instagram
-  "instagram-transcript": [up(IG_REEL), lang()],
-  "instagram-summarizer": [up(IG_REEL), langOut()],
+  "instagram-transcript": [up(IG_REEL), lang(), cacheP()],
+  "instagram-summarizer": [up(IG_REEL), langOut(), cacheP()],
   "instagram-details": [up(IG_POST)],
   "instagram-comments": [up(IG_POST), lp(50, 500)],
   "instagram-channel-details": [up(IG_PROFILE)],
@@ -1180,8 +1181,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "instagram-basic-profile": [up("Instagram profile URL or @handle.")],
   // Facebook
   "facebook-details": [up(FB_VIDEO)],
-  "facebook-transcript": [up(FB_VIDEO)],
-  "facebook-summarizer": [up(FB_VIDEO)],
+  "facebook-transcript": [up(FB_VIDEO), cacheP()],
+  "facebook-summarizer": [up(FB_VIDEO), cacheP()],
   "facebook-comments": [up(FB_VIDEO), lp(50, 500)],
   "facebook-page-details": [up("Facebook page URL, @handle, or page name, e.g. https://facebook.com/PageName.")],
   "facebook-profile-posts": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
@@ -1197,7 +1198,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "facebook-marketplace-item": [up("Facebook Marketplace item URL.")],
   // Twitter / X
   "twitter-tweet-details": [up("Public tweet URL, e.g. https://x.com/user/status/ID.")],
-  "twitter-transcript": [up("Public tweet URL, e.g. https://x.com/user/status/ID.")],
+  "twitter-transcript": [up("Public tweet URL, e.g. https://x.com/user/status/ID."), cacheP()],
   "twitter-profile": [up("Twitter/X profile URL or @handle, e.g. https://x.com/username.")],
   "twitter-user-tweets": [up("Twitter/X profile URL or @handle."), lp(20, 200)],
   "twitter-search": [qp("Keywords or search query (min 2 characters)."), lp(20, 200)],
@@ -1244,11 +1245,11 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "twitch-user-schedule": [up(TWITCH_PROFILE)],
   "twitch-clip": [up("Twitch clip URL, channel URL, or username.")],
   // Spotify
-  "spotify-artist": [up(SPOTIFY_URL)],
-  "spotify-track": [up(SPOTIFY_URL)],
-  "spotify-album": [up(SPOTIFY_URL)],
+  "spotify-artist": [up(SPOTIFY_URL), cacheP()],
+  "spotify-track": [up(SPOTIFY_URL), cacheP()],
+  "spotify-album": [up(SPOTIFY_URL), cacheP()],
   "spotify-search": [qp(), { name: "type", type: "string", required: false, description: "tracks, albums, artists, podcasts, or episodes. Default tracks." }, lp(20, 50)],
-  "spotify-podcast": [up(SPOTIFY_URL), lp(20, 50)],
+  "spotify-podcast": [up(SPOTIFY_URL), lp(20, 50), cacheP()],
   "spotify-podcast-episodes": [up(SPOTIFY_URL), lp(20, 50)],
   // SoundCloud
   "soundcloud-artist": [up(SC_PROFILE)],

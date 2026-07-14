@@ -32,7 +32,7 @@ from app.services.youtube_native import (
     search_native,
     transcript_native,
 )
-from app.utils.formatters import safe_int, safe_list, safe_str
+from app.utils.formatters import normalize_language_code, safe_int, safe_list, safe_str
 from app.utils.url import (
     extract_youtube_id,
     normalize_youtube_channel_url,
@@ -545,6 +545,7 @@ async def _fetch_transcript_item(norm_url: str, language: str | None) -> dict[st
 async def youtube_transcript(
     url: str = Query(..., description="YouTube video URL"),
     language: str | None = Query(None, description="ISO language code (en, tr, es...)"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, norm_url = _require_youtube_url(url)
@@ -594,14 +595,15 @@ async def youtube_transcript(
                 "transcriptSegments": segments,
                 "wordCount": len(full.split()),
                 "segments": len(segments),
-                "language": safe_str(item.get("language") or language),
+                "language": normalize_language_code(safe_str(item.get("language") or language)),
             }
 
         data = await cached_or_run(
             endpoint="youtube.transcript",
-            params={"url": norm_url, "language": language or "", "v": 3},
+            params={"url": norm_url, "language": language or "", "v": 4},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -615,6 +617,7 @@ async def youtube_transcript(
 async def youtube_summarize(
     url: str = Query(...),
     language: str | None = Query(None),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, norm_url = _require_youtube_url(url)
@@ -658,6 +661,7 @@ async def youtube_summarize(
             params={"url": norm_url, "language": language or "", "v": 3},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -1544,18 +1548,20 @@ async def youtube_hashtag_search(
 async def shorts_transcript(
     url: str = Query(...),
     language: str | None = Query(None, description="ISO language code (en, tr, es...)"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    return await youtube_transcript(url=url, language=language, caller=caller)
+    return await youtube_transcript(url=url, language=language, cache=cache, caller=caller)
 
 
 @router.get("/shorts/summarize", summary="YouTube Shorts AI summary")
 async def shorts_summarize(
     url: str = Query(...),
     language: str | None = Query(None),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    return await youtube_summarize(url=url, language=language, caller=caller)
+    return await youtube_summarize(url=url, language=language, cache=cache, caller=caller)
 
 
 @router.get("/shorts/video-details", summary="YouTube Shorts metadata")

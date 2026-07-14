@@ -29,6 +29,7 @@ async def cached_or_run(
     ctx: dict[str, Any],
     ttl: int | None = None,
     stale_while_revalidate: bool = False,
+    use_cache: bool = True,
 ) -> dict[str, Any]:
     """
     Look up cache; if miss, run `runner()` and store result.
@@ -44,12 +45,16 @@ async def cached_or_run(
     slow trending-style endpoints (200s+ actor runs) with low param
     cardinality, where making a caller wait minutes for a marginally fresher
     list is a bad trade.
+
+    `use_cache=False` (driven by the caller's `cache=false` query param)
+    skips the cache lookup so the data is always fetched fresh; the fresh
+    result still refreshes the cache for subsequent cached calls.
     """
     effective_ttl = ttl if ttl is not None else default_ttl_for(endpoint)
 
     key = make_cache_key(endpoint, params)
     stale_key = key + ":stale"
-    if effective_ttl > 0:
+    if effective_ttl > 0 and use_cache:
         cached = await cache_get(key)
         if cached is not None:
             ctx["cache_hit"] = True

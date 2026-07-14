@@ -213,33 +213,36 @@ async def _details(kind: str, uri: str, limit: int | None = None) -> dict[str, A
 @router.get("/artist", summary="Spotify artist details")
 async def artist(
     url: str = Query(..., description="Spotify artist URL, URI, or ID"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "artist")
     async with billed_call(caller=caller, endpoint="/v1/spotify/artist", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.artist", {"uri": uri, "v": 3}, lambda: _details("artist", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC)
+        data = await cached_or_run("spotify.artist", {"uri": uri, "v": 3}, lambda: _details("artist", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
         return ApiResponse(data=data)
 
 
 @router.get("/track", summary="Spotify track details")
 async def track(
     url: str = Query(..., description="Spotify track URL, URI, or ID"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "track")
     async with billed_call(caller=caller, endpoint="/v1/spotify/track", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.track", {"uri": uri, "v": 4}, lambda: _details("track", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC)
+        data = await cached_or_run("spotify.track", {"uri": uri, "v": 4}, lambda: _details("track", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
         return ApiResponse(data=data)
 
 
 @router.get("/album", summary="Spotify album details")
 async def album(
     url: str = Query(..., description="Spotify album URL, URI, or ID"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "album")
     async with billed_call(caller=caller, endpoint="/v1/spotify/album", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.album", {"uri": uri, "v": 3}, lambda: _details("album", uri, limit=1), ctx, ttl=get_settings().CACHE_TTL_STATIC)
+        data = await cached_or_run("spotify.album", {"uri": uri, "v": 3}, lambda: _details("album", uri, limit=1), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
         return ApiResponse(data=data)
 
 
@@ -247,11 +250,12 @@ async def album(
 async def podcast(
     url: str = Query(..., description="Spotify show/podcast URL, URI, or ID"),
     limit: int = Query(20, ge=1, le=50),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "show")
     async with billed_call(caller=caller, endpoint="/v1/spotify/podcast", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.podcast", {"uri": uri, "limit": limit, "v": 3}, lambda: _details("podcast", uri, limit), ctx, ttl=get_settings().CACHE_TTL_STATIC)
+        data = await cached_or_run("spotify.podcast", {"uri": uri, "limit": limit, "v": 3}, lambda: _details("podcast", uri, limit), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
         return ApiResponse(data=data)
 
 

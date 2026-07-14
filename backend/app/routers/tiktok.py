@@ -524,6 +524,7 @@ async def tiktok_transcript(
         description="Optional ISO-639-1 hint (e.g. 'tr') to pin the speech language",
         max_length=8,
     ),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_tiktok_video_url(url)
@@ -552,6 +553,7 @@ async def tiktok_transcript(
             params={"url": url, "language": lang, "v": 4},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -564,6 +566,7 @@ async def tiktok_summarize(
         description="Optional ISO-639-1 code (e.g. 'tr'): pins the speech language and sets the summary output language",
         max_length=8,
     ),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_tiktok_video_url(url)
@@ -592,6 +595,7 @@ async def tiktok_summarize(
             params={"url": url, "language": lang, "v": 5},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 

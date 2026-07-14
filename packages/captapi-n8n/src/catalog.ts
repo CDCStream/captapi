@@ -89,6 +89,12 @@ const language = (): ToolParam => ({
   required: false,
   description: 'Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.',
 });
+const cacheParam = (): ToolParam => ({
+  name: "cache",
+  type: "boolean",
+  required: false,
+  description: "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).",
+});
 const commentId = (): ToolParam => ({
   name: "comment_id",
   type: "string",
@@ -124,8 +130,8 @@ const LINKBIO_PAGE = "Linkbio page URL or username.";
 const LINKME_PROFILE = "Linkme profile URL or username.";
 
 const YOUTUBE: Omit<Endpoint, "platform">[] = [
-  { tool: "youtube_transcript", name: "YouTube Transcript", path: "/v1/youtube/transcript", credits: 2, summary: "Extract the full timestamped transcript of a YouTube video.", params: [url(YT_VIDEO), language()] },
-  { tool: "youtube_summarize", name: "YouTube Summarizer", path: "/v1/youtube/summarize", credits: 4, summary: "AI summary (key points, topics, sentiment) of a YouTube video.", params: [url(YT_VIDEO), language()] },
+  { tool: "youtube_transcript", name: "YouTube Transcript", path: "/v1/youtube/transcript", credits: 2, summary: "Extract the full timestamped transcript of a YouTube video.", params: [url(YT_VIDEO), language(), cacheParam()] },
+  { tool: "youtube_summarize", name: "YouTube Summarizer", path: "/v1/youtube/summarize", credits: 4, summary: "AI summary (key points, topics, sentiment) of a YouTube video.", params: [url(YT_VIDEO), language(), cacheParam()] },
   { tool: "youtube_video_details", name: "YouTube Video Details", path: "/v1/youtube/video-details", credits: 1, summary: "Metadata + engagement stats for a YouTube video.", params: [url(YT_VIDEO)] },
   { tool: "youtube_comments", name: "YouTube Comments", path: "/v1/youtube/comments", credits: 20, summary: "Comments on a YouTube video.", params: [url(YT_VIDEO), limit(50, 500)] },
   { tool: "youtube_channel_details", name: "YouTube Channel Details", path: "/v1/youtube/channel-details", credits: 1, summary: "Channel info & subscriber/stats for a YouTube channel.", params: [url(YT_CHANNEL)] },
@@ -134,8 +140,8 @@ const YOUTUBE: Omit<Endpoint, "platform">[] = [
   { tool: "youtube_playlist_videos", name: "YouTube Playlist Videos", path: "/v1/youtube/playlist-videos", credits: 50, summary: "List videos in a YouTube playlist.", params: [url("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), limit(50, 500), fastRss()] },
   { tool: "youtube_playlist", name: "YouTube Playlist", path: "/v1/youtube/playlist", credits: 50, summary: "Playlist metadata plus videos from a YouTube playlist.", params: [url("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), limit(50, 500), fastRss()] },
   { tool: "youtube_video_download", name: "YouTube Video Download", path: "/v1/youtube/video-download", credits: 3, summary: "Direct download URLs for a YouTube video.", params: [url(YT_VIDEO)] },
-  { tool: "youtube_shorts_transcript", name: "YouTube Shorts Transcript", path: "/v1/youtube/shorts/transcript", credits: 2, summary: "Transcript of a YouTube Short.", params: [url(YT_SHORTS), language()] },
-  { tool: "youtube_shorts_summarize", name: "YouTube Shorts Summarizer", path: "/v1/youtube/shorts/summarize", credits: 4, summary: "AI summary of a YouTube Short.", params: [url(YT_SHORTS), language()] },
+  { tool: "youtube_shorts_transcript", name: "YouTube Shorts Transcript", path: "/v1/youtube/shorts/transcript", credits: 2, summary: "Transcript of a YouTube Short.", params: [url(YT_SHORTS), language(), cacheParam()] },
+  { tool: "youtube_shorts_summarize", name: "YouTube Shorts Summarizer", path: "/v1/youtube/shorts/summarize", credits: 4, summary: "AI summary of a YouTube Short.", params: [url(YT_SHORTS), language(), cacheParam()] },
   { tool: "youtube_shorts_details", name: "YouTube Shorts Stats", path: "/v1/youtube/shorts/video-details", credits: 1, summary: "Metadata + stats for a YouTube Short.", params: [url(YT_SHORTS)] },
   { tool: "youtube_shorts_comments", name: "YouTube Shorts Comments", path: "/v1/youtube/shorts/comments", credits: 20, summary: "Comments on a YouTube Short.", params: [url(YT_SHORTS), limit(50, 500)] },
   { tool: "youtube_channel_shorts", name: "YouTube Channel Shorts", path: "/v1/youtube/channel-shorts", credits: 20, summary: "List a channel's Shorts.", params: [url(YT_CHANNEL), limit(20, 200)] },
@@ -150,8 +156,8 @@ const YOUTUBE: Omit<Endpoint, "platform">[] = [
 ];
 
 const TIKTOK: Omit<Endpoint, "platform">[] = [
-  { tool: "tiktok_transcript", name: "TikTok Transcript", path: "/v1/tiktok/transcript", credits: 2, summary: "Transcript of a TikTok video (via captions).", params: [url(TT_VIDEO), language()] },
-  { tool: "tiktok_summarize", name: "TikTok Summarizer", path: "/v1/tiktok/summarize", credits: 4, summary: "AI summary of a TikTok video.", params: [url(TT_VIDEO), language()] },
+  { tool: "tiktok_transcript", name: "TikTok Transcript", path: "/v1/tiktok/transcript", credits: 2, summary: "Transcript of a TikTok video (via captions).", params: [url(TT_VIDEO), language(), cacheParam()] },
+  { tool: "tiktok_summarize", name: "TikTok Summarizer", path: "/v1/tiktok/summarize", credits: 4, summary: "AI summary of a TikTok video.", params: [url(TT_VIDEO), language(), cacheParam()] },
   { tool: "tiktok_video_details", name: "TikTok Video Details", path: "/v1/tiktok/video-details", credits: 1, summary: "Metadata + stats for a TikTok video.", params: [url(TT_VIDEO)] },
   { tool: "tiktok_comments", name: "TikTok Comments", path: "/v1/tiktok/comments", credits: 10, summary: "Comments on a TikTok video.", params: [url(TT_VIDEO), limit(50, 500)] },
   { tool: "tiktok_channel_details", name: "TikTok Channel Details", path: "/v1/tiktok/channel-details", credits: 1, summary: "Profile info & stats for a TikTok user.", params: [url(TT_PROFILE)] },
@@ -177,8 +183,8 @@ const TIKTOK: Omit<Endpoint, "platform">[] = [
 ];
 
 const INSTAGRAM: Omit<Endpoint, "platform">[] = [
-  { tool: "instagram_transcript", name: "Instagram Transcript", path: "/v1/instagram/transcript", credits: 2, summary: "Transcript of an Instagram Reel.", params: [url(IG_REEL), language()] },
-  { tool: "instagram_summarize", name: "Instagram Summarizer", path: "/v1/instagram/summarize", credits: 4, summary: "AI summary of an Instagram Reel.", params: [url(IG_REEL), language()] },
+  { tool: "instagram_transcript", name: "Instagram Transcript", path: "/v1/instagram/transcript", credits: 2, summary: "Transcript of an Instagram Reel.", params: [url(IG_REEL), language(), cacheParam()] },
+  { tool: "instagram_summarize", name: "Instagram Summarizer", path: "/v1/instagram/summarize", credits: 4, summary: "AI summary of an Instagram Reel.", params: [url(IG_REEL), language(), cacheParam()] },
   { tool: "instagram_details", name: "Instagram Details", path: "/v1/instagram/details", credits: 1, summary: "Details for an Instagram post or reel.", params: [url(IG_POST)] },
   { tool: "instagram_comments", name: "Instagram Comments", path: "/v1/instagram/comments", credits: 45, summary: "Comments on an Instagram post or reel.", params: [url(IG_POST), limit(50, 500)] },
   { tool: "instagram_channel_details", name: "Instagram Channel Details", path: "/v1/instagram/channel-details", credits: 1, summary: "Profile info & stats for an Instagram account.", params: [url(IG_PROFILE)] },
@@ -200,8 +206,8 @@ const INSTAGRAM: Omit<Endpoint, "platform">[] = [
 
 const FACEBOOK: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_details", name: "Facebook Details", path: "/v1/facebook/details", credits: 1, summary: "Details for a Facebook video or post.", params: [url(FB_VIDEO)] },
-  { tool: "facebook_transcript", name: "Facebook Transcript", path: "/v1/facebook/transcript", credits: 2, summary: "Transcript of a Facebook video.", params: [url(FB_VIDEO)] },
-  { tool: "facebook_summarize", name: "Facebook Summarizer", path: "/v1/facebook/summarize", credits: 4, summary: "AI summary of a Facebook video or post.", params: [url(FB_VIDEO)] },
+  { tool: "facebook_transcript", name: "Facebook Transcript", path: "/v1/facebook/transcript", credits: 2, summary: "Transcript of a Facebook video.", params: [url(FB_VIDEO), cacheParam()] },
+  { tool: "facebook_summarize", name: "Facebook Summarizer", path: "/v1/facebook/summarize", credits: 4, summary: "AI summary of a Facebook video or post.", params: [url(FB_VIDEO), cacheParam()] },
   { tool: "facebook_comments", name: "Facebook Comments", path: "/v1/facebook/comments", credits: 30, summary: "Comments on a Facebook post.", params: [url(FB_VIDEO), limit(50, 500)] },
   { tool: "facebook_page_details", name: "Facebook Page Details", path: "/v1/facebook/page-details", credits: 1, summary: "Info & stats for a Facebook page.", params: [url("Facebook page URL, e.g. https://facebook.com/PageName.")] },
   { tool: "facebook_profile_posts", name: "Facebook Profile Posts", path: "/v1/facebook/profile-posts", credits: 12, summary: "Latest posts from a Facebook profile/page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
@@ -237,7 +243,7 @@ const RB_CHANNEL = "Rumble channel URL, e.g. https://rumble.com/c/name.";
 
 const TWITTER: Omit<Endpoint, "platform">[] = [
   { tool: "twitter_tweet_details", name: "Twitter/X Tweet Details", path: "/v1/twitter/tweet-details", credits: 1, summary: "Metadata + engagement stats for a tweet.", params: [url(TW_TWEET)] },
-  { tool: "twitter_transcript", name: "Twitter/X Transcript", path: "/v1/twitter/transcript", credits: 7, summary: "Extract tweet text as transcript text.", params: [url(TW_TWEET)] },
+  { tool: "twitter_transcript", name: "Twitter/X Transcript", path: "/v1/twitter/transcript", credits: 7, summary: "Extract tweet text as transcript text.", params: [url(TW_TWEET), cacheParam()] },
   { tool: "twitter_profile", name: "Twitter/X Profile", path: "/v1/twitter/profile", credits: 1, summary: "Profile info & stats for a Twitter/X account.", params: [url(TW_PROFILE)] },
   { tool: "twitter_user_tweets", name: "Twitter/X User Tweets", path: "/v1/twitter/user-tweets", credits: 14, summary: "Recent tweets from a Twitter/X profile.", params: [url(TW_PROFILE), limit(20, 200)] },
   { tool: "twitter_search", name: "Twitter/X Search", path: "/v1/twitter/search", credits: 14, summary: "Search tweets by keyword.", params: [q(), limit(20, 200)] },
@@ -327,11 +333,11 @@ const TWITCH: Omit<Endpoint, "platform">[] = [
 ];
 
 const SPOTIFY: Omit<Endpoint, "platform">[] = [
-  { tool: "spotify_artist", name: "Spotify Artist", path: "/v1/spotify/artist", credits: 6, summary: "Spotify artist details, followers and listener metadata.", params: [url(SPOTIFY_URL)] },
-  { tool: "spotify_track", name: "Spotify Track", path: "/v1/spotify/track", credits: 6, summary: "Spotify track metadata, artists, album and play count when available.", params: [url(SPOTIFY_URL)] },
-  { tool: "spotify_album", name: "Spotify Album", path: "/v1/spotify/album", credits: 6, summary: "Spotify album metadata and track count.", params: [url(SPOTIFY_URL)] },
+  { tool: "spotify_artist", name: "Spotify Artist", path: "/v1/spotify/artist", credits: 6, summary: "Spotify artist details, followers and listener metadata.", params: [url(SPOTIFY_URL), cacheParam()] },
+  { tool: "spotify_track", name: "Spotify Track", path: "/v1/spotify/track", credits: 6, summary: "Spotify track metadata, artists, album and play count when available.", params: [url(SPOTIFY_URL), cacheParam()] },
+  { tool: "spotify_album", name: "Spotify Album", path: "/v1/spotify/album", credits: 6, summary: "Spotify album metadata and track count.", params: [url(SPOTIFY_URL), cacheParam()] },
   { tool: "spotify_search", name: "Spotify Search", path: "/v1/spotify/search", credits: 23, summary: "Search Spotify tracks, albums, artists, podcasts or episodes.", params: [q(), { name: "type", type: "string", required: false, description: "tracks, albums, artists, podcasts, or episodes. Default tracks." }, limit(20, 50)] },
-  { tool: "spotify_podcast", name: "Spotify Podcast", path: "/v1/spotify/podcast", credits: 6, summary: "Spotify podcast/show details and episode summary metadata.", params: [url(SPOTIFY_URL), limit(20, 50)] },
+  { tool: "spotify_podcast", name: "Spotify Podcast", path: "/v1/spotify/podcast", credits: 6, summary: "Spotify podcast/show details and episode summary metadata.", params: [url(SPOTIFY_URL), limit(20, 50), cacheParam()] },
   { tool: "spotify_podcast_episodes", name: "Spotify Podcast Episodes", path: "/v1/spotify/podcast-episodes", credits: 23, summary: "List episodes for a Spotify podcast/show.", params: [url(SPOTIFY_URL), limit(20, 50)] },
 ];
 

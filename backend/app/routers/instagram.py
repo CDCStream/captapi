@@ -464,6 +464,7 @@ async def instagram_transcript(
             "for short clips with little speech."
         ),
     ),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_instagram_post_url(url)
@@ -493,6 +494,7 @@ async def instagram_transcript(
             params={"url": url, "language": lang, "v": 8},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -509,6 +511,7 @@ async def instagram_summarize(
             "and sets the summary output language."
         ),
     ),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_instagram_post_url(url)
@@ -540,6 +543,7 @@ async def instagram_summarize(
             params={"url": url, "language": lang, "v": 8},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 

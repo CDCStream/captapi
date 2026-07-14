@@ -23010,26 +23010,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "videoId": "dQw4w9WgXcQ",
     "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
-    "transcript": "[Music] We're no strangers to love. You know the rules and so do I. I feel commitments from what I'm thinking of. You wouldn't get this from any other guy. I just want to tell you how I'm feeling. Got to make you understand. Never going to give you up. I'm going to let you down. I'm going to run around and desert you. I'm going to make you say goodbye. Tell a lie and hurt you. We've known each other for so long. Your heart's been aching, but you're too shy to say we don't kno ...",
+    "transcript": "[♪♪♪] ♪ We're no strangers to love ♪ ♪ You know the rules and so do I ♪ ♪ A full commitment's what I'm thinking of ♪ ♪ You wouldn't get this from any other guy ♪ ♪ I just wanna tell you how I'm feeling ♪ ♪ Gotta make you understand ♪ ♪ Never gonna give you up ♪ ♪ Never gonna let you down ♪ ♪ Never gonna run around and desert you ♪ ♪ Never gonna make you cry ♪ ♪ Never gonna say goodbye ♪ ♪ Never gonna tell a lie and hurt you ♪ ...",
     "transcriptSegments": [
       {
-        "text": "[Music]",
-        "start": 0.32,
-        "duration": 14.26,
-        "end": 14.58,
-        "timestamp": "00:00"
+        "text": "[♪♪♪]",
+        "start": 1.36,
+        "duration": 1.68,
+        "end": 3.04,
+        "timestamp": "00:01"
       },
       {
-        "text": "We're no strangers to",
-        "start": 18.8,
-        "duration": 7.16,
-        "end": 25.96,
+        "text": "♪ We're no strangers to love ♪",
+        "start": 18.64,
+        "duration": 3.24,
+        "end": 21.88,
         "timestamp": "00:18"
       }
     ],
-    "wordCount": 291,
-    "segments": 52,
-    "language": "English"
+    "wordCount": 487,
+    "segments": 61,
+    "language": "en"
   },
   "youtube-trending-shorts": {
     "platform": "youtube",

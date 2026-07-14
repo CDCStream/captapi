@@ -47,3 +47,42 @@ def first_present(*values):
         if v is not None:
             return v
     return None
+
+
+_LANG_NAME_TO_ISO: dict[str, str] = {
+    "afrikaans": "af", "albanian": "sq", "arabic": "ar", "armenian": "hy",
+    "azerbaijani": "az", "basque": "eu", "belarusian": "be", "bengali": "bn",
+    "bosnian": "bs", "bulgarian": "bg", "catalan": "ca", "chinese": "zh",
+    "croatian": "hr", "czech": "cs", "danish": "da", "dutch": "nl",
+    "english": "en", "estonian": "et", "filipino": "fil", "finnish": "fi",
+    "french": "fr", "galician": "gl", "georgian": "ka", "german": "de",
+    "greek": "el", "gujarati": "gu", "haitian creole": "ht", "hebrew": "he",
+    "hindi": "hi", "hungarian": "hu", "icelandic": "is", "indonesian": "id",
+    "irish": "ga", "italian": "it", "japanese": "ja", "kannada": "kn",
+    "kazakh": "kk", "korean": "ko", "latvian": "lv", "lithuanian": "lt",
+    "macedonian": "mk", "malay": "ms", "malayalam": "ml", "maltese": "mt",
+    "marathi": "mr", "mongolian": "mn", "nepali": "ne", "norwegian": "no",
+    "persian": "fa", "polish": "pl", "portuguese": "pt", "punjabi": "pa",
+    "romanian": "ro", "russian": "ru", "serbian": "sr", "sinhala": "si",
+    "slovak": "sk", "slovenian": "sl", "spanish": "es", "swahili": "sw",
+    "swedish": "sv", "tamil": "ta", "telugu": "te", "thai": "th",
+    "turkish": "tr", "ukrainian": "uk", "urdu": "ur", "uzbek": "uz",
+    "vietnamese": "vi", "welsh": "cy",
+}
+
+
+def normalize_language_code(value: str | None) -> str | None:
+    """Normalize a language value to an ISO 639-1 code (lowercase 2-3 letters).
+
+    Handles: 'English' -> 'en', 'en-US' -> 'en', 'en' -> 'en', None -> None.
+    """
+    if not value:
+        return None
+    v = value.strip().lower()
+    if not v:
+        return None
+    if len(v) <= 3:
+        return v
+    if "-" in v and len(v.split("-")[0]) <= 3:
+        return v.split("-")[0]
+    return _LANG_NAME_TO_ISO.get(v, v)
