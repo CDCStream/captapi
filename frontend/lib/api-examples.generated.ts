@@ -4769,15 +4769,23 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "instagram-summarizer": {
     "platform": "instagram",
-    "url": "https://www.instagram.com/p/DZFsjH9E3gK/",
-    "summary": "ABC News and National Geographic are collaborating to showcase America's most extraordinary natural locations through a series titled 'Seven Natural Wonders of America.' The initiative aims to explore and reveal these awe-inspiring sites, with the first location being introduced by Nightline Co-Anchor Juju Chang and National Geographic Explorer Andrés Ruzo. This program promises to take viewers on an exciting journey through some of the most remarkable landscapes in the count ...",
+    "url": "https://www.instagram.com/garyvee/reel/DMpuiXeubFY/",
+    "summary": "The speaker emphasizes the importance of self-worth and the belief that everyone has the potential to become significant. They encourage listeners to recognize their own value and to fight for their happiness, suggesting that negative influences from others can diminish one's self-esteem. By surrounding oneself with positivity and cutting out pessimistic influences, individuals can foster a more optimistic outlook on life. The message is ultimately one of empowerment, urging people to acknowledge their worth and strive for personal fulfillment.",
     "keyPoints": [
-      "ABC News and National Geographic present 'Seven Natural Wonders of America'.",
-      "Nightline Co-Anchor Juju Chang and Explorer Andrés Ruzo introduce the first location."
+      "Everyone has the potential to be significant and should recognize their own value.",
+      "Negative voices from others can impact self-esteem; it's important to challenge them.",
+      "Fighting for happiness is essential and requires active effort.",
+      "Surrounding oneself with positivity can lead to a more optimistic mindset.",
+      "Cynicism and overanalysis can negatively affect mental well-being.",
+      "Being a good person and genuinely trying is commendable and valuable."
     ],
     "topics": [
-      "Natural Wonders",
-      "ABC News"
+      "self-worth",
+      "happiness",
+      "positivity",
+      "optimism",
+      "mental health",
+      "empowerment"
     ],
     "sentiment": "positive"
   },
