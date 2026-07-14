@@ -870,7 +870,7 @@
         }
       },
       "instagramComments": {
-        "label": "Instagram Comments",
+        "label": "Instagram Post Comments",
         "description": "Comments on an Instagram post or reel. Costs ~45 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,

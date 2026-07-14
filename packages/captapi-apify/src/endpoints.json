@@ -1114,7 +1114,7 @@
   {
     "tool": "instagram_comments",
     "platform": "instagram",
-    "name": "Instagram Comments",
+    "name": "Instagram Post Comments",
     "path": "/v1/instagram/comments",
     "credits": 45,
     "summary": "Comments on an Instagram post or reel.",

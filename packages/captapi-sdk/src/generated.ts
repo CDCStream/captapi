@@ -671,7 +671,7 @@ export class InstagramApi {
   details(params: InstagramDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/details", params);
   }
-  /** Instagram Comments — Comments on an Instagram post or reel. (45 credits) */
+  /** Instagram Post Comments — Comments on an Instagram post or reel. (45 credits) */
   comments(params: InstagramCommentsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/comments", params);
   }

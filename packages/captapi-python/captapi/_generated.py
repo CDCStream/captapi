@@ -809,7 +809,7 @@ class InstagramApi:
         return self._t.get("/v1/instagram/details", {"url": url})
 
     def comments(self, *, url: str, limit: float | None = None) -> dict[str, Any]:
-        """Instagram Comments — Comments on an Instagram post or reel. (45 credits)
+        """Instagram Post Comments — Comments on an Instagram post or reel. (45 credits)
 
         :param url: Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
@@ -964,7 +964,7 @@ class AsyncInstagramApi:
         return await self._t.get("/v1/instagram/details", {"url": url})
 
     async def comments(self, *, url: str, limit: float | None = None) -> dict[str, Any]:
-        """Instagram Comments — Comments on an Instagram post or reel. (45 credits)
+        """Instagram Post Comments — Comments on an Instagram post or reel. (45 credits)
 
         :param url: Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
