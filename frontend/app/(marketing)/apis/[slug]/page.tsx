@@ -334,6 +334,10 @@ export default async function ApiDetailPage({
             ]}
           />
           <p className="mt-3 text-sm text-muted-foreground">
+            Billing metadata is returned in response headers:{" "}
+            <code className="text-xs">X-Captapi-Credits</code> (credits
+            charged), <code className="text-xs">X-Captapi-Cache</code> (hit or
+            miss), and <code className="text-xs">X-Captapi-Source</code>.
             Failed requests (4xx/5xx) are never charged. See the full list of
             error codes in the{" "}
             <Link href="/docs#errors" className="text-primary hover:underline">

@@ -174,6 +174,11 @@ export default async function HowToPage({
         <section className="mt-12">
           <h2 className="text-2xl font-semibold mb-4">What the response looks like</h2>
           <CodeTabs samples={[{ label: "200 OK", code: exampleResponse(ep) }]} />
+          <p className="mt-3 text-sm text-muted-foreground">
+            Billing metadata (credits charged, cache hit/miss) is returned in
+            the <code className="text-xs">X-Captapi-Credits</code> and{" "}
+            <code className="text-xs">X-Captapi-Cache</code> response headers.
+          </p>
         </section>
 
         {/* Parameters */}

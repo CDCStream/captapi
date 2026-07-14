@@ -1401,11 +1401,7 @@ function exampleData(ep: ApiEndpoint): Record<string, unknown> {
 }
 
 export function exampleResponse(ep: ApiEndpoint): string {
-  return JSON.stringify(
-    { success: true, cached: false, creditsUsed: ep.credits, data: exampleData(ep) },
-    null,
-    2,
-  );
+  return JSON.stringify({ success: true, data: exampleData(ep) }, null, 2);
 }
 
 function article(label: string): string {
