@@ -219,8 +219,8 @@ def _transcript_from_item(item: dict[str, Any]) -> tuple[str, list[dict[str, Any
         for seg in raw_segments:
             if isinstance(seg, dict):
                 text = safe_str(seg.get("text") or seg.get("caption") or seg.get("sentence")).strip()
-                start = safe_float(seg.get("start") or seg.get("startTime") or seg.get("startMs")) or 0
-                duration = safe_float(seg.get("duration") or seg.get("dur")) or 0
+                start = round(safe_float(seg.get("start") or seg.get("startTime") or seg.get("startMs")) or 0, 3)
+                duration = round(safe_float(seg.get("duration") or seg.get("dur")) or 0, 3)
                 if not duration:
                     end = safe_float(seg.get("end")) or 0
                     duration = round(max(end - start, 0), 3)
@@ -231,7 +231,15 @@ def _transcript_from_item(item: dict[str, Any]) -> tuple[str, list[dict[str, Any
             if text:
                 mm = int(start // 60)
                 ss = int(start % 60)
-                segments.append({"text": text, "start": start, "duration": duration, "timestamp": f"{mm:02d}:{ss:02d}"})
+                segments.append(
+                    {
+                        "text": text,
+                        "start": start,
+                        "duration": duration,
+                        "end": round(start + duration, 3),
+                        "timestamp": f"{mm:02d}:{ss:02d}",
+                    }
+                )
                 parts.append(text)
     # Deliberately NOT falling back to item["text"]/item["caption"]: those are
     # the post caption, not speech. Returning them as "transcript" is wrong
@@ -491,7 +499,7 @@ async def instagram_transcript(
 
         data = await cached_or_run(
             endpoint="instagram.transcript",
-            params={"url": url, "language": lang, "v": 8},
+            params={"url": url, "language": lang, "v": 9},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

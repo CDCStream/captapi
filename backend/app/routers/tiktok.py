@@ -446,6 +446,7 @@ def _tiktok_transcript_segments(item: dict[str, Any]) -> tuple[str, list[dict[st
                 "text": text,
                 "start": start,
                 "duration": round(max(end - start, 0), 3),
+                "end": round(max(end, start), 3),
                 "timestamp": f"{mm:02d}:{ss:02d}",
             }
         )
@@ -557,7 +558,7 @@ async def tiktok_transcript(
 
         data = await cached_or_run(
             endpoint="tiktok.transcript",
-            params={"url": url, "language": lang, "v": 5},
+            params={"url": url, "language": lang, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

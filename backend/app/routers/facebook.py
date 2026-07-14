@@ -390,14 +390,15 @@ async def facebook_transcript(
                     text = safe_str(s.get("text")).strip()
                     if not text:
                         continue
-                    start = float(s.get("start") or 0)
-                    end = float(s.get("end") or 0)
+                    start = round(float(s.get("start") or 0), 3)
+                    end = round(float(s.get("end") or 0), 3)
                     mm, ss = int(start // 60), int(start % 60)
                     segments.append(
                         {
                             "text": text,
                             "start": start,
                             "duration": round(max(end - start, 0), 3),
+                            "end": round(max(end, start), 3),
                             "timestamp": f"{mm:02d}:{ss:02d}",
                         }
                     )
@@ -430,7 +431,7 @@ async def facebook_transcript(
 
         data = await cached_or_run(
             endpoint="facebook.transcript",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

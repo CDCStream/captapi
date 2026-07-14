@@ -291,6 +291,7 @@ def _parse_verbose(resp: Any) -> dict[str, Any]:
                 "text": seg_text,
                 "start": start,
                 "duration": round(max(end - start, 0.0), 3),
+                "end": round(max(end, start), 3),
                 "timestamp": f"{mm:02d}:{ss:02d}",
             }
         )
