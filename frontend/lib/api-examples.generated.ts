@@ -3740,27 +3740,33 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "instagram-details": {
     "platform": "instagram",
-    "url": "https://www.instagram.com/p/DZFqdAxlkUG/",
-    "id": "3910718563091367174",
-    "postType": "Image",
-    "productType": "feed",
-    "caption": "After decades of recovery efforts, the wild giant panda population has nearly doubled since the species was listed as endangered in 1990. In this photograph by @amivitale, a keeper wearing a panda suit performs a health check in Wolong, China, reflecting one of the many measures used to prepare captive-bred pandas for life in the wild.\n\nSee what other stories our Nat Geo archive images have to tell at the link in bio.",
-    "description": "After decades of recovery efforts, the wild giant panda population has nearly doubled since the species was listed as endangered in 1990. In this photograph by @amivitale, a keeper wearing a panda suit performs a health check in Wolong, China, reflecting one of the many measures used to prepare captive-bred pandas for life in the wild.\n\nSee what other stories our Nat Geo archive images have to tell at the link in bio.",
-    "publishedAt": "2026-06-03T13:00:01.000Z",
-    "thumbnailUrl": "https://scontent-dfw6-2.cdninstagram.com/v/t51.82787-15/712483886_18663141787019133_915376241070987040_n.jpg?stp=dst-jpg_e35_s1080x1080_sh2.08_tt6&_nc_ht=scontent-dfw6-2.cdninstagram.com&_nc_cat=109&_nc_oc=Q6cZ2gGWrTviZKLqUp9nVG-dal-Mz1Q1rmPG_BzosAxFWG6ymUp5J7nr2f73r9WZVj3h1z4&_nc_ohc=VkMi-o9ULacQ7kNvwFL8qLc&_nc_gid=Gb5svf0mcuhndKh43Ujhng&edm=ADp7STQBAAAA&ccb=7-5&oh=00_AQAjdElHFyKbhAakuORE7_ktz1-E7tdAIa1uXOzCLLUKWg&oe=6A4DB33A&_nc_sid=c6f216",
+    "url": "https://www.instagram.com/p/DMpuiXeubFY/",
+    "id": "DMpuiXeubFY",
+    "postType": "Video",
+    "productType": "clips",
+    "caption": "I’m sooooooooo tired of the clouds ☁️ and the rain 🌧️ … my friends …. 99% of you who see this are wonderful and great people .. please start loving yourself ❤️ start appreciating yourself ❤️ start understanding that for many Reasons too many of you put yourselves down and beat yourselves up … STOP 🛑 THAT SHIT … I am telling you, you’re great… now believe it yourself - stop comparing, stop worrying about outside noise and judgment - start slowing down and focusing on what actually matters ❤️❤️❤️❤️🔑 SHARE THIS WITH SOMEONE YOU LOVE 💕\n\nPS: Hit the follow or following button in my profile and hit the ⭐️ to add to favorites\n\n#loveyourself #mindset #garyvee",
+    "description": "I’m sooooooooo tired of the clouds ☁️ and the rain 🌧️ … my friends …. 99% of you who see this are wonderful and great people .. please start loving yourself ❤️ start appreciating yourself ❤️ start understanding that for many Reasons too many of you put yourselves down and beat yourselves up … STOP 🛑 THAT SHIT … I am telling you, you’re great… now believe it yourself - stop comparing, stop worrying about outside noise and judgment - start slowing down and focusing on what actually matters ❤️❤️❤️❤️🔑 SHARE THIS WITH SOMEONE YOU LOVE 💕\n\nPS: Hit the follow or following button in my profile and hit the ⭐️ to add to favorites\n\n#loveyourself #mindset #garyvee",
+    "publishedAt": "2025-07-28T12:47:26Z",
+    "durationSeconds": 43.141,
+    "thumbnailUrl": "https://scontent-mxp1-1.cdninstagram.com/v/t51.71878-15/523977602_1278121770625597_4217876654787678410_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=102&ig_cache_key=MzY4NjY4MjQ0MTc5MjcyOTQzMg%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad",
+    "videoUrl": "https://scontent-mxp2-1.cdninstagram.com/o1/v/t2/f2/m86/AQOHtEmHkCFISkPxZqXoHmebinsmMBpu7ILoNTfybikAJLlFVZfWqR3Wu0nCGjbCeibt1HDFNeXtCqc2CknThwA9MsHRSPr4Rd9kjgc.mp4?_nc_cat=104&_nc_sid=5e9851&_nc_ht=scontent-mxp2-1.cdninstagram.com",
     "author": {
-      "username": "natgeo",
-      "displayName": "National Geographic",
-      "url": "https://instagram.com/natgeo"
+      "username": "garyvee",
+      "displayName": "Gary Vay-Ner-Chuk",
+      "url": "https://instagram.com/garyvee",
+      "verified": true,
+      "profileImage": "https://scontent-mxp1-1.cdninstagram.com/v/t51.2885-19/447913595_1241465900569550_7339008130351792368_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_ht=scontent-mxp1-1.cdninstagram.com&_nc_cat=1"
     },
     "engagement": {
-      "likes": 237870,
-      "comments": 1137
+      "likes": 1018045,
+      "comments": 4326
     },
-    "hashtags": [],
-    "mentions": [
-      "amivitale"
-    ]
+    "hashtags": [
+      "loveyourself",
+      "mindset",
+      "garyvee"
+    ],
+    "mentions": []
   },
   "instagram-embed": {
     "platform": "instagram",
