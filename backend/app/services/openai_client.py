@@ -282,15 +282,15 @@ def _parse_verbose(resp: Any) -> dict[str, Any]:
             continue
         if float(getattr(seg, "avg_logprob", 0.0)) < _MIN_AVG_LOGPROB:
             continue  # decoder was guessing (music/silence), not transcribing
-        start = float(getattr(seg, "start", 0.0))
-        end = float(getattr(seg, "end", start))
+        start = round(float(getattr(seg, "start", 0.0)), 3)
+        end = round(float(getattr(seg, "end", start)), 3)
         mm = int(start // 60)
         ss = int(start % 60)
         segments.append(
             {
                 "text": seg_text,
                 "start": start,
-                "duration": max(end - start, 0.0),
+                "duration": round(max(end - start, 0.0), 3),
                 "timestamp": f"{mm:02d}:{ss:02d}",
             }
         )

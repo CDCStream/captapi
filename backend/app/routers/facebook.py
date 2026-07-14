@@ -19,7 +19,7 @@ from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
-from app.utils.formatters import safe_float, safe_int, safe_str
+from app.utils.formatters import normalize_language_code, safe_float, safe_int, safe_str
 from app.utils.url import (
     detect_url_platform,
     extract_facebook_page,
@@ -402,7 +402,7 @@ async def facebook_transcript(
                         }
                     )
                 full = (safe_str(item.get("transcript")) or " ".join(s["text"] for s in segments)).strip()
-                language = safe_str(item.get("detected_language"))
+                language = normalize_language_code(safe_str(item.get("detected_language")))
 
             if not full:
                 # Fallback for text-only posts: use the post body.
@@ -430,7 +430,7 @@ async def facebook_transcript(
 
         data = await cached_or_run(
             endpoint="facebook.transcript",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

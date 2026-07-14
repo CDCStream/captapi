@@ -27,7 +27,14 @@ from app.services.tiktok_native import (
     profile_region_native,
     video_details_native,
 )
-from app.utils.formatters import first_present, safe_float, safe_int, safe_list, safe_str
+from app.utils.formatters import (
+    first_present,
+    normalize_language_code,
+    safe_float,
+    safe_int,
+    safe_list,
+    safe_str,
+)
 from app.utils.url import (
     extract_tiktok_id,
     extract_tiktok_username,
@@ -431,8 +438,8 @@ def _tiktok_transcript_segments(item: dict[str, Any]) -> tuple[str, list[dict[st
         text = safe_str(s.get("text")).strip()
         if not text:
             continue
-        start = safe_float(s.get("start")) or 0
-        end = safe_float(s.get("end")) or 0
+        start = round(safe_float(s.get("start")) or 0, 3)
+        end = round(safe_float(s.get("end")) or 0, 3)
         mm, ss = int(start // 60), int(start % 60)
         segments.append(
             {
@@ -545,12 +552,12 @@ async def tiktok_transcript(
                 "transcriptSegments": segments,
                 "wordCount": len(full.split()),
                 "segments": len(segments),
-                "language": detected,
+                "language": normalize_language_code(detected),
             }
 
         data = await cached_or_run(
             endpoint="tiktok.transcript",
-            params={"url": url, "language": lang, "v": 4},
+            params={"url": url, "language": lang, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
