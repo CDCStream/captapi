@@ -22995,14 +22995,24 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "videoId": "dQw4w9WgXcQ",
     "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
-    "summary": "The transcript captures the essence of a well-known song that expresses themes of love, commitment, and emotional honesty. The lyrics convey a strong message about loyalty and the importance of being truthful in a relationship. The speaker reassures their partner that they will never betray or abandon them, emphasizing a deep understanding of each other's feelings despite the challenges they face. The repetitive nature of the phrases reinforces the sincerity of the speaker's  ...",
+    "summary": "The song 'Never Gonna Give You Up' by Rick Astley is a classic pop anthem that emphasizes unwavering commitment and loyalty in a romantic relationship. The lyrics express a deep emotional connection, highlighting the importance of honesty and trust between partners. Astley reassures his loved one that he will always be there for them, promising never to abandon or hurt them, which resonates with listeners on a personal level.\n\nThis iconic track has gained a cultural significance beyond its initial release, becoming a symbol of internet memes and nostalgia. Its catchy melody and memorable chorus have made it a timeless favorite, often associated with themes of love, dedication, and sincerity. The song's upbeat tempo and heartfelt message continue to engage audiences, making it a staple in pop music history.",
     "keyPoints": [
-      "The song emphasizes themes of love and commitment.",
-      "The speaker expresses a strong desire for emotional honesty."
+      "Emphasizes commitment and loyalty in relationships.",
+      "Highlights the importance of honesty and trust.",
+      "Reassures loved ones of unwavering support.",
+      "Cultural icon associated with internet memes.",
+      "Timeless melody and catchy chorus.",
+      "Resonates with themes of love and dedication.",
+      "Continues to engage audiences across generations."
     ],
     "topics": [
-      "love",
-      "commitment"
+      "Rick Astley",
+      "Never Gonna Give You Up",
+      "Pop Music",
+      "Commitment",
+      "Love",
+      "Nostalgia",
+      "Internet Memes"
     ],
     "sentiment": "positive"
   },
