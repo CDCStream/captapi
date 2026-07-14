@@ -269,7 +269,6 @@ export default async function ApiDetailPage({
           <Button asChild size="lg" variant="outline">
             <Link href="/docs">Read the docs</Link>
           </Button>
-          <BugReportDialog defaultEndpointSlug={ep.slug} size="lg" />
         </div>
 
         {/* Answer-first overview (AEO) */}
@@ -305,7 +304,15 @@ export default async function ApiDetailPage({
 
         {/* Interactive request builder */}
         <section className="mt-12">
-          <h2 className="text-2xl font-semibold">Try it</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-2xl font-semibold">Try it</h2>
+            <BugReportDialog
+              defaultEndpointSlug={ep.slug}
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+            />
+          </div>
           <p className="mt-2 mb-4 max-w-3xl text-sm text-muted-foreground">
             Fill in the parameters below and copy a ready-to-run request in your
             language of choice.
