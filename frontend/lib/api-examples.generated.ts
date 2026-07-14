@@ -5123,7 +5123,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ],
     "wordCount": 135,
-    "segments": 9
+    "segments": 9,
+    "language": "en"
   },
   "instagram-trending-reels": {
     "platform": "instagram",

@@ -19,7 +19,13 @@ from app.services import instagram_decodo as decodo
 from app.services import instagram_native
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript, transcribe_video_url
-from app.utils.formatters import safe_float, safe_int, safe_list, safe_str
+from app.utils.formatters import (
+    normalize_language_code,
+    safe_float,
+    safe_int,
+    safe_list,
+    safe_str,
+)
 from app.utils.url import (
     detect_url_platform,
     extract_instagram_shortcode,
@@ -265,8 +271,8 @@ def _looks_like_caption(full: str, item: dict[str, Any]) -> bool:
 
 async def _fetch_instagram_transcript(
     url: str, language: str | None = None
-) -> tuple[str, list[dict[str, Any]], str]:
-    """Return (full transcript, segments, source).
+) -> tuple[str, list[dict[str, Any]], str, str | None]:
+    """Return (full transcript, segments, source, detected language).
 
     Primary: resolve the reel's MP4 natively (~1-2s, Apify scraper fallback)
     and Whisper-transcribe it ourselves. This always yields actual SPEECH,
@@ -279,7 +285,7 @@ async def _fetch_instagram_transcript(
     settings = get_settings()
     apify = get_apify()
 
-    async def _whisper(media_url: str) -> tuple[str, list[dict[str, Any]]] | None:
+    async def _whisper(media_url: str) -> tuple[str, list[dict[str, Any]], str | None] | None:
         """Whisper a media URL; None = fetch failed / too large (try next)."""
         try:
             tx = await transcribe_video_url(media_url, language=language)
@@ -289,7 +295,8 @@ async def _fetch_instagram_transcript(
             return None
         full = (safe_str(tx.get("transcript")) or "").strip()
         if full:
-            return full, tx.get("transcriptSegments") or []
+            detected = normalize_language_code(safe_str(tx.get("language")) or language)
+            return full, tx.get("transcriptSegments") or [], detected
         # Whisper ran fine and heard nothing -> genuinely no speech.
         raise HTTPException(status_code=422, detail="No speech found in this Reel")
 
@@ -299,7 +306,7 @@ async def _fetch_instagram_transcript(
     if native and safe_str(native.get("videoUrl")):
         result = await _whisper(safe_str(native.get("videoUrl")))
         if result:
-            return result[0], result[1], "direct"
+            return result[0], result[1], "direct", result[2]
 
     # Decodo failed or the MP4 was too large for Whisper's 25 MB cap: the reel
     # scraper also exposes an audio-only track (~30x smaller), so long reels
@@ -318,7 +325,7 @@ async def _fetch_instagram_transcript(
                 continue
             result = await _whisper(media_url)
             if result:
-                return result[0], result[1], "openai"
+                return result[0], result[1], "openai", result[2]
 
     # Fallback: transcript actors (video URL could not be resolved/downloaded).
     try:
@@ -336,7 +343,10 @@ async def _fetch_instagram_transcript(
     if items:
         full, segments = _transcript_from_item(items[0])
         if full and not _looks_like_caption(full, items[0]):
-            return full, segments, "apify"
+            detected = normalize_language_code(
+                safe_str(items[0].get("language") or items[0].get("detectedLanguage")) or language
+            )
+            return full, segments, "apify", detected
 
     try:
         items = await apify.run_actor_sync(
@@ -349,7 +359,10 @@ async def _fetch_instagram_transcript(
     if items and safe_str(items[0].get("status")) != "error":
         full, segments = _transcript_from_item(items[0])
         if full and not _looks_like_caption(full, items[0]):
-            return full, segments, "apify"
+            detected = normalize_language_code(
+                safe_str(items[0].get("language") or items[0].get("detectedLanguage")) or language
+            )
+            return full, segments, "apify", detected
 
     if reel_item is None and native is None:
         raise HTTPException(status_code=404, detail="Reel not found")
@@ -486,7 +499,7 @@ async def instagram_transcript(
         base_credits=CREDIT_TRANSCRIPT,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            full, segments, source = await _fetch_instagram_transcript(url, language=lang)
+            full, segments, source, detected = await _fetch_instagram_transcript(url, language=lang)
             ctx["source"] = source
             return {
                 "platform": "instagram",
@@ -495,11 +508,12 @@ async def instagram_transcript(
                 "transcriptSegments": segments,
                 "wordCount": len(full.split()),
                 "segments": len(segments),
+                "language": detected,
             }
 
         data = await cached_or_run(
             endpoint="instagram.transcript",
-            params={"url": url, "language": lang, "v": 9},
+            params={"url": url, "language": lang, "v": 10},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -532,7 +546,7 @@ async def instagram_summarize(
         base_credits=CREDIT_SUMMARIZE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            text, _segments, source = await _fetch_instagram_transcript(url, language=lang)
+            text, _segments, source, _detected = await _fetch_instagram_transcript(url, language=lang)
             ctx["source"] = source
             if not text:
                 raise HTTPException(status_code=422, detail="No content to summarize")

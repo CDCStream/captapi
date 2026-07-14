@@ -2517,7 +2517,8 @@
         }
       ],
       "wordCount": 135,
-      "segments": 9
+      "segments": 9,
+      "language": "en"
     },
     "error": null
   },
