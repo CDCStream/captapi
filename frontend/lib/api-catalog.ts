@@ -103,6 +103,8 @@ export interface ApiEndpoint {
   creditsPerResult?: number;
   /** Optional override for the "what you get" bullet list. */
   delivers?: string[];
+  /** Optional override for the generated category tagline. */
+  tagline?: string;
 }
 
 export interface PlatformGroup {
@@ -247,7 +249,7 @@ const TIKTOK: Spec[] = [
 const INSTAGRAM: Spec[] = [
   { slug: "instagram-transcript", name: "Instagram Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/instagram/transcript", credits: 2 },
   { slug: "instagram-summarizer", name: "Instagram Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/instagram/summarize", credits: 4 },
-  { slug: "instagram-details", name: "Instagram Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/instagram/details", credits: 1 },
+  { slug: "instagram-details", name: "Instagram Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/instagram/details", credits: 1, tagline: "Get full Instagram post metadata — caption, likes, comments, duration, and more." },
   { slug: "instagram-comments", name: "Instagram Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/instagram/comments", credits: 45, creditsPerResult: 0.9 },
   { slug: "instagram-channel-details", name: "Instagram Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/instagram/channel-details", credits: 1 },
   { slug: "instagram-channel-posts", name: "Instagram Channel Posts API", shortName: "Channel Posts", category: "list", method: "GET", path: "/v1/instagram/channel-posts", credits: 6, creditsPerResult: 0.3 },
@@ -974,6 +976,7 @@ export function howToTitle(ep: ApiEndpoint): string {
 }
 
 export function tagline(ep: ApiEndpoint): string {
+  if (ep.tagline) return ep.tagline;
   const platform = PLATFORM_LABEL[ep.platform];
   switch (ep.category) {
     case "transcript":
