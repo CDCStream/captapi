@@ -274,12 +274,12 @@ export default async function ApiDetailPage({
         {/* Answer-first overview (AEO) */}
         <section className="mt-14">
           <Tldr>
-            The <strong>{ep.name}</strong> ({platformLabel(ep.platform)}) returns{" "}
-            {tagline(ep).charAt(0).toLowerCase() + tagline(ep).slice(1)} It&apos;s a
-            single authenticated <code>{ep.method ?? "GET"}</code> request to{" "}
-            <code>{ep.path}</code> that responds with clean JSON, costs{" "}
-            {creditLabel(ep)}, and is cached for 24 hours (repeat calls are free).
-            Start with 100 free credits — no credit card.
+            {tagline(ep)} The <strong>{ep.name}</strong> (
+            {platformLabel(ep.platform)}) is a single authenticated{" "}
+            <code>{ep.method ?? "GET"}</code> request to <code>{ep.path}</code>{" "}
+            that responds with clean JSON, costs {creditLabel(ep)}, and is
+            cached for 24 hours (repeat calls are free). Start with 100 free
+            credits — no credit card.
           </Tldr>
           <h2 className="text-2xl font-semibold">
             What is the {ep.name}?
