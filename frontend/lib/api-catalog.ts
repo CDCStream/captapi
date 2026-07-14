@@ -914,12 +914,10 @@ export function getGroup(id: PlatformId): PlatformGroup {
   return PLATFORM_GROUPS.find((g) => g.id === id)!;
 }
 
-export function relatedEndpoints(slug: string, max = 6): ApiEndpoint[] {
+export function relatedEndpoints(slug: string): ApiEndpoint[] {
   const ep = getEndpoint(slug);
   if (!ep) return [];
-  return getGroup(ep.platform)
-    .endpoints.filter((e) => e.slug !== slug)
-    .slice(0, max);
+  return getGroup(ep.platform).endpoints.filter((e) => e.slug !== slug);
 }
 
 // ---------------------------------------------------------------------------
