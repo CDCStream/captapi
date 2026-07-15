@@ -787,6 +787,12 @@ async def _ig_feed_collect(
                 continue
             collected.append(instagram_native.map_feed_post(raw, followers=followers))
         next_cursor = next_max_id if more and next_max_id else None
+        # Instagram suffixes next_max_id with the last item's owner id, which
+        # differs from the profile on collab posts. Our public cursor embeds
+        # the profile's user id (the feed accepts either as max_id), so the
+        # next request pages the right account.
+        if next_cursor:
+            next_cursor = f"{next_cursor.split('_')[0]}_{user_id}"
         if len(collected) >= limit or next_cursor is None:
             break
     return collected[:limit], next_cursor
@@ -800,8 +806,8 @@ def _ig_channel_page(
         return None
     posts = first_page["items"]
     user_id = first_page.get("userId")
-    followers = None
-    if posts:
+    followers = first_page.get("followers")
+    if followers is None and posts:
         followers = posts[0].get("author", {}).get("followers")
     next_cursor = None
     if first_page.get("hasMore") and posts and user_id and posts[-1].get("id"):
@@ -914,20 +920,25 @@ async def instagram_channel_reels(
                 if page is None:
                     return None
                 reels, next_cursor, user_id, followers = page
-                if len(reels) < limit and next_cursor and user_id:
-                    extra = await _ig_feed_collect(
-                        user_id, next_cursor, limit - len(reels), reels_only=True, followers=followers
+                # Prefer the native feed for the whole page: the GraphQL
+                # timeline omits duration/play counts for clips and buries
+                # recent Reels under legacy IGTV uploads. The Decodo items
+                # only serve as a fallback when the feed is unreachable.
+                if user_id:
+                    native = await _ig_feed_collect(
+                        user_id, None, limit, reels_only=True, followers=followers
                     )
-                    if extra is not None:
-                        more_reels, next_cursor = extra
-                        reels = reels + more_reels
+                    if native is not None and native[0]:
+                        reels, next_cursor = native
+                if not reels:
+                    return None
                 return {"url": url, "totalReturned": len(reels), "reels": reels, "nextCursor": next_cursor}
 
             return await _try_decodo(ctx, _decodo_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-reels",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 11},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 12},
             runner=_run,
             ctx=ctx,
         )

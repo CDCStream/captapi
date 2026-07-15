@@ -91,7 +91,9 @@ def test_profile_and_timeline_functions(monkeypatch) -> None:
     # keeps only videos.
     assert posts and [post["id"] for post in posts["items"]] == ["p1", "r1"]
     assert posts["userId"] == "42"
+    assert posts["followers"] == 1234
     assert reels and [reel["id"] for reel in reels["items"]] == ["r1"]
+    assert reels["followers"] == 1234
 
 
 def test_hashtag_deduplicates_top_and_recent(monkeypatch) -> None:

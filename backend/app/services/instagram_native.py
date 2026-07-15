@@ -70,7 +70,7 @@ _MPD_DURATION_RE = re.compile(
 def _video_duration(media: dict[str, Any], cover: dict[str, Any]) -> float | None:
     direct = safe_float(media.get("video_duration") or cover.get("video_duration"))
     if direct:
-        return direct
+        return round(direct, 3)
     m = _MPD_DURATION_RE.search(
         safe_str(media.get("video_dash_manifest") or cover.get("video_dash_manifest")) or ""
     )
