@@ -4894,7 +4894,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "instagram",
         "url": "https://www.instagram.com/p/CO8OyJbHFSC/",
         "id": "2574998105692591234_286828500",
-        "postType": "Video",
+        "postType": "Sidecar",
         "productType": "carousel_container",
         "section": "TV & Movies",
         "topic": "Comedy TV & Movies",
