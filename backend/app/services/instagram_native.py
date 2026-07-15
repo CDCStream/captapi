@@ -23,6 +23,7 @@ import httpx
 import structlog
 
 from app.services.http_fetch import proxy_for
+from app.services.instagram_decodo import hidden_count
 from app.utils.formatters import safe_float, safe_int, safe_str
 
 log = structlog.get_logger(__name__)
@@ -158,8 +159,8 @@ async def fetch_post_details(shortcode: str) -> dict[str, Any] | None:
         # No "views": Instagram hides play counts from the logged-out API for
         # clips, so the field can't be served consistently across post types.
         "engagement": {
-            "likes": safe_int(media.get("like_count")) or 0,
-            "comments": safe_int(media.get("comment_count")) or 0,
+            "likes": hidden_count(media.get("like_count")),
+            "comments": hidden_count(media.get("comment_count")),
         },
         "hashtags": _HASHTAG_RE.findall(caption or ""),
         "mentions": _MENTION_RE.findall(caption or ""),
@@ -227,8 +228,8 @@ def map_feed_post(
             "author": author,
             "engagement": {
                 "views": safe_int(media.get("play_count") or media.get("view_count")),
-                "likes": safe_int(media.get("like_count")) or 0,
-                "comments": safe_int(media.get("comment_count")) or 0,
+                "likes": hidden_count(media.get("like_count")),
+                "comments": hidden_count(media.get("comment_count")),
             },
             "hashtags": _HASHTAG_RE.findall(caption),
             "mentions": _MENTION_RE.findall(caption),

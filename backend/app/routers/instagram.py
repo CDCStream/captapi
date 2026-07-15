@@ -97,6 +97,7 @@ def _normalize_post(item: dict) -> dict:
     author = item.get("ownerUsername") or owner.get("username")
     post_type = safe_str(item.get("type"))
     duration = safe_float(item.get("videoDuration") or item.get("duration") or item.get("durationSeconds"))
+    caption = safe_str(item.get("caption") or item.get("text") or item.get("description")) or ""
     return {
         "platform": "instagram",
         "url": safe_str(item.get("url") or item.get("permalink") or item.get("shortcodeUrl")),
@@ -105,8 +106,8 @@ def _normalize_post(item: dict) -> dict:
         # stripped for non-video posts.
         "postType": post_type,
         "productType": safe_str(item.get("productType")),
-        "caption": safe_str(item.get("caption") or item.get("text") or item.get("description")),
-        "description": safe_str(item.get("caption") or item.get("text") or item.get("description")),
+        "caption": caption,
+        "description": caption,
         "publishedAt": safe_str(item.get("timestamp") or item.get("takenAt") or item.get("taken_at")),
         # Apify reports durations as float32 noise (17.95800018310547); round
         # to millisecond precision like the native mappers.
@@ -123,8 +124,8 @@ def _normalize_post(item: dict) -> dict:
         },
         "engagement": {
             "views": safe_int(item.get("videoViewCount") or item.get("videoPlayCount")),
-            "likes": safe_int(item.get("likesCount") or item.get("likeCount")) or 0,
-            "comments": safe_int(item.get("commentsCount") or item.get("commentCount")) or 0,
+            "likes": decodo.hidden_count(item.get("likesCount") or item.get("likeCount")),
+            "comments": decodo.hidden_count(item.get("commentsCount") or item.get("commentCount")),
         },
         "hashtags": safe_list(item.get("hashtags")),
         "mentions": safe_list(item.get("mentions")),
@@ -491,7 +492,7 @@ async def instagram_details(
 
         data = await cached_or_run(
             endpoint="instagram.details",
-            params={"url": url, "v": 11},
+            params={"url": url, "v": 12},
             runner=_run,
             ctx=ctx,
         )
@@ -897,7 +898,7 @@ async def instagram_channel_posts(
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 13},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 14},
             runner=_run,
             ctx=ctx,
         )
@@ -966,7 +967,7 @@ async def instagram_channel_reels(
 
         data = await cached_or_run(
             endpoint="instagram.channel-reels",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 14},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 15},
             runner=_run,
             ctx=ctx,
         )
@@ -1013,7 +1014,7 @@ async def instagram_reels_search(
 
         data = await cached_or_run(
             endpoint="instagram.reels-search",
-            params={"q": q, "limit": limit, "v": 11},
+            params={"q": q, "limit": limit, "v": 12},
             runner=_run,
             ctx=ctx,
         )
@@ -1060,8 +1061,8 @@ def _normalize_trending_item(item: dict) -> dict:
         },
         "engagement": {
             "views": safe_int(item.get("plays")),
-            "likes": safe_int(item.get("likes")) or 0,
-            "comments": safe_int(item.get("comments")) or 0,
+            "likes": decodo.hidden_count(item.get("likes")),
+            "comments": decodo.hidden_count(item.get("comments")),
         },
         "hashtags": decodo._HASHTAG_RE.findall(caption),
         "mentions": decodo._MENTION_RE.findall(caption),
@@ -1165,7 +1166,7 @@ async def instagram_trending_reels(
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit, "v": 9},
+            params={"country": country, "limit": limit, "v": 10},
             runner=_run,
             ctx=ctx,
             # Trending actor runs take minutes; serve the last list instantly
@@ -1318,7 +1319,7 @@ async def instagram_tagged_posts(
 
         data = await cached_or_run(
             endpoint="instagram.tagged-posts",
-            params={"url": url, "limit": limit, "v": 8},
+            params={"url": url, "limit": limit, "v": 9},
             runner=_run,
             ctx=ctx,
         )
@@ -1401,7 +1402,7 @@ async def instagram_hashtag_search(
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",
-            params={"q": q, "limit": limit, "v": 10},
+            params={"q": q, "limit": limit, "v": 11},
             runner=_run,
             ctx=ctx,
         )

@@ -197,18 +197,28 @@ _HASHTAG_RE = re.compile(r"#(\w*[^\W\d]\w*)", re.UNICODE)
 _MENTION_RE = re.compile(r"@([A-Za-z0-9_](?:[A-Za-z0-9_.]*[A-Za-z0-9_])?)")
 
 
+def hidden_count(value: Any) -> int | None:
+    """Instagram reports hidden like counts as -1; treat any negative count
+    as unknown (None) so it gets stripped instead of leaking -1, and missing
+    counts as 0 like the rest of the platform."""
+    n = safe_int(value)
+    if n is None:
+        return 0
+    return None if n < 0 else n
+
+
 def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
     """Drop fields we can't fill instead of returning nulls: video-only
-    fields (videoUrl, durationSeconds, views) on images/carousels, and
-    author fields the source doesn't provide (e.g. Apify post listings
-    carry no owner object)."""
+    fields (videoUrl, durationSeconds, views) on images/carousels, hidden
+    engagement counts (None), and author fields the source doesn't provide
+    (e.g. Apify post listings carry no owner object)."""
     if not post.get("videoUrl"):
         post.pop("videoUrl", None)
     if post.get("durationSeconds") is None:
         post.pop("durationSeconds", None)
     engagement = post.get("engagement")
-    if isinstance(engagement, dict) and engagement.get("views") is None:
-        engagement.pop("views", None)
+    if isinstance(engagement, dict):
+        post["engagement"] = {k: v for k, v in engagement.items() if v is not None}
     author = post.get("author")
     if isinstance(author, dict):
         post["author"] = {k: v for k, v in author.items() if v is not None}
@@ -258,8 +268,8 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         },
         "engagement": {
             "views": safe_int(node.get("video_view_count") or node.get("video_play_count") or node.get("views")),
-            "likes": _count(node.get("edge_media_preview_like")) or safe_int(node.get("likes")) or 0,
-            "comments": _count(node.get("edge_media_to_comment")) or safe_int(node.get("num_comments")) or 0,
+            "likes": hidden_count(_count(node.get("edge_media_preview_like")) or node.get("likes")),
+            "comments": hidden_count(_count(node.get("edge_media_to_comment")) or node.get("num_comments")),
         },
         "hashtags": _HASHTAG_RE.findall(caption),
         "mentions": _MENTION_RE.findall(caption),
