@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import math
 import re
+from datetime import datetime, timezone
 from typing import Any
 
 import httpx
@@ -1078,27 +1079,42 @@ async def instagram_trending_reels(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Explore scraping regularly needs >120s (sometimes >10 min); try a
-            # live run first, then fall back to the actor's latest successful
-            # run - trending content stays relevant for hours.
+            # Explore runs take ~10-12 minutes - far beyond any request
+            # timeout - so a live sync wait can never finish. Instead: serve
+            # the newest finished snapshot for this country (<=48h old),
+            # kick off a background refresh once it is older than 6h, and for
+            # a cold country join the in-flight run (or start one) and wait
+            # out the request budget before returning a clear retry hint.
             client = ApifyClient(timeout=280, max_attempts=1)
-            try:
-                items = await client.run_actor_sync(
-                    settings.APIFY_ACTOR_INSTAGRAM_TRENDING,
-                    {"max_results": limit, "download_medias": "none", "country": country},
-                    max_items=limit,
+            actor = settings.APIFY_ACTOR_INSTAGRAM_TRENDING
+            run_input = {"max_results": limit, "download_medias": "none", "country": country}
+            match = {"country": country}
+
+            def _payload(items: list[dict[str, Any]]) -> dict[str, Any]:
+                reels = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
+                ctx["source"] = "apify"
+                return {"platform": "instagram", "country": country, "totalReturned": len(reels), "reels": reels}
+
+            last = await client.last_succeeded_run(actor, max_age_secs=48 * 3600, input_match=match)
+            if last:
+                items = await client.dataset_items(last["defaultDatasetId"], max_items=limit)
+                if items:
+                    finished = datetime.fromisoformat(last["finishedAt"].replace("Z", "+00:00"))
+                    age_secs = (datetime.now(timezone.utc) - finished).total_seconds()
+                    if age_secs > 6 * 3600 and not await client.find_active_run(actor, input_match=match):
+                        await client.start_run(actor, run_input)
+                    return _payload(items)
+
+            active = await client.find_active_run(actor, input_match=match)
+            if active is None:
+                active = await client.start_run(actor, run_input)
+            items = await client.wait_for_run_items(active["id"], wait_secs=270, max_items=limit) if active else []
+            if not items:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Trending Reels for this country are being refreshed right now (Explore scraping takes ~10 minutes). Please retry in a few minutes.",
                 )
-            except ApifyError:
-                items = await client.last_succeeded_items(
-                    settings.APIFY_ACTOR_INSTAGRAM_TRENDING,
-                    max_age_secs=48 * 3600,
-                    max_items=limit,
-                )
-                if not items:
-                    raise
-            reels = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
-            ctx["source"] = "apify"
-            return {"platform": "instagram", "country": country, "totalReturned": len(reels), "reels": reels}
+            return _payload(items)
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from collections.abc import Callable
 from datetime import datetime, timezone
 from typing import Any
@@ -99,15 +100,43 @@ class ApifyClient:
         items = await self.run_actor_sync(actor_id, run_input, max_items=1)
         return items[0] if items else None
 
-    async def last_succeeded_items(
+    async def _fetch_run_input(self, client: httpx.AsyncClient, run: dict[str, Any]) -> dict[str, Any]:
+        store_id = run.get("defaultKeyValueStoreId")
+        if not store_id:
+            return {}
+        try:
+            resp = await client.get(
+                f"{self.BASE}/key-value-stores/{store_id}/records/INPUT",
+                params={"token": self.token},
+            )
+            if resp.status_code != 200:
+                return {}
+            data = resp.json()
+        except (httpx.HTTPError, ValueError):
+            return {}
+        return data if isinstance(data, dict) else {}
+
+    async def dataset_items(self, dataset_id: str, max_items: int | None = None) -> list[dict[str, Any]]:
+        try:
+            async with httpx.AsyncClient(timeout=60) as client:
+                resp = await client.get(
+                    f"{self.BASE}/datasets/{dataset_id}/items",
+                    params={"token": self.token, "clean": "1", **({"limit": max_items} if max_items else {})},
+                )
+                resp.raise_for_status()
+                items = resp.json()
+        except (httpx.HTTPError, ValueError):
+            return []
+        return items if isinstance(items, list) else []
+
+    async def last_succeeded_run(
         self,
         actor_id: str,
         max_age_secs: float,
-        max_items: int | None = None,
-    ) -> list[dict[str, Any]]:
-        """Dataset items from the actor's most recent SUCCEEDED run, if it
-        finished within ``max_age_secs``. Lets slow actors (runs > sync
-        timeout) serve slightly stale data instead of failing."""
+        input_match: dict[str, Any] | None = None,
+    ) -> dict[str, Any] | None:
+        """Most recent SUCCEEDED run that finished within ``max_age_secs``,
+        optionally restricted to runs whose INPUT contains ``input_match``."""
         actor_path = actor_id.replace("/", "~")
         try:
             async with httpx.AsyncClient(timeout=30) as client:
@@ -116,25 +145,108 @@ class ApifyClient:
                     params={"token": self.token, "desc": 1, "limit": 10, "status": "SUCCEEDED"},
                 )
                 resp.raise_for_status()
-                runs = (resp.json().get("data") or {}).get("items") or []
-                for run in runs:
+                for run in (resp.json().get("data") or {}).get("items") or []:
                     finished = run.get("finishedAt")
-                    dataset_id = run.get("defaultDatasetId")
-                    if not (finished and dataset_id):
+                    if not (finished and run.get("defaultDatasetId")):
                         continue
                     finished_dt = datetime.fromisoformat(finished.replace("Z", "+00:00"))
                     if (datetime.now(timezone.utc) - finished_dt).total_seconds() > max_age_secs:
+                        return None
+                    if input_match:
+                        run_input = await self._fetch_run_input(client, run)
+                        if any(run_input.get(k) != v for k, v in input_match.items()):
+                            continue
+                    return run
+        except httpx.HTTPError:
+            return None
+        return None
+
+    async def last_succeeded_items(
+        self,
+        actor_id: str,
+        max_age_secs: float,
+        max_items: int | None = None,
+        input_match: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Dataset items from the actor's most recent SUCCEEDED run, if it
+        finished within ``max_age_secs``. Lets slow actors (runs > sync
+        timeout) serve slightly stale data instead of failing."""
+        run = await self.last_succeeded_run(actor_id, max_age_secs, input_match)
+        if not run:
+            return []
+        return await self.dataset_items(run["defaultDatasetId"], max_items=max_items)
+
+    async def start_run(self, actor_id: str, run_input: dict[str, Any]) -> dict[str, Any] | None:
+        """Fire-and-forget actor run; returns the run object or None."""
+        actor_path = actor_id.replace("/", "~")
+        try:
+            async with httpx.AsyncClient(timeout=30) as client:
+                resp = await client.post(
+                    f"{self.BASE}/acts/{actor_path}/runs",
+                    params={"token": self.token},
+                    json=run_input,
+                )
+                resp.raise_for_status()
+                return (resp.json().get("data") or {}) or None
+        except httpx.HTTPError:
+            return None
+
+    async def find_active_run(
+        self, actor_id: str, input_match: dict[str, Any] | None = None
+    ) -> dict[str, Any] | None:
+        """Newest READY/RUNNING run, optionally matching INPUT — used to join
+        an in-flight run instead of paying for a duplicate."""
+        actor_path = actor_id.replace("/", "~")
+        try:
+            async with httpx.AsyncClient(timeout=30) as client:
+                resp = await client.get(
+                    f"{self.BASE}/acts/{actor_path}/runs",
+                    params={"token": self.token, "desc": 1, "limit": 10},
+                )
+                resp.raise_for_status()
+                for run in (resp.json().get("data") or {}).get("items") or []:
+                    if run.get("status") not in ("READY", "RUNNING"):
+                        continue
+                    if input_match:
+                        run_input = await self._fetch_run_input(client, run)
+                        if any(run_input.get(k) != v for k, v in input_match.items()):
+                            continue
+                    return run
+        except httpx.HTTPError:
+            return None
+        return None
+
+    async def wait_for_run_items(
+        self,
+        run_id: str,
+        wait_secs: float,
+        max_items: int | None = None,
+    ) -> list[dict[str, Any]]:
+        """Poll a run until it finishes or ``wait_secs`` elapses; returns its
+        dataset items on success, [] otherwise (the run keeps going)."""
+        deadline = time.monotonic() + wait_secs
+        try:
+            async with httpx.AsyncClient(timeout=90) as client:
+                while True:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
                         return []
-                    items_resp = await client.get(
-                        f"{self.BASE}/datasets/{dataset_id}/items",
-                        params={"token": self.token, "clean": "1", **({"limit": max_items} if max_items else {})},
+                    resp = await client.get(
+                        f"{self.BASE}/actor-runs/{run_id}",
+                        params={"token": self.token, "waitForFinish": int(min(60, max(1, remaining)))},
                     )
-                    items_resp.raise_for_status()
-                    items = items_resp.json()
-                    return items if isinstance(items, list) else []
+                    resp.raise_for_status()
+                    run = resp.json().get("data") or {}
+                    status = run.get("status")
+                    if status == "SUCCEEDED":
+                        dataset_id = run.get("defaultDatasetId")
+                        if not dataset_id:
+                            return []
+                        return await self.dataset_items(dataset_id, max_items=max_items)
+                    if status in ("FAILED", "ABORTED", "ABORTING", "TIMED-OUT"):
+                        return []
         except httpx.HTTPError:
             return []
-        return []
 
     async def run_with_fallback(
         self,
