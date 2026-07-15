@@ -4199,64 +4199,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   },
-  "instagram-music-posts": {
-    "url": "https://www.instagram.com/reels/audio/27919946310946207/",
-    "totalReturned": 2,
-    "posts": [
-      {
-        "platform": "instagram",
-        "url": "https://www.instagram.com/reel/DaSip_jgfgL/",
-        "id": "DaSip_jgfgL",
-        "caption": "A moment of awe. While searching for the Seven Natural Wonders of America, @debrobertsabc and National Geographic Explorer James Edward Mills (@thejoytripproject) captured this beautiful view. Can you guess where they are? \n\nDiscover more beauty and nature in the final Wonders of America list, revealed during the 24-hour “Disney Celebrates America” live event special on July 4th on ABC, Disney+ and Nat Geo.",
-        "description": "A moment of awe. While searching for the Seven Natural Wonders of America, @debrobertsabc and National Geographic Explorer James Edward Mills (@thejoytripproject) captured this beautiful view. Can you guess where they are? \n\nDiscover more beauty and nature in the final Wonders of America list, revealed during the 24-hour “Disney Celebrates America” live event special on July 4th on ABC, Disney+ and Nat Geo.",
-        "publishedAt": "2026-07-02T12:00:36.000Z",
-        "durationSeconds": 11.766,
-        "thumbnailUrl": "https://scontent-mxp2-1.cdninstagram.com/v/t51.82787-19/683576066_18653628823019133_9051036240972105113_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby40MDAuYzIifQ&_nc_ht=scontent-mxp2-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gGoauyYeSfZkgkzuskEm26QARlDJEcSqzdC_9B6OMzipJ33nGRLjwO8riaS3xMTH34&_nc_ohc=2USYwZYX5iAQ7kNvwFScCyk&_nc_gid=aXQYEIoxBtj95Q5qiz5xjg&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQAPSvHeTbwIvdXUceHDrVFF7FnagjhbsfstM6fNXjipow&oe=6A4DC0EB&_nc_sid=10d13b",
-        "videoUrl": "https://scontent-mxp2-1.cdninstagram.com/o1/v/t2/f2/m86/AQNm7Q5NYwBbSA4Vve0iRre5MLeKDljn9vqPN8i0TZf3FeZZPqrhcercZFtrix4mhl9VzcRx5LCOVhf4ogU2MyOH_nTUdLv7h_iUeT4.mp4?_nc_cat=100&_nc_sid=5e9851&_nc_ht=scontent-mxp2-1.cdninstagram.com&_nc_ohc=XNGgU029RsUQ7kNvwFpFA5h&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTg2NzI0ODIzNjgwMTkxMzMsImFzc2V0X2FnZV9kYXlzIjoxLCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6MTEsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=a3ed5364566742cd&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC84NzQ3RjZBOUFBOUUwQTVFQjY1OUY0RUMwQTVBMjZBM192aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzYyNDQ4QjdCMTVDNEVBN0U1OTkzODZFNTAyNUNCQkJEX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACb66vbpwqGrQhUCKAJDMywXQCeIMSbpeNUYEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=aXQYEIoxBtj95Q5qiz5xjg&_nc_ss=72a8c&_nc_zt=28&oh=00_AQD2yojG2Npon86MnBXXeJoaGrQEAN-MqppodXMm3CmIig&oe=6A49C515",
-        "author": {
-          "username": "natgeo",
-          "displayName": "National Geographic",
-          "url": "https://instagram.com/natgeo",
-          "followers": null,
-          "verified": true,
-          "profileImage": "https://scontent-mxp2-1.cdninstagram.com/v/t51.82787-19/683576066_18653628823019133_9051036240972105113_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby40MDAuYzIifQ&_nc_ht=scontent-mxp2-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gGoauyYeSfZkgkzuskEm26QARlDJEcSqzdC_9B6OMzipJ33nGRLjwO8riaS3xMTH34&_nc_ohc=2USYwZYX5iAQ7kNvwFScCyk&_nc_gid=aXQYEIoxBtj95Q5qiz5xjg&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQAPSvHeTbwIvdXUceHDrVFF7FnagjhbsfstM6fNXjipow&oe=6A4DC0EB&_nc_sid=10d13b"
-        },
-        "engagement": {
-          "views": 2288496,
-          "likes": 81781,
-          "comments": 710
-        },
-        "musicId": "27919946310946207",
-        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/"
-      },
-      {
-        "platform": "instagram",
-        "url": "https://www.instagram.com/reel/DaSoYW5RAFe/",
-        "id": "DaSoYW5RAFe",
-        "caption": null,
-        "description": null,
-        "publishedAt": "2026-07-02T12:50:41.000Z",
-        "durationSeconds": 11.766,
-        "thumbnailUrl": "https://scontent-mxp2-1.cdninstagram.com/v/t51.2885-19/472395903_1632557347342739_3603961920398839795_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-mxp2-1.cdninstagram.com&_nc_cat=111&_nc_oc=Q6cZ2gGoauyYeSfZkgkzuskEm26QARlDJEcSqzdC_9B6OMzipJ33nGRLjwO8riaS3xMTH34&_nc_ohc=Ka9xCJiNlFgQ7kNvwFE0TIP&_nc_gid=aXQYEIoxBtj95Q5qiz5xjg&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQA3ldR8AcGDBWyMqMRy7Xab6gFOGHJXZhvnm7Jbh9zqrw&oe=6A4DBDF7&_nc_sid=10d13b",
-        "videoUrl": "https://scontent-mxp1-1.cdninstagram.com/o1/v/t2/f2/m86/AQOxaTUHwRMH1LR-qCjmwWf12s4DxYfj7jftlu4IAIUDV6xXlXo9CYOpfl8h1OV0TPbsnrarq_XCy8AFiVgZYjgxRA7Ax3hq2w3dF8A.mp4?_nc_cat=103&_nc_sid=5e9851&_nc_ht=scontent-mxp1-1.cdninstagram.com&_nc_ohc=yicUpp1mJscQ7kNvwFmTtLO&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTAzMDA1NTg5OTQ5OTIzNiwiYXNzZXRfYWdlX2RheXMiOjEsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjoxMSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=5c909a2f905a09ca&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC82NTRCRDYxNzM1MkIzOURCRDNEREJBNzA3Njk2OUVBOF92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzU1NDY5NTYxNkZDMTJDNjZGMTczMzcyRDRGOEEyNDkwX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACbIq-i_krXUAxUCKAJDMywXQCeIMSbpeNUYEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=aXQYEIoxBtj95Q5qiz5xjg&_nc_ss=72289&_nc_zt=28&oh=00_AQBLJuDv7QIDwoKAGtTstgMUAB5jy41iPdgbq5SmERSmdg&oe=6A49BEEC",
-        "author": {
-          "username": "millan7885",
-          "displayName": "Angélica Millán Ortega",
-          "url": "https://instagram.com/millan7885",
-          "followers": null,
-          "verified": false,
-          "profileImage": "https://scontent-mxp2-1.cdninstagram.com/v/t51.2885-19/472395903_1632557347342739_3603961920398839795_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-mxp2-1.cdninstagram.com&_nc_cat=111&_nc_oc=Q6cZ2gGoauyYeSfZkgkzuskEm26QARlDJEcSqzdC_9B6OMzipJ33nGRLjwO8riaS3xMTH34&_nc_ohc=Ka9xCJiNlFgQ7kNvwFE0TIP&_nc_gid=aXQYEIoxBtj95Q5qiz5xjg&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQA3ldR8AcGDBWyMqMRy7Xab6gFOGHJXZhvnm7Jbh9zqrw&oe=6A4DBDF7&_nc_sid=10d13b"
-        },
-        "engagement": {
-          "views": 163,
-          "likes": 8,
-          "comments": 0
-        },
-        "musicId": "27919946310946207",
-        "musicUrl": "https://www.instagram.com/reels/audio/27919946310946207/"
-      }
-    ]
-  },
   "instagram-profile-search": {
     "query": "fitness",
     "totalReturned": 2,

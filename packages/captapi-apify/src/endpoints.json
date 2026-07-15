@@ -68,6 +68,12 @@
         "type": "string",
         "required": true,
         "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -90,6 +96,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -106,6 +118,12 @@
         "type": "string",
         "required": true,
         "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC..."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -128,6 +146,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -156,6 +180,12 @@
         "type": "boolean",
         "required": false,
         "description": "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -184,6 +214,12 @@
         "type": "boolean",
         "required": false,
         "description": "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -212,6 +248,12 @@
         "type": "boolean",
         "required": false,
         "description": "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -228,6 +270,12 @@
         "type": "string",
         "required": true,
         "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -300,6 +348,12 @@
         "type": "string",
         "required": true,
         "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -322,6 +376,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -344,6 +404,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -366,6 +432,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -388,6 +460,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -410,6 +488,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -438,6 +522,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -460,6 +550,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -482,6 +578,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -498,6 +600,12 @@
         "type": "string",
         "required": true,
         "description": "YouTube community post URL."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -514,6 +622,12 @@
         "type": "string",
         "required": true,
         "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -586,6 +700,12 @@
         "type": "string",
         "required": true,
         "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -608,6 +728,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -624,6 +750,12 @@
         "type": "string",
         "required": true,
         "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -640,6 +772,12 @@
         "type": "string",
         "required": true,
         "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -656,6 +794,12 @@
         "type": "string",
         "required": true,
         "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -678,6 +822,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -712,6 +862,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -728,6 +884,12 @@
         "type": "string",
         "required": true,
         "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -750,6 +912,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -778,6 +946,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -800,6 +974,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -822,6 +1002,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -844,6 +1030,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -866,6 +1058,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -888,6 +1086,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -910,6 +1114,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -926,6 +1136,12 @@
         "type": "string",
         "required": true,
         "description": "TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -948,6 +1164,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -970,6 +1192,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -986,6 +1214,12 @@
         "type": "string",
         "required": true,
         "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1002,6 +1236,12 @@
         "type": "string",
         "required": true,
         "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1036,6 +1276,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1108,6 +1354,12 @@
         "type": "string",
         "required": true,
         "description": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1130,6 +1382,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1146,6 +1404,12 @@
         "type": "string",
         "required": true,
         "description": "Instagram profile URL, e.g. https://instagram.com/username/."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1174,6 +1438,12 @@
         "type": "string",
         "required": false,
         "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1202,6 +1472,12 @@
         "type": "string",
         "required": false,
         "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1224,6 +1500,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1246,6 +1528,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1262,6 +1550,12 @@
         "type": "string",
         "required": true,
         "description": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1284,28 +1578,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
-      }
-    ]
-  },
-  {
-    "tool": "instagram_music_posts",
-    "platform": "instagram",
-    "name": "Instagram Music Posts",
-    "path": "/v1/instagram/music-posts",
-    "credits": 18,
-    "summary": "Posts/Reels using an Instagram audio.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Instagram audio/music page URL."
       },
       {
-        "name": "limit",
-        "type": "number",
+        "name": "cache",
+        "type": "boolean",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1328,6 +1606,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1350,6 +1634,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1372,6 +1662,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1388,6 +1684,12 @@
         "type": "string",
         "required": true,
         "description": "Instagram profile URL, e.g. https://instagram.com/username/."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1410,6 +1712,12 @@
         "type": "number",
         "required": false,
         "description": "Max highlights to expand. Default 10, max 50."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1426,6 +1734,12 @@
         "type": "string",
         "required": true,
         "description": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1442,6 +1756,12 @@
         "type": "string",
         "required": true,
         "description": "Instagram profile URL, e.g. https://instagram.com/username/."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1458,6 +1778,12 @@
         "type": "string",
         "required": true,
         "description": "Public Facebook video or post URL."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1524,6 +1850,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1540,6 +1872,12 @@
         "type": "string",
         "required": true,
         "description": "Facebook page URL, e.g. https://facebook.com/PageName."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1562,6 +1900,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1584,6 +1928,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1606,6 +1956,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1634,6 +1990,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1668,6 +2030,12 @@
         "type": "string",
         "required": false,
         "description": "Set true to fetch full description, photos and coordinates per listing (slower, costs more)."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1690,6 +2058,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 10, max 50. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1712,6 +2086,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1728,6 +2108,12 @@
         "type": "string",
         "required": true,
         "description": "Facebook event URL, e.g. https://facebook.com/events/ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1750,6 +2136,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1772,6 +2164,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1788,6 +2186,12 @@
         "type": "string",
         "required": true,
         "description": "Facebook Marketplace item URL."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1804,6 +2208,12 @@
         "type": "string",
         "required": true,
         "description": "Public tweet URL, e.g. https://x.com/user/status/ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1842,6 +2252,12 @@
         "type": "string",
         "required": true,
         "description": "Twitter/X profile URL or @handle, e.g. https://x.com/username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1864,6 +2280,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1886,6 +2308,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1902,6 +2330,12 @@
         "type": "string",
         "required": true,
         "description": "X community URL (x.com/i/communities/ID) or community ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1924,6 +2358,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1946,6 +2386,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1962,6 +2408,12 @@
         "type": "string",
         "required": true,
         "description": "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/..."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -1984,6 +2436,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2006,6 +2464,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2028,6 +2492,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2044,6 +2514,12 @@
         "type": "string",
         "required": true,
         "description": "Subreddit URL, r/name, or bare name, e.g. r/technology."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2072,6 +2548,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2088,6 +2570,12 @@
         "type": "string",
         "required": true,
         "description": "Threads profile URL or @handle, e.g. https://threads.net/@username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2110,6 +2598,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2126,6 +2620,12 @@
         "type": "string",
         "required": true,
         "description": "Threads post URL, e.g. https://threads.net/@user/post/CODE."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2148,6 +2648,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2170,6 +2676,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2186,6 +2698,12 @@
         "type": "string",
         "required": true,
         "description": "Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2208,6 +2726,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2224,6 +2748,12 @@
         "type": "string",
         "required": true,
         "description": "Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2240,6 +2770,12 @@
         "type": "string",
         "required": true,
         "description": "Pinterest pin URL, e.g. https://pinterest.com/pin/ID/."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2262,6 +2798,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2284,6 +2826,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2306,6 +2854,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2328,6 +2882,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2344,6 +2904,12 @@
         "type": "string",
         "required": true,
         "description": "LinkedIn profile URL, e.g. https://linkedin.com/in/slug."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2360,6 +2926,12 @@
         "type": "string",
         "required": true,
         "description": "LinkedIn company URL, e.g. https://linkedin.com/company/slug."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2376,6 +2948,12 @@
         "type": "string",
         "required": true,
         "description": "LinkedIn post or activity URL."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2392,6 +2970,12 @@
         "type": "string",
         "required": true,
         "description": "LinkedIn post or activity URL."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2414,6 +2998,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2442,6 +3032,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 50. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2458,6 +3054,12 @@
         "type": "string",
         "required": true,
         "description": "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2480,6 +3082,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2502,6 +3110,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2524,6 +3138,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2552,6 +3172,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2574,6 +3200,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2590,6 +3222,12 @@
         "type": "string",
         "required": true,
         "description": "TikTok Shop product URL."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2612,6 +3250,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2634,6 +3278,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2650,6 +3300,12 @@
         "type": "string",
         "required": true,
         "description": "GitHub username or profile URL."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2672,6 +3328,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 30, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2688,6 +3350,12 @@
         "type": "string",
         "required": true,
         "description": "Repository URL or owner/name."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2716,6 +3384,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 30, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2738,6 +3412,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 30, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2760,6 +3440,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 30, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2782,6 +3468,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 30, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2798,6 +3490,12 @@
         "type": "string",
         "required": true,
         "description": "GitHub username or profile URL."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2820,6 +3518,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2842,6 +3546,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2876,6 +3586,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 10, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2892,6 +3608,12 @@
         "type": "string",
         "required": true,
         "description": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2914,6 +3636,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 30. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2930,6 +3658,12 @@
         "type": "string",
         "required": true,
         "description": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -2946,6 +3680,12 @@
         "type": "string",
         "required": true,
         "description": "Twitch clip URL, channel URL, or username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3040,6 +3780,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 50. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3090,6 +3836,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 50. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3106,6 +3858,12 @@
         "type": "string",
         "required": true,
         "description": "SoundCloud artist profile URL or username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3128,6 +3886,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3144,6 +3908,12 @@
         "type": "string",
         "required": true,
         "description": "SoundCloud track URL."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3160,6 +3930,12 @@
         "type": "string",
         "required": true,
         "description": "Linktree profile URL or username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3176,6 +3952,12 @@
         "type": "string",
         "required": true,
         "description": "Snapchat username or profile URL."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3192,6 +3974,12 @@
         "type": "string",
         "required": true,
         "description": "Truth Social profile URL or @username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3214,6 +4002,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 80. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3230,6 +4024,12 @@
         "type": "string",
         "required": true,
         "description": "Truth Social post URL or post ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3252,6 +4052,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 30, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3280,6 +4086,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3302,6 +4114,12 @@
         "type": "string",
         "required": false,
         "description": "Optional comma-separated list of names."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3381,6 +4199,12 @@
         "type": "string",
         "required": true,
         "description": "Kwai/Kuaishou profile URL or user ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3403,6 +4227,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3419,6 +4249,12 @@
         "type": "string",
         "required": true,
         "description": "Kwai/Kuaishou post URL or video/photo ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3435,6 +4271,12 @@
         "type": "string",
         "required": true,
         "description": "Komi page URL or username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3451,6 +4293,12 @@
         "type": "string",
         "required": true,
         "description": "Pillar page URL or username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3467,6 +4315,12 @@
         "type": "string",
         "required": true,
         "description": "Linkbio page URL or username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3483,6 +4337,12 @@
         "type": "string",
         "required": true,
         "description": "Linkme profile URL or username."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3511,6 +4371,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3539,6 +4405,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3567,6 +4439,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3583,6 +4461,12 @@
         "type": "string",
         "required": true,
         "description": "Meta Ad Library ad URL."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3599,6 +4483,12 @@
         "type": "string",
         "required": true,
         "description": "Meta Ad Library ad URL or ad ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3627,6 +4517,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3649,6 +4545,12 @@
         "type": "string",
         "required": false,
         "description": "ISO country code. Default DE."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3677,6 +4579,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3699,6 +4607,12 @@
         "type": "string",
         "required": false,
         "description": "ISO country code. Default US."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3727,6 +4641,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 10, max 50. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3755,6 +4675,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   },
@@ -3771,6 +4697,12 @@
         "type": "string",
         "required": true,
         "description": "LinkedIn Ad Library URL or ad ID."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
       }
     ]
   }

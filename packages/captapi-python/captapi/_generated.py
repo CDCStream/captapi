@@ -963,15 +963,6 @@ class InstagramApi:
         """
         return self._t.get("/v1/instagram/tagged-posts", {"url": url, "limit": limit, "cache": cache})
 
-    def music_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Music Posts — Posts/Reels using an Instagram audio. (18 credits)
-
-        :param url: Instagram audio/music page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
-        """
-        return self._t.get("/v1/instagram/music-posts", {"url": url, "limit": limit, "cache": cache})
-
     def reels_by_audio_id(self, *, audio_id: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Reels By Audio ID — Posts/Reels using an Instagram audio ID. (28 credits)
 
@@ -1134,15 +1125,6 @@ class AsyncInstagramApi:
         :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
         return await self._t.get("/v1/instagram/tagged-posts", {"url": url, "limit": limit, "cache": cache})
-
-    async def music_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Music Posts — Posts/Reels using an Instagram audio. (18 credits)
-
-        :param url: Instagram audio/music page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
-        """
-        return await self._t.get("/v1/instagram/music-posts", {"url": url, "limit": limit, "cache": cache})
 
     async def reels_by_audio_id(self, *, audio_id: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Reels By Audio ID — Posts/Reels using an Instagram audio ID. (28 credits)

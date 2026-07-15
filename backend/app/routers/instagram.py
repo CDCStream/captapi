@@ -1349,48 +1349,6 @@ async def instagram_tagged_posts(
         return ApiResponse(data=data)
 
 
-@router.get("/music-posts", summary="Posts/Reels using an Instagram audio")
-async def instagram_music_posts(
-    url: str = Query(..., description="Instagram audio/music page URL"),
-    limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
-    caller: ApiCaller = Depends(require_api_key),
-):
-    _reject_instagram_platform_mismatch(url, "https://www.instagram.com/reels/audio/123456789/")
-    settings = get_settings()
-    cost = _scaled_credits(limit, RATE_IG_RICH, 3)
-    async with billed_call(
-        caller=caller,
-        endpoint="/v1/instagram/music-posts",
-        platform="instagram",
-        resource_url=url,
-        base_credits=cost,
-    ) as ctx:
-        async def _run() -> dict[str, Any]:
-            async def _apify() -> dict[str, Any]:
-                apify = get_apify()
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_INSTAGRAM_AUDIO,
-                    {"audioUrls": [url], "maxResults": limit, "downloadVideos": False},
-                    max_items=limit,
-                )
-                posts = [_normalize_audio_reel(i) for i in items[:limit] if not i.get("error")]
-                return {"url": url, "totalReturned": len(posts), "posts": posts}
-
-            ctx["source"] = "apify"
-            return await _apify()
-
-        data = await cached_or_run(
-            endpoint="instagram.music-posts",
-            params={"url": url, "limit": limit, "v": 4},
-            runner=_run,
-            ctx=ctx,
-            use_cache=cache,
-        )
-        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_RICH, 3)
-        return ApiResponse(data=data)
-
-
 @router.get("/hashtag-search", summary="Search Instagram posts by hashtag")
 async def instagram_hashtag_search(
     q: str = Query(..., min_length=2, description="Hashtag (without #)"),

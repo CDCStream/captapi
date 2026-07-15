@@ -81,7 +81,6 @@ const INPUTS = {
   "instagram-reels-search": ["--q", "travel", "--limit", L],
   "instagram-video-download": ["--url", IG_REEL],
   "instagram-tagged-posts": ["--url", IG_PROFILE, "--limit", L],
-  "instagram-music-posts": ["--url", IG_AUDIO, "--limit", L],
   "instagram-hashtag-search": ["--q", "travel", "--limit", L],
   "instagram-profile-search": ["--q", "nasa", "--limit", L],
   "instagram-story-highlights": ["--url", IG_PROFILE],

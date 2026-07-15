@@ -707,15 +707,6 @@ export interface InstagramTaggedPostsParams {
   cache?: boolean;
 }
 
-export interface InstagramMusicPostsParams {
-  /** Instagram audio/music page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
-  limit?: number;
-  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
-  cache?: boolean;
-}
-
 export interface InstagramReelsByAudioIdParams {
   /** Instagram audio/music ID or full audio URL. */
   audio_id: string;
@@ -818,10 +809,6 @@ export class InstagramApi {
   /** Instagram Tagged Posts — Posts an Instagram user is tagged in. (18 credits) */
   taggedPosts(params: InstagramTaggedPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/tagged-posts", params);
-  }
-  /** Instagram Music Posts — Posts/Reels using an Instagram audio. (18 credits) */
-  musicPosts(params: InstagramMusicPostsParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/instagram/music-posts", params);
   }
   /** Instagram Reels By Audio ID — Posts/Reels using an Instagram audio ID. (28 credits) */
   reelsByAudioId(params: InstagramReelsByAudioIdParams): Promise<ApiEnvelope> {

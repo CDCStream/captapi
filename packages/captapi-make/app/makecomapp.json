@@ -1005,23 +1005,6 @@
           "scope": null
         }
       },
-      "instagramMusicPosts": {
-        "label": "Instagram Music Posts",
-        "description": "Posts/Reels using an Instagram audio. Costs ~18 credits (cached results free, failures never charged).",
-        "connection": "captapi",
-        "altConnection": null,
-        "webhook": null,
-        "moduleType": "action",
-        "actionCrud": "read",
-        "codeFiles": {
-          "communication": "modules/instagramMusicPosts/communication.iml.json",
-          "staticParams": null,
-          "mappableParams": "modules/instagramMusicPosts/mappable-params.iml.json",
-          "interface": null,
-          "samples": null,
-          "scope": null
-        }
-      },
       "instagramReelsByAudioId": {
         "label": "Instagram Reels By Audio ID",
         "description": "Posts/Reels using an Instagram audio ID. Costs ~28 credits (cached results free, failures never charged).",

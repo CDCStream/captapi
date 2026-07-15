@@ -13,6 +13,17 @@ const nextConfig = {
       { source: "/.well-known/llms-full.txt", destination: "/llms-full.txt" },
     ];
   },
+  async redirects() {
+    return [
+      // instagram-music-posts was removed (duplicate of reels-by-audio-id,
+      // same scraper and data); keep old docs links alive.
+      {
+        source: "/apis/instagram-music-posts",
+        destination: "/apis/instagram-reels-by-audio-id",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

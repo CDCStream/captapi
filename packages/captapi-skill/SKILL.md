@@ -158,7 +158,6 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `instagram_trending_reels` | `/v1/instagram/trending-reels` | `country`? (string), `limit`? (number) | 28 |
 | `instagram_video_download` | `/v1/instagram/video-download` | `url` (string) | 3 |
 | `instagram_tagged_posts` | `/v1/instagram/tagged-posts` | `url` (string), `limit`? (number) | 18 |
-| `instagram_music_posts` | `/v1/instagram/music-posts` | `url` (string), `limit`? (number) | 18 |
 | `instagram_reels_by_audio_id` | `/v1/instagram/reels-by-audio-id` | `audio_id` (string), `limit`? (number) | 28 |
 | `instagram_hashtag_search` | `/v1/instagram/hashtag-search` | `q` (string), `limit`? (number) | 12 |
 | `instagram_profile_search` | `/v1/instagram/profile-search` | `q` (string), `limit`? (number) | 12 |

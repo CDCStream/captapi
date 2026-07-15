@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-15",
     category: "improvement",
+    title: "Instagram Music Posts API retired",
+    description:
+      "The Instagram Music Posts API has been removed — it was a duplicate of the Instagram Reels By Audio ID API (same scraper, same data) at a higher price. Use Reels By Audio ID instead; it accepts both audio IDs and full audio page URLs.",
+    items: [
+      "GET /v1/instagram/music-posts no longer exists (returns 404)",
+      "Migrate to GET /v1/instagram/reels-by-audio-id — pass your audio page URL or the numeric audio ID as audio_id",
+      "Old docs links redirect to the Reels By Audio ID page automatically",
+    ],
+  },
+  {
+    publishedAt: "2026-07-15",
+    category: "improvement",
     title: "cache=false parameter on every endpoint",
     description:
       "Every data endpoint now accepts an optional cache=false query parameter to bypass the cache and always fetch fresh data. Previously only transcript, summarizer, and Spotify endpoints supported it.",

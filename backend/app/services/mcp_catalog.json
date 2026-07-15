@@ -1588,34 +1588,6 @@
     ]
   },
   {
-    "tool": "instagram_music_posts",
-    "platform": "instagram",
-    "name": "Instagram Music Posts",
-    "path": "/v1/instagram/music-posts",
-    "credits": 18,
-    "summary": "Posts/Reels using an Instagram audio.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Instagram audio/music page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
-      }
-    ]
-  },
-  {
     "tool": "instagram_reels_by_audio_id",
     "platform": "instagram",
     "name": "Instagram Reels By Audio ID",
