@@ -12,8 +12,10 @@ this doc_id is its replacement.
 
 from __future__ import annotations
 
+import base64
 import json
 import re
+import urllib.parse
 from datetime import datetime, timezone
 from typing import Any
 
@@ -45,13 +47,15 @@ async def fetch_reel_media(shortcode: str) -> dict[str, Any] | None:
     media = await _fetch_item(shortcode)
     if media is None:
         return None
-    videos = media.get("video_versions") or []
+    # Reels can be carousels; the playable video lives on the cover child.
+    cover = (media.get("carousel_media") or [media])[0]
+    videos = media.get("video_versions") or cover.get("video_versions") or []
     images = (media.get("image_versions2") or {}).get("candidates") or []
     caption = media.get("caption")
     return {
         "videoUrl": safe_str(videos[0].get("url")) if videos else None,
         "thumbnailUrl": safe_str(images[0].get("url")) if images else None,
-        "duration": safe_float(media.get("video_duration")),
+        "duration": _video_duration(media, cover),
         "caption": safe_str(caption.get("text")) if isinstance(caption, dict) else None,
         "username": safe_str((media.get("user") or {}).get("username")),
     }
@@ -72,6 +76,24 @@ _MPD_DURATION_RE = re.compile(
 )
 
 
+def _duration_from_video_url(url: str) -> float | None:
+    """Instagram CDN video URLs embed the duration in the base64 ``efg`` query
+    param (JSON with a ``duration_s`` field). Coarse (integer seconds) but a
+    useful fallback when the media object omits video_duration/dash manifest."""
+    if not url:
+        return None
+    try:
+        efg = urllib.parse.parse_qs(urllib.parse.urlparse(url).query).get("efg", [None])[0]
+        if not efg:
+            return None
+        padded = efg + "=" * (-len(efg) % 4)
+        blob = json.loads(base64.urlsafe_b64decode(padded).decode("utf-8", "ignore"))
+        dur = safe_float(blob.get("duration_s"))
+        return round(dur, 3) if dur else None
+    except (ValueError, TypeError, json.JSONDecodeError):
+        return None
+
+
 def _video_duration(media: dict[str, Any], cover: dict[str, Any]) -> float | None:
     direct = safe_float(media.get("video_duration") or cover.get("video_duration"))
     if direct:
@@ -79,10 +101,11 @@ def _video_duration(media: dict[str, Any], cover: dict[str, Any]) -> float | Non
     m = _MPD_DURATION_RE.search(
         safe_str(media.get("video_dash_manifest") or cover.get("video_dash_manifest")) or ""
     )
-    if not m:
-        return None
-    hours, minutes, seconds = int(m.group(1) or 0), int(m.group(2) or 0), float(m.group(3))
-    return round(hours * 3600 + minutes * 60 + seconds, 3)
+    if m:
+        hours, minutes, seconds = int(m.group(1) or 0), int(m.group(2) or 0), float(m.group(3))
+        return round(hours * 3600 + minutes * 60 + seconds, 3)
+    videos = media.get("video_versions") or cover.get("video_versions") or []
+    return _duration_from_video_url(safe_str(videos[0].get("url")) if videos else "")
 
 
 async def fetch_post_details(shortcode: str) -> dict[str, Any] | None:

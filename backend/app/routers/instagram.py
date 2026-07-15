@@ -1193,13 +1193,16 @@ async def instagram_video_download(
             native = await instagram_native.fetch_reel_media(_require_instagram_post_url(url))
             if native and safe_str(native.get("videoUrl")):
                 ctx["source"] = "direct"
-                return {
+                result = {
                     "platform": "instagram",
                     "url": url,
                     "downloadUrl": safe_str(native.get("videoUrl")),
                     "thumbnailUrl": safe_str(native.get("thumbnailUrl")),
                     "duration": safe_float(native.get("duration")),
                 }
+                if result["duration"] is None:
+                    result.pop("duration")
+                return result
 
             ctx["source"] = "apify"
             apify = get_apify()
@@ -1213,17 +1216,23 @@ async def instagram_video_download(
             download_url = safe_str(v.get("videoUrl") or v.get("video_url") or v.get("downloadUrl"))
             if not download_url:
                 raise HTTPException(status_code=404, detail="Video download URL not found")
-            return {
+            duration = safe_float(v.get("videoDuration") or v.get("duration") or v.get("durationSeconds"))
+            if duration is None:
+                duration = instagram_native._duration_from_video_url(download_url)
+            result = {
                 "platform": "instagram",
                 "url": url,
                 "downloadUrl": download_url,
                 "thumbnailUrl": safe_str(v.get("displayUrl") or v.get("thumbnailUrl") or v.get("thumbnail")),
-                "duration": safe_float(v.get("videoDuration") or v.get("duration") or v.get("durationSeconds")),
+                "duration": duration,
             }
+            if duration is None:
+                result.pop("duration")
+            return result
 
         data = await cached_or_run(
             endpoint="instagram.video-download",
-            params={"url": url, "v": 7},
+            params={"url": url, "v": 8},
             runner=_run,
             ctx=ctx,
             ttl=3600,
