@@ -1901,10 +1901,358 @@ export function platformFaqs(group: PlatformGroup): FaqItem[] {
 }
 
 // ---------------------------------------------------------------------------
-// Response structure (per category)
+// Response structure
 // ---------------------------------------------------------------------------
+// Derived from the real captured example for each endpoint so the documented
+// fields always match what the API actually returns. The per-category switch
+// below is only a fallback for endpoints without a snapshot.
+
+/** Human descriptions for well-known response fields. */
+const FIELD_DESCS: Record<string, string> = {
+  // Identity / linking
+  platform: "Platform identifier (e.g. youtube, instagram).",
+  id: "Stable platform ID for the item.",
+  url: "Canonical URL of the item.",
+  uri: "Platform URI for the item.",
+  slug: "URL slug of the item.",
+  shortcode: "Instagram shortcode of the post.",
+  permalink: "Permanent URL of the post.",
+  query: "The search query you sent.",
+  totalReturned: "Number of items returned in this response.",
+  nextCursor: "Cursor to pass for the next page of results.",
+  raw: "Raw upstream payload for advanced use (fields may change).",
+
+  // People / profiles
+  username: "Account username / handle.",
+  handle: "Account handle.",
+  login: "Account login name.",
+  displayName: "Display name of the account.",
+  name: "Name of the item or account.",
+  fullName: "Full display name.",
+  firstName: "First name.",
+  lastName: "Last name.",
+  author: "Author name or handle.",
+  bio: "Profile bio or description.",
+  headline: "Profile headline.",
+  verified: "Whether the account is verified.",
+  isVerified: "Whether the account is verified.",
+  private: "Whether the account is private.",
+  followers: "Follower count.",
+  following: "Number of accounts followed.",
+  followings: "Number of accounts followed.",
+  subscriberCount: "Subscriber count.",
+  connections: "Number of connections.",
+  members: "Member count.",
+  postCount: "Total number of posts.",
+  videoCount: "Total number of videos.",
+  tweetCount: "Total number of tweets.",
+  mediaCount: "Total number of media posts.",
+  location: "Location shown on the profile or item.",
+  website: "Website listed on the profile.",
+  email: "Public email address, when exposed.",
+  joinedDate: "When the account was created.",
+
+  // Content
+  title: "Title of the item.",
+  text: "Text content.",
+  description: "Description text.",
+  caption: "Post caption.",
+  publishedAt: "Publish date (ISO 8601).",
+  createdAt: "Creation date (ISO 8601).",
+  updatedAt: "Last update date (ISO 8601).",
+  timestamp: "Human-readable timestamp (MM:SS format).",
+  type: "Content type of the item.",
+  postType: 'Post type ("Image", "Video" or "Sidecar" for carousels).',
+  productType: "Platform product type (e.g. clips, feed).",
+  language: "Detected or requested language code.",
+  lang: "Language code of the content.",
+  hashtags: "Hashtags extracted from the text.",
+  mentions: "Accounts mentioned in the text.",
+  tags: "Tags attached to the item.",
+  topics: "Detected topics and themes.",
+  category: "Category of the item.",
+  nsfw: "Whether the content is marked NSFW.",
+  sensitive: "Whether the content is flagged sensitive.",
+  isLive: "Whether the account/channel is currently live.",
+  isVideo: "Whether the item is a video.",
+  isPinned: "Whether the item is pinned.",
+  isAd: "Whether the item is a paid promotion.",
+  isReply: "Whether the tweet is a reply.",
+  isRetweet: "Whether the tweet is a retweet.",
+  isBlueVerified: "Whether the account has blue-check verification.",
+
+  // Media
+  thumbnailUrl: "Thumbnail image URL.",
+  thumbnail: "Thumbnail image URL.",
+  image: "Image URL.",
+  avatar: "Avatar image URL.",
+  profileImage: "Profile image URL.",
+  banner: "Banner image URL.",
+  bannerImage: "Banner image URL.",
+  bannerUrl: "Banner image URL.",
+  coverImage: "Cover image URL.",
+  coverUrl: "Cover image URL.",
+  logo: "Logo image URL.",
+  videoUrl: "Direct video file URL (CDN link).",
+  downloadUrl: "Direct download URL for the media file.",
+  noWatermarkUrl: "Watermark-free variant of the video URL.",
+  embedUrl: "URL for embedding the item.",
+  videoId: "Platform video ID.",
+  streamUrls: "Live stream playback URLs.",
+  playUrl: "Playback URL.",
+  audioUrl: "Audio file URL.",
+  media: "Media attached to the item.",
+  images: "Image URLs attached to the item.",
+  photos: "Photo URLs attached to the item.",
+
+  // Duration
+  duration: "Length in seconds.",
+  durationSeconds: "Length in seconds.",
+  durationMs: "Length in milliseconds.",
+  durationFormatted: "Human-readable duration.",
+  start: "Start time in seconds.",
+  end: "End time in seconds.",
+  expiresAt: "When signed URLs expire (ISO 8601).",
+
+  // Engagement
+  engagement: "Engagement metrics for the item.",
+  views: "View count.",
+  viewCount: "View count.",
+  plays: "Play count.",
+  playCount: "Play count.",
+  likes: "Like count.",
+  likeCount: "Like count.",
+  comments: "Comment count.",
+  commentCount: "Comment count.",
+  totalComments: "Total number of comments.",
+  shares: "Share count.",
+  shareCount: "Share count.",
+  reposts: "Repost count.",
+  replies: "Number of replies.",
+  replyCount: "Number of replies.",
+  retweets: "Retweet count.",
+  quotes: "Quote count.",
+  bookmarks: "Bookmark count.",
+  saves: "Save count.",
+  upvotes: "Upvote count.",
+  dislikes: "Dislike count.",
+  score: "Vote score.",
+  rank: "Rank position in the list.",
+  engagementRate: "Engagement rate (interactions / views).",
+
+  // Transcript / summarize
+  transcript: "Complete text transcript.",
+  wordCount: "Total number of words in the transcript.",
+  segments: "Total number of transcript segments.",
+  transcriptSegments: "Timestamped transcript segments.",
+  summary: "AI-generated summary of the content.",
+  keyPoints: "The most important takeaways.",
+  sentiment: "Overall tone (positive, neutral, negative).",
+  speaker: "Speaker label for the segment.",
+
+  // Comments
+  authorAvatarUrl: "Avatar URL of the comment author.",
+  authorUrl: "Profile URL of the author.",
+  authorName: "Name of the author.",
+  authorIsVerified: "Whether the author is verified.",
+  authorIsChannelOwner: "Whether the author owns the channel.",
+  hasCreatorHeart: "Whether the creator hearted the comment.",
+  parentId: "ID of the parent comment for replies.",
+  edited: "Whether the comment was edited.",
+  stickied: "Whether the comment is stickied.",
+
+  // Commerce / ads
+  price: "Price of the item.",
+  priceFormatted: "Formatted price string.",
+  originalPrice: "Price before discount.",
+  discount: "Discount amount or percentage.",
+  currency: "Currency code.",
+  rating: "Average rating.",
+  reviews: "Number of reviews.",
+  reviewCount: "Number of reviews.",
+  sold: "Units sold.",
+  stock: "Units in stock.",
+  advertiser: "Advertiser running the ad.",
+  adFormat: "Format of the ad creative.",
+  cta: "Call-to-action text.",
+  landingUrl: "Landing page the ad links to.",
+  firstShown: "When the ad was first shown.",
+  lastShown: "When the ad was last shown.",
+  impressions: "Estimated ad impressions.",
+  spend: "Estimated ad spend.",
+
+  // Music / audio
+  album: "Album the track belongs to.",
+  artists: "Artists credited on the item.",
+  artist: "Artist name.",
+  artistUrl: "Artist profile URL.",
+  genre: "Music genre.",
+  releaseYear: "Year of release.",
+  releaseDate: "Release date.",
+  totalTracks: "Number of tracks.",
+  totalEpisodes: "Number of episodes.",
+  monthlyListeners: "Monthly listener count.",
+  isrc: "International Standard Recording Code.",
+  musicName: "Name of the soundtrack used.",
+  musicUrl: "URL of the soundtrack used.",
+  musicId: "ID of the soundtrack used.",
+
+  // Channels / streaming
+  channelName: "Name of the channel.",
+  channelUrl: "URL of the channel.",
+  channelId: "ID of the channel.",
+  channelFollowers: "Follower count of the channel.",
+  channelVerified: "Whether the channel is verified.",
+  game: "Game or category being streamed.",
+  viewers: "Current live viewer count.",
+  viewerCount: "Current live viewer count.",
+  startedAt: "When the stream started (ISO 8601).",
+  broadcaster: "Name of the broadcaster.",
+  isPartner: "Whether the channel is a platform partner.",
+  isAffiliate: "Whether the channel is an affiliate.",
+
+  // Developer / repos
+  stars: "Star count.",
+  forks: "Fork count.",
+  watchers: "Watcher count.",
+  openIssues: "Open issue count.",
+  defaultBranch: "Default branch name.",
+  homepage: "Project homepage URL.",
+  license: "License identifier.",
+  pushedAt: "Last push date (ISO 8601).",
+  isFork: "Whether the repository is a fork.",
+  isArchived: "Whether the repository is archived.",
+  owner: "Owner of the repository.",
+  publicRepos: "Number of public repositories.",
+  publicGists: "Number of public gists.",
+
+  // Download formats
+  formats: "All available download formats.",
+  itag: "YouTube format identifier.",
+  mimeType: "Container and codecs (e.g. video/mp4; avc1...).",
+  qualityLabel: "Resolution label (e.g. 720p).",
+  quality: "Quality tier of the format.",
+  width: "Width in pixels.",
+  height: "Height in pixels.",
+  fps: "Frames per second.",
+  bitrate: "Bitrate in bits per second.",
+  audioQuality: "Audio quality tier.",
+
+  // Reddit / community
+  subreddit: "Subreddit the post belongs to.",
+  flair: "Post flair.",
+  activeUsers: "Currently active user count.",
+  moderatorCount: "Number of moderators.",
+
+  // Links-in-bio
+  linkCount: "Number of links on the page.",
+  links: "Links listed on the page.",
+  socials: "Social profiles listed on the page.",
+  socialAccounts: "Detected social accounts by platform.",
+};
+
+const RAW_KEYS = new Set(["raw", "rawFirstItem", "_metadata"]);
+
+const isScalarValue = (v: unknown): boolean =>
+  v === null || ["string", "number", "boolean"].includes(typeof v);
+
+function humanizeField(name: string): string {
+  const words = name
+    .replace(/[_-]+/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+function exampleHint(v: unknown): string {
+  if (typeof v === "string")
+    return v && v.length <= 40 && !v.startsWith("http") ? ` Example: "${v}".` : "";
+  if (typeof v === "number" || typeof v === "boolean") return ` Example: ${v}.`;
+  return "";
+}
+
+/** Description for a single field, preferring the curated dictionary. */
+function describeField(name: string, value: unknown): string {
+  if (RAW_KEYS.has(name)) return FIELD_DESCS.raw;
+  if (isScalarValue(value)) {
+    if (FIELD_DESCS[name]) return FIELD_DESCS[name];
+    if (typeof value === "string" && value.startsWith("http"))
+      return `${humanizeField(name)} URL.`;
+    return `${humanizeField(name)}.${exampleHint(value)}`;
+  }
+  if (Array.isArray(value)) {
+    const first = value.find((x) => x && typeof x === "object" && !Array.isArray(x)) as
+      | Record<string, unknown>
+      | undefined;
+    if (first) {
+      return `Array of objects with ${Object.keys(first).slice(0, 6).join(", ")}.`;
+    }
+    return FIELD_DESCS[name] ?? `${humanizeField(name)} (array).`;
+  }
+  if (value && typeof value === "object") {
+    const keys = Object.keys(value as Record<string, unknown>);
+    if (keys.length === 0) return FIELD_DESCS[name] ?? `${humanizeField(name)}.`;
+    return `Object with ${keys.slice(0, 6).join(", ")}.`;
+  }
+  return FIELD_DESCS[name] ?? `${humanizeField(name)}.`;
+}
+
+function fieldsFromObject(obj: Record<string, unknown>): ResponseField[] {
+  return Object.entries(obj).map(([k, v]) => ({ name: k, desc: describeField(k, v) }));
+}
+
+/** Build the documented response structure from a real example payload. */
+function structureFromExample(data: Record<string, unknown>): ResponseGroup[] {
+  const top: ResponseField[] = [];
+  const nested: ResponseGroup[] = [];
+
+  for (const [key, value] of Object.entries(data)) {
+    if (RAW_KEYS.has(key)) {
+      top.push({ name: key, desc: FIELD_DESCS.raw });
+      continue;
+    }
+    if (Array.isArray(value)) {
+      const first = value.find((x) => x && typeof x === "object" && !Array.isArray(x)) as
+        | Record<string, unknown>
+        | undefined;
+      if (first) {
+        nested.push({
+          title: humanizeField(key),
+          note: `Each item in ${key} contains:`,
+          fields: fieldsFromObject(first),
+        });
+        continue;
+      }
+      top.push({ name: key, desc: describeField(key, value) });
+      continue;
+    }
+    if (value && typeof value === "object") {
+      const inner = value as Record<string, unknown>;
+      if (Object.keys(inner).length > 0) {
+        nested.push({
+          title: humanizeField(key),
+          note: `The ${key} object contains:`,
+          fields: fieldsFromObject(inner),
+        });
+        continue;
+      }
+    }
+    top.push({ name: key, desc: describeField(key, value) });
+  }
+
+  const groups: ResponseGroup[] = [];
+  if (top.length > 0) groups.push({ title: "Top-level fields", fields: top });
+  groups.push(...nested);
+  return groups;
+}
 
 export function responseStructure(ep: ApiEndpoint): ResponseGroup[] {
+  const real = API_EXAMPLES[ep.slug];
+  if (real && Object.keys(real).length > 0) {
+    const derived = structureFromExample(real);
+    if (derived.length > 0) return derived;
+  }
   switch (ep.category) {
     case "transcript":
       return [
