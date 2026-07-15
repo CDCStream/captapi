@@ -397,31 +397,35 @@ async def _fetch_instagram_transcript(
 
 
 def _normalize_audio_reel(item: dict) -> dict:
-    """Map the reels-by-audio scraper output (capitalized keys) to our shape."""
+    """Map the reels-by-audio scraper output (capitalized keys) to our shape.
+
+    The actor only exposes the author's profile picture (no reel cover image),
+    so we don't emit thumbnailUrl rather than passing the avatar off as one.
+    Null-valued fields (empty caption, missing author bits, hidden counts) are
+    stripped by strip_null_post_fields at the call site."""
     author = item.get("author") or {}
     username = author.get("username")
+    caption = safe_str(item.get("caption")) or ""
     return {
         "platform": "instagram",
         "url": safe_str(item.get("URL") or item.get("url")),
         "id": safe_str(item.get("Id") or item.get("id")),
-        "caption": safe_str(item.get("caption")),
-        "description": safe_str(item.get("caption")),
+        "caption": caption,
+        "description": caption,
         "publishedAt": safe_str(item.get("postedAt")),
         "durationSeconds": safe_float(item.get("videoDuration")),
-        "thumbnailUrl": safe_str(author.get("temporaryProfilePictureUrl")),
         "videoUrl": safe_str(item.get("videoTemporaryUrl") or item.get("storedVideoUrl")),
         "author": {
             "username": safe_str(username),
             "displayName": safe_str(author.get("fullname")),
             "url": f"https://instagram.com/{username}" if username else None,
-            "followers": None,
             "verified": author.get("isVerified"),
             "profileImage": safe_str(author.get("temporaryProfilePictureUrl")),
         },
         "engagement": {
             "views": safe_int(item.get("playCount")),
-            "likes": safe_int(item.get("likeCount")),
-            "comments": safe_int(item.get("commentCount")),
+            "likes": decodo.hidden_count(item.get("likeCount")),
+            "comments": decodo.hidden_count(item.get("commentCount")),
         },
         "musicId": safe_str(item.get("musicId")),
         "musicUrl": safe_str(item.get("musicUrl")),
@@ -1284,7 +1288,11 @@ async def instagram_reels_by_audio_id(
                     {"audioUrls": [audio_url], "maxResults": limit, "downloadVideos": False},
                     max_items=limit,
                 )
-                reels = [_normalize_audio_reel(i) for i in items[:limit] if not i.get("error")]
+                reels = [
+                    decodo.strip_null_post_fields(_normalize_audio_reel(i))
+                    for i in items[:limit]
+                    if not i.get("error")
+                ]
                 return {
                     "platform": "instagram",
                     "audioId": audio_id,
@@ -1298,7 +1306,7 @@ async def instagram_reels_by_audio_id(
 
         data = await cached_or_run(
             endpoint="instagram.reels-by-audio-id",
-            params={"audio_id": audio_id, "limit": limit, "v": 4},
+            params={"audio_id": audio_id, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
