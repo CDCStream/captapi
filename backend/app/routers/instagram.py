@@ -785,7 +785,9 @@ async def _ig_feed_collect(
         for raw in items:
             if reels_only and safe_int(raw.get("media_type")) != 2:
                 continue
-            collected.append(instagram_native.map_feed_post(raw, followers=followers))
+            collected.append(
+                instagram_native.map_feed_post(raw, followers=followers, profile_user_id=user_id)
+            )
         next_cursor = next_max_id if more and next_max_id else None
         # Instagram suffixes next_max_id with the last item's owner id, which
         # differs from the profile on collab posts. Our public cursor embeds
@@ -869,7 +871,7 @@ async def instagram_channel_posts(
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 11},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 12},
             runner=_run,
             ctx=ctx,
         )
@@ -938,7 +940,7 @@ async def instagram_channel_reels(
 
         data = await cached_or_run(
             endpoint="instagram.channel-reels",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 12},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 13},
             runner=_run,
             ctx=ctx,
         )

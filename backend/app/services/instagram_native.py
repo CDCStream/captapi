@@ -138,8 +138,17 @@ async def fetch_post_details(shortcode: str) -> dict[str, Any] | None:
     }
 
 
-def map_feed_post(media: dict[str, Any], followers: int | None = None) -> dict[str, Any]:
-    """Map an api/v1 feed item to the channel-posts/reels list shape."""
+def map_feed_post(
+    media: dict[str, Any],
+    followers: int | None = None,
+    profile_user_id: str | None = None,
+) -> dict[str, Any]:
+    """Map an api/v1 feed item to the channel-posts/reels list shape.
+
+    ``followers`` is the requested profile's count; it only belongs on items
+    that profile actually owns (collab posts in the feed are authored by a
+    different account), hence the ``profile_user_id`` ownership check.
+    """
     from app.services.instagram_decodo import strip_null_post_fields
 
     caption_obj = media.get("caption")
@@ -168,7 +177,10 @@ def map_feed_post(media: dict[str, Any], followers: int | None = None) -> dict[s
         "verified": user.get("is_verified"),
         "profileImage": safe_str(user.get("profile_pic_url")) or None,
     }
-    if followers is not None:
+    owner_id = safe_str(user.get("pk") or user.get("pk_id") or user.get("id"))
+    if followers is not None and (
+        profile_user_id is None or owner_id is None or owner_id == profile_user_id
+    ):
         author["followers"] = followers
 
     return strip_null_post_fields(
