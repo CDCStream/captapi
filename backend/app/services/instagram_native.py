@@ -201,12 +201,41 @@ async def fetch_user_feed_page(
 ) -> tuple[list[dict[str, Any]], str | None, bool] | None:
     """One page of a profile's timeline via the logged-out api/v1 feed
     endpoint. Datacenter IPs get a flat 401 here, so this goes straight to
-    the residential tier. Returns (raw items, next_max_id, more_available)
-    or None on failure.
+    the residential tier. Whether a residential IP gets 200 or 401 is
+    per-session luck, so retry on a fresh session before giving up.
+    Returns (raw items, next_max_id, more_available) or None on failure.
     """
     params: dict[str, Any] = {"count": max(1, min(count, 33))}
     if max_id:
         params["max_id"] = max_id
+    degraded: tuple[list[dict[str, Any]], str | None, bool] | None = None
+    for attempt in range(3):
+        result = await _fetch_feed_once(user_id, params, attempt)
+        if result is None:
+            continue
+        # Some sessions get a stripped feed variant whose clips carry no
+        # video_duration/dash manifest. One fresh session usually fixes it,
+        # but don't burn more than one extra request on cosmetics.
+        if not _feed_page_degraded(result[0]):
+            return result
+        if degraded is not None:
+            return result
+        degraded = result
+    return degraded
+
+
+def _feed_page_degraded(items: list[dict[str, Any]]) -> bool:
+    return any(
+        safe_int(item.get("media_type")) == 2
+        and not item.get("video_duration")
+        and not item.get("video_dash_manifest")
+        for item in items
+    )
+
+
+async def _fetch_feed_once(
+    user_id: str, params: dict[str, Any], attempt: int
+) -> tuple[list[dict[str, Any]], str | None, bool] | None:
     try:
         async with httpx.AsyncClient(
             timeout=12, proxy=proxy_for("residential"), follow_redirects=True
@@ -223,10 +252,10 @@ async def fetch_user_feed_page(
                 },
             )
     except httpx.HTTPError as exc:
-        log.info("ig_feed_transport_error", error=str(exc)[:120])
+        log.info("ig_feed_transport_error", attempt=attempt, error=str(exc)[:120])
         return None
     if resp.status_code != 200:
-        log.info("ig_feed_http_error", status=resp.status_code)
+        log.info("ig_feed_http_error", attempt=attempt, status=resp.status_code)
         return None
     try:
         payload = resp.json()
