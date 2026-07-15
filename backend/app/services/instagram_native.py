@@ -59,7 +59,9 @@ async def fetch_reel_media(shortcode: str) -> dict[str, Any] | None:
 
 _MEDIA_TYPE_NAMES = {1: "Image", 2: "Video", 8: "Sidecar"}
 _HASHTAG_RE = re.compile(r"#(\w+)", re.UNICODE)
-_MENTION_RE = re.compile(r"@([A-Za-z0-9_.]+)")
+# Same as instagram_decodo._MENTION_RE: usernames may contain dots but never
+# end with one, so "@herbalife." in a caption must capture "herbalife".
+_MENTION_RE = re.compile(r"@([A-Za-z0-9_](?:[A-Za-z0-9_.]*[A-Za-z0-9_])?)")
 # DASH manifest carries the duration when `video_duration` is absent,
 # e.g. mediaPresentationDuration="PT0H0M30.033S".
 _MPD_DURATION_RE = re.compile(
