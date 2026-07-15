@@ -49,6 +49,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 /** Static mirror of the migration seed — used only when the table is unavailable. */
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
+    publishedAt: "2026-07-15",
+    category: "improvement",
+    title: "cache=false parameter on every endpoint",
+    description:
+      "Every data endpoint now accepts an optional cache=false query parameter to bypass the cache and always fetch fresh data. Previously only transcript, summarizer, and Spotify endpoints supported it.",
+    items: [
+      "Add cache=false to any request when you need live numbers instead of the cached copy (fresh calls are billed as usual; the result still refreshes the cache)",
+      "Documented on all 179 API pages and available in the playground, MCP server, SDKs, CLI, and n8n node",
+      "Account endpoints (balance, usage) are always live and unaffected",
+    ],
+  },
+  {
     publishedAt: "2026-07-14",
     category: "feature",
     title: "Report a bug from any API page",

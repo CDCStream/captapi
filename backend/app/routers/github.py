@@ -168,6 +168,7 @@ def _pull(p: dict[str, Any]) -> dict[str, Any]:
 @router.get("/user", summary="GitHub user profile")
 async def github_user(
     username: str = Query(..., description="GitHub username or profile URL"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     login = _username(username)
@@ -177,13 +178,14 @@ async def github_user(
         async def _run() -> dict[str, Any]:
             return _user(await _get(f"/users/{login}"))
 
-        return ApiResponse(data=await cached_or_run("github.user", {"login": login, "v": 2}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("github.user", {"login": login, "v": 2}, _run, ctx, use_cache=cache))
 
 
 @router.get("/repositories", summary="List a GitHub user's repositories")
 async def repositories(
     username: str = Query(..., description="GitHub username or profile URL"),
     limit: int = Query(30, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     login = _username(username)
@@ -195,7 +197,7 @@ async def repositories(
             repos = [_repo(i) for i in items[:limit]]
             return {"username": login, "totalReturned": len(repos), "repositories": repos}
 
-        data = await cached_or_run("github.repositories", {"login": login, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("github.repositories", {"login": login, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["repositories"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
@@ -203,6 +205,7 @@ async def repositories(
 @router.get("/repository", summary="GitHub repository details")
 async def repository(
     repo: str = Query(..., description="Repository URL or owner/name"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     parts = _repo_parts(repo)
@@ -213,7 +216,7 @@ async def repository(
         async def _run() -> dict[str, Any]:
             return _repo(await _get(f"/repos/{owner}/{name}"))
 
-        return ApiResponse(data=await cached_or_run("github.repository", {"owner": owner, "name": name, "v": 2}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("github.repository", {"owner": owner, "name": name, "v": 2}, _run, ctx, use_cache=cache))
 
 
 @router.get("/pull-requests", summary="List repository pull requests")
@@ -221,6 +224,7 @@ async def pull_requests(
     repo: str = Query(..., description="Repository URL or owner/name"),
     state: str = Query("open", pattern="^(open|closed|all)$"),
     limit: int = Query(30, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     parts = _repo_parts(repo)
@@ -233,7 +237,7 @@ async def pull_requests(
             pulls = [_pull(i) for i in items[:limit]]
             return {"repository": f"{owner}/{name}", "totalReturned": len(pulls), "pullRequests": pulls}
 
-        data = await cached_or_run("github.pull-requests", {"repo": f"{owner}/{name}", "state": state, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("github.pull-requests", {"repo": f"{owner}/{name}", "state": state, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["pullRequests"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
@@ -242,6 +246,7 @@ async def pull_requests(
 async def activity(
     username: str = Query(..., description="GitHub username or profile URL"),
     limit: int = Query(30, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     login = _username(username)
@@ -253,7 +258,7 @@ async def activity(
             events = [_event(i) for i in items[:limit]]
             return {"username": login, "totalReturned": len(events), "events": events}
 
-        data = await cached_or_run("github.activity", {"login": login, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("github.activity", {"login": login, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["events"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
@@ -262,6 +267,7 @@ async def activity(
 async def followers(
     username: str = Query(...),
     limit: int = Query(30, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     login = _username(username)
@@ -273,7 +279,7 @@ async def followers(
             users = [{"login": safe_str(i.get("login")), "url": safe_str(i.get("html_url")), "avatar": safe_str(i.get("avatar_url"))} for i in items[:limit]]
             return {"username": login, "totalReturned": len(users), "followers": users}
 
-        data = await cached_or_run("github.followers", {"login": login, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("github.followers", {"login": login, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["followers"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
@@ -282,6 +288,7 @@ async def followers(
 async def following(
     username: str = Query(...),
     limit: int = Query(30, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     login = _username(username)
@@ -293,7 +300,7 @@ async def following(
             users = [{"login": safe_str(i.get("login")), "url": safe_str(i.get("html_url")), "avatar": safe_str(i.get("avatar_url"))} for i in items[:limit]]
             return {"username": login, "totalReturned": len(users), "following": users}
 
-        data = await cached_or_run("github.following", {"login": login, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("github.following", {"login": login, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["following"]), GITHUB_LIST_RATE)
         return ApiResponse(data=data)
 
@@ -301,6 +308,7 @@ async def following(
 @router.get("/contributions", summary="GitHub contribution summary")
 async def contributions(
     username: str = Query(..., description="GitHub username or profile URL"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     login = _username(username)
@@ -318,13 +326,14 @@ async def contributions(
                 "starsAcrossSampledRepos": sum(safe_int(r.get("stargazers_count")) for r in repos),
             }
 
-        return ApiResponse(data=await cached_or_run("github.contributions", {"login": login, "v": 2}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("github.contributions", {"login": login, "v": 2}, _run, ctx, use_cache=cache))
 
 
 @router.get("/trending-repositories", summary="Trending GitHub repositories")
 async def trending_repositories(
     q: str = Query("stars:>1000", description="GitHub search query"),
     limit: int = Query(20, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     async with billed_call(caller=caller, endpoint="/v1/github/trending-repositories", platform="github", resource_url=None, base_credits=_scaled(limit, GITHUB_SEARCH_RATE)) as ctx:
@@ -333,7 +342,7 @@ async def trending_repositories(
             repos = [_repo(i) for i in (data.get("items") or [])[:limit]]
             return {"query": q, "totalReturned": len(repos), "repositories": repos}
 
-        data = await cached_or_run("github.trending-repositories", {"q": q, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("github.trending-repositories", {"q": q, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["repositories"]), GITHUB_SEARCH_RATE)
         return ApiResponse(data=data)
 
@@ -342,6 +351,7 @@ async def trending_repositories(
 async def trending_developers(
     q: str = Query("followers:>1000", description="GitHub user search query"),
     limit: int = Query(20, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     async with billed_call(caller=caller, endpoint="/v1/github/trending-developers", platform="github", resource_url=None, base_credits=_scaled(limit, GITHUB_SEARCH_RATE)) as ctx:
@@ -353,6 +363,6 @@ async def trending_developers(
             ]
             return {"query": q, "totalReturned": len(users), "developers": users}
 
-        data = await cached_or_run("github.trending-developers", {"q": q, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("github.trending-developers", {"q": q, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["developers"]), GITHUB_SEARCH_RATE)
         return ApiResponse(data=data)

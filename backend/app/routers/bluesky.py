@@ -179,6 +179,7 @@ def _normalize_profile(p: dict[str, Any]) -> dict[str, Any]:
 @router.get("/profile", summary="Bluesky profile details & stats")
 async def bluesky_profile(
     url: str = Query(..., description="Bluesky profile URL, @handle, or handle"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     actor = _require_bluesky_actor(url)
@@ -198,6 +199,7 @@ async def bluesky_profile(
             params={"actor": actor, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=result)
 
@@ -206,6 +208,7 @@ async def bluesky_profile(
 async def bluesky_user_posts(
     url: str = Query(..., description="Bluesky profile URL, @handle, or handle"),
     limit: int = Query(25, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     actor = _require_bluesky_actor(url)
@@ -230,6 +233,7 @@ async def bluesky_user_posts(
             params={"actor": actor, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled(len(result["posts"]), RATE, 1)
         return ApiResponse(data=result)
@@ -238,6 +242,7 @@ async def bluesky_user_posts(
 @router.get("/post-details", summary="Bluesky post metadata + engagement")
 async def bluesky_post_details(
     url: str = Query(..., description="Bluesky post URL"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     parsed = _require_bluesky_post_url(url)
@@ -266,5 +271,6 @@ async def bluesky_post_details(
             params={"handle": handle, "rkey": rkey, "v": 3},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=result)

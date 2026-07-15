@@ -98,6 +98,7 @@ def _artist(item: dict[str, Any], url: str) -> dict[str, Any]:
 @router.get("/artist", summary="SoundCloud artist profile")
 async def artist(
     url: str = Query(..., description="SoundCloud artist URL or username"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     profile = _profile_url(url)
@@ -119,7 +120,7 @@ async def artist(
             ctx["source"] = "apify"
             return _artist(items[0], profile)
 
-        data = await cached_or_run("soundcloud.artist", {"url": profile, "v": 3}, _run, ctx)
+        data = await cached_or_run("soundcloud.artist", {"url": profile, "v": 3}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 
@@ -127,6 +128,7 @@ async def artist(
 async def artist_tracks(
     url: str = Query(..., description="SoundCloud artist URL or username"),
     limit: int = Query(20, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     profile = _profile_url(url)
@@ -153,7 +155,7 @@ async def artist_tracks(
             ctx["source"] = "apify"
             return {"platform": "soundcloud", "artistUrl": profile, "totalReturned": len(tracks), "tracks": tracks}
 
-        data = await cached_or_run("soundcloud.artist-tracks", {"url": profile, "limit": limit, "v": 4}, _run, ctx)
+        data = await cached_or_run("soundcloud.artist-tracks", {"url": profile, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["tracks"]))
         return ApiResponse(data=data)
 
@@ -161,6 +163,7 @@ async def artist_tracks(
 @router.get("/track", summary="SoundCloud track details")
 async def track(
     url: str = Query(..., description="SoundCloud track URL"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     detected = detect_url_platform(url)
@@ -189,5 +192,5 @@ async def track(
             ctx["source"] = "apify"
             return _track(items[0])
 
-        data = await cached_or_run("soundcloud.track", {"url": url, "v": 3}, _run, ctx)
+        data = await cached_or_run("soundcloud.track", {"url": url, "v": 3}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)

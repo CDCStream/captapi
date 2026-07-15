@@ -784,6 +784,7 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
 @router.get("/video-details", summary="YouTube video metadata + stats")
 async def youtube_video_details(
     url: str = Query(...),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, norm_url = _require_youtube_url(url)
@@ -845,6 +846,7 @@ async def youtube_video_details(
             params={"url": norm_url, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -854,6 +856,7 @@ async def youtube_video_details(
 async def youtube_comments(
     url: str = Query(...),
     limit: int = Query(50, ge=1, le=500),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, norm_url = _require_youtube_url(url)
@@ -933,6 +936,7 @@ async def youtube_comments(
             params={"url": norm_url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["comments"]), RATE_YT_COMMENTS, 2)
         return ApiResponse(data=data)
@@ -942,6 +946,7 @@ async def youtube_comments(
 @router.get("/channel-details", summary="YouTube channel info & stats")
 async def youtube_channel_details(
     url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = normalize_youtube_channel_url(url)
@@ -996,6 +1001,7 @@ async def youtube_channel_details(
             params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -1006,6 +1012,7 @@ async def youtube_channel_videos(
     url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     limit: int = Query(20, ge=1, le=200),
     fast: bool = Query(False, description="Use YouTube's public RSS feed for faster but less detailed metadata."),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = normalize_youtube_channel_url(url)
@@ -1056,6 +1063,7 @@ async def youtube_channel_videos(
             params={"url": url, "limit": limit, "fast": fast, "v": 5},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["videos"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
@@ -1067,6 +1075,7 @@ async def youtube_playlist_videos(
     url: str = Query(...),
     limit: int = Query(50, ge=1, le=500),
     fast: bool = Query(False, description="Use YouTube's public RSS feed for faster but less detailed metadata."),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1114,6 +1123,7 @@ async def youtube_playlist_videos(
             params={"url": url, "limit": limit, "fast": fast, "v": 5},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["videos"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
@@ -1124,6 +1134,7 @@ async def youtube_playlist(
     url: str = Query(..., description="YouTube playlist URL"),
     limit: int = Query(50, ge=1, le=500),
     fast: bool = Query(False, description="Use YouTube's public RSS feed for faster but less detailed metadata."),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1194,6 +1205,7 @@ async def youtube_playlist(
             params={"url": url, "limit": limit, "fast": fast, "v": 5},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["videos"]), RATE_YT_VIDEO, 5)
         return ApiResponse(data=data)
@@ -1204,6 +1216,7 @@ async def youtube_playlist(
 async def youtube_search(
     q: str = Query(..., min_length=2),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1248,6 +1261,7 @@ async def youtube_search(
             params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
@@ -1257,6 +1271,7 @@ async def youtube_search(
 async def youtube_trending_shorts(
     q: str = Query("trending", min_length=2, description="Seed keyword for trending Shorts"),
     limit: int = Query(20, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1308,6 +1323,7 @@ async def youtube_trending_shorts(
             # Trending actor runs take minutes; serve the last list instantly
             # after TTL expiry and refresh in the background.
             stale_while_revalidate=True,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["shorts"]), RATE_YT_MARGIN, 2)
         return ApiResponse(data=data)
@@ -1317,6 +1333,7 @@ async def youtube_trending_shorts(
 @router.get("/video-download", summary="Get direct video download URLs")
 async def youtube_video_download(
     url: str = Query(...),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, norm_url = _require_youtube_url(url)
@@ -1410,6 +1427,7 @@ async def youtube_video_download(
             runner=_run,
             ctx=ctx,
             ttl=3600,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -1419,6 +1437,7 @@ async def youtube_video_download(
 async def youtube_channel_shorts(
     url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = normalize_youtube_channel_url(url)
@@ -1452,6 +1471,7 @@ async def youtube_channel_shorts(
             params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["shorts"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
@@ -1461,6 +1481,7 @@ async def youtube_channel_shorts(
 async def youtube_channel_streams(
     url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = normalize_youtube_channel_url(url)
@@ -1494,6 +1515,7 @@ async def youtube_channel_streams(
             params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["streams"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
@@ -1503,6 +1525,7 @@ async def youtube_channel_streams(
 async def youtube_hashtag_search(
     q: str = Query(..., min_length=2, description="Hashtag (with or without #)"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1539,6 +1562,7 @@ async def youtube_hashtag_search(
             params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
@@ -1567,18 +1591,20 @@ async def shorts_summarize(
 @router.get("/shorts/video-details", summary="YouTube Shorts metadata")
 async def shorts_details(
     url: str = Query(...),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    return await youtube_video_details(url=url, caller=caller)
+    return await youtube_video_details(url=url, cache=cache, caller=caller)
 
 
 @router.get("/shorts/comments", summary="YouTube Shorts comments")
 async def shorts_comments(
     url: str = Query(...),
     limit: int = Query(50, ge=1, le=500),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    return await youtube_comments(url=url, limit=limit, caller=caller)
+    return await youtube_comments(url=url, limit=limit, cache=cache, caller=caller)
 
 
 # ---------- COMMENT REPLIES ----------------------------------------------
@@ -1587,6 +1613,7 @@ async def youtube_comment_replies(
     url: str = Query(..., description="YouTube video URL the comment belongs to"),
     comment_id: str = Query(..., description="ID of the parent comment"),
     limit: int = Query(50, ge=1, le=500),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, norm_url = _require_youtube_url(url)
@@ -1643,6 +1670,7 @@ async def youtube_comment_replies(
             params={"url": norm_url, "comment_id": comment_id, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["replies"]), RATE_YT_COMMENTS, 2)
         return ApiResponse(data=data)
@@ -1653,6 +1681,7 @@ async def youtube_comment_replies(
 async def youtube_channel_playlists(
     url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = normalize_youtube_channel_url(url)
@@ -1698,6 +1727,7 @@ async def youtube_channel_playlists(
             params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["playlists"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
@@ -1708,6 +1738,7 @@ async def youtube_channel_playlists(
 async def youtube_community_posts(
     url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = normalize_youtube_channel_url(url)
@@ -1757,6 +1788,7 @@ async def youtube_community_posts(
             params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_YT_COMMUNITY, 2)
         return ApiResponse(data=data)
@@ -1848,6 +1880,7 @@ def _find_images(obj: Any):
 @router.get("/community-post-details", summary="YouTube community post details")
 async def youtube_community_post_details(
     url: str = Query(..., description="YouTube community post URL"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     async with billed_call(
@@ -1867,6 +1900,7 @@ async def youtube_community_post_details(
             params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -1905,6 +1939,7 @@ def _normalize_sponsor_segment(seg: dict[str, Any]) -> dict[str, Any]:
 @router.get("/video-sponsors", summary="Sponsor/self-promo segments in a YouTube video")
 async def youtube_video_sponsors(
     url: str = Query(..., description="YouTube video URL or ID"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, _ = _require_youtube_url(url)
@@ -1947,5 +1982,6 @@ async def youtube_video_sponsors(
             params={"vid": vid, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)

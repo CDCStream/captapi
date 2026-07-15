@@ -205,6 +205,7 @@ async def _actor_post(post_id: str, url: str) -> dict[str, Any]:
 @router.get("/profile", summary="Truth Social profile")
 async def profile(
     url: str = Query(..., description="Truth Social profile URL or @username"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _username(url)
@@ -220,7 +221,7 @@ async def profile(
                     raise
             return await _actor_account(username)
 
-        data = await cached_or_run("truth-social.profile", {"username": username, "v": 2}, _run, ctx)
+        data = await cached_or_run("truth-social.profile", {"username": username, "v": 2}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 
@@ -228,6 +229,7 @@ async def profile(
 async def user_posts(
     url: str = Query(..., description="Truth Social profile URL or @username"),
     limit: int = Query(20, ge=1, le=80),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _username(url)
@@ -251,13 +253,14 @@ async def user_posts(
             posts = [_normalize_post(i) for i in items[:limit] if isinstance(i, dict)]
             return {"username": username, "totalReturned": len(posts), "posts": posts}
 
-        data = await cached_or_run("truth-social.user-posts", {"username": username, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("truth-social.user-posts", {"username": username, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 
 @router.get("/post", summary="Truth Social post")
 async def post(
     url: str = Query(..., description="Truth Social post URL or post ID"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     post_id = _post_id(url)
@@ -273,5 +276,5 @@ async def post(
                     raise
             return await _actor_post(post_id, url)
 
-        data = await cached_or_run("truth-social.post", {"post_id": post_id, "v": 2}, _run, ctx)
+        data = await cached_or_run("truth-social.post", {"post_id": post_id, "v": 2}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)

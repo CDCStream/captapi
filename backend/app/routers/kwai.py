@@ -128,6 +128,7 @@ def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
 @router.get("/profile", summary="Kwai profile")
 async def profile(
     url: str = Query(..., description="Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     profile_url = _profile_url(url)
@@ -140,7 +141,7 @@ async def profile(
                 raise HTTPException(status_code=404, detail="Kwai profile not found")
             return _normalize_profile(items[0])
 
-        data = await cached_or_run("kwai.profile", {"url": profile_url, "v": 3}, _run, ctx)
+        data = await cached_or_run("kwai.profile", {"url": profile_url, "v": 3}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 
@@ -148,6 +149,7 @@ async def profile(
 async def user_posts(
     url: str = Query(..., description="Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     profile_url = _profile_url(url)
@@ -161,7 +163,7 @@ async def user_posts(
             posts = [_normalize_post(i) for i in items[:limit]]
             return {"profileUrl": profile_url, "totalReturned": len(posts), "posts": posts}
 
-        data = await cached_or_run("kwai.user-posts", {"url": profile_url, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("kwai.user-posts", {"url": profile_url, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = max(2, math.ceil(len(data["posts"]) * 2.25))
         return ApiResponse(data=data)
 
@@ -169,6 +171,7 @@ async def user_posts(
 @router.get("/post", summary="Kwai post")
 async def post(
     url: str = Query(..., description="Kwai video URL (e.g. https://www.kwai.com/@handle/video/5238962376325675745)"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     video_url = _video_url(url)
@@ -181,5 +184,5 @@ async def post(
                 raise HTTPException(status_code=404, detail="Kwai post not found")
             return _normalize_post(items[0])
 
-        data = await cached_or_run("kwai.post", {"url": video_url, "v": 3}, _run, ctx)
+        data = await cached_or_run("kwai.post", {"url": video_url, "v": 3}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)

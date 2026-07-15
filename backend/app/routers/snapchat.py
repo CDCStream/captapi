@@ -55,6 +55,7 @@ def _normalize(item: dict[str, Any]) -> dict[str, Any]:
 @router.get("/user-profile", summary="Snapchat public user profile")
 async def user_profile(
     url: str = Query(..., description="Snapchat username or profile URL"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _username(url)
@@ -72,5 +73,5 @@ async def user_profile(
                 raise HTTPException(status_code=404, detail="Snapchat profile not found")
             return _normalize(items[0])
 
-        data = await cached_or_run("snapchat.user-profile", {"username": username, "v": 2}, _run, ctx)
+        data = await cached_or_run("snapchat.user-profile", {"username": username, "v": 2}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)

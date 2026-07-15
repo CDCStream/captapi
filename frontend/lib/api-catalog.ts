@@ -1316,14 +1316,22 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
 
 export function params(ep: ApiEndpoint): ApiParam[] {
   const explicit = ENDPOINT_PARAMS[ep.slug];
-  if (explicit) return explicit;
+  if (explicit) return withCacheParam(ep, explicit);
   // Fallback (should not happen for catalog endpoints): derive from category.
   const base: ApiParam[] = [];
   if (ep.category === "search") base.push(qp());
   else base.push(up(`Public ${PLATFORM_LABEL[ep.platform]} URL.`));
   if (["comments", "search", "list"].includes(ep.category)) base.push(lp(20, 200));
   if (ep.category === "transcript" || ep.category === "summarize") base.push(lang());
-  return base;
+  return withCacheParam(ep, base);
+}
+
+/** Every data endpoint caches responses and accepts `cache=false` to bypass;
+ * make sure the docs always list the param. Account endpoints (balance,
+ * usage) are live reads with no cache layer. */
+function withCacheParam(ep: ApiEndpoint, list: ApiParam[]): ApiParam[] {
+  if (ep.platform === "account" || list.some((p) => p.name === "cache")) return list;
+  return [...list, cacheP()];
 }
 
 function exampleData(ep: ApiEndpoint): Record<string, unknown> {

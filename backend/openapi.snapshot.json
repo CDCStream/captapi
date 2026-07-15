@@ -98,6 +98,18 @@
               "title": "Language"
             },
             "description": "ISO language code (en, tr, es...)"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -160,6 +172,18 @@
               ],
               "title": "Language"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -205,6 +229,18 @@
               "type": "string",
               "title": "Url"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -262,6 +298,18 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -309,6 +357,18 @@
               "title": "Url"
             },
             "description": "Channel URL, @handle, bare handle, or UC... channel ID"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -380,6 +440,18 @@
               "title": "Fast"
             },
             "description": "Use YouTube's public RSS feed for faster but less detailed metadata."
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -449,6 +521,18 @@
               "title": "Fast"
             },
             "description": "Use YouTube's public RSS feed for faster but less detailed metadata."
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -520,6 +604,18 @@
               "title": "Fast"
             },
             "description": "Use YouTube's public RSS feed for faster but less detailed metadata."
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -578,6 +674,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -639,6 +747,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -684,6 +804,18 @@
               "type": "string",
               "title": "Url"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -743,6 +875,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -802,6 +946,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -862,6 +1018,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -925,6 +1093,18 @@
               "title": "Language"
             },
             "description": "ISO language code (en, tr, es...)"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -986,6 +1166,18 @@
               ],
               "title": "Language"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1031,6 +1223,18 @@
               "type": "string",
               "title": "Url"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1088,6 +1292,18 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1158,6 +1374,18 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1217,6 +1445,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1276,6 +1516,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1323,6 +1575,18 @@
               "title": "Url"
             },
             "description": "YouTube community post URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1370,6 +1634,18 @@
               "title": "Url"
             },
             "description": "YouTube video URL or ID"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1415,6 +1691,18 @@
               "type": "string",
               "title": "Url"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1460,6 +1748,37 @@
               "type": "string",
               "title": "Url"
             }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 8
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional ISO-639-1 hint (e.g. 'tr') to pin the speech language",
+              "title": "Language"
+            },
+            "description": "Optional ISO-639-1 hint (e.g. 'tr') to pin the speech language"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1505,6 +1824,37 @@
               "type": "string",
               "title": "Url"
             }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 8
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional ISO-639-1 code (e.g. 'tr'): pins the speech language and sets the summary output language",
+              "title": "Language"
+            },
+            "description": "Optional ISO-639-1 code (e.g. 'tr'): pins the speech language and sets the summary output language"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1562,6 +1912,18 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1609,6 +1971,18 @@
               "title": "Url"
             },
             "description": "TikTok profile URL, @handle, or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1656,6 +2030,18 @@
               "title": "Url"
             },
             "description": "TikTok profile URL, @handle, or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1703,6 +2089,18 @@
               "title": "Url"
             },
             "description": "TikTok profile URL, @handle, or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1750,6 +2148,18 @@
               "title": "Url"
             },
             "description": "TikTok profile URL, @handle, or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1832,6 +2242,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1921,6 +2343,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -1968,6 +2402,18 @@
               "title": "Url"
             },
             "description": "TikTok profile URL, @handle, or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2026,6 +2472,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2071,6 +2529,18 @@
               "type": "string",
               "title": "Url"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2130,6 +2600,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2200,6 +2682,18 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2259,6 +2753,18 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2318,6 +2824,18 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2377,6 +2895,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2437,6 +2967,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2495,6 +3037,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2553,6 +3107,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2600,6 +3166,18 @@
               "title": "Url"
             },
             "description": "TikTok music/sound URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2662,6 +3240,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2723,6 +3313,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2795,6 +3397,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2854,6 +3468,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2901,6 +3527,18 @@
               "title": "Url"
             },
             "description": "TikTok Shop product URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -2960,6 +3598,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3019,6 +3669,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3066,6 +3728,18 @@
               "title": "Url"
             },
             "description": "Truth Social profile URL or @username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3125,6 +3799,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3172,6 +3858,18 @@
               "title": "Url"
             },
             "description": "Truth Social post URL or post ID"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3219,6 +3917,18 @@
               "title": "Url"
             },
             "description": "Instagram post or reel URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3264,6 +3974,38 @@
               "type": "string",
               "title": "Url"
             }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 5
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional ISO-639-1 language hint (e.g. 'tr', 'en'). Pins the transcription language instead of auto-detection; recommended for short clips with little speech.",
+              "title": "Language"
+            },
+            "description": "Optional ISO-639-1 language hint (e.g. 'tr', 'en'). Pins the transcription language instead of auto-detection; recommended for short clips with little speech."
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3309,6 +4051,38 @@
               "type": "string",
               "title": "Url"
             }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 5
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional ISO-639-1 code (e.g. 'tr'): pins the speech language and sets the summary output language.",
+              "title": "Language"
+            },
+            "description": "Optional ISO-639-1 code (e.g. 'tr'): pins the speech language and sets the summary output language."
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3366,6 +4140,18 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3413,6 +4199,18 @@
               "title": "Url"
             },
             "description": "Instagram profile URL, @handle, or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3460,6 +4258,18 @@
               "title": "Url"
             },
             "description": "Instagram profile URL or @handle"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3519,6 +4329,36 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296",
+              "title": "Cursor"
+            },
+            "description": "Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3578,6 +4418,36 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296",
+              "title": "Cursor"
+            },
+            "description": "Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3638,6 +4508,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3681,11 +4563,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "description": "Country name for Explore localization",
+              "description": "Country name or ISO code (e.g. 'United States' or 'US') for Explore localization",
               "default": "United States",
               "title": "Country"
             },
-            "description": "Country name for Explore localization"
+            "description": "Country name or ISO code (e.g. 'United States' or 'US') for Explore localization"
           },
           {
             "name": "limit",
@@ -3698,6 +4580,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3743,6 +4637,18 @@
               "type": "string",
               "title": "Url"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3803,6 +4709,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3862,6 +4780,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3921,6 +4851,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -3981,6 +4923,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4039,6 +4993,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4086,6 +5052,18 @@
               "title": "Url"
             },
             "description": "Instagram profile URL, @handle, or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4147,6 +5125,18 @@
               "title": "Limit"
             },
             "description": "Max highlights to expand"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4194,6 +5184,18 @@
               "title": "Url"
             },
             "description": "Instagram post or reel URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4239,6 +5241,18 @@
               "type": "string",
               "title": "Url"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4284,6 +5298,18 @@
               "type": "string",
               "title": "Url"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4329,6 +5355,18 @@
               "type": "string",
               "title": "Url"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4386,6 +5424,18 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4433,6 +5483,18 @@
               "title": "Url"
             },
             "description": "Facebook page URL, @handle, or page name"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4492,6 +5554,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4551,6 +5625,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4610,6 +5696,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4680,6 +5778,18 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4739,6 +5849,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4798,6 +5920,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4845,6 +5979,18 @@
               "title": "Url"
             },
             "description": "Facebook Marketplace item URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4929,6 +6075,18 @@
               "title": "Details"
             },
             "description": "Fetch full description, photos & coordinates per listing (slower, costs more)"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -4989,6 +6147,18 @@
               "default": 10,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5049,6 +6219,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5096,6 +6278,18 @@
               "title": "Url"
             },
             "description": "Facebook event URL, e.g. https://facebook.com/events/ID"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5166,6 +6360,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5237,6 +6443,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5309,6 +6527,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5356,6 +6586,18 @@
               "title": "Url"
             },
             "description": "Meta Ad Library ad URL or ad ID"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5403,6 +6645,18 @@
               "title": "Url"
             },
             "description": "Meta Ad Library ad URL or ad ID"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5473,6 +6727,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5532,6 +6798,18 @@
               "default": "DE",
               "title": "Country"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5604,6 +6882,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5663,6 +6953,18 @@
               "default": "US",
               "title": "Country"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5733,6 +7035,18 @@
               "default": 10,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5803,6 +7117,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5850,6 +7176,18 @@
               "title": "Url"
             },
             "description": "LinkedIn Ad Library URL or ad ID"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5938,6 +7276,18 @@
               "default": 10,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -5985,6 +7335,18 @@
               "title": "Username"
             },
             "description": "GitHub username or profile URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6044,6 +7406,18 @@
               "default": 30,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6091,6 +7465,18 @@
               "title": "Repo"
             },
             "description": "Repository URL or owner/name"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6161,6 +7547,18 @@
               "default": 30,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6220,6 +7618,18 @@
               "default": 30,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6277,6 +7687,18 @@
               "default": 30,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6334,6 +7756,18 @@
               "default": 30,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6381,6 +7815,18 @@
               "title": "Username"
             },
             "description": "GitHub username or profile URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6441,6 +7887,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6501,6 +7959,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6548,6 +8018,18 @@
               "title": "Url"
             },
             "description": "Public tweet URL, e.g. https://x.com/user/status/ID"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6595,6 +8077,18 @@
               "title": "Url"
             },
             "description": "Public tweet URL, e.g. https://x.com/user/status/ID"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6642,6 +8136,18 @@
               "title": "Url"
             },
             "description": "Profile URL or @handle, e.g. https://x.com/username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6701,6 +8207,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6761,6 +8279,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6808,6 +8338,18 @@
               "title": "Url"
             },
             "description": "Community URL (x.com/i/communities/ID) or community ID"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6867,6 +8409,18 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6926,6 +8480,18 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -6973,6 +8539,18 @@
               "title": "Url"
             },
             "description": "Subreddit URL, r/name, or bare name"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7020,6 +8598,18 @@
               "title": "Url"
             },
             "description": "Reddit post URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7079,6 +8669,18 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7140,6 +8742,18 @@
               "title": "Limit"
             },
             "description": "Max comments to include in the transcript"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7211,6 +8825,18 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7271,6 +8897,18 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7318,6 +8956,18 @@
               "title": "Url"
             },
             "description": "Threads profile URL or @handle"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7377,6 +9027,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7437,6 +9099,18 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7497,6 +9171,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7544,6 +9230,18 @@
               "title": "Url"
             },
             "description": "Threads post URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7591,6 +9289,18 @@
               "title": "Url"
             },
             "description": "Bluesky profile URL, @handle, or handle"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7650,6 +9360,18 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7697,6 +9419,18 @@
               "title": "Url"
             },
             "description": "Bluesky post URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7744,6 +9478,18 @@
               "title": "Url"
             },
             "description": "Pinterest pin URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7803,6 +9549,18 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7862,6 +9620,18 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7921,6 +9691,18 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -7981,6 +9763,18 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8028,6 +9822,18 @@
               "title": "Url"
             },
             "description": "LinkedIn profile URL, e.g. https://linkedin.com/in/slug"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8075,6 +9881,18 @@
               "title": "Url"
             },
             "description": "LinkedIn company URL, e.g. https://linkedin.com/company/slug"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8122,6 +9940,18 @@
               "title": "Url"
             },
             "description": "LinkedIn post/activity URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8169,6 +9999,18 @@
               "title": "Url"
             },
             "description": "LinkedIn post/activity URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8228,6 +10070,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8299,6 +10153,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8346,6 +10212,18 @@
               "title": "Url"
             },
             "description": "Rumble video URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8405,6 +10283,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8464,6 +10354,18 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8524,6 +10426,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8585,6 +10499,18 @@
               "title": "Limit"
             },
             "description": "How many recent clips to inspect when a channel is passed"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8628,10 +10554,22 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Kuaishou profile URL or numeric user ID (e.g. .../profile/2542916559)",
+              "description": "Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)",
               "title": "Url"
             },
-            "description": "Kuaishou profile URL or numeric user ID (e.g. .../profile/2542916559)"
+            "description": "Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8675,10 +10613,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Kuaishou profile URL or numeric user ID (e.g. .../profile/2542916559)",
+              "description": "Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)",
               "title": "Url"
             },
-            "description": "Kuaishou profile URL or numeric user ID (e.g. .../profile/2542916559)"
+            "description": "Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)"
           },
           {
             "name": "limit",
@@ -8691,6 +10629,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8734,10 +10684,22 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Kuaishou video URL or numeric video/photo ID (e.g. .../short-video/5241627202658372579)",
+              "description": "Kwai video URL (e.g. https://www.kwai.com/@handle/video/5238962376325675745)",
               "title": "Url"
             },
-            "description": "Kuaishou video URL or numeric video/photo ID (e.g. .../short-video/5241627202658372579)"
+            "description": "Kwai video URL (e.g. https://www.kwai.com/@handle/video/5238962376325675745)"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8785,6 +10747,18 @@
               "title": "Url"
             },
             "description": "Komi page URL or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8832,6 +10806,18 @@
               "title": "Url"
             },
             "description": "Pillar page URL or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8879,6 +10865,18 @@
               "title": "Url"
             },
             "description": "Linkbio (lnk.bio) page URL or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8926,6 +10924,18 @@
               "title": "Url"
             },
             "description": "Linkme profile URL or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -8973,6 +10983,18 @@
               "title": "Url"
             },
             "description": "Twitch channel URL or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9032,6 +11054,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9079,6 +11113,18 @@
               "title": "Url"
             },
             "description": "Twitch channel URL or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9126,6 +11172,18 @@
               "title": "Url"
             },
             "description": "Twitch clip URL, channel URL, or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9173,6 +11231,18 @@
               "title": "Url"
             },
             "description": "Spotify artist URL, URI, or ID"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9220,6 +11290,18 @@
               "title": "Url"
             },
             "description": "Spotify track URL, URI, or ID"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9267,6 +11349,18 @@
               "title": "Url"
             },
             "description": "Spotify album URL, URI, or ID"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9326,6 +11420,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9385,6 +11491,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9454,6 +11572,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9501,6 +11631,18 @@
               "title": "Url"
             },
             "description": "SoundCloud artist URL or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9560,6 +11702,18 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9607,6 +11761,18 @@
               "title": "Url"
             },
             "description": "SoundCloud track URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9654,6 +11820,18 @@
               "title": "Url"
             },
             "description": "Linktree profile URL or username"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9701,6 +11879,18 @@
               "title": "Url"
             },
             "description": "Snapchat username or profile URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9774,6 +11964,18 @@
               "title": "Limit"
             },
             "description": "Max products to include. Use 0 for shop metadata only when supported."
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9840,6 +12042,18 @@
               "title": "Names"
             },
             "description": "Optional comma-separated list of names"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9902,6 +12116,18 @@
               ],
               "title": "Names"
             }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -9950,6 +12176,18 @@
               "title": "Url"
             },
             "description": "A public post, video, or reel URL"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set false to bypass the 24h cache and fetch fresh data.",
+              "default": true,
+              "title": "Cache"
+            },
+            "description": "Set false to bypass the 24h cache and fetch fresh data."
           }
         ],
         "responses": {
@@ -10848,10 +13086,479 @@
           }
         }
       }
+    },
+    "/v1/monitors": {
+      "get": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "List your monitors",
+        "operationId": "list_monitors_v1_monitors_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Create a monitor",
+        "operationId": "create_monitor_v1_monitors_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/monitors/{monitor_id}": {
+      "get": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Get one monitor (includes webhook secret)",
+        "operationId": "get_monitor_v1_monitors__monitor_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "monitor_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Monitor Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Update a monitor",
+        "operationId": "update_monitor_v1_monitors__monitor_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "monitor_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Monitor Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Delete a monitor",
+        "operationId": "delete_monitor_v1_monitors__monitor_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "monitor_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Monitor Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/monitors/{monitor_id}/test": {
+      "post": {
+        "tags": [
+          "Monitors"
+        ],
+        "summary": "Send a signed test payload to your webhook",
+        "operationId": "test_monitor_v1_monitors__monitor_id__test_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "monitor_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Monitor Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/history": {
+      "get": {
+        "tags": [
+          "History"
+        ],
+        "summary": "Metric time series for a profile or post",
+        "operationId": "metric_history_v1_history_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "endpoint",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Tracked endpoint path, e.g. /v1/youtube/channel-details",
+              "title": "Endpoint"
+            },
+            "description": "Tracked endpoint path, e.g. /v1/youtube/channel-details"
+          },
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The same URL you pass to that endpoint",
+              "title": "Url"
+            },
+            "description": "The same URL you pass to that endpoint"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 365,
+              "minimum": 1,
+              "default": 30,
+              "title": "Days"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "default": 200,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batch": {
+      "post": {
+        "tags": [
+          "Batch"
+        ],
+        "summary": "Run up to 20 endpoint calls in one request",
+        "operationId": "run_batch_v1_batch_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/v1/status": {
+      "get": {
+        "tags": [
+          "Status"
+        ],
+        "summary": "Public API health (live, based on latest requests, no auth required)",
+        "operationId": "api_status_v1_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Api Status V1 Status Get"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "ApiResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "ApiResponse"
+      },
+      "BatchItem": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "Captapi GET path, e.g. /v1/youtube/video-details"
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "title": "BatchItem"
+      },
+      "BatchRequest": {
+        "properties": {
+          "requests": {
+            "items": {
+              "$ref": "#/components/schemas/BatchItem"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Requests"
+          }
+        },
+        "type": "object",
+        "required": [
+          "requests"
+        ],
+        "title": "BatchRequest"
+      },
       "Body_video_summarize_v1_video_summarize_post": {
         "properties": {
           "file": {
@@ -10965,6 +13672,123 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "MonitorCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Name",
+            "default": ""
+          },
+          "endpoint": {
+            "type": "string",
+            "title": "Endpoint",
+            "description": "Captapi GET path, e.g. /v1/reddit/subreddit-posts"
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params"
+          },
+          "interval_minutes": {
+            "type": "integer",
+            "maximum": 1440.0,
+            "minimum": 15.0,
+            "title": "Interval Minutes",
+            "default": 60
+          },
+          "webhook_url": {
+            "type": "string",
+            "title": "Webhook Url",
+            "description": "HTTPS URL that receives new-item payloads"
+          },
+          "secret": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 16
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secret",
+            "description": "HMAC secret; generated if omitted"
+          }
+        },
+        "type": "object",
+        "required": [
+          "endpoint",
+          "webhook_url"
+        ],
+        "title": "MonitorCreate"
+      },
+      "MonitorUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "params": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Params"
+          },
+          "interval_minutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1440.0,
+                "minimum": 15.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interval Minutes"
+          },
+          "webhook_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Webhook Url"
+          },
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active"
+          }
+        },
+        "type": "object",
+        "title": "MonitorUpdate"
       },
       "ValidationError": {
         "properties": {

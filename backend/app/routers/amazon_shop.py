@@ -114,6 +114,7 @@ async def amazon_shop_page(
     url: str = Query(..., description="Amazon seller storefront URL, seller profile URL, or seller ID"),
     marketplace: str = Query("US", min_length=2, max_length=5),
     limit: int = Query(20, ge=0, le=200, description="Max products to include. Use 0 for shop metadata only when supported."),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     detected = detect_url_platform(url)
@@ -141,5 +142,5 @@ async def amazon_shop_page(
                 raise HTTPException(status_code=404, detail="Amazon Shop page not found")
             return _normalize_shop(items[:max_products], url, marketplace)
 
-        data = await cached_or_run("amazon-shop.page", {"url": url, "marketplace": marketplace.upper(), "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("amazon-shop.page", {"url": url, "marketplace": marketplace.upper(), "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)

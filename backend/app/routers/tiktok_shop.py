@@ -126,6 +126,7 @@ async def shop_search(
     q: str = Query(..., min_length=2, description="Product search query"),
     region: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/shop-search", platform="tiktok_shop", resource_url=None, base_credits=_scaled(limit, RATE_SHOP)) as ctx:
@@ -134,7 +135,7 @@ async def shop_search(
             products = [_normalize_product(i) for i in items]
             return {"query": q, "region": region.upper(), "totalReturned": len(products), "products": products}
 
-        data = await cached_or_run("tiktok-shop.shop-search", {"q": q, "region": region, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("tiktok-shop.shop-search", {"q": q, "region": region, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["products"]), RATE_SHOP)
         return ApiResponse(data=data)
 
@@ -143,6 +144,7 @@ async def shop_search(
 async def shop_products(
     url: str = Query(..., description="TikTok Shop store URL"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_non_tiktok_url(url, "https://www.tiktok.com/shop/store")
@@ -154,7 +156,7 @@ async def shop_products(
             products = [_normalize_product(i) for i in items]
             return {"url": url, "totalReturned": len(products), "products": products}
 
-        data = await cached_or_run("tiktok-shop.shop-products", {"url": url, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("tiktok-shop.shop-products", {"url": url, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["products"]), RATE_SHOP)
         return ApiResponse(data=data)
 
@@ -162,6 +164,7 @@ async def shop_products(
 @router.get("/product-details", summary="TikTok Shop product details")
 async def product_details(
     url: str = Query(..., description="TikTok Shop product URL"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_non_tiktok_url(url, "https://www.tiktok.com/shop/pdp/product/123")
@@ -194,13 +197,14 @@ async def product_details(
             normalized["url"] = normalized["url"] or url
             return normalized
 
-        return ApiResponse(data=await cached_or_run("tiktok-shop.product-details", {"url": url, "v": 3}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("tiktok-shop.product-details", {"url": url, "v": 3}, _run, ctx, use_cache=cache))
 
 
 @router.get("/product-reviews", summary="TikTok Shop product reviews")
 async def product_reviews(
     url: str = Query(..., description="TikTok Shop product URL"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_non_tiktok_url(url, "https://www.tiktok.com/shop/pdp/product/123")
@@ -224,7 +228,7 @@ async def product_reviews(
             reviews = [_normalize_review(i) for i in items[:limit]]
             return {"url": url, "totalReturned": len(reviews), "reviews": reviews}
 
-        data = await cached_or_run("tiktok-shop.product-reviews", {"url": url, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("tiktok-shop.product-reviews", {"url": url, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["reviews"]), RATE_REVIEWS)
         return ApiResponse(data=data)
 
@@ -233,6 +237,7 @@ async def product_reviews(
 async def user_showcase(
     username: str = Query(..., description="TikTok username, with or without @"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_non_tiktok_url(username, "https://www.tiktok.com/@username")
@@ -245,6 +250,6 @@ async def user_showcase(
             products = [_normalize_product(i) for i in items]
             return {"username": handle, "totalReturned": len(products), "products": products}
 
-        data = await cached_or_run("tiktok-shop.user-showcase", {"username": handle, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("tiktok-shop.user-showcase", {"username": handle, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["products"]), RATE_REVIEWS)
         return ApiResponse(data=data)

@@ -56,6 +56,7 @@ async def google_search(
     country: str = Query("us", min_length=2, max_length=2, description="Two-letter country code"),
     language: str = Query("en", min_length=2, max_length=5, description="Google interface language"),
     limit: int = Query(10, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -100,6 +101,7 @@ async def google_search(
             params={"q": q, "country": country, "language": language, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled(len(data["results"]))
         return ApiResponse(data=data)

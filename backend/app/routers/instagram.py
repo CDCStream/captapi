@@ -431,6 +431,7 @@ def _normalize_audio_reel(item: dict) -> dict:
 @router.get("/details", summary="Instagram post/reel details")
 async def instagram_details(
     url: str = Query(..., description="Instagram post or reel URL"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_instagram_post_url(url)
@@ -495,6 +496,7 @@ async def instagram_details(
             params={"url": url, "v": 12},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -601,6 +603,7 @@ async def instagram_summarize(
 async def instagram_comments(
     url: str = Query(...),
     limit: int = Query(50, ge=1, le=500),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_instagram_post_url(url)
@@ -652,6 +655,7 @@ async def instagram_comments(
             params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["comments"]), RATE_IG_RICH, 2)
         return ApiResponse(data=data)
@@ -660,6 +664,7 @@ async def instagram_comments(
 @router.get("/channel-details", summary="Instagram profile info")
 async def instagram_channel_details(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -721,6 +726,7 @@ async def instagram_channel_details(
             params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -728,6 +734,7 @@ async def instagram_channel_details(
 @router.get("/basic-profile", summary="Lightweight Instagram profile lookup")
 async def instagram_basic_profile(
     url: str = Query(..., description="Instagram profile URL or @handle"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -783,6 +790,7 @@ async def instagram_basic_profile(
             params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -849,6 +857,7 @@ async def instagram_channel_posts(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
     cursor: str | None = Query(None, description="Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -901,6 +910,7 @@ async def instagram_channel_posts(
             params={"url": url, "limit": limit, "cursor": cursor or "", "v": 14},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_CHANNEL, 1)
         return ApiResponse(data=data)
@@ -911,6 +921,7 @@ async def instagram_channel_reels(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
     cursor: str | None = Query(None, description="Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -970,6 +981,7 @@ async def instagram_channel_reels(
             params={"url": url, "limit": limit, "cursor": cursor or "", "v": 15},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_CHANNEL, 1)
         return ApiResponse(data=data)
@@ -979,6 +991,7 @@ async def instagram_channel_reels(
 async def instagram_reels_search(
     q: str = Query(..., min_length=2, description="Hashtag (without #) or keyword"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1017,6 +1030,7 @@ async def instagram_reels_search(
             params={"q": q, "limit": limit, "v": 12},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_IG_POSTS, CREDIT_SEARCH)
         return ApiResponse(data=data)
@@ -1114,6 +1128,7 @@ def _normalize_trending_country(raw: str) -> str:
 async def instagram_trending_reels(
     country: str = Query("United States", description="Country name or ISO code (e.g. 'United States' or 'US') for Explore localization"),
     limit: int = Query(20, ge=10, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1172,6 +1187,7 @@ async def instagram_trending_reels(
             # Trending actor runs take minutes; serve the last list instantly
             # after TTL expiry and refresh in the background.
             stale_while_revalidate=True,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_MARGIN, 2)
         return ApiResponse(data=data)
@@ -1180,6 +1196,7 @@ async def instagram_trending_reels(
 @router.get("/video-download", summary="Direct video URL for Instagram Reel")
 async def instagram_video_download(
     url: str = Query(...),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1237,6 +1254,7 @@ async def instagram_video_download(
             runner=_run,
             ctx=ctx,
             ttl=3600,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -1245,6 +1263,7 @@ async def instagram_video_download(
 async def instagram_reels_by_audio_id(
     audio_id: str = Query(..., min_length=2, description="Instagram audio/music ID or full audio URL"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_instagram_platform_mismatch(audio_id, "https://www.instagram.com/reels/audio/123456789/")
@@ -1282,6 +1301,7 @@ async def instagram_reels_by_audio_id(
             params={"audio_id": audio_id, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_MARGIN, 2)
         return ApiResponse(data=data)
@@ -1291,6 +1311,7 @@ async def instagram_reels_by_audio_id(
 async def instagram_tagged_posts(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -1322,6 +1343,7 @@ async def instagram_tagged_posts(
             params={"url": url, "limit": limit, "v": 9},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_RICH, 2)
         return ApiResponse(data=data)
@@ -1331,6 +1353,7 @@ async def instagram_tagged_posts(
 async def instagram_music_posts(
     url: str = Query(..., description="Instagram audio/music page URL"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_instagram_platform_mismatch(url, "https://www.instagram.com/reels/audio/123456789/")
@@ -1362,6 +1385,7 @@ async def instagram_music_posts(
             params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_RICH, 3)
         return ApiResponse(data=data)
@@ -1371,6 +1395,7 @@ async def instagram_music_posts(
 async def instagram_hashtag_search(
     q: str = Query(..., min_length=2, description="Hashtag (without #)"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1405,6 +1430,7 @@ async def instagram_hashtag_search(
             params={"q": q, "limit": limit, "v": 11},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_IG_POSTS, CREDIT_SEARCH)
         return ApiResponse(data=data)
@@ -1427,6 +1453,7 @@ def _normalize_ig_profile(item: dict) -> dict:
 async def instagram_profile_search(
     q: str = Query(..., min_length=2),
     limit: int = Query(20, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1457,6 +1484,7 @@ async def instagram_profile_search(
             params={"q": q, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["users"]), RATE_IG_POSTS, CREDIT_SEARCH)
         return ApiResponse(data=data)
@@ -1474,6 +1502,7 @@ def _highlight_payload(item: dict) -> dict:
 @router.get("/story-highlights", summary="List an Instagram profile's story highlights")
 async def instagram_story_highlights(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -1513,6 +1542,7 @@ async def instagram_story_highlights(
             params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -1521,6 +1551,7 @@ async def instagram_story_highlights(
 async def instagram_highlights_details(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(10, ge=1, le=50, description="Max highlights to expand"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -1580,6 +1611,7 @@ async def instagram_highlights_details(
             params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["highlights"]), RATE_IG_RICH, 5)
         return ApiResponse(data=data)
@@ -1588,6 +1620,7 @@ async def instagram_highlights_details(
 @router.get("/embed", summary="Embed HTML for an Instagram post/reel")
 async def instagram_embed(
     url: str = Query(..., description="Instagram post or reel URL"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     shortcode = _require_instagram_post_url(url)
@@ -1623,5 +1656,6 @@ async def instagram_embed(
             params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)

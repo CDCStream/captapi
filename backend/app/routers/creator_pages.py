@@ -268,7 +268,7 @@ async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
     }
 
 
-async def _page(platform: str, url: str, caller: ApiCaller):
+async def _page(platform: str, url: str, caller: ApiCaller, use_cache: bool = True):
     detected = detect_url_platform(url)
     if detected and detected != platform:
         raise HTTPException(
@@ -277,27 +277,30 @@ async def _page(platform: str, url: str, caller: ApiCaller):
         )
     profile = _url(platform, url)
     async with billed_call(caller=caller, endpoint=f"/v1/{platform}/{'profile' if platform == 'linkme' else 'page'}", platform=platform, resource_url=profile, base_credits=4) as ctx:
-        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 3}, lambda: _fetch_page(platform, profile), ctx)
+        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 3}, lambda: _fetch_page(platform, profile), ctx, use_cache=use_cache)
         if not (data.get("username") or data.get("links")):
             raise HTTPException(status_code=404, detail=f"{platform.title()} page not found")
         return ApiResponse(data=data)
 
 
+_CACHE_DESC = "Set false to bypass the 24h cache and fetch fresh data."
+
+
 @router.get("/komi/page", summary="Komi page")
-async def komi_page(url: str = Query(..., description="Komi page URL or username"), caller: ApiCaller = Depends(require_api_key)):
-    return await _page("komi", url, caller)
+async def komi_page(url: str = Query(..., description="Komi page URL or username"), cache: bool = Query(True, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
+    return await _page("komi", url, caller, use_cache=cache)
 
 
 @router.get("/pillar/page", summary="Pillar page")
-async def pillar_page(url: str = Query(..., description="Pillar page URL or username"), caller: ApiCaller = Depends(require_api_key)):
-    return await _page("pillar", url, caller)
+async def pillar_page(url: str = Query(..., description="Pillar page URL or username"), cache: bool = Query(True, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
+    return await _page("pillar", url, caller, use_cache=cache)
 
 
 @router.get("/linkbio/page", summary="Linkbio page")
-async def linkbio_page(url: str = Query(..., description="Linkbio (lnk.bio) page URL or username"), caller: ApiCaller = Depends(require_api_key)):
-    return await _page("linkbio", url, caller)
+async def linkbio_page(url: str = Query(..., description="Linkbio (lnk.bio) page URL or username"), cache: bool = Query(True, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
+    return await _page("linkbio", url, caller, use_cache=cache)
 
 
 @router.get("/linkme/profile", summary="Linkme profile")
-async def linkme_profile(url: str = Query(..., description="Linkme profile URL or username"), caller: ApiCaller = Depends(require_api_key)):
-    return await _page("linkme", url, caller)
+async def linkme_profile(url: str = Query(..., description="Linkme profile URL or username"), cache: bool = Query(True, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
+    return await _page("linkme", url, caller, use_cache=cache)

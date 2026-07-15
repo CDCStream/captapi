@@ -390,6 +390,7 @@ def _normalize_creator(item: dict) -> dict:
 @router.get("/video-details", summary="TikTok video metadata + stats")
 async def tiktok_video_details(
     url: str = Query(...),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_tiktok_video_url(url)
@@ -424,6 +425,7 @@ async def tiktok_video_details(
             params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -612,6 +614,7 @@ async def tiktok_summarize(
 async def tiktok_comments(
     url: str = Query(...),
     limit: int = Query(50, ge=1, le=500),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_tiktok_video_url(url)
@@ -657,6 +660,7 @@ async def tiktok_comments(
             params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["comments"]), RATE_COMMENTS, 2)
         return ApiResponse(data=data)
@@ -665,6 +669,7 @@ async def tiktok_comments(
 @router.get("/channel-details", summary="TikTok profile / channel info")
 async def tiktok_channel_details(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
@@ -722,6 +727,7 @@ async def tiktok_channel_details(
             params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -729,6 +735,7 @@ async def tiktok_channel_details(
 @router.get("/profile-region", summary="TikTok profile region/language signals")
 async def tiktok_profile_region(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
@@ -764,6 +771,7 @@ async def tiktok_profile_region(
             params={"handle": handle, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -771,6 +779,7 @@ async def tiktok_profile_region(
 @router.get("/live", summary="TikTok live status + room info for a creator")
 async def tiktok_live(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
@@ -824,6 +833,7 @@ async def tiktok_live(
             params={"handle": handle, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -831,6 +841,7 @@ async def tiktok_live(
 @router.get("/live-info", summary="TikTok live room info for a creator")
 async def tiktok_live_info(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     # ScrapeCreators exposes both Live and Live Info. Our live endpoint already
@@ -873,6 +884,7 @@ async def tiktok_live_info(
             params={"handle": handle, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -883,6 +895,7 @@ async def tiktok_search_suggestions(
     country: str = Query("US", min_length=2, max_length=2),
     language: str = Query("en-US"),
     limit: int = Query(20, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -920,6 +933,7 @@ async def tiktok_search_suggestions(
             params={"q": q, "country": country.upper(), "language": language, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["suggestions"]), RATE_TREND_MARGIN, 2)
         return ApiResponse(data=data)
@@ -931,6 +945,7 @@ async def tiktok_popular_creators(
     sort: str = Query("follower", pattern="^(follower|engagement|popularity)$"),
     follower_count: str | None = Query(None, description="Optional range: 10k-100k, 100k-1m, 1m-10m, >10m"),
     limit: int = Query(20, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -980,6 +995,7 @@ async def tiktok_popular_creators(
             params={"country": country.upper(), "sort": sort, "follower_count": follower_count or "", "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["creators"]), RATE_TREND_MARGIN, 2)
         return ApiResponse(data=data)
@@ -988,6 +1004,7 @@ async def tiktok_popular_creators(
 @router.get("/audience-demographics", summary="TikTok profile audience/demographic signals")
 async def tiktok_audience_demographics(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
@@ -1050,6 +1067,7 @@ async def tiktok_audience_demographics(
             params={"handle": handle, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -1058,6 +1076,7 @@ async def tiktok_audience_demographics(
 async def tiktok_search(
     q: str = Query(..., min_length=2),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1084,6 +1103,7 @@ async def tiktok_search(
             params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_CHANNEL_POSTS, CREDIT_SEARCH)
         return ApiResponse(data=data)
@@ -1092,6 +1112,7 @@ async def tiktok_search(
 @router.get("/video-download", summary="TikTok video download URL")
 async def tiktok_video_download(
     url: str = Query(...),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1138,6 +1159,7 @@ async def tiktok_video_download(
             runner=_run,
             ctx=ctx,
             ttl=3600,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -1146,6 +1168,7 @@ async def tiktok_video_download(
 async def tiktok_channel_posts(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
@@ -1173,6 +1196,7 @@ async def tiktok_channel_posts(
             params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_CHANNEL_POSTS, 2)
         return ApiResponse(data=data)
@@ -1183,6 +1207,7 @@ async def tiktok_comment_replies(
     url: str = Query(..., description="URL of the TikTok video the comment belongs to"),
     comment_id: str = Query(..., description="ID of the parent comment"),
     limit: int = Query(50, ge=1, le=500),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_tiktok_video_url(url)
@@ -1284,6 +1309,7 @@ async def tiktok_comment_replies(
             params={"url": url, "comment_id": comment_id, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         # Bill on the actual rows crawled (what Apify charged us for), not the
         # filtered reply count. On a cache hit this is ignored (cache_hit -> 0).
@@ -1297,6 +1323,7 @@ async def tiktok_comment_replies(
 async def tiktok_user_followers(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     limit: int = Query(50, ge=1, le=500),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
@@ -1332,6 +1359,7 @@ async def tiktok_user_followers(
             params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["followers"]), RATE_FOLLOWERS, 5)
         return ApiResponse(data=data)
@@ -1341,6 +1369,7 @@ async def tiktok_user_followers(
 async def tiktok_user_followings(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     limit: int = Query(50, ge=1, le=500),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
@@ -1376,6 +1405,7 @@ async def tiktok_user_followings(
             params={"url": url, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["followings"]), RATE_FOLLOWERS, 5)
         return ApiResponse(data=data)
@@ -1385,6 +1415,7 @@ async def tiktok_user_followings(
 async def tiktok_music_posts(
     url: str = Query(..., description="TikTok music/sound URL"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1410,6 +1441,7 @@ async def tiktok_music_posts(
             params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_MUSIC_POSTS, 3)
         return ApiResponse(data=data)
@@ -1419,6 +1451,7 @@ async def tiktok_music_posts(
 async def tiktok_hashtag_search(
     q: str = Query(..., min_length=2, description="Hashtag (with or without #)"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1445,6 +1478,7 @@ async def tiktok_hashtag_search(
             params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_CHANNEL_POSTS, CREDIT_SEARCH)
         return ApiResponse(data=data)
@@ -1454,6 +1488,7 @@ async def tiktok_hashtag_search(
 async def tiktok_top_search(
     q: str = Query(..., min_length=2),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1480,6 +1515,7 @@ async def tiktok_top_search(
             params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_CHANNEL_POSTS, CREDIT_SEARCH)
         return ApiResponse(data=data)
@@ -1489,6 +1525,7 @@ async def tiktok_top_search(
 async def tiktok_user_search(
     q: str = Query(..., min_length=2),
     limit: int = Query(20, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1520,6 +1557,7 @@ async def tiktok_user_search(
             params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["users"]), RATE_USER_SEARCH, 5)
         return ApiResponse(data=data)
@@ -1528,6 +1566,7 @@ async def tiktok_user_search(
 @router.get("/song-details", summary="Details of a TikTok sound/song")
 async def tiktok_song_details(
     url: str = Query(..., description="TikTok music/sound URL"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1672,6 +1711,7 @@ async def tiktok_song_details(
             params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -1710,6 +1750,7 @@ def _normalize_trend_video(v: dict) -> dict:
 async def tiktok_trending_feed(
     country: str = Query("US", min_length=2, max_length=2, description="ISO country code"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1736,6 +1777,7 @@ async def tiktok_trending_feed(
             params={"country": country.upper(), "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_TREND, CREDIT_SEARCH)
         return ApiResponse(data=data)
@@ -1745,6 +1787,7 @@ async def tiktok_trending_feed(
 async def tiktok_popular_hashtags(
     query: str = Query("trending", min_length=1, description="Topic or keyword to discover trending hashtags for"),
     limit: int = Query(20, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1823,6 +1866,7 @@ async def tiktok_popular_hashtags(
             params={"query": query, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = cost
         return ApiResponse(data=data)

@@ -567,6 +567,7 @@ async def _reddit_search_actor(query: str, limit: int) -> list[dict[str, Any]]:
 async def subreddit_posts(
     url: str = Query(..., description="Subreddit URL, r/name, or bare name"),
     limit: int = Query(25, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     sub = _require_subreddit(url)
@@ -608,6 +609,7 @@ async def subreddit_posts(
             params={"sub": sub, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled(len(data["posts"]), RATE, 2)
         return ApiResponse(data=data)
@@ -704,6 +706,7 @@ async def _subreddit_details_native(sub: str) -> dict[str, Any] | None:
 @router.get("/subreddit-details", summary="Subreddit info & member stats")
 async def subreddit_details(
     url: str = Query(..., description="Subreddit URL, r/name, or bare name"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     sub = _require_subreddit(url)
@@ -742,6 +745,7 @@ async def subreddit_details(
             params={"sub": sub, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -749,6 +753,7 @@ async def subreddit_details(
 @router.get("/post-details", summary="Reddit post metadata + stats")
 async def post_details(
     url: str = Query(..., description="Reddit post URL"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     post_id = _require_reddit_post_url(url)
@@ -768,6 +773,7 @@ async def post_details(
             params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -776,6 +782,7 @@ async def post_details(
 async def post_comments(
     url: str = Query(..., description="Reddit post URL"),
     limit: int = Query(50, ge=1, le=500),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     post_id = _require_reddit_post_url(url)
@@ -796,6 +803,7 @@ async def post_comments(
             params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled(len(data["comments"]), RATE, 2)
         return ApiResponse(data=data)
@@ -805,6 +813,7 @@ async def post_comments(
 async def post_transcript(
     url: str = Query(..., description="Reddit post URL"),
     limit: int = Query(50, ge=0, le=200, description="Max comments to include in the transcript"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     post_id = _require_reddit_post_url(url)
@@ -866,6 +875,7 @@ async def post_transcript(
             params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled(max(data.get("commentsIncluded", 0), 1), RATE, 2)
         return ApiResponse(data=data)
@@ -876,6 +886,7 @@ async def subreddit_search(
     url: str = Query(..., description="Subreddit URL, r/name, or bare name"),
     q: str = Query(..., min_length=2, description="Search query"),
     limit: int = Query(25, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     sub = _require_subreddit(url)
@@ -920,6 +931,7 @@ async def subreddit_search(
             params={"sub": sub, "q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled(len(data["results"]), RATE, 2)
         return ApiResponse(data=data)
@@ -929,6 +941,7 @@ async def subreddit_search(
 async def reddit_search(
     q: str = Query(..., min_length=2, description="Search query"),
     limit: int = Query(25, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -964,6 +977,7 @@ async def reddit_search(
             params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled(len(data["results"]), RATE, 2)
         return ApiResponse(data=data)

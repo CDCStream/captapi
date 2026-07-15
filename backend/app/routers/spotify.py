@@ -263,6 +263,7 @@ async def podcast(
 async def podcast_episodes(
     url: str = Query(..., description="Spotify show/podcast URL, URI, or ID"),
     limit: int = Query(20, ge=1, le=50),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "show")
@@ -283,7 +284,7 @@ async def podcast_episodes(
             normalized = [_normalize(i, "episode") for i in rows]
             return {"platform": "spotify", "podcast": data, "totalReturned": len(normalized[:limit]), "episodes": normalized[:limit]}
 
-        data = await cached_or_run("spotify.podcast-episodes", {"uri": uri, "limit": limit, "v": 3}, _run, ctx)
+        data = await cached_or_run("spotify.podcast-episodes", {"uri": uri, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["episodes"]))
         return ApiResponse(data=data)
 
@@ -293,6 +294,7 @@ async def search(
     q: str = Query(..., min_length=2),
     type: str = Query("tracks", pattern="^(tracks|albums|artists|podcasts|episodes)$"),
     limit: int = Query(20, ge=1, le=50),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -324,6 +326,6 @@ async def search(
             results = [_normalize(i, kind) for i in items[:limit] if not i.get("error")]
             return {"platform": "spotify", "query": q, "type": type, "totalReturned": len(results), "results": results}
 
-        data = await cached_or_run("spotify.search", {"q": q, "type": type, "limit": limit, "v": 3}, _run, ctx)
+        data = await cached_or_run("spotify.search", {"q": q, "type": type, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["results"]))
         return ApiResponse(data=data)

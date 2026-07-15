@@ -421,7 +421,17 @@ function withPlatform(
   list: Omit<Endpoint, "platform">[],
   platform: Platform,
 ): Endpoint[] {
-  return list.map((e) => ({ ...e, platform }));
+  // Every data endpoint caches responses and accepts cache=false to bypass;
+  // account endpoints are the only ones with no cache layer.
+  const addCache = platform !== "account";
+  return list.map((e) => ({
+    ...e,
+    platform,
+    params:
+      addCache && !e.params.some((p) => p.name === "cache")
+        ? [...e.params, cacheParam()]
+        : e.params,
+  }));
 }
 
 export const ENDPOINTS: Endpoint[] = [

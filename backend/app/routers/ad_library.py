@@ -351,6 +351,7 @@ async def facebook_search(
     q: str = Query(..., min_length=2),
     country: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -364,7 +365,7 @@ async def facebook_search(
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.facebook.search", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx)
+        data = await cached_or_run("ad-library.facebook.search", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
@@ -374,6 +375,7 @@ async def facebook_company_ads(
     url: str = Query(..., description="Facebook page URL or Meta Ad Library URL"),
     country: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_ad_platform_mismatch(url, "facebook", "https://www.facebook.com/ads/library/?id=123456789")
@@ -388,7 +390,7 @@ async def facebook_company_ads(
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
             return {"url": url, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.facebook.company-ads", {"url": url, "country": country, "limit": limit, "v": 3}, _run, ctx)
+        data = await cached_or_run("ad-library.facebook.company-ads", {"url": url, "country": country, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
@@ -398,6 +400,7 @@ async def facebook_search_companies(
     q: str = Query(..., min_length=2, description="Company or brand name to search for"),
     country: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -418,7 +421,7 @@ async def facebook_search_companies(
             companies = list(advertisers.values())
             return {"query": q, "country": country.upper(), "totalReturned": len(companies), "companies": companies}
 
-        data = await cached_or_run("ad-library.facebook.search-companies", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx)
+        data = await cached_or_run("ad-library.facebook.search-companies", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["companies"]))
         return ApiResponse(data=data)
 
@@ -426,6 +429,7 @@ async def facebook_search_companies(
 @router.get("/facebook/ad-details", summary="Meta/Facebook ad details")
 async def facebook_ad_details(
     url: str = Query(..., description="Meta Ad Library ad URL or ad ID"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -437,12 +441,13 @@ async def facebook_ad_details(
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(items[0], "facebook_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.facebook.ad-details", {"url": ad_url, "v": 3}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.facebook.ad-details", {"url": ad_url, "v": 3}, _run, ctx, use_cache=cache))
 
 
 @router.get("/facebook/ad-transcript", summary="Meta/Facebook ad transcript / creative text")
 async def facebook_ad_transcript(
     url: str = Query(..., description="Meta Ad Library ad URL or ad ID"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -480,7 +485,7 @@ async def facebook_ad_transcript(
                 "advertiser": ad.get("advertiser"),
             }
 
-        return ApiResponse(data=await cached_or_run("ad-library.facebook.ad-transcript", {"url": ad_url, "v": 3}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.facebook.ad-transcript", {"url": ad_url, "v": 3}, _run, ctx, use_cache=cache))
 
 
 @router.get("/tiktok/search", summary="Search TikTok Ad Library")
@@ -488,6 +493,7 @@ async def tiktok_search(
     q: str = Query(..., min_length=2),
     country: str = Query("DE", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -497,7 +503,7 @@ async def tiktok_search(
             ads = [_normalize_ad(i, "tiktok_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.tiktok.search", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx)
+        data = await cached_or_run("ad-library.tiktok.search", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
@@ -506,6 +512,7 @@ async def tiktok_search(
 async def tiktok_ad_details(
     url: str = Query(..., description="TikTok Ad Library URL or ad ID"),
     country: str = Query("DE", min_length=2, max_length=2),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -556,7 +563,7 @@ async def tiktok_ad_details(
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(best, "tiktok_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.tiktok.ad-details", {"ad_id": ad_id, "country": region, "v": 3}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.tiktok.ad-details", {"ad_id": ad_id, "country": region, "v": 3}, _run, ctx, use_cache=cache))
 
 
 @router.get("/google/company-ads", summary="Google Ads Transparency Center company ads")
@@ -564,6 +571,7 @@ async def google_company_ads(
     advertiser: str = Query(..., min_length=2, description="Advertiser name, domain, or Google advertiser ID"),
     country: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -573,7 +581,7 @@ async def google_company_ads(
             ads = [_normalize_ad(i, "google_ad_library") for i in items]
             return {"advertiser": advertiser, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.google.company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "v": 3}, _run, ctx)
+        data = await cached_or_run("ad-library.google.company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["ads"]), RATE_GOOGLE_COMPANY_ADS)
         return ApiResponse(data=data)
 
@@ -582,6 +590,7 @@ async def google_company_ads(
 async def google_ad_details(
     creative_id: str = Query(..., description="Google Ads Transparency URL containing AR... and CR... IDs"),
     country: str = Query("US", min_length=2, max_length=2),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -596,7 +605,7 @@ async def google_ad_details(
                     return _normalize_ad(item, "google_ad_library")
             raise HTTPException(status_code=404, detail="Ad not found")
 
-        return ApiResponse(data=await cached_or_run("ad-library.google.ad-details", {"creative_id": creative_id, "country": country, "v": 3}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.google.ad-details", {"creative_id": creative_id, "country": country, "v": 3}, _run, ctx, use_cache=cache))
 
 
 @router.get("/google/advertiser-search", summary="Search Google Ads advertisers")
@@ -604,6 +613,7 @@ async def google_advertiser_search(
     q: str = Query(..., min_length=2),
     country: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(10, ge=1, le=50),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -618,7 +628,7 @@ async def google_advertiser_search(
                     advertisers[name] = ad["advertiser"]
             return {"query": q, "country": country.upper(), "totalReturned": len(advertisers), "advertisers": list(advertisers.values())}
 
-        return ApiResponse(data=await cached_or_run("ad-library.google.advertiser-search", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.google.advertiser-search", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx, use_cache=cache))
 
 
 @router.get("/linkedin/search-ads", summary="Search LinkedIn Ad Library")
@@ -626,6 +636,7 @@ async def linkedin_search_ads(
     q: str = Query(..., min_length=2),
     country: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -635,7 +646,7 @@ async def linkedin_search_ads(
             ads = [_normalize_ad(i, "linkedin_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.linkedin.search-ads", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx)
+        data = await cached_or_run("ad-library.linkedin.search-ads", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
@@ -643,6 +654,7 @@ async def linkedin_search_ads(
 @router.get("/linkedin/ad-details", summary="LinkedIn ad details")
 async def linkedin_ad_details(
     url: str = Query(..., description="LinkedIn Ad Library URL or ad ID"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -669,4 +681,4 @@ async def linkedin_ad_details(
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(items[0], "linkedin_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.linkedin.ad-details", {"url": ad_url, "v": 3}, _run, ctx))
+        return ApiResponse(data=await cached_or_run("ad-library.linkedin.ad-details", {"url": ad_url, "v": 3}, _run, ctx, use_cache=cache))

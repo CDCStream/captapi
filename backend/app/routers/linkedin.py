@@ -193,6 +193,7 @@ def _normalize_post_list_item(p: dict[str, Any]) -> dict[str, Any]:
 @router.get("/profile", summary="LinkedIn person profile details")
 async def linkedin_profile(
     url: str = Query(..., description="LinkedIn profile URL, e.g. https://linkedin.com/in/slug"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     slug = _require_linkedin_profile_url(url)
@@ -218,6 +219,7 @@ async def linkedin_profile(
             params={"slug": slug, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -225,6 +227,7 @@ async def linkedin_profile(
 @router.get("/company", summary="LinkedIn company page details")
 async def linkedin_company(
     url: str = Query(..., description="LinkedIn company URL, e.g. https://linkedin.com/company/slug"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     slug = _require_linkedin_company_url(url)
@@ -250,6 +253,7 @@ async def linkedin_company(
             params={"slug": slug, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -257,6 +261,7 @@ async def linkedin_company(
 @router.get("/post-details", summary="LinkedIn post metadata + engagement")
 async def linkedin_post_details(
     url: str = Query(..., description="LinkedIn post/activity URL"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_linkedin_platform_mismatch(url, "https://www.linkedin.com/posts/activity-123456789")
@@ -284,6 +289,7 @@ async def linkedin_post_details(
             params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -291,6 +297,7 @@ async def linkedin_post_details(
 @router.get("/post-transcript", summary="LinkedIn post transcript / text extraction")
 async def linkedin_post_transcript(
     url: str = Query(..., description="LinkedIn post/activity URL"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_linkedin_platform_mismatch(url, "https://www.linkedin.com/posts/activity-123456789")
@@ -330,6 +337,7 @@ async def linkedin_post_transcript(
             params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -338,6 +346,7 @@ async def linkedin_post_transcript(
 async def linkedin_company_posts(
     url: str = Query(..., description="LinkedIn company URL, e.g. https://linkedin.com/company/slug"),
     limit: int = Query(20, ge=1, le=100),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     slug = _require_linkedin_company_url(url)
@@ -364,6 +373,7 @@ async def linkedin_company_posts(
             params={"slug": slug, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled(len(data["posts"]))
         return ApiResponse(data=data)
@@ -374,6 +384,7 @@ async def linkedin_search_posts(
     q: str = Query(..., min_length=2, description="Keyword to search in public LinkedIn posts"),
     sort: str = Query("relevance", pattern="^(relevance|date)$"),
     limit: int = Query(20, ge=1, le=50),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -404,6 +415,7 @@ async def linkedin_search_posts(
             params={"q": q, "sort": sort, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled(len(data["posts"]))
         return ApiResponse(data=data)

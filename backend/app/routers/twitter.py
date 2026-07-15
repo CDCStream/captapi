@@ -195,6 +195,7 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
 @router.get("/tweet-details", summary="Tweet metadata + engagement stats")
 async def twitter_tweet_details(
     url: str = Query(..., description="Public tweet URL, e.g. https://x.com/user/status/ID"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_tweet_url(url)
@@ -222,6 +223,7 @@ async def twitter_tweet_details(
             params={"url": url, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -299,6 +301,7 @@ async def twitter_transcript(
 @router.get("/profile", summary="Twitter/X profile details & stats")
 async def twitter_profile(
     url: str = Query(..., description="Profile URL or @handle, e.g. https://x.com/username"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_twitter_handle(url)
@@ -332,6 +335,7 @@ async def twitter_profile(
             # slowly, so serve the last copy instantly after the 1h TTL and
             # refresh in the background instead of making every caller wait.
             stale_while_revalidate=True,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -340,6 +344,7 @@ async def twitter_profile(
 async def twitter_user_tweets(
     url: str = Query(..., description="Profile URL or @handle"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_twitter_handle(url)
@@ -367,6 +372,7 @@ async def twitter_user_tweets(
             params={"handle": handle, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["tweets"]), RATE_TWEET, 2)
         return ApiResponse(data=data)
@@ -376,6 +382,7 @@ async def twitter_user_tweets(
 async def twitter_search(
     q: str = Query(..., min_length=2, description="Search query or keywords"),
     limit: int = Query(20, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -402,6 +409,7 @@ async def twitter_search(
             params={"q": q, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_TWEET, 2)
         return ApiResponse(data=data)
@@ -420,6 +428,7 @@ def _extract_community_id(value: str) -> str | None:
 @router.get("/community", summary="X (Twitter) community details")
 async def twitter_community(
     url: str = Query(..., description="Community URL (x.com/i/communities/ID) or community ID"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_twitter_platform_mismatch(url, "https://x.com/i/communities/123456789")
@@ -472,6 +481,7 @@ async def twitter_community(
             params={"community_id": community_id, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         return ApiResponse(data=data)
 
@@ -480,6 +490,7 @@ async def twitter_community(
 async def twitter_community_tweets(
     url: str = Query(..., description="Community URL (x.com/i/communities/ID) or community ID"),
     limit: int = Query(25, ge=1, le=200),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_twitter_platform_mismatch(url, "https://x.com/i/communities/123456789")
@@ -515,6 +526,7 @@ async def twitter_community_tweets(
             params={"community_id": community_id, "limit": limit, "v": 2},
             runner=_run,
             ctx=ctx,
+            use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["tweets"]), RATE_TWEET, 2)
         return ApiResponse(data=data)

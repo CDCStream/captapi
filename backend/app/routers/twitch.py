@@ -187,6 +187,7 @@ async def _channel(username: str) -> dict[str, Any]:
 @router.get("/profile", summary="Twitch channel profile")
 async def profile(
     url: str = Query(..., description="Twitch channel URL or username"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _target(url)
@@ -201,7 +202,7 @@ async def profile(
             ctx["source"] = "apify"
             return await _channel(username)
 
-        data = await cached_or_run("twitch.profile", {"username": username, "v": 2}, _run, ctx)
+        data = await cached_or_run("twitch.profile", {"username": username, "v": 2}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 
@@ -209,6 +210,7 @@ async def profile(
 async def user_videos(
     url: str = Query(..., description="Twitch channel URL or username"),
     limit: int = Query(20, ge=1, le=30),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _target(url)
@@ -233,7 +235,7 @@ async def user_videos(
             ctx["source"] = "apify"
             return {"platform": "twitch", "username": username, "totalReturned": len(videos), "videos": videos[:limit]}
 
-        data = await cached_or_run("twitch.user-videos", {"username": username, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("twitch.user-videos", {"username": username, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["videos"]))
         return ApiResponse(data=data)
 
@@ -241,6 +243,7 @@ async def user_videos(
 @router.get("/user-schedule", summary="Twitch channel schedule")
 async def user_schedule(
     url: str = Query(..., description="Twitch channel URL or username"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _target(url)
@@ -260,13 +263,14 @@ async def user_schedule(
                 schedule = _schedule_segments(channel.get("schedule"))
             return {"platform": "twitch", "username": username, "schedule": schedule}
 
-        data = await cached_or_run("twitch.user-schedule", {"username": username, "v": 2}, _run, ctx)
+        data = await cached_or_run("twitch.user-schedule", {"username": username, "v": 2}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 
 @router.get("/clip", summary="Twitch clip metadata")
 async def clip(
     url: str = Query(..., description="Twitch clip URL, channel URL, or username"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -315,5 +319,5 @@ async def clip(
             ctx["source"] = "apify"
             return _video(items[0])
 
-        data = await cached_or_run("twitch.clip", {"url": url, "v": 3}, _run, ctx)
+        data = await cached_or_run("twitch.clip", {"url": url, "v": 3}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)

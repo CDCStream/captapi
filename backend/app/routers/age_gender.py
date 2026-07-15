@@ -58,11 +58,12 @@ async def _run_lookup(name: str, names: str | None) -> dict[str, Any]:
 async def get_age_gender(
     name: str = Query(..., min_length=1, description="First name, or fallback when names is omitted"),
     names: str | None = Query(None, description="Optional comma-separated list of names"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     parsed = _names(name, names)
     async with billed_call(caller=caller, endpoint="/v1/age-gender", platform="age_gender", resource_url=None, base_credits=max(4, len(parsed) * 4)) as ctx:
-        data = await cached_or_run("age-gender.get", {"names": ",".join(parsed), "v": 2}, lambda: _run_lookup(name, names), ctx)
+        data = await cached_or_run("age-gender.get", {"names": ",".join(parsed), "v": 2}, lambda: _run_lookup(name, names), ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 
@@ -70,6 +71,7 @@ async def get_age_gender(
 async def get_age_gender_alias(
     name: str = Query(..., min_length=1),
     names: str | None = Query(None),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    return await get_age_gender(name=name, names=names, caller=caller)
+    return await get_age_gender(name=name, names=names, cache=cache, caller=caller)

@@ -22,6 +22,8 @@ export interface YoutubeSummarizeParams {
 export interface YoutubeVideoDetailsParams {
   /** Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeCommentsParams {
@@ -29,11 +31,15 @@ export interface YoutubeCommentsParams {
   url: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeChannelDetailsParams {
   /** YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeSearchParams {
@@ -41,6 +47,8 @@ export interface YoutubeSearchParams {
   q: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeChannelVideosParams {
@@ -50,6 +58,8 @@ export interface YoutubeChannelVideosParams {
   limit?: number;
   /** Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters. */
   fast?: boolean;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubePlaylistVideosParams {
@@ -59,6 +69,8 @@ export interface YoutubePlaylistVideosParams {
   limit?: number;
   /** Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters. */
   fast?: boolean;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubePlaylistParams {
@@ -68,11 +80,15 @@ export interface YoutubePlaylistParams {
   limit?: number;
   /** Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters. */
   fast?: boolean;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeVideoDownloadParams {
   /** Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeShortsTranscriptParams {
@@ -96,6 +112,8 @@ export interface YoutubeShortsSummarizeParams {
 export interface YoutubeShortsDetailsParams {
   /** Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeShortsCommentsParams {
@@ -103,6 +121,8 @@ export interface YoutubeShortsCommentsParams {
   url: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeChannelShortsParams {
@@ -110,6 +130,8 @@ export interface YoutubeChannelShortsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeTrendingShortsParams {
@@ -117,6 +139,8 @@ export interface YoutubeTrendingShortsParams {
   q?: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeChannelStreamsParams {
@@ -124,6 +148,8 @@ export interface YoutubeChannelStreamsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeHashtagSearchParams {
@@ -131,6 +157,8 @@ export interface YoutubeHashtagSearchParams {
   q: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeCommentRepliesParams {
@@ -140,6 +168,8 @@ export interface YoutubeCommentRepliesParams {
   comment_id: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeChannelPlaylistsParams {
@@ -147,6 +177,8 @@ export interface YoutubeChannelPlaylistsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeCommunityPostsParams {
@@ -154,16 +186,22 @@ export interface YoutubeCommunityPostsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeCommunityPostDetailsParams {
   /** YouTube community post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface YoutubeVideoSponsorsParams {
   /** Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class YoutubeApi {
@@ -283,6 +321,8 @@ export interface TiktokSummarizeParams {
 export interface TiktokVideoDetailsParams {
   /** Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokCommentsParams {
@@ -290,21 +330,29 @@ export interface TiktokCommentsParams {
   url: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokChannelDetailsParams {
   /** TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokProfileRegionParams {
   /** TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokAudienceDemographicsParams {
   /** TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokSearchParams {
@@ -312,6 +360,8 @@ export interface TiktokSearchParams {
   q: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokSearchSuggestionsParams {
@@ -323,11 +373,15 @@ export interface TiktokSearchSuggestionsParams {
   language?: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokVideoDownloadParams {
   /** Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokChannelPostsParams {
@@ -335,6 +389,8 @@ export interface TiktokChannelPostsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokCommentRepliesParams {
@@ -344,6 +400,8 @@ export interface TiktokCommentRepliesParams {
   comment_id: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokUserFollowersParams {
@@ -351,6 +409,8 @@ export interface TiktokUserFollowersParams {
   url: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokUserFollowingsParams {
@@ -358,6 +418,8 @@ export interface TiktokUserFollowingsParams {
   url: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokMusicPostsParams {
@@ -365,6 +427,8 @@ export interface TiktokMusicPostsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokHashtagSearchParams {
@@ -372,6 +436,8 @@ export interface TiktokHashtagSearchParams {
   q: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokTopSearchParams {
@@ -379,6 +445,8 @@ export interface TiktokTopSearchParams {
   q: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokUserSearchParams {
@@ -386,11 +454,15 @@ export interface TiktokUserSearchParams {
   q: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokSongDetailsParams {
   /** TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokTrendingFeedParams {
@@ -398,6 +470,8 @@ export interface TiktokTrendingFeedParams {
   country?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokPopularHashtagsParams {
@@ -405,16 +479,22 @@ export interface TiktokPopularHashtagsParams {
   query?: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokLiveParams {
   /** TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokLiveInfoParams {
   /** TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokPopularCreatorsParams {
@@ -426,6 +506,8 @@ export interface TiktokPopularCreatorsParams {
   follower_count?: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class TiktokApi {
@@ -549,6 +631,8 @@ export interface InstagramSummarizeParams {
 export interface InstagramDetailsParams {
   /** Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramCommentsParams {
@@ -556,11 +640,15 @@ export interface InstagramCommentsParams {
   url: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramChannelDetailsParams {
   /** Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramChannelPostsParams {
@@ -570,6 +658,8 @@ export interface InstagramChannelPostsParams {
   limit?: number;
   /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
   cursor?: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramChannelReelsParams {
@@ -579,6 +669,8 @@ export interface InstagramChannelReelsParams {
   limit?: number;
   /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
   cursor?: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramReelsSearchParams {
@@ -586,6 +678,8 @@ export interface InstagramReelsSearchParams {
   q: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramTrendingReelsParams {
@@ -593,11 +687,15 @@ export interface InstagramTrendingReelsParams {
   country?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramVideoDownloadParams {
   /** Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramTaggedPostsParams {
@@ -605,6 +703,8 @@ export interface InstagramTaggedPostsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramMusicPostsParams {
@@ -612,6 +712,8 @@ export interface InstagramMusicPostsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramReelsByAudioIdParams {
@@ -619,6 +721,8 @@ export interface InstagramReelsByAudioIdParams {
   audio_id: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramHashtagSearchParams {
@@ -626,6 +730,8 @@ export interface InstagramHashtagSearchParams {
   q: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramProfileSearchParams {
@@ -633,11 +739,15 @@ export interface InstagramProfileSearchParams {
   q: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramStoryHighlightsParams {
   /** Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramHighlightsDetailsParams {
@@ -645,16 +755,22 @@ export interface InstagramHighlightsDetailsParams {
   url: string;
   /** Max highlights to expand. Default 10, max 50. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramEmbedParams {
   /** Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface InstagramBasicProfileParams {
   /** Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class InstagramApi {
@@ -740,6 +856,8 @@ export class InstagramApi {
 export interface FacebookDetailsParams {
   /** Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookTranscriptParams {
@@ -761,11 +879,15 @@ export interface FacebookCommentsParams {
   url: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookPageDetailsParams {
   /** Facebook page URL, e.g. https://facebook.com/PageName. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookProfilePostsParams {
@@ -773,6 +895,8 @@ export interface FacebookProfilePostsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookProfileReelsParams {
@@ -780,6 +904,8 @@ export interface FacebookProfileReelsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookGroupPostsParams {
@@ -787,6 +913,8 @@ export interface FacebookGroupPostsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookCommentRepliesParams {
@@ -796,6 +924,8 @@ export interface FacebookCommentRepliesParams {
   comment_id: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookMarketplaceSearchParams {
@@ -807,6 +937,8 @@ export interface FacebookMarketplaceSearchParams {
   limit?: number;
   /** Set true to fetch full description, photos and coordinates per listing (slower, costs more). */
   details?: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookMarketplaceLocationSearchParams {
@@ -814,6 +946,8 @@ export interface FacebookMarketplaceLocationSearchParams {
   q: string;
   /** Max items to return. Default 10, max 50. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookEventSearchParams {
@@ -821,11 +955,15 @@ export interface FacebookEventSearchParams {
   q: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookEventDetailsParams {
   /** Facebook event URL, e.g. https://facebook.com/events/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookProfilePhotosParams {
@@ -833,6 +971,8 @@ export interface FacebookProfilePhotosParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookProfileEventsParams {
@@ -840,11 +980,15 @@ export interface FacebookProfileEventsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookMarketplaceItemParams {
   /** Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class FacebookApi {
@@ -918,6 +1062,8 @@ export class FacebookApi {
 export interface TwitterTweetDetailsParams {
   /** Public tweet URL, e.g. https://x.com/user/status/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TwitterTranscriptParams {
@@ -930,6 +1076,8 @@ export interface TwitterTranscriptParams {
 export interface TwitterProfileParams {
   /** Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TwitterUserTweetsParams {
@@ -937,6 +1085,8 @@ export interface TwitterUserTweetsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TwitterSearchParams {
@@ -944,11 +1094,15 @@ export interface TwitterSearchParams {
   q: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TwitterCommunityParams {
   /** X community URL (x.com/i/communities/ID) or community ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TwitterCommunityTweetsParams {
@@ -956,6 +1110,8 @@ export interface TwitterCommunityTweetsParams {
   url: string;
   /** Max items to return. Default 25, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class TwitterApi {
@@ -995,11 +1151,15 @@ export interface RedditSubredditPostsParams {
   url: string;
   /** Max items to return. Default 25, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface RedditPostDetailsParams {
   /** Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface RedditPostCommentsParams {
@@ -1007,6 +1167,8 @@ export interface RedditPostCommentsParams {
   url: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface RedditPostTranscriptParams {
@@ -1014,6 +1176,8 @@ export interface RedditPostTranscriptParams {
   url: string;
   /** Max items to return. Default 50, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface RedditSearchParams {
@@ -1021,11 +1185,15 @@ export interface RedditSearchParams {
   q: string;
   /** Max items to return. Default 25, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface RedditSubredditDetailsParams {
   /** Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface RedditSubredditSearchParams {
@@ -1035,6 +1203,8 @@ export interface RedditSubredditSearchParams {
   q: string;
   /** Max items to return. Default 25, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class RedditApi {
@@ -1072,6 +1242,8 @@ export class RedditApi {
 export interface ThreadsProfileParams {
   /** Threads profile URL or @handle, e.g. https://threads.net/@username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface ThreadsUserPostsParams {
@@ -1079,11 +1251,15 @@ export interface ThreadsUserPostsParams {
   url: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface ThreadsPostDetailsParams {
   /** Threads post URL, e.g. https://threads.net/@user/post/CODE. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface ThreadsSearchParams {
@@ -1091,6 +1267,8 @@ export interface ThreadsSearchParams {
   q: string;
   /** Max items to return. Default 25, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface ThreadsSearchUsersParams {
@@ -1098,6 +1276,8 @@ export interface ThreadsSearchUsersParams {
   q: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class ThreadsApi {
@@ -1127,6 +1307,8 @@ export class ThreadsApi {
 export interface BlueskyProfileParams {
   /** Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface BlueskyUserPostsParams {
@@ -1134,11 +1316,15 @@ export interface BlueskyUserPostsParams {
   url: string;
   /** Max items to return. Default 25, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface BlueskyPostDetailsParams {
   /** Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class BlueskyApi {
@@ -1160,6 +1346,8 @@ export class BlueskyApi {
 export interface PinterestPinDetailsParams {
   /** Pinterest pin URL, e.g. https://pinterest.com/pin/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface PinterestUserPinsParams {
@@ -1167,6 +1355,8 @@ export interface PinterestUserPinsParams {
   url: string;
   /** Max items to return. Default 25, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface PinterestSearchParams {
@@ -1174,6 +1364,8 @@ export interface PinterestSearchParams {
   q: string;
   /** Max items to return. Default 25, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface PinterestBoardParams {
@@ -1181,6 +1373,8 @@ export interface PinterestBoardParams {
   url: string;
   /** Max items to return. Default 25, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface PinterestUserBoardsParams {
@@ -1188,6 +1382,8 @@ export interface PinterestUserBoardsParams {
   url: string;
   /** Max items to return. Default 25, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class PinterestApi {
@@ -1217,21 +1413,29 @@ export class PinterestApi {
 export interface LinkedinProfileParams {
   /** LinkedIn profile URL, e.g. https://linkedin.com/in/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface LinkedinCompanyParams {
   /** LinkedIn company URL, e.g. https://linkedin.com/company/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface LinkedinPostDetailsParams {
   /** LinkedIn post or activity URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface LinkedinPostTranscriptParams {
   /** LinkedIn post or activity URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface LinkedinCompanyPostsParams {
@@ -1239,6 +1443,8 @@ export interface LinkedinCompanyPostsParams {
   url: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface LinkedinSearchPostsParams {
@@ -1248,6 +1454,8 @@ export interface LinkedinSearchPostsParams {
   sort?: string;
   /** Max items to return. Default 20, max 50. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class LinkedinApi {
@@ -1281,6 +1489,8 @@ export class LinkedinApi {
 export interface RumbleVideoDetailsParams {
   /** Rumble video URL, e.g. https://rumble.com/vXXXX-title.html. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface RumbleChannelVideosParams {
@@ -1288,6 +1498,8 @@ export interface RumbleChannelVideosParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface RumbleSearchParams {
@@ -1295,6 +1507,8 @@ export interface RumbleSearchParams {
   q: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface RumbleCommentsParams {
@@ -1302,6 +1516,8 @@ export interface RumbleCommentsParams {
   url: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class RumbleApi {
@@ -1331,6 +1547,8 @@ export interface TiktokShopSearchParams {
   region?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokShopProductsParams {
@@ -1338,11 +1556,15 @@ export interface TiktokShopProductsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokShopProductDetailsParams {
   /** TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokShopProductReviewsParams {
@@ -1350,6 +1572,8 @@ export interface TiktokShopProductReviewsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokShopUserShowcaseParams {
@@ -1357,6 +1581,8 @@ export interface TiktokShopUserShowcaseParams {
   username: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class TiktokShopApi {
@@ -1386,6 +1612,8 @@ export class TiktokShopApi {
 export interface GithubUserParams {
   /** GitHub username or profile URL. */
   username: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface GithubRepositoriesParams {
@@ -1393,11 +1621,15 @@ export interface GithubRepositoriesParams {
   username: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface GithubRepositoryParams {
   /** Repository URL or owner/name. */
   repo: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface GithubPullRequestsParams {
@@ -1407,6 +1639,8 @@ export interface GithubPullRequestsParams {
   state?: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface GithubActivityParams {
@@ -1414,6 +1648,8 @@ export interface GithubActivityParams {
   username: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface GithubFollowersParams {
@@ -1421,6 +1657,8 @@ export interface GithubFollowersParams {
   username: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface GithubFollowingParams {
@@ -1428,11 +1666,15 @@ export interface GithubFollowingParams {
   username: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface GithubContributionsParams {
   /** GitHub username or profile URL. */
   username: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface GithubTrendingRepositoriesParams {
@@ -1440,6 +1682,8 @@ export interface GithubTrendingRepositoriesParams {
   q: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface GithubTrendingDevelopersParams {
@@ -1447,6 +1691,8 @@ export interface GithubTrendingDevelopersParams {
   q: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class GithubApi {
@@ -1502,6 +1748,8 @@ export interface GoogleSearchParams {
   language?: string;
   /** Max items to return. Default 10, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class GoogleApi {
@@ -1515,6 +1763,8 @@ export class GoogleApi {
 export interface TwitchProfileParams {
   /** Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TwitchUserVideosParams {
@@ -1522,16 +1772,22 @@ export interface TwitchUserVideosParams {
   url: string;
   /** Max items to return. Default 20, max 30. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TwitchUserScheduleParams {
   /** Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TwitchClipParams {
   /** Twitch clip URL, channel URL, or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class TwitchApi {
@@ -1582,6 +1838,8 @@ export interface SpotifySearchParams {
   type?: string;
   /** Max items to return. Default 20, max 50. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface SpotifyPodcastParams {
@@ -1598,6 +1856,8 @@ export interface SpotifyPodcastEpisodesParams {
   url: string;
   /** Max items to return. Default 20, max 50. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class SpotifyApi {
@@ -1631,6 +1891,8 @@ export class SpotifyApi {
 export interface SoundcloudArtistParams {
   /** SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface SoundcloudArtistTracksParams {
@@ -1638,11 +1900,15 @@ export interface SoundcloudArtistTracksParams {
   url: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface SoundcloudTrackParams {
   /** SoundCloud track URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class SoundcloudApi {
@@ -1664,6 +1930,8 @@ export class SoundcloudApi {
 export interface LinktreePageParams {
   /** Linktree profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class LinktreeApi {
@@ -1677,6 +1945,8 @@ export class LinktreeApi {
 export interface SnapchatUserProfileParams {
   /** Snapchat username or profile URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class SnapchatApi {
@@ -1690,6 +1960,8 @@ export class SnapchatApi {
 export interface TruthSocialProfileParams {
   /** Truth Social profile URL or @username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TruthSocialUserPostsParams {
@@ -1697,11 +1969,15 @@ export interface TruthSocialUserPostsParams {
   url: string;
   /** Max items to return. Default 20, max 80. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TruthSocialPostParams {
   /** Truth Social post URL or post ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class TruthSocialApi {
@@ -1725,6 +2001,8 @@ export interface KickClipParams {
   url: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class KickApi {
@@ -1742,6 +2020,8 @@ export interface AmazonShopPageParams {
   marketplace?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class AmazonShopApi {
@@ -1757,6 +2037,8 @@ export interface AgeGenderGetParams {
   name: string;
   /** Optional comma-separated list of names. */
   names?: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class AgeGenderApi {
@@ -1810,6 +2092,8 @@ export class AccountApi {
 export interface KwaiProfileParams {
   /** Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface KwaiUserPostsParams {
@@ -1817,11 +2101,15 @@ export interface KwaiUserPostsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface KwaiPostParams {
   /** Kwai/Kuaishou post URL or video/photo ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class KwaiApi {
@@ -1843,6 +2131,8 @@ export class KwaiApi {
 export interface KomiPageParams {
   /** Komi page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class KomiApi {
@@ -1856,6 +2146,8 @@ export class KomiApi {
 export interface PillarPageParams {
   /** Pillar page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class PillarApi {
@@ -1869,6 +2161,8 @@ export class PillarApi {
 export interface LinkbioPageParams {
   /** Linkbio page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class LinkbioApi {
@@ -1882,6 +2176,8 @@ export class LinkbioApi {
 export interface LinkmeProfileParams {
   /** Linkme profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class LinkmeApi {
@@ -1899,6 +2195,8 @@ export interface FacebookAdLibrarySearchParams {
   country?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookAdLibraryCompanyAdsParams {
@@ -1908,6 +2206,8 @@ export interface FacebookAdLibraryCompanyAdsParams {
   country?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookAdLibrarySearchCompaniesParams {
@@ -1917,16 +2217,22 @@ export interface FacebookAdLibrarySearchCompaniesParams {
   country?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookAdLibraryAdDetailsParams {
   /** Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface FacebookAdLibraryAdTranscriptParams {
   /** Meta Ad Library ad URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokAdLibrarySearchParams {
@@ -1936,6 +2242,8 @@ export interface TiktokAdLibrarySearchParams {
   country?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface TiktokAdLibraryAdDetailsParams {
@@ -1943,6 +2251,8 @@ export interface TiktokAdLibraryAdDetailsParams {
   url: string;
   /** ISO country code. Default DE. */
   country?: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface GoogleAdLibraryCompanyAdsParams {
@@ -1952,6 +2262,8 @@ export interface GoogleAdLibraryCompanyAdsParams {
   country?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface GoogleAdLibraryAdDetailsParams {
@@ -1959,6 +2271,8 @@ export interface GoogleAdLibraryAdDetailsParams {
   creative_id: string;
   /** ISO country code. Default US. */
   country?: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface GoogleAdLibraryAdvertiserSearchParams {
@@ -1968,6 +2282,8 @@ export interface GoogleAdLibraryAdvertiserSearchParams {
   country?: string;
   /** Max items to return. Default 10, max 50. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface LinkedinAdLibrarySearchAdsParams {
@@ -1977,11 +2293,15 @@ export interface LinkedinAdLibrarySearchAdsParams {
   country?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export interface LinkedinAdLibraryAdDetailsParams {
   /** LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
+  cache?: boolean;
 }
 
 export class AdLibraryApi {

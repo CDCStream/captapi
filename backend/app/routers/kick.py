@@ -90,6 +90,7 @@ async def _kick_api_clips(channel: str, limit: int) -> list[dict[str, Any]]:
 async def kick_clip(
     url: str = Query(..., description="Kick clip URL, channel URL, or channel username"),
     limit: int = Query(30, ge=1, le=100, description="How many recent clips to inspect when a channel is passed"),
+    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     channel = _channel_url(url)
@@ -124,5 +125,5 @@ async def kick_clip(
                 raise HTTPException(status_code=404, detail="Kick clip not found")
             return {"channelUrl": channel, "clip": selected, "totalReturned": len(clips), "clips": clips}
 
-        data = await cached_or_run("kick.clip", {"url": url, "limit": limit, "v": 2}, _run, ctx)
+        data = await cached_or_run("kick.clip", {"url": url, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
