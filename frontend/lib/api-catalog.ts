@@ -1172,7 +1172,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "instagram-channel-posts": [up(IG_PROFILE), lp(20, 200), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (e.g. 3937014945555313553_1697296). A null nextCursor means the end of the list." }],
   "instagram-channel-reels": [up(IG_PROFILE), lp(20, 200), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (e.g. 3937158245004702478_12281817). A null nextCursor means the end of the list." }],
   "instagram-reels-search": [qp("Hashtag (without #) or keyword (min 2 characters)."), lp(20, 200)],
-  "instagram-trending-reels": [{ name: "country", type: "string", required: false, description: "Country name for Explore localization. Default United States." }, lp(20, 200)],
+  "instagram-trending-reels": [{ name: "country", type: "string", required: false, description: "Country for Explore localization — full name or ISO code (e.g. 'United States', 'US', 'Turkey', 'TR'). Default United States. 35 countries supported." }, lp(20, 200)],
   "instagram-video-download": [up(IG_REEL)],
   "instagram-tagged-posts": [up(IG_PROFILE), lp(20, 200)],
   "instagram-music-posts": [up("Instagram audio/music page URL."), lp(20, 200)],

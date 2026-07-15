@@ -1020,13 +1020,55 @@ async def instagram_reels_search(
         return ApiResponse(data=data)
 
 
+# Countries supported by the trending actor's input enum. Anything else makes
+# the run fail instantly with invalid-input, so we validate up front.
+_TRENDING_COUNTRIES = [
+    "United States", "Canada", "United Kingdom", "Australia", "Germany",
+    "France", "Italy", "Spain", "Netherlands", "Sweden", "Norway", "Denmark",
+    "Finland", "Poland", "Portugal", "Brazil", "Mexico", "Argentina", "Chile",
+    "Colombia", "Japan", "South Korea", "Singapore", "Hong Kong", "Taiwan",
+    "India", "Indonesia", "Thailand", "Philippines", "Malaysia", "Vietnam",
+    "United Arab Emirates", "Saudi Arabia", "Turkey", "South Africa",
+]
+_TRENDING_COUNTRY_ALIASES = {
+    "us": "United States", "usa": "United States", "u.s.": "United States",
+    "ca": "Canada", "gb": "United Kingdom", "uk": "United Kingdom",
+    "au": "Australia", "de": "Germany", "fr": "France", "it": "Italy",
+    "es": "Spain", "nl": "Netherlands", "se": "Sweden", "no": "Norway",
+    "dk": "Denmark", "fi": "Finland", "pl": "Poland", "pt": "Portugal",
+    "br": "Brazil", "mx": "Mexico", "ar": "Argentina", "cl": "Chile",
+    "co": "Colombia", "jp": "Japan", "kr": "South Korea", "korea": "South Korea",
+    "sg": "Singapore", "hk": "Hong Kong", "tw": "Taiwan", "in": "India",
+    "id": "Indonesia", "th": "Thailand", "ph": "Philippines", "my": "Malaysia",
+    "vn": "Vietnam", "ae": "United Arab Emirates", "uae": "United Arab Emirates",
+    "sa": "Saudi Arabia", "ksa": "Saudi Arabia", "tr": "Turkey",
+    "turkiye": "Turkey", "türkiye": "Turkey", "za": "South Africa",
+}
+
+
+def _normalize_trending_country(raw: str) -> str:
+    cleaned = raw.strip()
+    lowered = cleaned.lower()
+    for name in _TRENDING_COUNTRIES:
+        if name.lower() == lowered:
+            return name
+    alias = _TRENDING_COUNTRY_ALIASES.get(lowered)
+    if alias:
+        return alias
+    raise HTTPException(
+        status_code=422,
+        detail=f"Unsupported country '{cleaned}'. Use a country name or ISO code from: {', '.join(_TRENDING_COUNTRIES)}.",
+    )
+
+
 @router.get("/trending-reels", summary="Instagram trending Reels / Explore posts")
 async def instagram_trending_reels(
-    country: str = Query("United States", description="Country name for Explore localization"),
+    country: str = Query("United States", description="Country name or ISO code (e.g. 'United States' or 'US') for Explore localization"),
     limit: int = Query(20, ge=10, le=200),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
+    country = _normalize_trending_country(country)
     cost = _scaled_credits(limit, RATE_IG_MARGIN, 2)
     async with billed_call(
         caller=caller,
