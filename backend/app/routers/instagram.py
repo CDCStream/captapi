@@ -1021,6 +1021,46 @@ async def instagram_reels_search(
         return ApiResponse(data=data)
 
 
+def _normalize_trending_item(item: dict) -> dict:
+    """The trending actor uses its own snake_case schema (username, likes,
+    plays, image_url, epoch timestamp...), so the generic Apify post
+    normalizer maps it to empty/raw values."""
+    username = safe_str(item.get("username"))
+    product = safe_str(item.get("type"))  # feed | carousel_container | clips
+    is_video = bool(item.get("is_video"))
+    post_type = "Video" if is_video else ("Sidecar" if product == "carousel_container" else "Image")
+    caption = safe_str(item.get("caption")) or ""
+    duration = safe_float(item.get("duration"))
+    published = safe_str(item.get("date"))
+    return {
+        "platform": "instagram",
+        "url": safe_str(item.get("url")),
+        "id": safe_str(item.get("id") or item.get("code")),
+        "postType": post_type,
+        "productType": product,
+        # Explore feed category, e.g. "TV & Movies" / "Bollywood TV & Movies".
+        "section": safe_str(item.get("section")),
+        "topic": safe_str(item.get("topic")),
+        "caption": caption,
+        "description": caption,
+        "publishedAt": published.replace("+00:00", "Z") if published else None,
+        "durationSeconds": round(duration, 3) if duration is not None else None,
+        "thumbnailUrl": safe_str(item.get("thumbnail_url") or item.get("image_url")),
+        "videoUrl": safe_str(item.get("video_url")),
+        "author": {
+            "username": username,
+            "url": f"https://instagram.com/{username}" if username else None,
+        },
+        "engagement": {
+            "views": safe_int(item.get("plays")),
+            "likes": safe_int(item.get("likes")) or 0,
+            "comments": safe_int(item.get("comments")) or 0,
+        },
+        "hashtags": decodo._HASHTAG_RE.findall(caption),
+        "mentions": decodo._MENTION_RE.findall(caption),
+    }
+
+
 # Countries supported by the trending actor's input enum. Anything else makes
 # the run fail instantly with invalid-input, so we validate up front.
 _TRENDING_COUNTRIES = [
@@ -1091,7 +1131,7 @@ async def instagram_trending_reels(
             match = {"country": country}
 
             def _payload(items: list[dict[str, Any]]) -> dict[str, Any]:
-                reels = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
+                reels = [decodo.strip_null_post_fields(_normalize_trending_item(i)) for i in items[:limit] if not i.get("error")]
                 ctx["source"] = "apify"
                 return {"platform": "instagram", "country": country, "totalReturned": len(reels), "reels": reels}
 
@@ -1118,7 +1158,7 @@ async def instagram_trending_reels(
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit, "v": 7},
+            params={"country": country, "limit": limit, "v": 8},
             runner=_run,
             ctx=ctx,
             # Trending actor runs take minutes; serve the last list instantly
