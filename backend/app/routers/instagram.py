@@ -95,6 +95,7 @@ def _normalize_post(item: dict) -> dict:
     owner = item.get("owner") or {}
     author = item.get("ownerUsername") or owner.get("username")
     post_type = safe_str(item.get("type"))
+    duration = safe_float(item.get("videoDuration") or item.get("duration") or item.get("durationSeconds"))
     return {
         "platform": "instagram",
         "url": safe_str(item.get("url") or item.get("permalink") or item.get("shortcodeUrl")),
@@ -106,7 +107,9 @@ def _normalize_post(item: dict) -> dict:
         "caption": safe_str(item.get("caption") or item.get("text") or item.get("description")),
         "description": safe_str(item.get("caption") or item.get("text") or item.get("description")),
         "publishedAt": safe_str(item.get("timestamp") or item.get("takenAt") or item.get("taken_at")),
-        "durationSeconds": safe_float(item.get("videoDuration") or item.get("duration") or item.get("durationSeconds")),
+        # Apify reports durations as float32 noise (17.95800018310547); round
+        # to millisecond precision like the native mappers.
+        "durationSeconds": round(duration, 3) if duration is not None else None,
         "thumbnailUrl": safe_str(item.get("displayUrl") or item.get("thumbnailUrl") or item.get("thumbnail")),
         "videoUrl": safe_str(item.get("videoUrl") or item.get("video_url") or item.get("downloadUrl")),
         "author": {
@@ -1009,7 +1012,7 @@ async def instagram_reels_search(
 
         data = await cached_or_run(
             endpoint="instagram.reels-search",
-            params={"q": q, "limit": limit, "v": 10},
+            params={"q": q, "limit": limit, "v": 11},
             runner=_run,
             ctx=ctx,
         )
