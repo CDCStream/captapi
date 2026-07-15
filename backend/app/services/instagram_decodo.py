@@ -188,7 +188,10 @@ def _owner(node: dict[str, Any]) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
-_HASHTAG_RE = re.compile(r"#(\w+)", re.UNICODE)
+# Instagram hashtags must contain at least one non-numeric character, so
+# "#1" in a caption ("ranked #1") is not a real hashtag - require one letter
+# or underscore to avoid capturing purely numeric tokens.
+_HASHTAG_RE = re.compile(r"#(\w*[^\W\d]\w*)", re.UNICODE)
 # Usernames may contain dots but never end with one, so "@kyliejenner." in a
 # caption must capture "kyliejenner" without the trailing punctuation.
 _MENTION_RE = re.compile(r"@([A-Za-z0-9_](?:[A-Za-z0-9_.]*[A-Za-z0-9_])?)")

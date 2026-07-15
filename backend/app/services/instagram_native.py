@@ -58,7 +58,10 @@ async def fetch_reel_media(shortcode: str) -> dict[str, Any] | None:
 
 
 _MEDIA_TYPE_NAMES = {1: "Image", 2: "Video", 8: "Sidecar"}
-_HASHTAG_RE = re.compile(r"#(\w+)", re.UNICODE)
+# Instagram hashtags must contain at least one non-numeric character, so
+# "#1" in a caption ("ranked #1") is not a real hashtag - require one letter
+# or underscore to avoid capturing purely numeric tokens.
+_HASHTAG_RE = re.compile(r"#(\w*[^\W\d]\w*)", re.UNICODE)
 # Same as instagram_decodo._MENTION_RE: usernames may contain dots but never
 # end with one, so "@herbalife." in a caption must capture "herbalife".
 _MENTION_RE = re.compile(r"@([A-Za-z0-9_](?:[A-Za-z0-9_.]*[A-Za-z0-9_])?)")

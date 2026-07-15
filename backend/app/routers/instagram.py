@@ -1028,7 +1028,14 @@ def _normalize_trending_item(item: dict) -> dict:
     username = safe_str(item.get("username"))
     product = safe_str(item.get("type"))  # feed | carousel_container | clips
     is_video = bool(item.get("is_video"))
-    post_type = "Video" if is_video else ("Sidecar" if product == "carousel_container" else "Image")
+    # Match the rest of the platform: postType reflects the container, so a
+    # carousel is "Sidecar" even when its first media is a video.
+    if product == "carousel_container":
+        post_type = "Sidecar"
+    elif is_video:
+        post_type = "Video"
+    else:
+        post_type = "Image"
     caption = safe_str(item.get("caption")) or ""
     duration = safe_float(item.get("duration"))
     published = safe_str(item.get("date"))
@@ -1158,7 +1165,7 @@ async def instagram_trending_reels(
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit, "v": 8},
+            params={"country": country, "limit": limit, "v": 9},
             runner=_run,
             ctx=ctx,
             # Trending actor runs take minutes; serve the last list instantly
