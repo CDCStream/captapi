@@ -1394,11 +1394,11 @@ function exampleData(ep: ApiEndpoint): Record<string, unknown> {
       };
     case "download":
       return {
-        downloadUrl: "https://cdn.captapi.com/dl/abc123.mp4",
-        format: "mp4",
-        quality: "1080p",
-        sizeBytes: 18432044,
-        expiresIn: 3600,
+        platform: ep.platform,
+        url: "https://example.com/video/123",
+        downloadUrl: "https://cdn.example.com/video.mp4",
+        thumbnailUrl: "https://cdn.example.com/cover.jpg",
+        duration: 43.4,
       };
   }
 }
@@ -2039,15 +2039,53 @@ export function responseStructure(ep: ApiEndpoint): ResponseGroup[] {
         },
       ];
     case "download":
+      // Each platform's downloader returns a different shape; describe the
+      // real fields instead of a generic template.
+      if (ep.slug === "youtube-video-download") {
+        return [
+          {
+            title: "Download",
+            fields: [
+              { name: "videoId", desc: "YouTube video ID." },
+              { name: "title", desc: "Video title." },
+              { name: "downloadUrl", desc: "Direct MP4 URL for the best progressive (video+audio) format." },
+              { name: "expiresAt", desc: "When the signed download links expire (ISO 8601, ~6 hours)." },
+            ],
+          },
+          {
+            title: "Each format",
+            note: "Each item in formats contains:",
+            fields: [
+              { name: "itag", desc: "YouTube format identifier." },
+              { name: "url", desc: "Direct URL for this format." },
+              { name: "mimeType", desc: "Container and codecs (e.g. video/mp4; avc1...)." },
+              { name: "qualityLabel", desc: "Resolution label (e.g. 720p)." },
+              { name: "width", desc: "Video width in pixels (with height, fps, bitrate alongside)." },
+              { name: "audioQuality", desc: "Audio quality tier for formats that include audio." },
+            ],
+          },
+        ];
+      }
+      if (ep.slug === "tiktok-video-download") {
+        return [
+          {
+            title: "Download",
+            fields: [
+              { name: "downloadUrl", desc: "Direct MP4 CDN URL for the video." },
+              { name: "noWatermarkUrl", desc: "Watermark-free variant of the video URL." },
+              { name: "duration", desc: "Video length in seconds." },
+            ],
+          },
+        ];
+      }
+      // instagram-video-download
       return [
         {
           title: "Download",
           fields: [
-            { name: "downloadUrl", desc: "Direct, watermark-free media URL." },
-            { name: "format", desc: "Container/format of the file (e.g. mp4)." },
-            { name: "quality", desc: "Resolution of the returned media." },
-            { name: "sizeBytes", desc: "File size in bytes." },
-            { name: "expiresIn", desc: "Seconds until the signed link expires." },
+            { name: "downloadUrl", desc: "Direct MP4 CDN URL for the Reel (no watermark)." },
+            { name: "thumbnailUrl", desc: "Cover image URL." },
+            { name: "duration", desc: "Video length in seconds. Omitted when Instagram does not expose it." },
           ],
         },
       ];
