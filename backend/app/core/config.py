@@ -118,6 +118,9 @@ class Settings(BaseSettings):
     # nothing for most reels because IG rarely exposes captions.
     APIFY_INSTAGRAM_TRANSCRIPT_METHOD: str = "auto"
     APIFY_ACTOR_INSTAGRAM_TAGGED: str = "apify/instagram-tagged-scraper"
+    # Hashtag feeds: dedicated scraper first (same output schema as the
+    # general one), general scraper via the explore/tags URL as fallback.
+    APIFY_ACTOR_INSTAGRAM_HASHTAG: str = "apify/instagram-hashtag-scraper"
     # Dedicated reels-by-audio scraper (input: audioUrls). The generic
     # apify/instagram-scraper does not reliably resolve audio pages.
     APIFY_ACTOR_INSTAGRAM_AUDIO: str = "kinaesthetic_millionaire/instagram-reels-audio-scraper"

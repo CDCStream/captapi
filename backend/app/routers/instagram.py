@@ -165,6 +165,28 @@ def _instagram_profile_candidates(settings: Any, profile_url: str, limit: int, r
     )
 
 
+def _instagram_hashtag_candidates(
+    settings: Any, tag: str, limit: int, results_type: str
+) -> list[tuple[str, dict[str, Any]]]:
+    """Hashtag feed candidates; ``results_type`` "reels" keeps only videos."""
+    return _dedupe_candidates(
+        [
+            (
+                settings.APIFY_ACTOR_INSTAGRAM_HASHTAG,
+                {"hashtags": [tag], "resultsLimit": limit, "resultsType": results_type},
+            ),
+            (
+                settings.APIFY_ACTOR_INSTAGRAM,
+                {
+                    "directUrls": [f"https://www.instagram.com/explore/tags/{tag}/"],
+                    "resultsLimit": limit,
+                    "resultsType": results_type,
+                },
+            ),
+        ]
+    )
+
+
 def _instagram_reel_candidates(settings: Any, url: str, *, subtitles: bool = False) -> list[tuple[str, dict[str, Any]]]:
     payload: dict[str, Any] = {"directUrls": [url], "resultsLimit": 1}
     if subtitles:
@@ -966,17 +988,15 @@ async def instagram_reels_search(
         async def _run() -> dict[str, Any]:
             async def _apify() -> dict[str, Any]:
                 apify = get_apify()
-                tag = q.lstrip("#")
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_INSTAGRAM,
-                    {
-                        "directUrls": [f"https://www.instagram.com/explore/tags/{tag}/"],
-                        "resultsLimit": limit,
-                        "resultsType": "posts",
-                    },
+                items, _actor = await apify.run_with_fallback(
+                    _instagram_hashtag_candidates(settings, q.lstrip("#"), limit, "reels"),
                     max_items=limit,
                 )
-                results = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
+                results = [
+                    decodo.strip_null_post_fields(_normalize_post(i))
+                    for i in items[:limit]
+                    if not i.get("error") and i.get("type") == "Video"
+                ]
                 return {"query": q, "totalReturned": len(results), "results": results}
 
             async def _decodo_run() -> dict[str, Any] | None:
@@ -989,7 +1009,7 @@ async def instagram_reels_search(
 
         data = await cached_or_run(
             endpoint="instagram.reels-search",
-            params={"q": q, "limit": limit, "v": 9},
+            params={"q": q, "limit": limit, "v": 10},
             runner=_run,
             ctx=ctx,
         )
@@ -1247,14 +1267,8 @@ async def instagram_hashtag_search(
         async def _run() -> dict[str, Any]:
             async def _apify() -> dict[str, Any]:
                 apify = get_apify()
-                tag = q.lstrip("#")
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_INSTAGRAM,
-                    {
-                        "directUrls": [f"https://www.instagram.com/explore/tags/{tag}/"],
-                        "resultsLimit": limit,
-                        "resultsType": "posts",
-                    },
+                items, _actor = await apify.run_with_fallback(
+                    _instagram_hashtag_candidates(settings, q.lstrip("#"), limit, "posts"),
                     max_items=limit,
                 )
                 results = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
@@ -1270,7 +1284,7 @@ async def instagram_hashtag_search(
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",
-            params={"q": q, "limit": limit, "v": 9},
+            params={"q": q, "limit": limit, "v": 10},
             runner=_run,
             ctx=ctx,
         )
