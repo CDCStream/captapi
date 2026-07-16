@@ -1621,8 +1621,9 @@ async def instagram_embed(
     cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    # Posts/reels resolve to a shortcode; anything else is treated as a profile
-    # handle (both render via Instagram's embed.js blockquote).
+    # Posts/reels resolve to a shortcode (type reel when the URL is a /reel/,
+    # else post); anything else is treated as a profile handle. All three render
+    # via Instagram's embed.js blockquote.
     shortcode = extract_instagram_shortcode(url)
     username = None if shortcode else extract_instagram_username(url)
     if not shortcode and not username:
@@ -1645,7 +1646,7 @@ async def instagram_embed(
         async def _run() -> dict[str, Any]:
             async def _local() -> dict[str, Any]:
                 if shortcode:
-                    kind = "post"
+                    kind = "reel" if re.search(r"/reels?/", url) else "post"
                     permalink = f"https://www.instagram.com/p/{shortcode}/"
                 else:
                     kind = "profile"
@@ -1671,7 +1672,7 @@ async def instagram_embed(
 
         data = await cached_or_run(
             endpoint="instagram.embed",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -56,7 +56,7 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
       "The Instagram Embed API is now called the Instagram Embed HTML API, and it accepts profile URLs in addition to posts and reels. Pass any post, reel, or profile URL (or an @handle) and get back ready-to-paste embed HTML plus the canonical permalink. Posts/reels return a media card; profiles return a profile card.",
     items: [
       "Now accepts profile URLs and @handles, not just posts and reels",
-      "Response adds a type flag (post/profile) and username for profiles",
+      "Response adds a type flag (post/reel/profile) and username for profiles",
       "Still a flat 1 credit — pure HTML builder, no scraping",
     ],
   },
