@@ -217,7 +217,7 @@ const YOUTUBE: Spec[] = [
   { slug: "youtube-comment-replies", name: "YouTube Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/youtube/comment-replies", credits: 20, creditsPerResult: 0.4 },
   { slug: "youtube-channel-playlists", name: "YouTube Channel Playlists API", shortName: "Channel Playlists", category: "list", method: "GET", path: "/v1/youtube/channel-playlists", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-community-posts", name: "YouTube Community Posts API", shortName: "Community Posts", category: "list", method: "GET", path: "/v1/youtube/community-posts", credits: 10, creditsPerResult: 0.5 },
-  { slug: "youtube-community-post-details", name: "YouTube Community Post Details API", shortName: "Community Post Details", category: "details", method: "GET", path: "/v1/youtube/community-post-details", credits: 7 },
+  { slug: "youtube-community-post-details", name: "YouTube Community Post Details API", shortName: "Community Post Details", category: "details", method: "GET", path: "/v1/youtube/community-post-details", credits: 1 },
   { slug: "youtube-video-sponsors", name: "YouTube Video Sponsors API", shortName: "Video Sponsors", category: "details", method: "GET", path: "/v1/youtube/video-sponsors", credits: 1 },
 ];
 
@@ -225,9 +225,9 @@ const TIKTOK: Spec[] = [
   { slug: "tiktok-transcript", name: "TikTok Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/tiktok/transcript", credits: 2 },
   { slug: "tiktok-summarizer", name: "TikTok Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/tiktok/summarize", credits: 4 },
   { slug: "tiktok-video-details", name: "TikTok Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/tiktok/video-details", credits: 1, tagline: "Get everything about one TikTok video from its URL — caption, view/like/comment/share/save counts, creator, sound, hashtags, and thumbnail.", longDescription: "Paste any public TikTok video URL and the TikTok Video Details API returns the full picture as clean JSON: the caption, when it was posted, how long it runs, and its engagement — views, likes, comments, shares, and saves. You also get the creator (username, display name, follower count, verified badge, and avatar), the sound/music name, the list of hashtags, and a thumbnail image. Use it to build analytics dashboards, track a campaign, or enrich a content database. Need the downloadable video file itself? Use the TikTok Video Download API — this endpoint focuses on metadata and stats (videoUrl is null here). No TikTok login and no scraping setup on your side, and results are cached for 24 hours, so repeat lookups are instant and free.", delivers: ["Caption, publish date, and video duration", "Views, likes, comments, shares, and saves", "Creator profile — handle, name, followers, verified, avatar", "Sound name, hashtags, and thumbnail image"] },
-  { slug: "tiktok-comments", name: "TikTok Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/tiktok/comments", credits: 10, creditsPerResult: 0.2, tagline: "Get the comments on any TikTok video — text, author, avatar, likes, and timestamp for each one, with cursor pagination to page through them all.", longDescription: "Paste a public TikTok video URL and the TikTok Comments API returns its comments as clean JSON. Each comment includes the text, the author's username and avatar, how many likes it has, and when it was posted. The response also reports totalComments — the video's full comment count. Fetch up to 500 comments per call with the limit parameter, then pass the returned nextCursor value back in to page through the rest — billing scales with results returned. Need the actual reply threads under a comment? Pass that comment's id to the TikTok Comment Replies API. Ideal for sentiment analysis, social listening, moderation, and spotting engaged fans. No TikTok login and no scraping setup on your side.", delivers: ["Comment text, author username, and avatar", "Like count and publish time per comment", "totalComments plus cursor pagination (nextCursor) through every comment", "limit up to 500 — billed per comment returned", "Pair with Comment Replies to pull reply threads"] },
+  { slug: "tiktok-comments", name: "TikTok Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/tiktok/comments", credits: 2, tagline: "Get the comments on any TikTok video — text, author, avatar, likes, and timestamp for each one, with cursor pagination to page through them all.", longDescription: "Paste a public TikTok video URL and the TikTok Comments API returns its comments as clean JSON. Each comment includes the text, the author's username and avatar, how many likes it has, and when it was posted. The response also reports totalComments — the video's full comment count. Fetch up to 500 comments per call with the limit parameter, then pass the returned nextCursor value back in to page through the rest — a flat 2 credits per call, no matter how many comments you fetch. Need the actual reply threads under a comment? Pass that comment's id to the TikTok Comment Replies API. Ideal for sentiment analysis, social listening, moderation, and spotting engaged fans. No TikTok login and no scraping setup on your side.", delivers: ["Comment text, author username, and avatar", "Like count and publish time per comment", "totalComments plus cursor pagination (nextCursor) through every comment", "limit up to 500 — billed per comment returned", "Pair with Comment Replies to pull reply threads"] },
   { slug: "tiktok-channel-details", name: "TikTok Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/tiktok/channel-details", credits: 1 },
-  { slug: "tiktok-profile-region", name: "TikTok Profile Region API", shortName: "Profile Region", category: "channel", method: "GET", path: "/v1/tiktok/profile-region", credits: 7 },
+  { slug: "tiktok-profile-region", name: "TikTok Profile Region API", shortName: "Profile Region", category: "channel", method: "GET", path: "/v1/tiktok/profile-region", credits: 1 },
   { slug: "tiktok-audience-demographics", name: "TikTok Audience Demographics API", shortName: "Audience Demographics", category: "channel", method: "GET", path: "/v1/tiktok/audience-demographics", credits: 7 },
   { slug: "tiktok-search", name: "TikTok Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/tiktok/search", credits: 14, creditsPerResult: 0.7 },
   { slug: "tiktok-search-suggestions", name: "TikTok Search Suggestions API", shortName: "Search Suggestions", category: "search", method: "GET", path: "/v1/tiktok/search-suggestions", credits: 28, creditsPerResult: 1.4 },
@@ -285,7 +285,7 @@ const FACEBOOK: Spec[] = [
   { slug: "facebook-event-details", name: "Facebook Event Details API", shortName: "Event Details", category: "details", method: "GET", path: "/v1/facebook/event-details", credits: 2 },
   { slug: "facebook-profile-photos", name: "Facebook Profile Photos API", shortName: "Profile Photos", category: "list", method: "GET", path: "/v1/facebook/profile-photos", credits: 12, creditsPerResult: 0.6 },
   { slug: "facebook-profile-events", name: "Facebook Profile Events API", shortName: "Profile Events", category: "list", method: "GET", path: "/v1/facebook/profile-events", credits: 40, creditsPerResult: 2 },
-  { slug: "facebook-marketplace-item", name: "Facebook Marketplace Item API", shortName: "Marketplace Item", category: "details", method: "GET", path: "/v1/facebook/marketplace-item", credits: 17 },
+  { slug: "facebook-marketplace-item", name: "Facebook Marketplace Item API", shortName: "Marketplace Item", category: "details", method: "GET", path: "/v1/facebook/marketplace-item", credits: 1 },
 ];
 
 const TWITTER: Spec[] = [
@@ -373,10 +373,10 @@ const GOOGLE: Spec[] = [
 ];
 
 const TWITCH: Spec[] = [
-  { slug: "twitch-profile", name: "Twitch Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/twitch/profile", credits: 9 },
+  { slug: "twitch-profile", name: "Twitch Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/twitch/profile", credits: 1 },
   { slug: "twitch-user-videos", name: "Twitch User Videos API", shortName: "User Videos", category: "list", method: "GET", path: "/v1/twitch/user-videos", credits: 34, creditsPerResult: 1.7 },
-  { slug: "twitch-user-schedule", name: "Twitch User Schedule API", shortName: "User Schedule", category: "list", method: "GET", path: "/v1/twitch/user-schedule", credits: 34 },
-  { slug: "twitch-clip", name: "Twitch Clip API", shortName: "Clip", category: "details", method: "GET", path: "/v1/twitch/clip", credits: 9 },
+  { slug: "twitch-user-schedule", name: "Twitch User Schedule API", shortName: "User Schedule", category: "list", method: "GET", path: "/v1/twitch/user-schedule", credits: 1 },
+  { slug: "twitch-clip", name: "Twitch Clip API", shortName: "Clip", category: "details", method: "GET", path: "/v1/twitch/clip", credits: 1 },
 ];
 
 const SPOTIFY: Spec[] = [
@@ -389,9 +389,9 @@ const SPOTIFY: Spec[] = [
 ];
 
 const SOUNDCLOUD: Spec[] = [
-  { slug: "soundcloud-artist", name: "SoundCloud Artist API", shortName: "Artist", category: "channel", method: "GET", path: "/v1/soundcloud/artist", credits: 7 },
+  { slug: "soundcloud-artist", name: "SoundCloud Artist API", shortName: "Artist", category: "channel", method: "GET", path: "/v1/soundcloud/artist", credits: 1 },
   { slug: "soundcloud-artist-tracks", name: "SoundCloud Artist Tracks API", shortName: "Artist Tracks", category: "list", method: "GET", path: "/v1/soundcloud/artist-tracks", credits: 28, creditsPerResult: 1.4 },
-  { slug: "soundcloud-track", name: "SoundCloud Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/soundcloud/track", credits: 7 },
+  { slug: "soundcloud-track", name: "SoundCloud Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/soundcloud/track", credits: 1 },
 ];
 
 const LINKTREE: Spec[] = [

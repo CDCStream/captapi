@@ -199,7 +199,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/community-posts", {"url": url, "limit": limit, "cache": cache})
 
     def community_post_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Community Post Details — Details for a single YouTube community post. (7 credits)
+        """YouTube Community Post Details — Details for a single YouTube community post. (1 credit)
 
         :param url: YouTube community post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -409,7 +409,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/community-posts", {"url": url, "limit": limit, "cache": cache})
 
     async def community_post_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Community Post Details — Details for a single YouTube community post. (7 credits)
+        """YouTube Community Post Details — Details for a single YouTube community post. (1 credit)
 
         :param url: YouTube community post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -456,7 +456,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/video-details", {"url": url, "cache": cache})
 
     def comments(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Comments — Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500). (10 credits)
+        """TikTok Comments — Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500). (2 credits)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
@@ -474,7 +474,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/channel-details", {"url": url, "cache": cache})
 
     def profile_region(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Profile Region — Region and language signals for a TikTok profile. (7 credits)
+        """TikTok Profile Region — Region and language signals for a TikTok profile. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -675,7 +675,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/video-details", {"url": url, "cache": cache})
 
     async def comments(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Comments — Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500). (10 credits)
+        """TikTok Comments — Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500). (2 credits)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
@@ -693,7 +693,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/channel-details", {"url": url, "cache": cache})
 
     async def profile_region(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Profile Region — Region and language signals for a TikTok profile. (7 credits)
+        """TikTok Profile Region — Region and language signals for a TikTok profile. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1323,7 +1323,7 @@ class FacebookApi:
         return self._t.get("/v1/facebook/profile-events", {"url": url, "limit": limit, "cache": cache})
 
     def marketplace_item(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (17 credits)
+        """Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (1 credit)
 
         :param url: Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1469,7 +1469,7 @@ class AsyncFacebookApi:
         return await self._t.get("/v1/facebook/profile-events", {"url": url, "limit": limit, "cache": cache})
 
     async def marketplace_item(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (17 credits)
+        """Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (1 credit)
 
         :param url: Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2508,7 +2508,7 @@ class TwitchApi:
         self._t = transport
 
     def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Twitch Profile — Twitch channel profile, followers, live status and recent metadata. (9 credits)
+        """Twitch Profile — Twitch channel profile, followers, live status and recent metadata. (1 credit)
 
         :param url: Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2525,7 +2525,7 @@ class TwitchApi:
         return self._t.get("/v1/twitch/user-videos", {"url": url, "limit": limit, "cache": cache})
 
     def user_schedule(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Twitch User Schedule — Upcoming Twitch schedule data when exposed on the public channel. (34 credits)
+        """Twitch User Schedule — Upcoming Twitch schedule data when exposed on the public channel. (1 credit)
 
         :param url: Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2533,7 +2533,7 @@ class TwitchApi:
         return self._t.get("/v1/twitch/user-schedule", {"url": url, "cache": cache})
 
     def clip(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Twitch Clip — Twitch clip metadata from a clip URL or channel fallback. (9 credits)
+        """Twitch Clip — Twitch clip metadata from a clip URL or channel fallback. (1 credit)
 
         :param url: Twitch clip URL, channel URL, or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2546,7 +2546,7 @@ class AsyncTwitchApi:
         self._t = transport
 
     async def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Twitch Profile — Twitch channel profile, followers, live status and recent metadata. (9 credits)
+        """Twitch Profile — Twitch channel profile, followers, live status and recent metadata. (1 credit)
 
         :param url: Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2563,7 +2563,7 @@ class AsyncTwitchApi:
         return await self._t.get("/v1/twitch/user-videos", {"url": url, "limit": limit, "cache": cache})
 
     async def user_schedule(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Twitch User Schedule — Upcoming Twitch schedule data when exposed on the public channel. (34 credits)
+        """Twitch User Schedule — Upcoming Twitch schedule data when exposed on the public channel. (1 credit)
 
         :param url: Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2571,7 +2571,7 @@ class AsyncTwitchApi:
         return await self._t.get("/v1/twitch/user-schedule", {"url": url, "cache": cache})
 
     async def clip(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Twitch Clip — Twitch clip metadata from a clip URL or channel fallback. (9 credits)
+        """Twitch Clip — Twitch clip metadata from a clip URL or channel fallback. (1 credit)
 
         :param url: Twitch clip URL, channel URL, or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2698,7 +2698,7 @@ class SoundcloudApi:
         self._t = transport
 
     def artist(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """SoundCloud Artist — SoundCloud artist profile metadata. (7 credits)
+        """SoundCloud Artist — SoundCloud artist profile metadata. (1 credit)
 
         :param url: SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2715,7 +2715,7 @@ class SoundcloudApi:
         return self._t.get("/v1/soundcloud/artist-tracks", {"url": url, "limit": limit, "cache": cache})
 
     def track(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """SoundCloud Track — SoundCloud track metadata and engagement stats. (7 credits)
+        """SoundCloud Track — SoundCloud track metadata and engagement stats. (1 credit)
 
         :param url: SoundCloud track URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2728,7 +2728,7 @@ class AsyncSoundcloudApi:
         self._t = transport
 
     async def artist(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """SoundCloud Artist — SoundCloud artist profile metadata. (7 credits)
+        """SoundCloud Artist — SoundCloud artist profile metadata. (1 credit)
 
         :param url: SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2745,7 +2745,7 @@ class AsyncSoundcloudApi:
         return await self._t.get("/v1/soundcloud/artist-tracks", {"url": url, "limit": limit, "cache": cache})
 
     async def track(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """SoundCloud Track — SoundCloud track metadata and engagement stats. (7 credits)
+        """SoundCloud Track — SoundCloud track metadata and engagement stats. (1 credit)
 
         :param url: SoundCloud track URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

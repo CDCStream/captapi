@@ -378,7 +378,7 @@
       },
       "youtubeCommunityPostDetails": {
         "label": "YouTube Community Post Details",
-        "description": "Details for a single YouTube community post. Costs ~7 credits (cached results free, failures never charged).",
+        "description": "Details for a single YouTube community post. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -463,7 +463,7 @@
       },
       "tiktokComments": {
         "label": "TikTok Comments",
-        "description": "Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500). Costs ~10 credits (cached results free, failures never charged).",
+        "description": "Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500). Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -497,7 +497,7 @@
       },
       "tiktokProfileRegion": {
         "label": "TikTok Profile Region",
-        "description": "Region and language signals for a TikTok profile. Costs ~7 credits (cached results free, failures never charged).",
+        "description": "Region and language signals for a TikTok profile. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1381,7 +1381,7 @@
       },
       "facebookMarketplaceItem": {
         "label": "Facebook Marketplace Item",
-        "description": "Details for a single Facebook Marketplace listing. Costs ~17 credits (cached results free, failures never charged).",
+        "description": "Details for a single Facebook Marketplace listing. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2299,7 +2299,7 @@
       },
       "twitchProfile": {
         "label": "Twitch Profile",
-        "description": "Twitch channel profile, followers, live status and recent metadata. Costs ~9 credits (cached results free, failures never charged).",
+        "description": "Twitch channel profile, followers, live status and recent metadata. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2333,7 +2333,7 @@
       },
       "twitchUserSchedule": {
         "label": "Twitch User Schedule",
-        "description": "Upcoming Twitch schedule data when exposed on the public channel. Costs ~34 credits (cached results free, failures never charged).",
+        "description": "Upcoming Twitch schedule data when exposed on the public channel. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2350,7 +2350,7 @@
       },
       "twitchClip": {
         "label": "Twitch Clip",
-        "description": "Twitch clip metadata from a clip URL or channel fallback. Costs ~9 credits (cached results free, failures never charged).",
+        "description": "Twitch clip metadata from a clip URL or channel fallback. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2469,7 +2469,7 @@
       },
       "soundcloudArtist": {
         "label": "SoundCloud Artist",
-        "description": "SoundCloud artist profile metadata. Costs ~7 credits (cached results free, failures never charged).",
+        "description": "SoundCloud artist profile metadata. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2503,7 +2503,7 @@
       },
       "soundcloudTrack": {
         "label": "SoundCloud Track",
-        "description": "SoundCloud track metadata and engagement stats. Costs ~7 credits (cached results free, failures never charged).",
+        "description": "SoundCloud track metadata and engagement stats. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

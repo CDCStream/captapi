@@ -51,9 +51,23 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
     category: "improvement",
+    title: "Cheaper pricing on native endpoints",
+    description:
+      "Endpoints that we serve directly from the platform's own data (no third-party actor) now cost far fewer credits. TikTok Comments drops to a flat 2 credits per call, and a range of native single-fetch endpoints drop to just 1 credit. Cached results are still free and failed or empty calls are never charged.",
+    items: [
+      "TikTok Comments: flat 2 credits per call (was up to 10)",
+      "TikTok Profile Region and YouTube Community Post Details: 1 credit",
+      "Twitch Profile, Twitch Clip, and Twitch User Schedule: 1 credit",
+      "SoundCloud Artist and SoundCloud Track: 1 credit",
+      "Facebook Marketplace Item: 1 credit",
+    ],
+  },
+  {
+    publishedAt: "2026-07-16",
+    category: "improvement",
     title: "TikTok Comments is now native with cursor pagination",
     description:
-      "The TikTok Comments API now fetches straight from TikTok's own data (no third-party actor) and supports true cursor pagination. Each response includes totalComments (the video's full comment count) and a nextCursor — pass it back in the cursor parameter to page through every comment, up to 500 per call. Comments still return text, author username and avatar, like count, and publish time. Billing is unchanged (per comment returned), and the API automatically falls back to the actor if the native path is unavailable.",
+      "The TikTok Comments API now fetches straight from TikTok's own data (no third-party actor) and supports true cursor pagination. Each response includes totalComments (the video's full comment count) and a nextCursor — pass it back in the cursor parameter to page through every comment, up to 500 per call. Comments still return text, author username and avatar, like count, and publish time. Now billed as a flat 2 credits per call (no matter how many comments you fetch), and the API automatically falls back to the actor if the native path is unavailable.",
     items: [
       "Native TikTok source — no Apify actor on the hot path",
       "Cursor pagination: pass the returned nextCursor to fetch the next page",

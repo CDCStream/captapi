@@ -47,6 +47,8 @@ CREDIT_TRANSCRIPT = 2
 CREDIT_SUMMARIZE = 4
 CREDIT_VIDEO_DETAILS = 1
 CREDIT_CHANNEL_DETAILS = 1
+CREDIT_COMMENTS = 2  # native (TikTok's own API); flat fee, our cost ~$0
+CREDIT_PROFILE_REGION = 1  # native-first from the profile page
 CREDIT_SEARCH = 2
 CREDIT_DOWNLOAD = 3
 
@@ -640,13 +642,14 @@ async def tiktok_comments(
             detail="Invalid cursor. Pass the nextCursor value from a previous response.",
         )
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_COMMENTS, 2)
+    # Flat fee: comments are served natively from TikTok's own API (our cost is
+    # ~$0), so a single low charge covers any page size instead of per-result.
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/comments",
         platform="tiktok",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_COMMENTS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Primary: TikTok's own cursor-paginated mobile comment API (no actor
@@ -707,7 +710,6 @@ async def tiktok_comments(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["comments"]), RATE_COMMENTS, 2)
         return ApiResponse(data=data)
 
 
@@ -790,7 +792,7 @@ async def tiktok_profile_region(
         endpoint="/v1/tiktok/profile-region",
         platform="tiktok",
         resource_url=f"https://www.tiktok.com/@{handle}",
-        base_credits=7,
+        base_credits=CREDIT_PROFILE_REGION,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Primary: profile page JSON. Returns None when it exposes neither

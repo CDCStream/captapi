@@ -193,7 +193,7 @@ async def profile(
     username = _target(url)
     if not username:
         raise HTTPException(status_code=400, detail="Invalid Twitch channel")
-    async with billed_call(caller=caller, endpoint="/v1/twitch/profile", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=9) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/twitch/profile", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=1) as ctx:
         async def _run() -> dict[str, Any]:
             native = await channel_native(username)
             if native is not None:
@@ -249,7 +249,7 @@ async def user_schedule(
     username = _target(url)
     if not username:
         raise HTTPException(status_code=400, detail="Invalid Twitch channel")
-    async with billed_call(caller=caller, endpoint="/v1/twitch/user-schedule", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=34) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/twitch/user-schedule", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=1) as ctx:
         async def _run() -> dict[str, Any]:
             native = await schedule_native(username)
             if native is not None:
@@ -274,7 +274,7 @@ async def clip(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/twitch/clip", platform="twitch", resource_url=url, base_credits=9) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/twitch/clip", platform="twitch", resource_url=url, base_credits=1) as ctx:
         async def _run() -> dict[str, Any]:
             is_clip_url = "clips.twitch.tv" in url or "/clip/" in url
 

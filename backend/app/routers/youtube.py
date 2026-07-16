@@ -1888,7 +1888,7 @@ async def youtube_community_post_details(
         endpoint="/v1/youtube/community-post-details",
         platform="youtube",
         resource_url=url,
-        base_credits=7,
+        base_credits=1,  # native: parsed from the public post page, no actor cost
     ) as ctx:
         async def _run() -> dict[str, Any]:
             item = await _fetch_community_post_page(url)

@@ -290,7 +290,7 @@ export class YoutubeApi {
   communityPosts(params: YoutubeCommunityPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/community-posts", params);
   }
-  /** YouTube Community Post Details — Details for a single YouTube community post. (7 credits) */
+  /** YouTube Community Post Details — Details for a single YouTube community post. (1 credit) */
   communityPostDetails(params: YoutubeCommunityPostDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/community-post-details", params);
   }
@@ -526,7 +526,7 @@ export class TiktokApi {
   videoDetails(params: TiktokVideoDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/video-details", params);
   }
-  /** TikTok Comments — Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500). (10 credits) */
+  /** TikTok Comments — Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500). (2 credits) */
   comments(params: TiktokCommentsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/comments", params);
   }
@@ -534,7 +534,7 @@ export class TiktokApi {
   channelDetails(params: TiktokChannelDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/channel-details", params);
   }
-  /** TikTok Profile Region — Region and language signals for a TikTok profile. (7 credits) */
+  /** TikTok Profile Region — Region and language signals for a TikTok profile. (1 credit) */
   profileRegion(params: TiktokProfileRegionParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/profile-region", params);
   }
@@ -1038,7 +1038,7 @@ export class FacebookApi {
   profileEvents(params: FacebookProfileEventsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/profile-events", params);
   }
-  /** Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (17 credits) */
+  /** Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (1 credit) */
   marketplaceItem(params: FacebookMarketplaceItemParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/marketplace-item", params);
   }
@@ -1777,7 +1777,7 @@ export interface TwitchClipParams {
 
 export class TwitchApi {
   constructor(private readonly core: HttpCore) {}
-  /** Twitch Profile — Twitch channel profile, followers, live status and recent metadata. (9 credits) */
+  /** Twitch Profile — Twitch channel profile, followers, live status and recent metadata. (1 credit) */
   profile(params: TwitchProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitch/profile", params);
   }
@@ -1785,11 +1785,11 @@ export class TwitchApi {
   userVideos(params: TwitchUserVideosParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitch/user-videos", params);
   }
-  /** Twitch User Schedule — Upcoming Twitch schedule data when exposed on the public channel. (34 credits) */
+  /** Twitch User Schedule — Upcoming Twitch schedule data when exposed on the public channel. (1 credit) */
   userSchedule(params: TwitchUserScheduleParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitch/user-schedule", params);
   }
-  /** Twitch Clip — Twitch clip metadata from a clip URL or channel fallback. (9 credits) */
+  /** Twitch Clip — Twitch clip metadata from a clip URL or channel fallback. (1 credit) */
   clip(params: TwitchClipParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitch/clip", params);
   }
@@ -1898,7 +1898,7 @@ export interface SoundcloudTrackParams {
 
 export class SoundcloudApi {
   constructor(private readonly core: HttpCore) {}
-  /** SoundCloud Artist — SoundCloud artist profile metadata. (7 credits) */
+  /** SoundCloud Artist — SoundCloud artist profile metadata. (1 credit) */
   artist(params: SoundcloudArtistParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/soundcloud/artist", params);
   }
@@ -1906,7 +1906,7 @@ export class SoundcloudApi {
   artistTracks(params: SoundcloudArtistTracksParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/soundcloud/artist-tracks", params);
   }
-  /** SoundCloud Track — SoundCloud track metadata and engagement stats. (7 credits) */
+  /** SoundCloud Track — SoundCloud track metadata and engagement stats. (1 credit) */
   track(params: SoundcloudTrackParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/soundcloud/track", params);
   }

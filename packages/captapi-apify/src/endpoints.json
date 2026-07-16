@@ -592,7 +592,7 @@
     "platform": "youtube",
     "name": "YouTube Community Post Details",
     "path": "/v1/youtube/community-post-details",
-    "credits": 7,
+    "credits": 1,
     "summary": "Details for a single YouTube community post.",
     "params": [
       {
@@ -714,7 +714,7 @@
     "platform": "tiktok",
     "name": "TikTok Comments",
     "path": "/v1/tiktok/comments",
-    "credits": 10,
+    "credits": 2,
     "summary": "Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500).",
     "params": [
       {
@@ -770,7 +770,7 @@
     "platform": "tiktok",
     "name": "TikTok Profile Region",
     "path": "/v1/tiktok/profile-region",
-    "credits": 7,
+    "credits": 1,
     "summary": "Region and language signals for a TikTok profile.",
     "params": [
       {
@@ -2172,7 +2172,7 @@
     "platform": "facebook",
     "name": "Facebook Marketplace Item",
     "path": "/v1/facebook/marketplace-item",
-    "credits": 17,
+    "credits": 1,
     "summary": "Details for a single Facebook Marketplace listing.",
     "params": [
       {
@@ -3594,7 +3594,7 @@
     "platform": "twitch",
     "name": "Twitch Profile",
     "path": "/v1/twitch/profile",
-    "credits": 9,
+    "credits": 1,
     "summary": "Twitch channel profile, followers, live status and recent metadata.",
     "params": [
       {
@@ -3644,7 +3644,7 @@
     "platform": "twitch",
     "name": "Twitch User Schedule",
     "path": "/v1/twitch/user-schedule",
-    "credits": 34,
+    "credits": 1,
     "summary": "Upcoming Twitch schedule data when exposed on the public channel.",
     "params": [
       {
@@ -3666,7 +3666,7 @@
     "platform": "twitch",
     "name": "Twitch Clip",
     "path": "/v1/twitch/clip",
-    "credits": 9,
+    "credits": 1,
     "summary": "Twitch clip metadata from a clip URL or channel fallback.",
     "params": [
       {
@@ -3844,7 +3844,7 @@
     "platform": "soundcloud",
     "name": "SoundCloud Artist",
     "path": "/v1/soundcloud/artist",
-    "credits": 7,
+    "credits": 1,
     "summary": "SoundCloud artist profile metadata.",
     "params": [
       {
@@ -3894,7 +3894,7 @@
     "platform": "soundcloud",
     "name": "SoundCloud Track",
     "path": "/v1/soundcloud/track",
-    "credits": 7,
+    "credits": 1,
     "summary": "SoundCloud track metadata and engagement stats.",
     "params": [
       {

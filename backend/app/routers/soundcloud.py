@@ -102,7 +102,7 @@ async def artist(
     caller: ApiCaller = Depends(require_api_key),
 ):
     profile = _profile_url(url)
-    async with billed_call(caller=caller, endpoint="/v1/soundcloud/artist", platform="soundcloud", resource_url=profile, base_credits=7) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/soundcloud/artist", platform="soundcloud", resource_url=profile, base_credits=1) as ctx:
         async def _run() -> dict[str, Any]:
             resolved = await native.resolve(profile)
             if isinstance(resolved, dict) and resolved.get("kind") == "user":
@@ -174,7 +174,7 @@ async def track(
         )
     if "soundcloud.com/" not in url:
         raise HTTPException(status_code=400, detail="Invalid SoundCloud track URL. Pass a SoundCloud URL like https://soundcloud.com/artist/track.")
-    async with billed_call(caller=caller, endpoint="/v1/soundcloud/track", platform="soundcloud", resource_url=url, base_credits=7) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/soundcloud/track", platform="soundcloud", resource_url=url, base_credits=1) as ctx:
         async def _run() -> dict[str, Any]:
             resolved = await native.resolve(url)
             if isinstance(resolved, dict) and resolved.get("kind") == "track":

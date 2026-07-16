@@ -986,7 +986,7 @@ async def facebook_marketplace_item(
         endpoint="/v1/facebook/marketplace-item",
         platform="facebook",
         resource_url=url,
-        base_credits=17,
+        base_credits=1,  # native: OG scrape from the public listing page, no actor
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Fast path: scrape OpenGraph metadata from the public listing page.

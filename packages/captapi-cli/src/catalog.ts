@@ -151,7 +151,7 @@ const YOUTUBE: Omit<Endpoint, "platform">[] = [
   { tool: "youtube_comment_replies", name: "YouTube Comment Replies", path: "/v1/youtube/comment-replies", credits: 20, summary: "Replies to a specific YouTube comment.", params: [url(YT_VIDEO), commentId(), limit(50, 500)] },
   { tool: "youtube_channel_playlists", name: "YouTube Channel Playlists", path: "/v1/youtube/channel-playlists", credits: 20, summary: "List a channel's playlists.", params: [url(YT_CHANNEL), limit(20, 200)] },
   { tool: "youtube_community_posts", name: "YouTube Community Posts", path: "/v1/youtube/community-posts", credits: 10, summary: "List a channel's community (posts) tab.", params: [url(YT_CHANNEL), limit(20, 200)] },
-  { tool: "youtube_community_post_details", name: "YouTube Community Post Details", path: "/v1/youtube/community-post-details", credits: 7, summary: "Details for a single YouTube community post.", params: [url("YouTube community post URL.")] },
+  { tool: "youtube_community_post_details", name: "YouTube Community Post Details", path: "/v1/youtube/community-post-details", credits: 1, summary: "Details for a single YouTube community post.", params: [url("YouTube community post URL.")] },
   { tool: "youtube_video_sponsors", name: "YouTube Video Sponsors", path: "/v1/youtube/video-sponsors", credits: 1, summary: "Sponsor / self-promo / interaction segments in a YouTube video (via SponsorBlock).", params: [url(YT_VIDEO)] },
 ];
 
@@ -159,9 +159,9 @@ const TIKTOK: Omit<Endpoint, "platform">[] = [
   { tool: "tiktok_transcript", name: "TikTok Transcript", path: "/v1/tiktok/transcript", credits: 2, summary: "Transcript of a TikTok video (via captions).", params: [url(TT_VIDEO), language(), cacheParam()] },
   { tool: "tiktok_summarize", name: "TikTok Summarizer", path: "/v1/tiktok/summarize", credits: 4, summary: "AI summary of a TikTok video.", params: [url(TT_VIDEO), language(), cacheParam()] },
   { tool: "tiktok_video_details", name: "TikTok Video Details", path: "/v1/tiktok/video-details", credits: 1, summary: "Metadata + stats for a TikTok video.", params: [url(TT_VIDEO)] },
-  { tool: "tiktok_comments", name: "TikTok Comments", path: "/v1/tiktok/comments", credits: 10, summary: "Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500).", params: [url(TT_VIDEO), limit(50, 500), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset)." }] },
+  { tool: "tiktok_comments", name: "TikTok Comments", path: "/v1/tiktok/comments", credits: 2, summary: "Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500).", params: [url(TT_VIDEO), limit(50, 500), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset)." }] },
   { tool: "tiktok_channel_details", name: "TikTok Channel Details", path: "/v1/tiktok/channel-details", credits: 1, summary: "Profile info & stats for a TikTok user.", params: [url(TT_PROFILE)] },
-  { tool: "tiktok_profile_region", name: "TikTok Profile Region", path: "/v1/tiktok/profile-region", credits: 7, summary: "Region and language signals for a TikTok profile.", params: [url(TT_PROFILE)] },
+  { tool: "tiktok_profile_region", name: "TikTok Profile Region", path: "/v1/tiktok/profile-region", credits: 1, summary: "Region and language signals for a TikTok profile.", params: [url(TT_PROFILE)] },
   { tool: "tiktok_audience_demographics", name: "TikTok Audience Demographics", path: "/v1/tiktok/audience-demographics", credits: 7, summary: "Audience and demographic signals for a TikTok profile.", params: [url(TT_PROFILE)] },
   { tool: "tiktok_search", name: "TikTok Search", path: "/v1/tiktok/search", credits: 14, summary: "Search TikTok videos by keyword/hashtag.", params: [q(), limit(20, 200)] },
   { tool: "tiktok_search_suggestions", name: "TikTok Search Suggestions", path: "/v1/tiktok/search-suggestions", credits: 28, summary: "TikTok search/autocomplete suggestions for a seed keyword.", params: [q("Seed keyword for autocomplete suggestions."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, language(), limit(20, 100)] },
@@ -219,7 +219,7 @@ const FACEBOOK: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_event_details", name: "Facebook Event Details", path: "/v1/facebook/event-details", credits: 2, summary: "Details for a Facebook event (date, location, attendees, tickets).", params: [url("Facebook event URL, e.g. https://facebook.com/events/ID.")] },
   { tool: "facebook_profile_photos", name: "Facebook Profile Photos", path: "/v1/facebook/profile-photos", credits: 12, summary: "Photos from a Facebook profile or page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
   { tool: "facebook_profile_events", name: "Facebook Profile Events", path: "/v1/facebook/profile-events", credits: 40, summary: "Events from a Facebook profile or page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
-  { tool: "facebook_marketplace_item", name: "Facebook Marketplace Item", path: "/v1/facebook/marketplace-item", credits: 17, summary: "Details for a single Facebook Marketplace listing.", params: [url("Facebook Marketplace item URL.")] },
+  { tool: "facebook_marketplace_item", name: "Facebook Marketplace Item", path: "/v1/facebook/marketplace-item", credits: 1, summary: "Details for a single Facebook Marketplace listing.", params: [url("Facebook Marketplace item URL.")] },
 ];
 
 const TW_TWEET = "Public tweet URL, e.g. https://x.com/user/status/ID.";
@@ -325,10 +325,10 @@ const GOOGLE: Omit<Endpoint, "platform">[] = [
 ];
 
 const TWITCH: Omit<Endpoint, "platform">[] = [
-  { tool: "twitch_profile", name: "Twitch Profile", path: "/v1/twitch/profile", credits: 9, summary: "Twitch channel profile, followers, live status and recent metadata.", params: [url(TWITCH_PROFILE)] },
+  { tool: "twitch_profile", name: "Twitch Profile", path: "/v1/twitch/profile", credits: 1, summary: "Twitch channel profile, followers, live status and recent metadata.", params: [url(TWITCH_PROFILE)] },
   { tool: "twitch_user_videos", name: "Twitch User Videos", path: "/v1/twitch/user-videos", credits: 34, summary: "Recent Twitch VODs for a channel.", params: [url(TWITCH_PROFILE), limit(20, 30)] },
-  { tool: "twitch_user_schedule", name: "Twitch User Schedule", path: "/v1/twitch/user-schedule", credits: 34, summary: "Upcoming Twitch schedule data when exposed on the public channel.", params: [url(TWITCH_PROFILE)] },
-  { tool: "twitch_clip", name: "Twitch Clip", path: "/v1/twitch/clip", credits: 9, summary: "Twitch clip metadata from a clip URL or channel fallback.", params: [url("Twitch clip URL, channel URL, or username.")] },
+  { tool: "twitch_user_schedule", name: "Twitch User Schedule", path: "/v1/twitch/user-schedule", credits: 1, summary: "Upcoming Twitch schedule data when exposed on the public channel.", params: [url(TWITCH_PROFILE)] },
+  { tool: "twitch_clip", name: "Twitch Clip", path: "/v1/twitch/clip", credits: 1, summary: "Twitch clip metadata from a clip URL or channel fallback.", params: [url("Twitch clip URL, channel URL, or username.")] },
 ];
 
 const SPOTIFY: Omit<Endpoint, "platform">[] = [
@@ -341,9 +341,9 @@ const SPOTIFY: Omit<Endpoint, "platform">[] = [
 ];
 
 const SOUNDCLOUD: Omit<Endpoint, "platform">[] = [
-  { tool: "soundcloud_artist", name: "SoundCloud Artist", path: "/v1/soundcloud/artist", credits: 7, summary: "SoundCloud artist profile metadata.", params: [url(SC_PROFILE)] },
+  { tool: "soundcloud_artist", name: "SoundCloud Artist", path: "/v1/soundcloud/artist", credits: 1, summary: "SoundCloud artist profile metadata.", params: [url(SC_PROFILE)] },
   { tool: "soundcloud_artist_tracks", name: "SoundCloud Artist Tracks", path: "/v1/soundcloud/artist-tracks", credits: 28, summary: "Tracks from a SoundCloud artist profile.", params: [url(SC_PROFILE), limit(20, 100)] },
-  { tool: "soundcloud_track", name: "SoundCloud Track", path: "/v1/soundcloud/track", credits: 7, summary: "SoundCloud track metadata and engagement stats.", params: [url(SC_TRACK)] },
+  { tool: "soundcloud_track", name: "SoundCloud Track", path: "/v1/soundcloud/track", credits: 1, summary: "SoundCloud track metadata and engagement stats.", params: [url(SC_TRACK)] },
 ];
 
 const LINKTREE: Omit<Endpoint, "platform">[] = [
