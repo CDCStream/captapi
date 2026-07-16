@@ -172,7 +172,7 @@ def _normalize_post_download(item: dict[str, Any]) -> dict[str, Any]:
 @router.get("/profile", summary="Threads profile details & stats")
 async def threads_profile(
     url: str = Query(..., description="Threads profile URL or @handle"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_threads_handle(url)
@@ -211,7 +211,7 @@ async def threads_profile(
 async def threads_user_posts(
     url: str = Query(..., description="Threads profile URL or @handle"),
     limit: int = Query(20, ge=1, le=100),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_threads_handle(url)
@@ -249,7 +249,7 @@ async def threads_user_posts(
 async def threads_search(
     q: str = Query(..., min_length=2, description="Keyword or phrase to search Threads"),
     limit: int = Query(25, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -286,7 +286,7 @@ async def threads_search(
 async def threads_search_users(
     q: str = Query(..., min_length=2, description="Keyword to search Threads users"),
     limit: int = Query(20, ge=1, le=100),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -352,7 +352,7 @@ _POST_AUTHOR_RE = re.compile(r"@([A-Za-z0-9._]+)/post/")
 @router.get("/post-details", summary="Threads post metadata + engagement")
 async def threads_post_details(
     url: str = Query(..., description="Threads post URL"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     code = _require_threads_post_url(url)

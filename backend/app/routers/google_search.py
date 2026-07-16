@@ -56,7 +56,7 @@ async def google_search(
     country: str = Query("us", min_length=2, max_length=2, description="Two-letter country code"),
     language: str = Query("en", min_length=2, max_length=5, description="Google interface language"),
     limit: int = Query(10, ge=1, le=100),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()

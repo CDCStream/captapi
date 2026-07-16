@@ -187,7 +187,7 @@ async def _channel(username: str) -> dict[str, Any]:
 @router.get("/profile", summary="Twitch channel profile")
 async def profile(
     url: str = Query(..., description="Twitch channel URL or username"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _target(url)
@@ -210,7 +210,7 @@ async def profile(
 async def user_videos(
     url: str = Query(..., description="Twitch channel URL or username"),
     limit: int = Query(20, ge=1, le=30),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _target(url)
@@ -243,7 +243,7 @@ async def user_videos(
 @router.get("/user-schedule", summary="Twitch channel schedule")
 async def user_schedule(
     url: str = Query(..., description="Twitch channel URL or username"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _target(url)
@@ -270,7 +270,7 @@ async def user_schedule(
 @router.get("/clip", summary="Twitch clip metadata")
 async def clip(
     url: str = Query(..., description="Twitch clip URL, channel URL, or username"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()

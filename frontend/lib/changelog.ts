@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
     category: "improvement",
+    title: "cache defaults to false — fresh data unless you opt in",
+    description:
+      "The optional cache query parameter on every data endpoint now defaults to false, so requests fetch fresh data unless you explicitly pass cache=true. Previously the default was true (serve from the 24h cache). Pass cache=true when you want the cached copy for free/instant repeat lookups.",
+    items: [
+      "Default is now cache=false on all data endpoints (always fresh)",
+      "Pass cache=true to serve from the 24h response cache",
+      "Updated across OpenAPI, docs, playground, MCP, SDKs, CLI, n8n, Make, Zapier, and Apify",
+    ],
+  },
+  {
+    publishedAt: "2026-07-16",
+    category: "improvement",
     title: "Instagram Basic Profile is now native, by user ID — richer fields",
     description:
       "The Instagram Basic Profile API now takes an Instagram numeric user ID (e.g. 314216) and returns a much richer public profile — username, full name, biography, follower/following/media counts, verification and privacy flags, business/professional status, and standard + HD profile pictures — straight from Instagram's own data. A profile URL, @handle, or username is still accepted and resolved automatically. It runs on our native resolver (no third-party actor), still costs 1 credit, and null/empty fields are stripped for a tidy response.",

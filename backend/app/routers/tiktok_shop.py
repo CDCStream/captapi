@@ -126,7 +126,7 @@ async def shop_search(
     q: str = Query(..., min_length=2, description="Product search query"),
     region: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/shop-search", platform="tiktok_shop", resource_url=None, base_credits=_scaled(limit, RATE_SHOP)) as ctx:
@@ -144,7 +144,7 @@ async def shop_search(
 async def shop_products(
     url: str = Query(..., description="TikTok Shop store URL"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_non_tiktok_url(url, "https://www.tiktok.com/shop/store")
@@ -164,7 +164,7 @@ async def shop_products(
 @router.get("/product-details", summary="TikTok Shop product details")
 async def product_details(
     url: str = Query(..., description="TikTok Shop product URL"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_non_tiktok_url(url, "https://www.tiktok.com/shop/pdp/product/123")
@@ -204,7 +204,7 @@ async def product_details(
 async def product_reviews(
     url: str = Query(..., description="TikTok Shop product URL"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_non_tiktok_url(url, "https://www.tiktok.com/shop/pdp/product/123")
@@ -237,7 +237,7 @@ async def product_reviews(
 async def user_showcase(
     username: str = Query(..., description="TikTok username, with or without @"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_non_tiktok_url(username, "https://www.tiktok.com/@username")

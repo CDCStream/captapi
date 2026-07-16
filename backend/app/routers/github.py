@@ -168,7 +168,7 @@ def _pull(p: dict[str, Any]) -> dict[str, Any]:
 @router.get("/user", summary="GitHub user profile")
 async def github_user(
     username: str = Query(..., description="GitHub username or profile URL"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     login = _username(username)
@@ -185,7 +185,7 @@ async def github_user(
 async def repositories(
     username: str = Query(..., description="GitHub username or profile URL"),
     limit: int = Query(30, ge=1, le=100),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     login = _username(username)
@@ -205,7 +205,7 @@ async def repositories(
 @router.get("/repository", summary="GitHub repository details")
 async def repository(
     repo: str = Query(..., description="Repository URL or owner/name"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     parts = _repo_parts(repo)
@@ -224,7 +224,7 @@ async def pull_requests(
     repo: str = Query(..., description="Repository URL or owner/name"),
     state: str = Query("open", pattern="^(open|closed|all)$"),
     limit: int = Query(30, ge=1, le=100),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     parts = _repo_parts(repo)
@@ -246,7 +246,7 @@ async def pull_requests(
 async def activity(
     username: str = Query(..., description="GitHub username or profile URL"),
     limit: int = Query(30, ge=1, le=100),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     login = _username(username)
@@ -267,7 +267,7 @@ async def activity(
 async def followers(
     username: str = Query(...),
     limit: int = Query(30, ge=1, le=100),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     login = _username(username)
@@ -288,7 +288,7 @@ async def followers(
 async def following(
     username: str = Query(...),
     limit: int = Query(30, ge=1, le=100),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     login = _username(username)
@@ -308,7 +308,7 @@ async def following(
 @router.get("/contributions", summary="GitHub contribution summary")
 async def contributions(
     username: str = Query(..., description="GitHub username or profile URL"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     login = _username(username)
@@ -333,7 +333,7 @@ async def contributions(
 async def trending_repositories(
     q: str = Query("stars:>1000", description="GitHub search query"),
     limit: int = Query(20, ge=1, le=100),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     async with billed_call(caller=caller, endpoint="/v1/github/trending-repositories", platform="github", resource_url=None, base_credits=_scaled(limit, GITHUB_SEARCH_RATE)) as ctx:
@@ -351,7 +351,7 @@ async def trending_repositories(
 async def trending_developers(
     q: str = Query("followers:>1000", description="GitHub user search query"),
     limit: int = Query(20, ge=1, le=100),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     async with billed_call(caller=caller, endpoint="/v1/github/trending-developers", platform="github", resource_url=None, base_credits=_scaled(limit, GITHUB_SEARCH_RATE)) as ctx:

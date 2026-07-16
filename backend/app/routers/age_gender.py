@@ -58,7 +58,7 @@ async def _run_lookup(name: str, names: str | None) -> dict[str, Any]:
 async def get_age_gender(
     name: str = Query(..., min_length=1, description="First name, or fallback when names is omitted"),
     names: str | None = Query(None, description="Optional comma-separated list of names"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     parsed = _names(name, names)
@@ -71,7 +71,7 @@ async def get_age_gender(
 async def get_age_gender_alias(
     name: str = Query(..., min_length=1),
     names: str | None = Query(None),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     return await get_age_gender(name=name, names=names, cache=cache, caller=caller)

@@ -212,7 +212,7 @@ async def _fetch_video_page(url: str) -> dict[str, Any]:
 @router.get("/video-details", summary="Rumble video metadata + stats")
 async def video_details(
     url: str = Query(..., description="Rumble video URL"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_rumble_video_url(url)
@@ -253,7 +253,7 @@ async def video_details(
 async def channel_videos(
     url: str = Query(..., description="Rumble channel URL, e.g. https://rumble.com/c/name"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     channel = _require_rumble_channel_url(url)
@@ -298,7 +298,7 @@ async def channel_videos(
 async def comments(
     url: str = Query(..., description="Rumble video URL"),
     limit: int = Query(50, ge=1, le=500),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_rumble_video_url(url)
@@ -362,7 +362,7 @@ async def comments(
 async def rumble_search(
     q: str = Query(..., min_length=2, description="Search query"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()

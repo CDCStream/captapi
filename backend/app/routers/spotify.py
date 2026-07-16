@@ -213,7 +213,7 @@ async def _details(kind: str, uri: str, limit: int | None = None) -> dict[str, A
 @router.get("/artist", summary="Spotify artist details")
 async def artist(
     url: str = Query(..., description="Spotify artist URL, URI, or ID"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "artist")
@@ -225,7 +225,7 @@ async def artist(
 @router.get("/track", summary="Spotify track details")
 async def track(
     url: str = Query(..., description="Spotify track URL, URI, or ID"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "track")
@@ -237,7 +237,7 @@ async def track(
 @router.get("/album", summary="Spotify album details")
 async def album(
     url: str = Query(..., description="Spotify album URL, URI, or ID"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "album")
@@ -250,7 +250,7 @@ async def album(
 async def podcast(
     url: str = Query(..., description="Spotify show/podcast URL, URI, or ID"),
     limit: int = Query(20, ge=1, le=50),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "show")
@@ -263,7 +263,7 @@ async def podcast(
 async def podcast_episodes(
     url: str = Query(..., description="Spotify show/podcast URL, URI, or ID"),
     limit: int = Query(20, ge=1, le=50),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "show")
@@ -294,7 +294,7 @@ async def search(
     q: str = Query(..., min_length=2),
     type: str = Query("tracks", pattern="^(tracks|albums|artists|podcasts|episodes)$"),
     limit: int = Query(20, ge=1, le=50),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()

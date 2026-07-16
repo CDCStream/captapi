@@ -1083,7 +1083,7 @@ const lang = (): ApiParam => ({ name: "language", type: "string", required: fals
 const langOut = (): ApiParam => ({ name: "language", type: "string", required: false, description: 'ISO code, e.g. "tr": pins the speech language and sets the summary output language. Defaults to auto-detect + English summary.' });
 const cid = (): ApiParam => ({ name: "comment_id", type: "string", required: true, description: "ID of the parent comment to fetch replies for (from the comments endpoint)." });
 const fastRss = (): ApiParam => ({ name: "fast", type: "boolean", required: false, description: "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters." });
-const cacheP = (): ApiParam => ({ name: "cache", type: "boolean", required: false, description: "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)." });
+const cacheP = (): ApiParam => ({ name: "cache", type: "boolean", required: false, description: "Set true to serve from the 24h response cache. Default false — always fetch fresh data." });
 
 const YT_VIDEO = "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL.";
 const YT_SHORTS = "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL.";
@@ -1324,9 +1324,9 @@ export function params(ep: ApiEndpoint): ApiParam[] {
   return withCacheParam(ep, base);
 }
 
-/** Every data endpoint caches responses and accepts `cache=false` to bypass;
- * make sure the docs always list the param. Account endpoints (balance,
- * usage) are live reads with no cache layer. */
+/** Every data endpoint accepts an optional `cache` param (default false =
+ * always fresh). Set `cache=true` to serve from the 24h response cache.
+ * Account endpoints (balance, usage) are live reads with no cache layer. */
 function withCacheParam(ep: ApiEndpoint, list: ApiParam[]): ApiParam[] {
   if (ep.platform === "account" || list.some((p) => p.name === "cache")) return list;
   return [...list, cacheP()];

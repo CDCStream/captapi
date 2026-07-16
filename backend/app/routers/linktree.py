@@ -135,7 +135,7 @@ def _normalize(data: dict[str, Any], url: str) -> dict[str, Any]:
 @router.get("/page", summary="Linktree page")
 async def linktree_page(
     url: str = Query(..., description="Linktree profile URL or username"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     profile = _profile_url(url)

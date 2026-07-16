@@ -14,7 +14,7 @@ class YoutubeApi:
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/transcript", {"url": url, "language": language, "cache": cache})
 
@@ -23,7 +23,7 @@ class YoutubeApi:
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/summarize", {"url": url, "language": language, "cache": cache})
 
@@ -31,7 +31,7 @@ class YoutubeApi:
         """YouTube Video Details — Metadata + engagement stats for a YouTube video. (1 credit)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/video-details", {"url": url, "cache": cache})
 
@@ -40,7 +40,7 @@ class YoutubeApi:
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/comments", {"url": url, "limit": limit, "cache": cache})
 
@@ -48,7 +48,7 @@ class YoutubeApi:
         """YouTube Channel Details — Channel info & subscriber/stats for a YouTube channel. (1 credit)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/channel-details", {"url": url, "cache": cache})
 
@@ -57,7 +57,7 @@ class YoutubeApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/search", {"q": q, "limit": limit, "cache": cache})
 
@@ -67,7 +67,7 @@ class YoutubeApi:
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param fast: Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/channel-videos", {"url": url, "limit": limit, "fast": fast, "cache": cache})
 
@@ -77,7 +77,7 @@ class YoutubeApi:
         :param url: YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
         :param fast: Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/playlist-videos", {"url": url, "limit": limit, "fast": fast, "cache": cache})
 
@@ -87,7 +87,7 @@ class YoutubeApi:
         :param url: YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
         :param fast: Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/playlist", {"url": url, "limit": limit, "fast": fast, "cache": cache})
 
@@ -95,7 +95,7 @@ class YoutubeApi:
         """YouTube Video Download — Direct download URLs for a YouTube video. (3 credits)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/video-download", {"url": url, "cache": cache})
 
@@ -104,7 +104,7 @@ class YoutubeApi:
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/shorts/transcript", {"url": url, "language": language, "cache": cache})
 
@@ -113,7 +113,7 @@ class YoutubeApi:
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/shorts/summarize", {"url": url, "language": language, "cache": cache})
 
@@ -121,7 +121,7 @@ class YoutubeApi:
         """YouTube Shorts Stats — Metadata + stats for a YouTube Short. (1 credit)
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/shorts/video-details", {"url": url, "cache": cache})
 
@@ -130,7 +130,7 @@ class YoutubeApi:
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/shorts/comments", {"url": url, "limit": limit, "cache": cache})
 
@@ -139,7 +139,7 @@ class YoutubeApi:
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/channel-shorts", {"url": url, "limit": limit, "cache": cache})
 
@@ -148,7 +148,7 @@ class YoutubeApi:
 
         :param q: Seed keyword for trending Shorts. Default trending.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/trending-shorts", {"q": q, "limit": limit, "cache": cache})
 
@@ -157,7 +157,7 @@ class YoutubeApi:
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/channel-streams", {"url": url, "limit": limit, "cache": cache})
 
@@ -166,7 +166,7 @@ class YoutubeApi:
 
         :param q: Hashtag with or without the # (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/hashtag-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -176,7 +176,7 @@ class YoutubeApi:
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param comment_id: ID of the parent comment to fetch replies for (from the comments endpoint).
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
 
@@ -185,7 +185,7 @@ class YoutubeApi:
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/channel-playlists", {"url": url, "limit": limit, "cache": cache})
 
@@ -194,7 +194,7 @@ class YoutubeApi:
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/community-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -202,7 +202,7 @@ class YoutubeApi:
         """YouTube Community Post Details — Details for a single YouTube community post. (7 credits)
 
         :param url: YouTube community post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/community-post-details", {"url": url, "cache": cache})
 
@@ -210,7 +210,7 @@ class YoutubeApi:
         """YouTube Video Sponsors — Sponsor / self-promo / interaction segments in a YouTube video (via SponsorBlock). (1 credit)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/youtube/video-sponsors", {"url": url, "cache": cache})
 
@@ -224,7 +224,7 @@ class AsyncYoutubeApi:
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/transcript", {"url": url, "language": language, "cache": cache})
 
@@ -233,7 +233,7 @@ class AsyncYoutubeApi:
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/summarize", {"url": url, "language": language, "cache": cache})
 
@@ -241,7 +241,7 @@ class AsyncYoutubeApi:
         """YouTube Video Details — Metadata + engagement stats for a YouTube video. (1 credit)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/video-details", {"url": url, "cache": cache})
 
@@ -250,7 +250,7 @@ class AsyncYoutubeApi:
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/comments", {"url": url, "limit": limit, "cache": cache})
 
@@ -258,7 +258,7 @@ class AsyncYoutubeApi:
         """YouTube Channel Details — Channel info & subscriber/stats for a YouTube channel. (1 credit)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/channel-details", {"url": url, "cache": cache})
 
@@ -267,7 +267,7 @@ class AsyncYoutubeApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/search", {"q": q, "limit": limit, "cache": cache})
 
@@ -277,7 +277,7 @@ class AsyncYoutubeApi:
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param fast: Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/channel-videos", {"url": url, "limit": limit, "fast": fast, "cache": cache})
 
@@ -287,7 +287,7 @@ class AsyncYoutubeApi:
         :param url: YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
         :param fast: Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/playlist-videos", {"url": url, "limit": limit, "fast": fast, "cache": cache})
 
@@ -297,7 +297,7 @@ class AsyncYoutubeApi:
         :param url: YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
         :param fast: Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/playlist", {"url": url, "limit": limit, "fast": fast, "cache": cache})
 
@@ -305,7 +305,7 @@ class AsyncYoutubeApi:
         """YouTube Video Download — Direct download URLs for a YouTube video. (3 credits)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/video-download", {"url": url, "cache": cache})
 
@@ -314,7 +314,7 @@ class AsyncYoutubeApi:
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/shorts/transcript", {"url": url, "language": language, "cache": cache})
 
@@ -323,7 +323,7 @@ class AsyncYoutubeApi:
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/shorts/summarize", {"url": url, "language": language, "cache": cache})
 
@@ -331,7 +331,7 @@ class AsyncYoutubeApi:
         """YouTube Shorts Stats — Metadata + stats for a YouTube Short. (1 credit)
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/shorts/video-details", {"url": url, "cache": cache})
 
@@ -340,7 +340,7 @@ class AsyncYoutubeApi:
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/shorts/comments", {"url": url, "limit": limit, "cache": cache})
 
@@ -349,7 +349,7 @@ class AsyncYoutubeApi:
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/channel-shorts", {"url": url, "limit": limit, "cache": cache})
 
@@ -358,7 +358,7 @@ class AsyncYoutubeApi:
 
         :param q: Seed keyword for trending Shorts. Default trending.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/trending-shorts", {"q": q, "limit": limit, "cache": cache})
 
@@ -367,7 +367,7 @@ class AsyncYoutubeApi:
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/channel-streams", {"url": url, "limit": limit, "cache": cache})
 
@@ -376,7 +376,7 @@ class AsyncYoutubeApi:
 
         :param q: Hashtag with or without the # (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/hashtag-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -386,7 +386,7 @@ class AsyncYoutubeApi:
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param comment_id: ID of the parent comment to fetch replies for (from the comments endpoint).
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
 
@@ -395,7 +395,7 @@ class AsyncYoutubeApi:
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/channel-playlists", {"url": url, "limit": limit, "cache": cache})
 
@@ -404,7 +404,7 @@ class AsyncYoutubeApi:
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/community-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -412,7 +412,7 @@ class AsyncYoutubeApi:
         """YouTube Community Post Details — Details for a single YouTube community post. (7 credits)
 
         :param url: YouTube community post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/community-post-details", {"url": url, "cache": cache})
 
@@ -420,7 +420,7 @@ class AsyncYoutubeApi:
         """YouTube Video Sponsors — Sponsor / self-promo / interaction segments in a YouTube video (via SponsorBlock). (1 credit)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/youtube/video-sponsors", {"url": url, "cache": cache})
 
@@ -434,7 +434,7 @@ class TiktokApi:
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/transcript", {"url": url, "language": language, "cache": cache})
 
@@ -443,7 +443,7 @@ class TiktokApi:
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/summarize", {"url": url, "language": language, "cache": cache})
 
@@ -451,7 +451,7 @@ class TiktokApi:
         """TikTok Video Details — Metadata + stats for a TikTok video. (1 credit)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/video-details", {"url": url, "cache": cache})
 
@@ -460,7 +460,7 @@ class TiktokApi:
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/comments", {"url": url, "limit": limit, "cache": cache})
 
@@ -468,7 +468,7 @@ class TiktokApi:
         """TikTok Channel Details — Profile info & stats for a TikTok user. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/channel-details", {"url": url, "cache": cache})
 
@@ -476,7 +476,7 @@ class TiktokApi:
         """TikTok Profile Region — Region and language signals for a TikTok profile. (7 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/profile-region", {"url": url, "cache": cache})
 
@@ -484,7 +484,7 @@ class TiktokApi:
         """TikTok Audience Demographics — Audience and demographic signals for a TikTok profile. (7 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/audience-demographics", {"url": url, "cache": cache})
 
@@ -493,7 +493,7 @@ class TiktokApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/search", {"q": q, "limit": limit, "cache": cache})
 
@@ -504,7 +504,7 @@ class TiktokApi:
         :param country: Two-letter ISO country code. Default US.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/search-suggestions", {"q": q, "country": country, "language": language, "limit": limit, "cache": cache})
 
@@ -512,7 +512,7 @@ class TiktokApi:
         """TikTok Video Download — No-watermark download URL for a TikTok video. (3 credits)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/video-download", {"url": url, "cache": cache})
 
@@ -521,7 +521,7 @@ class TiktokApi:
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/channel-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -531,7 +531,7 @@ class TiktokApi:
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param comment_id: ID of the parent comment to fetch replies for (from the comments endpoint).
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
 
@@ -540,7 +540,7 @@ class TiktokApi:
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/user-followers", {"url": url, "limit": limit, "cache": cache})
 
@@ -549,7 +549,7 @@ class TiktokApi:
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/user-followings", {"url": url, "limit": limit, "cache": cache})
 
@@ -558,7 +558,7 @@ class TiktokApi:
 
         :param url: TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/music-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -567,7 +567,7 @@ class TiktokApi:
 
         :param q: Hashtag with or without the # (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/hashtag-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -576,7 +576,7 @@ class TiktokApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/top-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -585,7 +585,7 @@ class TiktokApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/user-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -593,7 +593,7 @@ class TiktokApi:
         """TikTok Song Details — Details of a TikTok sound/song. (2 credits)
 
         :param url: TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/song-details", {"url": url, "cache": cache})
 
@@ -602,7 +602,7 @@ class TiktokApi:
 
         :param country: Two-letter ISO country code, e.g. US, GB, TR. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/trending-feed", {"country": country, "limit": limit, "cache": cache})
 
@@ -611,7 +611,7 @@ class TiktokApi:
 
         :param query: Topic or keyword to discover trending hashtags for. Default "trending".
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/popular-hashtags", {"query": query, "limit": limit, "cache": cache})
 
@@ -619,7 +619,7 @@ class TiktokApi:
         """TikTok Live — Live status & room info for a TikTok creator. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/live", {"url": url, "cache": cache})
 
@@ -627,7 +627,7 @@ class TiktokApi:
         """TikTok Live Info — Live room details for a TikTok creator. (7 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/live-info", {"url": url, "cache": cache})
 
@@ -638,7 +638,7 @@ class TiktokApi:
         :param sort: follower, engagement, or popularity. Default follower.
         :param follower_count: Optional range: 10k-100k, 100k-1m, 1m-10m, >10m.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/popular-creators", {"country": country, "sort": sort, "follower_count": follower_count, "limit": limit, "cache": cache})
 
@@ -652,7 +652,7 @@ class AsyncTiktokApi:
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/transcript", {"url": url, "language": language, "cache": cache})
 
@@ -661,7 +661,7 @@ class AsyncTiktokApi:
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/summarize", {"url": url, "language": language, "cache": cache})
 
@@ -669,7 +669,7 @@ class AsyncTiktokApi:
         """TikTok Video Details — Metadata + stats for a TikTok video. (1 credit)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/video-details", {"url": url, "cache": cache})
 
@@ -678,7 +678,7 @@ class AsyncTiktokApi:
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/comments", {"url": url, "limit": limit, "cache": cache})
 
@@ -686,7 +686,7 @@ class AsyncTiktokApi:
         """TikTok Channel Details — Profile info & stats for a TikTok user. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/channel-details", {"url": url, "cache": cache})
 
@@ -694,7 +694,7 @@ class AsyncTiktokApi:
         """TikTok Profile Region — Region and language signals for a TikTok profile. (7 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/profile-region", {"url": url, "cache": cache})
 
@@ -702,7 +702,7 @@ class AsyncTiktokApi:
         """TikTok Audience Demographics — Audience and demographic signals for a TikTok profile. (7 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/audience-demographics", {"url": url, "cache": cache})
 
@@ -711,7 +711,7 @@ class AsyncTiktokApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/search", {"q": q, "limit": limit, "cache": cache})
 
@@ -722,7 +722,7 @@ class AsyncTiktokApi:
         :param country: Two-letter ISO country code. Default US.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/search-suggestions", {"q": q, "country": country, "language": language, "limit": limit, "cache": cache})
 
@@ -730,7 +730,7 @@ class AsyncTiktokApi:
         """TikTok Video Download — No-watermark download URL for a TikTok video. (3 credits)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/video-download", {"url": url, "cache": cache})
 
@@ -739,7 +739,7 @@ class AsyncTiktokApi:
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/channel-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -749,7 +749,7 @@ class AsyncTiktokApi:
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param comment_id: ID of the parent comment to fetch replies for (from the comments endpoint).
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
 
@@ -758,7 +758,7 @@ class AsyncTiktokApi:
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/user-followers", {"url": url, "limit": limit, "cache": cache})
 
@@ -767,7 +767,7 @@ class AsyncTiktokApi:
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/user-followings", {"url": url, "limit": limit, "cache": cache})
 
@@ -776,7 +776,7 @@ class AsyncTiktokApi:
 
         :param url: TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/music-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -785,7 +785,7 @@ class AsyncTiktokApi:
 
         :param q: Hashtag with or without the # (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/hashtag-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -794,7 +794,7 @@ class AsyncTiktokApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/top-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -803,7 +803,7 @@ class AsyncTiktokApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/user-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -811,7 +811,7 @@ class AsyncTiktokApi:
         """TikTok Song Details — Details of a TikTok sound/song. (2 credits)
 
         :param url: TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/song-details", {"url": url, "cache": cache})
 
@@ -820,7 +820,7 @@ class AsyncTiktokApi:
 
         :param country: Two-letter ISO country code, e.g. US, GB, TR. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/trending-feed", {"country": country, "limit": limit, "cache": cache})
 
@@ -829,7 +829,7 @@ class AsyncTiktokApi:
 
         :param query: Topic or keyword to discover trending hashtags for. Default "trending".
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/popular-hashtags", {"query": query, "limit": limit, "cache": cache})
 
@@ -837,7 +837,7 @@ class AsyncTiktokApi:
         """TikTok Live — Live status & room info for a TikTok creator. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/live", {"url": url, "cache": cache})
 
@@ -845,7 +845,7 @@ class AsyncTiktokApi:
         """TikTok Live Info — Live room details for a TikTok creator. (7 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/live-info", {"url": url, "cache": cache})
 
@@ -856,7 +856,7 @@ class AsyncTiktokApi:
         :param sort: follower, engagement, or popularity. Default follower.
         :param follower_count: Optional range: 10k-100k, 100k-1m, 1m-10m, >10m.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/popular-creators", {"country": country, "sort": sort, "follower_count": follower_count, "limit": limit, "cache": cache})
 
@@ -870,7 +870,7 @@ class InstagramApi:
 
         :param url: Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/transcript", {"url": url, "language": language, "cache": cache})
 
@@ -879,7 +879,7 @@ class InstagramApi:
 
         :param url: Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/summarize", {"url": url, "language": language, "cache": cache})
 
@@ -887,7 +887,7 @@ class InstagramApi:
         """Instagram Post Details — Details for an Instagram post or reel. (1 credit)
 
         :param url: Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/details", {"url": url, "cache": cache})
 
@@ -896,7 +896,7 @@ class InstagramApi:
 
         :param url: Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/comments", {"url": url, "limit": limit, "cache": cache})
 
@@ -904,7 +904,7 @@ class InstagramApi:
         """Instagram Channel Details — Profile info & stats for an Instagram account. (1 credit)
 
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/channel-details", {"url": url, "cache": cache})
 
@@ -914,7 +914,7 @@ class InstagramApi:
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/channel-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
@@ -924,7 +924,7 @@ class InstagramApi:
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/channel-reels", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
@@ -933,7 +933,7 @@ class InstagramApi:
 
         :param q: Hashtag (without #) or keyword (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/reels-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -942,7 +942,7 @@ class InstagramApi:
 
         :param country: Country name for Explore localization. Default United States.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/trending-reels", {"country": country, "limit": limit, "cache": cache})
 
@@ -950,7 +950,7 @@ class InstagramApi:
         """Instagram Video Download — Direct video URL for an Instagram Reel. (3 credits)
 
         :param url: Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/video-download", {"url": url, "cache": cache})
 
@@ -959,7 +959,7 @@ class InstagramApi:
 
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/tagged-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -968,7 +968,7 @@ class InstagramApi:
 
         :param audio_id: Instagram audio/music ID or full audio URL.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/reels-by-audio-id", {"audio_id": audio_id, "limit": limit, "cache": cache})
 
@@ -977,7 +977,7 @@ class InstagramApi:
 
         :param q: Hashtag without the # (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/hashtag-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -985,7 +985,7 @@ class InstagramApi:
         """Instagram Profile Search — Resolve an Instagram account name or @handle to its public profile. (1 credit)
 
         :param q: Search query or keywords (min 2 chars).
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/profile-search", {"q": q, "cache": cache})
 
@@ -993,7 +993,7 @@ class InstagramApi:
         """Instagram Story Highlights — List a profile's story highlight covers. (5 credits)
 
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/story-highlights", {"url": url, "cache": cache})
 
@@ -1001,7 +1001,7 @@ class InstagramApi:
         """Instagram Highlights Details — Stories inside a single Instagram highlight, by highlight ID. (1 credit)
 
         :param id_: Highlight ID from Story Highlights, e.g. highlight:18201653992314974.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/highlights-details", {"id": id_, "cache": cache})
 
@@ -1009,7 +1009,7 @@ class InstagramApi:
         """Instagram Embed HTML — Embed HTML for an Instagram post, reel, or profile. (1 credit)
 
         :param url: Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/embed", {"url": url, "cache": cache})
 
@@ -1017,7 +1017,7 @@ class InstagramApi:
         """Instagram Basic Profile — Full public Instagram profile by numeric user ID (a URL/@handle is also accepted). (1 credit)
 
         :param userId: Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/basic-profile", {"userId": userId, "cache": cache})
 
@@ -1031,7 +1031,7 @@ class AsyncInstagramApi:
 
         :param url: Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/transcript", {"url": url, "language": language, "cache": cache})
 
@@ -1040,7 +1040,7 @@ class AsyncInstagramApi:
 
         :param url: Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/summarize", {"url": url, "language": language, "cache": cache})
 
@@ -1048,7 +1048,7 @@ class AsyncInstagramApi:
         """Instagram Post Details — Details for an Instagram post or reel. (1 credit)
 
         :param url: Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/details", {"url": url, "cache": cache})
 
@@ -1057,7 +1057,7 @@ class AsyncInstagramApi:
 
         :param url: Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/comments", {"url": url, "limit": limit, "cache": cache})
 
@@ -1065,7 +1065,7 @@ class AsyncInstagramApi:
         """Instagram Channel Details — Profile info & stats for an Instagram account. (1 credit)
 
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/channel-details", {"url": url, "cache": cache})
 
@@ -1075,7 +1075,7 @@ class AsyncInstagramApi:
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/channel-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
@@ -1085,7 +1085,7 @@ class AsyncInstagramApi:
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/channel-reels", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
@@ -1094,7 +1094,7 @@ class AsyncInstagramApi:
 
         :param q: Hashtag (without #) or keyword (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/reels-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -1103,7 +1103,7 @@ class AsyncInstagramApi:
 
         :param country: Country name for Explore localization. Default United States.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/trending-reels", {"country": country, "limit": limit, "cache": cache})
 
@@ -1111,7 +1111,7 @@ class AsyncInstagramApi:
         """Instagram Video Download — Direct video URL for an Instagram Reel. (3 credits)
 
         :param url: Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/video-download", {"url": url, "cache": cache})
 
@@ -1120,7 +1120,7 @@ class AsyncInstagramApi:
 
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/tagged-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -1129,7 +1129,7 @@ class AsyncInstagramApi:
 
         :param audio_id: Instagram audio/music ID or full audio URL.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/reels-by-audio-id", {"audio_id": audio_id, "limit": limit, "cache": cache})
 
@@ -1138,7 +1138,7 @@ class AsyncInstagramApi:
 
         :param q: Hashtag without the # (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/hashtag-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -1146,7 +1146,7 @@ class AsyncInstagramApi:
         """Instagram Profile Search — Resolve an Instagram account name or @handle to its public profile. (1 credit)
 
         :param q: Search query or keywords (min 2 chars).
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/profile-search", {"q": q, "cache": cache})
 
@@ -1154,7 +1154,7 @@ class AsyncInstagramApi:
         """Instagram Story Highlights — List a profile's story highlight covers. (5 credits)
 
         :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/story-highlights", {"url": url, "cache": cache})
 
@@ -1162,7 +1162,7 @@ class AsyncInstagramApi:
         """Instagram Highlights Details — Stories inside a single Instagram highlight, by highlight ID. (1 credit)
 
         :param id_: Highlight ID from Story Highlights, e.g. highlight:18201653992314974.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/highlights-details", {"id": id_, "cache": cache})
 
@@ -1170,7 +1170,7 @@ class AsyncInstagramApi:
         """Instagram Embed HTML — Embed HTML for an Instagram post, reel, or profile. (1 credit)
 
         :param url: Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/embed", {"url": url, "cache": cache})
 
@@ -1178,7 +1178,7 @@ class AsyncInstagramApi:
         """Instagram Basic Profile — Full public Instagram profile by numeric user ID (a URL/@handle is also accepted). (1 credit)
 
         :param userId: Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/basic-profile", {"userId": userId, "cache": cache})
 
@@ -1191,7 +1191,7 @@ class FacebookApi:
         """Facebook Details — Details for a Facebook video or post. (1 credit)
 
         :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/details", {"url": url, "cache": cache})
 
@@ -1199,7 +1199,7 @@ class FacebookApi:
         """Facebook Transcript — Transcript of a Facebook video. (2 credits)
 
         :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/transcript", {"url": url, "cache": cache})
 
@@ -1207,7 +1207,7 @@ class FacebookApi:
         """Facebook Summarizer — AI summary of a Facebook video or post. (4 credits)
 
         :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/summarize", {"url": url, "cache": cache})
 
@@ -1216,7 +1216,7 @@ class FacebookApi:
 
         :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/comments", {"url": url, "limit": limit, "cache": cache})
 
@@ -1224,7 +1224,7 @@ class FacebookApi:
         """Facebook Page Details — Info & stats for a Facebook page. (1 credit)
 
         :param url: Facebook page URL, e.g. https://facebook.com/PageName. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/page-details", {"url": url, "cache": cache})
 
@@ -1233,7 +1233,7 @@ class FacebookApi:
 
         :param url: Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/profile-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -1242,7 +1242,7 @@ class FacebookApi:
 
         :param url: Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/profile-reels", {"url": url, "limit": limit, "cache": cache})
 
@@ -1251,7 +1251,7 @@ class FacebookApi:
 
         :param url: Public Facebook group URL, e.g. https://facebook.com/groups/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/group-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -1261,7 +1261,7 @@ class FacebookApi:
         :param url: Facebook post URL the comment belongs to. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param comment_id: ID of the parent comment to fetch replies for (from the comments endpoint).
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
 
@@ -1272,7 +1272,7 @@ class FacebookApi:
         :param location: City or place name, e.g. 'Austin, TX'.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param details: Set true to fetch full description, photos and coordinates per listing (slower, costs more).
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/marketplace-search", {"q": q, "location": location, "limit": limit, "details": details, "cache": cache})
 
@@ -1281,7 +1281,7 @@ class FacebookApi:
 
         :param q: City/place search query, e.g. Austin.
         :param limit: Max items to return. Default 10, max 50. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/marketplace-location-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -1290,7 +1290,7 @@ class FacebookApi:
 
         :param q: Topic and/or place, e.g. 'comedy Chicago' (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/event-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -1298,7 +1298,7 @@ class FacebookApi:
         """Facebook Event Details — Details for a Facebook event (date, location, attendees, tickets). (2 credits)
 
         :param url: Facebook event URL, e.g. https://facebook.com/events/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/event-details", {"url": url, "cache": cache})
 
@@ -1307,7 +1307,7 @@ class FacebookApi:
 
         :param url: Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/profile-photos", {"url": url, "limit": limit, "cache": cache})
 
@@ -1316,7 +1316,7 @@ class FacebookApi:
 
         :param url: Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/profile-events", {"url": url, "limit": limit, "cache": cache})
 
@@ -1324,7 +1324,7 @@ class FacebookApi:
         """Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (17 credits)
 
         :param url: Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/marketplace-item", {"url": url, "cache": cache})
 
@@ -1337,7 +1337,7 @@ class AsyncFacebookApi:
         """Facebook Details — Details for a Facebook video or post. (1 credit)
 
         :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/details", {"url": url, "cache": cache})
 
@@ -1345,7 +1345,7 @@ class AsyncFacebookApi:
         """Facebook Transcript — Transcript of a Facebook video. (2 credits)
 
         :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/transcript", {"url": url, "cache": cache})
 
@@ -1353,7 +1353,7 @@ class AsyncFacebookApi:
         """Facebook Summarizer — AI summary of a Facebook video or post. (4 credits)
 
         :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/summarize", {"url": url, "cache": cache})
 
@@ -1362,7 +1362,7 @@ class AsyncFacebookApi:
 
         :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/comments", {"url": url, "limit": limit, "cache": cache})
 
@@ -1370,7 +1370,7 @@ class AsyncFacebookApi:
         """Facebook Page Details — Info & stats for a Facebook page. (1 credit)
 
         :param url: Facebook page URL, e.g. https://facebook.com/PageName. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/page-details", {"url": url, "cache": cache})
 
@@ -1379,7 +1379,7 @@ class AsyncFacebookApi:
 
         :param url: Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/profile-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -1388,7 +1388,7 @@ class AsyncFacebookApi:
 
         :param url: Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/profile-reels", {"url": url, "limit": limit, "cache": cache})
 
@@ -1397,7 +1397,7 @@ class AsyncFacebookApi:
 
         :param url: Public Facebook group URL, e.g. https://facebook.com/groups/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/group-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -1407,7 +1407,7 @@ class AsyncFacebookApi:
         :param url: Facebook post URL the comment belongs to. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param comment_id: ID of the parent comment to fetch replies for (from the comments endpoint).
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
 
@@ -1418,7 +1418,7 @@ class AsyncFacebookApi:
         :param location: City or place name, e.g. 'Austin, TX'.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param details: Set true to fetch full description, photos and coordinates per listing (slower, costs more).
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/marketplace-search", {"q": q, "location": location, "limit": limit, "details": details, "cache": cache})
 
@@ -1427,7 +1427,7 @@ class AsyncFacebookApi:
 
         :param q: City/place search query, e.g. Austin.
         :param limit: Max items to return. Default 10, max 50. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/marketplace-location-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -1436,7 +1436,7 @@ class AsyncFacebookApi:
 
         :param q: Topic and/or place, e.g. 'comedy Chicago' (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/event-search", {"q": q, "limit": limit, "cache": cache})
 
@@ -1444,7 +1444,7 @@ class AsyncFacebookApi:
         """Facebook Event Details — Details for a Facebook event (date, location, attendees, tickets). (2 credits)
 
         :param url: Facebook event URL, e.g. https://facebook.com/events/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/event-details", {"url": url, "cache": cache})
 
@@ -1453,7 +1453,7 @@ class AsyncFacebookApi:
 
         :param url: Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/profile-photos", {"url": url, "limit": limit, "cache": cache})
 
@@ -1462,7 +1462,7 @@ class AsyncFacebookApi:
 
         :param url: Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/profile-events", {"url": url, "limit": limit, "cache": cache})
 
@@ -1470,7 +1470,7 @@ class AsyncFacebookApi:
         """Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (17 credits)
 
         :param url: Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/marketplace-item", {"url": url, "cache": cache})
 
@@ -1483,7 +1483,7 @@ class TwitterApi:
         """Twitter/X Tweet Details — Metadata + engagement stats for a tweet. (1 credit)
 
         :param url: Public tweet URL, e.g. https://x.com/user/status/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/twitter/tweet-details", {"url": url, "cache": cache})
 
@@ -1491,7 +1491,7 @@ class TwitterApi:
         """Twitter/X Transcript — Extract tweet text as transcript text. (7 credits)
 
         :param url: Public tweet URL, e.g. https://x.com/user/status/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/twitter/transcript", {"url": url, "cache": cache})
 
@@ -1499,7 +1499,7 @@ class TwitterApi:
         """Twitter/X Profile — Profile info & stats for a Twitter/X account. (1 credit)
 
         :param url: Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/twitter/profile", {"url": url, "cache": cache})
 
@@ -1508,7 +1508,7 @@ class TwitterApi:
 
         :param url: Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/twitter/user-tweets", {"url": url, "limit": limit, "cache": cache})
 
@@ -1517,7 +1517,7 @@ class TwitterApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/twitter/search", {"q": q, "limit": limit, "cache": cache})
 
@@ -1525,7 +1525,7 @@ class TwitterApi:
         """Twitter/X Community — Details for an X (Twitter) community. (1 credit)
 
         :param url: X community URL (x.com/i/communities/ID) or community ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/twitter/community", {"url": url, "cache": cache})
 
@@ -1534,7 +1534,7 @@ class TwitterApi:
 
         :param url: X community URL (x.com/i/communities/ID) or community ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/twitter/community-tweets", {"url": url, "limit": limit, "cache": cache})
 
@@ -1547,7 +1547,7 @@ class AsyncTwitterApi:
         """Twitter/X Tweet Details — Metadata + engagement stats for a tweet. (1 credit)
 
         :param url: Public tweet URL, e.g. https://x.com/user/status/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/twitter/tweet-details", {"url": url, "cache": cache})
 
@@ -1555,7 +1555,7 @@ class AsyncTwitterApi:
         """Twitter/X Transcript — Extract tweet text as transcript text. (7 credits)
 
         :param url: Public tweet URL, e.g. https://x.com/user/status/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/twitter/transcript", {"url": url, "cache": cache})
 
@@ -1563,7 +1563,7 @@ class AsyncTwitterApi:
         """Twitter/X Profile — Profile info & stats for a Twitter/X account. (1 credit)
 
         :param url: Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/twitter/profile", {"url": url, "cache": cache})
 
@@ -1572,7 +1572,7 @@ class AsyncTwitterApi:
 
         :param url: Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/twitter/user-tweets", {"url": url, "limit": limit, "cache": cache})
 
@@ -1581,7 +1581,7 @@ class AsyncTwitterApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/twitter/search", {"q": q, "limit": limit, "cache": cache})
 
@@ -1589,7 +1589,7 @@ class AsyncTwitterApi:
         """Twitter/X Community — Details for an X (Twitter) community. (1 credit)
 
         :param url: X community URL (x.com/i/communities/ID) or community ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/twitter/community", {"url": url, "cache": cache})
 
@@ -1598,7 +1598,7 @@ class AsyncTwitterApi:
 
         :param url: X community URL (x.com/i/communities/ID) or community ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/twitter/community-tweets", {"url": url, "limit": limit, "cache": cache})
 
@@ -1612,7 +1612,7 @@ class RedditApi:
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/reddit/subreddit-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -1620,7 +1620,7 @@ class RedditApi:
         """Reddit Post Details — Metadata + stats for a Reddit post. (1 credit)
 
         :param url: Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/reddit/post-details", {"url": url, "cache": cache})
 
@@ -1629,7 +1629,7 @@ class RedditApi:
 
         :param url: Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/reddit/post-comments", {"url": url, "limit": limit, "cache": cache})
 
@@ -1638,7 +1638,7 @@ class RedditApi:
 
         :param url: Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/reddit/post-transcript", {"url": url, "limit": limit, "cache": cache})
 
@@ -1647,7 +1647,7 @@ class RedditApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/reddit/search", {"q": q, "limit": limit, "cache": cache})
 
@@ -1655,7 +1655,7 @@ class RedditApi:
         """Reddit Subreddit Details — Info & member stats for a subreddit. (1 credit)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/reddit/subreddit-details", {"url": url, "cache": cache})
 
@@ -1665,7 +1665,7 @@ class RedditApi:
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/reddit/subreddit-search", {"url": url, "q": q, "limit": limit, "cache": cache})
 
@@ -1679,7 +1679,7 @@ class AsyncRedditApi:
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/reddit/subreddit-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -1687,7 +1687,7 @@ class AsyncRedditApi:
         """Reddit Post Details — Metadata + stats for a Reddit post. (1 credit)
 
         :param url: Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/reddit/post-details", {"url": url, "cache": cache})
 
@@ -1696,7 +1696,7 @@ class AsyncRedditApi:
 
         :param url: Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/reddit/post-comments", {"url": url, "limit": limit, "cache": cache})
 
@@ -1705,7 +1705,7 @@ class AsyncRedditApi:
 
         :param url: Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/reddit/post-transcript", {"url": url, "limit": limit, "cache": cache})
 
@@ -1714,7 +1714,7 @@ class AsyncRedditApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/reddit/search", {"q": q, "limit": limit, "cache": cache})
 
@@ -1722,7 +1722,7 @@ class AsyncRedditApi:
         """Reddit Subreddit Details — Info & member stats for a subreddit. (1 credit)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/reddit/subreddit-details", {"url": url, "cache": cache})
 
@@ -1732,7 +1732,7 @@ class AsyncRedditApi:
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/reddit/subreddit-search", {"url": url, "q": q, "limit": limit, "cache": cache})
 
@@ -1745,7 +1745,7 @@ class ThreadsApi:
         """Threads Profile — Profile info & stats for a Threads account. (1 credit)
 
         :param url: Threads profile URL or @handle, e.g. https://threads.net/@username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/threads/profile", {"url": url, "cache": cache})
 
@@ -1754,7 +1754,7 @@ class ThreadsApi:
 
         :param url: Threads profile URL or @handle, e.g. https://threads.net/@username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/threads/user-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -1762,7 +1762,7 @@ class ThreadsApi:
         """Threads Post Details — Metadata + engagement for a Threads post. (1 credit)
 
         :param url: Threads post URL, e.g. https://threads.net/@user/post/CODE. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/threads/post-details", {"url": url, "cache": cache})
 
@@ -1771,7 +1771,7 @@ class ThreadsApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/threads/search", {"q": q, "limit": limit, "cache": cache})
 
@@ -1780,7 +1780,7 @@ class ThreadsApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/threads/search-users", {"q": q, "limit": limit, "cache": cache})
 
@@ -1793,7 +1793,7 @@ class AsyncThreadsApi:
         """Threads Profile — Profile info & stats for a Threads account. (1 credit)
 
         :param url: Threads profile URL or @handle, e.g. https://threads.net/@username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/threads/profile", {"url": url, "cache": cache})
 
@@ -1802,7 +1802,7 @@ class AsyncThreadsApi:
 
         :param url: Threads profile URL or @handle, e.g. https://threads.net/@username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/threads/user-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -1810,7 +1810,7 @@ class AsyncThreadsApi:
         """Threads Post Details — Metadata + engagement for a Threads post. (1 credit)
 
         :param url: Threads post URL, e.g. https://threads.net/@user/post/CODE. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/threads/post-details", {"url": url, "cache": cache})
 
@@ -1819,7 +1819,7 @@ class AsyncThreadsApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/threads/search", {"q": q, "limit": limit, "cache": cache})
 
@@ -1828,7 +1828,7 @@ class AsyncThreadsApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/threads/search-users", {"q": q, "limit": limit, "cache": cache})
 
@@ -1841,7 +1841,7 @@ class BlueskyApi:
         """Bluesky Profile — Profile info & stats for a Bluesky account. (1 credit)
 
         :param url: Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/bluesky/profile", {"url": url, "cache": cache})
 
@@ -1850,7 +1850,7 @@ class BlueskyApi:
 
         :param url: Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/bluesky/user-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -1858,7 +1858,7 @@ class BlueskyApi:
         """Bluesky Post Details — Metadata + engagement for a Bluesky post. (1 credit)
 
         :param url: Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/bluesky/post-details", {"url": url, "cache": cache})
 
@@ -1871,7 +1871,7 @@ class AsyncBlueskyApi:
         """Bluesky Profile — Profile info & stats for a Bluesky account. (1 credit)
 
         :param url: Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/bluesky/profile", {"url": url, "cache": cache})
 
@@ -1880,7 +1880,7 @@ class AsyncBlueskyApi:
 
         :param url: Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/bluesky/user-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -1888,7 +1888,7 @@ class AsyncBlueskyApi:
         """Bluesky Post Details — Metadata + engagement for a Bluesky post. (1 credit)
 
         :param url: Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/bluesky/post-details", {"url": url, "cache": cache})
 
@@ -1901,7 +1901,7 @@ class PinterestApi:
         """Pinterest Pin Details — Metadata + saves for a Pinterest pin. (1 credit)
 
         :param url: Pinterest pin URL, e.g. https://pinterest.com/pin/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/pinterest/pin-details", {"url": url, "cache": cache})
 
@@ -1910,7 +1910,7 @@ class PinterestApi:
 
         :param url: Pinterest profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/pinterest/user-pins", {"url": url, "limit": limit, "cache": cache})
 
@@ -1919,7 +1919,7 @@ class PinterestApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/pinterest/search", {"q": q, "limit": limit, "cache": cache})
 
@@ -1928,7 +1928,7 @@ class PinterestApi:
 
         :param url: Pinterest board URL, e.g. https://pinterest.com/username/board-name/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/pinterest/board", {"url": url, "limit": limit, "cache": cache})
 
@@ -1937,7 +1937,7 @@ class PinterestApi:
 
         :param url: Pinterest profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/pinterest/user-boards", {"url": url, "limit": limit, "cache": cache})
 
@@ -1950,7 +1950,7 @@ class AsyncPinterestApi:
         """Pinterest Pin Details — Metadata + saves for a Pinterest pin. (1 credit)
 
         :param url: Pinterest pin URL, e.g. https://pinterest.com/pin/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/pinterest/pin-details", {"url": url, "cache": cache})
 
@@ -1959,7 +1959,7 @@ class AsyncPinterestApi:
 
         :param url: Pinterest profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/pinterest/user-pins", {"url": url, "limit": limit, "cache": cache})
 
@@ -1968,7 +1968,7 @@ class AsyncPinterestApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/pinterest/search", {"q": q, "limit": limit, "cache": cache})
 
@@ -1977,7 +1977,7 @@ class AsyncPinterestApi:
 
         :param url: Pinterest board URL, e.g. https://pinterest.com/username/board-name/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/pinterest/board", {"url": url, "limit": limit, "cache": cache})
 
@@ -1986,7 +1986,7 @@ class AsyncPinterestApi:
 
         :param url: Pinterest profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/pinterest/user-boards", {"url": url, "limit": limit, "cache": cache})
 
@@ -1999,7 +1999,7 @@ class LinkedinApi:
         """LinkedIn Profile — Public LinkedIn person profile details. (2 credits)
 
         :param url: LinkedIn profile URL, e.g. https://linkedin.com/in/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/linkedin/profile", {"url": url, "cache": cache})
 
@@ -2007,7 +2007,7 @@ class LinkedinApi:
         """LinkedIn Company — Public LinkedIn company page details. (2 credits)
 
         :param url: LinkedIn company URL, e.g. https://linkedin.com/company/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/linkedin/company", {"url": url, "cache": cache})
 
@@ -2015,7 +2015,7 @@ class LinkedinApi:
         """LinkedIn Post Details — Metadata + engagement for a LinkedIn post. (1 credit)
 
         :param url: LinkedIn post or activity URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/linkedin/post-details", {"url": url, "cache": cache})
 
@@ -2023,7 +2023,7 @@ class LinkedinApi:
         """LinkedIn Post Transcript — Extract post text as a transcript for a LinkedIn post. (7 credits)
 
         :param url: LinkedIn post or activity URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/linkedin/post-transcript", {"url": url, "cache": cache})
 
@@ -2032,7 +2032,7 @@ class LinkedinApi:
 
         :param url: LinkedIn company URL, e.g. https://linkedin.com/company/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/linkedin/company-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -2042,7 +2042,7 @@ class LinkedinApi:
         :param q: Search query or keywords (min 2 chars).
         :param sort: relevance or date. Default relevance.
         :param limit: Max items to return. Default 20, max 50. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/linkedin/search-posts", {"q": q, "sort": sort, "limit": limit, "cache": cache})
 
@@ -2055,7 +2055,7 @@ class AsyncLinkedinApi:
         """LinkedIn Profile — Public LinkedIn person profile details. (2 credits)
 
         :param url: LinkedIn profile URL, e.g. https://linkedin.com/in/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/linkedin/profile", {"url": url, "cache": cache})
 
@@ -2063,7 +2063,7 @@ class AsyncLinkedinApi:
         """LinkedIn Company — Public LinkedIn company page details. (2 credits)
 
         :param url: LinkedIn company URL, e.g. https://linkedin.com/company/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/linkedin/company", {"url": url, "cache": cache})
 
@@ -2071,7 +2071,7 @@ class AsyncLinkedinApi:
         """LinkedIn Post Details — Metadata + engagement for a LinkedIn post. (1 credit)
 
         :param url: LinkedIn post or activity URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/linkedin/post-details", {"url": url, "cache": cache})
 
@@ -2079,7 +2079,7 @@ class AsyncLinkedinApi:
         """LinkedIn Post Transcript — Extract post text as a transcript for a LinkedIn post. (7 credits)
 
         :param url: LinkedIn post or activity URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/linkedin/post-transcript", {"url": url, "cache": cache})
 
@@ -2088,7 +2088,7 @@ class AsyncLinkedinApi:
 
         :param url: LinkedIn company URL, e.g. https://linkedin.com/company/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/linkedin/company-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -2098,7 +2098,7 @@ class AsyncLinkedinApi:
         :param q: Search query or keywords (min 2 chars).
         :param sort: relevance or date. Default relevance.
         :param limit: Max items to return. Default 20, max 50. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/linkedin/search-posts", {"q": q, "sort": sort, "limit": limit, "cache": cache})
 
@@ -2111,7 +2111,7 @@ class RumbleApi:
         """Rumble Video Details — Metadata + stats for a Rumble video. (1 credit)
 
         :param url: Rumble video URL, e.g. https://rumble.com/vXXXX-title.html. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/rumble/video-details", {"url": url, "cache": cache})
 
@@ -2120,7 +2120,7 @@ class RumbleApi:
 
         :param url: Rumble channel URL, e.g. https://rumble.com/c/name. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/rumble/channel-videos", {"url": url, "limit": limit, "cache": cache})
 
@@ -2129,7 +2129,7 @@ class RumbleApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/rumble/search", {"q": q, "limit": limit, "cache": cache})
 
@@ -2138,7 +2138,7 @@ class RumbleApi:
 
         :param url: Rumble video URL, e.g. https://rumble.com/vXXXX-title.html. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/rumble/comments", {"url": url, "limit": limit, "cache": cache})
 
@@ -2151,7 +2151,7 @@ class AsyncRumbleApi:
         """Rumble Video Details — Metadata + stats for a Rumble video. (1 credit)
 
         :param url: Rumble video URL, e.g. https://rumble.com/vXXXX-title.html. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/rumble/video-details", {"url": url, "cache": cache})
 
@@ -2160,7 +2160,7 @@ class AsyncRumbleApi:
 
         :param url: Rumble channel URL, e.g. https://rumble.com/c/name. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/rumble/channel-videos", {"url": url, "limit": limit, "cache": cache})
 
@@ -2169,7 +2169,7 @@ class AsyncRumbleApi:
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/rumble/search", {"q": q, "limit": limit, "cache": cache})
 
@@ -2178,7 +2178,7 @@ class AsyncRumbleApi:
 
         :param url: Rumble video URL, e.g. https://rumble.com/vXXXX-title.html. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/rumble/comments", {"url": url, "limit": limit, "cache": cache})
 
@@ -2193,7 +2193,7 @@ class TiktokShopApi:
         :param q: Product search query.
         :param region: Two-letter TikTok Shop region. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok-shop/shop-search", {"q": q, "region": region, "limit": limit, "cache": cache})
 
@@ -2202,7 +2202,7 @@ class TiktokShopApi:
 
         :param url: TikTok Shop store URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok-shop/shop-products", {"url": url, "limit": limit, "cache": cache})
 
@@ -2210,7 +2210,7 @@ class TiktokShopApi:
         """TikTok Shop Product Details — Full TikTok Shop product details, seller and price metadata. (14 credits)
 
         :param url: TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok-shop/product-details", {"url": url, "cache": cache})
 
@@ -2219,7 +2219,7 @@ class TiktokShopApi:
 
         :param url: TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok-shop/product-reviews", {"url": url, "limit": limit, "cache": cache})
 
@@ -2228,7 +2228,7 @@ class TiktokShopApi:
 
         :param username: TikTok username with or without @.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok-shop/user-showcase", {"username": username, "limit": limit, "cache": cache})
 
@@ -2243,7 +2243,7 @@ class AsyncTiktokShopApi:
         :param q: Product search query.
         :param region: Two-letter TikTok Shop region. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok-shop/shop-search", {"q": q, "region": region, "limit": limit, "cache": cache})
 
@@ -2252,7 +2252,7 @@ class AsyncTiktokShopApi:
 
         :param url: TikTok Shop store URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok-shop/shop-products", {"url": url, "limit": limit, "cache": cache})
 
@@ -2260,7 +2260,7 @@ class AsyncTiktokShopApi:
         """TikTok Shop Product Details — Full TikTok Shop product details, seller and price metadata. (14 credits)
 
         :param url: TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok-shop/product-details", {"url": url, "cache": cache})
 
@@ -2269,7 +2269,7 @@ class AsyncTiktokShopApi:
 
         :param url: TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok-shop/product-reviews", {"url": url, "limit": limit, "cache": cache})
 
@@ -2278,7 +2278,7 @@ class AsyncTiktokShopApi:
 
         :param username: TikTok username with or without @.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok-shop/user-showcase", {"username": username, "limit": limit, "cache": cache})
 
@@ -2291,7 +2291,7 @@ class GithubApi:
         """GitHub User — Public GitHub user profile details. (3 credits)
 
         :param username: GitHub username or profile URL.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/user", {"username": username, "cache": cache})
 
@@ -2300,7 +2300,7 @@ class GithubApi:
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/repositories", {"username": username, "limit": limit, "cache": cache})
 
@@ -2308,7 +2308,7 @@ class GithubApi:
         """GitHub Repository — Repository details, stars, forks and metadata. (3 credits)
 
         :param repo: Repository URL or owner/name.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/repository", {"repo": repo, "cache": cache})
 
@@ -2318,7 +2318,7 @@ class GithubApi:
         :param repo: Repository URL or owner/name.
         :param state: open, closed, or all. Default open.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/pull-requests", {"repo": repo, "state": state, "limit": limit, "cache": cache})
 
@@ -2327,7 +2327,7 @@ class GithubApi:
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/activity", {"username": username, "limit": limit, "cache": cache})
 
@@ -2336,7 +2336,7 @@ class GithubApi:
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/followers", {"username": username, "limit": limit, "cache": cache})
 
@@ -2345,7 +2345,7 @@ class GithubApi:
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/following", {"username": username, "limit": limit, "cache": cache})
 
@@ -2353,7 +2353,7 @@ class GithubApi:
         """GitHub Contributions — Summary of recent public GitHub contributions. (3 credits)
 
         :param username: GitHub username or profile URL.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/contributions", {"username": username, "cache": cache})
 
@@ -2362,7 +2362,7 @@ class GithubApi:
 
         :param q: GitHub repository search query. Default stars:>1000.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/trending-repositories", {"q": q, "limit": limit, "cache": cache})
 
@@ -2371,7 +2371,7 @@ class GithubApi:
 
         :param q: GitHub user search query. Default followers:>1000.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/github/trending-developers", {"q": q, "limit": limit, "cache": cache})
 
@@ -2384,7 +2384,7 @@ class AsyncGithubApi:
         """GitHub User — Public GitHub user profile details. (3 credits)
 
         :param username: GitHub username or profile URL.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/user", {"username": username, "cache": cache})
 
@@ -2393,7 +2393,7 @@ class AsyncGithubApi:
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/repositories", {"username": username, "limit": limit, "cache": cache})
 
@@ -2401,7 +2401,7 @@ class AsyncGithubApi:
         """GitHub Repository — Repository details, stars, forks and metadata. (3 credits)
 
         :param repo: Repository URL or owner/name.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/repository", {"repo": repo, "cache": cache})
 
@@ -2411,7 +2411,7 @@ class AsyncGithubApi:
         :param repo: Repository URL or owner/name.
         :param state: open, closed, or all. Default open.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/pull-requests", {"repo": repo, "state": state, "limit": limit, "cache": cache})
 
@@ -2420,7 +2420,7 @@ class AsyncGithubApi:
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/activity", {"username": username, "limit": limit, "cache": cache})
 
@@ -2429,7 +2429,7 @@ class AsyncGithubApi:
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/followers", {"username": username, "limit": limit, "cache": cache})
 
@@ -2438,7 +2438,7 @@ class AsyncGithubApi:
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/following", {"username": username, "limit": limit, "cache": cache})
 
@@ -2446,7 +2446,7 @@ class AsyncGithubApi:
         """GitHub Contributions — Summary of recent public GitHub contributions. (3 credits)
 
         :param username: GitHub username or profile URL.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/contributions", {"username": username, "cache": cache})
 
@@ -2455,7 +2455,7 @@ class AsyncGithubApi:
 
         :param q: GitHub repository search query. Default stars:>1000.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/trending-repositories", {"q": q, "limit": limit, "cache": cache})
 
@@ -2464,7 +2464,7 @@ class AsyncGithubApi:
 
         :param q: GitHub user search query. Default followers:>1000.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/github/trending-developers", {"q": q, "limit": limit, "cache": cache})
 
@@ -2480,7 +2480,7 @@ class GoogleApi:
         :param country: Two-letter country code. Default us.
         :param language: Google language code. Default en.
         :param limit: Max items to return. Default 10, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/google/search", {"q": q, "country": country, "language": language, "limit": limit, "cache": cache})
 
@@ -2496,7 +2496,7 @@ class AsyncGoogleApi:
         :param country: Two-letter country code. Default us.
         :param language: Google language code. Default en.
         :param limit: Max items to return. Default 10, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/google/search", {"q": q, "country": country, "language": language, "limit": limit, "cache": cache})
 
@@ -2509,7 +2509,7 @@ class TwitchApi:
         """Twitch Profile — Twitch channel profile, followers, live status and recent metadata. (9 credits)
 
         :param url: Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/twitch/profile", {"url": url, "cache": cache})
 
@@ -2518,7 +2518,7 @@ class TwitchApi:
 
         :param url: Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 30. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/twitch/user-videos", {"url": url, "limit": limit, "cache": cache})
 
@@ -2526,7 +2526,7 @@ class TwitchApi:
         """Twitch User Schedule — Upcoming Twitch schedule data when exposed on the public channel. (34 credits)
 
         :param url: Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/twitch/user-schedule", {"url": url, "cache": cache})
 
@@ -2534,7 +2534,7 @@ class TwitchApi:
         """Twitch Clip — Twitch clip metadata from a clip URL or channel fallback. (9 credits)
 
         :param url: Twitch clip URL, channel URL, or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/twitch/clip", {"url": url, "cache": cache})
 
@@ -2547,7 +2547,7 @@ class AsyncTwitchApi:
         """Twitch Profile — Twitch channel profile, followers, live status and recent metadata. (9 credits)
 
         :param url: Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/twitch/profile", {"url": url, "cache": cache})
 
@@ -2556,7 +2556,7 @@ class AsyncTwitchApi:
 
         :param url: Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 30. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/twitch/user-videos", {"url": url, "limit": limit, "cache": cache})
 
@@ -2564,7 +2564,7 @@ class AsyncTwitchApi:
         """Twitch User Schedule — Upcoming Twitch schedule data when exposed on the public channel. (34 credits)
 
         :param url: Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/twitch/user-schedule", {"url": url, "cache": cache})
 
@@ -2572,7 +2572,7 @@ class AsyncTwitchApi:
         """Twitch Clip — Twitch clip metadata from a clip URL or channel fallback. (9 credits)
 
         :param url: Twitch clip URL, channel URL, or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/twitch/clip", {"url": url, "cache": cache})
 
@@ -2585,7 +2585,7 @@ class SpotifyApi:
         """Spotify Artist — Spotify artist details, followers and listener metadata. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/spotify/artist", {"url": url, "cache": cache})
 
@@ -2593,7 +2593,7 @@ class SpotifyApi:
         """Spotify Track — Spotify track metadata, artists, album and play count when available. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/spotify/track", {"url": url, "cache": cache})
 
@@ -2601,7 +2601,7 @@ class SpotifyApi:
         """Spotify Album — Spotify album metadata and track count. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/spotify/album", {"url": url, "cache": cache})
 
@@ -2611,7 +2611,7 @@ class SpotifyApi:
         :param q: Search query or keywords (min 2 chars).
         :param type_: tracks, albums, artists, podcasts, or episodes. Default tracks.
         :param limit: Max items to return. Default 20, max 50. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/spotify/search", {"q": q, "type": type_, "limit": limit, "cache": cache})
 
@@ -2620,7 +2620,7 @@ class SpotifyApi:
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 50. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/spotify/podcast", {"url": url, "limit": limit, "cache": cache})
 
@@ -2629,7 +2629,7 @@ class SpotifyApi:
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 50. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/spotify/podcast-episodes", {"url": url, "limit": limit, "cache": cache})
 
@@ -2642,7 +2642,7 @@ class AsyncSpotifyApi:
         """Spotify Artist — Spotify artist details, followers and listener metadata. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/spotify/artist", {"url": url, "cache": cache})
 
@@ -2650,7 +2650,7 @@ class AsyncSpotifyApi:
         """Spotify Track — Spotify track metadata, artists, album and play count when available. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/spotify/track", {"url": url, "cache": cache})
 
@@ -2658,7 +2658,7 @@ class AsyncSpotifyApi:
         """Spotify Album — Spotify album metadata and track count. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/spotify/album", {"url": url, "cache": cache})
 
@@ -2668,7 +2668,7 @@ class AsyncSpotifyApi:
         :param q: Search query or keywords (min 2 chars).
         :param type_: tracks, albums, artists, podcasts, or episodes. Default tracks.
         :param limit: Max items to return. Default 20, max 50. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/spotify/search", {"q": q, "type": type_, "limit": limit, "cache": cache})
 
@@ -2677,7 +2677,7 @@ class AsyncSpotifyApi:
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 50. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/spotify/podcast", {"url": url, "limit": limit, "cache": cache})
 
@@ -2686,7 +2686,7 @@ class AsyncSpotifyApi:
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 50. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/spotify/podcast-episodes", {"url": url, "limit": limit, "cache": cache})
 
@@ -2699,7 +2699,7 @@ class SoundcloudApi:
         """SoundCloud Artist — SoundCloud artist profile metadata. (7 credits)
 
         :param url: SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/soundcloud/artist", {"url": url, "cache": cache})
 
@@ -2708,7 +2708,7 @@ class SoundcloudApi:
 
         :param url: SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/soundcloud/artist-tracks", {"url": url, "limit": limit, "cache": cache})
 
@@ -2716,7 +2716,7 @@ class SoundcloudApi:
         """SoundCloud Track — SoundCloud track metadata and engagement stats. (7 credits)
 
         :param url: SoundCloud track URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/soundcloud/track", {"url": url, "cache": cache})
 
@@ -2729,7 +2729,7 @@ class AsyncSoundcloudApi:
         """SoundCloud Artist — SoundCloud artist profile metadata. (7 credits)
 
         :param url: SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/soundcloud/artist", {"url": url, "cache": cache})
 
@@ -2738,7 +2738,7 @@ class AsyncSoundcloudApi:
 
         :param url: SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/soundcloud/artist-tracks", {"url": url, "limit": limit, "cache": cache})
 
@@ -2746,7 +2746,7 @@ class AsyncSoundcloudApi:
         """SoundCloud Track — SoundCloud track metadata and engagement stats. (7 credits)
 
         :param url: SoundCloud track URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/soundcloud/track", {"url": url, "cache": cache})
 
@@ -2759,7 +2759,7 @@ class LinktreeApi:
         """Linktree Page — Public Linktree profile links, socials and profile metadata. (4 credits)
 
         :param url: Linktree profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/linktree/page", {"url": url, "cache": cache})
 
@@ -2772,7 +2772,7 @@ class AsyncLinktreeApi:
         """Linktree Page — Public Linktree profile links, socials and profile metadata. (4 credits)
 
         :param url: Linktree profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/linktree/page", {"url": url, "cache": cache})
 
@@ -2785,7 +2785,7 @@ class SnapchatApi:
         """Snapchat User Profile — Public Snapchat profile metadata, subscriber count, avatar and highlights. (11 credits)
 
         :param url: Snapchat username or profile URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/snapchat/user-profile", {"url": url, "cache": cache})
 
@@ -2798,7 +2798,7 @@ class AsyncSnapchatApi:
         """Snapchat User Profile — Public Snapchat profile metadata, subscriber count, avatar and highlights. (11 credits)
 
         :param url: Snapchat username or profile URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/snapchat/user-profile", {"url": url, "cache": cache})
 
@@ -2811,7 +2811,7 @@ class TruthSocialApi:
         """Truth Social Profile — Public Truth Social profile metadata and stats. (5 credits)
 
         :param url: Truth Social profile URL or @username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/truth-social/profile", {"url": url, "cache": cache})
 
@@ -2820,7 +2820,7 @@ class TruthSocialApi:
 
         :param url: Truth Social profile URL or @username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 80. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/truth-social/user-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -2828,7 +2828,7 @@ class TruthSocialApi:
         """Truth Social Post — Truth Social post metadata, text, media and engagement. (5 credits)
 
         :param url: Truth Social post URL or post ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/truth-social/post", {"url": url, "cache": cache})
 
@@ -2841,7 +2841,7 @@ class AsyncTruthSocialApi:
         """Truth Social Profile — Public Truth Social profile metadata and stats. (5 credits)
 
         :param url: Truth Social profile URL or @username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/truth-social/profile", {"url": url, "cache": cache})
 
@@ -2850,7 +2850,7 @@ class AsyncTruthSocialApi:
 
         :param url: Truth Social profile URL or @username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 80. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/truth-social/user-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -2858,7 +2858,7 @@ class AsyncTruthSocialApi:
         """Truth Social Post — Truth Social post metadata, text, media and engagement. (5 credits)
 
         :param url: Truth Social post URL or post ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/truth-social/post", {"url": url, "cache": cache})
 
@@ -2872,7 +2872,7 @@ class KickApi:
 
         :param url: Kick clip URL, channel URL, or channel username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/kick/clip", {"url": url, "limit": limit, "cache": cache})
 
@@ -2886,7 +2886,7 @@ class AsyncKickApi:
 
         :param url: Kick clip URL, channel URL, or channel username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/kick/clip", {"url": url, "limit": limit, "cache": cache})
 
@@ -2901,7 +2901,7 @@ class AmazonShopApi:
         :param url: Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param marketplace: Amazon marketplace code. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/amazon-shop/page", {"url": url, "marketplace": marketplace, "limit": limit, "cache": cache})
 
@@ -2916,7 +2916,7 @@ class AsyncAmazonShopApi:
         :param url: Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param marketplace: Amazon marketplace code. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/amazon-shop/page", {"url": url, "marketplace": marketplace, "limit": limit, "cache": cache})
 
@@ -2930,7 +2930,7 @@ class AgeGenderApi:
 
         :param name: First name, or fallback when names is omitted.
         :param names: Optional comma-separated list of names.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/age-gender", {"name": name, "names": names, "cache": cache})
 
@@ -2944,7 +2944,7 @@ class AsyncAgeGenderApi:
 
         :param name: First name, or fallback when names is omitted.
         :param names: Optional comma-separated list of names.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/age-gender", {"name": name, "names": names, "cache": cache})
 
@@ -3021,7 +3021,7 @@ class KwaiApi:
         """Kwai Profile — Kwai/Kuaishou public profile details and stats. (17 credits)
 
         :param url: Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/kwai/profile", {"url": url, "cache": cache})
 
@@ -3030,7 +3030,7 @@ class KwaiApi:
 
         :param url: Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/kwai/user-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -3038,7 +3038,7 @@ class KwaiApi:
         """Kwai Post — Kwai/Kuaishou post metadata and engagement. (17 credits)
 
         :param url: Kwai/Kuaishou post URL or video/photo ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/kwai/post", {"url": url, "cache": cache})
 
@@ -3051,7 +3051,7 @@ class AsyncKwaiApi:
         """Kwai Profile — Kwai/Kuaishou public profile details and stats. (17 credits)
 
         :param url: Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/kwai/profile", {"url": url, "cache": cache})
 
@@ -3060,7 +3060,7 @@ class AsyncKwaiApi:
 
         :param url: Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/kwai/user-posts", {"url": url, "limit": limit, "cache": cache})
 
@@ -3068,7 +3068,7 @@ class AsyncKwaiApi:
         """Kwai Post — Kwai/Kuaishou post metadata and engagement. (17 credits)
 
         :param url: Kwai/Kuaishou post URL or video/photo ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/kwai/post", {"url": url, "cache": cache})
 
@@ -3081,7 +3081,7 @@ class KomiApi:
         """Komi Page — Public Komi page links and profile metadata. (4 credits)
 
         :param url: Komi page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/komi/page", {"url": url, "cache": cache})
 
@@ -3094,7 +3094,7 @@ class AsyncKomiApi:
         """Komi Page — Public Komi page links and profile metadata. (4 credits)
 
         :param url: Komi page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/komi/page", {"url": url, "cache": cache})
 
@@ -3107,7 +3107,7 @@ class PillarApi:
         """Pillar Page — Public Pillar page links and profile metadata. (4 credits)
 
         :param url: Pillar page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/pillar/page", {"url": url, "cache": cache})
 
@@ -3120,7 +3120,7 @@ class AsyncPillarApi:
         """Pillar Page — Public Pillar page links and profile metadata. (4 credits)
 
         :param url: Pillar page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/pillar/page", {"url": url, "cache": cache})
 
@@ -3133,7 +3133,7 @@ class LinkbioApi:
         """Linkbio Page — Public Linkbio page links and profile metadata. (4 credits)
 
         :param url: Linkbio page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/linkbio/page", {"url": url, "cache": cache})
 
@@ -3146,7 +3146,7 @@ class AsyncLinkbioApi:
         """Linkbio Page — Public Linkbio page links and profile metadata. (4 credits)
 
         :param url: Linkbio page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/linkbio/page", {"url": url, "cache": cache})
 
@@ -3159,7 +3159,7 @@ class LinkmeApi:
         """Linkme Profile — Public Linkme profile links and metadata. (4 credits)
 
         :param url: Linkme profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/linkme/profile", {"url": url, "cache": cache})
 
@@ -3172,7 +3172,7 @@ class AsyncLinkmeApi:
         """Linkme Profile — Public Linkme profile links and metadata. (4 credits)
 
         :param url: Linkme profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/linkme/profile", {"url": url, "cache": cache})
 
@@ -3187,7 +3187,7 @@ class AdLibraryApi:
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/ad-library/facebook/search", {"q": q, "country": country, "limit": limit, "cache": cache})
 
@@ -3197,7 +3197,7 @@ class AdLibraryApi:
         :param url: Facebook page URL or Meta Ad Library URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param country: ISO country code. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/ad-library/facebook/company-ads", {"url": url, "country": country, "limit": limit, "cache": cache})
 
@@ -3207,7 +3207,7 @@ class AdLibraryApi:
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/ad-library/facebook/search-companies", {"q": q, "country": country, "limit": limit, "cache": cache})
 
@@ -3215,7 +3215,7 @@ class AdLibraryApi:
         """Facebook Ad Details — Meta/Facebook ad details. (17 credits)
 
         :param url: Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/ad-library/facebook/ad-details", {"url": url, "cache": cache})
 
@@ -3223,7 +3223,7 @@ class AdLibraryApi:
         """Facebook Ad Transcript — Extract creative text from a Meta/Facebook ad as transcript text. (17 credits)
 
         :param url: Meta Ad Library ad URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/ad-library/facebook/ad-transcript", {"url": url, "cache": cache})
 
@@ -3233,7 +3233,7 @@ class AdLibraryApi:
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default DE.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/ad-library/tiktok/search", {"q": q, "country": country, "limit": limit, "cache": cache})
 
@@ -3242,7 +3242,7 @@ class AdLibraryApi:
 
         :param url: TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param country: ISO country code. Default DE.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/ad-library/tiktok/ad-details", {"url": url, "country": country, "cache": cache})
 
@@ -3252,7 +3252,7 @@ class AdLibraryApi:
         :param advertiser: Advertiser name, domain, or Google advertiser ID.
         :param country: ISO country code. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/ad-library/google/company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "cache": cache})
 
@@ -3261,7 +3261,7 @@ class AdLibraryApi:
 
         :param creative_id: Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID.
         :param country: ISO country code. Default US.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/ad-library/google/ad-details", {"creative_id": creative_id, "country": country, "cache": cache})
 
@@ -3271,7 +3271,7 @@ class AdLibraryApi:
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
         :param limit: Max items to return. Default 10, max 50. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/ad-library/google/advertiser-search", {"q": q, "country": country, "limit": limit, "cache": cache})
 
@@ -3281,7 +3281,7 @@ class AdLibraryApi:
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/ad-library/linkedin/search-ads", {"q": q, "country": country, "limit": limit, "cache": cache})
 
@@ -3289,7 +3289,7 @@ class AdLibraryApi:
         """LinkedIn Ad Details — LinkedIn ad details by URL or ID. (17 credits)
 
         :param url: LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/ad-library/linkedin/ad-details", {"url": url, "cache": cache})
 
@@ -3304,7 +3304,7 @@ class AsyncAdLibraryApi:
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/ad-library/facebook/search", {"q": q, "country": country, "limit": limit, "cache": cache})
 
@@ -3314,7 +3314,7 @@ class AsyncAdLibraryApi:
         :param url: Facebook page URL or Meta Ad Library URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param country: ISO country code. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/ad-library/facebook/company-ads", {"url": url, "country": country, "limit": limit, "cache": cache})
 
@@ -3324,7 +3324,7 @@ class AsyncAdLibraryApi:
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/ad-library/facebook/search-companies", {"q": q, "country": country, "limit": limit, "cache": cache})
 
@@ -3332,7 +3332,7 @@ class AsyncAdLibraryApi:
         """Facebook Ad Details — Meta/Facebook ad details. (17 credits)
 
         :param url: Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/ad-library/facebook/ad-details", {"url": url, "cache": cache})
 
@@ -3340,7 +3340,7 @@ class AsyncAdLibraryApi:
         """Facebook Ad Transcript — Extract creative text from a Meta/Facebook ad as transcript text. (17 credits)
 
         :param url: Meta Ad Library ad URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/ad-library/facebook/ad-transcript", {"url": url, "cache": cache})
 
@@ -3350,7 +3350,7 @@ class AsyncAdLibraryApi:
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default DE.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/ad-library/tiktok/search", {"q": q, "country": country, "limit": limit, "cache": cache})
 
@@ -3359,7 +3359,7 @@ class AsyncAdLibraryApi:
 
         :param url: TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param country: ISO country code. Default DE.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/ad-library/tiktok/ad-details", {"url": url, "country": country, "cache": cache})
 
@@ -3369,7 +3369,7 @@ class AsyncAdLibraryApi:
         :param advertiser: Advertiser name, domain, or Google advertiser ID.
         :param country: ISO country code. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/ad-library/google/company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "cache": cache})
 
@@ -3378,7 +3378,7 @@ class AsyncAdLibraryApi:
 
         :param creative_id: Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID.
         :param country: ISO country code. Default US.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/ad-library/google/ad-details", {"creative_id": creative_id, "country": country, "cache": cache})
 
@@ -3388,7 +3388,7 @@ class AsyncAdLibraryApi:
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
         :param limit: Max items to return. Default 10, max 50. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/ad-library/google/advertiser-search", {"q": q, "country": country, "limit": limit, "cache": cache})
 
@@ -3398,7 +3398,7 @@ class AsyncAdLibraryApi:
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/ad-library/linkedin/search-ads", {"q": q, "country": country, "limit": limit, "cache": cache})
 
@@ -3406,7 +3406,7 @@ class AsyncAdLibraryApi:
         """LinkedIn Ad Details — LinkedIn ad details by URL or ID. (17 credits)
 
         :param url: LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/ad-library/linkedin/ad-details", {"url": url, "cache": cache})
 

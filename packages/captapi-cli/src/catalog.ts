@@ -93,7 +93,7 @@ const cacheParam = (): ToolParam => ({
   name: "cache",
   type: "boolean",
   required: false,
-  description: "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).",
+  description: "Set true to serve from the 24h response cache. Default false — always fetch fresh data.",
 });
 const commentId = (): ToolParam => ({
   name: "comment_id",
@@ -420,7 +420,7 @@ function withPlatform(
   list: Omit<Endpoint, "platform">[],
   platform: Platform,
 ): Endpoint[] {
-  // Every data endpoint caches responses and accepts cache=false to bypass;
+  // Every data endpoint accepts optional cache (default false = always fresh);
   // account endpoints are the only ones with no cache layer.
   const addCache = platform !== "account";
   return list.map((e) => ({

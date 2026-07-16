@@ -114,7 +114,7 @@ async def amazon_shop_page(
     url: str = Query(..., description="Amazon seller storefront URL, seller profile URL, or seller ID"),
     marketplace: str = Query("US", min_length=2, max_length=5),
     limit: int = Query(20, ge=0, le=200, description="Max products to include. Use 0 for shop metadata only when supported."),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     detected = detect_url_platform(url)

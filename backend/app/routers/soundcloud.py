@@ -98,7 +98,7 @@ def _artist(item: dict[str, Any], url: str) -> dict[str, Any]:
 @router.get("/artist", summary="SoundCloud artist profile")
 async def artist(
     url: str = Query(..., description="SoundCloud artist URL or username"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     profile = _profile_url(url)
@@ -128,7 +128,7 @@ async def artist(
 async def artist_tracks(
     url: str = Query(..., description="SoundCloud artist URL or username"),
     limit: int = Query(20, ge=1, le=100),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     profile = _profile_url(url)
@@ -163,7 +163,7 @@ async def artist_tracks(
 @router.get("/track", summary="SoundCloud track details")
 async def track(
     url: str = Query(..., description="SoundCloud track URL"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     detected = detect_url_platform(url)

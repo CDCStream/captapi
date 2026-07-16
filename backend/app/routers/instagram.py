@@ -1,4 +1,4 @@
-﻿"""Instagram endpoints (Reels, Posts, Profiles)."""
+"""Instagram endpoints (Reels, Posts, Profiles)."""
 
 from __future__ import annotations
 
@@ -487,7 +487,7 @@ def _normalize_audio_reel(item: dict) -> dict:
 @router.get("/details", summary="Instagram post/reel details")
 async def instagram_details(
     url: str = Query(..., description="Instagram post or reel URL"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_instagram_post_url(url)
@@ -570,7 +570,7 @@ async def instagram_transcript(
             "for short clips with little speech."
         ),
     ),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_instagram_post_url(url)
@@ -618,7 +618,7 @@ async def instagram_summarize(
             "and sets the summary output language."
         ),
     ),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_instagram_post_url(url)
@@ -659,7 +659,7 @@ async def instagram_summarize(
 async def instagram_comments(
     url: str = Query(...),
     limit: int = Query(50, ge=1, le=500),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_instagram_post_url(url)
@@ -720,7 +720,7 @@ async def instagram_comments(
 @router.get("/channel-details", summary="Instagram profile info")
 async def instagram_channel_details(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -796,7 +796,7 @@ async def instagram_basic_profile(
             "username is also accepted and resolved automatically."
         ),
     ),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     mode, ident = _require_ig_profile_target(userId)
@@ -904,7 +904,7 @@ async def instagram_channel_posts(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
     cursor: str | None = Query(None, description="Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -968,7 +968,7 @@ async def instagram_channel_reels(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
     cursor: str | None = Query(None, description="Leave empty for the first page; then pass the nextCursor value returned in the previous response, e.g. 3937014945555313553_1697296"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -1038,7 +1038,7 @@ async def instagram_channel_reels(
 async def instagram_reels_search(
     q: str = Query(..., min_length=2, description="Hashtag (without #) or keyword"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1175,7 +1175,7 @@ def _normalize_trending_country(raw: str) -> str:
 async def instagram_trending_reels(
     country: str = Query("United States", description="Country name or ISO code (e.g. 'United States' or 'US') for Explore localization"),
     limit: int = Query(20, ge=10, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1243,7 +1243,7 @@ async def instagram_trending_reels(
 @router.get("/video-download", summary="Direct video URL for Instagram Reel")
 async def instagram_video_download(
     url: str = Query(...),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1310,7 +1310,7 @@ async def instagram_video_download(
 async def instagram_reels_by_audio_id(
     audio_id: str = Query(..., min_length=2, description="Instagram audio/music ID or full audio URL"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_instagram_platform_mismatch(audio_id, "https://www.instagram.com/reels/audio/123456789/")
@@ -1362,7 +1362,7 @@ async def instagram_reels_by_audio_id(
 async def instagram_tagged_posts(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -1404,7 +1404,7 @@ async def instagram_tagged_posts(
 async def instagram_hashtag_search(
     q: str = Query(..., min_length=2, description="Hashtag (without #)"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1486,7 +1486,7 @@ def _profile_to_search_user(profile: dict) -> dict:
 @router.get("/profile-search", summary="Find an Instagram profile by name or @handle")
 async def instagram_profile_search(
     q: str = Query(..., min_length=2),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     async with billed_call(
@@ -1540,7 +1540,7 @@ def _highlight_payload(item: dict) -> dict:
 @router.get("/story-highlights", summary="List an Instagram profile's story highlights")
 async def instagram_story_highlights(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
@@ -1594,7 +1594,7 @@ async def instagram_highlights_details(
             "e.g. highlight:18201653992314974 or 18201653992314974."
         ),
     ),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     highlight_id = _require_highlight_id(id)
@@ -1628,7 +1628,7 @@ async def instagram_highlights_details(
 @router.get("/embed", summary="Embed HTML for an Instagram post, reel, or profile")
 async def instagram_embed(
     url: str = Query(..., description="Instagram post, reel, or profile URL (or @handle)"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     # Posts/reels resolve to a shortcode (type reel when the URL is a /reel/,

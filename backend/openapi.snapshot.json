@@ -105,11 +105,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -179,11 +179,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -236,11 +236,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -305,11 +305,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -364,11 +364,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -447,11 +447,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -528,11 +528,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -611,11 +611,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -681,11 +681,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -754,11 +754,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -811,11 +811,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -882,11 +882,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -953,11 +953,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1025,11 +1025,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1100,11 +1100,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1173,11 +1173,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1230,11 +1230,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1299,11 +1299,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1381,11 +1381,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1452,11 +1452,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1523,11 +1523,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1582,11 +1582,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1641,11 +1641,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1698,11 +1698,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1774,11 +1774,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1850,11 +1850,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1919,11 +1919,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -1978,11 +1978,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -2037,11 +2037,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -2096,11 +2096,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -2155,11 +2155,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -2249,11 +2249,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -2350,11 +2350,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -2409,11 +2409,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -2479,11 +2479,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -2536,11 +2536,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -2607,11 +2607,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -2689,11 +2689,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -2760,11 +2760,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -2831,11 +2831,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -2902,11 +2902,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -2974,11 +2974,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -3044,11 +3044,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -3114,11 +3114,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -3173,11 +3173,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -3247,11 +3247,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -3320,11 +3320,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -3404,11 +3404,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -3475,11 +3475,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -3534,11 +3534,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -3605,11 +3605,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -3676,11 +3676,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -3735,11 +3735,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -3806,11 +3806,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -3865,11 +3865,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -3924,11 +3924,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4001,11 +4001,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4078,11 +4078,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4147,11 +4147,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4206,11 +4206,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4265,11 +4265,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4354,11 +4354,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4443,11 +4443,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4515,11 +4515,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4587,11 +4587,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4644,11 +4644,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4716,11 +4716,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4787,11 +4787,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4859,11 +4859,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4917,11 +4917,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -4976,11 +4976,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5035,11 +5035,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5094,11 +5094,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5151,11 +5151,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5208,11 +5208,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5265,11 +5265,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5334,11 +5334,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5393,11 +5393,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5464,11 +5464,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5535,11 +5535,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5606,11 +5606,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5688,11 +5688,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5759,11 +5759,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5830,11 +5830,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5889,11 +5889,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -5985,11 +5985,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -6057,11 +6057,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -6129,11 +6129,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -6188,11 +6188,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -6270,11 +6270,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -6353,11 +6353,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -6437,11 +6437,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -6496,11 +6496,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -6555,11 +6555,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -6637,11 +6637,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -6708,11 +6708,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -6792,11 +6792,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -6863,11 +6863,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -6945,11 +6945,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7027,11 +7027,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7086,11 +7086,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7186,11 +7186,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7245,11 +7245,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7316,11 +7316,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7375,11 +7375,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7457,11 +7457,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7528,11 +7528,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7597,11 +7597,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7666,11 +7666,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7725,11 +7725,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7797,11 +7797,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7869,11 +7869,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7928,11 +7928,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -7987,11 +7987,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -8046,11 +8046,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -8117,11 +8117,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -8189,11 +8189,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -8248,11 +8248,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -8319,11 +8319,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -8390,11 +8390,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -8449,11 +8449,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -8508,11 +8508,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -8579,11 +8579,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -8652,11 +8652,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -8735,11 +8735,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -8807,11 +8807,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -8866,11 +8866,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -8937,11 +8937,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9009,11 +9009,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9081,11 +9081,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9140,11 +9140,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9199,11 +9199,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9270,11 +9270,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9329,11 +9329,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9388,11 +9388,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9459,11 +9459,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9530,11 +9530,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9601,11 +9601,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9673,11 +9673,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9732,11 +9732,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9791,11 +9791,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9850,11 +9850,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9909,11 +9909,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -9980,11 +9980,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10063,11 +10063,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10122,11 +10122,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10193,11 +10193,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10264,11 +10264,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10336,11 +10336,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10409,11 +10409,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10468,11 +10468,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10539,11 +10539,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10598,11 +10598,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10657,11 +10657,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10716,11 +10716,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10775,11 +10775,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10834,11 +10834,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10893,11 +10893,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -10964,11 +10964,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11023,11 +11023,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11082,11 +11082,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11141,11 +11141,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11200,11 +11200,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11259,11 +11259,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11330,11 +11330,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11401,11 +11401,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11482,11 +11482,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11541,11 +11541,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11612,11 +11612,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11671,11 +11671,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11730,11 +11730,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11789,11 +11789,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11874,11 +11874,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -11952,11 +11952,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -12026,11 +12026,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {
@@ -12086,11 +12086,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set false to bypass the 24h cache and fetch fresh data.",
-              "default": true,
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
               "title": "Cache"
             },
-            "description": "Set false to bypass the 24h cache and fetch fresh data."
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
           }
         ],
         "responses": {

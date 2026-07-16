@@ -310,7 +310,7 @@ async def _fetch_pin_page(url: str) -> dict[str, Any]:
 @router.get("/pin-details", summary="Pinterest pin metadata + stats")
 async def pin_details(
     url: str = Query(..., description="Pinterest pin URL"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_pinterest_pin_url(url)
@@ -355,7 +355,7 @@ async def pin_details(
 async def user_pins(
     url: str = Query(..., description="Pinterest profile URL or username"),
     limit: int = Query(25, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _require_pinterest_username(url)
@@ -424,7 +424,7 @@ def _normalize_board(item: dict[str, Any], username: str | None = None) -> dict[
 async def pinterest_user_boards(
     url: str = Query(..., description="Pinterest profile URL or username"),
     limit: int = Query(25, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _require_pinterest_username(url)
@@ -469,7 +469,7 @@ def _is_board_url(url: str) -> bool:
 async def pinterest_board(
     url: str = Query(..., description="Pinterest board URL (.../username/board-name/)"),
     limit: int = Query(25, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_pinterest_platform_mismatch(url, "https://www.pinterest.com/username/board-name/")
@@ -506,7 +506,7 @@ async def pinterest_board(
 async def pinterest_search(
     q: str = Query(..., min_length=2, description="Search query"),
     limit: int = Query(25, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()

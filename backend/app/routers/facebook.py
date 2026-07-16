@@ -319,7 +319,7 @@ def _normalize_event(item: dict) -> dict:
 @router.get("/details", summary="Facebook video/post details")
 async def facebook_details(
     url: str = Query(...),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/page/posts/123")
@@ -356,7 +356,7 @@ async def facebook_details(
 @router.get("/transcript", summary="Facebook video transcript")
 async def facebook_transcript(
     url: str = Query(...),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/watch/?v=123")
@@ -444,7 +444,7 @@ async def facebook_transcript(
 @router.get("/summarize", summary="AI summary of Facebook video/post")
 async def facebook_summarize(
     url: str = Query(...),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/watch/?v=123")
@@ -501,7 +501,7 @@ async def facebook_summarize(
 async def facebook_comments(
     url: str = Query(...),
     limit: int = Query(50, ge=1, le=500),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/page/posts/123")
@@ -558,7 +558,7 @@ async def facebook_comments(
 @router.get("/page-details", summary="Facebook page info & stats")
 async def facebook_page_details(
     url: str = Query(..., description="Facebook page URL, @handle, or page name"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = _require_facebook_page(url)
@@ -643,7 +643,7 @@ async def facebook_page_details(
 async def facebook_profile_posts(
     url: str = Query(..., description="Facebook profile/page URL, @handle, or page name"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = _require_facebook_page(url)
@@ -682,7 +682,7 @@ async def facebook_profile_posts(
 async def facebook_profile_reels(
     url: str = Query(..., description="Facebook profile/page URL, @handle, or page name"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = _require_facebook_page(url)
@@ -728,7 +728,7 @@ async def facebook_profile_reels(
 async def facebook_group_posts(
     url: str = Query(..., description="Public Facebook group URL"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/groups/group-name")
@@ -768,7 +768,7 @@ async def facebook_comment_replies(
     url: str = Query(..., description="Facebook post URL the comment belongs to"),
     comment_id: str = Query(..., description="ID of the parent comment"),
     limit: int = Query(50, ge=1, le=500),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/page/posts/123")
@@ -854,7 +854,7 @@ def _normalize_photo(item: dict) -> dict:
 async def facebook_profile_photos(
     url: str = Query(..., description="Facebook profile/page URL, @handle, or page name"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = _require_facebook_page(url)
@@ -893,7 +893,7 @@ async def facebook_profile_photos(
 async def facebook_profile_events(
     url: str = Query(..., description="Facebook profile/page URL, @handle, or page name"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = _require_facebook_page(url)
@@ -971,7 +971,7 @@ def _partial_event_from_page(url: str, page: str) -> dict[str, Any] | None:
 @router.get("/marketplace-item", summary="Facebook Marketplace listing details")
 async def facebook_marketplace_item(
     url: str = Query(..., description="Facebook Marketplace item URL"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_facebook_path(
@@ -1075,7 +1075,7 @@ async def facebook_marketplace_search(
     location: str = Query(..., min_length=2, description="City or place name, e.g. 'Austin, TX'"),
     limit: int = Query(20, ge=1, le=200),
     details: bool = Query(False, description="Fetch full description, photos & coordinates per listing (slower, costs more)"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1119,7 +1119,7 @@ async def facebook_marketplace_search(
 async def facebook_marketplace_location_search(
     q: str = Query(..., min_length=2, description="City/place search query, e.g. Austin"),
     limit: int = Query(10, ge=1, le=50),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1169,7 +1169,7 @@ async def facebook_marketplace_location_search(
 async def facebook_event_search(
     q: str = Query(..., min_length=2, description="Topic and/or place, e.g. 'comedy Chicago'"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -1223,7 +1223,7 @@ async def facebook_event_search(
 @router.get("/event-details", summary="Facebook event details")
 async def facebook_event_details(
     url: str = Query(..., description="Facebook event URL, e.g. https://facebook.com/events/ID"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_facebook_path(

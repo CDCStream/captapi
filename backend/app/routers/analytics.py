@@ -430,7 +430,7 @@ def _unify(n: dict[str, Any]) -> dict[str, Any]:
 )
 async def post_analytics(
     url: str = Query(..., description="A public post, video, or reel URL"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     platform = _detect_platform(url)

@@ -128,7 +128,7 @@ def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
 @router.get("/profile", summary="Kwai profile")
 async def profile(
     url: str = Query(..., description="Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     profile_url = _profile_url(url)
@@ -149,7 +149,7 @@ async def profile(
 async def user_posts(
     url: str = Query(..., description="Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)"),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     profile_url = _profile_url(url)
@@ -171,7 +171,7 @@ async def user_posts(
 @router.get("/post", summary="Kwai post")
 async def post(
     url: str = Query(..., description="Kwai video URL (e.g. https://www.kwai.com/@handle/video/5238962376325675745)"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     video_url = _video_url(url)

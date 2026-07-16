@@ -351,7 +351,7 @@ async def facebook_search(
     q: str = Query(..., min_length=2),
     country: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -375,7 +375,7 @@ async def facebook_company_ads(
     url: str = Query(..., description="Facebook page URL or Meta Ad Library URL"),
     country: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_ad_platform_mismatch(url, "facebook", "https://www.facebook.com/ads/library/?id=123456789")
@@ -400,7 +400,7 @@ async def facebook_search_companies(
     q: str = Query(..., min_length=2, description="Company or brand name to search for"),
     country: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -429,7 +429,7 @@ async def facebook_search_companies(
 @router.get("/facebook/ad-details", summary="Meta/Facebook ad details")
 async def facebook_ad_details(
     url: str = Query(..., description="Meta Ad Library ad URL or ad ID"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -447,7 +447,7 @@ async def facebook_ad_details(
 @router.get("/facebook/ad-transcript", summary="Meta/Facebook ad transcript / creative text")
 async def facebook_ad_transcript(
     url: str = Query(..., description="Meta Ad Library ad URL or ad ID"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -493,7 +493,7 @@ async def tiktok_search(
     q: str = Query(..., min_length=2),
     country: str = Query("DE", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -512,7 +512,7 @@ async def tiktok_search(
 async def tiktok_ad_details(
     url: str = Query(..., description="TikTok Ad Library URL or ad ID"),
     country: str = Query("DE", min_length=2, max_length=2),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -571,7 +571,7 @@ async def google_company_ads(
     advertiser: str = Query(..., min_length=2, description="Advertiser name, domain, or Google advertiser ID"),
     country: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -590,7 +590,7 @@ async def google_company_ads(
 async def google_ad_details(
     creative_id: str = Query(..., description="Google Ads Transparency URL containing AR... and CR... IDs"),
     country: str = Query("US", min_length=2, max_length=2),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -613,7 +613,7 @@ async def google_advertiser_search(
     q: str = Query(..., min_length=2),
     country: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(10, ge=1, le=50),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -636,7 +636,7 @@ async def linkedin_search_ads(
     q: str = Query(..., min_length=2),
     country: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
@@ -654,7 +654,7 @@ async def linkedin_search_ads(
 @router.get("/linkedin/ad-details", summary="LinkedIn ad details")
 async def linkedin_ad_details(
     url: str = Query(..., description="LinkedIn Ad Library URL or ad ID"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()

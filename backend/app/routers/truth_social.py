@@ -205,7 +205,7 @@ async def _actor_post(post_id: str, url: str) -> dict[str, Any]:
 @router.get("/profile", summary="Truth Social profile")
 async def profile(
     url: str = Query(..., description="Truth Social profile URL or @username"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _username(url)
@@ -229,7 +229,7 @@ async def profile(
 async def user_posts(
     url: str = Query(..., description="Truth Social profile URL or @username"),
     limit: int = Query(20, ge=1, le=80),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _username(url)
@@ -260,7 +260,7 @@ async def user_posts(
 @router.get("/post", summary="Truth Social post")
 async def post(
     url: str = Query(..., description="Truth Social post URL or post ID"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     post_id = _post_id(url)

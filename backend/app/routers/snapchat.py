@@ -55,7 +55,7 @@ def _normalize(item: dict[str, Any]) -> dict[str, Any]:
 @router.get("/user-profile", summary="Snapchat public user profile")
 async def user_profile(
     url: str = Query(..., description="Snapchat username or profile URL"),
-    cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _username(url)

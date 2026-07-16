@@ -283,24 +283,24 @@ async def _page(platform: str, url: str, caller: ApiCaller, use_cache: bool = Tr
         return ApiResponse(data=data)
 
 
-_CACHE_DESC = "Set false to bypass the 24h cache and fetch fresh data."
+_CACHE_DESC = "Set true to use the 24h cache. Default false — always fetch fresh data."
 
 
 @router.get("/komi/page", summary="Komi page")
-async def komi_page(url: str = Query(..., description="Komi page URL or username"), cache: bool = Query(True, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
+async def komi_page(url: str = Query(..., description="Komi page URL or username"), cache: bool = Query(False, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
     return await _page("komi", url, caller, use_cache=cache)
 
 
 @router.get("/pillar/page", summary="Pillar page")
-async def pillar_page(url: str = Query(..., description="Pillar page URL or username"), cache: bool = Query(True, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
+async def pillar_page(url: str = Query(..., description="Pillar page URL or username"), cache: bool = Query(False, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
     return await _page("pillar", url, caller, use_cache=cache)
 
 
 @router.get("/linkbio/page", summary="Linkbio page")
-async def linkbio_page(url: str = Query(..., description="Linkbio (lnk.bio) page URL or username"), cache: bool = Query(True, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
+async def linkbio_page(url: str = Query(..., description="Linkbio (lnk.bio) page URL or username"), cache: bool = Query(False, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
     return await _page("linkbio", url, caller, use_cache=cache)
 
 
 @router.get("/linkme/profile", summary="Linkme profile")
-async def linkme_profile(url: str = Query(..., description="Linkme profile URL or username"), cache: bool = Query(True, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
+async def linkme_profile(url: str = Query(..., description="Linkme profile URL or username"), cache: bool = Query(False, description=_CACHE_DESC), caller: ApiCaller = Depends(require_api_key)):
     return await _page("linkme", url, caller, use_cache=cache)
