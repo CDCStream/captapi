@@ -474,7 +474,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/channel-details", {"url": url, "cache": cache})
 
     def profile_region(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Profile Region — Region and language signals for a TikTok profile. (1 credit)
+        """TikTok Profile Region — Where a TikTok creator's account is based (region) and its language, plus core profile stats — from a profile URL or @handle. region/language can be null when TikTok doesn't expose them. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -693,7 +693,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/channel-details", {"url": url, "cache": cache})
 
     async def profile_region(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Profile Region — Region and language signals for a TikTok profile. (1 credit)
+        """TikTok Profile Region — Where a TikTok creator's account is based (region) and its language, plus core profile stats — from a profile URL or @handle. region/language can be null when TikTok doesn't expose them. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

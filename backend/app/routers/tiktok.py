@@ -779,7 +779,7 @@ async def tiktok_channel_details(
         return ApiResponse(data=data)
 
 
-@router.get("/profile-region", summary="TikTok profile region/language signals")
+@router.get("/profile-region", summary="TikTok profile region, language & core stats")
 async def tiktok_profile_region(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),

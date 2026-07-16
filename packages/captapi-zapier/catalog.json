@@ -771,7 +771,7 @@
     "name": "TikTok Profile Region",
     "path": "/v1/tiktok/profile-region",
     "credits": 1,
-    "summary": "Region and language signals for a TikTok profile.",
+    "summary": "Where a TikTok creator's account is based (region) and its language, plus core profile stats — from a profile URL or @handle. region/language can be null when TikTok doesn't expose them.",
     "params": [
       {
         "name": "url",

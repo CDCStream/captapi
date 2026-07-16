@@ -111,7 +111,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `youtube_comment_replies` | `/v1/youtube/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number), `cache`? (boolean) | 20 |
 | `youtube_channel_playlists` | `/v1/youtube/channel-playlists` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
 | `youtube_community_posts` | `/v1/youtube/community-posts` | `url` (string), `limit`? (number), `cache`? (boolean) | 10 |
-| `youtube_community_post_details` | `/v1/youtube/community-post-details` | `url` (string), `cache`? (boolean) | 7 |
+| `youtube_community_post_details` | `/v1/youtube/community-post-details` | `url` (string), `cache`? (boolean) | 1 |
 | `youtube_video_sponsors` | `/v1/youtube/video-sponsors` | `url` (string), `cache`? (boolean) | 1 |
 
 ### TikTok
@@ -121,9 +121,9 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `tiktok_transcript` | `/v1/tiktok/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 2 |
 | `tiktok_summarize` | `/v1/tiktok/summarize` | `url` (string), `language`? (string), `cache`? (boolean) | 4 |
 | `tiktok_video_details` | `/v1/tiktok/video-details` | `url` (string), `cache`? (boolean) | 1 |
-| `tiktok_comments` | `/v1/tiktok/comments` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 10 |
+| `tiktok_comments` | `/v1/tiktok/comments` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |
 | `tiktok_channel_details` | `/v1/tiktok/channel-details` | `url` (string), `cache`? (boolean) | 1 |
-| `tiktok_profile_region` | `/v1/tiktok/profile-region` | `url` (string), `cache`? (boolean) | 7 |
+| `tiktok_profile_region` | `/v1/tiktok/profile-region` | `url` (string), `cache`? (boolean) | 1 |
 | `tiktok_audience_demographics` | `/v1/tiktok/audience-demographics` | `url` (string), `cache`? (boolean) | 7 |
 | `tiktok_search` | `/v1/tiktok/search` | `q` (string), `limit`? (number), `cache`? (boolean) | 14 |
 | `tiktok_search_suggestions` | `/v1/tiktok/search-suggestions` | `q` (string), `country`? (string), `language`? (string), `limit`? (number), `cache`? (boolean) | 28 |
@@ -185,7 +185,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `facebook_event_details` | `/v1/facebook/event-details` | `url` (string), `cache`? (boolean) | 2 |
 | `facebook_profile_photos` | `/v1/facebook/profile-photos` | `url` (string), `limit`? (number), `cache`? (boolean) | 12 |
 | `facebook_profile_events` | `/v1/facebook/profile-events` | `url` (string), `limit`? (number), `cache`? (boolean) | 40 |
-| `facebook_marketplace_item` | `/v1/facebook/marketplace-item` | `url` (string), `cache`? (boolean) | 17 |
+| `facebook_marketplace_item` | `/v1/facebook/marketplace-item` | `url` (string), `cache`? (boolean) | 1 |
 
 ### Twitter / X
 
@@ -294,10 +294,10 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `twitch_profile` | `/v1/twitch/profile` | `url` (string), `cache`? (boolean) | 9 |
+| `twitch_profile` | `/v1/twitch/profile` | `url` (string), `cache`? (boolean) | 1 |
 | `twitch_user_videos` | `/v1/twitch/user-videos` | `url` (string), `limit`? (number), `cache`? (boolean) | 34 |
-| `twitch_user_schedule` | `/v1/twitch/user-schedule` | `url` (string), `cache`? (boolean) | 34 |
-| `twitch_clip` | `/v1/twitch/clip` | `url` (string), `cache`? (boolean) | 9 |
+| `twitch_user_schedule` | `/v1/twitch/user-schedule` | `url` (string), `cache`? (boolean) | 1 |
+| `twitch_clip` | `/v1/twitch/clip` | `url` (string), `cache`? (boolean) | 1 |
 
 ### Spotify
 
@@ -314,9 +314,9 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `soundcloud_artist` | `/v1/soundcloud/artist` | `url` (string), `cache`? (boolean) | 7 |
+| `soundcloud_artist` | `/v1/soundcloud/artist` | `url` (string), `cache`? (boolean) | 1 |
 | `soundcloud_artist_tracks` | `/v1/soundcloud/artist-tracks` | `url` (string), `limit`? (number), `cache`? (boolean) | 28 |
-| `soundcloud_track` | `/v1/soundcloud/track` | `url` (string), `cache`? (boolean) | 7 |
+| `soundcloud_track` | `/v1/soundcloud/track` | `url` (string), `cache`? (boolean) | 1 |
 
 ### Linktree
 

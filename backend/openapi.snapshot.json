@@ -2030,7 +2030,7 @@
         "tags": [
           "TikTok"
         ],
-        "summary": "TikTok profile region/language signals",
+        "summary": "TikTok profile region, language & core stats",
         "operationId": "tiktok_profile_region_v1_tiktok_profile_region_get",
         "security": [
           {

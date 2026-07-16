@@ -534,7 +534,7 @@ export class TiktokApi {
   channelDetails(params: TiktokChannelDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/channel-details", params);
   }
-  /** TikTok Profile Region — Region and language signals for a TikTok profile. (1 credit) */
+  /** TikTok Profile Region — Where a TikTok creator's account is based (region) and its language, plus core profile stats — from a profile URL or @handle. region/language can be null when TikTok doesn't expose them. (1 credit) */
   profileRegion(params: TiktokProfileRegionParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/profile-region", params);
   }
