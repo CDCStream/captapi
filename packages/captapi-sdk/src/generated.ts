@@ -728,8 +728,6 @@ export interface InstagramHashtagSearchParams {
 export interface InstagramProfileSearchParams {
   /** Search query or keywords (min 2 chars). */
   q: string;
-  /** Max items to return. Default 20, max 100. Billed per result. */
-  limit?: number;
   /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
   cache?: boolean;
 }
@@ -818,7 +816,7 @@ export class InstagramApi {
   hashtagSearch(params: InstagramHashtagSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/hashtag-search", params);
   }
-  /** Instagram Profile Search — Search Instagram profiles by keyword. (12 credits) */
+  /** Instagram Profile Search — Resolve an Instagram account name or @handle to its public profile. (1 credit) */
   profileSearch(params: InstagramProfileSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/profile-search", params);
   }

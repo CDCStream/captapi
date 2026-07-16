@@ -4439,26 +4439,17 @@
     "status": 200,
     "credits": null,
     "data": {
-      "query": "fitness",
-      "totalReturned": 2,
+      "query": "nike",
+      "totalReturned": 1,
       "users": [
         {
-          "username": "planetfitness",
-          "displayName": "Planet Fitness",
-          "url": "https://instagram.com/planetfitness",
-          "followers": 558062,
+          "username": "nike",
+          "displayName": "Nike",
+          "url": "https://instagram.com/nike",
+          "followers": 291780978,
           "verified": true,
-          "private": null,
-          "profileImage": "https://scontent-hou1-1.cdninstagram.com/v/t51.82787-19/571859215_18539690485033373_6920541618037746178_n.jpg?stp=dst-jpg_e0_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-hou1-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gH8dpLFyw4tklxYv8ukEz_fbGy-PnbwenWY-ThZpqoo-LTcO4ltlvgsNHhbXPbuRoI&_nc_ohc=dUBhpEyI3loQ7kNvwHc5jfx&_nc_gid=lNPFSH5wTz9QIGzl9jUa1A&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQAGRo_KZBhI20-LlzCQDKrH6jzhTWMmf8-pk3P0zP71vA&oe=6A4DA7E5&_nc_sid=8b3546"
-        },
-        {
-          "username": "zumba",
-          "displayName": "Zumba",
-          "url": "https://instagram.com/zumba",
-          "followers": 4695167,
-          "verified": true,
-          "private": null,
-          "profileImage": "https://scontent-mia5-2.cdninstagram.com/v/t51.82787-19/610891666_18547024492018724_6367250792129156891_n.jpg?stp=dst-jpg_e0_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-mia5-2.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gEI9RqFsUGWDBdjHW5Nf6q3nWd7RUkgHb5LAlFA7U_YvwfJtj9GwuxFhaTMAhNS03U&_nc_ohc=4fV4yjx0sRgQ7kNvwFEtvLn&_nc_gid=1K03h-9tj_ziF-dEAfTpBg&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQBZCgtVKxx0xbTBTJo_aumgj-A6PDTbL59Y4nFxXhfWKQ&oe=6A4DBC57&_nc_sid=8b3546"
+          "private": false,
+          "profileImage": "https://instagram.ftas2-1.fna.fbcdn.net/v/t51.82787-19/551608484_18567162979020081_1135468084872726555_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4zOTkuYzIifQ&_nc_ht=instagram.ftas2-1.fna.fbcdn.net&_nc_cat=1&_nc_ohc=8gPTDp1oVhMQ7kNvwETrvZ3&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQBCOb7zz2iSBpbY2fpaSBUR25Hk-mqCp17LsL48j6fuIw&oe=6A5E90BA&_nc_sid=8b3546"
         }
       ]
     },

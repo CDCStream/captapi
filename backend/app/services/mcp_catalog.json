@@ -1648,20 +1648,14 @@
     "platform": "instagram",
     "name": "Instagram Profile Search",
     "path": "/v1/instagram/profile-search",
-    "credits": 12,
-    "summary": "Search Instagram profiles by keyword.",
+    "credits": 1,
+    "summary": "Resolve an Instagram account name or @handle to its public profile.",
     "params": [
       {
         "name": "q",
         "type": "string",
         "required": true,
         "description": "Search query or keywords (min 2 chars)."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 20, max 100. Billed per result."
       },
       {
         "name": "cache",

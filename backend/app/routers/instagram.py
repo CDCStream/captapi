@@ -1419,57 +1419,87 @@ async def instagram_hashtag_search(
         return ApiResponse(data=data)
 
 
-def _normalize_ig_profile(item: dict) -> dict:
-    username = item.get("username") or item.get("ownerUsername")
+# Instagram's keyword search (topsearch) is login-gated - a logged-out request
+# gets 401 {"require_login": true} on every proxy tier - so we can't fuzzy-match
+# many accounts. What DOES work logged-out is resolving an exact username to its
+# public profile (the same web_profile_info/GraphQL path Instagram Details uses).
+# So profile-search treats the query as an account name and returns the matching
+# public profile natively (no Apify actor, ~1 credit).
+def _profile_search_candidates(q: str) -> list[str]:
+    """Turn a free-text query into up to two Instagram username candidates.
+
+    Accepts a bare name, an @handle, or a full profile URL. Instagram usernames
+    are lowercase [a-z0-9._], so "Planet Fitness" -> "planetfitness".
+    """
+    raw = (q or "").strip()
+    base = (extract_instagram_username(raw) or raw).lstrip("@").strip().lower()
+    candidates: list[str] = []
+    if base:
+        candidates.append(base)
+    despaced = re.sub(r"\s+", "", base)
+    if despaced and despaced != base:
+        candidates.append(despaced)
+    valid = [c for c in candidates if re.fullmatch(r"[a-z0-9._]{1,30}", c)]
+    # de-dupe while preserving order
+    return list(dict.fromkeys(valid))[:2]
+
+
+def _profile_to_search_user(profile: dict) -> dict:
+    username = safe_str(profile.get("username"))
     return {
-        "username": safe_str(username),
-        "displayName": safe_str(item.get("fullName") or item.get("ownerFullName")),
-        "url": f"https://instagram.com/{username}" if username else None,
-        "followers": safe_int(item.get("followersCount")),
-        "verified": item.get("verified") or item.get("isVerified"),
-        "private": item.get("private") or item.get("isPrivate"),
-        "profileImage": safe_str(item.get("profilePicUrl")),
+        "username": username,
+        "displayName": safe_str(profile.get("displayName")),
+        "url": f"https://instagram.com/{username}" if username else safe_str(profile.get("url")),
+        "followers": safe_int(profile.get("followers")),
+        "verified": profile.get("verified"),
+        "private": profile.get("private"),
+        "profileImage": safe_str(profile.get("profileImage")),
     }
 
 
-@router.get("/profile-search", summary="Search Instagram profiles by keyword")
+@router.get("/profile-search", summary="Find an Instagram profile by name or @handle")
 async def instagram_profile_search(
     q: str = Query(..., min_length=2),
-    limit: int = Query(20, ge=1, le=100),
     cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    settings = get_settings()
-    cost = _scaled_credits(limit, RATE_IG_POSTS, CREDIT_SEARCH)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/profile-search",
         platform="instagram",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_CHANNEL,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            async def _apify() -> dict[str, Any]:
-                apify = get_apify()
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_INSTAGRAM,
-                    {"search": q, "searchType": "user", "searchLimit": limit, "resultsType": "details"},
-                    max_items=limit,
-                )
-                users = [_normalize_ig_profile(i) for i in items[:limit] if i.get("username") or i.get("ownerUsername")]
-                return {"query": q, "totalReturned": len(users), "users": users}
-
-            ctx["source"] = "apify"
-            return await _apify()
+            ctx["source"] = "direct"
+            users: list[dict[str, Any]] = []
+            for candidate in _profile_search_candidates(q):
+                profile: dict[str, Any] | None = None
+                if decodo.enabled():
+                    profile = await decodo.basic_profile(candidate)
+                if profile is None:
+                    meta = await _public_instagram_meta(f"https://www.instagram.com/{candidate}/")
+                    if meta:
+                        profile = {
+                            "username": candidate,
+                            "displayName": meta["title"],
+                            "followers": None,
+                            "verified": None,
+                            "private": None,
+                            "profileImage": meta["image"],
+                        }
+                if profile:
+                    users.append(_profile_to_search_user(profile))
+                    break
+            return {"query": q, "totalReturned": len(users), "users": users}
 
         data = await cached_or_run(
             endpoint="instagram.profile-search",
-            params={"q": q, "limit": limit, "v": 4},
+            params={"q": q, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["users"]), RATE_IG_POSTS, CREDIT_SEARCH)
         return ApiResponse(data=data)
 
 

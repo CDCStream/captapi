@@ -90,8 +90,8 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `youtube_transcript` | `/v1/youtube/transcript` | `url` (string), `language`? (string) | 2 |
-| `youtube_summarize` | `/v1/youtube/summarize` | `url` (string), `language`? (string) | 4 |
+| `youtube_transcript` | `/v1/youtube/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 2 |
+| `youtube_summarize` | `/v1/youtube/summarize` | `url` (string), `language`? (string), `cache`? (boolean) | 4 |
 | `youtube_video_details` | `/v1/youtube/video-details` | `url` (string) | 1 |
 | `youtube_comments` | `/v1/youtube/comments` | `url` (string), `limit`? (number) | 20 |
 | `youtube_channel_details` | `/v1/youtube/channel-details` | `url` (string) | 1 |
@@ -100,8 +100,8 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `youtube_playlist_videos` | `/v1/youtube/playlist-videos` | `url` (string), `limit`? (number), `fast`? (boolean) | 50 |
 | `youtube_playlist` | `/v1/youtube/playlist` | `url` (string), `limit`? (number), `fast`? (boolean) | 50 |
 | `youtube_video_download` | `/v1/youtube/video-download` | `url` (string) | 3 |
-| `youtube_shorts_transcript` | `/v1/youtube/shorts/transcript` | `url` (string), `language`? (string) | 2 |
-| `youtube_shorts_summarize` | `/v1/youtube/shorts/summarize` | `url` (string), `language`? (string) | 4 |
+| `youtube_shorts_transcript` | `/v1/youtube/shorts/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 2 |
+| `youtube_shorts_summarize` | `/v1/youtube/shorts/summarize` | `url` (string), `language`? (string), `cache`? (boolean) | 4 |
 | `youtube_shorts_details` | `/v1/youtube/shorts/video-details` | `url` (string) | 1 |
 | `youtube_shorts_comments` | `/v1/youtube/shorts/comments` | `url` (string), `limit`? (number) | 20 |
 | `youtube_channel_shorts` | `/v1/youtube/channel-shorts` | `url` (string), `limit`? (number) | 20 |
@@ -118,8 +118,8 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `tiktok_transcript` | `/v1/tiktok/transcript` | `url` (string) | 2 |
-| `tiktok_summarize` | `/v1/tiktok/summarize` | `url` (string) | 4 |
+| `tiktok_transcript` | `/v1/tiktok/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 2 |
+| `tiktok_summarize` | `/v1/tiktok/summarize` | `url` (string), `language`? (string), `cache`? (boolean) | 4 |
 | `tiktok_video_details` | `/v1/tiktok/video-details` | `url` (string) | 1 |
 | `tiktok_comments` | `/v1/tiktok/comments` | `url` (string), `limit`? (number) | 10 |
 | `tiktok_channel_details` | `/v1/tiktok/channel-details` | `url` (string) | 1 |
@@ -147,17 +147,18 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `instagram_transcript` | `/v1/instagram/transcript` | `url` (string) | 2 |
-| `instagram_summarize` | `/v1/instagram/summarize` | `url` (string) | 4 |
+| `instagram_transcript` | `/v1/instagram/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 2 |
+| `instagram_summarize` | `/v1/instagram/summarize` | `url` (string), `language`? (string), `cache`? (boolean) | 4 |
 | `instagram_details` | `/v1/instagram/details` | `url` (string) | 1 |
 | `instagram_comments` | `/v1/instagram/comments` | `url` (string), `limit`? (number) | 45 |
 | `instagram_channel_details` | `/v1/instagram/channel-details` | `url` (string) | 1 |
-| `instagram_channel_posts` | `/v1/instagram/channel-posts` | `url` (string), `limit`? (number) | 12 |
-| `instagram_channel_reels` | `/v1/instagram/channel-reels` | `url` (string), `limit`? (number) | 12 |
+| `instagram_channel_posts` | `/v1/instagram/channel-posts` | `url` (string), `limit`? (number), `cursor`? (string) | 6 |
+| `instagram_channel_reels` | `/v1/instagram/channel-reels` | `url` (string), `limit`? (number), `cursor`? (string) | 6 |
 | `instagram_reels_search` | `/v1/instagram/reels-search` | `q` (string), `limit`? (number) | 12 |
 | `instagram_trending_reels` | `/v1/instagram/trending-reels` | `country`? (string), `limit`? (number) | 28 |
 | `instagram_video_download` | `/v1/instagram/video-download` | `url` (string) | 3 |
 | `instagram_tagged_posts` | `/v1/instagram/tagged-posts` | `url` (string), `limit`? (number) | 18 |
+| `instagram_music_posts` | `/v1/instagram/music-posts` | `url` (string), `limit`? (number) | 18 |
 | `instagram_reels_by_audio_id` | `/v1/instagram/reels-by-audio-id` | `audio_id` (string), `limit`? (number) | 28 |
 | `instagram_hashtag_search` | `/v1/instagram/hashtag-search` | `q` (string), `limit`? (number) | 12 |
 | `instagram_profile_search` | `/v1/instagram/profile-search` | `q` (string), `limit`? (number) | 12 |
@@ -171,8 +172,8 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
 | `facebook_details` | `/v1/facebook/details` | `url` (string) | 1 |
-| `facebook_transcript` | `/v1/facebook/transcript` | `url` (string) | 2 |
-| `facebook_summarize` | `/v1/facebook/summarize` | `url` (string) | 4 |
+| `facebook_transcript` | `/v1/facebook/transcript` | `url` (string), `cache`? (boolean) | 2 |
+| `facebook_summarize` | `/v1/facebook/summarize` | `url` (string), `cache`? (boolean) | 4 |
 | `facebook_comments` | `/v1/facebook/comments` | `url` (string), `limit`? (number) | 30 |
 | `facebook_page_details` | `/v1/facebook/page-details` | `url` (string) | 1 |
 | `facebook_profile_posts` | `/v1/facebook/profile-posts` | `url` (string), `limit`? (number) | 12 |
@@ -192,7 +193,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
 | `twitter_tweet_details` | `/v1/twitter/tweet-details` | `url` (string) | 1 |
-| `twitter_transcript` | `/v1/twitter/transcript` | `url` (string) | 7 |
+| `twitter_transcript` | `/v1/twitter/transcript` | `url` (string), `cache`? (boolean) | 7 |
 | `twitter_profile` | `/v1/twitter/profile` | `url` (string) | 1 |
 | `twitter_user_tweets` | `/v1/twitter/user-tweets` | `url` (string), `limit`? (number) | 14 |
 | `twitter_search` | `/v1/twitter/search` | `q` (string), `limit`? (number) | 14 |
@@ -303,11 +304,11 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `spotify_artist` | `/v1/spotify/artist` | `url` (string) | 6 |
-| `spotify_track` | `/v1/spotify/track` | `url` (string) | 6 |
-| `spotify_album` | `/v1/spotify/album` | `url` (string) | 6 |
+| `spotify_artist` | `/v1/spotify/artist` | `url` (string), `cache`? (boolean) | 6 |
+| `spotify_track` | `/v1/spotify/track` | `url` (string), `cache`? (boolean) | 6 |
+| `spotify_album` | `/v1/spotify/album` | `url` (string), `cache`? (boolean) | 6 |
 | `spotify_search` | `/v1/spotify/search` | `q` (string), `type`? (string), `limit`? (number) | 23 |
-| `spotify_podcast` | `/v1/spotify/podcast` | `url` (string), `limit`? (number) | 6 |
+| `spotify_podcast` | `/v1/spotify/podcast` | `url` (string), `limit`? (number), `cache`? (boolean) | 6 |
 | `spotify_podcast_episodes` | `/v1/spotify/podcast-episodes` | `url` (string), `limit`? (number) | 23 |
 
 ### SoundCloud

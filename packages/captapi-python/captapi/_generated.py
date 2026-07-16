@@ -981,14 +981,13 @@ class InstagramApi:
         """
         return self._t.get("/v1/instagram/hashtag-search", {"q": q, "limit": limit, "cache": cache})
 
-    def profile_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Profile Search — Search Instagram profiles by keyword. (12 credits)
+    def profile_search(self, *, q: str, cache: bool | None = None) -> dict[str, Any]:
+        """Instagram Profile Search — Resolve an Instagram account name or @handle to its public profile. (1 credit)
 
         :param q: Search query or keywords (min 2 chars).
-        :param limit: Max items to return. Default 20, max 100. Billed per result.
         :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/instagram/profile-search", {"q": q, "limit": limit, "cache": cache})
+        return self._t.get("/v1/instagram/profile-search", {"q": q, "cache": cache})
 
     def story_highlights(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Story Highlights — List a profile's story highlight covers. (5 credits)
@@ -1144,14 +1143,13 @@ class AsyncInstagramApi:
         """
         return await self._t.get("/v1/instagram/hashtag-search", {"q": q, "limit": limit, "cache": cache})
 
-    async def profile_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Profile Search — Search Instagram profiles by keyword. (12 credits)
+    async def profile_search(self, *, q: str, cache: bool | None = None) -> dict[str, Any]:
+        """Instagram Profile Search — Resolve an Instagram account name or @handle to its public profile. (1 credit)
 
         :param q: Search query or keywords (min 2 chars).
-        :param limit: Max items to return. Default 20, max 100. Billed per result.
         :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/instagram/profile-search", {"q": q, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/instagram/profile-search", {"q": q, "cache": cache})
 
     async def story_highlights(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Story Highlights — List a profile's story highlight covers. (5 credits)

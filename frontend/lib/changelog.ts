@@ -49,6 +49,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 /** Static mirror of the migration seed — used only when the table is unavailable. */
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
+    publishedAt: "2026-07-16",
+    category: "improvement",
+    title: "Instagram Profile Search is now native — 1 credit",
+    description:
+      "The Instagram Profile Search API now runs on our native resolver instead of a third-party actor. Pass an account name, @handle, or profile URL and it resolves the matching public profile directly from Instagram. It's faster, more reliable, and the price dropped from 12 credits to 1.",
+    items: [
+      "Now costs 1 credit per lookup (was 12) and returns results in ~1s",
+      "Accepts a name, @handle, or profile URL — e.g. nike, @nasa, instagram.com/natgeo",
+      "The limit parameter was removed; the endpoint resolves the single matching profile",
+    ],
+  },
+  {
     publishedAt: "2026-07-15",
     category: "improvement",
     title: "Instagram Music Posts API retired",
