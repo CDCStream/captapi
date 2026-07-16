@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Loader2, Copy, Download, Search, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,12 +35,17 @@ export function ToolRunnerClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ResultData | null>(null);
+  // Ref guard blocks a second submit (e.g. rapid Enter) before React flushes
+  // the loading state — more reliable than reading `loading` alone.
+  const inFlight = useRef(false);
 
   const run = useCallback(async () => {
+    if (inFlight.current) return;
     if (!url.trim()) {
       toast.error("Please paste a video URL.");
       return;
     }
+    inFlight.current = true;
     setLoading(true);
     setError(null);
     setData(null);
@@ -57,6 +62,7 @@ export function ToolRunnerClient({
       setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setLoading(false);
+      inFlight.current = false;
     }
   }, [endpoint, url]);
 
@@ -101,10 +107,13 @@ export function ToolRunnerClient({
             inputMode="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && run()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !loading) run();
+            }}
+            disabled={loading}
             placeholder={placeholder || `Paste a ${platform} video URL`}
             aria-label={`${platform} video URL`}
-            className="w-full rounded-lg border border-white/15 bg-zinc-900 py-2.5 pl-9 pr-3 text-sm text-white placeholder:text-gray-500 outline-none focus:border-primary"
+            className="w-full rounded-lg border border-white/15 bg-zinc-900 py-2.5 pl-9 pr-3 text-sm text-white placeholder:text-gray-500 outline-none focus:border-primary disabled:opacity-60"
           />
         </div>
         <button

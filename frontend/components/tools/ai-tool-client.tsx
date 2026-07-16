@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Loader2, Copy, Sparkles, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
@@ -69,13 +69,17 @@ export function AiToolClient({ config }: { config: AiToolConfig }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ApiResult | null>(null);
+  // Ref guard blocks a second submit before React flushes the loading state.
+  const inFlight = useRef(false);
 
   const submit = useCallback(async () => {
+    if (inFlight.current) return;
     const missing = config.fields.find((f) => f.required && !values[f.name]?.trim());
     if (missing) {
       toast.error(`Please fill in "${missing.label}".`);
       return;
     }
+    inFlight.current = true;
     setLoading(true);
     setError(null);
     try {
@@ -91,6 +95,7 @@ export function AiToolClient({ config }: { config: AiToolConfig }) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setLoading(false);
+      inFlight.current = false;
     }
   }, [config, values]);
 
