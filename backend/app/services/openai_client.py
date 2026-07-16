@@ -77,6 +77,74 @@ async def summarize_transcript(
     }
 
 
+_REGION_SYSTEM = """You infer the most likely country a social-media creator is \
+based in, using only the public profile signals provided (bio/description, \
+display name, interface language, username). This is a best-effort estimate, \
+not authoritative data.
+
+Respond ONLY with valid JSON (no markdown) of the form:
+{"region": "<ISO 3166-1 alpha-2 uppercase code, e.g. IT>", "confidence": "high|medium|low"}
+
+Rules:
+- Use explicit cues first: a country/city named in the bio, a flag emoji, a \
+national language written in the bio, an obvious diaspora/nationality mention.
+- Interface language alone is weak (English especially — do NOT assume US/UK \
+from English). Treat language-only guesses as "low" confidence.
+- If you genuinely cannot tell, return {"region": null, "confidence": "low"}. \
+Never invent a country you have no signal for."""
+
+
+async def infer_region(
+    *,
+    username: str | None = None,
+    display_name: str | None = None,
+    bio: str | None = None,
+    language: str | None = None,
+) -> dict[str, Any] | None:
+    """Best-effort country guess from public profile signals via gpt-4o-mini.
+
+    Returns ``{"region": "IT"|None, "confidence": "high|medium|low"}`` or
+    ``None`` when there is nothing to reason about or the call fails (callers
+    treat the estimate as optional, never fatal).
+    """
+    if not any([bio, display_name, language, username]):
+        return None
+    settings = get_settings()
+    client = get_openai()
+    user_prompt = (
+        f"Username: {username or 'unknown'}\n"
+        f"Display name: {display_name or 'unknown'}\n"
+        f"Interface language: {language or 'unknown'}\n"
+        f"Bio: {(bio or '').strip()[:500] or 'unknown'}"
+    )
+    try:
+        resp = await client.chat.completions.create(
+            model=settings.OPENAI_MODEL_SUMMARY,
+            response_format={"type": "json_object"},
+            temperature=0,
+            messages=[
+                {"role": "system", "content": _REGION_SYSTEM},
+                {"role": "user", "content": user_prompt},
+            ],
+        )
+        parsed = json.loads(resp.choices[0].message.content or "{}")
+    except Exception:  # noqa: BLE001 - estimate is optional, never fatal
+        log.warning("infer_region_failed", username=username)
+        return None
+
+    region = parsed.get("region")
+    if isinstance(region, str):
+        region = region.strip().upper()[:2] or None
+    else:
+        region = None
+    confidence = parsed.get("confidence")
+    if confidence not in ("high", "medium", "low"):
+        confidence = "low"
+    if region is None:
+        confidence = "low"
+    return {"region": region, "confidence": confidence}
+
+
 # whisper-1 rejects uploads over 25 MB; short-form videos are well under this.
 WHISPER_MAX_BYTES = 25 * 1024 * 1024
 

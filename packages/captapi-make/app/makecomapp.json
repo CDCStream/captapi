@@ -497,7 +497,7 @@
       },
       "tiktokProfileRegion": {
         "label": "TikTok Profile Region",
-        "description": "Where a TikTok creator's account is based (region) and its language, plus core profile stats — from a profile URL or @handle. region/language can be null when TikTok doesn't expose them. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "An AI-estimated creator country (estimatedRegion + confidence) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so estimatedRegion is inferred from public bio/name/language cues (best-effort, not authoritative). Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

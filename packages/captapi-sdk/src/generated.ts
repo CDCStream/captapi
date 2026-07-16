@@ -534,7 +534,7 @@ export class TiktokApi {
   channelDetails(params: TiktokChannelDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/channel-details", params);
   }
-  /** TikTok Profile Region — Where a TikTok creator's account is based (region) and its language, plus core profile stats — from a profile URL or @handle. region/language can be null when TikTok doesn't expose them. (1 credit) */
+  /** TikTok Profile Region — An AI-estimated creator country (estimatedRegion + confidence) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so estimatedRegion is inferred from public bio/name/language cues (best-effort, not authoritative). (2 credits) */
   profileRegion(params: TiktokProfileRegionParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/profile-region", params);
   }

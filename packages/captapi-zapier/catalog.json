@@ -770,8 +770,8 @@
     "platform": "TikTok",
     "name": "TikTok Profile Region",
     "path": "/v1/tiktok/profile-region",
-    "credits": 1,
-    "summary": "Where a TikTok creator's account is based (region) and its language, plus core profile stats — from a profile URL or @handle. region/language can be null when TikTok doesn't expose them.",
+    "credits": 2,
+    "summary": "An AI-estimated creator country (estimatedRegion + confidence) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so estimatedRegion is inferred from public bio/name/language cues (best-effort, not authoritative).",
     "params": [
       {
         "name": "url",

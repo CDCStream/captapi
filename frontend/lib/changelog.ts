@@ -51,12 +51,25 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
     category: "improvement",
+    title: "TikTok Profile Region now includes an AI-estimated country",
+    description:
+      "TikTok no longer exposes an account's country on any public surface, so the authoritative region field is almost always null. The TikTok Profile Region API now adds an AI-estimated country (estimatedRegion, e.g. IT or US) inferred from public profile cues — bio, display name, and language — alongside a regionConfidence (high/medium/low) and a regionSource, so it's always clearly labelled as a best-effort guess rather than data reported by TikTok. It now costs 2 credits per call to cover the extra inference step.",
+    items: [
+      "New estimatedRegion (ISO country), regionConfidence, and regionSource fields",
+      "Authoritative region is kept as-is (usually null) — never overwritten",
+      "Estimate is derived from public bio/name/language signals only",
+      "Now 2 credits per call; cached results stay free",
+    ],
+  },
+  {
+    publishedAt: "2026-07-16",
+    category: "improvement",
     title: "Cheaper pricing on native endpoints",
     description:
       "Endpoints that we serve directly from the platform's own data (no third-party actor) now cost far fewer credits. TikTok Comments drops to a flat 2 credits per call, and a range of native single-fetch endpoints drop to just 1 credit. Cached results are still free and failed or empty calls are never charged.",
     items: [
       "TikTok Comments: flat 2 credits per call (was up to 10)",
-      "TikTok Profile Region and YouTube Community Post Details: 1 credit",
+      "YouTube Community Post Details: 1 credit",
       "Twitch Profile, Twitch Clip, and Twitch User Schedule: 1 credit",
       "SoundCloud Artist and SoundCloud Track: 1 credit",
       "Facebook Marketplace Item: 1 credit",

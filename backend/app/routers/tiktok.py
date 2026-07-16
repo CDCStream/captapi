@@ -18,6 +18,7 @@ from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import (
     WHISPER_MAX_BYTES,
+    infer_region,
     summarize_transcript,
     transcribe_audio,
 )
@@ -48,7 +49,7 @@ CREDIT_SUMMARIZE = 4
 CREDIT_VIDEO_DETAILS = 1
 CREDIT_CHANNEL_DETAILS = 1
 CREDIT_COMMENTS = 2  # native (TikTok's own API); flat fee, our cost ~$0
-CREDIT_PROFILE_REGION = 1  # native-first from the profile page
+CREDIT_PROFILE_REGION = 2  # native-first from the profile page + LLM region estimate
 CREDIT_SEARCH = 2
 CREDIT_DOWNLOAD = 3
 
@@ -779,6 +780,29 @@ async def tiktok_channel_details(
         return ApiResponse(data=data)
 
 
+async def _add_estimated_region(data: dict[str, Any]) -> None:
+    """Attach an LLM-inferred country estimate to a profile-region payload.
+
+    TikTok no longer exposes an account's ``region`` on any public surface, so
+    ``region`` is almost always null. As a best-effort signal we let gpt-4o-mini
+    guess the creator's likely country from public cues (bio, display name,
+    language) and expose it in clearly-labelled, separate fields — never
+    overwriting the authoritative ``region``.
+    """
+    raw = data.get("raw") or {}
+    user = raw.get("user") or raw.get("authorMeta") or {}
+    bio = safe_str(user.get("signature"))
+    est = await infer_region(
+        username=data.get("username"),
+        display_name=data.get("displayName"),
+        bio=bio,
+        language=data.get("language"),
+    )
+    data["estimatedRegion"] = (est or {}).get("region")
+    data["regionConfidence"] = (est or {}).get("confidence")
+    data["regionSource"] = "inferred"
+
+
 @router.get("/profile-region", summary="TikTok profile region, language & core stats")
 async def tiktok_profile_region(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
@@ -801,6 +825,7 @@ async def tiktok_profile_region(
             native = await profile_region_native(handle)
             if native is not None:
                 ctx["source"] = "direct"
+                await _add_estimated_region(native)
                 return native
 
             items = await get_apify().run_actor_sync(
@@ -811,7 +836,9 @@ async def tiktok_profile_region(
             if not items:
                 raise HTTPException(status_code=404, detail="Profile not found")
             ctx["source"] = "apify"
-            return _normalize_profile_region(items[0], handle)
+            base = _normalize_profile_region(items[0], handle)
+            await _add_estimated_region(base)
+            return base
 
         data = await cached_or_run(
             endpoint="tiktok.profile-region",
