@@ -92,6 +92,23 @@ def _require_instagram_profile(value: str) -> str:
     return handle
 
 
+# A valid Instagram hashtag is word chars (unicode letters/digits/underscore)
+# with at least one letter. The Apify scrapers hand back the raw token, which
+# can keep trailing punctuation (e.g. "#DestinationDeRêv'" -> "DestinationDeRêv'")
+# or numeric-only tags. Clean them here so the Apify path matches the Decodo
+# path (instagram_decodo._HASHTAG_RE) and both sources return identical tags.
+def _clean_hashtag(tag: str) -> str | None:
+    trimmed = re.sub(r"^\W+|\W+$", "", tag or "", flags=re.UNICODE)
+    if not trimmed or not re.search(r"[^\W\d]", trimmed, flags=re.UNICODE):
+        return None
+    return trimmed
+
+
+def _clean_hashtags(raw: Any) -> list[str]:
+    cleaned = (_clean_hashtag(str(tag)) for tag in safe_list(raw))
+    return [tag for tag in cleaned if tag]
+
+
 def _normalize_post(item: dict) -> dict:
     owner = item.get("owner") or {}
     author = item.get("ownerUsername") or owner.get("username")
@@ -127,7 +144,7 @@ def _normalize_post(item: dict) -> dict:
             "likes": decodo.hidden_count(item.get("likesCount") or item.get("likeCount")),
             "comments": decodo.hidden_count(item.get("commentsCount") or item.get("commentCount")),
         },
-        "hashtags": safe_list(item.get("hashtags")),
+        "hashtags": _clean_hashtags(item.get("hashtags")),
         "mentions": safe_list(item.get("mentions")),
     }
 

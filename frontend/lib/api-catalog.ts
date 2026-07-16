@@ -1598,9 +1598,14 @@ const PROFILE_URL: Record<PlatformId, string> = {
 function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
   switch (p.name) {
     case "q":
+    case "query": {
+      // Keep the Try-it default (and cURL snippet) in sync with the captured
+      // example response so users don't see e.g. q=skincare next to a "travel"
+      // example. Fall back to a sensible default when no snapshot exists.
+      const captured = API_EXAMPLES[ep.slug]?.query;
+      if (typeof captured === "string" && captured.trim()) return captured;
       return ep.platform === "youtube" ? "structured data api" : "skincare";
-    case "query":
-      return "skincare";
+    }
     case "country":
       return "US";
     case "region":
