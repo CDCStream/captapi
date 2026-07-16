@@ -770,8 +770,8 @@
     "platform": "tiktok",
     "name": "TikTok Profile Region",
     "path": "/v1/tiktok/profile-region",
-    "credits": 2,
-    "summary": "An AI-estimated creator country (estimatedRegion + confidence) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so estimatedRegion is inferred from public bio/name/language cues (best-effort, not authoritative).",
+    "credits": 3,
+    "summary": "A creator's region (TikTok's own when exposed, else their dominant audience country — regionSource says which), an independent AI-estimated home country (estimatedRegion + confidence), interface language, and core profile stats, from a profile URL or @handle.",
     "params": [
       {
         "name": "url",
@@ -792,8 +792,8 @@
     "platform": "tiktok",
     "name": "TikTok Audience Demographics",
     "path": "/v1/tiktok/audience-demographics",
-    "credits": 7,
-    "summary": "Audience and demographic signals for a TikTok profile.",
+    "credits": 3,
+    "summary": "Ranked country breakdown of a TikTok creator's audience (audienceLocations: country, countryCode, count, percentage), sampled natively from the people commenting on their recent videos. Engagement-based signal, not a follower census. From a profile URL or @handle.",
     "params": [
       {
         "name": "url",

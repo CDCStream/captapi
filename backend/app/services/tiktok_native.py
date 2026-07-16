@@ -17,6 +17,7 @@ from __future__ import annotations
 import asyncio
 import json
 import re
+from collections import Counter
 from datetime import datetime, timezone
 from typing import Any
 
@@ -404,3 +405,52 @@ async def profile_region_native(handle: str) -> dict[str, Any] | None:
         "profileImage": safe_str(user.get("avatarLarger") or user.get("avatarMedium")),
         "raw": {"user": user, "statsV2": stats_v2},
     }
+
+
+# --- Audience geography (commenter region sampling) ------------------------
+#
+# TikTok never exposes a creator's follower geography publicly, but the mobile
+# comment API returns each commenter's ``region`` (ISO-3166 alpha-2 country
+# code). Sampling commenters across a creator's recent videos and tallying
+# those regions yields an engagement-based audience-country breakdown — the
+# same signal third-party "audience" endpoints surface. Video IDs still have to
+# come from the caller (TikTok gates the post list behind signed params).
+async def audience_regions_native(
+    aweme_ids: list[str], target_total: int = 500, per_video: int = 150
+) -> list[str] | None:
+    """Collect commenter country codes across the given videos.
+
+    Fetches comment pages natively and pulls ``user.region`` from each comment,
+    stopping once ``target_total`` codes are gathered or the videos are
+    exhausted. Returns the list of ISO country codes (with duplicates, ready to
+    tally) or ``None`` if every video's comments were blocked.
+    """
+    regions: list[str] = []
+    any_success = False
+    for aweme_id in aweme_ids:
+        if len(regions) >= target_total:
+            break
+        collected = 0
+        cur = "0"
+        for _ in range(per_video // 15 + 2):
+            if collected >= per_video or len(regions) >= target_total:
+                break
+            want = min(30, per_video - collected)
+            page = await _comment_page(aweme_id, cur, want)
+            if page is None:
+                break  # this video is blocked right now; try the next one
+            any_success = True
+            comments = page.get("comments") or []
+            for c in comments:
+                user = c.get("user") or {}
+                code = safe_str(user.get("region"))
+                if code:
+                    regions.append(code.strip().upper())
+            collected += len(comments)
+            nxt = page.get("cursor")
+            cur = str(nxt) if nxt is not None else cur
+            if not page.get("has_more"):
+                break
+    if not any_success:
+        return None
+    return regions

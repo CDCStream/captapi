@@ -5755,10 +5755,10 @@
       "username": "khaby.lame",
       "displayName": "Khabane lame",
       "url": "https://www.tiktok.com/@khaby.lame",
-      "region": null,
+      "region": "PK",
+      "regionSource": "audience",
       "estimatedRegion": "IT",
       "regionConfidence": "high",
-      "regionSource": "inferred",
       "language": "en",
       "followers": 162351219,
       "following": 81,
@@ -5833,108 +5833,54 @@
     "credits": null,
     "data": {
       "platform": "tiktok",
-      "username": "khaby.lame",
-      "profile": {
-        "platform": "tiktok",
-        "username": "khaby.lame",
-        "displayName": "Khabane lame",
-        "url": "https://www.tiktok.com/@khaby.lame",
-        "region": null,
-        "language": "en",
-        "followers": 162300000,
-        "following": 80,
-        "likes": 2600000000,
-        "videos": 1336,
-        "verified": true,
-        "private": false,
-        "profileImage": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=c3d4da3d&x-expires=1783274400&x-signature=H%2BOg3bdEl39rUi%2BIhNaXAJvqxgk%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5",
-        "raw": {
-          "id": "7657944906748398879",
-          "text": "You can keep the keys bro ✌🏾#learnfromkhaby #comedy ",
-          "textLanguage": "en",
-          "createTime": 1783004253,
-          "createTimeISO": "2026-07-02T14:57:33.000Z",
-          "isAd": false,
-          "authorMeta": {
-            "id": "127905465618821121",
-            "name": "khaby.lame",
-            "profileUrl": "https://www.tiktok.com/@khaby.lame",
-            "nickName": "Khabane lame",
-            "verified": true,
-            "signature": "Se vuoi ridere sei nel posto giusto😎 If u wanna laugh u r in the right place😎",
-            "bioLink": null,
-            "avatar": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=c3d4da3d&x-expires=1783274400&x-signature=H%2BOg3bdEl39rUi%2BIhNaXAJvqxgk%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5",
-            "commerceUserInfo": {
-              "commerceUser": false
-            },
-            "privateAccount": false,
-            "roomId": "",
-            "ttSeller": false,
-            "createTime": 1470866554,
-            "following": 80,
-            "friends": 76,
-            "fans": 162300000,
-            "heart": 2600000000,
-            "video": 1336,
-            "digg": 0,
-            "followDatasetUrl": null,
-            "originalAvatarUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=c3d4da3d&x-expires=1783274400&x-signature=H%2BOg3bdEl39rUi%2BIhNaXAJvqxgk%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5"
-          },
-          "musicMeta": {
-            "musicName": "original sound",
-            "musicAuthor": "Khabane lame",
-            "musicOriginal": true,
-            "playUrl": "https://v16m.tiktokcdn-us.com/23cee21afe6381d210e8ece9f0bd7e43/6a485a08/video/tos/useast8/tos-useast8-v-27dcd7-tx2/owffFAAoUCIZ7rhMCXLIAiG9ojET44AIItehqP/?a=1233&bti=ODszNWYuMDE6&&bt=125&ft=GSDrKInz7Th94mqGXq8Zmo&mime_type=audio_mpeg&rc=M282cW85cnE6PDMzaTU8NEBpM282cW85cnE6PDMzaTU8NEBuLnJxMmRrbDBhLS1kMTJzYSNuLnJxMmRrbDBhLS1kMTJzcw%3D%3D&vvpl=1&l=2026070318545548F87380618C6C17FD47&btag=e00048000",
-            "coverMediumUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=7ac3f1d0&x-expires=1783274400&x-signature=jkEF6wkH33NN%2BsHegV%2FSPo3Gw6k%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
-            "musicId": "7657944865078004511",
-            "originalCoverMediumUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=7ac3f1d0&x-expires=1783274400&x-signature=jkEF6wkH33NN%2BsHegV%2FSPo3Gw6k%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8"
-          },
-          "webVideoUrl": "https://www.tiktok.com/@khaby.lame/video/7657944906748398879",
-          "videoMeta": {
-            "height": 1280,
-            "width": 720,
-            "duration": 40,
-            "coverUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-p-0068-tx2/oEQfFAAOUCI8BbNMEoLIAiG3IjAjBtAQIteeqP~tplv-tiktokx-origin.image?dr=9636&x-expires=1783274400&x-signature=nFB4GEjBjWzeVToG2d43z4%2FJJKw%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast8",
-            "definition": "720p",
-            "format": "mp4",
-            "subtitleLinks": null,
-            "transcriptionLink": null,
-            "originalCoverUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-p-0068-tx2/oEQfFAAOUCI8BbNMEoLIAiG3IjAjBtAQIteeqP~tplv-tiktokx-origin.image?dr=9636&x-expires=1783274400&x-signature=nFB4GEjBjWzeVToG2d43z4%2FJJKw%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast8"
-          },
-          "diggCount": 111800,
-          "shareCount": 1466,
-          "playCount": 1100000,
-          "collectCount": 4527,
-          "commentCount": 2773,
-          "repostCount": 0,
-          "mentions": [],
-          "detailedMentions": [],
-          "hashtags": [
-            {
-              "name": "learnfromkhaby"
-            },
-            {
-              "name": "comedy"
-            }
-          ],
-          "effectStickers": [],
-          "isSlideshow": false,
-          "isPinned": false,
-          "isSponsored": false,
-          "mediaUrls": [],
-          "input": "khaby.lame",
-          "fromProfileSection": "videos",
-          "commentsDatasetUrl": null
+      "username": "shakira",
+      "url": "https://www.tiktok.com/@shakira",
+      "videosSampled": 12,
+      "sampleSize": 520,
+      "audienceLocations": [
+        {
+          "country": "Mexico",
+          "countryCode": "MX",
+          "count": 83,
+          "percentage": "15.96%"
+        },
+        {
+          "country": "United States",
+          "countryCode": "US",
+          "count": 34,
+          "percentage": "6.54%"
+        },
+        {
+          "country": "Venezuela",
+          "countryCode": "VE",
+          "count": 24,
+          "percentage": "4.62%"
+        },
+        {
+          "country": "Colombia",
+          "countryCode": "CO",
+          "count": 21,
+          "percentage": "4.04%"
+        },
+        {
+          "country": "Argentina",
+          "countryCode": "AR",
+          "count": 20,
+          "percentage": "3.85%"
+        },
+        {
+          "country": "France",
+          "countryCode": "FR",
+          "count": 20,
+          "percentage": "3.85%"
+        },
+        {
+          "country": "Spain",
+          "countryCode": "ES",
+          "count": 15,
+          "percentage": "2.88%"
         }
-      },
-      "region": null,
-      "language": "en",
-      "audienceSize": 162300000,
-      "ageDistribution": null,
-      "genderDistribution": null,
-      "geography": null,
-      "interests": null,
-      "raw": null
+      ]
     }
   },
   "tiktok-search-suggestions": {

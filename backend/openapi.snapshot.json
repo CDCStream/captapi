@@ -2030,7 +2030,7 @@
         "tags": [
           "TikTok"
         ],
-        "summary": "TikTok profile region, language & core stats",
+        "summary": "TikTok creator region, language & core stats",
         "operationId": "tiktok_profile_region_v1_tiktok_profile_region_get",
         "security": [
           {
@@ -2402,7 +2402,7 @@
         "tags": [
           "TikTok"
         ],
-        "summary": "TikTok profile audience/demographic signals",
+        "summary": "TikTok audience countries (by engaged commenters)",
         "operationId": "tiktok_audience_demographics_v1_tiktok_audience_demographics_get",
         "security": [
           {

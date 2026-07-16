@@ -123,8 +123,8 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `tiktok_video_details` | `/v1/tiktok/video-details` | `url` (string), `cache`? (boolean) | 1 |
 | `tiktok_comments` | `/v1/tiktok/comments` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |
 | `tiktok_channel_details` | `/v1/tiktok/channel-details` | `url` (string), `cache`? (boolean) | 1 |
-| `tiktok_profile_region` | `/v1/tiktok/profile-region` | `url` (string), `cache`? (boolean) | 2 |
-| `tiktok_audience_demographics` | `/v1/tiktok/audience-demographics` | `url` (string), `cache`? (boolean) | 7 |
+| `tiktok_profile_region` | `/v1/tiktok/profile-region` | `url` (string), `cache`? (boolean) | 3 |
+| `tiktok_audience_demographics` | `/v1/tiktok/audience-demographics` | `url` (string), `cache`? (boolean) | 3 |
 | `tiktok_search` | `/v1/tiktok/search` | `q` (string), `limit`? (number), `cache`? (boolean) | 14 |
 | `tiktok_search_suggestions` | `/v1/tiktok/search-suggestions` | `q` (string), `country`? (string), `language`? (string), `limit`? (number), `cache`? (boolean) | 28 |
 | `tiktok_video_download` | `/v1/tiktok/video-download` | `url` (string), `cache`? (boolean) | 3 |

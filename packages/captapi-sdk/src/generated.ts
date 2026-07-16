@@ -534,11 +534,11 @@ export class TiktokApi {
   channelDetails(params: TiktokChannelDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/channel-details", params);
   }
-  /** TikTok Profile Region — An AI-estimated creator country (estimatedRegion + confidence) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so estimatedRegion is inferred from public bio/name/language cues (best-effort, not authoritative). (2 credits) */
+  /** TikTok Profile Region — A creator's region (TikTok's own when exposed, else their dominant audience country — regionSource says which), an independent AI-estimated home country (estimatedRegion + confidence), interface language, and core profile stats, from a profile URL or @handle. (3 credits) */
   profileRegion(params: TiktokProfileRegionParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/profile-region", params);
   }
-  /** TikTok Audience Demographics — Audience and demographic signals for a TikTok profile. (7 credits) */
+  /** TikTok Audience Demographics — Ranked country breakdown of a TikTok creator's audience (audienceLocations: country, countryCode, count, percentage), sampled natively from the people commenting on their recent videos. Engagement-based signal, not a follower census. From a profile URL or @handle. (3 credits) */
   audienceDemographics(params: TiktokAudienceDemographicsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/audience-demographics", params);
   }

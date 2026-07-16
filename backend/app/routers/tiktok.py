@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import math
 import re
+from collections import Counter
 from datetime import datetime, timezone
 from typing import Any
 
@@ -24,10 +25,12 @@ from app.services.openai_client import (
 )
 from app.services import tiktok_native
 from app.services.tiktok_native import (
+    audience_regions_native,
     channel_details_native,
     profile_region_native,
     video_details_native,
 )
+from app.utils.countries import country_name
 from app.utils.formatters import (
     first_present,
     normalize_language_code,
@@ -49,9 +52,19 @@ CREDIT_SUMMARIZE = 4
 CREDIT_VIDEO_DETAILS = 1
 CREDIT_CHANNEL_DETAILS = 1
 CREDIT_COMMENTS = 2  # native (TikTok's own API); flat fee, our cost ~$0
-CREDIT_PROFILE_REGION = 2  # native-first from the profile page + LLM region estimate
+CREDIT_PROFILE_REGION = 3  # native profile + LLM estimate + audience-country region fill
+CREDIT_AUDIENCE = 3  # video list (actor) + native commenter-region sampling
 CREDIT_SEARCH = 2
 CREDIT_DOWNLOAD = 3
+
+# Audience-country sampling: how many recent videos to pull commenter regions
+# from, and how many commenter country codes to gather before tallying. The
+# full endpoint samples wide; the profile-region region fill samples lighter.
+AUDIENCE_VIDEO_SAMPLE = 12
+AUDIENCE_TARGET_TOTAL = 500
+REGION_FILL_VIDEO_SAMPLE = 6
+REGION_FILL_TARGET_TOTAL = 200
+REGION_FILL_MIN_SAMPLE = 20  # need at least this many codes to trust a top country
 
 # ---------------------------------------------------------------------------
 # Per-result credit rates for list endpoints.
@@ -780,6 +793,49 @@ async def tiktok_channel_details(
         return ApiResponse(data=data)
 
 
+def _tally_locations(codes: list[str]) -> list[dict[str, Any]]:
+    """Turn a list of ISO country codes (with duplicates) into a sorted
+    audience-location breakdown: ``[{country, countryCode, count, percentage}]``."""
+    counts = Counter(codes)
+    total = sum(counts.values())
+    if not total:
+        return []
+    out: list[dict[str, Any]] = []
+    for code, n in counts.most_common():
+        out.append(
+            {
+                "country": country_name(code),
+                "countryCode": code,
+                "count": n,
+                "percentage": f"{n / total * 100:.2f}%",
+            }
+        )
+    return out
+
+
+async def _fetch_audience_locations(
+    handle: str, settings: Any, *, video_sample: int, target_total: int
+) -> tuple[list[dict[str, Any]], int]:
+    """Sample commenter countries across a creator's recent videos.
+
+    Video IDs come from the profile actor (TikTok gates the post list behind
+    signed params), then commenter ``region`` codes are pulled natively from
+    TikTok's own comment API and tallied. Returns ``(audienceLocations,
+    videosSampled)``; ``audienceLocations`` is empty when comments are blocked.
+    """
+    items = await get_apify().run_actor_sync(
+        settings.APIFY_ACTOR_TIKTOK,
+        {"profiles": [handle], "resultsPerPage": video_sample, "shouldDownloadVideos": False},
+        max_items=video_sample,
+    )
+    aweme_ids = [safe_str(i.get("id") or i.get("videoId")) for i in (items or [])]
+    aweme_ids = [a for a in aweme_ids if a]
+    if not aweme_ids:
+        return [], 0
+    codes = await audience_regions_native(aweme_ids, target_total=target_total)
+    return _tally_locations(codes or []), len(aweme_ids)
+
+
 async def _add_estimated_region(data: dict[str, Any]) -> None:
     """Attach an LLM-inferred country estimate to a profile-region payload.
 
@@ -800,10 +856,32 @@ async def _add_estimated_region(data: dict[str, Any]) -> None:
     )
     data["estimatedRegion"] = (est or {}).get("region")
     data["regionConfidence"] = (est or {}).get("confidence")
-    data["regionSource"] = "inferred"
 
 
-@router.get("/profile-region", summary="TikTok profile region, language & core stats")
+async def _fill_region_from_audience(data: dict[str, Any], handle: str, settings: Any) -> None:
+    """When TikTok doesn't expose ``region`` (almost always), fall back to the
+    creator's dominant audience country — the most common commenter country
+    sampled natively from their videos. Flagged via ``regionSource`` so callers
+    can tell an authoritative region from this engagement-based proxy."""
+    if data.get("region"):
+        data["regionSource"] = "tiktok"
+        return
+    data["regionSource"] = None
+    try:
+        locations, _ = await _fetch_audience_locations(
+            handle, settings,
+            video_sample=REGION_FILL_VIDEO_SAMPLE,
+            target_total=REGION_FILL_TARGET_TOTAL,
+        )
+    except Exception:  # noqa: BLE001 - region fill is best-effort, never fatal
+        return
+    top = locations[0] if locations else None
+    if top and top["count"] >= REGION_FILL_MIN_SAMPLE:
+        data["region"] = top["countryCode"]
+        data["regionSource"] = "audience"
+
+
+@router.get("/profile-region", summary="TikTok creator region, language & core stats")
 async def tiktok_profile_region(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -825,24 +903,25 @@ async def tiktok_profile_region(
             native = await profile_region_native(handle)
             if native is not None:
                 ctx["source"] = "direct"
-                await _add_estimated_region(native)
-                return native
+                base = native
+            else:
+                items = await get_apify().run_actor_sync(
+                    settings.APIFY_ACTOR_TIKTOK_PROFILE,
+                    {"profiles": [handle], "resultsPerPage": 1},
+                    max_items=1,
+                )
+                if not items:
+                    raise HTTPException(status_code=404, detail="Profile not found")
+                ctx["source"] = "apify"
+                base = _normalize_profile_region(items[0], handle)
 
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_PROFILE,
-                {"profiles": [handle], "resultsPerPage": 1},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Profile not found")
-            ctx["source"] = "apify"
-            base = _normalize_profile_region(items[0], handle)
             await _add_estimated_region(base)
+            await _fill_region_from_audience(base, handle, settings)
             return base
 
         data = await cached_or_run(
             endpoint="tiktok.profile-region",
-            params={"handle": handle, "v": 2},
+            params={"handle": handle, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1075,7 +1154,7 @@ async def tiktok_popular_creators(
         return ApiResponse(data=data)
 
 
-@router.get("/audience-demographics", summary="TikTok profile audience/demographic signals")
+@router.get("/audience-demographics", summary="TikTok audience countries (by engaged commenters)")
 async def tiktok_audience_demographics(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -1088,57 +1167,33 @@ async def tiktok_audience_demographics(
         endpoint="/v1/tiktok/audience-demographics",
         platform="tiktok",
         resource_url=f"https://www.tiktok.com/@{handle}",
-        base_credits=7,
+        base_credits=CREDIT_AUDIENCE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-
-            async def _audience() -> dict[str, Any]:
-                # Some third-party audience actors expose richer fields, but not
-                # all support a stable input. Keep this optional and always
-                # return the reliable public profile-derived signals.
-                if not settings.APIFY_ACTOR_TIKTOK_AUDIENCE:
-                    return {}
-                try:
-                    audience_items = await apify.run_actor_sync(
-                        settings.APIFY_ACTOR_TIKTOK_AUDIENCE,
-                        {"username": handle, "profileUrl": f"https://www.tiktok.com/@{handle}"},
-                        max_items=1,
-                    )
-                    return audience_items[0] if audience_items else {}
-                except Exception:
-                    return {}
-
-            # Both actors are independent; running them concurrently saves a
-            # full actor run (~10-120s) per uncached request.
-            profile_items, demographics = await asyncio.gather(
-                apify.run_actor_sync(
-                    settings.APIFY_ACTOR_TIKTOK_PROFILE,
-                    {"profiles": [handle], "resultsPerPage": 1},
-                    max_items=1,
-                ),
-                _audience(),
+            # TikTok never publishes follower geography, but every commenter's
+            # country IS exposed on its own comment API. Sampling commenters
+            # across the creator's recent videos yields an engagement-based
+            # audience-country breakdown — computed natively, no audience actor.
+            locations, videos_sampled = await _fetch_audience_locations(
+                handle, settings,
+                video_sample=AUDIENCE_VIDEO_SAMPLE,
+                target_total=AUDIENCE_TARGET_TOTAL,
             )
-            if not profile_items:
-                raise HTTPException(status_code=404, detail="Profile not found")
-            profile = _normalize_profile_region(profile_items[0], handle)
+            if videos_sampled == 0:
+                raise HTTPException(status_code=404, detail="Profile not found or has no public videos")
+            ctx["source"] = "direct"
             return {
                 "platform": "tiktok",
                 "username": handle,
-                "profile": profile,
-                "region": profile.get("region"),
-                "language": profile.get("language"),
-                "audienceSize": profile.get("followers"),
-                "ageDistribution": demographics.get("age_distribution") or demographics.get("ageDistribution"),
-                "genderDistribution": demographics.get("gender_distribution") or demographics.get("genderDistribution"),
-                "geography": demographics.get("geography") or demographics.get("countries"),
-                "interests": demographics.get("interest_affinities") or demographics.get("interests"),
-                "raw": demographics or None,
+                "url": f"https://www.tiktok.com/@{handle}",
+                "videosSampled": videos_sampled,
+                "sampleSize": sum(loc["count"] for loc in locations),
+                "audienceLocations": locations,
             }
 
         data = await cached_or_run(
             endpoint="tiktok.audience-demographics",
-            params={"handle": handle, "v": 2},
+            params={"handle": handle, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

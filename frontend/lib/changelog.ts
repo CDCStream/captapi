@@ -51,14 +51,27 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
     category: "improvement",
-    title: "TikTok Profile Region now includes an AI-estimated country",
+    title: "TikTok Audience Demographics is now native — a real country breakdown",
     description:
-      "TikTok no longer exposes an account's country on any public surface, so the authoritative region field is almost always null. The TikTok Profile Region API now adds an AI-estimated country (estimatedRegion, e.g. IT or US) inferred from public profile cues — bio, display name, and language — alongside a regionConfidence (high/medium/low) and a regionSource, so it's always clearly labelled as a best-effort guess rather than data reported by TikTok. It now costs 2 credits per call to cover the extra inference step.",
+      "The TikTok Audience Demographics API now returns a ranked breakdown of a creator's audience by country. TikTok never publishes follower geography, but every commenter's country is exposed on its own data, so we sample the people engaging across a creator's recent videos and tally their countries into audienceLocations — each with a country name, ISO countryCode, a raw count, and a percentage of the sample, plus videosSampled and sampleSize for transparency. It's computed natively from TikTok's own data (no third-party audience panel) and now costs a flat 3 credits.",
     items: [
-      "New estimatedRegion (ISO country), regionConfidence, and regionSource fields",
-      "Authoritative region is kept as-is (usually null) — never overwritten",
-      "Estimate is derived from public bio/name/language signals only",
-      "Now 2 credits per call; cached results stay free",
+      "New audienceLocations array: country, countryCode, count, and percentage",
+      "Engagement-based country mix sampled from real commenters",
+      "videosSampled and sampleSize included so you can judge the sample",
+      "Native, no audience actor — flat 3 credits; cached results stay free",
+    ],
+  },
+  {
+    publishedAt: "2026-07-16",
+    category: "improvement",
+    title: "TikTok Profile Region now fills region with the top audience country",
+    description:
+      "TikTok almost never exposes an account's own country, so the region field used to be null. It's now filled with the best available signal: TikTok's authoritative region when present, otherwise the creator's dominant audience country — the most common country of the people commenting on their videos, sampled natively. A regionSource field tells you which one you got (\"tiktok\", \"audience\", or null). You also still get an independent AI-estimated home country (estimatedRegion) with a confidence score. It now costs 3 credits per call to cover the audience sampling.",
+    items: [
+      "region is now populated: TikTok's own value, else the dominant audience country",
+      "regionSource labels the origin — \"tiktok\", \"audience\", or null",
+      "estimatedRegion (AI-inferred home country) + regionConfidence still included",
+      "Now 3 credits per call; cached results stay free",
     ],
   },
   {

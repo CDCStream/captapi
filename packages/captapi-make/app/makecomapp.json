@@ -497,7 +497,7 @@
       },
       "tiktokProfileRegion": {
         "label": "TikTok Profile Region",
-        "description": "An AI-estimated creator country (estimatedRegion + confidence) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so estimatedRegion is inferred from public bio/name/language cues (best-effort, not authoritative). Costs ~2 credits (cached results free, failures never charged).",
+        "description": "A creator's region (TikTok's own when exposed, else their dominant audience country — regionSource says which), an independent AI-estimated home country (estimatedRegion + confidence), interface language, and core profile stats, from a profile URL or @handle. Costs ~3 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -514,7 +514,7 @@
       },
       "tiktokAudienceDemographics": {
         "label": "TikTok Audience Demographics",
-        "description": "Audience and demographic signals for a TikTok profile. Costs ~7 credits (cached results free, failures never charged).",
+        "description": "Ranked country breakdown of a TikTok creator's audience (audienceLocations: country, countryCode, count, percentage), sampled natively from the people commenting on their recent videos. Engagement-based signal, not a follower census. From a profile URL or @handle. Costs ~3 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
