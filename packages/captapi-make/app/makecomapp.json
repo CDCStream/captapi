@@ -463,7 +463,7 @@
       },
       "tiktokComments": {
         "label": "TikTok Comments",
-        "description": "Comments on a TikTok video. Costs ~10 credits (cached results free, failures never charged).",
+        "description": "Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500). Costs ~10 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

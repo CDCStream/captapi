@@ -1884,7 +1884,7 @@
         "tags": [
           "TikTok"
         ],
-        "summary": "TikTok video comments",
+        "summary": "Comments on a TikTok video (text, author, likes, timestamp) with cursor pagination",
         "operationId": "tiktok_comments_v1_tiktok_comments_get",
         "security": [
           {
@@ -1912,6 +1912,24 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset, e.g. 50).",
+              "title": "Cursor"
+            },
+            "description": "Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset, e.g. 50)."
           },
           {
             "name": "cache",

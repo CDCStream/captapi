@@ -622,14 +622,23 @@ async def tiktok_summarize(
         return ApiResponse(data=data)
 
 
-@router.get("/comments", summary="TikTok video comments")
+@router.get("/comments", summary="Comments on a TikTok video (text, author, likes, timestamp) with cursor pagination")
 async def tiktok_comments(
     url: str = Query(...),
     limit: int = Query(50, ge=1, le=500),
+    cursor: str | None = Query(
+        None,
+        description="Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset, e.g. 50).",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    _require_tiktok_video_url(url)
+    aweme_id = _require_tiktok_video_url(url)
+    if cursor is not None and not cursor.isdigit():
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid cursor. Pass the nextCursor value from a previous response.",
+        )
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_COMMENTS, 2)
     async with billed_call(
@@ -640,12 +649,36 @@ async def tiktok_comments(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Primary: TikTok's own cursor-paginated mobile comment API (no actor
+            # cost). Falls back to the Apify actor if every proxy IP is blocked.
+            native = await tiktok_native.comments_native(aweme_id, cursor, limit)
+            if native is not None:
+                comments, next_cursor, total = native
+                ctx["source"] = "direct"
+                payload = {
+                    "platform": "tiktok",
+                    "url": url,
+                    "totalComments": total,
+                    "totalReturned": len(comments),
+                    "comments": comments,
+                    "nextCursor": next_cursor,
+                }
+                return {k: v for k, v in payload.items() if v is not None}
+
+            # The Apify actor is not cursor-based, so it only serves the first
+            # page; deeper pages require the native path above.
+            if cursor:
+                raise HTTPException(
+                    status_code=502,
+                    detail="Failed to fetch the next page. Retry shortly.",
+                )
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK_COMMENTS,
                 {"postURLs": [url], "commentsPerPost": limit},
                 max_items=limit,
             )
+            ctx["source"] = "apify"
             comments = []
             for c in items[:limit]:
                 user = c.get("user") or {}
@@ -657,7 +690,6 @@ async def tiktok_comments(
                         "authorAvatarUrl": safe_str(c.get("avatarThumbnail") or user.get("avatarThumb")),
                         "likeCount": safe_int(c.get("diggCount") or c.get("likeCount")) or 0,
                         "publishedAt": safe_str(c.get("createTimeISO")),
-                        "replyCount": safe_int(c.get("replyCommentTotal")) or 0,
                     }
                 )
             return {
@@ -665,11 +697,12 @@ async def tiktok_comments(
                 "url": url,
                 "totalReturned": len(comments),
                 "comments": comments,
+                "nextCursor": None,
             }
 
         data = await cached_or_run(
             endpoint="tiktok.comments",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

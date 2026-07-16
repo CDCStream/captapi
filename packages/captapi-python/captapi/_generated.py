@@ -455,14 +455,15 @@ class TiktokApi:
         """
         return self._t.get("/v1/tiktok/video-details", {"url": url, "cache": cache})
 
-    def comments(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Comments — Comments on a TikTok video. (10 credits)
+    def comments(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Comments — Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500). (10 credits)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/tiktok/comments", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/tiktok/comments", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def channel_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Channel Details — Profile info & stats for a TikTok user. (1 credit)
@@ -673,14 +674,15 @@ class AsyncTiktokApi:
         """
         return await self._t.get("/v1/tiktok/video-details", {"url": url, "cache": cache})
 
-    async def comments(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Comments — Comments on a TikTok video. (10 credits)
+    async def comments(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Comments — Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500). (10 credits)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/tiktok/comments", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/tiktok/comments", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def channel_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Channel Details — Profile info & stats for a TikTok user. (1 credit)

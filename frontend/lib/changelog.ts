@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
     category: "improvement",
+    title: "TikTok Comments is now native with cursor pagination",
+    description:
+      "The TikTok Comments API now fetches straight from TikTok's own data (no third-party actor) and supports true cursor pagination. Each response includes totalComments (the video's full comment count) and a nextCursor — pass it back in the cursor parameter to page through every comment, up to 500 per call. Comments still return text, author username and avatar, like count, and publish time. Billing is unchanged (per comment returned), and the API automatically falls back to the actor if the native path is unavailable.",
+    items: [
+      "Native TikTok source — no Apify actor on the hot path",
+      "Cursor pagination: pass the returned nextCursor to fetch the next page",
+      "New totalComments field with the video's full comment count",
+      "Reply threads still available via the TikTok Comment Replies API",
+    ],
+  },
+  {
+    publishedAt: "2026-07-16",
+    category: "improvement",
     title: "cache defaults to false — fresh data unless you opt in",
     description:
       "The optional cache query parameter on every data endpoint now defaults to false, so requests fetch fresh data unless you explicitly pass cache=true. Previously the default was true (serve from the 24h cache). Pass cache=true when you want the cached copy for free/instant repeat lookups.",

@@ -330,6 +330,8 @@ export interface TiktokCommentsParams {
   url: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset). */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -524,7 +526,7 @@ export class TiktokApi {
   videoDetails(params: TiktokVideoDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/video-details", params);
   }
-  /** TikTok Comments — Comments on a TikTok video. (10 credits) */
+  /** TikTok Comments — Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500). (10 credits) */
   comments(params: TiktokCommentsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/comments", params);
   }

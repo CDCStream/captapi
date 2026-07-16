@@ -715,7 +715,7 @@
     "name": "TikTok Comments",
     "path": "/v1/tiktok/comments",
     "credits": 10,
-    "summary": "Comments on a TikTok video.",
+    "summary": "Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500).",
     "params": [
       {
         "name": "url",
@@ -728,6 +728,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset)."
       },
       {
         "name": "cache",

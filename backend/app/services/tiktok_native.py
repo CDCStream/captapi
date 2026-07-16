@@ -14,6 +14,7 @@ Every function returns data in the exact shapes the router already emits, or
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from datetime import datetime, timezone
@@ -22,6 +23,7 @@ from typing import Any
 import httpx
 
 from app.services.http_fetch import fetch as proxy_fetch
+from app.services.http_fetch import proxy_for
 from app.utils.formatters import safe_float, safe_int, safe_str
 
 TT_HEADERS: dict[str, str] = {
@@ -217,6 +219,156 @@ async def channel_details_native(handle: str, url: str) -> dict[str, Any] | None
         "externalUrl": safe_str(bio_link),
         "category": safe_str((user.get("commerceUserInfo") or {}).get("category")),
     }
+
+
+# --- Comments (mobile aweme API, cursor-paginated) -------------------------
+#
+# Comments are NOT in the page's rehydration blob, and TikTok's *web* comment
+# endpoint (www.tiktok.com/api/comment/list/) needs signed params (X-Bogus /
+# msToken) and returns an empty body without them. The *mobile* aweme endpoint,
+# however, serves logged-out comments with plain musical.ly device params and no
+# signature — as long as the request exits from a residential IP (datacenter and
+# some residential IPs get soft-blocked with status_code 2146). It is natively
+# cursor-paginated: each page returns ``cursor`` (next offset), ``has_more``,
+# and ``total``.
+_TT_COMMENT_HOSTS = (
+    "https://api22-normal-c-useast2a.tiktokv.com/aweme/v1/comment/list/",
+    "https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/comment/list/",
+)
+_TT_MOBILE_UA = (
+    "com.zhiliaoapp.musically/2023600030 (Linux; U; Android 10; en; Pixel 4; "
+    "Build/QQ3A.200805.001)"
+)
+_TT_COMMENT_PARAMS: dict[str, str] = {
+    "aid": "1233",
+    "device_id": "7318518857994389254",
+    "iid": "7318518857994389254",
+    "device_type": "Pixel 4",
+    "device_platform": "android",
+    "os_version": "10",
+    "version_code": "230600",
+    "app_name": "musical_ly",
+    "channel": "googleplay",
+    "region": "US",
+    "sys_region": "US",
+    "app_language": "en",
+    "language": "en",
+}
+
+
+def _map_comment(c: dict[str, Any]) -> dict[str, Any] | None:
+    cid = safe_str(c.get("cid") or c.get("id"))
+    if not cid:
+        return None
+    user = c.get("user") or {}
+    avatars = (user.get("avatar_thumb") or {}).get("url_list") or []
+    return {
+        "id": cid,
+        "text": (safe_str(c.get("text")) or "").strip(),
+        "author": safe_str(user.get("unique_id") or user.get("nickname")),
+        "authorAvatarUrl": safe_str(avatars[0] if avatars else None),
+        "likeCount": safe_int(c.get("digg_count")) or 0,
+        "publishedAt": _iso(c.get("create_time")),
+    }
+
+
+def _us_residential_proxy() -> str | None:
+    """Residential proxy URL pinned to US exits (Evomi appends geo targeting to
+    the password: ``pass_country-US``). The mobile comment API 2146-blocks most
+    non-US IPs, so pinning US sharply raises the per-request success rate."""
+    base = proxy_for("residential")
+    if not base:
+        return None
+    try:
+        scheme, rest = base.split("://", 1)
+        creds, hostpart = rest.rsplit("@", 1)
+        user, pwd = creds.split(":", 1)
+    except ValueError:
+        return base
+    if "_country-" in pwd:
+        return base
+    return f"{scheme}://{user}:{pwd}_country-US@{hostpart}"
+
+
+async def _comment_once(host: str, params: dict[str, str], headers: dict[str, str]) -> dict[str, Any] | None:
+    """Single mobile-API request on a fresh US residential IP. None unless the
+    response is a clean ``status_code == 0`` payload."""
+    try:
+        async with httpx.AsyncClient(
+            timeout=12, follow_redirects=True, proxy=_us_residential_proxy(), headers=headers
+        ) as client:
+            resp = await client.get(host, params=params)
+    except httpx.HTTPError:
+        return None
+    if resp.status_code != 200:
+        return None
+    try:
+        data = resp.json()
+    except ValueError:
+        return None
+    return data if isinstance(data, dict) and data.get("status_code") == 0 else None
+
+
+async def _comment_page(aweme_id: str, cursor: str, count: int) -> dict[str, Any] | None:
+    """One page of the mobile comment API, or None if every attempt is blocked.
+
+    The residential pool rotates its exit IP per connection but a large share of
+    IPs are soft-blocked (status_code 2146) at any moment, so we fire a batch of
+    concurrent requests (each a fresh IP) and take the first clean response,
+    cancelling the rest. A second batch covers an unlucky first round.
+    """
+    params = {**_TT_COMMENT_PARAMS, "aweme_id": aweme_id, "cursor": str(cursor), "count": str(count)}
+    headers = {"User-Agent": _TT_MOBILE_UA, "Accept": "application/json"}
+    for _ in range(2):
+        tasks = [
+            asyncio.create_task(_comment_once(_TT_COMMENT_HOSTS[i % len(_TT_COMMENT_HOSTS)], params, headers))
+            for i in range(8)
+        ]
+        try:
+            for coro in asyncio.as_completed(tasks):
+                res = await coro
+                if res is not None:
+                    return res
+        finally:
+            for t in tasks:
+                t.cancel()
+    return None
+
+
+async def comments_native(
+    aweme_id: str, cursor: str | None, limit: int
+) -> tuple[list[dict[str, Any]], str | None, int | None] | None:
+    """Fetch up to ``limit`` comments starting at ``cursor`` (offset).
+
+    Returns ``(comments, next_cursor, total)`` where ``next_cursor`` is the
+    offset to resume from (``None`` once the thread is exhausted) and ``total``
+    is the video's total comment count. Returns ``None`` if the very first page
+    fails so the caller can fall back to the Apify actor.
+    """
+    collected: list[dict[str, Any]] = []
+    cur = str(cursor) if cursor else "0"
+    total: int | None = None
+    max_pages = limit // 15 + 3
+    for _ in range(max_pages):
+        if len(collected) >= limit:
+            break
+        want = min(30, limit - len(collected))
+        page = await _comment_page(aweme_id, cur, want)
+        if page is None:
+            # Total failure on the first page -> let the caller use Apify.
+            # A later-page failure returns what we have plus the resume cursor.
+            return None if not collected else (collected, cur, total)
+        if total is None:
+            total = safe_int(page.get("total"))
+        for c in page.get("comments") or []:
+            mapped = _map_comment(c)
+            if mapped:
+                collected.append(mapped)
+        nxt = page.get("cursor")
+        cur = str(nxt) if nxt is not None else cur
+        if not page.get("has_more"):
+            return collected, None, total
+    return collected, cur, total
 
 
 async def profile_region_native(handle: str) -> dict[str, Any] | None:
