@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
+    category: "fix",
+    title: "Instagram Story Highlights: dropped the always-empty itemCount",
+    description:
+      "The Instagram Story Highlights API listed every highlight album with an itemCount that was always null — the light listing endpoint never loads the stories inside, so it could never count them. We removed the misleading field. To get the real count (and the stories themselves), use the Instagram Highlights Details API, where itemCount is now always populated.",
+    items: [
+      "Each highlight now returns id, title, and coverUrl (no more null itemCount)",
+      "Instagram Highlights Details now always fills itemCount from the expanded stories",
+      "Response cache was refreshed so you see the new shape immediately",
+    ],
+  },
+  {
+    publishedAt: "2026-07-16",
     category: "improvement",
     title: "Instagram Profile Search is now native — 1 credit",
     description:

@@ -1508,7 +1508,6 @@ def _highlight_payload(item: dict) -> dict:
         "id": safe_str(item.get("id") or item.get("highlightId")),
         "title": safe_str(item.get("title") or item.get("name")),
         "coverUrl": safe_str(item.get("coverUrl") or item.get("cover") or item.get("coverMediaUrl") or item.get("coverImageUrl")),
-        "itemCount": safe_int(item.get("itemCount") or item.get("mediaCount")),
     }
 
 
@@ -1552,7 +1551,7 @@ async def instagram_story_highlights(
 
         data = await cached_or_run(
             endpoint="instagram.story-highlights",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1601,7 +1600,7 @@ async def instagram_highlights_details(
                             continue
                         payload = _highlight_payload(h)
                         media = h.get("items") or h.get("media") or []
-                        payload["items"] = [
+                        items = [
                             {
                                 "type": safe_str(m.get("type") or m.get("mediaType")),
                                 "url": safe_str(m.get("url") or m.get("mediaUrl") or m.get("videoUrl") or m.get("imageUrl")),
@@ -1611,8 +1610,9 @@ async def instagram_highlights_details(
                             for m in (media if isinstance(media, list) else [])
                             if isinstance(m, dict)
                         ]
-                        if payload.get("itemCount") is None and payload["items"]:
-                            payload["itemCount"] = len(payload["items"])
+                        count = safe_int(h.get("itemCount") or h.get("mediaCount"))
+                        payload["itemCount"] = count if count is not None else (len(items) or None)
+                        payload["items"] = items
                         highlights.append(payload)
                 return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
 
