@@ -1622,8 +1622,8 @@ async def instagram_embed(
     caller: ApiCaller = Depends(require_api_key),
 ):
     # Posts/reels resolve to a shortcode (type reel when the URL is a /reel/,
-    # else post); anything else is treated as a profile handle. All three render
-    # via Instagram's embed.js blockquote.
+    # else post); anything else is treated as a profile handle. Each maps to an
+    # Instagram /embed/ page we fetch below.
     shortcode = extract_instagram_shortcode(url)
     username = None if shortcode else extract_instagram_username(url)
     if not shortcode and not username:
@@ -1635,7 +1635,6 @@ async def instagram_embed(
                 "https://www.instagram.com/reel/SHORTCODE/ or https://www.instagram.com/username/",
             ),
         )
-    # Pure string build - no Apify call, so this is a flat 1-credit endpoint.
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/embed",
@@ -1644,35 +1643,43 @@ async def instagram_embed(
         base_credits=1,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            async def _local() -> dict[str, Any]:
-                if shortcode:
-                    kind = "reel" if re.search(r"/reels?/", url) else "post"
-                    permalink = f"https://www.instagram.com/p/{shortcode}/"
-                else:
-                    kind = "profile"
-                    permalink = f"https://www.instagram.com/{username}/"
+            if shortcode:
+                kind = "reel" if re.search(r"/reels?/", url) else "post"
+                permalink = f"https://www.instagram.com/p/{shortcode}/"
+                embed_url = f"https://www.instagram.com/p/{shortcode}/embed/captioned/"
+            else:
+                kind = "profile"
+                permalink = f"https://www.instagram.com/{username}/"
+                embed_url = f"https://www.instagram.com/{username}/embed/"
+
+            # Prefer Instagram's own self-contained embed document; fall back to
+            # the lightweight blockquote snippet if the fetch is unavailable.
+            html = await instagram_native.fetch_embed_html(embed_url)
+            if html:
+                ctx["source"] = "native"
+            else:
+                ctx["source"] = "direct"
                 html = (
                     '<blockquote class="instagram-media" '
                     f'data-instgrm-permalink="{permalink}" data-instgrm-version="14"></blockquote>'
                     '<script async src="//www.instagram.com/embed.js"></script>'
                 )
-                payload = {
-                    "platform": "instagram",
-                    "url": url,
-                    "type": kind,
-                    "shortcode": shortcode,
-                    "username": username,
-                    "permalink": permalink,
-                    "html": html,
-                }
-                return {k: v for k, v in payload.items() if v is not None}
 
-            ctx["source"] = "direct"
-            return await _local()
+            payload = {
+                "platform": "instagram",
+                "url": url,
+                "type": kind,
+                "shortcode": shortcode,
+                "username": username,
+                "permalink": permalink,
+                "embedUrl": embed_url,
+                "html": html,
+            }
+            return {k: v for k, v in payload.items() if v is not None}
 
         data = await cached_or_run(
             endpoint="instagram.embed",
-            params={"url": url, "v": 6},
+            params={"url": url, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

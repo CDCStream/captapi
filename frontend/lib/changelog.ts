@@ -51,13 +51,14 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
     category: "improvement",
-    title: "Instagram Embed API is now the Instagram Embed HTML API — profiles supported",
+    title: "Instagram Embed API is now the Instagram Embed HTML API — full embed doc + profiles",
     description:
-      "The Instagram Embed API is now called the Instagram Embed HTML API, and it accepts profile URLs in addition to posts and reels. Pass any post, reel, or profile URL (or an @handle) and get back ready-to-paste embed HTML plus the canonical permalink. Posts/reels return a media card; profiles return a profile card.",
+      "The Instagram Embed API is now called the Instagram Embed HTML API. It now returns Instagram's own self-contained embed page as full HTML (the document served at /embed/) instead of just the blockquote snippet, plus an embedUrl you can point an <iframe src> at. It also accepts profile URLs and @handles in addition to posts and reels — posts/reels come back as a media card, profiles as a profile card.",
     items: [
-      "Now accepts profile URLs and @handles, not just posts and reels",
-      "Response adds a type flag (post/reel/profile) and username for profiles",
-      "Still a flat 1 credit — pure HTML builder, no scraping",
+      "html is now Instagram's full self-contained embed document (iframe-ready)",
+      "New embedUrl field to load the embed directly via <iframe src>",
+      "Accepts profile URLs/@handles too; adds a type flag (post/reel/profile)",
+      "Falls back to the classic blockquote + embed.js snippet if the page is unavailable",
     ],
   },
   {

@@ -3687,7 +3687,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "type": "post",
     "shortcode": "DZFqdAxlkUG",
     "permalink": "https://www.instagram.com/p/DZFqdAxlkUG/",
-    "html": "<blockquote class=\"instagram-media\" data-instgrm-permalink=\"https://www.instagram.com/p/DZFqdAxlkUG/\" data-instgrm-version=\"14\"></blockquote><script async src=\"//www.instagram.com/embed.js\"></script>"
+    "embedUrl": "https://www.instagram.com/p/DZFqdAxlkUG/embed/captioned/",
+    "html": "<!DOCTYPE html> <html lang=\"en\" id=\"facebook\" class=\"no_js\"> <head><meta charset=\"utf-8\" /><meta name=\"referrer\" content=\"default\" id=\"meta_referrer\" /> ... Instagram's full self-contained embed document (truncated for docs) ... </body></html>"
   },
   "instagram-hashtag-search": {
     "query": "travel",

@@ -449,3 +449,41 @@ async def _fetch_via(tier: str, shortcode: str) -> dict[str, Any] | None:
     if not items:
         return None
     return items[0]
+
+
+# Instagram serves the classic server-rendered embed page (<html id="facebook">)
+# only to non-browser clients; a modern Chrome UA gets the heavy React app shell.
+_EMBED_UA = "curl/8.4.0"
+
+
+async def fetch_embed_html(embed_url: str) -> str | None:
+    """Fetch Instagram's self-contained embed page HTML for a post/reel/profile.
+
+    ``embed_url`` is a fully-qualified .../embed/ (or /embed/captioned/) URL.
+    Returns the rendered document (the ``<html id="facebook">`` embed page) or
+    None if every proxy tier fails or Instagram returns the app shell instead.
+    """
+    for tier in _TIERS:
+        try:
+            html = await _fetch_embed_once(tier, embed_url)
+        except (httpx.HTTPError, ValueError) as exc:
+            log.info("ig_embed_tier_failed", tier=tier, error=str(exc)[:120])
+            continue
+        if html is not None:
+            return html
+    return None
+
+
+async def _fetch_embed_once(tier: str, embed_url: str) -> str | None:
+    async with httpx.AsyncClient(
+        timeout=12, proxy=proxy_for(tier), follow_redirects=True
+    ) as client:
+        resp = await client.get(embed_url, headers={"User-Agent": _EMBED_UA})
+        if resp.status_code != 200:
+            log.info("ig_embed_http_error", tier=tier, status=resp.status_code)
+            return None
+        html = resp.text
+    # Reject the heavy React app shell; we only want the lightweight embed doc.
+    if "EmbedFrame" not in html and 'id="facebook"' not in html:
+        return None
+    return html
