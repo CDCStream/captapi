@@ -5756,25 +5756,23 @@
       "displayName": "Khabane lame",
       "url": "https://www.tiktok.com/@khaby.lame",
       "region": "IT",
-      "regionConfidence": "high",
-      "regionSource": "inferred",
       "language": "en",
-      "followers": 162351219,
+      "followers": 162351566,
       "following": 81,
-      "likes": 2642159098,
+      "likes": 2642233803,
       "videos": 1342,
       "verified": true,
       "private": false,
-      "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=efa436bb&x-expires=1784390400&x-signature=4rTgGDTE1z9FrutEivOJE5aC500%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
+      "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=3be2ede9&x-expires=1784408400&x-signature=QqksIoYc8km9jU3DAPRtb5N7fP0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
       "raw": {
         "user": {
           "id": "127905465618821121",
           "shortId": "",
           "uniqueId": "khaby.lame",
           "nickname": "Khabane lame",
-          "avatarLarger": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=efa436bb&x-expires=1784390400&x-signature=4rTgGDTE1z9FrutEivOJE5aC500%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
-          "avatarMedium": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=ac139d01&x-expires=1784390400&x-signature=gfCYRuOqpn0s4WkJLKvT%2BaJZupk%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
-          "avatarThumb": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:100:100.jpeg?dr=9640&refresh_token=cb87d227&x-expires=1784390400&x-signature=7InNAXaq%2BOSdWA5mvKkWtvBDmkI%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
+          "avatarLarger": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=3be2ede9&x-expires=1784408400&x-signature=QqksIoYc8km9jU3DAPRtb5N7fP0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
+          "avatarMedium": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=b808c88c&x-expires=1784408400&x-signature=2O8O8m8rSCwfmZ%2BgI0YvAn6nz2Q%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
+          "avatarThumb": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:100:100.jpeg?dr=9640&refresh_token=3812e50f&x-expires=1784408400&x-signature=OGheGAi9zr7xwxQoXZhfD0FjAiQ%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
           "signature": "Se vuoi ridere sei nel posto giusto😎 If u wanna laugh u r in the right place😎",
           "createTime": 1470866554,
           "verified": true,
@@ -5815,15 +5813,17 @@
           "shortDramaCreator": {}
         },
         "statsV2": {
-          "followerCount": "162351219",
+          "followerCount": "162351566",
           "followingCount": "81",
-          "heart": "2642159098",
-          "heartCount": "2642159098",
+          "heart": "2642233803",
+          "heartCount": "2642233803",
           "videoCount": "1342",
           "diggCount": "0",
           "friendCount": "77"
         }
-      }
+      },
+      "regionConfidence": "high",
+      "regionSource": "inferred"
     }
   },
   "tiktok-audience-demographics": {
