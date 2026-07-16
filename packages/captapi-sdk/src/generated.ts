@@ -754,8 +754,8 @@ export interface InstagramEmbedParams {
 }
 
 export interface InstagramBasicProfileParams {
-  /** Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
+  /** Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically. */
+  userId: string;
   /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
   cache?: boolean;
 }
@@ -830,7 +830,7 @@ export class InstagramApi {
   embed(params: InstagramEmbedParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/embed", params);
   }
-  /** Instagram Basic Profile — Lightweight Instagram profile lookup (core fields). (1 credit) */
+  /** Instagram Basic Profile — Full public Instagram profile by numeric user ID (a URL/@handle is also accepted). (1 credit) */
   basicProfile(params: InstagramBasicProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/basic-profile", params);
   }

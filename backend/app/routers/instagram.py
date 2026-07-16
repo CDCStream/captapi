@@ -92,6 +92,25 @@ def _require_instagram_profile(value: str) -> str:
     return handle
 
 
+def _require_ig_profile_target(value: str) -> tuple[str, str]:
+    """Resolve a basic-profile lookup target. Returns ("id", <numeric id>) for a
+    bare numeric user ID, else ("handle", <username>) for a profile URL, @handle,
+    or username."""
+    raw = (value or "").strip()
+    if raw.isdigit():
+        return ("id", raw)
+    handle = extract_instagram_username(raw)
+    if not handle:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Invalid Instagram user. Pass a numeric user ID (e.g. 314216) or "
+                "a profile URL / @handle."
+            ),
+        )
+    return ("handle", handle)
+
+
 def _require_highlight_id(value: str) -> str:
     """Normalize a highlight identifier to its numeric id. Accepts the id
     returned by the Story Highlights API ("highlight:18201653992314974"), the
@@ -768,63 +787,54 @@ async def instagram_channel_details(
         return ApiResponse(data=data)
 
 
-@router.get("/basic-profile", summary="Lightweight Instagram profile lookup")
+@router.get("/basic-profile", summary="Full Instagram profile by user ID")
 async def instagram_basic_profile(
-    url: str = Query(..., description="Instagram profile URL or @handle"),
+    userId: str = Query(
+        ...,
+        description=(
+            "Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or "
+            "username is also accepted and resolved automatically."
+        ),
+    ),
     cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = _require_instagram_profile(url)
-    settings = get_settings()
+    mode, ident = _require_ig_profile_target(userId)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/basic-profile",
         platform="instagram",
-        resource_url=f"https://instagram.com/{handle}",
+        resource_url=f"instagram_user:{ident}",
         base_credits=CREDIT_CHANNEL,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            async def _apify() -> dict[str, Any]:
-                apify = get_apify()
-                try:
-                    items = await apify.run_actor_sync(
-                        settings.APIFY_ACTOR_INSTAGRAM_PROFILE,
-                        {"usernames": [handle]},
-                        max_items=1,
+            # Numeric id -> resolve the @username first (the by-id info endpoint
+            # is minimal logged-out, but always carries the username).
+            if mode == "id":
+                username = await instagram_native.resolve_username(ident)
+                if not username:
+                    raise HTTPException(
+                        status_code=404,
+                        detail="Profile not found for that user ID.",
                     )
-                except (ApifyError, httpx.HTTPError):
-                    items = []
-                if not items:
-                    meta = await _public_instagram_meta(f"https://www.instagram.com/{handle}/")
-                    if not meta:
-                        raise HTTPException(status_code=404, detail="Profile not found")
-                    return {
-                        "platform": "instagram",
-                        "id": "",
-                        "username": handle,
-                        "displayName": meta["title"],
-                        "profileImage": meta["image"],
-                        "verified": None,
-                        "private": None,
-                        "followers": 0,
-                    }
-                p = items[0]
-                return {
-                    "platform": "instagram",
-                    "id": safe_str(p.get("id") or p.get("pk")),
-                    "username": safe_str(p.get("username") or handle),
-                    "displayName": safe_str(p.get("fullName")),
-                    "profileImage": safe_str(p.get("profilePicUrl") or p.get("profilePicUrlHD")),
-                    "verified": p.get("verified"),
-                    "private": p.get("private") or p.get("isPrivate"),
-                    "followers": safe_int(p.get("followersCount")),
-                }
+            else:
+                username = ident
 
-            return await _try_decodo(ctx, lambda: decodo.basic_profile(handle), _apify)
+            # Rich profile from the logged-out web_profile_info endpoint; fall
+            # back to Decodo (same underlying data) if the native call fails.
+            user = await instagram_native.fetch_web_profile_info(username)
+            if user is not None:
+                ctx["source"] = "native"
+            else:
+                user = await decodo._profile(username)
+                ctx["source"] = "decodo"
+            if not user:
+                raise HTTPException(status_code=404, detail="Profile not found")
+            return instagram_native.map_basic_profile(user)
 
         data = await cached_or_run(
             endpoint="instagram.basic-profile",
-            params={"url": url, "v": 4},
+            params={"target": f"{mode}:{ident}", "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

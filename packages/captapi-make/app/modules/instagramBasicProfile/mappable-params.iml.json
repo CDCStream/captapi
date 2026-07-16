@@ -1,10 +1,10 @@
 [
   {
-    "name": "url",
+    "name": "userId",
     "type": "text",
-    "label": "URL",
+    "label": "UserId",
     "required": true,
-    "help": "Instagram profile URL, e.g. https://instagram.com/username/."
+    "help": "Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically."
   },
   {
     "name": "cache",

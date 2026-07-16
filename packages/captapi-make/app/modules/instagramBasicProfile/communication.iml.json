@@ -2,7 +2,7 @@
   "url": "/v1/instagram/basic-profile",
   "method": "GET",
   "qs": {
-    "url": "{{parameters.url}}",
+    "userId": "{{parameters.userId}}",
     "cache": "{{parameters.cache}}"
   },
   "response": {

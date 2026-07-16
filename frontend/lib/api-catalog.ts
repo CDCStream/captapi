@@ -266,7 +266,7 @@ const INSTAGRAM: Spec[] = [
   { slug: "instagram-story-highlights", name: "Instagram Story Highlights API", shortName: "Story Highlights", category: "list", method: "GET", path: "/v1/instagram/story-highlights", credits: 5, tagline: "List the Story Highlight albums pinned on an Instagram profile — the ID, title, and cover image for each highlight.", longDescription: "Highlights are the round albums of saved Stories pinned under an account's bio. Pass a profile URL, @handle, or username and the Instagram Story Highlights API returns those albums as clean JSON: each one's ID, title, and cover image. This lists the albums themselves — to pull the individual stories (photos and videos) inside a specific album, along with how many it holds, use the Instagram Highlights Details API with the highlight ID. Use it to see how a creator organizes their profile, build a highlights gallery, or find the album you want to dig into. No Instagram login, no OAuth, and no scraping to maintain — results are cached for 24 hours, so repeat lookups are instant and free.", delivers: ["Every Story Highlight album pinned on the profile", "Highlight ID for fetching the stories inside", "Title of each album", "Cover image URL for each album"] },
   { slug: "instagram-highlights-details", name: "Instagram Highlights Details API", shortName: "Highlights Details", category: "list", method: "GET", path: "/v1/instagram/highlights-details", credits: 1, tagline: "Open one Instagram Story Highlight by its ID and pull every story inside — media type, direct media URL, thumbnail, size, and post date.", longDescription: "Pass a single Highlight ID from the Instagram Story Highlights API (e.g. highlight:18201653992314974, or just the bare number) and this endpoint opens that one album and returns the photos and videos saved inside as clean JSON: each story's media type, direct media/video URL, thumbnail, dimensions, video duration, and when it was posted — plus the album's title, cover image, and how many stories it holds. The workflow: call Story Highlights first to list a profile's albums and their IDs, then pass an ID here to pull its contents. It runs on our native resolver (no third-party actor), so it's fast and costs just 1 credit — with no Instagram login or OAuth required, and results cached for 24 hours.", delivers: ["Every story (photo or video) saved inside the Highlight", "Media type and direct media/video URL for each story", "Thumbnail, dimensions, and video duration for each story", "Post date of each story, plus the album's title, cover, and item count"] },
   { slug: "instagram-embed", name: "Instagram Embed HTML API", shortName: "Embed HTML", category: "details", method: "GET", path: "/v1/instagram/embed", credits: 1, tagline: "Get Instagram's own self-contained embed HTML for any post, reel, or profile — ready to drop into an iframe on your site.", longDescription: "Pass an Instagram post, reel, or profile URL (or an @handle) and get back Instagram's own self-contained embed page as ready-to-use HTML — the full <html> document Instagram serves at /embed/, which you can drop straight into an <iframe srcdoc> or render server-side. The response also returns embedUrl, so you can point an <iframe src> at it directly instead. Posts and reels come back as a rich media card (with caption); profiles come back as a profile card that links to the account. No login or OAuth needed — it's fast, costs just 1 credit, and results are cached for 24 hours. If Instagram's embed page is ever unavailable, the response falls back to the classic blockquote + embed.js snippet.", delivers: ["Instagram's full self-contained embed HTML document", "embedUrl you can load directly in an <iframe src>", "Canonical Instagram permalink for the post/reel/profile", "Type flag (post/reel/profile) plus shortcode or username"] },
-  { slug: "instagram-basic-profile", name: "Instagram Basic Profile API", shortName: "Basic Profile", category: "channel", method: "GET", path: "/v1/instagram/basic-profile", credits: 1 },
+  { slug: "instagram-basic-profile", name: "Instagram Basic Profile API", shortName: "Basic Profile", category: "channel", method: "GET", path: "/v1/instagram/basic-profile", credits: 1, tagline: "Look up a full public Instagram profile by its numeric user ID — bio, follower/following/post counts, verification, profile pictures, and more.", longDescription: "Pass an Instagram numeric user ID (e.g. 314216) and get that account's public profile as clean JSON: username, full name, biography, follower / following / media counts, verification and privacy flags, business/professional status, profile picture (standard and HD), and its stable pk/fbid. A profile URL, @handle, or username is also accepted and resolved automatically. It runs on our native resolver (no third-party actor), so it's fast, costs just 1 credit, and needs no Instagram login or OAuth. Null and empty fields are stripped, so you only ever see populated data. Results are cached for 24 hours.", delivers: ["Username, full name, and biography", "Follower, following, and media counts", "Verification, privacy, and business/professional flags", "Standard and HD profile picture URLs, plus stable pk / fbid"] },
 ];
 
 const FACEBOOK: Spec[] = [
@@ -1180,7 +1180,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "instagram-story-highlights": [up(IG_PROFILE)],
   "instagram-highlights-details": [{ name: "id", type: "string", required: true, description: "Highlight ID from the Instagram Story Highlights API — e.g. highlight:18201653992314974 or the bare 18201653992314974." }],
   "instagram-embed": [up("Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/.")],
-  "instagram-basic-profile": [up("Instagram profile URL or @handle.")],
+  "instagram-basic-profile": [{ name: "userId", type: "string", required: true, description: "Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically." }],
   // Facebook
   "facebook-details": [up(FB_VIDEO)],
   "facebook-transcript": [up(FB_VIDEO), cacheP()],
@@ -1638,6 +1638,12 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       if (typeof captured === "string" && captured.trim()) return captured;
       return "highlight:18201653992314974";
     }
+    case "userId": {
+      const ex = API_EXAMPLES[ep.slug];
+      const captured = (ex?.id ?? ex?.pk) as unknown;
+      if (typeof captured === "string" && captured.trim()) return captured;
+      return "314216";
+    }
     case "url": {
       const d = p.description.toLowerCase();
       if (d.includes("playlist"))
@@ -1949,6 +1955,30 @@ const FIELD_DESCS: Record<string, string> = {
   username: "Account username / handle.",
   handle: "Account handle.",
   login: "Account login name.",
+  // Instagram basic profile (snake_case, competitor-compatible shape)
+  pk: "Instagram user primary key (same as id).",
+  full_name: "Account display (full) name.",
+  biography: "Profile bio text.",
+  biography_with_entities: "Bio text plus parsed @mentions / #hashtags.",
+  follower_count: "Follower count.",
+  following_count: "Number of accounts this profile follows.",
+  media_count: "Total number of posts on the profile.",
+  highlight_reel_count: "Number of Story Highlight albums on the profile.",
+  is_private: "Whether the account is private.",
+  is_verified: "Whether the account is verified.",
+  is_business: "Whether the account is a business account.",
+  is_professional_account: "Whether the account is a professional (creator/business) account.",
+  should_show_category: "Whether Instagram shows the account's category publicly.",
+  profile_pic_url: "Standard-resolution profile picture URL.",
+  hd_profile_pic_url_info: "Object with the HD profile picture URL.",
+  fbid_v2: "Linked Facebook/Meta ID for the account.",
+  pronouns: "Pronouns listed on the profile.",
+  bio_links: "External links shown on the profile.",
+  is_embeds_disabled: "Whether embedding this account's content is disabled.",
+  is_regulated_c18: "Whether the account is age-restricted (18+).",
+  show_account_transparency_details: "Whether Instagram shows account transparency details.",
+  show_text_post_app_badge: "Whether the Threads badge is shown on the profile.",
+  remove_message_entrypoint: "Whether the message button is hidden on the profile.",
   displayName: "Display name of the account.",
   name: "Name of the item or account.",
   fullName: "Full display name.",

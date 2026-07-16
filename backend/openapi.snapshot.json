@@ -4240,7 +4240,7 @@
         "tags": [
           "Instagram"
         ],
-        "summary": "Lightweight Instagram profile lookup",
+        "summary": "Full Instagram profile by user ID",
         "operationId": "instagram_basic_profile_v1_instagram_basic_profile_get",
         "security": [
           {
@@ -4249,15 +4249,15 @@
         ],
         "parameters": [
           {
-            "name": "url",
+            "name": "userId",
             "in": "query",
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Instagram profile URL or @handle",
-              "title": "Url"
+              "description": "Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically.",
+              "title": "Userid"
             },
-            "description": "Instagram profile URL or @handle"
+            "description": "Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically."
           },
           {
             "name": "cache",

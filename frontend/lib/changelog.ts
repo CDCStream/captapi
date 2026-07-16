@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
     category: "improvement",
+    title: "Instagram Basic Profile is now native, by user ID — richer fields",
+    description:
+      "The Instagram Basic Profile API now takes an Instagram numeric user ID (e.g. 314216) and returns a much richer public profile — username, full name, biography, follower/following/media counts, verification and privacy flags, business/professional status, and standard + HD profile pictures — straight from Instagram's own data. A profile URL, @handle, or username is still accepted and resolved automatically. It runs on our native resolver (no third-party actor), still costs 1 credit, and null/empty fields are stripped for a tidy response.",
+    items: [
+      "Accepts a numeric userId (URL/@handle/username also work)",
+      "Returns bio, counts, verification, business flags, pk/fbid, and HD profile pic",
+      "Native resolver — no Apify actor — with Decodo as a fallback",
+      "Null/empty fields are dropped, so you only see populated data",
+    ],
+  },
+  {
+    publishedAt: "2026-07-16",
+    category: "improvement",
     title: "Instagram Embed API is now the Instagram Embed HTML API — full embed doc + profiles",
     description:
       "The Instagram Embed API is now called the Instagram Embed HTML API. It now returns Instagram's own self-contained embed page as full HTML (the document served at /embed/) instead of just the blockquote snippet, plus an embedUrl you can point an <iframe src> at. It also accepts profile URLs and @handles in addition to posts and reels — posts/reels come back as a media card, profiles as a profile card.",

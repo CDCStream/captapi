@@ -1013,13 +1013,13 @@ class InstagramApi:
         """
         return self._t.get("/v1/instagram/embed", {"url": url, "cache": cache})
 
-    def basic_profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Basic Profile — Lightweight Instagram profile lookup (core fields). (1 credit)
+    def basic_profile(self, *, userId: str, cache: bool | None = None) -> dict[str, Any]:
+        """Instagram Basic Profile — Full public Instagram profile by numeric user ID (a URL/@handle is also accepted). (1 credit)
 
-        :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param userId: Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically.
         :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return self._t.get("/v1/instagram/basic-profile", {"url": url, "cache": cache})
+        return self._t.get("/v1/instagram/basic-profile", {"userId": userId, "cache": cache})
 
 
 class AsyncInstagramApi:
@@ -1174,13 +1174,13 @@ class AsyncInstagramApi:
         """
         return await self._t.get("/v1/instagram/embed", {"url": url, "cache": cache})
 
-    async def basic_profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Basic Profile — Lightweight Instagram profile lookup (core fields). (1 credit)
+    async def basic_profile(self, *, userId: str, cache: bool | None = None) -> dict[str, Any]:
+        """Instagram Basic Profile — Full public Instagram profile by numeric user ID (a URL/@handle is also accepted). (1 credit)
 
-        :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param userId: Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically.
         :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
-        return await self._t.get("/v1/instagram/basic-profile", {"url": url, "cache": cache})
+        return await self._t.get("/v1/instagram/basic-profile", {"userId": userId, "cache": cache})
 
 
 class FacebookApi:

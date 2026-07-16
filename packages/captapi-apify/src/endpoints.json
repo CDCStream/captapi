@@ -1737,13 +1737,13 @@
     "name": "Instagram Basic Profile",
     "path": "/v1/instagram/basic-profile",
     "credits": 1,
-    "summary": "Lightweight Instagram profile lookup (core fields).",
+    "summary": "Full public Instagram profile by numeric user ID (a URL/@handle is also accepted).",
     "params": [
       {
-        "name": "url",
+        "name": "userId",
         "type": "string",
         "required": true,
-        "description": "Instagram profile URL, e.g. https://instagram.com/username/."
+        "description": "Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically."
       },
       {
         "name": "cache",

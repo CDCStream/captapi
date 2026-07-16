@@ -1109,7 +1109,7 @@
       },
       "instagramBasicProfile": {
         "label": "Instagram Basic Profile",
-        "description": "Lightweight Instagram profile lookup (core fields). Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Full public Instagram profile by numeric user ID (a URL/@handle is also accepted). Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

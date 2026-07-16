@@ -487,3 +487,117 @@ async def _fetch_embed_once(tier: str, embed_url: str) -> str | None:
     if "EmbedFrame" not in html and 'id="facebook"' not in html:
         return None
     return html
+
+
+# --- Profile lookup (logged-out) --------------------------------------------
+_IG_APP_ID = "936619743392459"
+
+
+async def _ig_web_get(tier: str, url: str, referer: str) -> dict[str, Any] | None:
+    """GET an Instagram web api/v1 JSON endpoint logged-out (csrf + app id)."""
+    async with httpx.AsyncClient(
+        timeout=12, proxy=proxy_for(tier), follow_redirects=True
+    ) as client:
+        await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
+        csrf = client.cookies.get("csrftoken")
+        if not csrf:
+            return None
+        resp = await client.get(
+            url,
+            headers={
+                "User-Agent": _UA,
+                "X-IG-App-ID": _IG_APP_ID,
+                "X-CSRFToken": csrf,
+                "Referer": referer,
+            },
+        )
+        if resp.status_code != 200:
+            log.info("ig_web_http_error", tier=tier, status=resp.status_code)
+            return None
+        try:
+            return resp.json()
+        except ValueError:
+            return None
+
+
+async def resolve_username(user_id: str) -> str | None:
+    """Map a numeric Instagram user id to its @username via users/{id}/info/.
+    The logged-out response is minimal but always carries ``username``."""
+    url = f"https://www.instagram.com/api/v1/users/{user_id}/info/"
+    for tier in _TIERS:
+        try:
+            payload = await _ig_web_get(tier, url, "https://www.instagram.com/")
+        except (httpx.HTTPError, ValueError) as exc:
+            log.info("ig_userinfo_tier_failed", tier=tier, error=str(exc)[:120])
+            continue
+        user = (payload or {}).get("user") if isinstance(payload, dict) else None
+        username = safe_str((user or {}).get("username"))
+        if username:
+            return username
+    return None
+
+
+async def fetch_web_profile_info(username: str) -> dict[str, Any] | None:
+    """Rich logged-out profile via users/web_profile_info/?username=. Returns
+    the raw ``user`` node (69+ fields incl. counts, bio, verification)."""
+    handle = username.lstrip("@")
+    url = f"https://www.instagram.com/api/v1/users/web_profile_info/?username={urllib.parse.quote(handle)}"
+    referer = f"https://www.instagram.com/{handle}/"
+    for tier in _TIERS:
+        try:
+            payload = await _ig_web_get(tier, url, referer)
+        except (httpx.HTTPError, ValueError) as exc:
+            log.info("ig_wpi_tier_failed", tier=tier, error=str(exc)[:120])
+            continue
+        if not isinstance(payload, dict):
+            continue
+        user = (payload.get("data") or {}).get("user") or payload.get("user")
+        if isinstance(user, dict) and (user.get("username") or user.get("id")):
+            return user
+    return None
+
+
+def _edge_count(value: Any) -> int | None:
+    if isinstance(value, dict):
+        return safe_int(value.get("count"))
+    return safe_int(value)
+
+
+def map_basic_profile(user: dict[str, Any]) -> dict[str, Any]:
+    """Map a web_profile_info user node to a clean, competitor-compatible
+    profile shape. Null/absent fields are dropped so the JSON stays tidy."""
+    hd = safe_str(user.get("profile_pic_url_hd"))
+    bio_entities = user.get("biography_with_entities")
+    out: dict[str, Any] = {
+        "id": safe_str(user.get("id") or user.get("pk")),
+        "pk": safe_str(user.get("pk") or user.get("id")),
+        "username": safe_str(user.get("username")),
+        "full_name": safe_str(user.get("full_name")),
+        "biography": safe_str(user.get("biography")),
+        "biography_with_entities": bio_entities if isinstance(bio_entities, dict) else None,
+        "external_url": safe_str(user.get("external_url")),
+        "follower_count": _edge_count(user.get("edge_followed_by") or user.get("follower_count")),
+        "following_count": _edge_count(user.get("edge_follow") or user.get("following_count")),
+        "media_count": _edge_count(user.get("edge_owner_to_timeline_media") or user.get("media_count")),
+        "highlight_reel_count": safe_int(user.get("highlight_reel_count")),
+        "is_private": user.get("is_private"),
+        "is_verified": user.get("is_verified"),
+        "is_business": user.get("is_business_account"),
+        "is_professional_account": user.get("is_professional_account"),
+        "category": safe_str(user.get("category_name") or user.get("category")),
+        "should_show_category": user.get("should_show_category"),
+        "profile_pic_url": safe_str(user.get("profile_pic_url")),
+        "hd_profile_pic_url_info": {"url": hd} if hd else None,
+        "fbid_v2": safe_str(user.get("fbid") or user.get("fbid_v2")),
+        "pronouns": user.get("pronouns"),
+        "bio_links": user.get("bio_links"),
+        "is_embeds_disabled": user.get("is_embeds_disabled"),
+        "is_regulated_c18": user.get("is_regulated_c18"),
+        "show_account_transparency_details": user.get("show_account_transparency_details"),
+        "transparency_label": user.get("transparency_label"),
+        "transparency_product": user.get("transparency_product"),
+        "show_text_post_app_badge": user.get("show_text_post_app_badge"),
+        "remove_message_entrypoint": user.get("remove_message_entrypoint"),
+        "ai_agent_type": user.get("ai_agent_type"),
+    }
+    return {k: v for k, v in out.items() if v is not None}
