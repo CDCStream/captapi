@@ -42,11 +42,14 @@ export async function POST(req: Request) {
 
   const qs = new URLSearchParams({ url });
   if (language) qs.set("language", language);
+  // Public free tools always fetch fresh data — bypass the upstream 24h cache
+  // so viewers/checkers reflect the current state of the account or content.
+  qs.set("cache", "false");
 
   try {
     const res = await fetch(`${API_BASE}${endpoint}?${qs.toString()}`, {
       headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" },
-      // Server-side responses are cached 24h upstream; no need to cache here.
+      // Don't cache in Next either; upstream is already bypassed via cache=false.
       cache: "no-store",
     });
 
