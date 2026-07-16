@@ -3,7 +3,8 @@
   "method": "GET",
   "qs": {
     "creative_id": "{{parameters.creative_id}}",
-    "country": "{{parameters.country}}"
+    "country": "{{parameters.country}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"

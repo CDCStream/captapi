@@ -1041,7 +1041,7 @@
       },
       "instagramProfileSearch": {
         "label": "Instagram Profile Search",
-        "description": "Search Instagram profiles by keyword. Costs ~12 credits (cached results free, failures never charged).",
+        "description": "Resolve an Instagram account name or @handle to its public profile. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1075,7 +1075,7 @@
       },
       "instagramHighlightsDetails": {
         "label": "Instagram Highlights Details",
-        "description": "Items inside a profile's story highlights. Costs ~9 credits (cached results free, failures never charged).",
+        "description": "Stories inside a single Instagram highlight, by highlight ID. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

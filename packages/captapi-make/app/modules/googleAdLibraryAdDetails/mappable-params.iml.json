@@ -12,5 +12,12 @@
     "label": "Country",
     "required": false,
     "help": "ISO country code. Default US."
+  },
+  {
+    "name": "cache",
+    "type": "boolean",
+    "label": "Cache",
+    "required": false,
+    "help": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
   }
 ]

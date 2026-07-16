@@ -3,7 +3,8 @@
   "method": "GET",
   "qs": {
     "name": "{{parameters.name}}",
-    "names": "{{parameters.names}}"
+    "names": "{{parameters.names}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"

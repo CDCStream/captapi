@@ -1692,20 +1692,14 @@
     "platform": "instagram",
     "name": "Instagram Highlights Details",
     "path": "/v1/instagram/highlights-details",
-    "credits": 9,
-    "summary": "Items inside a profile's story highlights.",
+    "credits": 1,
+    "summary": "Stories inside a single Instagram highlight, by highlight ID.",
     "params": [
       {
-        "name": "url",
+        "name": "id",
         "type": "string",
         "required": true,
-        "description": "Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max highlights to expand. Default 10, max 50."
+        "description": "Highlight ID from Story Highlights, e.g. highlight:18201653992314974."
       },
       {
         "name": "cache",

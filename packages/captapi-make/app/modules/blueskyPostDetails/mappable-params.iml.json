@@ -5,5 +5,12 @@
     "label": "URL",
     "required": true,
     "help": "Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY."
+  },
+  {
+    "name": "cache",
+    "type": "boolean",
+    "label": "Cache",
+    "required": false,
+    "help": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
   }
 ]

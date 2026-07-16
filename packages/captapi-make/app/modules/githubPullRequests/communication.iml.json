@@ -4,7 +4,8 @@
   "qs": {
     "repo": "{{parameters.repo}}",
     "state": "{{parameters.state}}",
-    "limit": "{{parameters.limit}}"
+    "limit": "{{parameters.limit}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"

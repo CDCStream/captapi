@@ -3,7 +3,8 @@
   "method": "GET",
   "qs": {
     "url": "{{parameters.url}}",
-    "country": "{{parameters.country}}"
+    "country": "{{parameters.country}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"

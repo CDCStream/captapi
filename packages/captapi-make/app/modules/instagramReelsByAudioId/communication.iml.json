@@ -3,7 +3,8 @@
   "method": "GET",
   "qs": {
     "audio_id": "{{parameters.audio_id}}",
-    "limit": "{{parameters.limit}}"
+    "limit": "{{parameters.limit}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"

@@ -2,7 +2,8 @@
   "url": "/v1/kwai/post",
   "method": "GET",
   "qs": {
-    "url": "{{parameters.url}}"
+    "url": "{{parameters.url}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"

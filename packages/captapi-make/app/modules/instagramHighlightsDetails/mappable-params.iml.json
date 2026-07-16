@@ -1,16 +1,16 @@
 [
   {
-    "name": "url",
+    "name": "id",
     "type": "text",
-    "label": "URL",
+    "label": "Id",
     "required": true,
-    "help": "Instagram profile URL, e.g. https://instagram.com/username/."
+    "help": "Highlight ID from Story Highlights, e.g. highlight:18201653992314974."
   },
   {
-    "name": "limit",
-    "type": "number",
-    "label": "Limit",
+    "name": "cache",
+    "type": "boolean",
+    "label": "Cache",
     "required": false,
-    "help": "Max highlights to expand. Default 10, max 50."
+    "help": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
   }
 ]

@@ -19,5 +19,12 @@
     "label": "Limit",
     "required": false,
     "help": "Max items to return. Default 50, max 500. Billed per result."
+  },
+  {
+    "name": "cache",
+    "type": "boolean",
+    "label": "Cache",
+    "required": false,
+    "help": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
   }
 ]

@@ -5,5 +5,12 @@
     "label": "URL",
     "required": true,
     "help": "Kwai/Kuaishou post URL or video/photo ID."
+  },
+  {
+    "name": "cache",
+    "type": "boolean",
+    "label": "Cache",
+    "required": false,
+    "help": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
   }
 ]

@@ -2,8 +2,8 @@
   "url": "/v1/instagram/highlights-details",
   "method": "GET",
   "qs": {
-    "url": "{{parameters.url}}",
-    "limit": "{{parameters.limit}}"
+    "id": "{{parameters.id}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"

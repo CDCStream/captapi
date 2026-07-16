@@ -26,5 +26,12 @@
     "label": "Details",
     "required": false,
     "help": "Set true to fetch full description, photos and coordinates per listing (slower, costs more)."
+  },
+  {
+    "name": "cache",
+    "type": "boolean",
+    "label": "Cache",
+    "required": false,
+    "help": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
   }
 ]

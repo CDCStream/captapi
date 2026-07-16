@@ -5010,7 +5010,7 @@
         "tags": [
           "Instagram"
         ],
-        "summary": "Items inside an Instagram profile's highlights",
+        "summary": "Stories inside a single Instagram highlight",
         "operationId": "instagram_highlights_details_v1_instagram_highlights_details_get",
         "security": [
           {
@@ -5019,29 +5019,15 @@
         ],
         "parameters": [
           {
-            "name": "url",
+            "name": "id",
             "in": "query",
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Instagram profile URL, @handle, or username",
-              "title": "Url"
+              "description": "Highlight ID from the Instagram Story Highlights API, e.g. highlight:18201653992314974 or 18201653992314974.",
+              "title": "Id"
             },
-            "description": "Instagram profile URL, @handle, or username"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 50,
-              "minimum": 1,
-              "description": "Max highlights to expand",
-              "default": 10,
-              "title": "Limit"
-            },
-            "description": "Max highlights to expand"
+            "description": "Highlight ID from the Instagram Story Highlights API, e.g. highlight:18201653992314974 or 18201653992314974."
           },
           {
             "name": "cache",

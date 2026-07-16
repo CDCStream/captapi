@@ -167,6 +167,95 @@ async def fetch_post_details(shortcode: str) -> dict[str, Any] | None:
     }
 
 
+async def fetch_highlight_reel(highlight_id: str) -> dict[str, Any] | None:
+    """Details for one Story Highlight album via the logged-out reels_media
+    endpoint. ``highlight_id`` is the numeric id (no ``highlight:`` prefix).
+    Datacenter IPs get the full tray here; residential often returns an empty
+    tray, so try datacenter first. Returns the raw reel node or None.
+    """
+    reel_id = f"highlight:{highlight_id}"
+    for tier in ("datacenter", "residential"):
+        try:
+            node = await _fetch_reels_media_once(tier, reel_id)
+        except (httpx.HTTPError, ValueError, KeyError) as exc:
+            log.info("ig_highlight_tier_failed", tier=tier, error=str(exc)[:120])
+            continue
+        if node is not None:
+            return node
+    return None
+
+
+async def _fetch_reels_media_once(tier: str, reel_id: str) -> dict[str, Any] | None:
+    async with httpx.AsyncClient(
+        timeout=12, proxy=proxy_for(tier), follow_redirects=True
+    ) as client:
+        await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
+        csrf = client.cookies.get("csrftoken")
+        if not csrf:
+            return None
+        resp = await client.get(
+            "https://www.instagram.com/api/v1/feed/reels_media/",
+            params={"reel_ids": reel_id},
+            headers={
+                "User-Agent": _UA,
+                "X-IG-App-ID": "936619743392459",
+                "X-CSRFToken": csrf,
+                "Referer": "https://www.instagram.com/",
+            },
+        )
+        if resp.status_code != 200:
+            log.info("ig_highlight_http_error", tier=tier, status=resp.status_code)
+            return None
+        payload = resp.json()
+    reels = payload.get("reels")
+    if not isinstance(reels, dict):
+        return None
+    node = reels.get(reel_id)
+    return node if isinstance(node, dict) else None
+
+
+def _map_story_item(item: dict[str, Any]) -> dict[str, Any]:
+    media_type = safe_int(item.get("media_type"))
+    is_video = media_type == 2
+    videos = item.get("video_versions") or []
+    images = (item.get("image_versions2") or {}).get("candidates") or []
+    thumb = safe_str(images[0].get("url")) if images else None
+    taken_at = safe_int(item.get("taken_at"))
+    published = (
+        datetime.fromtimestamp(taken_at, tz=timezone.utc).isoformat().replace("+00:00", "Z")
+        if taken_at
+        else None
+    )
+    mapped = {
+        "type": _MEDIA_TYPE_NAMES.get(media_type or 0),
+        "url": (safe_str(videos[0].get("url")) if videos else None) if is_video else thumb,
+        "thumbnailUrl": thumb,
+        "takenAt": published,
+        "width": safe_int(item.get("original_width")),
+        "height": safe_int(item.get("original_height")),
+        "durationSeconds": _video_duration(item, item) if is_video else None,
+    }
+    return {k: v for k, v in mapped.items() if v is not None}
+
+
+def map_highlight_reel(node: dict[str, Any]) -> dict[str, Any]:
+    """Map a reels_media highlight node to the highlights-details shape."""
+    cover = node.get("cover_media") or {}
+    cover_url = (cover.get("cropped_image_version") or {}).get("url") or (
+        cover.get("full_image_version") or {}
+    ).get("url")
+    raw_items = node.get("items") or []
+    items = [_map_story_item(it) for it in raw_items if isinstance(it, dict)]
+    media_count = safe_int(node.get("media_count"))
+    return {
+        "id": safe_str(node.get("id")),
+        "title": safe_str(node.get("title")),
+        "coverUrl": safe_str(cover_url),
+        "itemCount": media_count if media_count is not None else (len(items) or None),
+        "items": items,
+    }
+
+
 def map_feed_post(
     media: dict[str, Any],
     followers: int | None = None,

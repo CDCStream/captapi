@@ -4,7 +4,8 @@
   "qs": {
     "url": "{{parameters.url}}",
     "comment_id": "{{parameters.comment_id}}",
-    "limit": "{{parameters.limit}}"
+    "limit": "{{parameters.limit}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"

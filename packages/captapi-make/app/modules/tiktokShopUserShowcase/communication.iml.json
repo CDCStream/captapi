@@ -3,7 +3,8 @@
   "method": "GET",
   "qs": {
     "username": "{{parameters.username}}",
-    "limit": "{{parameters.limit}}"
+    "limit": "{{parameters.limit}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"

@@ -3,7 +3,8 @@
   "method": "GET",
   "qs": {
     "query": "{{parameters.query}}",
-    "limit": "{{parameters.limit}}"
+    "limit": "{{parameters.limit}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"

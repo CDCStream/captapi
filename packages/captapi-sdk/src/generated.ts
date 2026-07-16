@@ -740,10 +740,8 @@ export interface InstagramStoryHighlightsParams {
 }
 
 export interface InstagramHighlightsDetailsParams {
-  /** Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** Max highlights to expand. Default 10, max 50. */
-  limit?: number;
+  /** Highlight ID from Story Highlights, e.g. highlight:18201653992314974. */
+  id: string;
   /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
   cache?: boolean;
 }
@@ -824,7 +822,7 @@ export class InstagramApi {
   storyHighlights(params: InstagramStoryHighlightsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/story-highlights", params);
   }
-  /** Instagram Highlights Details — Items inside a profile's story highlights. (9 credits) */
+  /** Instagram Highlights Details — Stories inside a single Instagram highlight, by highlight ID. (1 credit) */
   highlightsDetails(params: InstagramHighlightsDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/highlights-details", params);
   }

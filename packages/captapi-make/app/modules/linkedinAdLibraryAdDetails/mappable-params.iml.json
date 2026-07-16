@@ -5,5 +5,12 @@
     "label": "URL",
     "required": true,
     "help": "LinkedIn Ad Library URL or ad ID."
+  },
+  {
+    "name": "cache",
+    "type": "boolean",
+    "label": "Cache",
+    "required": false,
+    "help": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
   }
 ]

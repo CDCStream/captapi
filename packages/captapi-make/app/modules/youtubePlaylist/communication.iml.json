@@ -4,7 +4,8 @@
   "qs": {
     "url": "{{parameters.url}}",
     "limit": "{{parameters.limit}}",
-    "fast": "{{parameters.fast}}"
+    "fast": "{{parameters.fast}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"

@@ -92,6 +92,22 @@ def _require_instagram_profile(value: str) -> str:
     return handle
 
 
+def _require_highlight_id(value: str) -> str:
+    """Normalize a highlight identifier to its numeric id. Accepts the id
+    returned by the Story Highlights API ("highlight:18201653992314974"), the
+    bare numeric id, or a stories/highlights URL."""
+    match = re.search(r"(\d{6,})", value or "")
+    if not match:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Invalid highlight ID. Pass an ID from the Instagram Story Highlights API, "
+                "e.g. highlight:18201653992314974 or 18201653992314974."
+            ),
+        )
+    return match.group(1)
+
+
 # A valid Instagram hashtag is word chars (unicode letters/digits/underscore)
 # with at least one letter. The Apify scrapers hand back the raw token, which
 # can keep trailing punctuation (e.g. "#DestinationDeRêv'" -> "DestinationDeRêv'")
@@ -1559,74 +1575,43 @@ async def instagram_story_highlights(
         return ApiResponse(data=data)
 
 
-@router.get("/highlights-details", summary="Items inside an Instagram profile's highlights")
+@router.get("/highlights-details", summary="Stories inside a single Instagram highlight")
 async def instagram_highlights_details(
-    url: str = Query(..., description="Instagram profile URL, @handle, or username"),
-    limit: int = Query(10, ge=1, le=50, description="Max highlights to expand"),
+    id: str = Query(
+        ...,
+        description=(
+            "Highlight ID from the Instagram Story Highlights API, "
+            "e.g. highlight:18201653992314974 or 18201653992314974."
+        ),
+    ),
     cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    handle = _require_instagram_profile(url)
-    settings = get_settings()
-    cost = _scaled_credits(limit, RATE_IG_RICH, 5)
+    highlight_id = _require_highlight_id(id)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/highlights-details",
         platform="instagram",
-        resource_url=url,
-        base_credits=cost,
+        resource_url=f"highlight:{highlight_id}",
+        base_credits=CREDIT_CHANNEL,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            async def _apify() -> dict[str, Any]:
-                apify = get_apify()
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_INSTAGRAM_HIGHLIGHTS,
-                    {
-                        "usernames": [handle],
-                        "includeStories": False,
-                        "includeHighlights": True,
-                        "expandHighlightItems": True,
-                        "maxHighlightsPerUser": limit,
-                    },
-                    max_items=limit,
+            node = await instagram_native.fetch_highlight_reel(highlight_id)
+            if node is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Highlight not found or unavailable. Check the ID from the Story Highlights API.",
                 )
-                highlights: list[dict[str, Any]] = []
-                for row in items:
-                    raw = row.get("highlights") or row.get("highlightsList") or []
-                    if not isinstance(raw, list):
-                        continue
-                    for h in raw:
-                        if not isinstance(h, dict):
-                            continue
-                        payload = _highlight_payload(h)
-                        media = h.get("items") or h.get("media") or []
-                        items = [
-                            {
-                                "type": safe_str(m.get("type") or m.get("mediaType")),
-                                "url": safe_str(m.get("url") or m.get("mediaUrl") or m.get("videoUrl") or m.get("imageUrl")),
-                                "thumbnailUrl": safe_str(m.get("thumbnailUrl") or m.get("displayUrl")),
-                                "takenAt": safe_str(m.get("takenAt") or m.get("timestamp")),
-                            }
-                            for m in (media if isinstance(media, list) else [])
-                            if isinstance(m, dict)
-                        ]
-                        count = safe_int(h.get("itemCount") or h.get("mediaCount"))
-                        payload["itemCount"] = count if count is not None else (len(items) or None)
-                        payload["items"] = items
-                        highlights.append(payload)
-                return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
-
-            ctx["source"] = "apify"
-            return await _apify()
+            ctx["source"] = "native"
+            return instagram_native.map_highlight_reel(node)
 
         data = await cached_or_run(
             endpoint="instagram.highlights-details",
-            params={"url": url, "limit": limit, "v": 4},
+            params={"id": highlight_id, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["highlights"]), RATE_IG_RICH, 5)
         return ApiResponse(data=data)
 
 

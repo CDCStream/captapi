@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
+    category: "improvement",
+    title: "Instagram Highlights Details is now native, by highlight ID — 1 credit",
+    description:
+      "The Instagram Highlights Details API now takes a single Highlight ID (the id returned by the Story Highlights API) and returns just that album's stories, straight from Instagram's own data. Pair it with Story Highlights: list a profile's albums, then pass an ID here to pull its contents. It's faster, richer, and the price dropped from 9 credits to 1.",
+    items: [
+      "Now accepts id (e.g. highlight:18201653992314974) instead of a profile URL + limit",
+      "Returns one highlight's stories with media/video URL, thumbnail, size, duration, and post date",
+      "Runs on our native resolver — ~1s, no third-party actor — and now costs 1 credit (was 9)",
+    ],
+  },
+  {
+    publishedAt: "2026-07-16",
     category: "fix",
     title: "Instagram Story Highlights: dropped the always-empty itemCount",
     description:

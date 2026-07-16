@@ -19,5 +19,12 @@
     "label": "Fast",
     "required": false,
     "help": "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters."
+  },
+  {
+    "name": "cache",
+    "type": "boolean",
+    "label": "Cache",
+    "required": false,
+    "help": "Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true)."
   }
 ]

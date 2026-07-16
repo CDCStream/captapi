@@ -84,7 +84,7 @@ const INPUTS = {
   "instagram-hashtag-search": ["--q", "travel", "--limit", L],
   "instagram-profile-search": ["--q", "nasa", "--limit", L],
   "instagram-story-highlights": ["--url", IG_PROFILE],
-  "instagram-highlights-details": ["--url", IG_PROFILE, "--limit", L],
+  "instagram-highlights-details": ["--id", "highlight:18201653992314974"],
   "instagram-embed": ["--url", IG_POST],
 
   "facebook-details": ["--url", FB_POST],

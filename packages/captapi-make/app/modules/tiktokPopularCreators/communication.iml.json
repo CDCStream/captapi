@@ -5,7 +5,8 @@
     "country": "{{parameters.country}}",
     "sort": "{{parameters.sort}}",
     "follower_count": "{{parameters.follower_count}}",
-    "limit": "{{parameters.limit}}"
+    "limit": "{{parameters.limit}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"

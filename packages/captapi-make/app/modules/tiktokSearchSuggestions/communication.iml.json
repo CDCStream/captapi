@@ -5,7 +5,8 @@
     "q": "{{parameters.q}}",
     "country": "{{parameters.country}}",
     "language": "{{parameters.language}}",
-    "limit": "{{parameters.limit}}"
+    "limit": "{{parameters.limit}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"

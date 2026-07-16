@@ -5,7 +5,8 @@
     "q": "{{parameters.q}}",
     "location": "{{parameters.location}}",
     "limit": "{{parameters.limit}}",
-    "details": "{{parameters.details}}"
+    "details": "{{parameters.details}}",
+    "cache": "{{parameters.cache}}"
   },
   "response": {
     "output": "{{body.data}}"
