@@ -1649,8 +1649,13 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       if (d.includes("company"))
         return "https://www.linkedin.com/company/microsoft";
       if (d.includes("page")) return PROFILE_URL.facebook;
-      if (d.includes("channel") || d.includes("profile") || d.includes("@handle"))
+      if (d.includes("channel") || d.includes("profile") || d.includes("@handle")) {
+        // Keep the Try-it default (and cURL snippet) in sync with the captured
+        // example response, so the shown profile matches the sample output.
+        const captured = API_EXAMPLES[ep.slug]?.url;
+        if (typeof captured === "string" && /^https?:\/\//.test(captured)) return captured;
         return PROFILE_URL[ep.platform];
+      }
       return getGroup(ep.platform).exampleUrl;
     }
     default:
