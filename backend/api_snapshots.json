@@ -2053,7 +2053,7 @@
       "publishedAt": "2026-06-02T14:56:35.000Z",
       "durationSeconds": 29,
       "thumbnailUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-p-0068-tx2/oUAHVIiQDac8uC75AEfyALAA1FrTAqEEQ3GRPe~tplv-tiktokx-origin.image?dr=9636&x-expires=1783263600&x-signature=2PlkofS3nAbuOWtQQSaCTJIU0bQ%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-      "videoUrl": "https://api.apify.com/v2/key-value-stores/XsAesczIHnIrglIRh/records/video-khabylame-20260602145635-7646812028874673439.mp4",
+      "videoUrl": null,
       "author": {
         "username": "khaby.lame",
         "displayName": "Khabane lame",

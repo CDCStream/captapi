@@ -70,7 +70,10 @@ def _iso(create_time: Any) -> str | None:
     ts = safe_int(create_time)
     if not ts:
         return None
-    return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
+    # Match the Apify path's createTimeISO format (…T00:45:18.000Z) so publishedAt
+    # is identical whichever source serves the request. TikTok timestamps are
+    # whole seconds, so milliseconds are always .000.
+    return datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
 
 async def video_details_native(url: str) -> dict[str, Any] | None:

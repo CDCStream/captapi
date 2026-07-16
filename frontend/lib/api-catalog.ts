@@ -224,7 +224,7 @@ const YOUTUBE: Spec[] = [
 const TIKTOK: Spec[] = [
   { slug: "tiktok-transcript", name: "TikTok Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/tiktok/transcript", credits: 2 },
   { slug: "tiktok-summarizer", name: "TikTok Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/tiktok/summarize", credits: 4 },
-  { slug: "tiktok-video-details", name: "TikTok Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/tiktok/video-details", credits: 1 },
+  { slug: "tiktok-video-details", name: "TikTok Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/tiktok/video-details", credits: 1, tagline: "Get everything about one TikTok video from its URL — caption, view/like/comment/share/save counts, creator, sound, hashtags, and thumbnail.", longDescription: "Paste any public TikTok video URL and the TikTok Video Details API returns the full picture as clean JSON: the caption, when it was posted, how long it runs, and its engagement — views, likes, comments, shares, and saves. You also get the creator (username, display name, follower count, verified badge, and avatar), the sound/music name, the list of hashtags, and a thumbnail image. Use it to build analytics dashboards, track a campaign, or enrich a content database. Need the downloadable video file itself? Use the TikTok Video Download API — this endpoint focuses on metadata and stats (videoUrl is null here). No TikTok login and no scraping setup on your side, and results are cached for 24 hours, so repeat lookups are instant and free.", delivers: ["Caption, publish date, and video duration", "Views, likes, comments, shares, and saves", "Creator profile — handle, name, followers, verified, avatar", "Sound name, hashtags, and thumbnail image"] },
   { slug: "tiktok-comments", name: "TikTok Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/tiktok/comments", credits: 10, creditsPerResult: 0.2 },
   { slug: "tiktok-channel-details", name: "TikTok Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/tiktok/channel-details", credits: 1 },
   { slug: "tiktok-profile-region", name: "TikTok Profile Region API", shortName: "Profile Region", category: "channel", method: "GET", path: "/v1/tiktok/profile-region", credits: 7 },
@@ -2046,7 +2046,7 @@ const FIELD_DESCS: Record<string, string> = {
   coverImage: "Cover image URL.",
   coverUrl: "Cover image URL.",
   logo: "Logo image URL.",
-  videoUrl: "Direct video file URL (CDN link).",
+  videoUrl: "Direct video file URL (CDN link); may be null when a download URL isn't exposed — use the platform's download endpoint for the file.",
   downloadUrl: "Direct download URL for the media file.",
   noWatermarkUrl: "Watermark-free variant of the video URL.",
   embedUrl: "Embed page URL — load it directly in an <iframe src>.",

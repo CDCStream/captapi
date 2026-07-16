@@ -204,6 +204,18 @@ def _normalize_profile_region(item: dict, handle: str) -> dict:
     }
 
 
+def _tt_published_iso(item: dict) -> str | None:
+    """publishedAt as …T00:45:18.000Z. Prefer the actor's ISO string; otherwise
+    convert the unix ``createTime`` (never stringify the raw integer)."""
+    iso = safe_str(item.get("createTimeISO"))
+    if iso:
+        return iso
+    ts = safe_int(item.get("createTime"))
+    if ts:
+        return datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    return None
+
+
 def _normalize(item: dict) -> dict:
     """Map raw TikTok actor output to our standard shape."""
     author = item.get("authorMeta") or item.get("author") or {}
@@ -222,7 +234,7 @@ def _normalize(item: dict) -> dict:
         "id": safe_str(item.get("id") or item.get("videoId")),
         "caption": safe_str(item.get("text") or item.get("desc")),
         "description": safe_str(item.get("text") or item.get("desc")),
-        "publishedAt": safe_str(item.get("createTimeISO") or item.get("createTime")),
+        "publishedAt": _tt_published_iso(item),
         "durationSeconds": safe_float(video_meta.get("duration") or item.get("duration")),
         "thumbnailUrl": safe_str(
             video_meta.get("coverUrl")
