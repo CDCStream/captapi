@@ -474,7 +474,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/channel-details", {"url": url, "cache": cache})
 
     def profile_region(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Profile Region — A creator's region (TikTok's own when exposed, else their dominant audience country — regionSource says which), an independent AI-estimated home country (estimatedRegion + confidence), interface language, and core profile stats, from a profile URL or @handle. (3 credits)
+        """TikTok Profile Region — A creator's resolved country (region) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so when missing region is AI-inferred from public bio/name/language cues; regionSource says whether it's "tiktok" or "inferred" and regionConfidence grades the guess. (2 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -693,7 +693,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/channel-details", {"url": url, "cache": cache})
 
     async def profile_region(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Profile Region — A creator's region (TikTok's own when exposed, else their dominant audience country — regionSource says which), an independent AI-estimated home country (estimatedRegion + confidence), interface language, and core profile stats, from a profile URL or @handle. (3 credits)
+        """TikTok Profile Region — A creator's resolved country (region) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so when missing region is AI-inferred from public bio/name/language cues; regionSource says whether it's "tiktok" or "inferred" and regionConfidence grades the guess. (2 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

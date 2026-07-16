@@ -64,14 +64,14 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
     category: "improvement",
-    title: "TikTok Profile Region now fills region with the top audience country",
+    title: "TikTok Profile Region now resolves a country even when TikTok hides it",
     description:
-      "TikTok almost never exposes an account's own country, so the region field used to be null. It's now filled with the best available signal: TikTok's authoritative region when present, otherwise the creator's dominant audience country — the most common country of the people commenting on their videos, sampled natively. A regionSource field tells you which one you got (\"tiktok\", \"audience\", or null). You also still get an independent AI-estimated home country (estimatedRegion) with a confidence score. It now costs 3 credits per call to cover the audience sampling.",
+      "TikTok no longer exposes an account's country on any public surface, so the region field used to be almost always null. It's now filled with the best available signal: TikTok's authoritative value when present, otherwise an AI-inferred country (e.g. IT or US) guessed from public profile cues — bio, display name, and language. A regionSource field tells you which one you got (\"tiktok\" or \"inferred\") and regionConfidence (high/medium/low) grades an inferred guess. Flat 2 credits per call.",
     items: [
-      "region is now populated: TikTok's own value, else the dominant audience country",
-      "regionSource labels the origin — \"tiktok\", \"audience\", or null",
-      "estimatedRegion (AI-inferred home country) + regionConfidence still included",
-      "Now 3 credits per call; cached results stay free",
+      "region is now populated: TikTok's own value, else an AI-inferred country",
+      "regionSource labels the origin — \"tiktok\" or \"inferred\"",
+      "regionConfidence grades inferred guesses (high/medium/low)",
+      "Flat 2 credits per call; cached results stay free",
     ],
   },
   {

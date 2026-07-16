@@ -497,7 +497,7 @@
       },
       "tiktokProfileRegion": {
         "label": "TikTok Profile Region",
-        "description": "A creator's region (TikTok's own when exposed, else their dominant audience country — regionSource says which), an independent AI-estimated home country (estimatedRegion + confidence), interface language, and core profile stats, from a profile URL or @handle. Costs ~3 credits (cached results free, failures never charged).",
+        "description": "A creator's resolved country (region) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so when missing region is AI-inferred from public bio/name/language cues; regionSource says whether it's \"tiktok\" or \"inferred\" and regionConfidence grades the guess. Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

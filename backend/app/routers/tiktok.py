@@ -52,19 +52,16 @@ CREDIT_SUMMARIZE = 4
 CREDIT_VIDEO_DETAILS = 1
 CREDIT_CHANNEL_DETAILS = 1
 CREDIT_COMMENTS = 2  # native (TikTok's own API); flat fee, our cost ~$0
-CREDIT_PROFILE_REGION = 3  # native profile + LLM estimate + audience-country region fill
+CREDIT_PROFILE_REGION = 2  # native profile page + fast LLM region estimate
 CREDIT_AUDIENCE = 3  # video list (actor) + native commenter-region sampling
 CREDIT_SEARCH = 2
 CREDIT_DOWNLOAD = 3
 
-# Audience-country sampling: how many recent videos to pull commenter regions
-# from, and how many commenter country codes to gather before tallying. The
-# full endpoint samples wide; the profile-region region fill samples lighter.
+# Audience-country sampling for /audience-demographics: how many recent videos
+# to pull commenter regions from, and how many country codes to gather before
+# tallying.
 AUDIENCE_VIDEO_SAMPLE = 12
 AUDIENCE_TARGET_TOTAL = 500
-REGION_FILL_VIDEO_SAMPLE = 6
-REGION_FILL_TARGET_TOTAL = 200
-REGION_FILL_MIN_SAMPLE = 20  # need at least this many codes to trust a top country
 
 # ---------------------------------------------------------------------------
 # Per-result credit rates for list endpoints.
@@ -836,15 +833,19 @@ async def _fetch_audience_locations(
     return _tally_locations(codes or []), len(aweme_ids)
 
 
-async def _add_estimated_region(data: dict[str, Any]) -> None:
-    """Attach an LLM-inferred country estimate to a profile-region payload.
+async def _resolve_region(data: dict[str, Any]) -> None:
+    """Populate ``region`` with the best available country signal.
 
-    TikTok no longer exposes an account's ``region`` on any public surface, so
-    ``region`` is almost always null. As a best-effort signal we let gpt-4o-mini
-    guess the creator's likely country from public cues (bio, display name,
-    language) and expose it in clearly-labelled, separate fields — never
-    overwriting the authoritative ``region``.
+    TikTok almost never exposes an account's ``region`` on any public surface,
+    so when it's missing we fill ``region`` with a gpt-4o-mini guess of the
+    creator's likely country from public cues (bio, display name, language).
+    ``regionSource`` records where the value came from ("tiktok" when authoritative,
+    "inferred" when estimated) and ``regionConfidence`` grades the estimate.
     """
+    if data.get("region"):
+        data["regionConfidence"] = None
+        data["regionSource"] = "tiktok"
+        return
     raw = data.get("raw") or {}
     user = raw.get("user") or raw.get("authorMeta") or {}
     bio = safe_str(user.get("signature"))
@@ -854,31 +855,9 @@ async def _add_estimated_region(data: dict[str, Any]) -> None:
         bio=bio,
         language=data.get("language"),
     )
-    data["estimatedRegion"] = (est or {}).get("region")
+    data["region"] = (est or {}).get("region")
     data["regionConfidence"] = (est or {}).get("confidence")
-
-
-async def _fill_region_from_audience(data: dict[str, Any], handle: str, settings: Any) -> None:
-    """When TikTok doesn't expose ``region`` (almost always), fall back to the
-    creator's dominant audience country — the most common commenter country
-    sampled natively from their videos. Flagged via ``regionSource`` so callers
-    can tell an authoritative region from this engagement-based proxy."""
-    if data.get("region"):
-        data["regionSource"] = "tiktok"
-        return
-    data["regionSource"] = None
-    try:
-        locations, _ = await _fetch_audience_locations(
-            handle, settings,
-            video_sample=REGION_FILL_VIDEO_SAMPLE,
-            target_total=REGION_FILL_TARGET_TOTAL,
-        )
-    except Exception:  # noqa: BLE001 - region fill is best-effort, never fatal
-        return
-    top = locations[0] if locations else None
-    if top and top["count"] >= REGION_FILL_MIN_SAMPLE:
-        data["region"] = top["countryCode"]
-        data["regionSource"] = "audience"
+    data["regionSource"] = "inferred"
 
 
 @router.get("/profile-region", summary="TikTok creator region, language & core stats")
@@ -915,13 +894,12 @@ async def tiktok_profile_region(
                 ctx["source"] = "apify"
                 base = _normalize_profile_region(items[0], handle)
 
-            await _add_estimated_region(base)
-            await _fill_region_from_audience(base, handle, settings)
+            await _resolve_region(base)
             return base
 
         data = await cached_or_run(
             endpoint="tiktok.profile-region",
-            params={"handle": handle, "v": 3},
+            params={"handle": handle, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
