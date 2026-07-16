@@ -747,7 +747,7 @@ export interface InstagramHighlightsDetailsParams {
 }
 
 export interface InstagramEmbedParams {
-  /** Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  /** Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
   /** Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true). */
   cache?: boolean;
@@ -826,7 +826,7 @@ export class InstagramApi {
   highlightsDetails(params: InstagramHighlightsDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/highlights-details", params);
   }
-  /** Instagram Embed — Embed HTML for an Instagram post/reel. (1 credit) */
+  /** Instagram Embed HTML — Embed HTML for an Instagram post, reel, or profile. (1 credit) */
   embed(params: InstagramEmbedParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/embed", params);
   }

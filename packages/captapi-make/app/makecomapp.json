@@ -1091,8 +1091,8 @@
         }
       },
       "instagramEmbed": {
-        "label": "Instagram Embed",
-        "description": "Embed HTML for an Instagram post/reel. Costs ~1 credit (cached results free, failures never charged).",
+        "label": "Instagram Embed HTML",
+        "description": "Embed HTML for an Instagram post, reel, or profile. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

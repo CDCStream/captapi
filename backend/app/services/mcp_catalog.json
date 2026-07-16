@@ -1712,16 +1712,16 @@
   {
     "tool": "instagram_embed",
     "platform": "instagram",
-    "name": "Instagram Embed",
+    "name": "Instagram Embed HTML",
     "path": "/v1/instagram/embed",
     "credits": 1,
-    "summary": "Embed HTML for an Instagram post/reel.",
+    "summary": "Embed HTML for an Instagram post, reel, or profile.",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+        "description": "Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",

@@ -1615,14 +1615,26 @@ async def instagram_highlights_details(
         return ApiResponse(data=data)
 
 
-@router.get("/embed", summary="Embed HTML for an Instagram post/reel")
+@router.get("/embed", summary="Embed HTML for an Instagram post, reel, or profile")
 async def instagram_embed(
-    url: str = Query(..., description="Instagram post or reel URL"),
+    url: str = Query(..., description="Instagram post, reel, or profile URL (or @handle)"),
     cache: bool = Query(True, description="Set false to bypass the 24h cache and fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    shortcode = _require_instagram_post_url(url)
-    # Pure string build â€” no Apify call, so this is a flat 1-credit endpoint.
+    # Posts/reels resolve to a shortcode; anything else is treated as a profile
+    # handle (both render via Instagram's embed.js blockquote).
+    shortcode = extract_instagram_shortcode(url)
+    username = None if shortcode else extract_instagram_username(url)
+    if not shortcode and not username:
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(
+                url,
+                "instagram",
+                "https://www.instagram.com/reel/SHORTCODE/ or https://www.instagram.com/username/",
+            ),
+        )
+    # Pure string build - no Apify call, so this is a flat 1-credit endpoint.
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/embed",
@@ -1632,26 +1644,34 @@ async def instagram_embed(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             async def _local() -> dict[str, Any]:
-                permalink = f"https://www.instagram.com/p/{shortcode}/"
+                if shortcode:
+                    kind = "post"
+                    permalink = f"https://www.instagram.com/p/{shortcode}/"
+                else:
+                    kind = "profile"
+                    permalink = f"https://www.instagram.com/{username}/"
                 html = (
                     '<blockquote class="instagram-media" '
                     f'data-instgrm-permalink="{permalink}" data-instgrm-version="14"></blockquote>'
                     '<script async src="//www.instagram.com/embed.js"></script>'
                 )
-                return {
+                payload = {
                     "platform": "instagram",
                     "url": url,
+                    "type": kind,
                     "shortcode": shortcode,
+                    "username": username,
                     "permalink": permalink,
                     "html": html,
                 }
+                return {k: v for k, v in payload.items() if v is not None}
 
             ctx["source"] = "direct"
             return await _local()
 
         data = await cached_or_run(
             endpoint="instagram.embed",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

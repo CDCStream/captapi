@@ -3684,6 +3684,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "instagram-embed": {
     "platform": "instagram",
     "url": "https://www.instagram.com/p/DZFqdAxlkUG/",
+    "type": "post",
     "shortcode": "DZFqdAxlkUG",
     "permalink": "https://www.instagram.com/p/DZFqdAxlkUG/",
     "html": "<blockquote class=\"instagram-media\" data-instgrm-permalink=\"https://www.instagram.com/p/DZFqdAxlkUG/\" data-instgrm-version=\"14\"></blockquote><script async src=\"//www.instagram.com/embed.js\"></script>"

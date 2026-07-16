@@ -199,7 +199,7 @@ const INSTAGRAM: Omit<Endpoint, "platform">[] = [
   { tool: "instagram_profile_search", name: "Instagram Profile Search", path: "/v1/instagram/profile-search", credits: 1, summary: "Resolve an Instagram account name or @handle to its public profile.", params: [q()] },
   { tool: "instagram_story_highlights", name: "Instagram Story Highlights", path: "/v1/instagram/story-highlights", credits: 5, summary: "List a profile's story highlight covers.", params: [url(IG_PROFILE)] },
   { tool: "instagram_highlights_details", name: "Instagram Highlights Details", path: "/v1/instagram/highlights-details", credits: 1, summary: "Stories inside a single Instagram highlight, by highlight ID.", params: [{ name: "id", type: "string", required: true, description: "Highlight ID from Story Highlights, e.g. highlight:18201653992314974." }] },
-  { tool: "instagram_embed", name: "Instagram Embed", path: "/v1/instagram/embed", credits: 1, summary: "Embed HTML for an Instagram post/reel.", params: [url(IG_POST)] },
+  { tool: "instagram_embed", name: "Instagram Embed HTML", path: "/v1/instagram/embed", credits: 1, summary: "Embed HTML for an Instagram post, reel, or profile.", params: [url("Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/.")] },
   { tool: "instagram_basic_profile", name: "Instagram Basic Profile", path: "/v1/instagram/basic-profile", credits: 1, summary: "Lightweight Instagram profile lookup (core fields).", params: [url(IG_PROFILE)] },
 ];
 

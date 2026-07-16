@@ -5069,7 +5069,7 @@
         "tags": [
           "Instagram"
         ],
-        "summary": "Embed HTML for an Instagram post/reel",
+        "summary": "Embed HTML for an Instagram post, reel, or profile",
         "operationId": "instagram_embed_v1_instagram_embed_get",
         "security": [
           {
@@ -5083,10 +5083,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Instagram post or reel URL",
+              "description": "Instagram post, reel, or profile URL (or @handle)",
               "title": "Url"
             },
-            "description": "Instagram post or reel URL"
+            "description": "Instagram post, reel, or profile URL (or @handle)"
           },
           {
             "name": "cache",

@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
     category: "improvement",
+    title: "Instagram Embed API is now the Instagram Embed HTML API — profiles supported",
+    description:
+      "The Instagram Embed API is now called the Instagram Embed HTML API, and it accepts profile URLs in addition to posts and reels. Pass any post, reel, or profile URL (or an @handle) and get back ready-to-paste embed HTML plus the canonical permalink. Posts/reels return a media card; profiles return a profile card.",
+    items: [
+      "Now accepts profile URLs and @handles, not just posts and reels",
+      "Response adds a type flag (post/profile) and username for profiles",
+      "Still a flat 1 credit — pure HTML builder, no scraping",
+    ],
+  },
+  {
+    publishedAt: "2026-07-16",
+    category: "improvement",
     title: "Instagram Highlights Details is now native, by highlight ID — 1 credit",
     description:
       "The Instagram Highlights Details API now takes a single Highlight ID (the id returned by the Story Highlights API) and returns just that album's stories, straight from Instagram's own data. Pair it with Story Highlights: list a profile's albums, then pass an ID here to pull its contents. It's faster, richer, and the price dropped from 9 credits to 1.",

@@ -1006,9 +1006,9 @@ class InstagramApi:
         return self._t.get("/v1/instagram/highlights-details", {"id": id_, "cache": cache})
 
     def embed(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Embed — Embed HTML for an Instagram post/reel. (1 credit)
+        """Instagram Embed HTML — Embed HTML for an Instagram post, reel, or profile. (1 credit)
 
-        :param url: Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
         return self._t.get("/v1/instagram/embed", {"url": url, "cache": cache})
@@ -1167,9 +1167,9 @@ class AsyncInstagramApi:
         return await self._t.get("/v1/instagram/highlights-details", {"id": id_, "cache": cache})
 
     async def embed(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Embed — Embed HTML for an Instagram post/reel. (1 credit)
+        """Instagram Embed HTML — Embed HTML for an Instagram post, reel, or profile. (1 credit)
 
-        :param url: Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Responses are cached for 24 hours by default. Set false to bypass the cache and always fetch fresh data (default true).
         """
         return await self._t.get("/v1/instagram/embed", {"url": url, "cache": cache})

@@ -4,7 +4,7 @@
     "type": "text",
     "label": "URL",
     "required": true,
-    "help": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/."
+    "help": "Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/."
   },
   {
     "name": "cache",
