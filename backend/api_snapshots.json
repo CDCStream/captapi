@@ -5673,7 +5673,7 @@
     "data": {
       "platform": "tiktok",
       "query": "skincare",
-      "totalReturned": 5,
+      "totalReturned": 8,
       "suggestions": [
         {
           "seed": "skincare",
@@ -5685,33 +5685,57 @@
         },
         {
           "seed": "skincare",
-          "suggestion": "skincare products",
-          "rank": 2,
-          "searchUrl": "https://www.tiktok.com/search?q=skincare+products",
-          "region": "US",
-          "language": "en-US"
-        },
-        {
-          "seed": "skincare",
           "suggestion": "skincare routine men",
-          "rank": 3,
+          "rank": 2,
           "searchUrl": "https://www.tiktok.com/search?q=skincare+routine+men",
           "region": "US",
           "language": "en-US"
         },
         {
           "seed": "skincare",
-          "suggestion": "based skincare bundle",
-          "rank": 4,
-          "searchUrl": "https://www.tiktok.com/search?q=based+skincare+bundle",
+          "suggestion": "skincare products",
+          "rank": 3,
+          "searchUrl": "https://www.tiktok.com/search?q=skincare+products",
           "region": "US",
           "language": "en-US"
         },
         {
           "seed": "skincare",
           "suggestion": "Skincare korean",
-          "rank": 5,
+          "rank": 4,
           "searchUrl": "https://www.tiktok.com/search?q=Skincare+korean",
+          "region": "US",
+          "language": "en-US"
+        },
+        {
+          "seed": "skincare",
+          "suggestion": "skincare for men",
+          "rank": 5,
+          "searchUrl": "https://www.tiktok.com/search?q=skincare+for+men",
+          "region": "US",
+          "language": "en-US"
+        },
+        {
+          "seed": "skincare",
+          "suggestion": "skincare medicube",
+          "rank": 6,
+          "searchUrl": "https://www.tiktok.com/search?q=skincare+medicube",
+          "region": "US",
+          "language": "en-US"
+        },
+        {
+          "seed": "skincare",
+          "suggestion": "skincare",
+          "rank": 7,
+          "searchUrl": "https://www.tiktok.com/search?q=skincare",
+          "region": "US",
+          "language": "en-US"
+        },
+        {
+          "seed": "skincare",
+          "suggestion": "skincare for 9–10 girls",
+          "rank": 8,
+          "searchUrl": "https://www.tiktok.com/search?q=skincare+for+9%E2%80%9310+girls",
           "region": "US",
           "language": "en-US"
         }
