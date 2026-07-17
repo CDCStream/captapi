@@ -357,15 +357,6 @@ export interface TiktokAudienceDemographicsParams {
   cache?: boolean;
 }
 
-export interface TiktokSearchParams {
-  /** Search query or keywords (min 2 chars). */
-  q: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
-  limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
 export interface TiktokSearchSuggestionsParams {
   /** Seed keyword for autocomplete suggestions. */
   q: string;
@@ -433,28 +424,10 @@ export interface TiktokMusicPostsParams {
   cache?: boolean;
 }
 
-export interface TiktokHashtagSearchParams {
-  /** Hashtag with or without the # (min 2 chars). */
-  q: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
-  limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
 export interface TiktokTopSearchParams {
   /** Search query or keywords (min 2 chars). */
   q: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
-  limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface TiktokUserSearchParams {
-  /** Search query or keywords (min 2 chars). */
-  q: string;
-  /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -566,10 +539,6 @@ export class TiktokApi {
   audienceDemographics(params: TiktokAudienceDemographicsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/audience-demographics", params);
   }
-  /** TikTok Search — Search TikTok videos by keyword/hashtag. (14 credits) */
-  search(params: TiktokSearchParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/tiktok/search", params);
-  }
   /** TikTok Search Suggestions — TikTok search/autocomplete suggestions for a seed keyword. (28 credits) */
   searchSuggestions(params: TiktokSearchSuggestionsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/search-suggestions", params);
@@ -598,17 +567,9 @@ export class TiktokApi {
   musicPosts(params: TiktokMusicPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/music-posts", params);
   }
-  /** TikTok Hashtag Search — Search TikTok videos by hashtag. (14 credits) */
-  hashtagSearch(params: TiktokHashtagSearchParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/tiktok/hashtag-search", params);
-  }
   /** TikTok Top Search — Top mixed TikTok results for a keyword. (14 credits) */
   topSearch(params: TiktokTopSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/top-search", params);
-  }
-  /** TikTok User Search — Search TikTok users/creators by keyword. (8 credits) */
-  userSearch(params: TiktokUserSearchParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/tiktok/user-search", params);
   }
   /** TikTok Search by Hashtag — Search TikTok videos by hashtag — video URL, caption, author, and engagement counts per result, with cursor pagination (nextCursor + hasMore). (14 credits) */
   searchByHashtag(params: TiktokSearchByHashtagParams): Promise<ApiEnvelope> {

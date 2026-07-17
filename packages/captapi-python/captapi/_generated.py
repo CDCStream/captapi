@@ -489,15 +489,6 @@ class TiktokApi:
         """
         return self._t.get("/v1/tiktok/audience-demographics", {"url": url, "cache": cache})
 
-    def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Search — Search TikTok videos by keyword/hashtag. (14 credits)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/tiktok/search", {"q": q, "limit": limit, "cache": cache})
-
     def search_suggestions(self, *, q: str, country: str | None = None, language: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Search Suggestions — TikTok search/autocomplete suggestions for a seed keyword. (28 credits)
 
@@ -563,15 +554,6 @@ class TiktokApi:
         """
         return self._t.get("/v1/tiktok/music-posts", {"url": url, "limit": limit, "cache": cache})
 
-    def hashtag_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Hashtag Search — Search TikTok videos by hashtag. (14 credits)
-
-        :param q: Hashtag with or without the # (min 2 chars).
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/tiktok/hashtag-search", {"q": q, "limit": limit, "cache": cache})
-
     def top_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Top Search — Top mixed TikTok results for a keyword. (14 credits)
 
@@ -580,15 +562,6 @@ class TiktokApi:
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/top-search", {"q": q, "limit": limit, "cache": cache})
-
-    def user_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok User Search — Search TikTok users/creators by keyword. (8 credits)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/tiktok/user-search", {"q": q, "limit": limit, "cache": cache})
 
     def search_by_hashtag(self, *, q: str, limit: float | None = None, cursor: float | None = None, region: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Search by Hashtag — Search TikTok videos by hashtag — video URL, caption, author, and engagement counts per result, with cursor pagination (nextCursor + hasMore). (14 credits)
@@ -729,15 +702,6 @@ class AsyncTiktokApi:
         """
         return await self._t.get("/v1/tiktok/audience-demographics", {"url": url, "cache": cache})
 
-    async def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Search — Search TikTok videos by keyword/hashtag. (14 credits)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/tiktok/search", {"q": q, "limit": limit, "cache": cache})
-
     async def search_suggestions(self, *, q: str, country: str | None = None, language: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Search Suggestions — TikTok search/autocomplete suggestions for a seed keyword. (28 credits)
 
@@ -803,15 +767,6 @@ class AsyncTiktokApi:
         """
         return await self._t.get("/v1/tiktok/music-posts", {"url": url, "limit": limit, "cache": cache})
 
-    async def hashtag_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Hashtag Search — Search TikTok videos by hashtag. (14 credits)
-
-        :param q: Hashtag with or without the # (min 2 chars).
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/tiktok/hashtag-search", {"q": q, "limit": limit, "cache": cache})
-
     async def top_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Top Search — Top mixed TikTok results for a keyword. (14 credits)
 
@@ -820,15 +775,6 @@ class AsyncTiktokApi:
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/top-search", {"q": q, "limit": limit, "cache": cache})
-
-    async def user_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok User Search — Search TikTok users/creators by keyword. (8 credits)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param limit: Max items to return. Default 20, max 100. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/tiktok/user-search", {"q": q, "limit": limit, "cache": cache})
 
     async def search_by_hashtag(self, *, q: str, limit: float | None = None, cursor: float | None = None, region: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Search by Hashtag — Search TikTok videos by hashtag — video URL, caption, author, and engagement counts per result, with cursor pagination (nextCursor + hasMore). (14 credits)

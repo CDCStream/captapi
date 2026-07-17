@@ -301,7 +301,13 @@ async def main() -> None:
         payloads["tiktok-channel-posts"] = {"url": TT_PROFILE_URL, "totalReturned": len(posts), "posts": posts}
     if raw["tt_search"]:
         results = [tt_video(i) for i in raw["tt_search"][:5]]
-        payloads["tiktok-search"] = {"query": "skincare", "totalReturned": len(results), "results": results}
+        payloads["tiktok-search-by-hashtag"] = {
+            "query": "skincare",
+            "totalReturned": len(results),
+            "hasMore": True,
+            "nextCursor": 20,
+            "results": results,
+        }
     payloads["tiktok-comments"] = tt_comments_payload(raw["tt_comments"])
     payloads["youtube-channel-details"] = yt_channel_details_payload(raw["yt_channel"])
     if raw["yt_channel_videos"]:

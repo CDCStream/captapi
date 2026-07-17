@@ -39,7 +39,6 @@ Kontrol: 200 doner mi - JSON alanlari dolu mu - sure makul mu (test URL'leri: do
 - [ ] Channel Details — `GET /v1/tiktok/channel-details`
 - [ ] Profile Region — `GET /v1/tiktok/profile-region`
 - [ ] Audience Demographics — `GET /v1/tiktok/audience-demographics`
-- [ ] Search — `GET /v1/tiktok/search`
 - [ ] Search Suggestions — `GET /v1/tiktok/search-suggestions`
 - [ ] Video Download — `GET /v1/tiktok/video-download`
 - [ ] Channel Posts — `GET /v1/tiktok/channel-posts`
@@ -47,9 +46,9 @@ Kontrol: 200 doner mi - JSON alanlari dolu mu - sure makul mu (test URL'leri: do
 - [ ] User Followers — `GET /v1/tiktok/user-followers`
 - [ ] User Followings — `GET /v1/tiktok/user-followings`
 - [ ] Music Posts — `GET /v1/tiktok/music-posts`
-- [ ] Hashtag Search — `GET /v1/tiktok/hashtag-search`
 - [ ] Top Search — `GET /v1/tiktok/top-search`
-- [ ] User Search — `GET /v1/tiktok/user-search`
+- [ ] Search by Hashtag — `GET /v1/tiktok/search/hashtag`
+- [ ] Search Users — `GET /v1/tiktok/search/users`
 - [ ] Song Details — `GET /v1/tiktok/song-details`
 - [ ] Trending Feed — `GET /v1/tiktok/trending-feed`
 - [ ] Popular Hashtags — `GET /v1/tiktok/popular-hashtags`

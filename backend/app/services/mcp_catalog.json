@@ -810,34 +810,6 @@
     ]
   },
   {
-    "tool": "tiktok_search",
-    "platform": "tiktok",
-    "name": "TikTok Search",
-    "path": "/v1/tiktok/search",
-    "credits": 14,
-    "summary": "Search TikTok videos by keyword/hashtag.",
-    "params": [
-      {
-        "name": "q",
-        "type": "string",
-        "required": true,
-        "description": "Search query or keywords (min 2 chars)."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
     "tool": "tiktok_search_suggestions",
     "platform": "tiktok",
     "name": "TikTok Search Suggestions",
@@ -1046,34 +1018,6 @@
     ]
   },
   {
-    "tool": "tiktok_hashtag_search",
-    "platform": "tiktok",
-    "name": "TikTok Hashtag Search",
-    "path": "/v1/tiktok/hashtag-search",
-    "credits": 14,
-    "summary": "Search TikTok videos by hashtag.",
-    "params": [
-      {
-        "name": "q",
-        "type": "string",
-        "required": true,
-        "description": "Hashtag with or without the # (min 2 chars)."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
     "tool": "tiktok_top_search",
     "platform": "tiktok",
     "name": "TikTok Top Search",
@@ -1092,34 +1036,6 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "tiktok_user_search",
-    "platform": "tiktok",
-    "name": "TikTok User Search",
-    "path": "/v1/tiktok/user-search",
-    "credits": 8,
-    "summary": "Search TikTok users/creators by keyword.",
-    "params": [
-      {
-        "name": "q",
-        "type": "string",
-        "required": true,
-        "description": "Search query or keywords (min 2 chars)."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 20, max 100. Billed per result."
       },
       {
         "name": "cache",

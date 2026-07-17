@@ -7,7 +7,7 @@ Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop,
 Age/Gender and public Ad Libraries —
 transcripts, AI summaries, comments, stats, search, commerce data and downloads.
 
-- **180 action modules**, one per Captapi endpoint.
+- **177 action modules**, one per Captapi endpoint.
 - **One connection**: paste your Captapi API key (Bearer auth).
 - Every module returns the API `data` payload directly.
 

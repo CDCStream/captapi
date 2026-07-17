@@ -1179,43 +1179,6 @@ async def tiktok_audience_demographics(
         return ApiResponse(data=data)
 
 
-@router.get("/search", summary="Search TikTok videos by hashtag/keyword")
-async def tiktok_search(
-    q: str = Query(..., min_length=2),
-    limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
-    caller: ApiCaller = Depends(require_api_key),
-):
-    settings = get_settings()
-    cost = _scaled_credits(limit, RATE_CHANNEL_POSTS, CREDIT_SEARCH)
-    async with billed_call(
-        caller=caller,
-        endpoint="/v1/tiktok/search",
-        platform="tiktok",
-        resource_url=None,
-        base_credits=cost,
-    ) as ctx:
-        async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_SEARCH,
-                {"searchQueries": [q], "resultsPerPage": limit},
-                max_items=limit,
-            )
-            results = [_normalize(i) for i in items[:limit]]
-            return {"query": q, "totalReturned": len(results), "results": results}
-
-        data = await cached_or_run(
-            endpoint="tiktok.search",
-            params={"q": q, "limit": limit, "v": 2},
-            runner=_run,
-            ctx=ctx,
-            use_cache=cache,
-        )
-        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_CHANNEL_POSTS, CREDIT_SEARCH)
-        return ApiResponse(data=data)
-
-
 @router.get("/video-download", summary="TikTok video download URL")
 async def tiktok_video_download(
     url: str = Query(...),
@@ -1554,43 +1517,6 @@ async def tiktok_music_posts(
         return ApiResponse(data=data)
 
 
-@router.get("/hashtag-search", summary="Search TikTok videos by hashtag")
-async def tiktok_hashtag_search(
-    q: str = Query(..., min_length=2, description="Hashtag (with or without #)"),
-    limit: int = Query(20, ge=1, le=200),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
-    caller: ApiCaller = Depends(require_api_key),
-):
-    settings = get_settings()
-    cost = _scaled_credits(limit, RATE_CHANNEL_POSTS, CREDIT_SEARCH)
-    async with billed_call(
-        caller=caller,
-        endpoint="/v1/tiktok/hashtag-search",
-        platform="tiktok",
-        resource_url=None,
-        base_credits=cost,
-    ) as ctx:
-        async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK,
-                {"hashtags": [q.lstrip("#")], "resultsPerPage": limit, "shouldDownloadVideos": False},
-                max_items=limit,
-            )
-            results = [_normalize(i) for i in items[:limit]]
-            return {"query": q, "totalReturned": len(results), "results": results}
-
-        data = await cached_or_run(
-            endpoint="tiktok.hashtag-search",
-            params={"q": q, "limit": limit, "v": 2},
-            runner=_run,
-            ctx=ctx,
-            use_cache=cache,
-        )
-        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_CHANNEL_POSTS, CREDIT_SEARCH)
-        return ApiResponse(data=data)
-
-
 @router.get("/top-search", summary="Top mixed TikTok search results for a keyword")
 async def tiktok_top_search(
     q: str = Query(..., min_length=2),
@@ -1625,48 +1551,6 @@ async def tiktok_top_search(
             use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_CHANNEL_POSTS, CREDIT_SEARCH)
-        return ApiResponse(data=data)
-
-
-@router.get("/user-search", summary="Search TikTok users/creators by keyword")
-async def tiktok_user_search(
-    q: str = Query(..., min_length=2),
-    limit: int = Query(20, ge=1, le=100),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
-    caller: ApiCaller = Depends(require_api_key),
-):
-    settings = get_settings()
-    cost = _scaled_credits(limit, RATE_USER_SEARCH, 5)
-    async with billed_call(
-        caller=caller,
-        endpoint="/v1/tiktok/user-search",
-        platform="tiktok",
-        resource_url=None,
-        base_credits=cost,
-    ) as ctx:
-        async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK,
-                {
-                    "searchQueries": [q],
-                    "searchSection": "/user",
-                    "maxProfilesPerQuery": limit,
-                    "resultsPerPage": limit,
-                },
-                max_items=limit,
-            )
-            users = [_normalize_user(i) for i in items[:limit]]
-            return {"query": q, "totalReturned": len(users), "users": users}
-
-        data = await cached_or_run(
-            endpoint="tiktok.user-search",
-            params={"q": q, "limit": limit, "v": 2},
-            runner=_run,
-            ctx=ctx,
-            use_cache=cache,
-        )
-        ctx["credits_override"] = _scaled_credits(len(data["users"]), RATE_USER_SEARCH, 5)
         return ApiResponse(data=data)
 
 

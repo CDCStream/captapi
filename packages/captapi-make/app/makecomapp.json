@@ -529,23 +529,6 @@
           "scope": null
         }
       },
-      "tiktokSearch": {
-        "label": "TikTok Search",
-        "description": "Search TikTok videos by keyword/hashtag. Costs ~14 credits (cached results free, failures never charged).",
-        "connection": "captapi",
-        "altConnection": null,
-        "webhook": null,
-        "moduleType": "action",
-        "actionCrud": "read",
-        "codeFiles": {
-          "communication": "modules/tiktokSearch/communication.iml.json",
-          "staticParams": null,
-          "mappableParams": "modules/tiktokSearch/mappable-params.iml.json",
-          "interface": null,
-          "samples": null,
-          "scope": null
-        }
-      },
       "tiktokSearchSuggestions": {
         "label": "TikTok Search Suggestions",
         "description": "TikTok search/autocomplete suggestions for a seed keyword. Costs ~28 credits (cached results free, failures never charged).",
@@ -665,23 +648,6 @@
           "scope": null
         }
       },
-      "tiktokHashtagSearch": {
-        "label": "TikTok Hashtag Search",
-        "description": "Search TikTok videos by hashtag. Costs ~14 credits (cached results free, failures never charged).",
-        "connection": "captapi",
-        "altConnection": null,
-        "webhook": null,
-        "moduleType": "action",
-        "actionCrud": "read",
-        "codeFiles": {
-          "communication": "modules/tiktokHashtagSearch/communication.iml.json",
-          "staticParams": null,
-          "mappableParams": "modules/tiktokHashtagSearch/mappable-params.iml.json",
-          "interface": null,
-          "samples": null,
-          "scope": null
-        }
-      },
       "tiktokTopSearch": {
         "label": "TikTok Top Search",
         "description": "Top mixed TikTok results for a keyword. Costs ~14 credits (cached results free, failures never charged).",
@@ -694,23 +660,6 @@
           "communication": "modules/tiktokTopSearch/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/tiktokTopSearch/mappable-params.iml.json",
-          "interface": null,
-          "samples": null,
-          "scope": null
-        }
-      },
-      "tiktokUserSearch": {
-        "label": "TikTok User Search",
-        "description": "Search TikTok users/creators by keyword. Costs ~8 credits (cached results free, failures never charged).",
-        "connection": "captapi",
-        "altConnection": null,
-        "webhook": null,
-        "moduleType": "action",
-        "actionCrud": "read",
-        "codeFiles": {
-          "communication": "modules/tiktokUserSearch/communication.iml.json",
-          "staticParams": null,
-          "mappableParams": "modules/tiktokUserSearch/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null
