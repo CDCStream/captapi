@@ -8,6 +8,7 @@ import re
 from collections import Counter
 from datetime import datetime, timezone
 from typing import Any
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -372,10 +373,15 @@ def _normalize_suggestion(item: dict, seed: str) -> dict:
         or item.get("text")
         or item.get("searchTerm")
     )
+    suggestion = safe_str(suggestion)
+    search_url = safe_str(item.get("searchUrl"))
+    if not search_url and suggestion:
+        search_url = f"https://www.tiktok.com/search?q={quote(suggestion)}"
     return {
-        "seed": safe_str(item.get("seed") or item.get("sourceKeyword") or seed),
-        "suggestion": safe_str(suggestion),
-        "rank": safe_int(item.get("rank") or item.get("position")),
+        "seed": safe_str(item.get("seedKeyword") or item.get("seed") or item.get("sourceKeyword") or seed),
+        "suggestion": suggestion,
+        "rank": safe_int(item.get("suggestionRank") or item.get("rank") or item.get("position")),
+        "searchUrl": search_url,
         "region": safe_str(item.get("region")),
         "language": safe_str(item.get("language")),
     }

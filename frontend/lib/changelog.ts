@@ -50,6 +50,17 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-17",
+    category: "improvement",
+    title: "TikTok Search Suggestions now returns a ready-to-open search link",
+    description:
+      "Every suggestion from the TikTok Search Suggestions API now includes a searchUrl — a direct TikTok search link that runs that exact query, so you can jump straight from a suggested keyword to its results. Alongside the existing suggestion text, rank, seed keyword, region, and language, it makes the endpoint a more complete keyword-research tool. No change to pricing.",
+    items: [
+      "New searchUrl field on each suggestion — opens that exact search on TikTok",
+      "Rank now reflects TikTok's own suggestion order",
+    ],
+  },
+  {
+    publishedAt: "2026-07-17",
     category: "feature",
     title: "TikTok search, reworked: Search by Hashtag and Search Users",
     description:
