@@ -1130,6 +1130,80 @@
     ]
   },
   {
+    "tool": "tiktok_search_by_hashtag",
+    "platform": "tiktok",
+    "name": "TikTok Search by Hashtag",
+    "path": "/v1/tiktok/search/hashtag",
+    "credits": 14,
+    "summary": "Search TikTok videos by hashtag — video URL, caption, author, and engagement counts per result, with cursor pagination (nextCursor + hasMore).",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Hashtag with or without the # (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "number",
+        "required": false,
+        "description": "Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end."
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "required": false,
+        "description": "Two-letter ISO country the scraping proxy is routed through. Default US. Only sets the proxy location — does not filter results by country."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_search_users",
+    "platform": "tiktok",
+    "name": "TikTok Search Users",
+    "path": "/v1/tiktok/search/users",
+    "credits": 8,
+    "summary": "Search TikTok users by keyword — username, display name, bio, follower count, verified flag, and avatar per result, with cursor pagination (nextCursor + hasMore).",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query matched against usernames, display names and bios."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "number",
+        "required": false,
+        "description": "Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
     "tool": "tiktok_song_details",
     "platform": "tiktok",
     "name": "TikTok Song Details",

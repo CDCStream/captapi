@@ -48,6 +48,8 @@
       "tiktokHashtagSearch",
       "tiktokTopSearch",
       "tiktokUserSearch",
+      "tiktokSearchByHashtag",
+      "tiktokSearchUsers",
       "tiktokSongDetails",
       "tiktokTrendingFeed",
       "tiktokPopularHashtags",

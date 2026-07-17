@@ -590,6 +590,27 @@ class TiktokApi:
         """
         return self._t.get("/v1/tiktok/user-search", {"q": q, "limit": limit, "cache": cache})
 
+    def search_by_hashtag(self, *, q: str, limit: float | None = None, cursor: float | None = None, region: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Search by Hashtag — Search TikTok videos by hashtag — video URL, caption, author, and engagement counts per result, with cursor pagination (nextCursor + hasMore). (14 credits)
+
+        :param q: Hashtag with or without the # (min 2 chars).
+        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param cursor: Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end.
+        :param region: Two-letter ISO country the scraping proxy is routed through. Default US. Only sets the proxy location — does not filter results by country.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/tiktok/search/hashtag", {"q": q, "limit": limit, "cursor": cursor, "region": region, "cache": cache})
+
+    def search_users(self, *, q: str, limit: float | None = None, cursor: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Search Users — Search TikTok users by keyword — username, display name, bio, follower count, verified flag, and avatar per result, with cursor pagination (nextCursor + hasMore). (8 credits)
+
+        :param q: Search query matched against usernames, display names and bios.
+        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param cursor: Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/tiktok/search/users", {"q": q, "limit": limit, "cursor": cursor, "cache": cache})
+
     def song_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Song Details — Details of a TikTok sound/song. (2 credits)
 
@@ -808,6 +829,27 @@ class AsyncTiktokApi:
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/user-search", {"q": q, "limit": limit, "cache": cache})
+
+    async def search_by_hashtag(self, *, q: str, limit: float | None = None, cursor: float | None = None, region: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Search by Hashtag — Search TikTok videos by hashtag — video URL, caption, author, and engagement counts per result, with cursor pagination (nextCursor + hasMore). (14 credits)
+
+        :param q: Hashtag with or without the # (min 2 chars).
+        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param cursor: Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end.
+        :param region: Two-letter ISO country the scraping proxy is routed through. Default US. Only sets the proxy location — does not filter results by country.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/tiktok/search/hashtag", {"q": q, "limit": limit, "cursor": cursor, "region": region, "cache": cache})
+
+    async def search_users(self, *, q: str, limit: float | None = None, cursor: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Search Users — Search TikTok users by keyword — username, display name, bio, follower count, verified flag, and avatar per result, with cursor pagination (nextCursor + hasMore). (8 credits)
+
+        :param q: Search query matched against usernames, display names and bios.
+        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param cursor: Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/tiktok/search/users", {"q": q, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def song_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Song Details — Details of a TikTok sound/song. (2 credits)

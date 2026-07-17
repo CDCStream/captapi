@@ -460,6 +460,30 @@ export interface TiktokUserSearchParams {
   cache?: boolean;
 }
 
+export interface TiktokSearchByHashtagParams {
+  /** Hashtag with or without the # (min 2 chars). */
+  q: string;
+  /** Max items to return. Default 20, max 100. Billed per result. */
+  limit?: number;
+  /** Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end. */
+  cursor?: number;
+  /** Two-letter ISO country the scraping proxy is routed through. Default US. Only sets the proxy location — does not filter results by country. */
+  region?: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface TiktokSearchUsersParams {
+  /** Search query matched against usernames, display names and bios. */
+  q: string;
+  /** Max items to return. Default 20, max 100. Billed per result. */
+  limit?: number;
+  /** Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end. */
+  cursor?: number;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
 export interface TiktokSongDetailsParams {
   /** TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
@@ -585,6 +609,14 @@ export class TiktokApi {
   /** TikTok User Search — Search TikTok users/creators by keyword. (8 credits) */
   userSearch(params: TiktokUserSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/user-search", params);
+  }
+  /** TikTok Search by Hashtag — Search TikTok videos by hashtag — video URL, caption, author, and engagement counts per result, with cursor pagination (nextCursor + hasMore). (14 credits) */
+  searchByHashtag(params: TiktokSearchByHashtagParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/tiktok/search/hashtag", params);
+  }
+  /** TikTok Search Users — Search TikTok users by keyword — username, display name, bio, follower count, verified flag, and avatar per result, with cursor pagination (nextCursor + hasMore). (8 credits) */
+  searchUsers(params: TiktokSearchUsersParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/tiktok/search/users", params);
   }
   /** TikTok Song Details — Details of a TikTok sound/song. (2 credits) */
   songDetails(params: TiktokSongDetailsParams): Promise<ApiEnvelope> {

@@ -1670,6 +1670,128 @@ async def tiktok_user_search(
         return ApiResponse(data=data)
 
 
+@router.get("/search/hashtag", summary="Search TikTok videos by hashtag")
+async def tiktok_search_by_hashtag(
+    q: str = Query(..., min_length=2, description="Hashtag to search for (with or without the leading #)."),
+    limit: int = Query(20, ge=1, le=100, description="Number of videos to return per page."),
+    cursor: int = Query(
+        0,
+        ge=0,
+        description="Pagination offset. Pass the `nextCursor` from the previous response to fetch the next page.",
+    ),
+    region: str = Query(
+        "US",
+        min_length=2,
+        max_length=2,
+        description="ISO 3166-1 alpha-2 country the scraping proxy is routed through. This only sets the proxy location — it does not restrict results to that country.",
+    ),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    region_code = region.strip().upper()
+    cost = _scaled_credits(limit, RATE_CHANNEL_POSTS, CREDIT_SEARCH)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/search/hashtag",
+        platform="tiktok",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            # The actor always starts from the top of the hashtag feed, so we
+            # fetch cursor+limit rows and slice the requested page. hasMore is
+            # true when the actor still had rows beyond this page.
+            want = cursor + limit
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK,
+                {
+                    "hashtags": [q.lstrip("#")],
+                    "resultsPerPage": want,
+                    "shouldDownloadVideos": False,
+                    "proxyConfiguration": {"useApifyProxy": True, "apifyProxyCountry": region_code},
+                },
+                max_items=want,
+            )
+            page = items[cursor : cursor + limit]
+            results = [_normalize(i) for i in page]
+            has_more = len(items) > cursor + limit
+            return {
+                "query": q,
+                "totalReturned": len(results),
+                "hasMore": has_more,
+                "nextCursor": (cursor + limit) if has_more else None,
+                "results": results,
+            }
+
+        data = await cached_or_run(
+            endpoint="tiktok.search-hashtag",
+            params={"q": q, "limit": limit, "cursor": cursor, "region": region_code, "v": 1},
+            runner=_run,
+            ctx=ctx,
+            use_cache=cache,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_CHANNEL_POSTS, CREDIT_SEARCH)
+        return ApiResponse(data=data)
+
+
+@router.get("/search/users", summary="Search TikTok users by keyword")
+async def tiktok_search_users(
+    q: str = Query(..., min_length=2, description="Search query matched against usernames, display names and bios."),
+    limit: int = Query(20, ge=1, le=100, description="Number of users to return per page."),
+    cursor: int = Query(
+        0,
+        ge=0,
+        description="Pagination offset. Pass the `nextCursor` from the previous response to fetch the next page.",
+    ),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    cost = _scaled_credits(limit, RATE_USER_SEARCH, 5)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/search/users",
+        platform="tiktok",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            apify = get_apify()
+            want = cursor + limit
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_TIKTOK,
+                {
+                    "searchQueries": [q],
+                    "searchSection": "/user",
+                    "maxProfilesPerQuery": want,
+                    "resultsPerPage": want,
+                },
+                max_items=want,
+            )
+            page = items[cursor : cursor + limit]
+            users = [_normalize_user(i) for i in page]
+            has_more = len(items) > cursor + limit
+            return {
+                "query": q,
+                "totalReturned": len(users),
+                "hasMore": has_more,
+                "nextCursor": (cursor + limit) if has_more else None,
+                "users": users,
+            }
+
+        data = await cached_or_run(
+            endpoint="tiktok.search-users",
+            params={"q": q, "limit": limit, "cursor": cursor, "v": 1},
+            runner=_run,
+            ctx=ctx,
+            use_cache=cache,
+        )
+        ctx["credits_override"] = _scaled_credits(len(data["users"]), RATE_USER_SEARCH, 5)
+        return ApiResponse(data=data)
+
+
 @router.get("/song-details", summary="Details of a TikTok sound/song")
 async def tiktok_song_details(
     url: str = Query(..., description="TikTok music/sound URL"),

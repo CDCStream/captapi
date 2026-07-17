@@ -1,0 +1,37 @@
+[
+  {
+    "name": "q",
+    "type": "text",
+    "label": "Search Query",
+    "required": true,
+    "help": "Hashtag with or without the # (min 2 chars)."
+  },
+  {
+    "name": "limit",
+    "type": "number",
+    "label": "Limit",
+    "required": false,
+    "help": "Max items to return. Default 20, max 100. Billed per result."
+  },
+  {
+    "name": "cursor",
+    "type": "number",
+    "label": "Cursor",
+    "required": false,
+    "help": "Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end."
+  },
+  {
+    "name": "region",
+    "type": "text",
+    "label": "Region",
+    "required": false,
+    "help": "Two-letter ISO country the scraping proxy is routed through. Default US. Only sets the proxy location — does not filter results by country."
+  },
+  {
+    "name": "cache",
+    "type": "boolean",
+    "label": "Cache",
+    "required": false,
+    "help": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+  }
+]

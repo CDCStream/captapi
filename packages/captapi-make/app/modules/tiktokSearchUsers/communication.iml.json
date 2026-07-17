@@ -1,0 +1,13 @@
+{
+  "url": "/v1/tiktok/search/users",
+  "method": "GET",
+  "qs": {
+    "q": "{{parameters.q}}",
+    "limit": "{{parameters.limit}}",
+    "cursor": "{{parameters.cursor}}",
+    "cache": "{{parameters.cache}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

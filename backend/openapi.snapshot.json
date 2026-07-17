@@ -3161,6 +3161,194 @@
         }
       }
     },
+    "/v1/tiktok/search/hashtag": {
+      "get": {
+        "tags": [
+          "TikTok"
+        ],
+        "summary": "Search TikTok videos by hashtag",
+        "operationId": "tiktok_search_by_hashtag_v1_tiktok_search_hashtag_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "description": "Hashtag to search for (with or without the leading #).",
+              "title": "Q"
+            },
+            "description": "Hashtag to search for (with or without the leading #)."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Number of videos to return per page.",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "Number of videos to return per page."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Pagination offset. Pass the `nextCursor` from the previous response to fetch the next page.",
+              "default": 0,
+              "title": "Cursor"
+            },
+            "description": "Pagination offset. Pass the `nextCursor` from the previous response to fetch the next page."
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 2,
+              "description": "ISO 3166-1 alpha-2 country the scraping proxy is routed through. This only sets the proxy location — it does not restrict results to that country.",
+              "default": "US",
+              "title": "Region"
+            },
+            "description": "ISO 3166-1 alpha-2 country the scraping proxy is routed through. This only sets the proxy location — it does not restrict results to that country."
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
+              "title": "Cache"
+            },
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tiktok/search/users": {
+      "get": {
+        "tags": [
+          "TikTok"
+        ],
+        "summary": "Search TikTok users by keyword",
+        "operationId": "tiktok_search_users_v1_tiktok_search_users_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "description": "Search query matched against usernames, display names and bios.",
+              "title": "Q"
+            },
+            "description": "Search query matched against usernames, display names and bios."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Number of users to return per page.",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "Number of users to return per page."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Pagination offset. Pass the `nextCursor` from the previous response to fetch the next page.",
+              "default": 0,
+              "title": "Cursor"
+            },
+            "description": "Pagination offset. Pass the `nextCursor` from the previous response to fetch the next page."
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
+              "title": "Cache"
+            },
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/tiktok/song-details": {
       "get": {
         "tags": [
@@ -13484,7 +13672,7 @@
         "properties": {
           "file": {
             "type": "string",
-            "contentMediaType": "application/octet-stream",
+            "format": "binary",
             "title": "File"
           }
         },
@@ -13498,7 +13686,7 @@
         "properties": {
           "file": {
             "type": "string",
-            "contentMediaType": "application/octet-stream",
+            "format": "binary",
             "title": "File"
           }
         },
@@ -13734,13 +13922,6 @@
           "type": {
             "type": "string",
             "title": "Error Type"
-          },
-          "input": {
-            "title": "Input"
-          },
-          "ctx": {
-            "type": "object",
-            "title": "Context"
           }
         },
         "type": "object",

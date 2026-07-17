@@ -20049,6 +20049,81 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   },
+  "tiktok-search-by-hashtag": {
+    "query": "skincare",
+    "totalReturned": 2,
+    "hasMore": true,
+    "nextCursor": 20,
+    "results": [
+      {
+        "platform": "tiktok",
+        "url": "https://www.tiktok.com/@kiyokobeauty/video/7653529024362237205",
+        "id": "7653529024362237205",
+        "caption": "Not all skincare ingredients play well together 👀 #kbeauty #serum #serumviral #retinol",
+        "description": "Not all skincare ingredients play well together 👀 #kbeauty #serum #serumviral #retinol",
+        "publishedAt": "2026-06-20T17:21:36.000Z",
+        "durationSeconds": 46.0,
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/o84EbWFABZ1GTe6fAAAjD9egIoDLtmIUAIgQoz~tplv-tiktokx-origin.image?dr=9636&x-expires=1783267200&x-signature=X5LtS2EYdm6766uGn77A1pxHweg%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
+        "videoUrl": null,
+        "author": {
+          "username": "kiyokobeauty",
+          "displayName": "Kiyoko Beauty",
+          "url": "https://www.tiktok.com/@kiyokobeauty",
+          "followers": 197400,
+          "verified": false,
+          "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/a5295edb170033395d63b8582a0c2b18~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=24d9f8a7&x-expires=1783267200&x-signature=kIZECYZ2vIovzwy5wUSklbelCkg%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5"
+        },
+        "engagement": {
+          "views": 207700,
+          "likes": 14100,
+          "comments": 96,
+          "shares": 904,
+          "saves": 7196
+        },
+        "hashtags": [
+          "kbeauty",
+          "serum",
+          "serumviral",
+          "retinol"
+        ],
+        "musicName": "original sound"
+      },
+      {
+        "platform": "tiktok",
+        "url": "https://www.tiktok.com/@itsedonna/video/7647568358941953301",
+        "id": "7647568358941953301",
+        "caption": "My skin after 7 days of targeting dark spots  #inaweek #glassskin #darkspots #skintransformation #tipsskincare @Redence",
+        "description": "My skin after 7 days of targeting dark spots  #inaweek #glassskin #darkspots #skintransformation #tipsskincare @Redence",
+        "publishedAt": "2026-06-04T15:51:11.000Z",
+        "durationSeconds": 19.0,
+        "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/oIRC7FB3A4tfAfInuqdIAIUhNAEEIATNDZnXEg~tplv-tiktokx-origin.image?dr=9636&x-expires=1783267200&x-signature=W2r3YLMUxz1dtIMVCxkWs97SdAw%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
+        "videoUrl": null,
+        "author": {
+          "username": "itsedonna",
+          "displayName": "Itsedonna | Skincare",
+          "url": "https://www.tiktok.com/@itsedonna",
+          "followers": 163600,
+          "verified": false,
+          "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/cc0a588649800a2c61ca8dba4a383f3f~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=8e5cdd97&x-expires=1783267200&x-signature=TrRI44hlANqwthHul0wDsh7w8lM%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5"
+        },
+        "engagement": {
+          "views": 1300000,
+          "likes": 40600,
+          "comments": 269,
+          "shares": 4245,
+          "saves": 17070
+        },
+        "hashtags": [
+          "inaweek",
+          "glassskin",
+          "darkspots",
+          "skintransformation",
+          "tipsskincare"
+        ],
+        "musicName": "Originalton"
+      }
+    ]
+  },
   "tiktok-search-suggestions": {
     "platform": "tiktok",
     "query": "skincare",
@@ -20088,6 +20163,32 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "rank": 5,
         "region": "US",
         "language": "en-US"
+      }
+    ]
+  },
+  "tiktok-search-users": {
+    "query": "khaby",
+    "totalReturned": 2,
+    "hasMore": true,
+    "nextCursor": 20,
+    "users": [
+      {
+        "username": "khaby.lame",
+        "displayName": "Khabane lame",
+        "bio": "Se vuoi ridere sei nel posto giusto 🤣😎",
+        "url": "https://www.tiktok.com/@khaby.lame",
+        "followers": 162400000,
+        "verified": true,
+        "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/f8c7cad75f3a12205d31d6662d2555d5~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=9a9eefbd&x-expires=1780686000&x-signature=wd0lGv2zU3FtToLz2%2FEJFNeD1fg%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5"
+      },
+      {
+        "username": "khabylam206",
+        "displayName": "khaby lame",
+        "bio": "No stress \nOnly funny 🤣 😂",
+        "url": "https://www.tiktok.com/@khabylam206",
+        "followers": 71700,
+        "verified": false,
+        "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/3dd8c5e3598ec508f5768144e7338d10~tplv-tiktokx-cropcenter:720:720.jpeg?dr=9640&refresh_token=9a9eefbd&x-expires=1780686000&x-signature=wd0lGv2zU3FtToLz2%2FEJFNeD1fg%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast5"
       }
     ]
   },

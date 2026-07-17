@@ -1,0 +1,14 @@
+{
+  "url": "/v1/tiktok/search/hashtag",
+  "method": "GET",
+  "qs": {
+    "q": "{{parameters.q}}",
+    "limit": "{{parameters.limit}}",
+    "cursor": "{{parameters.cursor}}",
+    "region": "{{parameters.region}}",
+    "cache": "{{parameters.cache}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

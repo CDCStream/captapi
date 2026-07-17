@@ -716,6 +716,40 @@
           "scope": null
         }
       },
+      "tiktokSearchByHashtag": {
+        "label": "TikTok Search by Hashtag",
+        "description": "Search TikTok videos by hashtag — video URL, caption, author, and engagement counts per result, with cursor pagination (nextCursor + hasMore). Costs ~14 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokSearchByHashtag/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokSearchByHashtag/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "tiktokSearchUsers": {
+        "label": "TikTok Search Users",
+        "description": "Search TikTok users by keyword — username, display name, bio, follower count, verified flag, and avatar per result, with cursor pagination (nextCursor + hasMore). Costs ~8 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/tiktokSearchUsers/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/tiktokSearchUsers/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
       "tiktokSongDetails": {
         "label": "TikTok Song Details",
         "description": "Details of a TikTok sound/song. Costs ~2 credits (cached results free, failures never charged).",

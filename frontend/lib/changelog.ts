@@ -49,6 +49,19 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 /** Static mirror of the migration seed — used only when the table is unavailable. */
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
+    publishedAt: "2026-07-17",
+    category: "feature",
+    title: "Two new TikTok search endpoints: Search by Hashtag and Search Users",
+    description:
+      "TikTok search is now split into two focused endpoints. Search by Hashtag (/v1/tiktok/search/hashtag) returns the videos posted under a tag — each with its URL, caption, author, and full engagement counts — plus an optional region parameter that sets the proxy's exit country. Search Users (/v1/tiktok/search/users) returns the creators whose username, display name, or bio match a query, each with follower count, verified flag, and avatar. Both add cursor pagination: pass the returned nextCursor to page through results and check hasMore to know when you've reached the end. Billed per result.",
+    items: [
+      "TikTok Search by Hashtag API — videos under a hashtag with engagement counts and an optional proxy region",
+      "TikTok Search Users API — creators matching a query with follower count, verified flag, and avatar",
+      "Both support cursor pagination via nextCursor + hasMore",
+      "Billed per result; cached results stay free",
+    ],
+  },
+  {
     publishedAt: "2026-07-16",
     category: "improvement",
     title: "TikTok Audience Demographics is now native — a real country breakdown",
