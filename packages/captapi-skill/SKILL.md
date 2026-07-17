@@ -5,7 +5,7 @@ description: Use when extracting public social-media and web data from YouTube, 
 
 # Captapi
 
-Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Google Search, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, Age/Gender enrichment, public Ad Libraries, and account usage utilities**. One key works across all 29 data platforms. No OAuth, no per-platform SDKs. Responses are clean JSON. Pass cache=true for the 24h response cache (repeat hits cost 0 credits); default is cache=false (always fresh). 172 endpoints total.
+Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Google Search, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, Age/Gender enrichment, public Ad Libraries, and account usage utilities**. One key works across all 29 data platforms. No OAuth, no per-platform SDKs. Responses are clean JSON. Pass cache=true for the 24h response cache (repeat hits cost 0 credits); default is cache=false (always fresh). 170 endpoints total.
 
 - Base URL: `https://api.captapi.com`
 - Docs: https://captapi.com/docs · Full machine reference: https://captapi.com/llms-full.txt
@@ -41,7 +41,7 @@ For shell tasks, scripts, or when no MCP client is available, the official CLI c
 ```bash
 npx @captapi/cli login                 # save the human-provided key to ~/.captapi/config.json
 npx @captapi/cli balance               # remaining credits
-npx @captapi/cli list                  # all 172 commands
+npx @captapi/cli list                  # all 170 commands
 npx @captapi/cli youtube-transcript --url "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 npx @captapi/cli tiktok-comment-replies --url "<video>" --comment_id "<id>" --limit 20
 ```
@@ -50,15 +50,15 @@ The CLI reads the key from `~/.captapi/config.json` (via `login`) or the `CAPTAP
 
 ## Use in n8n workflows (n8n-nodes-captapi)
 
-For no-code/low-code automations, the official `n8n-nodes-captapi` community node exposes all 172 endpoints in n8n. Install it from **Settings → Community Nodes** (package `n8n-nodes-captapi`; self-hosted: `npm install n8n-nodes-captapi`, then restart). Create a **Captapi API** credential with the human-provided `capt_live_...` key, add the **Captapi** node, pick a **Platform** and **Operation**, and it returns the same structured JSON as the REST API for downstream nodes.
+For no-code/low-code automations, the official `n8n-nodes-captapi` community node exposes all 170 endpoints in n8n. Install it from **Settings → Community Nodes** (package `n8n-nodes-captapi`; self-hosted: `npm install n8n-nodes-captapi`, then restart). Create a **Captapi API** credential with the human-provided `capt_live_...` key, add the **Captapi** node, pick a **Platform** and **Operation**, and it returns the same structured JSON as the REST API for downstream nodes.
 
 ## Use in Make.com scenarios (custom app)
 
-For Make.com (Integromat), the Captapi custom app exposes all 172 endpoints as action modules grouped by platform. Create a **Captapi API Key** connection with the human-provided `capt_live_...` key (verified against `/v1/account/limits`), then drop the module you need into a scenario, fill in the `url` (or search query) and optional `limit`, and it returns the same structured JSON `data` as the REST API for downstream modules.
+For Make.com (Integromat), the Captapi custom app exposes all 170 endpoints as action modules grouped by platform. Create a **Captapi API Key** connection with the human-provided `capt_live_...` key (verified against `/v1/account/limits`), then drop the module you need into a scenario, fill in the `url` (or search query) and optional `limit`, and it returns the same structured JSON `data` as the REST API for downstream modules.
 
 ## Use on Apify (BYO-key Actor)
 
-On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API (no scraping). Set the `apiKey` input to the human-provided `capt_live_...` key, choose an `operation` (any of the 172 endpoints), fill the fields it needs (`url` / search query / `limit` / ...), and the Actor returns one dataset item with the same structured JSON `data` as the REST API. Credits are billed to the user's own Captapi account. The Actor is also callable through Apify's MCP server (mcp.apify.com), so agents already connected to Apify can run it by name.
+On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API (no scraping). Set the `apiKey` input to the human-provided `capt_live_...` key, choose an `operation` (any of the 170 endpoints), fill the fields it needs (`url` / search query / `limit` / ...), and the Actor returns one dataset item with the same structured JSON `data` as the REST API. Credits are billed to the user's own Captapi account. The Actor is also callable through Apify's MCP server (mcp.apify.com), so agents already connected to Apify can run it by name.
 
 ## Choosing the right endpoint
 
@@ -281,7 +281,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `google_search` | `/v1/google/search` | `q` (string), `country`? (string), `language`? (string), `limit`? (number), `cache`? (boolean) | 42 |
+
 
 ### Twitch
 
@@ -347,7 +347,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `age_gender_get` | `/v1/age-gender` | `name` (string), `names`? (string), `cache`? (boolean) | 4 |
+
 
 ### Kwai
 

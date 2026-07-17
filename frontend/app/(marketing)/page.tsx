@@ -43,8 +43,8 @@ const features = [
   },
   {
     icon: ShieldCheck,
-    title: "Reliable Scraping",
-    body: "Apify-backed actors with automatic retries and fallback.",
+    title: "Reliable Data",
+    body: "Resilient data pipelines with automatic retries and fallback.",
   },
 ];
 

@@ -1662,27 +1662,6 @@ export class GithubApi {
   }
 }
 
-export interface GoogleSearchParams {
-  /** Search query or keywords (min 2 chars). */
-  q: string;
-  /** Two-letter country code. Default us. */
-  country?: string;
-  /** Google language code. Default en. */
-  language?: string;
-  /** Max items to return. Default 10, max 100. Billed per result. */
-  limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export class GoogleApi {
-  constructor(private readonly core: HttpCore) {}
-  /** Google Search — Google SERP organic search results by keyword, country, and language. (42 credits) */
-  search(params: GoogleSearchParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/google/search", params);
-  }
-}
-
 export interface TwitchProfileParams {
   /** Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
@@ -1952,23 +1931,6 @@ export class AmazonShopApi {
   /** Amazon Shop Page — Amazon seller storefront metadata and product listings. (89 credits) */
   page(params: AmazonShopPageParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/amazon-shop/page", params);
-  }
-}
-
-export interface AgeGenderGetParams {
-  /** First name, or fallback when names is omitted. */
-  name: string;
-  /** Optional comma-separated list of names. */
-  names?: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export class AgeGenderApi {
-  constructor(private readonly core: HttpCore) {}
-  /** Age and Gender — Predict age, gender and nationality signals from first names. (4 credits) */
-  get(params: AgeGenderGetParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/age-gender", params);
   }
 }
 
@@ -2294,7 +2256,6 @@ export class Captapi {
   readonly rumble: RumbleApi;
   readonly tiktokShop: TiktokShopApi;
   readonly github: GithubApi;
-  readonly google: GoogleApi;
   readonly twitch: TwitchApi;
   readonly spotify: SpotifyApi;
   readonly soundcloud: SoundcloudApi;
@@ -2303,7 +2264,6 @@ export class Captapi {
   readonly truthSocial: TruthSocialApi;
   readonly kick: KickApi;
   readonly amazonShop: AmazonShopApi;
-  readonly ageGender: AgeGenderApi;
   readonly account: AccountApi;
   readonly kwai: KwaiApi;
   readonly komi: KomiApi;
@@ -2326,7 +2286,6 @@ export class Captapi {
     this.rumble = new RumbleApi(core);
     this.tiktokShop = new TiktokShopApi(core);
     this.github = new GithubApi(core);
-    this.google = new GoogleApi(core);
     this.twitch = new TwitchApi(core);
     this.spotify = new SpotifyApi(core);
     this.soundcloud = new SoundcloudApi(core);
@@ -2335,7 +2294,6 @@ export class Captapi {
     this.truthSocial = new TruthSocialApi(core);
     this.kick = new KickApi(core);
     this.amazonShop = new AmazonShopApi(core);
-    this.ageGender = new AgeGenderApi(core);
     this.account = new AccountApi(core);
     this.kwai = new KwaiApi(core);
     this.komi = new KomiApi(core);

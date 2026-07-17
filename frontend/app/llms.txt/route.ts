@@ -70,7 +70,7 @@ export async function GET() {
 
 > One API for structured data from ${PLATFORM_COUNT} social platforms — YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Twitch, Spotify, and more. Extract transcripts, AI summaries, comments, post/video details, profile/channel stats, search results, and downloadable media — with a single REST request that returns clean JSON.
 
-Captapi is a developer API (Merchant of Record billing via Dodo Payments) that unifies access to public social-media data across ${PLATFORM_COUNT} platforms. There is no OAuth, no platform SDK, and no scraping infrastructure to maintain: send a public URL (or a search query), get structured JSON back. A single API key works across every platform. Responses are cached for 24 hours, so repeat lookups are instant and cost 0 credits. New accounts start with 100 free credits.
+Captapi is a developer API (Merchant of Record billing via Paddle) that unifies access to public social-media data across ${PLATFORM_COUNT} platforms. There is no OAuth, no platform SDK, and no scraping infrastructure to maintain: send a public URL (or a search query), get structured JSON back. A single API key works across every platform. Responses are cached for 24 hours, so repeat lookups are instant and cost 0 credits. New accounts start with 100 free credits.
 
 Base API URL: https://api.captapi.com
 Authentication: \`Authorization: Bearer capt_live_...\` (create a key in the dashboard).

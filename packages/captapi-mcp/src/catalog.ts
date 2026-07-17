@@ -17,7 +17,6 @@ export type Platform =
   | "tiktok_shop"
   | "github"
   | "ad_library"
-  | "google"
   | "twitch"
   | "spotify"
   | "soundcloud"
@@ -26,7 +25,6 @@ export type Platform =
   | "truth_social"
   | "kick"
   | "amazon_shop"
-  | "age_gender"
   | "account"
   | "kwai"
   | "komi"
@@ -314,10 +312,6 @@ const GITHUB: Omit<Endpoint, "platform">[] = [
 ];
 
 
-const GOOGLE: Omit<Endpoint, "platform">[] = [
-  { tool: "google_search", name: "Google Search", path: "/v1/google/search", credits: 42, summary: "Google SERP organic search results by keyword, country, and language.", params: [q(), { name: "country", type: "string", required: false, description: "Two-letter country code. Default us." }, { name: "language", type: "string", required: false, description: "Google language code. Default en." }, limit(10, 100)] },
-];
-
 const TWITCH: Omit<Endpoint, "platform">[] = [
   { tool: "twitch_profile", name: "Twitch Profile", path: "/v1/twitch/profile", credits: 1, summary: "Twitch channel profile, followers, live status and recent metadata.", params: [url(TWITCH_PROFILE)] },
   { tool: "twitch_user_videos", name: "Twitch User Videos", path: "/v1/twitch/user-videos", credits: 34, summary: "Recent Twitch VODs for a channel.", params: [url(TWITCH_PROFILE), limit(20, 30)] },
@@ -360,10 +354,6 @@ const KICK: Omit<Endpoint, "platform">[] = [
 
 const AMAZON_SHOP_ENDPOINTS: Omit<Endpoint, "platform">[] = [
   { tool: "amazon_shop_page", name: "Amazon Shop Page", path: "/v1/amazon-shop/page", credits: 89, summary: "Amazon seller storefront metadata and product listings.", params: [url(AMAZON_SHOP), { name: "marketplace", type: "string", required: false, description: "Amazon marketplace code. Default US." }, limit(20, 200)] },
-];
-
-const AGE_GENDER: Omit<Endpoint, "platform">[] = [
-  { tool: "age_gender_get", name: "Age and Gender", path: "/v1/age-gender", credits: 4, summary: "Predict age, gender and nationality signals from first names.", params: [{ name: "name", type: "string", required: true, description: "First name, or fallback when names is omitted." }, { name: "names", type: "string", required: false, description: "Optional comma-separated list of names." }] },
 ];
 
 const ACCOUNT: Omit<Endpoint, "platform">[] = [
@@ -441,7 +431,6 @@ export const ENDPOINTS: Endpoint[] = [
   ...withPlatform(RUMBLE, "rumble"),
   ...withPlatform(TIKTOK_SHOP, "tiktok_shop"),
   ...withPlatform(GITHUB, "github"),
-  ...withPlatform(GOOGLE, "google"),
   ...withPlatform(TWITCH, "twitch"),
   ...withPlatform(SPOTIFY, "spotify"),
   ...withPlatform(SOUNDCLOUD, "soundcloud"),
@@ -450,7 +439,6 @@ export const ENDPOINTS: Endpoint[] = [
   ...withPlatform(TRUTH_SOCIAL, "truth_social"),
   ...withPlatform(KICK, "kick"),
   ...withPlatform(AMAZON_SHOP_ENDPOINTS, "amazon_shop"),
-  ...withPlatform(AGE_GENDER, "age_gender"),
   ...withPlatform(ACCOUNT, "account"),
   ...withPlatform(KWAI, "kwai"),
   ...withPlatform(KOMI, "komi"),

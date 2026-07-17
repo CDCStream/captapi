@@ -2379,38 +2379,6 @@ class AsyncGithubApi:
         return await self._t.get("/v1/github/trending-developers", {"q": q, "limit": limit, "cache": cache})
 
 
-class GoogleApi:
-    def __init__(self, transport: SyncTransport) -> None:
-        self._t = transport
-
-    def search(self, *, q: str, country: str | None = None, language: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Search — Google SERP organic search results by keyword, country, and language. (42 credits)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param country: Two-letter country code. Default us.
-        :param language: Google language code. Default en.
-        :param limit: Max items to return. Default 10, max 100. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/google/search", {"q": q, "country": country, "language": language, "limit": limit, "cache": cache})
-
-
-class AsyncGoogleApi:
-    def __init__(self, transport: AsyncTransport) -> None:
-        self._t = transport
-
-    async def search(self, *, q: str, country: str | None = None, language: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Search — Google SERP organic search results by keyword, country, and language. (42 credits)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param country: Two-letter country code. Default us.
-        :param language: Google language code. Default en.
-        :param limit: Max items to return. Default 10, max 100. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/google/search", {"q": q, "country": country, "language": language, "limit": limit, "cache": cache})
-
-
 class TwitchApi:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
@@ -2829,34 +2797,6 @@ class AsyncAmazonShopApi:
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/amazon-shop/page", {"url": url, "marketplace": marketplace, "limit": limit, "cache": cache})
-
-
-class AgeGenderApi:
-    def __init__(self, transport: SyncTransport) -> None:
-        self._t = transport
-
-    def get(self, *, name: str, names: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Age and Gender — Predict age, gender and nationality signals from first names. (4 credits)
-
-        :param name: First name, or fallback when names is omitted.
-        :param names: Optional comma-separated list of names.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/age-gender", {"name": name, "names": names, "cache": cache})
-
-
-class AsyncAgeGenderApi:
-    def __init__(self, transport: AsyncTransport) -> None:
-        self._t = transport
-
-    async def get(self, *, name: str, names: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Age and Gender — Predict age, gender and nationality signals from first names. (4 credits)
-
-        :param name: First name, or fallback when names is omitted.
-        :param names: Optional comma-separated list of names.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/age-gender", {"name": name, "names": names, "cache": cache})
 
 
 class AccountApi:
@@ -3339,7 +3279,6 @@ class Captapi:
         self.rumble = RumbleApi(self._transport)
         self.tiktok_shop = TiktokShopApi(self._transport)
         self.github = GithubApi(self._transport)
-        self.google = GoogleApi(self._transport)
         self.twitch = TwitchApi(self._transport)
         self.spotify = SpotifyApi(self._transport)
         self.soundcloud = SoundcloudApi(self._transport)
@@ -3348,7 +3287,6 @@ class Captapi:
         self.truth_social = TruthSocialApi(self._transport)
         self.kick = KickApi(self._transport)
         self.amazon_shop = AmazonShopApi(self._transport)
-        self.age_gender = AgeGenderApi(self._transport)
         self.account = AccountApi(self._transport)
         self.kwai = KwaiApi(self._transport)
         self.komi = KomiApi(self._transport)
@@ -3385,7 +3323,6 @@ class AsyncCaptapi:
         self.rumble = AsyncRumbleApi(self._transport)
         self.tiktok_shop = AsyncTiktokShopApi(self._transport)
         self.github = AsyncGithubApi(self._transport)
-        self.google = AsyncGoogleApi(self._transport)
         self.twitch = AsyncTwitchApi(self._transport)
         self.spotify = AsyncSpotifyApi(self._transport)
         self.soundcloud = AsyncSoundcloudApi(self._transport)
@@ -3394,7 +3331,6 @@ class AsyncCaptapi:
         self.truth_social = AsyncTruthSocialApi(self._transport)
         self.kick = AsyncKickApi(self._transport)
         self.amazon_shop = AsyncAmazonShopApi(self._transport)
-        self.age_gender = AsyncAgeGenderApi(self._transport)
         self.account = AsyncAccountApi(self._transport)
         self.kwai = AsyncKwaiApi(self._transport)
         self.komi = AsyncKomiApi(self._transport)

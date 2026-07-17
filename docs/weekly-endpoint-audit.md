@@ -1,6 +1,6 @@
 # Captapi Weekly Endpoint Audit
 
-Hafta: ____ | Toplam: 172 endpoint / 30 platform
+Hafta: ____ | Toplam: 170 endpoint / 28 platform
 
 Kontrol: 200 doner mi - JSON alanlari dolu mu - sure makul mu (test URL'leri: docs/example-urls.md)
 
@@ -170,10 +170,6 @@ Kontrol: 200 doner mi - JSON alanlari dolu mu - sure makul mu (test URL'leri: do
 - [ ] Trending Repositories — `GET /v1/github/trending-repositories`
 - [ ] Trending Developers — `GET /v1/github/trending-developers`
 
-## Google (1)
-
-- [ ] Search — `GET /v1/google/search`
-
 ## Twitch (4)
 
 - [ ] Profile — `GET /v1/twitch/profile`
@@ -217,10 +213,6 @@ Kontrol: 200 doner mi - JSON alanlari dolu mu - sure makul mu (test URL'leri: do
 ## Amazon Shop (1)
 
 - [ ] Shop Page — `GET /v1/amazon-shop/page`
-
-## Age and Gender (1)
-
-- [ ] Age and Gender — `GET /v1/age-gender`
 
 ## Account (4)
 

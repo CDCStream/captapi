@@ -167,7 +167,7 @@ const ERRORS: { code: string; status: string; meaning: string }[] = [
   { code: "not_found", status: "404", meaning: "The target URL or resource could not be found." },
   { code: "no_captions", status: "422", meaning: "No captions and audio transcription failed (not charged)." },
   { code: "rate_limited", status: "429", meaning: "Too many requests — slow down or upgrade your plan." },
-  { code: "upstream_error", status: "502", meaning: "Temporary scraping failure. Safe to retry (not charged)." },
+  { code: "upstream_error", status: "502", meaning: "Temporary upstream data-source failure. Safe to retry (not charged)." },
 ];
 
 function H2({ id, children }: { id: string; children: React.ReactNode }) {
@@ -260,8 +260,8 @@ export default function DocsPage() {
         Captapi gives you <strong className="text-foreground">structured data
         from social media video</strong> through one consistent REST API. Send a
         public URL from YouTube, TikTok, Instagram, or Facebook and get back
-        clean JSON — transcripts, AI summaries, video details, comments, search
-        results, and downloads. No OAuth, no per-platform SDKs, no scraping
+        clean JSON — transcripts, AI summaries, video details, comments, and
+        search results. No OAuth, no per-platform SDKs, no data-collection
         infrastructure to maintain.
       </p>
       <ul className="mt-4 space-y-2 text-sm text-muted-foreground max-w-3xl">
@@ -336,8 +336,8 @@ export default function DocsPage() {
       <H2 id="credits-caching">Credits &amp; Caching</H2>
       <p className="text-muted-foreground max-w-3xl">
         Credits are the unit of billing. Each endpoint costs 1–4 credits per
-        successful call (video details: 1, transcript/comments: 2, summarize: 4,
-        downloads: 3). <strong className="text-foreground">Failed and empty
+        successful call (video details: 1, transcript/comments: 2, summarize: 4).
+        <strong className="text-foreground">Failed and empty
         results are never charged.</strong>
       </p>
       <p className="mt-3 text-muted-foreground max-w-3xl">

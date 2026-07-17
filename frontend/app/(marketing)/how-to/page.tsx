@@ -6,7 +6,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata = buildMetadata({
   title: "How-to Guides — Social Media Data APIs | Captapi",
   description:
-    "Step-by-step guides to extract transcripts, AI summaries, comments, downloads, search results, profiles, ad intelligence, and commerce data with a single REST API call.",
+    "Step-by-step guides to extract transcripts, AI summaries, comments, search results, profiles, ad intelligence, and commerce data with a single REST API call.",
   path: "/how-to",
 });
 

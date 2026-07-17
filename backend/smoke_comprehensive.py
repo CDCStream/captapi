@@ -71,8 +71,6 @@ async def main() -> None:
         ("linktree",     "/v1/linktree/page",               {"url": "https://linktr.ee/taylorswift"}, False),
         ("snapchat",     "/v1/snapchat/user-profile",       {"url": "https://www.snapchat.com/add/teamsnapchat"}, False),
         ("amazon_shop",  "/v1/amazon-shop/page",            {"url": "https://www.amazon.com/stores/page/x?seller=A2L77EE7U53NWQ", "limit": 5}, False),
-        ("age_gender",   "/v1/age-gender",                  {"name": "Michael"}, False),
-        ("google",       "/v1/google/search",               {"q": "best coffee shops", "limit": 5}, False),
         ("github",       "/v1/github/user",                 {"username": "torvalds"}, False),
         ("tiktok_shop",  "/v1/tiktok-shop/shop-search",     {"q": "phone case", "limit": 5}, False),
         ("ad_library",   "/v1/ad-library/facebook/search",  {"q": "nike", "limit": 5}, False),

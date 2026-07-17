@@ -20,7 +20,6 @@ from app.services.apify_client import ApifyError
 from app.routers import (
     account,
     ad_library,
-    age_gender,
     analytics,
     amazon_shop,
     auth_keys,
@@ -29,7 +28,6 @@ from app.routers import (
     creator_pages,
     facebook,
     github,
-    google_search,
     history,
     instagram,
     kick,
@@ -260,7 +258,6 @@ def create_app() -> FastAPI:
     app.include_router(instagram.router, prefix="/v1/instagram", tags=["Instagram"])
     app.include_router(facebook.router, prefix="/v1/facebook", tags=["Facebook"])
     app.include_router(ad_library.router, prefix="/v1/ad-library", tags=["Ad Library"])
-    app.include_router(google_search.router, prefix="/v1/google", tags=["Google"])
     app.include_router(github.router, prefix="/v1/github", tags=["GitHub"])
     app.include_router(twitter.router, prefix="/v1/twitter", tags=["Twitter"])
     app.include_router(reddit.router, prefix="/v1/reddit", tags=["Reddit"])
@@ -278,7 +275,6 @@ def create_app() -> FastAPI:
     app.include_router(linktree.router, prefix="/v1/linktree", tags=["Linktree"])
     app.include_router(snapchat.router, prefix="/v1/snapchat", tags=["Snapchat"])
     app.include_router(amazon_shop.router, prefix="/v1/amazon-shop", tags=["Amazon Shop"])
-    app.include_router(age_gender.router, prefix="/v1/age-gender", tags=["Age and Gender"])
     app.include_router(analytics.router, prefix="/v1/analytics", tags=["Analytics"])
     app.include_router(video.router, prefix="/v1/video", tags=["Video Files"])
     app.include_router(account.router, prefix="/v1/account", tags=["Account"])

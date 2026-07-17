@@ -2178,23 +2178,6 @@
           "scope": null
         }
       },
-      "googleSearch": {
-        "label": "Google Search",
-        "description": "Google SERP organic search results by keyword, country, and language. Costs ~42 credits (cached results free, failures never charged).",
-        "connection": "captapi",
-        "altConnection": null,
-        "webhook": null,
-        "moduleType": "action",
-        "actionCrud": "read",
-        "codeFiles": {
-          "communication": "modules/googleSearch/communication.iml.json",
-          "staticParams": null,
-          "mappableParams": "modules/googleSearch/mappable-params.iml.json",
-          "interface": null,
-          "samples": null,
-          "scope": null
-        }
-      },
       "twitchProfile": {
         "label": "Twitch Profile",
         "description": "Twitch channel profile, followers, live status and recent metadata. Costs ~1 credit (cached results free, failures never charged).",
@@ -2530,23 +2513,6 @@
           "communication": "modules/amazonShopPage/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/amazonShopPage/mappable-params.iml.json",
-          "interface": null,
-          "samples": null,
-          "scope": null
-        }
-      },
-      "ageGenderGet": {
-        "label": "Age and Gender",
-        "description": "Predict age, gender and nationality signals from first names. Costs ~4 credits (cached results free, failures never charged).",
-        "connection": "captapi",
-        "altConnection": null,
-        "webhook": null,
-        "moduleType": "action",
-        "actionCrud": "read",
-        "codeFiles": {
-          "communication": "modules/ageGenderGet/communication.iml.json",
-          "staticParams": null,
-          "mappableParams": "modules/ageGenderGet/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null

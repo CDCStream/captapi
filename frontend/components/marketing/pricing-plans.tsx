@@ -14,6 +14,7 @@ import {
   CreativePricing,
   type PricingTier,
 } from "@/components/ui/creative-pricing";
+import { ENDPOINT_COUNT } from "@/lib/api-catalog";
 import { cn } from "@/lib/utils";
 
 type Cycle = "monthly" | "yearly" | "payg";
@@ -74,7 +75,7 @@ function subscriptionTiers(cycle: "monthly" | "yearly"): PricingTier[] {
       features: [
         "100 lifetime credits",
         "40 requests / minute",
-        "All 34 APIs included",
+        `All ${ENDPOINT_COUNT} APIs included`,
       ],
     },
     {
@@ -89,7 +90,7 @@ function subscriptionTiers(cycle: "monthly" | "yearly"): PricingTier[] {
       features: [
         `${PLAN_CREDITS.starter.toLocaleString("en-US")} credits / month`,
         "120 requests / minute",
-        "All 34 APIs included",
+        `All ${ENDPOINT_COUNT} APIs included`,
       ],
     },
     {

@@ -60,13 +60,13 @@ const STRUCTURED_DATA = {
       applicationSubCategory: "API",
       operatingSystem: "Any",
       url: SITE_URL,
-      description: `Extract transcripts, AI summaries, comments, video details, profiles, search results, ad intelligence, commerce data, and downloads from ${PLATFORM_COUNT} platforms with a single REST API. Also available as a Model Context Protocol (MCP) server, a CLI, an n8n community node, a Make.com app, and an Apify Actor for AI agents like Claude and Cursor and for no-code workflows.`,
+      description: `Extract transcripts, AI summaries, comments, video details, profiles, search results, ad intelligence, and commerce data from ${PLATFORM_COUNT} platforms with a single REST API. Also available as a Model Context Protocol (MCP) server, a CLI, an n8n community node, a Make.com app, and an Apify Actor for AI agents like Claude and Cursor and for no-code workflows.`,
       featureList: [
         "YouTube, TikTok, Instagram, Facebook, X, Reddit, LinkedIn, and more",
         "AI video summaries",
         "Comments, replies & profile/channel stats",
         "Keyword, hashtag & user search",
-        "No-watermark video & media downloads",
+        "Structured JSON responses (no HTML parsing)",
         `MCP server for Claude, Cursor, VS Code (${ENDPOINT_COUNT} tools)`,
         "Official CLI (@captapi/cli)",
         "Typed TypeScript SDK (@captapi/sdk) & Python SDK (pip install captapi)",
@@ -185,6 +185,8 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
               <h3 className="font-semibold mb-3">Legal</h3>
               <ul className="space-y-2 text-muted-foreground">
                 <li><Link href="/legal/terms" className="hover:text-foreground">Terms of Service</Link></li>
+                <li><Link href="/legal/acceptable-use" className="hover:text-foreground">Acceptable Use Policy</Link></li>
+                <li><Link href="/legal/refund" className="hover:text-foreground">Refund Policy</Link></li>
                 <li><Link href="/legal/privacy" className="hover:text-foreground">Privacy Policy</Link></li>
               </ul>
             </div>

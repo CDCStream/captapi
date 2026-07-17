@@ -10,7 +10,7 @@ import {
 } from "@/lib/api-catalog";
 
 const TITLE = "Social Media APIs — YouTube, TikTok, Instagram, Facebook & X";
-const DESCRIPTION = `One REST API for ${ENDPOINT_COUNT} endpoints across ${PLATFORM_COUNT} social platforms — YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Twitch, Spotify, and more. Transcripts, AI summaries, details, comments, search, and downloads — structured JSON, no OAuth.`;
+const DESCRIPTION = `One REST API for ${ENDPOINT_COUNT} endpoints across ${PLATFORM_COUNT} social platforms — YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Twitch, Spotify, and more. Transcripts, AI summaries, details, comments, and search — structured JSON, no OAuth.`;
 
 export const metadata: Metadata = {
   title: `${TITLE} | Captapi`,

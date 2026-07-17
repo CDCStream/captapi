@@ -102,8 +102,8 @@ export async function generateMetadata({
       keywords: [
         `${group.name} API`,
         `${group.name} data API`,
-        `${group.name} scraper API`,
-        `scrape ${group.name}`,
+        `${group.name} REST API`,
+        `${group.name} data`,
         "social media API",
       ],
       alternates: { canonical: url },

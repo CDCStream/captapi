@@ -1,8 +1,11 @@
-"""Dodo Payments billing: checkout sessions, customer portal, webhooks."""
+"""Billing: checkout, customer portal, subscription lifecycle, and webhooks.
+
+Provider-agnostic — the active merchant of record is selected by
+settings.PAYMENT_PROVIDER (see app.services.payments). All DB writes here use
+the active provider's id columns, so switching providers needs no changes here.
+"""
 
 from __future__ import annotations
-
-import json
 
 import structlog
 from fastapi import APIRouter, Header, HTTPException, Request
@@ -10,7 +13,7 @@ from pydantic import BaseModel
 
 from app.core.config import get_settings
 from app.routers.auth_keys import _user_from_jwt
-from app.services.dodo_client import get_dodo, resolve_pack, resolve_subscription
+from app.services.payments import SUBSCRIPTION_CREDITS, WebhookEvent, get_provider
 from app.services.supabase_client import get_supabase
 
 router = APIRouter()
@@ -31,25 +34,27 @@ class ChangePlanBody(BaseModel):
 
 
 def _existing_customer_id(user_id: str) -> str | None:
+    p = get_provider()
     sb = get_supabase()
     res = (
         sb.table("subscriptions")
-        .select("dodo_customer_id")
+        .select(p.customer_col)
         .eq("user_id", user_id)
         .limit(1)
         .execute()
     )
-    if res.data and res.data[0].get("dodo_customer_id"):
-        return res.data[0]["dodo_customer_id"]
+    if res.data and res.data[0].get(p.customer_col):
+        return res.data[0][p.customer_col]
     return None
 
 
 def _subscription_record(user_id: str) -> dict | None:
+    p = get_provider()
     sb = get_supabase()
     res = (
         sb.table("subscriptions")
         .select(
-            "dodo_subscription_id, dodo_customer_id, status, plan, "
+            f"{p.subscription_col}, {p.customer_col}, status, plan, "
             "current_period_end, cancel_at_period_end"
         )
         .eq("user_id", user_id)
@@ -59,35 +64,37 @@ def _subscription_record(user_id: str) -> dict | None:
     return res.data[0] if res.data else None
 
 
-@router.post("/checkout", summary="Create a Dodo Payments checkout session")
+def _subscription_id(record: dict | None) -> str | None:
+    return record.get(get_provider().subscription_col) if record else None
+
+
+@router.post("/checkout", summary="Create a checkout session")
 async def create_checkout(
     body: CheckoutBody,
     authorization: str | None = Header(default=None),
 ):
     settings = get_settings()
+    p = get_provider()
     user_id = await _user_from_jwt(authorization)
     sb = get_supabase()
 
     item = (
-        resolve_pack(body.pack)
+        p.resolve_pack(body.pack)
         if body.pack
-        else resolve_subscription(body.plan or "", body.cycle)
+        else p.resolve_subscription(body.plan or "", body.cycle)
     )
     if not item:
         raise HTTPException(
             status_code=400,
-            detail="Unknown or unconfigured product. Set the matching DODO_PRODUCT_* env var.",
+            detail="Unknown or unconfigured product. Check the matching price/product env var.",
         )
 
     user_res = sb.auth.admin.get_user_by_id(user_id)
     email = user_res.user.email if user_res and user_res.user else None
-
     customer_id = _existing_customer_id(user_id)
-    customer = {"customer_id": customer_id} if customer_id else {"email": email}
 
     return_url = (
-        body.success_url
-        or f"{settings.APP_BASE_URL}/dashboard/billing?status=success"
+        body.success_url or f"{settings.FRONTEND_URL}/dashboard/billing?status=success"
     )
 
     metadata = {
@@ -99,38 +106,44 @@ async def create_checkout(
         metadata["plan"] = item.plan
 
     try:
-        session = get_dodo().checkout_sessions.create(
-            product_cart=[{"product_id": item.product_id, "quantity": 1}],
-            customer=customer,
+        result = p.create_checkout(
+            item=item,
+            user_id=user_id,
+            email=email,
+            customer_id=customer_id,
             return_url=return_url,
             metadata=metadata,
         )
     except Exception as e:  # noqa: BLE001
-        log.error("dodo_checkout_failed", error=str(e))
+        log.error("checkout_failed", provider=p.name, error=str(e))
         raise HTTPException(status_code=502, detail=f"Checkout failed: {e}") from e
 
-    return {"id": session.session_id, "url": session.checkout_url}
+    return {
+        "provider": result.provider,
+        "url": result.url,
+        "transaction_id": result.transaction_id,
+    }
 
 
-@router.post("/portal", summary="Create a Dodo customer portal session")
+@router.post("/portal", summary="Create a customer billing portal session")
 async def create_portal(authorization: str | None = Header(default=None)):
     user_id = await _user_from_jwt(authorization)
     customer_id = _existing_customer_id(user_id)
     if not customer_id:
         raise HTTPException(status_code=404, detail="No billing customer found yet")
     try:
-        portal = get_dodo().customers.customer_portal.create(customer_id=customer_id)
+        url = get_provider().create_portal(customer_id)
     except Exception as e:  # noqa: BLE001
-        log.error("dodo_portal_failed", error=str(e))
+        log.error("portal_failed", error=str(e))
         raise HTTPException(status_code=502, detail=f"Portal failed: {e}") from e
-    return {"url": getattr(portal, "link", None) or getattr(portal, "url", None)}
+    return {"url": url}
 
 
 @router.get("/subscription", summary="Current subscription status")
 async def get_subscription(authorization: str | None = Header(default=None)):
     user_id = await _user_from_jwt(authorization)
     record = _subscription_record(user_id)
-    if not record or not record.get("dodo_subscription_id"):
+    if not record or not _subscription_id(record):
         return {"active": False, "plan": "free"}
     return {
         "active": record.get("status") == "active",
@@ -144,18 +157,13 @@ async def get_subscription(authorization: str | None = Header(default=None)):
 @router.post("/subscription/cancel", summary="Cancel at end of billing period")
 async def cancel_subscription(authorization: str | None = Header(default=None)):
     user_id = await _user_from_jwt(authorization)
-    record = _subscription_record(user_id)
-    sub_id = record.get("dodo_subscription_id") if record else None
+    sub_id = _subscription_id(_subscription_record(user_id))
     if not sub_id:
         raise HTTPException(status_code=404, detail="No active subscription")
     try:
-        get_dodo().subscriptions.update(
-            sub_id,
-            cancel_at_next_billing_date=True,
-            cancel_reason="cancelled_by_customer",
-        )
+        get_provider().cancel(sub_id)
     except Exception as e:  # noqa: BLE001
-        log.error("dodo_cancel_failed", error=str(e))
+        log.error("cancel_failed", error=str(e))
         raise HTTPException(status_code=502, detail=f"Cancel failed: {e}") from e
 
     get_supabase().table("subscriptions").update(
@@ -167,14 +175,13 @@ async def cancel_subscription(authorization: str | None = Header(default=None)):
 @router.post("/subscription/reactivate", summary="Undo a scheduled cancellation")
 async def reactivate_subscription(authorization: str | None = Header(default=None)):
     user_id = await _user_from_jwt(authorization)
-    record = _subscription_record(user_id)
-    sub_id = record.get("dodo_subscription_id") if record else None
+    sub_id = _subscription_id(_subscription_record(user_id))
     if not sub_id:
         raise HTTPException(status_code=404, detail="No active subscription")
     try:
-        get_dodo().subscriptions.update(sub_id, cancel_at_next_billing_date=False)
+        get_provider().reactivate(sub_id)
     except Exception as e:  # noqa: BLE001
-        log.error("dodo_reactivate_failed", error=str(e))
+        log.error("reactivate_failed", error=str(e))
         raise HTTPException(status_code=502, detail=f"Reactivate failed: {e}") from e
 
     get_supabase().table("subscriptions").update(
@@ -188,22 +195,20 @@ async def change_plan(
     body: ChangePlanBody,
     authorization: str | None = Header(default=None),
 ):
+    p = get_provider()
     user_id = await _user_from_jwt(authorization)
     record = _subscription_record(user_id)
-    sub_id = record.get("dodo_subscription_id") if record else None
+    sub_id = _subscription_id(record)
     if not sub_id:
         raise HTTPException(
             status_code=404,
             detail="No active subscription. Use checkout to start one.",
         )
 
-    item = resolve_subscription(body.plan, body.cycle)
+    item = p.resolve_subscription(body.plan, body.cycle)
     if not item:
-        raise HTTPException(
-            status_code=400,
-            detail="Unknown or unconfigured plan.",
-        )
-    if record.get("plan") == body.plan:
+        raise HTTPException(status_code=400, detail="Unknown or unconfigured plan.")
+    if record and record.get("plan") == body.plan:
         raise HTTPException(status_code=400, detail="Already on this plan.")
 
     metadata = {
@@ -213,20 +218,14 @@ async def change_plan(
         "plan": item.plan or body.plan,
     }
     try:
-        get_dodo().subscriptions.change_plan(
-            sub_id,
-            product_id=item.product_id,
-            proration_billing_mode="prorated_immediately",
-            quantity=1,
-            metadata=metadata,
-        )
+        p.change_plan(sub_id, item, metadata)
     except Exception as e:  # noqa: BLE001
-        log.error("dodo_change_plan_failed", error=str(e))
+        log.error("change_plan_failed", error=str(e))
         raise HTTPException(status_code=502, detail=f"Plan change failed: {e}") from e
 
     # Reflect immediately: grant_credits SETS subscription_credits (no double-grant).
     sb = get_supabase()
-    renews_at = record.get("current_period_end")
+    renews_at = record.get("current_period_end") if record else None
     sb.rpc(
         "grant_credits",
         {
@@ -237,9 +236,7 @@ async def change_plan(
             "p_renews_at": renews_at,
         },
     ).execute()
-    sb.table("subscriptions").update({"plan": body.plan}).eq(
-        "user_id", user_id
-    ).execute()
+    sb.table("subscriptions").update({"plan": body.plan}).eq("user_id", user_id).execute()
     sb.table("credit_transactions").insert(
         {
             "user_id": user_id,
@@ -251,7 +248,8 @@ async def change_plan(
     return {"plan": body.plan, "credits": item.credits}
 
 
-def _grant_subscription(sb, user_id: str, plan: str, credits: int, renews_at, data: dict):
+def _grant_subscription(sb, user_id: str, plan: str, credits: int, event: WebhookEvent) -> None:
+    p = get_provider()
     sb.rpc(
         "grant_credits",
         {
@@ -259,71 +257,105 @@ def _grant_subscription(sb, user_id: str, plan: str, credits: int, renews_at, da
             "p_subscription": credits,
             "p_topup": 0,
             "p_plan": plan,
-            "p_renews_at": renews_at,
+            "p_renews_at": event.renews_at,
         },
     ).execute()
-    customer = data.get("customer") or {}
-    sb.table("subscriptions").upsert(
-        {
-            "user_id": user_id,
-            "dodo_customer_id": customer.get("customer_id"),
-            "dodo_subscription_id": data.get("subscription_id"),
-            "status": data.get("status", "active"),
-            "plan": plan,
-            "current_period_end": renews_at,
-            "cancel_at_period_end": bool(data.get("cancel_at_next_billing_date")),
-        },
-        on_conflict="user_id",
-    ).execute()
-
-
-@router.post("/webhook", summary="Dodo Payments webhook handler", include_in_schema=False)
-async def dodo_webhook(request: Request):
-    body = await request.body()
-    headers = {
-        "webhook-id": request.headers.get("webhook-id", ""),
-        "webhook-signature": request.headers.get("webhook-signature", ""),
-        "webhook-timestamp": request.headers.get("webhook-timestamp", ""),
+    row = {
+        "user_id": user_id,
+        "status": event.status or "active",
+        "plan": plan,
+        "current_period_end": event.renews_at,
+        "cancel_at_period_end": event.cancel_at_period_end,
     }
+    if event.customer_id:
+        row[p.customer_col] = event.customer_id
+    if event.subscription_id:
+        row[p.subscription_col] = event.subscription_id
+    sb.table("subscriptions").upsert(row, on_conflict="user_id").execute()
+
+
+def _resolve_user_id(event: WebhookEvent) -> str | None:
+    if event.user_id:
+        return event.user_id
+    p = get_provider()
+    sb = get_supabase()
+    for col, value in ((p.subscription_col, event.subscription_id), (p.customer_col, event.customer_id)):
+        if not value:
+            continue
+        res = sb.table("subscriptions").select("user_id").eq(col, value).limit(1).execute()
+        if res.data:
+            return res.data[0]["user_id"]
+    return None
+
+
+def _plan_from_db(user_id: str) -> str | None:
+    res = (
+        get_supabase()
+        .table("subscriptions")
+        .select("plan")
+        .eq("user_id", user_id)
+        .limit(1)
+        .execute()
+    )
+    return res.data[0]["plan"] if res.data else None
+
+
+@router.post("/webhook", summary="Payment provider webhook handler", include_in_schema=False)
+async def billing_webhook(request: Request):
+    p = get_provider()
+    body = await request.body()
+    headers = {k.lower(): v for k, v in request.headers.items()}
     try:
-        get_dodo().webhooks.unwrap(body, headers=headers)
+        event = p.verify_and_parse(body, headers)
     except Exception as e:  # noqa: BLE001
+        log.warning("webhook_verify_failed", provider=p.name, error=str(e))
         raise HTTPException(status_code=401, detail="Invalid signature") from e
 
-    event = json.loads(body)
-    etype = event.get("type", "")
-    data = event.get("data") or {}
-    meta = data.get("metadata") or {}
-    user_id = meta.get("user_id")
-    sb = get_supabase()
-    log.info("dodo_webhook", type=etype, user_id=user_id)
+    if event.action == "ignore":
+        return {"received": True}
 
+    sb = get_supabase()
+    user_id = _resolve_user_id(event)
+    log.info("billing_webhook", provider=p.name, action=event.action, user_id=user_id)
     if not user_id:
         return {"received": True}
 
-    credits = int(meta.get("credits", 0) or 0)
-    plan = meta.get("plan")
-
-    # --- Subscriptions ---------------------------------------------------
-    if etype in ("subscription.active", "subscription.renewed"):
+    if event.action == "grant_subscription":
+        plan = event.plan or _plan_from_db(user_id)
+        credits = event.credits or (SUBSCRIPTION_CREDITS.get(plan or "", 0))
         if plan and credits:
-            renews_at = data.get("next_billing_date")
-            _grant_subscription(sb, user_id, plan, credits, renews_at, data)
+            _grant_subscription(sb, user_id, plan, credits, event)
             sb.table("credit_transactions").insert(
                 {
                     "user_id": user_id,
                     "type": "subscription_grant",
                     "amount": credits,
-                    "description": f"Subscription {etype.split('.')[1]}: {plan}",
+                    "description": f"Subscription payment: {plan}",
                 }
             ).execute()
 
-    elif etype == "subscription.on_hold":
-        sb.table("subscriptions").update({"status": "on_hold"}).eq(
-            "user_id", user_id
+    elif event.action == "grant_topup" and event.credits:
+        sb.rpc(
+            "grant_credits",
+            {
+                "p_user_id": user_id,
+                "p_subscription": 0,
+                "p_topup": event.credits,
+                "p_plan": None,
+                "p_renews_at": None,
+            },
         ).execute()
+        txn = {
+            "user_id": user_id,
+            "type": "topup",
+            "amount": event.credits,
+            "description": f"PAYG pack: {event.credits} credits",
+        }
+        if event.payment_id:
+            txn[p.payment_col] = event.payment_id
+        sb.table("credit_transactions").insert(txn).execute()
 
-    elif etype in ("subscription.cancelled", "subscription.expired", "subscription.failed"):
+    elif event.action == "cancel":
         sb.table("subscriptions").update({"status": "canceled", "plan": "free"}).eq(
             "user_id", user_id
         ).execute()
@@ -331,29 +363,13 @@ async def dodo_webhook(request: Request):
             {"plan": "free", "subscription_credits": 0}
         ).eq("user_id", user_id).execute()
 
-    # --- One-time packs (PAYG) ------------------------------------------
-    elif etype == "payment.succeeded":
-        # Subscription invoices also emit payment.succeeded; skip those here
-        # (handled by subscription.active / subscription.renewed).
-        if not data.get("subscription_id") and credits:
-            sb.rpc(
-                "grant_credits",
-                {
-                    "p_user_id": user_id,
-                    "p_subscription": 0,
-                    "p_topup": credits,
-                    "p_plan": None,
-                    "p_renews_at": None,
-                },
-            ).execute()
-            sb.table("credit_transactions").insert(
-                {
-                    "user_id": user_id,
-                    "type": "topup",
-                    "amount": credits,
-                    "description": f"PAYG pack: {credits} credits",
-                    "dodo_payment_id": data.get("payment_id"),
-                }
-            ).execute()
+    elif event.action == "status":
+        update: dict = {}
+        if event.status:
+            update["status"] = event.status
+        update["cancel_at_period_end"] = event.cancel_at_period_end
+        if event.renews_at:
+            update["current_period_end"] = event.renews_at
+        sb.table("subscriptions").update(update).eq("user_id", user_id).execute()
 
     return {"received": True}

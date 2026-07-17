@@ -93,13 +93,6 @@ export const MAKER_TOOLS: MakerTool[] = [
     type: "reference",
   },
   {
-    slug: "instagram-profile-viewer",
-    name: "Instagram Profile Viewer",
-    blurb: "Enter any public username to browse the profile photo, posts, reels, and highlights anonymously. Free, no login.",
-    platform: "Instagram",
-    type: "viewer",
-  },
-  {
     slug: "social-media-bio-generator",
     name: "Social Media Bio Generator",
     blurb: "6 on-brand bios for YouTube, TikTok, Instagram, or X — within each platform's limit.",
@@ -259,20 +252,6 @@ export const MAKER_TOOLS: MakerTool[] = [
     blurb: "What every Snapchat friend emoji, symbol, and icon means — the yellow heart, fire, green dot, hourglass, and more.",
     platform: "Snapchat",
     type: "reference",
-  },
-  {
-    slug: "tiktok-viewer",
-    name: "TikTok Viewer",
-    blurb: "Enter any public username to watch TikTok videos, stories, and profiles anonymously. Free, no account, no app.",
-    platform: "TikTok",
-    type: "viewer",
-  },
-  {
-    slug: "threads-viewer",
-    name: "Threads Viewer",
-    blurb: "Enter any public username to browse Threads posts, replies, and profiles anonymously. Free, no Instagram login.",
-    platform: "Threads",
-    type: "viewer",
   },
   {
     slug: "linkedin-headline-generator",

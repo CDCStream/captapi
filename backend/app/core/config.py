@@ -224,7 +224,6 @@ class Settings(BaseSettings):
     APIFY_ACTOR_RUMBLE_DETAILS: str = "azzouzana/rumble-all-inclusive-scraper"
     APIFY_ACTOR_RUMBLE_COMMENTS: str = "thescrapelab/apify-rumble-scraper"
     # Long-tail public platforms.
-    APIFY_ACTOR_GOOGLE_SEARCH: str = "apify/google-search-scraper"
     APIFY_ACTOR_TWITCH: str = "maximedupre/twitch-scraper"
     APIFY_ACTOR_TWITCH_URL: str = "abotapi/twitch-scraper"
     # Upcoming broadcast schedule (nextSchedule) per channel; the actors above
@@ -243,7 +242,6 @@ class Settings(BaseSettings):
     APIFY_ACTOR_TRUTH_SOCIAL_FALLBACK: str = "automation-lab/truth-social-scraper"
     APIFY_ACTOR_KICK: str = "scrapestorm/kick-videos-clips-scraper-cheap"
     APIFY_ACTOR_AMAZON_SHOP: str = "piotrv1001/amazon-storefront-scraper"
-    APIFY_ACTOR_AGE_GENDER: str = "parseforge/agify-name-demographics-scraper"
     APIFY_ACTOR_KWAI: str = "natanielsantos/kwai-scraper"
 
     # TikTok Shop. 5 modes: shop_search, shop_catalog, product_details,
@@ -314,7 +312,30 @@ class Settings(BaseSettings):
     OPENAI_MODEL_SUMMARY: str = "gpt-4o-mini"
     OPENAI_MODEL_TRANSCRIPTION: str = "whisper-1"
 
-    # Dodo Payments (Merchant of Record)
+    # Active Merchant-of-Record provider. "paddle" is live; "dodo" is kept as a
+    # dormant fallback (its code path still works if switched back).
+    PAYMENT_PROVIDER: Literal["paddle", "dodo"] = "paddle"
+
+    # --- Paddle Billing (Merchant of Record) ---------------------------------
+    PADDLE_API_KEY: str = ""
+    PADDLE_WEBHOOK_SECRET: str = ""
+    PADDLE_ENVIRONMENT: Literal["sandbox", "production"] = "sandbox"
+
+    # Subscription price IDs (one per plan / billing cycle), from the Paddle
+    # dashboard (format: pri_...).
+    PADDLE_PRICE_STARTER_MONTHLY: str = ""
+    PADDLE_PRICE_STARTER_YEARLY: str = ""
+    PADDLE_PRICE_PRO_MONTHLY: str = ""
+    PADDLE_PRICE_PRO_YEARLY: str = ""
+    PADDLE_PRICE_BUSINESS_MONTHLY: str = ""
+    PADDLE_PRICE_BUSINESS_YEARLY: str = ""
+
+    # One-time (PAYG) credit pack price IDs.
+    PADDLE_PRICE_PACK_STARTER: str = ""
+    PADDLE_PRICE_PACK_GROWTH: str = ""
+    PADDLE_PRICE_PACK_SCALE: str = ""
+
+    # --- Dodo Payments (dormant fallback) ------------------------------------
     DODO_PAYMENTS_API_KEY: str = ""
     DODO_PAYMENTS_WEBHOOK_KEY: str = ""
     DODO_PAYMENTS_ENVIRONMENT: Literal["test_mode", "live_mode"] = "test_mode"

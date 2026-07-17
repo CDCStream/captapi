@@ -192,12 +192,6 @@
     ]
   },
   {
-    "label": "Google",
-    "modules": [
-      "googleSearch"
-    ]
-  },
-  {
     "label": "Twitch",
     "modules": [
       "twitchProfile",
@@ -255,12 +249,6 @@
     "label": "Amazon Shop",
     "modules": [
       "amazonShopPage"
-    ]
-  },
-  {
-    "label": "Age and Gender",
-    "modules": [
-      "ageGenderGet"
     ]
   },
   {

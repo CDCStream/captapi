@@ -58,7 +58,11 @@ export const api = {
     cycle?: "monthly" | "yearly";
     pack?: string;
   }) =>
-    apiFetch<{ url: string }>("/v1/billing/checkout", {
+    apiFetch<{
+      provider: string;
+      url?: string | null;
+      transaction_id?: string | null;
+    }>("/v1/billing/checkout", {
       method: "POST",
       body: JSON.stringify(body),
     }),

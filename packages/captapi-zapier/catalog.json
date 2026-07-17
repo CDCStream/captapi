@@ -3430,46 +3430,6 @@
     ]
   },
   {
-    "tool": "google_search",
-    "platform": "Google",
-    "name": "Google Search",
-    "path": "/v1/google/search",
-    "credits": 42,
-    "summary": "Google SERP organic search results by keyword, country, and language.",
-    "params": [
-      {
-        "name": "q",
-        "type": "string",
-        "required": true,
-        "description": "Search query or keywords (min 2 chars)."
-      },
-      {
-        "name": "country",
-        "type": "string",
-        "required": false,
-        "description": "Two-letter country code. Default us."
-      },
-      {
-        "name": "language",
-        "type": "string",
-        "required": false,
-        "description": "Google language code. Default en."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 10, max 100. Billed per result."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
     "tool": "twitch_profile",
     "platform": "Twitch",
     "name": "Twitch Profile",
@@ -3960,34 +3920,6 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "age_gender_get",
-    "platform": "Age and Gender",
-    "name": "Age and Gender",
-    "path": "/v1/age-gender",
-    "credits": 4,
-    "summary": "Predict age, gender and nationality signals from first names.",
-    "params": [
-      {
-        "name": "name",
-        "type": "string",
-        "required": true,
-        "description": "First name, or fallback when names is omitted."
-      },
-      {
-        "name": "names",
-        "type": "string",
-        "required": false,
-        "description": "Optional comma-separated list of names."
       },
       {
         "name": "cache",

@@ -44,7 +44,6 @@ const categoryBaseCostUsd: Record<Category, number> = {
 const platformCostMultiplier: Partial<Record<PlatformId, number>> = {
   // Low-cost public/direct API style sources.
   account: 0.1,
-  age_gender: 0.5,
   github: 0.4,
   linktree: 0.5,
   komi: 0.5,
@@ -55,7 +54,6 @@ const platformCostMultiplier: Partial<Record<PlatformId, number>> = {
   bluesky: 0.6,
 
   // Paid actor / heavier scraping sources.
-  google: 1.5,
   twitch: 1.2,
   spotify: 0.8,
   soundcloud: 1.0,

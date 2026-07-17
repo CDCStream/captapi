@@ -31,8 +31,9 @@ export default function PrivacyPage() {
       </p>
       <h3>Billing information</h3>
       <p>
-        Payments are processed by Stripe. We never see or store your full credit
-        card number — only a Stripe customer ID and the last four digits.
+        Payments are handled by our merchant-of-record payment provider and its
+        underlying processors. We never see or store your full card number — only a
+        customer/transaction reference and, where provided, the last four digits.
       </p>
 
       <h2>2. How We Use Your Information</h2>
@@ -50,8 +51,8 @@ export default function PrivacyPage() {
       </p>
       <ul>
         <li><strong>Supabase</strong> — authentication & database hosting</li>
-        <li><strong>Stripe</strong> — payment processing</li>
-        <li><strong>Apify</strong> — scraping infrastructure</li>
+        <li><strong>Paddle</strong> — our merchant of record for checkout, billing & payment processing</li>
+        <li><strong>Apify</strong> — data collection infrastructure</li>
         <li><strong>OpenAI</strong> — AI summarization (input transcripts only; OpenAI does not train on API data per their policy)</li>
         <li><strong>Upstash</strong> — caching & rate limiting</li>
         <li><strong>Sentry</strong> — error tracking (no request bodies sent)</li>

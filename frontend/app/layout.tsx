@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     "followers API",
     "social media posts API",
     "video data API",
-    "social media scraping API",
+    "social media data API",
   ],
   verification: process.env.NEXT_PUBLIC_GSC_VERIFICATION
     ? { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION }

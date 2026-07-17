@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { initializePaddle, type Paddle, CheckoutEventNames } from "@paddle/paddle-js";
 import {
   Loader2,
   Zap,
@@ -16,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreativePricing, type PricingTier } from "@/components/ui/creative-pricing";
 import { api } from "@/lib/api-client";
+import { ENDPOINT_COUNT } from "@/lib/api-catalog";
 import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics";
 import { gaEvent, adsConversion } from "@/lib/gtag";
@@ -48,7 +50,7 @@ const PLANS = [
     credits: 2000,
     tier: 1,
     description: "For side projects",
-    features: ["2,000 credits / month", "120 requests / minute", "All 34 APIs included", "Email support"],
+    features: ["2,000 credits / month", "120 requests / minute", `All ${ENDPOINT_COUNT} APIs included`, "Email support"],
   },
   {
     id: "pro",
@@ -138,6 +140,7 @@ export default function BillingPage() {
   const [sub, setSub] = useState<Subscription | null>(null);
   const [busy, setBusy] = useState(false);
   const [cycle, setCycle] = useState<Cycle>("monthly");
+  const [paddle, setPaddle] = useState<Paddle>();
 
   const load = useCallback(async () => {
     const sb = createClient();
@@ -160,6 +163,27 @@ export default function BillingPage() {
     load();
   }, [load]);
 
+  // Initialize Paddle.js for overlay checkout (Merchant of Record).
+  useEffect(() => {
+    const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
+    if (!token) return;
+    const environment =
+      process.env.NEXT_PUBLIC_PADDLE_ENV === "production" ? "production" : "sandbox";
+    initializePaddle({
+      environment,
+      token,
+      eventCallback: (event) => {
+        if (event.name === CheckoutEventNames.CHECKOUT_COMPLETED) {
+          toast.success("Payment complete — credits are on the way.");
+          // Webhook grants credits server-side; refresh shortly after.
+          setTimeout(() => load(), 2500);
+        }
+      },
+    }).then((instance) => {
+      if (instance) setPaddle(instance);
+    });
+  }, [load]);
+
   const currentPlan = sub?.plan ?? balance?.plan ?? "free";
   const hasActiveSub = Boolean(sub?.active);
   const currentTier = tierOf(currentPlan);
@@ -172,8 +196,17 @@ export default function BillingPage() {
     gaEvent("begin_checkout", { ...body });
     adsConversion();
     try {
-      const { url } = await api.createCheckout(body);
-      window.location.href = url;
+      const res = await api.createCheckout(body);
+      if (res.transaction_id && paddle) {
+        paddle.Checkout.open({ transactionId: res.transaction_id });
+        setBusy(false);
+        return;
+      }
+      if (res.url) {
+        window.location.href = res.url;
+        return;
+      }
+      throw new Error("Checkout could not be started. Please try again.");
     } catch (e) {
       toast.error(String(e));
       setBusy(false);

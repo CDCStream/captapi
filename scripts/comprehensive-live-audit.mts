@@ -521,7 +521,6 @@ async function mcpAudit() {
     "tiktok_shop_shop_search",
     "google_ad_library_company_ads",
     "facebook_marketplace_location_search",
-    "age_gender_get",
     "linktree_page",
     "kwai_profile",
     "youtube_video_details",

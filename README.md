@@ -4,13 +4,13 @@ API-as-a-Service that extracts transcripts, AI summaries, comments, engagement m
 
 ## Architecture
 
-- **Backend**: FastAPI (Python 3.12) — Apify scraping + OpenAI summarization
+- **Backend**: FastAPI (Python 3.12) — Apify data collection + OpenAI summarization
 - **Frontend**: Next.js 15 + Tailwind + shadcn/ui — landing, dashboard, billing
 - **DB / Auth**: Supabase (Postgres + Auth + Storage)
 - **Cache / Rate limit**: Upstash Redis
-- **Scraping**: Apify Actors
+- **Data collection**: Apify Actors
 - **AI**: OpenAI (gpt-4o-mini + Whisper)
-- **Billing**: Stripe (subscriptions + top-up credits)
+- **Billing**: Paddle (Merchant of Record — subscriptions + top-up credits; Dodo Payments kept as a dormant fallback)
 
 ## Quick Start
 
@@ -21,7 +21,7 @@ API-as-a-Service that extracts transcripts, AI summaries, comments, engagement m
 - Supabase project (free tier)
 - Apify account + API token
 - OpenAI API key
-- Stripe account (test mode)
+- Paddle account (sandbox mode)
 - Upstash Redis (free tier)
 
 ### 1. Supabase Setup
@@ -75,7 +75,7 @@ socialkit-clone/
 │   │   ├── main.py         App entry
 │   │   ├── core/           Config, auth, credits, security
 │   │   ├── routers/        Endpoint handlers per platform
-│   │   ├── services/       Apify, OpenAI, Supabase, Cache, Stripe
+│   │   ├── services/       Apify, OpenAI, Supabase, Cache, Paddle
 │   │   ├── schemas/        Pydantic models
 │   │   └── utils/          Helpers
 │   ├── pyproject.toml
