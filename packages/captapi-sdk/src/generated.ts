@@ -358,9 +358,9 @@ export interface TiktokAudienceDemographicsParams {
 }
 
 export interface TiktokSearchSuggestionsParams {
-  /** Seed keyword for autocomplete suggestions. */
+  /** Seed keyword to expand into autocomplete suggestions, e.g. skincare. */
   q: string;
-  /** Two-letter ISO country code. Default US. */
+  /** Two-letter ISO country code that localizes suggestions to a market, e.g. US, GB, DE. Default US. */
   country?: string;
   /** Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect. */
   language?: string;
@@ -539,7 +539,7 @@ export class TiktokApi {
   audienceDemographics(params: TiktokAudienceDemographicsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/audience-demographics", params);
   }
-  /** TikTok Search Suggestions — TikTok search/autocomplete suggestions for a seed keyword. (28 credits) */
+  /** TikTok Search Suggestions — The autocomplete terms TikTok suggests in its search bar for a seed keyword — the real phrases people search, ranked. Localize by country + language. (28 credits) */
   searchSuggestions(params: TiktokSearchSuggestionsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/search-suggestions", params);
   }

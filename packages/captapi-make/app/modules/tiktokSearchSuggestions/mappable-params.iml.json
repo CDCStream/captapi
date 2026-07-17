@@ -4,14 +4,14 @@
     "type": "text",
     "label": "Search Query",
     "required": true,
-    "help": "Seed keyword for autocomplete suggestions."
+    "help": "Seed keyword to expand into autocomplete suggestions, e.g. skincare."
   },
   {
     "name": "country",
     "type": "text",
     "label": "Country",
     "required": false,
-    "help": "Two-letter ISO country code. Default US."
+    "help": "Two-letter ISO country code that localizes suggestions to a market, e.g. US, GB, DE. Default US."
   },
   {
     "name": "language",

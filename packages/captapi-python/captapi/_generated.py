@@ -490,10 +490,10 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/audience-demographics", {"url": url, "cache": cache})
 
     def search_suggestions(self, *, q: str, country: str | None = None, language: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Search Suggestions — TikTok search/autocomplete suggestions for a seed keyword. (28 credits)
+        """TikTok Search Suggestions — The autocomplete terms TikTok suggests in its search bar for a seed keyword — the real phrases people search, ranked. Localize by country + language. (28 credits)
 
-        :param q: Seed keyword for autocomplete suggestions.
-        :param country: Two-letter ISO country code. Default US.
+        :param q: Seed keyword to expand into autocomplete suggestions, e.g. skincare.
+        :param country: Two-letter ISO country code that localizes suggestions to a market, e.g. US, GB, DE. Default US.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -703,10 +703,10 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/audience-demographics", {"url": url, "cache": cache})
 
     async def search_suggestions(self, *, q: str, country: str | None = None, language: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Search Suggestions — TikTok search/autocomplete suggestions for a seed keyword. (28 credits)
+        """TikTok Search Suggestions — The autocomplete terms TikTok suggests in its search bar for a seed keyword — the real phrases people search, ranked. Localize by country + language. (28 credits)
 
-        :param q: Seed keyword for autocomplete suggestions.
-        :param country: Two-letter ISO country code. Default US.
+        :param q: Seed keyword to expand into autocomplete suggestions, e.g. skincare.
+        :param country: Two-letter ISO country code that localizes suggestions to a market, e.g. US, GB, DE. Default US.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

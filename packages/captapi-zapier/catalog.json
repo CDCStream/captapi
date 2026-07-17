@@ -815,19 +815,19 @@
     "name": "TikTok Search Suggestions",
     "path": "/v1/tiktok/search-suggestions",
     "credits": 28,
-    "summary": "TikTok search/autocomplete suggestions for a seed keyword.",
+    "summary": "The autocomplete terms TikTok suggests in its search bar for a seed keyword — the real phrases people search, ranked. Localize by country + language.",
     "params": [
       {
         "name": "q",
         "type": "string",
         "required": true,
-        "description": "Seed keyword for autocomplete suggestions."
+        "description": "Seed keyword to expand into autocomplete suggestions, e.g. skincare."
       },
       {
         "name": "country",
         "type": "string",
         "required": false,
-        "description": "Two-letter ISO country code. Default US."
+        "description": "Two-letter ISO country code that localizes suggestions to a market, e.g. US, GB, DE. Default US."
       },
       {
         "name": "language",

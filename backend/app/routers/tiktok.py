@@ -1022,10 +1022,10 @@ async def tiktok_live_info(
 
 @router.get("/search-suggestions", summary="TikTok search/autocomplete suggestions")
 async def tiktok_search_suggestions(
-    q: str = Query(..., min_length=1, description="Seed keyword"),
-    country: str = Query("US", min_length=2, max_length=2),
-    language: str = Query("en-US"),
-    limit: int = Query(20, ge=1, le=100),
+    q: str = Query(..., min_length=1, description="Seed keyword to expand into autocomplete suggestions, e.g. skincare."),
+    country: str = Query("US", min_length=2, max_length=2, description="Two-letter ISO country code that localizes the suggestions to a market, e.g. US, GB, DE. Default US."),
+    language: str = Query("en-US", description="Interface language for the suggestions, e.g. en-US or de-DE. Default en-US."),
+    limit: int = Query(20, ge=1, le=100, description="Number of suggestions to return (1-100). Default 20."),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):

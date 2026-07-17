@@ -531,7 +531,7 @@
       },
       "tiktokSearchSuggestions": {
         "label": "TikTok Search Suggestions",
-        "description": "TikTok search/autocomplete suggestions for a seed keyword. Costs ~28 credits (cached results free, failures never charged).",
+        "description": "The autocomplete terms TikTok suggests in its search bar for a seed keyword — the real phrases people search, ranked. Localize by country + language. Costs ~28 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

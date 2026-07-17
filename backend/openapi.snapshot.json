@@ -2222,10 +2222,10 @@
             "schema": {
               "type": "string",
               "minLength": 1,
-              "description": "Seed keyword",
+              "description": "Seed keyword to expand into autocomplete suggestions, e.g. skincare.",
               "title": "Q"
             },
-            "description": "Seed keyword"
+            "description": "Seed keyword to expand into autocomplete suggestions, e.g. skincare."
           },
           {
             "name": "country",
@@ -2235,9 +2235,11 @@
               "type": "string",
               "minLength": 2,
               "maxLength": 2,
+              "description": "Two-letter ISO country code that localizes the suggestions to a market, e.g. US, GB, DE. Default US.",
               "default": "US",
               "title": "Country"
-            }
+            },
+            "description": "Two-letter ISO country code that localizes the suggestions to a market, e.g. US, GB, DE. Default US."
           },
           {
             "name": "language",
@@ -2245,9 +2247,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "description": "Interface language for the suggestions, e.g. en-US or de-DE. Default en-US.",
               "default": "en-US",
               "title": "Language"
-            }
+            },
+            "description": "Interface language for the suggestions, e.g. en-US or de-DE. Default en-US."
           },
           {
             "name": "limit",
@@ -2257,9 +2261,11 @@
               "type": "integer",
               "maximum": 100,
               "minimum": 1,
+              "description": "Number of suggestions to return (1-100). Default 20.",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "Number of suggestions to return (1-100). Default 20."
           },
           {
             "name": "cache",
