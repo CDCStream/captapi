@@ -8,7 +8,7 @@ import re
 from collections import Counter
 from datetime import datetime, timezone
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote_plus
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -374,9 +374,10 @@ def _normalize_suggestion(item: dict, seed: str) -> dict:
         or item.get("searchTerm")
     )
     suggestion = safe_str(suggestion)
-    search_url = safe_str(item.get("searchUrl"))
-    if not search_url and suggestion:
-        search_url = f"https://www.tiktok.com/search?q={quote(suggestion)}"
+    # Always build the search URL ourselves: TikTok's search does not resolve
+    # %20-encoded spaces, so we use + (quote_plus). The actor's own searchUrl
+    # uses %20 and returns no results, so we ignore it.
+    search_url = f"https://www.tiktok.com/search?q={quote_plus(suggestion)}" if suggestion else ""
     return {
         "seed": safe_str(item.get("seedKeyword") or item.get("seed") or item.get("sourceKeyword") or seed),
         "suggestion": suggestion,

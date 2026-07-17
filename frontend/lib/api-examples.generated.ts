@@ -19846,7 +19846,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "seed": "skincare",
         "suggestion": "skincare routine",
         "rank": 1,
-        "searchUrl": "https://www.tiktok.com/search?q=skincare%20routine",
+        "searchUrl": "https://www.tiktok.com/search?q=skincare+routine",
         "region": "US",
         "language": "en-US"
       },
@@ -19854,7 +19854,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "seed": "skincare",
         "suggestion": "skincare products",
         "rank": 2,
-        "searchUrl": "https://www.tiktok.com/search?q=skincare%20products",
+        "searchUrl": "https://www.tiktok.com/search?q=skincare+products",
         "region": "US",
         "language": "en-US"
       },
@@ -19862,7 +19862,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "seed": "skincare",
         "suggestion": "skincare routine men",
         "rank": 3,
-        "searchUrl": "https://www.tiktok.com/search?q=skincare%20routine%20men",
+        "searchUrl": "https://www.tiktok.com/search?q=skincare+routine+men",
         "region": "US",
         "language": "en-US"
       },
@@ -19870,7 +19870,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "seed": "skincare",
         "suggestion": "based skincare bundle",
         "rank": 4,
-        "searchUrl": "https://www.tiktok.com/search?q=based%20skincare%20bundle",
+        "searchUrl": "https://www.tiktok.com/search?q=based+skincare+bundle",
         "region": "US",
         "language": "en-US"
       },
@@ -19878,7 +19878,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "seed": "skincare",
         "suggestion": "Skincare korean",
         "rank": 5,
-        "searchUrl": "https://www.tiktok.com/search?q=Skincare%20korean",
+        "searchUrl": "https://www.tiktok.com/search?q=Skincare+korean",
         "region": "US",
         "language": "en-US"
       }
