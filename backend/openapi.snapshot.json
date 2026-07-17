@@ -783,63 +783,6 @@
         }
       }
     },
-    "/v1/youtube/video-download": {
-      "get": {
-        "tags": [
-          "YouTube"
-        ],
-        "summary": "Get direct video download URLs",
-        "operationId": "youtube_video_download_v1_youtube_video_download_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "url",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Url"
-            }
-          },
-          {
-            "name": "cache",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
-              "default": false,
-              "title": "Cache"
-            },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/youtube/channel-shorts": {
       "get": {
         "tags": [
@@ -2261,11 +2204,11 @@
               "type": "integer",
               "maximum": 100,
               "minimum": 1,
-              "description": "Number of suggestions to return (1-100). Default 20.",
+              "description": "Upper bound on how many suggestions to return (1-100, default 20). TikTok only surfaces a limited number of real autocomplete suggestions per keyword, so you'll often get fewer than the limit.",
               "default": 20,
               "title": "Limit"
             },
-            "description": "Number of suggestions to return (1-100). Default 20."
+            "description": "Upper bound on how many suggestions to return (1-100, default 20). TikTok only surfaces a limited number of real autocomplete suggestions per keyword, so you'll often get fewer than the limit."
           },
           {
             "name": "cache",
@@ -2426,63 +2369,6 @@
               "title": "Url"
             },
             "description": "TikTok profile URL, @handle, or username"
-          },
-          {
-            "name": "cache",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
-              "default": false,
-              "title": "Cache"
-            },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/tiktok/video-download": {
-      "get": {
-        "tags": [
-          "TikTok"
-        ],
-        "summary": "TikTok video download URL",
-        "operationId": "tiktok_video_download_v1_tiktok_video_download_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "url",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Url"
-            }
           },
           {
             "name": "cache",
@@ -4616,63 +4502,6 @@
         }
       }
     },
-    "/v1/instagram/video-download": {
-      "get": {
-        "tags": [
-          "Instagram"
-        ],
-        "summary": "Direct video URL for Instagram Reel",
-        "operationId": "instagram_video_download_v1_instagram_video_download_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "url",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Url"
-            }
-          },
-          {
-            "name": "cache",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
-              "default": false,
-              "title": "Cache"
-            },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/instagram/reels-by-audio-id": {
       "get": {
         "tags": [
@@ -4910,124 +4739,6 @@
               "minLength": 2,
               "title": "Q"
             }
-          },
-          {
-            "name": "cache",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
-              "default": false,
-              "title": "Cache"
-            },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/instagram/story-highlights": {
-      "get": {
-        "tags": [
-          "Instagram"
-        ],
-        "summary": "List an Instagram profile's story highlights",
-        "operationId": "instagram_story_highlights_v1_instagram_story_highlights_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "url",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Instagram profile URL, @handle, or username",
-              "title": "Url"
-            },
-            "description": "Instagram profile URL, @handle, or username"
-          },
-          {
-            "name": "cache",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
-              "default": false,
-              "title": "Cache"
-            },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/instagram/highlights-details": {
-      "get": {
-        "tags": [
-          "Instagram"
-        ],
-        "summary": "Stories inside a single Instagram highlight",
-        "operationId": "instagram_highlights_details_v1_instagram_highlights_details_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "Highlight ID from the Instagram Story Highlights API, e.g. highlight:18201653992314974 or 18201653992314974.",
-              "title": "Id"
-            },
-            "description": "Highlight ID from the Instagram Story Highlights API, e.g. highlight:18201653992314974 or 18201653992314974."
           },
           {
             "name": "cache",

@@ -41,7 +41,6 @@ CREDIT_SUMMARIZE = 4
 CREDIT_DETAILS = 1
 CREDIT_CHANNEL = 1
 CREDIT_SEARCH = 2
-CREDIT_DOWNLOAD = 3
 
 # Per-result rates calibrated to ~80% markup (rate = cost_per_result * 400 at a
 # $0.0045/credit sell price) over verified Apify prices:
@@ -109,22 +108,6 @@ def _require_ig_profile_target(value: str) -> tuple[str, str]:
             ),
         )
     return ("handle", handle)
-
-
-def _require_highlight_id(value: str) -> str:
-    """Normalize a highlight identifier to its numeric id. Accepts the id
-    returned by the Story Highlights API ("highlight:18201653992314974"), the
-    bare numeric id, or a stories/highlights URL."""
-    match = re.search(r"(\d{6,})", value or "")
-    if not match:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                "Invalid highlight ID. Pass an ID from the Instagram Story Highlights API, "
-                "e.g. highlight:18201653992314974 or 18201653992314974."
-            ),
-        )
-    return match.group(1)
 
 
 # A valid Instagram hashtag is word chars (unicode letters/digits/underscore)
@@ -1240,72 +1223,6 @@ async def instagram_trending_reels(
         return ApiResponse(data=data)
 
 
-@router.get("/video-download", summary="Direct video URL for Instagram Reel")
-async def instagram_video_download(
-    url: str = Query(...),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
-    caller: ApiCaller = Depends(require_api_key),
-):
-    settings = get_settings()
-    async with billed_call(
-        caller=caller,
-        endpoint="/v1/instagram/video-download",
-        platform="instagram",
-        resource_url=url,
-        base_credits=CREDIT_DOWNLOAD,
-    ) as ctx:
-        async def _run() -> dict[str, Any]:
-            native = await instagram_native.fetch_reel_media(_require_instagram_post_url(url))
-            if native and safe_str(native.get("videoUrl")):
-                ctx["source"] = "direct"
-                result = {
-                    "platform": "instagram",
-                    "url": url,
-                    "downloadUrl": safe_str(native.get("videoUrl")),
-                    "thumbnailUrl": safe_str(native.get("thumbnailUrl")),
-                    "duration": safe_float(native.get("duration")),
-                }
-                if result["duration"] is None:
-                    result.pop("duration")
-                return result
-
-            ctx["source"] = "apify"
-            apify = get_apify()
-            items, _actor = await apify.run_with_fallback(
-                _instagram_reel_candidates(settings, url),
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Reel not found")
-            v = items[0]
-            download_url = safe_str(v.get("videoUrl") or v.get("video_url") or v.get("downloadUrl"))
-            if not download_url:
-                raise HTTPException(status_code=404, detail="Video download URL not found")
-            duration = safe_float(v.get("videoDuration") or v.get("duration") or v.get("durationSeconds"))
-            if duration is None:
-                duration = instagram_native._duration_from_video_url(download_url)
-            result = {
-                "platform": "instagram",
-                "url": url,
-                "downloadUrl": download_url,
-                "thumbnailUrl": safe_str(v.get("displayUrl") or v.get("thumbnailUrl") or v.get("thumbnail")),
-                "duration": duration,
-            }
-            if duration is None:
-                result.pop("duration")
-            return result
-
-        data = await cached_or_run(
-            endpoint="instagram.video-download",
-            params={"url": url, "v": 8},
-            runner=_run,
-            ctx=ctx,
-            ttl=3600,
-            use_cache=cache,
-        )
-        return ApiResponse(data=data)
-
-
 @router.get("/reels-by-audio-id", summary="Instagram Reels by audio ID")
 async def instagram_reels_by_audio_id(
     audio_id: str = Query(..., min_length=2, description="Instagram audio/music ID or full audio URL"),
@@ -1522,102 +1439,6 @@ async def instagram_profile_search(
         data = await cached_or_run(
             endpoint="instagram.profile-search",
             params={"q": q, "v": 5},
-            runner=_run,
-            ctx=ctx,
-            use_cache=cache,
-        )
-        return ApiResponse(data=data)
-
-
-def _highlight_payload(item: dict) -> dict:
-    return {
-        "id": safe_str(item.get("id") or item.get("highlightId")),
-        "title": safe_str(item.get("title") or item.get("name")),
-        "coverUrl": safe_str(item.get("coverUrl") or item.get("cover") or item.get("coverMediaUrl") or item.get("coverImageUrl")),
-    }
-
-
-@router.get("/story-highlights", summary="List an Instagram profile's story highlights")
-async def instagram_story_highlights(
-    url: str = Query(..., description="Instagram profile URL, @handle, or username"),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
-    caller: ApiCaller = Depends(require_api_key),
-):
-    handle = _require_instagram_profile(url)
-    settings = get_settings()
-    async with billed_call(
-        caller=caller,
-        endpoint="/v1/instagram/story-highlights",
-        platform="instagram",
-        resource_url=url,
-        base_credits=CREDIT_CHANNEL + 4,
-    ) as ctx:
-        async def _run() -> dict[str, Any]:
-            async def _apify() -> dict[str, Any]:
-                apify = get_apify()
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_INSTAGRAM_HIGHLIGHTS,
-                    {
-                        "usernames": [handle],
-                        "includeStories": False,
-                        "includeHighlights": True,
-                        "expandHighlightItems": False,
-                    },
-                    max_items=1,
-                )
-                highlights: list[dict[str, Any]] = []
-                for row in items:
-                    raw = row.get("highlights") or row.get("highlightsList") or []
-                    if isinstance(raw, list):
-                        highlights.extend(_highlight_payload(h) for h in raw if isinstance(h, dict))
-                return {"url": url, "totalReturned": len(highlights), "highlights": highlights}
-
-            ctx["source"] = "apify"
-            return await _apify()
-
-        data = await cached_or_run(
-            endpoint="instagram.story-highlights",
-            params={"url": url, "v": 5},
-            runner=_run,
-            ctx=ctx,
-            use_cache=cache,
-        )
-        return ApiResponse(data=data)
-
-
-@router.get("/highlights-details", summary="Stories inside a single Instagram highlight")
-async def instagram_highlights_details(
-    id: str = Query(
-        ...,
-        description=(
-            "Highlight ID from the Instagram Story Highlights API, "
-            "e.g. highlight:18201653992314974 or 18201653992314974."
-        ),
-    ),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
-    caller: ApiCaller = Depends(require_api_key),
-):
-    highlight_id = _require_highlight_id(id)
-    async with billed_call(
-        caller=caller,
-        endpoint="/v1/instagram/highlights-details",
-        platform="instagram",
-        resource_url=f"highlight:{highlight_id}",
-        base_credits=CREDIT_CHANNEL,
-    ) as ctx:
-        async def _run() -> dict[str, Any]:
-            node = await instagram_native.fetch_highlight_reel(highlight_id)
-            if node is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail="Highlight not found or unavailable. Check the ID from the Story Highlights API.",
-                )
-            ctx["source"] = "native"
-            return instagram_native.map_highlight_reel(node)
-
-        data = await cached_or_run(
-            endpoint="instagram.highlights-details",
-            params={"id": highlight_id, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

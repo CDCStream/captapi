@@ -51,8 +51,7 @@ export type Category =
   | "comments"
   | "channel"
   | "search"
-  | "list"
-  | "download";
+  | "list";
 
 export interface ApiParam {
   name: string;
@@ -205,7 +204,6 @@ const YOUTUBE: Spec[] = [
   { slug: "youtube-channel-videos", name: "YouTube Channel Videos API", shortName: "Channel Videos", category: "list", method: "GET", path: "/v1/youtube/channel-videos", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-playlist-videos", name: "YouTube Playlist Videos API", shortName: "Playlist Videos", category: "list", method: "GET", path: "/v1/youtube/playlist-videos", credits: 50, creditsPerResult: 1 },
   { slug: "youtube-playlist", name: "YouTube Playlist API", shortName: "Playlist", category: "list", method: "GET", path: "/v1/youtube/playlist", credits: 50, creditsPerResult: 1 },
-  { slug: "youtube-video-download", name: "YouTube Video Download API", shortName: "Video Download", category: "download", method: "GET", path: "/v1/youtube/video-download", credits: 3 },
   { slug: "youtube-shorts-transcript", name: "YouTube Shorts Transcript API", shortName: "Shorts Transcript", category: "transcript", method: "GET", path: "/v1/youtube/shorts/transcript", credits: 2 },
   { slug: "youtube-shorts-summarizer", name: "YouTube Shorts Summarizer API", shortName: "Shorts Summarizer", category: "summarize", method: "GET", path: "/v1/youtube/shorts/summarize", credits: 4 },
   { slug: "youtube-shorts-stats", name: "YouTube Shorts Stats API", shortName: "Shorts Stats", category: "details", method: "GET", path: "/v1/youtube/shorts/video-details", credits: 1 },
@@ -230,7 +228,6 @@ const TIKTOK: Spec[] = [
   { slug: "tiktok-profile-region", name: "TikTok Profile Region API", shortName: "Profile Region", category: "channel", method: "GET", path: "/v1/tiktok/profile-region", credits: 2, tagline: "Find out where a TikTok creator is likely based and what language they use — a resolved country plus language and core profile stats for any public profile.", longDescription: "Give the TikTok Profile Region API a profile URL, @handle, or username and it returns location and language signals as clean JSON. TikTok almost never publishes an account's country publicly, so when it's missing the region field is filled with an AI-inferred country (e.g. IT or US) guessed from public cues like the bio, display name, and language. A regionSource field tells you where the value came from — \"tiktok\" when TikTok reported it, \"inferred\" when it's a best-effort estimate — and regionConfidence (high/medium/low) grades the guess, so you always know how reliable it is. You also get the interface language and the core profile stats — followers, following, total likes, and video count — plus display name, verified and private flags, and the avatar. Use it for audience and geo analysis, content localization, compliance checks, or vetting creators before a partnership. Flat 2 credits per call, no TikTok login or scraping setup on your side, and results are cached for 24 hours so repeat lookups are instant and free.", delivers: ["Creator country in region — TikTok's own when exposed, else an AI-inferred guess", "regionSource (tiktok/inferred) and regionConfidence so you know how reliable it is", "Interface language plus core stats — followers, following, likes, and video count", "Display name, verified and private flags, and avatar — ideal for geo/audience analysis, localization, and creator vetting"] },
   { slug: "tiktok-audience-demographics", name: "TikTok Audience Demographics API", shortName: "Audience Demographics", category: "channel", method: "GET", path: "/v1/tiktok/audience-demographics", credits: 3, tagline: "See which countries a TikTok creator's audience comes from — a ranked country breakdown built natively from the people who actually engage with their videos.", longDescription: "Give the TikTok Audience Demographics API a profile URL, @handle, or username and it returns a ranked breakdown of the creator's audience by country as clean JSON. TikTok never publishes follower geography publicly, but every commenter's country IS exposed on its own data — so we sample the people commenting across the creator's recent videos and tally their countries into audienceLocations, each with a country name, ISO countryCode, a raw count, and a percentage of the sample. You also get videosSampled and sampleSize so you know how the breakdown was built. It's an engagement-based audience signal (who interacts), not a follower census, and it's computed natively from TikTok's own data — no third-party audience panel. Use it for market sizing, geo targeting, localization, and influencer vetting. Flat 3 credits per call, and results are cached for 24 hours.", delivers: ["Ranked audienceLocations: country, countryCode, count, and percentage", "Engagement-based country mix sampled from real commenters", "videosSampled and sampleSize for transparency on the sample", "Native — computed from TikTok's own data, no audience-panel actor"] },
   { slug: "tiktok-search-suggestions", name: "TikTok Search Suggestions API", shortName: "Search Suggestions", category: "search", method: "GET", path: "/v1/tiktok/search-suggestions", credits: 28, creditsPerResult: 1.4, tagline: "Get the autocomplete terms TikTok suggests in its search bar for a keyword — the real phrases people search, ranked, so you can find trending queries and long-tail keyword ideas.", longDescription: "Give the TikTok Search Suggestions API a seed keyword and it returns the autocomplete (typeahead) terms TikTok shows in its search bar as clean JSON — the actual phrases real users are searching for. Each suggestion includes the suggested search term, its rank (1 = shown at the top), a ready-to-open searchUrl that runs that exact search on TikTok, the seed keyword it was expanded from, and the region and language it was localized for. Use the country and language parameters to see what a specific market is searching (for example US in en-US, or DE in de-DE) — the same keyword returns different suggestions per country. It's the fastest way to do TikTok keyword research: surface trending queries, discover long-tail variations, plan content, or feed an SEO / hashtag tool. No TikTok login and no scraping setup on your side. Billed per suggestion returned, and results are cached for 24 hours so repeat lookups are instant and free.", delivers: ["The autocomplete terms TikTok suggests for your keyword", "Each suggestion with its rank — the order it appears in the search bar", "A ready-to-open searchUrl that runs that exact search on TikTok", "The seed keyword plus the region and language it was localized for", "Localize by country + language to see what a specific market searches"] },
-  { slug: "tiktok-video-download", name: "TikTok Video Download API", shortName: "Video Download", category: "download", method: "GET", path: "/v1/tiktok/video-download", credits: 3 },
   { slug: "tiktok-channel-posts", name: "TikTok Channel Posts API", shortName: "Channel Posts", category: "list", method: "GET", path: "/v1/tiktok/channel-posts", credits: 14, creditsPerResult: 0.7 },
   { slug: "tiktok-comment-replies", name: "TikTok Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/tiktok/comment-replies", credits: 50 },
   { slug: "tiktok-user-followers", name: "TikTok User Followers API", shortName: "User Followers", category: "list", method: "GET", path: "/v1/tiktok/user-followers", credits: 20, creditsPerResult: 0.4 },
@@ -257,13 +254,10 @@ const INSTAGRAM: Spec[] = [
   { slug: "instagram-channel-reels", name: "Instagram Channel Reels API", shortName: "Channel Reels", category: "list", method: "GET", path: "/v1/instagram/channel-reels", credits: 6, creditsPerResult: 0.3, tagline: "Get the latest Reels from any public Instagram profile — video URL, caption, views, likes, comments, and duration for each Reel, with cursor pagination for older ones.", longDescription: "Send a profile URL or @handle and the Instagram Channel Reels API returns that account's most recent Reels as clean, structured JSON. Photo and carousel posts are filtered out — you only get videos, each with its direct video URL, caption, view / like / comment counts, duration, and publish date. Need more than the first page? Pass the nextCursor value from the previous response to keep paging through older Reels. No Instagram login, no OAuth, and no scraping setup on your side — results are cached for 24 hours, so repeat lookups are instant and free." },
   { slug: "instagram-reels-search", name: "Instagram Reels Search API", shortName: "Reels Search", category: "search", method: "GET", path: "/v1/instagram/reels-search", credits: 12, creditsPerResult: 0.6, tagline: "Search Instagram Reels by hashtag or keyword — video URL, caption, author, views, likes, and comments for each matching Reel.", longDescription: "Send a hashtag (without the #) or keyword and the Instagram Reels Search API returns matching Reels as clean, structured JSON — videos only, no photos or carousels. Each result includes the direct video URL, caption, author profile, view / like / comment counts, duration, and publish date. Use it to research what's working in a niche, find creators around a topic, or feed content-discovery tools. No Instagram login, no OAuth, and no scraping setup on your side — results are cached for 24 hours, so repeat lookups are instant and free." },
   { slug: "instagram-trending-reels", name: "Instagram Trending Reels API", shortName: "Trending Reels", category: "list", method: "GET", path: "/v1/instagram/trending-reels", credits: 28, creditsPerResult: 1.4, tagline: "Get the Reels currently trending on Instagram's Explore feed for a chosen country — video URL, caption, author, views, likes, and comments for each one.", longDescription: "The Instagram Trending Reels API returns what's blowing up on Instagram right now. Pass a country name (default United States) and you get the Reels currently featured on that country's Explore feed as clean, structured JSON — each with its direct video URL, caption, author profile, and view / like / comment counts. No hashtag or keyword needed: this is Instagram's own trending selection, useful for spotting viral content, tracking trends by region, or seeding content-research tools. No Instagram login, no OAuth, and no scraping setup on your side — results are cached for 24 hours, so repeat lookups are instant and free." },
-  { slug: "instagram-video-download", name: "Instagram Video Download API", shortName: "Video Download", category: "download", method: "GET", path: "/v1/instagram/video-download", credits: 3, tagline: "Get a direct MP4 download URL for any public Instagram Reel or video post — no watermark tools or browser extensions needed.", longDescription: "Send a Reel or video post URL and the Instagram Video Download API returns a direct CDN link to the MP4 file, plus the thumbnail, caption, author, and duration when available. Fetch the video with a single HTTP GET — ideal for archiving content, media pipelines, AI video analysis, or building download features into your product. Note that CDN URLs are signed and expire after a while, so download promptly rather than storing the link. No Instagram login, no OAuth, and no scraping setup on your side — results are cached for 24 hours, so repeat lookups are instant and free." },
   { slug: "instagram-tagged-posts", name: "Instagram Tagged Posts API", shortName: "Tagged Posts", category: "list", method: "GET", path: "/v1/instagram/tagged-posts", credits: 18, creditsPerResult: 0.9, tagline: "Get the posts where an Instagram account is tagged by other users — caption, media URLs, author, likes, comments, and publish date for each post.", longDescription: "Send a profile URL or @handle and the Instagram Tagged Posts API returns the posts other people tagged that account in — the same content you see in the profile's \"Tagged\" tab — as clean, structured JSON. Each post includes who published it, the caption, image or video URLs, like and comment counts, post type, and publish date. It's the easiest way to see UGC and brand mentions: track who is tagging a brand, collect fan or customer content, or monitor collaborations. No Instagram login, no OAuth, and no scraping setup on your side — results are cached for 24 hours, so repeat lookups are instant and free." },
   { slug: "instagram-reels-by-audio-id", name: "Instagram Reels By Audio ID API", shortName: "Reels By Audio ID", category: "list", method: "GET", path: "/v1/instagram/reels-by-audio-id", credits: 28, creditsPerResult: 1.4, tagline: "Give it an Instagram sound and get back every Reel that uses it — each with its video, caption, creator, and view / like / comment counts.", longDescription: "On Instagram every Reel is built on an audio track, and each track has its own page listing the Reels that use it. This API takes that sound — either the numeric audio ID (the musicId you see on a Reel) or a full audio-page URL like https://www.instagram.com/reels/audio/AUDIO_ID/ — and returns those Reels as clean JSON. For each Reel you get a direct video URL, caption, the creator's profile, play / like / comment counts, duration, and publish date. Use it to see how far a trending sound has spread, find every creator who used your music, or measure a branded-audio campaign. No Instagram login, no OAuth, and no scraping to maintain — results are cached for 24 hours, so repeat lookups are instant and free.", delivers: ["Every public Reel made with that audio track", "Direct MP4 video URL and thumbnail for each Reel", "Caption, duration, publish date, and the sound's audio ID", "Creator handle plus play / like / comment counts"] },
   { slug: "instagram-hashtag-search", name: "Instagram Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/instagram/hashtag-search", credits: 12, creditsPerResult: 0.6, tagline: "Find public Instagram posts tagged with a hashtag — each result comes with its media, caption, author, and like / comment counts.", longDescription: "Pass a hashtag without the # (e.g. travel or foodie) and the Instagram Hashtag Search API returns the public posts and Reels that use that tag as clean JSON — the same grid you'd see on the hashtag's page in the app. Each result includes the post URL, media type (image, video, or carousel), caption, the author's profile, like / comment / view counts, a thumbnail, and the full list of hashtags and @mentions in the post. Use it to track a campaign or branded hashtag, discover creators in a niche, build a themed content feed, or watch a trend grow. No Instagram login, no OAuth, and no scraping to maintain — results are cached for 24 hours, so repeat lookups are instant and free.", delivers: ["Public posts and Reels tagged with your hashtag", "Post URL, media type, caption, and publish date", "Author handle plus like / comment / view counts", "Every hashtag and @mention extracted from each post"] },
   { slug: "instagram-profile-search", name: "Instagram Profile Search API", shortName: "Profile Search", category: "search", method: "GET", path: "/v1/instagram/profile-search", credits: 1, tagline: "Look up an Instagram account by name or @handle and get its profile back — display name, follower count, verified badge, private flag, and avatar.", longDescription: "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, or instagram.com/natgeo) and the Instagram Profile Search API resolves it to the matching public profile as clean JSON. It returns the account itself, not its posts: username, display name, profile URL, follower count, whether the account is verified or private, and the profile picture. Use it to turn a brand or creator name into a confirmed @handle, enrich a CRM or lead list, or feed an influencer-discovery tool. This runs on our native resolver (no third-party actor), so it's fast and costs just 1 credit — and with no Instagram login or OAuth required, results are cached for 24 hours so repeat lookups are instant and free.", delivers: ["The public Instagram profile that matches your query", "Username, display name, and profile URL", "Follower count plus verified and private flags", "Profile picture URL"] },
-  { slug: "instagram-story-highlights", name: "Instagram Story Highlights API", shortName: "Story Highlights", category: "list", method: "GET", path: "/v1/instagram/story-highlights", credits: 5, tagline: "List the Story Highlight albums pinned on an Instagram profile — the ID, title, and cover image for each highlight.", longDescription: "Highlights are the round albums of saved Stories pinned under an account's bio. Pass a profile URL, @handle, or username and the Instagram Story Highlights API returns those albums as clean JSON: each one's ID, title, and cover image. This lists the albums themselves — to pull the individual stories (photos and videos) inside a specific album, along with how many it holds, use the Instagram Highlights Details API with the highlight ID. Use it to see how a creator organizes their profile, build a highlights gallery, or find the album you want to dig into. No Instagram login, no OAuth, and no scraping to maintain — results are cached for 24 hours, so repeat lookups are instant and free.", delivers: ["Every Story Highlight album pinned on the profile", "Highlight ID for fetching the stories inside", "Title of each album", "Cover image URL for each album"] },
-  { slug: "instagram-highlights-details", name: "Instagram Highlights Details API", shortName: "Highlights Details", category: "list", method: "GET", path: "/v1/instagram/highlights-details", credits: 1, tagline: "Open one Instagram Story Highlight by its ID and pull every story inside — media type, direct media URL, thumbnail, size, and post date.", longDescription: "Pass a single Highlight ID from the Instagram Story Highlights API (e.g. highlight:18201653992314974, or just the bare number) and this endpoint opens that one album and returns the photos and videos saved inside as clean JSON: each story's media type, direct media/video URL, thumbnail, dimensions, video duration, and when it was posted — plus the album's title, cover image, and how many stories it holds. The workflow: call Story Highlights first to list a profile's albums and their IDs, then pass an ID here to pull its contents. It runs on our native resolver (no third-party actor), so it's fast and costs just 1 credit — with no Instagram login or OAuth required, and results cached for 24 hours.", delivers: ["Every story (photo or video) saved inside the Highlight", "Media type and direct media/video URL for each story", "Thumbnail, dimensions, and video duration for each story", "Post date of each story, plus the album's title, cover, and item count"] },
   { slug: "instagram-embed", name: "Instagram Embed HTML API", shortName: "Embed HTML", category: "details", method: "GET", path: "/v1/instagram/embed", credits: 1, tagline: "Get Instagram's own self-contained embed HTML for any post, reel, or profile — ready to drop into an iframe on your site.", longDescription: "Pass an Instagram post, reel, or profile URL (or an @handle) and get back Instagram's own self-contained embed page as ready-to-use HTML — the full <html> document Instagram serves at /embed/, which you can drop straight into an <iframe srcdoc> or render server-side. The response also returns embedUrl, so you can point an <iframe src> at it directly instead. Posts and reels come back as a rich media card (with caption); profiles come back as a profile card that links to the account. No login or OAuth needed — it's fast, costs just 1 credit, and results are cached for 24 hours. If Instagram's embed page is ever unavailable, the response falls back to the classic blockquote + embed.js snippet.", delivers: ["Instagram's full self-contained embed HTML document", "embedUrl you can load directly in an <iframe src>", "Canonical Instagram permalink for the post/reel/profile", "Type flag (post/reel/profile) plus shortcode or username"] },
   { slug: "instagram-basic-profile", name: "Instagram Basic Profile API", shortName: "Basic Profile", category: "channel", method: "GET", path: "/v1/instagram/basic-profile", credits: 1, tagline: "Look up a full public Instagram profile by its numeric user ID — bio, follower/following/post counts, verification, profile pictures, and more.", longDescription: "Pass an Instagram numeric user ID (e.g. 314216) and get that account's public profile as clean JSON: username, full name, biography, follower / following / media counts, verification and privacy flags, business/professional status, profile picture (standard and HD), and its stable pk/fbid. A profile URL, @handle, or username is also accepted and resolved automatically. It runs on our native resolver (no third-party actor), so it's fast, costs just 1 credit, and needs no Instagram login or OAuth. Null and empty fields are stripped, so you only ever see populated data. Results are cached for 24 hours.", delivers: ["Username, full name, and biography", "Follower, following, and media counts", "Verification, privacy, and business/professional flags", "Standard and HD profile picture URLs, plus stable pk / fbid"] },
 ];
@@ -934,7 +928,6 @@ const ACTION: Record<Category, string> = {
   channel: "fetch profile/channel details and audience stats",
   search: "search and return matching results",
   list: "list items in bulk with metadata",
-  download: "get a direct, no-watermark download URL",
 };
 
 export function platformLabel(p: PlatformId): string {
@@ -965,8 +958,6 @@ export function howToAction(ep: ApiEndpoint): string {
       return `run a ${p} ${sn}`;
     case "list":
       return `get ${p} ${sn}`;
-    case "download":
-      return `download a ${p} ${sn.replace("video download", "video")}`;
   }
 }
 
@@ -993,8 +984,6 @@ export function tagline(ep: ApiEndpoint): string {
       return `Search ${platform} programmatically and get structured, ranked results.`;
     case "list":
       return `Bulk-list ${platform} content with full metadata for each item.`;
-    case "download":
-      return `Get a direct, watermark-free download URL for any public ${platform} video.`;
   }
 }
 
@@ -1056,13 +1045,6 @@ export function delivers(ep: ApiEndpoint): string[] {
         "Configurable result limit",
         "Ideal for monitoring and content pipelines",
       ];
-    case "download":
-      return [
-        "Direct, watermark-free media URL",
-        "Available quality/format variants",
-        "File size and duration metadata",
-        "Short-lived signed link",
-      ];
   }
 }
 
@@ -1122,7 +1104,6 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-channel-videos": [up(YT_CHANNEL), lp(20, 200), fastRss()],
   "youtube-playlist-videos": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500), fastRss()],
   "youtube-playlist": [up("YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."), lp(50, 500), fastRss()],
-  "youtube-video-download": [up(YT_VIDEO)],
   "youtube-shorts-transcript": [up(YT_SHORTS), lang(), cacheP()],
   "youtube-shorts-summarizer": [up(YT_SHORTS), lang(), cacheP()],
   "youtube-shorts-stats": [up(YT_SHORTS)],
@@ -1144,8 +1125,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-channel-details": [up(TT_PROFILE)],
   "tiktok-profile-region": [up(TT_PROFILE)],
   "tiktok-audience-demographics": [up(TT_PROFILE)],
-  "tiktok-search-suggestions": [qp("Seed keyword to expand into autocomplete suggestions, e.g. skincare."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code that localizes the suggestions to a market, e.g. US, GB, DE. Default US." }, { name: "language", type: "string", required: false, description: "Interface language for the suggestions, e.g. en-US or de-DE. Default en-US." }, lp(20, 100)],
-  "tiktok-video-download": [up(TT_VIDEO)],
+  "tiktok-search-suggestions": [qp("Seed keyword to expand into autocomplete suggestions, e.g. skincare."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code that localizes the suggestions to a market, e.g. US, GB, DE. Default US." }, { name: "language", type: "string", required: false, description: "Interface language for the suggestions, e.g. en-US or de-DE. Default en-US." }, { name: "limit", type: "integer", required: false, description: "Upper bound on how many suggestions to return (1-100, default 20). TikTok only surfaces a limited number of real autocomplete suggestions per keyword, so you'll often get fewer than the limit. Billed per result returned." }],
   "tiktok-channel-posts": [up(TT_PROFILE), lp(20, 200)],
   "tiktok-comment-replies": [up(TT_VIDEO), cid(), lp(50, 500)],
   "tiktok-user-followers": [up(TT_PROFILE), lp(50, 500)],
@@ -1170,13 +1150,10 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "instagram-channel-reels": [up(IG_PROFILE), lp(20, 200), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (e.g. 3937158245004702478_12281817). A null nextCursor means the end of the list." }],
   "instagram-reels-search": [qp("Hashtag (without #) or keyword (min 2 characters)."), lp(20, 200)],
   "instagram-trending-reels": [{ name: "country", type: "string", required: false, description: "Country for Explore localization — full name or ISO code (e.g. 'United States', 'US', 'Turkey', 'TR'). Default United States. 35 countries supported." }, lp(20, 200)],
-  "instagram-video-download": [up(IG_REEL)],
   "instagram-tagged-posts": [up(IG_PROFILE), lp(20, 200)],
   "instagram-reels-by-audio-id": [{ name: "audio_id", type: "string", required: true, description: "Instagram audio/music ID or full audio URL." }, lp(20, 200)],
   "instagram-hashtag-search": [qp("Hashtag without the # (min 2 characters)."), lp(20, 200)],
   "instagram-profile-search": [qp("Account name, @handle, or profile URL to look up (min 2 characters).")],
-  "instagram-story-highlights": [up(IG_PROFILE)],
-  "instagram-highlights-details": [{ name: "id", type: "string", required: true, description: "Highlight ID from the Instagram Story Highlights API — e.g. highlight:18201653992314974 or the bare 18201653992314974." }],
   "instagram-embed": [up("Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/.")],
   "instagram-basic-profile": [{ name: "userId", type: "string", required: true, description: "Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically." }],
   // Facebook
@@ -1396,14 +1373,6 @@ function exampleData(ep: ApiEndpoint): Record<string, unknown> {
           { title: "Previous upload", url: "https://example.com/b", views: 75230, publishedAt: "2025-01-04" },
         ],
       };
-    case "download":
-      return {
-        platform: ep.platform,
-        url: "https://example.com/video/123",
-        downloadUrl: "https://cdn.example.com/video.mp4",
-        thumbnailUrl: "https://cdn.example.com/cover.jpg",
-        duration: 43.4,
-      };
   }
 }
 
@@ -1468,9 +1437,6 @@ function notFoundDetail(ep: ApiEndpoint): string | null {
     linkedin: "Not found on LinkedIn",
     amazon_shop: "Amazon Shop page not found",
   };
-  if (ep.category === "download") {
-    return p === "instagram" ? "Reel not found" : "Video not available";
-  }
   return RESOURCE_404[p] ?? "Resource not found";
 }
 
@@ -1864,12 +1830,6 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     list.push({
       q: `Which AI model powers the summaries?`,
       a: `Summaries are generated with GPT-4o-mini for a strong balance of quality, speed, and cost, built on top of the video transcript.`,
-    });
-  }
-  if (ep.category === "download") {
-    list.push({
-      q: `Are the downloads watermark-free?`,
-      a: `Yes — the ${ep.name} returns a direct, watermark-free media URL where the platform allows it, along with available quality variants.`,
     });
   }
   list.push({
@@ -2451,57 +2411,6 @@ export function responseStructure(ep: ApiEndpoint): ResponseGroup[] {
           ],
         },
       ];
-    case "download":
-      // Each platform's downloader returns a different shape; describe the
-      // real fields instead of a generic template.
-      if (ep.slug === "youtube-video-download") {
-        return [
-          {
-            title: "Download",
-            fields: [
-              { name: "videoId", desc: "YouTube video ID." },
-              { name: "title", desc: "Video title." },
-              { name: "downloadUrl", desc: "Direct MP4 URL for the best progressive (video+audio) format." },
-              { name: "expiresAt", desc: "When the signed download links expire (ISO 8601, ~6 hours)." },
-            ],
-          },
-          {
-            title: "Each format",
-            note: "Each item in formats contains:",
-            fields: [
-              { name: "itag", desc: "YouTube format identifier." },
-              { name: "url", desc: "Direct URL for this format." },
-              { name: "mimeType", desc: "Container and codecs (e.g. video/mp4; avc1...)." },
-              { name: "qualityLabel", desc: "Resolution label (e.g. 720p)." },
-              { name: "width", desc: "Video width in pixels (with height, fps, bitrate alongside)." },
-              { name: "audioQuality", desc: "Audio quality tier for formats that include audio." },
-            ],
-          },
-        ];
-      }
-      if (ep.slug === "tiktok-video-download") {
-        return [
-          {
-            title: "Download",
-            fields: [
-              { name: "downloadUrl", desc: "Direct MP4 CDN URL for the video." },
-              { name: "noWatermarkUrl", desc: "Watermark-free variant of the video URL." },
-              { name: "duration", desc: "Video length in seconds." },
-            ],
-          },
-        ];
-      }
-      // instagram-video-download
-      return [
-        {
-          title: "Download",
-          fields: [
-            { name: "downloadUrl", desc: "Direct MP4 CDN URL for the Reel (no watermark)." },
-            { name: "thumbnailUrl", desc: "Cover image URL." },
-            { name: "duration", desc: "Video length in seconds. Omitted when Instagram does not expose it." },
-          ],
-        },
-      ];
   }
 }
 
@@ -2563,13 +2472,6 @@ export function useCases(ep: ApiEndpoint): UseCase[] {
         { title: "Monitoring", desc: "Detect new uploads automatically." },
         { title: "Archiving", desc: "Snapshot a creator's full library." },
         { title: "Analytics", desc: "Aggregate performance across many videos." },
-      ];
-    case "download":
-      return [
-        { title: "Backup & Archiving", desc: "Save copies of public videos you own or license." },
-        { title: "Repurposing", desc: "Clip and remix content for other platforms." },
-        { title: "ML Datasets", desc: "Collect video and audio for model training." },
-        { title: "Offline Analysis", desc: "Process media without streaming it live." },
       ];
   }
 }

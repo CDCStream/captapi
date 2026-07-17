@@ -151,7 +151,7 @@ function sampleUrl(path: string) {
   if (path.includes("/tiktok/")) return TT_VIDEO;
   if (path.includes("/instagram/music")) return `https://www.instagram.com/reels/audio/${IG_AUDIO_ID}/`;
   if (path.includes("/instagram/channel") || path.includes("/instagram/tagged") || path.includes("/instagram/story") || path.includes("/instagram/highlights") || path.includes("/instagram/basic-profile")) return IG_PROFILE;
-  if (path.includes("/instagram/transcript") || path.includes("/instagram/summarize") || path.includes("/instagram/video-download")) return IG_REEL;
+  if (path.includes("/instagram/transcript") || path.includes("/instagram/summarize")) return IG_REEL;
   if (path.includes("/instagram/")) return IG_POST;
   if (path.includes("/facebook/page") || path.includes("/facebook/profile")) return FB_PAGE;
   if (path.includes("/facebook/group")) return FB_GROUP;

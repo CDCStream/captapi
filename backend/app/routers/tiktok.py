@@ -56,7 +56,6 @@ CREDIT_COMMENTS = 2  # native (TikTok's own API); flat fee, our cost ~$0
 CREDIT_PROFILE_REGION = 2  # native profile page + fast LLM region estimate
 CREDIT_AUDIENCE = 3  # video list (actor) + native commenter-region sampling
 CREDIT_SEARCH = 2
-CREDIT_DOWNLOAD = 3
 
 # Audience-country sampling for /audience-demographics: how many recent videos
 # to pull commenter regions from, and how many country codes to gather before
@@ -1032,7 +1031,7 @@ async def tiktok_search_suggestions(
     q: str = Query(..., min_length=1, description="Seed keyword to expand into autocomplete suggestions, e.g. skincare."),
     country: str = Query("US", min_length=2, max_length=2, description="Two-letter ISO country code that localizes the suggestions to a market, e.g. US, GB, DE. Default US."),
     language: str = Query("en-US", description="Interface language for the suggestions, e.g. en-US or de-DE. Default en-US."),
-    limit: int = Query(20, ge=1, le=100, description="Number of suggestions to return (1-100). Default 20."),
+    limit: int = Query(20, ge=1, le=100, description="Upper bound on how many suggestions to return (1-100, default 20). TikTok only surfaces a limited number of real autocomplete suggestions per keyword, so you'll often get fewer than the limit."),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -1181,61 +1180,6 @@ async def tiktok_audience_demographics(
             params={"handle": handle, "v": 3},
             runner=_run,
             ctx=ctx,
-            use_cache=cache,
-        )
-        return ApiResponse(data=data)
-
-
-@router.get("/video-download", summary="TikTok video download URL")
-async def tiktok_video_download(
-    url: str = Query(...),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
-    caller: ApiCaller = Depends(require_api_key),
-):
-    settings = get_settings()
-    async with billed_call(
-        caller=caller,
-        endpoint="/v1/tiktok/video-download",
-        platform="tiktok",
-        resource_url=url,
-        base_credits=CREDIT_DOWNLOAD,
-    ) as ctx:
-        async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK,
-                {"postURLs": [url], "shouldDownloadVideos": True, "resultsPerPage": 1},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Video not found")
-            item = items[0]
-            video_meta = item.get("videoMeta") or {}
-            media_urls = safe_list(item.get("mediaUrls"))
-            # The actor stores the downloaded (watermark-free) MP4 in its
-            # key-value store and links it via videoMeta.downloadAddr/mediaUrls.
-            download_url = safe_str(
-                video_meta.get("downloadAddr")
-                or (media_urls[0] if media_urls else None)
-                or item.get("videoUrl")
-                or item.get("downloadUrl")
-            )
-            if not download_url:
-                raise HTTPException(status_code=422, detail="No downloadable video URL available for this TikTok")
-            return {
-                "platform": "tiktok",
-                "url": url,
-                "downloadUrl": download_url,
-                "noWatermarkUrl": safe_str(item.get("videoUrlNoWaterMark")) or download_url,
-                "duration": safe_float(video_meta.get("duration")),
-            }
-
-        data = await cached_or_run(
-            endpoint="tiktok.video-download",
-            params={"url": url, "v": 2},
-            runner=_run,
-            ctx=ctx,
-            ttl=3600,
             use_cache=cache,
         )
         return ApiResponse(data=data)

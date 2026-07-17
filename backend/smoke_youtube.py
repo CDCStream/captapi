@@ -86,7 +86,6 @@ async def main() -> None:
         ("transcript",          "/v1/youtube/transcript",          {"url": VIDEO_URL}),
         ("summarize",           "/v1/youtube/summarize",           {"url": VIDEO_URL}),
         ("comments",            "/v1/youtube/comments",            {"url": VIDEO_URL, "limit": 5}),
-        ("video-download",      "/v1/youtube/video-download",      {"url": VIDEO_URL}),
         ("search",              "/v1/youtube/search",              {"q": "tech tutorial", "limit": 5}),
         ("shorts/transcript",   "/v1/youtube/shorts/transcript",   {"url": VIDEO_URL}),
         ("shorts/summarize",    "/v1/youtube/shorts/summarize",    {"url": VIDEO_URL}),

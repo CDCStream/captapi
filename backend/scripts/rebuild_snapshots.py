@@ -293,7 +293,6 @@ async def main() -> None:
 
     payloads: dict[str, Any] = {}
     payloads["tiktok-channel-details"] = tt_channel_details_payload(raw["tt_profile"])
-    payloads["tiktok-video-download"] = tt_download_payload(raw["tt_download"])
     if raw["tt_download"]:
         payloads["tiktok-video-details"] = tt_video(raw["tt_download"][0])
     if raw["tt_channel_posts"]:

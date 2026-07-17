@@ -171,7 +171,6 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 - **Single piece of content** (one video / reel / post): use \`*_transcript\`, \`*_summarize\`, \`*_video_details\` / \`*_details\`, or \`*_comments\` with the content \`url\`.
 - **A creator / account**: use \`*_channel_details\` (stats) or \`*_channel_posts\` / \`*_channel_reels\` (their content) with the profile \`url\`.
 - **Discovery**: use \`*_search\`, \`*_hashtag_search\`, or \`*_user_search\` with a \`q\` query.
-- **Downloads**: use \`*_video_download\` for a direct media URL.
 
 ## Parameter rules (important gotchas)
 

@@ -23,7 +23,6 @@ import {
   LinkIcon,
   Ghost,
   Clapperboard,
-  Download,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -62,7 +61,6 @@ const CATEGORY_ICONS: Record<Category, LucideIcon> = {
   channel: Users,
   search: Search,
   list: Clapperboard,
-  download: Download,
 };
 
 function EndpointCell({ ep }: { ep: ApiEndpoint }) {

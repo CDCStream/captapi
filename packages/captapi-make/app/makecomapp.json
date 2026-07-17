@@ -172,23 +172,6 @@
           "scope": null
         }
       },
-      "youtubeVideoDownload": {
-        "label": "YouTube Video Download",
-        "description": "Direct download URLs for a YouTube video. Costs ~3 credits (cached results free, failures never charged).",
-        "connection": "captapi",
-        "altConnection": null,
-        "webhook": null,
-        "moduleType": "action",
-        "actionCrud": "read",
-        "codeFiles": {
-          "communication": "modules/youtubeVideoDownload/communication.iml.json",
-          "staticParams": null,
-          "mappableParams": "modules/youtubeVideoDownload/mappable-params.iml.json",
-          "interface": null,
-          "samples": null,
-          "scope": null
-        }
-      },
       "youtubeShortsTranscript": {
         "label": "YouTube Shorts Transcript",
         "description": "Transcript of a YouTube Short. Costs ~2 credits (cached results free, failures never charged).",
@@ -541,23 +524,6 @@
           "communication": "modules/tiktokSearchSuggestions/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/tiktokSearchSuggestions/mappable-params.iml.json",
-          "interface": null,
-          "samples": null,
-          "scope": null
-        }
-      },
-      "tiktokVideoDownload": {
-        "label": "TikTok Video Download",
-        "description": "No-watermark download URL for a TikTok video. Costs ~3 credits (cached results free, failures never charged).",
-        "connection": "captapi",
-        "altConnection": null,
-        "webhook": null,
-        "moduleType": "action",
-        "actionCrud": "read",
-        "codeFiles": {
-          "communication": "modules/tiktokVideoDownload/communication.iml.json",
-          "staticParams": null,
-          "mappableParams": "modules/tiktokVideoDownload/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null
@@ -954,23 +920,6 @@
           "scope": null
         }
       },
-      "instagramVideoDownload": {
-        "label": "Instagram Video Download",
-        "description": "Direct video URL for an Instagram Reel. Costs ~3 credits (cached results free, failures never charged).",
-        "connection": "captapi",
-        "altConnection": null,
-        "webhook": null,
-        "moduleType": "action",
-        "actionCrud": "read",
-        "codeFiles": {
-          "communication": "modules/instagramVideoDownload/communication.iml.json",
-          "staticParams": null,
-          "mappableParams": "modules/instagramVideoDownload/mappable-params.iml.json",
-          "interface": null,
-          "samples": null,
-          "scope": null
-        }
-      },
       "instagramTaggedPosts": {
         "label": "Instagram Tagged Posts",
         "description": "Posts an Instagram user is tagged in. Costs ~18 credits (cached results free, failures never charged).",
@@ -1034,40 +983,6 @@
           "communication": "modules/instagramProfileSearch/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/instagramProfileSearch/mappable-params.iml.json",
-          "interface": null,
-          "samples": null,
-          "scope": null
-        }
-      },
-      "instagramStoryHighlights": {
-        "label": "Instagram Story Highlights",
-        "description": "List a profile's story highlight covers. Costs ~5 credits (cached results free, failures never charged).",
-        "connection": "captapi",
-        "altConnection": null,
-        "webhook": null,
-        "moduleType": "action",
-        "actionCrud": "read",
-        "codeFiles": {
-          "communication": "modules/instagramStoryHighlights/communication.iml.json",
-          "staticParams": null,
-          "mappableParams": "modules/instagramStoryHighlights/mappable-params.iml.json",
-          "interface": null,
-          "samples": null,
-          "scope": null
-        }
-      },
-      "instagramHighlightsDetails": {
-        "label": "Instagram Highlights Details",
-        "description": "Stories inside a single Instagram highlight, by highlight ID. Costs ~1 credit (cached results free, failures never charged).",
-        "connection": "captapi",
-        "altConnection": null,
-        "webhook": null,
-        "moduleType": "action",
-        "actionCrud": "read",
-        "codeFiles": {
-          "communication": "modules/instagramHighlightsDetails/communication.iml.json",
-          "staticParams": null,
-          "mappableParams": "modules/instagramHighlightsDetails/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null

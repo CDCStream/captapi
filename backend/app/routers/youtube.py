@@ -46,7 +46,6 @@ CREDIT_TRANSCRIPT = 1
 CREDIT_SUMMARIZE = 3
 CREDIT_VIDEO_DETAILS = 1
 CREDIT_CHANNEL_DETAILS = 1
-CREDIT_DOWNLOAD = 5
 
 # YouTube list endpoints hit per-result Apify actors:
 #   streamers/youtube-scraper          $2.40/1k WITH an Apify sub ($5/1k without)
@@ -1326,109 +1325,6 @@ async def youtube_trending_shorts(
             use_cache=cache,
         )
         ctx["credits_override"] = _scaled_credits(len(data["shorts"]), RATE_YT_MARGIN, 2)
-        return ApiResponse(data=data)
-
-
-# ---------- VIDEO DOWNLOAD ------------------------------------------------
-@router.get("/video-download", summary="Get direct video download URLs")
-async def youtube_video_download(
-    url: str = Query(...),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
-    caller: ApiCaller = Depends(require_api_key),
-):
-    vid, norm_url = _require_youtube_url(url)
-    settings = get_settings()
-    async with billed_call(
-        caller=caller,
-        endpoint="/v1/youtube/video-download",
-        platform="youtube",
-        resource_url=norm_url,
-        base_credits=CREDIT_DOWNLOAD,
-    ) as ctx:
-        _DISCRETE_URLS = (
-            ("downloadedFileUrl", "combined"),
-            ("videoOnlyUrl", "video-only"),
-            ("audioOnlyUrl", "audio-only"),
-        )
-        # Keys the primary downloader emits per format; fallback entries carry
-        # the same keys (null) so the formats[] element schema is path-stable.
-        _FALLBACK_FORMAT_KEYS = {
-            "itag": None, "mimeType": None, "bitrate": None,
-            "width": None, "height": None, "fps": None, "qualityLabel": None,
-            "audioQuality": None, "approxDurationMs": None,
-            "audioSampleRate": None, "audioChannels": None,
-            "lastModified": None, "projectionType": None, "qualityOrdinal": None,
-        }
-
-        def _has_download(items: list[dict[str, Any]]) -> bool:
-            if not items:
-                return False
-            v = items[0]
-            fmts = v.get("formats") or v.get("downloads") or []
-            return bool(
-                v.get("downloadUrl") or v.get("url") or v.get("mediaUrl") or fmts
-                or any(v.get(k) for k, _ in _DISCRETE_URLS)
-            )
-
-        async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items, _ = await apify.run_with_fallback(
-                [
-                    (settings.APIFY_ACTOR_YOUTUBE_DOWNLOAD,
-                     {"urls": [norm_url], "format": "all", "ttl": "none"}),
-                    (settings.APIFY_ACTOR_YOUTUBE_DOWNLOAD_FALLBACK,
-                     {"videos": [{"url": norm_url}]}),
-                ],
-                max_items=1,
-                is_valid=_has_download,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Video not available")
-            ctx["source"] = "apify"
-            v = items[0]
-            formats_raw = v.get("formats") or v.get("downloads") or []
-            download_url = safe_str(
-                v.get("downloadUrl")
-                or v.get("url")
-                or v.get("mediaUrl")
-                or (formats_raw[0].get("url") if formats_raw else None)
-            )
-            # The fallback downloader returns discrete file URLs rather than a
-            # formats array; synthesize entries carrying the same keys as the
-            # primary actor (null where unknown) so the formats[] element schema
-            # is identical on both paths.
-            if not formats_raw:
-                synth = [
-                    {**_FALLBACK_FORMAT_KEYS, "url": safe_str(v.get(key)), "quality": label}
-                    for key, label in _DISCRETE_URLS
-                    if v.get(key)
-                ]
-                if synth:
-                    formats_raw = synth
-                    download_url = download_url or synth[0]["url"]
-            expires_at = safe_str(v.get("expiresAt"))
-            if not expires_at and download_url:
-                # googlevideo URLs carry their expiry as a unix `expire` param.
-                exp = parse_qs(urlparse(download_url).query).get("expire", [None])[0]
-                if exp and str(exp).isdigit():
-                    expires_at = datetime.fromtimestamp(int(exp), tz=timezone.utc).isoformat()
-            return {
-                "url": norm_url,
-                "videoId": vid,
-                "title": safe_str(v.get("title")),
-                "downloadUrl": download_url,
-                "formats": formats_raw,
-                "expiresAt": expires_at,
-            }
-
-        data = await cached_or_run(
-            endpoint="youtube.video-download",
-            params={"url": norm_url, "v": 2},
-            runner=_run,
-            ctx=ctx,
-            ttl=3600,
-            use_cache=cache,
-        )
         return ApiResponse(data=data)
 
 

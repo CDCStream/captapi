@@ -91,14 +91,6 @@ class YoutubeApi:
         """
         return self._t.get("/v1/youtube/playlist", {"url": url, "limit": limit, "fast": fast, "cache": cache})
 
-    def video_download(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Video Download — Direct download URLs for a YouTube video. (3 credits)
-
-        :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/youtube/video-download", {"url": url, "cache": cache})
-
     def shorts_transcript(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Shorts Transcript — Transcript of a YouTube Short. (2 credits)
 
@@ -301,14 +293,6 @@ class AsyncYoutubeApi:
         """
         return await self._t.get("/v1/youtube/playlist", {"url": url, "limit": limit, "fast": fast, "cache": cache})
 
-    async def video_download(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Video Download — Direct download URLs for a YouTube video. (3 credits)
-
-        :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/youtube/video-download", {"url": url, "cache": cache})
-
     async def shorts_transcript(self, *, url: str, language: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Shorts Transcript — Transcript of a YouTube Short. (2 credits)
 
@@ -495,18 +479,10 @@ class TiktokApi:
         :param q: Seed keyword to expand into autocomplete suggestions, e.g. skincare.
         :param country: Two-letter ISO country code that localizes suggestions to a market, e.g. US, GB, DE. Default US.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param limit: Upper bound on suggestions to return (1-100, default 20). TikTok surfaces only a limited number of real autocomplete suggestions per keyword, so you'll often get fewer. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/search-suggestions", {"q": q, "country": country, "language": language, "limit": limit, "cache": cache})
-
-    def video_download(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Video Download — No-watermark download URL for a TikTok video. (3 credits)
-
-        :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/tiktok/video-download", {"url": url, "cache": cache})
 
     def channel_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Channel Posts — Latest posts from a TikTok profile. (14 credits)
@@ -708,18 +684,10 @@ class AsyncTiktokApi:
         :param q: Seed keyword to expand into autocomplete suggestions, e.g. skincare.
         :param country: Two-letter ISO country code that localizes suggestions to a market, e.g. US, GB, DE. Default US.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param limit: Upper bound on suggestions to return (1-100, default 20). TikTok surfaces only a limited number of real autocomplete suggestions per keyword, so you'll often get fewer. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/search-suggestions", {"q": q, "country": country, "language": language, "limit": limit, "cache": cache})
-
-    async def video_download(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Video Download — No-watermark download URL for a TikTok video. (3 credits)
-
-        :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/tiktok/video-download", {"url": url, "cache": cache})
 
     async def channel_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Channel Posts — Latest posts from a TikTok profile. (14 credits)
@@ -936,14 +904,6 @@ class InstagramApi:
         """
         return self._t.get("/v1/instagram/trending-reels", {"country": country, "limit": limit, "cache": cache})
 
-    def video_download(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Video Download — Direct video URL for an Instagram Reel. (3 credits)
-
-        :param url: Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/instagram/video-download", {"url": url, "cache": cache})
-
     def tagged_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Tagged Posts — Posts an Instagram user is tagged in. (18 credits)
 
@@ -978,22 +938,6 @@ class InstagramApi:
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/profile-search", {"q": q, "cache": cache})
-
-    def story_highlights(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Story Highlights — List a profile's story highlight covers. (5 credits)
-
-        :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/instagram/story-highlights", {"url": url, "cache": cache})
-
-    def highlights_details(self, *, id_: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Highlights Details — Stories inside a single Instagram highlight, by highlight ID. (1 credit)
-
-        :param id_: Highlight ID from Story Highlights, e.g. highlight:18201653992314974.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/instagram/highlights-details", {"id": id_, "cache": cache})
 
     def embed(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Embed HTML — Embed HTML for an Instagram post, reel, or profile. (1 credit)
@@ -1097,14 +1041,6 @@ class AsyncInstagramApi:
         """
         return await self._t.get("/v1/instagram/trending-reels", {"country": country, "limit": limit, "cache": cache})
 
-    async def video_download(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Video Download — Direct video URL for an Instagram Reel. (3 credits)
-
-        :param url: Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/instagram/video-download", {"url": url, "cache": cache})
-
     async def tagged_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Tagged Posts — Posts an Instagram user is tagged in. (18 credits)
 
@@ -1139,22 +1075,6 @@ class AsyncInstagramApi:
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/profile-search", {"q": q, "cache": cache})
-
-    async def story_highlights(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Story Highlights — List a profile's story highlight covers. (5 credits)
-
-        :param url: Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/instagram/story-highlights", {"url": url, "cache": cache})
-
-    async def highlights_details(self, *, id_: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Highlights Details — Stories inside a single Instagram highlight, by highlight ID. (1 credit)
-
-        :param id_: Highlight ID from Story Highlights, e.g. highlight:18201653992314974.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/instagram/highlights-details", {"id": id_, "cache": cache})
 
     async def embed(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Embed HTML — Embed HTML for an Instagram post, reel, or profile. (1 credit)

@@ -1,10 +1,10 @@
 # Captapi Weekly Endpoint Audit
 
-Hafta: ____ | Toplam: 179 endpoint / 30 platform
+Hafta: ____ | Toplam: 172 endpoint / 30 platform
 
 Kontrol: 200 doner mi - JSON alanlari dolu mu - sure makul mu (test URL'leri: docs/example-urls.md)
 
-## YouTube (23)
+## YouTube (22)
 
 - [ ] Transcript — `GET /v1/youtube/transcript`
 - [ ] Summarizer — `GET /v1/youtube/summarize`
@@ -15,7 +15,6 @@ Kontrol: 200 doner mi - JSON alanlari dolu mu - sure makul mu (test URL'leri: do
 - [ ] Channel Videos — `GET /v1/youtube/channel-videos`
 - [ ] Playlist Videos — `GET /v1/youtube/playlist-videos`
 - [ ] Playlist — `GET /v1/youtube/playlist`
-- [ ] Video Download — `GET /v1/youtube/video-download`
 - [ ] Shorts Transcript — `GET /v1/youtube/shorts/transcript`
 - [ ] Shorts Summarizer — `GET /v1/youtube/shorts/summarize`
 - [ ] Shorts Stats — `GET /v1/youtube/shorts/video-details`
@@ -30,7 +29,7 @@ Kontrol: 200 doner mi - JSON alanlari dolu mu - sure makul mu (test URL'leri: do
 - [ ] Community Post Details — `GET /v1/youtube/community-post-details`
 - [ ] Video Sponsors — `GET /v1/youtube/video-sponsors`
 
-## TikTok (24)
+## TikTok (22)
 
 - [ ] Transcript — `GET /v1/tiktok/transcript`
 - [ ] Summarizer — `GET /v1/tiktok/summarize`
@@ -40,7 +39,6 @@ Kontrol: 200 doner mi - JSON alanlari dolu mu - sure makul mu (test URL'leri: do
 - [ ] Profile Region — `GET /v1/tiktok/profile-region`
 - [ ] Audience Demographics — `GET /v1/tiktok/audience-demographics`
 - [ ] Search Suggestions — `GET /v1/tiktok/search-suggestions`
-- [ ] Video Download — `GET /v1/tiktok/video-download`
 - [ ] Channel Posts — `GET /v1/tiktok/channel-posts`
 - [ ] Comment Replies — `GET /v1/tiktok/comment-replies`
 - [ ] User Followers — `GET /v1/tiktok/user-followers`
@@ -56,25 +54,22 @@ Kontrol: 200 doner mi - JSON alanlari dolu mu - sure makul mu (test URL'leri: do
 - [ ] Live Info — `GET /v1/tiktok/live-info`
 - [ ] Popular Creators — `GET /v1/tiktok/popular-creators`
 
-## Instagram (19)
+## Instagram (15)
 
 - [ ] Transcript — `GET /v1/instagram/transcript`
 - [ ] Summarizer — `GET /v1/instagram/summarize`
-- [ ] Details — `GET /v1/instagram/details`
-- [ ] Comments — `GET /v1/instagram/comments`
+- [ ] Post Details — `GET /v1/instagram/details`
+- [ ] Post Comments — `GET /v1/instagram/comments`
 - [ ] Channel Details — `GET /v1/instagram/channel-details`
 - [ ] Channel Posts — `GET /v1/instagram/channel-posts`
 - [ ] Channel Reels — `GET /v1/instagram/channel-reels`
 - [ ] Reels Search — `GET /v1/instagram/reels-search`
 - [ ] Trending Reels — `GET /v1/instagram/trending-reels`
-- [ ] Video Download — `GET /v1/instagram/video-download`
 - [ ] Tagged Posts — `GET /v1/instagram/tagged-posts`
 - [ ] Reels By Audio ID — `GET /v1/instagram/reels-by-audio-id`
 - [ ] Hashtag Search — `GET /v1/instagram/hashtag-search`
 - [ ] Profile Search — `GET /v1/instagram/profile-search`
-- [ ] Story Highlights — `GET /v1/instagram/story-highlights`
-- [ ] Highlights Details — `GET /v1/instagram/highlights-details`
-- [ ] Embed — `GET /v1/instagram/embed`
+- [ ] Embed HTML — `GET /v1/instagram/embed`
 - [ ] Basic Profile — `GET /v1/instagram/basic-profile`
 
 ## Facebook (16)

@@ -101,13 +101,12 @@ All endpoints require `Authorization: Bearer capt_live_...` header.
 - `GET /v1/youtube/channel-videos?url=...&limit=...`
 - `GET /v1/youtube/playlist-videos?url=...&limit=...`
 - `GET /v1/youtube/search?q=...&limit=...`
-- `GET /v1/youtube/video-download?url=...`
 
 ### TikTok
-- `GET /v1/tiktok/transcript|summarize|video-details|comments|channel-details|search|video-download`
+- `GET /v1/tiktok/transcript|summarize|video-details|comments|channel-details`
 
 ### Instagram
-- `GET /v1/instagram/transcript|summarize|details|comments|channel-details|channel-posts|channel-reels|reels-search|video-download`
+- `GET /v1/instagram/transcript|summarize|details|comments|channel-details|channel-posts|channel-reels|reels-search`
 
 ### Facebook
 - `GET /v1/facebook/transcript|summarize|details|comments|page-details`

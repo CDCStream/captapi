@@ -96,8 +96,6 @@ async def main() -> None:
         ("TT summarize",          "/v1/tiktok/summarize",         {"url": TIKTOK_VIDEO}),
         ("TT comments",           "/v1/tiktok/comments",          {"url": TIKTOK_VIDEO, "limit": 5}),
         ("TT channel-details",    "/v1/tiktok/channel-details",   {"url": TIKTOK_PROFILE}),
-        ("TT search",             "/v1/tiktok/search",            {"q": "comedy", "limit": 3}),
-        ("TT video-download",     "/v1/tiktok/video-download",    {"url": TIKTOK_VIDEO}),
         # ---------- INSTAGRAM ----------
         ("IG details",            "/v1/instagram/details",        {"url": INSTAGRAM_POST}),
         ("IG transcript",         "/v1/instagram/transcript",     {"url": INSTAGRAM_REEL}),
@@ -107,7 +105,6 @@ async def main() -> None:
         ("IG channel-posts",      "/v1/instagram/channel-posts",  {"url": INSTAGRAM_PROFILE, "limit": 5}),
         ("IG channel-reels",      "/v1/instagram/channel-reels",  {"url": INSTAGRAM_PROFILE, "limit": 5}),
         ("IG reels-search",       "/v1/instagram/reels-search",   {"q": "travel", "limit": 5}),
-        ("IG video-download",     "/v1/instagram/video-download", {"url": INSTAGRAM_REEL + "?v=2"}),
         # ---------- FACEBOOK ----------
         ("FB details",            "/v1/facebook/details",         {"url": FACEBOOK_POST}),
         ("FB transcript",         "/v1/facebook/transcript",      {"url": FACEBOOK_POST}),

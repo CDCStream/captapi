@@ -84,13 +84,6 @@ export interface YoutubePlaylistParams {
   cache?: boolean;
 }
 
-export interface YoutubeVideoDownloadParams {
-  /** Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
 export interface YoutubeShortsTranscriptParams {
   /** Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
@@ -242,10 +235,6 @@ export class YoutubeApi {
   playlist(params: YoutubePlaylistParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/playlist", params);
   }
-  /** YouTube Video Download — Direct download URLs for a YouTube video. (3 credits) */
-  videoDownload(params: YoutubeVideoDownloadParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/youtube/video-download", params);
-  }
   /** YouTube Shorts Transcript — Transcript of a YouTube Short. (2 credits) */
   shortsTranscript(params: YoutubeShortsTranscriptParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/shorts/transcript", params);
@@ -364,15 +353,8 @@ export interface TiktokSearchSuggestionsParams {
   country?: string;
   /** Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect. */
   language?: string;
-  /** Max items to return. Default 20, max 100. Billed per result. */
+  /** Upper bound on suggestions to return (1-100, default 20). TikTok surfaces only a limited number of real autocomplete suggestions per keyword, so you'll often get fewer. Billed per result. */
   limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface TiktokVideoDownloadParams {
-  /** Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -543,10 +525,6 @@ export class TiktokApi {
   searchSuggestions(params: TiktokSearchSuggestionsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/search-suggestions", params);
   }
-  /** TikTok Video Download — No-watermark download URL for a TikTok video. (3 credits) */
-  videoDownload(params: TiktokVideoDownloadParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/tiktok/video-download", params);
-  }
   /** TikTok Channel Posts — Latest posts from a TikTok profile. (14 credits) */
   channelPosts(params: TiktokChannelPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/channel-posts", params);
@@ -686,13 +664,6 @@ export interface InstagramTrendingReelsParams {
   cache?: boolean;
 }
 
-export interface InstagramVideoDownloadParams {
-  /** Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
 export interface InstagramTaggedPostsParams {
   /** Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
@@ -723,20 +694,6 @@ export interface InstagramHashtagSearchParams {
 export interface InstagramProfileSearchParams {
   /** Search query or keywords (min 2 chars). */
   q: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface InstagramStoryHighlightsParams {
-  /** Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface InstagramHighlightsDetailsParams {
-  /** Highlight ID from Story Highlights, e.g. highlight:18201653992314974. */
-  id: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -793,10 +750,6 @@ export class InstagramApi {
   trendingReels(params: InstagramTrendingReelsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/trending-reels", params);
   }
-  /** Instagram Video Download — Direct video URL for an Instagram Reel. (3 credits) */
-  videoDownload(params: InstagramVideoDownloadParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/instagram/video-download", params);
-  }
   /** Instagram Tagged Posts — Posts an Instagram user is tagged in. (18 credits) */
   taggedPosts(params: InstagramTaggedPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/tagged-posts", params);
@@ -812,14 +765,6 @@ export class InstagramApi {
   /** Instagram Profile Search — Resolve an Instagram account name or @handle to its public profile. (1 credit) */
   profileSearch(params: InstagramProfileSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/profile-search", params);
-  }
-  /** Instagram Story Highlights — List a profile's story highlight covers. (5 credits) */
-  storyHighlights(params: InstagramStoryHighlightsParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/instagram/story-highlights", params);
-  }
-  /** Instagram Highlights Details — Stories inside a single Instagram highlight, by highlight ID. (1 credit) */
-  highlightsDetails(params: InstagramHighlightsDetailsParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/instagram/highlights-details", params);
   }
   /** Instagram Embed HTML — Embed HTML for an Instagram post, reel, or profile. (1 credit) */
   embed(params: InstagramEmbedParams): Promise<ApiEnvelope> {

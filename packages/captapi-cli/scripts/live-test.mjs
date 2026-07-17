@@ -40,7 +40,6 @@ const INPUTS = {
   "youtube-search": ["--q", "mrbeast", "--limit", L],
   "youtube-channel-videos": ["--url", YT_CHANNEL, "--limit", L],
   "youtube-playlist-videos": null, // chained
-  "youtube-video-download": ["--url", YT_VIDEO],
   "youtube-shorts-transcript": ["--url", YT_SHORT],
   "youtube-shorts-summarize": ["--url", YT_SHORT],
   "youtube-shorts-details": ["--url", YT_SHORT],
@@ -57,7 +56,6 @@ const INPUTS = {
   "tiktok-video-details": ["--url", TT_VIDEO],
   "tiktok-comments": ["--url", TT_VIDEO, "--limit", L],
   "tiktok-channel-details": ["--url", TT_PROFILE],
-  "tiktok-video-download": ["--url", TT_VIDEO],
   "tiktok-channel-posts": ["--url", TT_PROFILE, "--limit", L],
   "tiktok-comment-replies": null, // chained
   "tiktok-user-followers": ["--url", TT_PROFILE, "--limit", L],
@@ -78,12 +76,9 @@ const INPUTS = {
   "instagram-channel-posts": ["--url", IG_PROFILE, "--limit", L],
   "instagram-channel-reels": ["--url", IG_PROFILE, "--limit", L],
   "instagram-reels-search": ["--q", "travel", "--limit", L],
-  "instagram-video-download": ["--url", IG_REEL],
   "instagram-tagged-posts": ["--url", IG_PROFILE, "--limit", L],
   "instagram-hashtag-search": ["--q", "travel", "--limit", L],
   "instagram-profile-search": ["--q", "nasa", "--limit", L],
-  "instagram-story-highlights": ["--url", IG_PROFILE],
-  "instagram-highlights-details": ["--id", "highlight:18201653992314974"],
   "instagram-embed": ["--url", IG_POST],
 
   "facebook-details": ["--url", FB_POST],

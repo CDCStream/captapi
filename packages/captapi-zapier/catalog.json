@@ -258,28 +258,6 @@
     ]
   },
   {
-    "tool": "youtube_video_download",
-    "platform": "YouTube",
-    "name": "YouTube Video Download",
-    "path": "/v1/youtube/video-download",
-    "credits": 3,
-    "summary": "Direct download URLs for a YouTube video.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
     "tool": "youtube_shorts_transcript",
     "platform": "YouTube",
     "name": "YouTube Shorts Transcript",
@@ -839,29 +817,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 100. Billed per result."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "tiktok_video_download",
-    "platform": "TikTok",
-    "name": "TikTok Video Download",
-    "path": "/v1/tiktok/video-download",
-    "credits": 3,
-    "summary": "No-watermark download URL for a TikTok video.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+        "description": "Upper bound on suggestions to return (1-100, default 20). TikTok surfaces only a limited number of real autocomplete suggestions per keyword, so you'll often get fewer. Billed per result."
       },
       {
         "name": "cache",
@@ -1534,28 +1490,6 @@
     ]
   },
   {
-    "tool": "instagram_video_download",
-    "platform": "Instagram",
-    "name": "Instagram Video Download",
-    "path": "/v1/instagram/video-download",
-    "credits": 3,
-    "summary": "Direct video URL for an Instagram Reel.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
     "tool": "instagram_tagged_posts",
     "platform": "Instagram",
     "name": "Instagram Tagged Posts",
@@ -1652,50 +1586,6 @@
         "type": "string",
         "required": true,
         "description": "Search query or keywords (min 2 chars)."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "instagram_story_highlights",
-    "platform": "Instagram",
-    "name": "Instagram Story Highlights",
-    "path": "/v1/instagram/story-highlights",
-    "credits": 5,
-    "summary": "List a profile's story highlight covers.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Instagram profile URL, e.g. https://instagram.com/username/."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "instagram_highlights_details",
-    "platform": "Instagram",
-    "name": "Instagram Highlights Details",
-    "path": "/v1/instagram/highlights-details",
-    "credits": 1,
-    "summary": "Stories inside a single Instagram highlight, by highlight ID.",
-    "params": [
-      {
-        "name": "id",
-        "type": "string",
-        "required": true,
-        "description": "Highlight ID from Story Highlights, e.g. highlight:18201653992314974."
       },
       {
         "name": "cache",

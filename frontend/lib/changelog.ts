@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-17",
+    category: "platform",
+    title: "Retired media-download and privacy-workaround endpoints and tools",
+    description:
+      "To keep Captapi focused on public data and analytics, we've retired the media-download endpoints and a set of free tools that copied media files or worked around platform privacy features. Retired APIs: YouTube Video Download, TikTok Video Download, Instagram Video Download, Instagram Story Highlights, and Instagram Highlights Details. Retired free tools: YouTube to MP4/MP3, YouTube Shorts Downloader, YouTube Thumbnail Downloader, Instagram Photo Downloader, Instagram Highlights Viewer, Snapchat Story Viewer, Who Viewed My Profile, Am I Blocked, What Happens When You Block, Screenshot Notification Checker, and Snapchat+ Checker. All transcript, summary, profile, stats, comment, search, and trend endpoints are unchanged.",
+    items: [
+      "Retired 5 download/story endpoints across YouTube, TikTok, and Instagram",
+      "Retired 12 media-download and privacy-workaround free tools",
+      "No change to transcripts, summaries, profiles, stats, comments, search, or trends",
+    ],
+  },
+  {
+    publishedAt: "2026-07-17",
     category: "improvement",
     title: "TikTok Search Suggestions now returns a ready-to-open search link",
     description:

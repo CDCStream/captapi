@@ -30,13 +30,12 @@ const NATIVE_PATHS = new Set<string>([
 // YouTube is native-first across the board except a few actor-only endpoints.
 const YT_APIFY_ONLY = new Set<string>([
   "/v1/youtube/trending-shorts",
-  "/v1/youtube/video-download",
   "/v1/youtube/community-posts",
 ]);
 
 // Instagram endpoints served by Decodo's instagram_graphql_profile target.
 // hashtag/post targets are currently disabled on Decodo's side, so
-// hashtag-search and video-download fall back to Apify.
+// hashtag-search falls back to Apify.
 const IG_DECODO_PATHS = new Set<string>([
   "/v1/instagram/channel-details",
   "/v1/instagram/basic-profile",

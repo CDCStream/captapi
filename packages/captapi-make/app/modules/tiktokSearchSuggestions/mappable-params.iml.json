@@ -25,7 +25,7 @@
     "type": "number",
     "label": "Limit",
     "required": false,
-    "help": "Max items to return. Default 20, max 100. Billed per result."
+    "help": "Upper bound on suggestions to return (1-100, default 20). TikTok surfaces only a limited number of real autocomplete suggestions per keyword, so you'll often get fewer. Billed per result."
   },
   {
     "name": "cache",

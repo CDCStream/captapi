@@ -5,7 +5,7 @@ description: Use when extracting public social-media and web data from YouTube, 
 
 # Captapi
 
-Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Google Search, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, Age/Gender enrichment, public Ad Libraries, and account usage utilities**. One key works across all 29 data platforms. No OAuth, no per-platform SDKs. Responses are clean JSON. Pass cache=true for the 24h response cache (repeat hits cost 0 credits); default is cache=false (always fresh). 177 endpoints total.
+Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Google Search, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, Age/Gender enrichment, public Ad Libraries, and account usage utilities**. One key works across all 29 data platforms. No OAuth, no per-platform SDKs. Responses are clean JSON. Pass cache=true for the 24h response cache (repeat hits cost 0 credits); default is cache=false (always fresh). 172 endpoints total.
 
 - Base URL: `https://api.captapi.com`
 - Docs: https://captapi.com/docs · Full machine reference: https://captapi.com/llms-full.txt
@@ -41,7 +41,7 @@ For shell tasks, scripts, or when no MCP client is available, the official CLI c
 ```bash
 npx @captapi/cli login                 # save the human-provided key to ~/.captapi/config.json
 npx @captapi/cli balance               # remaining credits
-npx @captapi/cli list                  # all 177 commands
+npx @captapi/cli list                  # all 172 commands
 npx @captapi/cli youtube-transcript --url "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 npx @captapi/cli tiktok-comment-replies --url "<video>" --comment_id "<id>" --limit 20
 ```
@@ -50,22 +50,21 @@ The CLI reads the key from `~/.captapi/config.json` (via `login`) or the `CAPTAP
 
 ## Use in n8n workflows (n8n-nodes-captapi)
 
-For no-code/low-code automations, the official `n8n-nodes-captapi` community node exposes all 177 endpoints in n8n. Install it from **Settings → Community Nodes** (package `n8n-nodes-captapi`; self-hosted: `npm install n8n-nodes-captapi`, then restart). Create a **Captapi API** credential with the human-provided `capt_live_...` key, add the **Captapi** node, pick a **Platform** and **Operation**, and it returns the same structured JSON as the REST API for downstream nodes.
+For no-code/low-code automations, the official `n8n-nodes-captapi` community node exposes all 172 endpoints in n8n. Install it from **Settings → Community Nodes** (package `n8n-nodes-captapi`; self-hosted: `npm install n8n-nodes-captapi`, then restart). Create a **Captapi API** credential with the human-provided `capt_live_...` key, add the **Captapi** node, pick a **Platform** and **Operation**, and it returns the same structured JSON as the REST API for downstream nodes.
 
 ## Use in Make.com scenarios (custom app)
 
-For Make.com (Integromat), the Captapi custom app exposes all 177 endpoints as action modules grouped by platform. Create a **Captapi API Key** connection with the human-provided `capt_live_...` key (verified against `/v1/account/limits`), then drop the module you need into a scenario, fill in the `url` (or search query) and optional `limit`, and it returns the same structured JSON `data` as the REST API for downstream modules.
+For Make.com (Integromat), the Captapi custom app exposes all 172 endpoints as action modules grouped by platform. Create a **Captapi API Key** connection with the human-provided `capt_live_...` key (verified against `/v1/account/limits`), then drop the module you need into a scenario, fill in the `url` (or search query) and optional `limit`, and it returns the same structured JSON `data` as the REST API for downstream modules.
 
 ## Use on Apify (BYO-key Actor)
 
-On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API (no scraping). Set the `apiKey` input to the human-provided `capt_live_...` key, choose an `operation` (any of the 177 endpoints), fill the fields it needs (`url` / search query / `limit` / ...), and the Actor returns one dataset item with the same structured JSON `data` as the REST API. Credits are billed to the user's own Captapi account. The Actor is also callable through Apify's MCP server (mcp.apify.com), so agents already connected to Apify can run it by name.
+On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API (no scraping). Set the `apiKey` input to the human-provided `capt_live_...` key, choose an `operation` (any of the 172 endpoints), fill the fields it needs (`url` / search query / `limit` / ...), and the Actor returns one dataset item with the same structured JSON `data` as the REST API. Credits are billed to the user's own Captapi account. The Actor is also callable through Apify's MCP server (mcp.apify.com), so agents already connected to Apify can run it by name.
 
 ## Choosing the right endpoint
 
 - **Single piece of content** (one video / reel / post): use `*_transcript`, `*_summarize`, `*_video_details` / `*_details`, or `*_comments` with the content `url`.
 - **A creator / account**: use `*_channel_details` (stats) or `*_channel_posts` / `*_channel_reels` (their content) with the profile `url`.
 - **Discovery**: use `*_search`, `*_hashtag_search`, or `*_user_search` with a `q` query.
-- **Downloads**: use `*_video_download` for a direct media URL.
 
 ## Parameter rules (important gotchas)
 
@@ -99,7 +98,6 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `youtube_channel_videos` | `/v1/youtube/channel-videos` | `url` (string), `limit`? (number), `fast`? (boolean), `cache`? (boolean) | 20 |
 | `youtube_playlist_videos` | `/v1/youtube/playlist-videos` | `url` (string), `limit`? (number), `fast`? (boolean), `cache`? (boolean) | 50 |
 | `youtube_playlist` | `/v1/youtube/playlist` | `url` (string), `limit`? (number), `fast`? (boolean), `cache`? (boolean) | 50 |
-| `youtube_video_download` | `/v1/youtube/video-download` | `url` (string), `cache`? (boolean) | 3 |
 | `youtube_shorts_transcript` | `/v1/youtube/shorts/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 2 |
 | `youtube_shorts_summarize` | `/v1/youtube/shorts/summarize` | `url` (string), `language`? (string), `cache`? (boolean) | 4 |
 | `youtube_shorts_details` | `/v1/youtube/shorts/video-details` | `url` (string), `cache`? (boolean) | 1 |
@@ -126,7 +124,6 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `tiktok_profile_region` | `/v1/tiktok/profile-region` | `url` (string), `cache`? (boolean) | 2 |
 | `tiktok_audience_demographics` | `/v1/tiktok/audience-demographics` | `url` (string), `cache`? (boolean) | 3 |
 | `tiktok_search_suggestions` | `/v1/tiktok/search-suggestions` | `q` (string), `country`? (string), `language`? (string), `limit`? (number), `cache`? (boolean) | 28 |
-| `tiktok_video_download` | `/v1/tiktok/video-download` | `url` (string), `cache`? (boolean) | 3 |
 | `tiktok_channel_posts` | `/v1/tiktok/channel-posts` | `url` (string), `limit`? (number), `cache`? (boolean) | 14 |
 | `tiktok_comment_replies` | `/v1/tiktok/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number), `cache`? (boolean) | 50 |
 | `tiktok_user_followers` | `/v1/tiktok/user-followers` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
@@ -155,13 +152,10 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `instagram_channel_reels` | `/v1/instagram/channel-reels` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 6 |
 | `instagram_reels_search` | `/v1/instagram/reels-search` | `q` (string), `limit`? (number), `cache`? (boolean) | 12 |
 | `instagram_trending_reels` | `/v1/instagram/trending-reels` | `country`? (string), `limit`? (number), `cache`? (boolean) | 28 |
-| `instagram_video_download` | `/v1/instagram/video-download` | `url` (string), `cache`? (boolean) | 3 |
 | `instagram_tagged_posts` | `/v1/instagram/tagged-posts` | `url` (string), `limit`? (number), `cache`? (boolean) | 18 |
 | `instagram_reels_by_audio_id` | `/v1/instagram/reels-by-audio-id` | `audio_id` (string), `limit`? (number), `cache`? (boolean) | 28 |
 | `instagram_hashtag_search` | `/v1/instagram/hashtag-search` | `q` (string), `limit`? (number), `cache`? (boolean) | 12 |
 | `instagram_profile_search` | `/v1/instagram/profile-search` | `q` (string), `cache`? (boolean) | 1 |
-| `instagram_story_highlights` | `/v1/instagram/story-highlights` | `url` (string), `cache`? (boolean) | 5 |
-| `instagram_highlights_details` | `/v1/instagram/highlights-details` | `id` (string), `cache`? (boolean) | 1 |
 | `instagram_embed` | `/v1/instagram/embed` | `url` (string), `cache`? (boolean) | 1 |
 | `instagram_basic_profile` | `/v1/instagram/basic-profile` | `userId` (string), `cache`? (boolean) | 1 |
 

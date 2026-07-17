@@ -16,27 +16,6 @@ export interface MakerTool {
 
 export const MAKER_TOOLS: MakerTool[] = [
   {
-    slug: "youtube-to-mp4",
-    name: "YouTube to MP4 Converter",
-    blurb: "Paste a YouTube link to preview the video and pick an MP4 quality from 144p to 1080p HD. Free, no sign-up.",
-    platform: "YouTube",
-    type: "converter",
-  },
-  {
-    slug: "youtube-to-mp3",
-    name: "YouTube to MP3 Converter",
-    blurb: "Paste a YouTube link to preview the video and pick an MP3 audio quality from 64 to 320 kbps. Free, no sign-up.",
-    platform: "YouTube",
-    type: "converter",
-  },
-  {
-    slug: "youtube-shorts-downloader",
-    name: "YouTube Shorts Downloader",
-    blurb: "Paste a YouTube Shorts link to preview it and pick an MP4 quality from 360p to 1080p HD. Free, no watermark.",
-    platform: "YouTube",
-    type: "downloader",
-  },
-  {
     slug: "youtube-thumbnail-maker",
     name: "Free AI YouTube Thumbnail Maker",
     blurb: "Generate click-ready AI thumbnails from a title, portrait, and reference image. Multiple 16:9 variations, no sign-up.",
@@ -114,25 +93,11 @@ export const MAKER_TOOLS: MakerTool[] = [
     type: "reference",
   },
   {
-    slug: "instagram-highlights-viewer",
-    name: "Instagram Highlights Viewer",
-    blurb: "Enter any public username to open and browse their story highlights anonymously. Free, no login.",
-    platform: "Instagram",
-    type: "viewer",
-  },
-  {
     slug: "instagram-profile-viewer",
     name: "Instagram Profile Viewer",
     blurb: "Enter any public username to browse the profile photo, posts, reels, and highlights anonymously. Free, no login.",
     platform: "Instagram",
     type: "viewer",
-  },
-  {
-    slug: "instagram-photo-downloader",
-    name: "Instagram Photo Downloader",
-    blurb: "Paste a public post or reel link to open and save the image in original quality. Free, no login.",
-    platform: "Instagram",
-    type: "downloader",
   },
   {
     slug: "social-media-bio-generator",
@@ -191,13 +156,6 @@ export const MAKER_TOOLS: MakerTool[] = [
     type: "converter",
   },
   {
-    slug: "youtube-thumbnail-downloader",
-    name: "YouTube Thumbnail Downloader",
-    blurb: "Grab any video's thumbnail in HD (1280×720) and every other size — plus the exact thumbnail dimensions YouTube uses.",
-    platform: "YouTube",
-    type: "downloader",
-  },
-  {
     slug: "engagement-rate-calculator",
     name: "Engagement Rate Calculator",
     blurb: "Calculate TikTok, Instagram, or YouTube engagement rate from likes, comments, and followers — with benchmarks by follower size.",
@@ -212,25 +170,11 @@ export const MAKER_TOOLS: MakerTool[] = [
     type: "ai",
   },
   {
-    slug: "screenshot-notification-checker",
-    name: "Screenshot Notification Checker",
-    blurb: "Does Instagram, Snapchat, TikTok, Facebook, or WhatsApp notify screenshots? Pick a platform and action for an instant answer.",
-    platform: "General",
-    type: "reference",
-  },
-  {
     slug: "tiktok-money-calculator",
     name: "TikTok Money Calculator",
     blurb: "Estimate what TikTok pays per view and per video from Creator Rewards, plus brand deal rates by follower count.",
     platform: "TikTok",
     type: "calculator",
-  },
-  {
-    slug: "am-i-blocked",
-    name: "Am I Blocked? Checker",
-    blurb: "Answer a few quick questions to find out if someone blocked you on Instagram, Snapchat, or WhatsApp.",
-    platform: "General",
-    type: "reference",
   },
   {
     slug: "social-media-slang",
@@ -266,13 +210,6 @@ export const MAKER_TOOLS: MakerTool[] = [
     blurb: "6 About Me bios that fit Discord's 190-character limit, in your style — aesthetic, funny, edgy, or minimal.",
     platform: "Discord",
     type: "ai",
-  },
-  {
-    slug: "who-viewed-my-profile",
-    name: "Who Viewed My Profile?",
-    blurb: "Can you see who viewed your Instagram, TikTok, Snapchat, Facebook, or LinkedIn? Instant answer per platform and content type.",
-    platform: "General",
-    type: "reference",
   },
   {
     slug: "social-media-character-counter",
@@ -324,31 +261,10 @@ export const MAKER_TOOLS: MakerTool[] = [
     type: "reference",
   },
   {
-    slug: "snapchat-plus-checker",
-    name: "Snapchat+ Checker",
-    blurb: "How to tell if someone has Snapchat+ — every visible sign, from the badge to story rewatch counts, explained.",
-    platform: "Snapchat",
-    type: "reference",
-  },
-  {
-    slug: "what-happens-when-you-block",
-    name: "What Happens When You Block?",
-    blurb: "Will they know? What can they still see? Every blocking rule for Instagram, Facebook, Snapchat, WhatsApp, and TikTok.",
-    platform: "General",
-    type: "reference",
-  },
-  {
     slug: "tiktok-viewer",
     name: "TikTok Viewer",
     blurb: "Enter any public username to watch TikTok videos, stories, and profiles anonymously. Free, no account, no app.",
     platform: "TikTok",
-    type: "viewer",
-  },
-  {
-    slug: "snapchat-story-viewer",
-    name: "Snapchat Story Viewer",
-    blurb: "Enter any public username to watch Snapchat stories and spotlight anonymously in your browser. Free, no login.",
-    platform: "Snapchat",
     type: "viewer",
   },
   {
