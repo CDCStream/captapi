@@ -38,6 +38,7 @@ from app.utils.countries import country_name
 from app.utils.formatters import (
     first_present,
     normalize_language_code,
+    strip_empty,
     safe_float,
     safe_int,
     safe_list,
@@ -377,7 +378,7 @@ def _normalize_aweme(item: dict) -> dict:
 
 def _normalize_music_post(item: dict) -> dict:
     is_aweme = bool(item.get("aweme_id") or ("digg_count" in item and "play_count" in item))
-    return _normalize_aweme(item) if is_aweme else _normalize(item)
+    return strip_empty(_normalize_aweme(item) if is_aweme else _normalize(item))
 
 
 def _tiktok_music_id(value: str) -> str | None:
@@ -475,33 +476,37 @@ def _normalize_creator(item: dict) -> dict:
     verified = item.get("verified")
     if verified is None:
         verified = nested.get("verified") if nested.get("verified") is not None else nested.get("isVerified")
-    return {
-        "rank": safe_int(item.get("rank")),
-        "username": handle,
-        "displayName": safe_str(
-            item.get("name")
-            or nested.get("nickname")
-            or nested.get("displayName")
-            or item.get("nickname")
-            or item.get("displayName")
-        ),
-        "url": safe_str(item.get("profileUrl") or nested.get("profileUrl") or item.get("url"))
-        or (f"https://www.tiktok.com/@{handle}" if handle else None),
-        "bio": safe_str(item.get("bio") or nested.get("signature") or nested.get("bio")),
-        "followers": followers or None,
-        "engagementRate": item.get("engagementRate") or item.get("engagement_rate") or item.get("followerGrowthRate"),
-        "likes": likes or None,
-        "videos": videos or None,
-        "country": safe_str(item.get("countryCode") or item.get("country") or nested.get("region")),
-        "verified": verified,
-        "profileImage": safe_str(
-            item.get("creatorAvatarUrl")
-            or nested.get("avatarLarger")
-            or nested.get("avatar")
-            or item.get("avatar")
-            or item.get("avatarUrl")
-        ),
-    }
+    return strip_empty(
+        {
+            "rank": safe_int(item.get("rank")),
+            "username": handle,
+            "displayName": safe_str(
+                item.get("name")
+                or nested.get("nickname")
+                or nested.get("displayName")
+                or item.get("nickname")
+                or item.get("displayName")
+            ),
+            "url": safe_str(item.get("profileUrl") or nested.get("profileUrl") or item.get("url"))
+            or (f"https://www.tiktok.com/@{handle}" if handle else None),
+            "bio": safe_str(item.get("bio") or nested.get("signature") or nested.get("bio")),
+            "followers": followers or None,
+            "engagementRate": item.get("engagementRate")
+            or item.get("engagement_rate")
+            or item.get("followerGrowthRate"),
+            "likes": likes or None,
+            "videos": videos or None,
+            "country": safe_str(item.get("countryCode") or item.get("country") or nested.get("region")),
+            "verified": verified,
+            "profileImage": safe_str(
+                item.get("creatorAvatarUrl")
+                or nested.get("avatarLarger")
+                or nested.get("avatar")
+                or item.get("avatar")
+                or item.get("avatarUrl")
+            ),
+        }
+    )
 
 
 @router.get("/video-details", summary="TikTok video metadata + stats")
@@ -1054,42 +1059,48 @@ def _normalize_live(item: dict[str, Any], handle: str) -> dict[str, Any]:
     )
     if not isinstance(stream_urls, list):
         stream_urls = []
-    return {
-        "platform": "tiktok",
-        "username": safe_str(
-            user.get("uniqueId") or item.get("unique_id") or item.get("handle") or handle
-        ),
-        "isLive": bool(item.get("is_live") if item.get("is_live") is not None else item.get("isLive")),
-        "creator": {
-            "displayName": safe_str(user.get("nickname") or item.get("nickname")),
-            "followers": safe_int(user.get("followerCount") or item.get("follower_count")),
-            "verified": user.get("verified") if user.get("verified") is not None else item.get("verified"),
-            "avatar": safe_str(
-                user.get("avatarUrl")
-                or user.get("avatarThumb")
-                or item.get("avatar_url")
-                or item.get("avatarUrl")
+    return strip_empty(
+        {
+            "platform": "tiktok",
+            "username": safe_str(
+                user.get("uniqueId") or item.get("unique_id") or item.get("handle") or handle
             ),
-            "bio": safe_str(user.get("signature") or item.get("bio") or item.get("signature")),
-        },
-        "room": {
-            "id": safe_str(
-                item.get("roomId")
-                or item.get("room_id")
-                or room.get("room_id")
-                or room.get("id")
-            ),
-            "title": safe_str(room.get("title") or item.get("room_title") or item.get("title")),
-            "startedAt": safe_str(room.get("started_at") or item.get("started_at") or item.get("startedAt")),
-            "viewerCount": safe_int(room.get("viewer_count") or item.get("viewer_count") or item.get("viewerCount")),
-            "totalEnterCount": safe_int(
-                room.get("total_enter_count") or item.get("total_enter_count") or item.get("totalEnterCount")
-            ),
-            "likeCount": safe_int(room.get("like_count") or item.get("like_count") or item.get("likeCount")),
-            "coverUrl": safe_str(room.get("cover_url") or item.get("cover_url") or item.get("coverUrl")),
-            "streamUrls": stream_urls or None,
-        },
-    }
+            "isLive": bool(item.get("is_live") if item.get("is_live") is not None else item.get("isLive")),
+            "creator": {
+                "displayName": safe_str(user.get("nickname") or item.get("nickname")),
+                "followers": safe_int(user.get("followerCount") or item.get("follower_count")),
+                "verified": user.get("verified") if user.get("verified") is not None else item.get("verified"),
+                "avatar": safe_str(
+                    user.get("avatarUrl")
+                    or user.get("avatarThumb")
+                    or item.get("avatar_url")
+                    or item.get("avatarUrl")
+                ),
+                "bio": safe_str(user.get("signature") or item.get("bio") or item.get("signature")),
+            },
+            "room": {
+                "id": safe_str(
+                    item.get("roomId")
+                    or item.get("room_id")
+                    or room.get("room_id")
+                    or room.get("id")
+                ),
+                "title": safe_str(room.get("title") or item.get("room_title") or item.get("title")),
+                "startedAt": safe_str(room.get("started_at") or item.get("started_at") or item.get("startedAt")),
+                "viewerCount": safe_int(
+                    room.get("viewer_count") or item.get("viewer_count") or item.get("viewerCount")
+                ),
+                "totalEnterCount": safe_int(
+                    room.get("total_enter_count")
+                    or item.get("total_enter_count")
+                    or item.get("totalEnterCount")
+                ),
+                "likeCount": safe_int(room.get("like_count") or item.get("like_count") or item.get("likeCount")),
+                "coverUrl": safe_str(room.get("cover_url") or item.get("cover_url") or item.get("coverUrl")),
+                "streamUrls": stream_urls or None,
+            },
+        }
+    )
 
 
 @router.get("/live", summary="TikTok live status + room info for a creator")
@@ -1123,7 +1134,7 @@ async def tiktok_live(
 
         data = await cached_or_run(
             endpoint="tiktok.live",
-            params={"handle": handle, "v": 3},
+            params={"handle": handle, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1161,15 +1172,17 @@ async def tiktok_live_info(
             if item.get("error"):
                 raise HTTPException(status_code=404, detail="Creator not found")
             normalized = _normalize_live(item, handle)
-            return {
-                **normalized,
-                "streamUrls": (normalized.get("room") or {}).get("streamUrls") or [],
-                "raw": item,
-            }
+            return strip_empty(
+                {
+                    **normalized,
+                    "streamUrls": (normalized.get("room") or {}).get("streamUrls") or [],
+                    "raw": item,
+                }
+            )
 
         data = await cached_or_run(
             endpoint="tiktok.live-info",
-            params={"handle": handle, "v": 3},
+            params={"handle": handle, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1307,7 +1320,7 @@ async def tiktok_popular_creators(
 
         data = await cached_or_run(
             endpoint="tiktok.popular-creators",
-            params={"country": country.upper(), "sort": sort, "follower_count": follower_count or "", "limit": limit, "v": 3},
+            params={"country": country.upper(), "sort": sort, "follower_count": follower_count or "", "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1726,7 +1739,7 @@ async def tiktok_music_posts(
 
         data = await cached_or_run(
             endpoint="tiktok.music-posts",
-            params={"url": url, "limit": limit, "v": 4},
+            params={"url": url, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

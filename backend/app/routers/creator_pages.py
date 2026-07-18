@@ -14,7 +14,7 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.cached_runner import cached_or_run
-from app.utils.formatters import safe_str
+from app.utils.formatters import safe_str, strip_empty
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
@@ -230,20 +230,22 @@ async def _fetch_komi(value: str) -> dict[str, Any] | None:
         for link in profile.get("socialProfileLinks") or []
         if isinstance(link, dict) and link.get("link")
     ]
-    return {
-        "platform": "komi",
-        "url": f"https://komi.io/{data.get('username') or username}",
-        "username": safe_str(data.get("username")),
-        "name": safe_str(profile.get("displayName")) or safe_str(data.get("username")),
-        "firstName": safe_str(data.get("firstName") or profile.get("firstName")),
-        "lastName": safe_str(data.get("lastName") or profile.get("lastName")),
-        "description": safe_str(profile.get("bio")),
-        "avatar": safe_str(data.get("avatar") or profile.get("avatar")),
-        "linkCount": len(links),
-        "links": links,
-        "socials": _detect_socials(links),
-        "email": safe_str(data.get("email") or profile.get("email")) or _detect_email("", links),
-    }
+    return strip_empty(
+        {
+            "platform": "komi",
+            "url": f"https://komi.io/{data.get('username') or username}",
+            "username": safe_str(data.get("username")),
+            "name": safe_str(profile.get("displayName")) or safe_str(data.get("username")),
+            "firstName": safe_str(data.get("firstName") or profile.get("firstName")),
+            "lastName": safe_str(data.get("lastName") or profile.get("lastName")),
+            "description": safe_str(profile.get("bio")),
+            "avatar": safe_str(data.get("avatar") or profile.get("avatar")),
+            "linkCount": len(links),
+            "links": links,
+            "socials": _detect_socials(links),
+            "email": safe_str(data.get("email") or profile.get("email")) or _detect_email("", links),
+        }
+    )
 
 
 async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
@@ -268,20 +270,22 @@ async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
     description = _meta(page, "og:description") or _meta(page, "description") or _first_string(data, ("bio", "description", "subtitle"))
     avatar = _meta(page, "og:image") or _meta(page, "twitter:image") or _first_string(data, ("avatar", "avatarUrl", "profilePicture", "imageUrl"))
     username = _first_string(data, ("username", "handle", "slug")) or str(resp.url).rstrip("/").rsplit("/", 1)[-1]
-    return {
-        "platform": platform,
-        "url": safe_str(str(resp.url)),
-        "username": safe_str(username),
-        "name": safe_str(title),
-        "firstName": _first_string(data, ("firstName", "first_name")),
-        "lastName": _first_string(data, ("lastName", "last_name")),
-        "description": safe_str(description),
-        "avatar": safe_str(avatar),
-        "linkCount": len(links),
-        "links": links,
-        "socials": _detect_socials(links),
-        "email": _detect_email(page, links),
-    }
+    return strip_empty(
+        {
+            "platform": platform,
+            "url": safe_str(str(resp.url)),
+            "username": safe_str(username),
+            "name": safe_str(title),
+            "firstName": _first_string(data, ("firstName", "first_name")),
+            "lastName": _first_string(data, ("lastName", "last_name")),
+            "description": safe_str(description),
+            "avatar": safe_str(avatar),
+            "linkCount": len(links),
+            "links": links,
+            "socials": _detect_socials(links),
+            "email": _detect_email(page, links),
+        }
+    )
 
 
 async def _page(platform: str, url: str, caller: ApiCaller, use_cache: bool = True):
@@ -293,7 +297,7 @@ async def _page(platform: str, url: str, caller: ApiCaller, use_cache: bool = Tr
         )
     profile = _url(platform, url)
     async with billed_call(caller=caller, endpoint=f"/v1/{platform}/{'profile' if platform == 'linkme' else 'page'}", platform=platform, resource_url=profile, base_credits=4) as ctx:
-        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 3}, lambda: _fetch_page(platform, profile), ctx, use_cache=use_cache)
+        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 4}, lambda: _fetch_page(platform, profile), ctx, use_cache=use_cache)
         if not (data.get("username") or data.get("links")):
             raise HTTPException(status_code=404, detail=f"{platform.title()} page not found")
         return ApiResponse(data=data)

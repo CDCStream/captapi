@@ -5717,22 +5717,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "linkCount": 2,
     "links": [
       {
-        "id": null,
         "title": "Privacy Policy",
-        "url": "https://about.link.me/privacypolicy",
-        "type": null,
-        "thumbnail": null
+        "url": "https://about.link.me/privacypolicy"
       },
       {
-        "id": null,
         "title": "Terms",
-        "url": "https://about.link.me/termsandconditions",
-        "type": null,
-        "thumbnail": null
+        "url": "https://about.link.me/termsandconditions"
       }
-    ],
-    "socials": {},
-    "email": null
+    ]
   },
   "linktree-page": {
     "platform": "linktree",
@@ -5825,14 +5817,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://pillar.io/jayshetty",
     "username": "jayshetty",
     "name": "Pillar - The All-In-One Toolkit for Creators & Managers",
-    "firstName": null,
-    "lastName": null,
     "description": "Monetize your business with an all-in-one creator store, live media kit, brand database, and more",
     "avatar": "https://athlane-cdn-prod.s3.amazonaws.com/img/default-preview-thumbnail.png",
-    "linkCount": 0,
-    "links": [],
-    "socials": {},
-    "email": null
+    "linkCount": 0
   },
   "pinterest-board": {
     "board": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/",
@@ -5842,42 +5829,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "pinterest",
         "id": "264938527987338255",
         "url": "https://www.pinterest.com/pin/264938527987338255/",
-        "title": null,
-        "description": null,
-        "destinationUrl": null,
         "image": "https://i.pinimg.com/474x/48/fc/27/48fc27e91a1474ebc42754552521e6c5.jpg",
-        "saves": null,
-        "comments": null,
-        "publishedAt": null,
         "board": {
           "name": "Indigo Blues Lookbook",
           "url": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/"
         },
         "author": {
-          "username": "potterybarn",
-          "displayName": null,
-          "followers": null
+          "username": "potterybarn"
         }
       },
       {
         "platform": "pinterest",
         "id": "264938459268357928",
         "url": "https://www.pinterest.com/pin/264938459268357928/",
-        "title": null,
-        "description": null,
-        "destinationUrl": null,
         "image": "https://i.pinimg.com/236x/c8/e4/66/c8e4662b25910a74b691263d7709cd3d.jpg",
-        "saves": null,
-        "comments": null,
-        "publishedAt": null,
         "board": {
           "name": "Indigo Blues Lookbook",
           "url": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/"
         },
         "author": {
-          "username": "potterybarn",
-          "displayName": null,
-          "followers": null
+          "username": "potterybarn"
         }
       },
       {
@@ -5889,8 +5860,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/?cm_ven=OrganicSocial&amp;cm_cat=Pinterest&amp;cm_pla=stpin&amp;cm_ite=indigobluespillows",
         "image": "https://i.pinimg.com/564x/f5/9f/9d/f59f9d35bef5b4190ad0e3908c4c1c3b.jpg",
         "saves": 2,
-        "comments": null,
-        "publishedAt": null,
         "board": {
           "name": "Indigo Blues Lookbook",
           "url": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/",
@@ -5915,8 +5884,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/?cm_ven=OrganicSocial&amp;cm_cat=Pinterest&amp;cm_pla=stpin&amp;cm_ite=indigobluessawyertable",
         "image": "https://i.pinimg.com/564x/36/14/43/3614436ea92b5354f63a769b4812c59d.jpg",
         "saves": 1,
-        "comments": null,
-        "publishedAt": null,
         "board": {
           "name": "Indigo Blues Lookbook",
           "url": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/",
@@ -5941,8 +5908,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "destinationUrl": "https://www.potterybarn.com/pages/lookbook/fall/?cm_ven=OrganicSocial&amp;cm_cat=Pinterest&amp;cm_pla=stpin&amp;cm_ite=indigobluesentryway",
         "image": "https://i.pinimg.com/564x/c8/e4/66/c8e4662b25910a74b691263d7709cd3d.jpg",
         "saves": 1,
-        "comments": null,
-        "publishedAt": null,
         "board": {
           "name": "Indigo Blues Lookbook",
           "url": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/",
@@ -5964,15 +5929,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "platform": "pinterest",
     "id": "422281212828530",
     "url": "https://www.pinterest.com/pin/422281212828530/",
-    "title": null,
-    "description": null,
-    "destinationUrl": null,
     "image": "https://i.pinimg.com/564x/51/a2/0e/51a20efe23e50376920012d832a191a2.jpg",
     "isVideo": false,
     "dominantColor": "#a87147",
     "saves": 9038,
-    "comments": null,
-    "publishedAt": null,
     "board": {
       "name": "Sala",
       "url": "https://www.pinterest.com/camilarmoutinho/sala/",
@@ -6001,7 +5961,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "destinationUrl": "https://www.luluandgeorgia.com/products/kimberly-coffee-table?variant=41218898952291#m24480845889635",
         "image": "https://i.pinimg.com/originals/7f/68/af/7f68af1e9476e0a762ed9fcccd66cd24.jpg",
         "saves": 2,
-        "comments": null,
         "publishedAt": "Tue, 28 Apr 2026 04:03:26 +0000",
         "board": {
           "name": "pretty furniture",
@@ -6022,7 +5981,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "destinationUrl": "https://www.article.com/product/13941/turoy-ivory-boucle-swivel-chair?utm_medium=social&utm_source=pinterest&utm_campaign=evergreen&utm_content=igc",
         "image": "https://i.pinimg.com/originals/bc/ea/89/bcea896786826d048bdb6f4d486fc241.jpg",
         "saves": 91,
-        "comments": null,
         "publishedAt": "Fri, 13 Feb 2026 17:08:40 +0000",
         "board": {
           "name": "Baddie",
@@ -6043,7 +6001,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "destinationUrl": "https://www.ebay.com/itm/137021246378?amdata=enc:AQALAAAAoGfYFPkwiKCW4ZNSs2u11xDAO/sD8pUVTTSi6RT2Xikfuo2Dp8t0xbVTehCaXCERik/Rgu9Q8sdVVpQCXAL2xlyMzPWbz2UFMg7JonjwH2b2hpLpVb1Lu0F7HZ%2BnBbVjYQU1mAGtivLje06cloH25c%2BbtTRVjzKeMbmpKyPVEIuQn2v95m%2BFd67bxNmI7DBEkfZ5WChdGmtik28CuQk2nWE%3D&mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=5339156686&customid=Kogadecor&toolid=10001&mkevt=1",
         "image": "https://i.pinimg.com/originals/b6/50/5e/b6505ec536a038c53dd960c4554c682b.png",
         "saves": 1,
-        "comments": null,
         "publishedAt": "Wed, 24 Jun 2026 12:49:49 +0000",
         "board": {
           "name": "Aesthetic Home Lighting",
@@ -6058,44 +6015,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "pinterest",
         "id": "Rp8MMDIq",
-        "url": "https://www.pinterest.com/pin/Rp8MMDIq/",
-        "title": null,
-        "description": null,
-        "destinationUrl": null,
-        "image": null,
-        "saves": null,
-        "comments": null,
-        "publishedAt": null,
-        "board": {
-          "name": null,
-          "url": null
-        },
-        "author": {
-          "username": null,
-          "displayName": null,
-          "followers": null
-        }
+        "url": "https://www.pinterest.com/pin/Rp8MMDIq/"
       },
       {
         "platform": "pinterest",
         "id": "-8702786212179256373",
-        "url": "https://www.pinterest.com/pin/-8702786212179256373/",
-        "title": null,
-        "description": null,
-        "destinationUrl": null,
-        "image": null,
-        "saves": null,
-        "comments": null,
-        "publishedAt": null,
-        "board": {
-          "name": null,
-          "url": null
-        },
-        "author": {
-          "username": null,
-          "displayName": null,
-          "followers": null
-        }
+        "url": "https://www.pinterest.com/pin/-8702786212179256373/"
       }
     ]
   },
@@ -6109,15 +6034,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "name": "Indigo Blues Lookbook",
         "slug": "indigo-blues-lookbook",
         "url": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/",
-        "privacy": null,
-        "pinCount": null,
-        "followers": null,
-        "sectionCount": null,
-        "coverImage": null,
-        "createdAt": null,
         "owner": {
-          "username": "potterybarn",
-          "displayName": null
+          "username": "potterybarn"
         }
       },
       {
@@ -6126,15 +6044,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "name": "The Kittles Cozy Cabin Transformation",
         "slug": "the-kittles-cozy-cabin-transformation",
         "url": "https://www.pinterest.com/potterybarn/the-kittles-cozy-cabin-transformation/",
-        "privacy": null,
-        "pinCount": null,
-        "followers": null,
-        "sectionCount": null,
-        "coverImage": null,
-        "createdAt": null,
         "owner": {
-          "username": "potterybarn",
-          "displayName": null
+          "username": "potterybarn"
         }
       },
       {
@@ -6143,15 +6054,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "name": "4Th Of July Shop",
         "slug": "4th-of-july-shop",
         "url": "https://www.pinterest.com/potterybarn/4th-of-july-shop/",
-        "privacy": null,
-        "pinCount": null,
-        "followers": null,
-        "sectionCount": null,
-        "coverImage": null,
-        "createdAt": null,
         "owner": {
-          "username": "potterybarn",
-          "displayName": null
+          "username": "potterybarn"
         }
       },
       {
@@ -6160,15 +6064,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "name": "Fathers Day Shop",
         "slug": "fathers-day-shop",
         "url": "https://www.pinterest.com/potterybarn/fathers-day-shop/",
-        "privacy": null,
-        "pinCount": null,
-        "followers": null,
-        "sectionCount": null,
-        "coverImage": null,
-        "createdAt": null,
         "owner": {
-          "username": "potterybarn",
-          "displayName": null
+          "username": "potterybarn"
         }
       },
       {
@@ -6177,15 +6074,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "name": "Veranda Lookbook",
         "slug": "veranda-lookbook",
         "url": "https://www.pinterest.com/potterybarn/veranda-lookbook/",
-        "privacy": null,
-        "pinCount": null,
-        "followers": null,
-        "sectionCount": null,
-        "coverImage": null,
-        "createdAt": null,
         "owner": {
-          "username": "potterybarn",
-          "displayName": null
+          "username": "potterybarn"
         }
       }
     ]
@@ -6198,105 +6088,44 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "pinterest",
         "id": "264938459268357928",
         "url": "https://www.pinterest.com/pin/264938459268357928/",
-        "title": null,
-        "description": null,
-        "destinationUrl": null,
         "image": "https://i.pinimg.com/236x/ef/50/71/ef5071a63c172f9bd2f0eeccdb08112f.jpg",
-        "saves": null,
-        "comments": null,
-        "publishedAt": null,
-        "board": {
-          "name": null,
-          "url": null
-        },
         "author": {
-          "username": "potterybarn",
-          "displayName": null,
-          "followers": null
+          "username": "potterybarn"
         }
       },
       {
         "platform": "pinterest",
         "id": "264938459268356753",
         "url": "https://www.pinterest.com/pin/264938459268356753/",
-        "title": null,
-        "description": null,
-        "destinationUrl": null,
         "image": "https://i.pinimg.com/236x/73/73/a1/7373a19e207b7da7ddb8815e92546af8.jpg",
-        "saves": null,
-        "comments": null,
-        "publishedAt": null,
-        "board": {
-          "name": null,
-          "url": null
-        },
         "author": {
-          "username": "potterybarn",
-          "displayName": null,
-          "followers": null
+          "username": "potterybarn"
         }
       },
       {
         "platform": "pinterest",
         "id": "264938459268356442",
         "url": "https://www.pinterest.com/pin/264938459268356442/",
-        "title": null,
-        "description": null,
-        "destinationUrl": null,
         "image": "https://i.pinimg.com/236x/16/83/30/168330c3c94d8bc8eff30b5ef4a69d8a.jpg",
-        "saves": null,
-        "comments": null,
-        "publishedAt": null,
-        "board": {
-          "name": null,
-          "url": null
-        },
         "author": {
-          "username": "potterybarn",
-          "displayName": null,
-          "followers": null
+          "username": "potterybarn"
         }
       },
       {
         "platform": "pinterest",
         "id": "264938459268355565",
         "url": "https://www.pinterest.com/pin/264938459268355565/",
-        "title": null,
-        "description": null,
-        "destinationUrl": null,
         "image": "https://i.pinimg.com/236x/01/f8/fe/01f8fe04d20bb1aaa88662a421731a83.jpg",
-        "saves": null,
-        "comments": null,
-        "publishedAt": null,
-        "board": {
-          "name": null,
-          "url": null
-        },
         "author": {
-          "username": "potterybarn",
-          "displayName": null,
-          "followers": null
+          "username": "potterybarn"
         }
       },
       {
         "platform": "pinterest",
         "id": "264938527987338255",
         "url": "https://www.pinterest.com/pin/264938527987338255/",
-        "title": null,
-        "description": null,
-        "destinationUrl": null,
-        "image": null,
-        "saves": null,
-        "comments": null,
-        "publishedAt": null,
-        "board": {
-          "name": null,
-          "url": null
-        },
         "author": {
-          "username": "potterybarn",
-          "displayName": null,
-          "followers": null
+          "username": "potterybarn"
         }
       }
     ]
@@ -17470,18 +17299,13 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "displayName": "ESPN",
       "followers": 59905666,
       "verified": true,
-      "avatar": "https://p19-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=32e9082e&x-expires=1784570400&x-signature=ONThrhLfNKOpgkDFmJxK49n%2Fqfo%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast8",
-      "bio": null
+      "avatar": "https://p19-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=32e9082e&x-expires=1784570400&x-signature=ONThrhLfNKOpgkDFmJxK49n%2Fqfo%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast8"
     },
     "room": {
-      "id": null,
       "title": "WORLD CUP FINAL PREVIEW 🏆⚽️",
       "startedAt": "2026-07-16T17:54:15.000Z",
       "viewerCount": 1,
-      "totalEnterCount": null,
-      "likeCount": null,
-      "coverUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=579fc032&x-expires=1784570400&x-signature=rnhgUlO8hHhNkLynLOErjI3zdt0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast8",
-      "streamUrls": null
+      "coverUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=579fc032&x-expires=1784570400&x-signature=rnhgUlO8hHhNkLynLOErjI3zdt0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast8"
     }
   },
   "tiktok-live-info": {
@@ -17492,20 +17316,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "displayName": "ESPN",
       "followers": 59905666,
       "verified": true,
-      "avatar": "https://p19-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=32e9082e&x-expires=1784570400&x-signature=ONThrhLfNKOpgkDFmJxK49n%2Fqfo%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast8",
-      "bio": null
+      "avatar": "https://p19-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=32e9082e&x-expires=1784570400&x-signature=ONThrhLfNKOpgkDFmJxK49n%2Fqfo%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast8"
     },
     "room": {
-      "id": null,
       "title": "WORLD CUP FINAL PREVIEW 🏆⚽️",
       "startedAt": "2026-07-16T17:54:15.000Z",
       "viewerCount": 1,
-      "totalEnterCount": null,
-      "likeCount": null,
-      "coverUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=579fc032&x-expires=1784570400&x-signature=rnhgUlO8hHhNkLynLOErjI3zdt0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast8",
-      "streamUrls": null
+      "coverUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=579fc032&x-expires=1784570400&x-signature=rnhgUlO8hHhNkLynLOErjI3zdt0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast8"
     },
-    "streamUrls": [],
     "raw": {
       "handle": "espn",
       "is_live": false,
@@ -17516,12 +17334,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "avatar_url": "https://p19-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=32e9082e&x-expires=1784570400&x-signature=ONThrhLfNKOpgkDFmJxK49n%2Fqfo%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast8",
       "room_title": "WORLD CUP FINAL PREVIEW 🏆⚽️",
       "viewer_count": 1,
-      "total_enter_count": null,
-      "like_count": null,
       "started_at": "2026-07-16T17:54:15.000Z",
       "cover_url": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=579fc032&x-expires=1784570400&x-signature=rnhgUlO8hHhNkLynLOErjI3zdt0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast8",
       "room_url": "https://www.tiktok.com/@espn/live",
-      "stream_urls": null,
       "_metadata": {
         "page": 1,
         "fetched_at": "2026-07-18T18:46:41.168Z",
@@ -17546,7 +17361,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "username": "khaby.lame",
           "displayName": "Khabane lame",
           "url": "https://www.tiktok.com/@khaby.lame",
-          "followers": null,
           "verified": false,
           "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter-q:300:300:q70.jpeg?dr=10793&idc=my2&ps=87d6e48a&refresh_token=c419b6af&s=MUSIC_AWEME&sc=avatar&shcp=f6441914&shp=d05b14bd&t=223449c4&x-expires=1784484000&x-signature=lNTkKTYT4LeGk%2BDJv5qASOdsRy0%3D"
         },
@@ -17560,15 +17374,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "hashtags": [
           "learnfromkhaby",
           "comedy"
-        ],
-        "musicName": null
+        ]
       },
       {
         "platform": "tiktok",
         "url": "https://www.tiktok.com/@your_tanvir85/video/7651239857070837012",
         "id": "7651239857070837012",
-        "caption": null,
-        "description": null,
         "publishedAt": "2026-06-14T13:18:27+00:00",
         "durationSeconds": 28.0,
         "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0037/oIcBniDjFAjYLquCVRI0ABOEdezIIcCfgqqG9E~tplv-tiktokx-cropcenter-q:300:400:q70.webp?dr=14782&refresh_token=c43e159e&x-expires=1784484000&x-signature=WXxk%2By7DGOVJzG9bFVCaG3f%2FZY8%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=f6441914&idc=my2&biz_tag=tt_video&s=MUSIC_AWEME&sc=cover",
@@ -17576,7 +17387,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "username": "your_tanvir85",
           "displayName": "T🐾",
           "url": "https://www.tiktok.com/@your_tanvir85",
-          "followers": null,
           "verified": false,
           "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/a981ea344f184414d934479a4014c0a1~tplv-tiktokx-cropcenter-q:300:300:q70.jpeg?dr=10793&idc=my2&ps=87d6e48a&refresh_token=348a6823&s=MUSIC_AWEME&sc=avatar&shcp=f6441914&shp=d05b14bd&t=223449c4&x-expires=1784484000&x-signature=cssxwuNkYNVmKMdmlPFch%2F015RY%3D"
         },
@@ -17586,9 +17396,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "comments": 0,
           "shares": 0,
           "saves": 0
-        },
-        "hashtags": [],
-        "musicName": null
+        }
       },
       {
         "platform": "tiktok",
@@ -17603,7 +17411,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "username": "mdn.kashar",
           "displayName": "Noor Asma",
           "url": "https://www.tiktok.com/@mdn.kashar",
-          "followers": null,
           "verified": false,
           "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/41163a4e589ef19e95ea2a5f3ad4545a~tplv-tiktokx-cropcenter-q:300:300:q70.jpeg?dr=10793&idc=my2&ps=87d6e48a&refresh_token=ef093a73&s=MUSIC_AWEME&sc=avatar&shcp=f6441914&shp=d05b14bd&t=223449c4&x-expires=1784484000&x-signature=6JhSX07v344cwwKGBfhAGi3VkPw%3D"
         },
@@ -17616,8 +17423,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [
           "duet"
-        ],
-        "musicName": null
+        ]
       },
       {
         "platform": "tiktok",
@@ -17632,7 +17438,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "username": "user3548141725451",
           "displayName": "khaby.lame",
           "url": "https://www.tiktok.com/@user3548141725451",
-          "followers": null,
           "verified": false,
           "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-alisg-avt-0068/14e15476ed8f4c0edc7e4a12c3d3d79c~tplv-tiktokx-cropcenter-q:300:300:q70.jpeg?dr=10793&idc=my2&ps=87d6e48a&refresh_token=4cc7be5b&s=MUSIC_AWEME&sc=avatar&shcp=f6441914&shp=d05b14bd&t=223449c4&x-expires=1784484000&x-signature=ZBcWyYZNUL2UkH96pWvar%2F%2Bv3dA%3D"
         },
@@ -17645,8 +17450,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "hashtags": [
           "ডুয়েট"
-        ],
-        "musicName": null
+        ]
       }
     ]
   },
@@ -17661,70 +17465,35 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "username": "tiktok_trending",
         "displayName": "Trending TikTok creator discovery: trending",
         "url": "https://www.tiktok.com/@tiktok_trending",
-        "bio": null,
-        "followers": null,
-        "engagementRate": null,
-        "likes": null,
-        "videos": null,
-        "country": "US",
-        "verified": null,
-        "profileImage": null
+        "country": "US"
       },
       {
         "rank": 2,
         "username": "tiktok_viral",
         "displayName": "Trending TikTok creator discovery: viral",
         "url": "https://www.tiktok.com/@tiktok_viral",
-        "bio": null,
-        "followers": null,
-        "engagementRate": null,
-        "likes": null,
-        "videos": null,
-        "country": "US",
-        "verified": null,
-        "profileImage": null
+        "country": "US"
       },
       {
         "rank": 3,
         "username": "tiktok_fyp",
         "displayName": "Trending TikTok creator discovery: fyp",
         "url": "https://www.tiktok.com/@tiktok_fyp",
-        "bio": null,
-        "followers": null,
-        "engagementRate": null,
-        "likes": null,
-        "videos": null,
-        "country": "US",
-        "verified": null,
-        "profileImage": null
+        "country": "US"
       },
       {
         "rank": 4,
         "username": "tiktok_dance",
         "displayName": "Trending TikTok creator discovery: dance",
         "url": "https://www.tiktok.com/@tiktok_dance",
-        "bio": null,
-        "followers": null,
-        "engagementRate": null,
-        "likes": null,
-        "videos": null,
-        "country": "US",
-        "verified": null,
-        "profileImage": null
+        "country": "US"
       },
       {
         "rank": 5,
         "username": "tiktok_music",
         "displayName": "Trending TikTok creator discovery: music",
         "url": "https://www.tiktok.com/@tiktok_music",
-        "bio": null,
-        "followers": null,
-        "engagementRate": null,
-        "likes": null,
-        "videos": null,
-        "country": "US",
-        "verified": null,
-        "profileImage": null
+        "country": "US"
       }
     ]
   },
@@ -18994,7 +18763,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "thumbnail": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/a952a6bb-ad94-4889-8ac1-6afadf21d338/landscape/thumb/thumb-0000000000-1920x1080.jpg",
     "videoUrl": "https://d1ndex63qxojbr.cloudfront.net/nauth/a952a6bb-ad94-4889-8ac1-6afadf21d338/landscape/h264/1080/index.mp4",
     "game": "Just Chatting",
-    "language": null,
     "broadcaster": "xqc",
     "broadcasterProfileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-150x150.jpeg"
   },
@@ -19011,13 +18779,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "isPartner": true,
     "isAffiliate": false,
     "isLive": false,
-    "stream": {
-      "title": null,
-      "game": null,
-      "viewers": null,
-      "startedAt": null,
-      "thumbnail": null
-    },
     "lastBroadcast": {
       "title": "SLAY SQUAD IS READY FOR TWITCH RIVALS",
       "game": "VALORANT",
@@ -19027,7 +18788,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "twitch",
         "id": "2822327261",
-        "slug": null,
         "url": "https://www.twitch.tv/videos/2822327261",
         "embedUrl": "https://player.twitch.tv/?video=2822327261&parent=captapi.com",
         "title": "SLAY SQUAD IS READY FOR TWITCH RIVALS",
@@ -19035,7 +18795,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "durationSeconds": 27603,
         "views": 252034,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/ab15105c80354605d662_shroud_317655371096_1784311356//thumb/thumb0-{width}x{height}.jpg",
-        "videoUrl": null,
         "game": "VALORANT",
         "language": "en",
         "broadcaster": "shroud",
@@ -19044,7 +18803,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "twitch",
         "id": "2820701541",
-        "slug": null,
         "url": "https://www.twitch.tv/videos/2820701541",
         "embedUrl": "https://player.twitch.tv/?video=2820701541&parent=captapi.com",
         "title": "playing the WORST RE to see if it gets BETTER with my BROY in CRIME (CRIMINALS)",
@@ -19052,7 +18810,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "durationSeconds": 20459,
         "views": 159880,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/d2db6f270365e5d9cdb8_shroud_319522039392_1784135169//thumb/thumb0-{width}x{height}.jpg",
-        "videoUrl": null,
         "game": "Resident Evil 6",
         "language": "en",
         "broadcaster": "shroud",
@@ -19061,7 +18818,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "twitch",
         "id": "2819944258",
-        "slug": null,
         "url": "https://www.twitch.tv/videos/2819944258",
         "embedUrl": "https://player.twitch.tv/?video=2819944258&parent=captapi.com",
         "title": "beating old school games with my broy",
@@ -19069,7 +18825,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "durationSeconds": 21466,
         "views": 163663,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/d44528ef11380710aeb9_shroud_317000664311_1784051215//thumb/thumb0-{width}x{height}.jpg",
-        "videoUrl": null,
         "game": "Resident Evil 5",
         "language": "en",
         "broadcaster": "shroud",
@@ -19078,7 +18833,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "twitch",
         "id": "2819140044",
-        "slug": null,
         "url": "https://www.twitch.tv/videos/2819140044",
         "embedUrl": "https://player.twitch.tv/?video=2819140044&parent=captapi.com",
         "title": "co-op with the first BROY",
@@ -19086,7 +18840,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "durationSeconds": 21962,
         "views": 197923,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/e23cdc24ddcf120f3527_shroud_319426227036_1783963756//thumb/thumb0-{width}x{height}.jpg",
-        "videoUrl": null,
         "game": "Resident Evil 5",
         "language": "en",
         "broadcaster": "shroud",
@@ -19095,7 +18848,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "twitch",
         "id": "2817597094",
-        "slug": null,
         "url": "https://www.twitch.tv/videos/2817597094",
         "embedUrl": "https://player.twitch.tv/?video=2817597094&parent=captapi.com",
         "title": "beating this game again for my 19 year old self",
@@ -19103,15 +18855,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "durationSeconds": 18457,
         "views": 183579,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/ecda5af60c31e1859242_shroud_318433704663_1783792352//thumb/thumb0-{width}x{height}.jpg",
-        "videoUrl": null,
         "game": "Assassin's Creed Black Flag Resynced",
         "language": "en",
         "broadcaster": "shroud",
         "broadcasterProfileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png"
       }
     ],
-    "topClips": [],
-    "schedule": [],
     "createdAt": "2012-11-03T15:50:32.87847Z"
   },
   "twitch-user-schedule": {
@@ -19134,7 +18883,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "twitch",
         "id": "2822327261",
-        "slug": null,
         "url": "https://www.twitch.tv/videos/2822327261",
         "embedUrl": "https://player.twitch.tv/?video=2822327261&parent=captapi.com",
         "title": "SLAY SQUAD IS READY FOR TWITCH RIVALS",
@@ -19142,16 +18890,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "durationSeconds": 27603,
         "views": 252034,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/ab15105c80354605d662_shroud_317655371096_1784311356//thumb/thumb0-320x180.jpg",
-        "videoUrl": null,
-        "game": "VALORANT",
-        "language": null,
-        "broadcaster": null,
-        "broadcasterProfileImage": null
+        "game": "VALORANT"
       },
       {
         "platform": "twitch",
         "id": "2820701541",
-        "slug": null,
         "url": "https://www.twitch.tv/videos/2820701541",
         "embedUrl": "https://player.twitch.tv/?video=2820701541&parent=captapi.com",
         "title": "playing the WORST RE to see if it gets BETTER with my BROY in CRIME (CRIMINALS)",
@@ -19159,16 +18902,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "durationSeconds": 20459,
         "views": 159880,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/d2db6f270365e5d9cdb8_shroud_319522039392_1784135169//thumb/thumb0-320x180.jpg",
-        "videoUrl": null,
-        "game": "Resident Evil 6",
-        "language": null,
-        "broadcaster": null,
-        "broadcasterProfileImage": null
+        "game": "Resident Evil 6"
       },
       {
         "platform": "twitch",
         "id": "2819944258",
-        "slug": null,
         "url": "https://www.twitch.tv/videos/2819944258",
         "embedUrl": "https://player.twitch.tv/?video=2819944258&parent=captapi.com",
         "title": "beating old school games with my broy",
@@ -19176,16 +18914,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "durationSeconds": 21466,
         "views": 163663,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/d44528ef11380710aeb9_shroud_317000664311_1784051215//thumb/thumb0-320x180.jpg",
-        "videoUrl": null,
-        "game": "Resident Evil 5",
-        "language": null,
-        "broadcaster": null,
-        "broadcasterProfileImage": null
+        "game": "Resident Evil 5"
       },
       {
         "platform": "twitch",
         "id": "2819140044",
-        "slug": null,
         "url": "https://www.twitch.tv/videos/2819140044",
         "embedUrl": "https://player.twitch.tv/?video=2819140044&parent=captapi.com",
         "title": "co-op with the first BROY",
@@ -19193,16 +18926,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "durationSeconds": 21962,
         "views": 197923,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/e23cdc24ddcf120f3527_shroud_319426227036_1783963756//thumb/thumb0-320x180.jpg",
-        "videoUrl": null,
-        "game": "Resident Evil 5",
-        "language": null,
-        "broadcaster": null,
-        "broadcasterProfileImage": null
+        "game": "Resident Evil 5"
       },
       {
         "platform": "twitch",
         "id": "2817597094",
-        "slug": null,
         "url": "https://www.twitch.tv/videos/2817597094",
         "embedUrl": "https://player.twitch.tv/?video=2817597094&parent=captapi.com",
         "title": "beating this game again for my 19 year old self",
@@ -19210,11 +18938,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "durationSeconds": 18457,
         "views": 183579,
         "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/ecda5af60c31e1859242_shroud_318433704663_1783792352//thumb/thumb0-320x180.jpg",
-        "videoUrl": null,
-        "game": "Assassin's Creed Black Flag Resynced",
-        "language": null,
-        "broadcaster": null,
-        "broadcasterProfileImage": null
+        "game": "Assassin's Creed Black Flag Resynced"
       }
     ]
   },
@@ -20525,47 +20249,34 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "url": "https://www.youtube.com/shorts/9pLk3OU6bOs",
         "title": "This morning routine is scientifically proven to make you limitless.",
-        "publishedAt": null,
         "viewCount": 1300000,
-        "durationSeconds": null,
         "thumbnailUrl": "https://i.ytimg.com/vi/9pLk3OU6bOs/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLDiXBnjUzZ_6Iqszq8ReeL74YuBcQ",
         "channelName": "SpoonFedStudy"
       },
       {
         "url": "https://www.youtube.com/shorts/ABuFOn1PJ-M",
         "title": "Productive Weekend routine for 10 to 18 years old (Perfect guide) ⋆.𐙚 ̊💗",
-        "publishedAt": null,
         "viewCount": 360000,
-        "durationSeconds": null,
         "thumbnailUrl": "https://i.ytimg.com/vi/ABuFOn1PJ-M/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLDwvgnfGJ0W20jmRJ07IQqGe08GvQ",
         "channelName": "GlowzzTips"
       },
       {
         "url": "https://www.youtube.com/shorts/1XeZTJ2lS28",
         "title": "The PERFECT School Morning Routine That will ♡ Motivate You ♡",
-        "publishedAt": null,
         "viewCount": 314000,
-        "durationSeconds": null,
-        "thumbnailUrl": "https://yt3.ggpht.com/8w81XroNqOF9W3erjDB3xS7halYtbDmfR680j0AfRF7hkuFjP-dzJmMv2oEbic94kGdI_TEpfw=s176-c-k-c0x00ffffff-no-rj",
-        "channelName": null
+        "thumbnailUrl": "https://yt3.ggpht.com/8w81XroNqOF9W3erjDB3xS7halYtbDmfR680j0AfRF7hkuFjP-dzJmMv2oEbic94kGdI_TEpfw=s176-c-k-c0x00ffffff-no-rj"
       },
       {
         "url": "https://www.youtube.com/shorts/A24QBJr3qRE",
         "title": "*THAT GIRL* glow up morning routine | tips + habits to level up mentally and physically",
-        "publishedAt": null,
         "viewCount": 592000,
-        "durationSeconds": null,
-        "thumbnailUrl": "https://yt3.ggpht.com/V75KuC2kX2yXiFtYgXFU5Xi0obmZOGvhQlubrCh9pes1kwW8jGUwnPVLXZPvE_Sn2oqpjvlF=s176-c-k-c0x00ffffff-no-rj",
-        "channelName": null
+        "thumbnailUrl": "https://yt3.ggpht.com/V75KuC2kX2yXiFtYgXFU5Xi0obmZOGvhQlubrCh9pes1kwW8jGUwnPVLXZPvE_Sn2oqpjvlF=s176-c-k-c0x00ffffff-no-rj"
       },
       {
         "url": "https://www.youtube.com/shorts/1QgC0xhSIF8",
         "title": "The ONLY morning routine that ACTUALLY changed my life",
-        "publishedAt": null,
         "viewCount": 896000,
-        "durationSeconds": null,
-        "thumbnailUrl": "https://yt3.ggpht.com/ayAaCsdT2qIRCJJGUxGkGDwfsqmEYSJBRGROlWWIVsopvAnFtxS8Zku208D59apsUpvYiLoQ-A=s176-c-k-c0x00ffffff-no-rj",
-        "channelName": null
+        "thumbnailUrl": "https://yt3.ggpht.com/ayAaCsdT2qIRCJJGUxGkGDwfsqmEYSJBRGROlWWIVsopvAnFtxS8Zku208D59apsUpvYiLoQ-A=s176-c-k-c0x00ffffff-no-rj"
       }
     ]
   },

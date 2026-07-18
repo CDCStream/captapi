@@ -18,7 +18,7 @@ from app.services.twitch_native import (
     clip_native,
     schedule_native,
 )
-from app.utils.formatters import safe_int, safe_str
+from app.utils.formatters import safe_int, safe_str, strip_empty
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
@@ -101,74 +101,82 @@ def _video(item: dict[str, Any]) -> dict[str, Any]:
     quality_url = None
     if qualities and isinstance(qualities[0], dict):
         quality_url = qualities[0].get("sourceURL") or qualities[0].get("sourceUrl")
-    return {
-        "platform": "twitch",
-        "id": video_id,
-        "slug": slug,
-        "url": url,
-        "embedUrl": embed,
-        "title": safe_str(item.get("title") or item.get("clipTitle")),
-        "createdAt": safe_str(item.get("createdAt") or item.get("publishedAt")),
-        "durationSeconds": safe_int(
-            item.get("durationSeconds") or item.get("lengthSeconds") or item.get("duration")
-        ),
-        "views": safe_int(item.get("viewCount") or item.get("views") or item.get("clipViewCount")),
-        "thumbnail": safe_str(item.get("thumbnailUrl") or item.get("thumbnailURL") or item.get("thumbnail")),
-        "videoUrl": safe_str(
-            item.get("videoMp4Url")
-            or item.get("mp4Url")
-            or item.get("sourceURL")
-            or item.get("sourceUrl")
-            or item.get("videoQualitiesUrl")
-            or quality_url
-        ),
-        "game": safe_str(
-            item.get("gameName")
-            or item.get("currentGame")
-            or ((item.get("game") or {}).get("name") if isinstance(item.get("game"), dict) else item.get("game"))
-        ),
-        "language": safe_str(item.get("language") or item.get("broadcastLanguage")),
-        "broadcaster": broadcaster,
-        "broadcasterProfileImage": safe_str(
-            item.get("broadcasterProfileImageUrl")
-            or item.get("profileImageUrl")
-            or item.get("profileImageURL")
-            or ((item.get("broadcaster") or {}).get("profileImageURL") if isinstance(item.get("broadcaster"), dict) else None)
-        ),
-    }
+    return strip_empty(
+        {
+            "platform": "twitch",
+            "id": video_id,
+            "slug": slug,
+            "url": url,
+            "embedUrl": embed,
+            "title": safe_str(item.get("title") or item.get("clipTitle")),
+            "createdAt": safe_str(item.get("createdAt") or item.get("publishedAt")),
+            "durationSeconds": safe_int(
+                item.get("durationSeconds") or item.get("lengthSeconds") or item.get("duration")
+            ),
+            "views": safe_int(item.get("viewCount") or item.get("views") or item.get("clipViewCount")),
+            "thumbnail": safe_str(item.get("thumbnailUrl") or item.get("thumbnailURL") or item.get("thumbnail")),
+            "videoUrl": safe_str(
+                item.get("videoMp4Url")
+                or item.get("mp4Url")
+                or item.get("sourceURL")
+                or item.get("sourceUrl")
+                or item.get("videoQualitiesUrl")
+                or quality_url
+            ),
+            "game": safe_str(
+                item.get("gameName")
+                or item.get("currentGame")
+                or ((item.get("game") or {}).get("name") if isinstance(item.get("game"), dict) else item.get("game"))
+            ),
+            "language": safe_str(item.get("language") or item.get("broadcastLanguage")),
+            "broadcaster": broadcaster,
+            "broadcasterProfileImage": safe_str(
+                item.get("broadcasterProfileImageUrl")
+                or item.get("profileImageUrl")
+                or item.get("profileImageURL")
+                or (
+                    (item.get("broadcaster") or {}).get("profileImageURL")
+                    if isinstance(item.get("broadcaster"), dict)
+                    else None
+                ),
+            ),
+        }
+    )
 
 
 def _profile(item: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "platform": "twitch",
-        "id": safe_str(item.get("id") or item.get("channelId")),
-        "login": safe_str(item.get("login")),
-        "displayName": safe_str(item.get("displayName") or item.get("name")),
-        "url": safe_str(item.get("sourceUrl") or item.get("url")),
-        "description": safe_str(item.get("description")),
-        "followers": safe_int(item.get("followersCount") or item.get("followers")),
-        "profileImage": safe_str(item.get("profileImageUrl") or item.get("profileImageURL")),
-        "bannerImage": safe_str(item.get("bannerImageUrl") or item.get("bannerImageURL")),
-        "isPartner": bool(item.get("isPartner")),
-        "isAffiliate": bool(item.get("isAffiliate")),
-        "isLive": bool(item.get("isLive")),
-        "stream": {
-            "title": safe_str(item.get("streamTitle") or item.get("broadcastTitle")),
-            "game": safe_str(item.get("currentGame") or item.get("broadcastGameName")),
-            "viewers": safe_int(item.get("currentViewers") or item.get("viewersCount")),
-            "startedAt": safe_str(item.get("startedAt") or item.get("streamStartedAt")),
-            "thumbnail": safe_str(item.get("thumbnailUrl")),
-        },
-        "lastBroadcast": {
-            "title": safe_str(item.get("lastBroadcastTitle")),
-            "game": safe_str(item.get("lastBroadcastGame")),
-            "startedAt": safe_str(item.get("lastBroadcastDate") or item.get("lastBroadcastStartedAt")),
-        },
-        "recentVideos": [_video(v) for v in item.get("recentVideos", []) if isinstance(v, dict)],
-        "topClips": [_video(v) for v in item.get("topClips", []) if isinstance(v, dict)],
-        "schedule": _schedule_segments(item.get("nextSchedule") or item.get("schedule")),
-        "createdAt": safe_str(item.get("createdAt")),
-    }
+    return strip_empty(
+        {
+            "platform": "twitch",
+            "id": safe_str(item.get("id") or item.get("channelId")),
+            "login": safe_str(item.get("login")),
+            "displayName": safe_str(item.get("displayName") or item.get("name")),
+            "url": safe_str(item.get("sourceUrl") or item.get("url")),
+            "description": safe_str(item.get("description")),
+            "followers": safe_int(item.get("followersCount") or item.get("followers")),
+            "profileImage": safe_str(item.get("profileImageUrl") or item.get("profileImageURL")),
+            "bannerImage": safe_str(item.get("bannerImageUrl") or item.get("bannerImageURL")),
+            "isPartner": bool(item.get("isPartner")),
+            "isAffiliate": bool(item.get("isAffiliate")),
+            "isLive": bool(item.get("isLive")),
+            "stream": {
+                "title": safe_str(item.get("streamTitle") or item.get("broadcastTitle")),
+                "game": safe_str(item.get("currentGame") or item.get("broadcastGameName")),
+                "viewers": safe_int(item.get("currentViewers") or item.get("viewersCount")),
+                "startedAt": safe_str(item.get("startedAt") or item.get("streamStartedAt")),
+                "thumbnail": safe_str(item.get("thumbnailUrl")),
+            },
+            "lastBroadcast": {
+                "title": safe_str(item.get("lastBroadcastTitle")),
+                "game": safe_str(item.get("lastBroadcastGame")),
+                "startedAt": safe_str(item.get("lastBroadcastDate") or item.get("lastBroadcastStartedAt")),
+            },
+            "recentVideos": [_video(v) for v in item.get("recentVideos", []) if isinstance(v, dict)],
+            "topClips": [_video(v) for v in item.get("topClips", []) if isinstance(v, dict)],
+            "schedule": _schedule_segments(item.get("nextSchedule") or item.get("schedule")),
+            "createdAt": safe_str(item.get("createdAt")),
+        }
+    )
 
 
 def _schedule_segments(value: Any) -> list[dict[str, Any]]:
@@ -240,7 +248,7 @@ async def profile(
             ctx["source"] = "apify"
             return await _channel(username)
 
-        data = await cached_or_run("twitch.profile", {"username": username, "v": 2}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("twitch.profile", {"username": username, "v": 3}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 
@@ -273,7 +281,7 @@ async def user_videos(
             ctx["source"] = "apify"
             return {"platform": "twitch", "username": username, "totalReturned": len(videos), "videos": videos[:limit]}
 
-        data = await cached_or_run("twitch.user-videos", {"username": username, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("twitch.user-videos", {"username": username, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["videos"]))
         return ApiResponse(data=data)
 
@@ -357,5 +365,5 @@ async def clip(
             ctx["source"] = "apify"
             return _video(items[0])
 
-        data = await cached_or_run("twitch.clip", {"url": url, "v": 3}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("twitch.clip", {"url": url, "v": 4}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)

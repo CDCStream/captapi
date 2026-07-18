@@ -33,7 +33,7 @@ from app.services.youtube_native import (
     transcript_native,
     video_details_native,
 )
-from app.utils.formatters import normalize_language_code, safe_int, safe_list, safe_str
+from app.utils.formatters import normalize_language_code, safe_int, safe_list, safe_str, strip_empty
 from app.utils.url import (
     extract_youtube_id,
     normalize_youtube_channel_url,
@@ -358,22 +358,24 @@ def _video_card(v: dict) -> dict:
     stats = v.get("statistics") if isinstance(v.get("statistics"), dict) else {}
     if isinstance(snippet, dict) and (snippet.get("resourceId") or snippet.get("videoUrl")):
         video_id = safe_str((snippet.get("resourceId") or {}).get("videoId") or content.get("videoId"))
-        return {
-            "url": safe_str(snippet.get("videoUrl"))
-            or (f"https://www.youtube.com/watch?v={video_id}" if video_id else ""),
-            "title": safe_str(snippet.get("title")) or "",
-            "publishedAt": safe_str(snippet.get("publishedAt") or content.get("videoPublishedAt")),
-            "viewCount": safe_int(snippet.get("viewCount") or stats.get("viewCount") or v.get("viewCount")),
-            "durationSeconds": _duration_seconds(
-                snippet.get("duration")
-                or content.get("duration")
-                or v.get("duration")
-                or v.get("lengthSeconds")
-                or v.get("lengthText")
-            ),
-            "thumbnailUrl": _best_snippet_thumbnail(snippet),
-            "channelName": safe_str(snippet.get("videoOwnerChannelTitle") or snippet.get("channelTitle")),
-        }
+        return strip_empty(
+            {
+                "url": safe_str(snippet.get("videoUrl"))
+                or (f"https://www.youtube.com/watch?v={video_id}" if video_id else ""),
+                "title": safe_str(snippet.get("title")) or "",
+                "publishedAt": safe_str(snippet.get("publishedAt") or content.get("videoPublishedAt")),
+                "viewCount": safe_int(snippet.get("viewCount") or stats.get("viewCount") or v.get("viewCount")),
+                "durationSeconds": _duration_seconds(
+                    snippet.get("duration")
+                    or content.get("duration")
+                    or v.get("duration")
+                    or v.get("lengthSeconds")
+                    or v.get("lengthText")
+                ),
+                "thumbnailUrl": _best_snippet_thumbnail(snippet),
+                "channelName": safe_str(snippet.get("videoOwnerChannelTitle") or snippet.get("channelTitle")),
+            }
+        )
     video_id = safe_str(v.get("videoId") or v.get("video_id") or v.get("id"))
     if isinstance(video_id, str) and len(video_id) > 20:
         # Some actors put a playlistItem id here; prefer nested videoId.
@@ -382,43 +384,45 @@ def _video_card(v: dict) -> dict:
     url = safe_str(v.get("url") or v.get("videoUrl") or v.get("video_url") or v.get("link"))
     if not url and video_id and len(video_id) == 11:
         url = f"https://www.youtube.com/watch?v={video_id}"
-    return {
-        "url": url,
-        "title": safe_str(v.get("title") or v.get("videoTitle") or v.get("video_title") or v.get("name")) or "",
-        "publishedAt": safe_str(
-            v.get("date")
-            or v.get("publishedAt")
-            or v.get("published_at")
-            or v.get("published")
-            or v.get("publishDate")
-            or v.get("publishedTimeText")
-            or v.get("uploadDate")
-        ),
-        "viewCount": safe_int(
-            v.get("viewCount")
-            or v.get("views")
-            or v.get("view_count")
-            or v.get("view_count_text")
-            or v.get("numberOfViews")
-            or stats.get("viewCount")
-        ),
-        "durationSeconds": _duration_seconds(
-            v.get("duration")
-            or v.get("durationSeconds")
-            or v.get("duration_seconds")
-            or v.get("lengthSeconds")
-            or v.get("lengthText")
-            or v.get("durationText")
-            or v.get("timeText")
-            or content.get("duration")
-        ),
-        "thumbnailUrl": safe_str(
-            v.get("thumbnailUrl") or v.get("thumbnail") or v.get("thumbnail_url") or v.get("thumbnailUrlHigh")
-        ),
-        "channelName": safe_str(
-            v.get("channelName") or v.get("channel") or v.get("channelTitle") or v.get("channel_name")
-        ),
-    }
+    return strip_empty(
+        {
+            "url": url,
+            "title": safe_str(v.get("title") or v.get("videoTitle") or v.get("video_title") or v.get("name")) or "",
+            "publishedAt": safe_str(
+                v.get("date")
+                or v.get("publishedAt")
+                or v.get("published_at")
+                or v.get("published")
+                or v.get("publishDate")
+                or v.get("publishedTimeText")
+                or v.get("uploadDate")
+            ),
+            "viewCount": safe_int(
+                v.get("viewCount")
+                or v.get("views")
+                or v.get("view_count")
+                or v.get("view_count_text")
+                or v.get("numberOfViews")
+                or stats.get("viewCount")
+            ),
+            "durationSeconds": _duration_seconds(
+                v.get("duration")
+                or v.get("durationSeconds")
+                or v.get("duration_seconds")
+                or v.get("lengthSeconds")
+                or v.get("lengthText")
+                or v.get("durationText")
+                or v.get("timeText")
+                or content.get("duration")
+            ),
+            "thumbnailUrl": safe_str(
+                v.get("thumbnailUrl") or v.get("thumbnail") or v.get("thumbnail_url") or v.get("thumbnailUrlHigh")
+            ),
+            "channelName": safe_str(
+                v.get("channelName") or v.get("channel") or v.get("channelTitle") or v.get("channel_name")
+            ),
+        }
+    )
 
 
 def _has_video_card_data(v: dict[str, Any]) -> bool:
@@ -1197,7 +1201,7 @@ async def youtube_playlist_videos(
 
         data = await cached_or_run(
             endpoint="youtube.playlist-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 8},
+            params={"url": url, "limit": limit, "fast": fast, "v": 9},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1287,7 +1291,7 @@ async def youtube_playlist(
 
         data = await cached_or_run(
             endpoint="youtube.playlist",
-            params={"url": url, "limit": limit, "fast": fast, "v": 7},
+            params={"url": url, "limit": limit, "fast": fast, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1402,7 +1406,7 @@ async def youtube_trending_shorts(
 
         data = await cached_or_run(
             endpoint="youtube.trending-shorts",
-            params={"q": q, "limit": limit, "v": 3},
+            params={"q": q, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             # Trending actor runs take minutes; serve the last list instantly

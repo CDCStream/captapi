@@ -20,7 +20,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
-from app.utils.formatters import safe_int, safe_str
+from app.utils.formatters import safe_int, safe_str, strip_empty
 from app.utils.url import (
     detect_url_platform,
     extract_pinterest_pin_id,
@@ -92,77 +92,83 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
     board_url = safe_str(item.get("boardUrl") or board.get("url"))
     if board_url and board_url.startswith("/"):
         board_url = f"https://www.pinterest.com{board_url}"
-    return {
-        "platform": "pinterest",
-        "id": safe_str(pin_id),
-        "url": safe_str(pin_url)
-        or (f"https://www.pinterest.com/pin/{pin_id}/" if pin_id else None),
-        "title": safe_str(
-            item.get("title")
-            or item.get("grid_title")
-            or item.get("closeup_unified_title")
-            or item.get("gridTitle")
-        ),
-        "description": safe_str(
-            item.get("description")
-            or item.get("altText")
-            or item.get("autoAltText")
-            or item.get("alt_text")
-        ),
-        "destinationUrl": safe_str(
-            item.get("link")
-            or item.get("destinationUrl")
-            or item.get("sourceLink")
-            or item.get("linkUrl")
-            or item.get("clickThroughUrl")
-        ),
-        "image": _image(item),
-        "saves": safe_int(
-            item.get("repin_count")
-            or item.get("saveCount")
-            or item.get("repinCount")
-            or item.get("save_count")
-            or item.get("saves")
-            or item.get("reactionCount")
-            or item.get("aggregateSaveCount")
-        ),
-        "comments": safe_int(
-            item.get("comment_count")
-            or item.get("commentCount")
-            or item.get("commentsCount")
-            or ((item.get("aggregated_pin_data") or {}).get("comment_count") if isinstance(item.get("aggregated_pin_data"), dict) else None)
-        ),
-        "publishedAt": safe_str(
-            item.get("created_at")
-            or item.get("createdAt")
-            or item.get("createdDate")
-            or item.get("date")
-        ),
-        "board": {
-            "name": safe_str(item.get("boardName") or board.get("name")),
-            "url": board_url,
-        },
-        "author": {
-            "username": safe_str(
-                pinner.get("username")
-                or item.get("pinner_username")
-                or item.get("creator")
-                or item.get("creatorUsername")
+    return strip_empty(
+        {
+            "platform": "pinterest",
+            "id": safe_str(pin_id),
+            "url": safe_str(pin_url)
+            or (f"https://www.pinterest.com/pin/{pin_id}/" if pin_id else None),
+            "title": safe_str(
+                item.get("title")
+                or item.get("grid_title")
+                or item.get("closeup_unified_title")
+                or item.get("gridTitle")
             ),
-            "displayName": safe_str(
-                pinner.get("full_name")
-                or pinner.get("fullName")
-                or item.get("pinner_name")
-                or item.get("creatorFullName")
-                or item.get("creatorName")
+            "description": safe_str(
+                item.get("description")
+                or item.get("altText")
+                or item.get("autoAltText")
+                or item.get("alt_text")
             ),
-            "followers": safe_int(
-                pinner.get("follower_count")
-                or pinner.get("followerCount")
-                or item.get("creatorFollowerCount")
+            "destinationUrl": safe_str(
+                item.get("link")
+                or item.get("destinationUrl")
+                or item.get("sourceLink")
+                or item.get("linkUrl")
+                or item.get("clickThroughUrl")
             ),
-        },
-    }
+            "image": _image(item),
+            "saves": safe_int(
+                item.get("repin_count")
+                or item.get("saveCount")
+                or item.get("repinCount")
+                or item.get("save_count")
+                or item.get("saves")
+                or item.get("reactionCount")
+                or item.get("aggregateSaveCount")
+            ),
+            "comments": safe_int(
+                item.get("comment_count")
+                or item.get("commentCount")
+                or item.get("commentsCount")
+                or (
+                    (item.get("aggregated_pin_data") or {}).get("comment_count")
+                    if isinstance(item.get("aggregated_pin_data"), dict)
+                    else None
+                )
+            ),
+            "publishedAt": safe_str(
+                item.get("created_at")
+                or item.get("createdAt")
+                or item.get("createdDate")
+                or item.get("date")
+            ),
+            "board": {
+                "name": safe_str(item.get("boardName") or board.get("name")),
+                "url": board_url,
+            },
+            "author": {
+                "username": safe_str(
+                    pinner.get("username")
+                    or item.get("pinner_username")
+                    or item.get("creator")
+                    or item.get("creatorUsername")
+                ),
+                "displayName": safe_str(
+                    pinner.get("full_name")
+                    or pinner.get("fullName")
+                    or item.get("pinner_name")
+                    or item.get("creatorFullName")
+                    or item.get("creatorName")
+                ),
+                "followers": safe_int(
+                    pinner.get("follower_count")
+                    or pinner.get("followerCount")
+                    or item.get("creatorFollowerCount")
+                ),
+            },
+        }
+    )
 
 
 # The router's run-input format (mode/keywords/usernames/boardUrls) targets
@@ -318,40 +324,46 @@ async def _fetch_pin_pidgets(pin_id: str) -> dict[str, Any] | None:
         or pin.get("title")
         or pin.get("description")
     )
-    return {
-        "platform": "pinterest",
-        "id": safe_str(pin.get("id") or pin_id),
-        "url": f"https://www.pinterest.com/pin/{pin_id}/",
-        "title": title,
-        "description": safe_str(
-            pin.get("description") or pin.get("auto_alt_text") or pin.get("alt_text")
-        ),
-        "destinationUrl": safe_str(pin.get("link") or rich.get("url")),
-        "image": safe_str(image),
-        "isVideo": bool(pin.get("is_video")),
-        "dominantColor": safe_str(pin.get("dominant_color")),
-        "saves": safe_int(stats.get("saves") or pin.get("repin_count") or pin.get("share_count")),
-        "comments": safe_int(
-            pin.get("comment_count")
-            or stats.get("comments")
-            or ((pin.get("aggregated_pin_data") or {}).get("comment_count") if isinstance(pin.get("aggregated_pin_data"), dict) else None)
-        ),
-        "publishedAt": safe_str(pin.get("created_at")),
-        "board": {
-            "name": safe_str(board.get("name")),
-            "url": f"https://www.pinterest.com{board_url}" if board_url and board_url.startswith("/") else board_url,
-            "pinCount": safe_int(board.get("pin_count")),
-            "followers": safe_int(board.get("follower_count")),
-        },
-        "author": {
-            "username": safe_str(username),
-            "displayName": safe_str(pinner.get("full_name")),
-            "url": profile_url,
-            "followers": safe_int(pinner.get("follower_count")),
-            "pinCount": safe_int(pinner.get("pin_count")),
-            "avatar": safe_str(pinner.get("image_small_url")),
-        },
-    }
+    return strip_empty(
+        {
+            "platform": "pinterest",
+            "id": safe_str(pin.get("id") or pin_id),
+            "url": f"https://www.pinterest.com/pin/{pin_id}/",
+            "title": title,
+            "description": safe_str(
+                pin.get("description") or pin.get("auto_alt_text") or pin.get("alt_text")
+            ),
+            "destinationUrl": safe_str(pin.get("link") or rich.get("url")),
+            "image": safe_str(image),
+            "isVideo": bool(pin.get("is_video")),
+            "dominantColor": safe_str(pin.get("dominant_color")),
+            "saves": safe_int(stats.get("saves") or pin.get("repin_count") or pin.get("share_count")),
+            "comments": safe_int(
+                pin.get("comment_count")
+                or stats.get("comments")
+                or (
+                    (pin.get("aggregated_pin_data") or {}).get("comment_count")
+                    if isinstance(pin.get("aggregated_pin_data"), dict)
+                    else None
+                )
+            ),
+            "publishedAt": safe_str(pin.get("created_at")),
+            "board": {
+                "name": safe_str(board.get("name")),
+                "url": f"https://www.pinterest.com{board_url}" if board_url and board_url.startswith("/") else board_url,
+                "pinCount": safe_int(board.get("pin_count")),
+                "followers": safe_int(board.get("follower_count")),
+            },
+            "author": {
+                "username": safe_str(username),
+                "displayName": safe_str(pinner.get("full_name")),
+                "url": profile_url,
+                "followers": safe_int(pinner.get("follower_count")),
+                "pinCount": safe_int(pinner.get("pin_count")),
+                "avatar": safe_str(pinner.get("image_small_url")),
+            },
+        }
+    )
 
 
 async def _fetch_pin_page(url: str) -> dict[str, Any]:
@@ -374,19 +386,18 @@ async def _fetch_pin_page(url: str) -> dict[str, Any]:
     if not (title or description or image):
         raise HTTPException(status_code=404, detail="Pin not found")
 
-    return {
-        "platform": "pinterest",
-        "id": safe_str(pin_id),
-        "url": safe_str(canonical),
-        "title": safe_str(title),
-        "description": safe_str(description),
-        "destinationUrl": None,
-        "image": safe_str(image),
-        "saves": 0,
-        "comments": 0,
-        "publishedAt": None,
-        "author": {"username": None, "displayName": None, "followers": 0},
-    }
+    return strip_empty(
+        {
+            "platform": "pinterest",
+            "id": safe_str(pin_id),
+            "url": safe_str(canonical),
+            "title": safe_str(title),
+            "description": safe_str(description),
+            "image": safe_str(image),
+            "saves": 0,
+            "comments": 0,
+        }
+    )
 
 
 @router.get("/pin-details", summary="Pinterest pin metadata + stats")
@@ -425,7 +436,7 @@ async def pin_details(
 
         data = await cached_or_run(
             endpoint="pinterest.pin-details",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -460,7 +471,7 @@ async def user_pins(
 
         data = await cached_or_run(
             endpoint="pinterest.user-pins",
-            params={"username": username, "limit": limit, "v": 3},
+            params={"username": username, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -485,41 +496,43 @@ def _normalize_board(item: dict[str, Any], username: str | None = None) -> dict[
     cover = item.get("cover") if isinstance(item.get("cover"), dict) else {}
     cover_images = cover.get("images") if isinstance(cover.get("images"), dict) else {}
     cover_orig = cover_images.get("orig") if isinstance(cover_images.get("orig"), dict) else {}
-    return {
-        "platform": "pinterest",
-        "id": board_id,
-        "name": safe_str(item.get("boardName") or item.get("name") or item.get("title")),
-        "slug": slug,
-        "url": url,
-        "privacy": safe_str(item.get("privacy") or item.get("boardPrivacy")),
-        "pinCount": safe_int(
-            item.get("pinCount") or item.get("pin_count") or item.get("pinsCount") or item.get("pin_count_mod")
-        ),
-        "followers": safe_int(
-            item.get("followerCount") or item.get("follower_count") or item.get("followers")
-        ),
-        "sectionCount": safe_int(item.get("sectionCount") or item.get("section_count")),
-        "coverImage": safe_str(
-            item.get("coverImageHdUrl")
-            or item.get("coverImageUrl")
-            or item.get("image_cover_url")
-            or item.get("coverImage")
-            or cover.get("url")
-            or cover_orig.get("url")
-        ),
-        "createdAt": safe_str(item.get("createdDate") or item.get("created_at") or item.get("createdAt")),
-        "owner": {
-            "username": safe_str(
-                owner.get("username")
-                or item.get("ownerUsername")
-                or item.get("creator")
-                or username
+    return strip_empty(
+        {
+            "platform": "pinterest",
+            "id": board_id,
+            "name": safe_str(item.get("boardName") or item.get("name") or item.get("title")),
+            "slug": slug,
+            "url": url,
+            "privacy": safe_str(item.get("privacy") or item.get("boardPrivacy")),
+            "pinCount": safe_int(
+                item.get("pinCount") or item.get("pin_count") or item.get("pinsCount") or item.get("pin_count_mod")
             ),
-            "displayName": safe_str(
-                owner.get("full_name") or item.get("ownerName") or item.get("creatorFullName")
+            "followers": safe_int(
+                item.get("followerCount") or item.get("follower_count") or item.get("followers")
             ),
-        },
-    }
+            "sectionCount": safe_int(item.get("sectionCount") or item.get("section_count")),
+            "coverImage": safe_str(
+                item.get("coverImageHdUrl")
+                or item.get("coverImageUrl")
+                or item.get("image_cover_url")
+                or item.get("coverImage")
+                or cover.get("url")
+                or cover_orig.get("url")
+            ),
+            "createdAt": safe_str(item.get("createdDate") or item.get("created_at") or item.get("createdAt")),
+            "owner": {
+                "username": safe_str(
+                    owner.get("username")
+                    or item.get("ownerUsername")
+                    or item.get("creator")
+                    or username
+                ),
+                "displayName": safe_str(
+                    owner.get("full_name") or item.get("ownerName") or item.get("creatorFullName")
+                ),
+            },
+        }
+    )
 
 
 @router.get("/user-boards", summary="List the boards on a Pinterest profile")
@@ -548,7 +561,7 @@ async def pinterest_user_boards(
 
         data = await cached_or_run(
             endpoint="pinterest.user-boards",
-            params={"username": username, "limit": limit, "v": 3},
+            params={"username": username, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -596,7 +609,7 @@ async def pinterest_board(
 
         data = await cached_or_run(
             endpoint="pinterest.board",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -630,7 +643,7 @@ async def pinterest_search(
 
         data = await cached_or_run(
             endpoint="pinterest.search",
-            params={"q": q, "limit": limit, "v": 2},
+            params={"q": q, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

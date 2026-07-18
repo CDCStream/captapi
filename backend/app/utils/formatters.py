@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 
 def seconds_to_timestamp(seconds: float) -> str:
     seconds = max(0.0, float(seconds))
@@ -39,6 +41,21 @@ def safe_list(v) -> list:
     if isinstance(v, list):
         return v
     return []
+
+
+def strip_empty(value: Any) -> Any:
+    """Drop None / '' / [] / {} keys recursively. Keeps 0 and False."""
+    if isinstance(value, dict):
+        out: dict[str, Any] = {}
+        for key, child in value.items():
+            cleaned = strip_empty(child)
+            if cleaned is None or cleaned == "" or cleaned == [] or cleaned == {}:
+                continue
+            out[key] = cleaned
+        return out
+    if isinstance(value, list):
+        return [strip_empty(item) for item in value]
+    return value
 
 
 def first_present(*values):
