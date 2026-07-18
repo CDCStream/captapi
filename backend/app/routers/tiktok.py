@@ -231,6 +231,32 @@ def _tt_published_iso(item: dict) -> str | None:
     return None
 
 
+_TT_HASHTAG_RE = re.compile(r"#([^\s#]+)")
+
+
+def _tt_hashtags(item: dict, caption: str | None) -> list[str]:
+    """Deduped hashtags from actor fields + caption; drop empty strings."""
+    seen: set[str] = set()
+    out: list[str] = []
+
+    def _add(raw: Any) -> None:
+        name = safe_str(raw)
+        if not name:
+            return
+        name = name.lstrip("#").strip()
+        if not name or name in seen:
+            return
+        seen.add(name)
+        out.append(name)
+
+    for h in safe_list(item.get("hashtags")):
+        _add(h.get("name") if isinstance(h, dict) else h)
+    if caption:
+        for tag in _TT_HASHTAG_RE.findall(caption):
+            _add(tag)
+    return out
+
+
 def _normalize(item: dict) -> dict:
     """Map raw TikTok actor output to our standard shape."""
     author = item.get("authorMeta") or item.get("author") or {}
@@ -242,13 +268,15 @@ def _normalize(item: dict) -> dict:
         author = {}
     video_meta = item.get("videoMeta") or {}
     covers = safe_list(item.get("covers"))
-    media_urls = safe_list(item.get("mediaUrls"))
+    caption = safe_str(item.get("text") or item.get("desc"))
+    # Channel-posts / video-details focus on metadata+stats; CDN play URLs are
+    # IP-bound and usually 403 for API consumers (same as the native path).
     return {
         "platform": "tiktok",
         "url": safe_str(item.get("webVideoUrl") or item.get("url")),
         "id": safe_str(item.get("id") or item.get("videoId")),
-        "caption": safe_str(item.get("text") or item.get("desc")),
-        "description": safe_str(item.get("text") or item.get("desc")),
+        "caption": caption,
+        "description": caption,
         "publishedAt": _tt_published_iso(item),
         "durationSeconds": safe_float(video_meta.get("duration") or item.get("duration")),
         "thumbnailUrl": safe_str(
@@ -256,12 +284,7 @@ def _normalize(item: dict) -> dict:
             or video_meta.get("originalCoverUrl")
             or (covers[0] if covers else None)
         ),
-        "videoUrl": safe_str(
-            item.get("videoUrl")
-            or video_meta.get("downloadAddr")
-            or (item.get("video") or {}).get("downloadAddr")
-            or (media_urls[0] if media_urls else None)
-        ),
+        "videoUrl": None,
         "author": {
             "username": safe_str(author.get("name") or author.get("uniqueId")),
             "displayName": safe_str(author.get("nickName") or author.get("nickname")),
@@ -277,7 +300,7 @@ def _normalize(item: dict) -> dict:
             "shares": safe_int(item.get("shareCount") or stats.get("shareCount")),
             "saves": safe_int(item.get("collectCount") or stats.get("collectCount")),
         },
-        "hashtags": [h.get("name") if isinstance(h, dict) else h for h in safe_list(item.get("hashtags"))],
+        "hashtags": _tt_hashtags(item, caption),
         "musicName": safe_str(music.get("musicName") or music.get("title")),
     }
 

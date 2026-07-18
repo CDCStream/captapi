@@ -449,6 +449,38 @@ def _url_list_first(node: Any) -> str | None:
     return safe_str(node)
 
 
+# Caption fallback: mobile aweme rows often omit/partial-fill text_extra /
+# cha_list even when the desc is full of #tags.
+_HASHTAG_RE = re.compile(r"#([^\s#]+)")
+
+
+def _collect_hashtags(item: dict[str, Any], caption: str | None) -> list[str]:
+    """Deduped hashtags from structured fields + caption, skipping empties."""
+    seen: set[str] = set()
+    out: list[str] = []
+
+    def _add(raw: Any) -> None:
+        name = safe_str(raw)
+        if not name:
+            return
+        name = name.lstrip("#").strip()
+        if not name or name in seen:
+            return
+        seen.add(name)
+        out.append(name)
+
+    for te in item.get("text_extra") or item.get("textExtra") or []:
+        if isinstance(te, dict):
+            _add(te.get("hashtag_name") or te.get("hashtagName"))
+    for cha in item.get("cha_list") or item.get("chaList") or item.get("challenges") or []:
+        if isinstance(cha, dict):
+            _add(cha.get("cha_name") or cha.get("chaName") or cha.get("title"))
+    if caption:
+        for tag in _HASHTAG_RE.findall(caption):
+            _add(tag)
+    return out
+
+
 def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
     """Map a mobile aweme row to the same post shape as video_details_native."""
     aweme_id = safe_str(item.get("aweme_id") or item.get("id"))
@@ -476,20 +508,8 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
     if duration is not None and duration > 1000:
         duration = duration / 1000.0
 
-    hashtags: list[str] = []
-    for te in item.get("text_extra") or item.get("textExtra") or []:
-        if not isinstance(te, dict):
-            continue
-        name = safe_str(te.get("hashtag_name") or te.get("hashtagName"))
-        if name:
-            hashtags.append(name)
-    if not hashtags:
-        for cha in item.get("cha_list") or item.get("chaList") or []:
-            if not isinstance(cha, dict):
-                continue
-            name = safe_str(cha.get("cha_name") or cha.get("chaName") or cha.get("title"))
-            if name:
-                hashtags.append(name)
+    caption = safe_str(item.get("desc"))
+    hashtags = _collect_hashtags(item, caption)
 
     avatar = (
         _url_list_first(author.get("avatar_larger") or author.get("avatarLarger"))
@@ -502,6 +522,10 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
         or _url_list_first(video.get("dynamic_cover") or video.get("dynamicCover"))
     )
 
+    verified = author.get("verified")
+    if verified is None:
+        verified = author.get("is_verified")
+
     return {
         "platform": "tiktok",
         "url": (
@@ -510,8 +534,8 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
             else safe_str(item.get("share_url") or item.get("shareUrl"))
         ),
         "id": aweme_id,
-        "caption": safe_str(item.get("desc")),
-        "description": safe_str(item.get("desc")),
+        "caption": caption,
+        "description": caption,
         "publishedAt": _iso(item.get("create_time") or item.get("createTime")),
         "durationSeconds": duration,
         "thumbnailUrl": cover,
@@ -527,7 +551,7 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
                 or author_stats.get("follower_count")
                 or author_stats.get("followerCount")
             ),
-            "verified": author.get("verified") or author.get("is_verified"),
+            "verified": verified,
             "profileImage": avatar,
         },
         "engagement": {
