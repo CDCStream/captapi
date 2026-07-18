@@ -20142,38 +20142,38 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "youtube-shorts-comments": {
     "url": "https://www.youtube.com/watch?v=DXVHmGoCTco",
     "videoId": "DXVHmGoCTco",
-    "totalReturned": 10,
+    "totalReturned": 2,
+    "totalComments": 172101,
+    "nextCursor": "Eg0SC0RYVkhtR29DVGNvGAYyJSIRIgtEWFZIbUdvQ1RjbzAAeAJCEGNvbW1lbnRzLXNlY3Rpb24%3D",
+    "hasMore": true,
     "comments": [
       {
         "id": "UgzoTD5YBfsX4xvnclx4AaABAg",
         "author": "@MrBeast",
+        "authorAvatarUrl": "https://yt3.ggpht.com/nxYrc_1_2f77DoBadyxMTmv7ZpRZapHR5jbuYe7PlPd5cIRJxtNNEYyOC0ZsxaDyJJzXrnJiuDE=s88-c-k-c0x00ffffff-no-rj",
+        "authorIsVerified": true,
+        "authorIsChannelOwner": true,
         "text": "Who is your favorite streamer?",
-        "likeCount": 67000,
-        "replyCount": 1000,
-        "publishedTimeText": "1 month ago (edited)",
-        "authorAvatarUrl": null,
-        "authorIsVerified": false,
-        "authorIsChannelOwner": false,
-        "hasCreatorHeart": false,
+        "likeCount": 69000,
+        "replyCount": 907,
+        "hasCreatorHeart": true,
+        "publishedTimeText": "3 months ago (edited)",
         "replyToId": null
       },
       {
-        "id": "UgycsG5e6HB_ZIPSLcF4AaABAg",
-        "author": "@KBD-LGN",
-        "text": "I don't need 100 thousand dollars and not millions, just help buy back my rental housing 4400430319225923 I think if not you but your subscribers will help me at least 1 cent 400 million subscribers it's already an achievement! Thank you very much to all caring people, I don't need too much",
-        "likeCount": 0,
-        "replyCount": 0,
-        "publishedTimeText": "48 seconds ago",
-        "authorAvatarUrl": null,
+        "id": "UgyQ5z9f7wcaa6tM1hB4AaABAg",
+        "author": "@NoOne-p8b",
+        "authorAvatarUrl": "https://yt3.ggpht.com/ytc/AIdro_kVrDUhBwT9mRE2gmGtChvxhznEB5UPX2XPBtWPAOOek_gveCxp4-WhcCMLH1t7oFAkEQ=s88-c-k-c0x00ffffff-no-rj",
         "authorIsVerified": false,
         "authorIsChannelOwner": false,
-        "hasCreatorHeart": false,
+        "text": "Rakai is a type of guy who everyone wants to avoid, but still sticks around like a parasite.",
+        "likeCount": 20000,
+        "replyCount": 70,
+        "hasCreatorHeart": true,
+        "publishedTimeText": "3 months ago",
         "replyToId": null
       }
-    ],
-    "nextCursor": null,
-    "hasMore": false,
-    "totalComments": 10
+    ]
   },
   "youtube-shorts-stats": {
     "url": "https://www.youtube.com/watch?v=DXVHmGoCTco",
