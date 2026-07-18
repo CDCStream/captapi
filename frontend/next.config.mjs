@@ -22,6 +22,53 @@ const nextConfig = {
         destination: "/apis/instagram-reels-by-audio-id",
         permanent: true,
       },
+      // Retired media-download how-tos / tools (ban-risk surfaces).
+      {
+        source: "/how-to/youtube-video-download",
+        destination: "/how-to/youtube-video-details",
+        permanent: true,
+      },
+      {
+        source: "/how-to/tiktok-video-download",
+        destination: "/how-to/tiktok-video-details",
+        permanent: true,
+      },
+      {
+        source: "/how-to/instagram-video-download",
+        destination: "/how-to/instagram-details",
+        permanent: true,
+      },
+      {
+        source: "/tools/youtube-shorts-downloader",
+        destination: "/tools/youtube-transcript",
+        permanent: true,
+      },
+      {
+        source: "/tools/youtube-to-mp4",
+        destination: "/tools/youtube-transcript",
+        permanent: true,
+      },
+      {
+        source: "/tools/youtube-to-mp3",
+        destination: "/tools/youtube-transcript",
+        permanent: true,
+      },
+      {
+        source: "/tools/youtube-thumbnail-downloader",
+        destination: "/tools/youtube-transcript",
+        permanent: true,
+      },
+      {
+        source: "/tools/instagram-photo-downloader",
+        destination: "/tools",
+        permanent: true,
+      },
+      // Removed blog post still linked from other articles.
+      {
+        source: "/blog/mastering-rest-api-best-practices",
+        destination: "/docs",
+        permanent: true,
+      },
     ];
   },
 };
