@@ -21,7 +21,7 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
-from app.utils.formatters import safe_int, safe_str
+from app.utils.formatters import parse_compact_count, safe_int, safe_str
 from app.utils.url import (
     extract_rumble_channel,
     extract_rumble_video_id,
@@ -80,15 +80,15 @@ def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
         "description": safe_str(item.get("description")),
         "channel": safe_str(item.get("channel") or item.get("channelName") or item.get("author")),
         "channelUrl": _clean_url(item.get("channelUrl")),
-        "views": safe_int(item.get("views") or item.get("viewCount") or item.get("viewsCount")),
-        "likes": safe_int(
+        "views": parse_compact_count(item.get("views") or item.get("viewCount") or item.get("viewsCount")),
+        "likes": parse_compact_count(
             item.get("likes")
             or item.get("likeCount")
             or item.get("likesCount")
             or item.get("engagementCount")
             or item.get("votes")
         ),
-        "dislikes": safe_int(item.get("dislikes") or item.get("dislikeCount")),
+        "dislikes": parse_compact_count(item.get("dislikes") or item.get("dislikeCount")),
         "duration": safe_str(item.get("duration") or item.get("durationSeconds")),
         "publishedAt": safe_str(
             item.get("uploadedAt")
@@ -97,7 +97,7 @@ def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
             or item.get("date")
         ),
         "thumbnail": safe_str(item.get("thumbnail") or item.get("thumbnailUrl") or item.get("image")),
-        "comments": safe_int(item.get("commentsCount") or item.get("comments")),
+        "comments": parse_compact_count(item.get("commentsCount") or item.get("comments")),
     }
 
 

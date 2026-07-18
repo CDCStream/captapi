@@ -428,12 +428,15 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
     adv = normalized["advertiser"]
     if platform == "google_ad_library" and not adv["url"] and adv["id"]:
         adv["url"] = f"https://adstransparency.google.com/advertiser/{adv['id']}"
-    # Upstream often withholds spend/impressions/CTA (LinkedIn/TikTok) and
-    # advertiser logos (Google Ads Transparency). Prefer omitting dead keys.
+    # LinkedIn / TikTok libraries often withhold spend/impressions/CTA. Prefer
+    # omitting always-null metadata over shipping dead keys. Facebook/Google
+    # sometimes return these, so keep explicit null when missing.
     if platform in {"tiktok_ad_library", "linkedin_ad_library"}:
         for key in ("cta", "landingUrl", "firstShown", "lastShown", "impressions", "spend", "country", "headline"):
             if normalized.get(key) in (None, "", [], {}):
                 normalized.pop(key, None)
+    # Advertiser logo is never supplied by Google Ads Transparency; omit empty
+    # advertiser keys across libraries when upstream gave nothing.
     for key in ("id", "name", "url", "logo"):
         if adv.get(key) in (None, "", []):
             adv.pop(key, None)

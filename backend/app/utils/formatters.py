@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 
@@ -19,6 +20,38 @@ def safe_int(v) -> int | None:
         return int(v)
     except (ValueError, TypeError):
         return None
+
+
+_COMPACT_COUNT_RE = re.compile(
+    r"([\d.,]+)\s*([KMB])?\b",
+    re.IGNORECASE,
+)
+_COMPACT_MULT = {"K": 1_000, "M": 1_000_000, "B": 1_000_000_000}
+
+
+def parse_compact_count(v) -> int | None:
+    """Parse ints or compact strings like '37.5K', '1.2M', '1,234'."""
+    if v is None:
+        return None
+    if isinstance(v, bool):
+        return int(v)
+    if isinstance(v, (int, float)):
+        return int(v)
+    s = str(v).strip().replace("\u00a0", " ")
+    if not s:
+        return None
+    direct = safe_int(s.replace(",", ""))
+    if direct is not None:
+        return direct
+    m = _COMPACT_COUNT_RE.search(s)
+    if not m:
+        return None
+    try:
+        base = float(m.group(1).replace(",", ""))
+    except ValueError:
+        return None
+    suffix = (m.group(2) or "").upper()
+    return int(base * _COMPACT_MULT.get(suffix, 1))
 
 
 def safe_float(v) -> float | None:
