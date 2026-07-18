@@ -733,6 +733,16 @@ def _comments_section_token(data: Any) -> str | None:
     return first
 
 
+def _comments_total(data: Any) -> int | None:
+    """Best-effort total from commentsHeaderRenderer count text."""
+    for header in walk_find(data, "commentsHeaderRenderer"):
+        for key in ("countText", "commentsCount", "headerText"):
+            n = parse_count_text(text_of(header.get(key)))
+            if n is not None:
+                return n
+    return None
+
+
 async def comments_native(
     norm_url: str,
     limit: int,
@@ -742,28 +752,30 @@ async def comments_native(
     """Top-level comments via InnerTube continuation tokens.
 
     Pass ``cursor`` (previous ``nextCursor``) to fetch the next page. Without a
-    cursor we bootstrap from the watch page's comments-section token. Large
-    first-page requests (``limit > 40``) still fall through to Apify so callers
-    get denser reply metadata in one shot.
+    cursor we bootstrap from the watch page's comments-section token.
     """
     token = cursor or None
+    total_comments: int | None = None
     if not token:
-        if limit > 40:
-            return None
         data, _ = await fetch_page_data(norm_url, timeout=12)
         if data is None:
             return None
+        total_comments = _comments_total(data)
         token = _comments_section_token(data)
     if not token:
         return None
 
     rows: list[dict[str, Any]] = []
     seen: set[str] = set()
+    # ~20 comments per InnerTube hop; keep a small buffer for empty pages.
+    max_hops = max(8, (limit // 15) + 3)
     hops = 0
-    while token and len(rows) < limit and hops < 6:
+    while token and len(rows) < limit and hops < max_hops:
         payload = await innertube("next", {"continuation": token}, timeout=15)
         if payload is None:
             break
+        if total_comments is None:
+            total_comments = _comments_total(payload)
         for row in _comment_payloads(payload):
             if row["id"] not in seen:
                 seen.add(row["id"])
@@ -778,7 +790,7 @@ async def comments_native(
     next_cursor = token if token else None
     return {
         "comments": rows[:limit],
-        "totalComments": None,
+        "totalComments": total_comments,
         "nextCursor": next_cursor,
     }
 

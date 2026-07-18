@@ -866,7 +866,6 @@ async def youtube_comments(
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, norm_url = _require_youtube_url(url)
-    settings = get_settings()
     cost = _scaled_credits(limit, RATE_YT_COMMENTS, 2)
 
     async with billed_call(
@@ -877,80 +876,34 @@ async def youtube_comments(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Native InnerTube only — Apify's streamers comments actor has no
+            # client-facing cursor, so it cannot power nextCursor/hasMore.
             native = await comments_native(norm_url, limit, cursor=cursor)
-            if native and native.get("comments"):
-                ctx["source"] = "direct"
-                comments = native["comments"]
-                next_cursor = safe_str(native.get("nextCursor")) or None
-                return {
-                    "url": norm_url,
-                    "videoId": vid,
-                    "totalReturned": len(comments),
-                    "totalComments": native.get("totalComments"),
-                    "nextCursor": next_cursor,
-                    "hasMore": next_cursor is not None,
-                    "comments": comments,
-                }
-
-            if cursor:
+            if not native or not native.get("comments"):
                 raise HTTPException(
-                    status_code=400,
-                    detail="Cursor pagination is only available on the native YouTube path. Start a new request without cursor.",
+                    status_code=400 if cursor else 502,
+                    detail=(
+                        "Invalid or expired cursor. Start a new request without cursor."
+                        if cursor
+                        else "Could not fetch YouTube comments"
+                    ),
                 )
-
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_YOUTUBE_COMMENTS,
-                {"startUrls": [{"url": norm_url}], "maxComments": limit},
-                max_items=limit,
-            )
-            comments = []
-            for c in items[:limit]:
-                comments.append(
-                    {
-                        "id": safe_str(c.get("cid") or c.get("commentId") or c.get("id")),
-                        "author": safe_str(c.get("author") or c.get("authorName")),
-                        "authorAvatarUrl": safe_str(
-                            c.get("avatar") or c.get("authorThumbnail")
-                        ),
-                        "authorIsVerified": bool(c.get("isVerified")),
-                        "authorIsChannelOwner": bool(c.get("authorIsChannelOwner")),
-                        "text": (
-                            c.get("comment")
-                            or c.get("text")
-                            or c.get("content")
-                            or ""
-                        ).strip(),
-                        "likeCount": safe_int(
-                            c.get("voteCount") or c.get("votes") or c.get("likeCount")
-                        )
-                        or 0,
-                        "replyCount": safe_int(
-                            c.get("replyCount") or c.get("replies")
-                        )
-                        or 0,
-                        "hasCreatorHeart": bool(c.get("hasCreatorHeart")),
-                        "publishedTimeText": safe_str(
-                            c.get("publishedTimeText") or c.get("publishedAt")
-                        ),
-                        "replyToId": safe_str(c.get("replyToCid")),
-                    }
-                )
-            total_comments = safe_int(items[0].get("commentsCount")) if items else None
-            ctx["source"] = "apify"
+            ctx["source"] = "direct"
+            comments = native["comments"]
+            next_cursor = safe_str(native.get("nextCursor")) or None
             return {
                 "url": norm_url,
                 "videoId": vid,
                 "totalReturned": len(comments),
-                "totalComments": total_comments,
-                "nextCursor": None,
-                "hasMore": False,
+                "totalComments": native.get("totalComments"),
+                "nextCursor": next_cursor,
+                "hasMore": next_cursor is not None,
                 "comments": comments,
             }
 
         data = await cached_or_run(
             endpoint="youtube.comments",
-            params={"url": norm_url, "limit": limit, "cursor": cursor or "", "v": 3},
+            params={"url": norm_url, "limit": limit, "cursor": cursor or "", "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1515,10 +1468,17 @@ async def shorts_details(
 async def shorts_comments(
     url: str = Query(...),
     limit: int = Query(50, ge=1, le=500),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    return await youtube_comments(url=url, limit=limit, cache=cache, caller=caller)
+    return await youtube_comments(url=url, limit=limit, cursor=cursor, cache=cache, caller=caller)
 
 
 # ---------- COMMENT REPLIES ----------------------------------------------

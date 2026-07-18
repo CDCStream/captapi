@@ -347,7 +347,7 @@
     "name": "YouTube Shorts Comments",
     "path": "/v1/youtube/shorts/comments",
     "credits": 20,
-    "summary": "Comments on a YouTube Short.",
+    "summary": "Comments on a YouTube Short, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "url",
@@ -360,6 +360,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",

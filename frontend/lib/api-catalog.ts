@@ -1169,7 +1169,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-shorts-transcript": [up(YT_SHORTS), lang(), cacheP()],
   "youtube-shorts-summarizer": [up(YT_SHORTS), lang(), cacheP()],
   "youtube-shorts-stats": [up(YT_SHORTS)],
-  "youtube-shorts-comments": [up(YT_SHORTS), lp(50, 500)],
+  "youtube-shorts-comments": [up(YT_SHORTS), lp(50, 500), CURSOR],
   "youtube-channel-shorts": [up(YT_CHANNEL), lp(20, 200)],
   "youtube-trending-shorts": [{ name: "q", type: "string", required: false, description: "Seed keyword for trending Shorts. Defaults to trending." }, lp(20, 100)],
   "youtube-channel-streams": [up(YT_CHANNEL), lp(20, 200)],
