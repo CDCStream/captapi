@@ -83,7 +83,7 @@
     "name": "YouTube Comments",
     "path": "/v1/youtube/comments",
     "credits": 20,
-    "summary": "Comments on a YouTube video.",
+    "summary": "Comments on a YouTube video, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "url",
@@ -96,6 +96,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -749,7 +755,7 @@
     "name": "TikTok Profile Region",
     "path": "/v1/tiktok/profile-region",
     "credits": 2,
-    "summary": "A creator's resolved country (region) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so when missing region is AI-inferred from public bio/name/language cues; regionSource says whether it's \"tiktok\" or \"inferred\" and regionConfidence grades the guess.",
+    "summary": "Where a TikTok creator is likely based and what language they use — country, language, and core profile stats from a profile URL or @handle. When TikTok hides the country, it is estimated from public bio/name/language cues, with a confidence grade.",
     "params": [
       {
         "name": "url",
@@ -771,7 +777,7 @@
     "name": "TikTok Audience Demographics",
     "path": "/v1/tiktok/audience-demographics",
     "credits": 3,
-    "summary": "Ranked country breakdown of a TikTok creator's audience (audienceLocations: country, countryCode, count, percentage), sampled natively from the people commenting on their recent videos. Engagement-based signal, not a follower census. From a profile URL or @handle.",
+    "summary": "Ranked country breakdown of a TikTok creator's audience, based on people who comment on their recent videos (not a full follower census). From a profile URL or @handle.",
     "params": [
       {
         "name": "url",
@@ -832,8 +838,8 @@
     "platform": "tiktok",
     "name": "TikTok Channel Posts",
     "path": "/v1/tiktok/channel-posts",
-    "credits": 14,
-    "summary": "Latest posts from a TikTok profile.",
+    "credits": 2,
+    "summary": "Latest videos from a TikTok profile — caption, engagement, thumbnail, sound, and hashtags for each post. Cursor pagination via nextCursor.",
     "params": [
       {
         "name": "url",
@@ -848,6 +854,12 @@
         "description": "Max items to return. Default 20, max 200. Billed per result."
       },
       {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+      },
+      {
         "name": "cache",
         "type": "boolean",
         "required": false,
@@ -860,8 +872,8 @@
     "platform": "tiktok",
     "name": "TikTok Comment Replies",
     "path": "/v1/tiktok/comment-replies",
-    "credits": 50,
-    "summary": "Replies to a specific TikTok comment.",
+    "credits": 2,
+    "summary": "Replies under a TikTok comment — text, author, likes, timestamp, with cursor pagination (nextCursor + hasMore). Flat 2 credits.",
     "params": [
       {
         "name": "url",
@@ -880,6 +892,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -1031,7 +1049,7 @@
         "name": "region",
         "type": "string",
         "required": false,
-        "description": "Two-letter ISO country the scraping proxy is routed through. Default US. Only sets the proxy location — does not filter results by country."
+        "description": "Two-letter ISO country our request is sent from. Default US. Does not filter results by country."
       },
       {
         "name": "cache",
@@ -2247,7 +2265,7 @@
     "name": "Reddit Subreddit Posts",
     "path": "/v1/reddit/subreddit-posts",
     "credits": 10,
-    "summary": "Recent posts in a subreddit.",
+    "summary": "Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "url",
@@ -2260,6 +2278,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -2353,7 +2377,7 @@
     "name": "Reddit Search",
     "path": "/v1/reddit/search",
     "credits": 10,
-    "summary": "Search Reddit posts by keyword.",
+    "summary": "Search Reddit posts by keyword, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "q",
@@ -2366,6 +2390,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -2403,7 +2433,7 @@
     "name": "Reddit Subreddit Search",
     "path": "/v1/reddit/subreddit-search",
     "credits": 10,
-    "summary": "Search posts within a specific subreddit.",
+    "summary": "Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "url",
@@ -2422,6 +2452,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -2587,7 +2623,7 @@
     "name": "Bluesky User Posts",
     "path": "/v1/bluesky/user-posts",
     "credits": 3,
-    "summary": "Recent posts from a Bluesky profile.",
+    "summary": "Recent posts from a Bluesky profile, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "url",
@@ -2600,6 +2636,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -3189,7 +3231,7 @@
     "name": "GitHub Repositories",
     "path": "/v1/github/repositories",
     "credits": 12,
-    "summary": "List a GitHub user's repositories.",
+    "summary": "List a GitHub user's repositories, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "username",
@@ -3202,6 +3244,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 30, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -3239,7 +3287,7 @@
     "name": "GitHub Pull Requests",
     "path": "/v1/github/pull-requests",
     "credits": 12,
-    "summary": "List repository pull requests.",
+    "summary": "List repository pull requests, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "repo",
@@ -3260,6 +3308,12 @@
         "description": "Max items to return. Default 30, max 100. Billed per result."
       },
       {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+      },
+      {
         "name": "cache",
         "type": "boolean",
         "required": false,
@@ -3273,7 +3327,7 @@
     "name": "GitHub Activity",
     "path": "/v1/github/activity",
     "credits": 12,
-    "summary": "Recent public activity for a GitHub user.",
+    "summary": "Recent public activity for a GitHub user, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "username",
@@ -3286,6 +3340,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 30, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -3301,7 +3361,7 @@
     "name": "GitHub Followers",
     "path": "/v1/github/followers",
     "credits": 12,
-    "summary": "List GitHub followers.",
+    "summary": "List GitHub followers, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "username",
@@ -3314,6 +3374,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 30, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -3329,7 +3395,7 @@
     "name": "GitHub Following",
     "path": "/v1/github/following",
     "credits": 12,
-    "summary": "List accounts a GitHub user follows.",
+    "summary": "List accounts a GitHub user follows, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "username",
@@ -3342,6 +3408,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 30, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -3707,7 +3779,7 @@
     "name": "SoundCloud Artist Tracks",
     "path": "/v1/soundcloud/artist-tracks",
     "credits": 28,
-    "summary": "Tracks from a SoundCloud artist profile.",
+    "summary": "Tracks from a SoundCloud artist profile, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "url",
@@ -3720,6 +3792,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -3823,7 +3901,7 @@
     "name": "Truth Social User Posts",
     "path": "/v1/truth-social/user-posts",
     "credits": 17,
-    "summary": "Recent public posts from a Truth Social profile.",
+    "summary": "Recent public posts from a Truth Social profile, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "url",
@@ -3836,6 +3914,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 80. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",

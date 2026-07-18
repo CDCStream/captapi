@@ -4,6 +4,7 @@
   "qs": {
     "q": "{{parameters.q}}",
     "limit": "{{parameters.limit}}",
+    "cursor": "{{parameters.cursor}}",
     "cache": "{{parameters.cache}}"
   },
   "response": {

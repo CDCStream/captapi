@@ -14,6 +14,13 @@
     "help": "Max items to return. Default 30, max 100. Billed per result."
   },
   {
+    "name": "cursor",
+    "type": "text",
+    "label": "Cursor",
+    "required": false,
+    "help": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+  },
+  {
     "name": "cache",
     "type": "boolean",
     "label": "Cache",

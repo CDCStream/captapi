@@ -5,6 +5,6 @@
   "description": "Generator for the Captapi Make.com custom app (local app definition built from the shared endpoint catalog).",
   "type": "module",
   "scripts": {
-    "generate": "node generate.mjs"
+    "generate": "node --experimental-strip-types generate.mjs"
   }
 }

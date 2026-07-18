@@ -1,8 +1,8 @@
 // Live end-to-end test of the published CLI surface against the production API.
-// Runs every one of the 62 endpoint commands with known-good inputs (chaining
-// comment IDs where required) and reports pass/fail + total credits spent.
+// Iterates every tool in dist/catalog.js; endpoints listed in INPUTS/CHAINS are
+// called, the rest are reported as NO_INPUT. Uses the rebuilt dist catalog.
 //
-//   node scripts/live-test.mjs            # all 62
+//   node scripts/live-test.mjs            # all catalog tools
 //   node scripts/live-test.mjs youtube    # one platform
 //
 // Reads the API key from ~/.captapi/config.json (run `captapi login` first).
@@ -28,6 +28,7 @@ const FB_POST =
   "https://www.facebook.com/NASA/posts/pfbid02skzNsrLf5atYZfzvzHAK9gHwDnZC5u4pDZMLQ1u3iJmfoA8tNsGpT7Uj6WPs6K3Rl";
 const FB_PAGE = "https://www.facebook.com/NASA";
 const FB_GROUP = "https://www.facebook.com/groups/444075055796968";
+const KWAI_PROFILE = "https://www.kwai.com/@easycashindonesia";
 const L = "2"; // small limit to keep credit cost down
 
 // Static args per command (chained ones resolved at runtime; see CHAINS).
@@ -80,6 +81,11 @@ const INPUTS = {
   "instagram-hashtag-search": ["--q", "travel", "--limit", L],
   "instagram-profile-search": ["--q", "nasa", "--limit", L],
   "instagram-embed": ["--url", IG_POST],
+  "instagram-basic-profile": ["--userId", "314216"],
+  "instagram-reels-by-audio-id": ["--audio_id", IG_AUDIO, "--limit", L],
+
+  "kwai-profile": ["--url", KWAI_PROFILE],
+  "kwai-user-posts": ["--url", KWAI_PROFILE, "--limit", L],
 
   "facebook-details": ["--url", FB_POST],
   "facebook-transcript": ["--url", FB_POST],

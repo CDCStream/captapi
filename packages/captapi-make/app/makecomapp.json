@@ -72,7 +72,7 @@
       },
       "youtubeComments": {
         "label": "YouTube Comments",
-        "description": "Comments on a YouTube video. Costs ~20 credits (cached results free, failures never charged).",
+        "description": "Comments on a YouTube video, with cursor pagination (nextCursor + hasMore). Costs ~20 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -480,7 +480,7 @@
       },
       "tiktokProfileRegion": {
         "label": "TikTok Profile Region",
-        "description": "A creator's resolved country (region) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so when missing region is AI-inferred from public bio/name/language cues; regionSource says whether it's \"tiktok\" or \"inferred\" and regionConfidence grades the guess. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Where a TikTok creator is likely based and what language they use — country, language, and core profile stats from a profile URL or @handle. When TikTok hides the country, it is estimated from public bio/name/language cues, with a confidence grade. Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -497,7 +497,7 @@
       },
       "tiktokAudienceDemographics": {
         "label": "TikTok Audience Demographics",
-        "description": "Ranked country breakdown of a TikTok creator's audience (audienceLocations: country, countryCode, count, percentage), sampled natively from the people commenting on their recent videos. Engagement-based signal, not a follower census. From a profile URL or @handle. Costs ~3 credits (cached results free, failures never charged).",
+        "description": "Ranked country breakdown of a TikTok creator's audience, based on people who comment on their recent videos (not a full follower census). From a profile URL or @handle. Costs ~3 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -531,7 +531,7 @@
       },
       "tiktokChannelPosts": {
         "label": "TikTok Channel Posts",
-        "description": "Latest posts from a TikTok profile. Costs ~14 credits (cached results free, failures never charged).",
+        "description": "Latest videos from a TikTok profile — caption, engagement, thumbnail, sound, and hashtags for each post. Cursor pagination via nextCursor. Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -548,7 +548,7 @@
       },
       "tiktokCommentReplies": {
         "label": "TikTok Comment Replies",
-        "description": "Replies to a specific TikTok comment. Costs ~50 credits (cached results free, failures never charged).",
+        "description": "Replies under a TikTok comment — text, author, likes, timestamp, with cursor pagination (nextCursor + hasMore). Flat 2 credits. Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1415,7 +1415,7 @@
       },
       "redditSubredditPosts": {
         "label": "Reddit Subreddit Posts",
-        "description": "Recent posts in a subreddit. Costs ~10 credits (cached results free, failures never charged).",
+        "description": "Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore). Costs ~10 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1483,7 +1483,7 @@
       },
       "redditSearch": {
         "label": "Reddit Search",
-        "description": "Search Reddit posts by keyword. Costs ~10 credits (cached results free, failures never charged).",
+        "description": "Search Reddit posts by keyword, with cursor pagination (nextCursor + hasMore). Costs ~10 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1517,7 +1517,7 @@
       },
       "redditSubredditSearch": {
         "label": "Reddit Subreddit Search",
-        "description": "Search posts within a specific subreddit. Costs ~10 credits (cached results free, failures never charged).",
+        "description": "Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore). Costs ~10 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1636,7 +1636,7 @@
       },
       "blueskyUserPosts": {
         "label": "Bluesky User Posts",
-        "description": "Recent posts from a Bluesky profile. Costs ~3 credits (cached results free, failures never charged).",
+        "description": "Recent posts from a Bluesky profile, with cursor pagination (nextCursor + hasMore). Costs ~3 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2027,7 +2027,7 @@
       },
       "githubRepositories": {
         "label": "GitHub Repositories",
-        "description": "List a GitHub user's repositories. Costs ~12 credits (cached results free, failures never charged).",
+        "description": "List a GitHub user's repositories, with cursor pagination (nextCursor + hasMore). Costs ~12 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2061,7 +2061,7 @@
       },
       "githubPullRequests": {
         "label": "GitHub Pull Requests",
-        "description": "List repository pull requests. Costs ~12 credits (cached results free, failures never charged).",
+        "description": "List repository pull requests, with cursor pagination (nextCursor + hasMore). Costs ~12 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2078,7 +2078,7 @@
       },
       "githubActivity": {
         "label": "GitHub Activity",
-        "description": "Recent public activity for a GitHub user. Costs ~12 credits (cached results free, failures never charged).",
+        "description": "Recent public activity for a GitHub user, with cursor pagination (nextCursor + hasMore). Costs ~12 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2095,7 +2095,7 @@
       },
       "githubFollowers": {
         "label": "GitHub Followers",
-        "description": "List GitHub followers. Costs ~12 credits (cached results free, failures never charged).",
+        "description": "List GitHub followers, with cursor pagination (nextCursor + hasMore). Costs ~12 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2112,7 +2112,7 @@
       },
       "githubFollowing": {
         "label": "GitHub Following",
-        "description": "List accounts a GitHub user follows. Costs ~12 credits (cached results free, failures never charged).",
+        "description": "List accounts a GitHub user follows, with cursor pagination (nextCursor + hasMore). Costs ~12 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2367,7 +2367,7 @@
       },
       "soundcloudArtistTracks": {
         "label": "SoundCloud Artist Tracks",
-        "description": "Tracks from a SoundCloud artist profile. Costs ~28 credits (cached results free, failures never charged).",
+        "description": "Tracks from a SoundCloud artist profile, with cursor pagination (nextCursor + hasMore). Costs ~28 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2452,7 +2452,7 @@
       },
       "truthSocialUserPosts": {
         "label": "Truth Social User Posts",
-        "description": "Recent public posts from a Truth Social profile. Costs ~17 credits (cached results free, failures never charged).",
+        "description": "Recent public posts from a Truth Social profile, with cursor pagination (nextCursor + hasMore). Costs ~17 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

@@ -10,7 +10,7 @@
   },
   "scripts": {
     "start": "node src/main.js",
-    "generate": "node generate.mjs"
+    "generate": "node --experimental-strip-types generate.mjs"
   },
   "dependencies": {
     "apify": "^3.2.6"

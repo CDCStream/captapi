@@ -650,7 +650,7 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     blurb: "Extract Kwai/Kuaishou profile details, user posts, and post metadata.",
     icon: "video",
     color: "text-orange-500",
-    exampleUrl: "https://www.kuaishou.com/profile/2542916559",
+    exampleUrl: "https://www.kwai.com/@easycashindonesia",
     endpoints: KWAI.map((s) => ({ ...s, platform: "kwai" as const })),
   },
   {
@@ -1122,8 +1122,9 @@ const TRUTH_PROFILE = "Truth Social profile URL or @username.";
 const TRUTH_POST = "Truth Social post URL or post ID.";
 const KICK_CLIP = "Kick clip URL, channel URL, or channel username.";
 const AMAZON_SHOP_URL = "Amazon seller storefront URL, seller profile URL, or seller ID.";
-const KWAI_PROFILE = "Kwai/Kuaishou profile URL or user ID.";
-const KWAI_POST = "Kwai/Kuaishou post URL or video/photo ID.";
+const KWAI_PROFILE = "Kwai profile URL or @handle, e.g. https://www.kwai.com/@easycashindonesia.";
+const KWAI_POST = "Kwai video URL, e.g. https://www.kwai.com/@handle/video/5238962376325675745.";
+const CURSOR = { name: "cursor", type: "string" as const, required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." };
 const KOMI_PAGE = "Komi page URL or username.";
 const PILLAR_PAGE = "Pillar page URL or username.";
 const LINKBIO_PAGE = "Linkbio page URL or username.";
@@ -1134,7 +1135,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-transcript": [up(YT_VIDEO), lang(), cacheP()],
   "youtube-summarizer": [up(YT_VIDEO), lang(), cacheP()],
   "youtube-video-details": [up(YT_VIDEO)],
-  "youtube-comments": [up(YT_VIDEO), lp(50, 500)],
+  "youtube-comments": [up(YT_VIDEO), lp(50, 500), CURSOR],
   "youtube-channel-details": [up(YT_CHANNEL)],
   "youtube-search": [qp(), lp(20, 200)],
   "youtube-channel-videos": [up(YT_CHANNEL), lp(20, 200), fastRss()],
@@ -1223,13 +1224,13 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "twitter-community": [up("X community URL (x.com/i/communities/ID) or community ID.")],
   "twitter-community-tweets": [up("X community URL (x.com/i/communities/ID) or community ID."), lp(25, 200)],
   // Reddit
-  "reddit-subreddit-posts": [up("Subreddit URL, r/name, or bare name, e.g. r/technology."), lp(25, 200)],
+  "reddit-subreddit-posts": [up("Subreddit URL, r/name, or bare name, e.g. r/technology."), lp(25, 200), CURSOR],
   "reddit-post-details": [up("Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/...")],
   "reddit-post-comments": [up("Reddit post URL."), lp(50, 500)],
   "reddit-post-transcript": [up("Reddit post URL."), lp(50, 200)],
-  "reddit-search": [qp("Keywords or search query (min 2 characters)."), lp(25, 200)],
+  "reddit-search": [qp("Keywords or search query (min 2 characters)."), lp(25, 200), CURSOR],
   "reddit-subreddit-details": [up("Subreddit URL, r/name, or bare name, e.g. r/technology.")],
-  "reddit-subreddit-search": [up("Subreddit URL, r/name, or bare name, e.g. r/technology."), qp("Keywords or search query (min 2 characters)."), lp(25, 200)],
+  "reddit-subreddit-search": [up("Subreddit URL, r/name, or bare name, e.g. r/technology."), qp("Keywords or search query (min 2 characters)."), lp(25, 200), CURSOR],
   // Threads
   "threads-profile": [up("Threads profile URL or @handle, e.g. https://threads.net/@username.")],
   "threads-user-posts": [up("Threads profile URL or @handle."), lp(20, 100)],
@@ -1238,7 +1239,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "threads-search-users": [qp("Keyword to find Threads users (min 2 characters)."), lp(20, 100)],
   // Bluesky
   "bluesky-profile": [up("Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle.")],
-  "bluesky-user-posts": [up("Bluesky profile URL, @handle, or handle."), lp(25, 100)],
+  "bluesky-user-posts": [up("Bluesky profile URL, @handle, or handle."), lp(25, 100), CURSOR],
   "bluesky-post-details": [up("Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY.")],
   // Pinterest
   "pinterest-pin-details": [up("Pinterest pin URL, e.g. https://pinterest.com/pin/ID/.")],
@@ -1269,14 +1270,14 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "spotify-podcast-episodes": [up(SPOTIFY_URL), lp(20, 50)],
   // SoundCloud
   "soundcloud-artist": [up(SC_PROFILE)],
-  "soundcloud-artist-tracks": [up(SC_PROFILE), lp(20, 100)],
+  "soundcloud-artist-tracks": [up(SC_PROFILE), lp(20, 100), CURSOR],
   "soundcloud-track": [up(SC_TRACK)],
   // Linktree / Snapchat
   "linktree-page": [up(LINKTREE_PROFILE)],
   "snapchat-user-profile": [up(SNAPCHAT_PROFILE)],
   // Truth Social / Kick / Amazon / Age-Gender
   "truth-social-profile": [up(TRUTH_PROFILE)],
-  "truth-social-user-posts": [up(TRUTH_PROFILE), lp(20, 80)],
+  "truth-social-user-posts": [up(TRUTH_PROFILE), lp(20, 80), CURSOR],
   "truth-social-post": [up(TRUTH_POST)],
   "kick-clip": [up(KICK_CLIP), lp(30, 100)],
   "amazon-shop-page": [up(AMAZON_SHOP_URL), { name: "marketplace", type: "string", required: false, description: "Amazon marketplace code. Default US." }, lp(20, 200)],
@@ -1295,12 +1296,12 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "linkme-profile": [up(LINKME_PROFILE)],
   // GitHub
   "github-user": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL, e.g. vercel or https://github.com/vercel." }],
-  "github-repositories": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100)],
+  "github-repositories": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100), CURSOR],
   "github-repository": [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name, e.g. vercel/next.js." }],
-  "github-pull-requests": [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name, e.g. vercel/next.js." }, { name: "state", type: "string", required: false, description: "open, closed, or all. Default open." }, lp(30, 100)],
-  "github-activity": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100)],
-  "github-followers": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100)],
-  "github-following": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100)],
+  "github-pull-requests": [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name, e.g. vercel/next.js." }, { name: "state", type: "string", required: false, description: "open, closed, or all. Default open." }, lp(30, 100), CURSOR],
+  "github-activity": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100), CURSOR],
+  "github-followers": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100), CURSOR],
+  "github-following": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100), CURSOR],
   "github-contributions": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }],
   "github-trending-repositories": [{ name: "q", type: "string", required: false, description: "GitHub search query. Default stars:>1000." }, lp(20, 100)],
   "github-trending-developers": [{ name: "q", type: "string", required: false, description: "GitHub user search query. Default followers:>1000." }, lp(20, 100)],
@@ -1587,7 +1588,7 @@ const PROFILE_URL: Record<PlatformId, string> = {
   kick: "https://kick.com/xqc",
   amazon_shop: "https://www.amazon.com/s?me=ATVPDKIKX0DER",
   account: "https://captapi.com/dashboard",
-  kwai: "https://www.kuaishou.com/profile/2542916559",
+  kwai: "https://www.kwai.com/@easycashindonesia",
   komi: "https://komi.io/example",
   pillar: "https://pillar.io/example",
   linkbio: "https://lnk.bio/example",

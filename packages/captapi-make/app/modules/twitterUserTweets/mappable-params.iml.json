@@ -4,7 +4,7 @@
     "type": "text",
     "label": "URL",
     "required": true,
-    "help": "Twitter/X profile URL or @handle, e.g. https://x.com/username."
+    "help": "Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
   },
   {
     "name": "limit",

@@ -4,6 +4,7 @@
   "qs": {
     "username": "{{parameters.username}}",
     "limit": "{{parameters.limit}}",
+    "cursor": "{{parameters.cursor}}",
     "cache": "{{parameters.cache}}"
   },
   "response": {

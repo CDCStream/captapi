@@ -5,6 +5,7 @@
     "url": "{{parameters.url}}",
     "comment_id": "{{parameters.comment_id}}",
     "limit": "{{parameters.limit}}",
+    "cursor": "{{parameters.cursor}}",
     "cache": "{{parameters.cache}}"
   },
   "response": {

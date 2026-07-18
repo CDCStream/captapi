@@ -31,6 +31,8 @@ export interface YoutubeCommentsParams {
   url: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -211,7 +213,7 @@ export class YoutubeApi {
   videoDetails(params: YoutubeVideoDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/video-details", params);
   }
-  /** YouTube Comments — Comments on a YouTube video. (20 credits) */
+  /** YouTube Comments — Comments on a YouTube video, with cursor pagination (nextCursor + hasMore). (20 credits) */
   comments(params: YoutubeCommentsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/comments", params);
   }
@@ -364,6 +366,8 @@ export interface TiktokChannelPostsParams {
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -375,6 +379,8 @@ export interface TiktokCommentRepliesParams {
   comment_id: string;
   /** Max items to return. Default 50, max 500. Billed per result. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -422,7 +428,7 @@ export interface TiktokSearchByHashtagParams {
   limit?: number;
   /** Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end. */
   cursor?: number;
-  /** Two-letter ISO country the scraping proxy is routed through. Default US. Only sets the proxy location — does not filter results by country. */
+  /** Two-letter ISO country our request is sent from. Default US. Does not filter results by country. */
   region?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -513,11 +519,11 @@ export class TiktokApi {
   channelDetails(params: TiktokChannelDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/channel-details", params);
   }
-  /** TikTok Profile Region — A creator's resolved country (region) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so when missing region is AI-inferred from public bio/name/language cues; regionSource says whether it's "tiktok" or "inferred" and regionConfidence grades the guess. (2 credits) */
+  /** TikTok Profile Region — Where a TikTok creator is likely based and what language they use — country, language, and core profile stats from a profile URL or @handle. When TikTok hides the country, it is estimated from public bio/name/language cues, with a confidence grade. (2 credits) */
   profileRegion(params: TiktokProfileRegionParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/profile-region", params);
   }
-  /** TikTok Audience Demographics — Ranked country breakdown of a TikTok creator's audience (audienceLocations: country, countryCode, count, percentage), sampled natively from the people commenting on their recent videos. Engagement-based signal, not a follower census. From a profile URL or @handle. (3 credits) */
+  /** TikTok Audience Demographics — Ranked country breakdown of a TikTok creator's audience, based on people who comment on their recent videos (not a full follower census). From a profile URL or @handle. (3 credits) */
   audienceDemographics(params: TiktokAudienceDemographicsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/audience-demographics", params);
   }
@@ -525,11 +531,11 @@ export class TiktokApi {
   searchSuggestions(params: TiktokSearchSuggestionsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/search-suggestions", params);
   }
-  /** TikTok Channel Posts — Latest posts from a TikTok profile. (14 credits) */
+  /** TikTok Channel Posts — Latest videos from a TikTok profile — caption, engagement, thumbnail, sound, and hashtags for each post. Cursor pagination via nextCursor. (2 credits) */
   channelPosts(params: TiktokChannelPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/channel-posts", params);
   }
-  /** TikTok Comment Replies — Replies to a specific TikTok comment. (50 credits) */
+  /** TikTok Comment Replies — Replies under a TikTok comment — text, author, likes, timestamp, with cursor pagination (nextCursor + hasMore). Flat 2 credits. (2 credits) */
   commentReplies(params: TiktokCommentRepliesParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/comment-replies", params);
   }
@@ -1074,6 +1080,8 @@ export interface RedditSubredditPostsParams {
   url: string;
   /** Max items to return. Default 25, max 200. Billed per result. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -1108,6 +1116,8 @@ export interface RedditSearchParams {
   q: string;
   /** Max items to return. Default 25, max 200. Billed per result. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -1126,13 +1136,15 @@ export interface RedditSubredditSearchParams {
   q: string;
   /** Max items to return. Default 25, max 200. Billed per result. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
 
 export class RedditApi {
   constructor(private readonly core: HttpCore) {}
-  /** Reddit Subreddit Posts — Recent posts in a subreddit. (10 credits) */
+  /** Reddit Subreddit Posts — Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore). (10 credits) */
   subredditPosts(params: RedditSubredditPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/subreddit-posts", params);
   }
@@ -1148,7 +1160,7 @@ export class RedditApi {
   postTranscript(params: RedditPostTranscriptParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/post-transcript", params);
   }
-  /** Reddit Search — Search Reddit posts by keyword. (10 credits) */
+  /** Reddit Search — Search Reddit posts by keyword, with cursor pagination (nextCursor + hasMore). (10 credits) */
   search(params: RedditSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/search", params);
   }
@@ -1156,7 +1168,7 @@ export class RedditApi {
   subredditDetails(params: RedditSubredditDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/subreddit-details", params);
   }
-  /** Reddit Subreddit Search — Search posts within a specific subreddit. (10 credits) */
+  /** Reddit Subreddit Search — Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore). (10 credits) */
   subredditSearch(params: RedditSubredditSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/subreddit-search", params);
   }
@@ -1239,6 +1251,8 @@ export interface BlueskyUserPostsParams {
   url: string;
   /** Max items to return. Default 25, max 100. Billed per result. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -1256,7 +1270,7 @@ export class BlueskyApi {
   profile(params: BlueskyProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/bluesky/profile", params);
   }
-  /** Bluesky User Posts — Recent posts from a Bluesky profile. (3 credits) */
+  /** Bluesky User Posts — Recent posts from a Bluesky profile, with cursor pagination (nextCursor + hasMore). (3 credits) */
   userPosts(params: BlueskyUserPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/bluesky/user-posts", params);
   }
@@ -1544,6 +1558,8 @@ export interface GithubRepositoriesParams {
   username: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
+  /** Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -1562,6 +1578,8 @@ export interface GithubPullRequestsParams {
   state?: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
+  /** Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -1571,6 +1589,8 @@ export interface GithubActivityParams {
   username: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
+  /** Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -1580,6 +1600,8 @@ export interface GithubFollowersParams {
   username: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
+  /** Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -1589,6 +1611,8 @@ export interface GithubFollowingParams {
   username: string;
   /** Max items to return. Default 30, max 100. Billed per result. */
   limit?: number;
+  /** Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -1624,7 +1648,7 @@ export class GithubApi {
   user(params: GithubUserParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/user", params);
   }
-  /** GitHub Repositories — List a GitHub user's repositories. (12 credits) */
+  /** GitHub Repositories — List a GitHub user's repositories, with cursor pagination (nextCursor + hasMore). (12 credits) */
   repositories(params: GithubRepositoriesParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/repositories", params);
   }
@@ -1632,19 +1656,19 @@ export class GithubApi {
   repository(params: GithubRepositoryParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/repository", params);
   }
-  /** GitHub Pull Requests — List repository pull requests. (12 credits) */
+  /** GitHub Pull Requests — List repository pull requests, with cursor pagination (nextCursor + hasMore). (12 credits) */
   pullRequests(params: GithubPullRequestsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/pull-requests", params);
   }
-  /** GitHub Activity — Recent public activity for a GitHub user. (12 credits) */
+  /** GitHub Activity — Recent public activity for a GitHub user, with cursor pagination (nextCursor + hasMore). (12 credits) */
   activity(params: GithubActivityParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/activity", params);
   }
-  /** GitHub Followers — List GitHub followers. (12 credits) */
+  /** GitHub Followers — List GitHub followers, with cursor pagination (nextCursor + hasMore). (12 credits) */
   followers(params: GithubFollowersParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/followers", params);
   }
-  /** GitHub Following — List accounts a GitHub user follows. (12 credits) */
+  /** GitHub Following — List accounts a GitHub user follows, with cursor pagination (nextCursor + hasMore). (12 credits) */
   following(params: GithubFollowingParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/following", params);
   }
@@ -1802,6 +1826,8 @@ export interface SoundcloudArtistTracksParams {
   url: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -1819,7 +1845,7 @@ export class SoundcloudApi {
   artist(params: SoundcloudArtistParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/soundcloud/artist", params);
   }
-  /** SoundCloud Artist Tracks — Tracks from a SoundCloud artist profile. (28 credits) */
+  /** SoundCloud Artist Tracks — Tracks from a SoundCloud artist profile, with cursor pagination (nextCursor + hasMore). (28 credits) */
   artistTracks(params: SoundcloudArtistTracksParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/soundcloud/artist-tracks", params);
   }
@@ -1871,6 +1897,8 @@ export interface TruthSocialUserPostsParams {
   url: string;
   /** Max items to return. Default 20, max 80. Billed per result. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -1888,7 +1916,7 @@ export class TruthSocialApi {
   profile(params: TruthSocialProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/truth-social/profile", params);
   }
-  /** Truth Social User Posts — Recent public posts from a Truth Social profile. (17 credits) */
+  /** Truth Social User Posts — Recent public posts from a Truth Social profile, with cursor pagination (nextCursor + hasMore). (17 credits) */
   userPosts(params: TruthSocialUserPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/truth-social/user-posts", params);
   }

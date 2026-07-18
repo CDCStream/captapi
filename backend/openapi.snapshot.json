@@ -270,7 +270,7 @@
         "tags": [
           "YouTube"
         ],
-        "summary": "YouTube video comments (paginated)",
+        "summary": "YouTube video comments (cursor-paginated)",
         "operationId": "youtube_comments_v1_youtube_comments_get",
         "security": [
           {
@@ -298,6 +298,24 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
           },
           {
             "name": "cache",
@@ -2410,7 +2428,8 @@
         "tags": [
           "TikTok"
         ],
-        "summary": "Latest posts from a TikTok profile",
+        "summary": "Latest videos from a TikTok profile (cursor-paginated)",
+        "description": "Returns a creator's most recent public videos as structured JSON — caption, engagement (views/likes/comments/shares/saves), thumbnail, hashtags, sound name, and author profile. Accepts a profile URL, @handle, or username. Prefers TikTok's native mobile post API (cursor pagination via nextCursor / hasMore); falls back to our data-collection pool on the first page if every residential exit is soft-blocked. Flat 2 credits per call.",
         "operationId": "tiktok_channel_posts_v1_tiktok_channel_posts_get",
         "security": [
           {
@@ -2437,9 +2456,29 @@
               "type": "integer",
               "maximum": 200,
               "minimum": 1,
+              "description": "How many latest videos to return (1–200). Newest first. Flat 2 credits per call.",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "How many latest videos to return (1–200). Newest first. Flat 2 credits per call."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (TikTok's max_cursor timestamp, e.g. 1783614676000).",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (TikTok's max_cursor timestamp, e.g. 1783614676000)."
           },
           {
             "name": "cache",
@@ -2481,7 +2520,7 @@
         "tags": [
           "TikTok"
         ],
-        "summary": "Replies to a TikTok comment",
+        "summary": "Replies to a TikTok comment (cursor-paginated)",
         "operationId": "tiktok_comment_replies_v1_tiktok_comment_replies_get",
         "security": [
           {
@@ -2522,6 +2561,24 @@
               "default": 50,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
           },
           {
             "name": "cache",
@@ -3655,7 +3712,7 @@
         "tags": [
           "Truth Social"
         ],
-        "summary": "Truth Social user posts",
+        "summary": "Truth Social user posts (cursor-paginated)",
         "operationId": "user_posts_v1_truth_social_user_posts_get",
         "security": [
           {
@@ -3685,6 +3742,24 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor (Mastodon max_id). Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor (Mastodon max_id). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
           },
           {
             "name": "cache",
@@ -6890,7 +6965,7 @@
         "tags": [
           "GitHub"
         ],
-        "summary": "List a GitHub user's repositories",
+        "summary": "List a GitHub user's repositories (cursor-paginated)",
         "operationId": "repositories_v1_github_repositories_get",
         "security": [
           {
@@ -6920,6 +6995,24 @@
               "default": 30,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
           },
           {
             "name": "cache",
@@ -7020,7 +7113,7 @@
         "tags": [
           "GitHub"
         ],
-        "summary": "List repository pull requests",
+        "summary": "List repository pull requests (cursor-paginated)",
         "operationId": "pull_requests_v1_github_pull_requests_get",
         "security": [
           {
@@ -7063,6 +7156,24 @@
             }
           },
           {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+          },
+          {
             "name": "cache",
             "in": "query",
             "required": false,
@@ -7102,7 +7213,7 @@
         "tags": [
           "GitHub"
         ],
-        "summary": "GitHub user public activity",
+        "summary": "GitHub user public activity (cursor-paginated)",
         "operationId": "activity_v1_github_activity_get",
         "security": [
           {
@@ -7132,6 +7243,24 @@
               "default": 30,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
           },
           {
             "name": "cache",
@@ -7173,7 +7302,7 @@
         "tags": [
           "GitHub"
         ],
-        "summary": "List GitHub followers",
+        "summary": "List GitHub followers (cursor-paginated)",
         "operationId": "followers_v1_github_followers_get",
         "security": [
           {
@@ -7201,6 +7330,24 @@
               "default": 30,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
           },
           {
             "name": "cache",
@@ -7242,7 +7389,7 @@
         "tags": [
           "GitHub"
         ],
-        "summary": "List GitHub following",
+        "summary": "List GitHub following (cursor-paginated)",
         "operationId": "following_v1_github_following_get",
         "security": [
           {
@@ -7270,6 +7417,24 @@
               "default": 30,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
           },
           {
             "name": "cache",
@@ -7964,7 +8129,7 @@
         "tags": [
           "Reddit"
         ],
-        "summary": "List recent posts in a subreddit",
+        "summary": "List recent posts in a subreddit (cursor-paginated)",
         "operationId": "subreddit_posts_v1_reddit_subreddit_posts_get",
         "security": [
           {
@@ -7994,6 +8159,24 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (Reddit's after fullname).",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (Reddit's after fullname)."
           },
           {
             "name": "cache",
@@ -8297,7 +8480,7 @@
         "tags": [
           "Reddit"
         ],
-        "summary": "Search posts within a specific subreddit",
+        "summary": "Search posts within a specific subreddit (cursor-paginated)",
         "operationId": "subreddit_search_v1_reddit_subreddit_search_get",
         "security": [
           {
@@ -8341,6 +8524,24 @@
             }
           },
           {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+          },
+          {
             "name": "cache",
             "in": "query",
             "required": false,
@@ -8380,7 +8581,7 @@
         "tags": [
           "Reddit"
         ],
-        "summary": "Search Reddit posts by keyword",
+        "summary": "Search Reddit posts by keyword (cursor-paginated)",
         "operationId": "reddit_search_v1_reddit_search_get",
         "security": [
           {
@@ -8411,6 +8612,24 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
           },
           {
             "name": "cache",
@@ -8844,7 +9063,7 @@
         "tags": [
           "Bluesky"
         ],
-        "summary": "List recent posts for a Bluesky profile",
+        "summary": "List recent posts for a Bluesky profile (cursor-paginated)",
         "operationId": "bluesky_user_posts_v1_bluesky_user_posts_get",
         "security": [
           {
@@ -8874,6 +9093,24 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
           },
           {
             "name": "cache",
@@ -11186,7 +11423,7 @@
         "tags": [
           "SoundCloud"
         ],
-        "summary": "SoundCloud artist tracks",
+        "summary": "SoundCloud artist tracks (cursor-paginated)",
         "operationId": "artist_tracks_v1_soundcloud_artist_tracks_get",
         "security": [
           {
@@ -11216,6 +11453,24 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
           },
           {
             "name": "cache",
@@ -12152,7 +12407,7 @@
         "tags": [
           "Billing"
         ],
-        "summary": "Create a Dodo Payments checkout session",
+        "summary": "Create a checkout session",
         "operationId": "create_checkout_v1_billing_checkout_post",
         "parameters": [
           {
@@ -12209,7 +12464,7 @@
         "tags": [
           "Billing"
         ],
-        "summary": "Create a Dodo customer portal session",
+        "summary": "Create a customer billing portal session",
         "operationId": "create_portal_v1_billing_portal_post",
         "parameters": [
           {

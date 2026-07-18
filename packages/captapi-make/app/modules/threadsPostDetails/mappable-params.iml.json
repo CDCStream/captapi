@@ -4,7 +4,7 @@
     "type": "text",
     "label": "URL",
     "required": true,
-    "help": "Threads post URL, e.g. https://threads.net/@user/post/CODE."
+    "help": "Threads post URL, e.g. https://threads.net/@user/post/CODE. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
   },
   {
     "name": "cache",

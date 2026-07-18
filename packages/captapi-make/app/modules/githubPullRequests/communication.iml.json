@@ -5,6 +5,7 @@
     "repo": "{{parameters.repo}}",
     "state": "{{parameters.state}}",
     "limit": "{{parameters.limit}}",
+    "cursor": "{{parameters.cursor}}",
     "cache": "{{parameters.cache}}"
   },
   "response": {

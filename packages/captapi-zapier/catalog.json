@@ -11,7 +11,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "language",
@@ -39,7 +39,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "language",
@@ -67,7 +67,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -83,19 +83,25 @@
     "name": "YouTube Comments",
     "path": "/v1/youtube/comments",
     "credits": 20,
-    "summary": "Comments on a YouTube video.",
+    "summary": "Comments on a YouTube video, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -117,7 +123,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC..."
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -167,7 +173,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC..."
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -201,7 +207,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."
+        "description": "YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -235,7 +241,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID."
+        "description": "YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -269,7 +275,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID."
+        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "language",
@@ -297,7 +303,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID."
+        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "language",
@@ -325,7 +331,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID."
+        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -347,7 +353,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID."
+        "description": "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -375,7 +381,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC..."
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -431,7 +437,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC..."
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -487,7 +493,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "comment_id",
@@ -521,7 +527,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC..."
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -549,7 +555,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC..."
+        "description": "YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -577,7 +583,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "YouTube community post URL."
+        "description": "YouTube community post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -599,7 +605,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID."
+        "description": "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -621,7 +627,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "language",
@@ -649,7 +655,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "language",
@@ -677,7 +683,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -699,7 +705,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -733,7 +739,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -749,13 +755,13 @@
     "name": "TikTok Profile Region",
     "path": "/v1/tiktok/profile-region",
     "credits": 2,
-    "summary": "A creator's resolved country (region) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so when missing region is AI-inferred from public bio/name/language cues; regionSource says whether it's \"tiktok\" or \"inferred\" and regionConfidence grades the guess.",
+    "summary": "Where a TikTok creator is likely based and what language they use — country, language, and core profile stats from a profile URL or @handle. When TikTok hides the country, it is estimated from public bio/name/language cues, with a confidence grade.",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -771,13 +777,13 @@
     "name": "TikTok Audience Demographics",
     "path": "/v1/tiktok/audience-demographics",
     "credits": 3,
-    "summary": "Ranked country breakdown of a TikTok creator's audience (audienceLocations: country, countryCode, count, percentage), sampled natively from the people commenting on their recent videos. Engagement-based signal, not a follower census. From a profile URL or @handle.",
+    "summary": "Ranked country breakdown of a TikTok creator's audience, based on people who comment on their recent videos (not a full follower census). From a profile URL or @handle.",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -832,20 +838,26 @@
     "platform": "TikTok",
     "name": "TikTok Channel Posts",
     "path": "/v1/tiktok/channel-posts",
-    "credits": 14,
-    "summary": "Latest posts from a TikTok profile.",
+    "credits": 2,
+    "summary": "Latest videos from a TikTok profile — caption, engagement, thumbnail, sound, and hashtags for each post. Cursor pagination via nextCursor.",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -860,14 +872,14 @@
     "platform": "TikTok",
     "name": "TikTok Comment Replies",
     "path": "/v1/tiktok/comment-replies",
-    "credits": 50,
-    "summary": "Replies to a specific TikTok comment.",
+    "credits": 2,
+    "summary": "Replies under a TikTok comment — text, author, likes, timestamp, with cursor pagination (nextCursor + hasMore). Flat 2 credits.",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID."
+        "description": "Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "comment_id",
@@ -880,6 +892,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 50, max 500. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -901,7 +919,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -929,7 +947,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -957,7 +975,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID."
+        "description": "TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -1031,7 +1049,7 @@
         "name": "region",
         "type": "string",
         "required": false,
-        "description": "Two-letter ISO country the scraping proxy is routed through. Default US. Only sets the proxy location — does not filter results by country."
+        "description": "Two-letter ISO country our request is sent from. Default US. Does not filter results by country."
       },
       {
         "name": "cache",
@@ -1087,7 +1105,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID."
+        "description": "TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -1165,7 +1183,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -1187,7 +1205,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "TikTok profile URL, e.g. https://tiktok.com/@username."
+        "description": "TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -1249,7 +1267,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/."
+        "description": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "language",
@@ -1277,7 +1295,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/."
+        "description": "Instagram Reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "language",
@@ -1305,7 +1323,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/."
+        "description": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -1327,7 +1345,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/."
+        "description": "Instagram post or reel URL, e.g. https://instagram.com/reel/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -1355,7 +1373,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Instagram profile URL, e.g. https://instagram.com/username/."
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -1377,7 +1395,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Instagram profile URL, e.g. https://instagram.com/username/."
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -1411,7 +1429,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Instagram profile URL, e.g. https://instagram.com/username/."
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -1501,7 +1519,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Instagram profile URL, e.g. https://instagram.com/username/."
+        "description": "Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -1607,7 +1625,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/."
+        "description": "Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -1651,7 +1669,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public Facebook video or post URL."
+        "description": "Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -1673,7 +1691,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public Facebook video or post URL."
+        "description": "Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -1695,7 +1713,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public Facebook video or post URL."
+        "description": "Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -1717,7 +1735,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public Facebook video or post URL."
+        "description": "Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -1745,7 +1763,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Facebook page URL, e.g. https://facebook.com/PageName."
+        "description": "Facebook page URL, e.g. https://facebook.com/PageName. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -1767,7 +1785,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Facebook profile or page URL."
+        "description": "Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -1795,7 +1813,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Facebook profile or page URL."
+        "description": "Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -1823,7 +1841,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public Facebook group URL, e.g. https://facebook.com/groups/ID."
+        "description": "Public Facebook group URL, e.g. https://facebook.com/groups/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -1851,7 +1869,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Facebook post URL the comment belongs to."
+        "description": "Facebook post URL the comment belongs to. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "comment_id",
@@ -1981,7 +1999,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Facebook event URL, e.g. https://facebook.com/events/ID."
+        "description": "Facebook event URL, e.g. https://facebook.com/events/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2003,7 +2021,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Facebook profile or page URL."
+        "description": "Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -2031,7 +2049,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Facebook profile or page URL."
+        "description": "Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -2059,7 +2077,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Facebook Marketplace item URL."
+        "description": "Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2081,7 +2099,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public tweet URL, e.g. https://x.com/user/status/ID."
+        "description": "Public tweet URL, e.g. https://x.com/user/status/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2103,7 +2121,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Public tweet URL, e.g. https://x.com/user/status/ID."
+        "description": "Public tweet URL, e.g. https://x.com/user/status/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2125,7 +2143,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Twitter/X profile URL or @handle, e.g. https://x.com/username."
+        "description": "Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2147,7 +2165,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Twitter/X profile URL or @handle, e.g. https://x.com/username."
+        "description": "Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -2203,7 +2221,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "X community URL (x.com/i/communities/ID) or community ID."
+        "description": "X community URL (x.com/i/communities/ID) or community ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2225,7 +2243,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "X community URL (x.com/i/communities/ID) or community ID."
+        "description": "X community URL (x.com/i/communities/ID) or community ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -2247,19 +2265,25 @@
     "name": "Reddit Subreddit Posts",
     "path": "/v1/reddit/subreddit-posts",
     "credits": 10,
-    "summary": "Recent posts in a subreddit.",
+    "summary": "Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Subreddit URL, r/name, or bare name, e.g. r/technology."
+        "description": "Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -2281,7 +2305,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/..."
+        "description": "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2303,7 +2327,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/..."
+        "description": "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -2331,7 +2355,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/..."
+        "description": "Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -2353,7 +2377,7 @@
     "name": "Reddit Search",
     "path": "/v1/reddit/search",
     "credits": 10,
-    "summary": "Search Reddit posts by keyword.",
+    "summary": "Search Reddit posts by keyword, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "q",
@@ -2366,6 +2390,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -2387,7 +2417,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Subreddit URL, r/name, or bare name, e.g. r/technology."
+        "description": "Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2403,13 +2433,13 @@
     "name": "Reddit Subreddit Search",
     "path": "/v1/reddit/subreddit-search",
     "credits": 10,
-    "summary": "Search posts within a specific subreddit.",
+    "summary": "Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Subreddit URL, r/name, or bare name, e.g. r/technology."
+        "description": "Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "q",
@@ -2422,6 +2452,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 200. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -2443,7 +2479,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Threads profile URL or @handle, e.g. https://threads.net/@username."
+        "description": "Threads profile URL or @handle, e.g. https://threads.net/@username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2465,7 +2501,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Threads profile URL or @handle, e.g. https://threads.net/@username."
+        "description": "Threads profile URL or @handle, e.g. https://threads.net/@username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -2493,7 +2529,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Threads post URL, e.g. https://threads.net/@user/post/CODE."
+        "description": "Threads post URL, e.g. https://threads.net/@user/post/CODE. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2571,7 +2607,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle."
+        "description": "Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2587,19 +2623,25 @@
     "name": "Bluesky User Posts",
     "path": "/v1/bluesky/user-posts",
     "credits": 3,
-    "summary": "Recent posts from a Bluesky profile.",
+    "summary": "Recent posts from a Bluesky profile, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle."
+        "description": "Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 25, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -2621,7 +2663,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY."
+        "description": "Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2643,7 +2685,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Pinterest pin URL, e.g. https://pinterest.com/pin/ID/."
+        "description": "Pinterest pin URL, e.g. https://pinterest.com/pin/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2665,7 +2707,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Pinterest profile URL or username."
+        "description": "Pinterest profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -2721,7 +2763,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Pinterest board URL, e.g. https://pinterest.com/username/board-name/."
+        "description": "Pinterest board URL, e.g. https://pinterest.com/username/board-name/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -2749,7 +2791,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Pinterest profile URL or username."
+        "description": "Pinterest profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -2777,7 +2819,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "LinkedIn profile URL, e.g. https://linkedin.com/in/slug."
+        "description": "LinkedIn profile URL, e.g. https://linkedin.com/in/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2799,7 +2841,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "LinkedIn company URL, e.g. https://linkedin.com/company/slug."
+        "description": "LinkedIn company URL, e.g. https://linkedin.com/company/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2821,7 +2863,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "LinkedIn post or activity URL."
+        "description": "LinkedIn post or activity URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2843,7 +2885,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "LinkedIn post or activity URL."
+        "description": "LinkedIn post or activity URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2865,7 +2907,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "LinkedIn company URL, e.g. https://linkedin.com/company/slug."
+        "description": "LinkedIn company URL, e.g. https://linkedin.com/company/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -2927,7 +2969,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html."
+        "description": "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -2949,7 +2991,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Rumble channel URL, e.g. https://rumble.com/c/name."
+        "description": "Rumble channel URL, e.g. https://rumble.com/c/name. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -3005,7 +3047,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html."
+        "description": "Rumble video URL, e.g. https://rumble.com/vXXXX-title.html. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -3067,7 +3109,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "TikTok Shop store URL."
+        "description": "TikTok Shop store URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -3095,7 +3137,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "TikTok Shop product URL."
+        "description": "TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -3117,7 +3159,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "TikTok Shop product URL."
+        "description": "TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -3189,7 +3231,7 @@
     "name": "GitHub Repositories",
     "path": "/v1/github/repositories",
     "credits": 12,
-    "summary": "List a GitHub user's repositories.",
+    "summary": "List a GitHub user's repositories, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "username",
@@ -3202,6 +3244,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 30, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -3239,7 +3287,7 @@
     "name": "GitHub Pull Requests",
     "path": "/v1/github/pull-requests",
     "credits": 12,
-    "summary": "List repository pull requests.",
+    "summary": "List repository pull requests, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "repo",
@@ -3260,6 +3308,12 @@
         "description": "Max items to return. Default 30, max 100. Billed per result."
       },
       {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+      },
+      {
         "name": "cache",
         "type": "boolean",
         "required": false,
@@ -3273,7 +3327,7 @@
     "name": "GitHub Activity",
     "path": "/v1/github/activity",
     "credits": 12,
-    "summary": "Recent public activity for a GitHub user.",
+    "summary": "Recent public activity for a GitHub user, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "username",
@@ -3286,6 +3340,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 30, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -3301,7 +3361,7 @@
     "name": "GitHub Followers",
     "path": "/v1/github/followers",
     "credits": 12,
-    "summary": "List GitHub followers.",
+    "summary": "List GitHub followers, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "username",
@@ -3314,6 +3374,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 30, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -3329,7 +3395,7 @@
     "name": "GitHub Following",
     "path": "/v1/github/following",
     "credits": 12,
-    "summary": "List accounts a GitHub user follows.",
+    "summary": "List accounts a GitHub user follows, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "username",
@@ -3342,6 +3408,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 30, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -3441,7 +3513,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud."
+        "description": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -3463,7 +3535,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud."
+        "description": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -3491,7 +3563,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud."
+        "description": "Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -3513,7 +3585,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Twitch clip URL, channel URL, or username."
+        "description": "Twitch clip URL, channel URL, or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -3535,7 +3607,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Spotify URL, URI, or ID."
+        "description": "Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -3557,7 +3629,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Spotify URL, URI, or ID."
+        "description": "Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -3579,7 +3651,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Spotify URL, URI, or ID."
+        "description": "Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -3635,7 +3707,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Spotify URL, URI, or ID."
+        "description": "Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -3663,7 +3735,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Spotify URL, URI, or ID."
+        "description": "Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -3691,7 +3763,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "SoundCloud artist profile URL or username."
+        "description": "SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -3707,19 +3779,25 @@
     "name": "SoundCloud Artist Tracks",
     "path": "/v1/soundcloud/artist-tracks",
     "credits": 28,
-    "summary": "Tracks from a SoundCloud artist profile.",
+    "summary": "Tracks from a SoundCloud artist profile, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "SoundCloud artist profile URL or username."
+        "description": "SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -3741,7 +3819,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "SoundCloud track URL."
+        "description": "SoundCloud track URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -3763,7 +3841,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Linktree profile URL or username."
+        "description": "Linktree profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -3785,7 +3863,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Snapchat username or profile URL."
+        "description": "Snapchat username or profile URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -3807,7 +3885,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Truth Social profile URL or @username."
+        "description": "Truth Social profile URL or @username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -3823,19 +3901,25 @@
     "name": "Truth Social User Posts",
     "path": "/v1/truth-social/user-posts",
     "credits": 17,
-    "summary": "Recent public posts from a Truth Social profile.",
+    "summary": "Recent public posts from a Truth Social profile, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Truth Social profile URL or @username."
+        "description": "Truth Social profile URL or @username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 80. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
       },
       {
         "name": "cache",
@@ -3857,7 +3941,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Truth Social post URL or post ID."
+        "description": "Truth Social post URL or post ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -3879,7 +3963,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Kick clip URL, channel URL, or channel username."
+        "description": "Kick clip URL, channel URL, or channel username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -3907,7 +3991,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Amazon seller storefront URL, seller profile URL, or seller ID."
+        "description": "Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "marketplace",
@@ -4004,7 +4088,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Kwai/Kuaishou profile URL or user ID."
+        "description": "Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -4026,7 +4110,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Kwai/Kuaishou profile URL or user ID."
+        "description": "Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "limit",
@@ -4054,7 +4138,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Kwai/Kuaishou post URL or video/photo ID."
+        "description": "Kwai/Kuaishou post URL or video/photo ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -4076,7 +4160,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Komi page URL or username."
+        "description": "Komi page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -4098,7 +4182,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Pillar page URL or username."
+        "description": "Pillar page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -4120,7 +4204,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Linkbio page URL or username."
+        "description": "Linkbio page URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -4142,7 +4226,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Linkme profile URL or username."
+        "description": "Linkme profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -4198,7 +4282,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Facebook page URL or Meta Ad Library URL."
+        "description": "Facebook page URL or Meta Ad Library URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "country",
@@ -4266,7 +4350,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Meta Ad Library ad URL."
+        "description": "Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -4288,7 +4372,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Meta Ad Library ad URL or ad ID."
+        "description": "Meta Ad Library ad URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",
@@ -4344,7 +4428,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "TikTok Ad Library URL or ad ID."
+        "description": "TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "country",
@@ -4502,7 +4586,7 @@
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "LinkedIn Ad Library URL or ad ID."
+        "description": "LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",

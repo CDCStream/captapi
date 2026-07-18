@@ -25,7 +25,7 @@
     "type": "text",
     "label": "Region",
     "required": false,
-    "help": "Two-letter ISO country the scraping proxy is routed through. Default US. Only sets the proxy location — does not filter results by country."
+    "help": "Two-letter ISO country our request is sent from. Default US. Does not filter results by country."
   },
   {
     "name": "cache",

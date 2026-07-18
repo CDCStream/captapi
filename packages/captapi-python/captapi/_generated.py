@@ -35,14 +35,15 @@ class YoutubeApi:
         """
         return self._t.get("/v1/youtube/video-details", {"url": url, "cache": cache})
 
-    def comments(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Comments — Comments on a YouTube video. (20 credits)
+    def comments(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Comments — Comments on a YouTube video, with cursor pagination (nextCursor + hasMore). (20 credits)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/youtube/comments", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/youtube/comments", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def channel_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Channel Details — Channel info & subscriber/stats for a YouTube channel. (1 credit)
@@ -237,14 +238,15 @@ class AsyncYoutubeApi:
         """
         return await self._t.get("/v1/youtube/video-details", {"url": url, "cache": cache})
 
-    async def comments(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Comments — Comments on a YouTube video. (20 credits)
+    async def comments(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Comments — Comments on a YouTube video, with cursor pagination (nextCursor + hasMore). (20 credits)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/youtube/comments", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/youtube/comments", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def channel_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Channel Details — Channel info & subscriber/stats for a YouTube channel. (1 credit)
@@ -458,7 +460,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/channel-details", {"url": url, "cache": cache})
 
     def profile_region(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Profile Region — A creator's resolved country (region) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so when missing region is AI-inferred from public bio/name/language cues; regionSource says whether it's "tiktok" or "inferred" and regionConfidence grades the guess. (2 credits)
+        """TikTok Profile Region — Where a TikTok creator is likely based and what language they use — country, language, and core profile stats from a profile URL or @handle. When TikTok hides the country, it is estimated from public bio/name/language cues, with a confidence grade. (2 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -466,7 +468,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/profile-region", {"url": url, "cache": cache})
 
     def audience_demographics(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Audience Demographics — Ranked country breakdown of a TikTok creator's audience (audienceLocations: country, countryCode, count, percentage), sampled natively from the people commenting on their recent videos. Engagement-based signal, not a follower census. From a profile URL or @handle. (3 credits)
+        """TikTok Audience Demographics — Ranked country breakdown of a TikTok creator's audience, based on people who comment on their recent videos (not a full follower census). From a profile URL or @handle. (3 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -484,24 +486,26 @@ class TiktokApi:
         """
         return self._t.get("/v1/tiktok/search-suggestions", {"q": q, "country": country, "language": language, "limit": limit, "cache": cache})
 
-    def channel_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Channel Posts — Latest posts from a TikTok profile. (14 credits)
+    def channel_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Channel Posts — Latest videos from a TikTok profile — caption, engagement, thumbnail, sound, and hashtags for each post. Cursor pagination via nextCursor. (2 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/tiktok/channel-posts", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/tiktok/channel-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
-    def comment_replies(self, *, url: str, comment_id: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Comment Replies — Replies to a specific TikTok comment. (50 credits)
+    def comment_replies(self, *, url: str, comment_id: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Comment Replies — Replies under a TikTok comment — text, author, likes, timestamp, with cursor pagination (nextCursor + hasMore). Flat 2 credits. (2 credits)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param comment_id: ID of the parent comment to fetch replies for (from the comments endpoint).
         :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/tiktok/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
+        return self._t.get("/v1/tiktok/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cursor": cursor, "cache": cache})
 
     def user_followers(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok User Followers — List a TikTok user's followers. (20 credits)
@@ -545,7 +549,7 @@ class TiktokApi:
         :param q: Hashtag with or without the # (min 2 chars).
         :param limit: Max items to return. Default 20, max 100. Billed per result.
         :param cursor: Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end.
-        :param region: Two-letter ISO country the scraping proxy is routed through. Default US. Only sets the proxy location — does not filter results by country.
+        :param region: Two-letter ISO country our request is sent from. Default US. Does not filter results by country.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/tiktok/search/hashtag", {"q": q, "limit": limit, "cursor": cursor, "region": region, "cache": cache})
@@ -663,7 +667,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/channel-details", {"url": url, "cache": cache})
 
     async def profile_region(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Profile Region — A creator's resolved country (region) plus interface language and core profile stats, from a profile URL or @handle. TikTok's own region is almost always null, so when missing region is AI-inferred from public bio/name/language cues; regionSource says whether it's "tiktok" or "inferred" and regionConfidence grades the guess. (2 credits)
+        """TikTok Profile Region — Where a TikTok creator is likely based and what language they use — country, language, and core profile stats from a profile URL or @handle. When TikTok hides the country, it is estimated from public bio/name/language cues, with a confidence grade. (2 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -671,7 +675,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/profile-region", {"url": url, "cache": cache})
 
     async def audience_demographics(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Audience Demographics — Ranked country breakdown of a TikTok creator's audience (audienceLocations: country, countryCode, count, percentage), sampled natively from the people commenting on their recent videos. Engagement-based signal, not a follower census. From a profile URL or @handle. (3 credits)
+        """TikTok Audience Demographics — Ranked country breakdown of a TikTok creator's audience, based on people who comment on their recent videos (not a full follower census). From a profile URL or @handle. (3 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -689,24 +693,26 @@ class AsyncTiktokApi:
         """
         return await self._t.get("/v1/tiktok/search-suggestions", {"q": q, "country": country, "language": language, "limit": limit, "cache": cache})
 
-    async def channel_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Channel Posts — Latest posts from a TikTok profile. (14 credits)
+    async def channel_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Channel Posts — Latest videos from a TikTok profile — caption, engagement, thumbnail, sound, and hashtags for each post. Cursor pagination via nextCursor. (2 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/tiktok/channel-posts", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/tiktok/channel-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
-    async def comment_replies(self, *, url: str, comment_id: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Comment Replies — Replies to a specific TikTok comment. (50 credits)
+    async def comment_replies(self, *, url: str, comment_id: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Comment Replies — Replies under a TikTok comment — text, author, likes, timestamp, with cursor pagination (nextCursor + hasMore). Flat 2 credits. (2 credits)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param comment_id: ID of the parent comment to fetch replies for (from the comments endpoint).
         :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/tiktok/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/tiktok/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def user_followers(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok User Followers — List a TikTok user's followers. (20 credits)
@@ -750,7 +756,7 @@ class AsyncTiktokApi:
         :param q: Hashtag with or without the # (min 2 chars).
         :param limit: Max items to return. Default 20, max 100. Billed per result.
         :param cursor: Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end.
-        :param region: Two-letter ISO country the scraping proxy is routed through. Default US. Only sets the proxy location — does not filter results by country.
+        :param region: Two-letter ISO country our request is sent from. Default US. Does not filter results by country.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok/search/hashtag", {"q": q, "limit": limit, "cursor": cursor, "region": region, "cache": cache})
@@ -1517,14 +1523,15 @@ class RedditApi:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
 
-    def subreddit_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Subreddit Posts — Recent posts in a subreddit. (10 credits)
+    def subreddit_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Reddit Subreddit Posts — Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore). (10 credits)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/reddit/subreddit-posts", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/reddit/subreddit-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def post_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Reddit Post Details — Metadata + stats for a Reddit post. (1 credit)
@@ -1552,14 +1559,15 @@ class RedditApi:
         """
         return self._t.get("/v1/reddit/post-transcript", {"url": url, "limit": limit, "cache": cache})
 
-    def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Search — Search Reddit posts by keyword. (10 credits)
+    def search(self, *, q: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Reddit Search — Search Reddit posts by keyword, with cursor pagination (nextCursor + hasMore). (10 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/reddit/search", {"q": q, "limit": limit, "cache": cache})
+        return self._t.get("/v1/reddit/search", {"q": q, "limit": limit, "cursor": cursor, "cache": cache})
 
     def subreddit_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Reddit Subreddit Details — Info & member stats for a subreddit. (1 credit)
@@ -1569,29 +1577,31 @@ class RedditApi:
         """
         return self._t.get("/v1/reddit/subreddit-details", {"url": url, "cache": cache})
 
-    def subreddit_search(self, *, url: str, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Subreddit Search — Search posts within a specific subreddit. (10 credits)
+    def subreddit_search(self, *, url: str, q: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Reddit Subreddit Search — Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore). (10 credits)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/reddit/subreddit-search", {"url": url, "q": q, "limit": limit, "cache": cache})
+        return self._t.get("/v1/reddit/subreddit-search", {"url": url, "q": q, "limit": limit, "cursor": cursor, "cache": cache})
 
 
 class AsyncRedditApi:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
 
-    async def subreddit_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Subreddit Posts — Recent posts in a subreddit. (10 credits)
+    async def subreddit_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Reddit Subreddit Posts — Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore). (10 credits)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/reddit/subreddit-posts", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/reddit/subreddit-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def post_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Reddit Post Details — Metadata + stats for a Reddit post. (1 credit)
@@ -1619,14 +1629,15 @@ class AsyncRedditApi:
         """
         return await self._t.get("/v1/reddit/post-transcript", {"url": url, "limit": limit, "cache": cache})
 
-    async def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Search — Search Reddit posts by keyword. (10 credits)
+    async def search(self, *, q: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Reddit Search — Search Reddit posts by keyword, with cursor pagination (nextCursor + hasMore). (10 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/reddit/search", {"q": q, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/reddit/search", {"q": q, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def subreddit_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Reddit Subreddit Details — Info & member stats for a subreddit. (1 credit)
@@ -1636,15 +1647,16 @@ class AsyncRedditApi:
         """
         return await self._t.get("/v1/reddit/subreddit-details", {"url": url, "cache": cache})
 
-    async def subreddit_search(self, *, url: str, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Subreddit Search — Search posts within a specific subreddit. (10 credits)
+    async def subreddit_search(self, *, url: str, q: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Reddit Subreddit Search — Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore). (10 credits)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/reddit/subreddit-search", {"url": url, "q": q, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/reddit/subreddit-search", {"url": url, "q": q, "limit": limit, "cursor": cursor, "cache": cache})
 
 
 class ThreadsApi:
@@ -1755,14 +1767,15 @@ class BlueskyApi:
         """
         return self._t.get("/v1/bluesky/profile", {"url": url, "cache": cache})
 
-    def user_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Bluesky User Posts — Recent posts from a Bluesky profile. (3 credits)
+    def user_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Bluesky User Posts — Recent posts from a Bluesky profile, with cursor pagination (nextCursor + hasMore). (3 credits)
 
         :param url: Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 100. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/bluesky/user-posts", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/bluesky/user-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def post_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Bluesky Post Details — Metadata + engagement for a Bluesky post. (1 credit)
@@ -1785,14 +1798,15 @@ class AsyncBlueskyApi:
         """
         return await self._t.get("/v1/bluesky/profile", {"url": url, "cache": cache})
 
-    async def user_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Bluesky User Posts — Recent posts from a Bluesky profile. (3 credits)
+    async def user_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Bluesky User Posts — Recent posts from a Bluesky profile, with cursor pagination (nextCursor + hasMore). (3 credits)
 
         :param url: Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 100. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/bluesky/user-posts", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/bluesky/user-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def post_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Bluesky Post Details — Metadata + engagement for a Bluesky post. (1 credit)
@@ -2205,14 +2219,15 @@ class GithubApi:
         """
         return self._t.get("/v1/github/user", {"username": username, "cache": cache})
 
-    def repositories(self, *, username: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Repositories — List a GitHub user's repositories. (12 credits)
+    def repositories(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Repositories — List a GitHub user's repositories, with cursor pagination (nextCursor + hasMore). (12 credits)
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
+        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/github/repositories", {"username": username, "limit": limit, "cache": cache})
+        return self._t.get("/v1/github/repositories", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
 
     def repository(self, *, repo: str, cache: bool | None = None) -> dict[str, Any]:
         """GitHub Repository — Repository details, stars, forks and metadata. (3 credits)
@@ -2222,42 +2237,46 @@ class GithubApi:
         """
         return self._t.get("/v1/github/repository", {"repo": repo, "cache": cache})
 
-    def pull_requests(self, *, repo: str, state: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Pull Requests — List repository pull requests. (12 credits)
+    def pull_requests(self, *, repo: str, state: str | None = None, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Pull Requests — List repository pull requests, with cursor pagination (nextCursor + hasMore). (12 credits)
 
         :param repo: Repository URL or owner/name.
         :param state: open, closed, or all. Default open.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
+        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/github/pull-requests", {"repo": repo, "state": state, "limit": limit, "cache": cache})
+        return self._t.get("/v1/github/pull-requests", {"repo": repo, "state": state, "limit": limit, "cursor": cursor, "cache": cache})
 
-    def activity(self, *, username: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Activity — Recent public activity for a GitHub user. (12 credits)
+    def activity(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Activity — Recent public activity for a GitHub user, with cursor pagination (nextCursor + hasMore). (12 credits)
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
+        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/github/activity", {"username": username, "limit": limit, "cache": cache})
+        return self._t.get("/v1/github/activity", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
 
-    def followers(self, *, username: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Followers — List GitHub followers. (12 credits)
+    def followers(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Followers — List GitHub followers, with cursor pagination (nextCursor + hasMore). (12 credits)
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
+        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/github/followers", {"username": username, "limit": limit, "cache": cache})
+        return self._t.get("/v1/github/followers", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
 
-    def following(self, *, username: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Following — List accounts a GitHub user follows. (12 credits)
+    def following(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Following — List accounts a GitHub user follows, with cursor pagination (nextCursor + hasMore). (12 credits)
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
+        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/github/following", {"username": username, "limit": limit, "cache": cache})
+        return self._t.get("/v1/github/following", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
 
     def contributions(self, *, username: str, cache: bool | None = None) -> dict[str, Any]:
         """GitHub Contributions — Summary of recent public GitHub contributions. (3 credits)
@@ -2298,14 +2317,15 @@ class AsyncGithubApi:
         """
         return await self._t.get("/v1/github/user", {"username": username, "cache": cache})
 
-    async def repositories(self, *, username: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Repositories — List a GitHub user's repositories. (12 credits)
+    async def repositories(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Repositories — List a GitHub user's repositories, with cursor pagination (nextCursor + hasMore). (12 credits)
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
+        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/github/repositories", {"username": username, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/github/repositories", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def repository(self, *, repo: str, cache: bool | None = None) -> dict[str, Any]:
         """GitHub Repository — Repository details, stars, forks and metadata. (3 credits)
@@ -2315,42 +2335,46 @@ class AsyncGithubApi:
         """
         return await self._t.get("/v1/github/repository", {"repo": repo, "cache": cache})
 
-    async def pull_requests(self, *, repo: str, state: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Pull Requests — List repository pull requests. (12 credits)
+    async def pull_requests(self, *, repo: str, state: str | None = None, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Pull Requests — List repository pull requests, with cursor pagination (nextCursor + hasMore). (12 credits)
 
         :param repo: Repository URL or owner/name.
         :param state: open, closed, or all. Default open.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
+        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/github/pull-requests", {"repo": repo, "state": state, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/github/pull-requests", {"repo": repo, "state": state, "limit": limit, "cursor": cursor, "cache": cache})
 
-    async def activity(self, *, username: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Activity — Recent public activity for a GitHub user. (12 credits)
+    async def activity(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Activity — Recent public activity for a GitHub user, with cursor pagination (nextCursor + hasMore). (12 credits)
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
+        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/github/activity", {"username": username, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/github/activity", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
 
-    async def followers(self, *, username: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Followers — List GitHub followers. (12 credits)
+    async def followers(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Followers — List GitHub followers, with cursor pagination (nextCursor + hasMore). (12 credits)
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
+        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/github/followers", {"username": username, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/github/followers", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
 
-    async def following(self, *, username: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub Following — List accounts a GitHub user follows. (12 credits)
+    async def following(self, *, username: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """GitHub Following — List accounts a GitHub user follows, with cursor pagination (nextCursor + hasMore). (12 credits)
 
         :param username: GitHub username or profile URL.
         :param limit: Max items to return. Default 30, max 100. Billed per result.
+        :param cursor: Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/github/following", {"username": username, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/github/following", {"username": username, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def contributions(self, *, username: str, cache: bool | None = None) -> dict[str, Any]:
         """GitHub Contributions — Summary of recent public GitHub contributions. (3 credits)
@@ -2581,14 +2605,15 @@ class SoundcloudApi:
         """
         return self._t.get("/v1/soundcloud/artist", {"url": url, "cache": cache})
 
-    def artist_tracks(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """SoundCloud Artist Tracks — Tracks from a SoundCloud artist profile. (28 credits)
+    def artist_tracks(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """SoundCloud Artist Tracks — Tracks from a SoundCloud artist profile, with cursor pagination (nextCursor + hasMore). (28 credits)
 
         :param url: SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/soundcloud/artist-tracks", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/soundcloud/artist-tracks", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def track(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """SoundCloud Track — SoundCloud track metadata and engagement stats. (1 credit)
@@ -2611,14 +2636,15 @@ class AsyncSoundcloudApi:
         """
         return await self._t.get("/v1/soundcloud/artist", {"url": url, "cache": cache})
 
-    async def artist_tracks(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """SoundCloud Artist Tracks — Tracks from a SoundCloud artist profile. (28 credits)
+    async def artist_tracks(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """SoundCloud Artist Tracks — Tracks from a SoundCloud artist profile, with cursor pagination (nextCursor + hasMore). (28 credits)
 
         :param url: SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/soundcloud/artist-tracks", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/soundcloud/artist-tracks", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def track(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """SoundCloud Track — SoundCloud track metadata and engagement stats. (1 credit)
@@ -2693,14 +2719,15 @@ class TruthSocialApi:
         """
         return self._t.get("/v1/truth-social/profile", {"url": url, "cache": cache})
 
-    def user_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Truth Social User Posts — Recent public posts from a Truth Social profile. (17 credits)
+    def user_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Truth Social User Posts — Recent public posts from a Truth Social profile, with cursor pagination (nextCursor + hasMore). (17 credits)
 
         :param url: Truth Social profile URL or @username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 80. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/truth-social/user-posts", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/truth-social/user-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def post(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Truth Social Post — Truth Social post metadata, text, media and engagement. (5 credits)
@@ -2723,14 +2750,15 @@ class AsyncTruthSocialApi:
         """
         return await self._t.get("/v1/truth-social/profile", {"url": url, "cache": cache})
 
-    async def user_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Truth Social User Posts — Recent public posts from a Truth Social profile. (17 credits)
+    async def user_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Truth Social User Posts — Recent public posts from a Truth Social profile, with cursor pagination (nextCursor + hasMore). (17 credits)
 
         :param url: Truth Social profile URL or @username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 80. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/truth-social/user-posts", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/truth-social/user-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def post(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Truth Social Post — Truth Social post metadata, text, media and engagement. (5 credits)

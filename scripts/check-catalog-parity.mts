@@ -11,6 +11,9 @@
  *   - packages/captapi-cli/src/catalog.ts
  *   - packages/captapi-mcp/src/catalog.ts
  *   - packages/captapi-n8n/src/catalog.ts
+ *   - backend/app/services/mcp_catalog.json (hosted MCP)
+ *   - packages/captapi-zapier/catalog.json
+ *   - packages/captapi-apify/src/endpoints.json
  *
  * Source of truth for the backend surface (in priority order):
  *   1. $OPENAPI_URL              e.g. http://127.0.0.1:8000/v1/openapi.json
@@ -134,11 +137,47 @@ async function pkgEntries(rel: string): Promise<DocEntry[]> {
   }));
 }
 
+function jsonCatalogEntries(rel: string, mapItem: (e: any) => DocEntry): DocEntry[] {
+  const raw = JSON.parse(readFileSync(resolve(ROOT, rel), "utf8"));
+  const list = Array.isArray(raw) ? raw : raw.endpoints ?? Object.values(raw);
+  return list.map(mapItem);
+}
+
 const catalogs: Record<string, DocEntry[]> = {
   "frontend/lib/api-catalog.ts": frontendEntries,
   "packages/captapi-cli": await pkgEntries("../packages/captapi-cli/src/catalog.ts"),
   "packages/captapi-mcp": await pkgEntries("../packages/captapi-mcp/src/catalog.ts"),
   "packages/captapi-n8n": await pkgEntries("../packages/captapi-n8n/src/catalog.ts"),
+  "backend/app/services/mcp_catalog.json": jsonCatalogEntries(
+    "backend/app/services/mcp_catalog.json",
+    (e) => ({
+      id: e.tool,
+      path: e.path,
+      method: "GET",
+      params: (e.params ?? []).map((p: any) => ({ name: p.name, required: !!p.required })),
+    }),
+  ),
+  "packages/captapi-zapier/catalog.json": jsonCatalogEntries(
+    "packages/captapi-zapier/catalog.json",
+    (e) => ({
+      id: e.tool ?? e.key ?? e.name,
+      path: e.path,
+      method: "GET",
+      params: (e.params ?? e.inputFields ?? []).map((p: any) => ({
+        name: p.name ?? p.key,
+        required: !!p.required,
+      })),
+    }),
+  ),
+  "packages/captapi-apify/src/endpoints.json": jsonCatalogEntries(
+    "packages/captapi-apify/src/endpoints.json",
+    (e) => ({
+      id: e.tool ?? e.id ?? e.name,
+      path: e.path,
+      method: "GET",
+      params: (e.params ?? []).map((p: any) => ({ name: p.name, required: !!p.required })),
+    }),
+  ),
 };
 
 let allIssues: Issue[] = [];
