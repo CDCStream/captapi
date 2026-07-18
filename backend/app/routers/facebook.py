@@ -208,6 +208,45 @@ def _normalize_listing(item: dict) -> dict:
     }
 
 
+def _marketplace_photo_uris(item: dict) -> list[str]:
+    """Pull image URIs from GraphQL listing photo fields when present."""
+    uris: list[str] = []
+
+    def _add(value: Any) -> None:
+        uri = safe_str(value)
+        if uri and uri not in uris:
+            uris.append(uri)
+
+    primary = item.get("primary_listing_photo")
+    if isinstance(primary, dict):
+        image = primary.get("image") if isinstance(primary.get("image"), dict) else {}
+        _add(image.get("uri") or primary.get("uri") or primary.get("url"))
+    _add(item.get("primary_photo") or item.get("image") or item.get("imageUrl"))
+
+    listing_photos = item.get("listing_photos")
+    if isinstance(listing_photos, dict):
+        for edge in listing_photos.get("edges") or []:
+            if not isinstance(edge, dict):
+                continue
+            node = edge.get("node") if isinstance(edge.get("node"), dict) else edge
+            image = node.get("image") if isinstance(node.get("image"), dict) else {}
+            _add(image.get("uri") or node.get("uri") or node.get("url"))
+    elif isinstance(listing_photos, list):
+        for photo in listing_photos:
+            if isinstance(photo, str):
+                _add(photo)
+            elif isinstance(photo, dict):
+                image = photo.get("image") if isinstance(photo.get("image"), dict) else {}
+                _add(image.get("uri") or photo.get("uri") or photo.get("url"))
+
+    for photo in item.get("photos") or []:
+        if isinstance(photo, str):
+            _add(photo)
+        elif isinstance(photo, dict):
+            _add(photo.get("uri") or photo.get("url") or photo.get("image"))
+    return uris
+
+
 def _normalize_marketplace_detail(item: dict, url: str) -> dict:
     """Map the raw GraphQL listing entity from the per-item details actor."""
     price = item.get("listing_price") if isinstance(item.get("listing_price"), dict) else {}
@@ -230,13 +269,14 @@ def _normalize_marketplace_detail(item: dict, url: str) -> dict:
         amount = float(price.get("amount")) if price.get("amount") is not None else None
     except (TypeError, ValueError):
         amount = None
+    photos = _marketplace_photo_uris(item)
     return {
         "platform": "facebook",
         "id": safe_str(item.get("id")),
         "url": safe_str(item.get("share_uri")) or url,
         "title": safe_str(item.get("marketplace_listing_title") or item.get("base_marketplace_listing_title")),
         "description": safe_str(desc.get("text")),
-        "image": None,
+        "image": photos[0] if photos else None,
         "price": amount,
         "priceFormatted": safe_str(price.get("formatted_amount_zeros_stripped")),
         "currency": safe_str(price.get("currency")),
@@ -247,7 +287,7 @@ def _normalize_marketplace_detail(item: dict, url: str) -> dict:
         "isSold": item.get("is_sold"),
         "isLive": item.get("is_live"),
         "deliveryTypes": item.get("delivery_types") or [],
-        "photos": [],
+        "photos": photos,
         "createdAt": created_iso,
     }
 

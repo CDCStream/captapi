@@ -733,16 +733,27 @@ def _comments_section_token(data: Any) -> str | None:
     return first
 
 
-async def comments_native(norm_url: str, limit: int) -> dict[str, Any] | None:
-    # Native path currently extracts the first top-level comments page. For
-    # larger pages keep Apify as the fallback so callers still get the requested
-    # result count and reply metadata.
-    if limit > 20:
-        return None
-    data, _ = await fetch_page_data(norm_url, timeout=12)
-    if data is None:
-        return None
-    token = _comments_section_token(data)
+async def comments_native(
+    norm_url: str,
+    limit: int,
+    *,
+    cursor: str | None = None,
+) -> dict[str, Any] | None:
+    """Top-level comments via InnerTube continuation tokens.
+
+    Pass ``cursor`` (previous ``nextCursor``) to fetch the next page. Without a
+    cursor we bootstrap from the watch page's comments-section token. Large
+    first-page requests (``limit > 40``) still fall through to Apify so callers
+    get denser reply metadata in one shot.
+    """
+    token = cursor or None
+    if not token:
+        if limit > 40:
+            return None
+        data, _ = await fetch_page_data(norm_url, timeout=12)
+        if data is None:
+            return None
+        token = _comments_section_token(data)
     if not token:
         return None
 
@@ -764,7 +775,12 @@ async def comments_native(norm_url: str, limit: int) -> dict[str, Any] | None:
 
     if not rows:
         return None
-    return {"comments": rows[:limit], "totalComments": None}
+    next_cursor = token if token else None
+    return {
+        "comments": rows[:limit],
+        "totalComments": None,
+        "nextCursor": next_cursor,
+    }
 
 
 def _reply_continuation_for_thread(thread: dict[str, Any], comment_id: str) -> str | None:

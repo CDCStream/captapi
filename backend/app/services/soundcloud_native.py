@@ -93,30 +93,34 @@ async def resolve(url: str) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-async def user_tracks(user_id: int | str, limit: int) -> list[dict[str, Any]]:
-    """Most recent tracks of a user, newest first.
+async def user_tracks(
+    user_id: int | str,
+    limit: int,
+    *,
+    cursor: str | None = None,
+) -> tuple[list[dict[str, Any]], str | None]:
+    """One page of a user's tracks (newest first) plus the next cursor.
 
-    Uses api-v2 cursor pagination (``next_href``) rather than a numeric
-    offset, which SoundCloud pages unreliably. ``linked_partitioning=1``
-    makes the API return the cursor URL.
+    Uses api-v2 cursor pagination (``next_href``). Pass ``cursor`` from a
+    previous response's ``nextCursor`` to fetch the next page.
     """
     rows: list[dict[str, Any]] = []
+    next_cursor: str | None = None
     async with httpx.AsyncClient(timeout=15, headers=_UA, follow_redirects=True) as client:
-        url: str | None = f"{_API}/users/{user_id}/tracks"
-        params: dict[str, Any] | None = {
-            "limit": min(max(limit, 1), 200),
-            "linked_partitioning": 1,
-        }
-        while url and len(rows) < limit:
-            page = await _get(client, url, params)
-            if not isinstance(page, dict):
-                break
+        url: str | None = cursor if cursor and cursor.startswith("http") else f"{_API}/users/{user_id}/tracks"
+        params: dict[str, Any] | None = None
+        if not cursor:
+            params = {
+                "limit": min(max(limit, 1), 200),
+                "linked_partitioning": 1,
+            }
+        page = await _get(client, url, params)
+        if isinstance(page, dict):
             batch = [r for r in (page.get("collection") or []) if isinstance(r, dict)]
-            rows.extend(batch)
-            # next_href already carries the cursor + query; don't re-add params.
-            url = page.get("next_href")
-            params = None
-    return rows[:limit]
+            rows.extend(batch[:limit])
+            next_href = page.get("next_href")
+            next_cursor = next_href if isinstance(next_href, str) and next_href else None
+    return rows[:limit], next_cursor
 
 
 def prep_track_row(raw: dict[str, Any]) -> dict[str, Any]:

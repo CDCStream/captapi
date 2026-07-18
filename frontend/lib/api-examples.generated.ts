@@ -260,6 +260,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "bluesky-user-posts": {
     "handle": "jay.bsky.team",
     "totalReturned": 5,
+    "nextCursor": "2026-06-26T14:20:00.000Z",
+    "hasMore": true,
     "posts": [
       {
         "platform": "bluesky",
@@ -8017,6 +8019,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "reddit-subreddit-posts": {
     "subreddit": "space",
     "totalReturned": 5,
+    "nextCursor": "t3_17ujvgn",
+    "hasMore": true,
     "posts": [
       {
         "platform": "reddit",
@@ -8736,6 +8740,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "platform": "soundcloud",
     "artistUrl": "https://soundcloud.com/flume",
     "totalReturned": 4,
+    "nextCursor": "https://api-v2.soundcloud.com/users/123/tracks?cursor=eyJvZmZzZXQiOjQwfQ==",
+    "hasMore": true,
     "tracks": [
       {
         "platform": "soundcloud",

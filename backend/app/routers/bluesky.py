@@ -204,10 +204,17 @@ async def bluesky_profile(
         return ApiResponse(data=result)
 
 
-@router.get("/user-posts", summary="List recent posts for a Bluesky profile")
+@router.get("/user-posts", summary="List recent posts for a Bluesky profile (cursor-paginated)")
 async def bluesky_user_posts(
     url: str = Query(..., description="Bluesky profile URL, @handle, or handle"),
     limit: int = Query(25, ge=1, le=100),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -221,16 +228,24 @@ async def bluesky_user_posts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            data = await _xrpc(
-                "app.bsky.feed.getAuthorFeed", {"actor": actor, "limit": limit}
-            )
+            params: dict[str, Any] = {"actor": actor, "limit": limit}
+            if cursor:
+                params["cursor"] = cursor
+            data = await _xrpc("app.bsky.feed.getAuthorFeed", params)
             feed = data.get("feed") or []
             posts = [_normalize_post(f["post"]) for f in feed if f.get("post")][:limit]
-            return {"handle": actor, "totalReturned": len(posts), "posts": posts}
+            next_cursor = safe_str(data.get("cursor")) or None
+            return {
+                "handle": actor,
+                "totalReturned": len(posts),
+                "nextCursor": next_cursor,
+                "hasMore": next_cursor is not None,
+                "posts": posts,
+            }
 
         result = await cached_or_run(
             endpoint="bluesky.user-posts",
-            params={"actor": actor, "limit": limit, "v": 3},
+            params={"actor": actor, "limit": limit, "cursor": cursor or "", "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

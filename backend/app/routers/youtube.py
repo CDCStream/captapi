@@ -851,10 +851,17 @@ async def youtube_video_details(
 
 
 # ---------- COMMENTS ------------------------------------------------------
-@router.get("/comments", summary="YouTube video comments (paginated)")
+@router.get("/comments", summary="YouTube video comments (cursor-paginated)")
 async def youtube_comments(
     url: str = Query(...),
     limit: int = Query(50, ge=1, le=500),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -870,17 +877,26 @@ async def youtube_comments(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await comments_native(norm_url, limit)
+            native = await comments_native(norm_url, limit, cursor=cursor)
             if native and native.get("comments"):
                 ctx["source"] = "direct"
                 comments = native["comments"]
+                next_cursor = safe_str(native.get("nextCursor")) or None
                 return {
                     "url": norm_url,
                     "videoId": vid,
                     "totalReturned": len(comments),
                     "totalComments": native.get("totalComments"),
+                    "nextCursor": next_cursor,
+                    "hasMore": next_cursor is not None,
                     "comments": comments,
                 }
+
+            if cursor:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Cursor pagination is only available on the native YouTube path. Start a new request without cursor.",
+                )
 
             apify = get_apify()
             items = await apify.run_actor_sync(
@@ -927,12 +943,14 @@ async def youtube_comments(
                 "videoId": vid,
                 "totalReturned": len(comments),
                 "totalComments": total_comments,
+                "nextCursor": None,
+                "hasMore": False,
                 "comments": comments,
             }
 
         data = await cached_or_run(
             endpoint="youtube.comments",
-            params={"url": norm_url, "limit": limit, "v": 2},
+            params={"url": norm_url, "limit": limit, "cursor": cursor or "", "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

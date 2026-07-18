@@ -92,7 +92,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `youtube_transcript` | `/v1/youtube/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 2 |
 | `youtube_summarize` | `/v1/youtube/summarize` | `url` (string), `language`? (string), `cache`? (boolean) | 4 |
 | `youtube_video_details` | `/v1/youtube/video-details` | `url` (string), `cache`? (boolean) | 1 |
-| `youtube_comments` | `/v1/youtube/comments` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
+| `youtube_comments` | `/v1/youtube/comments` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 20 |
 | `youtube_channel_details` | `/v1/youtube/channel-details` | `url` (string), `cache`? (boolean) | 1 |
 | `youtube_search` | `/v1/youtube/search` | `q` (string), `limit`? (number), `cache`? (boolean) | 20 |
 | `youtube_channel_videos` | `/v1/youtube/channel-videos` | `url` (string), `limit`? (number), `fast`? (boolean), `cache`? (boolean) | 20 |
@@ -196,13 +196,13 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `reddit_subreddit_posts` | `/v1/reddit/subreddit-posts` | `url` (string), `limit`? (number), `cache`? (boolean) | 10 |
+| `reddit_subreddit_posts` | `/v1/reddit/subreddit-posts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 10 |
 | `reddit_post_details` | `/v1/reddit/post-details` | `url` (string), `cache`? (boolean) | 1 |
 | `reddit_post_comments` | `/v1/reddit/post-comments` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
 | `reddit_post_transcript` | `/v1/reddit/post-transcript` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
-| `reddit_search` | `/v1/reddit/search` | `q` (string), `limit`? (number), `cache`? (boolean) | 10 |
+| `reddit_search` | `/v1/reddit/search` | `q` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 10 |
 | `reddit_subreddit_details` | `/v1/reddit/subreddit-details` | `url` (string), `cache`? (boolean) | 1 |
-| `reddit_subreddit_search` | `/v1/reddit/subreddit-search` | `url` (string), `q` (string), `limit`? (number), `cache`? (boolean) | 10 |
+| `reddit_subreddit_search` | `/v1/reddit/subreddit-search` | `url` (string), `q` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 10 |
 
 ### Threads
 
@@ -219,7 +219,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
 | `bluesky_profile` | `/v1/bluesky/profile` | `url` (string), `cache`? (boolean) | 1 |
-| `bluesky_user_posts` | `/v1/bluesky/user-posts` | `url` (string), `limit`? (number), `cache`? (boolean) | 3 |
+| `bluesky_user_posts` | `/v1/bluesky/user-posts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 3 |
 | `bluesky_post_details` | `/v1/bluesky/post-details` | `url` (string), `cache`? (boolean) | 1 |
 
 ### Pinterest
@@ -267,12 +267,12 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
 | `github_user` | `/v1/github/user` | `username` (string), `cache`? (boolean) | 3 |
-| `github_repositories` | `/v1/github/repositories` | `username` (string), `limit`? (number), `cache`? (boolean) | 12 |
+| `github_repositories` | `/v1/github/repositories` | `username` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 12 |
 | `github_repository` | `/v1/github/repository` | `repo` (string), `cache`? (boolean) | 3 |
-| `github_pull_requests` | `/v1/github/pull-requests` | `repo` (string), `state`? (string), `limit`? (number), `cache`? (boolean) | 12 |
-| `github_activity` | `/v1/github/activity` | `username` (string), `limit`? (number), `cache`? (boolean) | 12 |
-| `github_followers` | `/v1/github/followers` | `username` (string), `limit`? (number), `cache`? (boolean) | 12 |
-| `github_following` | `/v1/github/following` | `username` (string), `limit`? (number), `cache`? (boolean) | 12 |
+| `github_pull_requests` | `/v1/github/pull-requests` | `repo` (string), `state`? (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 12 |
+| `github_activity` | `/v1/github/activity` | `username` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 12 |
+| `github_followers` | `/v1/github/followers` | `username` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 12 |
+| `github_following` | `/v1/github/following` | `username` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 12 |
 | `github_contributions` | `/v1/github/contributions` | `username` (string), `cache`? (boolean) | 3 |
 | `github_trending_repositories` | `/v1/github/trending-repositories` | `q` (string), `limit`? (number), `cache`? (boolean) | 12 |
 | `github_trending_developers` | `/v1/github/trending-developers` | `q` (string), `limit`? (number), `cache`? (boolean) | 12 |
@@ -308,7 +308,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
 | `soundcloud_artist` | `/v1/soundcloud/artist` | `url` (string), `cache`? (boolean) | 1 |
-| `soundcloud_artist_tracks` | `/v1/soundcloud/artist-tracks` | `url` (string), `limit`? (number), `cache`? (boolean) | 28 |
+| `soundcloud_artist_tracks` | `/v1/soundcloud/artist-tracks` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 28 |
 | `soundcloud_track` | `/v1/soundcloud/track` | `url` (string), `cache`? (boolean) | 1 |
 
 ### Linktree
@@ -328,7 +328,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
 | `truth_social_profile` | `/v1/truth-social/profile` | `url` (string), `cache`? (boolean) | 5 |
-| `truth_social_user_posts` | `/v1/truth-social/user-posts` | `url` (string), `limit`? (number), `cache`? (boolean) | 17 |
+| `truth_social_user_posts` | `/v1/truth-social/user-posts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 17 |
 | `truth_social_post` | `/v1/truth-social/post` | `url` (string), `cache`? (boolean) | 5 |
 
 ### Kick

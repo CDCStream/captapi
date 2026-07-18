@@ -225,35 +225,73 @@ async def profile(
         return ApiResponse(data=data)
 
 
-@router.get("/user-posts", summary="Truth Social user posts")
+@router.get("/user-posts", summary="Truth Social user posts (cursor-paginated)")
 async def user_posts(
     url: str = Query(..., description="Truth Social profile URL or @username"),
     limit: int = Query(20, ge=1, le=80),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor (Mastodon max_id). Leave empty for the first page; "
+            "then pass the nextCursor value returned in the previous response."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     username = _username(url)
     if not username:
         raise HTTPException(status_code=400, detail="Invalid Truth Social profile")
+    if cursor is not None and cursor != "" and not str(cursor).isdigit():
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid cursor. Pass the nextCursor value from a previous response.",
+        )
     async with billed_call(caller=caller, endpoint="/v1/truth-social/user-posts", platform="truth_social", resource_url=f"{BASE}/@{username}", base_credits=max(5, math.ceil(limit * 0.85))) as ctx:
         async def _run() -> dict[str, Any]:
+            next_cursor: str | None = None
             try:
                 account = await _get_json("/api/v1/accounts/lookup", {"acct": username})
                 account_id = account.get("id")
                 if not account_id:
                     raise HTTPException(status_code=404, detail="Truth Social profile not found")
-                items = await _get_json(
-                    f"/api/v1/accounts/{account_id}/statuses",
-                    {"limit": min(limit, 40), "exclude_replies": "true", "with_muted": "true"},
-                )
+                params: dict[str, Any] = {
+                    "limit": min(limit, 40),
+                    "exclude_replies": "true",
+                    "with_muted": "true",
+                }
+                if cursor:
+                    params["max_id"] = cursor
+                items = await _get_json(f"/api/v1/accounts/{account_id}/statuses", params)
+                ctx["source"] = "direct"
             except HTTPException as exc:
                 if exc.status_code not in {502, 503, 504}:
                     raise
+                if cursor:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Cursor pagination is only available on the native Truth Social path. Start a new request without cursor.",
+                    ) from exc
                 items = await _actor_posts(username, limit)
+                ctx["source"] = "apify"
             posts = [_normalize_post(i) for i in items[:limit] if isinstance(i, dict)]
-            return {"username": username, "totalReturned": len(posts), "posts": posts}
+            if ctx.get("source") == "direct" and posts and len(posts) >= min(limit, 40):
+                next_cursor = posts[-1].get("id")
+            return {
+                "username": username,
+                "totalReturned": len(posts),
+                "nextCursor": next_cursor,
+                "hasMore": next_cursor is not None,
+                "posts": posts,
+            }
 
-        data = await cached_or_run("truth-social.user-posts", {"username": username, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
+        data = await cached_or_run(
+            "truth-social.user-posts",
+            {"username": username, "limit": limit, "cursor": cursor or "", "v": 3},
+            _run,
+            ctx,
+            use_cache=cache,
+        )
         return ApiResponse(data=data)
 
 

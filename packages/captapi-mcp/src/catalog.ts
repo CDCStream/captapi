@@ -131,7 +131,7 @@ const YOUTUBE: Omit<Endpoint, "platform">[] = [
   { tool: "youtube_transcript", name: "YouTube Transcript", path: "/v1/youtube/transcript", credits: 2, summary: "Extract the full timestamped transcript of a YouTube video.", params: [url(YT_VIDEO), language(), cacheParam()] },
   { tool: "youtube_summarize", name: "YouTube Summarizer", path: "/v1/youtube/summarize", credits: 4, summary: "AI summary (key points, topics, sentiment) of a YouTube video.", params: [url(YT_VIDEO), language(), cacheParam()] },
   { tool: "youtube_video_details", name: "YouTube Video Details", path: "/v1/youtube/video-details", credits: 1, summary: "Metadata + engagement stats for a YouTube video.", params: [url(YT_VIDEO)] },
-  { tool: "youtube_comments", name: "YouTube Comments", path: "/v1/youtube/comments", credits: 20, summary: "Comments on a YouTube video.", params: [url(YT_VIDEO), limit(50, 500)] },
+  { tool: "youtube_comments", name: "YouTube Comments", path: "/v1/youtube/comments", credits: 20, summary: "Comments on a YouTube video, with cursor pagination (nextCursor + hasMore).", params: [url(YT_VIDEO), limit(50, 500), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
   { tool: "youtube_channel_details", name: "YouTube Channel Details", path: "/v1/youtube/channel-details", credits: 1, summary: "Channel info & subscriber/stats for a YouTube channel.", params: [url(YT_CHANNEL)] },
   { tool: "youtube_search", name: "YouTube Search", path: "/v1/youtube/search", credits: 20, summary: "Search YouTube videos by keyword.", params: [q(), limit(20, 200)] },
   { tool: "youtube_channel_videos", name: "YouTube Channel Videos", path: "/v1/youtube/channel-videos", credits: 20, summary: "List a channel's uploaded videos.", params: [url(YT_CHANNEL), limit(20, 200), fastRss()] },
@@ -243,13 +243,13 @@ const TWITTER: Omit<Endpoint, "platform">[] = [
 ];
 
 const REDDIT: Omit<Endpoint, "platform">[] = [
-  { tool: "reddit_subreddit_posts", name: "Reddit Subreddit Posts", path: "/v1/reddit/subreddit-posts", credits: 10, summary: "Recent posts in a subreddit.", params: [url(RD_SUB), limit(25, 200)] },
+  { tool: "reddit_subreddit_posts", name: "Reddit Subreddit Posts", path: "/v1/reddit/subreddit-posts", credits: 10, summary: "Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore).", params: [url(RD_SUB), limit(25, 200), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
   { tool: "reddit_post_details", name: "Reddit Post Details", path: "/v1/reddit/post-details", credits: 1, summary: "Metadata + stats for a Reddit post.", params: [url(RD_POST)] },
   { tool: "reddit_post_comments", name: "Reddit Post Comments", path: "/v1/reddit/post-comments", credits: 20, summary: "Comments on a Reddit post.", params: [url(RD_POST), limit(50, 500)] },
   { tool: "reddit_post_transcript", name: "Reddit Post Transcript", path: "/v1/reddit/post-transcript", credits: 20, summary: "Extract Reddit post text and top comments as a discussion transcript.", params: [url(RD_POST), limit(50, 200)] },
-  { tool: "reddit_search", name: "Reddit Search", path: "/v1/reddit/search", credits: 10, summary: "Search Reddit posts by keyword.", params: [q(), limit(25, 200)] },
+  { tool: "reddit_search", name: "Reddit Search", path: "/v1/reddit/search", credits: 10, summary: "Search Reddit posts by keyword, with cursor pagination (nextCursor + hasMore).", params: [q(), limit(25, 200), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
   { tool: "reddit_subreddit_details", name: "Reddit Subreddit Details", path: "/v1/reddit/subreddit-details", credits: 1, summary: "Info & member stats for a subreddit.", params: [url(RD_SUB)] },
-  { tool: "reddit_subreddit_search", name: "Reddit Subreddit Search", path: "/v1/reddit/subreddit-search", credits: 10, summary: "Search posts within a specific subreddit.", params: [url(RD_SUB), q(), limit(25, 200)] },
+  { tool: "reddit_subreddit_search", name: "Reddit Subreddit Search", path: "/v1/reddit/subreddit-search", credits: 10, summary: "Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore).", params: [url(RD_SUB), q(), limit(25, 200), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
 ];
 
 const THREADS: Omit<Endpoint, "platform">[] = [
@@ -262,7 +262,7 @@ const THREADS: Omit<Endpoint, "platform">[] = [
 
 const BLUESKY: Omit<Endpoint, "platform">[] = [
   { tool: "bluesky_profile", name: "Bluesky Profile", path: "/v1/bluesky/profile", credits: 1, summary: "Profile info & stats for a Bluesky account.", params: [url(BS_PROFILE)] },
-  { tool: "bluesky_user_posts", name: "Bluesky User Posts", path: "/v1/bluesky/user-posts", credits: 3, summary: "Recent posts from a Bluesky profile.", params: [url(BS_PROFILE), limit(25, 100)] },
+  { tool: "bluesky_user_posts", name: "Bluesky User Posts", path: "/v1/bluesky/user-posts", credits: 3, summary: "Recent posts from a Bluesky profile, with cursor pagination (nextCursor + hasMore).", params: [url(BS_PROFILE), limit(25, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
   { tool: "bluesky_post_details", name: "Bluesky Post Details", path: "/v1/bluesky/post-details", credits: 1, summary: "Metadata + engagement for a Bluesky post.", params: [url(BS_POST)] },
 ];
 
@@ -300,12 +300,12 @@ const TIKTOK_SHOP: Omit<Endpoint, "platform">[] = [
 
 const GITHUB: Omit<Endpoint, "platform">[] = [
   { tool: "github_user", name: "GitHub User", path: "/v1/github/user", credits: 3, summary: "Public GitHub user profile details.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }] },
-  { tool: "github_repositories", name: "GitHub Repositories", path: "/v1/github/repositories", credits: 12, summary: "List a GitHub user's repositories.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100)] },
+  { tool: "github_repositories", name: "GitHub Repositories", path: "/v1/github/repositories", credits: 12, summary: "List a GitHub user's repositories, with cursor pagination (nextCursor + hasMore).", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
   { tool: "github_repository", name: "GitHub Repository", path: "/v1/github/repository", credits: 3, summary: "Repository details, stars, forks and metadata.", params: [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name." }] },
-  { tool: "github_pull_requests", name: "GitHub Pull Requests", path: "/v1/github/pull-requests", credits: 12, summary: "List repository pull requests.", params: [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name." }, { name: "state", type: "string", required: false, description: "open, closed, or all. Default open." }, limit(30, 100)] },
-  { tool: "github_activity", name: "GitHub Activity", path: "/v1/github/activity", credits: 12, summary: "Recent public activity for a GitHub user.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100)] },
-  { tool: "github_followers", name: "GitHub Followers", path: "/v1/github/followers", credits: 12, summary: "List GitHub followers.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100)] },
-  { tool: "github_following", name: "GitHub Following", path: "/v1/github/following", credits: 12, summary: "List accounts a GitHub user follows.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100)] },
+  { tool: "github_pull_requests", name: "GitHub Pull Requests", path: "/v1/github/pull-requests", credits: 12, summary: "List repository pull requests, with cursor pagination (nextCursor + hasMore).", params: [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name." }, { name: "state", type: "string", required: false, description: "open, closed, or all. Default open." }, limit(30, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
+  { tool: "github_activity", name: "GitHub Activity", path: "/v1/github/activity", credits: 12, summary: "Recent public activity for a GitHub user, with cursor pagination (nextCursor + hasMore).", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
+  { tool: "github_followers", name: "GitHub Followers", path: "/v1/github/followers", credits: 12, summary: "List GitHub followers, with cursor pagination (nextCursor + hasMore).", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
+  { tool: "github_following", name: "GitHub Following", path: "/v1/github/following", credits: 12, summary: "List accounts a GitHub user follows, with cursor pagination (nextCursor + hasMore).", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, limit(30, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor (page number as string). Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
   { tool: "github_contributions", name: "GitHub Contributions", path: "/v1/github/contributions", credits: 3, summary: "Summary of recent public GitHub contributions.", params: [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }] },
   { tool: "github_trending_repositories", name: "GitHub Trending Repositories", path: "/v1/github/trending-repositories", credits: 12, summary: "Search trending repositories by stars or query.", params: [q("GitHub repository search query. Default stars:>1000."), limit(20, 100)] },
   { tool: "github_trending_developers", name: "GitHub Trending Developers", path: "/v1/github/trending-developers", credits: 12, summary: "Search popular GitHub developers.", params: [q("GitHub user search query. Default followers:>1000."), limit(20, 100)] },
@@ -330,7 +330,7 @@ const SPOTIFY: Omit<Endpoint, "platform">[] = [
 
 const SOUNDCLOUD: Omit<Endpoint, "platform">[] = [
   { tool: "soundcloud_artist", name: "SoundCloud Artist", path: "/v1/soundcloud/artist", credits: 1, summary: "SoundCloud artist profile metadata.", params: [url(SC_PROFILE)] },
-  { tool: "soundcloud_artist_tracks", name: "SoundCloud Artist Tracks", path: "/v1/soundcloud/artist-tracks", credits: 28, summary: "Tracks from a SoundCloud artist profile.", params: [url(SC_PROFILE), limit(20, 100)] },
+  { tool: "soundcloud_artist_tracks", name: "SoundCloud Artist Tracks", path: "/v1/soundcloud/artist-tracks", credits: 28, summary: "Tracks from a SoundCloud artist profile, with cursor pagination (nextCursor + hasMore).", params: [url(SC_PROFILE), limit(20, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
   { tool: "soundcloud_track", name: "SoundCloud Track", path: "/v1/soundcloud/track", credits: 1, summary: "SoundCloud track metadata and engagement stats.", params: [url(SC_TRACK)] },
 ];
 
@@ -344,7 +344,7 @@ const SNAPCHAT: Omit<Endpoint, "platform">[] = [
 
 const TRUTH_SOCIAL: Omit<Endpoint, "platform">[] = [
   { tool: "truth_social_profile", name: "Truth Social Profile", path: "/v1/truth-social/profile", credits: 5, summary: "Public Truth Social profile metadata and stats.", params: [url(TRUTH_PROFILE)] },
-  { tool: "truth_social_user_posts", name: "Truth Social User Posts", path: "/v1/truth-social/user-posts", credits: 17, summary: "Recent public posts from a Truth Social profile.", params: [url(TRUTH_PROFILE), limit(20, 80)] },
+  { tool: "truth_social_user_posts", name: "Truth Social User Posts", path: "/v1/truth-social/user-posts", credits: 17, summary: "Recent public posts from a Truth Social profile, with cursor pagination (nextCursor + hasMore).", params: [url(TRUTH_PROFILE), limit(20, 80), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
   { tool: "truth_social_post", name: "Truth Social Post", path: "/v1/truth-social/post", credits: 5, summary: "Truth Social post metadata, text, media and engagement.", params: [url(TRUTH_POST)] },
 ];
 

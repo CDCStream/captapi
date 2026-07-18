@@ -471,15 +471,23 @@ async def _fetch_reddit_post_resilient(
         ) from exc
 
 
-async def _reddit_listing_json(path: str, params: dict[str, Any], limit: int) -> list[dict[str, Any]]:
+async def _reddit_listing_json(
+    path: str,
+    params: dict[str, Any],
+    limit: int,
+    *,
+    after: str | None = None,
+) -> tuple[list[dict[str, Any]], str | None]:
     """Fetch a Reddit public JSON listing (search or subreddit feed) natively.
 
-    Returns [] on any upstream problem so callers can fall back to the actor.
-    Unlike the trudax lite actor, the public JSON includes scores and comment
-    counts, so posts come back with full engagement data.
+    Returns ``([], None)`` on any upstream problem so callers can fall back to
+    the actor. Unlike the trudax lite actor, the public JSON includes scores and
+    comment counts, so posts come back with full engagement data.
     """
     headers = {"User-Agent": "CaptapiBot/1.0 (+https://captapi.com)"}
     query = {"raw_json": "1", "limit": max(limit, 1), **params}
+    if after:
+        query["after"] = after
 
     async def _attempt_direct(base: str) -> Any | None:
         try:
@@ -514,7 +522,8 @@ async def _reddit_listing_json(path: str, params: dict[str, Any], limit: int) ->
         payload = await attempt()
         if payload is None:
             continue
-        children = ((payload.get("data") or {}).get("children") or []) if isinstance(payload, dict) else []
+        listing = (payload.get("data") or {}) if isinstance(payload, dict) else {}
+        children = listing.get("children") or []
         posts: list[dict[str, Any]] = []
         for child in children:
             raw = child.get("data") if isinstance(child, dict) else None
@@ -545,8 +554,9 @@ async def _reddit_listing_json(path: str, params: dict[str, Any], limit: int) ->
                 )
             )
         if posts:
-            return posts[:limit]
-    return []
+            next_after = safe_str(listing.get("after")) or None
+            return posts[:limit], next_after
+    return [], None
 
 
 async def _reddit_search_actor(query: str, limit: int) -> list[dict[str, Any]]:
@@ -563,10 +573,17 @@ async def _reddit_search_actor(query: str, limit: int) -> list[dict[str, Any]]:
     return [_normalize_post(i) for i in items if _is_post(i)][:limit]
 
 
-@router.get("/subreddit-posts", summary="List recent posts in a subreddit")
+@router.get("/subreddit-posts", summary="List recent posts in a subreddit (cursor-paginated)")
 async def subreddit_posts(
     url: str = Query(..., description="Subreddit URL, r/name, or bare name"),
     limit: int = Query(25, ge=1, le=200),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response (Reddit's after fullname)."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -581,9 +598,17 @@ async def subreddit_posts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            posts = await _reddit_listing_json(f"/r/{sub}/new.json", {}, limit)
+            posts, next_cursor = await _reddit_listing_json(
+                f"/r/{sub}/new.json", {}, limit, after=cursor
+            )
             if posts:
                 ctx["source"] = "direct"
+            # Apify actors are not cursor-based — only serve the first page.
+            if not posts and cursor:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Cursor pagination is only available on the native Reddit feed. Start a new request without cursor.",
+                )
             if not posts:
                 posts = await _reddit_search_actor(f"r/{sub}", limit)
                 if posts:
@@ -602,11 +627,17 @@ async def subreddit_posts(
                 )
                 posts = [_normalize_post(i) for i in items if _is_post(i)][:limit]
                 ctx["source"] = "apify"
-            return {"subreddit": sub, "totalReturned": len(posts), "posts": posts}
+            return {
+                "subreddit": sub,
+                "totalReturned": len(posts),
+                "nextCursor": next_cursor if ctx.get("source") == "direct" else None,
+                "hasMore": bool(next_cursor) if ctx.get("source") == "direct" else False,
+                "posts": posts,
+            }
 
         data = await cached_or_run(
             endpoint="reddit.subreddit-posts",
-            params={"sub": sub, "limit": limit, "v": 2},
+            params={"sub": sub, "limit": limit, "cursor": cursor or "", "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -881,11 +912,18 @@ async def post_transcript(
         return ApiResponse(data=data)
 
 
-@router.get("/subreddit-search", summary="Search posts within a specific subreddit")
+@router.get("/subreddit-search", summary="Search posts within a specific subreddit (cursor-paginated)")
 async def subreddit_search(
     url: str = Query(..., description="Subreddit URL, r/name, or bare name"),
     q: str = Query(..., min_length=2, description="Search query"),
     limit: int = Query(25, ge=1, le=200),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -900,11 +938,19 @@ async def subreddit_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            results = await _reddit_listing_json(
-                f"/r/{sub}/search.json", {"q": q, "restrict_sr": "1", "sort": "relevance"}, limit
+            results, next_cursor = await _reddit_listing_json(
+                f"/r/{sub}/search.json",
+                {"q": q, "restrict_sr": "1", "sort": "relevance"},
+                limit,
+                after=cursor,
             )
             if results:
                 ctx["source"] = "direct"
+            if not results and cursor:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Cursor pagination is only available on the native Reddit search. Start a new request without cursor.",
+                )
             if not results:
                 results = await _reddit_search_actor(f"r/{sub} {q}", limit)
                 if results:
@@ -924,11 +970,18 @@ async def subreddit_search(
                 )
                 results = [_normalize_post(i) for i in items if _is_post(i)][:limit]
                 ctx["source"] = "apify"
-            return {"subreddit": sub, "query": q, "totalReturned": len(results), "results": results}
+            return {
+                "subreddit": sub,
+                "query": q,
+                "totalReturned": len(results),
+                "nextCursor": next_cursor if ctx.get("source") == "direct" else None,
+                "hasMore": bool(next_cursor) if ctx.get("source") == "direct" else False,
+                "results": results,
+            }
 
         data = await cached_or_run(
             endpoint="reddit.subreddit-search",
-            params={"sub": sub, "q": q, "limit": limit, "v": 2},
+            params={"sub": sub, "q": q, "limit": limit, "cursor": cursor or "", "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -937,10 +990,17 @@ async def subreddit_search(
         return ApiResponse(data=data)
 
 
-@router.get("/search", summary="Search Reddit posts by keyword")
+@router.get("/search", summary="Search Reddit posts by keyword (cursor-paginated)")
 async def reddit_search(
     q: str = Query(..., min_length=2, description="Search query"),
     limit: int = Query(25, ge=1, le=200),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -954,9 +1014,16 @@ async def reddit_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            results = await _reddit_listing_json("/search.json", {"q": q, "sort": "relevance"}, limit)
+            results, next_cursor = await _reddit_listing_json(
+                "/search.json", {"q": q, "sort": "relevance"}, limit, after=cursor
+            )
             if results:
                 ctx["source"] = "direct"
+            if not results and cursor:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Cursor pagination is only available on the native Reddit search. Start a new request without cursor.",
+                )
             if not results:
                 results = await _reddit_search_actor(q, limit)
                 if results:
@@ -970,11 +1037,17 @@ async def reddit_search(
                 )
                 results = [_normalize_post(i) for i in items if _is_post(i)][:limit]
                 ctx["source"] = "apify"
-            return {"query": q, "totalReturned": len(results), "results": results}
+            return {
+                "query": q,
+                "totalReturned": len(results),
+                "nextCursor": next_cursor if ctx.get("source") == "direct" else None,
+                "hasMore": bool(next_cursor) if ctx.get("source") == "direct" else False,
+                "results": results,
+            }
 
         data = await cached_or_run(
             endpoint="reddit.search",
-            params={"q": q, "limit": limit, "v": 2},
+            params={"q": q, "limit": limit, "cursor": cursor or "", "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

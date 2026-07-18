@@ -124,10 +124,17 @@ async def artist(
         return ApiResponse(data=data)
 
 
-@router.get("/artist-tracks", summary="SoundCloud artist tracks")
+@router.get("/artist-tracks", summary="SoundCloud artist tracks (cursor-paginated)")
 async def artist_tracks(
     url: str = Query(..., description="SoundCloud artist URL or username"),
     limit: int = Query(20, ge=1, le=100),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -137,12 +144,24 @@ async def artist_tracks(
         async def _run() -> dict[str, Any]:
             resolved = await native.resolve(profile)
             if isinstance(resolved, dict) and resolved.get("kind") == "user" and resolved.get("id"):
-                rows = await native.user_tracks(resolved["id"], limit)
+                rows, next_cursor = await native.user_tracks(resolved["id"], limit, cursor=cursor)
                 if rows:
                     tracks = [_track(native.prep_track_row(r)) for r in rows][:limit]
                     ctx["source"] = "direct"
-                    return {"platform": "soundcloud", "artistUrl": profile, "totalReturned": len(tracks), "tracks": tracks}
+                    return {
+                        "platform": "soundcloud",
+                        "artistUrl": profile,
+                        "totalReturned": len(tracks),
+                        "nextCursor": next_cursor,
+                        "hasMore": next_cursor is not None,
+                        "tracks": tracks,
+                    }
 
+            if cursor:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Cursor pagination is only available on the native SoundCloud path. Start a new request without cursor.",
+                )
             settings = get_settings()
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_SOUNDCLOUD,
@@ -153,9 +172,22 @@ async def artist_tracks(
             # keep only real tracks (they always carry a title).
             tracks = [_track(i) for i in items if i.get("title") or i.get("name")][:limit]
             ctx["source"] = "apify"
-            return {"platform": "soundcloud", "artistUrl": profile, "totalReturned": len(tracks), "tracks": tracks}
+            return {
+                "platform": "soundcloud",
+                "artistUrl": profile,
+                "totalReturned": len(tracks),
+                "nextCursor": None,
+                "hasMore": False,
+                "tracks": tracks,
+            }
 
-        data = await cached_or_run("soundcloud.artist-tracks", {"url": profile, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
+        data = await cached_or_run(
+            "soundcloud.artist-tracks",
+            {"url": profile, "limit": limit, "cursor": cursor or "", "v": 5},
+            _run,
+            ctx,
+            use_cache=cache,
+        )
         ctx["credits_override"] = _scaled(len(data["tracks"]))
         return ApiResponse(data=data)
 
