@@ -20118,8 +20118,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "replyToId": null
       }
     ],
-    "nextCursor": null,
-    "hasMore": false
+    "nextCursor": "Eg0SC2RRdzR3OVdnWGNRAA%3D%3D",
+    "hasMore": true
   },
   "youtube-community-post-details": {
     "platform": "youtube",
