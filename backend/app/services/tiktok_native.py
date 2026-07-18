@@ -119,16 +119,12 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
         "publishedAt": _iso(item.get("createTime")),
         "durationSeconds": safe_float(video.get("duration")),
         "thumbnailUrl": safe_str(video.get("cover") or video.get("originCover")),
-        # playAddr/downloadAddr are CDN URLs tied to the fetching IP+cookies and
-        # usually 403 for API consumers, so we don't surface them here; the
-        # video-download endpoint (actor-backed) handles downloads.
-        "videoUrl": None,
         "author": {
             "username": username,
             "displayName": safe_str(author.get("nickname")),
             "url": f"https://www.tiktok.com/@{username}" if username else None,
             "followers": safe_int(author_stats.get("followerCount")),
-            "verified": author.get("verified"),
+            "verified": False if author.get("verified") is None else bool(author.get("verified")),
             "profileImage": safe_str(author.get("avatarLarger") or author.get("avatarMedium")),
         },
         "engagement": {
@@ -388,6 +384,104 @@ async def comments_native(
         if not page.get("has_more"):
             return collected, None, total
     return collected, cur, total
+
+
+# Reply threads use the same mobile hosts with ``/comment/list/reply/``.
+_TT_REPLY_HOSTS = tuple(
+    h.replace("/comment/list/", "/comment/list/reply/") for h in _TT_COMMENT_HOSTS
+)
+
+
+def _map_reply(c: dict[str, Any]) -> dict[str, Any] | None:
+    """Map a mobile reply row to the public comment-replies shape."""
+    mapped = _map_comment(c)
+    if mapped is None:
+        return None
+    user = c.get("user") or {}
+    verified = user.get("is_verified") or user.get("verified")
+    return {
+        "id": mapped["id"],
+        "text": mapped["text"],
+        "author": mapped["author"],
+        "authorName": safe_str(user.get("nickname") or user.get("nickName")),
+        "likeCount": mapped["likeCount"],
+        "publishedAt": mapped["publishedAt"],
+        "verified": False if verified is None else bool(verified),
+        "profileImage": mapped.get("authorAvatarUrl"),
+    }
+
+
+async def _reply_page(
+    aweme_id: str, comment_id: str, cursor: str, count: int
+) -> dict[str, Any] | None:
+    """One page of replies under ``comment_id``, or None if every attempt is blocked."""
+    did = str(random.randint(10**18, 10**19 - 1))
+    params = {
+        **_TT_COMMENT_PARAMS,
+        "device_id": did,
+        "iid": did,
+        "aweme_id": aweme_id,
+        "comment_id": str(comment_id),
+        "cursor": str(cursor),
+        "count": str(count),
+    }
+    headers = {"User-Agent": _TT_MOBILE_UA, "Accept": "application/json"}
+    geos = ("US", "NL")
+    for _ in range(2):
+        tasks = [
+            asyncio.create_task(
+                _comment_once(
+                    _TT_REPLY_HOSTS[i % len(_TT_REPLY_HOSTS)],
+                    params,
+                    headers,
+                    _residential_proxy(geos[i % len(geos)]),
+                )
+            )
+            for i in range(8)
+        ]
+        try:
+            for coro in asyncio.as_completed(tasks):
+                res = await coro
+                if res is not None and isinstance(res.get("comments"), list):
+                    return res
+        finally:
+            for t in tasks:
+                t.cancel()
+    return None
+
+
+async def comment_replies_native(
+    aweme_id: str, comment_id: str, cursor: str | None, limit: int
+) -> tuple[list[dict[str, Any]], str | None, int | None] | None:
+    """Fetch up to ``limit`` replies under ``comment_id`` starting at ``cursor``.
+
+    Returns ``(replies, next_cursor, total)``. ``None`` on first-page failure so
+    the router can fall back to Apify.
+    """
+    collected: list[dict[str, Any]] = []
+    cur = str(cursor) if cursor else "0"
+    total: int | None = None
+    max_pages = max(3, limit // 15 + 2)
+    for _ in range(max_pages):
+        if len(collected) >= limit:
+            break
+        want = min(30, limit - len(collected))
+        page = await _reply_page(aweme_id, comment_id, cur, want)
+        if page is None:
+            return None if not collected else (collected, cur, total)
+        if total is None:
+            total = safe_int(page.get("total"))
+        for c in page.get("comments") or []:
+            mapped = _map_reply(c)
+            if mapped:
+                collected.append(mapped)
+                if len(collected) >= limit:
+                    break
+        nxt = page.get("cursor")
+        cur = str(nxt) if nxt is not None else cur
+        if not page.get("has_more"):
+            return collected[:limit], None, total
+    return collected[:limit], cur, total
 
 
 async def profile_region_native(handle: str) -> dict[str, Any] | None:

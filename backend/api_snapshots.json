@@ -1746,7 +1746,6 @@
       "publishedAt": "2026-06-02T14:56:35.000Z",
       "durationSeconds": 29,
       "thumbnailUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-useast8-p-0068-tx2/oUAHVIiQDac8uC75AEfyALAA1FrTAqEEQ3GRPe~tplv-tiktokx-origin.image?dr=9636&x-expires=1783263600&x-signature=2PlkofS3nAbuOWtQQSaCTJIU0bQ%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-      "videoUrl": null,
       "author": {
         "username": "khaby.lame",
         "displayName": "Khabane lame",
@@ -1850,7 +1849,7 @@
           "authorName": "MAJIN_EVAN⚡",
           "likeCount": 5,
           "publishedAt": "2026-06-18T12:01:20.000Z",
-          "verified": null,
+          "verified": false,
           "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/6ea4cabf09938d71804dd2b430afbdcb~tplv-tiktokx-cropcenter:100:100.jpg?dr=9640&refresh_token=56261dba&x-expires=1783180800&x-signature=6KFqvos3UN%2FoDaOZOKnyIPxgvQE%3D&t=4d5b0474&ps=13740610&shp=30310797&shcp=ff37627b&idc=useast8"
         },
         {
@@ -1860,7 +1859,7 @@
           "authorName": "it's me Gung",
           "likeCount": 15,
           "publishedAt": "2026-06-19T09:48:12.000Z",
-          "verified": null,
+          "verified": false,
           "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/34e550efa4bd9aec97d7de21011f1d5d~tplv-tiktokx-cropcenter:100:100.jpg?dr=9640&refresh_token=df352923&x-expires=1783180800&x-signature=%2Bz2MqapNeqXb5O%2BSD8t7FTZlK1c%3D&t=4d5b0474&ps=13740610&shp=30310797&shcp=ff37627b&idc=useast8"
         },
         {
@@ -1870,7 +1869,7 @@
           "authorName": "MAJIN_EVAN⚡",
           "likeCount": 1,
           "publishedAt": "2026-06-26T09:27:17.000Z",
-          "verified": null,
+          "verified": false,
           "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/6ea4cabf09938d71804dd2b430afbdcb~tplv-tiktokx-cropcenter:100:100.jpg?dr=9640&refresh_token=56261dba&x-expires=1783180800&x-signature=6KFqvos3UN%2FoDaOZOKnyIPxgvQE%3D&t=4d5b0474&ps=13740610&shp=30310797&shcp=ff37627b&idc=useast8"
         },
         {
@@ -1880,7 +1879,7 @@
           "authorName": "OPPAI FANS",
           "likeCount": 11,
           "publishedAt": "2026-06-18T12:55:47.000Z",
-          "verified": null,
+          "verified": false,
           "profileImage": "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/3e676fb527590bc4a3cdca6245dd36c3~tplv-tiktokx-cropcenter:100:100.jpg?dr=9640&refresh_token=1f57ed1e&x-expires=1783180800&x-signature=G0fhF4HgYgI%2FnINaX7DhGCqLnC8%3D&t=4d5b0474&ps=13740610&shp=30310797&shcp=ff37627b&idc=useast8"
         },
         {
@@ -1890,7 +1889,7 @@
           "authorName": "𝙕𝙖𝙭𝙯 𝖋𝖙 𝙆𝙂𝙉",
           "likeCount": 2,
           "publishedAt": "2026-06-22T01:56:58.000Z",
-          "verified": null,
+          "verified": false,
           "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/cdbbf04e9282ba9b34596ca100fc73f3~tplv-tiktokx-cropcenter:100:100.jpg?dr=9640&refresh_token=81eede8f&x-expires=1783180800&x-signature=WAKJPmPMjXjhyxgUsaCT5gtKsS8%3D&t=4d5b0474&ps=13740610&shp=30310797&shcp=ff37627b&idc=useast8"
         },
         {
@@ -1900,7 +1899,7 @@
           "authorName": "Cal🦅",
           "likeCount": 1,
           "publishedAt": "2026-06-25T17:50:10.000Z",
-          "verified": null,
+          "verified": false,
           "profileImage": "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/a553573e0a120f841e441b1ff94db371~tplv-tiktokx-cropcenter:100:100.jpg?dr=9640&refresh_token=fa347877&x-expires=1783180800&x-signature=e1XFGyY3K0iPWKgWXrkh9XQ1xyg%3D&t=4d5b0474&ps=13740610&shp=30310797&shcp=ff37627b&idc=useast8"
         },
         {
@@ -1910,7 +1909,7 @@
           "authorName": "OPPAI FANS",
           "likeCount": 1,
           "publishedAt": "2026-06-27T07:09:58.000Z",
-          "verified": null,
+          "verified": false,
           "profileImage": "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/3e676fb527590bc4a3cdca6245dd36c3~tplv-tiktokx-cropcenter:100:100.jpg?dr=9640&refresh_token=1f57ed1e&x-expires=1783180800&x-signature=G0fhF4HgYgI%2FnINaX7DhGCqLnC8%3D&t=4d5b0474&ps=13740610&shp=30310797&shcp=ff37627b&idc=useast8"
         },
         {
@@ -1920,7 +1919,7 @@
           "authorName": "Fall",
           "likeCount": 1,
           "publishedAt": "2026-06-23T19:07:30.000Z",
-          "verified": null,
+          "verified": false,
           "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/e0101b36be56d56bf30e68797809e35a~tplv-tiktokx-cropcenter:100:100.jpg?dr=9640&refresh_token=8bd2c696&x-expires=1783180800&x-signature=AmsAk4RHtyFB7WDPrOng%2FlbZj7I%3D&t=4d5b0474&ps=13740610&shp=30310797&shcp=ff37627b&idc=useast8"
         },
         {
@@ -1930,7 +1929,7 @@
           "authorName": "Fall",
           "likeCount": 0,
           "publishedAt": "2026-06-23T19:06:55.000Z",
-          "verified": null,
+          "verified": false,
           "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/e0101b36be56d56bf30e68797809e35a~tplv-tiktokx-cropcenter:100:100.jpg?dr=9640&refresh_token=8bd2c696&x-expires=1783180800&x-signature=AmsAk4RHtyFB7WDPrOng%2FlbZj7I%3D&t=4d5b0474&ps=13740610&shp=30310797&shcp=ff37627b&idc=useast8"
         },
         {
@@ -1940,10 +1939,13 @@
           "authorName": "RAMA_dhan",
           "likeCount": 0,
           "publishedAt": "2026-06-23T09:25:07.000Z",
-          "verified": null,
+          "verified": false,
           "profileImage": "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/69f6058daa2c9ef72ac8309cccbc679c~tplv-tiktokx-cropcenter:100:100.jpg?dr=9640&refresh_token=8801bc0e&x-expires=1783180800&x-signature=GBIBPBLMejZInIfyfSNNa028EM0%3D&t=4d5b0474&ps=13740610&shp=30310797&shcp=ff37627b&idc=useast8"
         }
-      ]
+      ],
+      "totalReplies": 10,
+      "nextCursor": null,
+      "hasMore": false
     },
     "error": null
   },
@@ -2961,7 +2963,6 @@
           "publishedAt": "2026-06-18T10:43:42.000Z",
           "durationSeconds": 31.0,
           "thumbnailUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/osA0WBPuIylBYAupFvaaKEstkjz5yiizzQrdG~tplv-tiktokx-origin.image?dr=9636&x-expires=1783267200&x-signature=LOMsWtwAfKr4wuKhPER4S49PeOs%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-          "videoUrl": null,
           "author": {
             "username": "promakeuppro",
             "displayName": "ProMakeupPro",
@@ -2989,7 +2990,6 @@
           "publishedAt": "2026-06-17T11:00:57.000Z",
           "durationSeconds": 32.0,
           "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-useast5-p-0068-tx/o8IIkLUJPEAYHnGbQelhAkAAIyfUIZeNzBzAjm~tplv-tiktokx-dmt-logom:tos-useast5-i-0068-tx/oUAQgEpAR5dIqAffkAiMBnmxsk0DECFiSpKDAl.image?dr=9634&x-expires=1783267200&x-signature=HBYQuso88OhBcXWzfwjTeKX5ETI%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-          "videoUrl": null,
           "author": {
             "username": "dr.health888",
             "displayName": "Dr.Health888",
@@ -3023,7 +3023,6 @@
           "publishedAt": "2026-06-27T13:23:03.000Z",
           "durationSeconds": 126.0,
           "thumbnailUrl": "https://p19-common-sign.tiktokcdn-us.com/tos-useast2a-p-0037-euttp/oc3f0U6EA6R2AQTItCFqAzBDQ6mAADErf8PE3q~tplv-tiktokx-origin.image?dr=9636&x-expires=1783267200&x-signature=owCd6rbtE1tGdmXFLqgzoE09DxA%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-          "videoUrl": null,
           "author": {
             "username": "manelparletrop",
             "displayName": "manel",
@@ -3072,7 +3071,6 @@
           "publishedAt": "2026-06-20T17:21:36.000Z",
           "durationSeconds": 46.0,
           "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/o84EbWFABZ1GTe6fAAAjD9egIoDLtmIUAIgQoz~tplv-tiktokx-origin.image?dr=9636&x-expires=1783267200&x-signature=X5LtS2EYdm6766uGn77A1pxHweg%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-          "videoUrl": null,
           "author": {
             "username": "kiyokobeauty",
             "displayName": "Kiyoko Beauty",
@@ -3105,7 +3103,6 @@
           "publishedAt": "2026-06-04T15:51:11.000Z",
           "durationSeconds": 19.0,
           "thumbnailUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/oIRC7FB3A4tfAfInuqdIAIUhNAEEIATNDZnXEg~tplv-tiktokx-origin.image?dr=9636&x-expires=1783267200&x-signature=W2r3YLMUxz1dtIMVCxkWs97SdAw%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5",
-          "videoUrl": null,
           "author": {
             "username": "itsedonna",
             "displayName": "Itsedonna | Skincare",
@@ -3265,7 +3262,6 @@
           "publishedAt": "2026-06-02T14:56:35+00:00",
           "durationSeconds": 29.0,
           "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-useast8-p-0068-tx2/oUAHVIiQDac8uC75AEfyALAA1FrTAqEEQ3GRPe~tplv-tiktokx-cropcenter-q:300:400:q70.webp?dr=14782&refresh_token=d2ef9617&x-expires=1783180800&x-signature=KLda0lzeROXX%2Bwaa1NQd81GiVbg%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=f6441914&idc=my&biz_tag=tt_video&s=MUSIC_AWEME&sc=cover",
-          "videoUrl": "https://v58.tiktokcdn.com/video/tos/maliva/tos-maliva-ve-0068c799-us/oMf0evRAEgBEblA4kSDEVqI0HQW5K7RiuFIEQH/?a=1233&bti=O3YpOjQ0Zik3OjlmOm0uMjM6ZDQ0MDo%3D&&bt=3110&ft=TtG9XtwpMRm_sdr0_vWHg4jjUQ9DGbeqmXxwF_yN8llQ2Nz7T&mime_type=video_mp4&rc=OWk8aWk2Zzo0NmkzNzw1NkBpMzU8M2w5cm5oOzMzaTczNEA1LWFfYC9gNWAxY2M0YGFeYSMvMnNiMmRjcGNhLS1kMTJzcw%3D%3D&vvpl=1&l=20260704004940EF010BFB3FCD9E018201&VExpiration=1783183810&VSignature=NW4v3hOstudyEVU5O0_ImA&btag=e00088000",
           "author": {
             "username": "khaby.lame",
             "displayName": "Khabane lame",
@@ -3293,7 +3289,6 @@
           "publishedAt": "2026-06-05T04:19:57+00:00",
           "durationSeconds": 15.0,
           "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0037/o4BzQoWrBGAmToR5eJLnDjUB8ISAKC1RQfeZiI~tplv-tiktokx-cropcenter-q:300:400:q70.webp?dr=14782&refresh_token=e6003cd0&x-expires=1783180800&x-signature=9ExQTRoUUF3KuX1YCpnPjlIDFKU%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=f6441914&idc=my&biz_tag=tt_video&s=MUSIC_AWEME&sc=cover",
-          "videoUrl": "https://v58.tiktokcdn.com/video/tos/alisg/tos-alisg-pve-0037c001/okCJjrGnRxJez58fErfooOBIcWnLQIUSDIAAOK/?a=1233&bti=O3YpOjQ0Zik3OjlmOm0uMjM6ZDQ0MDo%3D&&bt=487&ft=TtG9XtwpMRm_sdr0_vWHg4jjUQ9DGbeqmXxwF_yN8llQ2Nz7T&mime_type=video_mp4&rc=NTo8ODo7ODg2OTxlZDY2ZEBpajh4aHM5cnI3OzMzODczNEBiNF4wNl5iNi0xMy0yLjMvYSMyZmVxMmQ0cGVhLS1kMTFzcw%3D%3D&vvpl=1&l=20260704004940EF010BFB3FCD9E018201&VExpiration=1783183796&VSignature=tXVlM9EGBz8l70FEkQwNvA&btag=e000b8000",
           "author": {
             "username": "bikesh.harijan5",
             "displayName": "BIKESH",
@@ -3321,7 +3316,6 @@
           "publishedAt": "2026-06-06T21:29:43+00:00",
           "durationSeconds": 0.0,
           "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-alisg-i-photomode-sg/3ac544d3bdb04994899fa25d7c1fe3a8~tplv-photomode-image-cover:480:0:q70.webp?dr=17580&refresh_token=4cfad4d2&x-expires=1784390400&x-signature=lBlNc3Jrd01xsSZURtrF5RwDzjY%3D&t=5897f7ec&ps=d5b8ac02&shp=d05b14bd&shcp=f6441914&idc=my&s=MUSIC_AWEME&biz_tag=tt_photomode&sc=cover",
-          "videoUrl": "https://sf19-ies-music-va.tiktokcdn.com/obj/ies-music-ttp-dup-us/tx27650420977368582943.mp3",
           "author": {
             "username": "asalfo_magic_system",
             "displayName": "A'SALFO ✪",
@@ -3349,7 +3343,6 @@
           "publishedAt": "2026-06-08T15:14:35+00:00",
           "durationSeconds": 30.0,
           "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-useast8-p-0068-tx2/oYAxEVEDAzfEerjA3qtmExMIFAFo9RAJtYCH0A~tplv-tiktokx-cropcenter-q:300:400:q70.webp?dr=14782&refresh_token=c9793484&x-expires=1783180800&x-signature=iOnPuTW87oZCAqlJG%2FRNdstTesc%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=f6441914&idc=my&biz_tag=tt_video&s=MUSIC_AWEME&sc=cover",
-          "videoUrl": "https://v58.tiktokcdn.com/video/tos/maliva/tos-maliva-ve-0068c799-us/ogbBBV5KIiRm2kydXjbiGA4EEQa3ApzBvjJix/?a=1233&bti=O3YpOjQ0Zik3OjlmOm0uMjM6ZDQ0MDo%3D&&bt=446&ft=TtG9XtwpMRm_sdr0_vWHg4jjUQ9DGbeqmXxwF_yN8llQ2Nz7T&mime_type=video_mp4&rc=ZWk7OzdpZ2lnaTU7OTc0M0Bpam1pdms5cnJnOzMzaTczNEAwNTIzMTIuNS0xYDEvNTBgYSNiYWgxMmRra2dhLS1kMTJzcw%3D%3D&vvpl=1&l=20260704004940EF010BFB3FCD9E018201&VExpiration=1783183811&VSignature=lIN0dHv-s9y4w2HWQL6JMA&btag=e00088000",
           "author": {
             "username": "ali.chai.wala777",
             "displayName": "Ali chai wala 777☕☕",
@@ -3377,7 +3370,6 @@
           "publishedAt": "2026-06-30T15:28:22+00:00",
           "durationSeconds": 16.0,
           "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0037/oYw7iFBEEQ6IgRQz9Hf7QL2ARZkHqDcQBBfSBw~tplv-tiktokx-cropcenter-q:300:400:q70.webp?dr=14782&refresh_token=fff67a50&x-expires=1783180800&x-signature=ZXeAHvdQxdrgZHcGQCPNnvbDKx4%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=f6441914&idc=my&biz_tag=tt_video&s=MUSIC_AWEME&sc=cover",
-          "videoUrl": "https://v58.tiktokcdn.com/video/tos/alisg/tos-alisg-pve-0037c001/oQyJDAZmecQsIiEq1QivBBgsx4bIeIIgRCB9E9/?a=1233&bti=O3YpOjQ0Zik3OjlmOm0uMjM6ZDQ0MDo%3D&&bt=1063&ft=TtG9XtwpMRm_sdr0_vWHg4jjUQ9DGbeqmXxwF_yN8llQ2Nz7T&mime_type=video_mp4&rc=OWkzNGk2Z2RnPGdkOjNmNUBpM2s0Znc5cnd3PDMzODczNEA0LS8uYzRjXzIxMDNhMmNeYSMxZ2VkMmRrcS5hLS1kMWBzcw%3D%3D&vvpl=1&l=20260704004940EF010BFB3FCD9E018201&VExpiration=1783183797&VSignature=oCCCCGAMkChMLbKI9fk9Tg&btag=e000b8000",
           "author": {
             "username": "babi_batox",
             "displayName": "Badi_Xatix",

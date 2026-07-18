@@ -29,6 +29,7 @@ from app.services.tiktok_native import (
     audience_regions_native,
     channel_details_native,
     channel_posts_native,
+    comment_replies_native,
     profile_region_native,
     video_details_native,
 )
@@ -54,6 +55,7 @@ CREDIT_SUMMARIZE = 4
 CREDIT_VIDEO_DETAILS = 1
 CREDIT_CHANNEL_DETAILS = 1
 CREDIT_COMMENTS = 2  # native (TikTok's own API); flat fee, our cost ~$0
+CREDIT_COMMENT_REPLIES = 2  # native comment/list/reply; flat fee, our cost ~$0
 CREDIT_CHANNEL_POSTS = 2  # native aweme/post; flat fee, our cost ~$0
 CREDIT_PROFILE_REGION = 2  # native profile page + fast LLM region estimate
 CREDIT_AUDIENCE = 3  # video list (actor) + native commenter-region sampling
@@ -269,8 +271,8 @@ def _normalize(item: dict) -> dict:
     video_meta = item.get("videoMeta") or {}
     covers = safe_list(item.get("covers"))
     caption = safe_str(item.get("text") or item.get("desc"))
-    # Channel-posts / video-details focus on metadata+stats; CDN play URLs are
-    # IP-bound and usually 403 for API consumers (same as the native path).
+    # Metadata+stats only — CDN play URLs are IP/cookie-bound (usually 403),
+    # so we omit videoUrl rather than always returning null.
     return {
         "platform": "tiktok",
         "url": safe_str(item.get("webVideoUrl") or item.get("url")),
@@ -284,7 +286,6 @@ def _normalize(item: dict) -> dict:
             or video_meta.get("originalCoverUrl")
             or (covers[0] if covers else None)
         ),
-        "videoUrl": None,
         "author": {
             "username": safe_str(author.get("name") or author.get("uniqueId")),
             "displayName": safe_str(author.get("nickName") or author.get("nickname")),
@@ -319,22 +320,23 @@ def _normalize_aweme(item: dict) -> dict:
     published = None
     if isinstance(create_time, (int, float)) and create_time > 0:
         published = datetime.fromtimestamp(int(create_time), tz=timezone.utc).isoformat()
+    caption = safe_str(item.get("title"))
+    verified = author.get("verified") or author.get("is_verified")
     return {
         "platform": "tiktok",
         "url": f"https://www.tiktok.com/@{username}/video/{video_id}" if username and video_id else None,
         "id": video_id or safe_str(item.get("aweme_id")),
-        "caption": safe_str(item.get("title")),
-        "description": safe_str(item.get("title")),
+        "caption": caption,
+        "description": caption,
         "publishedAt": published,
         "durationSeconds": safe_float(item.get("duration")),
         "thumbnailUrl": safe_str(item.get("cover") or item.get("origin_cover")),
-        "videoUrl": safe_str(item.get("play") or item.get("wmplay")),
         "author": {
             "username": username,
             "displayName": safe_str(author.get("nickname")),
             "url": f"https://www.tiktok.com/@{username}" if username else None,
-            "followers": None,
-            "verified": None,
+            "followers": safe_int(author.get("follower_count") or author.get("followers")),
+            "verified": False if verified is None else bool(verified),
             "profileImage": safe_str(author.get("avatar")),
         },
         "engagement": {
@@ -344,8 +346,8 @@ def _normalize_aweme(item: dict) -> dict:
             "shares": safe_int(item.get("share_count")),
             "saves": safe_int(item.get("collect_count")),
         },
-        "hashtags": [],
-        "musicName": None,
+        "hashtags": _tt_hashtags(item, caption),
+        "musicName": safe_str((item.get("music") or {}).get("title")) if isinstance(item.get("music"), dict) else None,
     }
 
 
@@ -708,6 +710,7 @@ async def tiktok_comments(
                     "totalReturned": len(comments),
                     "comments": comments,
                     "nextCursor": next_cursor,
+                    "hasMore": next_cursor is not None,
                 }
                 return {k: v for k, v in payload.items() if v is not None}
 
@@ -744,11 +747,12 @@ async def tiktok_comments(
                 "totalReturned": len(comments),
                 "comments": comments,
                 "nextCursor": None,
+                "hasMore": False,
             }
 
         data = await cached_or_run(
             endpoint="tiktok.comments",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 3},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -847,18 +851,22 @@ async def _fetch_audience_locations(
 ) -> tuple[list[dict[str, Any]], int]:
     """Sample commenter countries across a creator's recent videos.
 
-    Video IDs come from the profile actor (TikTok gates the post list behind
-    signed params), then commenter ``region`` codes are pulled natively from
-    TikTok's own comment API and tallied. Returns ``(audienceLocations,
-    videosSampled)``; ``audienceLocations`` is empty when comments are blocked.
+    Prefer native channel posts for video IDs; fall back to the profile actor
+    when TikTok soft-blocks the post list. Commenter ``region`` codes are
+    always pulled natively from TikTok's comment API.
     """
-    items = await get_apify().run_actor_sync(
-        settings.APIFY_ACTOR_TIKTOK,
-        {"profiles": [handle], "resultsPerPage": video_sample, "shouldDownloadVideos": False},
-        max_items=video_sample,
-    )
-    aweme_ids = [safe_str(i.get("id") or i.get("videoId")) for i in (items or [])]
-    aweme_ids = [a for a in aweme_ids if a]
+    aweme_ids: list[str] = []
+    native_posts = await channel_posts_native(handle, None, video_sample)
+    if native_posts is not None:
+        aweme_ids = [safe_str(p.get("id")) for p in native_posts[0] if safe_str(p.get("id"))]
+    if not aweme_ids:
+        items = await get_apify().run_actor_sync(
+            settings.APIFY_ACTOR_TIKTOK,
+            {"profiles": [handle], "resultsPerPage": video_sample, "shouldDownloadVideos": False},
+            max_items=video_sample,
+        )
+        aweme_ids = [safe_str(i.get("id") or i.get("videoId")) for i in (items or [])]
+        aweme_ids = [a for a in aweme_ids if a]
     if not aweme_ids:
         return [], 0
     codes = await audience_regions_native(aweme_ids, target_total=target_total)
@@ -1308,31 +1316,59 @@ async def tiktok_channel_posts(
         return ApiResponse(data=data)
 
 
-@router.get("/comment-replies", summary="Replies to a TikTok comment")
+@router.get("/comment-replies", summary="Replies to a TikTok comment (cursor-paginated)")
 async def tiktok_comment_replies(
     url: str = Query(..., description="URL of the TikTok video the comment belongs to"),
     comment_id: str = Query(..., description="ID of the parent comment"),
     limit: int = Query(50, ge=1, le=500),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    _require_tiktok_video_url(url)
+    aweme_id = _require_tiktok_video_url(url)
+    if cursor is not None and not str(cursor).isdigit():
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid cursor. Pass the nextCursor value from a previous response.",
+        )
     settings = get_settings()
-    # Worst-case crawl is REPLIES_MAX_ITEMS rows; pre-authorize that so we never
-    # do paid work the caller can't afford. Actual charge is set from the real
-    # number of rows crawled (see credits_override below).
-    cost = max(CREDIT_REPLIES_MIN, _scaled_credits(REPLIES_MAX_ITEMS, RATE_REPLIES_ROW, CREDIT_REPLIES_MIN))
+    # Flat fee: native reply path is ~$0. Apify crawl fallback is rare and
+    # covered by the same 2-credit charge (same model as /comments).
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/comment-replies",
         platform="tiktok",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_COMMENT_REPLIES,
     ) as ctx:
-        crawled = 0
-
         async def _run() -> dict[str, Any]:
-            nonlocal crawled
+            native = await comment_replies_native(aweme_id, comment_id, cursor, limit)
+            if native is not None:
+                replies, next_cursor, total = native
+                ctx["source"] = "direct"
+                return {
+                    "platform": "tiktok",
+                    "url": url,
+                    "commentId": comment_id,
+                    "totalReturned": len(replies),
+                    "totalReplies": total,
+                    "replies": replies,
+                    "nextCursor": next_cursor,
+                    "hasMore": next_cursor is not None,
+                }
+
+            if cursor:
+                raise HTTPException(
+                    status_code=502,
+                    detail="Failed to fetch the next page. Retry shortly.",
+                )
+
             apify = get_apify()
             fast_input = {
                 "videoUrls": [url],
@@ -1356,11 +1392,8 @@ async def tiktok_comment_replies(
                 ],
                 max_items=REPLIES_MAX_ITEMS,
             )
-            crawled = len(items)
-            replies = []
+            replies: list[dict[str, Any]] = []
             for r in items:
-                # Reply rows can use different parent id names depending on
-                # the actor. Some actors nest replies on the parent comment.
                 parent_id = safe_str(
                     r.get("parentCommentId")
                     or r.get("parentId")
@@ -1371,56 +1404,55 @@ async def tiktok_comment_replies(
                     nested = r.get("replies") or r.get("_replies") or []
                     if isinstance(nested, list) and safe_str(r.get("id") or r.get("cid")) == comment_id:
                         for child in nested:
+                            verified = child.get("replyAuthorVerified") or child.get("verified")
                             replies.append(
                                 {
                                     "id": safe_str(child.get("replyId") or child.get("cid") or child.get("id")),
                                     "text": (child.get("replyText") or child.get("text") or child.get("body") or "").strip(),
                                     "author": safe_str(child.get("replyAuthorUsername") or child.get("author") or child.get("uniqueId")),
                                     "authorName": safe_str(child.get("replyAuthorNickname") or child.get("authorName") or child.get("nickname")),
-                                    "likeCount": safe_int(child.get("replyLikeCount") or child.get("likeCount") or child.get("likes")),
+                                    "likeCount": safe_int(child.get("replyLikeCount") or child.get("likeCount") or child.get("likes")) or 0,
                                     "publishedAt": safe_str(child.get("replyCreateTime") or child.get("createdAt") or child.get("createTimeISO")),
-                                    "verified": child.get("replyAuthorVerified") or child.get("verified"),
+                                    "verified": False if verified is None else bool(verified),
                                     "profileImage": safe_str(child.get("replyAuthorAvatar") or child.get("avatar")),
                                 }
                             )
                             if len(replies) >= limit:
                                 break
                     continue
+                verified = r.get("replyAuthorVerified") or r.get("verified")
                 replies.append(
                     {
-                        # automation-lab rows: `authorId` is the @username and
-                        # `author` is the display name.
                         "id": safe_str(r.get("replyId") or r.get("cid") or r.get("id")),
                         "text": (r.get("replyText") or r.get("text") or r.get("body") or "").strip(),
                         "author": safe_str(r.get("replyAuthorUsername") or r.get("uniqueId") or r.get("authorId") or r.get("author")),
                         "authorName": safe_str(r.get("replyAuthorNickname") or r.get("authorName") or r.get("nickname") or r.get("author")),
                         "likeCount": safe_int(r.get("replyLikeCount") or r.get("likeCount") or r.get("likes")) or 0,
                         "publishedAt": safe_str(r.get("replyCreateTime") or r.get("createdAt") or r.get("createTimeISO")),
-                        "verified": r.get("replyAuthorVerified") or r.get("verified"),
+                        "verified": False if verified is None else bool(verified),
                         "profileImage": safe_str(r.get("replyAuthorAvatar") or r.get("avatar") or r.get("authorAvatarUrl")),
                     }
                 )
                 if len(replies) >= limit:
                     break
+            ctx["source"] = "apify"
             return {
                 "platform": "tiktok",
                 "url": url,
                 "commentId": comment_id,
                 "totalReturned": len(replies),
+                "totalReplies": None,
                 "replies": replies,
+                "nextCursor": None,
+                "hasMore": False,
             }
 
         data = await cached_or_run(
             endpoint="tiktok.comment-replies",
-            params={"url": url, "comment_id": comment_id, "limit": limit, "v": 2},
+            params={"url": url, "comment_id": comment_id, "limit": limit, "cursor": cursor or "", "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
-        )
-        # Bill on the actual rows crawled (what Apify charged us for), not the
-        # filtered reply count. On a cache hit this is ignored (cache_hit -> 0).
-        ctx["credits_override"] = max(
-            CREDIT_REPLIES_MIN, _scaled_credits(crawled, RATE_REPLIES_ROW, CREDIT_REPLIES_MIN)
         )
         return ApiResponse(data=data)
 

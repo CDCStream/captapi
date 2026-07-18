@@ -125,7 +125,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `tiktok_audience_demographics` | `/v1/tiktok/audience-demographics` | `url` (string), `cache`? (boolean) | 3 |
 | `tiktok_search_suggestions` | `/v1/tiktok/search-suggestions` | `q` (string), `country`? (string), `language`? (string), `limit`? (number), `cache`? (boolean) | 28 |
 | `tiktok_channel_posts` | `/v1/tiktok/channel-posts` | `url` (string), `limit`? (number), `cache`? (boolean) | 14 |
-| `tiktok_comment_replies` | `/v1/tiktok/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number), `cache`? (boolean) | 50 |
+| `tiktok_comment_replies` | `/v1/tiktok/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |
 | `tiktok_user_followers` | `/v1/tiktok/user-followers` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
 | `tiktok_user_followings` | `/v1/tiktok/user-followings` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
 | `tiktok_music_posts` | `/v1/tiktok/music-posts` | `url` (string), `limit`? (number), `cache`? (boolean) | 32 |

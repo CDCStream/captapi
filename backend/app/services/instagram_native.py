@@ -601,3 +601,39 @@ def map_basic_profile(user: dict[str, Any]) -> dict[str, Any]:
         "ai_agent_type": user.get("ai_agent_type"),
     }
     return {k: v for k, v in out.items() if v is not None}
+
+
+def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> dict[str, Any]:
+    """Map a web_profile_info user node to the channel-details response shape."""
+    username = safe_str(user.get("username")) or (handle or "").lstrip("@")
+    pic = safe_str(user.get("profile_pic_url_hd") or user.get("profile_pic_url"))
+    verified = user.get("is_verified")
+    return {
+        "platform": "instagram",
+        "url": f"https://instagram.com/{username}" if username else None,
+        "username": username,
+        "displayName": safe_str(user.get("full_name")),
+        "bio": safe_str(user.get("biography")),
+        "followers": _edge_count(user.get("edge_followed_by") or user.get("follower_count")),
+        "following": _edge_count(user.get("edge_follow") or user.get("following_count")),
+        "postCount": _edge_count(user.get("edge_owner_to_timeline_media") or user.get("media_count")),
+        "verified": False if verified is None else bool(verified),
+        "profileImage": pic,
+        "externalUrl": safe_str(user.get("external_url")) or "",
+    }
+
+
+def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
+    """Compact profile row for /profile-search (same fields as Decodo basic_profile)."""
+    username = safe_str(user.get("username"))
+    verified = user.get("is_verified")
+    private = user.get("is_private")
+    return {
+        "username": username,
+        "displayName": safe_str(user.get("full_name")),
+        "url": f"https://instagram.com/{username}" if username else None,
+        "followers": _edge_count(user.get("edge_followed_by") or user.get("follower_count")),
+        "verified": False if verified is None else bool(verified),
+        "private": False if private is None else bool(private),
+        "profileImage": safe_str(user.get("profile_pic_url_hd") or user.get("profile_pic_url")),
+    }

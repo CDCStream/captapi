@@ -716,6 +716,12 @@ async def instagram_channel_details(
         base_credits=CREDIT_CHANNEL,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Native first (same web_profile_info as basic-profile), then Decodo, then Apify/meta.
+            user = await instagram_native.fetch_web_profile_info(handle)
+            if user is not None:
+                ctx["source"] = "direct"
+                return instagram_native.map_channel_details(user, handle=handle)
+
             async def _apify() -> dict[str, Any]:
                 apify = get_apify()
                 try:
@@ -739,11 +745,12 @@ async def instagram_channel_details(
                         "followers": 0,
                         "following": 0,
                         "postCount": 0,
-                        "verified": None,
+                        "verified": False,
                         "profileImage": meta["image"],
                         "externalUrl": "",
                     }
                 p = items[0]
+                verified = p.get("verified")
                 return {
                     "platform": "instagram",
                     "url": f"https://instagram.com/{handle}",
@@ -753,16 +760,16 @@ async def instagram_channel_details(
                     "followers": safe_int(p.get("followersCount")),
                     "following": safe_int(p.get("followsCount")),
                     "postCount": safe_int(p.get("postsCount")),
-                    "verified": p.get("verified"),
+                    "verified": False if verified is None else bool(verified),
                     "profileImage": safe_str(p.get("profilePicUrl") or p.get("profilePicUrlHD")),
-                    "externalUrl": safe_str(p.get("externalUrl")),
+                    "externalUrl": safe_str(p.get("externalUrl")) or "",
                 }
 
             return await _try_decodo(ctx, lambda: decodo.channel_details(handle), _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-details",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -974,7 +981,13 @@ async def instagram_channel_reels(
                     raise HTTPException(status_code=502, detail="Failed to fetch the next page. Retry shortly.")
                 reels, next_cursor = result
                 ctx["source"] = "direct"
-                return {"url": url, "totalReturned": len(reels), "reels": reels, "nextCursor": next_cursor}
+                return {
+                    "url": url,
+                    "totalReturned": len(reels),
+                    "reels": reels,
+                    "nextCursor": next_cursor,
+                    "hasMore": next_cursor is not None,
+                }
 
             async def _apify() -> dict[str, Any]:
                 apify = get_apify()
@@ -983,7 +996,13 @@ async def instagram_channel_reels(
                     max_items=limit,
                 )
                 reels = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
-                return {"url": url, "totalReturned": len(reels), "reels": reels, "nextCursor": None}
+                return {
+                    "url": url,
+                    "totalReturned": len(reels),
+                    "reels": reels,
+                    "nextCursor": None,
+                    "hasMore": False,
+                }
 
             async def _decodo_run() -> dict[str, Any] | None:
                 page = _ig_channel_page(await decodo.channel_reels(handle, limit), limit)
@@ -1002,13 +1021,19 @@ async def instagram_channel_reels(
                         reels, next_cursor = native
                 if not reels:
                     return None
-                return {"url": url, "totalReturned": len(reels), "reels": reels, "nextCursor": next_cursor}
+                return {
+                    "url": url,
+                    "totalReturned": len(reels),
+                    "reels": reels,
+                    "nextCursor": next_cursor,
+                    "hasMore": next_cursor is not None,
+                }
 
             return await _try_decodo(ctx, _decodo_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-reels",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 15},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 16},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1414,31 +1439,41 @@ async def instagram_profile_search(
         base_credits=CREDIT_CHANNEL,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            ctx["source"] = "direct"
             users: list[dict[str, Any]] = []
             for candidate in _profile_search_candidates(q):
+                # Native first — same web_profile_info path as basic-profile.
+                user = await instagram_native.fetch_web_profile_info(candidate)
+                if user is not None:
+                    ctx["source"] = "direct"
+                    users.append(instagram_native.map_profile_search_user(user))
+                    break
                 profile: dict[str, Any] | None = None
                 if decodo.enabled():
                     profile = await decodo.basic_profile(candidate)
+                    if profile is not None:
+                        ctx["source"] = "decodo"
                 if profile is None:
                     meta = await _public_instagram_meta(f"https://www.instagram.com/{candidate}/")
                     if meta:
+                        ctx["source"] = "meta"
                         profile = {
                             "username": candidate,
                             "displayName": meta["title"],
                             "followers": None,
-                            "verified": None,
-                            "private": None,
+                            "verified": False,
+                            "private": False,
                             "profileImage": meta["image"],
                         }
                 if profile:
                     users.append(_profile_to_search_user(profile))
                     break
+            if not users:
+                ctx["source"] = ctx.get("source") or "direct"
             return {"query": q, "totalReturned": len(users), "users": users}
 
         data = await cached_or_run(
             endpoint="instagram.profile-search",
-            params={"q": q, "v": 5},
+            params={"q": q, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
