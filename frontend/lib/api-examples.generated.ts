@@ -2963,8 +2963,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "advertiser": {
       "id": "AR17365672681860497409",
       "name": "NIKE SRL",
-      "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409",
-      "logo": null
+      "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
     },
     "media": [
       "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/681805071230715799/index.html",
@@ -2981,8 +2980,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "id": "AR17365672681860497409",
         "name": "NIKE SRL",
-        "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409",
-        "logo": null
+        "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
       }
     ]
   },
@@ -3008,8 +3006,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "advertiser": {
           "id": "AR17365672681860497409",
           "name": "NIKE SRL",
-          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409",
-          "logo": null
+          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/681805071230715799/index.html",
@@ -3035,8 +3032,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "advertiser": {
           "id": "AR17365672681860497409",
           "name": "NIKE SRL",
-          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409",
-          "logo": null
+          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/simgad/3592989990789891796"
@@ -3059,8 +3055,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "advertiser": {
           "id": "AR17365672681860497409",
           "name": "NIKE SRL",
-          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409",
-          "logo": null
+          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/simgad/5369694199582718379"
@@ -3083,8 +3078,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "advertiser": {
           "id": "AR17365672681860497409",
           "name": "NIKE SRL",
-          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409",
-          "logo": null
+          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/7848753873335385669/index.html",
@@ -3110,8 +3104,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "advertiser": {
           "id": "AR17365672681860497409",
           "name": "NIKE SRL",
-          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409",
-          "logo": null
+          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/15365961693456714934/index.html",
