@@ -54,9 +54,24 @@ async def call(client: httpx.AsyncClient, slug: str, path: str, params: dict) ->
         return slug, {"status": 0, "elapsed": round(time.perf_counter() - started, 1), "body": {"error": str(e)}}
 
 
-async def run_phase(client: httpx.AsyncClient, tests: list[tuple[str, str, dict]]) -> dict[str, dict]:
-    results = await asyncio.gather(*(call(client, slug, path, params) for slug, path, params in tests))
-    out = {}
+async def run_phase(
+    client: httpx.AsyncClient,
+    tests: list[tuple[str, str, dict]],
+    *,
+    concurrency: int = 0,
+) -> dict[str, dict]:
+    """Run endpoint captures. concurrency=0 means fully parallel (legacy)."""
+    out: dict[str, dict] = {}
+    if concurrency and concurrency > 0:
+        sem = asyncio.Semaphore(concurrency)
+
+        async def _one(slug: str, path: str, params: dict) -> tuple[str, dict]:
+            async with sem:
+                return await call(client, slug, path, params)
+
+        results = await asyncio.gather(*(_one(slug, path, params) for slug, path, params in tests))
+    else:
+        results = await asyncio.gather(*(call(client, slug, path, params) for slug, path, params in tests))
     for slug, res in results:
         ok = 200 <= res["status"] < 300
         print(f"{'PASS' if ok else 'FAIL':4} {res['status']:>3} {res['elapsed']:>6}s  {slug}")
@@ -495,6 +510,50 @@ def batch5_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
     return tests
 
 
+def batch_nullfix_phase1() -> list[tuple[str, str, dict]]:
+    """Recapture endpoints whose normalizers were fixed for always-null fields."""
+    return [
+        ("github-repository", "/v1/github/repository", {"repo": "https://github.com/torvalds/linux"}),
+        ("github-repositories", "/v1/github/repositories", {"username": "torvalds", "limit": 5}),
+        ("github-trending-repositories", "/v1/github/trending-repositories", {"q": "stars:>1000 language:python", "limit": 5}),
+        ("twitch-clip", "/v1/twitch/clip", {"url": "https://www.twitch.tv/xqc/clip/EnergeticEmpathicElephantJKanStyle-0sOlvgAod9mDhCw4"}),
+        ("twitch-profile", "/v1/twitch/profile", {"url": "https://www.twitch.tv/shroud"}),
+        ("twitch-user-videos", "/v1/twitch/user-videos", {"url": "https://www.twitch.tv/shroud", "limit": 5}),
+        ("tiktok-live", "/v1/tiktok/live", {"url": "https://www.tiktok.com/@espn"}),
+        ("tiktok-live-info", "/v1/tiktok/live-info", {"url": "https://www.tiktok.com/@espn"}),
+        ("tiktok-popular-creators", "/v1/tiktok/popular-creators", {"country": "US", "limit": 5}),
+        ("tiktok-music-posts", "/v1/tiktok/music-posts", {"url": "https://www.tiktok.com/music/original-sound-7646812079113898783", "limit": 5}),
+        ("pinterest-pin-details", "/v1/pinterest/pin-details", {"url": "https://www.pinterest.com/pin/422281212828530/"}),
+        ("pinterest-user-boards", "/v1/pinterest/user-boards", {"url": "https://www.pinterest.com/potterybarn/", "limit": 5}),
+        ("pinterest-user-pins", "/v1/pinterest/user-pins", {"url": "https://www.pinterest.com/potterybarn/", "limit": 5}),
+        ("pinterest-board", "/v1/pinterest/board", {"url": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/", "limit": 5}),
+        ("youtube-playlist-videos", "/v1/youtube/playlist-videos", {"url": "https://www.youtube.com/playlist?list=PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj", "limit": 5}),
+        ("youtube-trending-shorts", "/v1/youtube/trending-shorts", {"q": "trending", "limit": 5}),
+        ("youtube-shorts-stats", "/v1/youtube/shorts/video-details", {"url": "https://www.youtube.com/shorts/DXVHmGoCTco"}),
+        (
+            "youtube-comment-replies",
+            "/v1/youtube/comment-replies",
+            {
+                "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                "comment_id": "Ugzge340dBgB75hWBm54AaABAg",
+                "limit": 10,
+            },
+        ),
+        ("facebook-marketplace-search", "/v1/facebook/marketplace-search", {"q": "desk chair", "location": "Austin, TX", "limit": 5}),
+        ("facebook-event-details", "/v1/facebook/event-details", {"url": "https://www.facebook.com/events/2905221439853710/"}),
+        ("threads-search-users", "/v1/threads/search-users", {"q": "tech", "limit": 5}),
+        ("rumble-channel-videos", "/v1/rumble/channel-videos", {"url": "https://rumble.com/c/Bongino", "limit": 5}),
+        ("rumble-video-details", "/v1/rumble/video-details", {"url": "https://rumble.com/v7cv2cc-now-i-can-finally-talk-about-it-ep.-2555-07172026.html"}),
+        ("linkme-profile", "/v1/linkme/profile", {"url": "https://link.me/kevinhart"}),
+        ("pillar-page", "/v1/pillar/page", {"url": "https://pillar.io/jayshetty"}),
+        ("amazon-shop-page", "/v1/amazon-shop/page", {"url": "https://www.amazon.com/sp?seller=A294P4X9EWVXLJ", "limit": 5}),
+        ("tiktok-shop-product-details", "/v1/tiktok-shop/product-details", {"url": "https://www.tiktok.com/shop/pdp/1731743608991158724"}),
+        ("tiktok-shop-search", "/v1/tiktok-shop/shop-search", {"q": "phone case", "limit": 5}),
+        ("tiktok-shop-products", "/v1/tiktok-shop/shop-products", {"url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079", "limit": 5}),
+        ("tiktok-shop-user-showcase", "/v1/tiktok-shop/user-showcase", {"username": "jeffreestar", "limit": 5}),
+    ]
+
+
 BATCHES = {
     "batch1": (batch1_phase1, batch1_phase2),
     "batch2": (batch2_phase1, batch2_phase2),
@@ -530,6 +589,7 @@ BATCHES = {
         ],
         lambda p1: [],
     ),
+    "batch_nullfix": (batch_nullfix_phase1, lambda _p1: []),
 }
 
 
@@ -538,21 +598,40 @@ async def main() -> None:
     phase1_fn, phase2_fn = BATCHES[batch]
 
     sb = get_supabase()
-    users = sb.auth.admin.list_users()
-    user = users[0]
-    print(f"Target: {BASE} | user: {user.email}")
+    # Prefer a balance with enough credits; list_users()[0] is often empty.
+    bals = (
+        sb.table("credit_balances")
+        .select("user_id,subscription_credits,topup_credits")
+        .execute()
+    )
+    cands = [
+        b
+        for b in (bals.data or [])
+        if (b.get("subscription_credits") or 0) + (b.get("topup_credits") or 0) > 200
+    ]
+    cands.sort(
+        key=lambda b: (b.get("subscription_credits") or 0) + (b.get("topup_credits") or 0),
+        reverse=True,
+    )
+    if not cands:
+        raise SystemExit("No credit_balances with >200 credits available for capture")
+    user_id = cands[0]["user_id"]
+    available = (cands[0].get("subscription_credits") or 0) + (cands[0].get("topup_credits") or 0)
+    print(f"Target: {BASE} | user: {user_id} | credits~={available}")
     plain, key_hash, prefix = generate_api_key()
     ins = sb.table("api_keys").insert(
-        {"user_id": user.id, "key_hash": key_hash, "key_prefix": prefix, "name": f"capture-{batch}"}
+        {"user_id": user_id, "key_hash": key_hash, "key_prefix": prefix, "name": f"capture-{batch}"}
     ).execute()
     key_id = ins.data[0]["id"]
 
+    # Heavy Apify batches (nullfix) need low concurrency to avoid 429s / timeouts.
+    conc = 3 if batch == "batch_nullfix" else 0
     try:
         async with httpx.AsyncClient(headers={"Authorization": f"Bearer {plain}"}) as client:
             print("--- phase 1")
-            p1 = await run_phase(client, phase1_fn())
+            p1 = await run_phase(client, phase1_fn(), concurrency=conc)
             print("--- phase 2")
-            p2 = await run_phase(client, phase2_fn(p1))
+            p2 = await run_phase(client, phase2_fn(p1), concurrency=conc)
     finally:
         sb.table("api_keys").delete().eq("id", key_id).execute()
         print(f"Revoked temp key {prefix}…")
