@@ -1185,10 +1185,19 @@ async def tiktok_audience_demographics(
         return ApiResponse(data=data)
 
 
-@router.get("/channel-posts", summary="Latest posts from a TikTok profile")
+@router.get(
+    "/channel-posts",
+    summary="Latest videos from a TikTok profile",
+    description=(
+        "Returns a creator's most recent public videos as structured JSON — "
+        "caption, engagement (views/likes/comments/shares/saves), thumbnail, "
+        "hashtags, sound name, and author profile. Accepts a profile URL, "
+        "@handle, or username. Newest first; billed per post returned."
+    ),
+)
 async def tiktok_channel_posts(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
-    limit: int = Query(20, ge=1, le=200),
+    limit: int = Query(20, ge=1, le=200, description="How many latest videos to return (1–200). Newest first. Billed per result."),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
