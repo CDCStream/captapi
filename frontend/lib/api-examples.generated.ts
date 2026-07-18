@@ -18449,6 +18449,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "tiktok-channel-posts": {
     "url": "https://www.tiktok.com/@khaby.lame",
     "totalReturned": 5,
+    "nextCursor": "1783614676000",
+    "hasMore": true,
     "posts": [
       {
         "platform": "tiktok",

@@ -1,21 +1,23 @@
-"""Self-scraped TikTok data from public web pages (no Apify).
+"""Self-scraped TikTok data from public web pages + mobile aweme APIs (no Apify).
 
 TikTok web pages embed a ``__UNIVERSAL_DATA_FOR_REHYDRATION__`` JSON blob with
 ``webapp.video-detail`` (full video stats) and ``webapp.user-detail`` (full
 profile stats). Fetching MUST go through the datacenter proxy tier: direct
 requests from server IPs get an empty shell page without the blob.
 
-List data (profile posts, search, comments) is NOT in the blob - those XHR
-calls need TikTok's signed parameters - so list endpoints stay on Apify.
+List data (profile posts, comments) is NOT in the blob — the *web* XHR
+endpoints need signed params — but TikTok's *mobile* aweme endpoints serve
+logged-out lists with plain device params over a US residential IP.
 
 Every function returns data in the exact shapes the router already emits, or
-``None`` on failure so callers can fall back to the Apify actors.
+``None`` on failure so callers can fall back (or raise) as they choose.
 """
 
 from __future__ import annotations
 
 import asyncio
 import json
+import random
 import re
 from collections import Counter
 from datetime import datetime, timezone
@@ -273,10 +275,13 @@ def _map_comment(c: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
-def _us_residential_proxy() -> str | None:
-    """Residential proxy URL pinned to US exits (Evomi appends geo targeting to
-    the password: ``pass_country-US``). The mobile comment API 2146-blocks most
-    non-US IPs, so pinning US sharply raises the per-request success rate."""
+def _residential_proxy(country: str = "US") -> str | None:
+    """Residential proxy URL pinned to ``country`` (Evomi: ``pass_country-XX``).
+
+    TikTok's mobile aweme APIs soft-block most exits; US (and often NL) are the
+    geos that actually return data. Any existing ``_country-`` suffix on the
+    password is replaced so callers can race multiple geos.
+    """
     base = proxy_for("residential")
     if not base:
         return None
@@ -287,16 +292,29 @@ def _us_residential_proxy() -> str | None:
     except ValueError:
         return base
     if "_country-" in pwd:
-        return base
-    return f"{scheme}://{user}:{pwd}_country-US@{hostpart}"
+        pwd = pwd.split("_country-", 1)[0]
+    return f"{scheme}://{user}:{pwd}_country-{country}@{hostpart}"
 
 
-async def _comment_once(host: str, params: dict[str, str], headers: dict[str, str]) -> dict[str, Any] | None:
-    """Single mobile-API request on a fresh US residential IP. None unless the
-    response is a clean ``status_code == 0`` payload."""
+def _us_residential_proxy() -> str | None:
+    """US-pinned residential proxy (comments path)."""
+    return _residential_proxy("US")
+
+
+async def _comment_once(
+    host: str,
+    params: dict[str, str],
+    headers: dict[str, str],
+    proxy: str | None = None,
+) -> dict[str, Any] | None:
+    """Single mobile-API request on a residential IP. None unless the response
+    is a clean ``status_code == 0`` payload."""
     try:
         async with httpx.AsyncClient(
-            timeout=12, follow_redirects=True, proxy=_us_residential_proxy(), headers=headers
+            timeout=12,
+            follow_redirects=True,
+            proxy=proxy or _us_residential_proxy(),
+            headers=headers,
         ) as client:
             resp = await client.get(host, params=params)
     except httpx.HTTPError:
@@ -407,14 +425,246 @@ async def profile_region_native(handle: str) -> dict[str, Any] | None:
     }
 
 
+# --- Channel posts (mobile aweme/post API, cursor-paginated) ---------------
+#
+# Profile post lists are not in the rehydration blob, and the web
+# ``/api/post/item_list/`` endpoint needs signed params. The mobile
+# ``/aweme/v1/aweme/post/`` endpoint, however, returns logged-out post pages
+# with ``sec_user_id`` + plain device params — same residential soft-block
+# pattern as comments (empty body / status 2146). Pagination uses TikTok's
+# own ``max_cursor`` timestamp cursor and ``has_more`` flag.
+_TT_POST_HOSTS = (
+    "https://api19-normal-c-useast1a.tiktokv.com/aweme/v1/aweme/post/",
+    "https://api22-normal-c-useast2a.tiktokv.com/aweme/v1/aweme/post/",
+    "https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/aweme/post/",
+    "https://api31-normal-useast2a.tiktokv.com/aweme/v1/aweme/post/",
+    "https://api.tiktokv.com/aweme/v1/aweme/post/",
+)
+
+
+def _url_list_first(node: Any) -> str | None:
+    if isinstance(node, dict):
+        urls = node.get("url_list") or node.get("urlList") or []
+        return safe_str(urls[0] if urls else None)
+    return safe_str(node)
+
+
+def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
+    """Map a mobile aweme row to the same post shape as video_details_native."""
+    aweme_id = safe_str(item.get("aweme_id") or item.get("id"))
+    if not aweme_id:
+        return None
+    author = item.get("author") or {}
+    if not isinstance(author, dict):
+        author = {}
+    stats = item.get("statistics") or item.get("stats") or {}
+    if not isinstance(stats, dict):
+        stats = {}
+    video = item.get("video") or {}
+    if not isinstance(video, dict):
+        video = {}
+    music = item.get("music") or {}
+    if not isinstance(music, dict):
+        music = {}
+    author_stats = item.get("author_stats") or item.get("authorStats") or {}
+    if not isinstance(author_stats, dict):
+        author_stats = {}
+
+    username = safe_str(author.get("unique_id") or author.get("uniqueId"))
+    duration = safe_float(video.get("duration") or item.get("duration"))
+    # Mobile aweme occasionally reports duration in milliseconds.
+    if duration is not None and duration > 1000:
+        duration = duration / 1000.0
+
+    hashtags: list[str] = []
+    for te in item.get("text_extra") or item.get("textExtra") or []:
+        if not isinstance(te, dict):
+            continue
+        name = safe_str(te.get("hashtag_name") or te.get("hashtagName"))
+        if name:
+            hashtags.append(name)
+    if not hashtags:
+        for cha in item.get("cha_list") or item.get("chaList") or []:
+            if not isinstance(cha, dict):
+                continue
+            name = safe_str(cha.get("cha_name") or cha.get("chaName") or cha.get("title"))
+            if name:
+                hashtags.append(name)
+
+    avatar = (
+        _url_list_first(author.get("avatar_larger") or author.get("avatarLarger"))
+        or _url_list_first(author.get("avatar_medium") or author.get("avatarMedium"))
+        or _url_list_first(author.get("avatar_thumb") or author.get("avatarThumb"))
+    )
+    cover = (
+        _url_list_first(video.get("cover"))
+        or _url_list_first(video.get("origin_cover") or video.get("originCover"))
+        or _url_list_first(video.get("dynamic_cover") or video.get("dynamicCover"))
+    )
+
+    return {
+        "platform": "tiktok",
+        "url": (
+            f"https://www.tiktok.com/@{username}/video/{aweme_id}"
+            if username
+            else safe_str(item.get("share_url") or item.get("shareUrl"))
+        ),
+        "id": aweme_id,
+        "caption": safe_str(item.get("desc")),
+        "description": safe_str(item.get("desc")),
+        "publishedAt": _iso(item.get("create_time") or item.get("createTime")),
+        "durationSeconds": duration,
+        "thumbnailUrl": cover,
+        # play_addr CDN URLs are IP/cookie-bound; keep null like video-details.
+        "videoUrl": None,
+        "author": {
+            "username": username,
+            "displayName": safe_str(author.get("nickname") or author.get("nickName")),
+            "url": f"https://www.tiktok.com/@{username}" if username else None,
+            "followers": safe_int(
+                author.get("follower_count")
+                or author.get("followerCount")
+                or author_stats.get("follower_count")
+                or author_stats.get("followerCount")
+            ),
+            "verified": author.get("verified") or author.get("is_verified"),
+            "profileImage": avatar,
+        },
+        "engagement": {
+            "views": safe_int(stats.get("play_count") or stats.get("playCount")),
+            "likes": safe_int(stats.get("digg_count") or stats.get("diggCount")),
+            "comments": safe_int(stats.get("comment_count") or stats.get("commentCount")),
+            "shares": safe_int(stats.get("share_count") or stats.get("shareCount")),
+            "saves": safe_int(stats.get("collect_count") or stats.get("collectCount")),
+        },
+        "hashtags": hashtags,
+        "musicName": safe_str(music.get("title")),
+    }
+
+
+def _post_page_ok(page: dict[str, Any], *, expect_items: bool) -> bool:
+    """Reject soft-block decoys: status_code 0 with an empty aweme_list.
+
+    Blocked exits often answer with ``status_code == 0``, ``aweme_list: []``
+    (sometimes echoing ``max_cursor``). A profile that has videos never
+    legitimately returns an empty page — the last page still has items with
+    ``has_more == 0`` — so empty payloads are always treated as a miss when
+    ``expect_items`` is true.
+    """
+    awemes = page.get("aweme_list")
+    if not isinstance(awemes, list):
+        return False
+    if awemes:
+        return True
+    return not expect_items
+
+
+async def _post_page(
+    sec_user_id: str, max_cursor: str, count: int, *, expect_items: bool
+) -> dict[str, Any] | None:
+    """One page of the mobile user-post API, or None if every attempt is blocked."""
+    # ``max_cursor`` is the real pager; ``cursor`` is accepted as an alias on
+    # some hosts. Deeper pages are softer-blocked, so we race harder for them.
+    headers = {"User-Agent": _TT_MOBILE_UA, "Accept": "application/json"}
+    # Keep races short — the router falls back to Apify when we miss. US + NL
+    # are the Evomi geos that actually return aweme_list (GB/CA/DE soft-block).
+    rounds = 3 if max_cursor not in ("", "0") else 2
+    concurrency = 12
+    geos = ("US", "NL")
+
+    async def _attempt(host: str, country: str) -> dict[str, Any] | None:
+        did = str(random.randint(10**18, 10**19 - 1))
+        # Both max_cursor and cursor must be set (including on page 2+); hosts
+        # that only see max_cursor often return empty soft-block decoys.
+        params = {
+            **_TT_COMMENT_PARAMS,
+            "device_id": did,
+            "iid": did,
+            "sec_user_id": sec_user_id,
+            "count": str(max(1, min(count, 35))),
+            "max_cursor": str(max_cursor),
+            "min_cursor": "0",
+            "cursor": str(max_cursor),
+        }
+        return await _comment_once(host, params, headers, _residential_proxy(country))
+
+    for _ in range(rounds):
+        tasks = [
+            asyncio.create_task(
+                _attempt(_TT_POST_HOSTS[i % len(_TT_POST_HOSTS)], geos[i % len(geos)])
+            )
+            for i in range(concurrency)
+        ]
+        try:
+            for coro in asyncio.as_completed(tasks):
+                res = await coro
+                if res is not None and _post_page_ok(res, expect_items=expect_items):
+                    return res
+        finally:
+            for t in tasks:
+                t.cancel()
+        await asyncio.sleep(0.15)
+    return None
+
+
+async def channel_posts_native(
+    handle: str, cursor: str | None, limit: int
+) -> tuple[list[dict[str, Any]], str | None] | None:
+    """Fetch up to ``limit`` latest posts for ``handle``, starting at ``cursor``.
+
+    ``cursor`` is TikTok's ``max_cursor`` (numeric timestamp string); omit / ``0``
+    for the first page. Returns ``(posts, next_cursor)`` where ``next_cursor`` is
+    ``None`` when the feed is exhausted. Returns ``None`` if the profile or the
+    first page cannot be loaded.
+    """
+    ui = await _user_info(handle)
+    if ui is None:
+        return None
+    user = ui.get("user") or {}
+    sec = safe_str(user.get("secUid"))
+    if not sec:
+        return None
+    stats_v2 = ui.get("statsV2") or {}
+    stats = ui.get("stats") or {}
+    video_count = _stat(stats_v2, stats, "videoCount") or 0
+    expect_items = video_count > 0
+
+    collected: list[dict[str, Any]] = []
+    cur = str(cursor) if cursor else "0"
+    max_pages = max(3, limit // 10 + 3)
+    for _ in range(max_pages):
+        if len(collected) >= limit:
+            break
+        want = min(30, limit - len(collected))
+        page = await _post_page(sec, cur, want, expect_items=expect_items)
+        if page is None:
+            return None if not collected else (collected, cur)
+        for raw in page.get("aweme_list") or []:
+            if not isinstance(raw, dict):
+                continue
+            mapped = _map_aweme_post(raw)
+            if mapped:
+                collected.append(mapped)
+                if len(collected) >= limit:
+                    break
+        nxt = page.get("max_cursor")
+        has_more = bool(page.get("has_more"))
+        if not has_more:
+            return collected[:limit], None
+        cur = str(nxt) if nxt is not None else cur
+        if len(collected) >= limit:
+            return collected[:limit], cur
+    return collected[:limit], (cur if collected else None)
+
+
 # --- Audience geography (commenter region sampling) ------------------------
 #
 # TikTok never exposes a creator's follower geography publicly, but the mobile
 # comment API returns each commenter's ``region`` (ISO-3166 alpha-2 country
 # code). Sampling commenters across a creator's recent videos and tallying
 # those regions yields an engagement-based audience-country breakdown — the
-# same signal third-party "audience" endpoints surface. Video IDs still have to
-# come from the caller (TikTok gates the post list behind signed params).
+# same signal third-party "audience" endpoints surface. Video IDs come from the
+# caller (or from ``channel_posts_native``).
 async def audience_regions_native(
     aweme_ids: list[str], target_total: int = 500, per_video: int = 150
 ) -> list[str] | None:

@@ -28,6 +28,7 @@ from app.services import tiktok_native
 from app.services.tiktok_native import (
     audience_regions_native,
     channel_details_native,
+    channel_posts_native,
     profile_region_native,
     video_details_native,
 )
@@ -53,6 +54,7 @@ CREDIT_SUMMARIZE = 4
 CREDIT_VIDEO_DETAILS = 1
 CREDIT_CHANNEL_DETAILS = 1
 CREDIT_COMMENTS = 2  # native (TikTok's own API); flat fee, our cost ~$0
+CREDIT_CHANNEL_POSTS = 2  # native aweme/post; flat fee, our cost ~$0
 CREDIT_PROFILE_REGION = 2  # native profile page + fast LLM region estimate
 CREDIT_AUDIENCE = 3  # video list (actor) + native commenter-region sampling
 CREDIT_SEARCH = 2
@@ -1187,31 +1189,73 @@ async def tiktok_audience_demographics(
 
 @router.get(
     "/channel-posts",
-    summary="Latest videos from a TikTok profile",
+    summary="Latest videos from a TikTok profile (cursor-paginated)",
     description=(
         "Returns a creator's most recent public videos as structured JSON — "
         "caption, engagement (views/likes/comments/shares/saves), thumbnail, "
         "hashtags, sound name, and author profile. Accepts a profile URL, "
-        "@handle, or username. Newest first; billed per post returned."
+        "@handle, or username. Prefers TikTok's native mobile post API "
+        "(cursor pagination via nextCursor / hasMore); falls back to our "
+        "data-collection pool on the first page if every residential exit is "
+        "soft-blocked. Flat 2 credits per call."
     ),
 )
 async def tiktok_channel_posts(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
-    limit: int = Query(20, ge=1, le=200, description="How many latest videos to return (1–200). Newest first. Billed per result."),
+    limit: int = Query(
+        20,
+        ge=1,
+        le=200,
+        description="How many latest videos to return (1–200). Newest first. Flat 2 credits per call.",
+    ),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response (TikTok's "
+            "max_cursor timestamp, e.g. 1783614676000)."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
+    if cursor is not None and not cursor.isdigit():
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid cursor. Pass the nextCursor value from a previous response.",
+        )
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_CHANNEL_POSTS, 2)
+    # Flat fee: native path is ~$0; Apify first-page fallback is rare and
+    # covered by the same 2-credit charge (same model as comments).
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/channel-posts",
         platform="tiktok",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_CHANNEL_POSTS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await channel_posts_native(handle, cursor, limit)
+            if native is not None:
+                posts, next_cursor = native
+                ctx["source"] = "direct"
+                return {
+                    "url": url,
+                    "totalReturned": len(posts),
+                    "posts": posts,
+                    "nextCursor": next_cursor,
+                    "hasMore": next_cursor is not None,
+                }
+
+            # Apify actor is not cursor-based — only the first page can fall
+            # back. Deeper pages need a clean native exit; ask the client to
+            # retry shortly (same pattern as /comments).
+            if cursor:
+                raise HTTPException(
+                    status_code=502,
+                    detail="Failed to fetch the next page. Retry shortly.",
+                )
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK,
@@ -1219,16 +1263,22 @@ async def tiktok_channel_posts(
                 max_items=limit,
             )
             posts = [_normalize(i) for i in items[:limit]]
-            return {"url": url, "totalReturned": len(posts), "posts": posts}
+            ctx["source"] = "apify"
+            return {
+                "url": url,
+                "totalReturned": len(posts),
+                "posts": posts,
+                "nextCursor": None,
+                "hasMore": False,
+            }
 
         data = await cached_or_run(
             endpoint="tiktok.channel-posts",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_CHANNEL_POSTS, 2)
         return ApiResponse(data=data)
 
 

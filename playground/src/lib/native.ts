@@ -20,7 +20,10 @@ const NATIVE_PATHS = new Set<string>([
   // TikTok native-first endpoints
   "/v1/tiktok/video-details",
   "/v1/tiktok/channel-details",
+  "/v1/tiktok/channel-posts",
+  "/v1/tiktok/comments",
   "/v1/tiktok/profile-region",
+  "/v1/tiktok/audience-demographics",
   // Twitter transcript uses the free syndication API (Apify fallback).
   "/v1/twitter/transcript",
   // YouTube is native-first for everything except these Apify-only paths
