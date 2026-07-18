@@ -266,7 +266,7 @@ export default function DocsPage() {
       </p>
       <ul className="mt-4 space-y-2 text-sm text-muted-foreground max-w-3xl">
         <li>• One API key works across all {PLATFORM_COUNT} platforms.</li>
-        <li>• Repeat calls are served from a shared cache for free (up to 24h; time-sensitive metrics refresh within ~1h).</li>
+        <li>• Pass <code className="rounded bg-muted px-1 py-0.5 text-xs">cache=true</code> to serve from the 24h shared cache (0 credits on hit). Default is always fresh.</li>
         <li>• You are only charged for successful requests.</li>
       </ul>
 
@@ -303,11 +303,17 @@ export default function DocsPage() {
       {/* Making Requests */}
       <H2 id="making-requests">Making Requests</H2>
       <p className="text-muted-foreground max-w-3xl">
-        Most endpoints take a single <code className="rounded bg-muted px-1.5 py-0.5 text-xs">url</code>{" "}
-        query parameter (search endpoints use <code className="rounded bg-muted px-1.5 py-0.5 text-xs">q</code>).
-        When building the request as a query string, you must{" "}
-        <strong className="text-foreground">URL-encode</strong> the target URL so
-        it isn&apos;t misinterpreted as multiple parameters.
+        Most endpoints take a <code className="rounded bg-muted px-1.5 py-0.5 text-xs">url</code>{" "}
+        or <code className="rounded bg-muted px-1.5 py-0.5 text-xs">q</code> query parameter.
+        Some need a different identifier instead — for example{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">userId</code>,{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">username</code>,{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">repo</code>,{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">advertiser</code>, or{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">comment_id</code>.
+        Check each endpoint&apos;s docs for the exact params. When building a query
+        string, you must <strong className="text-foreground">URL-encode</strong>{" "}
+        URL values so they aren&apos;t misinterpreted as multiple parameters.
       </p>
       <div className="mt-4">
         <CodeTabs samples={encodeSamples} />
@@ -335,16 +341,19 @@ export default function DocsPage() {
       {/* Credits & Caching */}
       <H2 id="credits-caching">Credits &amp; Caching</H2>
       <p className="text-muted-foreground max-w-3xl">
-        Credits are the unit of billing. Each endpoint costs 1–4 credits per
-        successful call (video details: 1, transcript/comments: 2, summarize: 4).
-        <strong className="text-foreground">Failed and empty
-        results are never charged.</strong>
+        Credits are the unit of billing. Cost is{" "}
+        <strong className="text-foreground">per endpoint</strong> (see each docs
+        page) — typically 1–4 for simple lookups, and higher for list/search/comment
+        endpoints (often 8–70). Many list endpoints also scale with the number of
+        results returned.{" "}
+        <strong className="text-foreground">Failed and empty results are never charged.</strong>
       </p>
       <p className="mt-3 text-muted-foreground max-w-3xl">
-        Responses are cached and shared across all accounts for{" "}
-        <strong className="text-foreground">up to 24 hours</strong> — time-sensitive
-        data (engagement metrics, follower lists) refreshes within ~1 hour so it
-        stays current. If a result is served from cache,{" "}
+        By default every data request fetches{" "}
+        <strong className="text-foreground">fresh</strong> data (
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">cache=false</code>).
+        Pass <code className="rounded bg-muted px-1.5 py-0.5 text-xs">cache=true</code>{" "}
+        to serve from the shared 24h response cache — then{" "}
         <code className="rounded bg-muted px-1.5 py-0.5 text-xs">cached</code> is{" "}
         <code className="rounded bg-muted px-1.5 py-0.5 text-xs">true</code> and{" "}
         <code className="rounded bg-muted px-1.5 py-0.5 text-xs">creditsUsed</code>{" "}

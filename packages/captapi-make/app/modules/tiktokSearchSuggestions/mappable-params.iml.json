@@ -18,7 +18,7 @@
     "type": "text",
     "label": "Language",
     "required": false,
-    "help": "Preferred caption language as an ISO code, e.g. \"en\". Defaults to auto-detect."
+    "help": "Interface language for localized results, e.g. en-US or de-DE. Default en-US."
   },
   {
     "name": "limit",

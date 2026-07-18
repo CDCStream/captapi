@@ -75,6 +75,19 @@ const limit = (def: number, max: number): ToolParam => ({
   required: false,
   description: `Max items to return. Default ${def}, max ${max}. Billed per result.`,
 });
+/** Limit helper for flat-fee endpoints (credit cost does not scale with limit). */
+const limitFlat = (def: number, max: number, credits: number): ToolParam => ({
+  name: "limit",
+  type: "number",
+  required: false,
+  description: `Max items to return. Default ${def}, max ${max}. Flat ${credits} credit${credits === 1 ? "" : "s"} per call.`,
+});
+const languageUi = (): ToolParam => ({
+  name: "language",
+  type: "string",
+  required: false,
+  description: "Interface language for localized results, e.g. en-US or de-DE. Default en-US.",
+});
 const fastRss = (): ToolParam => ({
   name: "fast",
   type: "boolean",
@@ -120,8 +133,8 @@ const TRUTH_PROFILE = "Truth Social profile URL or @username.";
 const TRUTH_POST = "Truth Social post URL or post ID.";
 const KICK_CLIP = "Kick clip URL, channel URL, or channel username.";
 const AMAZON_SHOP = "Amazon seller storefront URL, seller profile URL, or seller ID.";
-const KWAI_PROFILE = "Kwai/Kuaishou profile URL or user ID.";
-const KWAI_POST = "Kwai/Kuaishou post URL or video/photo ID.";
+const KWAI_PROFILE = "Kwai profile URL or @handle, e.g. https://www.kwai.com/@easycashindonesia.";
+const KWAI_POST = "Kwai video URL, e.g. https://www.kwai.com/@handle/video/5238962376325675745.";
 const KOMI_PAGE = "Komi page URL or username.";
 const PILLAR_PAGE = "Pillar page URL or username.";
 const LINKBIO_PAGE = "Linkbio page URL or username.";
@@ -156,13 +169,13 @@ const TIKTOK: Omit<Endpoint, "platform">[] = [
   { tool: "tiktok_transcript", name: "TikTok Transcript", path: "/v1/tiktok/transcript", credits: 2, summary: "Transcript of a TikTok video (via captions).", params: [url(TT_VIDEO), language(), cacheParam()] },
   { tool: "tiktok_summarize", name: "TikTok Summarizer", path: "/v1/tiktok/summarize", credits: 4, summary: "AI summary of a TikTok video.", params: [url(TT_VIDEO), language(), cacheParam()] },
   { tool: "tiktok_video_details", name: "TikTok Video Details", path: "/v1/tiktok/video-details", credits: 1, summary: "Metadata + stats for a TikTok video.", params: [url(TT_VIDEO)] },
-  { tool: "tiktok_comments", name: "TikTok Comments", path: "/v1/tiktok/comments", credits: 2, summary: "Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500).", params: [url(TT_VIDEO), limit(50, 500), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset)." }] },
+  { tool: "tiktok_comments", name: "TikTok Comments", path: "/v1/tiktok/comments", credits: 2, summary: "Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500).", params: [url(TT_VIDEO), limitFlat(50, 500, 2), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset)." }] },
   { tool: "tiktok_channel_details", name: "TikTok Channel Details", path: "/v1/tiktok/channel-details", credits: 1, summary: "Profile info & stats for a TikTok user.", params: [url(TT_PROFILE)] },
   { tool: "tiktok_profile_region", name: "TikTok Profile Region", path: "/v1/tiktok/profile-region", credits: 2, summary: "Where a TikTok creator is likely based and what language they use — country, language, and core profile stats from a profile URL or @handle. When TikTok hides the country, it is estimated from public bio/name/language cues, with a confidence grade.", params: [url(TT_PROFILE)] },
   { tool: "tiktok_audience_demographics", name: "TikTok Audience Demographics", path: "/v1/tiktok/audience-demographics", credits: 3, summary: "Ranked country breakdown of a TikTok creator's audience, based on people who comment on their recent videos (not a full follower census). From a profile URL or @handle.", params: [url(TT_PROFILE)] },
-  { tool: "tiktok_search_suggestions", name: "TikTok Search Suggestions", path: "/v1/tiktok/search-suggestions", credits: 28, summary: "The autocomplete terms TikTok suggests in its search bar for a seed keyword — the real phrases people search, ranked. Localize by country + language.", params: [q("Seed keyword to expand into autocomplete suggestions, e.g. skincare."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code that localizes suggestions to a market, e.g. US, GB, DE. Default US." }, language(), { name: "limit", type: "number", required: false, description: "Upper bound on suggestions to return (1-100, default 20). TikTok surfaces only a limited number of real autocomplete suggestions per keyword, so you'll often get fewer. Billed per result." }] },
-  { tool: "tiktok_channel_posts", name: "TikTok Channel Posts", path: "/v1/tiktok/channel-posts", credits: 2, summary: "Latest videos from a TikTok profile — caption, engagement, thumbnail, sound, and hashtags for each post. Cursor pagination via nextCursor.", params: [url(TT_PROFILE), limit(20, 200), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
-  { tool: "tiktok_comment_replies", name: "TikTok Comment Replies", path: "/v1/tiktok/comment-replies", credits: 2, summary: "Replies under a TikTok comment — text, author, likes, timestamp, with cursor pagination (nextCursor + hasMore). Flat 2 credits.", params: [url(TT_VIDEO), commentId(), limit(50, 500), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
+  { tool: "tiktok_search_suggestions", name: "TikTok Search Suggestions", path: "/v1/tiktok/search-suggestions", credits: 28, summary: "The autocomplete terms TikTok suggests in its search bar for a seed keyword — the real phrases people search, ranked. Localize by country + language.", params: [q("Seed keyword to expand into autocomplete suggestions, e.g. skincare."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code that localizes suggestions to a market, e.g. US, GB, DE. Default US." }, languageUi(), { name: "limit", type: "number", required: false, description: "Upper bound on suggestions to return (1-100, default 20). TikTok surfaces only a limited number of real autocomplete suggestions per keyword, so you'll often get fewer. Billed per result." }] },
+  { tool: "tiktok_channel_posts", name: "TikTok Channel Posts", path: "/v1/tiktok/channel-posts", credits: 2, summary: "Latest videos from a TikTok profile — caption, engagement, thumbnail, sound, and hashtags for each post. Cursor pagination via nextCursor.", params: [url(TT_PROFILE), limitFlat(20, 200, 2), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
+  { tool: "tiktok_comment_replies", name: "TikTok Comment Replies", path: "/v1/tiktok/comment-replies", credits: 2, summary: "Replies under a TikTok comment — text, author, likes, timestamp, with cursor pagination (nextCursor + hasMore). Flat 2 credits.", params: [url(TT_VIDEO), commentId(), limitFlat(50, 500, 2), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
   { tool: "tiktok_user_followers", name: "TikTok User Followers", path: "/v1/tiktok/user-followers", credits: 20, summary: "List a TikTok user's followers.", params: [url(TT_PROFILE), limit(50, 500)] },
   { tool: "tiktok_user_followings", name: "TikTok User Followings", path: "/v1/tiktok/user-followings", credits: 20, summary: "List who a TikTok user follows.", params: [url(TT_PROFILE), limit(50, 500)] },
   { tool: "tiktok_music_posts", name: "TikTok Music Posts", path: "/v1/tiktok/music-posts", credits: 32, summary: "Posts using a specific TikTok sound/music.", params: [url(TT_MUSIC), limit(20, 200)] },
@@ -206,7 +219,7 @@ const FACEBOOK: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_group_posts", name: "Facebook Group Posts", path: "/v1/facebook/group-posts", credits: 12, summary: "Posts from a public Facebook group.", params: [url("Public Facebook group URL, e.g. https://facebook.com/groups/ID."), limit(20, 200)] },
   { tool: "facebook_comment_replies", name: "Facebook Comment Replies", path: "/v1/facebook/comment-replies", credits: 30, summary: "Replies to a specific Facebook comment.", params: [url("Facebook post URL the comment belongs to."), commentId(), limit(50, 500)] },
   { tool: "facebook_marketplace_search", name: "Facebook Marketplace Search", path: "/v1/facebook/marketplace-search", credits: 28, summary: "Search Facebook Marketplace listings by keyword and location.", params: [q("Product or keyword to search for (min 2 chars)."), { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." }, limit(20, 200), { name: "details", type: "string", required: false, description: "Set true to fetch full description, photos and coordinates per listing (slower, costs more)." }] },
-  { tool: "facebook_marketplace_location_search", name: "Facebook Marketplace Location Search", path: "/v1/facebook/marketplace-location-search", credits: 17, summary: "Find Facebook Marketplace location candidates for a city or place query.", params: [q("City/place search query, e.g. Austin."), limit(10, 50)] },
+  { tool: "facebook_marketplace_location_search", name: "Facebook Marketplace Location Search", path: "/v1/facebook/marketplace-location-search", credits: 17, summary: "Find Facebook Marketplace location candidates for a city or place query.", params: [q("City/place search query, e.g. Austin."), limitFlat(10, 50, 17)] },
   { tool: "facebook_event_search", name: "Facebook Event Search", path: "/v1/facebook/event-search", credits: 40, summary: "Search Facebook events by topic and/or location.", params: [q("Topic and/or place, e.g. 'comedy Chicago' (min 2 chars)."), limit(20, 200)] },
   { tool: "facebook_event_details", name: "Facebook Event Details", path: "/v1/facebook/event-details", credits: 2, summary: "Details for a Facebook event (date, location, attendees, tickets).", params: [url("Facebook event URL, e.g. https://facebook.com/events/ID.")] },
   { tool: "facebook_profile_photos", name: "Facebook Profile Photos", path: "/v1/facebook/profile-photos", credits: 12, summary: "Photos from a Facebook profile or page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
@@ -324,7 +337,7 @@ const SPOTIFY: Omit<Endpoint, "platform">[] = [
   { tool: "spotify_track", name: "Spotify Track", path: "/v1/spotify/track", credits: 6, summary: "Spotify track metadata, artists, album and play count when available.", params: [url(SPOTIFY_URL), cacheParam()] },
   { tool: "spotify_album", name: "Spotify Album", path: "/v1/spotify/album", credits: 6, summary: "Spotify album metadata and track count.", params: [url(SPOTIFY_URL), cacheParam()] },
   { tool: "spotify_search", name: "Spotify Search", path: "/v1/spotify/search", credits: 23, summary: "Search Spotify tracks, albums, artists, podcasts or episodes.", params: [q(), { name: "type", type: "string", required: false, description: "tracks, albums, artists, podcasts, or episodes. Default tracks." }, limit(20, 50)] },
-  { tool: "spotify_podcast", name: "Spotify Podcast", path: "/v1/spotify/podcast", credits: 6, summary: "Spotify podcast/show details and episode summary metadata.", params: [url(SPOTIFY_URL), limit(20, 50), cacheParam()] },
+  { tool: "spotify_podcast", name: "Spotify Podcast", path: "/v1/spotify/podcast", credits: 6, summary: "Spotify podcast/show details and episode summary metadata.", params: [url(SPOTIFY_URL), limitFlat(20, 50, 6), cacheParam()] },
   { tool: "spotify_podcast_episodes", name: "Spotify Podcast Episodes", path: "/v1/spotify/podcast-episodes", credits: 23, summary: "List episodes for a Spotify podcast/show.", params: [url(SPOTIFY_URL), limit(20, 50)] },
 ];
 
@@ -349,7 +362,7 @@ const TRUTH_SOCIAL: Omit<Endpoint, "platform">[] = [
 ];
 
 const KICK: Omit<Endpoint, "platform">[] = [
-  { tool: "kick_clip", name: "Kick Clip", path: "/v1/kick/clip", credits: 34, summary: "Kick clip metadata from a clip URL or recent channel clips.", params: [url(KICK_CLIP), limit(30, 100)] },
+  { tool: "kick_clip", name: "Kick Clip", path: "/v1/kick/clip", credits: 34, summary: "Kick clip metadata from a clip URL or recent channel clips.", params: [url(KICK_CLIP), limitFlat(30, 100, 34)] },
 ];
 
 const AMAZON_SHOP_ENDPOINTS: Omit<Endpoint, "platform">[] = [
@@ -364,9 +377,9 @@ const ACCOUNT: Omit<Endpoint, "platform">[] = [
 ];
 
 const KWAI: Omit<Endpoint, "platform">[] = [
-  { tool: "kwai_profile", name: "Kwai Profile", path: "/v1/kwai/profile", credits: 17, summary: "Kwai/Kuaishou public profile details and stats.", params: [url(KWAI_PROFILE)] },
-  { tool: "kwai_user_posts", name: "Kwai User Posts", path: "/v1/kwai/user-posts", credits: 45, summary: "Recent Kwai/Kuaishou videos from a profile.", params: [url(KWAI_PROFILE), limit(20, 200)] },
-  { tool: "kwai_post", name: "Kwai Post", path: "/v1/kwai/post", credits: 17, summary: "Kwai/Kuaishou post metadata and engagement.", params: [url(KWAI_POST)] },
+  { tool: "kwai_profile", name: "Kwai Profile", path: "/v1/kwai/profile", credits: 17, summary: "Kwai public profile details and stats.", params: [url(KWAI_PROFILE)] },
+  { tool: "kwai_user_posts", name: "Kwai User Posts", path: "/v1/kwai/user-posts", credits: 45, summary: "Recent Kwai videos from a profile.", params: [url(KWAI_PROFILE), limit(20, 200)] },
+  { tool: "kwai_post", name: "Kwai Post", path: "/v1/kwai/post", credits: 17, summary: "Kwai post metadata and engagement.", params: [url(KWAI_POST)] },
 ];
 
 const KOMI: Omit<Endpoint, "platform">[] = [

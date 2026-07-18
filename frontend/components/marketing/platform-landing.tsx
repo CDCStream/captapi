@@ -272,7 +272,7 @@ export function PlatformLanding({ group }: { group: PlatformGroup }) {
             The <strong>{group.name} API</strong> returns public {group.name}{" "}
             data as clean, structured JSON — {group.endpoints.length} REST
             endpoint{group.endpoints.length === 1 ? "" : "s"} behind one Bearer
-            key. No OAuth, no scrapers to maintain, results cached for 24 hours
+            key. No OAuth, no scrapers to maintain. Pass cache=true for a free 24h cache hit; default is always fresh
             (repeat calls are free). Start with 100 free credits — no credit
             card.
           </Tldr>

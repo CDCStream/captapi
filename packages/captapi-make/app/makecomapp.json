@@ -2588,7 +2588,7 @@
       },
       "kwaiProfile": {
         "label": "Kwai Profile",
-        "description": "Kwai/Kuaishou public profile details and stats. Costs ~17 credits (cached results free, failures never charged).",
+        "description": "Kwai public profile details and stats. Costs ~17 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2605,7 +2605,7 @@
       },
       "kwaiUserPosts": {
         "label": "Kwai User Posts",
-        "description": "Recent Kwai/Kuaishou videos from a profile. Costs ~45 credits (cached results free, failures never charged).",
+        "description": "Recent Kwai videos from a profile. Costs ~45 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2622,7 +2622,7 @@
       },
       "kwaiPost": {
         "label": "Kwai Post",
-        "description": "Kwai/Kuaishou post metadata and engagement. Costs ~17 credits (cached results free, failures never charged).",
+        "description": "Kwai post metadata and engagement. Costs ~17 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

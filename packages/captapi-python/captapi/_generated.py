@@ -445,7 +445,7 @@ class TiktokApi:
         """TikTok Comments — Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500). (2 credits)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param limit: Max items to return. Default 50, max 500. Flat 2 credits per call.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -480,7 +480,7 @@ class TiktokApi:
 
         :param q: Seed keyword to expand into autocomplete suggestions, e.g. skincare.
         :param country: Two-letter ISO country code that localizes suggestions to a market, e.g. US, GB, DE. Default US.
-        :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param language: Interface language for localized results, e.g. en-US or de-DE. Default en-US.
         :param limit: Upper bound on suggestions to return (1-100, default 20). TikTok surfaces only a limited number of real autocomplete suggestions per keyword, so you'll often get fewer. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -490,7 +490,7 @@ class TiktokApi:
         """TikTok Channel Posts — Latest videos from a TikTok profile — caption, engagement, thumbnail, sound, and hashtags for each post. Cursor pagination via nextCursor. (2 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -501,7 +501,7 @@ class TiktokApi:
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param comment_id: ID of the parent comment to fetch replies for (from the comments endpoint).
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param limit: Max items to return. Default 50, max 500. Flat 2 credits per call.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -652,7 +652,7 @@ class AsyncTiktokApi:
         """TikTok Comments — Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500). (2 credits)
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param limit: Max items to return. Default 50, max 500. Flat 2 credits per call.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -687,7 +687,7 @@ class AsyncTiktokApi:
 
         :param q: Seed keyword to expand into autocomplete suggestions, e.g. skincare.
         :param country: Two-letter ISO country code that localizes suggestions to a market, e.g. US, GB, DE. Default US.
-        :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
+        :param language: Interface language for localized results, e.g. en-US or de-DE. Default en-US.
         :param limit: Upper bound on suggestions to return (1-100, default 20). TikTok surfaces only a limited number of real autocomplete suggestions per keyword, so you'll often get fewer. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -697,7 +697,7 @@ class AsyncTiktokApi:
         """TikTok Channel Posts — Latest videos from a TikTok profile — caption, engagement, thumbnail, sound, and hashtags for each post. Cursor pagination via nextCursor. (2 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -708,7 +708,7 @@ class AsyncTiktokApi:
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param comment_id: ID of the parent comment to fetch replies for (from the comments endpoint).
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param limit: Max items to return. Default 50, max 500. Flat 2 credits per call.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -1196,7 +1196,7 @@ class FacebookApi:
         """Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. (17 credits)
 
         :param q: City/place search query, e.g. Austin.
-        :param limit: Max items to return. Default 10, max 50. Billed per result.
+        :param limit: Max items to return. Default 10, max 50. Flat 17 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/marketplace-location-search", {"q": q, "limit": limit, "cache": cache})
@@ -1342,7 +1342,7 @@ class AsyncFacebookApi:
         """Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. (17 credits)
 
         :param q: City/place search query, e.g. Austin.
-        :param limit: Max items to return. Default 10, max 50. Billed per result.
+        :param limit: Max items to return. Default 10, max 50. Flat 17 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/marketplace-location-search", {"q": q, "limit": limit, "cache": cache})
@@ -2521,7 +2521,7 @@ class SpotifyApi:
         """Spotify Podcast — Spotify podcast/show details and episode summary metadata. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 50. Billed per result.
+        :param limit: Max items to return. Default 20, max 50. Flat 6 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/spotify/podcast", {"url": url, "limit": limit, "cache": cache})
@@ -2578,7 +2578,7 @@ class AsyncSpotifyApi:
         """Spotify Podcast — Spotify podcast/show details and episode summary metadata. (6 credits)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 50. Billed per result.
+        :param limit: Max items to return. Default 20, max 50. Flat 6 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/spotify/podcast", {"url": url, "limit": limit, "cache": cache})
@@ -2777,7 +2777,7 @@ class KickApi:
         """Kick Clip — Kick clip metadata from a clip URL or recent channel clips. (34 credits)
 
         :param url: Kick clip URL, channel URL, or channel username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 30, max 100. Billed per result.
+        :param limit: Max items to return. Default 30, max 100. Flat 34 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/kick/clip", {"url": url, "limit": limit, "cache": cache})
@@ -2791,7 +2791,7 @@ class AsyncKickApi:
         """Kick Clip — Kick clip metadata from a clip URL or recent channel clips. (34 credits)
 
         :param url: Kick clip URL, channel URL, or channel username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 30, max 100. Billed per result.
+        :param limit: Max items to return. Default 30, max 100. Flat 34 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/kick/clip", {"url": url, "limit": limit, "cache": cache})
@@ -2896,26 +2896,26 @@ class KwaiApi:
         self._t = transport
 
     def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Kwai Profile — Kwai/Kuaishou public profile details and stats. (17 credits)
+        """Kwai Profile — Kwai public profile details and stats. (17 credits)
 
-        :param url: Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Kwai profile URL or @handle, e.g. https://www.kwai.com/@easycashindonesia. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/kwai/profile", {"url": url, "cache": cache})
 
     def user_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Kwai User Posts — Recent Kwai/Kuaishou videos from a profile. (45 credits)
+        """Kwai User Posts — Recent Kwai videos from a profile. (45 credits)
 
-        :param url: Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Kwai profile URL or @handle, e.g. https://www.kwai.com/@easycashindonesia. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/kwai/user-posts", {"url": url, "limit": limit, "cache": cache})
 
     def post(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Kwai Post — Kwai/Kuaishou post metadata and engagement. (17 credits)
+        """Kwai Post — Kwai post metadata and engagement. (17 credits)
 
-        :param url: Kwai/Kuaishou post URL or video/photo ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Kwai video URL, e.g. https://www.kwai.com/@handle/video/5238962376325675745. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/kwai/post", {"url": url, "cache": cache})
@@ -2926,26 +2926,26 @@ class AsyncKwaiApi:
         self._t = transport
 
     async def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Kwai Profile — Kwai/Kuaishou public profile details and stats. (17 credits)
+        """Kwai Profile — Kwai public profile details and stats. (17 credits)
 
-        :param url: Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Kwai profile URL or @handle, e.g. https://www.kwai.com/@easycashindonesia. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/kwai/profile", {"url": url, "cache": cache})
 
     async def user_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Kwai User Posts — Recent Kwai/Kuaishou videos from a profile. (45 credits)
+        """Kwai User Posts — Recent Kwai videos from a profile. (45 credits)
 
-        :param url: Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Kwai profile URL or @handle, e.g. https://www.kwai.com/@easycashindonesia. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/kwai/user-posts", {"url": url, "limit": limit, "cache": cache})
 
     async def post(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Kwai Post — Kwai/Kuaishou post metadata and engagement. (17 credits)
+        """Kwai Post — Kwai post metadata and engagement. (17 credits)
 
-        :param url: Kwai/Kuaishou post URL or video/photo ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Kwai video URL, e.g. https://www.kwai.com/@handle/video/5238962376325675745. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/kwai/post", {"url": url, "cache": cache})

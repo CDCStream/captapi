@@ -115,7 +115,7 @@ export async function generateMetadata({
   const ep = getEndpoint(slug);
   if (!ep) return {};
   const title = `${ep.name} — ${platformLabel(ep.platform)} Data via REST`;
-  const description = `${tagline(ep)} No OAuth and no scraping — send a URL and get clean, structured JSON back, with results cached for 24 hours.`;
+  const description = `${tagline(ep)} No OAuth and no scraping — send a URL and get clean, structured JSON back, Pass cache=true for a free 24h cache hit; default is always fresh.`;
   const url = `${SITE_URL}/apis/${ep.slug}`;
   return {
     title: `${ep.name} | Captapi`,
@@ -277,8 +277,7 @@ export default async function ApiDetailPage({
             {tagline(ep)} The <strong>{ep.name}</strong> (
             {platformLabel(ep.platform)}) is a single authenticated{" "}
             <code>{ep.method ?? "GET"}</code> request to <code>{ep.path}</code>{" "}
-            that responds with clean JSON, costs {creditLabel(ep)}, and is
-            cached for 24 hours (repeat calls are free). Start with 100 free
+            that responds with clean JSON and costs {creditLabel(ep)}. Pass cache=true for a free 24h cache hit; default is always fresh. Start with 100 free
             credits — no credit card.
           </Tldr>
           <h2 className="text-2xl font-semibold">

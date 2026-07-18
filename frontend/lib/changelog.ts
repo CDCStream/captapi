@@ -226,12 +226,12 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-15",
     category: "improvement",
-    title: "cache=false parameter on every endpoint",
+    title: "cache parameter on every endpoint (historical)",
     description:
-      "Every data endpoint now accepts an optional cache=false query parameter to bypass the cache and always fetch fresh data. Previously only transcript, summarizer, and Spotify endpoints supported it.",
+      "Historical note: on this date every data endpoint gained an optional cache query parameter. Later (2026-07-16) the default flipped to cache=false (always fresh). Prefer the 2026-07-16 changelog entry for current behavior.",
     items: [
-      "Add cache=false to any request when you need live numbers instead of the cached copy (fresh calls are billed as usual; the result still refreshes the cache)",
-      "Documented on all 179 API pages and available in the playground, MCP server, SDKs, CLI, and n8n node",
+      "Superseded by: cache defaults to false — pass cache=true to use the 24h cache",
+      "Documented across docs, playground, MCP, SDKs, CLI, and n8n",
       "Account endpoints (balance, usage) are always live and unaffected",
     ],
   },
@@ -322,7 +322,7 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-04",
     category: "integration",
-    title: "MCP catalog synced to all 179 tools",
+    title: "MCP catalog synced to all endpoints",
     description:
       "The hosted MCP server and every published package now expose the full endpoint catalog.",
     items: [
@@ -345,7 +345,7 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-03",
     category: "improvement",
-    title: "Real response examples for all 179 endpoints",
+    title: "Real response examples for all endpoints",
     description:
       "Every endpoint page now shows a real captured response, refreshed in batches across the whole catalog.",
     items: [

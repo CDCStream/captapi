@@ -34,7 +34,7 @@ const features = [
   {
     icon: Zap,
     title: "Sub-second Cache",
-    body: "24h shared cache. Repeat requests are instant and free.",
+    body: "Optional 24h shared cache via cache=true — hits are instant and free.",
   },
   {
     icon: Code2,
@@ -82,7 +82,7 @@ const faqs = [
   },
   {
     q: "What counts as a credit?",
-    a: "Each request consumes 1-6 credits depending on the endpoint (transcript: 2, summarize: 4, video details: 1). Cached results (within 24h) cost 0 credits.",
+    a: "Each endpoint has its own credit cost (see the docs) — simple lookups are often 1–4 credits; list/search/comment calls can be higher and may scale with results. Pass cache=true for a free 24h cache hit; default is always fresh.",
   },
   {
     q: "What happens if a video has no captions?",

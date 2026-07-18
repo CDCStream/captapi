@@ -70,7 +70,7 @@ export async function GET() {
 
 > One API for structured data from ${PLATFORM_COUNT} social platforms — YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Twitch, Spotify, and more. Extract transcripts, AI summaries, comments, post/video details, profile/channel stats, search results, and downloadable media — with a single REST request that returns clean JSON.
 
-Captapi is a developer API (Merchant of Record billing via Paddle) that unifies access to public social-media data across ${PLATFORM_COUNT} platforms. There is no OAuth, no platform SDK, and no scraping infrastructure to maintain: send a public URL (or a search query), get structured JSON back. A single API key works across every platform. Responses are cached for 24 hours, so repeat lookups are instant and cost 0 credits. New accounts start with 100 free credits.
+Captapi is a developer API (Merchant of Record billing via Paddle) that unifies access to public social-media data across ${PLATFORM_COUNT} platforms. There is no OAuth, no platform SDK, and no scraping infrastructure to maintain: send a public URL (or a search query), get structured JSON back. A single API key works across every platform. Requests fetch fresh data by default; pass cache=true to serve from the 24h shared cache (0 credits on hit). New accounts start with 100 free credits.
 
 Base API URL: https://api.captapi.com
 Authentication: \`Authorization: Bearer capt_live_...\` (create a key in the dashboard).
@@ -81,7 +81,7 @@ Pricing: credit-based subscriptions (Starter, Pro, Business) plus one-time pay-a
 2. If MCP is not available, call REST directly. Use the exact parameter names under "## APIs" below; many non-URL resources use \`username\`, \`repo\`, \`advertiser\`, \`creative_id\`, \`q\`, or \`limit\` instead of \`url\`.
 3. Match URL platform to endpoint/tool platform before calling. A TikTok endpoint needs a \`tiktok.com\` URL, a YouTube endpoint needs a \`youtube.com\` or \`youtu.be\` URL, Instagram needs \`instagram.com\`, etc. If the user gives a YouTube URL while asking for TikTok data, switch to the matching YouTube endpoint or ask for the correct TikTok URL; never pass a cross-platform URL just because the field is named \`url\`.
 4. Ask the human for a \`capt_live_...\` API key once. Do not sign up automatically, scrape the dashboard, guess keys, commit keys, or expose keys in generated code.
-5. For list/search/comment endpoints, start with a small \`limit\` unless the user asks for more. Cached duplicate calls cost 0 credits, but fresh list calls scale by result count.
+5. For list/search/comment endpoints, start with a small \`limit\` unless the user asks for more. Pass cache=true for a free 24h cache hit (default is always fresh). Fresh list/search/comment calls may scale by result count.
 6. Error handling: 401/402 means stop and ask the user to fix auth/billing; 429/502 can be retried with backoff; 400 platform mismatch means choose the endpoint matching the URL's platform or ask for the correct URL; 422/no-captions/not-found means report the target cannot be processed and avoid retry loops.
 7. Return \`data\` by default. Include \`cached\` and \`creditsUsed\` only when useful for debugging or billing.
 
@@ -215,7 +215,7 @@ If you are not using MCP, every endpoint is a single authenticated GET request �
 - Method: GET. Pass parameters as URL query params (URL-encode values). Parameter names per endpoint are listed under "## APIs" below (\`*\` = required).
 - Success response: JSON \`{ "success": true, "cached": boolean, "creditsUsed": number, "data": { ... } }\`.
 - Error response: non-2xx with \`{ "detail": "..." }\`. Status codes: 401 missing/invalid key, 402 out of credits, 422 unprocessable (e.g. video has no captions — not charged), 429 rate limited (back off and retry).
-- Credits: repeat calls for the same request are cached for 24h and cost 0. Failed/empty results are not charged. New accounts include 100 free credits.
+- Credits: pass cache=true for a free 24h cache hit; default is always fresh. Failed/empty results are not charged. New accounts include 100 free credits.
 
 Example request (cURL):
 \`\`\`bash

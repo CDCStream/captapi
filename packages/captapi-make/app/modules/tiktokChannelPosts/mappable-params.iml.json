@@ -11,7 +11,7 @@
     "type": "number",
     "label": "Limit",
     "required": false,
-    "help": "Max items to return. Default 20, max 200. Billed per result."
+    "help": "Max items to return. Default 20, max 200. Flat 2 credits per call."
   },
   {
     "name": "cursor",

@@ -110,7 +110,7 @@ Errors: non-2xx with \`{ "detail": "..." }\` — 401 invalid key, 402 out of cre
 2. If no MCP client is available, call the REST API directly. Use the exact endpoint and parameter names in this file; do not invent \`url\` for endpoints that list \`username\`, \`repo\`, \`advertiser\`, or \`creative_id\`.
 3. Match URL platform to endpoint/tool platform before calling. A TikTok endpoint needs a \`tiktok.com\` URL, a YouTube endpoint needs a \`youtube.com\` or \`youtu.be\` URL, Instagram needs \`instagram.com\`, Facebook needs \`facebook.com\`, etc. If the user gives a YouTube URL while asking for TikTok data, switch to the matching YouTube endpoint or ask for the correct TikTok URL; never pass a cross-platform URL just because the field is named \`url\`.
 4. Ask the human for a \`capt_live_...\` key once. Never sign up, scrape the dashboard, store the key in source code, or print it in logs.
-5. Use \`limit\` conservatively for list/search/comment endpoints. Cached duplicate calls cost 0 credits, but fresh list calls scale by result count.
+5. Use \`limit\` conservatively for list/search/comment endpoints. Pass cache=true for a free 24h cache hit (default is always fresh). Fresh list/search/comment calls may scale by result count.
 6. On 401/402, stop and ask the user to fix credentials or billing. On 429/502, retry with backoff. On 400 platform mismatch, choose the endpoint matching the URL's platform or ask for the correct URL. On 422/not-found/no-captions, report the target cannot be processed and do not retry repeatedly.
 7. Return the \`data\` object to the user unless they explicitly ask for the wrapper metadata (\`cached\`, \`creditsUsed\`, etc.).
 

@@ -22,8 +22,9 @@ export default function PricingPage() {
           allowance runs out.
         </p>
         <p>
-          Rate limits are enforced per minute, per plan. Cached responses
-          (within 24h) don&apos;t consume credits or count toward your limit.
+          Rate limits are enforced per minute, per plan. Pass{" "}
+          <code className="rounded bg-muted px-1 py-0.5 text-xs">cache=true</code>{" "}
+          for a free 24h cache hit (default is always fresh).
         </p>
       </div>
     </section>

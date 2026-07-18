@@ -319,7 +319,7 @@ export interface TiktokVideoDetailsParams {
 export interface TiktokCommentsParams {
   /** Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 50, max 500. Billed per result. */
+  /** Max items to return. Default 50, max 500. Flat 2 credits per call. */
   limit?: number;
   /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset). */
   cursor?: string;
@@ -353,7 +353,7 @@ export interface TiktokSearchSuggestionsParams {
   q: string;
   /** Two-letter ISO country code that localizes suggestions to a market, e.g. US, GB, DE. Default US. */
   country?: string;
-  /** Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect. */
+  /** Interface language for localized results, e.g. en-US or de-DE. Default en-US. */
   language?: string;
   /** Upper bound on suggestions to return (1-100, default 20). TikTok surfaces only a limited number of real autocomplete suggestions per keyword, so you'll often get fewer. Billed per result. */
   limit?: number;
@@ -364,7 +364,7 @@ export interface TiktokSearchSuggestionsParams {
 export interface TiktokChannelPostsParams {
   /** TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
+  /** Max items to return. Default 20, max 200. Flat 2 credits per call. */
   limit?: number;
   /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
   cursor?: string;
@@ -377,7 +377,7 @@ export interface TiktokCommentRepliesParams {
   url: string;
   /** ID of the parent comment to fetch replies for (from the comments endpoint). */
   comment_id: string;
-  /** Max items to return. Default 50, max 500. Billed per result. */
+  /** Max items to return. Default 50, max 500. Flat 2 credits per call. */
   limit?: number;
   /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
   cursor?: string;
@@ -873,7 +873,7 @@ export interface FacebookMarketplaceSearchParams {
 export interface FacebookMarketplaceLocationSearchParams {
   /** City/place search query, e.g. Austin. */
   q: string;
-  /** Max items to return. Default 10, max 50. Billed per result. */
+  /** Max items to return. Default 10, max 50. Flat 17 credits per call. */
   limit?: number;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -1771,7 +1771,7 @@ export interface SpotifySearchParams {
 export interface SpotifyPodcastParams {
   /** Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 20, max 50. Billed per result. */
+  /** Max items to return. Default 20, max 50. Flat 6 credits per call. */
   limit?: number;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -1929,7 +1929,7 @@ export class TruthSocialApi {
 export interface KickClipParams {
   /** Kick clip URL, channel URL, or channel username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 30, max 100. Billed per result. */
+  /** Max items to return. Default 30, max 100. Flat 34 credits per call. */
   limit?: number;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -2003,14 +2003,14 @@ export class AccountApi {
 }
 
 export interface KwaiProfileParams {
-  /** Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  /** Kwai profile URL or @handle, e.g. https://www.kwai.com/@easycashindonesia. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
 
 export interface KwaiUserPostsParams {
-  /** Kwai/Kuaishou profile URL or user ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  /** Kwai profile URL or @handle, e.g. https://www.kwai.com/@easycashindonesia. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
@@ -2019,7 +2019,7 @@ export interface KwaiUserPostsParams {
 }
 
 export interface KwaiPostParams {
-  /** Kwai/Kuaishou post URL or video/photo ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  /** Kwai video URL, e.g. https://www.kwai.com/@handle/video/5238962376325675745. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -2027,15 +2027,15 @@ export interface KwaiPostParams {
 
 export class KwaiApi {
   constructor(private readonly core: HttpCore) {}
-  /** Kwai Profile — Kwai/Kuaishou public profile details and stats. (17 credits) */
+  /** Kwai Profile — Kwai public profile details and stats. (17 credits) */
   profile(params: KwaiProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/kwai/profile", params);
   }
-  /** Kwai User Posts — Recent Kwai/Kuaishou videos from a profile. (45 credits) */
+  /** Kwai User Posts — Recent Kwai videos from a profile. (45 credits) */
   userPosts(params: KwaiUserPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/kwai/user-posts", params);
   }
-  /** Kwai Post — Kwai/Kuaishou post metadata and engagement. (17 credits) */
+  /** Kwai Post — Kwai post metadata and engagement. (17 credits) */
   post(params: KwaiPostParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/kwai/post", params);
   }

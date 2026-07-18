@@ -61,7 +61,7 @@ function steps(ep: ApiEndpoint) {
     },
     {
       name: "Read the JSON response",
-      text: "Parse the clean JSON response. Results are cached for 24 hours, so repeat calls are free.",
+      text: "Parse the clean JSON response. Pass cache=true for a free 24h cache hit; default is always fresh.",
     },
   ];
 }
