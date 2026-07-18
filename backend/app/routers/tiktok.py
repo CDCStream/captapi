@@ -16,7 +16,7 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
-from app.services.apify_client import get_apify
+from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import (
     WHISPER_MAX_BYTES,
@@ -31,6 +31,7 @@ from app.services.tiktok_native import (
     channel_posts_native,
     comment_replies_native,
     profile_region_native,
+    search_suggestions_native,
     video_details_native,
 )
 from app.utils.countries import country_name
@@ -1079,17 +1080,35 @@ async def tiktok_search_suggestions(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_SEARCH_SUGGESTIONS,
-                {
-                    "keywords": [q],
-                    "maxSuggestionsPerKeyword": limit,
-                    "region": country.upper(),
-                    "language": language,
-                    "includeAlphabetExpansions": False,
-                },
-                max_items=limit,
+            # Native first — TikTok's public search preview. Apify actor is a
+            # fallback when every proxy tier is blocked.
+            native_rows = await search_suggestions_native(
+                q, country=country, language=language, limit=limit
             )
+            items: list[dict[str, Any]]
+            if native_rows:
+                ctx["source"] = "direct"
+                items = native_rows
+            else:
+                try:
+                    items = await get_apify().run_actor_sync(
+                        settings.APIFY_ACTOR_TIKTOK_SEARCH_SUGGESTIONS,
+                        {
+                            "keywords": [q],
+                            "maxSuggestionsPerKeyword": limit,
+                            "region": country.upper(),
+                            "language": language,
+                            "includeAlphabetExpansions": False,
+                        },
+                        max_items=limit,
+                    )
+                except ApifyError as exc:
+                    raise HTTPException(
+                        status_code=502,
+                        detail="Failed to fetch search suggestions. Retry shortly.",
+                    ) from exc
+                ctx["source"] = "apify"
+
             suggestions = [
                 s for s in (_normalize_suggestion(i, q) for i in items[:limit])
                 if s.get("suggestion")
@@ -1097,11 +1116,20 @@ async def tiktok_search_suggestions(
             for idx, s in enumerate(suggestions, start=1):
                 if s.get("rank") is None:
                     s["rank"] = idx
-            return {"platform": "tiktok", "query": q, "totalReturned": len(suggestions), "suggestions": suggestions}
+                if not s.get("region"):
+                    s["region"] = country.upper()
+                if not s.get("language"):
+                    s["language"] = language
+            return {
+                "platform": "tiktok",
+                "query": q,
+                "totalReturned": len(suggestions),
+                "suggestions": suggestions,
+            }
 
         data = await cached_or_run(
             endpoint="tiktok.search-suggestions",
-            params={"q": q, "country": country.upper(), "language": language, "limit": limit, "v": 2},
+            params={"q": q, "country": country.upper(), "language": language, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

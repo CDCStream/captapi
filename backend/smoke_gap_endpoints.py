@@ -90,7 +90,7 @@ async def main() -> None:
         ("Pinterest board", "/v1/pinterest/board", {"url": PIN_BOARD, "limit": 5}),
         ("FB profile-photos", "/v1/facebook/profile-photos", {"url": FB_PROFILE, "limit": 5}),
         # Batch 2
-        ("IG basic-profile", "/v1/instagram/basic-profile", {"url": IG_PROFILE}),
+        ("IG basic-profile", "/v1/instagram/basic-profile", {"userId": IG_PROFILE}),
         ("Reddit subreddit-search", "/v1/reddit/subreddit-search", {"url": REDDIT_SUB, "q": "rust", "limit": 5}),
         ("Threads search", "/v1/threads/search", {"q": THREADS_Q, "limit": 5}),
         ("Threads search-users", "/v1/threads/search-users", {"q": "nasa", "limit": 5}),

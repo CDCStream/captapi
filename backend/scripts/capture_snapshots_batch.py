@@ -134,7 +134,7 @@ def batch2_phase1() -> list[tuple[str, str, dict]]:
     return [
         ("tiktok-profile-region", "/v1/tiktok/profile-region", {"url": "https://www.tiktok.com/@khaby.lame"}),
         ("tiktok-audience-demographics", "/v1/tiktok/audience-demographics", {"url": "https://www.tiktok.com/@khaby.lame"}),
-        ("tiktok-search-suggestions", "/v1/tiktok/search-suggestions", {"q": "skincare", "limit": 5}),
+        ("tiktok-search-suggestions", "/v1/tiktok/search-suggestions", {"q": "makeup", "country": "US", "language": "en-US", "limit": 5}),
         ("tiktok-live", "/v1/tiktok/live", {"url": "https://www.tiktok.com/@espn"}),
         ("tiktok-live-info", "/v1/tiktok/live-info", {"url": "https://www.tiktok.com/@espn"}),
         ("tiktok-popular-creators", "/v1/tiktok/popular-creators", {"country": "US", "limit": 5}),
@@ -303,7 +303,7 @@ def batch4_phase1() -> list[tuple[str, str, dict]]:
         ("account-request-history", "/v1/account/request-history", {"limit": 5}),
         ("account-daily-usage", "/v1/account/daily-usage", {"days": 7}),
         ("account-most-used-routes", "/v1/account/most-used-routes", {"days": 30, "limit": 5}),
-        ("instagram-basic-profile", "/v1/instagram/basic-profile", {"url": "https://www.instagram.com/cristiano"}),
+        ("instagram-basic-profile", "/v1/instagram/basic-profile", {"userId": "314216"}),
         ("instagram-trending-reels", "/v1/instagram/trending-reels", {"country": "United States", "limit": 10}),
         ("instagram-reels-by-audio-id", "/v1/instagram/reels-by-audio-id", {"audio_id": "27919946310946207", "limit": 5}),
         ("bluesky-profile", "/v1/bluesky/profile", {"url": "https://bsky.app/profile/jay.bsky.team"}),
@@ -312,9 +312,9 @@ def batch4_phase1() -> list[tuple[str, str, dict]]:
         ("soundcloud-artist-tracks", "/v1/soundcloud/artist-tracks", {"url": "https://soundcloud.com/flume", "limit": 5}),
         ("truth-social-profile", "/v1/truth-social/profile", {"url": "@realDonaldTrump"}),
         ("truth-social-user-posts", "/v1/truth-social/user-posts", {"url": "@realDonaldTrump", "limit": 5}),
-        ("kwai-profile", "/v1/kwai/profile", {"url": "https://www.kuaishou.com/profile/2542916559"}),
-        ("kwai-user-posts", "/v1/kwai/user-posts", {"url": "https://www.kuaishou.com/profile/2542916559", "limit": 5}),
-        ("kwai-post", "/v1/kwai/post", {"url": "https://www.kuaishou.com/short-video/5241627202658372579?authorId=2542916559"}),
+        # International Kwai web model — actor expects kwai.com/@handle, not kuaishou.com/profile/<id>.
+        ("kwai-profile", "/v1/kwai/profile", {"url": "https://www.kwai.com/@easycashindonesia"}),
+        ("kwai-user-posts", "/v1/kwai/user-posts", {"url": "https://www.kwai.com/@easycashindonesia", "limit": 5}),
         ("reddit-post-transcript", "/v1/reddit/post-transcript", {"url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/", "limit": 5}),
         ("tiktok-shop-products", "/v1/tiktok-shop/shop-products", {"url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079", "limit": 5}),
         ("linktree-page", "/v1/linktree/page", {"url": "https://linktr.ee/selenagomez"}),
@@ -381,6 +381,13 @@ def batch4_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
     else:
         print("!! no truth social post url")
 
+    kwai_post = first_of("kwai-user-posts", "posts")
+    kwai_url = kwai_post.get("url") or kwai_post.get("postUrl")
+    if kwai_url:
+        tests.append(("kwai-post", "/v1/kwai/post", {"url": kwai_url}))
+    else:
+        print("!! no kwai post url")
+
     return tests
 
 
@@ -392,6 +399,26 @@ def batch4b_phase1() -> list[tuple[str, str, dict]]:
         ("reddit-post-transcript", "/v1/reddit/post-transcript", {"url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/", "limit": 5}),
         ("instagram-trending-reels", "/v1/instagram/trending-reels", {"country": "United States", "limit": 10}),
     ]
+
+
+def batch_fix_phase1() -> list[tuple[str, str, dict]]:
+    """Recapture endpoints that failed due to bad params / flaky upstream."""
+    return [
+        ("tiktok-search-suggestions", "/v1/tiktok/search-suggestions", {"q": "makeup", "country": "US", "language": "en-US", "limit": 5}),
+        ("instagram-basic-profile", "/v1/instagram/basic-profile", {"userId": "314216"}),
+        ("kwai-profile", "/v1/kwai/profile", {"url": "https://www.kwai.com/@easycashindonesia"}),
+        ("kwai-user-posts", "/v1/kwai/user-posts", {"url": "https://www.kwai.com/@easycashindonesia", "limit": 5}),
+    ]
+
+
+def batch_fix_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
+    body = p1.get("kwai-user-posts", {}).get("body") or {}
+    posts = (body.get("data") or {}).get("posts") or []
+    post = next((p for p in posts if isinstance(p, dict) and (p.get("url") or p.get("postUrl"))), None)
+    if not post:
+        print("!! no kwai post url")
+        return []
+    return [("kwai-post", "/v1/kwai/post", {"url": post.get("url") or post.get("postUrl")})]
 
 
 def batch5_phase1() -> list[tuple[str, str, dict]]:
@@ -473,6 +500,7 @@ BATCHES = {
     "batch2": (batch2_phase1, batch2_phase2),
     "batch3": (batch3_phase1, batch3_phase2),
     "batch4": (batch4_phase1, batch4_phase2),
+    "batch_fix": (batch_fix_phase1, batch_fix_phase2),
     "batch4b": (batch4b_phase1, batch4_phase2),
     "batch4c": (
         lambda: [

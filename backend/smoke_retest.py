@@ -19,8 +19,8 @@ from app.services.supabase_client import get_supabase
 
 BASE = os.environ.get("SMOKE_BASE", "http://127.0.0.1:8000")
 
-KWAI_PROFILE = "https://www.kuaishou.com/profile/2542916559"
-KWAI_VIDEO = "https://www.kuaishou.com/short-video/5241627202658372579"
+KWAI_PROFILE = "https://www.kwai.com/@easycashindonesia"
+KWAI_VIDEO = "https://www.kwai.com/@easycashindonesia/video/5238962376325675745"
 LINKBIO = "https://lnk.bio/nasa"
 KOMI = "https://komi.io/charlidamelio"
 PILLAR = "https://pillar.io/cocoao"

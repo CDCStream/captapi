@@ -822,3 +822,84 @@ async def audience_regions_native(
     if not any_success:
         return None
     return regions
+
+
+# --- Search suggestions (public web autocomplete) ---------------------------
+#
+# TikTok's logged-out search preview endpoint returns ``sug_list`` for a seed
+# keyword. Same shape the Apify keywords-discovery actor scrapes; we hit it
+# directly so a flaky actor doesn't 502 the whole route.
+_TT_SUGGEST_URL = "https://www.tiktok.com/api/search/general/preview/"
+
+
+async def search_suggestions_native(
+    q: str,
+    *,
+    country: str = "US",
+    language: str = "en-US",
+    limit: int = 20,
+) -> list[dict[str, Any]] | None:
+    """Return raw suggestion rows (``suggestion``, ``rank``, …) or ``None``."""
+    seed = (q or "").strip()
+    if not seed:
+        return None
+    region = (country or "US").upper()
+    lang = language or "en-US"
+    params = {
+        "aid": "1988",
+        "app_name": "tiktok_web",
+        "device_platform": "web_pc",
+        "keyword": seed,
+        "region": region,
+        "priority_region": region,
+    }
+    headers = {
+        **TT_HEADERS,
+        "Accept": "application/json, text/plain, */*",
+        "Referer": f"https://www.tiktok.com/search?q={seed}",
+        "Accept-Language": lang,
+    }
+    body: dict[str, Any] | None = None
+    for tier in ("datacenter", "residential"):
+        try:
+            resp = await proxy_fetch(
+                _TT_SUGGEST_URL, tier=tier, headers=headers, params=params, timeout=20
+            )
+        except httpx.HTTPError:
+            continue
+        if resp.status_code >= 400:
+            continue
+        try:
+            parsed = resp.json()
+        except ValueError:
+            continue
+        if isinstance(parsed, dict) and isinstance(parsed.get("sug_list"), list):
+            body = parsed
+            break
+    if body is None:
+        return None
+
+    out: list[dict[str, Any]] = []
+    for idx, row in enumerate(body.get("sug_list") or [], start=1):
+        if not isinstance(row, dict):
+            continue
+        word = safe_str(
+            row.get("content")
+            or (row.get("word_record") or {}).get("words_content")
+            or row.get("word")
+        )
+        if not word:
+            continue
+        rank = safe_int((row.get("word_record") or {}).get("words_position"))
+        out.append(
+            {
+                "seedKeyword": seed,
+                "suggestion": word,
+                "suggestionRank": (rank + 1) if rank is not None else idx,
+                "region": region,
+                "language": lang,
+            }
+        )
+        if len(out) >= limit:
+            break
+    return out if out else None
