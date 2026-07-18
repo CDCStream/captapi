@@ -69,6 +69,12 @@ const nextConfig = {
         destination: "/docs",
         permanent: true,
       },
+      // Retired Google Search API page (never shipped / removed from catalog).
+      {
+        source: "/apis/google-search",
+        destination: "/apis",
+        permanent: true,
+      },
     ];
   },
 };
