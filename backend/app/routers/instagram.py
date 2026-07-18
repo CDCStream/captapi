@@ -917,7 +917,13 @@ async def instagram_channel_posts(
                     raise HTTPException(status_code=502, detail="Failed to fetch the next page. Retry shortly.")
                 posts, next_cursor = result
                 ctx["source"] = "direct"
-                return {"url": url, "totalReturned": len(posts), "posts": posts, "nextCursor": next_cursor}
+                return {
+                    "url": url,
+                    "totalReturned": len(posts),
+                    "posts": posts,
+                    "nextCursor": next_cursor,
+                    "hasMore": next_cursor is not None,
+                }
 
             async def _apify() -> dict[str, Any]:
                 apify = get_apify()
@@ -925,8 +931,39 @@ async def instagram_channel_posts(
                     _instagram_profile_candidates(settings, f"https://www.instagram.com/{handle}/", limit, "posts"),
                     max_items=limit,
                 )
-                posts = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
-                return {"url": url, "totalReturned": len(posts), "posts": posts, "nextCursor": None}
+                # Enrich author fields the listing actor omits (followers /
+                # verified / avatar) from a cheap profile lookup.
+                profile = await decodo._profile(handle)
+                author_extra = {}
+                if isinstance(profile, dict):
+                    author_extra = {
+                        "displayName": safe_str(profile.get("full_name")),
+                        "followers": safe_int(
+                            (profile.get("edge_followed_by") or {}).get("count")
+                            if isinstance(profile.get("edge_followed_by"), dict)
+                            else profile.get("follower_count") or profile.get("followers")
+                        ),
+                        "verified": profile.get("is_verified"),
+                        "profileImage": safe_str(
+                            (profile.get("profile_pic_url_hd") or profile.get("profile_pic_url"))
+                        ),
+                    }
+                    author_extra = {k: v for k, v in author_extra.items() if v is not None}
+                posts = []
+                for i in items[:limit]:
+                    if i.get("error"):
+                        continue
+                    post = _normalize_post(i)
+                    if author_extra:
+                        post["author"] = {**author_extra, **(post.get("author") or {})}
+                    posts.append(decodo.strip_null_post_fields(post))
+                return {
+                    "url": url,
+                    "totalReturned": len(posts),
+                    "posts": posts,
+                    "nextCursor": None,
+                    "hasMore": False,
+                }
 
             async def _decodo_run() -> dict[str, Any] | None:
                 page = _ig_channel_page(await decodo.channel_posts(handle, limit), limit)
@@ -938,13 +975,19 @@ async def instagram_channel_posts(
                     if extra is not None:
                         more_posts, next_cursor = extra
                         posts = posts + more_posts
-                return {"url": url, "totalReturned": len(posts), "posts": posts, "nextCursor": next_cursor}
+                return {
+                    "url": url,
+                    "totalReturned": len(posts),
+                    "posts": posts,
+                    "nextCursor": next_cursor,
+                    "hasMore": next_cursor is not None,
+                }
 
             return await _try_decodo(ctx, _decodo_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 14},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 15},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

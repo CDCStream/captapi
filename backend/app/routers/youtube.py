@@ -979,7 +979,7 @@ async def youtube_channel_details(
 
         data = await cached_or_run(
             endpoint="youtube.channel-details",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

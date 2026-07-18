@@ -19,6 +19,7 @@ import json
 import re
 import xml.etree.ElementTree as ET
 from typing import Any, Iterator
+from urllib.parse import parse_qs, urlparse
 
 import httpx
 
@@ -489,6 +490,26 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
     joined = None
     country = None
     links: list[dict[str, str]] = []
+    # Channel page metadata also embeds primaryLinks (often present when the
+    # About popup returns an empty links array).
+    for link in meta.get("primaryLinks") or []:
+        if not isinstance(link, dict):
+            continue
+        nav = link.get("navigationEndpoint") or {}
+        link_url = safe_str(
+            (nav.get("urlEndpoint") or {}).get("url")
+            or (nav.get("commandMetadata") or {}).get("webCommandMetadata", {}).get("url")
+        )
+        if link_url and link_url.startswith("/"):
+            link_url = f"https://www.youtube.com{link_url}"
+        # YouTube wraps external URLs in a redirector — unwrap when present.
+        if link_url and "q=" in link_url and "youtube.com/redirect" in link_url:
+            q = parse_qs(urlparse(link_url).query).get("q") or []
+            if q:
+                link_url = q[0]
+        link_title = text_of(link.get("title"))
+        if link_url:
+            links.append({"text": safe_str(link_title) or "", "url": safe_str(link_url) or ""})
     about_payload = await innertube(
         "browse", {"browseId": channel_id, "params": _ABOUT_PARAMS}
     )
@@ -506,12 +527,18 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
                 video_count = parse_count_text(about.get("videoCountText"))
             if not description:
                 description = safe_str(text_of(about.get("description")))
+            about_links: list[dict[str, str]] = []
             for link in about.get("links") or []:
                 view_model = link.get("channelExternalLinkViewModel") or {}
                 link_title = text_of(view_model.get("title"))
                 link_url = text_of(view_model.get("link"))
                 if link_url:
-                    links.append({"text": safe_str(link_title) or "", "url": safe_str(link_url) or ""})
+                    about_links.append({"text": safe_str(link_title) or "", "url": safe_str(link_url) or ""})
+            if about_links:
+                links = about_links
+
+    if not links:
+        links = _links_from_html(html)
 
     verified = None
     if data:
@@ -534,6 +561,41 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
         "verified": verified,
         "links": links,
     }
+
+
+_SOCIAL_LINK_RE = re.compile(
+    r"https?://(?:www\.)?"
+    r"(instagram\.com|twitter\.com|x\.com|facebook\.com|tiktok\.com|twitch\.tv|"
+    r"linkedin\.com|discord\.gg|discord\.com)"
+    r"/[^\s\"'<>\\]+",
+    re.I,
+)
+_SOCIAL_LABELS = {
+    "instagram.com": "Instagram",
+    "twitter.com": "Twitter",
+    "x.com": "Twitter",
+    "facebook.com": "Facebook",
+    "tiktok.com": "TikTok",
+    "twitch.tv": "Twitch",
+    "linkedin.com": "LinkedIn",
+    "discord.gg": "Discord",
+    "discord.com": "Discord",
+}
+
+
+def _links_from_html(html: str) -> list[dict[str, str]]:
+    """Fallback social links from channel HTML when About/primaryLinks are empty."""
+    seen: set[str] = set()
+    out: list[dict[str, str]] = []
+    for m in _SOCIAL_LINK_RE.finditer(html or ""):
+        raw = m.group(0).rstrip(").,];")
+        host = m.group(1).lower()
+        # Dedupe by host so description noise doesn't flood the list.
+        if host in seen:
+            continue
+        seen.add(host)
+        out.append({"text": _SOCIAL_LABELS.get(host, host), "url": raw})
+    return out
 
 
 # ------------------------------------------------------------- transcript --

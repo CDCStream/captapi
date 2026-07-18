@@ -122,7 +122,19 @@ def _google_ids(value: str) -> tuple[str | None, str | None]:
 
 def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
     snapshot = item.get("snapshot") if isinstance(item.get("snapshot"), dict) else {}
-    advertiser = item.get("advertiser") or item.get("page") or item.get("company") or {}
+    advertiser = (
+        item.get("advertiser")
+        or item.get("page")
+        or item.get("company")
+        or item.get("organization")
+        or item.get("payingEntity")
+        or item.get("payer")
+        or item.get("adPayer")
+        or item.get("posterInfo")
+        or {}
+    )
+    if not isinstance(advertiser, dict):
+        advertiser = {"name": advertiser} if advertiser else {}
     media: list[Any] = []
 
     media.extend(_listify(item.get("media")))
@@ -290,15 +302,22 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
     advertiser_name = safe_str(
         _first(
             advertiser.get("name") if isinstance(advertiser, dict) else None,
+            advertiser.get("companyName") if isinstance(advertiser, dict) else None,
+            advertiser.get("title") if isinstance(advertiser, dict) else None,
             item.get("advertiserName"),
             item.get("advertiser_name"),
             item.get("adPaidForBy"),
+            item.get("paidForBy"),
             item.get("payerName"),
+            item.get("payingEntity"),
             item.get("pageName"),
             item.get("brandName"),
             item.get("companyName"),
-            item.get("pageInfo.page.name"),
+            item.get("organizationName"),
+            _dig(item, "pageInfo", "page", "name"),
+            _dig(item, "advertiser", "companyName"),
             snapshot.get("pageName"),
+            snapshot.get("advertiserName"),
         )
     )
     if advertiser_name and advertiser_name.strip().lower() in {"not mention", "n/a", "unknown"}:
@@ -373,23 +392,32 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             "url": safe_str(
                 _first(
                     advertiser.get("url") if isinstance(advertiser, dict) else None,
+                    advertiser.get("profileUrl") if isinstance(advertiser, dict) else None,
+                    advertiser.get("companyUrl") if isinstance(advertiser, dict) else None,
                     item.get("advertiserUrl"),
                     item.get("advertiser_url"),
                     item.get("companyUrl"),
+                    item.get("companyURL"),
                     item.get("pageUrl"),
                     item.get("pageURL"),
+                    item.get("organizationUrl"),
                     snapshot.get("pageProfileUri"),
+                    snapshot.get("advertiserUrl"),
                 )
             ),
             "logo": safe_str(
                 _first(
                     advertiser.get("logo") if isinstance(advertiser, dict) else None,
+                    advertiser.get("logoUrl") if isinstance(advertiser, dict) else None,
+                    advertiser.get("image") if isinstance(advertiser, dict) else None,
                     item.get("advertiserLogo"),
                     item.get("advertiser_logo"),
                     item.get("companyLogo"),
                     item.get("logoUrl"),
+                    item.get("logo"),
                     item.get("pageProfilePictureUrl"),
                     snapshot.get("pageProfilePictureUrl"),
+                    snapshot.get("advertiserLogo"),
                 )
             ),
         },
@@ -718,7 +746,7 @@ async def linkedin_search_ads(
             ads = [_normalize_ad(i, "linkedin_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.linkedin.search-ads", {"q": q, "country": country, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("ad-library.linkedin.search-ads", {"q": q, "country": country, "limit": limit, "v": 5}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
@@ -753,4 +781,4 @@ async def linkedin_ad_details(
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(items[0], "linkedin_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.linkedin.ad-details", {"url": ad_url, "v": 4}, _run, ctx, use_cache=cache))
+        return ApiResponse(data=await cached_or_run("ad-library.linkedin.ad-details", {"url": ad_url, "v": 5}, _run, ctx, use_cache=cache))

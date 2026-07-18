@@ -20388,20 +20388,31 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "@MrBeast",
         "text": "Who is your favorite streamer?",
         "likeCount": 67000,
-        "publishedAt": "1 month ago (edited)",
-        "replyCount": 1000
+        "replyCount": 1000,
+        "publishedTimeText": "1 month ago (edited)",
+        "authorAvatarUrl": null,
+        "authorIsVerified": false,
+        "authorIsChannelOwner": false,
+        "hasCreatorHeart": false,
+        "replyToId": null
       },
       {
         "id": "UgycsG5e6HB_ZIPSLcF4AaABAg",
         "author": "@KBD-LGN",
         "text": "I don't need 100 thousand dollars and not millions, just help buy back my rental housing 4400430319225923 I think if not you but your subscribers will help me at least 1 cent 400 million subscribers it's already an achievement! Thank you very much to all caring people, I don't need too much",
-        "likeCount": null,
-        "publishedAt": "48 seconds ago",
-        "replyCount": null
+        "likeCount": 0,
+        "replyCount": 0,
+        "publishedTimeText": "48 seconds ago",
+        "authorAvatarUrl": null,
+        "authorIsVerified": false,
+        "authorIsChannelOwner": false,
+        "hasCreatorHeart": false,
+        "replyToId": null
       }
     ],
     "nextCursor": null,
-    "hasMore": false
+    "hasMore": false,
+    "totalComments": 10
   },
   "youtube-shorts-stats": {
     "url": "https://www.youtube.com/watch?v=DXVHmGoCTco",
