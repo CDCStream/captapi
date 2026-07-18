@@ -34,6 +34,8 @@ RATE = 0.8
 
 
 def _scaled(limit: int, minimum: int = 2) -> int:
+    if limit <= 0:
+        return 0
     return max(minimum, math.ceil(limit * RATE))
 
 

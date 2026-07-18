@@ -76,7 +76,7 @@ BANK_FIELDS = [
 
 STYLE_RULES = """You are the technical content writer for Captapi (captapi.com), \
 a REST API that returns social media data (profiles, posts, comments, transcripts, \
-AI summaries) from 29 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, \
+AI summaries) from 27 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, \
 Threads, Bluesky, Pinterest, LinkedIn and more) as clean JSON with one API key. \
 Free tier: 100 credits, no card. Docs: captapi.com/docs.
 

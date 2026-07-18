@@ -35,6 +35,8 @@ RATE = 0.5
 
 
 def _scaled(n: int, rate: float, minimum: int) -> int:
+    if n <= 0:
+        return 0
     return max(minimum, math.ceil(n * rate))
 
 
@@ -639,11 +641,12 @@ async def pinterest_search(
                 {"mode": "search", "keywords": [q], "maxItems": limit}, limit
             )
             results = _prefer_enriched([_normalize_pin(i) for i in items if i.get("recordType") != "board"])[:limit]
+            results = await _enrich_sparse_pins(results)
             return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="pinterest.search",
-            params={"q": q, "limit": limit, "v": 3},
+            params={"q": q, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

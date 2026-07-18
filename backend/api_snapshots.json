@@ -5421,50 +5421,24 @@
   "tiktok-popular-creators": {
     "ok": true,
     "status": 200,
-    "credits": null,
     "data": {
       "platform": "tiktok",
       "country": "US",
       "sort": "follower",
-      "totalReturned": 5,
+      "totalReturned": 1,
       "creators": [
         {
           "rank": 1,
-          "username": "tiktok_trending",
-          "displayName": "Trending TikTok creator discovery: trending",
-          "url": "https://www.tiktok.com/@tiktok_trending",
-          "country": "US"
-        },
-        {
-          "rank": 2,
-          "username": "tiktok_viral",
-          "displayName": "Trending TikTok creator discovery: viral",
-          "url": "https://www.tiktok.com/@tiktok_viral",
-          "country": "US"
-        },
-        {
-          "rank": 3,
-          "username": "tiktok_fyp",
-          "displayName": "Trending TikTok creator discovery: fyp",
-          "url": "https://www.tiktok.com/@tiktok_fyp",
-          "country": "US"
-        },
-        {
-          "rank": 4,
-          "username": "tiktok_dance",
-          "displayName": "Trending TikTok creator discovery: dance",
-          "url": "https://www.tiktok.com/@tiktok_dance",
-          "country": "US"
-        },
-        {
-          "rank": 5,
-          "username": "tiktok_music",
-          "displayName": "Trending TikTok creator discovery: music",
-          "url": "https://www.tiktok.com/@tiktok_music",
+          "username": "khaby.lame",
+          "displayName": "Khabane lame",
+          "url": "https://www.tiktok.com/@khaby.lame",
+          "followers": 162300000,
+          "likes": 2600000000,
           "country": "US"
         }
       ]
-    }
+    },
+    "note": "Docs sample after stub-rejection fix; refresh from live when fallback returns full lists."
   },
   "tiktok-shop-search": {
     "ok": true,
@@ -20249,16 +20223,25 @@
   "pillar-page": {
     "ok": true,
     "status": 200,
-    "credits": null,
     "data": {
       "platform": "pillar",
-      "url": "https://pillar.io/jayshetty",
-      "username": "jayshetty",
-      "name": "Pillar - The All-In-One Toolkit for Creators & Managers",
-      "description": "Monetize your business with an all-in-one creator store, live media kit, brand database, and more",
-      "avatar": "https://athlane-cdn-prod.s3.amazonaws.com/img/default-preview-thumbnail.png",
-      "linkCount": 0
-    }
+      "url": "https://pillar.io/example",
+      "username": "example",
+      "name": "Example Creator",
+      "description": "Creator bio",
+      "linkCount": 2,
+      "links": [
+        {
+          "title": "Website",
+          "url": "https://example.com"
+        },
+        {
+          "title": "YouTube",
+          "url": "https://www.youtube.com/@example"
+        }
+      ]
+    },
+    "note": "Illustrative shape; live empty/marketing shells now 404."
   },
   "linkbio-page": {
     "ok": true,

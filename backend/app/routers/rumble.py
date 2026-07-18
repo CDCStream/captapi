@@ -35,6 +35,8 @@ RATE = 0.6
 
 
 def _scaled(n: int, rate: float, minimum: int) -> int:
+    if n <= 0:
+        return 0
     return max(minimum, math.ceil(n * rate))
 
 
@@ -118,7 +120,7 @@ def _normalize_az_video(item: dict[str, Any]) -> dict[str, Any]:
         "channel": safe_str(by.get("name") or by.get("title")),
         "channelUrl": _clean_url(by.get("url")),
         "channelFollowers": safe_int(by.get("followers")),
-        "channelVerified": bool(by.get("verified_badge")) or None,
+        "channelVerified": bool(by.get("verified_badge")),
         "views": safe_int(item.get("views")),
         "likes": safe_int(votes.get("num_votes_up")),
         "dislikes": safe_int(votes.get("num_votes_down")),
@@ -151,7 +153,7 @@ def _normalize_comment(item: dict[str, Any]) -> dict[str, Any]:
                 or item.get("authorName") or item.get("username")
             ),
             "url": safe_str(author.get("url") or item.get("authorUrl")),
-            "verified": bool(author.get("verified_badge")) or None,
+            "verified": bool(author.get("verified_badge")),
         },
         "likes": safe_int(item.get("likes") or item.get("upvotes") or item.get("comment_score")),
         "replyCount": len(replies) or safe_int(item.get("replyCount")),

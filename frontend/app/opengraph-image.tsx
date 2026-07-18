@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export const runtime = "nodejs";
-export const alt = "Captapi — One API for structured social data across 29 platforms";
+export const alt = "Captapi — One API for structured social data across 27 platforms";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -77,7 +77,7 @@ export default async function OpengraphImage() {
               maxWidth: 980,
             }}
           >
-            One API for structured social data across 29 platforms
+            One API for structured social data across 27 platforms
           </div>
           <div style={{ fontSize: 30, color: "#94a3b8", maxWidth: 940, lineHeight: 1.35 }}>
             170 endpoints for transcripts, AI summaries, comments, search, ads,

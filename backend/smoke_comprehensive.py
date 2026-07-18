@@ -1,5 +1,5 @@
 """Comprehensive cross-platform LIVE smoke test: one representative endpoint
-per platform across all 29 platforms. Confirms breadth & catches regressions.
+per platform across all 27 platforms. Confirms breadth & catches regressions.
 
 NOTE: makes REAL Apify / network calls and consumes REAL credits.
 Run:  python smoke_comprehensive.py   (SMOKE_BASE=http://127.0.0.1:8000 default)

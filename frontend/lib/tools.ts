@@ -24,7 +24,7 @@ export const TOOLS: Record<string, Tool> = {
     platform: "YouTube",
     apiEndpoint: "/v1/youtube/transcript",
     faq: [
-      { q: "Is this really free?", a: "Yes — you get 100 free credits when you sign up. Transcripts cost 1 credit each." },
+      { q: "Is this really free?", a: "Yes — this on-site tool is free with no sign-up. For the API, sign up for 100 free credits (transcripts cost 1 credit each)." },
       { q: "Does it work for any language?", a: "We support all languages auto-detected by YouTube captions." },
       { q: "Can I use it programmatically?", a: "Yes — just call our API directly. See docs." },
     ],
@@ -123,7 +123,7 @@ export function toolFaqs(t: Tool): { q: string; a: string }[] {
     ? [
         {
           q: `Is the ${p} summarizer free?`,
-          a: `Yes. You can summarize a public ${p} video right here for free. For automation or higher volume, sign up for 100 free credits — no credit card required.`,
+          a: `Yes. The on-site tool is free with no sign-up — paste a public ${p} URL and summarize right here. For API automation or higher volume, sign up for 100 free credits (no credit card required).`,
         },
         {
           q: `How does the ${p} AI summary work?`,
@@ -137,7 +137,7 @@ export function toolFaqs(t: Tool): { q: string; a: string }[] {
     : [
         {
           q: `Is the ${p} transcript tool free?`,
-          a: `Yes. Paste a public ${p} URL and get the full text for free. For programmatic access or higher volume, sign up for 100 free credits — no card required.`,
+          a: `Yes. The on-site tool is free with no sign-up — paste a public ${p} URL and get the full text here. For API access or higher volume, sign up for 100 free credits (no card required).`,
         },
         {
           q: `How do I get a transcript from a ${p} video?`,

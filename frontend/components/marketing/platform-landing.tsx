@@ -272,9 +272,9 @@ export function PlatformLanding({ group }: { group: PlatformGroup }) {
             The <strong>{group.name} API</strong> returns public {group.name}{" "}
             data as clean, structured JSON — {group.endpoints.length} REST
             endpoint{group.endpoints.length === 1 ? "" : "s"} behind one Bearer
-            key. No OAuth, no scrapers to maintain. Pass cache=true for a free 24h cache hit; default is always fresh
-            (repeat calls are free). Start with 100 free credits — no credit
-            card.
+            key. No OAuth, no scrapers to maintain. Pass cache=true for a free
+            24h cache hit; by default every call is fresh. Start with 100 free
+            credits — no credit card.
           </Tldr>
           <h2 className="text-2xl font-semibold">
             What is the {group.name} API?
@@ -344,8 +344,11 @@ export function PlatformLanding({ group }: { group: PlatformGroup }) {
               <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
                 Authorization: Bearer capt_live_...
               </code>{" "}
-              and parse the JSON response. Repeat calls are served from cache
-              for free.
+              and parse the JSON response. Pass{" "}
+              <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+                cache=true
+              </code>{" "}
+              to reuse a prior response from the 24h cache at no cost.
             </li>
           </ol>
         </section>

@@ -7,7 +7,7 @@ const PRICE_PER_CREDIT = COST_PER_CREDIT * 1.8; // +80% markup, not 80% gross ma
 const priceFor = (credits: number) => Math.round(credits * PRICE_PER_CREDIT);
 
 const PLANS = [
-  { name: "Free", credits: 0, price: 0, recurring: false },
+  { name: "Free", credits: 100, price: 0, recurring: false },
   { name: "Starter", credits: 2_000, price: priceFor(2_000), recurring: true },
   { name: "Pro", credits: 6_000, price: priceFor(6_000), recurring: true },
   { name: "Business", credits: 20_000, price: priceFor(20_000), recurring: true },

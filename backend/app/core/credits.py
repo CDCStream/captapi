@@ -128,6 +128,8 @@ async def billed_call(
     ctx: dict[str, Any] = {"cache_hit": False, "credits_override": None, "source": None}
     status_code = 200
     error: str | None = None
+    deduct_failed = False
+    billed_amount = base_credits
     try:
         yield ctx
     except HTTPException as e:
@@ -141,13 +143,24 @@ async def billed_call(
     finally:
         elapsed_ms = int((time.perf_counter() - started) * 1000)
         cache_hit = bool(ctx.get("cache_hit"))
-        credits_used = 0 if cache_hit else (ctx.get("credits_override") or base_credits)
+        # Respect explicit 0 overrides (empty result sets); `or` would ignore them.
+        override = ctx.get("credits_override")
+        if cache_hit:
+            credits_used = 0
+        elif override is not None:
+            credits_used = int(override)
+        else:
+            credits_used = base_credits
+        billed_amount = credits_used
 
         if credits_used > 0 and status_code < 400:
             ok = deduct_credits(caller.user_id, credits_used)
             if not ok:
+                billed_amount = credits_used
                 credits_used = 0
                 status_code = 402
+                deduct_failed = True
+                error = "insufficient_credits"
 
         source = None if cache_hit else ctx.get("source")
 
@@ -194,4 +207,15 @@ async def billed_call(
             response_time_ms=elapsed_ms,
             cache_hit=cache_hit,
             data=ctx.get("data"),
+        )
+
+    if deduct_failed:
+        raise HTTPException(
+            status_code=402,
+            detail={
+                "error": "insufficient_credits",
+                "required": billed_amount,
+                "available": caller.total_credits,
+                "upgrade_url": "/dashboard/billing",
+            },
         )

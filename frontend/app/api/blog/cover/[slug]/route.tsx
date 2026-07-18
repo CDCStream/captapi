@@ -167,7 +167,7 @@ export async function GET(
           >
             <div style={{ display: "flex" }}>captapi.com/blog</div>
             <div style={{ display: "flex", color: "#67e8f9", fontWeight: 700 }}>
-              One API. 29 platforms.
+              One API. 27 platforms.
             </div>
           </div>
         </div>

@@ -45,6 +45,7 @@ from app.utils.formatters import (
     safe_str,
 )
 from app.utils.url import (
+    detect_url_platform,
     extract_tiktok_id,
     extract_tiktok_username,
     platform_mismatch_detail,
@@ -102,6 +103,8 @@ CREDIT_REPLIES_MIN = 30
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
     """Credits for `n` returned items at `rate` credits/item (with a floor)."""
+    if n <= 0:
+        return 0
     return max(minimum, math.ceil(n * rate))
 
 
@@ -131,6 +134,75 @@ def _require_tiktok_profile(value: str) -> str:
             ),
         )
     return handle
+
+
+def _require_tiktok_music_url(url: str) -> str:
+    """Accept only TikTok music/sound URLs — never video or profile links."""
+    value = (url or "").strip()
+    lowered = value.lower()
+    detected = detect_url_platform(value) if value else None
+    if detected and detected != "tiktok":
+        raise HTTPException(
+            status_code=400,
+            detail=platform_mismatch_detail(
+                value,
+                "tiktok",
+                "https://www.tiktok.com/music/original-sound-7300000000000000000",
+            ),
+        )
+    if "/video/" in lowered or "/photo/" in lowered:
+        raise HTTPException(
+            status_code=400,
+            detail="Expected a TikTok music/sound URL, not a video URL. Example: https://www.tiktok.com/music/original-sound-7300000000000000000",
+        )
+    if "/music/" in lowered or "music.tiktok.com" in lowered or "/sound/" in lowered:
+        return value
+    raise HTTPException(
+        status_code=400,
+        detail="Expected a TikTok music/sound URL. Example: https://www.tiktok.com/music/original-sound-7300000000000000000",
+    )
+
+
+def _is_real_popular_creator_items(items: list[dict[str, Any]]) -> bool:
+    """Reject Creative Center keyword stubs (tiktok_trending, …) so fallback runs."""
+    if not items:
+        return False
+    real = 0
+    for item in items:
+        if not isinstance(item, dict) or item.get("error"):
+            continue
+        nested = item.get("author") if isinstance(item.get("author"), dict) else {}
+        handle = safe_str(
+            item.get("creatorHandle")
+            or nested.get("uniqueId")
+            or nested.get("username")
+            or item.get("uniqueId")
+            or item.get("username")
+            or item.get("handle")
+        )
+        if handle:
+            handle = handle.lstrip("@").lower()
+        display = (
+            safe_str(
+                item.get("name")
+                or nested.get("nickname")
+                or item.get("displayName")
+                or item.get("nickname")
+            )
+            or ""
+        ).lower()
+        if "creator discovery" in display or "trending tiktok creator" in display:
+            continue
+        if handle and handle.startswith("tiktok_") and not (
+            item.get("followerCount")
+            or nested.get("followerCount")
+            or item.get("followers")
+            or item.get("creatorAvatarUrl")
+        ):
+            continue
+        if handle:
+            real += 1
+    return real >= max(1, min(3, len(items) // 2))
 
 
 # Residential proxy improves reliability of the dedicated comment/reply scraper
@@ -309,27 +381,87 @@ def _normalize(item: dict) -> dict:
     }
 
 
+def _music_name_from_url(url: str | None) -> str | None:
+    """Humanize a TikTok music URL slug: /music/<slug>-<id> → 'slug words'."""
+    if not url:
+        return None
+    match = re.search(r"/music/([^/?#]+)", url, flags=re.IGNORECASE)
+    if not match:
+        return None
+    slug = match.group(1)
+    titled = re.match(r"^(.+)-(\d{6,})$", slug)
+    if not titled:
+        return None
+    words = titled.group(1).replace("-", " ").strip()
+    return words or None
+
+
 def _music_name(item: dict, music: Any = None) -> str | None:
     """Resolve sound title from clockworks / aweme / musicMeta shapes."""
     if music is None:
         music = item.get("music")
     if isinstance(music, dict):
-        name = safe_str(music.get("musicName") or music.get("title") or music.get("name"))
+        name = safe_str(
+            music.get("musicName")
+            or music.get("title")
+            or music.get("name")
+            or music.get("album")
+        )
         if name:
             return name
-    elif isinstance(music, str) and not music.startswith("http"):
-        return safe_str(music)
+        nested = music.get("musicInfo") or music.get("music_info")
+        if isinstance(nested, dict):
+            name = safe_str(
+                nested.get("musicName")
+                or nested.get("title")
+                or nested.get("name")
+                or nested.get("album")
+            )
+            if name:
+                return name
+        for key in ("playUrl", "play_url", "url", "musicUrl", "music_url"):
+            from_url = _music_name_from_url(safe_str(music.get(key)))
+            if from_url:
+                return from_url
+    elif isinstance(music, str):
+        if not music.startswith("http"):
+            return safe_str(music)
+        from_url = _music_name_from_url(music)
+        if from_url:
+            return from_url
     meta = item.get("musicMeta") if isinstance(item.get("musicMeta"), dict) else {}
     info = item.get("music_info") if isinstance(item.get("music_info"), dict) else {}
-    return safe_str(
+    music_info = item.get("musicInfo") if isinstance(item.get("musicInfo"), dict) else {}
+    name = safe_str(
         item.get("musicName")
         or item.get("music_title")
         or item.get("musicTitle")
         or meta.get("musicName")
         or meta.get("title")
+        or meta.get("album")
         or info.get("title")
         or info.get("name")
+        or info.get("album")
+        or music_info.get("musicName")
+        or music_info.get("title")
+        or music_info.get("name")
+        or music_info.get("album")
     )
+    if name:
+        return name
+    for candidate in (
+        item.get("musicUrl"),
+        item.get("music_url"),
+        meta.get("musicUrl"),
+        meta.get("playUrl"),
+        info.get("play_url"),
+        music_info.get("playUrl"),
+        item.get("url"),
+    ):
+        from_url = _music_name_from_url(safe_str(candidate))
+        if from_url:
+            return from_url
+    return None
 
 
 def _normalize_aweme(item: dict) -> dict:
@@ -490,12 +622,12 @@ def _normalize_creator(item: dict) -> dict:
             "url": safe_str(item.get("profileUrl") or nested.get("profileUrl") or item.get("url"))
             or (f"https://www.tiktok.com/@{handle}" if handle else None),
             "bio": safe_str(item.get("bio") or nested.get("signature") or nested.get("bio")),
-            "followers": followers or None,
+            "followers": followers,
             "engagementRate": item.get("engagementRate")
             or item.get("engagement_rate")
             or item.get("followerGrowthRate"),
-            "likes": likes or None,
-            "videos": videos or None,
+            "likes": likes,
+            "videos": videos,
             "country": safe_str(item.get("countryCode") or item.get("country") or nested.get("region")),
             "verified": verified,
             "profileImage": safe_str(
@@ -1308,8 +1440,16 @@ async def tiktok_popular_creators(
                     (settings.APIFY_ACTOR_TIKTOK_POPULAR_CREATORS_FALLBACK, fallback_input),
                 ],
                 max_items=limit,
+                is_valid=_is_real_popular_creator_items,
             )
-            creators = [_normalize_creator(i) for i in items[:limit]]
+            creators = [
+                c
+                for c in (_normalize_creator(i) for i in items[:limit])
+                if c.get("username")
+                and "creator discovery" not in (c.get("displayName") or "").lower()
+            ]
+            if not creators:
+                raise HTTPException(status_code=404, detail="No popular creators found for this country")
             return {
                 "platform": "tiktok",
                 "country": country.upper(),
@@ -1320,7 +1460,7 @@ async def tiktok_popular_creators(
 
         data = await cached_or_run(
             endpoint="tiktok.popular-creators",
-            params={"country": country.upper(), "sort": sort, "follower_count": follower_count or "", "limit": limit, "v": 4},
+            params={"country": country.upper(), "sort": sort, "follower_count": follower_count or "", "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1713,6 +1853,7 @@ async def tiktok_music_posts(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    url = _require_tiktok_music_url(url)
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_MUSIC_POSTS, 3)
     async with billed_call(
@@ -1731,6 +1872,8 @@ async def tiktok_music_posts(
             posts = [_normalize_music_post(i) for i in items[:limit]]
             # Aweme rows often omit music title; fall back to the first non-empty title in the page.
             sound_title = next((p.get("musicName") for p in posts if p.get("musicName")), None)
+            if not sound_title:
+                sound_title = _music_name_from_url(url)
             if sound_title:
                 for post in posts:
                     if not post.get("musicName"):
@@ -1739,7 +1882,7 @@ async def tiktok_music_posts(
 
         data = await cached_or_run(
             endpoint="tiktok.music-posts",
-            params={"url": url, "limit": limit, "v": 5},
+            params={"url": url, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1913,6 +2056,7 @@ async def tiktok_song_details(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    url = _require_tiktok_music_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -1925,8 +2069,8 @@ async def tiktok_song_details(
             apify = get_apify()
             # The TikTok music URL ends with the numeric sound id; parse it here
             # because apidojo returns the id as a JS number (precision loss).
-            m = re.search(r"(\d{6,})(?:\?|$)", url)
-            url_id = m.group(1) if m else None
+            m = re.search(r"/music/[^/]*?(\d{6,})|/sound/[^/]*?(\d{6,})|(\d{6,})(?:\?|$)", url)
+            url_id = next((g for g in (m.groups() if m else ()) if g), None)
 
             # Fast path: apidojo music scraper (~9s, has duration + cover).
             try:

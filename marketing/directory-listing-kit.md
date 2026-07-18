@@ -27,13 +27,13 @@ values
 - Long description (500+ chars):
   Captapi is a social data API for developers. One Bearer key gives you
   profiles, posts, videos, comments, transcripts, AI summaries, search, ad
-  libraries, and downloadable media across 20+ platforms - YouTube, TikTok,
+  libraries, and commerce data across 20+ platforms - YouTube, TikTok,
   Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest,
-  LinkedIn, Twitch, Spotify, and more. Responses are clean, consistent JSON
-  with a 24-hour shared cache (repeat calls are free). Ships with TypeScript
-  and Python SDKs, a CLI, a hosted MCP server for AI agents, n8n/Make/Apify
-  integrations, monitors with HMAC-signed webhooks, and a public status page.
-  Start free with 100 credits - no credit card required.
+  LinkedIn, Twitch, Spotify, and more. Responses are clean, consistent JSON;
+  pass cache=true for a free 24h cache hit (default is always fresh). Ships
+  with TypeScript and Python SDKs, a CLI, a hosted MCP server for AI agents,
+  n8n/Make/Apify integrations, monitors with HMAC-signed webhooks, and a
+  public status page. Start free with 100 credits - no credit card required.
 - Pricing model: Free tier + pay-as-you-go credits
 - Screenshots to prepare: landing hero, /apis catalog, endpoint page with
   playground, dashboard usage view, /status page, /integrations page.

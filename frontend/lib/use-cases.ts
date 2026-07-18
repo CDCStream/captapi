@@ -21,7 +21,7 @@ export const USE_CASES: Record<string, UseCase> = {
     audience: "AI Startups",
     metaTitle: "Video Data API for AI Startups & LLM Apps | Captapi",
     metaDescription:
-      "Feed clean transcripts, summaries, comments, profiles, and search results into your RAG pipeline, fine-tuning dataset, or AI agent. One REST API across 29 platforms.",
+      "Feed clean transcripts, summaries, comments, profiles, and search results into your RAG pipeline, fine-tuning dataset, or AI agent. One REST API across 27 platforms.",
     keyword: "video data api for ai",
     h1: "The video data API for AI startups",
     intro:
@@ -50,11 +50,11 @@ export const USE_CASES: Record<string, UseCase> = {
     audience: "Marketing Agencies",
     metaTitle: "Social Media Monitoring API for Agencies & Brands | Captapi",
     metaDescription:
-      "Track competitor content, monitor brand mentions, analyze sentiment, and research ads or commerce across 29 platforms with one social media data API.",
+      "Track competitor content, monitor brand mentions, analyze sentiment, and research ads or commerce across 27 platforms with one social media data API.",
     keyword: "social media monitoring api",
     h1: "Social media data API for agencies & brands",
     intro:
-      "Captapi gives agencies and brands a single API to track competitor content, monitor mentions, research ads and commerce, and analyze engagement across 29 platforms — comments, summaries and metrics in clean JSON, ready for your dashboards and reports.",
+      "Captapi gives agencies and brands a single API to track competitor content, monitor mentions, research ads and commerce, and analyze engagement across 27 platforms — comments, summaries and metrics in clean JSON, ready for your dashboards and reports.",
     builds: [
       { title: "Competitor content tracking", desc: "Pull videos, summaries and engagement metrics to see what's working for rivals." },
       { title: "Brand & mention monitoring", desc: "Search and collect comments to surface what people say about a brand." },
@@ -65,7 +65,7 @@ export const USE_CASES: Record<string, UseCase> = {
     faqs: [
       {
         q: "Can I monitor competitors across platforms with one API?",
-        a: "Yes. Captapi covers 29 platforms through a single REST API, so you can collect content, comments, search results, profiles, ad intelligence, commerce data and engagement metrics without juggling separate integrations.",
+        a: "Yes. Captapi covers 27 platforms through a single REST API, so you can collect content, comments, search results, profiles, ad intelligence, commerce data and engagement metrics without juggling separate integrations.",
       },
       {
         q: "Is the data ready for client reporting?",
@@ -108,11 +108,11 @@ export const USE_CASES: Record<string, UseCase> = {
     audience: "Researchers & Journalists",
     metaTitle: "Social Media Data API for Research & Journalism | Captapi",
     metaDescription:
-      "Bulk-export comments, transcripts, search results, profiles and metadata for trend analysis, OSINT and academic studies across 29 platforms.",
+      "Bulk-export comments, transcripts, search results, profiles and metadata for trend analysis, OSINT and academic studies across 27 platforms.",
     keyword: "social media data for research",
     h1: "Social media data API for researchers & journalists",
     intro:
-      "Captapi helps researchers and journalists collect public social data at scale — comments, transcripts, search results, profiles, video details and engagement metrics across 29 platforms — in clean JSON ready for analysis, with no scraping infrastructure to maintain.",
+      "Captapi helps researchers and journalists collect public social data at scale — comments, transcripts, search results, profiles, video details and engagement metrics across 27 platforms — in clean JSON ready for analysis, with no scraping infrastructure to maintain.",
     builds: [
       { title: "Trend & discourse analysis", desc: "Bulk-collect comments and transcripts to study narratives over time." },
       { title: "OSINT investigations", desc: "Pull public metadata and engagement signals for verification work." },
@@ -152,7 +152,7 @@ export const USE_CASES: Record<string, UseCase> = {
     faqs: [
       {
         q: "Do I need OAuth or per-platform API keys?",
-        a: "No. One Captapi key works across 29 supported platforms. We handle authentication, proxies, rate limits and retries for you.",
+        a: "No. One Captapi key works across 27 supported platforms. We handle authentication, proxies, rate limits and retries for you.",
       },
       {
         q: "How fast can I integrate?",

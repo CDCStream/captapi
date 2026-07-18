@@ -56,11 +56,11 @@ export const COMPETITORS: Record<string, Competitor> = {
     freeTier: "Varies",
     pricing: "Subscription / credits",
     edge: [
-      "Goes beyond the core video platforms with 29 social, commerce, ad library, and creator data sources",
+      "Goes beyond the core video platforms with 27 social, commerce, ad library, and creator data sources",
       "Goes beyond transcripts: AI summaries, comments and engagement metrics from the same endpoints",
       "100 free credits on signup, no credit card required",
       "Free public tools you can try without an account",
-      "Clean JSON with 24h response caching so repeat calls are free",
+      "Clean JSON — pass cache=true for a free 24h cache hit; default is always fresh",
     ],
     faqs: [
       {
@@ -82,7 +82,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     focus: "Transcript extractors and comment viewers",
     platforms: "YouTube, TikTok, Instagram",
     intro:
-      "SocialKit offers transcript extractors and comment viewers. Captapi packages the same capabilities into one developer-first REST API across 29 platforms, with summaries, search, profiles, ad intelligence, commerce data, and engagement metrics included.",
+      "SocialKit offers transcript extractors and comment viewers. Captapi packages the same capabilities into one developer-first REST API across 27 platforms, with summaries, search, profiles, ad intelligence, commerce data, and engagement metrics included.",
     transcripts: true,
     summaries: "varies",
     comments: true,
@@ -91,7 +91,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     pricing: "Varies",
     edge: [
       "One unified REST API instead of separate tools — transcripts, comments, summaries and details",
-      "Covers 29 social, commerce, ad library, and creator data platforms",
+      "Covers 27 social, commerce, ad library, and creator data platforms",
       "Predictable credit pricing with 100 free credits to start",
       "Full developer docs and clean JSON responses",
       "Free public tools for quick one-off extractions",
@@ -124,7 +124,7 @@ export const COMPETITORS: Record<string, Competitor> = {
       "Simple, predictable per-call credit pricing",
       "100 free credits on signup — no credit card",
       "Free public tools (no account needed) for quick tasks",
-      "Clean, consistent JSON with 24h caching",
+      "Clean, consistent JSON — pass cache=true for a free 24h hit; default is always fresh",
     ],
     faqs: [
       {
@@ -142,7 +142,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     focus: "TikTok-only API",
     platforms: "TikTok",
     intro:
-      "TikAPI focuses on TikTok. Captapi gives you TikTok plus 28 more social, commerce, ad library, and creator data sources in one API — including transcripts, AI summaries, comments, search, profiles, commerce data, and engagement metrics.",
+      "TikAPI focuses on TikTok. Captapi gives you TikTok plus 26 more social, commerce, ad library, and creator data sources in one API — including transcripts, AI summaries, comments, search, profiles, commerce data, and engagement metrics.",
     transcripts: "varies",
     summaries: "varies",
     comments: "varies",
@@ -150,7 +150,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     freeTier: "Varies",
     pricing: "Subscription",
     edge: [
-      "29 platforms in one API — not TikTok only",
+      "27 platforms in one API — not TikTok only",
       "Transcripts, AI summaries, comments and video details from a single key",
       "100 free credits on signup, no credit card",
       "Free public tools you can try instantly",
@@ -159,7 +159,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     faqs: [
       {
         q: "Is Captapi a good TikAPI alternative?",
-        a: "Yes, especially if you need more than TikTok. Captapi covers 29 platforms with transcripts, summaries, comments, details, search, profiles, ad intelligence, and commerce data behind one REST API.",
+        a: "Yes, especially if you need more than TikTok. Captapi covers 27 platforms with transcripts, summaries, comments, details, search, profiles, ad intelligence, and commerce data behind one REST API.",
       },
     ],
   },
@@ -183,7 +183,7 @@ export const COMPETITORS: Record<string, Competitor> = {
       "One stable REST endpoint per task — no choosing, chaining or maintaining actors",
       "Consistent, normalized JSON shape across every endpoint (we handle actor drift for you)",
       "Built-in transcripts and AI summaries, not just raw scrapes",
-      "Predictable per-call credits with 24h caching — repeat calls are free",
+      "Predictable per-call credits — pass cache=true for a free 24h hit; default is always fresh",
       "100 free credits and free public tools to start, no platform to learn",
     ],
     faqs: [
@@ -215,10 +215,10 @@ export const COMPETITORS: Record<string, Competitor> = {
     pricing: "Credits / units",
     edge: [
       "Focused on video content: transcripts, AI summaries, comments and engagement",
-      "Covers 29 social, commerce, ad library, and creator data platforms",
+      "Covers 27 social, commerce, ad library, and creator data platforms",
       "100 free credits on signup — no credit card",
       "Free public tools without an account",
-      "Clean JSON with 24h response caching",
+      "Clean JSON — pass cache=true for a free 24h cache hit; default is always fresh",
     ],
     faqs: [
       {

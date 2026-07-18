@@ -28,6 +28,8 @@ GITHUB_SEARCH_RATE = 0.6
 
 
 def _scaled(limit: int, rate: float, minimum: int = 3) -> int:
+    if limit <= 0:
+        return 0
     return max(minimum, math.ceil(limit * rate))
 
 

@@ -15,11 +15,12 @@ const CATALOG_ENDPOINTS = PLATFORM_GROUPS.reduce(
   (n, g) => n + g.endpoints.length,
   0,
 );
-// Integrations expose the catalog endpoints plus the 2 direct video-file routes.
-const TOTAL_ENDPOINTS = CATALOG_ENDPOINTS + 2;
-// The full API reference also documents the 2 cross-platform analytics routes.
-const REFERENCE_ENDPOINTS = CATALOG_ENDPOINTS + 4;
-const REFERENCE_GROUPS = PLATFORM_GROUPS.length + 2;
+// Utilities (analytics + video-file) live in the catalog for MCP/CLI, but the
+// docs reference still renders them as dedicated sections below the platform tables.
+const DOCS_PLATFORM_GROUPS = PLATFORM_GROUPS.filter((g) => g.id !== "utilities");
+const TOTAL_ENDPOINTS = CATALOG_ENDPOINTS;
+const REFERENCE_ENDPOINTS = CATALOG_ENDPOINTS;
+const REFERENCE_GROUPS = DOCS_PLATFORM_GROUPS.length + 2;
 
 export const metadata = buildMetadata({
   title: "Documentation — Captapi API Reference",
@@ -408,7 +409,7 @@ export default function DocsPage() {
         endpoint for full parameters, examples, and FAQs.
       </p>
 
-      {PLATFORM_GROUPS.map((g) => (
+      {DOCS_PLATFORM_GROUPS.map((g) => (
         <ReferenceTable
           key={g.id}
           id={platformAnchorId(g.id)}

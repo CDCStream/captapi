@@ -1,6 +1,6 @@
 # Captapi
 
-API-as-a-Service that extracts transcripts, AI summaries, comments, engagement metrics, and channel analytics from YouTube, TikTok, Instagram, and Facebook videos.
+One REST API for structured public data across **27 platforms** and **174 endpoints** — transcripts, AI summaries, comments, profiles, search, commerce data, ad libraries, analytics helpers, and engagement metrics. Clean JSON, no OAuth, one Bearer key.
 
 ## Architecture
 
@@ -88,46 +88,46 @@ socialkit-clone/
     └── migrations/         SQL schema
 ```
 
-## API Endpoints
+## API
 
-All endpoints require `Authorization: Bearer capt_live_...` header.
+All endpoints require `Authorization: Bearer capt_live_...` (or `x-api-key`).
 
-### YouTube
+Base URL: `https://api.captapi.com` (local: `http://localhost:8000`).
+
+Requests fetch fresh data by default. Pass `cache=true` for a free 24h cache hit.
+
+Full catalog (platforms, paths, credits, params): [frontend/lib/api-catalog.ts](frontend/lib/api-catalog.ts) and https://captapi.com/apis.
+
+### Platforms (27)
+
+YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, TikTok Shop, GitHub, Ad Library, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Amazon Shop, Kwai, Komi, Pillar, Linkbio, Linkme.
+
+### Example endpoints
+
 - `GET /v1/youtube/transcript?url=...`
-- `GET /v1/youtube/summarize?url=...`
-- `GET /v1/youtube/video-details?url=...`
-- `GET /v1/youtube/comments?url=...&limit=...`
-- `GET /v1/youtube/channel-details?url=...`
-- `GET /v1/youtube/channel-videos?url=...&limit=...`
-- `GET /v1/youtube/playlist-videos?url=...&limit=...`
-- `GET /v1/youtube/search?q=...&limit=...`
-
-### TikTok
-- `GET /v1/tiktok/transcript|summarize|video-details|comments|channel-details`
-
-### Instagram
-- `GET /v1/instagram/transcript|summarize|details|comments|channel-details|channel-posts|channel-reels|reels-search`
-
-### Facebook
-- `GET /v1/facebook/transcript|summarize|details|comments|page-details`
-
-### Video Files
-- `POST /v1/video/transcript` — multipart upload, Whisper transcription
-- `POST /v1/video/summarize` — transcription + AI summary
+- `GET /v1/tiktok/video-details?url=...`
+- `GET /v1/instagram/channel-details?url=...`
+- `GET /v1/facebook/marketplace-search?q=...&location=...`
 
 ### Account
-- `GET /v1/account/usage` — credit balance + recent requests
-- `GET /v1/account/limits` — plan + remaining quota
+
+- `GET /v1/account/balance` — remaining credits
+- `GET /v1/account/request-history` — recent requests
+- `GET /v1/account/daily-usage` — day-by-day credit usage
+- `GET /v1/account/most-used-routes` — ranked endpoint usage
 
 ## Pricing
 
-| Plan      | Price/mo | Credits/mo | $/Credit |
-|-----------|----------|-----------:|---------:|
-| Free      | $0       | 100 lifetime | —      |
-| Starter   | $9       | 1,500       | $0.006  |
-| Pro       | $29      | 6,000       | $0.0048 |
-| Business  | $99      | 25,000      | $0.0039 |
-| Top-up    | $5       | 500         | $0.01   |
+Credit-based. Prices mirror the live pricing page (`frontend/components/marketing/pricing-plans.tsx`).
+
+| Plan      | Credits              | Notes                          |
+|-----------|----------------------|--------------------------------|
+| Free      | 100 lifetime         | No card required               |
+| Starter   | 2,000 / month        | Side projects                  |
+| Pro       | 6,000 / month        | Growing products               |
+| Business  | 20,000 / month       | Data pipelines                 |
+
+One-time packs (never expire): Starter 2,000 · Growth 10,000 · Scale 50,000 credits.
 
 ## License
 

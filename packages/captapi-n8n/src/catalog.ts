@@ -26,6 +26,7 @@ export type Platform =
   | "kick"
   | "amazon_shop"
   | "account"
+  | "utilities"
   | "kwai"
   | "komi"
   | "pillar"
@@ -376,6 +377,65 @@ const ACCOUNT: Omit<Endpoint, "platform">[] = [
   { tool: "account_most_used_routes", name: "Most Used Routes", path: "/v1/account/most-used-routes", credits: 0, summary: "Most used API routes by request count and credits.", params: [{ name: "days", type: "number", required: false, description: "Number of days to include. Default 30, max 365." }, limit(20, 100)] },
 ];
 
+const UTILITIES: Omit<Endpoint, "platform">[] = [
+  {
+    tool: "analytics_post",
+    name: "Post Analytics",
+    path: "/v1/analytics/post",
+    credits: 1,
+    summary: "Unified metrics for one post/video/reel (platform auto-detected). Flat 1 credit.",
+    params: [
+      url("A public post, video, or reel URL from a supported platform."),
+      cacheParam(),
+    ],
+  },
+  {
+    tool: "analytics_compare",
+    name: "Compare Analytics",
+    path: "/v1/analytics/compare",
+    credits: 1,
+    summary: "Compare unified metrics across up to 10 URLs in one call. 1 credit per successfully resolved URL.",
+    params: [
+      {
+        name: "urls",
+        type: "string",
+        required: true,
+        description: "Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms.",
+      },
+    ],
+  },
+  {
+    tool: "video_transcript",
+    name: "Video File Transcript",
+    path: "/v1/video/transcript",
+    credits: 1,
+    summary: "Whisper transcription of an uploaded video/audio file. 1 credit per minute of audio.",
+    params: [
+      {
+        name: "file",
+        type: "string",
+        required: true,
+        description: "Local path or multipart file upload of the video/audio to transcribe.",
+      },
+    ],
+  },
+  {
+    tool: "video_summarize",
+    name: "Video File Summarizer",
+    path: "/v1/video/summarize",
+    credits: 2,
+    summary: "Transcribe an uploaded video/audio file and return an AI summary. 1 credit per minute + 1 for the summary.",
+    params: [
+      {
+        name: "file",
+        type: "string",
+        required: true,
+        description: "Local path or multipart file upload of the video/audio to transcribe and summarize.",
+      },
+    ],
+  },
+];
+
 const KWAI: Omit<Endpoint, "platform">[] = [
   { tool: "kwai_profile", name: "Kwai Profile", path: "/v1/kwai/profile", credits: 17, summary: "Kwai public profile details and stats.", params: [url(KWAI_PROFILE)] },
   { tool: "kwai_user_posts", name: "Kwai User Posts", path: "/v1/kwai/user-posts", credits: 45, summary: "Recent Kwai videos from a profile.", params: [url(KWAI_PROFILE), limit(20, 200)] },
@@ -418,8 +478,8 @@ function withPlatform(
   platform: Platform,
 ): Endpoint[] {
   // Every data endpoint accepts optional cache (default false = always fresh);
-  // account endpoints are the only ones with no cache layer.
-  const addCache = platform !== "account";
+  // account + utilities manage cache (or skip it) explicitly per endpoint.
+  const addCache = platform !== "account" && platform !== "utilities";
   return list.map((e) => ({
     ...e,
     platform,
@@ -453,6 +513,7 @@ export const ENDPOINTS: Endpoint[] = [
   ...withPlatform(KICK, "kick"),
   ...withPlatform(AMAZON_SHOP_ENDPOINTS, "amazon_shop"),
   ...withPlatform(ACCOUNT, "account"),
+  ...withPlatform(UTILITIES, "utilities"),
   ...withPlatform(KWAI, "kwai"),
   ...withPlatform(KOMI, "komi"),
   ...withPlatform(PILLAR, "pillar"),

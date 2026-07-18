@@ -35,7 +35,7 @@ LATEST_PROTOCOL_VERSION = "2025-06-18"
 SERVER_INFO = {"name": "captapi", "title": "Captapi", "version": __version__}
 
 INSTRUCTIONS = (
-    "Captapi exposes structured data from 29 platforms — YouTube, TikTok, "
+    "Captapi exposes structured data from 27 platforms — YouTube, TikTok, "
     "Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, "
     "LinkedIn, Rumble, Twitch, Spotify, GitHub, TikTok Shop, ad libraries, "
     "link-in-bio pages and more (transcripts, AI summaries, comments, stats, "

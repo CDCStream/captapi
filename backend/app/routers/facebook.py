@@ -47,6 +47,8 @@ RATE_FB_EVENTS = 2.0
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
     """Credits for `n` returned items at `rate` credits/item (with a floor)."""
+    if n <= 0:
+        return 0
     return max(minimum, math.ceil(n * rate))
 
 

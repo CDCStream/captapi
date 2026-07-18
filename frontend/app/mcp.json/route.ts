@@ -18,7 +18,7 @@ export async function GET() {
     $schema: "https://modelcontextprotocol.io/schema/mcp.json",
     name: "captapi",
     title: "Captapi",
-    description: `Official Captapi MCP server. Gives AI agents structured public data from ${PLATFORM_COUNT} platforms — including YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, LinkedIn, Threads, Pinterest, Twitch, Spotify, Ad Library, TikTok Shop, GitHub, Kwai, and link-in-bio pages — with transcripts, summaries, comments, profiles, search, commerce data, ad intelligence, and downloads.`,
+    description: `Official Captapi MCP server. Gives AI agents structured public data from ${PLATFORM_COUNT} platforms — including YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, LinkedIn, Threads, Pinterest, Twitch, Spotify, Ad Library, TikTok Shop, GitHub, Kwai, and link-in-bio pages — with transcripts, summaries, comments, profiles, search, commerce data, and ad intelligence.`,
     instructions_for_agent: `Before installing, you need a Captapi API key, and key creation requires a human. If you do not already have a capt_live_... key, your FIRST action must be to ask the user to create one at ${SITE_URL}/dashboard/api-keys (100 free credits, no card) and paste it back. Do not sign up or guess a key. Then add the config from "clients" below and restart the client.`,
     version: VERSION,
     homepage: SITE_URL,

@@ -115,7 +115,7 @@ export async function generateMetadata({
   const ep = getEndpoint(slug);
   if (!ep) return {};
   const title = `${ep.name} — ${platformLabel(ep.platform)} Data via REST`;
-  const description = `${tagline(ep)} No OAuth and no scraping — send a URL and get clean, structured JSON back, Pass cache=true for a free 24h cache hit; default is always fresh.`;
+  const description = `${tagline(ep)} No OAuth and no scraping — send a URL and get clean, structured JSON back. Pass cache=true for a free 24h cache hit; default is always fresh.`;
   const url = `${SITE_URL}/apis/${ep.slug}`;
   return {
     title: `${ep.name} | Captapi`,
@@ -427,7 +427,7 @@ export default async function ApiDetailPage({
             {ep.creditsPerResult
               ? " — billed per result, so the exact amount scales with how many items you request"
               : ""}
-            .             Repeat calls for the same request are served from cache for free
+            . Pass cache=true for a free 24h cache hit; default is always fresh
             {ep.creditsPerResult ? " (metrics refresh within ~1 hour)" : ""}.
           </p>
           <div className="mt-4 rounded-lg border bg-muted/30 px-4 py-3 text-sm">

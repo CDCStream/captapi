@@ -23,6 +23,9 @@ RATE = 1.4
 
 
 def _scaled(n: int, rate: float = RATE, minimum: int = 2) -> int:
+    if n <= 0:
+        return 0
+
     return max(minimum, math.ceil(n * rate))
 
 
@@ -54,7 +57,7 @@ def _track(item: dict[str, Any]) -> dict[str, Any]:
         ),
         "artistAvatar": safe_str(user.get("avatarUrl") or user.get("avatar_url") or item.get("userAvatarUrl")),
         "artistFollowers": safe_int(user.get("followersCount") or item.get("userFollowersCount")),
-        "artistVerified": bool(user.get("verified") or item.get("userVerified")) or None,
+        "artistVerified": bool(user.get("verified") or item.get("userVerified")),
         "durationMs": safe_int(item.get("duration") or item.get("durationMs")),
         "plays": safe_int(item.get("playbackCount") or item.get("playback_count") or item.get("plays")),
         "likes": safe_int(item.get("likesCount") or item.get("likes_count") or item.get("likes")),
@@ -65,8 +68,8 @@ def _track(item: dict[str, Any]) -> dict[str, Any]:
         "releaseDate": safe_str(item.get("releaseDate") or item.get("release_date")),
         "license": safe_str(item.get("license")),
         "isrc": safe_str(item.get("isrc")),
-        "downloadable": bool(item.get("downloadable")) or None,
-        "streamable": bool(item.get("streamable")) or None,
+        "downloadable": bool(item.get("downloadable")),
+        "streamable": bool(item.get("streamable")),
         "waveformUrl": safe_str(item.get("waveformUrl") or item.get("waveform_url")),
         "artwork": safe_str(item.get("artworkUrl") or item.get("artwork_url") or item.get("thumbnail")),
         "tags": [t for t in (item.get("tagList") or []) if isinstance(t, str)],
@@ -85,7 +88,7 @@ def _artist(item: dict[str, Any], url: str) -> dict[str, Any]:
         "avatar": safe_str(user.get("avatarUrl") or user.get("avatar_url")),
         "city": safe_str(user.get("city")),
         "countryCode": safe_str(user.get("countryCode") or user.get("country_code")),
-        "verified": bool(user.get("verified")) or None,
+        "verified": bool(user.get("verified")),
         "followers": safe_int(user.get("followersCount") or user.get("followers_count")),
         "followings": safe_int(user.get("followingsCount") or user.get("followings_count")),
         "trackCount": safe_int(user.get("trackCount") or user.get("track_count")),

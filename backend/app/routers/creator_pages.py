@@ -270,20 +270,34 @@ async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
     description = _meta(page, "og:description") or _meta(page, "description") or _first_string(data, ("bio", "description", "subtitle"))
     avatar = _meta(page, "og:image") or _meta(page, "twitter:image") or _first_string(data, ("avatar", "avatarUrl", "profilePicture", "imageUrl"))
     username = _first_string(data, ("username", "handle", "slug")) or str(resp.url).rstrip("/").rsplit("/", 1)[-1]
+    # Marketing / soft-404 shells often keep the path username but have no creator links
+    # and use the product's own OG title (e.g. "Pillar - The All-In-One Toolkit…").
+    name = safe_str(title)
+    marketing_shell = (
+        not links
+        and isinstance(name, str)
+        and (
+            name.lower().startswith(f"{platform} -")
+            or name.lower().startswith(f"{platform}:")
+            or f"{platform} - the" in name.lower()
+            or name.lower() in {platform, f"{platform}.io", f"{platform}.me", "lnk.bio"}
+        )
+    )
     return strip_empty(
         {
             "platform": platform,
             "url": safe_str(str(resp.url)),
-            "username": safe_str(username),
-            "name": safe_str(title),
+            "username": None if marketing_shell else safe_str(username),
+            "name": None if marketing_shell else name,
             "firstName": _first_string(data, ("firstName", "first_name")),
             "lastName": _first_string(data, ("lastName", "last_name")),
-            "description": safe_str(description),
-            "avatar": safe_str(avatar),
+            "description": None if marketing_shell else safe_str(description),
+            "avatar": None if marketing_shell else safe_str(avatar),
             "linkCount": len(links),
             "links": links,
             "socials": _detect_socials(links),
             "email": _detect_email(page, links),
+            "_marketingShell": True if marketing_shell else None,
         }
     )
 
@@ -297,9 +311,12 @@ async def _page(platform: str, url: str, caller: ApiCaller, use_cache: bool = Tr
         )
     profile = _url(platform, url)
     async with billed_call(caller=caller, endpoint=f"/v1/{platform}/{'profile' if platform == 'linkme' else 'page'}", platform=platform, resource_url=profile, base_credits=4) as ctx:
-        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 4}, lambda: _fetch_page(platform, profile), ctx, use_cache=use_cache)
-        if not (data.get("username") or data.get("links")):
+        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 5}, lambda: _fetch_page(platform, profile), ctx, use_cache=use_cache)
+        if data.pop("_marketingShell", None) or not (data.get("username") or data.get("links")):
             raise HTTPException(status_code=404, detail=f"{platform.title()} page not found")
+        # Pillar soft-404s to a marketing shell with the path username but no creator links.
+        if platform == "pillar" and not data.get("links"):
+            raise HTTPException(status_code=404, detail="Pillar page not found or has no public links")
         return ApiResponse(data=data)
 
 

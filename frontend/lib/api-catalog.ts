@@ -36,6 +36,7 @@ export type PlatformId =
   | "kick"
   | "amazon_shop"
   | "account"
+  | "utilities"
   | "kwai"
   | "komi"
   | "pillar"
@@ -150,8 +151,11 @@ export const API_URL =
  * default result count), so we display a single fixed number everywhere.
  */
 export function creditLabel(
-  e: Pick<ApiEndpoint, "credits" | "creditsPerResult">,
+  e: Pick<ApiEndpoint, "credits" | "creditsPerResult" | "slug">,
 ): string {
+  if (e.slug === "analytics-compare") return "1 credit/url";
+  if (e.slug === "video-transcript") return "1 credit/min";
+  if (e.slug === "video-summarize") return "1 credit/min +1";
   if (e.creditsPerResult) {
     return `~${e.credits} credits (${e.creditsPerResult}/result)`;
   }
@@ -182,6 +186,7 @@ const PLATFORM_LABEL: Record<PlatformId, string> = {
   kick: "Kick",
   amazon_shop: "Amazon Shop",
   account: "Account",
+  utilities: "Utilities",
   kwai: "Kwai",
   komi: "Komi",
   pillar: "Pillar",
@@ -270,10 +275,10 @@ const FACEBOOK: Spec[] = [
   { slug: "facebook-comments", name: "Facebook Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/facebook/comments", credits: 30, creditsPerResult: 0.6 },
   { slug: "facebook-page-details", name: "Facebook Page Details API", shortName: "Page Details", category: "channel", method: "GET", path: "/v1/facebook/page-details", credits: 1 },
   { slug: "facebook-profile-posts", name: "Facebook Profile Posts API", shortName: "Profile Posts", category: "list", method: "GET", path: "/v1/facebook/profile-posts", credits: 12, creditsPerResult: 0.6 },
-  { slug: "facebook-profile-reels", name: "Facebook Profile Reels API", shortName: "Profile Reels", category: "list", method: "GET", path: "/v1/facebook/profile-reels", credits: 36, creditsPerResult: 1.8 },
+  { slug: "facebook-profile-reels", name: "Facebook Profile Reels API", shortName: "Profile Reels", category: "list", method: "GET", path: "/v1/facebook/profile-reels", credits: 36, creditsPerResult: 1.8, tagline: "List Reels from a Facebook profile or page — billed at an effective 1.8 credits per Reel (upstream over-fetch at 0.6×).", longDescription: "Send a Facebook profile or page URL and get that account's Reels as clean JSON. creditsPerResult is 1.8 effective — the scraper over-fetches at a lower raw rate (0.6×) so the billed effective cost per returned Reel is 1.8. Typical cost ~36 credits at the default limit of 20. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
   { slug: "facebook-group-posts", name: "Facebook Group Posts API", shortName: "Group Posts", category: "list", method: "GET", path: "/v1/facebook/group-posts", credits: 12, creditsPerResult: 0.6 },
   { slug: "facebook-comment-replies", name: "Facebook Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/facebook/comment-replies", credits: 30, creditsPerResult: 0.6 },
-  { slug: "facebook-marketplace-search", name: "Facebook Marketplace Search API", shortName: "Marketplace Search", category: "search", method: "GET", path: "/v1/facebook/marketplace-search", credits: 28, creditsPerResult: 1.4 },
+  { slug: "facebook-marketplace-search", name: "Facebook Marketplace Search API", shortName: "Marketplace Search", category: "search", method: "GET", path: "/v1/facebook/marketplace-search", credits: 28, creditsPerResult: 1.4, tagline: "Search Facebook Marketplace by keyword and location — listing title, price, and link for each result (details=true doubles cost).", longDescription: "Search Facebook Marketplace with a product keyword and city/place. Each result includes title, price, and listing URL. Default billing is 1.4 credits per result (~28 at 20). Pass details=true for fuller listing fields (description, photos, coordinates) — that doubles cost to 2.8 credits per result (~56 at 20)." },
   { slug: "facebook-marketplace-location-search", name: "Facebook Marketplace Location Search API", shortName: "Marketplace Locations", category: "search", method: "GET", path: "/v1/facebook/marketplace-location-search", credits: 17 , tagline: "Look up Facebook Marketplace location IDs for a city or place — IDs you can pass into Marketplace Search.", longDescription: "Pass a city or place name and get matching Marketplace location IDs as structured JSON. Use those IDs with Marketplace Search to filter listings by area." },
   { slug: "facebook-event-search", name: "Facebook Event Search API", shortName: "Event Search", category: "search", method: "GET", path: "/v1/facebook/event-search", credits: 40, creditsPerResult: 2 },
   { slug: "facebook-event-details", name: "Facebook Event Details API", shortName: "Event Details", category: "details", method: "GET", path: "/v1/facebook/event-details", credits: 2 , tagline: "Get a Facebook event — title, time, place, host, and attendance signals as structured JSON.", longDescription: "Paste a Facebook event URL and get the event details as clean JSON: title, description, start/end time, location, host page, and interest or going counts when available. Flat 2 credits per call." },
@@ -411,6 +416,54 @@ const ACCOUNT: Spec[] = [
   { slug: "account-request-history", name: "Request History API", shortName: "Request History", category: "list", method: "GET", path: "/v1/account/request-history", credits: 0 , tagline: "See recent API requests made with your Captapi key — path, status, and credits used.", longDescription: "List recent requests for your Captapi account as structured JSON: endpoint path, status, credits charged, and timestamps. Free — does not consume credits." },
   { slug: "account-daily-usage", name: "Daily Usage API", shortName: "Daily Usage", category: "list", method: "GET", path: "/v1/account/daily-usage", credits: 0 , tagline: "See day-by-day credit usage for your Captapi account.", longDescription: "Get daily credit usage for your Captapi key as structured JSON — useful for spend monitoring and budgeting. Free — does not consume credits." },
   { slug: "account-most-used-routes", name: "Most Used Routes API", shortName: "Most Used Routes", category: "list", method: "GET", path: "/v1/account/most-used-routes", credits: 0 , tagline: "See which Captapi endpoints your key calls most often.", longDescription: "Get a ranked list of the routes your Captapi key uses most, with call counts over a chosen window. Free — does not consume credits." },
+];
+
+/** Cross-platform analytics + direct video-file upload helpers (not social platforms). */
+const UTILITIES: Spec[] = [
+  {
+    slug: "analytics-post",
+    name: "Post Analytics API",
+    shortName: "Post Analytics",
+    category: "details",
+    method: "GET",
+    path: "/v1/analytics/post",
+    credits: 1,
+    tagline: "Unified metrics for one post, video, or reel — platform auto-detected (1 credit).",
+    longDescription: "Pass any supported post, video, or reel URL (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble) and get one normalized metrics object — views, likes, comments, shares, saves, and engagement rate — with the platform auto-detected. Flat 1 credit per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.",
+  },
+  {
+    slug: "analytics-compare",
+    name: "Compare Analytics API",
+    shortName: "Compare Analytics",
+    category: "list",
+    method: "GET",
+    path: "/v1/analytics/compare",
+    credits: 1,
+    tagline: "Compare unified metrics across up to 10 URLs in one call — 1 credit per successfully resolved URL.",
+    longDescription: "Pass up to 10 comma-separated post/video/reel URLs (any mix of supported platforms) and get unified metrics for each — views, likes, comments, shares, saves, and engagement rate. Bills 1 credit per successfully resolved URL (minimum 1).",
+  },
+  {
+    slug: "video-transcript",
+    name: "Video File Transcript API",
+    shortName: "File Transcript",
+    category: "transcript",
+    method: "POST",
+    path: "/v1/video/transcript",
+    credits: 1,
+    tagline: "Whisper transcription of an uploaded video or audio file — 1 credit per minute of audio.",
+    longDescription: "Upload a video or audio file (multipart form field `file`) and get a Whisper transcript as structured JSON — full text, segments, word count, language, and duration. Billed at 1 credit per minute of audio (rounded up, minimum 1).",
+  },
+  {
+    slug: "video-summarize",
+    name: "Video File Summarizer API",
+    shortName: "File Summarizer",
+    category: "summarize",
+    method: "POST",
+    path: "/v1/video/summarize",
+    credits: 2,
+    tagline: "Transcribe an uploaded file with Whisper, then return an AI summary — 1 credit per minute + 1 for the summary.",
+    longDescription: "Upload a video or audio file (multipart form field `file`) to transcribe with Whisper and get an AI summary (key points, topics, sentiment) plus the transcript. Billed at 1 credit per minute of audio (rounded up) plus 1 credit for the summary.",
+  },
 ];
 
 const KWAI: Spec[] = [
@@ -650,6 +703,15 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     endpoints: ACCOUNT.map((s) => ({ ...s, platform: "account" as const })),
   },
   {
+    id: "utilities",
+    name: "Analytics & Video Files",
+    blurb: "Cross-platform post analytics and Whisper transcription/summarization for uploaded video or audio files.",
+    icon: "video",
+    color: "text-slate-600",
+    exampleUrl: "https://captapi.com/docs#api-analytics",
+    endpoints: UTILITIES.map((s) => ({ ...s, platform: "utilities" as const })),
+  },
+  {
     id: "kwai",
     name: "Kwai",
     blurb: "Extract Kwai profile details, user posts, and post metadata.",
@@ -713,11 +775,11 @@ export const ALL_ENDPOINTS: ApiEndpoint[] = PLATFORM_GROUPS.flatMap(
 export const ENDPOINT_COUNT = ALL_ENDPOINTS.length;
 
 /**
- * Number of public data platforms. Excludes the internal "Account" group,
- * which exposes usage/billing routes rather than a social platform.
+ * Number of public data platforms. Excludes internal groups ("Account",
+ * "Utilities") that are not social platforms.
  */
 export const PLATFORM_COUNT = PLATFORM_GROUPS.filter(
-  (g) => g.id !== "account",
+  (g) => g.id !== "account" && g.id !== "utilities",
 ).length;
 
 /** Stable anchor id for a platform group's section in the docs reference. */
@@ -732,10 +794,10 @@ export function platformSlug(id: PlatformId): string {
 
 /**
  * Platform groups that get a public landing page and appear in the APIs nav
- * dropdown. Excludes the internal "Account" group.
+ * dropdown. Excludes internal "Account" and "Utilities" groups.
  */
 export const PLATFORM_PAGES: PlatformGroup[] = PLATFORM_GROUPS.filter(
-  (g) => g.id !== "account",
+  (g) => g.id !== "account" && g.id !== "utilities",
 );
 
 /** Resolve a platform landing page from its URL slug (e.g. "truth-social-api"). */
@@ -902,6 +964,10 @@ function resourceLabel(ep: ApiEndpoint): string {
 /** What the user typically sends (for FAQ / longDescription). */
 function inputKind(ep: ApiEndpoint): string {
   if (ep.platform === "account") return "Captapi account";
+  if (ep.platform === "utilities") {
+    if (ep.slug.startsWith("video-")) return "uploaded video or audio file";
+    return "post or video URL";
+  }
   if (ep.category === "search") return "query";
   if (ep.category === "channel") return "profile or page";
   const sn = resourceLabel(ep);
@@ -929,7 +995,7 @@ export function platformLabel(p: PlatformId): string {
 
 /**
  * Natural "How to …" predicate for an endpoint, used by /how-to/[slug] pSEO
- * pages (e.g. "get a YouTube transcript", "download a TikTok video").
+ * pages (e.g. "get a YouTube transcript", "get TikTok video details").
  */
 export function howToAction(ep: ApiEndpoint): string {
   const p = PLATFORM_LABEL[ep.platform];
@@ -1233,7 +1299,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "facebook-profile-reels": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
   "facebook-group-posts": [up("Public Facebook group URL, e.g. https://facebook.com/groups/ID."), lp(20, 200)],
   "facebook-comment-replies": [up("Facebook post URL the comment belongs to."), cid(), lp(50, 500)],
-  "facebook-marketplace-search": [qp("Product or keyword to search Facebook Marketplace for."), { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." }, lp(20, 200), { name: "details", type: "string", required: false, description: "Set true to fetch full description, photos and coordinates per listing (slower, costs more)." }],
+  "facebook-marketplace-search": [qp("Product or keyword to search Facebook Marketplace for."), { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." }, lp(20, 200), { name: "details", type: "boolean", required: false, description: "When true, fetches full description, photos, and coordinates per listing. details=false → 1.4 credits/result (~28 at 20); details=true doubles cost → 2.8/result (~56 at 20)." }],
   "facebook-marketplace-location-search": [qp("City/place search query, e.g. Austin."), lpFlat(10, 50, 17)],
   "facebook-event-search": [qp("Topic and/or place, e.g. 'comedy Chicago'."), lp(20, 200)],
   "facebook-event-details": [up("Facebook event URL, e.g. https://facebook.com/events/ID.")],
@@ -1314,6 +1380,35 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "account-request-history": [lp(50, 500)],
   "account-daily-usage": [{ name: "days", type: "integer", required: false, description: "Number of days to include (default 30, max 365)." }],
   "account-most-used-routes": [{ name: "days", type: "integer", required: false, description: "Number of days to include (default 30, max 365)." }, lp(20, 100)],
+  // Utilities (analytics + uploaded video files)
+  "analytics-post": [
+    up("A public post, video, or reel URL (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble)."),
+    cacheP(),
+  ],
+  "analytics-compare": [
+    {
+      name: "urls",
+      type: "string",
+      required: true,
+      description: "Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms.",
+    },
+  ],
+  "video-transcript": [
+    {
+      name: "file",
+      type: "file",
+      required: true,
+      description: "Video or audio file to transcribe (multipart form upload).",
+    },
+  ],
+  "video-summarize": [
+    {
+      name: "file",
+      type: "file",
+      required: true,
+      description: "Video or audio file to transcribe and summarize (multipart form upload).",
+    },
+  ],
   // Kwai / small creator pages
   "kwai-profile": [up(KWAI_PROFILE)],
   "kwai-user-posts": [up(KWAI_PROFILE), lp(20, 200)],
@@ -1370,7 +1465,14 @@ export function params(ep: ApiEndpoint): ApiParam[] {
  * always fresh). Set `cache=true` to serve from the 24h response cache.
  * Account endpoints (balance, usage) are live reads with no cache layer. */
 function withCacheParam(ep: ApiEndpoint, list: ApiParam[]): ApiParam[] {
-  if (ep.platform === "account" || list.some((p) => p.name === "cache")) return list;
+  // Account + utilities manage cache (or skip it) explicitly per endpoint.
+  if (
+    ep.platform === "account" ||
+    ep.platform === "utilities" ||
+    list.some((p) => p.name === "cache")
+  ) {
+    return list;
+  }
   return [...list, cacheP()];
 }
 
@@ -1616,6 +1718,7 @@ const PROFILE_URL: Record<PlatformId, string> = {
   kick: "https://kick.com/xqc",
   amazon_shop: "https://www.amazon.com/s?me=ATVPDKIKX0DER",
   account: "https://captapi.com/dashboard",
+  utilities: "https://www.tiktok.com/@tiktok/video/7234567890123456789",
   kwai: "https://www.kwai.com/@easycashindonesia",
   komi: "https://komi.io/example",
   pillar: "https://pillar.io/example",
@@ -1673,11 +1776,28 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       if (typeof captured === "string" && captured.trim()) return captured;
       return "314216";
     }
+    case "urls":
+      return "https://www.tiktok.com/@tiktok/video/7234567890123456789,https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+    case "file":
+      return "@video.mp4";
     case "url": {
+      // Prefer a captured snapshot URL when it's a valid http(s) URL — keeps
+      // Try-it / cURL in sync with the example response for every url param.
+      const captured = API_EXAMPLES[ep.slug]?.url;
+      if (typeof captured === "string" && /^https?:\/\//.test(captured)) return captured;
+
       const d = p.description.toLowerCase();
+      const creatorPagePlatforms: PlatformId[] = ["komi", "pillar", "linkbio", "linkme"];
+
+      if (ep.slug === "facebook-marketplace-item" || d.includes("marketplace item"))
+        return "https://www.facebook.com/marketplace/item/2228870800986975/";
       if (d.includes("playlist"))
         return "https://www.youtube.com/playlist?list=PLrAXtmqj7v3Y";
-      if (d.includes("music") || d.includes("sound") || d.includes("audio"))
+      // Music/sound/audio heuristics — never apply to SoundCloud (use profile/track URLs).
+      if (
+        ep.platform !== "soundcloud" &&
+        (d.includes("music") || d.includes("sound") || d.includes("audio"))
+      )
         return ep.platform === "tiktok"
           ? "https://www.tiktok.com/music/original-sound-7300000000000000000"
           : "https://www.instagram.com/reels/audio/1234567890123456/";
@@ -1689,14 +1809,13 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
         return "https://www.reddit.com/r/technology/";
       if (d.includes("company"))
         return "https://www.linkedin.com/company/microsoft";
-      if (d.includes("page")) return PROFILE_URL.facebook;
-      if (d.includes("channel") || d.includes("profile") || d.includes("@handle")) {
-        // Keep the Try-it default (and cURL snippet) in sync with the captured
-        // example response, so the shown profile matches the sample output.
-        const captured = API_EXAMPLES[ep.slug]?.url;
-        if (typeof captured === "string" && /^https?:\/\//.test(captured)) return captured;
+      // Creator-page platforms: never treat "page" in the description as Facebook.
+      if (creatorPagePlatforms.includes(ep.platform))
         return PROFILE_URL[ep.platform];
-      }
+      if (d.includes("page") && ep.platform === "facebook") return PROFILE_URL.facebook;
+      if (d.includes("channel") || d.includes("profile") || d.includes("@handle"))
+        return PROFILE_URL[ep.platform];
+      if (ep.platform === "soundcloud") return PROFILE_URL.soundcloud;
       return getGroup(ep.platform).exampleUrl;
     }
     default:
@@ -1881,9 +2000,15 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       a:
         ep.platform === "account" || ep.credits === 0
           ? `Account endpoints are free — they do not consume credits.`
-          : ep.creditsPerResult
-            ? `At the default limit this endpoint costs ${ep.credits} credits (${ep.creditsPerResult} per result). Billing scales with how many results you request. ${CACHE_NOTE} Failed or empty results are never charged.`
-            : `Each successful call costs ${ep.credits} credit${ep.credits === 1 ? "" : "s"}. ${CACHE_NOTE} Failed or empty results are never charged.`,
+          : ep.slug === "analytics-compare"
+            ? `Billing is 1 credit per successfully resolved URL (minimum 1). Failed or empty results are never charged.`
+            : ep.slug === "video-transcript"
+              ? `Billing is 1 credit per minute of audio (rounded up, minimum 1). Failed or empty results are never charged.`
+              : ep.slug === "video-summarize"
+                ? `Billing is 1 credit per minute of audio (rounded up) plus 1 credit for the AI summary. Failed or empty results are never charged.`
+                : ep.creditsPerResult
+                  ? `At the default limit this endpoint costs ${ep.credits} credits (${ep.creditsPerResult} per result). Billing scales with how many results you request. ${CACHE_NOTE} Failed or empty results are never charged.`
+                  : `Each successful call costs ${ep.credits} credit${ep.credits === 1 ? "" : "s"}. ${CACHE_NOTE} Failed or empty results are never charged.`,
     },
     {
       q: `Do I need a ${platform} API key or OAuth?`,
@@ -1894,7 +2019,11 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     },
   ];
 
-  if (ep.category === "transcript" && ep.platform !== "account") {
+  if (
+    ep.category === "transcript" &&
+    ep.platform !== "account" &&
+    ep.platform !== "utilities"
+  ) {
     list.push({
       q: `What if the ${platform} ${inputKind(ep)} has no captions?`,
       a: `When no captions are available, Captapi transcribes the audio with AI (Whisper) automatically, so you still get a usable transcript.`,
@@ -2089,8 +2218,8 @@ const FIELD_DESCS: Record<string, string> = {
   coverImage: "Cover image URL.",
   coverUrl: "Cover image URL.",
   logo: "Logo image URL.",
-  videoUrl: "Direct video file URL (CDN link); may be null when a download URL isn't exposed — use the platform's download endpoint for the file.",
-  downloadUrl: "Direct download URL for the media file.",
+  videoUrl: "Direct video file URL (CDN link); may be null when the platform does not expose one.",
+  downloadUrl: "CDN media URL when present (not a dedicated download API).",
   noWatermarkUrl: "Watermark-free variant of the video URL.",
   embedUrl: "Embed page URL — load it directly in an <iframe src>.",
   videoId: "Platform video ID.",
@@ -2142,7 +2271,7 @@ const FIELD_DESCS: Record<string, string> = {
   // Transcript / summarize
   transcript: "Complete text transcript.",
   wordCount: "Total number of words in the transcript.",
-  segments: "Total number of transcript segments.",
+  segments: "Transcript segment count, or sponsor segment list on video-sponsors endpoints.",
   transcriptSegments: "Timestamped transcript segments.",
   summary: "AI-generated summary of the content.",
   keyPoints: "The most important takeaways.",

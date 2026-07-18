@@ -26,6 +26,8 @@ RATE_GOOGLE_ADVERTISER = 4.5
 
 
 def _scaled(limit: int, rate: float = RATE_AD_LIST, minimum: int = 2) -> int:
+    if limit <= 0:
+        return 0
     return max(minimum, math.ceil(limit * rate))
 
 

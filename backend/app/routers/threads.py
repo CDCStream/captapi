@@ -34,6 +34,8 @@ RATE = 0.7
 
 
 def _scaled(n: int, rate: float, minimum: int) -> int:
+    if n <= 0:
+        return 0
     return max(minimum, math.ceil(n * rate))
 
 

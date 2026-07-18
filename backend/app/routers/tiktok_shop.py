@@ -24,6 +24,8 @@ RATE_REVIEWS = 2.25
 
 
 def _scaled(limit: int, rate: float, minimum: int = 2) -> int:
+    if limit <= 0:
+        return 0
     return max(minimum, math.ceil(limit * rate))
 
 
