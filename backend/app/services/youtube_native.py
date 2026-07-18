@@ -743,6 +743,29 @@ def _comments_total(data: Any) -> int | None:
     return None
 
 
+async def _comments_entry_token(norm_url: str) -> tuple[str | None, int | None]:
+    """Resolve the comments-section continuation + optional total.
+
+    Prefer InnerTube ``next`` with ``videoId`` — watch-page HTML is frequently
+    429'd on datacenter IPs. Fall back to ytInitialData when needed.
+    """
+    # Lazy import avoids a circular dependency with app.utils.url.
+    from app.utils.url import extract_youtube_id
+
+    vid = extract_youtube_id(norm_url)
+    if vid:
+        boot = await innertube("next", {"videoId": vid}, timeout=15)
+        if boot is not None:
+            token = _comments_section_token(boot)
+            if token:
+                return token, _comments_total(boot)
+
+    data, _ = await fetch_page_data(norm_url, timeout=12)
+    if data is None:
+        return None, None
+    return _comments_section_token(data), _comments_total(data)
+
+
 async def comments_native(
     norm_url: str,
     limit: int,
@@ -752,16 +775,12 @@ async def comments_native(
     """Top-level comments via InnerTube continuation tokens.
 
     Pass ``cursor`` (previous ``nextCursor``) to fetch the next page. Without a
-    cursor we bootstrap from the watch page's comments-section token.
+    cursor we bootstrap via InnerTube ``next`` (videoId), not the watch HTML.
     """
     token = cursor or None
     total_comments: int | None = None
     if not token:
-        data, _ = await fetch_page_data(norm_url, timeout=12)
-        if data is None:
-            return None
-        total_comments = _comments_total(data)
-        token = _comments_section_token(data)
+        token, total_comments = await _comments_entry_token(norm_url)
     if not token:
         return None
 
@@ -804,10 +823,7 @@ def _reply_continuation_for_thread(thread: dict[str, Any], comment_id: str) -> s
 
 
 async def comment_replies_native(norm_url: str, comment_id: str, limit: int) -> list[dict[str, Any]]:
-    data, _ = await fetch_page_data(norm_url, timeout=12)
-    if data is None:
-        return []
-    token = _comments_section_token(data)
+    token, _ = await _comments_entry_token(norm_url)
     if not token:
         return []
 
