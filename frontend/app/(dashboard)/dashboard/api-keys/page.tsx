@@ -173,9 +173,19 @@ export default function ApiKeysPage() {
         )}
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        Keys are scoped to your account only. Anyone with a key can use your credits — keep them secret.
-      </p>
+      <div className="rounded-2xl border bg-background p-5 space-y-3">
+        <h2 className="font-semibold">How to authenticate</h2>
+        <p className="text-sm text-muted-foreground">
+          Send your key on every request. Both headers work:
+        </p>
+        <div className="space-y-2 font-mono text-xs">
+          <pre className="overflow-x-auto rounded-lg border bg-muted/50 p-3">{`Authorization: Bearer capt_live_...`}</pre>
+          <pre className="overflow-x-auto rounded-lg border bg-muted/50 p-3">{`x-api-key: capt_live_...`}</pre>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Keys are scoped to your account only. Anyone with a key can use your credits — keep them secret.
+        </p>
+      </div>
 
       {/* Create key modal */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>

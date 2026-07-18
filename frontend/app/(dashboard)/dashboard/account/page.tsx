@@ -12,6 +12,7 @@ import { track } from "@/lib/analytics";
 export default function AccountPage() {
   const [email, setEmail] = useState("");
   const [provider, setProvider] = useState<string>("email");
+  const [providers, setProviders] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -21,9 +22,19 @@ export default function AccountPage() {
       const { data: { user } } = await sb.auth.getUser();
       if (!user) return;
       setEmail(user.email ?? "");
-      setProvider((user.app_metadata?.provider as string) ?? "email");
+      const primary = (user.app_metadata?.provider as string) ?? "email";
+      const list = (user.app_metadata?.providers as string[] | undefined) ?? [primary];
+      setProvider(primary);
+      setProviders(list.length ? list : [primary]);
     })();
   }, []);
+
+  function providerLabel(p: string): string {
+    if (p === "google") return "Google";
+    if (p === "github") return "GitHub";
+    if (p === "email" || p === "email_password") return "Email & password";
+    return p.replace(/_/g, " ");
+  }
 
   async function sendResetEmail() {
     if (!email) {
@@ -64,9 +75,13 @@ export default function AccountPage() {
             </span>
             <div className="min-w-0">
               <div className="truncate font-medium">{email}</div>
-              <Badge variant="secondary" className="mt-1 text-xs capitalize">
-                {provider === "google" ? "Google account" : "Email & password"}
-              </Badge>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {providers.map((p) => (
+                  <Badge key={p} variant="secondary" className="text-xs capitalize">
+                    {providerLabel(p)}
+                  </Badge>
+                ))}
+              </div>
             </div>
           </div>
         </CardContent>
@@ -75,11 +90,15 @@ export default function AccountPage() {
       {/* Change password */}
       <Card>
         <CardHeader>
-          <CardTitle>{provider === "google" ? "Set a password" : "Change password"}</CardTitle>
+          <CardTitle>
+            {providers.includes("email") || provider === "email"
+              ? "Change password"
+              : "Set a password"}
+          </CardTitle>
           <CardDescription>
-            {provider === "google"
-              ? "We'll email you a secure link to set a password so you can also sign in without Google."
-              : "We'll email you a secure link. Open it to choose a new password."}
+            {providers.includes("email") || provider === "email"
+              ? "We'll email you a secure link. Open it to choose a new password."
+              : `You signed in with ${providerLabel(provider)}. We'll email you a secure link to set a password for email sign-in too.`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -108,7 +127,9 @@ export default function AccountPage() {
               ) : (
                 <KeyRound className="size-4" />
               )}
-              {provider === "google" ? "Email me a link to set a password" : "Change password"}
+              {providers.includes("email") || provider === "email"
+                ? "Change password"
+                : "Email me a link to set a password"}
             </Button>
           )}
         </CardContent>

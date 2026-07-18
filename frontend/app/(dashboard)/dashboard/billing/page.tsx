@@ -62,7 +62,7 @@ const PLANS = [
     tier: 2,
     popular: true,
     description: "For growing products",
-    features: ["6,000 credits / month", "300 requests / minute", "Priority support", "Bulk endpoints (beta)"],
+    features: ["6,000 credits / month", "300 requests / minute", `All ${ENDPOINT_COUNT} APIs included`, "Priority support", "Bulk endpoints (beta)"],
   },
   {
     id: "business",
@@ -73,7 +73,7 @@ const PLANS = [
     credits: 20000,
     tier: 3,
     description: "For data pipelines",
-    features: ["20,000 credits / month", "600 requests / minute", "Slack support + SLA", "Custom rate limits"],
+    features: ["20,000 credits / month", "600 requests / minute", `All ${ENDPOINT_COUNT} APIs included`, "Slack support + SLA", "Custom rate limits"],
   },
 ] as const;
 
@@ -115,7 +115,7 @@ const HEADERS: Record<Cycle, { tag: string; title: string; description: string }
   monthly: {
     tag: "Subscriptions",
     title: "Pick your plan.",
-    description: "Pay only for what you use — cached results are always free.",
+    description: "Monthly credits refresh each billing period. Pass cache=true for a free 24h cache hit; default is always fresh.",
   },
   yearly: {
     tag: "Save 30% yearly",
@@ -125,7 +125,7 @@ const HEADERS: Record<Cycle, { tag: string; title: string; description: string }
   payg: {
     tag: "Pay As You Go",
     title: "Top up anytime.",
-    description: "One-time credit packs that never expire.",
+    description: "One-time credit packs that never expire. Larger packs have a slightly higher per-1k rate.",
   },
 };
 

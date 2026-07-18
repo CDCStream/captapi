@@ -14,23 +14,23 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const nav = [
+export const DASHBOARD_NAV = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
   { href: "/dashboard/playground", label: "Playground", icon: PlayCircle },
   { href: "/dashboard/usage", label: "Usage", icon: BarChart3 },
-  { href: "/dashboard/analytics", label: "Dashboard", icon: LineChart },
+  { href: "/dashboard/analytics", label: "Analytics", icon: LineChart },
   { href: "/dashboard/agent-integrations", label: "Agent Integrations", icon: Bot },
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/account", label: "Account", icon: UserCog },
-];
+] as const;
 
-export function SidebarNav() {
+export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
     <nav className="flex flex-col gap-1">
-      {nav.map((n) => {
+      {DASHBOARD_NAV.map((n) => {
         const active =
           n.href === "/dashboard"
             ? pathname === "/dashboard"
@@ -39,6 +39,7 @@ export function SidebarNav() {
           <Link
             key={n.href}
             href={n.href}
+            onClick={onNavigate}
             className={cn(
               "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
               active

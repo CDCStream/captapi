@@ -5,27 +5,63 @@ import { formatDate, formatNumber } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
+async function sumCreditsUsed(
+  sb: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+): Promise<number> {
+  let sum = 0;
+  let from = 0;
+  const page = 1000;
+  for (;;) {
+    const { data } = await sb
+      .from("credit_transactions")
+      .select("amount")
+      .eq("user_id", userId)
+      .lt("amount", 0)
+      .range(from, from + page - 1);
+    if (!data?.length) break;
+    sum += data.reduce((s, t) => s + Math.abs(t.amount ?? 0), 0);
+    if (data.length < page) break;
+    from += page;
+  }
+  return sum;
+}
+
 export default async function UsagePage() {
   const sb = await createClient();
   const { data: { user } } = await sb.auth.getUser();
+  const userId = user!.id;
 
-  const { data: txs } = await sb
-    .from("credit_transactions")
-    .select("type, amount, description, created_at")
-    .eq("user_id", user!.id)
-    .order("created_at", { ascending: false })
-    .limit(50);
-
-  const { data: reqs } = await sb
-    .from("requests")
-    .select("endpoint, platform, resource_url, credits_used, cache_hit, status_code, response_time_ms, created_at")
-    .eq("user_id", user!.id)
-    .order("created_at", { ascending: false })
-    .limit(100);
-
-  const totalUsed = (txs ?? [])
-    .filter((t) => t.amount < 0)
-    .reduce((s, t) => s + Math.abs(t.amount), 0);
+  const [
+    { data: txs },
+    { data: reqs },
+    { count: requestCount },
+    { count: cacheHitCount },
+    totalUsed,
+  ] = await Promise.all([
+    sb
+      .from("credit_transactions")
+      .select("type, amount, description, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(50),
+    sb
+      .from("requests")
+      .select("endpoint, platform, resource_url, credits_used, cache_hit, status_code, response_time_ms, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(100),
+    sb
+      .from("requests")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId),
+    sb
+      .from("requests")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("cache_hit", true),
+    sumCreditsUsed(sb, userId),
+  ]);
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -43,22 +79,25 @@ export default async function UsagePage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Requests logged</CardDescription>
-            <CardTitle className="text-3xl">{reqs?.length ?? 0}</CardTitle>
+            <CardDescription>Requests logged (lifetime)</CardDescription>
+            <CardTitle className="text-3xl">{formatNumber(requestCount ?? 0)}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Cache hits</CardDescription>
+            <CardDescription>Cache hits (lifetime)</CardDescription>
             <CardTitle className="text-3xl">
-              {(reqs ?? []).filter((r) => r.cache_hit).length}
+              {formatNumber(cacheHitCount ?? 0)}
             </CardTitle>
           </CardHeader>
         </Card>
       </div>
 
       <Card>
-        <CardHeader><CardTitle>Recent requests</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Recent requests</CardTitle>
+          <CardDescription>Showing the last {reqs?.length ?? 0} requests.</CardDescription>
+        </CardHeader>
         <CardContent>
           {(reqs ?? []).length === 0 ? (
             <p className="text-sm text-muted-foreground">No requests yet.</p>
@@ -89,7 +128,10 @@ export default async function UsagePage() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Credit transactions</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Credit transactions</CardTitle>
+          <CardDescription>Showing the last {txs?.length ?? 0} transactions.</CardDescription>
+        </CardHeader>
         <CardContent>
           {(txs ?? []).length === 0 ? (
             <p className="text-sm text-muted-foreground">No transactions yet.</p>

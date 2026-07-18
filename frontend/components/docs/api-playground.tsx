@@ -104,16 +104,30 @@ export function ApiPlayground({
                   )}
                   <span className="text-[11px] text-muted-foreground">{p.type}</span>
                 </span>
-                <input
-                  type={p.type === "integer" || p.type === "number" ? "number" : "text"}
-                  inputMode={p.type === "integer" || p.type === "number" ? "numeric" : undefined}
-                  value={values[p.name] ?? ""}
-                  onChange={(e) => set(p.name, e.target.value)}
-                  placeholder={paramPlaceholder(ep, p)}
-                  className={`mt-1.5 w-full rounded-md border bg-background px-3 py-2 font-mono text-xs outline-none transition-colors focus:border-primary ${
-                    missing ? "border-rose-400/60" : ""
-                  }`}
-                />
+                {p.type === "boolean" ? (
+                  <select
+                    value={values[p.name] ?? ""}
+                    onChange={(e) => set(p.name, e.target.value)}
+                    className={`mt-1.5 w-full rounded-md border bg-background px-3 py-2 font-mono text-xs outline-none transition-colors focus:border-primary ${
+                      missing ? "border-rose-400/60" : ""
+                    }`}
+                  >
+                    <option value="">default (false / fresh)</option>
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                  </select>
+                ) : (
+                  <input
+                    type={p.type === "integer" || p.type === "number" ? "number" : "text"}
+                    inputMode={p.type === "integer" || p.type === "number" ? "numeric" : undefined}
+                    value={values[p.name] ?? ""}
+                    onChange={(e) => set(p.name, e.target.value)}
+                    placeholder={paramPlaceholder(ep, p)}
+                    className={`mt-1.5 w-full rounded-md border bg-background px-3 py-2 font-mono text-xs outline-none transition-colors focus:border-primary ${
+                      missing ? "border-rose-400/60" : ""
+                    }`}
+                  />
+                )}
                 <span className="mt-1 block text-xs text-muted-foreground">
                   {p.description}
                 </span>

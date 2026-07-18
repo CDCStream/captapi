@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 
 const DAYS = 30;
 const TOP_ENDPOINTS = 6;
-const PLATFORMS = ["youtube", "tiktok", "instagram", "facebook"] as const;
+const PLATFORMS = ["youtube", "tiktok", "instagram", "facebook", "other"] as const;
 
 function dayKey(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -66,6 +66,7 @@ export default async function AnalyticsPage() {
       tiktok: 0,
       instagram: 0,
       facebook: 0,
+      other: 0,
     });
   }
 
@@ -91,6 +92,8 @@ export default async function AnalyticsPage() {
       platform === "facebook"
     ) {
       p[platform] += credits;
+    } else if (platform) {
+      p.other += credits;
     }
 
     const ep = shortEndpoint(r.endpoint);
@@ -130,10 +133,10 @@ export default async function AnalyticsPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-3xl font-bold">Analytics</h1>
         <p className="mt-1 text-muted-foreground">
-          Daily usage over the last {DAYS} days — total, by platform, and by
-          endpoint.
+          Daily usage over the last {DAYS} days — total, by platform (plus Other),
+          and by endpoint.
         </p>
       </div>
 

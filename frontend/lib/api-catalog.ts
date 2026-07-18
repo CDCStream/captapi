@@ -149,7 +149,12 @@ export const API_URL =
  * typical cost of a standard request (for list endpoints, the cost at the
  * default result count), so we display a single fixed number everywhere.
  */
-export function creditLabel(e: Pick<ApiEndpoint, "credits">): string {
+export function creditLabel(
+  e: Pick<ApiEndpoint, "credits" | "creditsPerResult">,
+): string {
+  if (e.creditsPerResult) {
+    return `~${e.credits} credits (${e.creditsPerResult}/result)`;
+  }
   return `${e.credits} credit${e.credits === 1 ? "" : "s"}`;
 }
 
@@ -836,7 +841,7 @@ export const AGENT_ROUTING_EXAMPLES: AgentRoutingExample[] = [
       "Kwai user posts",
       "Analyze this Kwai creator",
     ],
-    prefer: "Use Kwai endpoints for Kwai URLs or numeric user IDs.",
+    prefer: "Use Kwai endpoints for https://www.kwai.com/@handle or @handle URLs.",
     endpointSlug: "kwai-user-posts",
     why: "Lists Kwai user posts with normalized metadata.",
   },
@@ -1782,7 +1787,7 @@ export function requestSamples(
   return [
     {
       label: "cURL",
-      code: `curl "${u}" \\\n  -H "Authorization: Bearer ${key}"`,
+      code: `curl "${u}" \\\n  -H "Authorization: Bearer ${key}"\n# or: -H "x-api-key: ${key}"`,
     },
     {
       label: "Python",
@@ -1793,7 +1798,7 @@ res = requests.get(
     params={
 ${pyParams}
     },
-    headers={"Authorization": "Bearer ${key}"},
+    headers={"Authorization": "Bearer ${key}"},  # or "x-api-key": "${key}"
 )
 print(res.json())`,
     },
@@ -1801,7 +1806,7 @@ print(res.json())`,
       label: "Node",
       code: `const res = await fetch(
   "${u}",
-  { headers: { Authorization: "Bearer ${key}" } },
+  { headers: { Authorization: "Bearer ${key}" } }, // or { "x-api-key": "${key}" }
 );
 const data = await res.json();
 console.log(data);`,
@@ -1814,7 +1819,7 @@ curl_setopt($ch, CURLOPT_URL, "${base}?" . http_build_query([
 ${phpParams}
 ]));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer ${key}"]);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer ${key}"]); // or x-api-key: ${key}
 echo curl_exec($ch);
 curl_close($ch);`,
     },
@@ -1831,7 +1836,7 @@ import (
 func main() {
 	req, _ := http.NewRequest("GET",
 		"${u}", nil)
-	req.Header.Set("Authorization", "Bearer ${key}")
+	req.Header.Set("Authorization", "Bearer ${key}") // or Set("x-api-key", "${key}")
 	res, _ := http.DefaultClient.Do(req)
 	defer res.Body.Close()
 	body, _ := io.ReadAll(res.Body)
@@ -1846,7 +1851,7 @@ import java.net.http.*;
 HttpClient client = HttpClient.newHttpClient();
 HttpRequest request = HttpRequest.newBuilder()
     .uri(URI.create("${u}"))
-    .header("Authorization", "Bearer ${key}")
+    .header("Authorization", "Bearer ${key}") // or .header("x-api-key", "${key}")
     .GET()
     .build();
 HttpResponse<String> res = client.send(

@@ -137,13 +137,15 @@ export default async function DashboardOverview() {
               <span className="flex size-8 items-center justify-center rounded-lg bg-sky-500/10 text-sky-500">
                 <Activity className="size-4" />
               </span>
-              Recent requests
+              Shown below
             </div>
             <div className="mt-4 text-4xl font-bold tracking-tight">
               {recent?.length ?? 0}
             </div>
             <p className="mt-4 text-xs text-muted-foreground">
-              Last 10 calls. Cached hits don&apos;t consume credits.
+              Last {recent?.length ?? 0} of your recent calls (max 10). Pass{" "}
+              <code className="rounded bg-muted px-1">cache=true</code> for a free
+              24h hit; default is always fresh.
             </p>
           </CardContent>
         </Card>

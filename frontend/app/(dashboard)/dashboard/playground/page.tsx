@@ -271,7 +271,7 @@ export default function PlaygroundPage() {
                               {e.shortName}
                             </span>
                             <span className="text-[10px] text-muted-foreground/70">
-                              {e.creditsPerResult ? `~${e.credits} credits` : creditLabel(e)}
+                              {creditLabel(e)}
                             </span>
                             <ChevronRight
                               className={cn(

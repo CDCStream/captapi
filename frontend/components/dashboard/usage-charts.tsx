@@ -32,6 +32,7 @@ export interface PlatformPoint {
   tiktok: number;
   instagram: number;
   facebook: number;
+  other: number;
 }
 
 export type EndpointPoint = { date: string } & Record<string, number | string>;
@@ -48,7 +49,10 @@ const PLATFORM_COLORS: Record<string, string> = {
   tiktok: "#ec4899",
   instagram: "#d946ef",
   facebook: "#2563eb",
+  other: "#64748b",
 };
+
+const PLATFORM_KEYS = ["youtube", "tiktok", "instagram", "facebook", "other"] as const;
 
 const ENDPOINT_PALETTE = [
   "#6366f1",
@@ -204,7 +208,7 @@ export function UsageCharts({
                 <XAxis dataKey="date" tickFormatter={fmtDay} minTickGap={24} {...axisProps} />
                 <YAxis allowDecimals={false} width={40} tickFormatter={(v) => formatNumber(v)} {...axisProps} />
                 <Tooltip content={<ChartTooltip />} />
-                {(["youtube", "tiktok", "instagram", "facebook"] as const).map((p) => (
+                {PLATFORM_KEYS.map((p) => (
                   <Line
                     key={p}
                     type="monotone"

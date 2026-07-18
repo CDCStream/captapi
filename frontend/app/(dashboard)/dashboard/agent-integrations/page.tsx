@@ -298,16 +298,16 @@ export default function AgentIntegrationsPage() {
           <KeyRound className="size-5 text-primary" />
           <h3 className="mt-3 font-semibold">One key</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            No OAuth, no per-platform setup. Credits are billed to your account;
-            cached results are free.
+            No OAuth, no per-platform setup. Credits are billed to your account.
+            Pass cache=true for a free 24h cache hit; default is always fresh.
           </p>
         </div>
         <div className="rounded-2xl border bg-background p-5">
           <Bot className="size-5 text-primary" />
           <h3 className="mt-3 font-semibold">Any agent</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Works with Cursor, Claude, VS Code, and any MCP-compatible client
-            over stdio.
+            Works with Cursor, Claude, VS Code, and any MCP-compatible client —
+            hosted HTTP (Bearer) or local stdio via npx.
           </p>
         </div>
       </div>
