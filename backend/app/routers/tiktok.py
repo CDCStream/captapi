@@ -290,7 +290,8 @@ def _normalize(item: dict) -> dict:
             "displayName": safe_str(author.get("nickName") or author.get("nickname")),
             "url": safe_str(author.get("profileUrl")),
             "followers": safe_int(author.get("fans") or author.get("followers")),
-            "verified": author.get("verified"),
+            # Badge flag: missing/unknown -> false (never null).
+            "verified": bool(author.get("verified")) if author.get("verified") is not None else False,
             "profileImage": safe_str(author.get("avatar") or author.get("avatarLarger")),
         },
         "engagement": {

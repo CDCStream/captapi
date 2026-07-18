@@ -522,9 +522,11 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
         or _url_list_first(video.get("dynamic_cover") or video.get("dynamicCover"))
     )
 
+    # Badge flag: missing/unknown -> false (never null).
     verified = author.get("verified")
     if verified is None:
         verified = author.get("is_verified")
+    verified = bool(verified) if verified is not None else False
 
     return {
         "platform": "tiktok",

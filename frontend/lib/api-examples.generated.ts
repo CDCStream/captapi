@@ -18465,7 +18465,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "displayName": "Paw Dreams",
           "url": "https://www.tiktok.com/@paw.dreams0",
           "followers": 117886,
-          "verified": null,
+          "verified": false,
           "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/14e5b5dbddf91912237e342a048afb2c~tplv-tiktokx-cropcenter-q:1080:1080:q70.webp"
         },
         "engagement": {
@@ -18499,7 +18499,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "displayName": "Paw Dreams",
           "url": "https://www.tiktok.com/@paw.dreams0",
           "followers": 117886,
-          "verified": null,
+          "verified": false,
           "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/14e5b5dbddf91912237e342a048afb2c~tplv-tiktokx-cropcenter-q:1080:1080:q70.webp"
         },
         "engagement": {
@@ -18533,7 +18533,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "displayName": "Paw Dreams",
           "url": "https://www.tiktok.com/@paw.dreams0",
           "followers": 117886,
-          "verified": null,
+          "verified": false,
           "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/14e5b5dbddf91912237e342a048afb2c~tplv-tiktokx-cropcenter-q:1080:1080:q70.webp"
         },
         "engagement": {
