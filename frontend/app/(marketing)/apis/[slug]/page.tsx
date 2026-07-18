@@ -258,9 +258,7 @@ export default async function ApiDetailPage({
         </p>
         <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-3.5 py-1.5 text-sm font-medium text-amber-600 dark:text-amber-400">
           <Coins className="size-4" />
-          {ep.creditsPerResult
-            ? `${creditLabel(ep)} per request (${ep.creditsPerResult} per result)`
-            : `${creditLabel(ep)} per request`}
+          {`${creditLabel(ep)} per request`}
         </div>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button asChild size="lg">

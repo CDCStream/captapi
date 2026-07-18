@@ -208,27 +208,78 @@ def _is_reel(item: dict) -> bool:
     return "/reel/" in u or "/reels/" in u
 
 
+def _currency_from_price(price_formatted: str | None, explicit: str | None = None) -> str | None:
+    if explicit:
+        return safe_str(explicit)
+    text = (price_formatted or "").strip()
+    if not text:
+        return None
+    symbols = {
+        "$": "USD",
+        "€": "EUR",
+        "£": "GBP",
+        "₺": "TRY",
+        "¥": "JPY",
+        "₹": "INR",
+        "A$": "AUD",
+        "C$": "CAD",
+    }
+    for sym, code in symbols.items():
+        if text.startswith(sym):
+            return code
+    m = re.match(r"^([A-Z]{3})\b", text)
+    return m.group(1) if m else None
+
+
+def _listing_created_at(item: dict) -> str | None:
+    raw = item.get("creation_time") or item.get("created_time") or item.get("listed_at") or item.get("createdAt")
+    if raw is None:
+        return None
+    if isinstance(raw, (int, float)) or (isinstance(raw, str) and raw.isdigit()):
+        try:
+            return datetime.fromtimestamp(int(raw), tz=timezone.utc).isoformat()
+        except (OSError, OverflowError, ValueError):
+            return None
+    return safe_str(raw)
+
+
 def _normalize_listing(item: dict) -> dict:
+    photos = item.get("photos") if isinstance(item.get("photos"), list) else []
+    photo_uris = [safe_str(p) for p in photos if isinstance(p, str) and p]
+    if not photo_uris:
+        photo_uris = _marketplace_photo_uris(item)
+    primary = safe_str(item.get("primary_photo") or item.get("image") or item.get("imageUrl"))
+    if primary and primary not in photo_uris:
+        photo_uris.insert(0, primary)
+    price_formatted = safe_str(item.get("price_formatted") or item.get("priceFormatted"))
+    location = item.get("location") if isinstance(item.get("location"), dict) else {}
     return {
         "platform": "facebook",
         "id": safe_str(item.get("id")),
         "title": safe_str(item.get("title")),
         "url": safe_str(item.get("url")),
         "price": item.get("price"),
-        "priceFormatted": safe_str(item.get("price_formatted")),
-        "currency": safe_str(item.get("currency")),
-        "location": safe_str(item.get("location_display") or item.get("city")),
-        "city": safe_str(item.get("city")),
-        "state": safe_str(item.get("state")),
-        "latitude": item.get("latitude"),
-        "longitude": item.get("longitude"),
+        "priceFormatted": price_formatted,
+        "currency": _currency_from_price(price_formatted, safe_str(item.get("currency"))),
+        "location": safe_str(item.get("location_display") or item.get("city") or location.get("name")),
+        "city": safe_str(item.get("city") or location.get("city")),
+        "state": safe_str(item.get("state") or location.get("state")),
+        "latitude": item.get("latitude") if item.get("latitude") is not None else location.get("latitude"),
+        "longitude": item.get("longitude") if item.get("longitude") is not None else location.get("longitude"),
         "isSold": item.get("is_sold"),
         "isLive": item.get("is_live"),
         "deliveryTypes": item.get("delivery_types") or [],
-        "image": safe_str(item.get("primary_photo")),
-        "photos": item.get("photos") or [],
-        "description": safe_str(item.get("description")),
-        "createdAt": safe_str(item.get("creation_time")),
+        "image": primary or (photo_uris[0] if photo_uris else None),
+        "photos": photo_uris,
+        "description": safe_str(
+            (item.get("description").get("text") if isinstance(item.get("description"), dict) else item.get("description"))
+            or (
+                item.get("redacted_description").get("text")
+                if isinstance(item.get("redacted_description"), dict)
+                else item.get("redacted_description")
+            )
+        ),
+        "createdAt": _listing_created_at(item),
     }
 
 
@@ -337,33 +388,73 @@ def _normalize_event(item: dict) -> dict:
     loc = item.get("location") if isinstance(item.get("location"), dict) else {}
     tickets = item.get("ticketsInfo") if isinstance(item.get("ticketsInfo"), dict) else {}
     organizers = item.get("organizators") if isinstance(item.get("organizators"), list) else []
+    if not organizers and isinstance(item.get("organizers"), list):
+        organizers = item["organizers"]
+    if not organizers and isinstance(item.get("hosts"), list):
+        organizers = item["hosts"]
     location_name = item.get("location_name") or item.get("venue") or item.get("locationName")
+    start_date = safe_str(item.get("utcStartDate") or item.get("start_date") or item.get("startDate"))
+    start_time = safe_str(
+        item.get("startTime")
+        or item.get("dateTimeSentence")
+        or item.get("start_time")
+        or item.get("startDateTime")
+        or start_date
+    )
+    address = safe_str(
+        item.get("address")
+        or item.get("location_address")
+        or loc.get("address")
+        or loc.get("name")
+        or location_name
+    )
+    organizer = safe_str(
+        item.get("organizedBy")
+        or item.get("organizer")
+        or item.get("host")
+        or item.get("hostName")
+        or (organizers[0].get("name") if organizers and isinstance(organizers[0], dict) else None)
+    )
+    if not organizer:
+        privacy = safe_str(item.get("privacyInfo") or item.get("privacy_info")) or ""
+        m = re.search(r"Hosted by\s+(.+)", privacy, flags=re.IGNORECASE)
+        if m:
+            organizer = m.group(1).strip() or None
     return {
         "platform": "facebook",
         "id": safe_str(item.get("id") or item.get("event_id") or item.get("eventId")),
         "url": safe_str(item.get("url") or item.get("event_url") or item.get("eventUrl")),
         "name": safe_str(item.get("name") or item.get("title")),
         "description": safe_str(item.get("description")),
-        "startDate": safe_str(item.get("utcStartDate") or item.get("start_date") or item.get("startDate")),
-        "startTime": safe_str(item.get("startTime") or item.get("dateTimeSentence") or item.get("start_time")),
-        "duration": safe_str(item.get("duration")),
-        "eventType": safe_str(item.get("eventType") or item.get("event_type")),
+        "startDate": start_date,
+        "startTime": start_time,
+        "duration": safe_str(item.get("duration") or item.get("durationText")),
+        "eventType": safe_str(item.get("eventType") or item.get("event_type") or item.get("type")),
         "isOnline": item.get("isOnline") if item.get("isOnline") is not None else item.get("is_online"),
         "isPast": item.get("isPast") if item.get("isPast") is not None else item.get("is_past"),
         "isCanceled": item.get("isCanceled") if item.get("isCanceled") is not None else item.get("is_canceled"),
-        "address": safe_str(item.get("address") or item.get("location_address")),
+        "address": address,
         "image": safe_str(item.get("imageUrl") or item.get("photo_url") or item.get("image")),
-        "usersGoing": safe_int(item.get("usersGoing") or item.get("going_count")),
-        "usersInterested": safe_int(item.get("usersInterested") or item.get("interested_count")),
-        "usersResponded": safe_int(item.get("usersResponded") or item.get("responded_count")),
+        "usersGoing": safe_int(
+            item.get("usersGoing") or item.get("going_count") or item.get("going") or item.get("users_going")
+        ),
+        "usersInterested": safe_int(
+            item.get("usersInterested")
+            or item.get("interested_count")
+            or item.get("interested")
+            or item.get("users_interested")
+        ),
+        "usersResponded": safe_int(
+            item.get("usersResponded") or item.get("responded_count") or item.get("users_responded")
+        ),
         "location": {
             "name": safe_str(loc.get("name") or location_name),
             "city": safe_str(loc.get("city") or loc.get("contextualName") or item.get("location_city")),
             "latitude": loc.get("latitude") or item.get("latitude"),
             "longitude": loc.get("longitude") or item.get("longitude"),
-            "countryCode": safe_str(loc.get("countryCode")),
+            "countryCode": safe_str(loc.get("countryCode") or loc.get("country_code") or item.get("countryCode")),
         },
-        "organizer": safe_str(item.get("organizedBy") or item.get("organizer") or item.get("host")),
+        "organizer": organizer,
         "organizers": [
             {
                 "id": safe_str(o.get("id")),
@@ -374,9 +465,11 @@ def _normalize_event(item: dict) -> dict:
             for o in organizers
             if isinstance(o, dict)
         ],
-        "ticketsUrl": safe_str(tickets.get("buyUrl")),
-        "categories": item.get("discoveryCategories") or [],
-        "externalLinks": item.get("externalLinks") or [],
+        "ticketsUrl": safe_str(
+            tickets.get("buyUrl") or item.get("ticketsUrl") or item.get("ticketUrl") or item.get("tickets_url")
+        ),
+        "categories": item.get("discoveryCategories") or item.get("categories") or [],
+        "externalLinks": item.get("externalLinks") or item.get("external_links") or [],
     }
 
 
@@ -1190,7 +1283,7 @@ async def facebook_marketplace_search(
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-search",
-            params={"q": q, "location": location, "limit": limit, "details": details, "v": 2},
+            params={"q": q, "location": location, "limit": limit, "details": details, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1372,7 +1465,7 @@ async def facebook_event_details(
 
         data = await cached_or_run(
             endpoint="facebook.event-details",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

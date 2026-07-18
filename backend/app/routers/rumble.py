@@ -112,7 +112,9 @@ def _normalize_az_video(item: dict[str, Any]) -> dict[str, Any]:
         "url": _clean_url(item.get("url")),
         "embedUrl": f"https://rumble.com/embed/{video_id}/" if video_id else None,
         "title": safe_str(item.get("title")),
-        "description": safe_str(item.get("description")),
+        "description": safe_str(
+            item.get("description") or item.get("body") or item.get("summary") or item.get("desc")
+        ),
         "channel": safe_str(by.get("name") or by.get("title")),
         "channelUrl": _clean_url(by.get("url")),
         "channelFollowers": safe_int(by.get("followers")),
@@ -124,7 +126,7 @@ def _normalize_az_video(item: dict[str, Any]) -> dict[str, Any]:
         "publishedAt": safe_str(item.get("upload_date")),
         "thumbnail": safe_str(item.get("thumb")),
         "comments": safe_int(comments.get("count")),
-        "isLive": bool(item.get("is_live") or item.get("livestream_status")) or None,
+        "isLive": bool(item.get("is_live") or item.get("livestream_status")),
         "streams": [
             {
                 "url": safe_str(v.get("url")),

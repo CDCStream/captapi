@@ -762,11 +762,17 @@ async def video_details_native(video_id: str, norm_url: str) -> dict[str, Any] |
     micro = (player.get("microformat") or {}).get("playerMicroformatRenderer") or {}
     thumbs = (details.get("thumbnail") or {}).get("thumbnails") or []
     channel_id = safe_str(details.get("channelId"))
-    length = details.get("lengthSeconds")
+    length = details.get("lengthSeconds") or micro.get("lengthSeconds")
     try:
         duration_seconds = int(length) if length is not None else None
     except (TypeError, ValueError):
         duration_seconds = None
+    if duration_seconds is None:
+        approx = details.get("approxDurationMs") or micro.get("approxDurationMs")
+        try:
+            duration_seconds = int(int(approx) / 1000) if approx is not None else None
+        except (TypeError, ValueError):
+            duration_seconds = None
     return {
         "url": norm_url,
         "id": video_id,
@@ -786,6 +792,22 @@ async def video_details_native(video_id: str, norm_url: str) -> dict[str, Any] |
     }
 
 # --------------------------------------------------------------- comments --
+def _comment_author_avatar(author: dict[str, Any]) -> str | None:
+    direct = safe_str(author.get("avatarThumbnailUrl") or author.get("avatarUrl"))
+    if direct:
+        return direct
+    # Newer InnerTube nests avatars under avatar.image.sources[].
+    avatar = author.get("avatar") if isinstance(author.get("avatar"), dict) else {}
+    image = avatar.get("image") if isinstance(avatar.get("image"), dict) else {}
+    sources = image.get("sources") if isinstance(image.get("sources"), list) else []
+    if sources and isinstance(sources[0], dict):
+        return safe_str(sources[0].get("url"))
+    thumbs = author.get("thumbnails") if isinstance(author.get("thumbnails"), list) else []
+    if thumbs and isinstance(thumbs[0], dict):
+        return safe_str(thumbs[0].get("url"))
+    return _best_thumb(author.get("avatar")) or _best_thumb(author.get("thumbnail"))
+
+
 def _comment_payload_to_api(p: dict[str, Any]) -> dict[str, Any] | None:
     props = p.get("properties") or {}
     author = p.get("author") or {}
@@ -798,7 +820,7 @@ def _comment_payload_to_api(p: dict[str, Any]) -> dict[str, Any] | None:
     return {
         "id": cid,
         "author": safe_str(author.get("displayName")),
-        "authorAvatarUrl": safe_str(author.get("avatarThumbnailUrl")),
+        "authorAvatarUrl": _comment_author_avatar(author if isinstance(author, dict) else {}),
         "authorIsVerified": bool(author.get("isVerified")),
         "authorIsChannelOwner": bool(author.get("isCreator")),
         "text": text.strip(),

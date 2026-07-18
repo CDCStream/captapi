@@ -5,6 +5,7 @@ Backed by a config-driven Pinterest actor. Field mappings are defensive.
 
 from __future__ import annotations
 
+import asyncio
 import html
 import math
 import re
@@ -83,20 +84,37 @@ def _image(item: dict[str, Any]) -> str | None:
 
 def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
     pinner = item.get("pinner") or item.get("user") or {}
+    if not isinstance(pinner, dict):
+        pinner = {}
+    board = item.get("board") if isinstance(item.get("board"), dict) else {}
     pin_id = item.get("id") or item.get("pinId") or item.get("pin_id")
     pin_url = item.get("url") or item.get("pinUrl") or item.get("pin_url")
+    board_url = safe_str(item.get("boardUrl") or board.get("url"))
+    if board_url and board_url.startswith("/"):
+        board_url = f"https://www.pinterest.com{board_url}"
     return {
         "platform": "pinterest",
         "id": safe_str(pin_id),
         "url": safe_str(pin_url)
         or (f"https://www.pinterest.com/pin/{pin_id}/" if pin_id else None),
-        "title": safe_str(item.get("title") or item.get("grid_title")),
-        "description": safe_str(item.get("description")),
+        "title": safe_str(
+            item.get("title")
+            or item.get("grid_title")
+            or item.get("closeup_unified_title")
+            or item.get("gridTitle")
+        ),
+        "description": safe_str(
+            item.get("description")
+            or item.get("altText")
+            or item.get("autoAltText")
+            or item.get("alt_text")
+        ),
         "destinationUrl": safe_str(
             item.get("link")
             or item.get("destinationUrl")
             or item.get("sourceLink")
             or item.get("linkUrl")
+            or item.get("clickThroughUrl")
         ),
         "image": _image(item),
         "saves": safe_int(
@@ -106,24 +124,37 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
             or item.get("save_count")
             or item.get("saves")
             or item.get("reactionCount")
+            or item.get("aggregateSaveCount")
         ),
-        "comments": safe_int(item.get("comment_count") or item.get("commentCount")),
-        "publishedAt": safe_str(item.get("created_at") or item.get("createdAt")),
+        "comments": safe_int(
+            item.get("comment_count")
+            or item.get("commentCount")
+            or item.get("commentsCount")
+            or ((item.get("aggregated_pin_data") or {}).get("comment_count") if isinstance(item.get("aggregated_pin_data"), dict) else None)
+        ),
+        "publishedAt": safe_str(
+            item.get("created_at")
+            or item.get("createdAt")
+            or item.get("createdDate")
+            or item.get("date")
+        ),
         "board": {
-            "name": safe_str(item.get("boardName")),
-            "url": safe_str(item.get("boardUrl")),
+            "name": safe_str(item.get("boardName") or board.get("name")),
+            "url": board_url,
         },
         "author": {
             "username": safe_str(
                 pinner.get("username")
                 or item.get("pinner_username")
                 or item.get("creator")
+                or item.get("creatorUsername")
             ),
             "displayName": safe_str(
                 pinner.get("full_name")
                 or pinner.get("fullName")
                 or item.get("pinner_name")
                 or item.get("creatorFullName")
+                or item.get("creatorName")
             ),
             "followers": safe_int(
                 pinner.get("follower_count")
@@ -165,6 +196,41 @@ def _prefer_enriched(pins: list[dict[str, Any]]) -> list[dict[str, Any]]:
     enriched = [p for p in pins if p.get("title") or p.get("image")]
     sparse = [p for p in pins if not (p.get("title") or p.get("image"))]
     return enriched + sparse
+
+
+async def _enrich_sparse_pins(pins: list[dict[str, Any]], *, max_enrich: int = 10) -> list[dict[str, Any]]:
+    """Fill title/saves/etc for stub actor rows via Pinterest's public pidgets API."""
+    to_enrich = [p for p in pins if p.get("id") and not p.get("title")][:max_enrich]
+    if not to_enrich:
+        return pins
+    details = await asyncio.gather(
+        *[_fetch_pin_pidgets(str(p["id"])) for p in to_enrich],
+        return_exceptions=True,
+    )
+    by_id: dict[str, dict[str, Any]] = {}
+    for pin, detail in zip(to_enrich, details):
+        if isinstance(detail, dict) and detail.get("id"):
+            by_id[str(detail["id"])] = detail
+    out: list[dict[str, Any]] = []
+    for pin in pins:
+        detail = by_id.get(str(pin.get("id") or ""))
+        if not detail:
+            out.append(pin)
+            continue
+        merged = {**pin}
+        for key in ("title", "description", "destinationUrl", "saves", "comments", "publishedAt", "image"):
+            if not merged.get(key) and detail.get(key):
+                merged[key] = detail[key]
+        if isinstance(merged.get("author"), dict) and isinstance(detail.get("author"), dict):
+            for key, value in detail["author"].items():
+                if value and not merged["author"].get(key):
+                    merged["author"][key] = value
+        if isinstance(merged.get("board"), dict) and isinstance(detail.get("board"), dict):
+            for key, value in detail["board"].items():
+                if value and not merged["board"].get(key):
+                    merged["board"][key] = value
+        out.append(merged)
+    return out
 
 
 def _meta(page: str, key: str) -> str | None:
@@ -242,18 +308,34 @@ async def _fetch_pin_pidgets(pin_id: str) -> dict[str, Any] | None:
     if profile_url:
         username = profile_url.rstrip("/").rsplit("/", 1)[-1]
     board_url = safe_str(board.get("url"))
+    rich = pin.get("rich_metadata") if isinstance(pin.get("rich_metadata"), dict) else {}
+    rich_summary = pin.get("rich_summary") if isinstance(pin.get("rich_summary"), dict) else {}
+    title = safe_str(
+        rich.get("title")
+        or pin.get("grid_title")
+        or pin.get("closeup_unified_title")
+        or rich_summary.get("display_name")
+        or pin.get("title")
+        or pin.get("description")
+    )
     return {
         "platform": "pinterest",
         "id": safe_str(pin.get("id") or pin_id),
         "url": f"https://www.pinterest.com/pin/{pin_id}/",
-        "title": safe_str((pin.get("rich_metadata") or {}).get("title")) or None,
-        "description": safe_str(pin.get("description")),
-        "destinationUrl": safe_str(pin.get("link")),
+        "title": title,
+        "description": safe_str(
+            pin.get("description") or pin.get("auto_alt_text") or pin.get("alt_text")
+        ),
+        "destinationUrl": safe_str(pin.get("link") or rich.get("url")),
         "image": safe_str(image),
         "isVideo": bool(pin.get("is_video")),
         "dominantColor": safe_str(pin.get("dominant_color")),
-        "saves": safe_int(stats.get("saves") or pin.get("repin_count")),
-        "comments": safe_int(pin.get("comment_count")),
+        "saves": safe_int(stats.get("saves") or pin.get("repin_count") or pin.get("share_count")),
+        "comments": safe_int(
+            pin.get("comment_count")
+            or stats.get("comments")
+            or ((pin.get("aggregated_pin_data") or {}).get("comment_count") if isinstance(pin.get("aggregated_pin_data"), dict) else None)
+        ),
         "publishedAt": safe_str(pin.get("created_at")),
         "board": {
             "name": safe_str(board.get("name")),
@@ -373,11 +455,12 @@ async def user_pins(
                 {"mode": "userPins", "usernames": [username], "maxItems": limit}, limit
             )
             pins = _prefer_enriched([_normalize_pin(i) for i in items if i.get("recordType") != "board"])[:limit]
+            pins = await _enrich_sparse_pins(pins)
             return {"username": username, "totalReturned": len(pins), "pins": pins}
 
         data = await cached_or_run(
             endpoint="pinterest.user-pins",
-            params={"username": username, "limit": limit, "v": 2},
+            params={"username": username, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -392,22 +475,39 @@ def _normalize_board(item: dict[str, Any], username: str | None = None) -> dict[
     if url and url.startswith("/"):
         url = f"https://www.pinterest.com{url}"
     owner = item.get("owner") if isinstance(item.get("owner"), dict) else {}
+    slug = safe_str(item.get("boardSlug") or item.get("slug"))
+    # Sparse actor rows only expose slug/name/url — derive a stable id from the URL path.
+    board_id = safe_str(item.get("id") or item.get("boardId"))
+    if not board_id and url:
+        parts = [p for p in url.rstrip("/").split("/") if p]
+        if len(parts) >= 2:
+            board_id = f"{parts[-2]}/{parts[-1]}"
+    cover = item.get("cover") if isinstance(item.get("cover"), dict) else {}
+    cover_images = cover.get("images") if isinstance(cover.get("images"), dict) else {}
+    cover_orig = cover_images.get("orig") if isinstance(cover_images.get("orig"), dict) else {}
     return {
         "platform": "pinterest",
-        "id": safe_str(item.get("id") or item.get("boardId")),
-        "name": safe_str(item.get("boardName") or item.get("name")),
-        "slug": safe_str(item.get("boardSlug")),
+        "id": board_id,
+        "name": safe_str(item.get("boardName") or item.get("name") or item.get("title")),
+        "slug": slug,
         "url": url,
-        "privacy": safe_str(item.get("privacy")),
-        "pinCount": safe_int(item.get("pinCount") or item.get("pin_count")),
-        "followers": safe_int(item.get("followerCount") or item.get("follower_count")),
+        "privacy": safe_str(item.get("privacy") or item.get("boardPrivacy")),
+        "pinCount": safe_int(
+            item.get("pinCount") or item.get("pin_count") or item.get("pinsCount") or item.get("pin_count_mod")
+        ),
+        "followers": safe_int(
+            item.get("followerCount") or item.get("follower_count") or item.get("followers")
+        ),
         "sectionCount": safe_int(item.get("sectionCount") or item.get("section_count")),
         "coverImage": safe_str(
             item.get("coverImageHdUrl")
             or item.get("coverImageUrl")
             or item.get("image_cover_url")
+            or item.get("coverImage")
+            or cover.get("url")
+            or cover_orig.get("url")
         ),
-        "createdAt": safe_str(item.get("createdDate") or item.get("created_at")),
+        "createdAt": safe_str(item.get("createdDate") or item.get("created_at") or item.get("createdAt")),
         "owner": {
             "username": safe_str(
                 owner.get("username")
@@ -415,7 +515,9 @@ def _normalize_board(item: dict[str, Any], username: str | None = None) -> dict[
                 or item.get("creator")
                 or username
             ),
-            "displayName": safe_str(owner.get("full_name") or item.get("ownerName")),
+            "displayName": safe_str(
+                owner.get("full_name") or item.get("ownerName") or item.get("creatorFullName")
+            ),
         },
     }
 
@@ -446,7 +548,7 @@ async def pinterest_user_boards(
 
         data = await cached_or_run(
             endpoint="pinterest.user-boards",
-            params={"username": username, "limit": limit, "v": 2},
+            params={"username": username, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -489,11 +591,12 @@ async def pinterest_board(
                 {"mode": "boardPins", "boardUrls": [url], "maxItems": limit}, limit
             )
             pins = _prefer_enriched([_normalize_pin(i) for i in items if i.get("recordType") != "board"])[:limit]
+            pins = await _enrich_sparse_pins(pins)
             return {"board": url, "totalReturned": len(pins), "pins": pins}
 
         data = await cached_or_run(
             endpoint="pinterest.board",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

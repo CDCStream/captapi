@@ -54,15 +54,21 @@ def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
         "id": safe_str(item.get("id") or item.get("productId") or item.get("product_id")),
         "url": safe_str(item.get("url") or item.get("productUrl") or item.get("product_url")),
         "title": safe_str(item.get("title") or item.get("name") or item.get("productName") or item.get("productTitle")),
-        "description": safe_str(item.get("description")),
+        "description": safe_str(
+            item.get("description")
+            or item.get("product_desc")
+            or item.get("productDesc")
+            or item.get("desc")
+            or item.get("productDescription")
+        ),
         "price": price,
-        "originalPrice": item.get("originalPrice"),
+        "originalPrice": item.get("originalPrice") or item.get("origin_price") or item.get("original_price"),
         "currency": safe_str(currency),
-        "discount": safe_str(item.get("discountPercent") or item.get("discount")),
-        "rating": item.get("rating") or item.get("reviewRating"),
-        "reviews": safe_int(item.get("reviews") or item.get("reviewCount")),
+        "discount": safe_str(item.get("discountPercent") or item.get("discount") or item.get("discount_rate")),
+        "rating": item.get("rating") or item.get("reviewRating") or item.get("product_rating"),
+        "reviews": safe_int(item.get("reviews") or item.get("reviewCount") or item.get("review_count")),
         "sold": safe_int(item.get("sold") or item.get("soldCount") or item.get("unitsSold") or item.get("sales_count")),
-        "stock": safe_int(item.get("stock")),
+        "stock": safe_int(item.get("stock") or item.get("stock_num") or item.get("inventory") or item.get("sku_stock")),
         "image": safe_str(
             item.get("image")
             or item.get("imageUrl")
@@ -72,9 +78,18 @@ def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
             or first_image
         ),
         "seller": {
-            "id": safe_str(seller.get("id") or seller.get("sellerId") or item.get("shopId")),
-            "name": safe_str(seller.get("name") or seller.get("sellerName") or seller.get("shopName") or item.get("shopName")),
-            "url": safe_str(seller.get("url") or seller.get("shopUrl")),
+            "id": safe_str(
+                seller.get("id")
+                or seller.get("sellerId")
+                or seller.get("shop_id")
+                or item.get("shopId")
+                or item.get("shop_id")
+                or item.get("seller_id")
+            ),
+            "name": safe_str(
+                seller.get("name") or seller.get("sellerName") or seller.get("shopName") or item.get("shopName")
+            ),
+            "url": safe_str(seller.get("url") or seller.get("shopUrl") or item.get("shopUrl")),
             "rating": seller.get("rating"),
         },
     }

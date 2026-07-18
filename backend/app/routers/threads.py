@@ -68,13 +68,27 @@ def _require_threads_post_url(url: str) -> str:
 
 
 def _user(u: dict[str, Any]) -> dict[str, Any]:
-    username = u.get("username") or u.get("userName")
+    username = u.get("username") or u.get("userName") or u.get("user_name")
+    pic_hd = u.get("hd_profile_pic_url_info") if isinstance(u.get("hd_profile_pic_url_info"), dict) else {}
     return {
         "username": safe_str(username),
         "displayName": safe_str(u.get("full_name") or u.get("fullName") or u.get("name")),
         "verified": u.get("is_verified") or u.get("isVerified"),
-        "followers": safe_int(u.get("follower_count") or u.get("followerCount") or u.get("followers")),
-        "profileImage": safe_str(u.get("profile_pic_url") or u.get("profilePicUrl")),
+        "followers": safe_int(
+            u.get("follower_count")
+            or u.get("followerCount")
+            or u.get("followers")
+            or u.get("follower_count_text")
+        ),
+        "profileImage": safe_str(
+            u.get("profile_pic_url")
+            or u.get("profilePicUrl")
+            or u.get("profile_pic_url_hd")
+            or u.get("profile_picture_url")
+            or u.get("profilePictureUrl")
+            or u.get("avatar")
+            or pic_hd.get("url")
+        ),
     }
 
 

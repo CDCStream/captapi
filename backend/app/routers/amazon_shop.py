@@ -23,16 +23,21 @@ router = APIRouter()
 
 
 def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
+    price = item.get("price") or item.get("priceValue")
+    currency = safe_str(item.get("currency") or item.get("currencyCode"))
+    price_formatted = safe_str(item.get("priceFormatted") or item.get("priceText"))
+    if not price_formatted and price is not None:
+        price_formatted = f"{currency} {price}".strip() if currency else str(price)
     return {
         "asin": safe_str(item.get("asin") or item.get("ASIN")),
         "title": safe_str(item.get("title") or item.get("name")),
         "url": safe_str(item.get("url") or item.get("productUrl")),
         "image": safe_str(item.get("image") or item.get("imageUrl")),
-        "price": item.get("price") or item.get("priceValue"),
-        "priceFormatted": safe_str(item.get("priceFormatted") or item.get("priceText")),
+        "price": price,
+        "priceFormatted": price_formatted,
         "rating": safe_float(item.get("rating") or item.get("stars")),
         "reviews": safe_int(item.get("reviews") or item.get("reviewsCount") or item.get("reviewCount")),
-        "availability": safe_str(item.get("availability")),
+        "availability": safe_str(item.get("availability") or item.get("availabilityType")),
     }
 
 

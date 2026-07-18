@@ -35,19 +35,19 @@ EXAMPLES = {
 
 # lnk.bio (and similar) sprinkle their own nav/share links through the markup;
 # these hosts must be filtered out so we only return the creator's real links.
+# Only strip share/nav URLs — keep same-host creator CTAs (pillar.io / link.me
+# pages often list outbound destinations on their own domain).
 _NAV_HOSTS = (
-    "lnk.bio",
+    "lnk.bio/share",
     "linkinbio.wiki",
     "facebook.com/sharer",
     "wa.me",
     "twitter.com/intent",
+    "x.com/intent",
     "line.me/lineit",
     "story.kakao.com/share",
     "reddit.com/submit",
     "linkedin.com/sharing",
-    "komi.io",
-    "pillar.io",
-    "link.me",
 )
 
 # Detected social-account keys, matched against link URLs (first match wins).
@@ -145,8 +145,24 @@ def _links(data: dict[str, Any]) -> list[dict[str, Any]]:
     seen: set[str] = set()
     links = []
     for obj in _walk(data):
-        raw_url = obj.get("url") or obj.get("link") or obj.get("href") or obj.get("targetUrl")
-        if not isinstance(raw_url, str) or not raw_url.startswith("http"):
+        raw_url = (
+            obj.get("url")
+            or obj.get("link")
+            or obj.get("href")
+            or obj.get("targetUrl")
+            or obj.get("destination")
+            or obj.get("destinationUrl")
+            or obj.get("redirectUrl")
+        )
+        if not isinstance(raw_url, str):
+            continue
+        raw_url = raw_url.strip()
+        if raw_url.startswith("//"):
+            raw_url = "https:" + raw_url
+        if not raw_url.startswith("http"):
+            continue
+        low = raw_url.lower()
+        if any(nav in low for nav in _NAV_HOSTS):
             continue
         if raw_url in seen:
             continue

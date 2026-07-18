@@ -49,24 +49,33 @@ async def _gql(query: str, variables: dict[str, Any]) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _video_node(node: dict[str, Any], *, broadcaster: str | None = None) -> dict[str, Any]:
+def _video_node(
+    node: dict[str, Any],
+    *,
+    broadcaster: str | None = None,
+    profile_image: str | None = None,
+) -> dict[str, Any]:
     game = node.get("game") or {}
+    video_id = safe_str(node.get("id"))
     return {
         "platform": "twitch",
-        "id": safe_str(node.get("id")),
+        "id": video_id,
         "slug": None,
-        "url": (f"https://www.twitch.tv/videos/{node.get('id')}" if node.get("id") else None),
-        "embedUrl": None,
+        "url": (f"https://www.twitch.tv/videos/{video_id}" if video_id else None),
+        "embedUrl": (
+            f"https://player.twitch.tv/?video={video_id}&parent=captapi.com" if video_id else None
+        ),
         "title": safe_str(node.get("title")),
         "createdAt": safe_str(node.get("createdAt")),
         "durationSeconds": safe_int(node.get("lengthSeconds")),
         "views": safe_int(node.get("viewCount")),
         "thumbnail": safe_str(node.get("previewThumbnailURL")),
+        # Twitch GraphQL does not expose a direct MP4 for VODs without a token.
         "videoUrl": None,
         "game": safe_str(game.get("name") if isinstance(game, dict) else game),
-        "language": None,
+        "language": safe_str(node.get("language")),
         "broadcaster": broadcaster,
-        "broadcasterProfileImage": None,
+        "broadcasterProfileImage": profile_image,
     }
 
 
@@ -85,7 +94,7 @@ query($login: String!, $videoLimit: Int!) {
     }
     lastBroadcast { title startedAt game { name } }
     videos(first: $videoLimit, sort: TIME) {
-      edges { node { id title lengthSeconds viewCount createdAt previewThumbnailURL game { name } } }
+      edges { node { id title lengthSeconds viewCount createdAt previewThumbnailURL language game { name } } }
     }
   }
 }
@@ -104,9 +113,10 @@ async def channel_native(login: str, video_limit: int = 30) -> dict[str, Any] | 
     stream = u.get("stream")
     last = u.get("lastBroadcast") or {}
     login_val = safe_str(u.get("login")) or login
+    profile_image = safe_str(u.get("profileImageURL"))
     edges = ((u.get("videos") or {}).get("edges")) or []
     recent = [
-        _video_node(e["node"], broadcaster=login_val)
+        _video_node(e["node"], broadcaster=login_val, profile_image=profile_image)
         for e in edges
         if isinstance(e, dict) and isinstance(e.get("node"), dict)
     ]

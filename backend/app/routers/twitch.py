@@ -74,17 +74,39 @@ def _run_input(mode: str, targets: list[str], limit: int = 30) -> dict[str, Any]
 
 
 def _video(item: dict[str, Any]) -> dict[str, Any]:
-    slug = safe_str(item.get("slug") or item.get("clipSlug"))
     url = safe_str(item.get("url") or item.get("videoUrl") or item.get("clipUrl") or item.get("sourceUrl"))
+    slug = safe_str(item.get("slug") or item.get("clipSlug")) or (_clip_slug(url) if url else None)
     if not url and slug:
         url = f"https://clips.twitch.tv/{slug}"
+    video_id = safe_str(item.get("id") or item.get("videoId") or item.get("clipId"))
+    # Actor clip rows often omit embed/mp4; derive embed from slug or VOD id.
+    embed = safe_str(item.get("embedUrl") or item.get("embedURL"))
+    if not embed and slug:
+        embed = f"https://clips.twitch.tv/embed?clip={slug}"
+    elif not embed and video_id and url and "/videos/" in url:
+        embed = f"https://player.twitch.tv/?video={video_id}&parent=captapi.com"
+    broadcaster = safe_str(
+        item.get("broadcasterName")
+        or item.get("broadcasterLogin")
+        or item.get("displayName")
+        or item.get("login")
+    )
+    if not broadcaster and url and "twitch.tv/" in url and "/clip/" in url:
+        # https://www.twitch.tv/<login>/clip/<slug>
+        try:
+            broadcaster = url.split("twitch.tv/", 1)[1].split("/clip/", 1)[0].strip("/") or None
+        except IndexError:
+            broadcaster = None
+    qualities = item.get("videoQualities") if isinstance(item.get("videoQualities"), list) else []
+    quality_url = None
+    if qualities and isinstance(qualities[0], dict):
+        quality_url = qualities[0].get("sourceURL") or qualities[0].get("sourceUrl")
     return {
         "platform": "twitch",
-        "id": safe_str(item.get("id") or item.get("videoId") or item.get("clipId")),
+        "id": video_id,
         "slug": slug,
         "url": url,
-        "embedUrl": safe_str(item.get("embedUrl") or item.get("embedURL"))
-        or (f"https://clips.twitch.tv/embed?clip={slug}" if slug else None),
+        "embedUrl": embed,
         "title": safe_str(item.get("title") or item.get("clipTitle")),
         "createdAt": safe_str(item.get("createdAt") or item.get("publishedAt")),
         "durationSeconds": safe_int(
@@ -92,11 +114,27 @@ def _video(item: dict[str, Any]) -> dict[str, Any]:
         ),
         "views": safe_int(item.get("viewCount") or item.get("views") or item.get("clipViewCount")),
         "thumbnail": safe_str(item.get("thumbnailUrl") or item.get("thumbnailURL") or item.get("thumbnail")),
-        "videoUrl": safe_str(item.get("videoMp4Url") or item.get("mp4Url") or item.get("sourceURL") or item.get("videoQualitiesUrl")),
-        "game": safe_str(item.get("gameName") or item.get("game") or item.get("currentGame")),
+        "videoUrl": safe_str(
+            item.get("videoMp4Url")
+            or item.get("mp4Url")
+            or item.get("sourceURL")
+            or item.get("sourceUrl")
+            or item.get("videoQualitiesUrl")
+            or quality_url
+        ),
+        "game": safe_str(
+            item.get("gameName")
+            or item.get("currentGame")
+            or ((item.get("game") or {}).get("name") if isinstance(item.get("game"), dict) else item.get("game"))
+        ),
         "language": safe_str(item.get("language") or item.get("broadcastLanguage")),
-        "broadcaster": safe_str(item.get("broadcasterName") or item.get("displayName") or item.get("login")),
-        "broadcasterProfileImage": safe_str(item.get("broadcasterProfileImageUrl") or item.get("profileImageUrl")),
+        "broadcaster": broadcaster,
+        "broadcasterProfileImage": safe_str(
+            item.get("broadcasterProfileImageUrl")
+            or item.get("profileImageUrl")
+            or item.get("profileImageURL")
+            or ((item.get("broadcaster") or {}).get("profileImageURL") if isinstance(item.get("broadcaster"), dict) else None)
+        ),
     }
 
 
