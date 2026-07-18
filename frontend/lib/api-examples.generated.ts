@@ -19891,7 +19891,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "channelName": "MrBeast",
     "channelUrl": "https://www.youtube.com/@MrBeast",
     "likes": "727K",
-    "comments": null,
+    "comments": 16260,
     "images": [
       "https://yt3.ggpht.com/BgBr4f_nvLm84HY2JVaPiDZRLZXJsqA7Q29CJkAksrwRFNXN1GgQJxzjYfzWUYR6ZekKBXCVwxPQKw=s1000-rw-nd-v1"
     ]

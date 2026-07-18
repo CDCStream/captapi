@@ -27,11 +27,16 @@ from app.services.youtube_native import (
     channel_tab_native,
     comment_replies_native,
     comments_native,
+    find_continuation_token,
     hashtag_native,
+    innertube,
+    parse_count_text,
     playlist_native,
     search_native,
+    text_of,
     transcript_native,
     video_details_native,
+    walk_find,
 )
 from app.utils.formatters import normalize_language_code, safe_int, safe_list, safe_str, strip_empty
 from app.utils.url import (
@@ -1811,6 +1816,22 @@ def _find_backstage_post(obj: Any):
             yield from _find_backstage_post(value)
 
 
+async def _community_post_comment_count(page_data: dict[str, Any]) -> int | None:
+    """Comment totals load via InnerTube browse continuation, not ytInitialData."""
+    token = find_continuation_token(page_data)
+    if not token:
+        return None
+    payload = await innertube("browse", {"continuation": token}, timeout=15)
+    if not isinstance(payload, dict):
+        return None
+    for header in walk_find(payload, "commentsHeaderRenderer"):
+        for key in ("countText", "commentsCount", "headerText"):
+            n = parse_count_text(text_of(header.get(key)))
+            if n is not None:
+                return n
+    return None
+
+
 async def _fetch_community_post_page(url: str) -> dict[str, Any]:
     """Parse a single community post from the public post page's
     ytInitialData (the community actor only accepts channel URLs)."""
@@ -1848,6 +1869,7 @@ async def _fetch_community_post_page(url: str) -> dict[str, Any]:
         thumbs = (renderer.get("image") or {}).get("thumbnails") or []
         if thumbs:
             images.append(safe_str(thumbs[-1].get("url")))
+    comments = await _community_post_comment_count(data)
     return {
         "platform": "youtube",
         "id": post_id,
@@ -1857,7 +1879,7 @@ async def _fetch_community_post_page(url: str) -> dict[str, Any]:
         "channelName": safe_str(_runs_text(author)),
         "channelUrl": f"https://www.youtube.com{author_browse}" if author_browse else None,
         "likes": safe_str(_runs_text(post.get("voteCount"))),
-        "comments": None,
+        "comments": comments,
         "images": [i for i in images if i],
     }
 
@@ -1893,7 +1915,7 @@ async def youtube_community_post_details(
 
         data = await cached_or_run(
             endpoint="youtube.community-post-details",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
