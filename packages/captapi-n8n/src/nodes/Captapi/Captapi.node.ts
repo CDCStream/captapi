@@ -135,7 +135,7 @@ export class Captapi implements INodeType {
 		version: 1,
 		subtitle: '={{$parameter["operation"]}}',
 		description:
-			'Structured social media data from 29 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop) — transcripts, AI summaries, comments, stats, search and downloads.',
+			'Structured social media data from 27 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop) — transcripts, AI summaries, comments, stats, search and downloads.',
 		defaults: {
 			name: 'Captapi',
 		},

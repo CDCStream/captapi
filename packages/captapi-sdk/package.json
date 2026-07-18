@@ -1,7 +1,7 @@
 {
   "name": "@captapi/sdk",
   "version": "0.1.0",
-  "description": "Official typed TypeScript SDK for the Captapi social media API — 179 endpoints across 29 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Twitch, Spotify, and more). Zero dependencies, built on fetch.",
+  "description": "Official typed TypeScript SDK for the Captapi social media API — 170 endpoints across 27 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Twitch, Spotify, and more). Zero dependencies, built on fetch.",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",

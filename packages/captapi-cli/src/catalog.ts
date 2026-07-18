@@ -463,5 +463,5 @@ export const ENDPOINTS: Endpoint[] = [
 
 /** A concise, agent-facing description (summary + cost) for an endpoint. */
 export function describe(e: Endpoint): string {
-  return `${e.summary} Costs ~${e.credits} credit${e.credits === 1 ? "" : "s"}; cached results are free, failures are never charged.`;
+  return `${e.summary} Costs ~${e.credits} credit${e.credits === 1 ? "" : "s"}; pass cache=true for a free 24h cache hit (default always fresh); failures are never charged.`;
 }

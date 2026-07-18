@@ -8,7 +8,7 @@ Built with the Zapier Platform CLI (`zapier-platform-core` 19).
 - **28 featured actions** covering the most-used endpoints (YouTube / TikTok /
   Instagram transcripts, summaries, details, comments, profiles, search;
   Facebook, Twitter/X, Reddit, LinkedIn, Threads; account balance).
-- **1 "Custom API Request" action** that exposes all 179 endpoints via a
+- **1 "Custom API Request" action** that exposes all 170 endpoints via a
   dropdown — picking an endpoint dynamically shows its exact input fields.
 - **API key auth** (Bearer), validated against `GET /v1/account/limits`.
 - Friendly error mapping: 401/403 → reconnect prompt, 402 → "top up credits".

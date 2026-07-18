@@ -50,7 +50,7 @@ function registerEndpoints(program: Command): void {
       .summary(`${e.summary} (${e.credits}cr)`)
       .description(
         `${e.summary}\n\nPlatform: ${e.platform}  •  Path: ${e.path}  •  ~${e.credits} credit(s).\n` +
-          `Cached results are free; failures are never charged.`,
+          `pass cache=true for a free 24h cache hit (default always fresh); failures are never charged.`,
       );
     for (const p of e.params) {
       const opt = new Option(flagFor(p), p.description);
@@ -67,7 +67,7 @@ function buildProgram(): Command {
   program
     .name("captapi")
     .description(
-      "Captapi CLI — social media data from 29 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop) from your terminal.",
+      "Captapi CLI — social media data from 27 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop) from your terminal.",
     )
     .version(VERSION, "-v, --version", "Print the CLI version");
 

@@ -1,11 +1,11 @@
 ---
 name: captapi
-description: Use when extracting public social-media and web data from YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Google Search, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, Age/Gender enrichment, public Ad Libraries, or Captapi account usage — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, commerce data, video downloads, credit balance, and request history. Captapi is one REST API (and MCP server) covering all 29 data platforms with a single key. Trigger on requests like "get this YouTube transcript", "scrape this TikTok profile", "fetch Instagram reel comments", or "summarize this video".
+description: Use when extracting public social-media and web data from YouTube, TikTok, Instagram, Facebook, X/Twitter, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, public Ad Libraries, or Captapi account usage — transcripts, AI summaries, comments, video/post details, profile & channel stats, search, hashtag/music lookups, commerce data, credit balance, and request history. Captapi is one REST API (and MCP server) covering all 27 data platforms with a single key. Trigger on requests like "get this YouTube transcript", "scrape this TikTok profile", "fetch Instagram reel comments", or "summarize this video".
 ---
 
 # Captapi
 
-Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Google Search, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, Age/Gender enrichment, public Ad Libraries, and account usage utilities**. One key works across all 29 data platforms. No OAuth, no per-platform SDKs. Responses are clean JSON. Pass cache=true for the 24h response cache (repeat hits cost 0 credits); default is cache=false (always fresh). 170 endpoints total.
+Captapi is one API for structured data from **YouTube, TikTok, Instagram, Facebook, X (Twitter), Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, GitHub, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop, TikTok Shop, public Ad Libraries, and account usage utilities**. One key works across all 27 data platforms. No OAuth, no per-platform SDKs. Responses are clean JSON. Pass cache=true for the 24h response cache (repeat hits cost 0 credits); default is cache=false (always fresh). 170 endpoints total.
 
 - Base URL: `https://api.captapi.com`
 - Docs: https://captapi.com/docs · Full machine reference: https://captapi.com/llms-full.txt
@@ -19,11 +19,12 @@ Using Captapi requires a `capt_live_...` API key, and **creating one requires a 
 
 ## How to call Captapi
 
-Every endpoint is a single authenticated `GET` request. Pass parameters as URL query params (URL-encode values). Send the key as a Bearer token:
+Every endpoint is a single authenticated `GET` request. Pass parameters as URL query params (URL-encode values). Send the key as `Authorization: Bearer capt_live_...` or `x-api-key: capt_live_...`:
 
 ```bash
 curl "https://api.captapi.com/v1/youtube/transcript?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ" \
   -H "Authorization: Bearer capt_live_..."
+# or: -H "x-api-key: capt_live_..."
 ```
 
 Response shape:
@@ -70,13 +71,13 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 - `url` — pass the **full public URL** of the video/reel/post/profile. Each endpoint's table notes the expected URL type.
 - `q` — search query or keyword (min 2 chars). For hashtag endpoints, pass the tag **without** `#`.
-- `limit` — optional; controls how many items list/search/comment endpoints return. **Billed per result**, so request only what you need. Defaults and maxes vary per endpoint.
-- `language` — optional ISO code (e.g. `en`) for the **YouTube** transcript/summary endpoints (incl. Shorts); defaults to auto-detect. Other platforms' transcript/summary endpoints take only `url`.
+- `limit` — optional; controls how many items list/search/comment endpoints return. **Usually billed per result**, so request only what you need. Exceptions billed flat: `tiktok_comments`, `tiktok_channel_posts`, and `tiktok_comment_replies` = **2 credits** per call. Defaults and maxes vary per endpoint.
+- `language` — optional. For transcript/summarize endpoints (YouTube, TikTok, Instagram, Shorts): preferred speech/caption language as an ISO code (e.g. `en`); defaults to auto-detect. For `tiktok_search_suggestions`: UI locale such as `en-US` or `de-DE` (default `en-US`), not caption language.
 - `comment_id` — required for `*_comment_replies`; get it from the corresponding `*_comments` response.
 
 ## Credits & errors
 
-- Each endpoint costs a fixed number of credits (see tables). **Cached results (within 24h) cost 0.** Failed or empty results are **never charged**.
+- Each endpoint costs a fixed number of credits (see tables). Pass `cache=true` for a free 24h shared-cache hit; default is always fresh (`cache=false`). Failed or empty results are **never charged**.
 - Error responses are non-2xx with `{ "detail": "..." }`:
   - `401` — missing/invalid key. Re-check the key with the user.
   - `402` — out of credits. Tell the user to top up at https://captapi.com/dashboard/billing.
@@ -277,12 +278,6 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `github_trending_repositories` | `/v1/github/trending-repositories` | `q` (string), `limit`? (number), `cache`? (boolean) | 12 |
 | `github_trending_developers` | `/v1/github/trending-developers` | `q` (string), `limit`? (number), `cache`? (boolean) | 12 |
 
-### Google Search
-
-| Tool / endpoint | REST path | Parameters | Credits |
-| --- | --- | --- | --- |
-
-
 ### Twitch
 
 | Tool / endpoint | REST path | Parameters | Credits |
@@ -342,12 +337,6 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
 | `amazon_shop_page` | `/v1/amazon-shop/page` | `url` (string), `marketplace`? (string), `limit`? (number), `cache`? (boolean) | 89 |
-
-### Age and Gender
-
-| Tool / endpoint | REST path | Parameters | Credits |
-| --- | --- | --- | --- |
-
 
 ### Kwai
 

@@ -73,7 +73,7 @@ export async function GET() {
 Captapi is a developer API (Merchant of Record billing via Paddle) that unifies access to public social-media data across ${PLATFORM_COUNT} platforms. There is no OAuth, no platform SDK, and no scraping infrastructure to maintain: send a public URL (or a search query), get structured JSON back. A single API key works across every platform. Requests fetch fresh data by default; pass cache=true to serve from the 24h shared cache (0 credits on hit). New accounts start with 100 free credits.
 
 Base API URL: https://api.captapi.com
-Authentication: \`Authorization: Bearer capt_live_...\` (create a key in the dashboard).
+Authentication: \`Authorization: Bearer capt_live_...\` or \`x-api-key: capt_live_...\` (create a key in the dashboard).
 Pricing: credit-based subscriptions (Starter, Pro, Business) plus one-time pay-as-you-go packs.
 
 ## Agent Operating Protocol
@@ -81,7 +81,7 @@ Pricing: credit-based subscriptions (Starter, Pro, Business) plus one-time pay-a
 2. If MCP is not available, call REST directly. Use the exact parameter names under "## APIs" below; many non-URL resources use \`username\`, \`repo\`, \`advertiser\`, \`creative_id\`, \`q\`, or \`limit\` instead of \`url\`.
 3. Match URL platform to endpoint/tool platform before calling. A TikTok endpoint needs a \`tiktok.com\` URL, a YouTube endpoint needs a \`youtube.com\` or \`youtu.be\` URL, Instagram needs \`instagram.com\`, etc. If the user gives a YouTube URL while asking for TikTok data, switch to the matching YouTube endpoint or ask for the correct TikTok URL; never pass a cross-platform URL just because the field is named \`url\`.
 4. Ask the human for a \`capt_live_...\` API key once. Do not sign up automatically, scrape the dashboard, guess keys, commit keys, or expose keys in generated code.
-5. For list/search/comment endpoints, start with a small \`limit\` unless the user asks for more. Pass cache=true for a free 24h cache hit (default is always fresh). Fresh list/search/comment calls may scale by result count.
+5. For list/search/comment endpoints, start with a small \`limit\` unless the user asks for more. Pass cache=true for a free 24h cache hit (default is always fresh). Most list/search/comment calls scale by result count; exceptions billed flat include TikTok comments, channel-posts, and comment-replies (2 credits each).
 6. Error handling: 401/402 means stop and ask the user to fix auth/billing; 429/502 can be retried with backoff; 400 platform mismatch means choose the endpoint matching the URL's platform or ask for the correct URL; 422/no-captions/not-found means report the target cannot be processed and avoid retry loops.
 7. Return \`data\` by default. Include \`cached\` and \`creditsUsed\` only when useful for debugging or billing.
 
@@ -204,14 +204,14 @@ A Make custom app exposes all ${ALL_ENDPOINTS.length} endpoints as action module
 
 ## Connect via Apify (BYO-key Actor)
 
-The Captapi Actor on Apify is a bring-your-own-key wrapper around the REST API (it does not scrape). Provide your \`capt_live_...\` key, pick an **Operation** (any of the ${ALL_ENDPOINTS.length} endpoints), fill the fields it needs (url / search query / limit / ...), and the Actor returns one dataset item with the same structured JSON \`data\` as the REST API. Credits are billed to your own Captapi account; cached results are free and failures are never charged. The Actor is also discoverable and callable by AI agents through Apify's MCP server (mcp.apify.com) — its input and output fields are fully documented so agents can run it and chain the result.
+The Captapi Actor on Apify is a bring-your-own-key wrapper around the REST API (it does not scrape). Provide your \`capt_live_...\` key, pick an **Operation** (any of the ${ALL_ENDPOINTS.length} endpoints), fill the fields it needs (url / search query / limit / ...), and the Actor returns one dataset item with the same structured JSON \`data\` as the REST API. Credits are billed to your own Captapi account; pass cache=true for a free 24h cache hit (default is always fresh), and failures are never charged. The Actor is also discoverable and callable by AI agents through Apify's MCP server (mcp.apify.com) — its input and output fields are fully documented so agents can run it and chain the result.
 
 ## Connect via REST API (call it directly from code)
 
 If you are not using MCP, every endpoint is a single authenticated GET request — write code against it directly (no SDK required).
 
 - Base URL: ${API_URL}
-- Auth: send the header \`Authorization: Bearer capt_live_...\` (a human creates the key once at ${base}/dashboard/api-keys).
+- Auth: send \`Authorization: Bearer capt_live_...\` or \`x-api-key: capt_live_...\` (a human creates the key once at ${base}/dashboard/api-keys).
 - Method: GET. Pass parameters as URL query params (URL-encode values). Parameter names per endpoint are listed under "## APIs" below (\`*\` = required).
 - Success response: JSON \`{ "success": true, "cached": boolean, "creditsUsed": number, "data": { ... } }\`.
 - Error response: non-2xx with \`{ "detail": "..." }\`. Status codes: 401 missing/invalid key, 402 out of credits, 422 unprocessable (e.g. video has no captions — not charged), 429 rate limited (back off and retry).
@@ -221,6 +221,7 @@ Example request (cURL):
 \`\`\`bash
 curl "${API_URL}/v1/youtube/transcript?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ" \\
   -H "Authorization: Bearer capt_live_..."
+# or: -H "x-api-key: capt_live_..."
 \`\`\`
 
 Example request (Python):

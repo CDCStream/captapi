@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "captapi"
 version = "0.1.0"
-description = "Official typed Python SDK for the Captapi social media API - 179 endpoints across 29 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Twitch, Spotify, and more)."
+description = "Official typed Python SDK for the Captapi social media API - 170 endpoints across 27 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Twitch, Spotify, and more)."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"

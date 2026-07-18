@@ -22,7 +22,7 @@
           "null"
         ],
         "title": "Cached",
-        "description": "Whether the result was served from cache (cached results are free).",
+        "description": "Whether the result was served from cache (pass cache=true for a free 24h cache hit (default is always fresh);).",
         "example": false
       },
       "creditsUsed": {

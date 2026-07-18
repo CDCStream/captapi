@@ -1,7 +1,7 @@
 # Captapi - Make.com custom app
 
 A [Make.com](https://www.make.com) (Integromat) custom app that exposes every
-Captapi endpoint as a module. Structured social media data from **29 platforms**
+Captapi endpoint as a module. Structured social media data from **27 platforms**
 (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest,
 LinkedIn, Rumble, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop) - transcripts, AI summaries,
 comments, stats, search, commerce data and downloads - with one API-key connection.
@@ -44,7 +44,7 @@ The script is idempotent: it reuses the existing app/connection/modules and
 re-uploads the base, readme, connection sections, every module's
 communication + mappable parameters, and the platform groups.
 
-> First deployed 2026-07-11 as `captapi-qspcy5` (eu1, 179 modules).
+> First deployed 2026-07-11 as `captapi-qspcy5` (eu1, 170 modules).
 
 Alternatively, the `app/` folder is a Make **local app**: install the
 **Make Apps Editor** VS Code extension, add the token, right-click

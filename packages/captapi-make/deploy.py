@@ -65,7 +65,7 @@ else:
         "name": APP_NAME,
         "label": "Captapi",
         "description": (
-            "Structured social media data from 29 platforms (YouTube, TikTok, "
+            "Structured social media data from 27 platforms (YouTube, TikTok, "
             "Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, "
             "LinkedIn and more): transcripts, AI summaries, comments, stats, "
             "search and downloads with one API key."

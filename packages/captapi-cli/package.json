@@ -1,7 +1,7 @@
 {
   "name": "@captapi/cli",
   "version": "0.3.0",
-  "description": "Official Captapi command-line interface — call 179 social, web, and account endpoints across 29 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop), check your credit balance, and wire Captapi into AI agents from your terminal.",
+  "description": "Official Captapi command-line interface — call 170 social, web, and account endpoints across 27 platforms (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Truth Social, Kick, Kwai, Komi, Pillar, Linkbio, Linkme, Amazon Shop), check your credit balance, and wire Captapi into AI agents from your terminal.",
   "license": "MIT",
   "type": "module",
   "bin": {

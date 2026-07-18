@@ -1,7 +1,7 @@
 {
   "name": "captapi-zapier",
   "version": "1.0.0",
-  "description": "Captapi integration for Zapier: structured social media data from 29 platforms with one API key.",
+  "description": "Captapi integration for Zapier: structured social media data from 27 platforms with one API key.",
   "main": "index.js",
   "private": true,
   "scripts": {

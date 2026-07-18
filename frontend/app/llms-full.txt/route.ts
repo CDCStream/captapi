@@ -10,6 +10,7 @@ import {
   mcpToolName,
   getEndpoint,
   AGENT_ROUTING_EXAMPLES,
+  exampleQueryString,
 } from "@/lib/api-catalog";
 
 export const dynamic = "force-static";
@@ -35,27 +36,7 @@ export async function GET() {
               .join("\n")
           : "  - (no parameters)";
 
-        // Build an example query string from each param's first sensible value.
-        const example = ps
-          .map((p) => {
-            if (p.name === "url")
-              return `url=${encodeURIComponent(
-                "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-              )}`;
-            if (p.name === "q" || p.name === "query") return "q=marketing";
-            if (p.name === "comment_id") return "comment_id=123456";
-            if (p.name === "limit") return "limit=20";
-            if (p.name === "language") return "language=en";
-            if (p.name === "country") return "country=US";
-            if (p.name === "region") return "region=US";
-            if (p.name === "username") return "username=vercel";
-            if (p.name === "repo") return "repo=vercel%2Fnext.js";
-            if (p.name === "advertiser") return "advertiser=nike";
-            if (p.name === "creative_id") return "creative_id=AR123456789%2FCR123456789";
-            if (p.name === "state") return "state=open";
-            return `${p.name}=value`;
-          })
-          .join("&");
+        const example = exampleQueryString(ep);
 
         return [
           `#### ${ep.name}`,
@@ -63,12 +44,12 @@ export async function GET() {
           `- Request: \`${ep.method} ${API_URL}${ep.path}\``,
           `- Parameters:`,
           paramLines,
-          `- Cost: ${creditLabel(ep)} (cached results 0 credits; failures not charged)`,
+          `- Cost: ${creditLabel(ep)} (pass cache=true for a free 24h cache hit; default always fresh; failures not charged)`,
           `- MCP tool: \`${mcpToolName(ep)}\``,
           `- Docs: ${base}/apis/${ep.slug}`,
           `- Example: \`curl "${API_URL}${ep.path}${
             example ? `?${example}` : ""
-          }" -H "Authorization: Bearer capt_live_..."\``,
+          }" -H "Authorization: Bearer capt_live_..."\` (or \`-H "x-api-key: capt_live_..."\`)`,
         ].join("\n");
       })
       .join("\n\n");
@@ -100,7 +81,7 @@ export async function GET() {
 This is the complete, machine-readable endpoint reference for Captapi: one API for structured data from ${PLATFORM_COUNT} platforms — YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Amazon Shop, Kwai, Komi, Pillar, Linkbio, Linkme, and more (transcripts, AI summaries, comments, details, profile/channel stats, search, commerce intelligence, ad libraries, and downloads). It returns clean JSON, needs no OAuth, and a single key works across all platforms. ${ALL_ENDPOINTS.length} endpoints total. The shorter overview is at ${base}/llms.txt.
 
 Base API URL: ${API_URL}
-Authentication: \`Authorization: Bearer capt_live_...\`
+Authentication: \`Authorization: Bearer capt_live_...\` or \`x-api-key: capt_live_...\`
 Method: GET (parameters are URL query params; URL-encode values).
 Success: \`{ "success": true, "cached": boolean, "creditsUsed": number, "data": { ... } }\`
 Errors: non-2xx with \`{ "detail": "..." }\` — 401 invalid key, 402 out of credits, 422 unprocessable (not charged), 429 rate limited.
@@ -110,7 +91,7 @@ Errors: non-2xx with \`{ "detail": "..." }\` — 401 invalid key, 402 out of cre
 2. If no MCP client is available, call the REST API directly. Use the exact endpoint and parameter names in this file; do not invent \`url\` for endpoints that list \`username\`, \`repo\`, \`advertiser\`, or \`creative_id\`.
 3. Match URL platform to endpoint/tool platform before calling. A TikTok endpoint needs a \`tiktok.com\` URL, a YouTube endpoint needs a \`youtube.com\` or \`youtu.be\` URL, Instagram needs \`instagram.com\`, Facebook needs \`facebook.com\`, etc. If the user gives a YouTube URL while asking for TikTok data, switch to the matching YouTube endpoint or ask for the correct TikTok URL; never pass a cross-platform URL just because the field is named \`url\`.
 4. Ask the human for a \`capt_live_...\` key once. Never sign up, scrape the dashboard, store the key in source code, or print it in logs.
-5. Use \`limit\` conservatively for list/search/comment endpoints. Pass cache=true for a free 24h cache hit (default is always fresh). Fresh list/search/comment calls may scale by result count.
+5. Use \`limit\` conservatively for list/search/comment endpoints. Pass cache=true for a free 24h cache hit (default is always fresh). Most list/search/comment calls scale by result count; TikTok comments, channel-posts, and comment-replies are flat 2 credits.
 6. On 401/402, stop and ask the user to fix credentials or billing. On 429/502, retry with backoff. On 400 platform mismatch, choose the endpoint matching the URL's platform or ask for the correct URL. On 422/not-found/no-captions, report the target cannot be processed and do not retry repeatedly.
 7. Return the \`data\` object to the user unless they explicitly ask for the wrapper metadata (\`cached\`, \`creditsUsed\`, etc.).
 

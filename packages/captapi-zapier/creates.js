@@ -118,7 +118,7 @@ const VISIBLE = new Set([
 function makeCreate(endpoint) {
   const creditNote =
     endpoint.credits > 0
-      ? ` Costs ~${endpoint.credits} credit${endpoint.credits === 1 ? "" : "s"} (cached results are free, failed requests are never charged).`
+      ? ` Costs ~${endpoint.credits} credit${endpoint.credits === 1 ? "" : "s"} (pass cache=true for a free 24h cache hit (default always fresh), failed requests are never charged).`
       : "";
   return {
     key: endpoint.tool,
@@ -157,7 +157,7 @@ const customRequest = {
   display: {
     label: "Custom API Request",
     description:
-      "Call any of the 179 Captapi endpoints across 29 platforms. Pick an endpoint and the matching input fields appear.",
+      "Call any of the 170 Captapi endpoints across 27 platforms. Pick an endpoint and the matching input fields appear.",
   },
   operation: {
     inputFields: [
