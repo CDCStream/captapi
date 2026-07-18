@@ -31,6 +31,7 @@ from app.services.youtube_native import (
     playlist_native,
     search_native,
     transcript_native,
+    video_details_native,
 )
 from app.utils.formatters import normalize_language_code, safe_int, safe_list, safe_str
 from app.utils.url import (
@@ -728,12 +729,22 @@ def _parse_like_count(html: str) -> int | None:
 
 
 async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | None:
-    """Fetch video metadata straight from the watch page (no Apify).
+    """Fetch video metadata without Apify.
 
-    Parses ``ytInitialPlayerResponse`` for core metadata/stats and the like
-    count from the page JSON. Returns None if the page can't be fetched or the
-    core fields are missing, so the caller can fall back to the actor.
+    Prefer InnerTube ANDROID player (watch HTML is frequently 429 from datacenter
+    IPs). Fall back to parsing ``ytInitialPlayerResponse`` from the watch page
+    when the player API is unavailable.
     """
+    android = await video_details_native(vid, norm_url)
+    if android is not None and android.get("viewCount") is not None:
+        duration_seconds = android.get("durationSeconds")
+        return {
+            **android,
+            "durationFormatted": _format_duration(
+                int(duration_seconds) if duration_seconds is not None else None
+            ),
+        }
+
     try:
         resp = await proxy_fetch(
             norm_url,
@@ -743,17 +754,17 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
             timeout=12,
         )
     except httpx.HTTPError:
-        return None
+        return android
     if resp.status_code >= 400:
-        return None
+        return android
 
     player = _extract_initial_json(resp.text, "ytInitialPlayerResponse")
     if player is None:
-        return None
+        return android
 
     details = player.get("videoDetails") or {}
     if not details.get("title"):
-        return None  # age-gated / unavailable -> let actor try
+        return android  # age-gated / unavailable -> let actor try
 
     micro = (player.get("microformat") or {}).get("playerMicroformatRenderer") or {}
     thumbs = (details.get("thumbnail") or {}).get("thumbnails") or []
@@ -842,7 +853,7 @@ async def youtube_video_details(
 
         data = await cached_or_run(
             endpoint="youtube.video-details",
-            params={"url": norm_url, "v": 2},
+            params={"url": norm_url, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1064,8 +1075,9 @@ async def youtube_playlist_videos(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # RSS is instant but caps at 15 items with no view/duration data,
-            # so it only serves the explicit fast mode.
+            # RSS is instant but caps at 15 items with no view/duration data.
+            # Prefer it for fast=true, and as a cheap step before Apify so dead
+            # playlist IDs 404 in seconds instead of multi-actor timeouts.
             if fast:
                 feed_videos = await _youtube_playlist_feed(url, limit)
                 if feed_videos:
@@ -1075,18 +1087,18 @@ async def youtube_playlist_videos(
             if native and native.get("videos"):
                 ctx["source"] = "direct"
                 return {"url": url, "totalReturned": len(native["videos"]), "videos": native["videos"]}
+            feed_videos = await _youtube_playlist_feed(url, limit)
+            if feed_videos:
+                ctx["source"] = "direct"
+                return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
             apify = get_apify()
             items, _actor = await apify.run_with_fallback(
-                _playlist_actor_candidates(settings, url, limit),
+                _playlist_actor_candidates(settings, url, limit)[:1],
                 max_items=limit,
                 is_valid=lambda rows: bool(_valid_video_items(rows)),
             )
             items = _valid_video_items(items)
             if not items:
-                feed_videos = await _youtube_playlist_feed(url, limit)
-                if feed_videos:
-                    ctx["source"] = "direct"
-                    return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
                 raise HTTPException(status_code=404, detail="Playlist not found")
             videos = []
             for v in items[:limit]:
@@ -1096,7 +1108,7 @@ async def youtube_playlist_videos(
 
         data = await cached_or_run(
             endpoint="youtube.playlist-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 6},
+            params={"url": url, "limit": limit, "fast": fast, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1151,24 +1163,26 @@ async def youtube_playlist(
                     "totalReturned": len(native["videos"]),
                     "videos": native["videos"],
                 }
+            feed_videos = await _youtube_playlist_feed(url, limit)
+            if feed_videos:
+                ctx["source"] = "direct"
+                return {
+                    "platform": "youtube",
+                    "url": url,
+                    "title": "",
+                    "channelName": feed_videos[0].get("channelName") if feed_videos else "",
+                    "totalReturned": len(feed_videos),
+                    "videos": feed_videos,
+                }
+            # Single actor only — multi-actor fallback was timing out 2–3 min on
+            # deleted playlist IDs that RSS already proved empty.
             items, _actor = await get_apify().run_with_fallback(
-                _playlist_actor_candidates(settings, url, limit),
+                _playlist_actor_candidates(settings, url, limit)[:1],
                 max_items=limit,
                 is_valid=lambda rows: bool(_valid_video_items(rows)),
             )
             items = _valid_video_items(items)
             if not items:
-                feed_videos = await _youtube_playlist_feed(url, limit)
-                if feed_videos:
-                    ctx["source"] = "direct"
-                    return {
-                        "platform": "youtube",
-                        "url": url,
-                        "title": "",
-                        "channelName": feed_videos[0].get("channelName") if feed_videos else "",
-                        "totalReturned": len(feed_videos),
-                        "videos": feed_videos,
-                    }
                 raise HTTPException(status_code=404, detail="Playlist not found")
             videos = [_video_card(v) for v in items[:limit]]
             first = items[0] if items else {}
@@ -1184,7 +1198,7 @@ async def youtube_playlist(
 
         data = await cached_or_run(
             endpoint="youtube.playlist",
-            params={"url": url, "limit": limit, "fast": fast, "v": 6},
+            params={"url": url, "limit": limit, "fast": fast, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

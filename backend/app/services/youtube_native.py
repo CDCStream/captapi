@@ -23,7 +23,7 @@ from typing import Any, Iterator
 import httpx
 
 from app.services.http_fetch import fetch as proxy_fetch, post_json
-from app.utils.formatters import safe_int, safe_str
+from app.utils.formatters import safe_int, safe_list, safe_str
 
 YT_HEADERS: dict[str, str] = {
     "User-Agent": (
@@ -684,6 +684,44 @@ async def transcript_native(norm_url: str, language: str | None) -> dict[str, An
         "language": safe_str(language or track.get("languageCode")),
     }
 
+
+
+# ---------------------------------------------------------- video details --
+async def video_details_native(video_id: str, norm_url: str) -> dict[str, Any] | None:
+    """Metadata/stats via InnerTube ANDROID player (watch HTML is often 429)."""
+    player = await _player_android(video_id)
+    if not player:
+        return None
+    if ((player.get("playabilityStatus") or {}).get("status")) != "OK":
+        return None
+    details = player.get("videoDetails") or {}
+    if not details.get("title"):
+        return None
+    micro = (player.get("microformat") or {}).get("playerMicroformatRenderer") or {}
+    thumbs = (details.get("thumbnail") or {}).get("thumbnails") or []
+    channel_id = safe_str(details.get("channelId"))
+    length = details.get("lengthSeconds")
+    try:
+        duration_seconds = int(length) if length is not None else None
+    except (TypeError, ValueError):
+        duration_seconds = None
+    return {
+        "url": norm_url,
+        "id": video_id,
+        "title": safe_str(details.get("title")) or "",
+        "description": safe_str(details.get("shortDescription")),
+        "channelName": safe_str(details.get("author") or micro.get("ownerChannelName")),
+        "channelId": channel_id,
+        "channelUrl": (f"https://www.youtube.com/channel/{channel_id}" if channel_id else None),
+        "publishedAt": safe_str(micro.get("publishDate") or micro.get("uploadDate")),
+        "durationSeconds": duration_seconds,
+        "viewCount": safe_int(details.get("viewCount")),
+        "likeCount": None,
+        "commentCount": None,
+        "thumbnailUrl": safe_str(thumbs[-1].get("url")) if thumbs else None,
+        "genre": safe_str(micro.get("category")),
+        "tags": safe_list(details.get("keywords")),
+    }
 
 # --------------------------------------------------------------- comments --
 def _comment_payload_to_api(p: dict[str, Any]) -> dict[str, Any] | None:
