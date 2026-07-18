@@ -1287,6 +1287,8 @@ async def tiktok_channel_posts(
                 max_items=limit,
             )
             posts = [_normalize(i) for i in items[:limit]]
+            for p in posts:
+                p.pop("videoUrl", None)
             ctx["source"] = "apify"
             return {
                 "url": url,
@@ -1298,7 +1300,7 @@ async def tiktok_channel_posts(
 
         data = await cached_or_run(
             endpoint="tiktok.channel-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 4},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

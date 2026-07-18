@@ -18459,7 +18459,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2026-07-13T15:00:00.000Z",
         "durationSeconds": 79.97,
         "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-no1a-p-0037-no/o8GAEB3hAPfJ9hQpWX4KWY5eeIgRQALTAFAUeG~tplv-tiktokx-cropcenter-q:300:400:q70.webp",
-        "videoUrl": null,
         "author": {
           "username": "paw.dreams0",
           "displayName": "Paw Dreams",
@@ -18493,7 +18492,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2026-07-12T16:00:00.000Z",
         "durationSeconds": 65.969,
         "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-no1a-p-0037-no/okepsDWBJhGTfTpIXjLeLEA8WMALIAKTjRAQeA~tplv-tiktokx-cropcenter-q:300:400:q70.webp",
-        "videoUrl": null,
         "author": {
           "username": "paw.dreams0",
           "displayName": "Paw Dreams",
@@ -18527,7 +18525,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2026-07-11T15:30:00.000Z",
         "durationSeconds": 81.688,
         "thumbnailUrl": "https://p16-common-sign.tiktokcdn.com/tos-no1a-p-0037-no/oYhfP5AcQI3DfUAWWYpJJGfKSgN1QuAeAA1LFW~tplv-tiktokx-cropcenter-q:300:400:q70.webp",
-        "videoUrl": null,
         "author": {
           "username": "paw.dreams0",
           "displayName": "Paw Dreams",

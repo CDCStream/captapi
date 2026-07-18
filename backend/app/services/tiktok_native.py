@@ -541,8 +541,6 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
         "publishedAt": _iso(item.get("create_time") or item.get("createTime")),
         "durationSeconds": duration,
         "thumbnailUrl": cover,
-        # play_addr CDN URLs are IP/cookie-bound; keep null like video-details.
-        "videoUrl": None,
         "author": {
             "username": username,
             "displayName": safe_str(author.get("nickname") or author.get("nickName")),
