@@ -822,44 +822,79 @@ def _parse_like_count(html: str) -> int | None:
     return None
 
 
+async def _watch_player_response(norm_url: str) -> tuple[dict[str, Any] | None, str]:
+    """Parse ``ytInitialPlayerResponse`` from the watch page.
+
+    Datacenter IPs are frequently 429'd; fall back to residential when needed.
+    """
+    html = ""
+    for tier, timeout in (("datacenter", 12.0), ("residential", 25.0)):
+        try:
+            resp = await proxy_fetch(
+                norm_url,
+                tier=tier,
+                headers=_YT_BROWSER_HEADERS,
+                cookies={"CONSENT": "YES+1", "SOCS": "CAI"},
+                timeout=timeout,
+            )
+        except httpx.HTTPError:
+            continue
+        if resp.status_code >= 400:
+            continue
+        html = resp.text
+        player = _extract_initial_json(html, "ytInitialPlayerResponse")
+        details = (player or {}).get("videoDetails") or {}
+        if player is not None and details.get("title"):
+            return player, html
+    return None, html
+
+
+def _genre_tags_from_player(player: dict[str, Any] | None) -> tuple[str | None, list[str]]:
+    if not isinstance(player, dict):
+        return None, []
+    details = player.get("videoDetails") or {}
+    micro = (player.get("microformat") or {}).get("playerMicroformatRenderer") or {}
+    return safe_str(micro.get("category")), safe_list(details.get("keywords"))
+
+
 async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | None:
     """Fetch video metadata without Apify.
 
     Prefer InnerTube ANDROID player (watch HTML is frequently 429 from datacenter
     IPs). Fall back to parsing ``ytInitialPlayerResponse`` from the watch page
-    when the player API is unavailable.
+    when the player API is unavailable. ANDROID often omits category/keywords —
+    enrich those from the watch-page microformat when missing.
     """
     android = await video_details_native(vid, norm_url)
-    if android is not None and android.get("viewCount") is not None:
+    android_ok = isinstance(android, dict) and android.get("viewCount") is not None
+    need_page = (
+        not android_ok
+        or not android.get("genre")
+        or android.get("likeCount") is None
+    )
+    player, html = await _watch_player_response(norm_url) if need_page else (None, "")
+    genre, tags = _genre_tags_from_player(player)
+
+    if android_ok and android is not None:
         duration_seconds = android.get("durationSeconds")
-        return {
+        out = {
             **android,
             "durationFormatted": _format_duration(
                 int(duration_seconds) if duration_seconds is not None else None
             ),
         }
+        if not out.get("genre") and genre:
+            out["genre"] = genre
+        if not out.get("tags") and tags:
+            out["tags"] = tags
+        if out.get("likeCount") is None and html:
+            out["likeCount"] = _parse_like_count(html)
+        return out
 
-    try:
-        resp = await proxy_fetch(
-            norm_url,
-            tier="datacenter",
-            headers=_YT_BROWSER_HEADERS,
-            cookies={"CONSENT": "YES+1", "SOCS": "CAI"},
-            timeout=12,
-        )
-    except httpx.HTTPError:
-        return android
-    if resp.status_code >= 400:
-        return android
-
-    player = _extract_initial_json(resp.text, "ytInitialPlayerResponse")
     if player is None:
         return android
 
     details = player.get("videoDetails") or {}
-    if not details.get("title"):
-        return android  # age-gated / unavailable -> let actor try
-
     micro = (player.get("microformat") or {}).get("playerMicroformatRenderer") or {}
     thumbs = (details.get("thumbnail") or {}).get("thumbnails") or []
     duration_seconds = _duration_seconds(details.get("lengthSeconds") or micro.get("lengthSeconds"))
@@ -883,11 +918,11 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
         "durationSeconds": duration_seconds,
         "durationFormatted": _format_duration(duration_seconds),
         "viewCount": safe_int(details.get("viewCount")),
-        "likeCount": _parse_like_count(resp.text),
+        "likeCount": _parse_like_count(html) if html else None,
         "commentCount": None,  # not exposed in page JSON; enrich via actor only if requested
         "thumbnailUrl": safe_str(thumbs[-1].get("url")) if thumbs else None,
-        "genre": safe_str(micro.get("category")),
-        "tags": safe_list(details.get("keywords")),
+        "genre": genre,
+        "tags": tags,
     }
 
 
@@ -932,6 +967,15 @@ async def youtube_video_details(
             if duration_seconds is None:
                 ms = safe_int(v.get("durationMs"))
                 duration_seconds = int(ms / 1000) if ms else None
+            genre = safe_str(v.get("genre") or v.get("category") or v.get("categoryName"))
+            tags = safe_list(v.get("tags") or v.get("keywords") or v.get("hashtags"))
+            # Actor often omits category; watch-page microformat still has it.
+            if not genre:
+                player, _ = await _watch_player_response(norm_url)
+                page_genre, page_tags = _genre_tags_from_player(player)
+                genre = page_genre
+                if not tags and page_tags:
+                    tags = page_tags
             return {
                 "url": norm_url,
                 "id": vid,
@@ -947,13 +991,13 @@ async def youtube_video_details(
                 "likeCount": safe_int(v.get("likes") or v.get("likeCount")),
                 "commentCount": safe_int(v.get("commentsCount") or v.get("commentCount")),
                 "thumbnailUrl": safe_str(v.get("thumbnailUrl") or (v.get("thumbnails") or [{}])[-1].get("url")),
-                "genre": safe_str(v.get("genre") or v.get("category") or v.get("categoryName")),
-                "tags": safe_list(v.get("tags")),
+                "genre": genre,
+                "tags": tags,
             }
 
         data = await cached_or_run(
             endpoint="youtube.video-details",
-            params={"url": norm_url, "v": 3},
+            params={"url": norm_url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
