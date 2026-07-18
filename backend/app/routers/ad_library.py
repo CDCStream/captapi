@@ -184,7 +184,6 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             item.get("creativeId"),
             item.get("creative_id"),
             item.get("adCreativeId"),
-            item.get("ad_id"),
         )
     )
     url = safe_str(
@@ -209,6 +208,8 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
         url = _facebook_ad_url(ad_id)
     if platform == "tiktok_ad_library" and not url and ad_id:
         url = f"https://library.tiktok.com/ads/detail/?ad_id={ad_id}"
+    if platform == "linkedin_ad_library" and not url and ad_id:
+        url = f"https://www.linkedin.com/ad-library/detail/{ad_id}"
 
     text = safe_str(
         _first(
@@ -220,6 +221,8 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             item.get("ad_text"),
             item.get("adCopy"),
             item.get("copy"),
+            item.get("caption"),
+            item.get("previewText"),
             item.get("description"),
             _dig(snapshot, "body", "text"),
         )
@@ -237,6 +240,9 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             ),
         )
     )
+    # jy-labs detail actor uses a placeholder title that isn't a real headline.
+    if headline and headline.strip().lower() in {"ad summary", "not mention", "n/a"}:
+        headline = None
 
     ad_format = safe_str(
         _first(
@@ -261,9 +267,42 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
         item.get("region"),
         item.get("regions"),
         item.get("targetCountries"),
+        item.get("countries"),
     )
     if isinstance(country_value, list):
         country_value = ", ".join(str(c) for c in country_value if c) or None
+
+    linked_urls = _listify(item.get("linkedInUrls") or item.get("linkedinUrls"))
+    landing = safe_str(
+        _first(
+            item.get("landingUrl"),
+            item.get("landing_page_url"),
+            item.get("destinationUrl"),
+            item.get("ctaUrl"),
+            item.get("cta_url"),
+            item.get("clickUrl"),
+            item.get("click_url"),
+            snapshot.get("linkUrl"),
+            next((u for u in linked_urls if isinstance(u, str) and u.startswith("http")), None),
+        )
+    )
+
+    advertiser_name = safe_str(
+        _first(
+            advertiser.get("name") if isinstance(advertiser, dict) else None,
+            item.get("advertiserName"),
+            item.get("advertiser_name"),
+            item.get("adPaidForBy"),
+            item.get("payerName"),
+            item.get("pageName"),
+            item.get("brandName"),
+            item.get("companyName"),
+            item.get("pageInfo.page.name"),
+            snapshot.get("pageName"),
+        )
+    )
+    if advertiser_name and advertiser_name.strip().lower() in {"not mention", "n/a", "unknown"}:
+        advertiser_name = None
 
     normalized = {
         "platform": platform,
@@ -277,44 +316,66 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
                 item.get("ctaText"),
                 item.get("cta_text"),
                 item.get("callToAction"),
+                item.get("ctaCategory"),
                 snapshot.get("ctaText"),
             )
         ),
-        "landingUrl": safe_str(
+        "landingUrl": landing,
+        "adFormat": ad_format,
+        "firstShown": safe_str(
             _first(
-                item.get("landingUrl"),
-                item.get("landing_page_url"),
-                item.get("destinationUrl"),
-                item.get("ctaUrl"),
-                item.get("cta_url"),
-                snapshot.get("linkUrl"),
+                item.get("firstShown"),
+                item.get("first_shown_date"),
+                item.get("firstShownDate"),
+                item.get("firstShownAt"),
+                item.get("startDateFormatted"),
+                item.get("startDate"),
+                item.get("adStartDate"),
             )
         ),
-        "adFormat": ad_format,
-        "firstShown": safe_str(_first(item.get("firstShown"), item.get("first_shown_date"), item.get("firstShownDate"), item.get("startDateFormatted"), item.get("startDate"), item.get("adStartDate"))),
-        "lastShown": safe_str(_first(item.get("lastShown"), item.get("last_shown_date"), item.get("lastShownDate"), item.get("endDateFormatted"), item.get("endDate"), item.get("adEndDate"))),
-        "impressions": _first(item.get("impressions"), item.get("impressionsRange"), item.get("reach"), item.get("impressionRange"), item.get("totalImpressionsInterval"), item.get("impressionsMin"), item.get("uniqueUsersSeen")),
-        "spend": _first(item.get("spend"), item.get("spendRange"), item.get("adSpent")),
+        "lastShown": safe_str(
+            _first(
+                item.get("lastShown"),
+                item.get("last_shown_date"),
+                item.get("lastShownDate"),
+                item.get("lastShownAt"),
+                item.get("endDateFormatted"),
+                item.get("endDate"),
+                item.get("adEndDate"),
+            )
+        ),
+        "impressions": _first(
+            item.get("impressions"),
+            item.get("impressionsRange"),
+            item.get("reach"),
+            item.get("reachRange"),
+            item.get("impressionRange"),
+            item.get("totalImpressionsInterval"),
+            item.get("impressionsMin"),
+            item.get("uniqueUsersSeen"),
+            item.get("estimatedAudience"),
+        ),
+        "spend": _first(item.get("spend"), item.get("spendRange"), item.get("adSpent"), item.get("budgetRange")),
         "country": safe_str(country_value),
         "advertiser": {
-            "id": safe_str(_first(advertiser.get("id") if isinstance(advertiser, dict) else None, item.get("advertiserId"), item.get("advertiser_id"), item.get("advertiserBusinessId"), item.get("pageID"), item.get("pageId"))),
-            "name": safe_str(
+            "id": safe_str(
                 _first(
-                    advertiser.get("name") if isinstance(advertiser, dict) else None,
-                    item.get("advertiserName"),
-                    item.get("advertiser_name"),
-                    item.get("pageName"),
-                    item.get("brandName"),
-                    item.get("pageInfo.page.name"),
-                    snapshot.get("pageName"),
+                    advertiser.get("id") if isinstance(advertiser, dict) else None,
+                    item.get("advertiserId"),
+                    item.get("advertiser_id"),
+                    item.get("advertiserBusinessId"),
+                    item.get("pageID"),
+                    item.get("pageId"),
+                    item.get("companyId"),
                 )
             ),
+            "name": advertiser_name,
             "url": safe_str(
                 _first(
                     advertiser.get("url") if isinstance(advertiser, dict) else None,
                     item.get("advertiserUrl"),
                     item.get("advertiser_url"),
-                    item.get("advertiserLogoUrl"),
+                    item.get("companyUrl"),
                     item.get("pageUrl"),
                     item.get("pageURL"),
                     snapshot.get("pageProfileUri"),
@@ -325,6 +386,8 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
                     advertiser.get("logo") if isinstance(advertiser, dict) else None,
                     item.get("advertiserLogo"),
                     item.get("advertiser_logo"),
+                    item.get("companyLogo"),
+                    item.get("logoUrl"),
                     item.get("pageProfilePictureUrl"),
                     snapshot.get("pageProfilePictureUrl"),
                 )
@@ -335,6 +398,15 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
     adv = normalized["advertiser"]
     if platform == "google_ad_library" and not adv["url"] and adv["id"]:
         adv["url"] = f"https://adstransparency.google.com/advertiser/{adv['id']}"
+    # LinkedIn / TikTok libraries often withhold spend/impressions/CTA. Prefer
+    # omitting always-null metadata over shipping dead keys.
+    if platform in {"tiktok_ad_library", "linkedin_ad_library"}:
+        for key in ("cta", "landingUrl", "firstShown", "lastShown", "impressions", "spend", "country", "headline"):
+            if normalized.get(key) in (None, "", [], {}):
+                normalized.pop(key, None)
+        for key in ("id", "name", "url", "logo"):
+            if adv.get(key) in (None, "", []):
+                adv.pop(key, None)
     return normalized
 
 
@@ -503,7 +575,7 @@ async def tiktok_search(
             ads = [_normalize_ad(i, "tiktok_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.tiktok.search", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("ad-library.tiktok.search", {"q": q, "country": country, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
@@ -563,7 +635,7 @@ async def tiktok_ad_details(
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(best, "tiktok_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.tiktok.ad-details", {"ad_id": ad_id, "country": region, "v": 3}, _run, ctx, use_cache=cache))
+        return ApiResponse(data=await cached_or_run("ad-library.tiktok.ad-details", {"ad_id": ad_id, "country": region, "v": 4}, _run, ctx, use_cache=cache))
 
 
 @router.get("/google/company-ads", summary="Google Ads Transparency Center company ads")
@@ -646,7 +718,7 @@ async def linkedin_search_ads(
             ads = [_normalize_ad(i, "linkedin_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.linkedin.search-ads", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("ad-library.linkedin.search-ads", {"q": q, "country": country, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
@@ -681,4 +753,4 @@ async def linkedin_ad_details(
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(items[0], "linkedin_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.linkedin.ad-details", {"url": ad_url, "v": 3}, _run, ctx, use_cache=cache))
+        return ApiResponse(data=await cached_or_run("ad-library.linkedin.ad-details", {"url": ad_url, "v": 4}, _run, ctx, use_cache=cache))

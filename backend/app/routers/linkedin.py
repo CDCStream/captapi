@@ -139,7 +139,26 @@ def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
     # company rows: flat datePublished.
     posted_at = p.get("posted_at") if isinstance(p.get("posted_at"), dict) else {}
     stats = p.get("stats") if isinstance(p.get("stats"), dict) else p
-    return {
+    # Do NOT fall back to top-level `headline` — on company JSON-LD rows that
+    # field is the post title (e.g. "June"), not the author's job title.
+    author_headline = safe_str(
+        author.get("headline")
+        or author.get("occupation")
+        or p.get("authorHeadline")
+        or p.get("author_headline")
+    )
+    engagement = {
+        "likes": safe_int(
+            stats.get("likes") or stats.get("total_reactions") or p.get("numLikes") or p.get("reactionsCount")
+        ),
+        "comments": safe_int(
+            stats.get("comments") or p.get("numComments") or p.get("commentsCount")
+        ),
+        "reposts": safe_int(
+            stats.get("shares") or p.get("reposts") or p.get("numShares") or p.get("repostsCount")
+        ),
+    }
+    out: dict[str, Any] = {
         "platform": "linkedin",
         "type": "post",
         "url": safe_str(post.get("url") or p.get("url") or p.get("postUrl") or p.get("post_url")),
@@ -154,23 +173,17 @@ def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
         ),
         "author": {
             "name": safe_str(author.get("name") or p.get("authorName") or p.get("companyName")),
-            "headline": safe_str(author.get("headline") or p.get("headline")),
+            "headline": author_headline,
             "url": safe_str(
                 author.get("url") or author.get("profile_url") or p.get("authorUrl") or p.get("companyUrl")
             ),
         },
-        "engagement": {
-            "likes": safe_int(
-                stats.get("likes") or stats.get("total_reactions") or p.get("numLikes") or p.get("reactionsCount")
-            ),
-            "comments": safe_int(
-                stats.get("comments") or p.get("numComments") or p.get("commentsCount")
-            ),
-            "reposts": safe_int(
-                stats.get("shares") or p.get("reposts") or p.get("numShares") or p.get("repostsCount")
-            ),
-        },
     }
+    # automation-lab company-posts actor is JSON-LD only — no likes/comments.
+    # Omit the empty engagement block instead of returning always-null keys.
+    if any(v is not None for v in engagement.values()):
+        out["engagement"] = engagement
+    return out
 
 
 _LI_ACTIVITY_RE = re.compile(r"activity[:-](\d{10,25})")
@@ -370,7 +383,7 @@ async def linkedin_company_posts(
 
         data = await cached_or_run(
             endpoint="linkedin.company-posts",
-            params={"slug": slug, "limit": limit, "v": 2},
+            params={"slug": slug, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

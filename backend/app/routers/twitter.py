@@ -92,6 +92,21 @@ def _as_bool(value: Any) -> bool | None:
     return None
 
 
+def _tweet_is_reply(item: dict[str, Any]) -> bool | None:
+    """Derive isReply across timeline + community actor field names."""
+    explicit = first_present(item.get("isReply"), _as_bool(item.get("is_reply")))
+    if explicit is not None:
+        return bool(explicit)
+    reply_to = item.get("in_reply_to_status_id") or item.get("inReplyToStatusId")
+    if reply_to is not None:
+        return bool(reply_to)
+    # Badger community scraper uses snake_case engagement keys and omits
+    # is_reply on root tweets — treat those as not-a-reply rather than null.
+    if "view_count" in item or "favorite_count" in item:
+        return False
+    return None
+
+
 def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
     author = item.get("author") or item.get("user") or {}
     if not author and item.get("username"):
@@ -118,14 +133,18 @@ def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
         "publishedAt": safe_str(item.get("createdAt") or item.get("created_at")),
         "author": _author(author),
         "engagement": {
-            "views": safe_int(first_present(item.get("viewCount"), item.get("views"))),
+            # Community scraper (badger/twitter-communities-scraper) uses snake_case
+            # view_count / favorite_count; timeline actors use camelCase viewCount.
+            "views": safe_int(
+                first_present(item.get("viewCount"), item.get("views"), item.get("view_count"))
+            ),
             "likes": safe_int(first_present(item.get("likeCount"), item.get("favoriteCount"), item.get("favorite_count"))),
             "replies": safe_int(first_present(item.get("replyCount"), item.get("reply_count"))),
             "retweets": safe_int(first_present(item.get("retweetCount"), item.get("retweet_count"))),
             "quotes": safe_int(first_present(item.get("quoteCount"), item.get("quote_count"))),
             "bookmarks": safe_int(first_present(item.get("bookmarkCount"), item.get("bookmark_count"))),
         },
-        "isReply": first_present(item.get("isReply"), _as_bool(item.get("is_reply"))),
+        "isReply": _tweet_is_reply(item),
         "isRetweet": first_present(item.get("isRetweet"), _as_bool(item.get("is_retweet"))),
         "hashtags": [
             tag
@@ -165,9 +184,9 @@ def _verified_flag(item: dict[str, Any]) -> bool | None:
 def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
     username = item.get("userName") or item.get("screen_name") or item.get("username")
     verified = _verified_flag(item)
-    # apidojo/twitter-user-scraper dropped the isBlueVerified key; on today's X
-    # the isVerified flag IS the blue checkmark, so mirror it when absent.
-    blue = first_present(item.get("isBlueVerified"), item.get("isVerified"))
+    # apidojo/twitter-user-scraper often only emits `verified` / `isVerified`.
+    # On today's X that flag is the blue checkmark, so mirror it for isBlueVerified.
+    blue = first_present(item.get("isBlueVerified"), item.get("isVerified"), item.get("verified"))
     return {
         "platform": "twitter",
         "url": safe_str(item.get("url"))
@@ -327,7 +346,7 @@ async def twitter_profile(
 
         data = await cached_or_run(
             endpoint="twitter.profile",
-            params={"handle": handle, "v": 3},
+            params={"handle": handle, "v": 4},
             runner=_run,
             ctx=ctx,
             # The apidojo actor cold-starts at ~14s. Profiles are polled
@@ -523,7 +542,7 @@ async def twitter_community_tweets(
 
         data = await cached_or_run(
             endpoint="twitter.community-tweets",
-            params={"community_id": community_id, "limit": limit, "v": 2},
+            params={"community_id": community_id, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

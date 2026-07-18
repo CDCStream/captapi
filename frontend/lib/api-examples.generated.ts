@@ -1242,7 +1242,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": null,
           "displayName": "Sarah Kelley",
-          "url": "https://www.facebook.com/groups/dogspotting",
+          "url": null,
           "profileImage": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.30808-1/578851856_10163302829603633_8831031195791920399_n.jpg?stp=c744.131.1304.1304a_cp0_dst-jpg_tt6&cstp=mx1304x1304&ctp=s50x50&_nc_cat=106&ccb=1-7&_nc_sid=e99d92&_nc_ohc=qaK6YYSnkJQQ7kNvwG4KjO1&_nc_oc=AdqvU5kukd7hdU0nVJGWzwL8KyltBoJFm_rnk1httPJ-KMxHt2kOC39M288jhFxn0aI&_nc_zt=24&_nc_ht=scontent-iad6-1.xx&_nc_gid=gf4OTFimhPgm4zJ_d21P5w&_nc_ss=72289&oh=00_AQAW2Gj7alVx0dvlkuK1lyPaTTR6cE1tf4jg3WjYqCHh3Q&oe=6A4DB988",
           "verified": null
         },
@@ -1268,7 +1268,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": null,
           "displayName": "Adam Steele",
-          "url": "https://www.facebook.com/groups/dogspotting",
+          "url": null,
           "profileImage": "https://scontent-iad3-2.xx.fbcdn.net/v/t39.30808-1/701658110_904739492573326_2972188160248678723_n.jpg?stp=c0.0.1538.1537a_cp6_dst-jpg_tt6&cstp=mx1538x1537&ctp=s50x50&_nc_cat=111&ccb=1-7&_nc_sid=1d2534&_nc_ohc=N_XuanVVWggQ7kNvwGKrRqv&_nc_oc=Adqn_pVmxZoV2vloLpytRzBcC1RmUuHrCG95LwVFH8wIuGFbwrzcznYSaOJxTTiYfVg&_nc_zt=24&_nc_ht=scontent-iad3-2.xx&_nc_gid=gf4OTFimhPgm4zJ_d21P5w&_nc_ss=72289&oh=00_AQC8c77X9N4mP7udkcoyJH5xNQfnBn2YtNzd1jUCJSENWQ&oe=6A4DB89B",
           "verified": null
         },
@@ -1294,7 +1294,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": null,
           "displayName": "Kei Ash McKenna",
-          "url": "https://www.facebook.com/groups/dogspotting",
+          "url": null,
           "profileImage": "https://scontent-iad3-1.xx.fbcdn.net/v/t1.6435-1/60286975_2306342186075856_7263416908790104064_n.jpg?stp=c0.0.910.910a_cp0_dst-jpg_tt6&cstp=mx910x910&ctp=s50x50&_nc_cat=108&ccb=1-7&_nc_sid=e99d92&_nc_ohc=7O4ueUSs5DEQ7kNvwGFSNSB&_nc_oc=AdonMwZnHGeZzMVyBHBvBoUHwngQRIhnOtVooqw_Hea6xUPIm-EFsD2MBmegMLBlMYQ&_nc_zt=24&_nc_ht=scontent-iad3-1.xx&_nc_gid=gf4OTFimhPgm4zJ_d21P5w&_nc_ss=72289&oh=00_AQCzbvpU6NZFuSRVvsN91MhaSirEoUCfxMh1PMFDEZs5dA&oe=6A6F4CC4",
           "verified": null
         },
@@ -1320,7 +1320,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": null,
           "displayName": "Tammy Kiter",
-          "url": "https://www.facebook.com/groups/dogspotting",
+          "url": null,
           "profileImage": "https://scontent-dfw6-1.xx.fbcdn.net/v/t39.30808-1/465791183_8831945490162165_4896672051825644682_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx320x320&ctp=s50x50&_nc_cat=101&ccb=1-7&_nc_sid=e99d92&_nc_ohc=yvkkJhMp_DIQ7kNvwFCyDtx&_nc_oc=AdqSsZ5A7eznaSYiJ_UFwq8Sa3xSOaghH2R-5Hz8Nm4ewoXS0yWYIO-l03khBQqhpQ4&_nc_zt=24&_nc_ht=scontent-dfw6-1.xx&_nc_gid=BZQFvz8C9SGmFdg98J2QJw&_nc_ss=72289&oh=00_AQBemWcDgDr7VIzAH4jXHnZuQnrVeLJym3RXRJknJtXN3g&oe=6A4DD6C7",
           "verified": null
         },
@@ -1346,7 +1346,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": null,
           "displayName": "Kaz Ferns",
-          "url": "https://www.facebook.com/groups/dogspotting",
+          "url": null,
           "profileImage": "https://scontent-dfw6-1.xx.fbcdn.net/v/t39.30808-1/702403966_10216451357833217_8590113315472192895_n.jpg?stp=c0.302.1536.1536a_cp0_dst-jpg_tt6&cstp=mx1536x1536&ctp=s50x50&_nc_cat=103&ccb=1-7&_nc_sid=e99d92&_nc_ohc=tui9M6x_1asQ7kNvwGNpQO1&_nc_oc=AdpD67uiCWpHLAd1-57rZjNX8Lpx5FrCVWG0rZ3bhwqmv378vHcvoE5Pd_JCPPxgYOs&_nc_zt=24&_nc_ht=scontent-dfw6-1.xx&_nc_gid=BZQFvz8C9SGmFdg98J2QJw&_nc_ss=72289&oh=00_AQA-IfuCv59lYdo4IarG9EhHd12HjJHkLNtjLUloVfTOWw&oe=6A4DD89F",
           "verified": null
         },
@@ -1850,12 +1850,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "YXBwX2l0ZW06MTAwMDQ0NTYxNTUwODMxOjIzMDUyNzI3MzI6NTo6MTU2ODIwMTIyODAwODU4MQ==",
         "url": "https://www.facebook.com/photo.php?fbid=1568201228008581&set=pb.100044561550831.-2207520000&type=3",
         "image": "https://scontent-mia5-2.xx.fbcdn.net/v/t39.99422-6/739596077_1554598526079319_7764838102821159111_n.png?stp=dst-jpg_tt6&cstp=mx2048x2048&ctp=s2048x2048&_nc_cat=1&ccb=1-7&_nc_sid=127cfc&_nc_ohc=gt4JC_WdvSYQ7kNvwGTz8_M&_nc_oc=AdoYvOi07pLqBhuho7XKpR0rdSMIFe5e7v4vp-xSZwQfLJoZS95qw50JQIBol8x3BSA&_nc_zt=14&_nc_ht=scontent-mia5-2.xx&_nc_gid=cjhU7CvvrM25lg5_SdKqdg&_nc_ss=72289&oh=00_AQCAsL9my7FB92unZB1G8A8xNLLeAgaPspwGGXu2Qhe9Hg&oe=6A4DECD1",
-        "caption": "A newly-released photo of Earth's horizon taken during the Artemis II mission from the window of the Orion spacecraft. This view shows the hazy, blue atmosphere on top of faded, textured clouds. The Moon appears as a tiny, white dot in the distance. Credit: NASA",
-        "publishedAt": null,
-        "likes": null,
-        "comments": null,
-        "width": null,
-        "height": null
+        "caption": "A newly-released photo of Earth's horizon taken during the Artemis II mission from the window of the Orion spacecraft. This view shows the hazy, blue atmosphere on top of faded, textured clouds. The Moon appears as a tiny, white dot in the distance. Credit: NASA"
       },
       {
         "platform": "facebook",
@@ -1863,11 +1858,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://www.facebook.com/photo.php?fbid=1568201171341920&set=pb.100044561550831.-2207520000&type=3",
         "image": "https://scontent-mia5-2.xx.fbcdn.net/v/t39.99422-6/738494240_1517432012920711_6195141728552532415_n.png?stp=dst-jpg_tt6&cstp=mx2048x2048&ctp=s2048x2048&_nc_cat=1&ccb=1-7&_nc_sid=127cfc&_nc_ohc=eVcYhY0hqJIQ7kNvwH-79p2&_nc_oc=AdrdwjJQ1kyxCSxQT3j-7lXdR9LRXzUrMdEEfuBRx1vOeNVajj_1DTcsO3oBgfUlkHY&_nc_zt=14&_nc_ht=scontent-mia5-2.xx&_nc_gid=cjhU7CvvrM25lg5_SdKqdg&_nc_ss=72289&oh=00_AQBJRYOuQhq0oMNitPQfn9IREr0rJP0R_pUj3HV7e1ot-g&oe=6A4DDCAA",
         "caption": "A newly-released photo of our Moon taken by the crew of Artemis II. The top portion is shadowed by black space. This angle captures a mostly uniform, light gray portion of the lunar surface, with darker patches in the lower third. Craters of various sizes are visible all over the Moon’s surface—most easily visible at the edge of the upper shadow. Credit: NASA",
-        "publishedAt": null,
-        "likes": null,
-        "comments": null,
-        "width": null,
-        "height": null
       },
       {
         "platform": "facebook",
@@ -1875,35 +1865,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://www.facebook.com/photo.php?fbid=1568201151341922&set=pb.100044561550831.-2207520000&type=3",
         "image": "https://scontent-mia5-2.xx.fbcdn.net/v/t39.99422-6/735761467_1991329928167370_6353960477553016321_n.png?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=1&ccb=1-7&_nc_sid=127cfc&_nc_ohc=QXoZTSqO4c4Q7kNvwGxPHER&_nc_oc=Ado4Wj7UpKAI7zqeFML9qzlR3vBfu3srJROq37a08GVwzglMr8fVvXNDcdmXsy1uxiE&_nc_zt=14&_nc_ht=scontent-mia5-2.xx&_nc_gid=cjhU7CvvrM25lg5_SdKqdg&_nc_ss=72289&oh=00_AQBRuDTEpxWlc17V3plLgf_GjE1d_EYfadEeqPXDwR6_Yw&oe=6A4DF1D9",
         "caption": "A crisp photo of Mars against black space. The Red Planet appears rust-colored with dark texturing along its middle and a light patch on its lower right side. Credit: USGS Astrogeology Science Center",
-        "publishedAt": null,
-        "likes": null,
-        "comments": null,
-        "width": null,
-        "height": null
       },
       {
         "platform": "facebook",
         "id": "YXBwX2l0ZW06MTAwMDQ0NTYxNTUwODMxOjIzMDUyNzI3MzI6NTo6MTU2NjUwMTAxNDg0NTI2OQ==",
         "url": "https://www.facebook.com/photo.php?fbid=1566501014845269&set=pb.100044561550831.-2207520000&type=3",
         "image": "https://scontent-mia5-1.xx.fbcdn.net/v/t39.99422-6/735193531_1369401081794252_3282264264129556761_n.png?stp=dst-jpg_tt6&cstp=mx1782x1264&ctp=s1782x1264&_nc_cat=101&ccb=1-7&_nc_sid=127cfc&_nc_ohc=WFiORgoguQMQ7kNvwFkXsDs&_nc_oc=AdoVKn1M18BsmDxx-9fjqlZzdjhtUti_iJRAu-JjoWeuyTMyBxlisdbXMjZN5h84eFU&_nc_zt=14&_nc_ht=scontent-mia5-1.xx&_nc_gid=cjhU7CvvrM25lg5_SdKqdg&_nc_ss=72289&oh=00_AQCH-clzF63z4t_Gr-uxWh0kiAEWwvtwVv0-nnKg48GJdA&oe=6A4E0112",
-        "caption": "A screenshot of the \"What Did Hubble See On Your Birthday\" website, with buttons to \"Select Your Birth Date\" and five Hubble photos displayed beneath. A reddish-blue star system faintly fills the background. Credit: NASA",
-        "publishedAt": null,
-        "likes": null,
-        "comments": null,
-        "width": null,
-        "height": null
+        "caption": "A screenshot of the \"What Did Hubble See On Your Birthday\" website, with buttons to \"Select Your Birth Date\" and five Hubble photos displayed beneath. A reddish-blue star system faintly fills the background. Credit: NASA"
       },
       {
         "platform": "facebook",
         "id": "YXBwX2l0ZW06MTAwMDQ0NTYxNTUwODMxOjIzMDUyNzI3MzI6NTo6MTU2NDk0MTc4MTY2Nzg1OQ==",
         "url": "https://www.facebook.com/photo.php?fbid=1564941781667859&set=pb.100044561550831.-2207520000&type=3",
         "image": "https://scontent-mia3-3.xx.fbcdn.net/v/t39.30808-6/734008892_1564941785001192_3952070880633221311_n.jpg?stp=dst-jpg_tt6&cstp=mx1273x1280&ctp=s1273x1280&_nc_cat=109&ccb=1-7&_nc_sid=127cfc&_nc_ohc=2Rh9bQ0m2YYQ7kNvwGydx9O&_nc_oc=AdpcoqPcqVBnvslep_0C7tWQgZkofrwHsEAqrVQxUBhBcFeKFV7dzTh_6NELe7SZTts&_nc_zt=23&_nc_ht=scontent-mia3-3.xx&_nc_gid=cjhU7CvvrM25lg5_SdKqdg&_nc_ss=72289&oh=00_AQA4IULhMZWSjEaqT4ba-MGZpAL68wafdqUScwTjM9Y_DA&oe=6A4DE345",
-        "caption": "A dense, sparkly star field collecting around a central point. The stars are various shades of white, yellow, and blue. Credit: ESA/Hubble & NASA, A. Sarajedini, G. Piotto",
-        "publishedAt": null,
-        "likes": null,
-        "comments": null,
-        "width": null,
-        "height": null
+        "caption": "A dense, sparkly star field collecting around a central point. The stars are various shades of white, yellow, and blue. Credit: ESA/Hubble & NASA, A. Sarajedini, G. Piotto"
       }
     ]
   },
@@ -6935,19 +6910,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://www.linkedin.com/ad-library/detail/1475728386",
     "text": "The apps you know go further with Copilot. Explore limited time offers today.",
     "headline": "Microsoft Outlook with Copilot",
-    "cta": null,
-    "landingUrl": null,
     "adFormat": "Single Image Ad",
-    "firstShown": null,
-    "lastShown": null,
-    "impressions": null,
-    "spend": null,
-    "country": null,
     "advertiser": {
-      "id": null,
       "name": "Microsoft 365",
-      "url": "https://www.linkedin.com/company/3509299",
-      "logo": null
+      "url": "https://www.linkedin.com/company/3509299"
     },
     "media": [
       "https://media.licdn.com/dms/image/v2/D4D10AQFWrEKj4VaX3g/image-shrink_1280/B4DZ7vxdWJHgAc-/0/1782139180792/Copilot_LinkedIn-Theme4_USA_1200x1200_PHA_SubTheme4L-SU_SMB-EN_NA_Standard_SBAN_LEA_NA_1jpg?e=2147483647&v=beta&t=nrMFf9aBVU7jPCZrhg2A-V0VMOscElqrqWshkXp_r7Y"
@@ -6963,19 +6929,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "1475728386",
         "url": "https://www.linkedin.com/ad-library/detail/1475728386",
         "text": "The apps you know go further with Copilot. Explore limited time offers today.",
-        "headline": null,
-        "cta": null,
-        "landingUrl": null,
         "adFormat": "Single Image Ad",
-        "firstShown": null,
-        "lastShown": null,
-        "impressions": null,
-        "spend": null,
         "country": "US",
         "advertiser": {
-          "id": null,
           "name": "Microsoft 365",
-          "url": null,
           "logo": "https://media.licdn.com/dms/image/v2/C560BAQGG-2Kb6o7o4A/company-logo_100_100/company-logo_100_100/0/1630592958709/microsoft_office_logo?e=1784764800&v=beta&t=McAvdsqf8HXtZyPU7nS-RGDY-98NHgoC_pwqOw5Gw7k"
         },
         "media": [
@@ -7057,38 +7014,28 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://www.linkedin.com/posts/microsoft_june-activity-7477715981667086336-BV_s",
         "text": "The most meaningful breakthroughs happen when technology is built with people in mind.\n \nThat was the message at Microsoft Build this month, where we announced a host of new tools to help developers build, dream and create. \n \nIn June’s edition of The Monthly Tech-In, we’re sharing stories from Build and beyond about the developers, founders and communities who are using AI to tackle real-world challenges, from helping creators protect their work to advancing more inclusive AI systems.\n \nRead more about the people and innovations who are shaping what's next:",
         "publishedAt": "2026-06-30T13:33:39.256Z",
-        "author": {
-          "name": "Microsoft",
-          "headline": "June",
-          "url": "https://www.linkedin.com/company/microsoft"
+          "author": {
+            "name": "Microsoft",
+            "headline": null,
+            "url": "https://www.linkedin.com/company/microsoft"
+          },
+          "id": "7477715981667086336",
+          "media": []
         },
-        "engagement": {
-          "likes": null,
-          "comments": null,
-          "reposts": null
-        },
-        "id": "7477715981667086336",
-        "media": []
-      },
-      {
-        "platform": "linkedin",
-        "type": "post",
-        "url": "https://www.linkedin.com/posts/microsoft_cancer-care-has-become-more-precise-over-activity-7470150280601440256-3c8q",
-        "text": "Cancer care has become more precise over time, but outcomes can still vary widely. Now, researchers are looking beyond mutations to how tumors behave.  \n \nIn new findings published in Nature Methods, Microsoft researcher Lorin Crawford shares how the right data can help AI reveal patterns in cell behavior that may lead to better ways to match therapies to patients. Read more about what Project Ex Vivo could mean for the future of treatment: https://msft.it/6009vgDWX",
-        "publishedAt": "2026-06-09T16:30:15.550Z",
-        "author": {
-          "name": "Microsoft",
-          "headline": null,
-          "url": "https://www.linkedin.com/company/microsoft"
-        },
-        "engagement": {
-          "likes": null,
-          "comments": null,
-          "reposts": null
-        },
-        "id": "7470150280601440256",
-        "media": []
-      }
+        {
+          "platform": "linkedin",
+          "type": "post",
+          "url": "https://www.linkedin.com/posts/microsoft_cancer-care-has-become-more-precise-over-activity-7470150280601440256-3c8q",
+          "text": "Cancer care has become more precise over time, but outcomes can still vary widely. Now, researchers are looking beyond mutations to how tumors behave.  \n \nIn new findings published in Nature Methods, Microsoft researcher Lorin Crawford shares how the right data can help AI reveal patterns in cell behavior that may lead to better ways to match therapies to patients. Read more about what Project Ex Vivo could mean for the future of treatment: https://msft.it/6009vgDWX",
+          "publishedAt": "2026-06-09T16:30:15.550Z",
+          "author": {
+            "name": "Microsoft",
+            "headline": null,
+            "url": "https://www.linkedin.com/company/microsoft"
+          },
+          "id": "7470150280601440256",
+          "media": []
+        }
     ]
   },
   "linkedin-post-details": {
@@ -18233,21 +18180,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "id": "7649211666845483028",
     "url": "https://library.tiktok.com/ads/detail/?ad_id=7649211666845483028",
     "text": "Stays put all night, no messy fallout #MakeupHack #FestivalMakeup",
-    "headline": null,
-    "cta": null,
-    "landingUrl": null,
     "adFormat": "video",
-    "firstShown": null,
-    "lastShown": null,
-    "impressions": null,
-    "spend": null,
-    "country": null,
-    "advertiser": {
-      "id": null,
-      "name": "Not Mention",
-      "url": null,
-      "logo": null
-    },
+    "advertiser": {},
     "media": [
       "https://p16-common-sign.tiktokcdn.com/tos-maliva-p-0068c799-us/oIgezERlqD2EFM1xADBnkHzKFBcISQfV0C9tpy~tplv-noop.image?dr=18692&refresh_token=a0fce6b6&x-expires=1783126706&x-signature=pzwpLOAqbyJ7zIEz5GHPVSDvOZQ%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&shcp=317596d8&idc=my&VideoID=v12025gd0000d8khedfog65orfmbj6cg",
       "https://v16m-default.tiktokcdn.com/ff617510a4b19dc54968edd3eaadd35d/6a485ab2/video/tos/maliva/tos-maliva-ve-0068c799-us/o4FCVEZDgmCByc5FfjqVDQAxItpe4KEPR1aU0S/?a=0&bti=NTU4QDM1NGA%3D&&bt=527&ft=cApXJCz7ThWHv80ZLGZmo0P&mime_type=video_mp4&rc=aDw4Omk2ZTdoNTloODloOkBpajllaXI5cmdrOzMzZzgzNEBhYGNjLmA1Ni4xMS80YjFeYSNgZ2pvMmRjYmhhLS1kLy9zcw%3D%3D&vvpl=1&l=20260704025747149C8D5E4B857CAD669F&btag=e00088000"
@@ -20566,7 +20500,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "quotes": 0,
           "bookmarks": 0
         },
-        "isReply": null,
+        "isReply": false,
         "isRetweet": false,
         "hashtags": [],
         "media": []
@@ -20594,7 +20528,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "quotes": 0,
           "bookmarks": 0
         },
-        "isReply": null,
+        "isReply": false,
         "isRetweet": false,
         "hashtags": [],
         "media": []
@@ -20622,7 +20556,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "quotes": 0,
           "bookmarks": 0
         },
-        "isReply": null,
+        "isReply": false,
         "isRetweet": false,
         "hashtags": [],
         "media": []
@@ -20643,9 +20577,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "tweetCount": 74183,
     "likesCount": 16859,
     "mediaCount": 28029,
-    "listedCount": 97069,
-    "isBlueVerified": null,
-    "website": "http://www.nasa.gov/",
+      "listedCount": 97069,
+      "isBlueVerified": true,
+      "website": "http://www.nasa.gov/",
     "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg",
     "bannerImage": "https://pbs.twimg.com/profile_banners/11348282/1775567134",
     "createdAt": "Wed Dec 19 20:20:32 +0000 2007"

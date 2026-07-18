@@ -143,6 +143,34 @@ def _normalize_post(item: dict) -> dict:
         or delivery.get("browser_native_hd_url")
         or delivery.get("browser_native_sd_url")
     )
+    # Group scrapers put the *group* URL in facebookUrl/inputUrl. Prefer the
+    # posting user's profile URL so author.username/url aren't the group page.
+    author_url = safe_str(
+        item.get("pageUrl")
+        or user.get("profileUrl")
+        or item.get("authorUrl")
+        or item.get("userUrl")
+    )
+    groupish = False
+    for candidate in (item.get("facebookUrl"), item.get("inputUrl")):
+        if candidate and "/groups/" in str(candidate).lower():
+            groupish = True
+            break
+    if not author_url and not groupish:
+        author_url = safe_str(item.get("facebookUrl") or item.get("inputUrl"))
+    author_username = safe_str(
+        item.get("pageUsername")
+        or user.get("username")
+        or user.get("id")
+        or _fb_username_from_url(author_url)
+        or (None if groupish else _fb_username_from_url(item.get("facebookUrl") or item.get("inputUrl")))
+        or item.get("author")
+    )
+    verified = item.get("isPageVerified")
+    if verified is None:
+        verified = item.get("verified")
+    if verified is None and isinstance(user, dict):
+        verified = user.get("isVerified") or user.get("verified")
     return {
         "platform": "facebook",
         "url": safe_str(item.get("url") or item.get("postUrl")),
@@ -158,15 +186,11 @@ def _normalize_post(item: dict) -> dict:
         "thumbnailUrl": safe_str(thumbnail),
         "videoUrl": safe_str(video_url),
         "author": {
-            "username": safe_str(
-                item.get("pageUsername")
-                or _fb_username_from_url(item.get("facebookUrl") or item.get("inputUrl"))
-                or item.get("author")
-            ),
+            "username": author_username,
             "displayName": safe_str(item.get("pageName") or user.get("name") or item.get("authorName")),
-            "url": safe_str(item.get("pageUrl") or user.get("profileUrl") or item.get("facebookUrl") or item.get("authorUrl")),
-            "profileImage": safe_str(user.get("profilePic")),
-            "verified": item.get("isPageVerified") or item.get("verified"),
+            "url": author_url,
+            "profileImage": safe_str(user.get("profilePic") or user.get("profilePicture")),
+            "verified": bool(verified) if verified is not None else None,
         },
         "engagement": {
             "views": safe_int(item.get("viewsCount") or item.get("videoViewCount") or item.get("videoPostViewCount")),
@@ -794,7 +818,7 @@ async def facebook_group_posts(
 
         data = await cached_or_run(
             endpoint="facebook.group-posts",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -870,24 +894,44 @@ async def facebook_comment_replies(
 
 
 def _normalize_photo(item: dict) -> dict:
-    return {
+    """Map Facebook photo actor rows; omit fields the actor never fills."""
+    out: dict[str, Any] = {
         "platform": "facebook",
         "id": safe_str(item.get("id") or item.get("photoId") or item.get("photo_id")),
         "url": safe_str(item.get("url") or item.get("photoUrl") or item.get("postUrl")),
         "image": safe_str(
             item.get("imageUrl")
+            or item.get("image_url")
             or item.get("image")
             or item.get("imageUri")
             or item.get("src")
             or item.get("thumbnail")
+            or item.get("thumbnail_url")
         ),
-        "caption": safe_str(item.get("caption") or item.get("text") or item.get("ocrText")),
-        "publishedAt": safe_str(item.get("timestamp") or item.get("date") or item.get("publishedAt")),
-        "likes": safe_int(item.get("likesCount") or item.get("reactionsCount")),
-        "comments": safe_int(item.get("commentsCount")),
-        "width": safe_int(item.get("width")),
-        "height": safe_int(item.get("height")),
+        "caption": safe_str(
+            item.get("caption") or item.get("text") or item.get("ocrText") or item.get("altText")
+        ),
     }
+    published = safe_str(
+        item.get("timestamp") or item.get("date") or item.get("publishedAt") or item.get("time")
+    )
+    if published:
+        out["publishedAt"] = published
+    likes = safe_int(
+        item.get("likesCount") or item.get("likes") or item.get("reactionsCount") or item.get("reactionLikeCount")
+    )
+    if likes is not None:
+        out["likes"] = likes
+    comments = safe_int(item.get("commentsCount") or item.get("comments"))
+    if comments is not None:
+        out["comments"] = comments
+    width = safe_int(item.get("width") or item.get("image_width") or item.get("imageWidth"))
+    if width is not None:
+        out["width"] = width
+    height = safe_int(item.get("height") or item.get("image_height") or item.get("imageHeight"))
+    if height is not None:
+        out["height"] = height
+    return out
 
 
 @router.get("/profile-photos", summary="Photos from a Facebook profile/page")
@@ -920,7 +964,7 @@ async def facebook_profile_photos(
 
         data = await cached_or_run(
             endpoint="facebook.profile-photos",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
