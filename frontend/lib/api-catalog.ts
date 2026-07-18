@@ -198,8 +198,8 @@ const YOUTUBE: Spec[] = [
   { slug: "youtube-channel-details", name: "YouTube Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/youtube/channel-details", credits: 1 },
   { slug: "youtube-search", name: "YouTube Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/youtube/search", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-channel-videos", name: "YouTube Channel Videos API", shortName: "Channel Videos", category: "list", method: "GET", path: "/v1/youtube/channel-videos", credits: 20, creditsPerResult: 1 },
-  { slug: "youtube-playlist-videos", name: "YouTube Playlist Videos API", shortName: "Playlist Videos", category: "list", method: "GET", path: "/v1/youtube/playlist-videos", credits: 50, creditsPerResult: 1 },
-  { slug: "youtube-playlist", name: "YouTube Playlist API", shortName: "Playlist", category: "list", method: "GET", path: "/v1/youtube/playlist", credits: 50, creditsPerResult: 1 },
+  { slug: "youtube-playlist-videos", name: "YouTube Playlist Videos API", shortName: "Playlist Videos", category: "list", method: "GET", path: "/v1/youtube/playlist-videos", credits: 50, creditsPerResult: 1 , tagline: "List the videos in a YouTube playlist — URL, title, and position for each item.", longDescription: "Paste a YouTube playlist URL and get the videos in that playlist as a structured list. Use Playlist when you also need playlist title and description in the same response. No YouTube OAuth required." },
+  { slug: "youtube-playlist", name: "YouTube Playlist API", shortName: "Playlist", category: "list", method: "GET", path: "/v1/youtube/playlist", credits: 50, creditsPerResult: 1 , tagline: "Get a YouTube playlist's metadata plus its videos — title, description, and each video's URL, title, and position.", longDescription: "Paste a YouTube playlist URL and get both the playlist details (title, description, channel) and the videos in it as structured JSON. Prefer this when you need playlist info and the video list together. For only the video list, use Playlist Videos. No YouTube OAuth required." },
   { slug: "youtube-shorts-transcript", name: "YouTube Shorts Transcript API", shortName: "Shorts Transcript", category: "transcript", method: "GET", path: "/v1/youtube/shorts/transcript", credits: 2 },
   { slug: "youtube-shorts-summarizer", name: "YouTube Shorts Summarizer API", shortName: "Shorts Summarizer", category: "summarize", method: "GET", path: "/v1/youtube/shorts/summarize", credits: 4 },
   { slug: "youtube-shorts-stats", name: "YouTube Shorts Stats API", shortName: "Shorts Stats", category: "details", method: "GET", path: "/v1/youtube/shorts/video-details", credits: 1 },
@@ -211,8 +211,8 @@ const YOUTUBE: Spec[] = [
   { slug: "youtube-comment-replies", name: "YouTube Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/youtube/comment-replies", credits: 20, creditsPerResult: 0.4 },
   { slug: "youtube-channel-playlists", name: "YouTube Channel Playlists API", shortName: "Channel Playlists", category: "list", method: "GET", path: "/v1/youtube/channel-playlists", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-community-posts", name: "YouTube Community Posts API", shortName: "Community Posts", category: "list", method: "GET", path: "/v1/youtube/community-posts", credits: 10, creditsPerResult: 0.5 },
-  { slug: "youtube-community-post-details", name: "YouTube Community Post Details API", shortName: "Community Post Details", category: "details", method: "GET", path: "/v1/youtube/community-post-details", credits: 1 },
-  { slug: "youtube-video-sponsors", name: "YouTube Video Sponsors API", shortName: "Video Sponsors", category: "details", method: "GET", path: "/v1/youtube/video-sponsors", credits: 1 },
+  { slug: "youtube-community-post-details", name: "YouTube Community Post Details API", shortName: "Community Post Details", category: "details", method: "GET", path: "/v1/youtube/community-post-details", credits: 1 , tagline: "Get a YouTube community post — text, images, poll options, likes, and comments as structured JSON.", longDescription: "Paste a YouTube community post URL and get the post as clean JSON: the text, attached images, poll options when present, like and comment counts, publish date, and the channel that posted it. Use it to archive community updates, track polls, or feed a content calendar. No YouTube OAuth required — results are cached for 24 hours." },
+  { slug: "youtube-video-sponsors", name: "YouTube Video Sponsors API", shortName: "Video Sponsors", category: "details", method: "GET", path: "/v1/youtube/video-sponsors", credits: 1 , tagline: "Find sponsor, self-promo, and interaction segments inside a YouTube video — start/end times and category for each segment.", longDescription: "Paste a YouTube video URL and get the sponsor and promo segments viewers have marked for that video: each segment includes a category (sponsor, self-promo, interaction, and similar), plus start and end timestamps. Useful for skipping ads in players, estimating brand-deal density, or cleaning footage for reuse. No YouTube OAuth required." },
 ];
 
 const TIKTOK: Spec[] = [
@@ -220,30 +220,30 @@ const TIKTOK: Spec[] = [
   { slug: "tiktok-summarizer", name: "TikTok Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/tiktok/summarize", credits: 4 },
   { slug: "tiktok-video-details", name: "TikTok Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/tiktok/video-details", credits: 1, tagline: "Get everything about one TikTok video from its URL — caption, view/like/comment/share/save counts, creator, sound, hashtags, and thumbnail.", longDescription: "Paste any public TikTok video URL and the TikTok Video Details API returns the full picture as clean JSON: the caption, when it was posted, how long it runs, and its engagement — views, likes, comments, shares, and saves. You also get the creator (username, display name, follower count, verified badge, and avatar), the sound/music name, the list of hashtags, and a thumbnail image. Use it to build analytics dashboards, track a campaign, or enrich a content database. This endpoint focuses on metadata and stats (videoUrl is null here). No TikTok login and no proxies or infrastructure to maintain on your side, and results are cached for 24 hours, so repeat lookups are instant and free.", delivers: ["Caption, publish date, and video duration", "Views, likes, comments, shares, and saves", "Creator profile — handle, name, followers, verified, avatar", "Sound name, hashtags, and thumbnail image"] },
   { slug: "tiktok-comments", name: "TikTok Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/tiktok/comments", credits: 2, tagline: "Get the comments on any TikTok video — text, author, avatar, likes, and timestamp for each one, with cursor pagination to page through them all.", longDescription: "Paste a public TikTok video URL and the TikTok Comments API returns its comments as clean JSON. Each comment includes the text, the author's username and avatar, how many likes it has, and when it was posted. The response also reports totalComments — the video's full comment count. Fetch up to 500 comments per call with the limit parameter, then pass the returned nextCursor value back in to page through the rest — a flat 2 credits per call, no matter how many comments you fetch. Need the actual reply threads under a comment? Pass that comment's id to the TikTok Comment Replies API. Ideal for sentiment analysis, social listening, moderation, and spotting engaged fans. No TikTok login and no proxies or infrastructure to maintain on your side.", delivers: ["Comment text, author username, and avatar", "Like count and publish time per comment", "totalComments plus cursor pagination (nextCursor) through every comment", "limit up to 500 — a flat 2 credits per call", "Pair with Comment Replies to pull reply threads"] },
-  { slug: "tiktok-channel-details", name: "TikTok Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/tiktok/channel-details", credits: 1 },
-  { slug: "tiktok-profile-region", name: "TikTok Profile Region API", shortName: "Profile Region", category: "channel", method: "GET", path: "/v1/tiktok/profile-region", credits: 2, tagline: "Find out where a TikTok creator is likely based and what language they use — a resolved country plus language and core profile stats for any public profile.", longDescription: "Give the TikTok Profile Region API a profile URL, @handle, or username and it returns location and language signals as clean JSON. TikTok almost never publishes an account's country publicly, so when it's missing the region field is filled with an AI-inferred country (e.g. IT or US) guessed from public cues like the bio, display name, and language. A regionSource field tells you where the value came from — \"tiktok\" when TikTok reported it, \"inferred\" when it's a best-effort estimate — and regionConfidence (high/medium/low) grades the guess, so you always know how reliable it is. You also get the interface language and the core profile stats — followers, following, total likes, and video count — plus display name, verified and private flags, and the avatar. Use it for audience and geo analysis, content localization, compliance checks, or vetting creators before a partnership. Flat 2 credits per call, no TikTok login or infrastructure to maintain on your side, and results are cached for 24 hours so repeat lookups are instant and free.", delivers: ["Creator country in region — TikTok's own when exposed, else an AI-inferred guess", "regionSource (tiktok/inferred) and regionConfidence so you know how reliable it is", "Interface language plus core stats — followers, following, likes, and video count", "Display name, verified and private flags, and avatar — ideal for geo/audience analysis, localization, and creator vetting"] },
-  { slug: "tiktok-audience-demographics", name: "TikTok Audience Demographics API", shortName: "Audience Demographics", category: "channel", method: "GET", path: "/v1/tiktok/audience-demographics", credits: 3, tagline: "See which countries a TikTok creator's audience comes from — a ranked country breakdown built natively from the people who actually engage with their videos.", longDescription: "Give the TikTok Audience Demographics API a profile URL, @handle, or username and it returns a ranked breakdown of the creator's audience by country as clean JSON. TikTok never publishes follower geography publicly, but every commenter's country IS exposed on its own data — so we sample the people commenting across the creator's recent videos and tally their countries into audienceLocations, each with a country name, ISO countryCode, a raw count, and a percentage of the sample. You also get videosSampled and sampleSize so you know how the breakdown was built. It's an engagement-based audience signal (who interacts), not a follower census, and it's computed natively from TikTok's own data — no third-party audience panel. Use it for market sizing, geo targeting, localization, and influencer vetting. Flat 3 credits per call, and results are cached for 24 hours.", delivers: ["Ranked audienceLocations: country, countryCode, count, and percentage", "Engagement-based country mix sampled from real commenters", "videosSampled and sampleSize for transparency on the sample", "Native — computed from TikTok's own data, no audience-panel actor"] },
-  { slug: "tiktok-search-suggestions", name: "TikTok Search Suggestions API", shortName: "Search Suggestions", category: "search", method: "GET", path: "/v1/tiktok/search-suggestions", credits: 28, creditsPerResult: 1.4, tagline: "Get the autocomplete terms TikTok suggests in its search bar for a keyword — the real phrases people search, ranked, so you can find trending queries and long-tail keyword ideas.", longDescription: "Give the TikTok Search Suggestions API a seed keyword and it returns the autocomplete (typeahead) terms TikTok shows in its search bar as clean JSON — the actual phrases real users are searching for. Each suggestion includes the suggested search term, its rank (1 = shown at the top), a ready-to-open searchUrl that runs that exact search on TikTok, the seed keyword it was expanded from, and the region and language it was localized for. Use the country and language parameters to see what a specific market is searching (for example US in en-US, or DE in de-DE) — the same keyword returns different suggestions per country. It's the fastest way to do TikTok keyword research: surface trending queries, discover long-tail variations, plan content, or feed an SEO / hashtag tool. No TikTok login and no proxies or infrastructure to maintain on your side. Billed per suggestion returned, and results are cached for 24 hours so repeat lookups are instant and free.", delivers: ["The autocomplete terms TikTok suggests for your keyword", "Each suggestion with its rank — the order it appears in the search bar", "A ready-to-open searchUrl that runs that exact search on TikTok", "The seed keyword plus the region and language it was localized for", "Localize by country + language to see what a specific market searches"] },
-  { slug: "tiktok-channel-posts", name: "TikTok Channel Posts API", shortName: "Channel Posts", category: "list", method: "GET", path: "/v1/tiktok/channel-posts", credits: 2, tagline: "Get the latest videos from any public TikTok profile — caption, view / like / comment counts, thumbnail, sound, and hashtags for each post, with cursor pagination to page through them all.", longDescription: "Send a profile URL, @handle, or username and the TikTok Channel Posts API returns that creator's most recent videos as clean, structured JSON. It prefers TikTok's own mobile post API (fast, native) and automatically falls back to our data-collection pool on the first page if TikTok soft-blocks every residential exit — so you still get a response. Each post includes the TikTok page URL and video ID, caption, publish date, duration, thumbnail, hashtags, and the sound/music name, plus full engagement — views, likes, comments, shares, and saves — and the author's profile (username, display name, followers, verified badge, avatar). Fetch up to 200 posts per call with the limit parameter, then pass the returned nextCursor value back in to page through older videos (hasMore tells you when you've reached the end) — a flat 2 credits per call, no matter how many posts you fetch. Ideal for creator monitoring, content calendars, competitor tracking, and feeding analytics or influencer tools. This endpoint focuses on metadata and stats. No TikTok login and no proxies or infrastructure to maintain on your side.", delivers: ["Latest public videos from any TikTok profile", "Caption, publish date, duration, thumbnail, hashtags, and sound name", "Views, likes, comments, shares, and saves per video", "Author profile — handle, name, followers, verified, avatar", "Cursor pagination (nextCursor + hasMore) — flat 2 credits per call", "Native-first with automatic first-page fallback for reliability"] },
+  { slug: "tiktok-channel-details", name: "TikTok Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/tiktok/channel-details", credits: 1 , tagline: "Get a TikTok profile's key stats — followers, following, likes, video count, bio, and verification." },
+  { slug: "tiktok-profile-region", name: "TikTok Profile Region API", shortName: "Profile Region", category: "channel", method: "GET", path: "/v1/tiktok/profile-region", credits: 2 , tagline: "Find out where a TikTok creator is likely based and what language they use — country, language, and core profile stats.", longDescription: "Give the TikTok Profile Region API a profile URL, @handle, or username and it returns location and language as clean JSON. TikTok almost never shows an account's country publicly, so when that value is missing we estimate the country from public cues like the bio, display name, and language. The response tells you whether the country came from TikTok itself or from that estimate, and how confident the estimate is (high, medium, or low). You also get the interface language and core profile stats — followers, following, total likes, and video count — plus display name, verified and private flags, and the avatar. Use it for audience and geo analysis, content localization, compliance checks, or vetting creators before a partnership. Flat 2 credits per call, and results are cached for 24 hours.", delivers: ["Creator country — TikTok's own when available, otherwise an AI estimate", "Whether the country came from TikTok or was estimated, plus confidence", "Interface language plus followers, following, likes, and video count", "Display name, verified and private flags, and avatar"] },
+  { slug: "tiktok-audience-demographics", name: "TikTok Audience Demographics API", shortName: "Audience Demographics", category: "channel", method: "GET", path: "/v1/tiktok/audience-demographics", credits: 3 , tagline: "See which countries a TikTok creator's audience comes from — a ranked country breakdown based on people who comment on their videos.", longDescription: "Give the TikTok Audience Demographics API a profile URL, @handle, or username and it returns a ranked country breakdown of the creator's audience as clean JSON. TikTok does not publish follower geography, but commenters often expose a country — so we sample people commenting on the creator's recent videos and tally countries into a list with country name, country code, count, and percentage. You also get how many videos and commenters were sampled. This reflects who engages, not a full follower census. Use it for market sizing, geo targeting, localization, and influencer vetting. Flat 3 credits per call, and results are cached for 24 hours.", delivers: ["Ranked countries with name, code, count, and percentage", "Country mix based on real commenters, not a follower census", "How many videos and commenters were sampled", "Computed from public TikTok engagement data"] },
+  { slug: "tiktok-search-suggestions", name: "TikTok Search Suggestions API", shortName: "Search Suggestions", category: "search", method: "GET", path: "/v1/tiktok/search-suggestions", credits: 28, creditsPerResult: 1.4, tagline: "Get the autocomplete terms TikTok suggests in its search bar for a keyword — the real phrases people search, ranked, so you can find trending queries and long-tail keyword ideas.", delivers: ["The autocomplete terms TikTok suggests for your keyword", "Each suggestion with its rank — the order it appears in the search bar", "A ready-to-open searchUrl that runs that exact search on TikTok", "The seed keyword plus the region and language it was localized for", "Localize by country + language to see what a specific market searches"] , longDescription: "Give the TikTok Search Suggestions API a seed keyword and it returns the autocomplete phrases TikTok shows in its search bar as clean JSON — the actual phrases people search for. Each suggestion includes the search term, its rank (1 = top of the list), a ready-to-open search URL, the seed keyword it came from, and the country and language it was localized for. Use the country and language parameters to see what a specific market is searching (for example US in English, or DE in German). Great for TikTok keyword research, trending queries, and content planning. No TikTok login required. Billed per suggestion returned, and results are cached for 24 hours." },
+  { slug: "tiktok-channel-posts", name: "TikTok Channel Posts API", shortName: "Channel Posts", category: "list", method: "GET", path: "/v1/tiktok/channel-posts", credits: 2, tagline: "Get the latest videos from any public TikTok profile — caption, view / like / comment counts, thumbnail, sound, and hashtags for each post, with cursor pagination to page through them all." , longDescription: "Send a profile URL, @handle, or username and the TikTok Channel Posts API returns that creator's most recent videos as clean, structured JSON. If TikTok blocks a direct fetch, the first page automatically retries through a backup path so you still get a response. Each post includes the TikTok page URL and video ID, caption, publish date, duration, thumbnail, hashtags, and the sound/music name, plus full engagement — views, likes, comments, shares, and saves — and the author's profile (username, display name, followers, verified badge, avatar). Fetch up to 200 posts per call with the limit parameter, then pass the returned nextCursor value back in to page through older videos (hasMore tells you when you've reached the end) — a flat 2 credits per call, no matter how many posts you fetch. Ideal for creator monitoring, content calendars, competitor tracking, and feeding analytics or influencer tools. This endpoint focuses on metadata and stats. No TikTok login and no infrastructure to maintain on your side.", delivers: ["Latest public videos from any TikTok profile", "Caption, publish date, duration, thumbnail, hashtags, and sound name", "Views, likes, comments, shares, and saves per video", "Author profile — handle, name, followers, verified, avatar", "Cursor pagination (nextCursor + hasMore) — flat 2 credits per call", "Automatic first-page backup if the direct fetch fails"] },
   { slug: "tiktok-comment-replies", name: "TikTok Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/tiktok/comment-replies", credits: 50 },
   { slug: "tiktok-user-followers", name: "TikTok User Followers API", shortName: "User Followers", category: "list", method: "GET", path: "/v1/tiktok/user-followers", credits: 20, creditsPerResult: 0.4 },
   { slug: "tiktok-user-followings", name: "TikTok User Followings API", shortName: "User Followings", category: "list", method: "GET", path: "/v1/tiktok/user-followings", credits: 20, creditsPerResult: 0.4 },
-  { slug: "tiktok-music-posts", name: "TikTok Music Posts API", shortName: "Music Posts", category: "list", method: "GET", path: "/v1/tiktok/music-posts", credits: 32, creditsPerResult: 1.6 },
-  { slug: "tiktok-top-search", name: "TikTok Top Search API", shortName: "Top Search", category: "search", method: "GET", path: "/v1/tiktok/top-search", credits: 14, creditsPerResult: 0.7 },
-  { slug: "tiktok-search-by-hashtag", name: "TikTok Search by Hashtag API", shortName: "Search by Hashtag", category: "search", method: "GET", path: "/v1/tiktok/search/hashtag", credits: 14, creditsPerResult: 0.7, tagline: "Search TikTok videos by hashtag — video URL, caption, author, and view / like / comment counts for each result, with cursor pagination to page through them all.", longDescription: "Pass a hashtag (with or without the #) and the TikTok Search by Hashtag API returns the videos posted under that tag as clean, structured JSON. Each result includes the video URL, caption, publish date, duration, thumbnail, the author's profile, and full engagement counts — views, likes, comments, shares, and saves — plus the hashtags and sound used. Need more than the first page? Pass the nextCursor value from the previous response to keep paging, and use hasMore to know when you've reached the end. An optional region parameter sets which country the data-collection proxy exits from (it does not filter results by country). Use it to track a campaign or branded hashtag, discover trending content in a niche, or build a themed content feed. No TikTok login and no proxies or infrastructure to maintain on your side. Billed per result — about 0.7 credits each.", delivers: ["Public videos posted under your hashtag", "Video URL, caption, thumbnail, duration, and publish date", "Author profile plus view / like / comment / share / save counts", "Cursor pagination (nextCursor + hasMore) through every result"] },
+  { slug: "tiktok-music-posts", name: "TikTok Music Posts API", shortName: "Music Posts", category: "list", method: "GET", path: "/v1/tiktok/music-posts", credits: 32, creditsPerResult: 1.6 , tagline: "List TikTok videos that use a specific sound — caption, author, and engagement for each post.", longDescription: "Paste a TikTok music/sound URL and get the public videos that use that sound as structured JSON. Each result includes caption, author, thumbnail, and engagement counts. Use Song Details first if you only need the sound's metadata. Billed per result." },
+  { slug: "tiktok-top-search", name: "TikTok Top Search API", shortName: "Top Search", category: "search", method: "GET", path: "/v1/tiktok/top-search", credits: 14, creditsPerResult: 0.7 , tagline: "Search TikTok's top mixed results for a keyword — videos and related hits ranked the way TikTok's search ranks them.", longDescription: "Pass a keyword and get TikTok's top mixed search results as structured JSON — the same style of ranked hits you see in TikTok search, not a single content type only. Each result includes the fields TikTok exposes for that hit (URL, caption or title, author, engagement when available). Billed per result." },
+  { slug: "tiktok-search-by-hashtag", name: "TikTok Search by Hashtag API", shortName: "Search by Hashtag", category: "search", method: "GET", path: "/v1/tiktok/search/hashtag", credits: 14, creditsPerResult: 0.7, tagline: "Search TikTok videos by hashtag — video URL, caption, author, and view / like / comment counts for each result, with cursor pagination to page through them all.", delivers: ["Public videos posted under your hashtag", "Video URL, caption, thumbnail, duration, and publish date", "Author profile plus view / like / comment / share / save counts", "Cursor pagination (nextCursor + hasMore) through every result"] , longDescription: "Pass a hashtag (with or without the #) and the TikTok Search by Hashtag API returns the videos posted under that tag as clean, structured JSON. Each result includes the video URL, caption, publish date, duration, thumbnail, the author's profile, and full engagement counts — views, likes, comments, shares, and saves — plus the hashtags and sound used. Need more than the first page? Pass the nextCursor value from the previous response to keep paging, and use hasMore to know when you've reached the end. An optional region parameter only chooses which country our request is sent from — it does not filter results by country. Use it to track a campaign or branded hashtag, discover trending content in a niche, or build a themed content feed. No TikTok login required. Billed per result — about 0.7 credits each." },
   { slug: "tiktok-search-users", name: "TikTok Search Users API", shortName: "Search Users", category: "search", method: "GET", path: "/v1/tiktok/search/users", credits: 8, creditsPerResult: 0.4, tagline: "Search TikTok users by keyword — username, display name, bio, follower count, verified flag, and avatar for each matching creator, with cursor pagination.", longDescription: "Pass a search query and the TikTok Search Users API returns the creators whose username, display name, or bio match it as clean, structured JSON. Each result includes the username, display name, profile URL, bio, follower count, verified flag, and avatar. Need more than the first page? Pass the nextCursor value from the previous response to keep paging, and use hasMore to know when you've reached the end. Use it to turn a brand or creator name into confirmed @handles, discover creators in a niche, enrich a CRM or lead list, or feed an influencer-discovery tool. No TikTok login and no proxies or infrastructure to maintain on your side. Billed per result — about 0.4 credits each.", delivers: ["Public creators matching your search query", "Username, display name, profile URL, and bio", "Follower count, verified flag, and avatar", "Cursor pagination (nextCursor + hasMore) through every result"] },
-  { slug: "tiktok-song-details", name: "TikTok Song Details API", shortName: "Song Details", category: "details", method: "GET", path: "/v1/tiktok/song-details", credits: 2 },
-  { slug: "tiktok-trending-feed", name: "TikTok Trending Feed API", shortName: "Trending Feed", category: "list", method: "GET", path: "/v1/tiktok/trending-feed", credits: 14, creditsPerResult: 0.7 },
-  { slug: "tiktok-popular-hashtags", name: "TikTok Popular Hashtags API", shortName: "Popular Hashtags", category: "list", method: "GET", path: "/v1/tiktok/popular-hashtags", credits: 14, creditsPerResult: 0.7 },
-  { slug: "tiktok-live", name: "TikTok Live API", shortName: "Live", category: "details", method: "GET", path: "/v1/tiktok/live", credits: 1 },
-  { slug: "tiktok-live-info", name: "TikTok Live Info API", shortName: "Live Info", category: "details", method: "GET", path: "/v1/tiktok/live-info", credits: 7 },
-  { slug: "tiktok-popular-creators", name: "TikTok Popular Creators API", shortName: "Popular Creators", category: "list", method: "GET", path: "/v1/tiktok/popular-creators", credits: 28, creditsPerResult: 1.4 },
+  { slug: "tiktok-song-details", name: "TikTok Song Details API", shortName: "Song Details", category: "details", method: "GET", path: "/v1/tiktok/song-details", credits: 2 , tagline: "Get details for a TikTok sound — title, artist, duration, cover art, and how many videos use it.", longDescription: "Paste a TikTok music/sound URL and get the sound's metadata as clean JSON: title, artist or original creator, duration, cover image, and usage count when available. Pair with Music Posts to list videos that use the same sound. Flat 2 credits per call." },
+  { slug: "tiktok-trending-feed", name: "TikTok Trending Feed API", shortName: "Trending Feed", category: "list", method: "GET", path: "/v1/tiktok/trending-feed", credits: 14, creditsPerResult: 0.7 , tagline: "Get videos from TikTok's trending feed — caption, author, and engagement for each item." },
+  { slug: "tiktok-popular-hashtags", name: "TikTok Popular Hashtags API", shortName: "Popular Hashtags", category: "list", method: "GET", path: "/v1/tiktok/popular-hashtags", credits: 14, creditsPerResult: 0.7 , tagline: "Get currently popular TikTok hashtags — name and popularity signals for each tag." },
+  { slug: "tiktok-live", name: "TikTok Live API", shortName: "Live", category: "details", method: "GET", path: "/v1/tiktok/live", credits: 1 , tagline: "Check whether a TikTok user is live right now — live status and basic room info when they are.", longDescription: "Send a TikTok profile URL or @handle and learn if that creator is currently live. When they are live you get basic room fields; when they are not, you get a clear offline status. For richer room details (title, viewer counts, and more), use Live Info. Flat 1 credit per call." },
+  { slug: "tiktok-live-info", name: "TikTok Live Info API", shortName: "Live Info", category: "details", method: "GET", path: "/v1/tiktok/live-info", credits: 7 , tagline: "Get details for a TikTok live room — title, host, viewer counts, and stream metadata when available.", longDescription: "Send a TikTok live or profile URL and get richer live-room details as structured JSON: title, host, viewer signals, and related stream fields when the room is active. Use Live for a cheap online/offline check first. Flat 7 credits per call." },
+  { slug: "tiktok-popular-creators", name: "TikTok Popular Creators API", shortName: "Popular Creators", category: "list", method: "GET", path: "/v1/tiktok/popular-creators", credits: 28, creditsPerResult: 1.4 , tagline: "Discover popular TikTok creators — handle, follower count, and profile fields for each account." },
 ];
 
 const INSTAGRAM: Spec[] = [
-  { slug: "instagram-transcript", name: "Instagram Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/instagram/transcript", credits: 2, tagline: "Turn any Instagram Reel's speech into text — the full transcript plus timestamped segments, ready for search, subtitles, or AI pipelines.", longDescription: "Send a Reel URL and the Instagram Transcript API returns everything spoken in the video as clean text: the full transcript, timestamped segments (start time and duration for each line), and word count. Auto-detects the spoken language, or pass an optional language code (like 'tr' or 'en') to pin it — recommended for short clips. Great for making Reels searchable, generating subtitles, feeding LLM/RAG pipelines, or repurposing video content as text. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side — results are cached for 24 hours, so repeat lookups are instant and free." },
+  { slug: "instagram-transcript", name: "Instagram Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/instagram/transcript", credits: 2, tagline: "Turn any Instagram Reel's speech into text — the full transcript plus timestamped segments, ready for search, subtitles, or AI pipelines." , longDescription: "Send a Reel URL and the Instagram Transcript API returns everything spoken in the video as clean text: the full transcript, timestamped segments (start time and duration for each line), and word count. Auto-detects the spoken language, or pass an optional language code (like 'tr' or 'en') to pin it — recommended for short clips. Great for making Reels searchable, generating subtitles, feeding AI tools, or turning video into text. No Instagram login or OAuth required — results are cached for 24 hours, so repeat lookups are instant and free." },
   { slug: "instagram-summarizer", name: "Instagram Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/instagram/summarize", credits: 4, tagline: "Get an AI summary of any Instagram Reel — a short paragraph plus key points, without watching the video.", longDescription: "Send a Reel URL and the Instagram Summarizer API transcribes the video and returns an AI-written summary as clean JSON: a concise paragraph plus a list of key points. Pass an optional language code (like 'tr') to pin the speech language and get the summary in that language — otherwise it auto-detects and summarizes in English. Perfect for content research at scale, briefing tools, and AI agents that need to understand video content without processing media. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side — results are cached for 24 hours, so repeat lookups are instant and free." },
-  { slug: "instagram-details", name: "Instagram Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/instagram/details", credits: 1, tagline: "Get full Instagram post metadata — caption, likes, comments, duration, and more." },
+  { slug: "instagram-details", name: "Instagram Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/instagram/details", credits: 1 , tagline: "Get an Instagram post or Reel — caption, likes, comments, media URLs, author, and publish date.", longDescription: "Paste an Instagram post or Reel URL and get the item as clean JSON: caption, like and comment counts, media URLs (image or video), author profile, duration when it is a Reel, and publish date. Use it for analytics dashboards, content databases, or campaign tracking. Flat 1 credit per call — no Instagram login or OAuth, and results are cached for 24 hours.", delivers: ["Caption, media URLs, and publish date", "Like and comment counts", "Author profile fields", "Duration for Reels when available"] },
   { slug: "instagram-comments", name: "Instagram Post Comments API", shortName: "Post Comments", category: "comments", method: "GET", path: "/v1/instagram/comments", credits: 45, creditsPerResult: 0.9, tagline: "Get the comments on any Instagram post or Reel — text, author, avatar, likes, and timestamp for each comment.", longDescription: "Send a post or Reel URL and the Instagram Post Comments API returns its comments as clean, structured JSON. Each comment includes the text, author username and avatar, like count, and when it was posted. Use the limit parameter (up to 500) to control how many you fetch — billing scales with results returned. Ideal for sentiment analysis, social listening, comment moderation, and finding engaged fans or customer feedback. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side — results are cached for 24 hours, so repeat lookups are instant and free." },
   { slug: "instagram-channel-details", name: "Instagram Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/instagram/channel-details", credits: 1, tagline: "Get any public Instagram profile's key stats in one call — followers, following, post count, bio, and verification status.", longDescription: "Send a profile URL or @handle and the Instagram Channel Details API returns the account's profile as clean, structured JSON: display name, bio, follower and following counts, total posts, profile image, and whether it's verified. It's the go-to endpoint for influencer vetting, competitor tracking, audience dashboards, and enriching user records with live Instagram stats. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side — results are cached for 24 hours, so repeat lookups are instant and free." },
   { slug: "instagram-channel-posts", name: "Instagram Channel Posts API", shortName: "Channel Posts", category: "list", method: "GET", path: "/v1/instagram/channel-posts", credits: 6, creditsPerResult: 0.3, tagline: "Get the latest posts from any public Instagram profile — caption, media URLs, likes, comments, and publish date for each post, with cursor pagination for older ones.", longDescription: "Send a profile URL or @handle and the Instagram Channel Posts API returns that account's most recent posts as clean, structured JSON. Each post includes the caption, image or video URLs, like and comment counts, post type, and publish date. Need more than the first page? Pass the nextCursor value from the previous response to keep paging through older posts. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side — results are cached for 24 hours, so repeat lookups are instant and free." },
@@ -253,13 +253,13 @@ const INSTAGRAM: Spec[] = [
   { slug: "instagram-tagged-posts", name: "Instagram Tagged Posts API", shortName: "Tagged Posts", category: "list", method: "GET", path: "/v1/instagram/tagged-posts", credits: 18, creditsPerResult: 0.9, tagline: "Get the posts where an Instagram account is tagged by other users — caption, media URLs, author, likes, comments, and publish date for each post.", longDescription: "Send a profile URL or @handle and the Instagram Tagged Posts API returns the posts other people tagged that account in — the same content you see in the profile's \"Tagged\" tab — as clean, structured JSON. Each post includes who published it, the caption, image or video URLs, like and comment counts, post type, and publish date. It's the easiest way to see UGC and brand mentions: track who is tagging a brand, collect fan or customer content, or monitor collaborations. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side — results are cached for 24 hours, so repeat lookups are instant and free." },
   { slug: "instagram-reels-by-audio-id", name: "Instagram Reels By Audio ID API", shortName: "Reels By Audio ID", category: "list", method: "GET", path: "/v1/instagram/reels-by-audio-id", credits: 28, creditsPerResult: 1.4, tagline: "Give it an Instagram sound and get back every Reel that uses it — each with its video, caption, creator, and view / like / comment counts.", longDescription: "On Instagram every Reel is built on an audio track, and each track has its own page listing the Reels that use it. This API takes that sound — either the numeric audio ID (the musicId you see on a Reel) or a full audio-page URL like https://www.instagram.com/reels/audio/AUDIO_ID/ — and returns those Reels as clean JSON. For each Reel you get a direct video URL, caption, the creator's profile, play / like / comment counts, duration, and publish date. Use it to see how far a trending sound has spread, find every creator who used your music, or measure a branded-audio campaign. No Instagram login, no OAuth, and no infrastructure to maintain — results are cached for 24 hours, so repeat lookups are instant and free.", delivers: ["Every public Reel made with that audio track", "Direct MP4 video URL and thumbnail for each Reel", "Caption, duration, publish date, and the sound's audio ID", "Creator handle plus play / like / comment counts"] },
   { slug: "instagram-hashtag-search", name: "Instagram Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/instagram/hashtag-search", credits: 12, creditsPerResult: 0.6, tagline: "Find public Instagram posts tagged with a hashtag — each result comes with its media, caption, author, and like / comment counts.", longDescription: "Pass a hashtag without the # (e.g. travel or foodie) and the Instagram Hashtag Search API returns the public posts and Reels that use that tag as clean JSON — the same grid you'd see on the hashtag's page in the app. Each result includes the post URL, media type (image, video, or carousel), caption, the author's profile, like / comment / view counts, a thumbnail, and the full list of hashtags and @mentions in the post. Use it to track a campaign or branded hashtag, discover creators in a niche, build a themed content feed, or watch a trend grow. No Instagram login, no OAuth, and no infrastructure to maintain — results are cached for 24 hours, so repeat lookups are instant and free.", delivers: ["Public posts and Reels tagged with your hashtag", "Post URL, media type, caption, and publish date", "Author handle plus like / comment / view counts", "Every hashtag and @mention extracted from each post"] },
-  { slug: "instagram-profile-search", name: "Instagram Profile Search API", shortName: "Profile Search", category: "search", method: "GET", path: "/v1/instagram/profile-search", credits: 1, tagline: "Look up an Instagram account by name or @handle and get its profile back — display name, follower count, verified badge, private flag, and avatar.", longDescription: "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, or instagram.com/natgeo) and the Instagram Profile Search API resolves it to the matching public profile as clean JSON. It returns the account itself, not its posts: username, display name, profile URL, follower count, whether the account is verified or private, and the profile picture. Use it to turn a brand or creator name into a confirmed @handle, enrich a CRM or lead list, or feed an influencer-discovery tool. This runs on our native resolver (no third-party actor), so it's fast and costs just 1 credit — and with no Instagram login or OAuth required, results are cached for 24 hours so repeat lookups are instant and free.", delivers: ["The public Instagram profile that matches your query", "Username, display name, and profile URL", "Follower count plus verified and private flags", "Profile picture URL"] },
+  { slug: "instagram-profile-search", name: "Instagram Profile Search API", shortName: "Profile Search", category: "search", method: "GET", path: "/v1/instagram/profile-search", credits: 1, tagline: "Look up an Instagram account by name or @handle and get its profile back — display name, follower count, verified badge, private flag, and avatar.", delivers: ["The public Instagram profile that matches your query", "Username, display name, and profile URL", "Follower count plus verified and private flags", "Profile picture URL"] , longDescription: "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, or instagram.com/natgeo) and the Instagram Profile Search API resolves it to the matching public profile as clean JSON. It returns the account itself, not its posts: username, display name, profile URL, follower count, whether the account is verified or private, and the profile picture. Use it to turn a brand or creator name into a confirmed @handle, enrich a CRM or lead list, or feed an influencer-discovery tool. Fast and costs just 1 credit — no Instagram login or OAuth, and results are cached for 24 hours." },
   { slug: "instagram-embed", name: "Instagram Embed HTML API", shortName: "Embed HTML", category: "details", method: "GET", path: "/v1/instagram/embed", credits: 1, tagline: "Get Instagram's own self-contained embed HTML for any post, reel, or profile — ready to drop into an iframe on your site.", longDescription: "Pass an Instagram post, reel, or profile URL (or an @handle) and get back Instagram's own self-contained embed page as ready-to-use HTML — the full <html> document Instagram serves at /embed/, which you can drop straight into an <iframe srcdoc> or render server-side. The response also returns embedUrl, so you can point an <iframe src> at it directly instead. Posts and reels come back as a rich media card (with caption); profiles come back as a profile card that links to the account. No login or OAuth needed — it's fast, costs just 1 credit, and results are cached for 24 hours. If Instagram's embed page is ever unavailable, the response falls back to the classic blockquote + embed.js snippet.", delivers: ["Instagram's full self-contained embed HTML document", "embedUrl you can load directly in an <iframe src>", "Canonical Instagram permalink for the post/reel/profile", "Type flag (post/reel/profile) plus shortcode or username"] },
-  { slug: "instagram-basic-profile", name: "Instagram Basic Profile API", shortName: "Basic Profile", category: "channel", method: "GET", path: "/v1/instagram/basic-profile", credits: 1, tagline: "Look up a full public Instagram profile by its numeric user ID — bio, follower/following/post counts, verification, profile pictures, and more.", longDescription: "Pass an Instagram numeric user ID (e.g. 314216) and get that account's public profile as clean JSON: username, full name, biography, follower / following / media counts, verification and privacy flags, business/professional status, profile picture (standard and HD), and its stable pk/fbid. A profile URL, @handle, or username is also accepted and resolved automatically. It runs on our native resolver (no third-party actor), so it's fast, costs just 1 credit, and needs no Instagram login or OAuth. Null and empty fields are stripped, so you only ever see populated data. Results are cached for 24 hours.", delivers: ["Username, full name, and biography", "Follower, following, and media counts", "Verification, privacy, and business/professional flags", "Standard and HD profile picture URLs, plus stable pk / fbid"] },
+  { slug: "instagram-basic-profile", name: "Instagram Basic Profile API", shortName: "Basic Profile", category: "channel", method: "GET", path: "/v1/instagram/basic-profile", credits: 1 , tagline: "Look up a full public Instagram profile by user ID (or @handle) — bio, follower counts, verification, and profile pictures.", longDescription: "Pass an Instagram numeric user ID (e.g. 314216) and get that account's public profile as clean JSON: username, full name, biography, follower / following / media counts, verification and privacy flags, business status, and profile pictures. A profile URL, @handle, or username is also accepted and resolved automatically. Fast, costs just 1 credit, and needs no Instagram login or OAuth. Empty fields are omitted. Results are cached for 24 hours.", delivers: ["Username, full name, and biography", "Follower, following, and media counts", "Verification, privacy, and business flags", "Standard and HD profile picture URLs, plus stable user IDs"] },
 ];
 
 const FACEBOOK: Spec[] = [
-  { slug: "facebook-details", name: "Facebook Details API", shortName: "Details", category: "details", method: "GET", path: "/v1/facebook/details", credits: 1 },
+  { slug: "facebook-details", name: "Facebook Details API", shortName: "Details", category: "details", method: "GET", path: "/v1/facebook/details", credits: 1 , tagline: "Get a Facebook post or video — caption, engagement, author, and media fields as structured JSON." },
   { slug: "facebook-transcript", name: "Facebook Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/facebook/transcript", credits: 2 },
   { slug: "facebook-summarizer", name: "Facebook Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/facebook/summarize", credits: 4 },
   { slug: "facebook-comments", name: "Facebook Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/facebook/comments", credits: 30, creditsPerResult: 0.6 },
@@ -269,38 +269,38 @@ const FACEBOOK: Spec[] = [
   { slug: "facebook-group-posts", name: "Facebook Group Posts API", shortName: "Group Posts", category: "list", method: "GET", path: "/v1/facebook/group-posts", credits: 12, creditsPerResult: 0.6 },
   { slug: "facebook-comment-replies", name: "Facebook Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/facebook/comment-replies", credits: 30, creditsPerResult: 0.6 },
   { slug: "facebook-marketplace-search", name: "Facebook Marketplace Search API", shortName: "Marketplace Search", category: "search", method: "GET", path: "/v1/facebook/marketplace-search", credits: 28, creditsPerResult: 1.4 },
-  { slug: "facebook-marketplace-location-search", name: "Facebook Marketplace Location Search API", shortName: "Marketplace Locations", category: "search", method: "GET", path: "/v1/facebook/marketplace-location-search", credits: 17 },
+  { slug: "facebook-marketplace-location-search", name: "Facebook Marketplace Location Search API", shortName: "Marketplace Locations", category: "search", method: "GET", path: "/v1/facebook/marketplace-location-search", credits: 17 , tagline: "Look up Facebook Marketplace location IDs for a city or place — IDs you can pass into Marketplace Search.", longDescription: "Pass a city or place name and get matching Marketplace location IDs as structured JSON. Use those IDs with Marketplace Search to filter listings by area." },
   { slug: "facebook-event-search", name: "Facebook Event Search API", shortName: "Event Search", category: "search", method: "GET", path: "/v1/facebook/event-search", credits: 40, creditsPerResult: 2 },
-  { slug: "facebook-event-details", name: "Facebook Event Details API", shortName: "Event Details", category: "details", method: "GET", path: "/v1/facebook/event-details", credits: 2 },
+  { slug: "facebook-event-details", name: "Facebook Event Details API", shortName: "Event Details", category: "details", method: "GET", path: "/v1/facebook/event-details", credits: 2 , tagline: "Get a Facebook event — title, time, place, host, and attendance signals as structured JSON.", longDescription: "Paste a Facebook event URL and get the event details as clean JSON: title, description, start/end time, location, host page, and interest or going counts when available. Flat 2 credits per call." },
   { slug: "facebook-profile-photos", name: "Facebook Profile Photos API", shortName: "Profile Photos", category: "list", method: "GET", path: "/v1/facebook/profile-photos", credits: 12, creditsPerResult: 0.6 },
   { slug: "facebook-profile-events", name: "Facebook Profile Events API", shortName: "Profile Events", category: "list", method: "GET", path: "/v1/facebook/profile-events", credits: 40, creditsPerResult: 2 },
-  { slug: "facebook-marketplace-item", name: "Facebook Marketplace Item API", shortName: "Marketplace Item", category: "details", method: "GET", path: "/v1/facebook/marketplace-item", credits: 1 },
+  { slug: "facebook-marketplace-item", name: "Facebook Marketplace Item API", shortName: "Marketplace Item", category: "details", method: "GET", path: "/v1/facebook/marketplace-item", credits: 1 , tagline: "Get a Facebook Marketplace listing — title, price, photos, seller, and location as structured JSON.", longDescription: "Paste a Facebook Marketplace item URL and get the listing as clean JSON: title, price, description, photos, seller, and location when available. Flat 1 credit per call." },
 ];
 
 const TWITTER: Spec[] = [
-  { slug: "twitter-tweet-details", name: "Twitter/X Tweet Details API", shortName: "Tweet Details", category: "details", method: "GET", path: "/v1/twitter/tweet-details", credits: 1 },
+  { slug: "twitter-tweet-details", name: "Twitter/X Tweet Details API", shortName: "Tweet Details", category: "details", method: "GET", path: "/v1/twitter/tweet-details", credits: 1 , tagline: "Get a tweet — text, author, likes, reposts, replies, and media as structured JSON.", longDescription: "Paste a tweet URL and get the tweet as clean JSON: text, author profile, like / repost / reply counts, media attachments when present, and publish time. Flat 1 credit per call." },
   { slug: "twitter-transcript", name: "Twitter/X Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/twitter/transcript", credits: 7 },
   { slug: "twitter-profile", name: "Twitter/X Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/twitter/profile", credits: 1 },
   { slug: "twitter-user-tweets", name: "Twitter/X User Tweets API", shortName: "User Tweets", category: "list", method: "GET", path: "/v1/twitter/user-tweets", credits: 14, creditsPerResult: 0.7 },
   { slug: "twitter-search", name: "Twitter/X Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/twitter/search", credits: 14, creditsPerResult: 0.7 },
-  { slug: "twitter-community", name: "Twitter/X Community API", shortName: "Community", category: "details", method: "GET", path: "/v1/twitter/community", credits: 1 },
+  { slug: "twitter-community", name: "Twitter/X Community API", shortName: "Community", category: "details", method: "GET", path: "/v1/twitter/community", credits: 1 , tagline: "Get a Twitter/X Community — name, description, member count, and rules as structured JSON.", longDescription: "Paste a Twitter/X Community URL and get the community metadata as clean JSON: name, description, member count, and related fields when available. Pair with Community Tweets to list posts inside it." },
   { slug: "twitter-community-tweets", name: "Twitter/X Community Tweets API", shortName: "Community Tweets", category: "list", method: "GET", path: "/v1/twitter/community-tweets", credits: 18, creditsPerResult: 0.7 },
 ];
 
 const REDDIT: Spec[] = [
   { slug: "reddit-subreddit-posts", name: "Reddit Subreddit Posts API", shortName: "Subreddit Posts", category: "list", method: "GET", path: "/v1/reddit/subreddit-posts", credits: 10, creditsPerResult: 0.4 },
-  { slug: "reddit-post-details", name: "Reddit Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/reddit/post-details", credits: 1 },
+  { slug: "reddit-post-details", name: "Reddit Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/reddit/post-details", credits: 1 , tagline: "Get a Reddit post — title, body, score, comments count, subreddit, and author as structured JSON.", longDescription: "Paste a Reddit post URL and get the post as clean JSON: title, body text, score, comment count, subreddit, author, and flair when available. Flat 1 credit per call." },
   { slug: "reddit-post-comments", name: "Reddit Post Comments API", shortName: "Post Comments", category: "comments", method: "GET", path: "/v1/reddit/post-comments", credits: 20, creditsPerResult: 0.4 },
-  { slug: "reddit-post-transcript", name: "Reddit Post Transcript API", shortName: "Post Transcript", category: "transcript", method: "GET", path: "/v1/reddit/post-transcript", credits: 20, creditsPerResult: 0.4 },
+  { slug: "reddit-post-transcript", name: "Reddit Post Transcript API", shortName: "Post Transcript", category: "transcript", method: "GET", path: "/v1/reddit/post-transcript", credits: 20, creditsPerResult: 0.4 , tagline: "Get a Reddit post's discussion as readable text — title, body, and comments in one transcript-style payload.", longDescription: "Paste a Reddit post URL and get the discussion as structured text: the post title and body plus comments flattened into a transcript-style response. This is discussion text, not speech-to-text from a video. Billed per result." },
   { slug: "reddit-search", name: "Reddit Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/reddit/search", credits: 10, creditsPerResult: 0.4 },
-  { slug: "reddit-subreddit-details", name: "Reddit Subreddit Details API", shortName: "Subreddit Details", category: "details", method: "GET", path: "/v1/reddit/subreddit-details", credits: 1 },
+  { slug: "reddit-subreddit-details", name: "Reddit Subreddit Details API", shortName: "Subreddit Details", category: "details", method: "GET", path: "/v1/reddit/subreddit-details", credits: 1 , tagline: "Get a subreddit — title, description, subscribers, and community rules signals as structured JSON." },
   { slug: "reddit-subreddit-search", name: "Reddit Subreddit Search API", shortName: "Subreddit Search", category: "search", method: "GET", path: "/v1/reddit/subreddit-search", credits: 10, creditsPerResult: 0.4 },
 ];
 
 const THREADS: Spec[] = [
   { slug: "threads-profile", name: "Threads Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/threads/profile", credits: 1 },
   { slug: "threads-user-posts", name: "Threads User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/threads/user-posts", credits: 14, creditsPerResult: 0.7 },
-  { slug: "threads-post-details", name: "Threads Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/threads/post-details", credits: 1 },
+  { slug: "threads-post-details", name: "Threads Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/threads/post-details", credits: 1 , tagline: "Get a Threads post — text, author, likes, replies, and media as structured JSON." },
   { slug: "threads-search", name: "Threads Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/threads/search", credits: 18, creditsPerResult: 0.7 },
   { slug: "threads-search-users", name: "Threads Search Users API", shortName: "Search Users", category: "search", method: "GET", path: "/v1/threads/search-users", credits: 14, creditsPerResult: 0.7 },
 ];
@@ -308,11 +308,11 @@ const THREADS: Spec[] = [
 const BLUESKY: Spec[] = [
   { slug: "bluesky-profile", name: "Bluesky Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/bluesky/profile", credits: 1 },
   { slug: "bluesky-user-posts", name: "Bluesky User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/bluesky/user-posts", credits: 3, creditsPerResult: 0.1 },
-  { slug: "bluesky-post-details", name: "Bluesky Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/bluesky/post-details", credits: 1 },
+  { slug: "bluesky-post-details", name: "Bluesky Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/bluesky/post-details", credits: 1 , tagline: "Get a Bluesky post — text, author, likes, reposts, and replies as structured JSON." },
 ];
 
 const PINTEREST: Spec[] = [
-  { slug: "pinterest-pin-details", name: "Pinterest Pin Details API", shortName: "Pin Details", category: "details", method: "GET", path: "/v1/pinterest/pin-details", credits: 1 },
+  { slug: "pinterest-pin-details", name: "Pinterest Pin Details API", shortName: "Pin Details", category: "details", method: "GET", path: "/v1/pinterest/pin-details", credits: 1 , tagline: "Get a Pinterest pin — title, description, image, board, and save/engagement fields as structured JSON." },
   { slug: "pinterest-user-pins", name: "Pinterest User Pins API", shortName: "User Pins", category: "list", method: "GET", path: "/v1/pinterest/user-pins", credits: 13, creditsPerResult: 0.5 },
   { slug: "pinterest-search", name: "Pinterest Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/pinterest/search", credits: 13, creditsPerResult: 0.5 },
   { slug: "pinterest-board", name: "Pinterest Board API", shortName: "Board", category: "list", method: "GET", path: "/v1/pinterest/board", credits: 13, creditsPerResult: 0.5 },
@@ -322,7 +322,7 @@ const PINTEREST: Spec[] = [
 const LINKEDIN: Spec[] = [
   { slug: "linkedin-profile", name: "LinkedIn Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/linkedin/profile", credits: 2 },
   { slug: "linkedin-company", name: "LinkedIn Company API", shortName: "Company", category: "channel", method: "GET", path: "/v1/linkedin/company", credits: 2 },
-  { slug: "linkedin-post-details", name: "LinkedIn Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/linkedin/post-details", credits: 1 },
+  { slug: "linkedin-post-details", name: "LinkedIn Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/linkedin/post-details", credits: 1 , tagline: "Get a LinkedIn post — text, author, reactions, and comments count as structured JSON." },
   { slug: "linkedin-post-transcript", name: "LinkedIn Post Transcript API", shortName: "Post Transcript", category: "transcript", method: "GET", path: "/v1/linkedin/post-transcript", credits: 7 },
   { slug: "linkedin-company-posts", name: "LinkedIn Company Posts API", shortName: "Company Posts", category: "list", method: "GET", path: "/v1/linkedin/company-posts", credits: 16, creditsPerResult: 0.8 },
   { slug: "linkedin-search-posts", name: "LinkedIn Search Posts API", shortName: "Search Posts", category: "search", method: "GET", path: "/v1/linkedin/search-posts", credits: 16, creditsPerResult: 0.8 },
@@ -338,7 +338,7 @@ const RUMBLE: Spec[] = [
 const TIKTOK_SHOP: Spec[] = [
   { slug: "tiktok-shop-search", name: "TikTok Shop Search API", shortName: "Shop Search", category: "search", method: "GET", path: "/v1/tiktok-shop/shop-search", credits: 56, creditsPerResult: 2.8 },
   { slug: "tiktok-shop-products", name: "TikTok Shop Products API", shortName: "Shop Products", category: "list", method: "GET", path: "/v1/tiktok-shop/shop-products", credits: 56, creditsPerResult: 2.8 },
-  { slug: "tiktok-shop-product-details", name: "TikTok Shop Product Details API", shortName: "Product Details", category: "details", method: "GET", path: "/v1/tiktok-shop/product-details", credits: 14 },
+  { slug: "tiktok-shop-product-details", name: "TikTok Shop Product Details API", shortName: "Product Details", category: "details", method: "GET", path: "/v1/tiktok-shop/product-details", credits: 14 , tagline: "Get a TikTok Shop product — title, price, images, seller, and sales signals as structured JSON." },
   { slug: "tiktok-shop-product-reviews", name: "TikTok Shop Product Reviews API", shortName: "Product Reviews", category: "comments", method: "GET", path: "/v1/tiktok-shop/product-reviews", credits: 45, creditsPerResult: 2.25 },
   { slug: "tiktok-shop-user-showcase", name: "TikTok Shop User Showcase API", shortName: "User Showcase", category: "list", method: "GET", path: "/v1/tiktok-shop/user-showcase", credits: 45, creditsPerResult: 2.25 },
 ];
@@ -347,11 +347,11 @@ const GITHUB: Spec[] = [
   { slug: "github-user", name: "GitHub User API", shortName: "User", category: "channel", method: "GET", path: "/v1/github/user", credits: 3 },
   { slug: "github-repositories", name: "GitHub Repositories API", shortName: "Repositories", category: "list", method: "GET", path: "/v1/github/repositories", credits: 12, creditsPerResult: 0.4 },
   { slug: "github-pull-requests", name: "GitHub Pull Requests API", shortName: "Pull Requests", category: "list", method: "GET", path: "/v1/github/pull-requests", credits: 12, creditsPerResult: 0.4 },
-  { slug: "github-activity", name: "GitHub Activity API", shortName: "Activity", category: "list", method: "GET", path: "/v1/github/activity", credits: 12, creditsPerResult: 0.4 },
+  { slug: "github-activity", name: "GitHub Activity API", shortName: "Activity", category: "list", method: "GET", path: "/v1/github/activity", credits: 12, creditsPerResult: 0.4 , tagline: "List a GitHub user's recent public activity — pushes, issues, pull requests, and similar events." },
   { slug: "github-followers", name: "GitHub Followers API", shortName: "Followers", category: "list", method: "GET", path: "/v1/github/followers", credits: 12, creditsPerResult: 0.4 },
   { slug: "github-following", name: "GitHub Following API", shortName: "Following", category: "list", method: "GET", path: "/v1/github/following", credits: 12, creditsPerResult: 0.4 },
-  { slug: "github-contributions", name: "GitHub Contributions API", shortName: "Contributions", category: "details", method: "GET", path: "/v1/github/contributions", credits: 3 },
-  { slug: "github-repository", name: "GitHub Repository API", shortName: "Repository", category: "details", method: "GET", path: "/v1/github/repository", credits: 3 },
+  { slug: "github-contributions", name: "GitHub Contributions API", shortName: "Contributions", category: "details", method: "GET", path: "/v1/github/contributions", credits: 3 , tagline: "Get a GitHub user's contribution activity — contribution counts and calendar-style signals as structured JSON.", longDescription: "Pass a GitHub username or profile URL and get contribution activity as clean JSON — useful for developer profiling and hiring screens. Flat 3 credits per call." },
+  { slug: "github-repository", name: "GitHub Repository API", shortName: "Repository", category: "details", method: "GET", path: "/v1/github/repository", credits: 3 , tagline: "Get a GitHub repository — description, stars, forks, language, license, and topics as structured JSON.", longDescription: "Pass a repository URL or owner/name and get the repo metadata as clean JSON: description, stars, forks, open issues, primary language, license, topics, and timestamps. Flat 3 credits per call." },
   { slug: "github-trending-repositories", name: "GitHub Trending Repositories API", shortName: "Trending Repositories", category: "search", method: "GET", path: "/v1/github/trending-repositories", credits: 12, creditsPerResult: 0.6 },
   { slug: "github-trending-developers", name: "GitHub Trending Developers API", shortName: "Trending Developers", category: "search", method: "GET", path: "/v1/github/trending-developers", credits: 12, creditsPerResult: 0.6 },
 ];
@@ -361,26 +361,26 @@ const TWITCH: Spec[] = [
   { slug: "twitch-profile", name: "Twitch Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/twitch/profile", credits: 1 },
   { slug: "twitch-user-videos", name: "Twitch User Videos API", shortName: "User Videos", category: "list", method: "GET", path: "/v1/twitch/user-videos", credits: 34, creditsPerResult: 1.7 },
   { slug: "twitch-user-schedule", name: "Twitch User Schedule API", shortName: "User Schedule", category: "list", method: "GET", path: "/v1/twitch/user-schedule", credits: 1 },
-  { slug: "twitch-clip", name: "Twitch Clip API", shortName: "Clip", category: "details", method: "GET", path: "/v1/twitch/clip", credits: 1 },
+  { slug: "twitch-clip", name: "Twitch Clip API", shortName: "Clip", category: "details", method: "GET", path: "/v1/twitch/clip", credits: 1 , tagline: "Get a Twitch clip — title, broadcaster, views, duration, and thumbnail as structured JSON." },
 ];
 
 const SPOTIFY: Spec[] = [
   { slug: "spotify-artist", name: "Spotify Artist API", shortName: "Artist", category: "channel", method: "GET", path: "/v1/spotify/artist", credits: 6 },
-  { slug: "spotify-track", name: "Spotify Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/spotify/track", credits: 6 },
-  { slug: "spotify-album", name: "Spotify Album API", shortName: "Album", category: "details", method: "GET", path: "/v1/spotify/album", credits: 6 },
+  { slug: "spotify-track", name: "Spotify Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/spotify/track", credits: 6 , tagline: "Get a Spotify track — title, artists, album, duration, and popularity as structured JSON." },
+  { slug: "spotify-album", name: "Spotify Album API", shortName: "Album", category: "details", method: "GET", path: "/v1/spotify/album", credits: 6 , tagline: "Get a Spotify album — title, artists, tracks, release date, and cover art as structured JSON." },
   { slug: "spotify-search", name: "Spotify Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/spotify/search", credits: 23, creditsPerResult: 1.15 },
-  { slug: "spotify-podcast", name: "Spotify Podcast API", shortName: "Podcast", category: "details", method: "GET", path: "/v1/spotify/podcast", credits: 6 },
+  { slug: "spotify-podcast", name: "Spotify Podcast API", shortName: "Podcast", category: "details", method: "GET", path: "/v1/spotify/podcast", credits: 6 , tagline: "Get a Spotify podcast show — title, publisher, description, and episode counts as structured JSON." },
   { slug: "spotify-podcast-episodes", name: "Spotify Podcast Episodes API", shortName: "Podcast Episodes", category: "list", method: "GET", path: "/v1/spotify/podcast-episodes", credits: 23, creditsPerResult: 1.15 },
 ];
 
 const SOUNDCLOUD: Spec[] = [
   { slug: "soundcloud-artist", name: "SoundCloud Artist API", shortName: "Artist", category: "channel", method: "GET", path: "/v1/soundcloud/artist", credits: 1 },
   { slug: "soundcloud-artist-tracks", name: "SoundCloud Artist Tracks API", shortName: "Artist Tracks", category: "list", method: "GET", path: "/v1/soundcloud/artist-tracks", credits: 28, creditsPerResult: 1.4 },
-  { slug: "soundcloud-track", name: "SoundCloud Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/soundcloud/track", credits: 1 },
+  { slug: "soundcloud-track", name: "SoundCloud Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/soundcloud/track", credits: 1 , tagline: "Get a SoundCloud track — title, artist, plays, likes, duration, and artwork as structured JSON." },
 ];
 
 const LINKTREE: Spec[] = [
-  { slug: "linktree-page", name: "Linktree Page API", shortName: "Page", category: "details", method: "GET", path: "/v1/linktree/page", credits: 4 },
+  { slug: "linktree-page", name: "Linktree Page API", shortName: "Page", category: "details", method: "GET", path: "/v1/linktree/page", credits: 4 , tagline: "Extract the links from a public Linktree page — title, URL, and order for each link.", longDescription: "Paste a Linktree URL and get the page's public links as structured JSON: each link's title, destination URL, and position. Ideal for lead enrichment and competitor link-in-bio research." },
 ];
 
 const SNAPCHAT: Spec[] = [
@@ -390,59 +390,59 @@ const SNAPCHAT: Spec[] = [
 const TRUTH_SOCIAL: Spec[] = [
   { slug: "truth-social-profile", name: "Truth Social Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/truth-social/profile", credits: 5 },
   { slug: "truth-social-user-posts", name: "Truth Social User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/truth-social/user-posts", credits: 17, creditsPerResult: 0.85 },
-  { slug: "truth-social-post", name: "Truth Social Post API", shortName: "Post", category: "details", method: "GET", path: "/v1/truth-social/post", credits: 5 },
+  { slug: "truth-social-post", name: "Truth Social Post API", shortName: "Post", category: "details", method: "GET", path: "/v1/truth-social/post", credits: 5 , tagline: "Get a Truth Social post — text, author, and engagement fields as structured JSON." },
 ];
 
 const KICK: Spec[] = [
-  { slug: "kick-clip", name: "Kick Clip API", shortName: "Clip", category: "details", method: "GET", path: "/v1/kick/clip", credits: 34 },
+  { slug: "kick-clip", name: "Kick Clip API", shortName: "Clip", category: "details", method: "GET", path: "/v1/kick/clip", credits: 34 , tagline: "Get a Kick clip — title, channel, views, duration, and thumbnail as structured JSON." },
 ];
 
 const AMAZON_SHOP: Spec[] = [
-  { slug: "amazon-shop-page", name: "Amazon Shop Page API", shortName: "Shop Page", category: "list", method: "GET", path: "/v1/amazon-shop/page", credits: 89, creditsPerResult: 4.45 },
+  { slug: "amazon-shop-page", name: "Amazon Shop Page API", shortName: "Shop Page", category: "list", method: "GET", path: "/v1/amazon-shop/page", credits: 89, creditsPerResult: 4.45 , tagline: "List products from an Amazon Shop / influencer storefront page — title, price, and product URL for each item." },
 ];
 
 const ACCOUNT: Spec[] = [
-  { slug: "account-balance", name: "Credit Balance API", shortName: "Credit Balance", category: "details", method: "GET", path: "/v1/account/balance", credits: 0 },
-  { slug: "account-request-history", name: "Request History API", shortName: "Request History", category: "list", method: "GET", path: "/v1/account/request-history", credits: 0 },
-  { slug: "account-daily-usage", name: "Daily Usage API", shortName: "Daily Usage", category: "list", method: "GET", path: "/v1/account/daily-usage", credits: 0 },
-  { slug: "account-most-used-routes", name: "Most Used Routes API", shortName: "Most Used Routes", category: "list", method: "GET", path: "/v1/account/most-used-routes", credits: 0 },
+  { slug: "account-balance", name: "Credit Balance API", shortName: "Credit Balance", category: "details", method: "GET", path: "/v1/account/balance", credits: 0 , tagline: "Check how many Captapi credits remain on your API key.", longDescription: "Call the Credit Balance API with your Captapi key and get the remaining credit balance as JSON. Free — does not consume credits." },
+  { slug: "account-request-history", name: "Request History API", shortName: "Request History", category: "list", method: "GET", path: "/v1/account/request-history", credits: 0 , tagline: "See recent API requests made with your Captapi key — path, status, and credits used.", longDescription: "List recent requests for your Captapi account as structured JSON: endpoint path, status, credits charged, and timestamps. Free — does not consume credits." },
+  { slug: "account-daily-usage", name: "Daily Usage API", shortName: "Daily Usage", category: "list", method: "GET", path: "/v1/account/daily-usage", credits: 0 , tagline: "See day-by-day credit usage for your Captapi account.", longDescription: "Get daily credit usage for your Captapi key as structured JSON — useful for spend monitoring and budgeting. Free — does not consume credits." },
+  { slug: "account-most-used-routes", name: "Most Used Routes API", shortName: "Most Used Routes", category: "list", method: "GET", path: "/v1/account/most-used-routes", credits: 0 , tagline: "See which Captapi endpoints your key calls most often.", longDescription: "Get a ranked list of the routes your Captapi key uses most, with call counts over a chosen window. Free — does not consume credits." },
 ];
 
 const KWAI: Spec[] = [
   { slug: "kwai-profile", name: "Kwai Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/kwai/profile", credits: 17 },
   { slug: "kwai-user-posts", name: "Kwai User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/kwai/user-posts", credits: 45, creditsPerResult: 2.25 },
-  { slug: "kwai-post", name: "Kwai Post API", shortName: "Post", category: "details", method: "GET", path: "/v1/kwai/post", credits: 17 },
+  { slug: "kwai-post", name: "Kwai Post API", shortName: "Post", category: "details", method: "GET", path: "/v1/kwai/post", credits: 17 , tagline: "Get a Kwai post — caption, author, and engagement fields as structured JSON." },
 ];
 
 const KOMI: Spec[] = [
-  { slug: "komi-page", name: "Komi Page API", shortName: "Page", category: "channel", method: "GET", path: "/v1/komi/page", credits: 4 },
+  { slug: "komi-page", name: "Komi Page API", shortName: "Page", category: "channel", method: "GET", path: "/v1/komi/page", credits: 4 , tagline: "Extract the public links and profile fields from a Komi page.", longDescription: "Paste a Komi page URL and get the creator's public page as structured JSON — profile fields plus the links listed on the page." },
 ];
 
 const PILLAR: Spec[] = [
-  { slug: "pillar-page", name: "Pillar Page API", shortName: "Page", category: "channel", method: "GET", path: "/v1/pillar/page", credits: 4 },
+  { slug: "pillar-page", name: "Pillar Page API", shortName: "Page", category: "channel", method: "GET", path: "/v1/pillar/page", credits: 4 , tagline: "Extract the public links and profile fields from a Pillar page.", longDescription: "Paste a Pillar page URL and get the creator's public page as structured JSON — profile fields plus the links listed on the page." },
 ];
 
 const LINKBIO: Spec[] = [
-  { slug: "linkbio-page", name: "Linkbio Page API", shortName: "Page", category: "channel", method: "GET", path: "/v1/linkbio/page", credits: 4 },
+  { slug: "linkbio-page", name: "Linkbio Page API", shortName: "Page", category: "channel", method: "GET", path: "/v1/linkbio/page", credits: 4 , tagline: "Extract the public links and profile fields from a Linkbio page.", longDescription: "Paste a Linkbio page URL and get the creator's public page as structured JSON — profile fields plus the links listed on the page." },
 ];
 
 const LINKME: Spec[] = [
-  { slug: "linkme-profile", name: "Linkme Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/linkme/profile", credits: 4 },
+  { slug: "linkme-profile", name: "Linkme Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/linkme/profile", credits: 4 , tagline: "Extract the public links and profile fields from a Linkme profile.", longDescription: "Paste a Linkme profile URL and get the public profile as structured JSON — profile fields plus the links listed on the page." },
 ];
 
 const AD_LIBRARY: Spec[] = [
   { slug: "facebook-ad-library-search", name: "Facebook Ad Library Search API", shortName: "Facebook Search", category: "search", method: "GET", path: "/v1/ad-library/facebook/search", credits: 70, creditsPerResult: 3.5 },
   { slug: "facebook-ad-library-company-ads", name: "Facebook Company Ads API", shortName: "Facebook Company Ads", category: "list", method: "GET", path: "/v1/ad-library/facebook/company-ads", credits: 70, creditsPerResult: 3.5 },
   { slug: "facebook-ad-library-search-companies", name: "Facebook Ad Library Search Companies API", shortName: "Facebook Search Companies", category: "search", method: "GET", path: "/v1/ad-library/facebook/search-companies", credits: 70, creditsPerResult: 3.5 },
-  { slug: "facebook-ad-library-ad-details", name: "Facebook Ad Details API", shortName: "Facebook Ad Details", category: "details", method: "GET", path: "/v1/ad-library/facebook/ad-details", credits: 17 },
+  { slug: "facebook-ad-library-ad-details", name: "Facebook Ad Details API", shortName: "Facebook Ad Details", category: "details", method: "GET", path: "/v1/ad-library/facebook/ad-details", credits: 17 , tagline: "Get a Meta Ad Library ad — creative text, media, advertiser, and delivery fields as structured JSON." },
   { slug: "facebook-ad-library-ad-transcript", name: "Facebook Ad Transcript API", shortName: "Facebook Ad Transcript", category: "transcript", method: "GET", path: "/v1/ad-library/facebook/ad-transcript", credits: 17 },
   { slug: "tiktok-ad-library-search", name: "TikTok Ad Library Search API", shortName: "TikTok Search", category: "search", method: "GET", path: "/v1/ad-library/tiktok/search", credits: 70, creditsPerResult: 3.5 },
-  { slug: "tiktok-ad-library-ad-details", name: "TikTok Ad Details API", shortName: "TikTok Ad Details", category: "details", method: "GET", path: "/v1/ad-library/tiktok/ad-details", credits: 17 },
+  { slug: "tiktok-ad-library-ad-details", name: "TikTok Ad Details API", shortName: "TikTok Ad Details", category: "details", method: "GET", path: "/v1/ad-library/tiktok/ad-details", credits: 17 , tagline: "Get a TikTok Ad Library ad — creative, advertiser, and delivery fields as structured JSON." },
   { slug: "google-ad-library-company-ads", name: "Google Company Ads API", shortName: "Google Company Ads", category: "list", method: "GET", path: "/v1/ad-library/google/company-ads", credits: 67, creditsPerResult: 3.35 },
-  { slug: "google-ad-library-ad-details", name: "Google Ad Details API", shortName: "Google Ad Details", category: "details", method: "GET", path: "/v1/ad-library/google/ad-details", credits: 17 },
+  { slug: "google-ad-library-ad-details", name: "Google Ad Details API", shortName: "Google Ad Details", category: "details", method: "GET", path: "/v1/ad-library/google/ad-details", credits: 17 , tagline: "Get a Google Ads Transparency ad — creative, advertiser, and delivery fields as structured JSON." },
   { slug: "google-ad-library-advertiser-search", name: "Google Advertiser Search API", shortName: "Google Advertiser Search", category: "search", method: "GET", path: "/v1/ad-library/google/advertiser-search", credits: 45, creditsPerResult: 4.5 },
   { slug: "linkedin-ad-library-search-ads", name: "LinkedIn Ad Library Search API", shortName: "LinkedIn Search Ads", category: "search", method: "GET", path: "/v1/ad-library/linkedin/search-ads", credits: 70, creditsPerResult: 3.5 },
-  { slug: "linkedin-ad-library-ad-details", name: "LinkedIn Ad Details API", shortName: "LinkedIn Ad Details", category: "details", method: "GET", path: "/v1/ad-library/linkedin/ad-details", credits: 17 },
+  { slug: "linkedin-ad-library-ad-details", name: "LinkedIn Ad Details API", shortName: "LinkedIn Ad Details", category: "details", method: "GET", path: "/v1/ad-library/linkedin/ad-details", credits: 17 , tagline: "Get a LinkedIn Ad Library ad — creative, advertiser, and delivery fields as structured JSON." },
 ];
 
 export const PLATFORM_GROUPS: PlatformGroup[] = [
@@ -882,12 +882,41 @@ export function relatedEndpoints(slug: string): ApiEndpoint[] {
 const ACTION: Record<Category, string> = {
   transcript: "extract the full, timestamped transcript",
   summarize: "generate an AI summary with key points and topics",
-  details: "fetch full metadata and engagement stats",
+  details: "fetch full metadata and key stats",
   comments: "pull comments with author, text, likes, and replies",
-  channel: "fetch profile/channel details and audience stats",
+  channel: "fetch profile or page details and audience stats",
   search: "search and return matching results",
   list: "list items in bulk with metadata",
 };
+
+/** Lowercase shortName for mid-sentence use. */
+function resourceLabel(ep: ApiEndpoint): string {
+  return ep.shortName.toLowerCase();
+}
+
+/** What the user typically sends (for FAQ / longDescription). */
+function inputKind(ep: ApiEndpoint): string {
+  if (ep.platform === "account") return "Captapi account";
+  if (ep.category === "search") return "query";
+  if (ep.category === "channel") return "profile or page";
+  const sn = resourceLabel(ep);
+  if (sn.includes("tweet")) return "tweet";
+  if (sn.includes("pin")) return "pin";
+  if (sn.includes("ad")) return "ad";
+  if (sn.includes("event")) return "event";
+  if (sn.includes("marketplace") || sn.includes("product") || sn.includes("shop"))
+    return "listing or product";
+  if (sn.includes("song") || sn.includes("track") || sn.includes("album") || sn.includes("music"))
+    return "sound or track";
+  if (sn.includes("clip")) return "clip";
+  if (sn.includes("post") || sn.includes("community")) return "post";
+  if (sn.includes("repo") || sn.includes("pull") || sn.includes("contribution") || sn.includes("activity"))
+    return "GitHub resource";
+  if (sn.includes("short")) return "Short";
+  if (sn.includes("video") || sn === "transcript" || sn === "summarizer" || sn === "details" || sn === "comments")
+    return "video";
+  return resourceLabel(ep);
+}
 
 export function platformLabel(p: PlatformId): string {
   return PLATFORM_LABEL[p];
@@ -899,7 +928,7 @@ export function platformLabel(p: PlatformId): string {
  */
 export function howToAction(ep: ApiEndpoint): string {
   const p = PLATFORM_LABEL[ep.platform];
-  const sn = ep.shortName.toLowerCase();
+  const sn = resourceLabel(ep);
   switch (ep.category) {
     case "transcript":
       return `get a ${p} ${sn}`;
@@ -928,79 +957,127 @@ export function howToTitle(ep: ApiEndpoint): string {
 export function tagline(ep: ApiEndpoint): string {
   if (ep.tagline) return ep.tagline;
   const platform = PLATFORM_LABEL[ep.platform];
+  const resource = resourceLabel(ep);
+
+  if (ep.platform === "account") {
+    switch (ep.slug) {
+      case "account-balance":
+        return "Check how many Captapi credits remain on your API key.";
+      case "account-request-history":
+        return "See recent API requests made with your Captapi key — path, status, and credits used.";
+      case "account-daily-usage":
+        return "See day-by-day credit usage for your Captapi account.";
+      case "account-most-used-routes":
+        return "See which Captapi endpoints your key calls most often.";
+      default:
+        return `Get ${resource} for your Captapi account as structured JSON.`;
+    }
+  }
+
   switch (ep.category) {
     case "transcript":
+      if (resource.includes("ad"))
+        return `Extract the spoken transcript from a public ${platform} ad in a single request.`;
+      if (ep.slug === "reddit-post-transcript")
+        return "Get the discussion text from a Reddit post — title, body, and comments as a readable transcript.";
+      if (resource.includes("post") && !resource.includes("short"))
+        return `Extract a transcript from a public ${platform} post with spoken audio or video.`;
+      if (resource.includes("short"))
+        return `Extract timestamped transcripts from any public ${platform} Short in a single request.`;
       return `Extract timestamped transcripts from any public ${platform} video in a single request.`;
     case "summarize":
+      if (resource.includes("short"))
+        return `Turn any ${platform} Short into an AI summary with key points, topics, and sentiment.`;
       return `Turn any ${platform} video into an AI summary with key points, topics, and sentiment.`;
     case "details":
-      return `Get full ${platform} video metadata — title, views, likes, duration, and more.`;
+      return `Get ${platform} ${resource} as structured JSON — key fields, stats, and metadata.`;
     case "comments":
+      if (resource.includes("review"))
+        return `Pull ${platform} product reviews with author, text, rating, and timestamps.`;
+      if (resource.includes("replies"))
+        return `Pull reply threads under a ${platform} comment — author, text, likes, and time.`;
       return `Pull ${platform} comments at scale with author, text, likes, and reply threads.`;
     case "channel":
-      return `Fetch ${platform} profile data — follower counts, bio, verification, and stats.`;
+      if (resource === "page" || resource.includes("page"))
+        return `Fetch a public ${platform} page — links, bio, and profile fields as structured JSON.`;
+      if (resource.includes("company"))
+        return `Fetch ${platform} company page data — name, industry, size, and follower stats.`;
+      return `Fetch ${platform} ${resource} — display name, bio, counts, and verification as structured JSON.`;
     case "search":
-      return `Search ${platform} programmatically and get structured, ranked results.`;
+      if (resource === "search")
+        return `Search ${platform} programmatically and get structured, ranked results.`;
+      return `Run a ${platform} ${resource} and get structured, ranked results as clean JSON.`;
     case "list":
-      return `Bulk-list ${platform} content with full metadata for each item.`;
+      return `List ${platform} ${resource} with full metadata for each item.`;
   }
 }
 
 export function longDescription(ep: ApiEndpoint): string {
   if (ep.longDescription) return ep.longDescription;
   const platform = PLATFORM_LABEL[ep.platform];
-  return `The ${ep.name} lets you ${ACTION[ep.category]} from ${platform} with a single REST call. No OAuth, no data-collection infrastructure, and no platform SDKs — send the URL, get clean structured JSON back. Results are cached for 24 hours, so repeat lookups are instant and free.`;
+  if (ep.platform === "account") {
+    return `The ${ep.name} returns live data for your Captapi API key with a single REST call to ${ep.path}. Account endpoints do not charge credits. Use them to monitor balance, usage, and which routes you call most.`;
+  }
+  return `The ${ep.name} lets you ${ACTION[ep.category]} for ${platform} ${resourceLabel(ep)} with a single REST call. No OAuth, no infrastructure to maintain, and no platform SDKs — send the request, get clean structured JSON back. Results are cached for 24 hours, so repeat lookups are instant and free.`;
 }
 
 export function delivers(ep: ApiEndpoint): string[] {
   if (ep.delivers) return ep.delivers;
+  if (ep.platform === "account") {
+    return [
+      "Live data for your Captapi API key",
+      "No credit charge for account endpoints",
+      "Clean JSON ready for dashboards and alerts",
+      "Useful for monitoring usage and spend",
+    ];
+  }
   switch (ep.category) {
     case "transcript":
       return [
-        "Full transcript text with start/end timestamps",
+        "Full transcript text with start/end timestamps when available",
         "Auto-detected language and segment count",
         "AI audio transcription fallback when no captions exist",
-        "Clean JSON ready for RAG, search, or subtitles",
+        "Clean JSON ready for search, subtitles, or AI pipelines",
       ];
     case "summarize":
       return [
-        "2–3 paragraph AI summary of the video",
+        "2–3 paragraph AI summary",
         "4–8 bullet key points and detected topics",
         "Overall sentiment and tone",
-        "Powered by the transcript under the hood",
+        "Built on the transcript under the hood",
       ];
     case "details":
       return [
-        "Title, description, and thumbnail URLs",
-        "View, like, comment, and share counts",
-        "Duration, publish date, and author handle",
+        `${ep.shortName} fields as clean structured JSON`,
+        "IDs, URLs, and titles where the platform exposes them",
+        "Engagement or popularity signals when available",
         "Stable IDs for joining with other endpoints",
       ];
     case "comments":
       return [
-        "Comment text, author name, and handle",
-        "Like counts and reply threads",
+        "Comment or review text, author name, and handle",
+        "Like counts and reply threads when available",
         "Pagination via the limit parameter",
         "Timestamps for trend and sentiment analysis",
       ];
     case "channel":
       return [
-        "Display name, handle, bio, and avatar",
+        "Display name, handle or URL, bio, and avatar when available",
         "Follower / subscriber and content counts",
-        "Verification status and external links",
-        "Aggregate engagement signals",
+        "Verification status and external links when exposed",
+        "Structured JSON ready for enrichment and dashboards",
       ];
     case "search":
       return [
         "Ranked, structured result list",
-        "Title, URL, author, and thumbnail per result",
-        "Engagement metrics where available",
+        "Title, URL, author, and thumbnail per result when available",
+        "Engagement metrics where the platform exposes them",
         "Configurable result limit",
       ];
     case "list":
       return [
-        "Bulk list of items with full metadata",
-        "View counts, dates, and direct URLs",
+        `Bulk list of ${resourceLabel(ep)} with metadata`,
+        "Dates, URLs, and engagement fields when available",
         "Configurable result limit",
         "Ideal for monitoring and content pipelines",
       ];
@@ -1091,7 +1168,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-user-followings": [up(TT_PROFILE), lp(50, 500)],
   "tiktok-music-posts": [up(TT_MUSIC), lp(20, 200)],
   "tiktok-top-search": [qp(), lp(20, 200)],
-  "tiktok-search-by-hashtag": [qp("Hashtag to search for, with or without the # (min 2 characters)."), lp(20, 100), { name: "cursor", type: "integer", required: false, description: "Pagination offset. Leave at 0 (or omit) for the first page; then pass the nextCursor value returned in the previous response. A null nextCursor means the end of the results." }, { name: "region", type: "string", required: false, description: "Two-letter ISO 3166-1 country the data-collection proxy is routed through. Default US. This only sets the proxy location — it does not filter results by country." }],
+  "tiktok-search-by-hashtag": [qp("Hashtag to search for, with or without the # (min 2 characters)."), lp(20, 100), { name: "cursor", type: "integer", required: false, description: "Pagination offset. Leave at 0 (or omit) for the first page; then pass the nextCursor value returned in the previous response. A null nextCursor means the end of the results." }, { name: "region", type: "string", required: false, description: "Two-letter ISO 3166-1 country our request is sent from. Default US. Does not filter results by country." }],
   "tiktok-search-users": [qp("Search query matched against usernames, display names and bios (min 2 characters)."), lp(20, 100), { name: "cursor", type: "integer", required: false, description: "Pagination offset. Leave at 0 (or omit) for the first page; then pass the nextCursor value returned in the previous response. A null nextCursor means the end of the results." }],
   "tiktok-song-details": [up(TT_MUSIC)],
   "tiktok-trending-feed": [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code, e.g. US, GB, TR. Default US." }, lp(20, 200)],
@@ -1760,35 +1837,42 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
   const list: FaqItem[] = [
     {
       q: `What does the ${ep.name} do?`,
-      a: `The ${ep.name} lets you ${ACTION[ep.category]} from a public ${platform} ${
-        ep.category === "search" ? "query" : ep.category === "channel" ? "profile" : "video"
-      } using one ${ep.method} request to ${ep.path}. It returns clean JSON — no OAuth or infrastructure setup required.`,
+      a:
+        ep.platform === "account"
+          ? `The ${ep.name} returns ${resourceLabel(ep)} for your Captapi API key via one ${ep.method} request to ${ep.path}. It returns clean JSON and does not charge credits.`
+          : `The ${ep.name} lets you ${ACTION[ep.category]} from a public ${platform} ${inputKind(ep)} using one ${ep.method} request to ${ep.path}. It returns clean JSON — no OAuth or infrastructure setup required.`,
     },
     {
       q: `How many credits does the ${ep.name} cost?`,
-      a: `Each successful call costs ${ep.credits} credit${ep.credits === 1 ? "" : "s"}. Responses are cached for 24 hours, and cached results cost 0 credits. Failed or empty results are never charged.`,
+      a:
+        ep.platform === "account" || ep.credits === 0
+          ? `Account endpoints are free — they do not consume credits.`
+          : `Each successful call costs ${ep.credits} credit${ep.credits === 1 ? "" : "s"}. Responses are cached for 24 hours, and cached results cost 0 credits. Failed or empty results are never charged.`,
     },
     {
       q: `Do I need a ${platform} API key or OAuth?`,
-      a: `No. A single Captapi key works across every platform Captapi supports — YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble. We handle proxies, rate limits, retries, and authentication for you.`,
+      a:
+        ep.platform === "account"
+          ? `You only need your Captapi API key (Authorization: Bearer). No third-party OAuth is required.`
+          : `No. A single Captapi key works across every platform Captapi supports — YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, and Rumble. We handle proxies, rate limits, retries, and authentication for you.`,
     },
   ];
 
-  if (ep.category === "transcript") {
+  if (ep.category === "transcript" && ep.platform !== "account") {
     list.push({
-      q: `What if the ${platform} video has no captions?`,
+      q: `What if the ${platform} ${inputKind(ep)} has no captions?`,
       a: `When no captions are available, Captapi transcribes the audio with AI (Whisper) automatically, so you still get a usable transcript.`,
     });
   }
   if (ep.category === "summarize") {
     list.push({
       q: `Which AI model powers the summaries?`,
-      a: `Summaries are generated with GPT-4o-mini for a strong balance of quality, speed, and cost, built on top of the video transcript.`,
+      a: `Summaries are generated with GPT-4o-mini for a strong balance of quality, speed, and cost, built on top of the transcript.`,
     });
   }
   list.push({
     q: `Is the ${ep.name} suitable for production use?`,
-    a: `Yes. It is a stable REST endpoint with predictable JSON, automatic retries, and a shared 24-hour cache. Use it for RAG pipelines, analytics, monitoring, and content automation.`,
+    a: `Yes. It is a stable REST endpoint with predictable JSON, automatic retries, and a shared 24-hour cache. Use it for analytics, monitoring, and content automation.`,
   });
 
   return list;
