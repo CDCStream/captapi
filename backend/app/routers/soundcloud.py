@@ -12,7 +12,7 @@ from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services import soundcloud_native as native
-from app.services.apify_client import get_apify
+from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
 from app.utils.url import detect_url_platform, platform_mismatch_detail
@@ -110,15 +110,19 @@ async def artist(
                 return _artist(resolved, profile)
 
             settings = get_settings()
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_SOUNDCLOUD,
-                {"mode": "userUrl", "startUrls": [profile], "maxResults": 1, "includeUserDetails": True},
-                max_items=1,
-            )
-            if not items:
+            try:
+                items = await get_apify().run_actor_sync(
+                    settings.APIFY_ACTOR_SOUNDCLOUD,
+                    {"mode": "userUrl", "startUrls": [profile], "maxResults": 1, "includeUserDetails": True},
+                    max_items=1,
+                )
+            except ApifyError:
+                items = []
+            item = items[0] if items and isinstance(items[0], dict) else None
+            if not item:
                 raise HTTPException(status_code=404, detail="SoundCloud artist not found")
             ctx["source"] = "apify"
-            return _artist(items[0], profile)
+            return _artist(item, profile)
 
         data = await cached_or_run("soundcloud.artist", {"url": profile, "v": 3}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)

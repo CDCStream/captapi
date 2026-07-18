@@ -1048,6 +1048,11 @@ async def youtube_playlist_videos(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    if not _playlist_id(url):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid playlist URL. Expected a YouTube playlist URL with a list= ID.",
+        )
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
 
@@ -1082,6 +1087,7 @@ async def youtube_playlist_videos(
                 if feed_videos:
                     ctx["source"] = "direct"
                     return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
+                raise HTTPException(status_code=404, detail="Playlist not found")
             videos = []
             for v in items[:limit]:
                 videos.append(_video_card(v))
@@ -1090,7 +1096,7 @@ async def youtube_playlist_videos(
 
         data = await cached_or_run(
             endpoint="youtube.playlist-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 5},
+            params={"url": url, "limit": limit, "fast": fast, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1107,6 +1113,11 @@ async def youtube_playlist(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    if not _playlist_id(url):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid playlist URL. Expected a YouTube playlist URL with a list= ID.",
+        )
     settings = get_settings()
     cost = _scaled_credits(limit, RATE_YT_VIDEO, 5)
     async with billed_call(
@@ -1158,6 +1169,7 @@ async def youtube_playlist(
                         "totalReturned": len(feed_videos),
                         "videos": feed_videos,
                     }
+                raise HTTPException(status_code=404, detail="Playlist not found")
             videos = [_video_card(v) for v in items[:limit]]
             first = items[0] if items else {}
             ctx["source"] = "apify"
@@ -1172,7 +1184,7 @@ async def youtube_playlist(
 
         data = await cached_or_run(
             endpoint="youtube.playlist",
-            params={"url": url, "limit": limit, "fast": fast, "v": 5},
+            params={"url": url, "limit": limit, "fast": fast, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

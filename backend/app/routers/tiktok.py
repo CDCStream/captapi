@@ -470,19 +470,25 @@ async def tiktok_video_details(
                 return native
 
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK,
-                {"postURLs": [url], "resultsPerPage": 1, "shouldDownloadVideos": False},
-                max_items=1,
-            )
-            if not items:
+            try:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_TIKTOK,
+                    {"postURLs": [url], "resultsPerPage": 1, "shouldDownloadVideos": False},
+                    max_items=1,
+                )
+            except ApifyError:
+                # Missing/private videos often surface as actor errors; treat as
+                # not-found rather than bubbling a 502/500 to the client.
+                raise HTTPException(status_code=404, detail="Video not found") from None
+            item = items[0] if items and isinstance(items[0], dict) else None
+            if not item or not (item.get("id") or item.get("videoId") or item.get("webVideoUrl")):
                 raise HTTPException(status_code=404, detail="Video not found")
             ctx["source"] = "apify"
-            return _normalize(items[0])
+            return _normalize(item)
 
         data = await cached_or_run(
             endpoint="tiktok.video-details",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -703,17 +709,40 @@ async def tiktok_comments(
             native = await tiktok_native.comments_native(aweme_id, cursor, limit)
             if native is not None:
                 comments, next_cursor, total = native
-                ctx["source"] = "direct"
-                payload = {
-                    "platform": "tiktok",
-                    "url": url,
-                    "totalComments": total,
-                    "totalReturned": len(comments),
-                    "comments": comments,
-                    "nextCursor": next_cursor,
-                    "hasMore": next_cursor is not None,
-                }
-                return {k: v for k, v in payload.items() if v is not None}
+                # Soft-empty first page (no comments, unknown/zero total) is often
+                # a dead/private aweme id — don't accept it as success yet.
+                soft_empty = (
+                    not cursor
+                    and not comments
+                    and (total is None or total == 0)
+                    and next_cursor is None
+                )
+                if not soft_empty:
+                    ctx["source"] = "direct"
+                    payload = {
+                        "platform": "tiktok",
+                        "url": url,
+                        "totalComments": total,
+                        "totalReturned": len(comments),
+                        "comments": comments,
+                        "nextCursor": next_cursor,
+                        "hasMore": next_cursor is not None,
+                    }
+                    return {k: v for k, v in payload.items() if v is not None}
+                # Confirmed empty thread on a real video: keep native success.
+                if total == 0:
+                    vd = await video_details_native(url)
+                    if vd is not None:
+                        ctx["source"] = "direct"
+                        return {
+                            "platform": "tiktok",
+                            "url": url,
+                            "totalComments": 0,
+                            "totalReturned": 0,
+                            "comments": [],
+                            "nextCursor": None,
+                            "hasMore": False,
+                        }
 
             # The Apify actor is not cursor-based, so it only serves the first
             # page; deeper pages require the native path above.
@@ -723,14 +752,18 @@ async def tiktok_comments(
                     detail="Failed to fetch the next page. Retry shortly.",
                 )
             apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_COMMENTS,
-                {"postURLs": [url], "commentsPerPost": limit},
-                max_items=limit,
-            )
-            ctx["source"] = "apify"
+            try:
+                items = await apify.run_actor_sync(
+                    settings.APIFY_ACTOR_TIKTOK_COMMENTS,
+                    {"postURLs": [url], "commentsPerPost": limit},
+                    max_items=limit,
+                )
+            except ApifyError:
+                items = []
             comments = []
             for c in items[:limit]:
+                if not isinstance(c, dict):
+                    continue
                 user = c.get("user") or {}
                 comments.append(
                     {
@@ -742,6 +775,9 @@ async def tiktok_comments(
                         "publishedAt": safe_str(c.get("createTimeISO")),
                     }
                 )
+            if not comments:
+                raise HTTPException(status_code=404, detail="Video not found or has no comments")
+            ctx["source"] = "apify"
             return {
                 "platform": "tiktok",
                 "url": url,
@@ -753,7 +789,7 @@ async def tiktok_comments(
 
         data = await cached_or_run(
             endpoint="tiktok.comments",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 4},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
