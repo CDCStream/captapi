@@ -276,7 +276,7 @@ const THREADS: Omit<Endpoint, "platform">[] = [
 
 const BLUESKY: Omit<Endpoint, "platform">[] = [
   { tool: "bluesky_profile", name: "Bluesky Profile", path: "/v1/bluesky/profile", credits: 1, summary: "Profile info & stats for a Bluesky account.", params: [url(BS_PROFILE)] },
-  { tool: "bluesky_user_posts", name: "Bluesky User Posts", path: "/v1/bluesky/user-posts", credits: 3, summary: "Recent posts from a Bluesky profile, with cursor pagination (nextCursor + hasMore).", params: [url(BS_PROFILE), limit(25, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
+  { tool: "bluesky_user_posts", name: "Bluesky User Posts", path: "/v1/bluesky/user-posts", credits: 3, summary: "Recent posts from a Bluesky profile — text, author, likes, reposts, embeds; cursor pagination.", params: [url(BS_PROFILE), limit(25, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
   { tool: "bluesky_post_details", name: "Bluesky Post Details", path: "/v1/bluesky/post-details", credits: 1, summary: "Metadata + engagement for a Bluesky post.", params: [url(BS_POST)] },
 ];
 

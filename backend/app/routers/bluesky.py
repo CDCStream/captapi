@@ -206,9 +206,9 @@ async def bluesky_profile(
         return ApiResponse(data=result)
 
 
-@router.get("/user-posts", summary="List recent posts for a Bluesky profile (cursor-paginated)")
+@router.get("/user-posts", summary="List recent posts from a Bluesky profile (cursor-paginated)")
 async def bluesky_user_posts(
-    url: str = Query(..., description="Bluesky profile URL, @handle, or handle"),
+    url: str = Query(..., description="Bluesky profile URL, @handle, or handle, e.g. https://bsky.app/profile/handle.bsky.social"),
     limit: int = Query(25, ge=1, le=100),
     cursor: str | None = Query(
         None,

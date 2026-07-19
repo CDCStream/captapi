@@ -9093,7 +9093,7 @@
         "tags": [
           "Bluesky"
         ],
-        "summary": "List recent posts for a Bluesky profile (cursor-paginated)",
+        "summary": "List recent posts from a Bluesky profile (cursor-paginated)",
         "operationId": "bluesky_user_posts_v1_bluesky_user_posts_get",
         "security": [
           {
@@ -9107,10 +9107,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Bluesky profile URL, @handle, or handle",
+              "description": "Bluesky profile URL, @handle, or handle, e.g. https://bsky.app/profile/handle.bsky.social",
               "title": "Url"
             },
-            "description": "Bluesky profile URL, @handle, or handle"
+            "description": "Bluesky profile URL, @handle, or handle, e.g. https://bsky.app/profile/handle.bsky.social"
           },
           {
             "name": "limit",

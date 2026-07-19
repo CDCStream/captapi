@@ -2629,7 +2629,7 @@
     "name": "Bluesky User Posts",
     "path": "/v1/bluesky/user-posts",
     "credits": 3,
-    "summary": "Recent posts from a Bluesky profile, with cursor pagination (nextCursor + hasMore).",
+    "summary": "Recent posts from a Bluesky profile — text, author, likes, reposts, embeds; cursor pagination.",
     "params": [
       {
         "name": "url",

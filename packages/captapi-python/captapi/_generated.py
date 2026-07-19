@@ -1770,7 +1770,7 @@ class BlueskyApi:
         return self._t.get("/v1/bluesky/profile", {"url": url, "cache": cache})
 
     def user_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Bluesky User Posts — Recent posts from a Bluesky profile, with cursor pagination (nextCursor + hasMore). (3 credits)
+        """Bluesky User Posts — Recent posts from a Bluesky profile — text, author, engagement, embeds; cursor pagination. (3 credits)
 
         :param url: Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 100. Billed per result.
@@ -1801,7 +1801,7 @@ class AsyncBlueskyApi:
         return await self._t.get("/v1/bluesky/profile", {"url": url, "cache": cache})
 
     async def user_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Bluesky User Posts — Recent posts from a Bluesky profile, with cursor pagination (nextCursor + hasMore). (3 credits)
+        """Bluesky User Posts — Recent posts from a Bluesky profile — text, author, engagement, embeds; cursor pagination. (3 credits)
 
         :param url: Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 100. Billed per result.

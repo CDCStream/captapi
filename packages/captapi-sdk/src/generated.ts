@@ -1272,7 +1272,7 @@ export class BlueskyApi {
   profile(params: BlueskyProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/bluesky/profile", params);
   }
-  /** Bluesky User Posts — Recent posts from a Bluesky profile, with cursor pagination (nextCursor + hasMore). (3 credits) */
+  /** Bluesky User Posts — Recent posts from a Bluesky profile — text, author, engagement, embeds; cursor pagination. (3 credits) */
   userPosts(params: BlueskyUserPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/bluesky/user-posts", params);
   }

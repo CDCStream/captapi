@@ -317,7 +317,7 @@ const THREADS: Spec[] = [
 
 const BLUESKY: Spec[] = [
   { slug: "bluesky-profile", name: "Bluesky Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/bluesky/profile", credits: 1 },
-  { slug: "bluesky-user-posts", name: "Bluesky User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/bluesky/user-posts", credits: 3, creditsPerResult: 0.1 },
+  { slug: "bluesky-user-posts", name: "Bluesky User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/bluesky/user-posts", credits: 3, creditsPerResult: 0.1, tagline: "Get recent posts from any Bluesky profile — text, author, likes, reposts, replies, and embeds, with cursor pagination.", longDescription: "Send a Bluesky profile URL, @handle, or handle and the Bluesky User Posts API returns that account's recent posts as clean JSON. Each post includes the Bluesky URL and AT URI, text, publish time, the author (handle, display name, DID, avatar), engagement (likes, reposts, replies, quotes), and embed details when the post has a link, image, or quote. Need more than the first page? Pass the nextCursor value from the previous response to keep paging, and use hasMore to know when you've reached the end. Ideal for creator monitoring, content calendars, and feeding analytics tools. Billed per result — about 0.1 credits each. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Recent public posts from any Bluesky profile", "Post URL, AT URI, text, and publish time", "Author handle, display name, DID, and avatar", "Likes, reposts, replies, quotes, and embeds when present", "Cursor pagination (nextCursor + hasMore) through older posts"] },
   { slug: "bluesky-post-details", name: "Bluesky Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/bluesky/post-details", credits: 1 , tagline: "Get a Bluesky post — text, author, likes, reposts, and replies as structured JSON." },
 ];
 
@@ -1330,7 +1330,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "threads-search-users": [qp("Keyword to find Threads users / creators (min 2 characters)."), lp(20, 100)],
   // Bluesky
   "bluesky-profile": [up("Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle.")],
-  "bluesky-user-posts": [up("Bluesky profile URL, @handle, or handle."), lp(25, 100), CURSOR],
+  "bluesky-user-posts": [up("Bluesky profile URL, @handle, or handle, e.g. https://bsky.app/profile/handle.bsky.social."), lp(25, 100), CURSOR],
   "bluesky-post-details": [up("Bluesky post URL, e.g. https://bsky.app/profile/handle/post/RKEY.")],
   // Pinterest
   "pinterest-pin-details": [up("Pinterest pin URL, e.g. https://pinterest.com/pin/ID/.")],

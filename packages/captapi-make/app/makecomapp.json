@@ -1636,7 +1636,7 @@
       },
       "blueskyUserPosts": {
         "label": "Bluesky User Posts",
-        "description": "Recent posts from a Bluesky profile, with cursor pagination (nextCursor + hasMore). Costs ~3 credits (cached results free, failures never charged).",
+        "description": "Recent posts from a Bluesky profile — text, author, likes, reposts, embeds; cursor pagination. Costs ~3 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
