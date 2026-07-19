@@ -991,18 +991,22 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "description": "Come out and enjoy an explosive comedy set by Auntie Hammy 🦉 HOOT HOOT",
     "startDate": "2026-07-19T23:00:00+00:00",
     "startTime": "2026-07-19T23:00:00+00:00",
+    "duration": null,
     "eventType": null,
     "isOnline": false,
     "isPast": null,
     "isCanceled": false,
-    "image": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-6/736455705_1551607669854746_6960960816332759417_n.jpg?stp=dst-jpg_tt6&cstp=mx1640x2048&ctp=s1640x2048&_nc_cat=101&ccb=1-7&_nc_sid=75d36f&_nc_ohc=QnWcz9lz-0UQ7kNvwFI3oGk&_nc_oc=AdoLgVitTDsWRohy5O7ea31m4teMLyI-of75VL0fFSGPbJfW9ee49mK2dNaPfWEu2ik&_nc_zt=23&_nc_ht=scontent-iad3-1.xx&_nc_gid=m8XwhWFVl38lk8MBhUDtOg&_nc_ss=7b289&oh=00_AQBw9Ld8S8OlFnVGXxnzSbwm4cvRfFgEhketbksw38zrQQ&oe=6A62BFEE",
     "address": "162 E Superior St",
+    "image": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-6/736455705_1551607669854746_6960960816332759417_n.jpg?stp=dst-jpg_tt6&cstp=mx1640x2048&ctp=s1640x2048&_nc_cat=101&ccb=1-7&_nc_sid=75d36f&_nc_ohc=QnWcz9lz-0UQ7kNvwGzyCoz&_nc_oc=AdoZjrFdnOJPAcRArI91kJvEd4hhXdWwbf0u-Jzu0FN8tRezU9E3_prgVS49fjJdnn0&_nc_zt=23&_nc_ht=scontent-iad3-1.xx&_nc_gid=vQauyG7k0ZWhl1OD9Nll7g&_nc_ss=7b289&oh=00_AQA_zNiUqVHa5A2-Scshr_rHsv0zP1cVrwlRQWa3rL2sAg&oe=6A62BFEE",
+    "usersGoing": null,
+    "usersInterested": null,
     "usersResponded": 95,
     "location": {
       "name": "The Comedy Bar",
       "city": "Chicago",
       "latitude": 41.891,
-      "longitude": -87.63293
+      "longitude": -87.63293,
+      "countryCode": null
     },
     "organizer": "Auntie HAMMY",
     "organizers": [
@@ -1012,7 +1016,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://www.facebook.com/auntiehammyTV",
         "verified": false
       }
-    ]
+    ],
+    "ticketsUrl": null,
+    "categories": [],
+    "externalLinks": []
   },
   "facebook-event-search": {
     "query": "comedy Chicago",
@@ -1025,13 +1032,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "name": "Auntie Hammy The Comedy Bar Chicago",
         "description": "Come out and enjoy an explosive comedy set by Auntie Hammy 🦉 HOOT HOOT",
         "startDate": "2026-07-19T23:00:00.000Z",
-        "startTime": "Sun, 19 Jul at 19:00 EDT",
+        "startTime": "Sun, Jul 19 at 7:00 PM EDT",
+        "duration": null,
         "eventType": "PUBLIC",
         "isOnline": false,
         "isPast": false,
         "isCanceled": false,
-        "image": "https://scontent.fsaw2-3.fna.fbcdn.net/v/t39.30808-6/736455705_1551607669854746_6960960816332759417_n.jpg?stp=dst-jpg_tt6&cstp=mx1640x2048&ctp=s1640x2048&_nc_cat=101&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=75d36f&_nc_ohc=QnWcz9lz-0UQ7kNvwG381U7&_nc_oc=Adpn1ttcBCMJTBg9zhkeDba5mNgzmLgeK-VLMZpdBmTzO_a-5eBHqZyuXmJT9QDTzzw&_nc_zt=23&_nc_ht=scontent.fsaw2-3.fna&_nc_gid=jvqLe8T5IvaSOyMsEmGtwQ&_nc_ss=7c289&oh=00_AQAQwjCbVMp4H0fBmgROfnEJnbjPi_1D68Oa_uguo_TO5w&oe=6A62BFEE",
-        "address": "162 E Superior St, Chicago, IL, United States",
+        "address": "162 E Superior St, Chicago, IL 60654",
+        "image": "https://scontent-lax7-1.xx.fbcdn.net/v/t39.30808-6/736455705_1551607669854746_6960960816332759417_n.jpg?stp=dst-jpg_tt6&cstp=mx1640x2048&ctp=s960x960&_nc_cat=101&ccb=1-7&_nc_sid=75d36f&_nc_ohc=QnWcz9lz-0UQ7kNvwFAMIur&_nc_oc=AdpNli6EYFKJCqYbLgMu3Jfd3UHzEC2F8VZ_YVkpraZpKhTkBnA4YWl6sYvIdLKjNO4&_nc_zt=23&_nc_ht=scontent-lax7-1.xx&_nc_gid=ck6yfwVkyD8Wb4wUW6v4DA&_nc_ss=7c289&oh=00_AQAvx_kZn37Km3jLmA3XZkDOlUneOHJ7MrMwMSb8d-Hc-w&oe=6A62BFEE",
         "usersGoing": 15,
         "usersInterested": 80,
         "usersResponded": 95,
@@ -1051,28 +1059,69 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "verified": true
           }
         ],
-        "ticketsUrl": "https://www.eventbrite.com/e/sunday-july-19-auntie-hammy-tickets-1988430523222?aff=oddtdtcreator&utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZnRzaASxIkJwZG9mAmV4dG4DYWVtAjExAHNydGMGYXBwX2lkDzEyNDAyNDU3NDI4NzQxNAABp7K8Gu6wihl4I0yJtI0lcHqHuFApklnUw2zTS7OfPdZNRW_AIuTA4GZduNWk_aem_WbU94zbhspIG66IbtVNvXA"
+        "ticketsUrl": "https://www.eventbrite.com/e/sunday-july-19-auntie-hammy-tickets-1988430523222?aff=oddtdtcreator&utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZnRzaASxIkJwZG9mAmV4dG4DYWVtAjExAHNydGMGYXBwX2lkDzEyNDAyNDU3NDI4NzQxNAABp7K8Gu6wihl4I0yJtI0lcHqHuFApklnUw2zTS7OfPdZNRW_AIuTA4GZduNWk_aem_WbU94zbhspIG66IbtVNvXA",
+        "categories": [],
+        "externalLinks": []
       },
       {
         "platform": "facebook",
-        "id": "1508116590975970",
-        "url": "https://www.facebook.com/events/1508116590975970/",
-        "name": "FAN EXPO CHICAGO! Korrupted Comedy Presents: The Writer's Room!",
-        "description": "Korrupted Comedy is BACK... At The FAN EXPO CHICAGO 2026!\nAugust 14-16 at The Donald E. Stephens Convention Center!\n ***YOU MUST HAVE TICKETS TO THE FAN EXPO CHICAGO 2026 IN ORDER TO ATTEND THESE EVENTS AND SHOWS!\n\nALL INFO HERE https://fanexpohq.com/fanexpochicago/family\n\nKorrupted Comedy is a Nationwide Indie Comedy Brand n Business. We run pop up shows all around the country and have an exclusive weekly residency at The LA Famous CLUB FAT SAL'S in Hollywood, CA!\nKorrupted Comedy at FAN EXPO CHICAGO 2025 was such a success, we got booked at FAN EXPO DENVER 2026 \nAnd are coming back to FAN EXPO CHICAGO 2026 \nBUT....With more than just a show...\n\nTHE WRITER'S ROOM!\n\"We bring together comedy, creativity, and a little rule-breaking energy for fans ready to write, perform, or try something new. Catch panels and workshops on stand-up, sketch, screenwriting, and building a voice that actually sounds like you.\"\nProduced, Presented and Hosted By Trevor Keveloh and Associates!\n\nFEATURING:\nTrevor Keveloh\nAND\nAuthor ROBERT DEAN\n(More Artists TBA!)\n\nMORE INFO ON...\nwww.korruptedcomedyllc.com\nAND\nhttps://fanexpohq.com/fanexpochicago",
-        "startDate": "2026-08-14T21:00:00.000Z",
-        "startTime": "Fri, Aug 14 at 4:00 PM CDT",
+        "id": "1571292111257531",
+        "url": "https://www.facebook.com/events/1571292111257531/",
+        "name": "Comedy Dance Chicago - Headliner at iO Fest - ONE NIGHT ONLY!",
+        "description": "Catch Comedy Dance Chicago headlining at iO Fest 2026!\n\nExperience the Best of Comedy Dance Chicago! This high-energy laugh-riot features fan favorites and hilarious hits from the group's first decade of performances. A joyful mashup of sketch comedy, physical humor, music, and dance, this show is sure to have you smiling, laughing, and dancing in your seat–you might even end up on stage!\n\nWith over 105 million views on social media, these dancin' fools have delighted audiences both online and on stage with their relatable humor and infectious energy. From pumpkin spice lattes to good old-fashioned staring contests, Comedy Dance Chicago turns everyday moments into delightfully absurd comedy.\n\nGet ready for an endorphin-releasing experience packed with big laughs, big moves, and hilariously unforgettable antics!\n\nGET TIX BEFORE THEY'RE GONE!\nOn sale now.\n$33.90",
+        "startDate": "2026-07-24T00:00:00.000Z",
+        "startTime": "Thu, 23 Jul at 19:00 CDT",
+        "duration": null,
         "eventType": "PUBLIC",
         "isOnline": false,
         "isPast": false,
         "isCanceled": false,
-        "image": "https://scontent-lax3-1.xx.fbcdn.net/v/t39.30808-6/689011216_1352432357033061_3630750992791860030_n.jpg?stp=cp6_dst-jpg_tt6&cstp=mx1080x1073&ctp=s960x960&_nc_cat=110&ccb=1-7&_nc_sid=75d36f&_nc_ohc=KqeOB2YjhEgQ7kNvwEnyVCQ&_nc_oc=AdoSKMKlVdFHplFSxoSZESfsCLNfo-0E7HU1DYaYmSQcRTwmZRrAieCuGInSuMZ3EWk&_nc_zt=23&_nc_ht=scontent-lax3-1.xx&_nc_gid=_adb7QmoSa7oqHHG6CUB7g&_nc_ss=7c289&oh=00_AQBJ9xYfbH--1M9t2JA_ns-NhH2bBUyXkyCSfuWqVdXUzA&oe=6A62B058",
+        "address": "iO Chicago",
+        "image": "https://scontent.fcok6-1.fna.fbcdn.net/v/t39.30808-6/727572593_944458875294176_7871427356385004346_n.jpg?stp=dst-jpg_tt6&cstp=mx1920x1005&ctp=s960x960&_nc_cat=110&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=75d36f&_nc_ohc=XC5DE81w914Q7kNvwHr8fOq&_nc_oc=AdqhL41DQWCXglbOMu9TprMpUr2Z6K_KEAisLSg24aNhUFOvZOZliij57vZsD5W7rVo&_nc_zt=23&_nc_ht=scontent.fcok6-1.fna&_nc_gid=Uzf6AUeZ8quj_wwYskrphw&_nc_ss=72289&oh=00_AQD6wDx39tfBxuEpJawtUm5Qw703DtQR_Pw8JPn9FndmxA&oe=6A62BFC1",
+        "usersGoing": 3,
+        "usersInterested": 7,
+        "usersResponded": 10,
+        "location": {
+          "name": "iO Chicago",
+          "city": null,
+          "latitude": 41.908455377027,
+          "longitude": -87.651833295822,
+          "countryCode": "US"
+        },
+        "organizer": "Event by Comedy Dance Chi",
+        "organizers": [
+          {
+            "id": "100091902168506",
+            "name": "Comedy Dance Chi",
+            "url": "https://www.facebook.com/ComedyDanceChi",
+            "verified": false
+          }
+        ],
+        "ticketsUrl": "https://www.crowdwork.com/e/comedy-dance-chicago?date=2026-07-23T19%3A00%3A00",
+        "categories": [],
+        "externalLinks": []
+      },
+      {
+        "platform": "facebook",
+        "id": "2530065584112510",
+        "url": "https://www.facebook.com/events/2530065584112510/",
+        "name": "FAN EXPO CHICAGO! Korrupted Comedy Presents: The Writer's Room!",
+        "description": "Korrupted Comedy is BACK... At The FAN EXPO CHICAGO 2026!\nAugust 14-16 at The Donald E. Stephens Convention Center!\n ***YOU MUST HAVE TICKETS TO THE FAN EXPO CHICAGO 2026 IN ORDER TO ATTEND THESE EVENTS AND SHOWS!\n\nEXPO HOURS!\nFriday 8/14... 4 PM – 9 PM\nSaturday 8/15... 10 AM – 7 PM\nSunday 8/16... 10 AM – 5 PM\n\nALL INFO HERE https://fanexpohq.com/fanexpochicago/family\n\nKorrupted Comedy is a Nationwide Indie Comedy Brand n Business. We run pop up shows all around the country and have an exclusive weekly residency at The LA Famous CLUB FAT SAL'S in Hollywood, CA!\nKorrupted Comedy at FAN EXPO CHICAGO 2025 was such a success, we got booked at FAN EXPO DENVER 2026 \nAnd are coming back to FAN EXPO CHICAGO 2026 \nBUT....With more than just a show...\n\nTHE WRITER'S ROOM!\n\"We bring together comedy, creativity, and a little rule-breaking energy for fans ready to write, perform, or try something new. Catch panels and workshops on stand-up, sketch, screenwriting, and building a voice that actually sounds like you.\"\nProduced, Presented and Hosted By Trevor Keveloh and Associates!\nMORE INFO ON...\nwww.korruptedcomedyllc.com\nAND\nhttps://fanexpohq.com/fanexpochicago",
+        "startDate": "2026-08-14T21:00:00.000Z",
+        "startTime": "Fri, 14 Aug at 16:00 CDT",
         "duration": "3 hr",
+        "eventType": "PUBLIC",
+        "isOnline": false,
+        "isPast": false,
+        "isCanceled": false,
         "address": "Donald E. Stephens Convention Center",
-        "usersGoing": 1,
+        "image": "https://scontent.fesb10-5.fna.fbcdn.net/v/t39.30808-6/689027874_1352432613699702_43040202742557035_n.jpg?stp=cp6_dst-jpg_tt6&cstp=mx1080x1073&ctp=s960x960&_nc_cat=109&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=75d36f&_nc_ohc=8iWt6_11os4Q7kNvwFADE2M&_nc_oc=AdpzwFYpyD13uJ56v9WIAVlIgC8OPzwj4vEUQleknULDsof4XNMpgxo28t4_41go7yM&_nc_zt=23&_nc_ht=scontent.fesb10-5.fna&_nc_gid=jKVJCf-8e6VVMggmrcKZVA&_nc_ss=7c289&oh=00_AQBWhP-PX_OZ5xQpz5OQ60aDzn5jzakp7XDWRiDrxqv18Q&oe=6A62C2B2",
+        "usersGoing": 3,
         "usersInterested": 1,
-        "usersResponded": 2,
+        "usersResponded": 4,
         "location": {
           "name": "Donald E. Stephens Convention Center",
+          "city": null,
           "latitude": 41.979445916976,
           "longitude": -87.86129415886,
           "countryCode": "US"
@@ -1087,6 +1136,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           }
         ],
         "ticketsUrl": "http://www.korruptedcomedyllc.com/",
+        "categories": [],
         "externalLinks": [
           "https://fanexpohq.com/fanexpochicago/family",
           "http://www.korruptedcomedyllc.com/",
@@ -1101,17 +1151,19 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "description": "Experience the Best of Comedy Dance Chicago! This high-energy laugh-riot features fan favorites and hilarious hits from the group's first decade of performances. A joyful mashup of sketch comedy, physical humor, music, and dance, this feel-good show is sure to have you smiling, laughing, and bopping in your seat. You might even end up on stage!With over 105 million views on social media, these dancin' fools have delighted audiences both online and on stage with their relatable humor and infectious energy. From pumpkin spice lattes to good old-fashioned staring contests, Comedy Dance Chicago turns everyday moments into delightfully absurd comedy.Get ready for an endorphin-releasing experience packed with big laughs, big moves, and hilariously unforgettable antics! Rated PG-13.\r\n\r\n\r\nTICKETS: $35.00 (Including Fees)\r\n\r\nCall the Opera House Box Office: (815) 338-5300 or email tickets@woodstockil.gov  with any questions",
         "startDate": "2026-09-20T00:30:00.000Z",
         "startTime": "Sat, Sep 19 at 7:30 PM CDT",
+        "duration": null,
         "eventType": "PUBLIC",
         "isOnline": false,
         "isPast": false,
         "isCanceled": false,
-        "image": "https://scontent.fros2-2.fna.fbcdn.net/v/t39.30808-6/730584696_1593348489465875_6836066750615974362_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=106&ccb=1-7&_nc_sid=75d36f&_nc_ohc=7q8kVsMfR9gQ7kNvwGfG7o-&_nc_oc=AdoFBCkLg1uxBMOoZlAkv3HBnjGbv2oOCuO-eIvH3BMAZrfmrh134gVf-BkT6OV4A5s&_nc_zt=23&_nc_ht=scontent.fros2-2.fna&_nc_gid=AzyMj0EjihtM_E7dCrqgmQ&_nc_ss=72289&oh=00_AQALxLVeE8JCDZq9DjwskXC-9Um7nn-WM3Z9imlCRgg4ZQ&oe=6A629C5C",
         "address": "121 West Van Buren Street\r\nWoodstock, IL 60098",
+        "image": "https://scontent.frez3-1.fna.fbcdn.net/v/t39.30808-6/730584696_1593348489465875_6836066750615974362_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=106&ccb=1-7&_nc_sid=75d36f&_nc_ohc=7q8kVsMfR9gQ7kNvwEXHwYa&_nc_oc=AdoQr8WIaJuzOzB3lQyakRUqQPLaYnTPlrBUDwg8XuogiFHxpt1ND-9P47dxdVaHWsg&_nc_zt=23&_nc_ht=scontent.frez3-1.fna&_nc_gid=OAero2wsfFtRicRfDu2XLw&_nc_ss=7c289&oh=00_AQCf60wakIoR393rsdhTEinb4hxTY8vbWR1ffNtyRlvvHg&oe=6A629C5C",
         "usersGoing": 1,
         "usersInterested": 7,
         "usersResponded": 8,
         "location": {
           "name": "121 West Van Buren Street\r\nWoodstock, IL 60098",
+          "city": null,
           "latitude": 42.31422,
           "longitude": -88.44763,
           "countryCode": "US"
@@ -1131,85 +1183,54 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCI2NjAwMzI2MTc1MzYzNzNcIn0ifQ%3D%3D&q=Comedy",
             "label": "Comedy"
           }
-        ]
+        ],
+        "externalLinks": []
       },
       {
         "platform": "facebook",
-        "id": "971576128806626",
-        "url": "https://www.facebook.com/events/971576128806626/",
-        "name": "Seth Payne presents Chicago Comedy Takeover 2 @ The 9th Ward",
-        "description": "Seth Payne presents the Chicago Comedy Takeover 2 live in The 9th Ward\n\n7pm Doors, 8pm Show\n\nTickets: General Admission Seated $26, available at TixR.com (convenience fees apply) or in person at the Babeville Box Office (M-F 11a-5p- in person fee free cash sales, 3% credit/debit card fee).\n\n \n\nSeth Payne, Buffalo/Chicago Comedian, is Back with another edition of Comedy Takeover at Babeville–Seth brings the Funniest and Wildest comics from Chicago to the 716 for a night of Hilarity!\n\nFeaturing: John Gasper, Grace Piotrowski, Ron Hexagon, Des Mulrooney, and Seth Payne.\n\nBe sure to buy your tickets in advance, this event has sold out the past two years!",
-        "startDate": "2026-08-29T00:00:00.000Z",
-        "startTime": "Fri, Aug 28 at 8:00 PM EDT",
+        "id": "1491158682760660",
+        "url": "https://www.facebook.com/events/1491158682760660/",
+        "name": "Gujju Bhai ni Exchange Offer - Live Comedy Show in Chicago",
+        "description": "Gujju Bhai ni Exchange Offer - Live Comedy Show in Chicago \n\nLaughter guaranteed. Entertainment unlimited. \n\nGet ready for a hilarious evening filled with witty humor, unforgettable characters, and nonstop laughter. \nA perfect family entertainer that has delighted Gujarati audiences across the world.  \n\nDate: July 19, 2026 \n\nTime: 5:00 PM (CDT) \n\nVenue: Hemmens Auditorium, 45 Symphony Way, Elgin, IL 60120 \n\nBook your tickets now and enjoy a comedy experience like no other. \n\nhttps://events.sulekha.com/gujju-bhai-ni-exchange-offer-live-in-chicago_event-in_elgin-il_400815\n\n#GujjuBhaiNiExchangeOffer #SiddharthRanderia #GujaratiComedy #ChicagoEvents #LiveTheatre #ComedyShow #FamilyEntertainment #ElginIL #GujaratiPlay #SulekhaEvents",
+        "startDate": "2026-07-19T22:00:00.000Z",
+        "startTime": "Sun, Jul 19 at 5:00 PM CDT",
+        "duration": null,
         "eventType": "PUBLIC",
         "isOnline": false,
         "isPast": false,
         "isCanceled": false,
-        "image": "https://scontent-eze1-1.xx.fbcdn.net/v/t39.30808-6/708154827_1400877588752622_6546879548206933579_n.jpg?stp=dst-jpg_tt6&cstp=mx800x800&ctp=s800x800&_nc_cat=111&ccb=1-7&_nc_sid=75d36f&_nc_ohc=JSKaef_PQwUQ7kNvwGuNUl1&_nc_oc=Adq8ZvoJP5dUPbh3uapLmaA9VVSipeYGn8OXNqoBr6luXkMjuTPFuAjGv05kqY7Ck6I&_nc_zt=23&_nc_ht=scontent-eze1-1.xx&_nc_gid=jQEb1s8fiHBDMEwKUXC_pg&_nc_ss=72289&oh=00_AQCGqsOozlYYE7XswMKSbLL8VeHfWncmdKuffK0tkXWD2w&oe=6A62CBBB",
-        "address": "341 Delaware Ave, Buffalo, NY, United States, New York 14202",
+        "address": "Hemmens Auditorium",
+        "image": "https://scontent.fbeg4-1.fna.fbcdn.net/v/t39.30808-6/740611573_1541713150721854_8896510579944802967_n.jpg?stp=dst-jpg_tt6&cstp=mx1280x500&ctp=s960x960&_nc_cat=100&ccb=1-7&_nc_sid=75d36f&_nc_ohc=Jr2pQcXcp1IQ7kNvwHfdPSv&_nc_oc=Adpx_3NZ2R-ZY7qbVWf1E-aCsehIhWnBGUpEqP7PKNt2W1CpANirlWsMV2yjrQZyZDw&_nc_zt=23&_nc_ht=scontent.fbeg4-1.fna&_nc_gid=SK9PkautwAdYkdB7bgU0-A&_nc_ss=72289&oh=00_AQB3ugrZ_uYkayeyYNHLDAdvTLWWbYJZ9lVxudff8JDhnQ&oe=6A62B23E",
         "usersGoing": 2,
-        "usersInterested": 4,
-        "usersResponded": 6,
-        "location": {
-          "name": "341 Delaware Ave, Buffalo, NY, United States, New York 14202",
-          "latitude": 42.89368,
-          "longitude": -78.87527,
-          "countryCode": "US"
-        },
-        "organizer": "Event by Babeville",
-        "organizers": [
-          {
-            "id": "100064911815653",
-            "name": "Babeville",
-            "url": "https://www.facebook.com/babeville",
-            "verified": false
-          }
-        ],
-        "ticketsUrl": "https://tixr.com/e/191413",
-        "categories": [
-          {
-            "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCI2NjAwMzI2MTc1MzYzNzNcIn0ifQ%3D%3D&q=Comedy",
-            "label": "Comedy"
-          }
-        ],
-        "externalLinks": [
-          "http://TixR.com/"
-        ]
-      },
-      {
-        "platform": "facebook",
-        "id": "1670633794193303",
-        "url": "https://www.facebook.com/events/1670633794193303/",
-        "name": "Be Part of the Chicago Comedy scene \"Standup Comedy 101\"",
-        "description": "Be part of the happening Chicago Comedy Scene. A New Standup Comedy 101 course begins Monday, September 7th @ 7pm, Roscoe Village. http://standupcomedy101.com #chicago #chicagoland #ChicagoEvents",
-        "startDate": "2026-09-08T00:00:00.000Z",
-        "startTime": "Mon, Sep 7 at 7:00 PM CDT",
-        "eventType": "PUBLIC",
-        "isOnline": false,
-        "isPast": false,
-        "isCanceled": false,
-        "image": "https://scontent.fmex1-6.fna.fbcdn.net/v/t39.30808-6/733448342_999108406474535_2598526572924536590_n.jpg?stp=dst-jpg_tt6&cstp=mx1275x1650&ctp=s960x960&_nc_cat=101&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=75d36f&_nc_ohc=Pf4g0PZMCV8Q7kNvwFbE-38&_nc_oc=AdqyPWKnFNLEXcyJ_j_rIZ9HvWB2cnK2JSLK8DxpQ9Vqoxzs5FbDVG27h458GaNMMxE&_nc_zt=23&_nc_ht=scontent.fmex1-6.fna&_nc_gid=a6nmuyX1zH_q_4yqq51k0w&_nc_ss=7c289&oh=00_AQAkl-heEJDm3ay0PqU3u-dPsUT_i8nJZlyKaKUmYfyS1w&oe=6A62A49D",
-        "address": "3403 N Damen Ave, Chicago, IL 60618-6105, United States",
-        "usersGoing": 1,
-        "usersInterested": 1,
+        "usersInterested": null,
         "usersResponded": 2,
         "location": {
-          "name": "3403 N. Damen Ave, Chicago, IL, United States, Illinois 60657",
-          "latitude": 41.94338,
-          "longitude": -87.67831,
+          "name": "Hemmens Auditorium",
+          "city": null,
+          "latitude": 42.039722662283,
+          "longitude": -88.286670949894,
           "countryCode": "US"
         },
-        "organizer": "Event by Comedy College Chicago",
+        "organizer": "Event by Sulekha Events in USA & Canada",
         "organizers": [
           {
-            "id": "100091261538844",
-            "name": "Comedy College Chicago",
-            "url": "https://www.facebook.com/people/Comedy-College-Chicago/100091261538844/",
+            "id": "100046495526677",
+            "name": "Sulekha Events in USA & Canada",
+            "url": "https://www.facebook.com/sulekhaevents",
             "verified": false
           }
         ],
+        "ticketsUrl": "https://events.sulekha.com/gujju-bhai-ni-exchange-offer-live-in-chicago_event-in_elgin-il_400815",
+        "categories": [],
         "externalLinks": [
-          "http://standupcomedy101.com/",
+          "https://events.sulekha.com/gujju-bhai-ni-exchange-offer-live-in-chicago_event-in_elgin-il_400815",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
           null,
           null,
           null
