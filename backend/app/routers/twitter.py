@@ -86,6 +86,31 @@ def _author(a: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _author_transcript(a: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Author for transcript — omit followers (syndication never provides them)."""
+    if not isinstance(a, dict) or not a:
+        return None
+    # Accept raw syndication/actor user or already-normalized author.
+    if "username" in a or "displayName" in a:
+        out = {
+            "username": safe_str(a.get("username")),
+            "displayName": safe_str(a.get("displayName")),
+            "url": safe_str(a.get("url")),
+            "verified": a.get("verified"),
+            "profileImage": safe_str(a.get("profileImage")),
+        }
+    else:
+        full = _author(a)
+        out = {
+            "username": full.get("username"),
+            "displayName": full.get("displayName"),
+            "url": full.get("url"),
+            "verified": full.get("verified"),
+            "profileImage": full.get("profileImage"),
+        }
+    return out
+
+
 def _as_bool(value: Any) -> bool | None:
     if isinstance(value, bool):
         return value
@@ -324,7 +349,7 @@ async def twitter_transcript(
                 "transcriptSegments": [{"text": text, "start": 0, "duration": 0, "timestamp": "00:00"}],
                 "wordCount": len(text.split()),
                 "segments": 1,
-                "author": author,
+                "author": _author_transcript(author),
                 "publishedAt": published,
             }
 
@@ -342,7 +367,7 @@ async def twitter_transcript(
                         text,
                         f"https://x.com/{username}/status/{tweet_id}" if username else url,
                         safe_str(syn.get("id_str")) or tweet_id,
-                        _author(u),
+                        u,
                         safe_str(syn.get("created_at")),
                     )
 
@@ -362,7 +387,7 @@ async def twitter_transcript(
 
         data = await cached_or_run(
             endpoint="twitter.transcript",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

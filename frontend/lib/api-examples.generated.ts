@@ -19357,7 +19357,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "username": "NASASpox",
       "displayName": "Bethany Stevens",
       "url": "https://x.com/NASASpox",
-      "followers": null,
       "verified": false,
       "profileImage": "https://pbs.twimg.com/profile_images/2030158374625759233/3fWyLDjS_normal.jpg"
     },
