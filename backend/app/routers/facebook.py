@@ -560,6 +560,7 @@ def _normalize_marketplace_location(item: dict) -> dict | None:
 
 
 def _normalize_event(item: dict) -> dict:
+    """Map Facebook event actor rows; omit sparse keys the actor left empty."""
     loc = item.get("location") if isinstance(item.get("location"), dict) else {}
     tickets = item.get("ticketsInfo") if isinstance(item.get("ticketsInfo"), dict) else {}
     organizers = item.get("organizators") if isinstance(item.get("organizators"), list) else []
@@ -576,10 +577,16 @@ def _normalize_event(item: dict) -> dict:
         or item.get("startDateTime")
         or start_date
     )
+    # Apify puts the street on location.streetAddress (not location.address).
+    # Prefer that over the venue name so address is a real street line when present.
+    street = safe_str(loc.get("streetAddress") or loc.get("address"))
+    city = safe_str(loc.get("city") or loc.get("contextualName") or item.get("location_city"))
+    composed_address = ", ".join(p for p in (street, city) if p) or None
     address = safe_str(
         item.get("address")
         or item.get("location_address")
-        or loc.get("address")
+        or composed_address
+        or street
         or loc.get("name")
         or location_name
     )
@@ -595,7 +602,24 @@ def _normalize_event(item: dict) -> dict:
         m = re.search(r"Hosted by\s+(.+)", privacy, flags=re.IGNORECASE)
         if m:
             organizer = m.group(1).strip() or None
-    return {
+
+    location: dict[str, Any] = {}
+    loc_name = safe_str(loc.get("name") or location_name)
+    if loc_name:
+        location["name"] = loc_name
+    if city:
+        location["city"] = city
+    lat = loc.get("latitude") if loc.get("latitude") is not None else item.get("latitude")
+    lng = loc.get("longitude") if loc.get("longitude") is not None else item.get("longitude")
+    if lat is not None:
+        location["latitude"] = lat
+    if lng is not None:
+        location["longitude"] = lng
+    country = safe_str(loc.get("countryCode") or loc.get("country_code") or item.get("countryCode"))
+    if country:
+        location["countryCode"] = country
+
+    out: dict[str, Any] = {
         "platform": "facebook",
         "id": safe_str(item.get("id") or item.get("event_id") or item.get("eventId")),
         "url": safe_str(item.get("url") or item.get("event_url") or item.get("eventUrl")),
@@ -603,49 +627,63 @@ def _normalize_event(item: dict) -> dict:
         "description": safe_str(item.get("description")),
         "startDate": start_date,
         "startTime": start_time,
-        "duration": safe_str(item.get("duration") or item.get("durationText")),
         "eventType": safe_str(item.get("eventType") or item.get("event_type") or item.get("type")),
         "isOnline": item.get("isOnline") if item.get("isOnline") is not None else item.get("is_online"),
         "isPast": item.get("isPast") if item.get("isPast") is not None else item.get("is_past"),
         "isCanceled": item.get("isCanceled") if item.get("isCanceled") is not None else item.get("is_canceled"),
-        "address": address,
         "image": safe_str(item.get("imageUrl") or item.get("photo_url") or item.get("image")),
-        "usersGoing": safe_int(
-            item.get("usersGoing") or item.get("going_count") or item.get("going") or item.get("users_going")
-        ),
-        "usersInterested": safe_int(
-            item.get("usersInterested")
-            or item.get("interested_count")
-            or item.get("interested")
-            or item.get("users_interested")
-        ),
-        "usersResponded": safe_int(
-            item.get("usersResponded") or item.get("responded_count") or item.get("users_responded")
-        ),
-        "location": {
-            "name": safe_str(loc.get("name") or location_name),
-            "city": safe_str(loc.get("city") or loc.get("contextualName") or item.get("location_city")),
-            "latitude": loc.get("latitude") or item.get("latitude"),
-            "longitude": loc.get("longitude") or item.get("longitude"),
-            "countryCode": safe_str(loc.get("countryCode") or loc.get("country_code") or item.get("countryCode")),
-        },
-        "organizer": organizer,
-        "organizers": [
-            {
-                "id": safe_str(o.get("id")),
-                "name": safe_str(o.get("name")),
-                "url": safe_str(o.get("url")),
-                "verified": o.get("isVerified"),
-            }
-            for o in organizers
-            if isinstance(o, dict)
-        ],
-        "ticketsUrl": safe_str(
-            tickets.get("buyUrl") or item.get("ticketsUrl") or item.get("ticketUrl") or item.get("tickets_url")
-        ),
-        "categories": item.get("discoveryCategories") or item.get("categories") or [],
-        "externalLinks": item.get("externalLinks") or item.get("external_links") or [],
     }
+    duration = safe_str(item.get("duration") or item.get("durationText"))
+    if duration:
+        out["duration"] = duration
+    if address:
+        out["address"] = address
+    going = safe_int(
+        item.get("usersGoing") or item.get("going_count") or item.get("going") or item.get("users_going")
+    )
+    if going is not None:
+        out["usersGoing"] = going
+    interested = safe_int(
+        item.get("usersInterested")
+        or item.get("interested_count")
+        or item.get("interested")
+        or item.get("users_interested")
+    )
+    if interested is not None:
+        out["usersInterested"] = interested
+    responded = safe_int(
+        item.get("usersResponded") or item.get("responded_count") or item.get("users_responded")
+    )
+    if responded is not None:
+        out["usersResponded"] = responded
+    if location:
+        out["location"] = location
+    if organizer:
+        out["organizer"] = organizer
+    org_list = [
+        {
+            "id": safe_str(o.get("id")),
+            "name": safe_str(o.get("name")),
+            "url": safe_str(o.get("url")),
+            "verified": bool(o.get("isVerified")) if o.get("isVerified") is not None else False,
+        }
+        for o in organizers
+        if isinstance(o, dict) and (o.get("id") or o.get("name") or o.get("url"))
+    ]
+    if org_list:
+        out["organizers"] = org_list
+    tickets_url = safe_str(
+        tickets.get("buyUrl") or item.get("ticketsUrl") or item.get("ticketUrl") or item.get("tickets_url")
+    )
+    if tickets_url:
+        out["ticketsUrl"] = tickets_url
+    categories = item.get("discoveryCategories") or item.get("categories") or []
+    if isinstance(categories, list) and categories:
+        out["categories"] = categories
+    external_links = item.get("externalLinks") or item.get("external_links") or []
+    if isinstance(external_links, list) and external_links:
+        out["externalLinks"] = external_links
+    return out
 
 
 @router.get("/details", summary="Facebook video/post details")
