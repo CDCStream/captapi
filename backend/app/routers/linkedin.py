@@ -443,12 +443,13 @@ async def linkedin_search_posts(
                 },
                 max_items=limit,
             )
-            posts = [_normalize_post_list_item(i) for i in items[:limit]]
+            # Search actor never returns media attachments.
+            posts = [_normalize_post_list_item(i, include_media=False) for i in items[:limit]]
             return {"query": q, "sort": sort, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
             endpoint="linkedin.search-posts",
-            params={"q": q, "sort": sort, "limit": limit, "v": 3},
+            params={"q": q, "sort": sort, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

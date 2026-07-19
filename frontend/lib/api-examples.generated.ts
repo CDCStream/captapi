@@ -5601,8 +5601,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "comments": 4,
           "reposts": 0
         },
-        "id": "7483943242477121536",
-        "media": []
+        "id": "7483943242477121536"
       },
       {
         "platform": "linkedin",
@@ -5620,8 +5619,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "comments": 22,
           "reposts": 0
         },
-        "id": "7483511021475762176",
-        "media": []
+        "id": "7483511021475762176"
       },
       {
         "platform": "linkedin",
@@ -5639,8 +5637,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "comments": 0,
           "reposts": 0
         },
-        "id": "7483173237300867074",
-        "media": []
+        "id": "7483173237300867074"
       },
       {
         "platform": "linkedin",
@@ -5653,8 +5650,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "headline": "Vision-Driven, Value-Focused Leadership | Business & Technology Strategist | Mission Development | Financial Management & Governance | Communications",
           "url": "https://www.linkedin.com/in/paullpothier?miniProfileUrn=urn%3Ali%3Afsd_profile%3AACoAADYU_o4Bj10qcm4RfjnvvlMq48nJZoIytaY"
         },
-        "id": "7483989470489243648",
-        "media": []
+        "id": "7483989470489243648"
       },
       {
         "platform": "linkedin",
@@ -5672,8 +5668,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "comments": 0,
           "reposts": 0
         },
-        "id": "7484136180788203520",
-        "media": []
+        "id": "7484136180788203520"
       }
     ]
   },
