@@ -21,7 +21,7 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
-from app.utils.formatters import parse_compact_count, safe_int, safe_str
+from app.utils.formatters import first_present, parse_compact_count, safe_int, safe_str
 from app.utils.url import (
     extract_rumble_channel,
     extract_rumble_video_id,
@@ -77,7 +77,7 @@ def _normalize_video(item: dict[str, Any]) -> dict[str, Any]:
         "id": safe_str(item.get("id") or item.get("videoId") or item.get("videoSlug")) or extract_rumble_video_id(url or ""),
         "url": url,
         "title": safe_str(item.get("title") or item.get("videoTitle")),
-        "description": safe_str(item.get("description")),
+        # Search actor never returns description — omit always-null key.
         "channel": safe_str(item.get("channel") or item.get("channelName") or item.get("author")),
         "channelUrl": _clean_url(item.get("channelUrl")),
         "views": parse_compact_count(item.get("views") or item.get("viewCount") or item.get("viewsCount")),
@@ -145,24 +145,42 @@ def _normalize_az_video(item: dict[str, Any], *, include_description: bool = Tru
 
 
 def _normalize_comment(item: dict[str, Any]) -> dict[str, Any]:
-    author = item.get("author") or item.get("user") or {}
-    replies = item.get("replies") if isinstance(item.get("replies"), list) else []
+    author = item.get("author") if isinstance(item.get("author"), dict) else None
+    if author is None:
+        author = item.get("user") if isinstance(item.get("user"), dict) else {}
+    slug = safe_str(author.get("slug") or item.get("authorSlug") or item.get("username"))
+    author_url = safe_str(author.get("url") or item.get("authorUrl"))
+    if not author_url and slug:
+        author_url = f"https://rumble.com/user/{slug}"
+    replies_raw = item.get("replies")
+    if isinstance(replies_raw, list):
+        reply_count = len(replies_raw)
+    else:
+        # Upstream uses null (not []) when there are no replies — treat as 0.
+        reply_count = safe_int(item.get("replyCount")) or 0
+    votes = item.get("rumble_votes") if isinstance(item.get("rumble_votes"), dict) else {}
     return {
         "platform": "rumble",
         "id": safe_str(item.get("id") or item.get("commentId")),
         "text": safe_str(item.get("text") or item.get("comment") or item.get("body")),
         "author": {
             "name": safe_str(
-                author.get("name") or author.get("title") or author.get("slug")
-                or item.get("authorName") or item.get("username")
+                author.get("name") or author.get("title") or slug
+                or item.get("authorName")
             ),
-            "url": safe_str(author.get("url") or item.get("authorUrl")),
+            "url": author_url,
             "verified": bool(author.get("verified_badge")),
         },
-        "likes": safe_int(item.get("likes") or item.get("upvotes") or item.get("comment_score")),
-        "replyCount": len(replies) or safe_int(item.get("replyCount")),
+        "likes": safe_int(
+            first_present(
+                item.get("likes"),
+                item.get("upvotes"),
+                item.get("comment_score"),
+                votes.get("num_votes_up"),
+            )
+        ),
+        "replyCount": reply_count,
         "createdAt": safe_str(item.get("createdAt") or item.get("date") or item.get("publishedAt")),
-        "videoUrl": safe_str(item.get("videoUrl") or item.get("sourceUrl")),
     }
 
 
@@ -358,7 +376,7 @@ async def comments(
 
         data = await cached_or_run(
             endpoint="rumble.comments",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -395,7 +413,7 @@ async def rumble_search(
 
         data = await cached_or_run(
             endpoint="rumble.search",
-            params={"q": q, "limit": limit, "v": 2},
+            params={"q": q, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

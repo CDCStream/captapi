@@ -6739,73 +6739,68 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "comments": [
       {
         "platform": "rumble",
-        "id": "614506788",
-        "text": "this really brings up the very questionable decision by SCOTUS on birthright citizenship which China is exploiting fully.",
+        "id": "614574144",
+        "text": "I live in The Keystone State of Morons.",
         "author": {
-          "name": "bartacusboy",
-          "url": null,
-          "verified": null
+          "name": "lindafosselman",
+          "url": "https://rumble.com/user/lindafosselman",
+          "verified": false
         },
         "likes": 0,
-        "replyCount": null,
-        "createdAt": "2026-07-18T11:31:53+00:00",
-        "videoUrl": null
+        "replyCount": 0,
+        "createdAt": "2026-07-19T17:37:54+00:00"
       },
       {
         "platform": "rumble",
-        "id": "614506188",
-        "text": "President Trump Must go after CNN, WNBC, WABC, for NOT broadcasting the July 16,2026 Speach he made.",
+        "id": "614573008",
+        "text": "Dan, I remember you speaking of this a long time ago. Am I wrong?",
         "author": {
-          "name": "D5M6S11",
-          "url": null,
-          "verified": null
+          "name": "holly1217",
+          "url": "https://rumble.com/user/holly1217",
+          "verified": false
         },
         "likes": 0,
-        "replyCount": null,
-        "createdAt": "2026-07-18T11:14:10+00:00",
-        "videoUrl": null
+        "replyCount": 0,
+        "createdAt": "2026-07-19T17:14:39+00:00"
       },
       {
         "platform": "rumble",
-        "id": "614506102",
-        "text": "I think Isreal is way more involved than China",
+        "id": "614571510",
+        "text": "So...when are you calling FuXNews out for burying the lead Dan??  All weekend and NOT ONE WORD any of the intel that Trump released on FuXNews.  So the Lefty media is full court press to discredit this data, and FuXNews SILENT...confirming what a lot of us already knew...FuXNews is a part of the deep state.  They are controlled opposition.",
         "author": {
-          "name": "Massageflgirl",
-          "url": null,
-          "verified": null
+          "name": "faamecanic",
+          "url": "https://rumble.com/user/faamecanic",
+          "verified": true
         },
         "likes": 0,
-        "replyCount": null,
-        "createdAt": "2026-07-18T11:11:15+00:00",
-        "videoUrl": null
+        "replyCount": 0,
+        "createdAt": "2026-07-19T16:41:22+00:00"
       },
       {
         "platform": "rumble",
-        "id": "614506054",
-        "text": "Whadareya knuts?  Seriously expect more than a handful of peeps to read the Federalist Papers?????  Or is this just some sort of debatesville trope?  Anyhow, if things are gonna change, git real, ain't gonna happen by exhorting the great unwashed to read ANYTHING.",
+        "id": "614570684",
+        "text": "If Trump does not use that speech and that evidence, particularly the Democratic states who refused to turn over their information, as a Segway into getting rid of the filibuster next week and passing the SAVE act, he’s missing a massive opportunity. I hope he’s too smart for that",
         "author": {
-          "name": "billdomb",
-          "url": null,
-          "verified": null
+          "name": "SOC",
+          "url": "https://rumble.com/user/SOC",
+          "verified": false
         },
         "likes": 0,
-        "replyCount": null,
-        "createdAt": "2026-07-18T11:09:57+00:00",
-        "videoUrl": null
+        "replyCount": 0,
+        "createdAt": "2026-07-19T16:23:49+00:00"
       },
       {
         "platform": "rumble",
-        "id": "614505830",
-        "text": "President Trump Must go after CNN, WNBC, WABC for Not Broadcasting his speach of July 16, 2026.\nThese people are Disspicable",
+        "id": "614568452",
+        "text": "can you comment on this guy Jack Hinkle?  seems like scum.",
         "author": {
-          "name": "D5M6S11",
-          "url": null,
-          "verified": null
+          "name": "bhornet",
+          "url": "https://rumble.com/user/bhornet",
+          "verified": false
         },
         "likes": 0,
-        "replyCount": null,
-        "createdAt": "2026-07-18T10:59:54+00:00",
-        "videoUrl": null
+        "replyCount": 0,
+        "createdAt": "2026-07-19T15:34:24+00:00"
       }
     ]
   },
@@ -6818,7 +6813,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "v7cqzts",
         "url": "https://rumble.com/v7cqzts-space-revolution-ep.-27.html",
         "title": "Space Revolution Ep. 27: GHOST in the GARDEN",
-        "description": null,
         "channel": "Badlands Media",
         "channelUrl": "https://rumble.com/c/BadlandsMedia",
         "views": 37500,
@@ -6834,7 +6828,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "v7cvxf6",
         "url": "https://rumble.com/v7cvxf6-space-is-fake-and-gay-.html",
         "title": "SPACE IS FAKE & GAY 🤡",
-        "description": null,
         "channel": "VeteransAgainstTreason",
         "channelUrl": "https://rumble.com/user/VeteransAgainstTreason",
         "views": 483,
@@ -6850,7 +6843,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "v7ctflu",
         "url": "https://rumble.com/v7ctflu-do-not-f-with-mysticism-xtwitter-space.html",
         "title": "Do NOT F#$% with Mysticism! X/Twitter Space",
-        "description": null,
         "channel": "Freedomain",
         "channelUrl": "https://rumble.com/c/freedomain",
         "views": 772,
@@ -6866,7 +6858,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "v7cu2fo",
         "url": "https://rumble.com/v7cu2fo-why-elon-wants-to-put-data-centers-in-space.html",
         "title": "Why Elon Wants to Put Data Centers in Space",
-        "description": null,
         "channel": "Anthony Pompliano",
         "channelUrl": "https://rumble.com/c/AnthonyPompliano",
         "views": 557,
@@ -6882,7 +6873,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "v7css18",
         "url": "https://rumble.com/v7css18-lets-see-whats-happening-in-this-space.html",
         "title": "lets see whats happening in this space!",
-        "description": null,
         "channel": "Tommyboifreedom31",
         "channelUrl": "https://rumble.com/user/Tommyboifreedom31",
         "views": 1050,
