@@ -1223,17 +1223,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "ticketsUrl": "https://events.sulekha.com/gujju-bhai-ni-exchange-offer-live-in-chicago_event-in_elgin-il_400815",
         "categories": [],
         "externalLinks": [
-          "https://events.sulekha.com/gujju-bhai-ni-exchange-offer-live-in-chicago_event-in_elgin-il_400815",
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
+          "https://events.sulekha.com/gujju-bhai-ni-exchange-offer-live-in-chicago_event-in_elgin-il_400815"
         ]
       }
     ]
