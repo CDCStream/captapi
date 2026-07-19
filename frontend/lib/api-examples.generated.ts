@@ -985,46 +985,225 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "facebook-event-details": {
     "platform": "facebook",
-    "id": "1553174396203117",
-    "url": "https://www.facebook.com/events/1553174396203117/",
-    "name": "Auntie Hammy The Comedy Bar Chicago",
-    "description": "Come out and enjoy an explosive comedy set by Auntie Hammy 🦉 HOOT HOOT",
-    "startDate": "2026-07-19T23:00:00+00:00",
-    "startTime": "2026-07-19T23:00:00+00:00",
+    "id": "1501904507609251",
+    "url": "https://www.facebook.com/events/1501904507609251/",
+    "name": "The Best of Chicago Comedy Showcase at Zanies Rosemont",
+    "description": "Get ready for an unforgettable evening of laughter as Chicago's comedy scene brings its A-game to the stage! \"The Best of Chicago Showcase\" features a dynamic lineup of the city's funniest stand-up comedians, delivering a blend of fresh, cutting-edge material and beloved, time-tested jokes.",
+    "startDate": "2026-08-20T00:00:00+00:00",
+    "startTime": "Wednesday, August 19, 2026 at 7:00 PM – 8:30 PM CDT",
     "duration": null,
     "eventType": null,
     "isOnline": false,
     "isPast": null,
     "isCanceled": false,
-    "address": "162 E Superior St",
-    "image": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-6/736455705_1551607669854746_6960960816332759417_n.jpg?stp=dst-jpg_tt6&cstp=mx1640x2048&ctp=s1640x2048&_nc_cat=101&ccb=1-7&_nc_sid=75d36f&_nc_ohc=QnWcz9lz-0UQ7kNvwGzyCoz&_nc_oc=AdoZjrFdnOJPAcRArI91kJvEd4hhXdWwbf0u-Jzu0FN8tRezU9E3_prgVS49fjJdnn0&_nc_zt=23&_nc_ht=scontent-iad3-1.xx&_nc_gid=vQauyG7k0ZWhl1OD9Nll7g&_nc_ss=7b289&oh=00_AQA_zNiUqVHa5A2-Scshr_rHsv0zP1cVrwlRQWa3rL2sAg&oe=6A62BFEE",
+    "address": "Rosemont",
+    "image": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-6/729939829_1455156393312553_7424802617478099383_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=108&ccb=1-7&_nc_sid=75d36f&_nc_ohc=NbH0PON4qgEQ7kNvwFpe5NR&_nc_oc=Adq5ueEQtrEOiuAgFzOO0Af3DxO_gOQ9fm_C3askwZrW4mBPiabjqlDsciP5zxSWkxE&_nc_zt=23&_nc_ht=scontent-iad3-1.xx&_nc_gid=uzyVymY6OIZIjd0SLNBHbw&_nc_ss=73289&oh=00_AQB9zBIyvpIeNL7Q6dm6HB53eQMi0VaaM9zGnnCw3Eqyvg&oe=6A62C921",
     "usersGoing": null,
     "usersInterested": null,
-    "usersResponded": 95,
+    "usersResponded": 3,
     "location": {
-      "name": "The Comedy Bar",
-      "city": "Chicago",
-      "latitude": 41.891,
-      "longitude": -87.63293,
-      "countryCode": null
+      "name": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
+      "city": "Rosemont, IL",
+      "latitude": 41.97826,
+      "longitude": -87.86738,
+      "countryCode": "US"
     },
-    "organizer": "Auntie HAMMY",
+    "organizer": "Zanies Rosemont Comedy Club",
     "organizers": [
       {
         "id": null,
-        "name": "Auntie HAMMY",
-        "url": "https://www.facebook.com/auntiehammyTV",
+        "name": "Zanies Rosemont Comedy Club",
+        "url": "https://www.facebook.com/RosemontZanies",
         "verified": false
       }
     ],
-    "ticketsUrl": null,
-    "categories": [],
+    "ticketsUrl": "https://www.etix.com/ticket/p/74170542/the-best-of-chicago-showcase-rosemont-zanies-rosemont",
+    "categories": [
+      {
+        "label": "Comedy",
+        "url": null
+      }
+    ],
     "externalLinks": []
   },
   "facebook-event-search": {
     "query": "comedy Chicago",
     "totalReturned": 5,
     "events": [
+      {
+        "platform": "facebook",
+        "id": "1501904507609251",
+        "url": "https://www.facebook.com/events/1501904507609251/",
+        "name": "The Best of Chicago Comedy Showcase at Zanies Rosemont",
+        "description": "Get ready for an unforgettable evening of laughter as Chicago's comedy scene brings its A-game to the stage! \"The Best of Chicago Showcase\" features a dynamic lineup of the city's funniest stand-up comedians, delivering a blend of fresh, cutting-edge material and beloved, time-tested jokes.",
+        "startDate": "2026-08-20T00:00:00.000Z",
+        "startTime": "Wed, Aug 19 at 7:00 PM CDT",
+        "duration": "1 hr 30 min",
+        "eventType": "PUBLIC",
+        "isOnline": false,
+        "isPast": false,
+        "isCanceled": false,
+        "address": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
+        "image": "https://scontent-sea5-1.xx.fbcdn.net/v/t39.30808-6/729939829_1455156393312553_7424802617478099383_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=108&ccb=1-7&_nc_sid=75d36f&_nc_ohc=NbH0PON4qgEQ7kNvwFfvEOL&_nc_oc=AdpblZwvmxosIcgc3OwGO0KjQseyyVe21EPOrqu2fhpvUR-sZ3bAnl4ubUcR25LODxg&_nc_zt=23&_nc_ht=scontent-sea5-1.xx&_nc_gid=dsvaDf_Vqhs1laFmDRMHrA&_nc_ss=72289&oh=00_AQDxeLI7lcoll0cTxWrYx65N2zGshRydR8chEsYlq1olQw&oe=6A62C921",
+        "usersGoing": 1,
+        "usersInterested": 2,
+        "usersResponded": 3,
+        "location": {
+          "name": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
+          "city": "Rosemont, IL",
+          "latitude": 41.97826,
+          "longitude": -87.86738,
+          "countryCode": "US"
+        },
+        "organizer": "Event by Zanies Rosemont Comedy Club",
+        "organizers": [
+          {
+            "id": "100064546187809",
+            "name": "Zanies Rosemont Comedy Club",
+            "url": "https://www.facebook.com/RosemontZanies",
+            "verified": false
+          }
+        ],
+        "ticketsUrl": "https://www.etix.com/ticket/p/74170542/the-best-of-chicago-showcase-rosemont-zanies-rosemont",
+        "categories": [
+          {
+            "label": "Comedy",
+            "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCI2NjAwMzI2MTc1MzYzNzNcIn0ifQ%3D%3D&q=Comedy"
+          }
+        ],
+        "externalLinks": []
+      },
+      {
+        "platform": "facebook",
+        "id": "971576128806626",
+        "url": "https://www.facebook.com/events/971576128806626/",
+        "name": "Seth Payne presents Chicago Comedy Takeover 2 @ The 9th Ward",
+        "description": "Seth Payne presents the Chicago Comedy Takeover 2 live in The 9th Ward\n\n7pm Doors, 8pm Show\n\nTickets: General Admission Seated $26, available at TixR.com (convenience fees apply) or in person at the Babeville Box Office (M-F 11a-5p- in person fee free cash sales, 3% credit/debit card fee).\n\n \n\nSeth Payne, Buffalo/Chicago Comedian, is Back with another edition of Comedy Takeover at Babeville–Seth brings the Funniest and Wildest comics from Chicago to the 716 for a night of Hilarity!\n\nFeaturing: John Gasper, Grace Piotrowski, Ron Hexagon, Des Mulrooney, and Seth Payne.\n\nBe sure to buy your tickets in advance, this event has sold out the past two years!",
+        "startDate": "2026-08-29T00:00:00.000Z",
+        "startTime": "Fri, 28 Aug at 20:00 EDT",
+        "duration": null,
+        "eventType": "PUBLIC",
+        "isOnline": false,
+        "isPast": false,
+        "isCanceled": false,
+        "address": "341 Delaware Ave, Buffalo, NY 14202-1871, United States",
+        "image": "https://scontent.fsgn2-5.fna.fbcdn.net/v/t39.30808-6/708154827_1400877588752622_6546879548206933579_n.jpg?stp=dst-jpg_tt6&cstp=mx800x800&ctp=s800x800&_nc_cat=111&ccb=1-7&_nc_sid=75d36f&_nc_ohc=JSKaef_PQwUQ7kNvwH4LIyk&_nc_oc=Adpy8tKeKfT1pniJyGi1JRpeV2Ob58pyzb0XNj8wdakQN3xGOIqyLT20pSY5knklueI&_nc_zt=23&_nc_ht=scontent.fsgn2-5.fna&_nc_gid=TzsbnHI7PgTm9A67Uv5nOg&_nc_ss=7c289&oh=00_AQDsrk_ZKQ3-b_2dsNIB4rQFZacJYhgX4mkKLdHFg-5KtQ&oe=6A62CBBB",
+        "usersGoing": 2,
+        "usersInterested": 4,
+        "usersResponded": 6,
+        "location": {
+          "name": "341 Delaware Ave, Buffalo, NY, United States, New York 14202",
+          "city": "Buffalo, NY",
+          "latitude": 42.89368,
+          "longitude": -78.87527,
+          "countryCode": "US"
+        },
+        "organizer": "Event by Babeville",
+        "organizers": [
+          {
+            "id": "100064911815653",
+            "name": "Babeville",
+            "url": "https://www.facebook.com/babeville",
+            "verified": false
+          }
+        ],
+        "ticketsUrl": "https://tixr.com/e/191413",
+        "categories": [
+          {
+            "label": "Comedy",
+            "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCI2NjAwMzI2MTc1MzYzNzNcIn0ifQ%3D%3D&q=Comedy"
+          }
+        ],
+        "externalLinks": [
+          "http://TixR.com/"
+        ]
+      },
+      {
+        "platform": "facebook",
+        "id": "1674511060258204",
+        "url": "https://www.facebook.com/events/1674511060258204/",
+        "name": "The Best of Chicago Comedy Showcase at Zanies Rosemont",
+        "description": "Get ready for an unforgettable evening of laughter as Chicago's comedy scene brings its A-game to the stage! \"The Best of Chicago Showcase\" features a dynamic lineup of the city's funniest stand-up comedians, delivering a blend of fresh, cutting-edge material and beloved, time-tested jokes.",
+        "startDate": "2026-07-30T01:00:00.000Z",
+        "startTime": "Wed, Jul 29 at 7:00 PM MDT",
+        "duration": "1 hr 30 min",
+        "eventType": "PUBLIC",
+        "isOnline": false,
+        "isPast": false,
+        "isCanceled": false,
+        "address": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
+        "image": "https://scontent-sea5-1.xx.fbcdn.net/v/t39.99422-6/730487643_1004057258666671_2184297960507075071_n.png?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=102&ccb=1-7&_nc_sid=75d36f&_nc_ohc=OFGNg8Lg_gMQ7kNvwEcjFSW&_nc_oc=Adq903FJip2_no3zK0IqKsV9JjAkn1FnF1xaBGKzrqyXXmaQa_55avB5vC86M3Gugxg&_nc_zt=14&_nc_ht=scontent-sea5-1.xx&_nc_gid=XZXxGTCEfI4DfHrlXKjxqA&_nc_ss=72289&oh=00_AQBb3QX63nZXkrBKTQtW7igb2yVH0WCm0f_udjqXSkW9dA&oe=6A62A3F3",
+        "usersGoing": 1,
+        "usersInterested": 4,
+        "usersResponded": 5,
+        "location": {
+          "name": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
+          "city": "Rosemont, IL",
+          "latitude": 41.97826,
+          "longitude": -87.86738,
+          "countryCode": "US"
+        },
+        "organizer": "Event by Zanies Rosemont Comedy Club",
+        "organizers": [
+          {
+            "id": "100064546187809",
+            "name": "Zanies Rosemont Comedy Club",
+            "url": "https://www.facebook.com/RosemontZanies",
+            "verified": false
+          }
+        ],
+        "ticketsUrl": "https://www.etix.com/ticket/p/33724290/the-best-of-chicago-showcase-rosemont-zanies-rosemont",
+        "categories": [
+          {
+            "label": "Comedy",
+            "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCI2NjAwMzI2MTc1MzYzNzNcIn0ifQ%3D%3D&q=Comedy"
+          }
+        ],
+        "externalLinks": []
+      },
+      {
+        "platform": "facebook",
+        "id": "2905221439853710",
+        "url": "https://www.facebook.com/events/2905221439853710/",
+        "name": "Comedy Dance Chicago",
+        "description": "Experience the Best of Comedy Dance Chicago! This high-energy laugh-riot features fan favorites and hilarious hits from the group's first decade of performances. A joyful mashup of sketch comedy, physical humor, music, and dance, this feel-good show is sure to have you smiling, laughing, and bopping in your seat. You might even end up on stage!With over 105 million views on social media, these dancin' fools have delighted audiences both online and on stage with their relatable humor and infectious energy. From pumpkin spice lattes to good old-fashioned staring contests, Comedy Dance Chicago turns everyday moments into delightfully absurd comedy.Get ready for an endorphin-releasing experience packed with big laughs, big moves, and hilariously unforgettable antics! Rated PG-13.\r\n\r\n\r\nTICKETS: $35.00 (Including Fees)\r\n\r\nCall the Opera House Box Office: (815) 338-5300 or email tickets@woodstockil.gov  with any questions",
+        "startDate": "2026-09-20T00:30:00.000Z",
+        "startTime": "Sat, Sep 19 at 7:30 PM CDT",
+        "duration": null,
+        "eventType": "PUBLIC",
+        "isOnline": false,
+        "isPast": false,
+        "isCanceled": false,
+        "address": "121 West Van Buren Street\r\nWoodstock, IL 60098",
+        "image": "https://scontent.ftzl1-1.fna.fbcdn.net/v/t39.30808-6/730584696_1593348489465875_6836066750615974362_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=106&ccb=1-7&_nc_sid=75d36f&_nc_ohc=7q8kVsMfR9gQ7kNvwFD4Q9N&_nc_oc=AdoJeeJqCrH4of9590C1oyFfW7-4mwSTNcGVPUGX0pT8sivvfAFAldTlS2IxcSxf3KA&_nc_zt=23&_nc_ht=scontent.ftzl1-1.fna&_nc_gid=ZJzm78hodizGfBYDMfyB_g&_nc_ss=7c289&oh=00_AQA9AJ6vsk1x19i9CGAvyPrZtVd8OWWQFvUPoUF4eLItIw&oe=6A629C5C",
+        "usersGoing": 1,
+        "usersInterested": 7,
+        "usersResponded": 8,
+        "location": {
+          "name": "121 West Van Buren Street\r\nWoodstock, IL 60098",
+          "city": "Woodstock, IL",
+          "latitude": 42.31422,
+          "longitude": -88.44763,
+          "countryCode": "US"
+        },
+        "organizer": "Event by Woodstock Opera House",
+        "organizers": [
+          {
+            "id": "100063722163729",
+            "name": "Woodstock Opera House",
+            "url": "https://www.facebook.com/woodstockoperahouse",
+            "verified": false
+          }
+        ],
+        "ticketsUrl": "https://www.etix.com/ticket/servlet/s/38224498",
+        "categories": [
+          {
+            "label": "Comedy",
+            "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCI2NjAwMzI2MTc1MzYzNzNcIn0ifQ%3D%3D&q=Comedy"
+          }
+        ],
+        "externalLinks": []
+      },
       {
         "platform": "facebook",
         "id": "1553174396203117",
@@ -1039,7 +1218,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "isPast": false,
         "isCanceled": false,
         "address": "162 E Superior St, Chicago, IL 60654",
-        "image": "https://scontent-lax7-1.xx.fbcdn.net/v/t39.30808-6/736455705_1551607669854746_6960960816332759417_n.jpg?stp=dst-jpg_tt6&cstp=mx1640x2048&ctp=s960x960&_nc_cat=101&ccb=1-7&_nc_sid=75d36f&_nc_ohc=QnWcz9lz-0UQ7kNvwFAMIur&_nc_oc=AdpNli6EYFKJCqYbLgMu3Jfd3UHzEC2F8VZ_YVkpraZpKhTkBnA4YWl6sYvIdLKjNO4&_nc_zt=23&_nc_ht=scontent-lax7-1.xx&_nc_gid=ck6yfwVkyD8Wb4wUW6v4DA&_nc_ss=7c289&oh=00_AQAvx_kZn37Km3jLmA3XZkDOlUneOHJ7MrMwMSb8d-Hc-w&oe=6A62BFEE",
+        "image": "https://scontent-mad1-1.xx.fbcdn.net/v/t39.30808-6/736455705_1551607669854746_6960960816332759417_n.jpg?stp=dst-jpg_tt6&cstp=mx1640x2048&ctp=s960x960&_nc_cat=101&ccb=1-7&_nc_sid=75d36f&_nc_ohc=QnWcz9lz-0UQ7kNvwErg835&_nc_oc=AdrmoPgxRVvgireZ1Jb3dplfu7GmpHgAK2ogaUiIkFVjMbIT5ir0Hxhl_3SHcnsxSUE&_nc_zt=23&_nc_ht=scontent-mad1-1.xx&_nc_gid=6h4iehjym9JrGb6waeAvpA&_nc_ss=72289&oh=00_AQB-vh_1pEllmeODv4AOi_WvLVBhWw1GGjGAgLR8-XVvFw&oe=6A62BFEE",
         "usersGoing": 15,
         "usersInterested": 80,
         "usersResponded": 95,
@@ -1062,169 +1241,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "ticketsUrl": "https://www.eventbrite.com/e/sunday-july-19-auntie-hammy-tickets-1988430523222?aff=oddtdtcreator&utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZnRzaASxIkJwZG9mAmV4dG4DYWVtAjExAHNydGMGYXBwX2lkDzEyNDAyNDU3NDI4NzQxNAABp7K8Gu6wihl4I0yJtI0lcHqHuFApklnUw2zTS7OfPdZNRW_AIuTA4GZduNWk_aem_WbU94zbhspIG66IbtVNvXA",
         "categories": [],
         "externalLinks": []
-      },
-      {
-        "platform": "facebook",
-        "id": "1571292111257531",
-        "url": "https://www.facebook.com/events/1571292111257531/",
-        "name": "Comedy Dance Chicago - Headliner at iO Fest - ONE NIGHT ONLY!",
-        "description": "Catch Comedy Dance Chicago headlining at iO Fest 2026!\n\nExperience the Best of Comedy Dance Chicago! This high-energy laugh-riot features fan favorites and hilarious hits from the group's first decade of performances. A joyful mashup of sketch comedy, physical humor, music, and dance, this show is sure to have you smiling, laughing, and dancing in your seat–you might even end up on stage!\n\nWith over 105 million views on social media, these dancin' fools have delighted audiences both online and on stage with their relatable humor and infectious energy. From pumpkin spice lattes to good old-fashioned staring contests, Comedy Dance Chicago turns everyday moments into delightfully absurd comedy.\n\nGet ready for an endorphin-releasing experience packed with big laughs, big moves, and hilariously unforgettable antics!\n\nGET TIX BEFORE THEY'RE GONE!\nOn sale now.\n$33.90",
-        "startDate": "2026-07-24T00:00:00.000Z",
-        "startTime": "Thu, 23 Jul at 19:00 CDT",
-        "duration": null,
-        "eventType": "PUBLIC",
-        "isOnline": false,
-        "isPast": false,
-        "isCanceled": false,
-        "address": "iO Chicago",
-        "image": "https://scontent.fcok6-1.fna.fbcdn.net/v/t39.30808-6/727572593_944458875294176_7871427356385004346_n.jpg?stp=dst-jpg_tt6&cstp=mx1920x1005&ctp=s960x960&_nc_cat=110&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=75d36f&_nc_ohc=XC5DE81w914Q7kNvwHr8fOq&_nc_oc=AdqhL41DQWCXglbOMu9TprMpUr2Z6K_KEAisLSg24aNhUFOvZOZliij57vZsD5W7rVo&_nc_zt=23&_nc_ht=scontent.fcok6-1.fna&_nc_gid=Uzf6AUeZ8quj_wwYskrphw&_nc_ss=72289&oh=00_AQD6wDx39tfBxuEpJawtUm5Qw703DtQR_Pw8JPn9FndmxA&oe=6A62BFC1",
-        "usersGoing": 3,
-        "usersInterested": 7,
-        "usersResponded": 10,
-        "location": {
-          "name": "iO Chicago",
-          "city": null,
-          "latitude": 41.908455377027,
-          "longitude": -87.651833295822,
-          "countryCode": "US"
-        },
-        "organizer": "Event by Comedy Dance Chi",
-        "organizers": [
-          {
-            "id": "100091902168506",
-            "name": "Comedy Dance Chi",
-            "url": "https://www.facebook.com/ComedyDanceChi",
-            "verified": false
-          }
-        ],
-        "ticketsUrl": "https://www.crowdwork.com/e/comedy-dance-chicago?date=2026-07-23T19%3A00%3A00",
-        "categories": [],
-        "externalLinks": []
-      },
-      {
-        "platform": "facebook",
-        "id": "2530065584112510",
-        "url": "https://www.facebook.com/events/2530065584112510/",
-        "name": "FAN EXPO CHICAGO! Korrupted Comedy Presents: The Writer's Room!",
-        "description": "Korrupted Comedy is BACK... At The FAN EXPO CHICAGO 2026!\nAugust 14-16 at The Donald E. Stephens Convention Center!\n ***YOU MUST HAVE TICKETS TO THE FAN EXPO CHICAGO 2026 IN ORDER TO ATTEND THESE EVENTS AND SHOWS!\n\nEXPO HOURS!\nFriday 8/14... 4 PM – 9 PM\nSaturday 8/15... 10 AM – 7 PM\nSunday 8/16... 10 AM – 5 PM\n\nALL INFO HERE https://fanexpohq.com/fanexpochicago/family\n\nKorrupted Comedy is a Nationwide Indie Comedy Brand n Business. We run pop up shows all around the country and have an exclusive weekly residency at The LA Famous CLUB FAT SAL'S in Hollywood, CA!\nKorrupted Comedy at FAN EXPO CHICAGO 2025 was such a success, we got booked at FAN EXPO DENVER 2026 \nAnd are coming back to FAN EXPO CHICAGO 2026 \nBUT....With more than just a show...\n\nTHE WRITER'S ROOM!\n\"We bring together comedy, creativity, and a little rule-breaking energy for fans ready to write, perform, or try something new. Catch panels and workshops on stand-up, sketch, screenwriting, and building a voice that actually sounds like you.\"\nProduced, Presented and Hosted By Trevor Keveloh and Associates!\nMORE INFO ON...\nwww.korruptedcomedyllc.com\nAND\nhttps://fanexpohq.com/fanexpochicago",
-        "startDate": "2026-08-14T21:00:00.000Z",
-        "startTime": "Fri, 14 Aug at 16:00 CDT",
-        "duration": "3 hr",
-        "eventType": "PUBLIC",
-        "isOnline": false,
-        "isPast": false,
-        "isCanceled": false,
-        "address": "Donald E. Stephens Convention Center",
-        "image": "https://scontent.fesb10-5.fna.fbcdn.net/v/t39.30808-6/689027874_1352432613699702_43040202742557035_n.jpg?stp=cp6_dst-jpg_tt6&cstp=mx1080x1073&ctp=s960x960&_nc_cat=109&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=75d36f&_nc_ohc=8iWt6_11os4Q7kNvwFADE2M&_nc_oc=AdpzwFYpyD13uJ56v9WIAVlIgC8OPzwj4vEUQleknULDsof4XNMpgxo28t4_41go7yM&_nc_zt=23&_nc_ht=scontent.fesb10-5.fna&_nc_gid=jKVJCf-8e6VVMggmrcKZVA&_nc_ss=7c289&oh=00_AQBWhP-PX_OZ5xQpz5OQ60aDzn5jzakp7XDWRiDrxqv18Q&oe=6A62C2B2",
-        "usersGoing": 3,
-        "usersInterested": 1,
-        "usersResponded": 4,
-        "location": {
-          "name": "Donald E. Stephens Convention Center",
-          "city": null,
-          "latitude": 41.979445916976,
-          "longitude": -87.86129415886,
-          "countryCode": "US"
-        },
-        "organizer": "Event by Korrupted Comedy",
-        "organizers": [
-          {
-            "id": "100067989283766",
-            "name": "Korrupted Comedy",
-            "url": "https://www.facebook.com/KorruptedComedy",
-            "verified": false
-          }
-        ],
-        "ticketsUrl": "http://www.korruptedcomedyllc.com/",
-        "categories": [],
-        "externalLinks": [
-          "https://fanexpohq.com/fanexpochicago/family",
-          "http://www.korruptedcomedyllc.com/",
-          "https://fanexpohq.com/fanexpochicago"
-        ]
-      },
-      {
-        "platform": "facebook",
-        "id": "2905221439853710",
-        "url": "https://www.facebook.com/events/2905221439853710/",
-        "name": "Comedy Dance Chicago",
-        "description": "Experience the Best of Comedy Dance Chicago! This high-energy laugh-riot features fan favorites and hilarious hits from the group's first decade of performances. A joyful mashup of sketch comedy, physical humor, music, and dance, this feel-good show is sure to have you smiling, laughing, and bopping in your seat. You might even end up on stage!With over 105 million views on social media, these dancin' fools have delighted audiences both online and on stage with their relatable humor and infectious energy. From pumpkin spice lattes to good old-fashioned staring contests, Comedy Dance Chicago turns everyday moments into delightfully absurd comedy.Get ready for an endorphin-releasing experience packed with big laughs, big moves, and hilariously unforgettable antics! Rated PG-13.\r\n\r\n\r\nTICKETS: $35.00 (Including Fees)\r\n\r\nCall the Opera House Box Office: (815) 338-5300 or email tickets@woodstockil.gov  with any questions",
-        "startDate": "2026-09-20T00:30:00.000Z",
-        "startTime": "Sat, Sep 19 at 7:30 PM CDT",
-        "duration": null,
-        "eventType": "PUBLIC",
-        "isOnline": false,
-        "isPast": false,
-        "isCanceled": false,
-        "address": "121 West Van Buren Street\r\nWoodstock, IL 60098",
-        "image": "https://scontent.frez3-1.fna.fbcdn.net/v/t39.30808-6/730584696_1593348489465875_6836066750615974362_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=106&ccb=1-7&_nc_sid=75d36f&_nc_ohc=7q8kVsMfR9gQ7kNvwEXHwYa&_nc_oc=AdoQr8WIaJuzOzB3lQyakRUqQPLaYnTPlrBUDwg8XuogiFHxpt1ND-9P47dxdVaHWsg&_nc_zt=23&_nc_ht=scontent.frez3-1.fna&_nc_gid=OAero2wsfFtRicRfDu2XLw&_nc_ss=7c289&oh=00_AQCf60wakIoR393rsdhTEinb4hxTY8vbWR1ffNtyRlvvHg&oe=6A629C5C",
-        "usersGoing": 1,
-        "usersInterested": 7,
-        "usersResponded": 8,
-        "location": {
-          "name": "121 West Van Buren Street\r\nWoodstock, IL 60098",
-          "city": null,
-          "latitude": 42.31422,
-          "longitude": -88.44763,
-          "countryCode": "US"
-        },
-        "organizer": "Event by Woodstock Opera House",
-        "organizers": [
-          {
-            "id": "100063722163729",
-            "name": "Woodstock Opera House",
-            "url": "https://www.facebook.com/woodstockoperahouse",
-            "verified": false
-          }
-        ],
-        "ticketsUrl": "https://www.etix.com/ticket/servlet/s/38224498",
-        "categories": [
-          {
-            "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCI2NjAwMzI2MTc1MzYzNzNcIn0ifQ%3D%3D&q=Comedy",
-            "label": "Comedy"
-          }
-        ],
-        "externalLinks": []
-      },
-      {
-        "platform": "facebook",
-        "id": "1491158682760660",
-        "url": "https://www.facebook.com/events/1491158682760660/",
-        "name": "Gujju Bhai ni Exchange Offer - Live Comedy Show in Chicago",
-        "description": "Gujju Bhai ni Exchange Offer - Live Comedy Show in Chicago \n\nLaughter guaranteed. Entertainment unlimited. \n\nGet ready for a hilarious evening filled with witty humor, unforgettable characters, and nonstop laughter. \nA perfect family entertainer that has delighted Gujarati audiences across the world.  \n\nDate: July 19, 2026 \n\nTime: 5:00 PM (CDT) \n\nVenue: Hemmens Auditorium, 45 Symphony Way, Elgin, IL 60120 \n\nBook your tickets now and enjoy a comedy experience like no other. \n\nhttps://events.sulekha.com/gujju-bhai-ni-exchange-offer-live-in-chicago_event-in_elgin-il_400815\n\n#GujjuBhaiNiExchangeOffer #SiddharthRanderia #GujaratiComedy #ChicagoEvents #LiveTheatre #ComedyShow #FamilyEntertainment #ElginIL #GujaratiPlay #SulekhaEvents",
-        "startDate": "2026-07-19T22:00:00.000Z",
-        "startTime": "Sun, Jul 19 at 5:00 PM CDT",
-        "duration": null,
-        "eventType": "PUBLIC",
-        "isOnline": false,
-        "isPast": false,
-        "isCanceled": false,
-        "address": "Hemmens Auditorium",
-        "image": "https://scontent.fbeg4-1.fna.fbcdn.net/v/t39.30808-6/740611573_1541713150721854_8896510579944802967_n.jpg?stp=dst-jpg_tt6&cstp=mx1280x500&ctp=s960x960&_nc_cat=100&ccb=1-7&_nc_sid=75d36f&_nc_ohc=Jr2pQcXcp1IQ7kNvwHfdPSv&_nc_oc=Adpx_3NZ2R-ZY7qbVWf1E-aCsehIhWnBGUpEqP7PKNt2W1CpANirlWsMV2yjrQZyZDw&_nc_zt=23&_nc_ht=scontent.fbeg4-1.fna&_nc_gid=SK9PkautwAdYkdB7bgU0-A&_nc_ss=72289&oh=00_AQB3ugrZ_uYkayeyYNHLDAdvTLWWbYJZ9lVxudff8JDhnQ&oe=6A62B23E",
-        "usersGoing": 2,
-        "usersInterested": null,
-        "usersResponded": 2,
-        "location": {
-          "name": "Hemmens Auditorium",
-          "city": null,
-          "latitude": 42.039722662283,
-          "longitude": -88.286670949894,
-          "countryCode": "US"
-        },
-        "organizer": "Event by Sulekha Events in USA & Canada",
-        "organizers": [
-          {
-            "id": "100046495526677",
-            "name": "Sulekha Events in USA & Canada",
-            "url": "https://www.facebook.com/sulekhaevents",
-            "verified": false
-          }
-        ],
-        "ticketsUrl": "https://events.sulekha.com/gujju-bhai-ni-exchange-offer-live-in-chicago_event-in_elgin-il_400815",
-        "categories": [],
-        "externalLinks": [
-          "https://events.sulekha.com/gujju-bhai-ni-exchange-offer-live-in-chicago_event-in_elgin-il_400815"
-        ]
       }
     ]
   },
