@@ -7,6 +7,7 @@ import math
 import re
 from datetime import datetime, timezone
 from typing import Any
+from urllib.parse import unquote
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -115,18 +116,78 @@ def _fb_username_from_url(value: str | None) -> str | None:
     return handle
 
 
+def _fb_unix_iso(raw: Any) -> str | None:
+    if raw is None:
+        return None
+    if isinstance(raw, (int, float)) or (isinstance(raw, str) and str(raw).isdigit()):
+        try:
+            return datetime.fromtimestamp(int(raw), tz=timezone.utc).isoformat().replace("+00:00", ".000Z")
+        except (OSError, OverflowError, ValueError):
+            return None
+    return safe_str(raw)
+
+
+def _fb_external_link(item: dict) -> str | None:
+    """Unwrap the first ExternalUrl from GraphQL message.ranges, if present."""
+    message = item.get("message")
+    ranges = message.get("ranges") if isinstance(message, dict) else None
+    if not isinstance(ranges, list):
+        return None
+    for rng in ranges:
+        if not isinstance(rng, dict):
+            continue
+        entity = rng.get("entity") or {}
+        if not isinstance(entity, dict):
+            continue
+        if entity.get("__typename") != "ExternalUrl" and entity.get("__isEntity") != "ExternalUrl":
+            continue
+        wrapped = safe_str(entity.get("url") or entity.get("mobileUrl"))
+        if not wrapped:
+            continue
+        # l.facebook.com/l.php?u=<encoded>
+        m = re.search(r"[?&]u=([^&]+)", wrapped)
+        if m:
+            return safe_str(unquote(m.group(1)))
+        return wrapped
+    return None
+
+
 def _normalize_post(item: dict) -> dict:
     # Group posts carry their photos under `attachments` instead of `media`.
+    # Reel rows from apify/facebook-posts-scraper often use the GraphQL
+    # ``short_form_video_context`` shape instead of the classic post shape.
+    short = item.get("short_form_video_context") if isinstance(item.get("short_form_video_context"), dict) else {}
+    playback = short.get("playback_video") if isinstance(short.get("playback_video"), dict) else {}
+    video_owner = short.get("video_owner") if isinstance(short.get("video_owner"), dict) else {}
+    delegate = video_owner.get("delegate_page") if isinstance(video_owner.get("delegate_page"), dict) else {}
+    display_pic = video_owner.get("displayPicture") if isinstance(video_owner.get("displayPicture"), dict) else {}
+    short_delivery = (
+        playback.get("videoDeliveryLegacyFields")
+        or playback.get("video_delivery_legacy_fields")
+        or {}
+    )
+    if not isinstance(short_delivery, dict):
+        short_delivery = {}
+    short_thumb = None
+    pref = playback.get("preferred_thumbnail")
+    if isinstance(pref, dict):
+        img = pref.get("image") if isinstance(pref.get("image"), dict) else pref
+        short_thumb = img.get("uri") if isinstance(img, dict) else None
+
     raw_media = item.get("media") or item.get("attachments")
     if isinstance(raw_media, list):
-        media = raw_media[0] if raw_media and isinstance(raw_media[0], dict) else {}
+        first = raw_media[0] if raw_media and isinstance(raw_media[0], dict) else {}
+        # attachments[{media:{...}}] vs media[{...}]
+        media = first.get("media") if isinstance(first.get("media"), dict) else first
     elif isinstance(raw_media, dict):
         media = raw_media
     else:
         media = {}
     user = item.get("user") or {}
-    delivery = media.get("videoDeliveryLegacyFields") or {}
-    duration_ms = media.get("playable_duration_in_ms")
+    delivery = media.get("videoDeliveryLegacyFields") or media.get("video_delivery_legacy_fields") or {}
+    if not isinstance(delivery, dict):
+        delivery = {}
+    duration_ms = media.get("playable_duration_in_ms") or playback.get("playable_duration_in_ms")
     media_thumb = media.get("thumbnail")
     if isinstance(media_thumb, dict):
         media_thumb = media_thumb.get("uri")
@@ -134,6 +195,7 @@ def _normalize_post(item: dict) -> dict:
         item.get("thumbnailUrl")
         or media.get("thumbnailUrl")
         or media_thumb
+        or short_thumb
         or ((media.get("thumbnailImage") or {}).get("uri"))
         or (((media.get("preferred_thumbnail") or {}).get("image") or {}).get("uri"))
         or ((media.get("image") or {}).get("uri"))
@@ -144,12 +206,19 @@ def _normalize_post(item: dict) -> dict:
         or media.get("videoUrl")
         or delivery.get("browser_native_hd_url")
         or delivery.get("browser_native_sd_url")
+        or short_delivery.get("browser_native_hd_url")
+        or short_delivery.get("browser_native_sd_url")
+        or playback.get("browser_native_hd_url")
+        or playback.get("browser_native_sd_url")
+        or playback.get("playable_url_quality_hd")
+        or playback.get("playable_url")
     )
     # Group scrapers put the *group* URL in facebookUrl/inputUrl. Prefer the
     # posting user's profile URL so author.username/url aren't the group page.
     author_url = safe_str(
         item.get("pageUrl")
         or user.get("profileUrl")
+        or video_owner.get("url")
         or item.get("authorUrl")
         or item.get("userUrl")
     )
@@ -163,45 +232,97 @@ def _normalize_post(item: dict) -> dict:
     author_username = safe_str(
         item.get("pageUsername")
         or user.get("username")
+        or delegate.get("uri_token")
+        or _fb_username_from_url(safe_str(video_owner.get("url")))
         or user.get("id")
         or _fb_username_from_url(author_url)
         or (None if groupish else _fb_username_from_url(item.get("facebookUrl") or item.get("inputUrl")))
         or item.get("author")
     )
+    # Classic posts: isPageVerified / user.verified (often absent).
+    # Reels (short_form): video_owner.is_verified is the live GraphQL signal.
     verified = item.get("isPageVerified")
     if verified is None:
         verified = item.get("verified")
     if verified is None and isinstance(user, dict):
         verified = user.get("isVerified") or user.get("verified")
+    if verified is None and video_owner:
+        verified = video_owner.get("is_verified")
+        if verified is None:
+            verified = video_owner.get("isVerified") or video_owner.get("verified")
+
+    message = item.get("message") if isinstance(item.get("message"), dict) else {}
+    caption = safe_str(
+        item.get("text")
+        or item.get("description")
+        or message.get("text")
+    )
+    published = safe_str(item.get("time") or item.get("publishedAt")) or _fb_unix_iso(
+        item.get("creation_time") or playback.get("publish_time") or playback.get("creation_time")
+    )
+    likers = item.get("likers") if isinstance(item.get("likers"), dict) else {}
+    post_url = safe_str(
+        item.get("url")
+        or item.get("postUrl")
+        or short.get("shareable_url")
+        or playback.get("permalink_url")
+        or item.get("facebookUrl")
+    )
+    is_video = item.get("isVideo")
+    if is_video is None:
+        is_video = bool(short or video_url or "/reel/" in (post_url or "").lower())
     return {
         "platform": "facebook",
-        "url": safe_str(item.get("url") or item.get("postUrl")),
-        "id": safe_str(item.get("postId") or item.get("id")),
-        "caption": safe_str(item.get("text") or item.get("description")),
-        "description": safe_str(item.get("text")),
-        "publishedAt": safe_str(item.get("time") or item.get("publishedAt")),
+        "url": post_url,
+        "id": safe_str(item.get("postId") or item.get("post_id") or item.get("id") or playback.get("id")),
+        "caption": caption,
+        "description": caption,
+        "publishedAt": published,
         "durationSeconds": safe_float(
             item.get("videoDuration")
             or media.get("duration")
+            or playback.get("length_in_second")
             or (duration_ms / 1000 if isinstance(duration_ms, (int, float)) and duration_ms else None)
         ),
         "thumbnailUrl": safe_str(thumbnail),
         "videoUrl": safe_str(video_url),
         "author": {
             "username": author_username,
-            "displayName": safe_str(item.get("pageName") or user.get("name") or item.get("authorName")),
+            "displayName": safe_str(
+                item.get("pageName") or user.get("name") or video_owner.get("name") or item.get("authorName")
+            ),
             "url": author_url,
-            "profileImage": safe_str(user.get("profilePic") or user.get("profilePicture")),
+            "profileImage": safe_str(
+                user.get("profilePic")
+                or user.get("profilePicture")
+                or display_pic.get("uri")
+            ),
             "verified": bool(verified) if verified is not None else None,
         },
         "engagement": {
             "views": safe_int(item.get("viewsCount") or item.get("videoViewCount") or item.get("videoPostViewCount")),
-            "likes": safe_int(item.get("likes") or item.get("likesCount") or item.get("reactionsCount")) or 0,
-            "comments": safe_int(item.get("comments") or item.get("commentsCount")) or 0,
-            "shares": safe_int(item.get("shares") or item.get("sharesCount")) or 0,
+            "likes": safe_int(
+                item.get("likes")
+                or item.get("likesCount")
+                or item.get("reactionsCount")
+                or likers.get("count")
+            )
+            or 0,
+            "comments": safe_int(
+                item.get("comments")
+                or item.get("commentsCount")
+                or item.get("total_comment_count")
+            )
+            or 0,
+            "shares": safe_int(
+                item.get("shares")
+                or item.get("sharesCount")
+                or item.get("share_count_reduced")
+            )
+            or 0,
         },
-        "isVideo": bool(item.get("isVideo")),
-        "link": safe_str(item.get("link")),
+        "isVideo": bool(is_video),
+        "link": safe_str(item.get("link")) or _fb_external_link(item),
     }
 
 
@@ -504,7 +625,7 @@ async def facebook_details(
 
         data = await cached_or_run(
             endpoint="facebook.details",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
