@@ -1063,7 +1063,7 @@ export class TwitterApi {
   userTweets(params: TwitterUserTweetsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitter/user-tweets", params);
   }
-  /** Twitter/X Search — Search tweets by keyword. (14 credits) */
+  /** Twitter/X Search — Search public tweets on X by keyword. (14 credits) */
   search(params: TwitterSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitter/search", params);
   }
@@ -1162,7 +1162,7 @@ export class RedditApi {
   postTranscript(params: RedditPostTranscriptParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/post-transcript", params);
   }
-  /** Reddit Search — Search Reddit posts by keyword, with cursor pagination (nextCursor + hasMore). (10 credits) */
+  /** Reddit Search — Search Reddit posts site-wide by keyword, with cursor pagination (nextCursor + hasMore). (10 credits) */
   search(params: RedditSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/search", params);
   }

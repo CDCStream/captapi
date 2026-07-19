@@ -1364,7 +1364,7 @@
       },
       "twitterSearch": {
         "label": "Twitter/X Search",
-        "description": "Search tweets by keyword. Costs ~14 credits (cached results free, failures never charged).",
+        "description": "Search public tweets on X by keyword — text, author, engagement, hashtags, and media. Costs ~14 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1483,7 +1483,7 @@
       },
       "redditSearch": {
         "label": "Reddit Search",
-        "description": "Search Reddit posts by keyword, with cursor pagination (nextCursor + hasMore). Costs ~10 credits (cached results free, failures never charged).",
+        "description": "Search Reddit posts site-wide by keyword — title, subreddit, author, upvotes, comments; cursor pagination. Costs ~10 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

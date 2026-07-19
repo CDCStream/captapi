@@ -2193,7 +2193,7 @@
     "name": "Twitter/X Search",
     "path": "/v1/twitter/search",
     "credits": 14,
-    "summary": "Search tweets by keyword.",
+    "summary": "Search public tweets on X by keyword — text, author, engagement, hashtags, and media.",
     "params": [
       {
         "name": "q",
@@ -2383,7 +2383,7 @@
     "name": "Reddit Search",
     "path": "/v1/reddit/search",
     "credits": 10,
-    "summary": "Search Reddit posts by keyword, with cursor pagination (nextCursor + hasMore).",
+    "summary": "Search Reddit posts site-wide by keyword — title, subreddit, author, upvotes, comments; cursor pagination.",
     "params": [
       {
         "name": "q",

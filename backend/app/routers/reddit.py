@@ -992,9 +992,9 @@ async def subreddit_search(
         return ApiResponse(data=data)
 
 
-@router.get("/search", summary="Search Reddit posts by keyword (cursor-paginated)")
+@router.get("/search", summary="Search Reddit posts site-wide by keyword (cursor-paginated)")
 async def reddit_search(
-    q: str = Query(..., min_length=2, description="Search query"),
+    q: str = Query(..., min_length=2, description="Keyword or phrase to search Reddit posts site-wide"),
     limit: int = Query(25, ge=1, le=200),
     cursor: str | None = Query(
         None,

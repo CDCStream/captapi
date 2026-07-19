@@ -7957,7 +7957,7 @@
         "tags": [
           "Twitter"
         ],
-        "summary": "Search tweets by keyword",
+        "summary": "Search public tweets on X by keyword",
         "operationId": "twitter_search_v1_twitter_search_get",
         "security": [
           {
@@ -7972,10 +7972,10 @@
             "schema": {
               "type": "string",
               "minLength": 2,
-              "description": "Search query or keywords",
+              "description": "Keyword or phrase to search public tweets on X",
               "title": "Q"
             },
-            "description": "Search query or keywords"
+            "description": "Keyword or phrase to search public tweets on X"
           },
           {
             "name": "limit",
@@ -8611,7 +8611,7 @@
         "tags": [
           "Reddit"
         ],
-        "summary": "Search Reddit posts by keyword (cursor-paginated)",
+        "summary": "Search Reddit posts site-wide by keyword (cursor-paginated)",
         "operationId": "reddit_search_v1_reddit_search_get",
         "security": [
           {
@@ -8626,10 +8626,10 @@
             "schema": {
               "type": "string",
               "minLength": 2,
-              "description": "Search query",
+              "description": "Keyword or phrase to search Reddit posts site-wide",
               "title": "Q"
             },
-            "description": "Search query"
+            "description": "Keyword or phrase to search Reddit posts site-wide"
           },
           {
             "name": "limit",
@@ -13340,8 +13340,8 @@
           },
           "interval_minutes": {
             "type": "integer",
-            "maximum": 1440.0,
-            "minimum": 15.0,
+            "maximum": 1440,
+            "minimum": 15,
             "title": "Interval Minutes",
             "default": 60
           },
@@ -13402,8 +13402,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 1440.0,
-                "minimum": 15.0
+                "maximum": 1440,
+                "minimum": 15
               },
               {
                 "type": "null"

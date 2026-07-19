@@ -1431,7 +1431,7 @@ class TwitterApi:
         return self._t.get("/v1/twitter/user-tweets", {"url": url, "limit": limit, "cache": cache})
 
     def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Twitter/X Search — Search tweets by keyword. (14 credits)
+        """Twitter/X Search — Search public tweets on X by keyword. (14 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -1495,7 +1495,7 @@ class AsyncTwitterApi:
         return await self._t.get("/v1/twitter/user-tweets", {"url": url, "limit": limit, "cache": cache})
 
     async def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Twitter/X Search — Search tweets by keyword. (14 credits)
+        """Twitter/X Search — Search public tweets on X by keyword. (14 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -1562,7 +1562,7 @@ class RedditApi:
         return self._t.get("/v1/reddit/post-transcript", {"url": url, "limit": limit, "cache": cache})
 
     def search(self, *, q: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Search — Search Reddit posts by keyword, with cursor pagination (nextCursor + hasMore). (10 credits)
+        """Reddit Search — Search Reddit posts site-wide by keyword, with cursor pagination (nextCursor + hasMore). (10 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
@@ -1632,7 +1632,7 @@ class AsyncRedditApi:
         return await self._t.get("/v1/reddit/post-transcript", {"url": url, "limit": limit, "cache": cache})
 
     async def search(self, *, q: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Search — Search Reddit posts by keyword, with cursor pagination (nextCursor + hasMore). (10 credits)
+        """Reddit Search — Search Reddit posts site-wide by keyword, with cursor pagination (nextCursor + hasMore). (10 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.

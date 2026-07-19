@@ -475,9 +475,9 @@ async def twitter_user_tweets(
         return ApiResponse(data=data)
 
 
-@router.get("/search", summary="Search tweets by keyword")
+@router.get("/search", summary="Search public tweets on X by keyword")
 async def twitter_search(
-    q: str = Query(..., min_length=2, description="Search query or keywords"),
+    q: str = Query(..., min_length=2, description="Keyword or phrase to search public tweets on X"),
     limit: int = Query(20, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
