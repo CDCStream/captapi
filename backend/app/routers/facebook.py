@@ -7,7 +7,7 @@ import math
 import re
 from datetime import datetime, timezone
 from typing import Any
-from urllib.parse import unquote
+from urllib.parse import parse_qs, unquote, urlparse
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -640,6 +640,33 @@ def _infer_city_from_text(*parts: str | None) -> str | None:
     return None
 
 
+def _infer_city_from_ticket_url(url: str | None) -> str | None:
+    """Pull City, ST from Ticketmaster-style slugs when address text is missing."""
+    u = safe_str(url)
+    if not u:
+        return None
+    try:
+        nested = parse_qs(urlparse(u).query).get("u")
+        if nested:
+            u = unquote(nested[0])
+    except Exception:  # noqa: BLE001
+        pass
+    path = urlparse(u).path.lower()
+    # Ticketmaster spells NYC as "...-new-york-new-york-MM-DD-YYYY"
+    if re.search(r"-new-york-new-york-\d{2}-\d{2}-\d{4}", path):
+        return "New York, NY"
+    m = re.search(r"-([a-z]+(?:-[a-z]+)*)-([a-z]{2})-\d{2}-\d{2}-\d{4}", path)
+    if not m:
+        return None
+    st = m.group(2).upper()
+    if st not in _US_STATE_ABBR:
+        return None
+    city = m.group(1).replace("-", " ").title()
+    if _looks_like_street_fragment(city):
+        return None
+    return f"{city}, {st}"
+
+
 def _normalize_event(item: dict) -> dict:
     """Map Facebook event actor rows into a stable response shape (same keys every time)."""
     loc = item.get("location") if isinstance(item.get("location"), dict) else {}
@@ -674,8 +701,15 @@ def _normalize_event(item: dict) -> dict:
         or loc.get("name")
         or location_name
     )
-    # TEXT places / crawlerbros often leave city null or bare ("Woodstock");
-    # recover "City, ST" from address / location name when possible.
+    tickets_url = safe_str(
+        tickets.get("buyUrl")
+        or item.get("ticketsUrl")
+        or item.get("ticketUrl")
+        or item.get("ticket_url")
+        or item.get("tickets_url")
+    )
+    # TEXT places / crawlerbros / venue-only pages often leave city null or bare;
+    # recover "City, ST" from address text, then Ticketmaster-style ticket URLs.
     inferred_city = _infer_city_from_text(
         address,
         street,
@@ -683,7 +717,7 @@ def _normalize_event(item: dict) -> dict:
         safe_str(location_name),
         safe_str(item.get("address")),
         safe_str(item.get("location_name")),
-    )
+    ) or _infer_city_from_ticket_url(tickets_url)
     if not city:
         city = inferred_city
     elif inferred_city and "," not in city and inferred_city.lower().startswith(city.lower()):
@@ -770,13 +804,7 @@ def _normalize_event(item: dict) -> dict:
             for o in organizers
             if isinstance(o, dict)
         ],
-        "ticketsUrl": safe_str(
-            tickets.get("buyUrl")
-            or item.get("ticketsUrl")
-            or item.get("ticketUrl")
-            or item.get("ticket_url")
-            or item.get("tickets_url")
-        ),
+        "ticketsUrl": tickets_url,
         "categories": categories,
         "externalLinks": external_links,
     }
@@ -1408,7 +1436,7 @@ async def facebook_profile_events(
 
         data = await cached_or_run(
             endpoint="facebook.profile-events",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             # Events actor runs take minutes (280s timeout); serve the last

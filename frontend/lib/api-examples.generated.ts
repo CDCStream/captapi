@@ -1583,7 +1583,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "usersResponded": 730,
         "location": {
           "name": "Madison Square Garden",
-          "city": null,
+          "city": "New York, NY",
           "latitude": 40.750513547361,
           "longitude": -73.992893513651,
           "countryCode": "US"
@@ -1635,7 +1635,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "usersResponded": 302,
         "location": {
           "name": "Madison Square Garden",
-          "city": null,
+          "city": "New York, NY",
           "latitude": 40.750513547361,
           "longitude": -73.992893513651,
           "countryCode": "US"
@@ -1692,7 +1692,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "usersResponded": 6373,
         "location": {
           "name": "Madison Square Garden",
-          "city": null,
+          "city": "New York, NY",
           "latitude": 40.750513547361,
           "longitude": -73.992893513651,
           "countryCode": "US"
@@ -1741,7 +1741,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "usersResponded": 124,
         "location": {
           "name": "Madison Square Garden",
-          "city": null,
+          "city": "New York, NY",
           "latitude": 40.750513547361,
           "longitude": -73.992893513651,
           "countryCode": "US"
@@ -1798,7 +1798,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "usersResponded": 2598,
         "location": {
           "name": "Madison Square Garden",
-          "city": null,
+          "city": "New York, NY",
           "latitude": 40.750513547361,
           "longitude": -73.992893513651,
           "countryCode": "US"
