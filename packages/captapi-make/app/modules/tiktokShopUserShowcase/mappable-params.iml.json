@@ -4,7 +4,7 @@
     "type": "text",
     "label": "Username",
     "required": true,
-    "help": "TikTok username with or without @."
+    "help": "TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug."
   },
   {
     "name": "limit",

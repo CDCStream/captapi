@@ -1542,7 +1542,7 @@ export class TiktokShopApi {
   productReviews(params: TiktokShopProductReviewsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok-shop/product-reviews", params);
   }
-  /** TikTok Shop User Showcase — Products promoted in a TikTok creator showcase. (45 credits) */
+  /** TikTok Shop User Showcase — Products a TikTok creator promotes in their Shop showcase — URL, title, price, image, seller shop id. (45 credits) */
   userShowcase(params: TiktokShopUserShowcaseParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok-shop/user-showcase", params);
   }

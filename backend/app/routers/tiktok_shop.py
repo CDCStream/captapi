@@ -82,6 +82,7 @@ def _normalize_product(
     search_mode: bool = False,
     catalog_mode: bool = False,
     details_mode: bool = False,
+    showcase_mode: bool = False,
 ) -> dict[str, Any]:
     # Sellers come nested (seller/shop/store/store_info) or flat (shopId/shopName).
     seller = item.get("seller") or item.get("shop") or item.get("store") or item.get("store_info") or {}
@@ -121,18 +122,24 @@ def _normalize_product(
             seller_url = f"https://www.tiktok.com/shop/store/{slug}/{seller_id}"
 
     # Mode-specific omissions for fields the upstream actor never returns.
-    include_description = not search_mode and not catalog_mode and not details_mode
-    include_rating_reviews = not search_mode and not details_mode
-    include_stock = not search_mode and not catalog_mode
-    include_seller_rating = not search_mode and not catalog_mode
-    include_list_pricing = not details_mode  # originalPrice / discount
-    include_seller_id_url = not details_mode
+    include_description = not search_mode and not catalog_mode and not details_mode and not showcase_mode
+    include_rating_reviews = not search_mode and not details_mode and not showcase_mode
+    include_stock = not search_mode and not catalog_mode and not showcase_mode
+    include_seller_rating = not search_mode and not catalog_mode and not showcase_mode
+    include_list_pricing = not details_mode and not showcase_mode  # originalPrice / discount
+    include_sold = not showcase_mode
+    include_full_seller = not details_mode and not showcase_mode
 
     out: dict[str, Any] = {
         "platform": "tiktok_shop",
         "id": safe_str(item.get("id") or item.get("productId") or item.get("product_id")),
         "url": safe_str(item.get("url") or item.get("productUrl") or item.get("product_url")),
-        "title": safe_str(item.get("title") or item.get("name") or item.get("productName") or item.get("productTitle")),
+        "title": safe_str(
+            item.get("title")
+            or item.get("name")
+            or item.get("productName")
+            or item.get("productTitle")
+        ),
     }
     if include_description:
         out["description"] = safe_str(
@@ -153,7 +160,8 @@ def _normalize_product(
     if include_rating_reviews:
         out["rating"] = item.get("rating") or item.get("reviewRating") or item.get("product_rating")
         out["reviews"] = safe_int(item.get("reviews") or item.get("reviewCount") or item.get("review_count"))
-    out["sold"] = safe_int(item.get("sold") or item.get("soldCount") or item.get("unitsSold") or item.get("sales_count"))
+    if include_sold:
+        out["sold"] = safe_int(item.get("sold") or item.get("soldCount") or item.get("unitsSold") or item.get("sales_count"))
     if include_stock:
         out["stock"] = safe_int(item.get("stock") or item.get("stock_num") or item.get("inventory") or item.get("sku_stock"))
     out["image"] = safe_str(
@@ -164,17 +172,23 @@ def _normalize_product(
         or item.get("productImage")
         or first_image
     )
-    if include_seller_id_url:
+    if showcase_mode:
+        # Creator showcase only exposes shopId — not store name/url/rating.
+        if seller_id:
+            out["seller"] = {"id": seller_id}
+    elif include_full_seller:
         out["seller"] = {
             "id": seller_id,
             "name": seller_name,
             "url": seller_url,
         }
+        if include_seller_rating:
+            out["seller"]["rating"] = seller.get("rating")
     else:
         # Details actor only returns store name + rating.
         out["seller"] = {"name": seller_name}
-    if include_seller_rating:
-        out["seller"]["rating"] = seller.get("rating")
+        if include_seller_rating:
+            out["seller"]["rating"] = seller.get("rating")
     return out
 
 
@@ -341,9 +355,15 @@ async def product_reviews(
         return ApiResponse(data=data)
 
 
-@router.get("/user-showcase", summary="TikTok Shop creator showcase")
+@router.get(
+    "/user-showcase",
+    summary="List products a TikTok creator promotes in their Shop showcase",
+)
 async def user_showcase(
-    username: str = Query(..., description="TikTok username, with or without @"),
+    username: str = Query(
+        ...,
+        description="TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug",
+    ),
     limit: int = Query(20, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
@@ -355,9 +375,9 @@ async def user_showcase(
     async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/user-showcase", platform="tiktok_shop", resource_url=f"https://www.tiktok.com/@{handle}", base_credits=_scaled(limit, RATE_REVIEWS)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_shop("creator_showcase", {"usernames": [handle], "maxResults": limit}, limit)
-            products = [_normalize_product(i) for i in items]
+            products = [_normalize_product(i, showcase_mode=True) for i in items]
             return {"username": handle, "totalReturned": len(products), "products": products}
 
-        data = await cached_or_run("tiktok-shop.user-showcase", {"username": handle, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("tiktok-shop.user-showcase", {"username": handle, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["products"]), RATE_REVIEWS)
         return ApiResponse(data=data)

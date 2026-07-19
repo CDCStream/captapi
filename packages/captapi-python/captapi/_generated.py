@@ -2150,7 +2150,7 @@ class TiktokShopApi:
         return self._t.get("/v1/tiktok-shop/product-reviews", {"url": url, "limit": limit, "cache": cache})
 
     def user_showcase(self, *, username: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop User Showcase — Products promoted in a TikTok creator showcase. (45 credits)
+        """TikTok Shop User Showcase — Products a TikTok creator promotes in their Shop showcase — URL, title, price, image, seller shop id. (45 credits)
 
         :param username: TikTok username with or without @.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -2200,7 +2200,7 @@ class AsyncTiktokShopApi:
         return await self._t.get("/v1/tiktok-shop/product-reviews", {"url": url, "limit": limit, "cache": cache})
 
     async def user_showcase(self, *, username: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop User Showcase — Products promoted in a TikTok creator showcase. (45 credits)
+        """TikTok Shop User Showcase — Products a TikTok creator promotes in their Shop showcase — URL, title, price, image, seller shop id. (45 credits)
 
         :param username: TikTok username with or without @.
         :param limit: Max items to return. Default 20, max 200. Billed per result.

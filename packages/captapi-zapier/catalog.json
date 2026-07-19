@@ -3187,13 +3187,13 @@
     "name": "TikTok Shop User Showcase",
     "path": "/v1/tiktok-shop/user-showcase",
     "credits": 45,
-    "summary": "Products promoted in a TikTok creator showcase.",
+    "summary": "Products a TikTok creator promotes in their Shop showcase — URL, title, price, image, seller shop id.",
     "params": [
       {
         "name": "username",
         "type": "string",
         "required": true,
-        "description": "TikTok username with or without @."
+        "description": "TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug."
       },
       {
         "name": "limit",

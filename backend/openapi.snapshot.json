@@ -3600,7 +3600,7 @@
         "tags": [
           "TikTok Shop"
         ],
-        "summary": "TikTok Shop creator showcase",
+        "summary": "List products a TikTok creator promotes in their Shop showcase",
         "operationId": "user_showcase_v1_tiktok_shop_user_showcase_get",
         "security": [
           {
@@ -3614,10 +3614,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "TikTok username, with or without @",
+              "description": "TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug",
               "title": "Username"
             },
-            "description": "TikTok username, with or without @"
+            "description": "TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug"
           },
           {
             "name": "limit",

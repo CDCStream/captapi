@@ -350,7 +350,7 @@ const TIKTOK_SHOP: Spec[] = [
   { slug: "tiktok-shop-products", name: "TikTok Shop Products API", shortName: "Shop Products", category: "list", method: "GET", path: "/v1/tiktok-shop/shop-products", credits: 56, creditsPerResult: 2.8 },
   { slug: "tiktok-shop-product-details", name: "TikTok Shop Product Details API", shortName: "Product Details", category: "details", method: "GET", path: "/v1/tiktok-shop/product-details", credits: 14 , tagline: "Get a TikTok Shop product — title, price, images, seller, and sales signals as structured JSON." },
   { slug: "tiktok-shop-product-reviews", name: "TikTok Shop Product Reviews API", shortName: "Product Reviews", category: "comments", method: "GET", path: "/v1/tiktok-shop/product-reviews", credits: 45, creditsPerResult: 2.25 },
-  { slug: "tiktok-shop-user-showcase", name: "TikTok Shop User Showcase API", shortName: "User Showcase", category: "list", method: "GET", path: "/v1/tiktok-shop/user-showcase", credits: 45, creditsPerResult: 2.25 },
+  { slug: "tiktok-shop-user-showcase", name: "TikTok Shop User Showcase API", shortName: "User Showcase", category: "list", method: "GET", path: "/v1/tiktok-shop/user-showcase", credits: 45, creditsPerResult: 2.25, tagline: "List products a TikTok creator is promoting in their Shop showcase — product URL, title, price, image, and seller shop id for each item.", longDescription: "Pass a TikTok username (with or without @, or a profile URL) and the TikTok Shop User Showcase API returns the products that creator is featuring in their TikTok Shop showcase as clean JSON. This is the affiliate / creator storefront shelf — not the full inventory of a brand store. Each product includes the product URL and id, title, price, currency, thumbnail image, and the seller's shop id when available. For a brand's full catalog, use TikTok Shop Products with a store URL instead. For deeper product fields (stock, seller rating), call Product Details with a product URL. Billed per result — about 2.25 credits each. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Products a TikTok creator is promoting in their Shop showcase", "Product URL, id, title, price, currency, and image", "Seller shop id when TikTok exposes it", "Useful for affiliate tracking and creator commerce research", "Not a full brand store catalog — use Shop Products for that"] },
 ];
 
 const GITHUB: Spec[] = [
@@ -871,7 +871,7 @@ export const AGENT_ROUTING_EXAMPLES: AgentRoutingExample[] = [
     ],
     prefer: "Use TikTok Shop endpoints before generic TikTok profile/video endpoints.",
     endpointSlug: "tiktok-shop-user-showcase",
-    why: "Returns products promoted in a creator's TikTok Shop showcase.",
+    why: "Returns products a TikTok creator is promoting in their Shop showcase (affiliate shelf), not a full brand store catalog.",
   },
   {
     intent: "GitHub repository intelligence",
@@ -1433,7 +1433,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-shop-products": [up("TikTok Shop store URL."), lp(20, 200)],
   "tiktok-shop-product-details": [up("TikTok Shop product URL.")],
   "tiktok-shop-product-reviews": [up("TikTok Shop product URL."), lp(20, 200)],
-  "tiktok-shop-user-showcase": [{ name: "username", type: "string", required: true, description: "TikTok username, with or without @." }, lp(20, 200)],
+  "tiktok-shop-user-showcase": [{ name: "username", type: "string", required: true, description: "TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug." }, lp(20, 200)],
   // Ad Library
   "facebook-ad-library-search": [qp("Keyword, brand, or advertiser to search Meta Ad Library (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
   "facebook-ad-library-company-ads": [up("Facebook page URL or Meta Ad Library URL."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],

@@ -17989,21 +17989,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "1732348343936586686",
         "url": "https://www.tiktok.com/shop/pdp/1732348343936586686",
         "title": "Oganacell PDRN Peptide Gua Sha Calming Gel Cream for Soothing & Barrier Care, Jawline Definition, Face Sculpting & De-Puffing, Firming & Elasticity Care for Sensitive Skin, At-Home Facial Care | Korean Skincare",
-        "description": null,
-        "price": "27.99",
-        "originalPrice": null,
+        "price": 27.99,
         "currency": "USD",
-        "discount": null,
-        "rating": null,
-        "reviews": null,
-        "sold": null,
-        "stock": null,
         "image": "https://p19-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/c29c24ff8dae4649a711659e1b425b0d~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=4ee6669e&shcp=9b759fb9&idc=useast5&from=1323722398",
         "seller": {
-          "id": "7496114058180594622",
-          "name": null,
-          "url": null,
-          "rating": null
+          "id": "7496114058180594622"
         }
       },
       {
@@ -18011,21 +18001,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "1732465688971547582",
         "url": "https://www.tiktok.com/shop/pdp/1732465688971547582",
         "title": "[Creator Exclusive] Oganacell PDRN Peptide Gua Sha Lifting Gel Cream for Jawline Definition, Face Sculpting & De-Puffing, Firming & Elasticity Care for Dry and Sagging Skin, Glass Skin Glow, At-Home Facial Care | Korean Skincare",
-        "description": null,
-        "price": "59.60",
-        "originalPrice": null,
+        "price": 59.6,
         "currency": "USD",
-        "discount": null,
-        "rating": null,
-        "reviews": null,
-        "sold": null,
-        "stock": null,
         "image": "https://p19-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/61d153b0cdde4002abf5b41ab5f90e8c~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=4ee6669e&shcp=9b759fb9&idc=useast5&from=1323722398",
         "seller": {
-          "id": "7496114058180594622",
-          "name": null,
-          "url": null,
-          "rating": null
+          "id": "7496114058180594622"
         }
       },
       {
@@ -18033,21 +18013,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "1732497823331554245",
         "url": "https://www.tiktok.com/shop/pdp/1732497823331554245",
         "title": "Heavy Metal Couture Artistry Bundle - 6PC Eye Brush Set, Heavy Metal Couture 9-Pan Palette, BeachProof Eyeliner 'Tattooed Devil' & 'Grave Digger', BeachProof Mascara 'Black'",
-        "description": null,
-        "price": "119.85",
-        "originalPrice": null,
+        "price": 119.85,
         "currency": "USD",
-        "discount": null,
-        "rating": null,
-        "reviews": null,
-        "sold": null,
-        "stock": null,
         "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/bfabe84ca345416eb5324ca7e0a484d2~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=4ee6669e&shcp=9b759fb9&idc=useast5&from=1323722398",
         "seller": {
-          "id": "7494986018328054725",
-          "name": null,
-          "url": null,
-          "rating": null
+          "id": "7494986018328054725"
         }
       },
       {
@@ -18055,21 +18025,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "1732497709724832709",
         "url": "https://www.tiktok.com/shop/pdp/1732497709724832709",
         "title": "The Stage Ready Set - Magic Star Mushroom Mist, BeachProof Eyeliner 'Tattooed Devil' & 'Grave Digger', Lip Balm 'Encore' & 'Unicorn Blood'",
-        "description": null,
-        "price": "100.30",
-        "originalPrice": null,
+        "price": 100.3,
         "currency": "USD",
-        "discount": null,
-        "rating": null,
-        "reviews": null,
-        "sold": null,
-        "stock": null,
         "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/8791aba9197e44ebb883a768f7d177e1~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=4ee6669e&shcp=9b759fb9&idc=useast5&from=1323722398",
         "seller": {
-          "id": "7494986018328054725",
-          "name": null,
-          "url": null,
-          "rating": null
+          "id": "7494986018328054725"
         }
       },
       {
@@ -18077,21 +18037,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "1732497708784587717",
         "url": "https://www.tiktok.com/shop/pdp/1732497708784587717",
         "title": "Heavy Metal Couture Mini Palette - 9-pan Mattes & Shimmer/Metallic Eyeshadow Shades - Preorder",
-        "description": null,
-        "price": "32.00",
-        "originalPrice": null,
+        "price": 32.0,
         "currency": "USD",
-        "discount": null,
-        "rating": null,
-        "reviews": null,
-        "sold": null,
-        "stock": null,
         "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/190744ec28fa4cc99274a7aec07cdeff~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=4ee6669e&shcp=9b759fb9&idc=useast5&from=1323722398",
         "seller": {
-          "id": "7494986018328054725",
-          "name": null,
-          "url": null,
-          "rating": null
+          "id": "7494986018328054725"
         }
       }
     ]
