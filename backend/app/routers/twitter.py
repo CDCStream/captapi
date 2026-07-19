@@ -560,7 +560,6 @@ async def twitter_community(
                 "name": safe_str(c.get("name") or c.get("title")),
                 "description": safe_str(c.get("description")),
                 "memberCount": safe_int(c.get("memberCount") or c.get("member_count") or c.get("members")),
-                "moderatorCount": safe_int(c.get("moderatorCount") or c.get("moderator_count")),
                 "createdAt": safe_str(
                     c.get("createdAt") or c.get("created_at_datetime") or c.get("created_at")
                 ),
@@ -575,7 +574,7 @@ async def twitter_community(
 
         data = await cached_or_run(
             endpoint="twitter.community",
-            params={"community_id": community_id, "v": 2},
+            params={"community_id": community_id, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

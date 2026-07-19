@@ -18970,7 +18970,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "name": "Build in Public",
     "description": "Share what you're working on. Get feedback. Help each other move forward. – Sponsored by bolt.new ⚡",
     "memberCount": 262696,
-    "moderatorCount": null,
     "createdAt": "2022-02-15T04:47:27.551000+00:00",
     "creator": "marckohlbrugge",
     "joinPolicy": "Open",
