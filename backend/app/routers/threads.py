@@ -69,20 +69,21 @@ def _require_threads_post_url(url: str) -> str:
     return code
 
 
-def _user(u: dict[str, Any]) -> dict[str, Any]:
+def _user(u: dict[str, Any], *, include_profile_image: bool = True) -> dict[str, Any]:
+    """Author/user card for posts & search.
+
+    Follower counts are omitted — post/search actors never return them
+    (use /profile). Search modes also omit profileImage (same reason).
+    """
     username = u.get("username") or u.get("userName") or u.get("user_name")
     pic_hd = u.get("hd_profile_pic_url_info") if isinstance(u.get("hd_profile_pic_url_info"), dict) else {}
-    return {
+    out: dict[str, Any] = {
         "username": safe_str(username),
         "displayName": safe_str(u.get("full_name") or u.get("fullName") or u.get("name")),
         "verified": u.get("is_verified") or u.get("isVerified"),
-        "followers": safe_int(
-            u.get("follower_count")
-            or u.get("followerCount")
-            or u.get("followers")
-            or u.get("follower_count_text")
-        ),
-        "profileImage": safe_str(
+    }
+    if include_profile_image:
+        out["profileImage"] = safe_str(
             u.get("profile_pic_url")
             or u.get("profilePicUrl")
             or u.get("profile_pic_url_hd")
@@ -90,8 +91,8 @@ def _user(u: dict[str, Any]) -> dict[str, Any]:
             or u.get("profilePictureUrl")
             or u.get("avatar")
             or pic_hd.get("url")
-        ),
-    }
+        )
+    return out
 
 
 def _post_media(item: dict[str, Any]) -> list[str]:
@@ -109,7 +110,7 @@ def _post_media(item: dict[str, Any]) -> list[str]:
     return urls
 
 
-def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
+def _normalize_post(item: dict[str, Any], *, include_author_image: bool = True) -> dict[str, Any]:
     user = item.get("user") or item.get("author") or item
     code = item.get("code") or item.get("shortcode") or item.get("post_code")
     author_name = (user.get("username") or user.get("userName")) if isinstance(user, dict) else None
@@ -130,7 +131,7 @@ def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
         "publishedAt": safe_str(
             item.get("taken_at") or item.get("date") or item.get("published_on") or item.get("publishedAt")
         ),
-        "author": _user(user),
+        "author": _user(user, include_profile_image=include_author_image),
         "engagement": {
             "likes": safe_int(item.get("like_count") or item.get("likeCount") or item.get("likes")),
             "replies": safe_int(
@@ -177,7 +178,6 @@ def _normalize_post_download(item: dict[str, Any]) -> dict[str, Any]:
             "username": safe_str(result.get("author")),
             "displayName": safe_str(result.get("author")),
             "verified": None,
-            "followers": 0,
             "profileImage": None,
         },
         "engagement": {"likes": 0, "replies": 0, "reposts": 0, "quotes": 0},
@@ -252,7 +252,7 @@ async def threads_user_posts(
 
         data = await cached_or_run(
             endpoint="threads.user-posts",
-            params={"handle": handle, "limit": limit, "v": 3},
+            params={"handle": handle, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -284,12 +284,12 @@ async def threads_search(
                 {"mode": "search", "searchQueries": [q], "maxPosts": limit},
                 max_items=limit,
             )
-            results = [_normalize_post(i) for i in items][:limit]
+            results = [_normalize_post(i, include_author_image=False) for i in items][:limit]
             return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="threads.search",
-            params={"q": q, "limit": limit, "v": 3},
+            params={"q": q, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -317,35 +317,23 @@ async def threads_search_users(
         async def _run() -> dict[str, Any]:
             apify = get_apify()
             # No dedicated user-search; derive distinct authors from a keyword
-            # search over a wider post sample. includeProfile adds separate
-            # profile rows with followers/bio/verified for each author found.
+            # search over a wider post sample.
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_THREADS_SEARCH,
-                {"mode": "search", "searchQueries": [q], "maxPosts": limit * 4, "includeProfile": True},
+                {"mode": "search", "searchQueries": [q], "maxPosts": limit * 4},
                 max_items=limit * 8,
             )
-            profiles: dict[str, dict[str, Any]] = {}
-            for item in items:
-                if item.get("type") == "profile":
-                    uname = item.get("username") or item.get("userName")
-                    if uname:
-                        profiles[uname] = item
             seen: set[str] = set()
             users: list[dict[str, Any]] = []
             for item in items:
                 if item.get("type") == "profile":
                     continue
-                u = _user(item.get("user") or item.get("author") or item)
+                # Search actors omit avatar/follower fields; keep the card lean.
+                u = _user(item.get("user") or item.get("author") or item, include_profile_image=False)
                 uname = u.get("username")
                 if not uname or uname in seen:
                     continue
                 seen.add(uname)
-                profile = profiles.get(uname)
-                if profile:
-                    enriched = _user(profile)
-                    for key, value in enriched.items():
-                        if u.get(key) is None and value is not None:
-                            u[key] = value
                 users.append(u)
                 if len(users) >= limit:
                     break
@@ -353,7 +341,7 @@ async def threads_search_users(
 
         data = await cached_or_run(
             endpoint="threads.search-users",
-            params={"q": q, "limit": limit, "v": 2},
+            params={"q": q, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -415,7 +403,7 @@ async def threads_post_details(
 
         data = await cached_or_run(
             endpoint="threads.post-details",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

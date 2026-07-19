@@ -16580,7 +16580,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "username": "zuck",
       "displayName": "Mark Zuckerberg",
       "verified": true,
-      "followers": null,
       "profileImage": "https://scontent-ams2-1.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-ams2-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gGzfdZYeV48_bXAcIhLSDs1Tu3U8XWRLEFZP1a41rbls7Z-6fXsXaVG9Mt-XkFu3qs&_nc_ohc=ZIy5tON9X10Q7kNvwEXcU3o&_nc_gid=nNW01RJSybveLMNzNjbnAg&edm=ADLnRjYBAAAA&ccb=7-5&oh=00_AQBm5nACNie0p2XpC0NYAE9oW_JbT9Fg1iwA09jJrO7y5g&oe=6A6133FE&_nc_sid=0164b6"
     },
     "engagement": {
@@ -16619,9 +16618,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "freecodecamp",
           "displayName": "freeCodeCamp.org",
-          "verified": false,
-          "followers": null,
-          "profileImage": null
+          "verified": false
         },
         "engagement": {
           "likes": 217,
@@ -16643,9 +16640,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "codexatechnologiez",
           "displayName": "Codexa Technologiez",
-          "verified": false,
-          "followers": null,
-          "profileImage": null
+          "verified": false
         },
         "engagement": {
           "likes": null,
@@ -16671,9 +16666,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "econ.omicbalance",
           "displayName": "economicbalance",
-          "verified": false,
-          "followers": null,
-          "profileImage": null
+          "verified": false
         },
         "engagement": {
           "likes": null,
@@ -16693,9 +16686,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "econ.omicbalance",
           "displayName": "economicbalance",
-          "verified": false,
-          "followers": null,
-          "profileImage": null
+          "verified": false
         },
         "engagement": {
           "likes": null,
@@ -16717,9 +16708,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "wwr9738",
           "displayName": "Learning AI Trading (Luna)",
-          "verified": false,
-          "followers": null,
-          "profileImage": null
+          "verified": false
         },
         "engagement": {
           "likes": null,
@@ -16740,37 +16729,27 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "username": "eau.dreyy",
         "displayName": "O-Drey",
-        "verified": true,
-        "followers": null,
-        "profileImage": null
+        "verified": true
       },
       {
         "username": "regina.workabroad",
         "displayName": "Regina Santana | Работа в Европе| LinkedIn • Резюме",
-        "verified": true,
-        "followers": null,
-        "profileImage": null
+        "verified": true
       },
       {
         "username": "polymath01os",
         "displayName": "Polymath OS",
-        "verified": false,
-        "followers": null,
-        "profileImage": null
+        "verified": false
       },
       {
         "username": "sixfiguretechie",
         "displayName": "Victoria Walker",
-        "verified": false,
-        "followers": null,
-        "profileImage": null
+        "verified": false
       },
       {
         "username": "ashley_valerie_",
         "displayName": "Ashley Valerie",
-        "verified": false,
-        "followers": null,
-        "profileImage": null
+        "verified": false
       }
     ]
   },
@@ -16789,7 +16768,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "username": "zuck",
           "displayName": "Mark Zuckerberg",
           "verified": true,
-          "followers": null,
           "profileImage": "https://scontent-ams2-1.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-ams2-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gGK-r5Fs0H_CkIIAmBevxCPS_IxUjGse0JUU-Ny0G_jD7Qw-HHxmiM4GxHrh3y1b7E&_nc_ohc=ZIy5tON9X10Q7kNvwEXcU3o&_nc_gid=R_Cy2IB0_vPt3sapZj6bqg&edm=ADLnRjYBAAAA&ccb=7-5&oh=00_AQAzSjZ7CiSBzXoZicNWpGtdoBM6Y5zM9HQXzeMZrO0A_g&oe=6A6133FE&_nc_sid=0164b6"
         },
         "engagement": {
@@ -16814,7 +16792,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "username": "zuck",
           "displayName": "Mark Zuckerberg",
           "verified": true,
-          "followers": null,
           "profileImage": "https://scontent-ams2-1.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-ams2-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gGK-r5Fs0H_CkIIAmBevxCPS_IxUjGse0JUU-Ny0G_jD7Qw-HHxmiM4GxHrh3y1b7E&_nc_ohc=ZIy5tON9X10Q7kNvwEXcU3o&_nc_gid=R_Cy2IB0_vPt3sapZj6bqg&edm=ADLnRjYBAAAA&ccb=7-5&oh=00_AQAzSjZ7CiSBzXoZicNWpGtdoBM6Y5zM9HQXzeMZrO0A_g&oe=6A6133FE&_nc_sid=0164b6"
         },
         "engagement": {
@@ -16838,7 +16815,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "username": "zuck",
           "displayName": "Mark Zuckerberg",
           "verified": true,
-          "followers": null,
           "profileImage": "https://scontent-ams2-1.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-ams2-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gGK-r5Fs0H_CkIIAmBevxCPS_IxUjGse0JUU-Ny0G_jD7Qw-HHxmiM4GxHrh3y1b7E&_nc_ohc=ZIy5tON9X10Q7kNvwEXcU3o&_nc_gid=R_Cy2IB0_vPt3sapZj6bqg&edm=ADLnRjYBAAAA&ccb=7-5&oh=00_AQAzSjZ7CiSBzXoZicNWpGtdoBM6Y5zM9HQXzeMZrO0A_g&oe=6A6133FE&_nc_sid=0164b6"
         },
         "engagement": {
@@ -16860,7 +16836,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "username": "zuck",
           "displayName": "Mark Zuckerberg",
           "verified": true,
-          "followers": null,
           "profileImage": "https://scontent-ams2-1.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-ams2-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gGK-r5Fs0H_CkIIAmBevxCPS_IxUjGse0JUU-Ny0G_jD7Qw-HHxmiM4GxHrh3y1b7E&_nc_ohc=ZIy5tON9X10Q7kNvwEXcU3o&_nc_gid=R_Cy2IB0_vPt3sapZj6bqg&edm=ADLnRjYBAAAA&ccb=7-5&oh=00_AQAzSjZ7CiSBzXoZicNWpGtdoBM6Y5zM9HQXzeMZrO0A_g&oe=6A6133FE&_nc_sid=0164b6"
         },
         "engagement": {
@@ -16884,7 +16859,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "username": "zuck",
           "displayName": "Mark Zuckerberg",
           "verified": true,
-          "followers": null,
           "profileImage": "https://scontent-ams2-1.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-ams2-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gGK-r5Fs0H_CkIIAmBevxCPS_IxUjGse0JUU-Ny0G_jD7Qw-HHxmiM4GxHrh3y1b7E&_nc_ohc=ZIy5tON9X10Q7kNvwEXcU3o&_nc_gid=R_Cy2IB0_vPt3sapZj6bqg&edm=ADLnRjYBAAAA&ccb=7-5&oh=00_AQAzSjZ7CiSBzXoZicNWpGtdoBM6Y5zM9HQXzeMZrO0A_g&oe=6A6133FE&_nc_sid=0164b6"
         },
         "engagement": {
