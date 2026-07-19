@@ -189,24 +189,31 @@ def _review_timestamp(item: dict[str, Any]) -> str | None:
 
 
 def _normalize_review(item: dict[str, Any]) -> dict[str, Any]:
-    user = item.get("user") or item.get("author") or {}
-    return {
+    user = item.get("user") if isinstance(item.get("user"), dict) else None
+    if user is None:
+        user = item.get("author") if isinstance(item.get("author"), dict) else {}
+    author_name = safe_str(
+        user.get("name") or user.get("nickname") or item.get("authorName") or item.get("reviewer_name")
+    )
+    author_avatar = safe_str(user.get("avatar") or user.get("avatarUrl"))
+    raw_images = item.get("images") or item.get("review_images") or []
+    images = [img for img in raw_images if img] if isinstance(raw_images, list) else []
+    out: dict[str, Any] = {
         "platform": "tiktok_shop",
         "id": safe_str(item.get("id") or item.get("reviewId") or item.get("review_id")),
         "rating": item.get("rating") or item.get("stars") or item.get("review_rating"),
         "text": safe_str(item.get("text") or item.get("content") or item.get("review") or item.get("review_text")),
         "createdAt": _review_timestamp(item),
-        "author": {
-            "name": safe_str(
-                user.get("name") or user.get("nickname") or item.get("authorName") or item.get("reviewer_name")
-            ),
-            "avatar": safe_str(user.get("avatar") or user.get("avatarUrl")),
-        },
-        "images": item.get("images") or item.get("review_images") or [],
         "verifiedPurchase": item.get("is_verified_purchase"),
         "sku": safe_str(item.get("sku_specification") or item.get("sku")),
         "country": safe_str(item.get("review_country") or item.get("country")),
     }
+    # Review actor almost never returns reviewer identity / images — omit empty shells.
+    if author_name or author_avatar:
+        out["author"] = {"name": author_name, "avatar": author_avatar}
+    if images:
+        out["images"] = images
+    return out
 
 
 async def _run_shop(mode: str, payload: dict[str, Any], limit: int) -> list[dict[str, Any]]:
@@ -329,7 +336,7 @@ async def product_reviews(
             reviews = [_normalize_review(i) for i in items[:limit]]
             return {"url": url, "totalReturned": len(reviews), "reviews": reviews}
 
-        data = await cached_or_run("tiktok-shop.product-reviews", {"url": url, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("tiktok-shop.product-reviews", {"url": url, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["reviews"]), RATE_REVIEWS)
         return ApiResponse(data=data)
 
