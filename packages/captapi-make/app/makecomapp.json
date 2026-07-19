@@ -1584,8 +1584,8 @@
         }
       },
       "threadsSearch": {
-        "label": "Threads Search",
-        "description": "Search Threads posts by keyword. Costs ~18 credits (cached results free, failures never charged).",
+        "label": "Threads Post Search",
+        "description": "Search public Threads posts by keyword — text, author, engagement, and media. Costs ~18 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1602,7 +1602,7 @@
       },
       "threadsSearchUsers": {
         "label": "Threads Search Users",
-        "description": "Find Threads users matching a keyword. Costs ~14 credits (cached results free, failures never charged).",
+        "description": "Find Threads users by keyword — username, display name, profile URL, verified. Costs ~14 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

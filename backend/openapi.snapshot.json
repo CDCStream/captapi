@@ -8831,7 +8831,7 @@
         "tags": [
           "Threads"
         ],
-        "summary": "Search Threads posts by keyword",
+        "summary": "Search public Threads posts by keyword",
         "operationId": "threads_search_v1_threads_search_get",
         "security": [
           {
@@ -8846,10 +8846,10 @@
             "schema": {
               "type": "string",
               "minLength": 2,
-              "description": "Keyword or phrase to search Threads",
+              "description": "Keyword or phrase to search public Threads posts",
               "title": "Q"
             },
-            "description": "Keyword or phrase to search Threads"
+            "description": "Keyword or phrase to search public Threads posts"
           },
           {
             "name": "limit",
@@ -8903,7 +8903,7 @@
         "tags": [
           "Threads"
         ],
-        "summary": "Find Threads users matching a keyword",
+        "summary": "Find Threads users / creators by keyword",
         "operationId": "threads_search_users_v1_threads_search_users_get",
         "security": [
           {

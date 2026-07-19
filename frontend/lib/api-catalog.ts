@@ -311,8 +311,8 @@ const THREADS: Spec[] = [
   { slug: "threads-profile", name: "Threads Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/threads/profile", credits: 1 },
   { slug: "threads-user-posts", name: "Threads User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/threads/user-posts", credits: 14, creditsPerResult: 0.7 },
   { slug: "threads-post-details", name: "Threads Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/threads/post-details", credits: 1 , tagline: "Get a Threads post — text, author, likes, replies, and media as structured JSON." },
-  { slug: "threads-search", name: "Threads Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/threads/search", credits: 18, creditsPerResult: 0.7 },
-  { slug: "threads-search-users", name: "Threads Search Users API", shortName: "Search Users", category: "search", method: "GET", path: "/v1/threads/search-users", credits: 14, creditsPerResult: 0.7 },
+  { slug: "threads-search", name: "Threads Post Search API", shortName: "Post Search", category: "search", method: "GET", path: "/v1/threads/search", credits: 18, creditsPerResult: 0.7, tagline: "Search public Threads posts by keyword — text, author, likes, replies, and media for each matching post.", longDescription: "Pass a keyword or phrase and the Threads Post Search API returns matching public posts as clean JSON. Each result includes the post URL and id, the text, when it was published, the author (username, display name, verified), engagement (likes, replies, reposts, quotes), and media URLs when the post has images or video. Use it for topic monitoring, brand listening, or content discovery on Threads. Path stays /v1/threads/search. Billed per result — about 0.7 credits each. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Public Threads posts matching your keyword", "Post URL, text, and publish time", "Author username, display name, and verified flag", "Likes, replies, reposts, quotes, and media URLs"] },
+  { slug: "threads-search-users", name: "Threads Search Users API", shortName: "Search Users", category: "search", method: "GET", path: "/v1/threads/search-users", credits: 14, creditsPerResult: 0.7, tagline: "Find Threads profiles by keyword — username, display name, profile URL, and verified flag for each match.", longDescription: "Pass a keyword and the Threads Search Users API returns distinct Threads profiles related to that topic as clean JSON. Each result includes username, display name, a ready-to-open profile URL (threads.net/@handle), and whether the account is verified. This endpoint does not include follower counts or avatars — call Threads Profile with the returned URL or @handle for full profile stats. Use it to discover creators in a niche, turn a name into a confirmed @handle, or seed a lead list. Billed per result — about 0.7 credits each. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Distinct Threads users matching your keyword", "Username, display name, and verified flag", "Canonical profile URL for each user", "Pair with Threads Profile for followers and avatar"] },
 ];
 
 const BLUESKY: Spec[] = [
@@ -1326,8 +1326,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "threads-profile": [up("Threads profile URL or @handle, e.g. https://threads.net/@username.")],
   "threads-user-posts": [up("Threads profile URL or @handle."), lp(20, 100)],
   "threads-post-details": [up("Threads post URL, e.g. https://threads.net/@user/post/CODE.")],
-  "threads-search": [qp("Keyword or phrase to search Threads (min 2 characters)."), lp(25, 200)],
-  "threads-search-users": [qp("Keyword to find Threads users (min 2 characters)."), lp(20, 100)],
+  "threads-search": [qp("Keyword or phrase to search public Threads posts (min 2 characters)."), lp(25, 200)],
+  "threads-search-users": [qp("Keyword to find Threads users / creators (min 2 characters)."), lp(20, 100)],
   // Bluesky
   "bluesky-profile": [up("Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle.")],
   "bluesky-user-posts": [up("Bluesky profile URL, @handle, or handle."), lp(25, 100), CURSOR],

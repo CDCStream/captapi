@@ -1691,7 +1691,7 @@ class ThreadsApi:
         return self._t.get("/v1/threads/post-details", {"url": url, "cache": cache})
 
     def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Threads Search — Search Threads posts by keyword. (18 credits)
+        """Threads Post Search — Search public Threads posts by keyword. (18 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
@@ -1700,7 +1700,7 @@ class ThreadsApi:
         return self._t.get("/v1/threads/search", {"q": q, "limit": limit, "cache": cache})
 
     def search_users(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Threads Search Users — Find Threads users matching a keyword. (14 credits)
+        """Threads Search Users — Find Threads users by keyword. (14 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 100. Billed per result.
@@ -1739,7 +1739,7 @@ class AsyncThreadsApi:
         return await self._t.get("/v1/threads/post-details", {"url": url, "cache": cache})
 
     async def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Threads Search — Search Threads posts by keyword. (18 credits)
+        """Threads Post Search — Search public Threads posts by keyword. (18 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
@@ -1748,7 +1748,7 @@ class AsyncThreadsApi:
         return await self._t.get("/v1/threads/search", {"q": q, "limit": limit, "cache": cache})
 
     async def search_users(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Threads Search Users — Find Threads users matching a keyword. (14 credits)
+        """Threads Search Users — Find Threads users by keyword. (14 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 100. Billed per result.

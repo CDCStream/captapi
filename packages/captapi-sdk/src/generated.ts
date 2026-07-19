@@ -1231,11 +1231,11 @@ export class ThreadsApi {
   postDetails(params: ThreadsPostDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/threads/post-details", params);
   }
-  /** Threads Search — Search Threads posts by keyword. (18 credits) */
+  /** Threads Post Search — Search public Threads posts by keyword. (18 credits) */
   search(params: ThreadsSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/threads/search", params);
   }
-  /** Threads Search Users — Find Threads users matching a keyword. (14 credits) */
+  /** Threads Search Users — Find Threads users by keyword. (14 credits) */
   searchUsers(params: ThreadsSearchUsersParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/threads/search-users", params);
   }

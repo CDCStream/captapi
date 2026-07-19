@@ -261,9 +261,9 @@ async def threads_user_posts(
         return ApiResponse(data=data)
 
 
-@router.get("/search", summary="Search Threads posts by keyword")
+@router.get("/search", summary="Search public Threads posts by keyword")
 async def threads_search(
-    q: str = Query(..., min_length=2, description="Keyword or phrase to search Threads"),
+    q: str = Query(..., min_length=2, description="Keyword or phrase to search public Threads posts"),
     limit: int = Query(25, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
@@ -298,9 +298,9 @@ async def threads_search(
         return ApiResponse(data=data)
 
 
-@router.get("/search-users", summary="Find Threads users matching a keyword")
+@router.get("/search-users", summary="Find Threads users / creators by keyword")
 async def threads_search_users(
-    q: str = Query(..., min_length=2, description="Keyword to search Threads users"),
+    q: str = Query(..., min_length=2, description="Keyword to find Threads users or creators"),
     limit: int = Query(20, ge=1, le=100),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
@@ -334,14 +334,21 @@ async def threads_search_users(
                 if not uname or uname in seen:
                     continue
                 seen.add(uname)
-                users.append(u)
+                users.append(
+                    {
+                        "username": uname,
+                        "displayName": u.get("displayName"),
+                        "url": f"https://www.threads.net/@{uname}",
+                        "verified": u.get("verified"),
+                    }
+                )
                 if len(users) >= limit:
                     break
             return {"query": q, "totalReturned": len(users), "users": users}
 
         data = await cached_or_run(
             endpoint="threads.search-users",
-            params={"q": q, "limit": limit, "v": 3},
+            params={"q": q, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

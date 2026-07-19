@@ -2548,10 +2548,10 @@
   {
     "tool": "threads_search",
     "platform": "Threads",
-    "name": "Threads Search",
+    "name": "Threads Post Search",
     "path": "/v1/threads/search",
     "credits": 18,
-    "summary": "Search Threads posts by keyword.",
+    "summary": "Search public Threads posts by keyword — text, author, engagement, and media.",
     "params": [
       {
         "name": "q",
@@ -2579,7 +2579,7 @@
     "name": "Threads Search Users",
     "path": "/v1/threads/search-users",
     "credits": 14,
-    "summary": "Find Threads users matching a keyword.",
+    "summary": "Find Threads users by keyword — username, display name, profile URL, verified.",
     "params": [
       {
         "name": "q",
