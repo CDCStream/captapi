@@ -651,9 +651,12 @@ def _normalize_event(item: dict) -> dict:
         organizers = item["hosts"]
     location_name = item.get("location_name") or item.get("venue") or item.get("locationName")
     start_date = safe_str(item.get("utcStartDate") or item.get("start_date") or item.get("startDate"))
+    # Prefer human-readable time (apify dateTimeSentence / crawlerbros formatted_date)
+    # over the ISO start_date fallback.
     start_time = safe_str(
         item.get("startTime")
         or item.get("dateTimeSentence")
+        or item.get("formatted_date")
         or item.get("start_time")
         or item.get("startDateTime")
         or start_date
@@ -671,15 +674,20 @@ def _normalize_event(item: dict) -> dict:
         or loc.get("name")
         or location_name
     )
-    # TEXT places often leave city null; recover City, ST from address / location name.
+    # TEXT places / crawlerbros often leave city null or bare ("Woodstock");
+    # recover "City, ST" from address / location name when possible.
+    inferred_city = _infer_city_from_text(
+        address,
+        street,
+        safe_str(loc.get("name")),
+        safe_str(location_name),
+        safe_str(item.get("address")),
+        safe_str(item.get("location_name")),
+    )
     if not city:
-        city = _infer_city_from_text(
-            address,
-            street,
-            safe_str(loc.get("name")),
-            safe_str(location_name),
-            safe_str(item.get("address")),
-        )
+        city = inferred_city
+    elif inferred_city and "," not in city and inferred_city.lower().startswith(city.lower()):
+        city = inferred_city
     organizer = safe_str(
         item.get("organizedBy")
         or item.get("organizer")
@@ -692,9 +700,19 @@ def _normalize_event(item: dict) -> dict:
         m = re.search(r"Hosted by\s+(.+)", privacy, flags=re.IGNORECASE)
         if m:
             organizer = m.group(1).strip() or None
-    categories = item.get("discoveryCategories") or item.get("categories") or []
-    if not isinstance(categories, list):
-        categories = []
+    # apify: discoveryCategories [{label,url}]; crawlerbros: categories ["Comedy"]
+    raw_categories = item.get("discoveryCategories") or item.get("categories") or []
+    categories: list[dict[str, Any]] = []
+    if isinstance(raw_categories, list):
+        for c in raw_categories:
+            if isinstance(c, str):
+                label = c.strip()
+                if label:
+                    categories.append({"label": label, "url": None})
+            elif isinstance(c, dict):
+                label = safe_str(c.get("label") or c.get("name"))
+                if label:
+                    categories.append({"label": label, "url": safe_str(c.get("url"))})
     # Apify pads externalLinks with null slots (fixed-length scrapes); keep real URLs only.
     raw_links = item.get("externalLinks") or item.get("external_links") or []
     external_links = [
@@ -702,6 +720,11 @@ def _normalize_event(item: dict) -> dict:
         for link in (safe_str(x) for x in (raw_links if isinstance(raw_links, list) else []))
         if link
     ]
+    country = safe_str(loc.get("countryCode") or loc.get("country_code") or item.get("countryCode"))
+    if not country and city and re.search(r",\s*([A-Z]{2})\b", city):
+        st = re.search(r",\s*([A-Z]{2})\b", city)
+        if st and st.group(1) in _US_STATE_ABBR:
+            country = "US"
     return {
         "platform": "facebook",
         "id": safe_str(item.get("id") or item.get("event_id") or item.get("eventId")),
@@ -730,11 +753,11 @@ def _normalize_event(item: dict) -> dict:
             item.get("usersResponded") or item.get("responded_count") or item.get("users_responded")
         ),
         "location": {
-            "name": safe_str(loc.get("name") or location_name),
+            "name": safe_str(loc.get("name") or location_name or item.get("location_name")),
             "city": city,
             "latitude": loc.get("latitude") if loc.get("latitude") is not None else item.get("latitude"),
             "longitude": loc.get("longitude") if loc.get("longitude") is not None else item.get("longitude"),
-            "countryCode": safe_str(loc.get("countryCode") or loc.get("country_code") or item.get("countryCode")),
+            "countryCode": country,
         },
         "organizer": organizer,
         "organizers": [
@@ -748,7 +771,11 @@ def _normalize_event(item: dict) -> dict:
             if isinstance(o, dict)
         ],
         "ticketsUrl": safe_str(
-            tickets.get("buyUrl") or item.get("ticketsUrl") or item.get("ticketUrl") or item.get("tickets_url")
+            tickets.get("buyUrl")
+            or item.get("ticketsUrl")
+            or item.get("ticketUrl")
+            or item.get("ticket_url")
+            or item.get("tickets_url")
         ),
         "categories": categories,
         "externalLinks": external_links,
@@ -1768,7 +1795,7 @@ async def facebook_event_details(
 
         data = await cached_or_run(
             endpoint="facebook.event-details",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
