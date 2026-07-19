@@ -1406,81 +1406,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "listings": [
       {
         "platform": "facebook",
-        "id": "877314832116342",
-        "title": "Desk chair",
-        "url": "https://www.facebook.com/marketplace/item/877314832116342/",
-        "price": 20,
-        "priceFormatted": "$20",
-        "currency": "USD",
-        "location": "Washington D.C.",
-        "city": "Washington",
-        "state": "DC",
-        "latitude": null,
-        "longitude": null,
-        "isSold": false,
-        "isLive": true,
-        "deliveryTypes": [
-          "IN_PERSON"
-        ],
-        "image": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/749629401_1344371334550487_4988145909938674869_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=LmF34sVytpEQ7kNvwGfnz2c&_nc_oc=AdpEfJLNq688r77eP9kYje9th9pl6XTuRWdsjf6fVKK1tG0c6n0dM-GK_9Cho5OBLDk&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=nqDHzkc0tjqu_uHaL98-KQ&_nc_ss=7f289&oh=00_AQD6aXmi_LA2nwKymSvTNTLl5Bl7xP-eugI8jcDSSy5N0A&oe=6A61AA71",
-        "photos": [
-          "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/749629401_1344371334550487_4988145909938674869_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=LmF34sVytpEQ7kNvwGfnz2c&_nc_oc=AdpEfJLNq688r77eP9kYje9th9pl6XTuRWdsjf6fVKK1tG0c6n0dM-GK_9Cho5OBLDk&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=nqDHzkc0tjqu_uHaL98-KQ&_nc_ss=7f289&oh=00_AQD6aXmi_LA2nwKymSvTNTLl5Bl7xP-eugI8jcDSSy5N0A&oe=6A61AA71"
-        ],
-        "description": null,
-        "createdAt": null
-      },
-      {
-        "platform": "facebook",
-        "id": "883983214303962",
-        "title": "Black Mesh Office Chair",
-        "url": "https://www.facebook.com/marketplace/item/883983214303962/",
-        "price": 20,
-        "priceFormatted": "$20",
-        "currency": "USD",
-        "location": "Silver Spring, Maryland",
-        "city": "Silver Spring",
-        "state": "MD",
-        "latitude": null,
-        "longitude": null,
-        "isSold": false,
-        "isLive": true,
-        "deliveryTypes": [
-          "IN_PERSON"
-        ],
-        "image": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/749981442_887595293936148_610596500381494264_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=106&ccb=1-7&_nc_sid=92e707&_nc_ohc=myCvH6tzYI4Q7kNvwH3nBO2&_nc_oc=AdoPziN88aStcHIXPqEh8BFgTeg2oADU7UD8vPoHdHSem_KdwNn652PV4XW1pO6DGso&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=nqDHzkc0tjqu_uHaL98-KQ&_nc_ss=7f289&oh=00_AQCykmrerS60-Mm0vJWHcPbxz8VJxMO2m0a_MB1jOjALSQ&oe=6A61A8F9",
-        "photos": [
-          "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/749981442_887595293936148_610596500381494264_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=106&ccb=1-7&_nc_sid=92e707&_nc_ohc=myCvH6tzYI4Q7kNvwH3nBO2&_nc_oc=AdoPziN88aStcHIXPqEh8BFgTeg2oADU7UD8vPoHdHSem_KdwNn652PV4XW1pO6DGso&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=nqDHzkc0tjqu_uHaL98-KQ&_nc_ss=7f289&oh=00_AQCykmrerS60-Mm0vJWHcPbxz8VJxMO2m0a_MB1jOjALSQ&oe=6A61A8F9"
-        ],
-        "description": null,
-        "createdAt": null
-      },
-      {
-        "platform": "facebook",
-        "id": "27670772145888872",
-        "title": "Grey Desk Chair",
-        "url": "https://www.facebook.com/marketplace/item/27670772145888872/",
-        "price": 20,
-        "priceFormatted": "$20",
-        "currency": "USD",
-        "location": "Washington D.C.",
-        "city": "Washington",
-        "state": "DC",
-        "latitude": null,
-        "longitude": null,
-        "isSold": false,
-        "isLive": true,
-        "deliveryTypes": [
-          "IN_PERSON"
-        ],
-        "image": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/749301026_2094675114593677_7526860975966890692_n.jpg?stp=c0.101.261.261a_dst-jpg_p261x260_tt6&_nc_cat=101&ccb=1-7&_nc_sid=92e707&_nc_ohc=nmh6-3GShL8Q7kNvwHKFlTr&_nc_oc=Adprq6YzVLBaviCeyNraQHFK6J81goBvRXNwKgWvCwVgyLb4daI5qkLKjNmy1c4w1YA&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=nqDHzkc0tjqu_uHaL98-KQ&_nc_ss=7f289&oh=00_AQDZF3-WvZuv_07Q-mr_jULLe-AkWAns3YvE9X5BmY5c6g&oe=6A618D0E",
-        "photos": [
-          "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/749301026_2094675114593677_7526860975966890692_n.jpg?stp=c0.101.261.261a_dst-jpg_p261x260_tt6&_nc_cat=101&ccb=1-7&_nc_sid=92e707&_nc_ohc=nmh6-3GShL8Q7kNvwHKFlTr&_nc_oc=Adprq6YzVLBaviCeyNraQHFK6J81goBvRXNwKgWvCwVgyLb4daI5qkLKjNmy1c4w1YA&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=nqDHzkc0tjqu_uHaL98-KQ&_nc_ss=7f289&oh=00_AQDZF3-WvZuv_07Q-mr_jULLe-AkWAns3YvE9X5BmY5c6g&oe=6A618D0E"
-        ],
-        "description": null,
-        "createdAt": null
-      },
-      {
-        "platform": "facebook",
         "id": "1684056162810328",
         "title": "Desk chair",
         "url": "https://www.facebook.com/marketplace/item/1684056162810328/",
@@ -1490,44 +1415,128 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "location": "Washington D.C.",
         "city": "Washington",
         "state": "DC",
-        "latitude": null,
-        "longitude": null,
+        "latitude": 38.910827636719,
+        "longitude": -77.019653320312,
         "isSold": false,
         "isLive": true,
         "deliveryTypes": [
           "IN_PERSON"
         ],
-        "image": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/729099259_2600662523665021_2872679799686599261_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=LMXVOzWNN3kQ7kNvwG2cBSn&_nc_oc=AdopbG5xP8koQZx8pzfAyEWtTQqYiicUltTjRtt1Hktxv5UxbOEZjBJfLal6XxUiM20&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=nqDHzkc0tjqu_uHaL98-KQ&_nc_ss=7f289&oh=00_AQDyvjzUIa62_yZK1y23xUMx_3t-JIVWermq-VgrLsMvsw&oe=6A618C3D",
+        "image": "https://scontent-lga3-2.xx.fbcdn.net/v/t39.84726-6/729099259_2600662523665021_2872679799686599261_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=V5k2eiTB5BoQ7kNvwFLiJxd&_nc_oc=AdovkHj4V_t8y--LdWGaSNQBYwNCTxxnsYHFaK2nc-V1FCPFvnrjRRaJAkFWNz6zJEE&_nc_zt=14&_nc_ht=scontent-lga3-2.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQCLOSQwHpC18Kn75hmJxJ5kETXqDgfjIoeWyvNOuIP_LQ&oe=6A62A57D",
         "photos": [
-          "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/729099259_2600662523665021_2872679799686599261_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=LMXVOzWNN3kQ7kNvwG2cBSn&_nc_oc=AdopbG5xP8koQZx8pzfAyEWtTQqYiicUltTjRtt1Hktxv5UxbOEZjBJfLal6XxUiM20&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=nqDHzkc0tjqu_uHaL98-KQ&_nc_ss=7f289&oh=00_AQDyvjzUIa62_yZK1y23xUMx_3t-JIVWermq-VgrLsMvsw&oe=6A618C3D"
+          "https://scontent-lga3-2.xx.fbcdn.net/v/t39.84726-6/729099259_2600662523665021_2872679799686599261_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=V5k2eiTB5BoQ7kNvwFLiJxd&_nc_oc=AdovkHj4V_t8y--LdWGaSNQBYwNCTxxnsYHFaK2nc-V1FCPFvnrjRRaJAkFWNz6zJEE&_nc_zt=14&_nc_ht=scontent-lga3-2.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQCLOSQwHpC18Kn75hmJxJ5kETXqDgfjIoeWyvNOuIP_LQ&oe=6A62A57D",
+          "https://scontent-lga3-2.xx.fbcdn.net/v/t39.84726-6/729099259_2600662523665021_2872679799686599261_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=V5k2eiTB5BoQ7kNvwEMVUlO&_nc_oc=AdrCb-HbT-bjIWEu_xrQFmwLbqkuJvYlu_GSAGjQ1oRd4C-mBIC5_mtq_fhDA4N75xk&_nc_zt=14&_nc_ht=scontent-lga3-2.xx&_nc_gid=ToC15gYSkjp7VVfCM3W7eg&_nc_ss=7f289&oh=00_AQBHbdSjxkXoc6ysX6CHu3jo-GaIOQUGHbfd6HGFW1uw8A&oe=6A62A57D"
         ],
-        "description": null,
-        "createdAt": null
+        "description": "Really comfortable adjustable desk chair",
+        "createdAt": "2026-06-27T00:23:01.000Z"
       },
       {
         "platform": "facebook",
-        "id": "1713084716476094",
+        "id": "877314832116342",
         "title": "Desk chair",
-        "url": "https://www.facebook.com/marketplace/item/1713084716476094/",
-        "price": 40,
-        "priceFormatted": "$40",
+        "url": "https://www.facebook.com/marketplace/item/877314832116342/",
+        "price": 20,
+        "priceFormatted": "$20",
         "currency": "USD",
         "location": "Washington D.C.",
         "city": "Washington",
         "state": "DC",
-        "latitude": null,
-        "longitude": null,
+        "latitude": 38.888854980469,
+        "longitude": -76.986694335938,
         "isSold": false,
         "isLive": true,
         "deliveryTypes": [
           "IN_PERSON"
         ],
-        "image": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/744662062_1716995909342166_3278591268559740732_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=104&ccb=1-7&_nc_sid=92e707&_nc_ohc=DDGF1u2_t_wQ7kNvwHPXyKX&_nc_oc=AdoKaFl7f6i0GmVmbkt3YQwUmXQzUkZ1-Y_9toIDJ1Asb3yz_AHEoVk6yKqYVu7DUME&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=nqDHzkc0tjqu_uHaL98-KQ&_nc_ss=7f289&oh=00_AQAFeqkcOmvOw1VsSHWyEZ_OjIE-gI-WigSeYrE2FAKPaQ&oe=6A619E38",
+        "image": "https://scontent-lga3-3.xx.fbcdn.net/v/t39.84726-6/749629401_1344371334550487_4988145909938674869_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=LmF34sVytpEQ7kNvwH0Bltm&_nc_oc=AdoV2vMUB1vlfeyVK_0v9OhIfkUW6bsy5B_6zfO7NckM4x8BGvcGtq-FIDEyzfREspI&_nc_zt=14&_nc_ht=scontent-lga3-3.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQCP0pnEc5FXLKC4HapyZ6Z1C9ECuNPNJaiKv3wSNCIkMA&oe=6A628B71",
         "photos": [
-          "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/744662062_1716995909342166_3278591268559740732_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=104&ccb=1-7&_nc_sid=92e707&_nc_ohc=DDGF1u2_t_wQ7kNvwHPXyKX&_nc_oc=AdoKaFl7f6i0GmVmbkt3YQwUmXQzUkZ1-Y_9toIDJ1Asb3yz_AHEoVk6yKqYVu7DUME&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=nqDHzkc0tjqu_uHaL98-KQ&_nc_ss=7f289&oh=00_AQAFeqkcOmvOw1VsSHWyEZ_OjIE-gI-WigSeYrE2FAKPaQ&oe=6A619E38"
+          "https://scontent-lga3-3.xx.fbcdn.net/v/t39.84726-6/749629401_1344371334550487_4988145909938674869_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=LmF34sVytpEQ7kNvwH0Bltm&_nc_oc=AdoV2vMUB1vlfeyVK_0v9OhIfkUW6bsy5B_6zfO7NckM4x8BGvcGtq-FIDEyzfREspI&_nc_zt=14&_nc_ht=scontent-lga3-3.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQCP0pnEc5FXLKC4HapyZ6Z1C9ECuNPNJaiKv3wSNCIkMA&oe=6A628B71",
+          "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/749629401_1344371334550487_4988145909938674869_n.jpg?stp=dst-jpg_s960x960_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=LmF34sVytpEQ7kNvwHFukl5&_nc_oc=AdrCtCUoNcltHSzpH9Mo7QU8cdRIHc3Nn0qL1fcYsTDw6e8qjLj1s4cCpYQuThXEU28&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=iMN8C3m2i3TGWtNqNh_ADw&_nc_ss=7f289&oh=00_AQDQlfYJF_FFF7sqVxOMtZnjNmobq30O6QfwzBJH7tkocQ&oe=6A628B71",
+          "https://scontent-bos5-1.xx.fbcdn.net/v/t45.5328-4/750294112_1784797239214942_5973269997469875794_n.jpg?stp=dst-jpg_s960x960_tt6&_nc_cat=110&ccb=1-7&_nc_sid=247b10&_nc_ohc=0sfjWL_C59kQ7kNvwGnLkWq&_nc_oc=AdqV5qjK9LCjf9bhID45xd8HyKPuV4nwNBi-ABhSZBz0bZ-uGexBCNCuPoVhWU_7Z6Q&_nc_zt=23&_nc_ht=scontent-bos5-1.xx&_nc_gid=iMN8C3m2i3TGWtNqNh_ADw&_nc_ss=7f289&oh=00_AQBkBi5wap91FC9HV8yEAK2xbsxYPivNHchM2Xl9SlEhaQ&oe=6A627ED4"
         ],
-        "description": null,
-        "createdAt": null
+        "description": "Black leather chair with adjustable high and tilt.\n\nMinor tear in back (photo #2) but otherwise like new.",
+        "createdAt": "2026-07-17T14:23:42.000Z"
+      },
+      {
+        "platform": "facebook",
+        "id": "2173975559828091",
+        "title": "Office Chair",
+        "url": "https://www.facebook.com/marketplace/item/2173975559828091/",
+        "price": 20,
+        "priceFormatted": "$20",
+        "currency": "USD",
+        "location": "Washington D.C.",
+        "city": "Washington",
+        "state": "DC",
+        "latitude": 38.905334472656,
+        "longitude": -77.030639648438,
+        "isSold": false,
+        "isLive": true,
+        "deliveryTypes": [
+          "IN_PERSON"
+        ],
+        "image": "https://scontent-lga3-3.xx.fbcdn.net/v/t39.84726-6/752488808_2377501942774136_7478534201953725773_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=102&ccb=1-7&_nc_sid=92e707&_nc_ohc=RjYR0L7jJ4EQ7kNvwEFb8F2&_nc_oc=AdrawdvdKGC2xkYBqkoJpIs8RYFzrvK3s1A_fYHH8J-owoWb7x4SvX30UtmD1x1n-AY&_nc_zt=14&_nc_ht=scontent-lga3-3.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQBSVENBUuvKKE2XVsalevHFxqcfvlEoLxBVOQT_eWqnwA&oe=6A62A28B",
+        "photos": [
+          "https://scontent-lga3-3.xx.fbcdn.net/v/t39.84726-6/752488808_2377501942774136_7478534201953725773_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=102&ccb=1-7&_nc_sid=92e707&_nc_ohc=RjYR0L7jJ4EQ7kNvwEFb8F2&_nc_oc=AdrawdvdKGC2xkYBqkoJpIs8RYFzrvK3s1A_fYHH8J-owoWb7x4SvX30UtmD1x1n-AY&_nc_zt=14&_nc_ht=scontent-lga3-3.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQBSVENBUuvKKE2XVsalevHFxqcfvlEoLxBVOQT_eWqnwA&oe=6A62A28B",
+          "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/752488808_2377501942774136_7478534201953725773_n.jpg?stp=dst-jpg_s960x960_tt6&_nc_cat=102&ccb=1-7&_nc_sid=92e707&_nc_ohc=RjYR0L7jJ4EQ7kNvwHLCZ86&_nc_oc=Adr-Xd2oJThLHhThQaYrNXEWutIbl_KwrcAmf1tBZLZkEltGuoniVjOkkeqZbo_Uv_E&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=8JndLgoJzjJ3lICJqdzk_g&_nc_ss=7f289&oh=00_AQA69xS_8ZUh_q71u2Admizlypex5ksoQZXNGflG6hXXAA&oe=6A62A28B"
+        ],
+        "description": "Moving out, must go by July 23 — office chair for sale, pickup in Logan Circle.",
+        "createdAt": "2026-07-18T19:26:17.000Z"
+      },
+      {
+        "platform": "facebook",
+        "id": "1171247105206893",
+        "title": "Office chair",
+        "url": "https://www.facebook.com/marketplace/item/1171247105206893/",
+        "price": 5,
+        "priceFormatted": "$5",
+        "currency": "USD",
+        "location": "Arlington, Virginia",
+        "city": "Arlington",
+        "state": "VA",
+        "latitude": 38.877868652344,
+        "longitude": -77.096557617188,
+        "isSold": false,
+        "isLive": true,
+        "deliveryTypes": [
+          "IN_PERSON"
+        ],
+        "image": "https://scontent-lga3-2.xx.fbcdn.net/v/t39.84726-6/746327331_1083912260825853_9122859599853642446_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=d7TdRnNRQEcQ7kNvwFu5v6M&_nc_oc=Adow19m9FEdNbCRKCgnI6WTQ23OHgkXCCfnID9UWL32luBHklb2A_ZnFMfdOfqRqZ4I&_nc_zt=14&_nc_ht=scontent-lga3-2.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQAvmjDz0Liqkye3FnH3Yvnu6UFvCXvWdHUaxfZ4dveVvA&oe=6A62745F",
+        "photos": [
+          "https://scontent-lga3-2.xx.fbcdn.net/v/t39.84726-6/746327331_1083912260825853_9122859599853642446_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=d7TdRnNRQEcQ7kNvwFu5v6M&_nc_oc=Adow19m9FEdNbCRKCgnI6WTQ23OHgkXCCfnID9UWL32luBHklb2A_ZnFMfdOfqRqZ4I&_nc_zt=14&_nc_ht=scontent-lga3-2.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQAvmjDz0Liqkye3FnH3Yvnu6UFvCXvWdHUaxfZ4dveVvA&oe=6A62745F",
+          "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/746327331_1083912260825853_9122859599853642446_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=d7TdRnNRQEcQ7kNvwGMQNEI&_nc_oc=Adr7ABAoty0KSFwiDK3sPb-pQOnZcyCUEwefb4Jj2q9DMAiWW3RABqj9wguJSx5KVYE&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=hRI4eETpBcYnbWdG44reDg&_nc_ss=7f289&oh=00_AQClK45Ga4mj1DnOvjOsjsqTwxnKKPqVXkMp4Q96wvUa7w&oe=6A62745F",
+          "https://scontent-bos5-1.xx.fbcdn.net/v/t45.5328-4/745540977_1624106143058627_707116389057658717_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=109&ccb=1-7&_nc_sid=247b10&_nc_ohc=3wDiuhgDig8Q7kNvwH6H5wa&_nc_oc=AdrCWR4z3jQYxEnR-UNfVnSc39_2EL50GlYPnTwMYTaT7DgA6qnaV05FVRFxVdI7-C8&_nc_zt=23&_nc_ht=scontent-bos5-1.xx&_nc_gid=hRI4eETpBcYnbWdG44reDg&_nc_ss=7f289&oh=00_AQBx0ZiZcsXpUthwjDsLyyOHBzHKgU_VylCahBEaUUcz3A&oe=6A6295A7"
+        ],
+        "description": "Had for about a year. The lever was installed wrong so it doesn’t work but can be fixed by someone handier than me. Pick up only.",
+        "createdAt": "2026-07-13T22:35:32.000Z"
+      },
+      {
+        "platform": "facebook",
+        "id": "4364170703849117",
+        "title": "Grey Swivel Desk Chair",
+        "url": "https://www.facebook.com/marketplace/item/4364170703849117/",
+        "price": 30,
+        "priceFormatted": "$30",
+        "currency": "USD",
+        "location": "Washington D.C.",
+        "city": "Washington",
+        "state": "DC",
+        "latitude": 38.894348144531,
+        "longitude": -77.041625976562,
+        "isSold": false,
+        "isLive": true,
+        "deliveryTypes": [
+          "IN_PERSON"
+        ],
+        "image": "https://scontent-lga3-1.xx.fbcdn.net/v/t39.84726-6/746164526_1785812285741106_8949820118797834424_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=103&ccb=1-7&_nc_sid=92e707&_nc_ohc=Ae_B1u7tqdUQ7kNvwGmYanm&_nc_oc=AdondR3xKfZRnZSXry5O9eXFXxMnG8o6KnEyhsVVuvlHAuWZ70c9mqirqg63RqnYSbo&_nc_zt=14&_nc_ht=scontent-lga3-1.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQBMUByNFhQFlPOSdWy4WY6Ehhf8UPp4a70OyoCYO9uKog&oe=6A626F98",
+        "photos": [
+          "https://scontent-lga3-1.xx.fbcdn.net/v/t39.84726-6/746164526_1785812285741106_8949820118797834424_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=103&ccb=1-7&_nc_sid=92e707&_nc_ohc=Ae_B1u7tqdUQ7kNvwGmYanm&_nc_oc=AdondR3xKfZRnZSXry5O9eXFXxMnG8o6KnEyhsVVuvlHAuWZ70c9mqirqg63RqnYSbo&_nc_zt=14&_nc_ht=scontent-lga3-1.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQBMUByNFhQFlPOSdWy4WY6Ehhf8UPp4a70OyoCYO9uKog&oe=6A626F98",
+          "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/746164526_1785812285741106_8949820118797834424_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=103&ccb=1-7&_nc_sid=92e707&_nc_ohc=Ae_B1u7tqdUQ7kNvwHluI3F&_nc_oc=AdpeBRMgGaLOeXu8blpxlUic2fmYUazE5IkfbPRFq4W_zNiZ2SZCXmLUHqsRWraNWYY&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=ypPppJpemGiz3RilPT-pMg&_nc_ss=7f289&oh=00_AQDDMaNKYFlmL7SDSXT0ZjOsoMZJDelhZGh1i3fFi7qC6A&oe=6A626F98",
+          "https://scontent-bos5-1.xx.fbcdn.net/v/t45.5328-4/747589906_2901995200133298_2451643044658583225_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=105&ccb=1-7&_nc_sid=247b10&_nc_ohc=8FBA-Kj9v5wQ7kNvwHcXYAM&_nc_oc=Adp-zLUsR-PI_If_ruyx-l7Un3uG6vhxGArKBtCH_8TVoAmgSU3I49ZNJalMlWj3fpw&_nc_zt=23&_nc_ht=scontent-bos5-1.xx&_nc_gid=ypPppJpemGiz3RilPT-pMg&_nc_ss=7f289&oh=00_AQDCMHTTqii13eumwO8GlfKRVyn57qLoaww4MQP0nJ--GA&oe=6A627C9B",
+          "https://scontent-bos5-1.xx.fbcdn.net/v/t45.5328-4/741411782_1035847442427331_515430543211366405_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=103&ccb=1-7&_nc_sid=247b10&_nc_ohc=0ZFdcSUazNMQ7kNvwEqjhw8&_nc_oc=Adr01krWc7e3_8p639BdxWTfS5wY9hipxuvSsMq3MOvrtKWTYtJef5KkhMgDUer_8XY&_nc_zt=23&_nc_ht=scontent-bos5-1.xx&_nc_gid=ypPppJpemGiz3RilPT-pMg&_nc_ss=7f289&oh=00_AQBIHWLiuR4hVPEBqAXGdoW8XXlRVVijgTVmwJ-Que6MkQ&oe=6A626FF8"
+        ],
+        "description": "Like new and recently cleaned. Moving and needing to down size. Price negotiable just w￼want to get rid of it by the end of the month! \n\nUpholstered swivel office chair with grey textured fabric. The chair has a polished chrome five-point base with black rolling casters. It includes a pneumatic lever for height adjustment and a contoured bucket-style seat with integrated armrests.\nW",
+        "createdAt": "2026-07-12T20:50:14.000Z"
       }
     ]
   },
