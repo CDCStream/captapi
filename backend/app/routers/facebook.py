@@ -152,6 +152,56 @@ def _fb_external_link(item: dict) -> str | None:
     return None
 
 
+def _fb_thumb_from_node(node: Any) -> str | None:
+    """Pull a thumbnail URI out of a media / attachment node."""
+    if not isinstance(node, dict):
+        return None
+    # Nested ``media`` wrapper (attachments[{media:{...}}]).
+    nested = node.get("media")
+    if isinstance(nested, dict):
+        from_nested = _fb_thumb_from_node(nested)
+        if from_nested:
+            return from_nested
+    for key in ("thumbnailUrl", "thumbnail"):
+        val = node.get(key)
+        if isinstance(val, str) and val:
+            return val
+        if isinstance(val, dict):
+            uri = safe_str(val.get("uri") or val.get("url"))
+            if uri:
+                return uri
+    for key in ("thumbnailImage", "preferred_thumbnail", "image", "photo_image"):
+        val = node.get(key)
+        if isinstance(val, dict):
+            inner = val.get("image") if isinstance(val.get("image"), dict) else val
+            if isinstance(inner, dict):
+                uri = safe_str(inner.get("uri") or inner.get("url"))
+                if uri:
+                    return uri
+    return None
+
+
+def _fb_first_media_node(raw_media: Any) -> dict:
+    """First usable media dict from ``media`` / ``attachments`` list-or-dict."""
+    if isinstance(raw_media, list):
+        for entry in raw_media:
+            if not isinstance(entry, dict):
+                continue
+            nested = entry.get("media")
+            if isinstance(nested, dict):
+                return nested
+            # Skip album/mediaset stubs that only carry a set URL.
+            if entry.get("thumbnail") or entry.get("photo_image") or entry.get("image") or entry.get(
+                "videoDeliveryLegacyFields"
+            ):
+                return entry
+        first = raw_media[0] if raw_media and isinstance(raw_media[0], dict) else {}
+        return first.get("media") if isinstance(first.get("media"), dict) else first
+    if isinstance(raw_media, dict):
+        return raw_media
+    return {}
+
+
 def _normalize_post(item: dict) -> dict:
     # Group posts carry their photos under `attachments` instead of `media`.
     # Reel rows from apify/facebook-posts-scraper often use the GraphQL
@@ -175,31 +225,27 @@ def _normalize_post(item: dict) -> dict:
         short_thumb = img.get("uri") if isinstance(img, dict) else None
 
     raw_media = item.get("media") or item.get("attachments")
+    media = _fb_first_media_node(raw_media)
+    # Album posts put a mediaset stub first; scan all attachments for a thumb.
+    attachment_thumb = None
     if isinstance(raw_media, list):
-        first = raw_media[0] if raw_media and isinstance(raw_media[0], dict) else {}
-        # attachments[{media:{...}}] vs media[{...}]
-        media = first.get("media") if isinstance(first.get("media"), dict) else first
+        for entry in raw_media:
+            attachment_thumb = _fb_thumb_from_node(entry)
+            if attachment_thumb:
+                break
     elif isinstance(raw_media, dict):
-        media = raw_media
-    else:
-        media = {}
+        attachment_thumb = _fb_thumb_from_node(raw_media)
+
     user = item.get("user") or {}
     delivery = media.get("videoDeliveryLegacyFields") or media.get("video_delivery_legacy_fields") or {}
     if not isinstance(delivery, dict):
         delivery = {}
     duration_ms = media.get("playable_duration_in_ms") or playback.get("playable_duration_in_ms")
-    media_thumb = media.get("thumbnail")
-    if isinstance(media_thumb, dict):
-        media_thumb = media_thumb.get("uri")
     thumbnail = (
-        item.get("thumbnailUrl")
-        or media.get("thumbnailUrl")
-        or media_thumb
+        safe_str(item.get("thumbnailUrl"))
+        or attachment_thumb
         or short_thumb
-        or ((media.get("thumbnailImage") or {}).get("uri"))
-        or (((media.get("preferred_thumbnail") or {}).get("image") or {}).get("uri"))
-        or ((media.get("image") or {}).get("uri"))
-        or ((media.get("photo_image") or {}).get("uri"))
+        or _fb_thumb_from_node(media)
     )
     video_url = (
         item.get("videoUrl")
@@ -229,12 +275,16 @@ def _normalize_post(item: dict) -> dict:
             break
     if not author_url and not groupish:
         author_url = safe_str(item.get("facebookUrl") or item.get("inputUrl"))
+    # Numeric FB user ids resolve as profile URLs; opaque pfbid tokens do not.
+    user_id = safe_str(user.get("id"))
+    if not author_url and user_id and user_id.isdigit():
+        author_url = f"https://www.facebook.com/{user_id}"
     author_username = safe_str(
         item.get("pageUsername")
         or user.get("username")
         or delegate.get("uri_token")
         or _fb_username_from_url(safe_str(video_owner.get("url")))
-        or user.get("id")
+        or (user_id if user_id and user_id.isdigit() else None)
         or _fb_username_from_url(author_url)
         or (None if groupish else _fb_username_from_url(item.get("facebookUrl") or item.get("inputUrl")))
         or item.get("author")
@@ -1034,7 +1084,7 @@ async def facebook_group_posts(
 
         data = await cached_or_run(
             endpoint="facebook.group-posts",
-            params={"url": url, "limit": limit, "v": 4},
+            params={"url": url, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
