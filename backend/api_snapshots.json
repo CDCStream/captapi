@@ -3756,8 +3756,34 @@
     "credits": null,
     "data": {
       "url": "https://www.facebook.com/groups/dogspotting",
-      "totalReturned": 5,
+      "totalReturned": 4,
       "posts": [
+        {
+          "platform": "facebook",
+          "url": "https://www.facebook.com/groups/dogspotting/permalink/10165879070869467/",
+          "id": "UzpfSTEwMDAwOTQyMjkyMTg1NjpWSzoxMDE2NTg3OTA3MDg2OTQ2Nw==",
+          "caption": "A noisy boy spotted in Santa Ponca, Majorca! 🇪🇸 🐕",
+          "description": "A noisy boy spotted in Santa Ponca, Majorca! 🇪🇸 🐕",
+          "publishedAt": "2026-07-18T00:30:13.000Z",
+          "durationSeconds": 7.521,
+          "thumbnailUrl": "https://scontent-hou1-1.xx.fbcdn.net/v/t15.5256-10/750814963_1771867270652695_257464611092456235_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1920&ctp=s960x960&_nc_cat=100&ccb=1-7&_nc_sid=117846&_nc_ohc=bC1NW9r7TOEQ7kNvwGcakXw&_nc_oc=AdpyUrWLK9RUAQ4jafUKynMDpKeGQNqdlOGGgdp9z6OBppco3KJeP6HrCkNF6HDZazM&_nc_zt=23&_nc_ht=scontent-hou1-1.xx&_nc_gid=hW9s5ywbMewQBWmarnrQjQ&_nc_ss=72289&oh=00_AQCLOWeo_fhV1rxviiINySL7kei7VuDR1WuceU8SslDQyw&oe=6A629065",
+          "videoUrl": "https://video-hou1-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQNiovKi5AqkyvA38ngh692gNhpxeI_LjhMK6vhKOYNc8a7Pac4cAwVXYTg9jho-mIfRhkVyhjQx5WF6LTe07x7HcXPmd-0420EwphRWR6BXfQ.mp4?_nc_cat=102&_nc_sid=5e9851&_nc_ht=video-hou1-1.xx.fbcdn.net&_nc_ohc=XTzct5gCtnMQ7kNvwG-DQqJ&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5GQUNFQk9PSy4uQzMuNzIwLmRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHAiLCJ4cHZfYXNzZXRfaWQiOjEwMDYzODE1MTg2OTE0MDYsImFzc2V0X2FnZV9kYXlzIjoxLCJ2aV91c2VjYXNlX2lkIjoxMDEyMSwiZHVyYXRpb25fcyI6NywidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=b707fd3e1650534e&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC8wNjQ4RkZCOUU3QzlFM0I4MUE1NjFFQTYxMDRBMThBQl9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50LzFBNEQxRDZDODM3RUI1NzgzMERGNTczNDYzMEFDMEI5X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACac8fDOjtPJAxUCKAJDMywXQB4hysCDEm8YGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUCZZKeAQA&_nc_gid=hW9s5ywbMewQBWmarnrQjQ&_nc_ss=72289&_nc_zt=28&oh=00_AQA1HMRfd-xtMJu_9dVeJDsW_nzZ763r9DATjb9HLXyhKg&oe=6A62869E&bitrate=893911&tag=dash_h264-basic-gen2_720p",
+          "author": {
+            "username": null,
+            "displayName": "Kaitlin Morton",
+            "url": null,
+            "profileImage": "https://scontent-hou1-1.xx.fbcdn.net/v/t39.30808-1/651270203_4489525084704878_7896016252183241824_n.jpg?stp=cp6_dst-jpg_tt6&cstp=mx2048x2048&ctp=s50x50&_nc_cat=107&ccb=1-7&_nc_sid=e99d92&_nc_ohc=cx1xhiJ4uPQQ7kNvwF6bJ9p&_nc_oc=AdpKM_uSk2cCufhEP6D7fZImx1e9ba5wnRGsB1UJQHm9b85FGcI-ciTSBRLd_nfVFTs&_nc_zt=24&_nc_ht=scontent-hou1-1.xx&_nc_gid=hW9s5ywbMewQBWmarnrQjQ&_nc_ss=72289&oh=00_AQAyxftQHNMtyJC5fMkONPaLrom_jVyo2o7EQ4301yWZIg&oe=6A628510",
+            "verified": null
+          },
+          "engagement": {
+            "views": 0,
+            "likes": 114,
+            "comments": 2,
+            "shares": 1
+          },
+          "isVideo": true,
+          "link": null
+        },
         {
           "platform": "facebook",
           "url": "https://www.facebook.com/groups/dogspotting/permalink/10165886760864467/",
@@ -3766,13 +3792,13 @@
           "description": "Good hair day",
           "publishedAt": "2026-07-19T10:38:11.000Z",
           "durationSeconds": null,
-          "thumbnailUrl": "https://scontent-phl2-1.xx.fbcdn.net/v/t39.30808-6/753007373_28503628642557364_7791533682344408914_n.jpg?stp=dst-jpg_tt6&cstp=mx1206x1278&ctp=p180x540&_nc_cat=110&ccb=1-7&_nc_sid=aa7b47&_nc_ohc=vodNf8nAt1IQ7kNvwGwN-xM&_nc_oc=AdrlgdY7UeF9o8216JfTORkTvxSnODSwsJC9f1zi1vv3eokpozbAczD-sajDNmnazJs&_nc_zt=23&_nc_ht=scontent-phl2-1.xx&_nc_gid=n1gNKx3vQXebYjP3ofIQeA&_nc_ss=72289&oh=00_AQBbIFTB_AkeuD7QgE0IqovuJ7bgk0WWOK4Ajf8ZdM5lRQ&oe=6A626CA6",
+          "thumbnailUrl": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-6/753007373_28503628642557364_7791533682344408914_n.jpg?stp=dst-jpg_tt6&cstp=mx1206x1278&ctp=p180x540&_nc_cat=110&ccb=1-7&_nc_sid=aa7b47&_nc_ohc=vodNf8nAt1IQ7kNvwGiaVZk&_nc_oc=AdpTpQXhiXJlKYH_jLWu4G0BnWnO7uoTFjLood3796Z8NENS_IZbaJX5PbLJsGukc9QKVUPERITAun5-B-GebhO1&_nc_zt=23&_nc_ht=scontent-iad3-1.xx&_nc_gid=Xq42ghMkY9TiGv0_1wC85A&_nc_ss=72289&oh=00_AQCwwume8yLYo0U0WvLy0qKd7ew1u_WE1pNQOIG-mWQP2g&oe=6A626CA6",
           "videoUrl": null,
           "author": {
             "username": null,
             "displayName": "Kylie Green",
             "url": null,
-            "profileImage": "https://scontent-phl2-1.xx.fbcdn.net/v/t39.30808-1/504350545_24477566361830299_2634417055039944345_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx2048x2048&ctp=s50x50&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=Sh4oaa55-OoQ7kNvwELQZhL&_nc_oc=AdqfWnLYEetQSbIxcDE9RIDzXvptZ9GHODDvt6LZXO1ZJ6UV0nt98lHJNH4UVSSZwMM&_nc_zt=24&_nc_ht=scontent-phl2-1.xx&_nc_gid=n1gNKx3vQXebYjP3ofIQeA&_nc_ss=72289&oh=00_AQD-Nk5S2EYJj1sRU1ZdTf-XyKNUzCZFr4citnYfg6nIcA&oe=6A627077",
+            "profileImage": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.30808-1/504350545_24477566361830299_2634417055039944345_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx2048x2048&ctp=s50x50&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=Sh4oaa55-OoQ7kNvwF82BQ5&_nc_oc=AdrUUkN_tYWmWbPsiAsPCU_PjkN_2kWeQzNOvFji3RbvJM77Vv9SviTT7Zk2zfJcYypwC-b8Vz9qzNPmZSUYvEU9&_nc_zt=24&_nc_ht=scontent-iad6-1.xx&_nc_gid=Xq42ghMkY9TiGv0_1wC85A&_nc_ss=72289&oh=00_AQCYCjURd_tnF4W-l8_VcEiygS-Chl27r5FTXErmxz_ZNg&oe=6A627077",
             "verified": null
           },
           "engagement": {
@@ -3792,13 +3818,13 @@
           "description": "Thought i saw a loaf needing rescue\nDamn his human was there… 🥲\n\nI mean so happy he has a home 🙃",
           "publishedAt": "2026-07-19T04:15:27.000Z",
           "durationSeconds": null,
-          "thumbnailUrl": "https://scontent-phl2-1.xx.fbcdn.net/v/t39.30808-6/749535316_2239349396879022_5352846328425280474_n.jpg?stp=dst-jpg_tt6&cstp=mx2048x1536&ctp=s590x590&_nc_cat=107&ccb=1-7&_nc_sid=aa7b47&_nc_ohc=hZ44ut1kTagQ7kNvwE5XHWE&_nc_oc=AdqhPxCpdEm-O6bZlyvP_rgnJB4SoGDhk7T0oW0-sEKJc2rw6M4ne19n2vsW7arzkjQ&_nc_zt=23&_nc_ht=scontent-phl2-1.xx&_nc_gid=n1gNKx3vQXebYjP3ofIQeA&_nc_ss=72289&oh=00_AQAayQWWjK_VSa2CdmXsAAcoq4qJSVgfu6bKM5SyOheFYg&oe=6A627371",
+          "thumbnailUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.30808-6/749535316_2239349396879022_5352846328425280474_n.jpg?stp=dst-jpg_tt6&cstp=mx2048x1536&ctp=s590x590&_nc_cat=107&ccb=1-7&_nc_sid=aa7b47&_nc_ohc=hZ44ut1kTagQ7kNvwFEkahV&_nc_oc=AdpHhSw51w7UXRjev5634qV9RcyNDY_v8ss86M07I0qi8FK5qq9WldQUkCcVJ1UOmIvwfRUGWn16s8CytglLthww&_nc_zt=23&_nc_ht=scontent-iad6-1.xx&_nc_gid=Xq42ghMkY9TiGv0_1wC85A&_nc_ss=72289&oh=00_AQDnbpkg7GdVcCcBxw-IgcNUU275oapSbbiQtxgoDmYh_Q&oe=6A627371",
           "videoUrl": null,
           "author": {
             "username": null,
             "displayName": "Hannah Lo",
             "url": null,
-            "profileImage": "https://scontent-phl2-1.xx.fbcdn.net/v/t39.30808-1/470622835_1773382490142384_5611274486657366606_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1152x1152&ctp=s50x50&_nc_cat=102&ccb=1-7&_nc_sid=e99d92&_nc_ohc=HUZyuIR8C5UQ7kNvwEvDK9W&_nc_oc=AdpvS8pMDsZQE_hH_ifxsKQSiKPhLqW44lNnq2nLLWKmsMBuh0wFN8cV3oIQqirvy8I&_nc_zt=24&_nc_ht=scontent-phl2-1.xx&_nc_gid=n1gNKx3vQXebYjP3ofIQeA&_nc_ss=72289&oh=00_AQCWrBlFiaa-Nj4mxbsW3uHNdFgheuxCSg9EACvfE1LJsw&oe=6A6275DD",
+            "profileImage": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.30808-1/470622835_1773382490142384_5611274486657366606_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1152x1152&ctp=s50x50&_nc_cat=102&ccb=1-7&_nc_sid=e99d92&_nc_ohc=HUZyuIR8C5UQ7kNvwFDxPhm&_nc_oc=AdoTnlkVUgeF-7LZtLMurzv2483USo4lSaJtLcTKPgkILTCz2caYEV7LM7l1xk7Ngp433iGqpVuLLUpAiVpumhfZ&_nc_zt=24&_nc_ht=scontent-iad6-1.xx&_nc_gid=Xq42ghMkY9TiGv0_1wC85A&_nc_ss=72289&oh=00_AQCF-jFtD2kNFjDTukL42iJKNXYsMFti4huUN7WTUn9_nQ&oe=6A6275DD",
             "verified": null
           },
           "engagement": {
@@ -3812,80 +3838,28 @@
         },
         {
           "platform": "facebook",
-          "url": "https://www.facebook.com/groups/dogspotting/permalink/10165885741239467/",
-          "id": "UzpfSTE0MTYwNjczNDU6Vks6MTAxNjU4ODU3NDEyMzk0Njc=",
-          "caption": "I do believe I have been Judged.",
-          "description": "I do believe I have been Judged.",
-          "publishedAt": "2026-07-19T04:02:22.000Z",
-          "durationSeconds": null,
-          "thumbnailUrl": "https://scontent-phl2-1.xx.fbcdn.net/v/t39.99422-6/749330490_2866360287057443_2954817546627269244_n.png?stp=dst-jpg_tt6&cstp=mx1320x1077&ctp=s640x640&_nc_cat=108&ccb=1-7&_nc_sid=aa7b47&_nc_ohc=_xPo3pT66zAQ7kNvwHzaFBS&_nc_oc=Ado0-DCvnqCvHSkzFZLP-gVYICUFXMY-T1dY7_ITfyX2ccPsdETdwEpRVu4FnOqSPPY&_nc_zt=14&_nc_ht=scontent-phl2-1.xx&_nc_gid=n1gNKx3vQXebYjP3ofIQeA&_nc_ss=72289&oh=00_AQCzP-i7vSKleTzLBdOGhlrPCAep6ZtpmH2fcYtQof8kMw&oe=6A629707",
-          "videoUrl": null,
-          "author": {
-            "username": "1416067345",
-            "displayName": "George Osner",
-            "url": "https://www.facebook.com/1416067345",
-            "profileImage": "https://scontent-phl2-1.xx.fbcdn.net/v/t39.30808-1/359767909_10231013078416506_2904229956235905420_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1538x1538&ctp=s50x50&_nc_cat=110&ccb=1-7&_nc_sid=1d2534&_nc_ohc=gKVqOdvxv30Q7kNvwEq1EDf&_nc_oc=AdpnoAyqV8miL5pLNiTiqULjpHOqzvAdI8_yR2aKEsA4booyA3Hx5RT2DFdR4Ibf1CQ&_nc_zt=24&_nc_ht=scontent-phl2-1.xx&_nc_gid=n1gNKx3vQXebYjP3ofIQeA&_nc_ss=72289&oh=00_AQC4r9vmf6cRGoBcqA1R_12v6LvfqovBwY5WdjAoweyqOg&oe=6A627EC5",
-            "verified": null
-          },
-          "engagement": {
-            "views": null,
-            "likes": 147,
-            "comments": 8,
-            "shares": 0
-          },
-          "isVideo": false,
-          "link": null
-        },
-        {
-          "platform": "facebook",
-          "url": "https://www.facebook.com/groups/dogspotting/permalink/10165884648139467/",
-          "id": "UzpfSTEwMDAxMDczNjYyMDc3NDpWSzoxMDE2NTg4NDY0ODEzOTQ2Nw==",
-          "caption": "An unusual sight on my walk this morning 😂😂",
-          "description": "An unusual sight on my walk this morning 😂😂",
-          "publishedAt": "2026-07-18T22:33:04.000Z",
-          "durationSeconds": null,
-          "thumbnailUrl": "https://scontent-hou1-1.xx.fbcdn.net/v/t39.30808-6/750565617_2808655582835635_1000519924356143449_n.jpg?stp=cp6_dst-jpg_tt6&cstp=mx1206x1925&ctp=p526x296&_nc_cat=103&ccb=1-7&_nc_sid=aa7b47&_nc_ohc=xDTYG4O2ZZ4Q7kNvwGBxBMq&_nc_oc=AdqeEJ8G4tHfzqB84_L8DzER1KncR1Tahe7bufikPg7k7VukIvWFet5Bw0swph7Jg6dFwOLBd9Ynp6jaj7f1g3UQ&_nc_zt=23&_nc_ht=scontent-hou1-1.xx&_nc_gid=Yqteb9S57n7si4LqSn_MRA&_nc_ss=72289&oh=00_AQA8GKIFQja5bymWRR7dJ2Vbapo4rXi4wtCr9TzfnLGBng&oe=6A627FD2",
-          "videoUrl": null,
+          "url": "https://www.facebook.com/groups/dogspotting/permalink/10165878400114467/",
+          "id": "UzpfSTEwMDAwMDUxNjU2MTgzMTpWSzoxMDE2NTg3ODQwMDExNDQ2Nw==",
+          "caption": "sausage spotting…Austin Tx 🩷",
+          "description": "sausage spotting…Austin Tx 🩷",
+          "publishedAt": "2026-07-17T17:56:36.000Z",
+          "durationSeconds": 4.201,
+          "thumbnailUrl": "https://scontent-atl3-3.xx.fbcdn.net/v/t15.5256-10/750550517_1023701473698102_4209954529057645990_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1920&ctp=s960x960&_nc_cat=110&ccb=1-7&_nc_sid=117846&_nc_ohc=04xYCacnpuIQ7kNvwHmHK9L&_nc_oc=AdrlDPB9BDeMqZpIOLivtsetk4qnaVvs03VCyWGT3655pf6ZGrIFIYLKkVKZJ3dTSfF4PzMede4x5xvWEKQdoLCx&_nc_zt=23&_nc_ht=scontent-atl3-3.xx&_nc_gid=hdl6p70Q6JirFuClh-i4Jw&_nc_ss=72289&oh=00_AQAS1PpbOnZ1AlqZR5sB2BaJ10NP83xLE8sMA9dN3yddzw&oe=6A626BD5",
+          "videoUrl": "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQNjgkga0kjcVL5rWdrzWx-Jk7BkLGyhcv_gnO9ACSHOQS8ixNFS9TlBMuGzTGs9nGKp22xSalmorww_9zjYyz9l5-dwlybjMXtnpHV39fHuuA.mp4?_nc_cat=103&_nc_sid=5e9851&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=ihZXdBjAHj4Q7kNvwGPPnJd&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5GQUNFQk9PSy4uQzMuNzIwLmRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHAiLCJ4cHZfYXNzZXRfaWQiOjEwMjAwODMzMzM5OTk2OTMsImFzc2V0X2FnZV9kYXlzIjoxLCJ2aV91c2VjYXNlX2lkIjoxMDEyMSwiZHVyYXRpb25fcyI6NCwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=50dbdc42ac36a4a7&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC9CMTRBQjMzNjAwODM3ODc2QjBBQTU2QTk0OTFFMzg5RF9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50L0VDNDcwRTI0OTk4OTNEODhGQTU5QkE0QTRGODVBOUI4X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACaasZ2M1fDPAxUCKAJDMywXQBDul41P3zsYGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUCZZKeAQA&_nc_gid=hdl6p70Q6JirFuClh-i4Jw&_nc_ss=72289&_nc_zt=28&oh=00_AQAqJiYxYh48c0RUdE0E1X5VZTMU2r1ryUlP-9qVR9iJKA&oe=6A629FC1&bitrate=2004314&tag=dash_h264-basic-gen2_720p",
           "author": {
             "username": null,
-            "displayName": "Lori Macbeth",
+            "displayName": "Alexis Langston",
             "url": null,
-            "profileImage": "https://scontent-hou1-1.xx.fbcdn.net/v/t39.30808-1/242074379_1469142246786982_4327234011813589126_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1920x1920&ctp=s50x50&_nc_cat=107&ccb=1-7&_nc_sid=e99d92&_nc_ohc=VIWE2WS8V8sQ7kNvwENSu7F&_nc_oc=Adrpr0XOlr6LVWnzgwjHKdXOTJT0JjRq5Tj2EYllTDxEzHZ69VrExPaAK0t0qSDQrWwSQrzpfTnZ1h4O0r_SWyy2&_nc_zt=24&_nc_ht=scontent-hou1-1.xx&_nc_gid=Yqteb9S57n7si4LqSn_MRA&_nc_ss=72289&oh=00_AQBAecjfDx3OMdTsh6VQNkZK_dL5CKeFecrWQh7adbyxxw&oe=6A629D22",
+            "profileImage": "https://scontent-atl3-3.xx.fbcdn.net/v/t39.30808-1/646941458_27018386404428546_3512895333164850332_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1242x1242&ctp=s50x50&_nc_cat=109&ccb=1-7&_nc_sid=e99d92&_nc_ohc=xEkm9wzVXkIQ7kNvwHxdJF_&_nc_oc=Adon-kFDFDQr-pkuzM9HGKv0P92uj3uz35iZa9wSYTFfLlfUlMQgKHo8dYDYlJU7s6Dej-5f4LOyv1gT6GrBp7Tz&_nc_zt=24&_nc_ht=scontent-atl3-3.xx&_nc_gid=hdl6p70Q6JirFuClh-i4Jw&_nc_ss=72289&oh=00_AQAq-NoCSBoD_QxoD020A5S89bytoeP-XPUYR7jCwJV_rg&oe=6A628C34",
             "verified": null
           },
           "engagement": {
-            "views": null,
-            "likes": 100,
-            "comments": 0,
-            "shares": 0
+            "views": 0,
+            "likes": 166,
+            "comments": 7,
+            "shares": 1
           },
-          "isVideo": false,
-          "link": null
-        },
-        {
-          "platform": "facebook",
-          "url": "https://www.facebook.com/groups/dogspotting/permalink/10165883936714467/",
-          "id": "UzpfSTEwMDAwNjY1MDQ3Nzc4NDpWSzoxMDE2NTg4MzkzNjcxNDQ2Nw==",
-          "caption": "Met Butch in Callicoon, NY! 😍",
-          "description": "Met Butch in Callicoon, NY! 😍",
-          "publishedAt": "2026-07-18T19:53:27.000Z",
-          "durationSeconds": null,
-          "thumbnailUrl": "https://scontent-hou1-1.xx.fbcdn.net/v/t39.30808-6/751549818_4547470998817871_3188863455434291229_n.jpg?stp=cp6_dst-jpg_tt6&cstp=mx1536x2048&ctp=p526x296&_nc_cat=105&ccb=1-7&_nc_sid=aa7b47&_nc_ohc=OvtgMcIHaXUQ7kNvwHsiQww&_nc_oc=Adr6Tgazzrfpd4WV5FbqDa4zTi2oiiwpFWzH9CVEhKGxZne4M89UBXHPc1nPtEK9g5yAUpziuP6R1xeIJHwqQB7k&_nc_zt=23&_nc_ht=scontent-hou1-1.xx&_nc_gid=Yqteb9S57n7si4LqSn_MRA&_nc_ss=72289&oh=00_AQAu_sK552hnQTJXEcJ3LrNvBiSVzzGL9VGMsdaDirZc_Q&oe=6A6286FA",
-          "videoUrl": null,
-          "author": {
-            "username": null,
-            "displayName": "Julia Bonavita",
-            "url": null,
-            "profileImage": "https://scontent-hou1-1.xx.fbcdn.net/v/t39.30808-1/357705942_3578619019036412_1936995585656622270_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x960&ctp=s50x50&_nc_cat=107&ccb=1-7&_nc_sid=e99d92&_nc_ohc=J62O-ujAYCQQ7kNvwHhJM4E&_nc_oc=AdrOW6p_yegmlIoHQ6y5VqGbegrDxI5rFQ2A3A1UR5RY5fF7QT_2nBFS-dn3XuTHCp4sy_HqJLHJjZ2u4osRG_CV&_nc_zt=24&_nc_ht=scontent-hou1-1.xx&_nc_gid=Yqteb9S57n7si4LqSn_MRA&_nc_ss=72289&oh=00_AQBKtyFAv7kdwQsTGMZ000LtRa027YBBJ4_KkcShiYYnQA&oe=6A629A9C",
-            "verified": null
-          },
-          "engagement": {
-            "views": null,
-            "likes": 134,
-            "comments": 1,
-            "shares": 0
-          },
-          "isVideo": false,
+          "isVideo": true,
           "link": null
         }
       ]
