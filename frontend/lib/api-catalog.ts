@@ -279,7 +279,7 @@ const FACEBOOK: Spec[] = [
   { slug: "facebook-group-posts", name: "Facebook Group Posts API", shortName: "Group Posts", category: "list", method: "GET", path: "/v1/facebook/group-posts", credits: 12, creditsPerResult: 0.6 },
   { slug: "facebook-comment-replies", name: "Facebook Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/facebook/comment-replies", credits: 30, creditsPerResult: 0.6 },
   { slug: "facebook-marketplace-search", name: "Facebook Marketplace Search API", shortName: "Marketplace Search", category: "search", method: "GET", path: "/v1/facebook/marketplace-search", credits: 28, creditsPerResult: 1.4, tagline: "Search Facebook Marketplace by keyword and location — listing title, price, and link for each result (details=true doubles cost).", longDescription: "Search Facebook Marketplace with a product keyword and city/place. Each result includes title, price, and listing URL. Default billing is 1.4 credits per result (~28 at 20). Pass details=true for fuller listing fields (description, photos, coordinates) — that doubles cost to 2.8 credits per result (~56 at 20)." },
-  { slug: "facebook-marketplace-location-search", name: "Facebook Marketplace Location Search API", shortName: "Marketplace Locations", category: "search", method: "GET", path: "/v1/facebook/marketplace-location-search", credits: 17 , tagline: "Look up Facebook Marketplace location IDs for a city or place — IDs you can pass into Marketplace Search.", longDescription: "Pass a city or place name and get matching Marketplace location IDs as structured JSON. Use those IDs with Marketplace Search to filter listings by area." },
+  { slug: "facebook-marketplace-location-search", name: "Facebook Marketplace Location Search API", shortName: "Marketplace Locations", category: "search", method: "GET", path: "/v1/facebook/marketplace-location-search", credits: 17 , tagline: "Look up Facebook Marketplace locations for a city or place — name, city, state, and optional coordinates (details=true doubles cost).", longDescription: "Pass a city or place name and get matching Marketplace locations as structured JSON (name, city, state). Default is a flat 17 credits. Pass details=true to include latitude/longitude — that doubles cost to 34 credits. Use the returned place names with Marketplace Search to filter listings by area." },
   { slug: "facebook-event-search", name: "Facebook Event Search API", shortName: "Event Search", category: "search", method: "GET", path: "/v1/facebook/event-search", credits: 40, creditsPerResult: 2 },
   { slug: "facebook-event-details", name: "Facebook Event Details API", shortName: "Event Details", category: "details", method: "GET", path: "/v1/facebook/event-details", credits: 2 , tagline: "Get a Facebook event — title, time, place, host, and attendance signals as structured JSON.", longDescription: "Paste a Facebook event URL and get the event details as clean JSON: title, description, start/end time, location, host page, and interest or going counts when available. Flat 2 credits per call." },
   { slug: "facebook-profile-photos", name: "Facebook Profile Photos API", shortName: "Profile Photos", category: "list", method: "GET", path: "/v1/facebook/profile-photos", credits: 12, creditsPerResult: 0.6 },
@@ -892,9 +892,9 @@ export const AGENT_ROUTING_EXAMPLES: AgentRoutingExample[] = [
       "Find Facebook Marketplace location id",
       "Search marketplace by city",
     ],
-    prefer: "Use location search first, then marketplace search with the selected location.",
+    prefer: "Use location search first (details=true when you need lat/lng), then marketplace search with the selected place.",
     endpointSlug: "facebook-marketplace-location-search",
-    why: "Finds location candidates for Facebook Marketplace searches.",
+    why: "Finds location candidates for Facebook Marketplace searches; details=true adds coordinates.",
   },
   {
     intent: "Kwai creator monitoring",
@@ -1300,7 +1300,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "facebook-group-posts": [up("Public Facebook group URL, e.g. https://facebook.com/groups/ID."), lp(20, 200)],
   "facebook-comment-replies": [up("Facebook post URL the comment belongs to."), cid(), lp(50, 500)],
   "facebook-marketplace-search": [qp("Product or keyword to search Facebook Marketplace for."), { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." }, lp(20, 200), { name: "details", type: "boolean", required: false, description: "When true, fetches full description, photos, and coordinates per listing. details=false → 1.4 credits/result (~28 at 20); details=true doubles cost → 2.8/result (~56 at 20)." }],
-  "facebook-marketplace-location-search": [qp("City/place search query, e.g. Austin."), lpFlat(10, 50, 17)],
+  "facebook-marketplace-location-search": [qp("City/place search query, e.g. Austin."), lpFlat(10, 50, 17), { name: "details", type: "boolean", required: false, description: "When true, fetches listing details so each location includes latitude/longitude. details=false → flat 17 credits; details=true doubles cost → 34 credits." }],
   "facebook-event-search": [qp("Topic and/or place, e.g. 'comedy Chicago'."), lp(20, 200)],
   "facebook-event-details": [up("Facebook event URL, e.g. https://facebook.com/events/ID.")],
   "facebook-profile-photos": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
@@ -1827,8 +1827,26 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
 function exampleArgs(ep: ApiEndpoint): { name: string; value: string }[] {
   const ps = params(ep);
   const required = ps.filter((p) => p.required);
-  const chosen = required.length > 0 ? required : ps.slice(0, 1);
-  return chosen.map((p) => ({ name: p.name, value: exampleValue(ep, p) }));
+  let chosen = required.length > 0 ? required : ps.slice(0, 1);
+  // Docs snapshots for marketplace endpoints use details=true (coords / full fields).
+  if (
+    ep.slug === "facebook-marketplace-search" ||
+    ep.slug === "facebook-marketplace-location-search"
+  ) {
+    const details = ps.find((p) => p.name === "details");
+    if (details && !chosen.some((p) => p.name === "details")) {
+      chosen = [...chosen, details];
+    }
+  }
+  return chosen.map((p) => ({
+    name: p.name,
+    value:
+      (ep.slug === "facebook-marketplace-search" ||
+        ep.slug === "facebook-marketplace-location-search") &&
+      p.name === "details"
+        ? "true"
+        : exampleValue(ep, p),
+  }));
 }
 
 export function exampleQueryString(ep: ApiEndpoint): string {

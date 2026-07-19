@@ -7306,31 +7306,23 @@
     "credits": null,
     "data": {
       "query": "Austin",
-      "totalReturned": 3,
+      "totalReturned": 2,
       "locations": [
         {
-          "id": "washington d.c.|washington|dc||",
+          "id": "washington d.c.|washington|dc",
           "name": "Washington D.C.",
           "city": "Washington",
           "state": "DC",
-          "latitude": null,
-          "longitude": null
+          "latitude": 38.894348144531,
+          "longitude": -77.041625976562
         },
         {
-          "id": "wheaton, maryland|silver spring|md||",
-          "name": "Wheaton, Maryland",
-          "city": "Silver Spring",
-          "state": "MD",
-          "latitude": null,
-          "longitude": null
-        },
-        {
-          "id": "annandale, virginia|annandale|va||",
+          "id": "annandale, virginia|annandale|va",
           "name": "Annandale, Virginia",
           "city": "Annandale",
           "state": "VA",
-          "latitude": null,
-          "longitude": null
+          "latitude": 38.828430175781,
+          "longitude": -77.206420898438
         }
       ]
     }

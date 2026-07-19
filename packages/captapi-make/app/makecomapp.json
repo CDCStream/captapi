@@ -21,7 +21,7 @@
     "module": {
       "youtubeTranscript": {
         "label": "YouTube Transcript",
-        "description": "Extract the full timestamped transcript of a YouTube video. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Extract the full timestamped transcript of a YouTube video. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -38,7 +38,7 @@
       },
       "youtubeSummarize": {
         "label": "YouTube Summarizer",
-        "description": "AI summary (key points, topics, sentiment) of a YouTube video. Costs ~4 credits (cached results free, failures never charged).",
+        "description": "AI summary (key points, topics, sentiment) of a YouTube video. Costs ~3 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -174,7 +174,7 @@
       },
       "youtubeShortsTranscript": {
         "label": "YouTube Shorts Transcript",
-        "description": "Transcript of a YouTube Short. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Transcript of a YouTube Short. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -191,7 +191,7 @@
       },
       "youtubeShortsSummarize": {
         "label": "YouTube Shorts Summarizer",
-        "description": "AI summary of a YouTube Short. Costs ~4 credits (cached results free, failures never charged).",
+        "description": "AI summary of a YouTube Short. Costs ~3 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1194,7 +1194,7 @@
       },
       "facebookMarketplaceLocationSearch": {
         "label": "Facebook Marketplace Location Search",
-        "description": "Find Facebook Marketplace location candidates for a city or place query. Costs ~17 credits (cached results free, failures never charged).",
+        "description": "Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34). Costs ~17 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1313,7 +1313,7 @@
       },
       "twitterTranscript": {
         "label": "Twitter/X Transcript",
-        "description": "Extract tweet text as transcript text. Costs ~7 credits (cached results free, failures never charged).",
+        "description": "Extract tweet text as transcript text. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -1806,7 +1806,7 @@
       },
       "linkedinPostTranscript": {
         "label": "LinkedIn Post Transcript",
-        "description": "Extract post text as a transcript for a LinkedIn post. Costs ~7 credits (cached results free, failures never charged).",
+        "description": "Extract post text as a transcript for a LinkedIn post. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2581,6 +2581,74 @@
           "communication": "modules/accountMostUsedRoutes/communication.iml.json",
           "staticParams": null,
           "mappableParams": "modules/accountMostUsedRoutes/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "analyticsPost": {
+        "label": "Post Analytics",
+        "description": "Unified metrics for one post/video/reel (platform auto-detected). Flat 1 credit. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/analyticsPost/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/analyticsPost/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "analyticsCompare": {
+        "label": "Compare Analytics",
+        "description": "Compare unified metrics across up to 10 URLs in one call. 1 credit per successfully resolved URL. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/analyticsCompare/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/analyticsCompare/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "videoTranscript": {
+        "label": "Video File Transcript",
+        "description": "Whisper transcription of an uploaded video/audio file. 1 credit per minute of audio. Costs ~1 credit (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/videoTranscript/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/videoTranscript/mappable-params.iml.json",
+          "interface": null,
+          "samples": null,
+          "scope": null
+        }
+      },
+      "videoSummarize": {
+        "label": "Video File Summarizer",
+        "description": "Transcribe an uploaded video/audio file and return an AI summary. 1 credit per minute + 1 for the summary. Costs ~2 credits (cached results free, failures never charged).",
+        "connection": "captapi",
+        "altConnection": null,
+        "webhook": null,
+        "moduleType": "action",
+        "actionCrud": "read",
+        "codeFiles": {
+          "communication": "modules/videoSummarize/communication.iml.json",
+          "staticParams": null,
+          "mappableParams": "modules/videoSummarize/mappable-params.iml.json",
           "interface": null,
           "samples": null,
           "scope": null

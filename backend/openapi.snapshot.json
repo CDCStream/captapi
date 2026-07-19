@@ -1255,6 +1255,24 @@
             }
           },
           {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+          },
+          {
             "name": "cache",
             "in": "query",
             "required": false,
@@ -5836,6 +5854,18 @@
               "default": 10,
               "title": "Limit"
             }
+          },
+          {
+            "name": "details",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "When true, fetches listing details so each location includes latitude/longitude (slower; doubles credit cost).",
+              "default": false,
+              "title": "Details"
+            },
+            "description": "When true, fetches listing details so each location includes latitude/longitude (slower; doubles credit cost)."
           },
           {
             "name": "cache",

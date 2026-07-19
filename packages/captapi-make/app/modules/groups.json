@@ -261,6 +261,15 @@
     ]
   },
   {
+    "label": "utilities",
+    "modules": [
+      "analyticsPost",
+      "analyticsCompare",
+      "videoTranscript",
+      "videoSummarize"
+    ]
+  },
+  {
     "label": "Kwai",
     "modules": [
       "kwaiProfile",

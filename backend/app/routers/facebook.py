@@ -546,7 +546,9 @@ def _normalize_marketplace_location(item: dict) -> dict | None:
     label = safe_str(item.get("location_display") or ", ".join(p for p in [city, state] if p))
     if not (label or city or state):
         return None
-    key = "|".join(str(v or "").lower() for v in [label, city, state, item.get("latitude"), item.get("longitude")])
+    # Stable id by place label (not per-listing coords) so details=true can
+    # enrich latitude/longitude without exploding duplicate city rows.
+    key = "|".join(str(v or "").lower() for v in [label, city, state])
     return {
         "id": key,
         "name": label or city or state,
@@ -1469,16 +1471,25 @@ async def facebook_marketplace_search(
 async def facebook_marketplace_location_search(
     q: str = Query(..., min_length=2, description="City/place search query, e.g. Austin"),
     limit: int = Query(10, ge=1, le=50),
+    details: bool = Query(
+        False,
+        description=(
+            "When true, fetches listing details so each location includes "
+            "latitude/longitude (slower; doubles credit cost)."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
+    # Flat fee: 17 without coords, 34 with details=true (Apify fetchItemDetails).
+    cost = 34 if details else 17
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/marketplace-location-search",
         platform="facebook",
         resource_url=None,
-        base_credits=17,
+        base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             items = await get_apify().run_actor_sync(
@@ -1487,7 +1498,7 @@ async def facebook_marketplace_location_search(
                     "queries": ["chair"],
                     "locationName": q,
                     "maxResultsPerQuery": min(max(limit, 5), 50),
-                    "fetchItemDetails": False,
+                    "fetchItemDetails": details,
                 },
                 max_items=min(max(limit, 5), 50),
             )
@@ -1496,18 +1507,30 @@ async def facebook_marketplace_location_search(
                 if item.get("error"):
                     continue
                 loc = _normalize_marketplace_location(item)
-                if loc and loc["id"] not in locations:
+                if not loc:
+                    continue
+                existing = locations.get(loc["id"])
+                if existing is None:
+                    locations[loc["id"]] = loc
+                elif existing.get("latitude") is None and loc.get("latitude") is not None:
                     locations[loc["id"]] = loc
             results = list(locations.values())[:limit]
             if not results:
-                fallback = {"id": q.strip().lower(), "name": q.strip(), "city": q.strip(), "state": None, "latitude": None, "longitude": None}
+                fallback = {
+                    "id": q.strip().lower(),
+                    "name": q.strip(),
+                    "city": q.strip(),
+                    "state": None,
+                    "latitude": None,
+                    "longitude": None,
+                }
                 results = [fallback]
             ctx["source"] = "apify"
             return {"query": q, "totalReturned": len(results), "locations": results}
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-location-search",
-            params={"q": q, "limit": limit, "v": 2},
+            params={"q": q, "limit": limit, "details": details, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -4,7 +4,7 @@
     "platform": "YouTube",
     "name": "YouTube Transcript",
     "path": "/v1/youtube/transcript",
-    "credits": 2,
+    "credits": 1,
     "summary": "Extract the full timestamped transcript of a YouTube video.",
     "params": [
       {
@@ -32,7 +32,7 @@
     "platform": "YouTube",
     "name": "YouTube Summarizer",
     "path": "/v1/youtube/summarize",
-    "credits": 4,
+    "credits": 3,
     "summary": "AI summary (key points, topics, sentiment) of a YouTube video.",
     "params": [
       {
@@ -268,7 +268,7 @@
     "platform": "YouTube",
     "name": "YouTube Shorts Transcript",
     "path": "/v1/youtube/shorts/transcript",
-    "credits": 2,
+    "credits": 1,
     "summary": "Transcript of a YouTube Short.",
     "params": [
       {
@@ -296,7 +296,7 @@
     "platform": "YouTube",
     "name": "YouTube Shorts Summarizer",
     "path": "/v1/youtube/shorts/summarize",
-    "credits": 4,
+    "credits": 3,
     "summary": "AI summary of a YouTube Short.",
     "params": [
       {
@@ -1937,7 +1937,7 @@
     "name": "Facebook Marketplace Location Search",
     "path": "/v1/facebook/marketplace-location-search",
     "credits": 17,
-    "summary": "Find Facebook Marketplace location candidates for a city or place query.",
+    "summary": "Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34).",
     "params": [
       {
         "name": "q",
@@ -1950,6 +1950,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 10, max 50. Flat 17 credits per call."
+      },
+      {
+        "name": "details",
+        "type": "string",
+        "required": false,
+        "description": "Set true to include latitude/longitude per location (slower; doubles cost to 34 credits)."
       },
       {
         "name": "cache",
@@ -2114,7 +2120,7 @@
     "platform": "Twitter / X",
     "name": "Twitter/X Transcript",
     "path": "/v1/twitter/transcript",
-    "credits": 7,
+    "credits": 1,
     "summary": "Extract tweet text as transcript text.",
     "params": [
       {
@@ -2878,7 +2884,7 @@
     "platform": "LinkedIn",
     "name": "LinkedIn Post Transcript",
     "path": "/v1/linkedin/post-transcript",
-    "credits": 7,
+    "credits": 1,
     "summary": "Extract post text as a transcript for a LinkedIn post.",
     "params": [
       {
@@ -4073,6 +4079,76 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      }
+    ]
+  },
+  {
+    "tool": "analytics_post",
+    "platform": "utilities",
+    "name": "Post Analytics",
+    "path": "/v1/analytics/post",
+    "credits": 1,
+    "summary": "Unified metrics for one post/video/reel (platform auto-detected). Flat 1 credit.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "A public post, video, or reel URL from a supported platform. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "analytics_compare",
+    "platform": "utilities",
+    "name": "Compare Analytics",
+    "path": "/v1/analytics/compare",
+    "credits": 1,
+    "summary": "Compare unified metrics across up to 10 URLs in one call. 1 credit per successfully resolved URL.",
+    "params": [
+      {
+        "name": "urls",
+        "type": "string",
+        "required": true,
+        "description": "Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms."
+      }
+    ]
+  },
+  {
+    "tool": "video_transcript",
+    "platform": "utilities",
+    "name": "Video File Transcript",
+    "path": "/v1/video/transcript",
+    "credits": 1,
+    "summary": "Whisper transcription of an uploaded video/audio file. 1 credit per minute of audio.",
+    "params": [
+      {
+        "name": "file",
+        "type": "string",
+        "required": true,
+        "description": "Local path or multipart file upload of the video/audio to transcribe."
+      }
+    ]
+  },
+  {
+    "tool": "video_summarize",
+    "platform": "utilities",
+    "name": "Video File Summarizer",
+    "path": "/v1/video/summarize",
+    "credits": 2,
+    "summary": "Transcribe an uploaded video/audio file and return an AI summary. 1 credit per minute + 1 for the summary.",
+    "params": [
+      {
+        "name": "file",
+        "type": "string",
+        "required": true,
+        "description": "Local path or multipart file upload of the video/audio to transcribe and summarize."
       }
     ]
   },

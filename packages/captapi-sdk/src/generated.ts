@@ -201,11 +201,11 @@ export interface YoutubeVideoSponsorsParams {
 
 export class YoutubeApi {
   constructor(private readonly core: HttpCore) {}
-  /** YouTube Transcript — Extract the full timestamped transcript of a YouTube video. (2 credits) */
+  /** YouTube Transcript — Extract the full timestamped transcript of a YouTube video. (1 credit) */
   transcript(params: YoutubeTranscriptParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/transcript", params);
   }
-  /** YouTube Summarizer — AI summary (key points, topics, sentiment) of a YouTube video. (4 credits) */
+  /** YouTube Summarizer — AI summary (key points, topics, sentiment) of a YouTube video. (3 credits) */
   summarize(params: YoutubeSummarizeParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/summarize", params);
   }
@@ -237,11 +237,11 @@ export class YoutubeApi {
   playlist(params: YoutubePlaylistParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/playlist", params);
   }
-  /** YouTube Shorts Transcript — Transcript of a YouTube Short. (2 credits) */
+  /** YouTube Shorts Transcript — Transcript of a YouTube Short. (1 credit) */
   shortsTranscript(params: YoutubeShortsTranscriptParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/shorts/transcript", params);
   }
-  /** YouTube Shorts Summarizer — AI summary of a YouTube Short. (4 credits) */
+  /** YouTube Shorts Summarizer — AI summary of a YouTube Short. (3 credits) */
   shortsSummarize(params: YoutubeShortsSummarizeParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/shorts/summarize", params);
   }
@@ -875,6 +875,8 @@ export interface FacebookMarketplaceLocationSearchParams {
   q: string;
   /** Max items to return. Default 10, max 50. Flat 17 credits per call. */
   limit?: number;
+  /** Set true to include latitude/longitude per location (slower; doubles cost to 34 credits). */
+  details?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -962,7 +964,7 @@ export class FacebookApi {
   marketplaceSearch(params: FacebookMarketplaceSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/marketplace-search", params);
   }
-  /** Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. (17 credits) */
+  /** Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34). (17 credits) */
   marketplaceLocationSearch(params: FacebookMarketplaceLocationSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/marketplace-location-search", params);
   }
@@ -1049,7 +1051,7 @@ export class TwitterApi {
   tweetDetails(params: TwitterTweetDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitter/tweet-details", params);
   }
-  /** Twitter/X Transcript — Extract tweet text as transcript text. (7 credits) */
+  /** Twitter/X Transcript — Extract tweet text as transcript text. (1 credit) */
   transcript(params: TwitterTranscriptParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitter/transcript", params);
   }
@@ -1409,7 +1411,7 @@ export class LinkedinApi {
   postDetails(params: LinkedinPostDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/linkedin/post-details", params);
   }
-  /** LinkedIn Post Transcript — Extract post text as a transcript for a LinkedIn post. (7 credits) */
+  /** LinkedIn Post Transcript — Extract post text as a transcript for a LinkedIn post. (1 credit) */
   postTranscript(params: LinkedinPostTranscriptParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/linkedin/post-transcript", params);
   }
@@ -2002,6 +2004,48 @@ export class AccountApi {
   }
 }
 
+export interface AnalyticsPostParams {
+  /** A public post, video, or reel URL from a supported platform. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  url: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface AnalyticsCompareParams {
+  /** Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms. */
+  urls: string;
+}
+
+export interface VideoTranscriptParams {
+  /** Local path or multipart file upload of the video/audio to transcribe. */
+  file: string;
+}
+
+export interface VideoSummarizeParams {
+  /** Local path or multipart file upload of the video/audio to transcribe and summarize. */
+  file: string;
+}
+
+export class UtilitiesApi {
+  constructor(private readonly core: HttpCore) {}
+  /** Post Analytics — Unified metrics for one post/video/reel (platform auto-detected). Flat 1 credit. (1 credit) */
+  analyticsPost(params: AnalyticsPostParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/analytics/post", params);
+  }
+  /** Compare Analytics — Compare unified metrics across up to 10 URLs in one call. 1 credit per successfully resolved URL. (1 credit) */
+  analyticsCompare(params: AnalyticsCompareParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/analytics/compare", params);
+  }
+  /** Video File Transcript — Whisper transcription of an uploaded video/audio file. 1 credit per minute of audio. (1 credit) */
+  videoTranscript(params: VideoTranscriptParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/video/transcript", params);
+  }
+  /** Video File Summarizer — Transcribe an uploaded video/audio file and return an AI summary. 1 credit per minute + 1 for the summary. (2 credits) */
+  videoSummarize(params: VideoSummarizeParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/video/summarize", params);
+  }
+}
+
 export interface KwaiProfileParams {
   /** Kwai profile URL or @handle, e.g. https://www.kwai.com/@easycashindonesia. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
@@ -2293,6 +2337,7 @@ export class Captapi {
   readonly kick: KickApi;
   readonly amazonShop: AmazonShopApi;
   readonly account: AccountApi;
+  readonly utilities: UtilitiesApi;
   readonly kwai: KwaiApi;
   readonly komi: KomiApi;
   readonly pillar: PillarApi;
@@ -2323,6 +2368,7 @@ export class Captapi {
     this.kick = new KickApi(core);
     this.amazonShop = new AmazonShopApi(core);
     this.account = new AccountApi(core);
+    this.utilities = new UtilitiesApi(core);
     this.kwai = new KwaiApi(core);
     this.komi = new KomiApi(core);
     this.pillar = new PillarApi(core);
