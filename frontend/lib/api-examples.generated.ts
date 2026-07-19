@@ -17828,7 +17828,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "1729527313880355335",
         "url": "https://www.tiktok.com/shop/pdp/1729527313880355335",
         "title": "Goli Ashwagandha & Vitamin D Gummy - Mixed Berry, KSM-66, Vegan, Plant Based, Non-GMO, Gluten-Free & Gelatin Free. America's #1 Ashwagandha Brand",
-        "description": null,
         "price": 14.98,
         "originalPrice": 24.99,
         "currency": "USD",
@@ -17836,13 +17835,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "rating": 4.5,
         "reviews": 94226,
         "sold": 1294820,
-        "stock": null,
         "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/27ecee8e289b49ab907cef6980b9f768~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
         "seller": {
-          "id": null,
-          "name": null,
-          "url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079",
-          "rating": null
+          "id": "7495794203056835079",
+          "name": "Goli Nutrition",
+          "url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079"
         }
       },
       {
@@ -17850,7 +17847,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "1731194857673101831",
         "url": "https://www.tiktok.com/shop/pdp/1731194857673101831",
         "title": "Zero Sugar Best Seller Trio - World's First 3-in-1 Pre, Post, Probiotic, Apple Cider Vinegar with Vitamin B12 and Probiotics To Address Bloating, Ashwagandha & L-Theanine, Vitamin D gummies. Gluten-Free, Vegan, Non-GMO & Gelatin-Free",
-        "description": null,
         "price": 32.3,
         "originalPrice": 105,
         "currency": "USD",
@@ -17858,13 +17854,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "rating": 4.5,
         "reviews": 44251,
         "sold": 977259,
-        "stock": null,
         "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/c347c31449564ea4a0300adb2d0cdaa9~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
         "seller": {
-          "id": null,
-          "name": null,
-          "url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079",
-          "rating": null
+          "id": "7495794203056835079",
+          "name": "Goli Nutrition",
+          "url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079"
         }
       },
       {
@@ -17872,7 +17866,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "1729587769570529799",
         "url": "https://www.tiktok.com/shop/pdp/1729587769570529799",
         "title": "3 Bottles of Goli Ashwagandha & Vitamin D Gummy - Mixed Berry, KSM-66, Vegan, Plant Based, Non-GMO, Gluten & Gelatin Free",
-        "description": null,
         "price": 44.98,
         "originalPrice": 74.94,
         "currency": "USD",
@@ -17880,13 +17873,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "rating": 4.7,
         "reviews": 71615,
         "sold": 861113,
-        "stock": null,
         "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/b0d9acd7ae184c8d89e2e498941485b6~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
         "seller": {
-          "id": null,
-          "name": null,
-          "url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079",
-          "rating": null
+          "id": "7495794203056835079",
+          "name": "Goli Nutrition",
+          "url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079"
         }
       },
       {
@@ -17894,7 +17885,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "1729589345444205063",
         "url": "https://www.tiktok.com/shop/pdp/1729589345444205063",
         "title": "3 Bottles of Goli Best Seller Bundle: Ashwagandha KSM-66, Apple Cider Vinegar, Matcha Mind supplement with Cognizin, Vitamins D2 and B12",
-        "description": null,
         "price": 31.8,
         "originalPrice": 74.97,
         "currency": "USD",
@@ -17902,13 +17892,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "rating": 4.6,
         "reviews": 40716,
         "sold": 544224,
-        "stock": null,
         "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/7a85d8aa9e2c4faab75a09fd9e5bff42~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
         "seller": {
-          "id": null,
-          "name": null,
-          "url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079",
-          "rating": null
+          "id": "7495794203056835079",
+          "name": "Goli Nutrition",
+          "url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079"
         }
       },
       {
@@ -17916,7 +17904,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "1729527774874997255",
         "url": "https://www.tiktok.com/shop/pdp/1729527774874997255",
         "title": "Goli Pre, Post, Probiotics Gummy - World's First 3-in-1 Gluten-Free, Vegan, Non-GMO, and Gelatin-Free.",
-        "description": null,
         "price": 14.98,
         "originalPrice": 24.97,
         "currency": "USD",
@@ -17924,13 +17911,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "rating": 4.5,
         "reviews": 11487,
         "sold": 205178,
-        "stock": null,
         "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/3939c5be64484010b5c2a3183ecfbec3~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
         "seller": {
-          "id": null,
-          "name": null,
-          "url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079",
-          "rating": null
+          "id": "7495794203056835079",
+          "name": "Goli Nutrition",
+          "url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079"
         }
       }
     ]
