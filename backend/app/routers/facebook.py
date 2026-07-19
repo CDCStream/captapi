@@ -559,6 +559,87 @@ def _normalize_marketplace_location(item: dict) -> dict | None:
     }
 
 
+# US state abbreviations — used to pull city from free-form TEXT places.
+_US_STATE_ABBR = {
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA",
+    "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+    "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT",
+    "VA", "WA", "WV", "WI", "WY", "DC",
+}
+_US_STATE_NAMES = {
+    "alabama": "AL", "alaska": "AK", "arizona": "AZ", "arkansas": "AR", "california": "CA",
+    "colorado": "CO", "connecticut": "CT", "delaware": "DE", "florida": "FL", "georgia": "GA",
+    "hawaii": "HI", "idaho": "ID", "illinois": "IL", "indiana": "IN", "iowa": "IA",
+    "kansas": "KS", "kentucky": "KY", "louisiana": "LA", "maine": "ME", "maryland": "MD",
+    "massachusetts": "MA", "michigan": "MI", "minnesota": "MN", "mississippi": "MS",
+    "missouri": "MO", "montana": "MT", "nebraska": "NE", "nevada": "NV", "new hampshire": "NH",
+    "new jersey": "NJ", "new mexico": "NM", "new york": "NY", "north carolina": "NC",
+    "north dakota": "ND", "ohio": "OH", "oklahoma": "OK", "oregon": "OR", "pennsylvania": "PA",
+    "rhode island": "RI", "south carolina": "SC", "south dakota": "SD", "tennessee": "TN",
+    "texas": "TX", "utah": "UT", "vermont": "VT", "virginia": "VA", "washington": "WA",
+    "west virginia": "WV", "wisconsin": "WI", "wyoming": "WY", "district of columbia": "DC",
+}
+_STREET_SUFFIX = re.compile(
+    r"\b(st|street|ave|avenue|rd|road|blvd|boulevard|dr|drive|ln|lane|way|ct|court|"
+    r"pl|place|pkwy|parkway|hwy|highway|cir|circle|ter|terrace)\.?$",
+    re.IGNORECASE,
+)
+
+
+def _looks_like_street_fragment(city: str) -> bool:
+    """True when a candidate 'city' is still part of the street line."""
+    s = city.strip()
+    if not s or re.search(r"\d", s):
+        return True
+    if _STREET_SUFFIX.search(s):
+        return True
+    # Single generic tokens / directionals.
+    if s.lower() in {"north", "south", "east", "west", "n", "s", "e", "w"}:
+        return True
+    return False
+
+
+def _infer_city_from_text(*parts: str | None) -> str | None:
+    """Best-effort City, ST from free-form address / location.name (no OpenAI)."""
+    chunks = [s for s in (safe_str(p) for p in parts) if s]
+    if not chunks:
+        return None
+    text = ", ".join(chunks)
+    text = re.sub(r"[\r\n]+", ", ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+
+    # Prefer "... City, ST[ ZIP]" with a real US state abbreviation.
+    # Walk matches and keep the last valid one (city sits after street in US addresses).
+    found: str | None = None
+    for m in re.finditer(
+        r"(?P<city>[A-Za-z][A-Za-z .'\-]{1,40}?),\s*(?P<st>[A-Za-z]{2})\b(?:\s+\d{5}(?:-\d{4})?)?",
+        text,
+    ):
+        st = m.group("st").upper()
+        if st not in _US_STATE_ABBR:
+            continue
+        city = m.group("city").strip(" ,")
+        if _looks_like_street_fragment(city):
+            continue
+        found = f"{city}, {st}"
+    if found:
+        return found
+
+    # "... City, Illinois 60018" / "... City, New York 14202"
+    for m in re.finditer(
+        r"(?P<city>[A-Za-z][A-Za-z .'\-]{1,40}?),\s*(?P<state>[A-Za-z][A-Za-z ]{2,20}?)\s+\d{5}\b",
+        text,
+    ):
+        st = _US_STATE_NAMES.get(m.group("state").strip().lower())
+        if not st:
+            continue
+        city = m.group("city").strip(" ,")
+        if _looks_like_street_fragment(city):
+            continue
+        return f"{city}, {st}"
+    return None
+
+
 def _normalize_event(item: dict) -> dict:
     """Map Facebook event actor rows into a stable response shape (same keys every time)."""
     loc = item.get("location") if isinstance(item.get("location"), dict) else {}
@@ -590,6 +671,15 @@ def _normalize_event(item: dict) -> dict:
         or loc.get("name")
         or location_name
     )
+    # TEXT places often leave city null; recover City, ST from address / location name.
+    if not city:
+        city = _infer_city_from_text(
+            address,
+            street,
+            safe_str(loc.get("name")),
+            safe_str(location_name),
+            safe_str(item.get("address")),
+        )
     organizer = safe_str(
         item.get("organizedBy")
         or item.get("organizer")
@@ -605,9 +695,13 @@ def _normalize_event(item: dict) -> dict:
     categories = item.get("discoveryCategories") or item.get("categories") or []
     if not isinstance(categories, list):
         categories = []
-    external_links = item.get("externalLinks") or item.get("external_links") or []
-    if not isinstance(external_links, list):
-        external_links = []
+    # Apify pads externalLinks with null slots (fixed-length scrapes); keep real URLs only.
+    raw_links = item.get("externalLinks") or item.get("external_links") or []
+    external_links = [
+        link
+        for link in (safe_str(x) for x in (raw_links if isinstance(raw_links, list) else []))
+        if link
+    ]
     return {
         "platform": "facebook",
         "id": safe_str(item.get("id") or item.get("event_id") or item.get("eventId")),
