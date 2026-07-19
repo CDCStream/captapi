@@ -2076,6 +2076,33 @@ async def tiktok_song_details(
             m = re.search(r"/music/[^/]*?(\d{6,})|/sound/[^/]*?(\d{6,})|(\d{6,})(?:\?|$)", url)
             url_id = next((g for g in (m.groups() if m else ()) if g), None)
 
+            async def _play_url_from_clockworks() -> str | None:
+                # apidojo/coregent omit the CDN audio URL; clockworks exposes playUrl.
+                try:
+                    cw_items = await apify.run_actor_sync(
+                        settings.APIFY_ACTOR_TIKTOK_MUSIC_FALLBACK,
+                        {
+                            "musics": [url],
+                            "resultsPerPage": 1,
+                            "shouldDownloadVideos": False,
+                        },
+                        max_items=1,
+                    )
+                except Exception:  # noqa: BLE001
+                    return None
+                if not cw_items:
+                    return None
+                music = cw_items[0].get("musicMeta") or cw_items[0].get("music") or cw_items[0]
+                return safe_str(music.get("playUrl") or music.get("audioUrl"))
+
+            async def _enrich_play_url(payload: dict[str, Any]) -> dict[str, Any]:
+                if payload.get("playUrl"):
+                    return payload
+                play_url = await _play_url_from_clockworks()
+                if play_url:
+                    payload["playUrl"] = play_url
+                return payload
+
             # Fast path: apidojo music scraper (~9s, has duration + cover).
             try:
                 items = await apify.run_actor_sync(
@@ -2089,18 +2116,23 @@ async def tiktok_song_details(
                 song = items[0].get("song") or {}
                 if song:
                     title = safe_str(song.get("title"))
-                    return {
-                        "platform": "tiktok",
-                        "url": url,
-                        "id": url_id or safe_str(song.get("id")),
-                        "title": title,
-                        "author": safe_str(song.get("artist")),
-                        "original": bool(title) and title.lower().startswith("original sound"),
-                        "album": safe_str(song.get("album")),
-                        "duration": safe_float(song.get("duration")),
-                        "coverUrl": safe_str(song.get("cover")),
-                        "playUrl": None,
-                    }
+                    return await _enrich_play_url(
+                        {
+                            "platform": "tiktok",
+                            "url": url,
+                            "id": url_id or safe_str(song.get("id")),
+                            "title": title,
+                            "author": safe_str(song.get("artist")),
+                            "original": bool(title) and title.lower().startswith("original sound"),
+                            # Original sounds genuinely have no album; licensed tracks may.
+                            "album": safe_str(song.get("album")),
+                            "duration": safe_float(song.get("duration")),
+                            "coverUrl": safe_str(song.get("cover")),
+                            "playUrl": safe_str(
+                                song.get("playUrl") or song.get("audioUrl") or song.get("play_url")
+                            ),
+                        }
+                    )
 
             # apidojo failed: the remaining fallbacks are independent actors, so
             # race them concurrently instead of cascading (worst case used to be
@@ -2127,27 +2159,57 @@ async def tiktok_song_details(
                     return None
                 item = summary_items[0]
                 music = item.get("sound") or item.get("music") or item.get("summary") or item
-                title = safe_str(music.get("title") or music.get("musicName") or music.get("name"))
+                title = safe_str(
+                    music.get("title")
+                    or music.get("musicName")
+                    or music.get("soundTitle")
+                    or music.get("name")
+                )
                 if not title:
                     return None
                 return {
                     "platform": "tiktok",
                     "url": url,
-                    "id": url_id or safe_str(music.get("id") or music.get("musicId") or music.get("soundId")),
+                    "id": url_id
+                    or safe_str(
+                        music.get("id") or music.get("musicId") or music.get("soundId")
+                    ),
                     "title": title,
-                    "author": safe_str(music.get("artist") or music.get("authorName") or music.get("author")),
+                    "author": safe_str(
+                        music.get("artist")
+                        or music.get("authorName")
+                        or music.get("soundAuthor")
+                        or music.get("author")
+                    ),
                     "original": bool(title) and title.lower().startswith("original sound"),
-                    "album": safe_str(music.get("album")),
-                    "duration": safe_float(music.get("duration") or music.get("durationSeconds")),
-                    "coverUrl": safe_str(music.get("cover") or music.get("coverUrl") or music.get("coverLarge")),
+                    "album": safe_str(music.get("album") or music.get("soundAlbum")),
+                    "duration": safe_float(
+                        music.get("duration")
+                        or music.get("durationSeconds")
+                        or music.get("soundDuration")
+                    ),
+                    "coverUrl": safe_str(
+                        music.get("cover")
+                        or music.get("coverUrl")
+                        or music.get("soundCoverUrl")
+                        or music.get("coverLarge")
+                    ),
                     "playUrl": safe_str(music.get("playUrl") or music.get("audioUrl")),
                 }
 
             async def _clockworks_fallback() -> dict[str, Any] | None:
-                # Clockworks sound scraper (slower, exposes playUrl).
+                # Prefer clockworks (has playUrl) over coregent summary.
                 try:
                     items, _actor = await apify.run_with_fallback(
                         [
+                            (
+                                settings.APIFY_ACTOR_TIKTOK_MUSIC_FALLBACK,
+                                {
+                                    "musics": [url],
+                                    "resultsPerPage": 1,
+                                    "shouldDownloadVideos": False,
+                                },
+                            ),
                             (
                                 settings.APIFY_ACTOR_TIKTOK_MUSIC,
                                 {
@@ -2156,10 +2218,6 @@ async def tiktok_song_details(
                                     "includeSoundSummary": True,
                                     "includeVideoFields": False,
                                 },
-                            ),
-                            (
-                                settings.APIFY_ACTOR_TIKTOK_MUSIC_FALLBACK,
-                                {"musics": [url], "resultsPerPage": 1, "shouldDownloadVideos": False},
                             ),
                         ],
                         max_items=1,
@@ -2175,17 +2233,47 @@ async def tiktok_song_details(
                     or items[0].get("summary")
                     or items[0]
                 )
+                title = safe_str(
+                    music.get("musicName")
+                    or music.get("title")
+                    or music.get("soundTitle")
+                    or music.get("name")
+                )
                 return {
                     "platform": "tiktok",
                     "url": url,
-                    "id": url_id or safe_str(music.get("musicId") or music.get("soundId") or music.get("id")),
-                    "title": safe_str(music.get("musicName") or music.get("title") or music.get("name")),
-                    "author": safe_str(music.get("musicAuthor") or music.get("authorName") or music.get("artist") or music.get("author")),
-                    "original": music.get("musicOriginal"),
-                    "album": None,
-                    "duration": safe_float(music.get("duration") or music.get("durationSeconds")),
+                    "id": url_id
+                    or safe_str(
+                        music.get("musicId") or music.get("soundId") or music.get("id")
+                    ),
+                    "title": title,
+                    "author": safe_str(
+                        music.get("musicAuthor")
+                        or music.get("authorName")
+                        or music.get("soundAuthor")
+                        or music.get("artist")
+                        or music.get("author")
+                    ),
+                    "original": music.get("musicOriginal")
+                    if music.get("musicOriginal") is not None
+                    else (
+                        bool(title) and title.lower().startswith("original sound")
+                        if title
+                        else None
+                    ),
+                    "album": safe_str(music.get("album") or music.get("soundAlbum")),
+                    "duration": safe_float(
+                        music.get("duration")
+                        or music.get("durationSeconds")
+                        or music.get("soundDuration")
+                    ),
                     "coverUrl": safe_str(
-                        music.get("coverLarge") or music.get("coverMedium") or music.get("coverMediumUrl") or music.get("coverUrl") or music.get("cover")
+                        music.get("coverLarge")
+                        or music.get("coverMedium")
+                        or music.get("coverMediumUrl")
+                        or music.get("coverUrl")
+                        or music.get("soundCoverUrl")
+                        or music.get("cover")
                     ),
                     "playUrl": safe_str(music.get("playUrl") or music.get("audioUrl")),
                 }
@@ -2193,14 +2281,17 @@ async def tiktok_song_details(
             summary_result, clockworks_result = await asyncio.gather(
                 _summary_fallback(), _clockworks_fallback()
             )
-            result = summary_result or clockworks_result
+            if clockworks_result and clockworks_result.get("playUrl"):
+                result = clockworks_result
+            else:
+                result = summary_result or clockworks_result
             if not result:
                 raise HTTPException(status_code=404, detail="Song not found")
-            return result
+            return await _enrich_play_url(result)
 
         data = await cached_or_run(
             endpoint="tiktok.song-details",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
