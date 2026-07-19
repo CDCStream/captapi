@@ -109,6 +109,67 @@ def _tweet_is_reply(item: dict[str, Any]) -> bool | None:
     return None
 
 
+def _nested_tweet(item: dict[str, Any]) -> dict[str, Any] | None:
+    """Original tweet payload nested under a retweet/quote shell."""
+    for key in ("retweet", "quote", "retweeted_status", "quoted_status", "quotedStatus"):
+        nested = item.get(key)
+        if isinstance(nested, dict) and nested:
+            return nested
+    return None
+
+
+def _raw_hashtags(item: dict[str, Any]) -> list[Any]:
+    entities = item.get("entities") if isinstance(item.get("entities"), dict) else {}
+    return safe_list(item.get("hashtags") or entities.get("hashtags"))
+
+
+def _tweet_hashtags(item: dict[str, Any]) -> list[str]:
+    raw = _raw_hashtags(item)
+    if not raw:
+        nested = _nested_tweet(item)
+        if nested:
+            raw = _raw_hashtags(nested)
+    tags: list[str] = []
+    for h in raw:
+        tag = (h.get("text") or h.get("tag")) if isinstance(h, dict) else safe_str(h)
+        if tag:
+            tags.append(tag)
+    return tags
+
+
+def _raw_media(item: dict[str, Any]) -> list[Any]:
+    """Media list from top-level, extendedEntities, or entities.media."""
+    direct = safe_list(item.get("media"))
+    if direct:
+        return direct
+    for container_key in ("extendedEntities", "entities"):
+        container = item.get(container_key)
+        if isinstance(container, dict):
+            media = safe_list(container.get("media"))
+            if media:
+                return media
+    return []
+
+
+def _tweet_media(item: dict[str, Any]) -> list[str]:
+    """URL list; for retweets/quotes fall through to the nested original."""
+    raw = _raw_media(item)
+    if not raw:
+        nested = _nested_tweet(item)
+        if nested:
+            raw = _raw_media(nested)
+    urls: list[str] = []
+    for m in raw:
+        if isinstance(m, dict):
+            # Prefer still/thumbnail URL over t.co permalink in `url`.
+            u = safe_str(m.get("media_url_https") or m.get("mediaUrl") or m.get("url"))
+        else:
+            u = safe_str(m)
+        if u:
+            urls.append(u)
+    return urls
+
+
 def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
     author = item.get("author") or item.get("user") or {}
     if not author and item.get("username"):
@@ -148,18 +209,8 @@ def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
         },
         "isReply": _tweet_is_reply(item),
         "isRetweet": first_present(item.get("isRetweet"), _as_bool(item.get("is_retweet"))),
-        "hashtags": [
-            tag
-            for tag in (
-                (h.get("text") or h.get("tag") if isinstance(h, dict) else safe_str(h))
-                for h in safe_list(item.get("hashtags") or (item.get("entities") or {}).get("hashtags"))
-            )
-            if tag
-        ],
-        "media": [
-            safe_str(m.get("media_url_https") or m.get("url") or m) if isinstance(m, dict) else safe_str(m)
-            for m in safe_list(item.get("media") or item.get("extendedEntities"))
-        ],
+        "hashtags": _tweet_hashtags(item),
+        "media": _tweet_media(item),
     }
 
 
@@ -241,7 +292,7 @@ async def twitter_tweet_details(
 
         data = await cached_or_run(
             endpoint="twitter.tweet-details",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -4956,7 +4956,9 @@
       "isReply": false,
       "isRetweet": true,
       "hashtags": [],
-      "media": []
+      "media": [
+        "https://pbs.twimg.com/media/HNdWSZ3XsAEekpT.jpg"
+      ]
     }
   },
   "twitter-transcript": {

@@ -19389,7 +19389,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "isReply": false,
     "isRetweet": true,
     "hashtags": [],
-    "media": []
+    "media": [
+      "https://pbs.twimg.com/media/HNdWSZ3XsAEekpT.jpg"
+    ]
   },
   "twitter-user-tweets": {
     "handle": "nasa",
