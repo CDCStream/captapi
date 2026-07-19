@@ -18,7 +18,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
-from app.utils.formatters import safe_int, safe_str
+from app.utils.formatters import first_present, safe_int, safe_str
 from app.utils.url import (
     detect_url_platform,
     extract_linkedin_company,
@@ -149,15 +149,26 @@ def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
         or p.get("authorHeadline")
         or p.get("author_headline")
     )
+    # Use first_present — `or` drops real zeros (shares/comments often 0).
     engagement = {
         "likes": safe_int(
-            stats.get("likes") or stats.get("total_reactions") or p.get("numLikes") or p.get("reactionsCount")
+            first_present(
+                stats.get("likes"),
+                stats.get("total_reactions"),
+                p.get("numLikes"),
+                p.get("reactionsCount"),
+            )
         ),
         "comments": safe_int(
-            stats.get("comments") or p.get("numComments") or p.get("commentsCount")
+            first_present(stats.get("comments"), p.get("numComments"), p.get("commentsCount"))
         ),
         "reposts": safe_int(
-            stats.get("shares") or p.get("reposts") or p.get("numShares") or p.get("repostsCount")
+            first_present(
+                stats.get("shares"),
+                p.get("reposts"),
+                p.get("numShares"),
+                p.get("repostsCount"),
+            )
         ),
     }
     out: dict[str, Any] = {
@@ -437,7 +448,7 @@ async def linkedin_search_posts(
 
         data = await cached_or_run(
             endpoint="linkedin.search-posts",
-            params={"q": q, "sort": sort, "limit": limit, "v": 2},
+            params={"q": q, "sort": sort, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

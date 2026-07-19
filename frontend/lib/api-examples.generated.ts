@@ -5599,7 +5599,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "engagement": {
           "likes": 4,
           "comments": 4,
-          "reposts": null
+          "reposts": 0
         },
         "id": "7483943242477121536",
         "media": []
@@ -5618,7 +5618,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "engagement": {
           "likes": 19,
           "comments": 22,
-          "reposts": null
+          "reposts": 0
         },
         "id": "7483511021475762176",
         "media": []
@@ -5636,8 +5636,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "engagement": {
           "likes": 2,
-          "comments": null,
-          "reposts": null
+          "comments": 0,
+          "reposts": 0
         },
         "id": "7483173237300867074",
         "media": []
@@ -5669,8 +5669,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "engagement": {
           "likes": 3,
-          "comments": null,
-          "reposts": null
+          "comments": 0,
+          "reposts": 0
         },
         "id": "7484136180788203520",
         "media": []
