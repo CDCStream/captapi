@@ -15,7 +15,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
-from app.utils.formatters import safe_int, safe_str
+from app.utils.formatters import safe_float, safe_int, safe_str
 from app.utils.url import detect_url_platform, extract_tiktok_username, platform_mismatch_detail
 
 router = APIRouter()
@@ -40,6 +40,7 @@ def _reject_non_tiktok_url(value: str, example: str) -> None:
 
 
 _SHOP_URL_RE = re.compile(r"/shop/store/([^/?#]+)/(\d+)", re.IGNORECASE)
+_PRICE_RE = re.compile(r"[\d]+(?:[.,]\d+)?")
 
 
 def _shop_slug(name: str) -> str | None:
@@ -57,11 +58,30 @@ def _parse_shop_url(url: str | None) -> tuple[str | None, str | None]:
     return m.group(2), m.group(1)
 
 
+def _coerce_price(value: Any) -> float | int | str | None:
+    """Normalize prices to numbers when possible ('$17.98' → 17.98)."""
+    if value is None or value == "":
+        return None
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return value
+    s = str(value).strip()
+    if not s:
+        return None
+    m = _PRICE_RE.search(s.replace(",", ""))
+    if not m:
+        return safe_str(s)
+    parsed = safe_float(m.group(0).replace(",", ""))
+    return parsed if parsed is not None else safe_str(s)
+
+
 def _normalize_product(
     item: dict[str, Any],
     *,
     search_mode: bool = False,
     catalog_mode: bool = False,
+    details_mode: bool = False,
 ) -> dict[str, Any]:
     # Sellers come nested (seller/shop/store/store_info) or flat (shopId/shopName).
     seller = item.get("seller") or item.get("shop") or item.get("store") or item.get("store_info") or {}
@@ -72,7 +92,9 @@ def _normalize_product(
     if isinstance(price, dict):
         # cunning_soil details actor: {"min_price": "$18.99", "max_price": ..., "currency": "USD"}
         currency = currency or price.get("currency")
-        price = price.get("min_price") or price.get("price") or price.get("max_price")
+        candidates = (price.get("min_price"), price.get("price"), price.get("max_price"))
+        price = next((c for c in candidates if c not in (None, "")), None)
+    price = _coerce_price(price)
     images = item.get("images")
     first_image = images[0] if isinstance(images, list) and images else None
     seller_url = safe_str(seller.get("url") or seller.get("shopUrl") or item.get("shopUrl"))
@@ -98,11 +120,13 @@ def _normalize_product(
         if slug:
             seller_url = f"https://www.tiktok.com/shop/store/{slug}/{seller_id}"
 
-    # Search/catalog omit fields the listing actor never returns.
-    include_description = not search_mode and not catalog_mode
-    include_rating_reviews = not search_mode
+    # Mode-specific omissions for fields the upstream actor never returns.
+    include_description = not search_mode and not catalog_mode and not details_mode
+    include_rating_reviews = not search_mode and not details_mode
     include_stock = not search_mode and not catalog_mode
     include_seller_rating = not search_mode and not catalog_mode
+    include_list_pricing = not details_mode  # originalPrice / discount
+    include_seller_id_url = not details_mode
 
     out: dict[str, Any] = {
         "platform": "tiktok_shop",
@@ -119,9 +143,13 @@ def _normalize_product(
             or item.get("productDescription")
         )
     out["price"] = price
-    out["originalPrice"] = item.get("originalPrice") or item.get("origin_price") or item.get("original_price")
+    if include_list_pricing:
+        out["originalPrice"] = _coerce_price(
+            item.get("originalPrice") or item.get("origin_price") or item.get("original_price")
+        )
     out["currency"] = safe_str(currency)
-    out["discount"] = safe_str(item.get("discountPercent") or item.get("discount") or item.get("discount_rate"))
+    if include_list_pricing:
+        out["discount"] = safe_str(item.get("discountPercent") or item.get("discount") or item.get("discount_rate"))
     if include_rating_reviews:
         out["rating"] = item.get("rating") or item.get("reviewRating") or item.get("product_rating")
         out["reviews"] = safe_int(item.get("reviews") or item.get("reviewCount") or item.get("review_count"))
@@ -136,11 +164,15 @@ def _normalize_product(
         or item.get("productImage")
         or first_image
     )
-    out["seller"] = {
-        "id": seller_id,
-        "name": seller_name,
-        "url": seller_url,
-    }
+    if include_seller_id_url:
+        out["seller"] = {
+            "id": seller_id,
+            "name": seller_name,
+            "url": seller_url,
+        }
+    else:
+        # Details actor only returns store name + rating.
+        out["seller"] = {"name": seller_name}
     if include_seller_rating:
         out["seller"]["rating"] = seller.get("rating")
     return out
@@ -258,12 +290,15 @@ async def product_details(
             if not items:
                 # Keep the endpoint useful with canonical basics for valid PDP URLs.
                 product_id = url.rstrip("/").split("/")[-1]
-                return _normalize_product({"productUrl": url, "productId": product_id})
-            normalized = _normalize_product(items[0])
+                return _normalize_product(
+                    {"productUrl": url, "productId": product_id},
+                    details_mode=True,
+                )
+            normalized = _normalize_product(items[0], details_mode=True)
             normalized["url"] = normalized["url"] or url
             return normalized
 
-        return ApiResponse(data=await cached_or_run("tiktok-shop.product-details", {"url": url, "v": 3}, _run, ctx, use_cache=cache))
+        return ApiResponse(data=await cached_or_run("tiktok-shop.product-details", {"url": url, "v": 4}, _run, ctx, use_cache=cache))
 
 
 @router.get("/product-reviews", summary="TikTok Shop product reviews")
