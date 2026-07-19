@@ -5521,11 +5521,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2026-06-30T13:33:39.256Z",
         "author": {
           "name": "Microsoft",
-          "headline": null,
           "url": "https://www.linkedin.com/company/microsoft"
         },
-        "id": "7477715981667086336",
-        "media": []
+        "id": "7477715981667086336"
       }
     ]
   },

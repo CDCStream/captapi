@@ -191,17 +191,27 @@ def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
 _LI_ACTIVITY_RE = re.compile(r"activity[:-](\d{10,25})")
 
 
-def _normalize_post_list_item(p: dict[str, Any]) -> dict[str, Any]:
+def _normalize_post_list_item(p: dict[str, Any], *, include_media: bool = True) -> dict[str, Any]:
     base = _normalize_post(p)
     post_id = safe_str(p.get("id") or p.get("urn") or p.get("post_id") or p.get("activity_id"))
     if not post_id:
         m = _LI_ACTIVITY_RE.search(base.get("url") or "")
         post_id = m.group(1) if m else None
     base["id"] = post_id
-    media = p.get("media") or p.get("images") or p.get("videos") or []
-    if isinstance(media, dict):
-        media = [media]
-    base["media"] = media
+    if include_media:
+        media = p.get("media") or p.get("images") or p.get("videos") or []
+        if isinstance(media, dict):
+            media = [media]
+        base["media"] = media
+    return base
+
+
+def _normalize_company_post(p: dict[str, Any]) -> dict[str, Any]:
+    """Company-posts actor is JSON-LD only — no author headline or media."""
+    base = _normalize_post_list_item(p, include_media=False)
+    author = base.get("author")
+    if isinstance(author, dict):
+        author.pop("headline", None)
     return base
 
 
@@ -380,12 +390,12 @@ async def linkedin_company_posts(
                 {"companyUrls": [company_url], "maxPostsPerCompany": limit},
                 max_items=limit,
             )
-            posts = [_normalize_post_list_item(i) for i in items[:limit]]
+            posts = [_normalize_company_post(i) for i in items[:limit]]
             return {"company": slug, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
             endpoint="linkedin.company-posts",
-            params={"slug": slug, "limit": limit, "v": 3},
+            params={"slug": slug, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
