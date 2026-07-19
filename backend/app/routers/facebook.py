@@ -517,14 +517,14 @@ def _normalize_marketplace_detail(item: dict, url: str) -> dict:
         amount = float(price.get("amount")) if price.get("amount") is not None else None
     except (TypeError, ValueError):
         amount = None
-    photos = _marketplace_photo_uris(item)
+    # The details actor never returns listing photos (no primary_listing_photo /
+    # listing_photos across live samples) — omit image/photos rather than always-null.
     return {
         "platform": "facebook",
         "id": safe_str(item.get("id")),
         "url": safe_str(item.get("share_uri")) or url,
         "title": safe_str(item.get("marketplace_listing_title") or item.get("base_marketplace_listing_title")),
         "description": safe_str(desc.get("text")),
-        "image": photos[0] if photos else None,
         "price": amount,
         "priceFormatted": safe_str(price.get("formatted_amount_zeros_stripped")),
         "currency": safe_str(price.get("currency")),
@@ -535,7 +535,6 @@ def _normalize_marketplace_detail(item: dict, url: str) -> dict:
         "isSold": item.get("is_sold"),
         "isLive": item.get("is_live"),
         "deliveryTypes": item.get("delivery_types") or [],
-        "photos": photos,
         "createdAt": created_iso,
     }
 
@@ -1540,23 +1539,8 @@ async def facebook_marketplace_item(
             if m:
                 item_id = m.group(1)
 
-            if title or description or image:
-                page = resp.text if resp is not None else ""
-                ctx["source"] = "direct"
-                return {
-                    "platform": "facebook",
-                    "id": safe_str(item_id),
-                    "url": safe_str(_og_meta(page, "og:url") or url),
-                    "title": safe_str(title),
-                    "description": safe_str(description),
-                    "image": safe_str(image),
-                    "price": None,
-                    "location": None,
-                    "photos": [image] if image else [],
-                }
-
-            # Fallback: per-item details actor (the search actor has no
-            # single-listing mode - it requires keyword queries).
+            # Prefer the details actor whenever possible — OG rarely has price/
+            # coords, and neither path reliably returns listing photos.
             apify = get_apify()
             items = []
             if item_id:
@@ -1571,11 +1555,33 @@ async def facebook_marketplace_item(
             if items and not items[0].get("error"):
                 ctx["source"] = "apify"
                 return _normalize_marketplace_detail(items[0], url)
+
+            if title or description:
+                page = resp.text if resp is not None else ""
+                ctx["source"] = "direct"
+                return {
+                    "platform": "facebook",
+                    "id": safe_str(item_id),
+                    "url": safe_str(_og_meta(page, "og:url") or url),
+                    "title": safe_str(title),
+                    "description": safe_str(description),
+                    "price": None,
+                    "priceFormatted": None,
+                    "currency": None,
+                    "condition": None,
+                    "location": None,
+                    "latitude": None,
+                    "longitude": None,
+                    "isSold": None,
+                    "isLive": None,
+                    "deliveryTypes": [],
+                    "createdAt": None,
+                }
             raise HTTPException(status_code=404, detail="Listing not found")
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-item",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

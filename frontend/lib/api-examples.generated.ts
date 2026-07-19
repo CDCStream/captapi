@@ -1360,7 +1360,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://www.facebook.com/marketplace/item/2228870800986975/",
     "title": "Elabest Mesh Office Chair, Ergonomic Computer Desk Chair, Sturdy Task Chair - Adjustable Lumbar Support",
     "description": "Breathable mesh office chair has an ergonomic design with a high back and adjustable headrest. This light gray task chair is manufactured by Elabest and features adjustable armrests, a five-point rolling base, and integrated lumbar support.\n\nEstimated (WxDxH): 26 x 24 x 45 in",
-    "image": null,
     "price": 125.0,
     "priceFormatted": "$125",
     "currency": "USD",
@@ -1374,7 +1373,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "IN_PERSON",
       "DOOR_PICKUP"
     ],
-    "photos": [],
     "createdAt": "2026-07-17T18:23:51+00:00"
   },
   "facebook-marketplace-location-search": {
