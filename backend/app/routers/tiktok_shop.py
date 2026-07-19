@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import re
 from datetime import datetime, timezone
 from typing import Any
 
@@ -38,7 +39,12 @@ def _reject_non_tiktok_url(value: str, example: str) -> None:
         )
 
 
-def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
+def _shop_slug(name: str) -> str | None:
+    slug = re.sub(r"[^a-z0-9]+", "-", name.strip().lower()).strip("-")
+    return slug or None
+
+
+def _normalize_product(item: dict[str, Any], *, search_mode: bool = False) -> dict[str, Any]:
     # Sellers come nested (seller/shop/store/store_info) or flat (shopId/shopName).
     seller = item.get("seller") or item.get("shop") or item.get("store") or item.get("store_info") or {}
     if not isinstance(seller, dict):
@@ -51,50 +57,64 @@ def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
         price = price.get("min_price") or price.get("price") or price.get("max_price")
     images = item.get("images")
     first_image = images[0] if isinstance(images, list) and images else None
-    return {
+    seller_id = safe_str(
+        seller.get("id")
+        or seller.get("sellerId")
+        or seller.get("shop_id")
+        or item.get("shopId")
+        or item.get("shop_id")
+        or item.get("seller_id")
+    )
+    seller_name = safe_str(
+        seller.get("name") or seller.get("sellerName") or seller.get("shopName") or item.get("shopName")
+    )
+    seller_url = safe_str(seller.get("url") or seller.get("shopUrl") or item.get("shopUrl"))
+    if not seller_url and seller_id and seller_name:
+        slug = _shop_slug(seller_name)
+        if slug:
+            seller_url = f"https://www.tiktok.com/shop/store/{slug}/{seller_id}"
+
+    out: dict[str, Any] = {
         "platform": "tiktok_shop",
         "id": safe_str(item.get("id") or item.get("productId") or item.get("product_id")),
         "url": safe_str(item.get("url") or item.get("productUrl") or item.get("product_url")),
         "title": safe_str(item.get("title") or item.get("name") or item.get("productName") or item.get("productTitle")),
-        "description": safe_str(
+    }
+    # Search listings never include these — omit always-null keys. Details/catalog may.
+    if not search_mode:
+        out["description"] = safe_str(
             item.get("description")
             or item.get("product_desc")
             or item.get("productDesc")
             or item.get("desc")
             or item.get("productDescription")
-        ),
-        "price": price,
-        "originalPrice": item.get("originalPrice") or item.get("origin_price") or item.get("original_price"),
-        "currency": safe_str(currency),
-        "discount": safe_str(item.get("discountPercent") or item.get("discount") or item.get("discount_rate")),
-        "rating": item.get("rating") or item.get("reviewRating") or item.get("product_rating"),
-        "reviews": safe_int(item.get("reviews") or item.get("reviewCount") or item.get("review_count")),
-        "sold": safe_int(item.get("sold") or item.get("soldCount") or item.get("unitsSold") or item.get("sales_count")),
-        "stock": safe_int(item.get("stock") or item.get("stock_num") or item.get("inventory") or item.get("sku_stock")),
-        "image": safe_str(
-            item.get("image")
-            or item.get("imageUrl")
-            or item.get("thumbnail")
-            or item.get("primaryImage")
-            or item.get("productImage")
-            or first_image
-        ),
-        "seller": {
-            "id": safe_str(
-                seller.get("id")
-                or seller.get("sellerId")
-                or seller.get("shop_id")
-                or item.get("shopId")
-                or item.get("shop_id")
-                or item.get("seller_id")
-            ),
-            "name": safe_str(
-                seller.get("name") or seller.get("sellerName") or seller.get("shopName") or item.get("shopName")
-            ),
-            "url": safe_str(seller.get("url") or seller.get("shopUrl") or item.get("shopUrl")),
-            "rating": seller.get("rating"),
-        },
+        )
+    out["price"] = price
+    out["originalPrice"] = item.get("originalPrice") or item.get("origin_price") or item.get("original_price")
+    out["currency"] = safe_str(currency)
+    out["discount"] = safe_str(item.get("discountPercent") or item.get("discount") or item.get("discount_rate"))
+    if not search_mode:
+        out["rating"] = item.get("rating") or item.get("reviewRating") or item.get("product_rating")
+        out["reviews"] = safe_int(item.get("reviews") or item.get("reviewCount") or item.get("review_count"))
+    out["sold"] = safe_int(item.get("sold") or item.get("soldCount") or item.get("unitsSold") or item.get("sales_count"))
+    if not search_mode:
+        out["stock"] = safe_int(item.get("stock") or item.get("stock_num") or item.get("inventory") or item.get("sku_stock"))
+    out["image"] = safe_str(
+        item.get("image")
+        or item.get("imageUrl")
+        or item.get("thumbnail")
+        or item.get("primaryImage")
+        or item.get("productImage")
+        or first_image
+    )
+    out["seller"] = {
+        "id": seller_id,
+        "name": seller_name,
+        "url": seller_url,
     }
+    if not search_mode:
+        out["seller"]["rating"] = seller.get("rating")
+    return out
 
 
 def _review_timestamp(item: dict[str, Any]) -> str | None:
@@ -149,10 +169,10 @@ async def shop_search(
     async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/shop-search", platform="tiktok_shop", resource_url=None, base_credits=_scaled(limit, RATE_SHOP)) as ctx:
         async def _run() -> dict[str, Any]:
             items = await _run_shop("shop_search", {"searchKeywords": [q], "region": region.upper(), "maxResults": limit}, limit)
-            products = [_normalize_product(i) for i in items]
+            products = [_normalize_product(i, search_mode=True) for i in items]
             return {"query": q, "region": region.upper(), "totalReturned": len(products), "products": products}
 
-        data = await cached_or_run("tiktok-shop.shop-search", {"q": q, "region": region, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("tiktok-shop.shop-search", {"q": q, "region": region, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["products"]), RATE_SHOP)
         return ApiResponse(data=data)
 
