@@ -29,6 +29,7 @@ from app.services.tiktok_native import (
     audience_regions_native,
     channel_details_native,
     channel_posts_native,
+    coerce_stats_v2,
     comment_replies_native,
     profile_region_native,
     search_suggestions_native,
@@ -255,6 +256,9 @@ def _normalize_user(item: dict) -> dict:
 def _normalize_profile_region(item: dict, handle: str) -> dict:
     user = item.get("user") or item.get("authorMeta") or item
     stats = item.get("stats") or item.get("authorStats") or {}
+    raw = dict(item)
+    if isinstance(raw.get("statsV2"), dict):
+        raw["statsV2"] = coerce_stats_v2(raw["statsV2"])
     return {
         "platform": "tiktok",
         "username": safe_str(user.get("uniqueId") or user.get("name") or handle),
@@ -291,7 +295,7 @@ def _normalize_profile_region(item: dict, handle: str) -> dict:
         "verified": first_present(user.get("verified"), user.get("isVerified")),
         "private": first_present(user.get("privateAccount"), user.get("isPrivate")),
         "profileImage": safe_str(user.get("avatarLarger") or user.get("avatar") or user.get("avatarMedium")),
-        "raw": item,
+        "raw": raw,
     }
 
 
@@ -1170,7 +1174,7 @@ async def tiktok_profile_region(
 
         data = await cached_or_run(
             endpoint="tiktok.profile-region",
-            params={"handle": handle, "v": 5},
+            params={"handle": handle, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

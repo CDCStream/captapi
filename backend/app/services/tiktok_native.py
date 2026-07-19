@@ -71,6 +71,21 @@ def _stat(stats_v2: dict[str, Any], stats: dict[str, Any], key: str) -> int | No
     return safe_int(stats_v2.get(key) if stats_v2.get(key) is not None else stats.get(key))
 
 
+def coerce_stats_v2(stats: dict[str, Any] | None) -> dict[str, Any]:
+    """Normalize TikTok statsV2 string counts (e.g. \"1623\") to ints."""
+    out: dict[str, Any] = {}
+    for key, value in (stats or {}).items():
+        if isinstance(value, bool):
+            out[key] = value
+            continue
+        if isinstance(value, (int, float)):
+            out[key] = int(value)
+            continue
+        parsed = safe_int(value)
+        out[key] = parsed if parsed is not None else value
+    return out
+
+
 def _iso(create_time: Any) -> str | None:
     ts = safe_int(create_time)
     if not ts:
@@ -515,7 +530,9 @@ async def profile_region_native(handle: str) -> dict[str, Any] | None:
         "verified": user.get("verified"),
         "private": user.get("privateAccount"),
         "profileImage": safe_str(user.get("avatarLarger") or user.get("avatarMedium")),
-        "raw": {"user": user, "statsV2": stats_v2},
+        # roomId/eventList/shortDramaCreator often arrive empty from TikTok itself
+        # ("" / [] / {}); keep them in raw when present so live/event profiles still surface.
+        "raw": {"user": user, "statsV2": coerce_stats_v2(stats_v2)},
     }
 
 
