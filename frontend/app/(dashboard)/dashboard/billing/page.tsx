@@ -196,9 +196,16 @@ export default function BillingPage() {
     gaEvent("begin_checkout", { ...body });
     adsConversion();
     try {
+      const sb = createClient();
+      const {
+        data: { user },
+      } = await sb.auth.getUser();
       const res = await api.createCheckout(body);
       if (res.transaction_id && paddle) {
-        paddle.Checkout.open({ transactionId: res.transaction_id });
+        paddle.Checkout.open({
+          transactionId: res.transaction_id,
+          ...(user?.email ? { customer: { email: user.email } } : {}),
+        });
         setBusy(false);
         return;
       }
