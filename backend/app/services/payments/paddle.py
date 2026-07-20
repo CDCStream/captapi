@@ -115,8 +115,12 @@ class PaddleProvider:
             "items": [{"price_id": item.price_id, "quantity": 1}],
             "custom_data": {k: str(v) for k, v in metadata.items()},
         }
+        # Prefill checkout email: prefer an existing Paddle customer, else
+        # pass the signed-in user's email so the overlay comes filled in.
         if customer_id:
             payload["customer_id"] = customer_id
+        elif email:
+            payload["customer"] = {"email": email}
         data = self._request("POST", "/transactions", payload)
         return CheckoutResult(provider=self.name, transaction_id=data.get("id"))
 
