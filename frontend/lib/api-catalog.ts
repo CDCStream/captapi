@@ -1747,7 +1747,8 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
     case "repo":
       return "vercel/next.js";
     case "state":
-      return "open";
+      // Prefer closed so docs examples show mergedAt when present.
+      return ep.slug === "github-pull-requests" ? "closed" : "open";
     case "sort":
       return "relevance";
     case "location":
@@ -1836,6 +1837,13 @@ function exampleArgs(ep: ApiEndpoint): { name: string; value: string }[] {
     const details = ps.find((p) => p.name === "details");
     if (details && !chosen.some((p) => p.name === "details")) {
       chosen = [...chosen, details];
+    }
+  }
+  // Pull-requests docs snapshot uses state=closed so mergedAt is visible.
+  if (ep.slug === "github-pull-requests") {
+    const state = ps.find((p) => p.name === "state");
+    if (state && !chosen.some((p) => p.name === "state")) {
+      chosen = [...chosen, state];
     }
   }
   return chosen.map((p) => ({

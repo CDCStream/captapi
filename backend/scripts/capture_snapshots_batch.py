@@ -235,7 +235,7 @@ def batch3_phase1() -> list[tuple[str, str, dict]]:
         ("github-user", "/v1/github/user", {"username": "torvalds"}),
         ("github-repositories", "/v1/github/repositories", {"username": "torvalds", "limit": 5}),
         ("github-repository", "/v1/github/repository", {"repo": "torvalds/linux"}),
-        ("github-pull-requests", "/v1/github/pull-requests", {"repo": "facebook/react", "state": "open", "limit": 5}),
+        ("github-pull-requests", "/v1/github/pull-requests", {"repo": "vercel/next.js", "state": "closed", "limit": 5}),
         ("github-activity", "/v1/github/activity", {"username": "torvalds", "limit": 5}),
         ("github-followers", "/v1/github/followers", {"username": "torvalds", "limit": 5}),
         ("github-following", "/v1/github/following", {"username": "gaearon", "limit": 5}),
