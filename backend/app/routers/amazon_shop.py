@@ -22,43 +22,81 @@ from app.utils.url import detect_url_platform, platform_mismatch_detail
 router = APIRouter()
 
 
+_PRODUCT_OMIT_IF_EMPTY = frozenset(
+    {"price", "priceFormatted", "rating", "reviews", "image", "url", "title"}
+)
+# Storefront actor never returns seller profile fields or product availability.
+_SELLER_OMIT_IF_EMPTY = frozenset({"name", "url", "rating", "reviewCount"})
+_RAW_OMIT_IF_EMPTY = frozenset(
+    {
+        "rating",
+        "ratingText",
+        "reviewCount",
+        "bestSellerCategory",
+        "availability",
+        "sellerName",
+        "storeName",
+    }
+)
+
+
+def _drop_empty(obj: dict[str, Any], keys: frozenset[str]) -> dict[str, Any]:
+    for key in keys:
+        if key in obj and obj[key] in (None, "", []):
+            obj.pop(key, None)
+    return obj
+
+
 def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
     price = item.get("price") or item.get("priceValue")
     currency = safe_str(item.get("currency") or item.get("currencyCode"))
     price_formatted = safe_str(item.get("priceFormatted") or item.get("priceText"))
     if not price_formatted and price is not None:
         price_formatted = f"{currency} {price}".strip() if currency else str(price)
-    return {
-        "asin": safe_str(item.get("asin") or item.get("ASIN")),
-        "title": safe_str(item.get("title") or item.get("name")),
-        "url": safe_str(item.get("url") or item.get("productUrl")),
-        "image": safe_str(item.get("image") or item.get("imageUrl")),
-        "price": price,
-        "priceFormatted": price_formatted,
-        "rating": safe_float(item.get("rating") or item.get("stars")),
-        "reviews": safe_int(item.get("reviews") or item.get("reviewsCount") or item.get("reviewCount")),
-        "availability": safe_str(item.get("availability") or item.get("availabilityType")),
-    }
+    # availability is never present on this actor — omit rather than null.
+    return _drop_empty(
+        {
+            "asin": safe_str(item.get("asin") or item.get("ASIN")),
+            "title": safe_str(item.get("title") or item.get("name")),
+            "url": safe_str(item.get("url") or item.get("productUrl")),
+            "image": safe_str(item.get("image") or item.get("imageUrl")),
+            "price": price,
+            "priceFormatted": price_formatted,
+            "rating": safe_float(item.get("rating") or item.get("stars")),
+            "reviews": safe_int(item.get("reviews") or item.get("reviewsCount") or item.get("reviewCount")),
+        },
+        _PRODUCT_OMIT_IF_EMPTY,
+    )
 
 
 def _normalize_shop(items: list[dict[str, Any]], url: str, marketplace: str) -> dict[str, Any]:
     first = items[0] if items else {}
-    seller = first.get("seller") if isinstance(first.get("seller"), dict) else first
+    seller_src = first.get("seller") if isinstance(first.get("seller"), dict) else first
     products = [_normalize_product(i) for i in items]
+    # Product rows expose sellerId only — do not reuse product rating/url as seller fields.
+    seller = _drop_empty(
+        {
+            "id": safe_str(seller_src.get("sellerId") or seller_src.get("seller_id") or seller_src.get("id")),
+            "name": safe_str(seller_src.get("sellerName") or seller_src.get("seller_name") or seller_src.get("brand")),
+            "url": safe_str(seller_src.get("sellerUrl") or seller_src.get("storefrontUrl")),
+            "rating": safe_float(seller_src.get("sellerRating") or seller_src.get("seller_rating")),
+            "reviewCount": safe_int(seller_src.get("sellerReviews") or seller_src.get("seller_reviews")),
+        },
+        _SELLER_OMIT_IF_EMPTY,
+    )
+    raw = None
+    if isinstance(first, dict) and first:
+        raw = _drop_empty(dict(first), _RAW_OMIT_IF_EMPTY)
+        # Drop remaining null/empty noise keys from the debug payload.
+        raw = {k: v for k, v in raw.items() if v not in (None, "", [])}
     return {
         "platform": "amazon_shop",
         "url": safe_str(url),
         "marketplace": marketplace.upper(),
-        "seller": {
-            "id": safe_str(seller.get("sellerId") or seller.get("seller_id") or seller.get("id")),
-            "name": safe_str(seller.get("sellerName") or seller.get("seller_name") or seller.get("name") or seller.get("brand")),
-            "url": safe_str(seller.get("sellerUrl") or seller.get("storefrontUrl") or seller.get("url")),
-            "rating": safe_float(seller.get("sellerRating") or seller.get("rating")),
-            "reviewCount": safe_int(seller.get("sellerReviews") or seller.get("reviewCount")),
-        },
+        "seller": seller,
         "totalReturned": len(products),
         "products": products,
-        "rawFirstItem": first or None,
+        "rawFirstItem": raw,
     }
 
 
@@ -101,13 +139,14 @@ async def _public_shop_metadata(url: str, marketplace: str) -> dict[str, Any] | 
         "platform": "amazon_shop",
         "url": safe_str(str(resp.url) or url),
         "marketplace": marketplace.upper(),
-        "seller": {
-            "id": "",
-            "name": safe_str(title),
-            "url": safe_str(str(resp.url) or url),
-            "rating": 0.0,
-            "reviewCount": 0,
-        },
+        "seller": _drop_empty(
+            {
+                "id": "",
+                "name": safe_str(title),
+                "url": safe_str(str(resp.url) or url),
+            },
+            _SELLER_OMIT_IF_EMPTY,
+        ),
         "totalReturned": 0,
         "products": [],
         "rawFirstItem": {"title": title, "image": image} if image else {"title": title},
@@ -147,5 +186,5 @@ async def amazon_shop_page(
                 raise HTTPException(status_code=404, detail="Amazon Shop page not found")
             return _normalize_shop(items[:max_products], url, marketplace)
 
-        data = await cached_or_run("amazon-shop.page", {"url": url, "marketplace": marketplace.upper(), "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("amazon-shop.page", {"url": url, "marketplace": marketplace.upper(), "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
