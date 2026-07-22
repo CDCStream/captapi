@@ -5351,33 +5351,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "name": "@charlidamelio",
     "avatar": "https://s3.us-west-2.amazonaws.com/cdn.lnk.bio/profilepics/-1344625_20220123667.jpg",
     "linkCount": 8,
-    "links": [
-      {
-        "url": "https://www.charlidamelio.com",
-        "title": "official website of charli d'amelio"
-      },
-      {
-        "url": "https://facebook.com/thecharlidamelio"
-      },
-      {
-        "url": "https://twitter.com/charlidamelio"
-      },
-      {
-        "url": "https://instagram.com/charlidamelio"
-      },
-      {
-        "url": "https://triller.co/m/@charlidamelio"
-      },
-      {
-        "url": "https://tiktok.com/@charlidamelio"
-      },
-      {
-        "url": "https://youtube.com/c/charlidamelio"
-      },
-      {
-        "url": "https://www.snapchat.com/add/damelioc"
-      }
-    ],
     "socials": {
       "facebook": "https://facebook.com/thecharlidamelio",
       "twitter": "https://twitter.com/charlidamelio",
@@ -5385,7 +5358,41 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "tiktok": "https://tiktok.com/@charlidamelio",
       "youtube": "https://youtube.com/c/charlidamelio",
       "snapchat": "https://www.snapchat.com/add/damelioc"
-    }
+    },
+    "links": [
+      {
+        "url": "https://www.charlidamelio.com",
+        "title": "official website of charli d'amelio"
+      },
+      {
+        "url": "https://facebook.com/thecharlidamelio",
+        "title": null
+      },
+      {
+        "url": "https://twitter.com/charlidamelio",
+        "title": null
+      },
+      {
+        "url": "https://instagram.com/charlidamelio",
+        "title": null
+      },
+      {
+        "url": "https://triller.co/m/@charlidamelio",
+        "title": null
+      },
+      {
+        "url": "https://tiktok.com/@charlidamelio",
+        "title": null
+      },
+      {
+        "url": "https://youtube.com/c/charlidamelio",
+        "title": null
+      },
+      {
+        "url": "https://www.snapchat.com/add/damelioc",
+        "title": null
+      }
+    ]
   },
   "linkedin-ad-library-ad-details": {
     "platform": "linkedin_ad_library",

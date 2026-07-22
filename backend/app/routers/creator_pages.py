@@ -159,6 +159,25 @@ def _walk(obj: Any):
             yield from _walk(value)
 
 
+def _link_item(
+    url: str,
+    *,
+    title: str | None = None,
+    link_id: str | None = None,
+    link_type: str | None = None,
+    thumbnail: str | None = None,
+) -> dict[str, Any]:
+    """Stable link shape: url + title always present (title may be null)."""
+    item: dict[str, Any] = {"url": url, "title": safe_str(title)}
+    if link_id:
+        item["id"] = link_id
+    if link_type:
+        item["type"] = link_type
+    if thumbnail:
+        item["thumbnail"] = thumbnail
+    return item
+
+
 def _links(data: dict[str, Any]) -> list[dict[str, Any]]:
     seen: set[str] = set()
     links = []
@@ -185,20 +204,18 @@ def _links(data: dict[str, Any]) -> list[dict[str, Any]]:
         if raw_url in seen:
             continue
         seen.add(raw_url)
-        link: dict[str, Any] = {"url": safe_str(raw_url)}
-        title = safe_str(obj.get("title") or obj.get("name") or obj.get("label") or obj.get("text"))
-        if title:
-            link["title"] = title
-        link_id = safe_str(obj.get("id") or obj.get("_id"))
-        if link_id:
-            link["id"] = link_id
-        link_type = safe_str(obj.get("type") or obj.get("kind"))
-        if link_type:
-            link["type"] = link_type
-        thumb = safe_str(obj.get("thumbnail") or obj.get("image") or obj.get("imageUrl"))
-        if thumb:
-            link["thumbnail"] = thumb
-        links.append(link)
+        url = safe_str(raw_url)
+        if not url:
+            continue
+        links.append(
+            _link_item(
+                url,
+                title=safe_str(obj.get("title") or obj.get("name") or obj.get("label") or obj.get("text")),
+                link_id=safe_str(obj.get("id") or obj.get("_id")),
+                link_type=safe_str(obj.get("type") or obj.get("kind")),
+                thumbnail=safe_str(obj.get("thumbnail") or obj.get("image") or obj.get("imageUrl")),
+            )
+        )
     return links[:200]
 
 
@@ -231,12 +248,31 @@ def _anchor_links(page: str, page_url: str | None = None) -> list[dict[str, Any]
         seen.add(href)
         text = re.sub(r"<[^>]+>", " ", match.group(2))
         text = re.sub(r"\s+", " ", html.unescape(text)).strip()
-        link: dict[str, Any] = {"url": safe_str(href)}
-        title = safe_str(text)
-        if title:
-            link["title"] = title
-        links.append(link)
+        url = safe_str(href)
+        if not url:
+            continue
+        links.append(_link_item(url, title=safe_str(text)))
     return links[:200]
+
+
+def _strip_page(data: dict[str, Any]) -> dict[str, Any]:
+    """strip_empty, but keep links[].title even when null for a stable schema."""
+    links = data.get("links")
+    cleaned = strip_empty({k: v for k, v in data.items() if k != "links"})
+    if isinstance(links, list):
+        cleaned["links"] = [
+            _link_item(
+                url,
+                title=link.get("title"),
+                link_id=link.get("id"),
+                link_type=link.get("type"),
+                thumbnail=link.get("thumbnail"),
+            )
+            for link in links
+            if isinstance(link, dict) and (url := safe_str(link.get("url")))
+        ]
+        cleaned["linkCount"] = len(cleaned["links"])
+    return cleaned
 
 
 def _first_string(data: dict[str, Any], keys: tuple[str, ...]) -> str | None:
@@ -260,16 +296,16 @@ async def _fetch_komi(value: str) -> dict[str, Any] | None:
     data = resp.json()
     profile = data.get("talentProfile") or {}
     # Komi socialProfileLinks are only {link, type} — no id/thumbnail upstream.
-    links = [
-        {
-            "title": safe_str(link.get("type")),
-            "url": safe_str(link.get("link")),
-            "type": safe_str(link.get("type")),
-        }
-        for link in profile.get("socialProfileLinks") or []
-        if isinstance(link, dict) and link.get("link")
-    ]
-    return strip_empty(
+    links = []
+    for link in profile.get("socialProfileLinks") or []:
+        if not isinstance(link, dict):
+            continue
+        url = safe_str(link.get("link"))
+        if not url:
+            continue
+        link_type = safe_str(link.get("type"))
+        links.append(_link_item(url, title=link_type, link_type=link_type))
+    return _strip_page(
         {
             "platform": "komi",
             "url": f"https://komi.io/{data.get('username') or username}",
@@ -347,7 +383,7 @@ async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
     # Default avatar SVG is not a real profile photo.
     if platform == "linkbio" and avatar and "avatar.svg" in avatar.lower():
         avatar = None
-    return strip_empty(
+    return _strip_page(
         {
             "platform": platform,
             "url": safe_str(page_url),
@@ -375,7 +411,7 @@ async def _page(platform: str, url: str, caller: ApiCaller, use_cache: bool = Tr
         )
     profile = _url(platform, url)
     async with billed_call(caller=caller, endpoint=f"/v1/{platform}/{'profile' if platform == 'linkme' else 'page'}", platform=platform, resource_url=profile, base_credits=4) as ctx:
-        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 7}, lambda: _fetch_page(platform, profile), ctx, use_cache=use_cache)
+        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 8}, lambda: _fetch_page(platform, profile), ctx, use_cache=use_cache)
         if data.pop("_marketingShell", None) or not (data.get("username") or data.get("links")):
             raise HTTPException(status_code=404, detail=f"{platform.title()} page not found")
         # Pillar soft-404s to a marketing shell with the path username but no creator links.
