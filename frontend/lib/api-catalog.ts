@@ -744,7 +744,7 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     blurb: "Extract public Linkbio page links and profile metadata.",
     icon: "link",
     color: "text-pink-500",
-    exampleUrl: "https://lnk.bio/example",
+    exampleUrl: "https://lnk.bio/charlidamelio",
     endpoints: LINKBIO.map((s) => ({ ...s, platform: "linkbio" as const })),
   },
   {
@@ -1218,7 +1218,7 @@ const KWAI_POST = "Kwai video URL, e.g. https://www.kwai.com/@topfilmeseseriesna
 const CURSOR = { name: "cursor", type: "string" as const, required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." };
 const KOMI_PAGE = "Komi page URL or username.";
 const PILLAR_PAGE = "Pillar page URL or username.";
-const LINKBIO_PAGE = "Linkbio page URL or username.";
+const LINKBIO_PAGE = "Linkbio (lnk.bio) page URL or username, e.g. https://lnk.bio/charlidamelio.";
 const LINKME_PROFILE = "Linkme profile URL or username.";
 
 const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
@@ -1722,7 +1722,7 @@ const PROFILE_URL: Record<PlatformId, string> = {
   kwai: "https://www.kwai.com/@topfilmeseseriesnatv",
   komi: "https://komi.io/example",
   pillar: "https://pillar.io/example",
-  linkbio: "https://lnk.bio/example",
+  linkbio: "https://lnk.bio/charlidamelio",
   linkme: "https://link.me/example",
 };
 

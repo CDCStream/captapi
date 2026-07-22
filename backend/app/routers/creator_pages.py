@@ -39,6 +39,8 @@ EXAMPLES = {
 # pages often list outbound destinations on their own domain).
 _NAV_HOSTS = (
     "lnk.bio/share",
+    "lnk.bio/?ref=",
+    "help.lnk.bio",
     "linkinbio.wiki",
     "facebook.com/sharer",
     "wa.me",
@@ -48,6 +50,22 @@ _NAV_HOSTS = (
     "story.kakao.com/share",
     "reddit.com/submit",
     "linkedin.com/sharing",
+    # Recurring lnk.bio footer / partner promos injected on many pages.
+    "cruciverba.io",
+    "flag.red",
+    "petrolprice.sg",
+    "istmp.email",
+    "mediakit.bio",
+    "menoo.me",
+)
+
+_LINKBIO_TITLE_SUFFIX = re.compile(
+    r"\s*(?:Lnk\.Bio\s*[·•\-]\s*link in bio|-\s*Link in Bio)\s*$",
+    re.IGNORECASE,
+)
+_LINKBIO_DESC_TEMPLATE = re.compile(
+    r"Lnk\.Bio|Profile and social media links for",
+    re.IGNORECASE,
 )
 
 # Detected social-account keys, matched against link URLs (first match wins).
@@ -167,19 +185,38 @@ def _links(data: dict[str, Any]) -> list[dict[str, Any]]:
         if raw_url in seen:
             continue
         seen.add(raw_url)
-        links.append(
-            {
-                "id": safe_str(obj.get("id") or obj.get("_id")),
-                "title": safe_str(obj.get("title") or obj.get("name") or obj.get("label") or obj.get("text")),
-                "url": safe_str(raw_url),
-                "type": safe_str(obj.get("type") or obj.get("kind")),
-                "thumbnail": safe_str(obj.get("thumbnail") or obj.get("image") or obj.get("imageUrl")),
-            }
-        )
+        link: dict[str, Any] = {"url": safe_str(raw_url)}
+        title = safe_str(obj.get("title") or obj.get("name") or obj.get("label") or obj.get("text"))
+        if title:
+            link["title"] = title
+        link_id = safe_str(obj.get("id") or obj.get("_id"))
+        if link_id:
+            link["id"] = link_id
+        link_type = safe_str(obj.get("type") or obj.get("kind"))
+        if link_type:
+            link["type"] = link_type
+        thumb = safe_str(obj.get("thumbnail") or obj.get("image") or obj.get("imageUrl"))
+        if thumb:
+            link["thumbnail"] = thumb
+        links.append(link)
     return links[:200]
 
 
-def _anchor_links(page: str) -> list[dict[str, Any]]:
+def _is_platform_noise_link(url: str, page_url: str | None = None) -> bool:
+    """Drop lnk.bio chrome (home, self profile, ref) and known footer promos."""
+    low = (url or "").lower()
+    if any(nav in low for nav in _NAV_HOSTS):
+        return True
+    if re.match(r"^https?://(www\.)?lnk\.bio/?$", low):
+        return True
+    if page_url:
+        base = page_url.rstrip("/").lower()
+        if low.rstrip("/") == base:
+            return True
+    return False
+
+
+def _anchor_links(page: str, page_url: str | None = None) -> list[dict[str, Any]]:
     """Fallback link extraction for server-rendered pages (e.g. lnk.bio) that
     don't ship a hydration blob. Pulls outbound <a href> targets, drops the
     platform's own nav/share links, and de-dupes."""
@@ -187,15 +224,18 @@ def _anchor_links(page: str) -> list[dict[str, Any]]:
     links: list[dict[str, Any]] = []
     for match in re.finditer(r'<a[^>]+href=["\'](https?://[^"\']+)["\'][^>]*>(.*?)</a>', page, flags=re.IGNORECASE | re.DOTALL):
         href = html.unescape(match.group(1)).strip()
-        low = href.lower()
-        if any(nav in low for nav in _NAV_HOSTS):
+        if _is_platform_noise_link(href, page_url):
             continue
         if href in seen:
             continue
         seen.add(href)
         text = re.sub(r"<[^>]+>", " ", match.group(2))
         text = re.sub(r"\s+", " ", html.unescape(text)).strip()
-        links.append({"id": None, "title": safe_str(text) or None, "url": safe_str(href), "type": None, "thumbnail": None})
+        link: dict[str, Any] = {"url": safe_str(href)}
+        title = safe_str(text)
+        if title:
+            link["title"] = title
+        links.append(link)
     return links[:200]
 
 
@@ -261,18 +301,40 @@ async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
     if resp.status_code >= 400:
         raise HTTPException(status_code=502, detail=f"{platform.title()} lookup failed")
     page = resp.text
+    page_url = str(resp.url)
     data = _next_data(page)
     links = _links(data)
     if not links:
-        links = _anchor_links(page)
+        links = _anchor_links(page, page_url=page_url)
+    links = [link for link in links if not _is_platform_noise_link(link.get("url") or "", page_url)]
     title = _meta(page, "og:title") or _meta(page, "twitter:title") or _first_string(data, ("displayName", "name", "title", "username"))
     description = _meta(page, "og:description") or _meta(page, "description") or _first_string(data, ("bio", "description", "subtitle"))
     avatar = _meta(page, "og:image") or _meta(page, "twitter:image") or _first_string(data, ("avatar", "avatarUrl", "profilePicture", "imageUrl"))
-    username = _first_string(data, ("username", "handle", "slug")) or str(resp.url).rstrip("/").rsplit("/", 1)[-1]
+    username = _first_string(data, ("username", "handle", "slug")) or page_url.rstrip("/").rsplit("/", 1)[-1]
     # Marketing / soft-404 shells often keep the path username but have no creator links
     # and use the product's own OG title (e.g. "Pillar - The All-In-One Toolkit…").
     name = safe_str(title)
-    marketing_shell = (
+    if platform == "linkbio" and name:
+        name = _LINKBIO_TITLE_SUFFIX.sub("", name).strip() or None
+    if platform == "linkbio" and description and _LINKBIO_DESC_TEMPLATE.search(description):
+        # Auto-generated OG blurb, not a creator bio.
+        description = None
+    # Recycled / mismatched lnk.bio handles (e.g. /nasa serving another creator).
+    path_user = (username or "").lstrip("@").lower()
+    og_handle = None
+    if name:
+        m = re.search(r"@([\w.]+)", name)
+        if m:
+            og_handle = m.group(1).lower()
+    mismatched = (
+        platform == "linkbio"
+        and bool(path_user)
+        and (
+            (og_handle and og_handle != path_user and path_user not in (name or "").lower())
+            or (isinstance(name, str) and name.lower() in {"not found - lnk.bio", "not found"})
+        )
+    )
+    marketing_shell = mismatched or (
         not links
         and isinstance(name, str)
         and (
@@ -282,10 +344,13 @@ async def _fetch_page(platform: str, value: str) -> dict[str, Any]:
             or name.lower() in {platform, f"{platform}.io", f"{platform}.me", "lnk.bio"}
         )
     )
+    # Default avatar SVG is not a real profile photo.
+    if platform == "linkbio" and avatar and "avatar.svg" in avatar.lower():
+        avatar = None
     return strip_empty(
         {
             "platform": platform,
-            "url": safe_str(str(resp.url)),
+            "url": safe_str(page_url),
             "username": None if marketing_shell else safe_str(username),
             "name": None if marketing_shell else name,
             "firstName": _first_string(data, ("firstName", "first_name")),
@@ -310,7 +375,7 @@ async def _page(platform: str, url: str, caller: ApiCaller, use_cache: bool = Tr
         )
     profile = _url(platform, url)
     async with billed_call(caller=caller, endpoint=f"/v1/{platform}/{'profile' if platform == 'linkme' else 'page'}", platform=platform, resource_url=profile, base_credits=4) as ctx:
-        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 6}, lambda: _fetch_page(platform, profile), ctx, use_cache=use_cache)
+        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 7}, lambda: _fetch_page(platform, profile), ctx, use_cache=use_cache)
         if data.pop("_marketingShell", None) or not (data.get("username") or data.get("links")):
             raise HTTPException(status_code=404, detail=f"{platform.title()} page not found")
         # Pillar soft-404s to a marketing shell with the path username but no creator links.

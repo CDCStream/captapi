@@ -337,7 +337,7 @@ def batch4_phase1() -> list[tuple[str, str, dict]]:
         ("amazon-shop-page", "/v1/amazon-shop/page", {"url": "https://www.amazon.com/sp?seller=A294P4X9EWVXLJ", "limit": 5}),
         ("komi-page", "/v1/komi/page", {"url": "https://komi.io/ksi"}),
         ("pillar-page", "/v1/pillar/page", {"url": "https://pillar.io/jayshetty"}),
-        ("linkbio-page", "/v1/linkbio/page", {"url": "https://lnk.bio/nasa"}),
+        ("linkbio-page", "/v1/linkbio/page", {"url": "https://lnk.bio/charlidamelio"}),
         ("linkme-profile", "/v1/linkme/profile", {"url": "https://link.me/kevinhart"}),
     ]
 
@@ -445,7 +445,7 @@ def batch5_phase1() -> list[tuple[str, str, dict]]:
         ("reddit-post-transcript", "/v1/reddit/post-transcript", {"url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/", "limit": 5}),
         ("komi-page", "/v1/komi/page", {"url": "https://komi.io/ksi"}),
         ("pillar-page", "/v1/pillar/page", {"url": "https://pillar.io/jayshetty"}),
-        ("linkbio-page", "/v1/linkbio/page", {"url": "https://lnk.bio/nasa"}),
+        ("linkbio-page", "/v1/linkbio/page", {"url": "https://lnk.bio/charlidamelio"}),
         ("linkme-profile", "/v1/linkme/profile", {"url": "https://link.me/kevinhart"}),
         ("linktree-page", "/v1/linktree/page", {"url": "https://linktr.ee/selenagomez"}),
         ("twitch-profile", "/v1/twitch/profile", {"url": "https://www.twitch.tv/shroud"}),

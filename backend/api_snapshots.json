@@ -19754,55 +19754,46 @@
     "credits": null,
     "data": {
       "platform": "linkbio",
-      "url": "https://lnk.bio/nasa",
-      "username": "nasa",
-      "name": "@propertiesbystephen Lnk.Bio · link in bio",
-      "firstName": null,
-      "lastName": null,
-      "description": "@propertiesbystephen Lnk.Bio · link in bio - Profile and social media links for propertiesbystephen",
-      "avatar": "https://s3.us-west-2.amazonaws.com/cdn.lnk.bio/profilepics/-1277863_20210902892.jpg",
-      "linkCount": 7,
+      "url": "https://lnk.bio/charlidamelio",
+      "username": "charlidamelio",
+      "name": "@charlidamelio",
+      "avatar": "https://s3.us-west-2.amazonaws.com/cdn.lnk.bio/profilepics/-1344625_20220123667.jpg",
+      "linkCount": 8,
       "links": [
         {
-          "id": null,
-          "title": "@propertiesbystephen",
-          "url": "https://www.instagram.com/propertiesbystephen",
-          "type": null,
-          "thumbnail": null
+          "url": "https://www.charlidamelio.com",
+          "title": "official website of charli d'amelio"
         },
         {
-          "id": null,
-          "title": "Soluzioni cruciverba",
-          "url": "https://cruciverba.io/",
-          "type": null,
-          "thumbnail": null
+          "url": "https://facebook.com/thecharlidamelio"
         },
         {
-          "id": null,
-          "title": "Red Flag Agreements",
-          "url": "https://flag.red/",
-          "type": null,
-          "thumbnail": null
+          "url": "https://twitter.com/charlidamelio"
         },
         {
-          "id": null,
-          "title": "Petrol Price Singapore",
-          "url": "https://petrolprice.sg/",
-          "type": null,
-          "thumbnail": null
+          "url": "https://instagram.com/charlidamelio"
         },
         {
-          "id": null,
-          "title": "Temporary Email API",
-          "url": "https://istmp.email/",
-          "type": null,
-          "thumbnail": null
+          "url": "https://triller.co/m/@charlidamelio"
+        },
+        {
+          "url": "https://tiktok.com/@charlidamelio"
+        },
+        {
+          "url": "https://youtube.com/c/charlidamelio"
+        },
+        {
+          "url": "https://www.snapchat.com/add/damelioc"
         }
       ],
       "socials": {
-        "instagram": "https://www.instagram.com/propertiesbystephen"
-      },
-      "email": null
+        "facebook": "https://facebook.com/thecharlidamelio",
+        "twitter": "https://twitter.com/charlidamelio",
+        "instagram": "https://instagram.com/charlidamelio",
+        "tiktok": "https://tiktok.com/@charlidamelio",
+        "youtube": "https://youtube.com/c/charlidamelio",
+        "snapchat": "https://www.snapchat.com/add/damelioc"
+      }
     }
   },
   "linkme-profile": {

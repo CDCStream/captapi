@@ -76,7 +76,7 @@ async def main() -> None:
         ("ad_library",   "/v1/ad-library/facebook/search",  {"q": "nike", "limit": 5}, False),
         ("komi",         "/v1/komi/page",                   {"url": "https://komi.io/charlidamelio"}, False),
         ("pillar",       "/v1/pillar/page",                 {"url": "https://pillar.io/cocoao"}, False),
-        ("linkbio",      "/v1/linkbio/page",                {"url": "https://lnk.bio/nasa"}, False),
+        ("linkbio",      "/v1/linkbio/page",                {"url": "https://lnk.bio/charlidamelio"}, False),
         ("linkme",       "/v1/linkme/profile",              {"url": "https://link.me/nasa"}, False),
         # Known environmental constraints (actor must be rented / datacenter IP blocked):
         ("kick [env]",   "/v1/kick/clip",                   {"url": "https://kick.com/xqc", "limit": 10}, True),
