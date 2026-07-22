@@ -42,9 +42,24 @@ def _profile_url(value: str) -> str:
     return f"https://soundcloud.com/{value.lstrip('@')}"
 
 
+_TRACK_OMIT_IF_EMPTY = frozenset(
+    {
+        "description",
+        "genre",
+        "artistFollowers",
+        "releaseDate",
+        "license",
+        "isrc",
+        "waveformUrl",
+        "artwork",
+        "tags",
+    }
+)
+
+
 def _track(item: dict[str, Any]) -> dict[str, Any]:
     user = item.get("user") or item.get("artist") or item.get("publisher") or {}
-    return {
+    out: dict[str, Any] = {
         "platform": "soundcloud",
         "id": safe_str(item.get("id") or item.get("trackId")),
         "url": safe_str(item.get("url") or item.get("permalinkUrl") or item.get("permalink_url")),
@@ -56,7 +71,11 @@ def _track(item: dict[str, Any]) -> dict[str, Any]:
             user.get("permalinkUrl") or user.get("permalink_url") or item.get("userUrl") or item.get("artistUrl")
         ),
         "artistAvatar": safe_str(user.get("avatarUrl") or user.get("avatar_url") or item.get("userAvatarUrl")),
-        "artistFollowers": safe_int(user.get("followersCount") or item.get("userFollowersCount")),
+        "artistFollowers": safe_int(
+            user.get("followersCount")
+            or user.get("followers_count")
+            or item.get("userFollowersCount")
+        ),
         "artistVerified": bool(user.get("verified") or item.get("userVerified")),
         "durationMs": safe_int(item.get("duration") or item.get("durationMs")),
         "plays": safe_int(item.get("playbackCount") or item.get("playback_count") or item.get("plays")),
@@ -74,11 +93,15 @@ def _track(item: dict[str, Any]) -> dict[str, Any]:
         "artwork": safe_str(item.get("artworkUrl") or item.get("artwork_url") or item.get("thumbnail")),
         "tags": [t for t in (item.get("tagList") or []) if isinstance(t, str)],
     }
+    for key in _TRACK_OMIT_IF_EMPTY:
+        if key in out and out[key] in (None, "", []):
+            out.pop(key, None)
+    return out
 
 
 def _artist(item: dict[str, Any], url: str) -> dict[str, Any]:
     user = item.get("user") or item.get("artist") or item
-    return {
+    out: dict[str, Any] = {
         "platform": "soundcloud",
         "id": safe_str(user.get("id") or user.get("userId")),
         "url": safe_str(user.get("permalinkUrl") or user.get("permalink_url") or url),
@@ -96,6 +119,10 @@ def _artist(item: dict[str, Any], url: str) -> dict[str, Any]:
         "likesCount": safe_int(user.get("likesCount") or user.get("likes_count")),
         "createdAt": safe_str(user.get("createdAt") or user.get("created_at")),
     }
+    for key in ("description", "city", "countryCode", "createdAt"):
+        if out.get(key) in (None, "", []):
+            out.pop(key, None)
+    return out
 
 
 @router.get("/artist", summary="SoundCloud artist profile")
@@ -127,7 +154,7 @@ async def artist(
             ctx["source"] = "apify"
             return _artist(item, profile)
 
-        data = await cached_or_run("soundcloud.artist", {"url": profile, "v": 3}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("soundcloud.artist", {"url": profile, "v": 4}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 
@@ -177,7 +204,7 @@ async def artist_tracks(
             )
             # includeUserDetails prepends the artist's user row to the dataset;
             # keep only real tracks (they always carry a title).
-            tracks = [_track(i) for i in items if i.get("title") or i.get("name")][:limit]
+            tracks = [_track(native.prep_track_row(i)) for i in items if i.get("title") or i.get("name")][:limit]
             ctx["source"] = "apify"
             return {
                 "platform": "soundcloud",
@@ -190,7 +217,7 @@ async def artist_tracks(
 
         data = await cached_or_run(
             "soundcloud.artist-tracks",
-            {"url": profile, "limit": limit, "cursor": cursor or "", "v": 5},
+            {"url": profile, "limit": limit, "cursor": cursor or "", "v": 7},
             _run,
             ctx,
             use_cache=cache,
@@ -229,7 +256,7 @@ async def track(
             if not items:
                 raise HTTPException(status_code=404, detail="SoundCloud track not found")
             ctx["source"] = "apify"
-            return _track(items[0])
+            return _track(native.prep_track_row(items[0]))
 
-        data = await cached_or_run("soundcloud.track", {"url": url, "v": 3}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("soundcloud.track", {"url": url, "v": 5}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)

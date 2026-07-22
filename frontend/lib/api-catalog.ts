@@ -1784,7 +1784,11 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
     case "url": {
       // Prefer a captured snapshot URL when it's a valid http(s) URL — keeps
       // Try-it / cURL in sync with the example response for every url param.
-      const captured = API_EXAMPLES[ep.slug]?.url;
+      const ex = API_EXAMPLES[ep.slug];
+      const captured =
+        (typeof ex?.url === "string" && ex.url) ||
+        (typeof ex?.artistUrl === "string" && ex.artistUrl) ||
+        null;
       if (typeof captured === "string" && /^https?:\/\//.test(captured)) return captured;
 
       const d = p.description.toLowerCase();
