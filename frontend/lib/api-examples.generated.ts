@@ -6921,101 +6921,85 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "snapchat-user-profile": {
     "platform": "snapchat",
-    "username": "kyliejenner",
-    "url": "https://www.snapchat.com/@kyliejenner",
-    "displayName": "King Kylie 👑",
-    "bio": null,
-    "category": null,
-    "subscriberCount": 30702000,
+    "username": "nba",
+    "url": "https://www.snapchat.com/@nba",
+    "displayName": "NBA",
+    "bio": "30 teams, 1 goal.",
+    "category": "public-profile-category-v3-business-group",
+    "subscriberCount": 3671500,
     "verified": true,
-    "avatar": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvaEJwN3Z0ZFl5NFVOeFpnWk04dXBYP2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,90_FMjpeg",
-    "snapcode": "https://app.snapchat.com/web/deeplink/snapcode?username=kyliejenner&type=SVG&bitmoji=enable",
-    "website": "kyliecosmetics.com",
+    "avatar": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvcGxQanhqRDFZRk9IUWdGMUZLRHNqP2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,90_FMjpeg",
+    "snapcode": "https://app.snapchat.com/web/deeplink/snapcode?username=nba&type=SVG&bitmoji=enable",
+    "website": "NBA.com",
     "highlights": [
       {
-        "highlightId": "367bdbd7-d19a-4bf1-bc81-c3e73f7b1809",
-        "snapCount": 7,
-        "storyTitle": "my morning <3",
-        "thumbnailUrl": "https://cf-st.sc-cdn.net/d/2c69RsW8eVxCmzNW3mvYh.410?mo=GjcaFjIBBDoBfUIGCP2answGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
-        "firstSnapUrl": "https://cf-st.sc-cdn.net/d/2c69RsW8eVxCmzNW3mvYh.1322?mo=GlkaFjIBBDoBfUIGCP2answGSAJQXmABcAFQwgFaB0RmTWVkaWGiAS4IqgoSJQojCKf_KyABMOADONQGQAFKDgoJNSQeKCEnKiEbEPQDUJBOaAIiAhIAkAOQTg%3D%3D&uc=94",
-        "firstSnapType": "video"
-      },
-      {
-        "highlightId": "67a0cfc6-75e3-4bfb-b45e-952229bf4150",
-        "snapCount": 56,
-        "storyTitle": "summer ☀️",
-        "thumbnailUrl": "https://cf-st.sc-cdn.net/d/8GPPhGGZ3UdpHSukk2ytV.410?mo=GjcaFjIBBDoBfUIGCPbHsc0GSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
-        "firstSnapUrl": "https://cf-st.sc-cdn.net/d/ZOIstUHtshtYTkmCk4DOp.400?mo=Gk8aDDIBBDoBfVBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBEwiQAyIOCgpCBgj0x7HNBkgCEgCiARMI5wciDgoKQgYI88exzQZIAxIA&uc=94",
+        "highlightId": "029f2cc3-c0df-46c2-b610-485c137f9a0a",
+        "snapCount": 4,
+        "storyTitle": "2025-26 NBA Finals 🏆",
+        "thumbnailUrl": "https://cf-st.sc-cdn.net/d/ZXSSacNIpSYqxAm21SSGc.410?mo=GjcaFjIBBDoBfUIGCMqG99AGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
+        "firstSnapUrl": "https://cf-st.sc-cdn.net/d/ZXSSacNIpSYqxAm21SSGc.400?mo=Gk8aDDIBBDoBfVBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBEwiQAyIOCgpCBgjKhvfQBkgCEgCiARMI5wciDgoKQgYIy4b30AZIAxIA&uc=94",
         "firstSnapType": "image"
       },
       {
-        "highlightId": "9391ed95-986d-4f20-997f-6abbc19079dd",
-        "snapCount": 50,
-        "storyTitle": "coachella 🌴",
-        "thumbnailUrl": "https://cf-st.sc-cdn.net/d/uCwRyChSnmbnhiYFUjxaS.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCJjO7s4GSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-        "firstSnapUrl": "https://cf-st.sc-cdn.net/d/yFjDCkyBUKvw5QUBpNtUq.1322.IRZXSOY?mo=GmIaFjIBBDoBfUIGCPSW584GSAJQXmABcAFQwgFaB0RmTWVkaWGiATcIqgoSJQojCMu0RCABMOADONQGQAFKDgoJVzMrLyYqJTw5EPQDUIZOaAIiCxIAKgdJUlpYU09ZkAOGTg%3D%3D&uc=94",
-        "firstSnapType": "video"
-      },
-      {
-        "highlightId": "33fb3309-f8a0-426e-a65a-88c8307cdb67",
-        "snapCount": 99,
-        "storyTitle": "fever dream 👙",
-        "thumbnailUrl": "https://cf-st.sc-cdn.net/d/waN6v5EQTBJC5tqZvt84x.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCNiA0NIGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-        "firstSnapUrl": "https://cf-st.sc-cdn.net/d/S53ut6dSvCpDZBjQyd7wP.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgjUgNDSBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
+        "highlightId": "2941c1a3-96ba-45aa-bdf4-30b344e63e42",
+        "snapCount": 19,
+        "storyTitle": "Your 2025-26 Kia NBA MVP 🏆",
+        "thumbnailUrl": "https://cf-st.sc-cdn.net/d/iqFfVpTceYNBTtMJvlQns.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCPa5qdAGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
+        "firstSnapUrl": "https://cf-st.sc-cdn.net/d/iqFfVpTceYNBTtMJvlQns.400.IRZXSOY?mo=GlwaCTIBBFBeYAFwAVDBAVoQUHVibGljSW1hZ2VTdG9yeaIBHwiQAyIaCg06AX1CBgj2uanQBkgCEgAqB0lSWlhTT1miARcI5wciEgoFMgF9SAQSACoHSVJaWFNPWQ%3D%3D&uc=94",
         "firstSnapType": "image"
       },
       {
-        "highlightId": "3a533b9f-f40b-4b32-8615-f90def786b22",
-        "snapCount": 15,
-        "storyTitle": "make coffee with me ☕️",
-        "thumbnailUrl": "https://cf-st.sc-cdn.net/d/cgnfS0U1VWH8I9TFtj74u.410.IRZXSOY?mo=GkAaFjIBBDoBfUIGCOvThtIGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiARAImgMiCxIAKgdJUlpYU09Z&uc=94",
-        "firstSnapUrl": "https://cf-st.sc-cdn.net/d/cgnfS0U1VWH8I9TFtj74u.1322.IRZXSOY?mo=GrIBGg4yAQQ6AX1IAlBeYAFwAVDCAVoHRGZNZWRpYaIBQQiqChIlCiMIpIM2IAEw4AM41AZAAUoOCglIJyszNDEvKCwQ9ANQkE5oAiIVCghCBgjr04bSBhIAKgdJUlpYU09ZogFLCKILEi8KLQj3jUIgATDgAzjUBkABShgKE203Mjw8NCswLC8sOCwrMCwtTDkQ9ANQkE5oAiIVCghCBgjx04bSBhIAKgdJUlpYU09ZkAOQTg%3D%3D&uc=94",
-        "firstSnapType": "video"
+        "highlightId": "918b1b3e-d60a-43e9-b5cd-651335d4687e",
+        "snapCount": 5,
+        "storyTitle": "2026 All-Star Rosters ⭐️",
+        "thumbnailUrl": "https://cf-st.sc-cdn.net/d/OVtsXn5gkLRCgYX1bsKWn.410?mo=GjcaFjIBBDoBfUIGCNXEiswGSAJQXmABcAFQxQFaEERmTGFyZ2VUaHVtYm5haWyiAQcImgMiAhIA&uc=94",
+        "firstSnapUrl": "https://cf-st.sc-cdn.net/d/OVtsXn5gkLRCgYX1bsKWn.400?mo=GkcaFDIBBDoBfUIGCNXEiswGUF5gAXABUMEBWhBQdWJsaWNJbWFnZVN0b3J5ogELCJADIgYKAkgCEgCiAQsI5wciBgoCSAMSAA%3D%3D&uc=94",
+        "firstSnapType": "image"
       }
     ],
     "relatedAccounts": [
       {
-        "username": "kimkardashian",
-        "profileUrl": "https://www.snapchat.com/@kimkardashian",
-        "displayName": "Kim Kardashian",
-        "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvUjlZUUE2a0xHQlV0SHMxSjZhYmZhP2JvPUVnMGFBQm9BTWdFRVNBSlFHV0FCJnVjPTI1._RS0,640_FMjpeg",
+        "username": "warriors",
+        "profileUrl": "https://www.snapchat.com/@warriors",
+        "displayName": "Golden State Warriors",
+        "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvNjRqVjdIRlJMaHk1V21yS0MwNUZ2P2JvPUVnMGFBQm9BTWdFRVNBSlFHV0FCJnVjPTI1._RS0,640_FMjpeg",
         "isVerified": true,
         "hasStory": false,
         "hasCuratedHighlights": false,
         "hasSpotlightHighlights": false,
         "subscribeLink": {
           "oneLinkBaseUrl": "https://click.snapchat.com/aVHG",
-          "deepLinkUrl": "https://www.snapchat.com/@kimkardashian",
+          "deepLinkUrl": "https://www.snapchat.com/@warriors",
           "iosAppStoreUrl": "https://apps.apple.com/app/apple-store/id447188370?pt=614006&ct=add_user&mt=8"
         }
       },
       {
-        "username": "kendalljenner",
-        "profileUrl": "https://www.snapchat.com/@kendalljenner",
-        "displayName": "Kendall Jenner",
-        "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvWW1tSUZkY2JlZTNrZVl5bVlQbEpxP2JvPUVnMGFBQm9BTWdFRVNBSlFDR0FCJnVjPTg._RS0,640_FMpng",
+        "username": "nfl",
+        "profileUrl": "https://www.snapchat.com/@nfl",
+        "displayName": "NFL Official",
+        "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvT3NjakFOS0dwSWh1VzQwek9qRnowP2JvPUVnMGFBQm9BTWdFRVNBSlFHV0FCJnVjPTI1._RS0,640_FMjpeg",
         "isVerified": true,
-        "hasStory": false,
+        "hasStory": true,
         "hasCuratedHighlights": false,
         "hasSpotlightHighlights": false,
         "subscribeLink": {
           "oneLinkBaseUrl": "https://click.snapchat.com/aVHG",
-          "deepLinkUrl": "https://www.snapchat.com/@kendalljenner",
+          "deepLinkUrl": "https://www.snapchat.com/@nfl",
           "iosAppStoreUrl": "https://apps.apple.com/app/apple-store/id447188370?pt=614006&ct=add_user&mt=8"
         }
       },
       {
-        "username": "kourtneykardash",
-        "profileUrl": "https://www.snapchat.com/@kourtneykardash",
-        "displayName": "Kourtney Kardashian",
-        "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvTlprQndFQk44VnJraXRwQkZ3cXdLP2JvPUVnMGFBQm9BTWdFRVNBSlFHV0FCJnVjPTI1._RS0,640_FMpng",
+        "username": "lakerssnaps",
+        "profileUrl": "https://www.snapchat.com/@lakerssnaps",
+        "displayName": "Los Angeles Lakers",
+        "profilePictureUrl": "https://cf-st.sc-cdn.net/aps/bolt/aHR0cHM6Ly9jZi1zdC5zYy1jZG4ubmV0L2QvbEplakhnM3lwRTd1dWEwdjliVjd6P2JvPUVna3lBUVJJQWxBWllBRSUzRCZ1Yz0yNQ._RS0,640_FMjpeg",
         "isVerified": true,
         "hasStory": false,
         "hasCuratedHighlights": false,
         "hasSpotlightHighlights": false,
         "subscribeLink": {
           "oneLinkBaseUrl": "https://click.snapchat.com/aVHG",
-          "deepLinkUrl": "https://www.snapchat.com/@kourtneykardash",
+          "deepLinkUrl": "https://www.snapchat.com/@lakerssnaps",
           "iosAppStoreUrl": "https://apps.apple.com/app/apple-store/id447188370?pt=614006&ct=add_user&mt=8"
         }
       }

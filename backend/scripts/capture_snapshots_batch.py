@@ -165,7 +165,7 @@ def batch2_phase1() -> list[tuple[str, str, dict]]:
         ("threads-user-posts", "/v1/threads/user-posts", {"url": "@zuck", "limit": 5}),
         ("threads-search", "/v1/threads/search", {"q": "artificial intelligence", "limit": 5}),
         ("threads-search-users", "/v1/threads/search-users", {"q": "tech", "limit": 5}),
-        ("snapchat-user-profile", "/v1/snapchat/user-profile", {"url": "kyliejenner"}),
+        ("snapchat-user-profile", "/v1/snapchat/user-profile", {"url": "nba"}),
     ]
 
 
