@@ -5698,11 +5698,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://linktr.ee/selenagomez",
     "id": 4274511,
     "username": "selenagomez",
-    "name": null,
     "description": "“In The Dark” & “I Said I Love You First...And You Said It Back” Out Now",
     "avatar": "https://ugc.production.linktr.ee/2be337b1-59dd-41e2-9c2d-9ecd765d1a76_506310332-18609160939019724-3952420009186030627-n.jpeg",
     "verified": false,
-    "verticals": [],
     "timezone": "America/Los_Angeles",
     "linkCount": 67,
     "links": [
@@ -5723,50 +5721,39 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "id": "515270816",
         "title": "In The Dark",
-        "url": null,
-        "type": "GROUP",
-        "thumbnail": null
+        "type": "GROUP"
       },
       {
         "id": "515273167",
         "title": "Revival 10 Year Anniversary",
-        "url": null,
-        "type": "GROUP",
-        "thumbnail": null
+        "type": "GROUP"
       },
       {
         "id": "508070161",
         "title": "Selena Gomez Throwback Collection",
-        "url": null,
-        "type": "GROUP",
-        "thumbnail": null
+        "type": "GROUP"
       }
     ],
     "socials": [
       {
         "type": "FACEBOOK",
-        "url": "https://facebook.com/Selena",
-        "position": 0
+        "url": "https://facebook.com/Selena"
       },
       {
         "type": "INSTAGRAM",
-        "url": "https://instagram.com/selenagomez",
-        "position": 0
+        "url": "https://instagram.com/selenagomez"
       },
       {
         "type": "TIKTOK",
-        "url": "https://tiktok.com/@selenagomez",
-        "position": 0
+        "url": "https://tiktok.com/@selenagomez"
       },
       {
         "type": "SPOTIFY",
-        "url": "https://open.spotify.com/artist/0C8ZW7ezQVs4URX5aX7Kqx?si=vLUeKsFuTSKqHn7JJIr2Eg",
-        "position": 0
+        "url": "https://open.spotify.com/artist/0C8ZW7ezQVs4URX5aX7Kqx?si=vLUeKsFuTSKqHn7JJIr2Eg"
       },
       {
         "type": "YOUTUBE",
-        "url": "https://youtube.com/selenagomez",
-        "position": 0
+        "url": "https://youtube.com/selenagomez"
       }
     ],
     "socialAccounts": {

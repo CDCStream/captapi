@@ -94,42 +94,78 @@ def _social_accounts(social_links: list[Any], links: list[dict[str, Any]]) -> di
     return accounts
 
 
+def _display_name(account: dict[str, Any], username: str | None) -> str | None:
+    """Prefer an explicit name; fall back to pageTitle when it isn't just @username."""
+    name = safe_str(account.get("name") or account.get("displayName"))
+    if name:
+        return name
+    page_title = safe_str(account.get("pageTitle"))
+    if not page_title:
+        return None
+    handle = (username or "").lstrip("@").lower()
+    if page_title.lstrip("@").lower() == handle:
+        return None
+    return page_title
+
+
 def _normalize(data: dict[str, Any], url: str) -> dict[str, Any]:
     page = _page_props(data)
     account = page.get("account") or page.get("profile") or {}
     links = page.get("links") or page.get("buttons") or []
     socials = page.get("socialLinks") or page.get("socials") or account.get("socialLinks") or []
-    normalized_links = []
+    username = safe_str(account.get("username") or account.get("profile") or page.get("username"))
+    normalized_links: list[dict[str, Any]] = []
     for item in links if isinstance(links, list) else []:
         if not isinstance(item, dict):
             continue
-        normalized_links.append(
-            {
-                "id": safe_str(item.get("id")),
-                "title": safe_str(item.get("title")),
-                "url": safe_str(item.get("url") or item.get("link")),
-                "type": safe_str(item.get("type") or item.get("linkType")),
-                "thumbnail": safe_str(item.get("thumbnail") or item.get("thumbnailUrl")),
-            }
-        )
+        link: dict[str, Any] = {
+            "id": safe_str(item.get("id")),
+            "title": safe_str(item.get("title")),
+            "type": safe_str(item.get("type") or item.get("linkType")),
+        }
+        # GROUP rows never have a destination URL/thumbnail upstream — omit empties.
+        link_url = safe_str(item.get("url") or item.get("link"))
+        thumb = safe_str(item.get("thumbnail") or item.get("thumbnailUrl"))
+        if link_url:
+            link["url"] = link_url
+        if thumb:
+            link["thumbnail"] = thumb
+        normalized_links.append(link)
+
+    verticals = [v for v in (account.get("verticals") or []) if isinstance(v, str)]
+    if not verticals and isinstance(account.get("pageMeta"), dict) and account["pageMeta"].get("vertical"):
+        verticals = [str(account["pageMeta"]["vertical"])]
+
     social_list = socials if isinstance(socials, list) else []
-    return {
+    # Drop always-zero social positions — Linktree sends 0 for every icon.
+    cleaned_socials: list[Any] = []
+    for item in social_list:
+        if isinstance(item, dict):
+            row = {k: v for k, v in item.items() if not (k == "position" and v in (0, None))}
+            cleaned_socials.append(row)
+        else:
+            cleaned_socials.append(item)
+
+    out: dict[str, Any] = {
         "platform": "linktree",
         "url": safe_str(url),
         "id": account.get("id"),
-        "username": safe_str(account.get("username") or account.get("profile") or page.get("username")),
-        "name": safe_str(account.get("name") or account.get("displayName")),
+        "username": username,
+        "name": _display_name(account, username),
         "description": safe_str(account.get("description") or account.get("bio")),
         "avatar": safe_str(account.get("avatarUrl") or account.get("profilePictureUrl")),
         "verified": bool(account.get("isVerified") or account.get("verified")),
-        "verticals": [v for v in (account.get("verticals") or []) if isinstance(v, str)]
-        or ([account["pageMeta"]["vertical"]] if isinstance(account.get("pageMeta"), dict) and account["pageMeta"].get("vertical") else []),
+        "verticals": verticals,
         "timezone": safe_str(account.get("timezone")),
         "linkCount": len(normalized_links),
         "links": normalized_links,
-        "socials": social_list,
+        "socials": cleaned_socials,
         "socialAccounts": _social_accounts(social_list, normalized_links),
     }
+    for key in ("name", "description", "avatar", "timezone", "verticals"):
+        if out.get(key) in (None, "", []):
+            out.pop(key, None)
+    return out
 
 
 @router.get("/page", summary="Linktree page")
@@ -153,5 +189,5 @@ async def linktree_page(
                 raise HTTPException(status_code=404, detail="Linktree profile not found")
             return data
 
-        data = await cached_or_run("linktree.page", {"url": profile, "v": 2}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("linktree.page", {"url": profile, "v": 3}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
