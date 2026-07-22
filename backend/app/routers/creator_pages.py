@@ -219,13 +219,12 @@ async def _fetch_komi(value: str) -> dict[str, Any] | None:
         return None
     data = resp.json()
     profile = data.get("talentProfile") or {}
+    # Komi socialProfileLinks are only {link, type} — no id/thumbnail upstream.
     links = [
         {
-            "id": safe_str(link.get("id")),
             "title": safe_str(link.get("type")),
             "url": safe_str(link.get("link")),
             "type": safe_str(link.get("type")),
-            "thumbnail": None,
         }
         for link in profile.get("socialProfileLinks") or []
         if isinstance(link, dict) and link.get("link")
@@ -311,7 +310,7 @@ async def _page(platform: str, url: str, caller: ApiCaller, use_cache: bool = Tr
         )
     profile = _url(platform, url)
     async with billed_call(caller=caller, endpoint=f"/v1/{platform}/{'profile' if platform == 'linkme' else 'page'}", platform=platform, resource_url=profile, base_credits=4) as ctx:
-        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 5}, lambda: _fetch_page(platform, profile), ctx, use_cache=use_cache)
+        data = await cached_or_run(f"{platform}.page", {"url": profile, "v": 6}, lambda: _fetch_page(platform, profile), ctx, use_cache=use_cache)
         if data.pop("_marketingShell", None) or not (data.get("username") or data.get("links")):
             raise HTTPException(status_code=404, detail=f"{platform.title()} page not found")
         # Pillar soft-404s to a marketing shell with the path username but no creator links.

@@ -4958,44 +4958,43 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "name": "KSI",
     "firstName": "KSI",
     "lastName": "Olatunji",
-    "description": null,
     "avatar": "https://komi-production-assets.s3.amazonaws.com/photos/OsqFjkXZxCB6vsUAyuLtm.jpeg",
     "linkCount": 7,
     "links": [
       {
-        "id": null,
         "title": "INSTAGRAM",
         "url": "https://www.instagram.com/ksi",
-        "type": "INSTAGRAM",
-        "thumbnail": null
+        "type": "INSTAGRAM"
       },
       {
-        "id": null,
         "title": "FACEBOOK",
         "url": "https://www.facebook.com/KSIOlajidebt",
-        "type": "FACEBOOK",
-        "thumbnail": null
+        "type": "FACEBOOK"
       },
       {
-        "id": null,
         "title": "TWITTER",
         "url": "https://twitter.com/KSI",
-        "type": "TWITTER",
-        "thumbnail": null
+        "type": "TWITTER"
       },
       {
-        "id": null,
         "title": "YOUTUBE",
         "url": "https://www.youtube.com/c/ksi",
-        "type": "YOUTUBE",
-        "thumbnail": null
+        "type": "YOUTUBE"
       },
       {
-        "id": null,
         "title": "SPOTIFY",
         "url": "https://open.spotify.com/artist/1nzgtKYFckznkcVMR3Gg4z?si=0pADGmEwS1iluryfgiIy8Q",
-        "type": "SPOTIFY",
-        "thumbnail": null
+        "type": "SPOTIFY"
+      },
+      {
+        "title": "APPLE_MUSIC",
+        "url": "https://music.apple.com/gb/artist/ksi/489704062",
+        "type": "APPLE_MUSIC"
+      },
+      {
+        "title": "WEBSITE",
+        "url": "https://www.sidemen.com/",
+        "type": "WEBSITE"
       }
     ],
     "socials": {
@@ -5005,8 +5004,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "youtube": "https://www.youtube.com/c/ksi",
       "spotify": "https://open.spotify.com/artist/1nzgtKYFckznkcVMR3Gg4z?si=0pADGmEwS1iluryfgiIy8Q",
       "appleMusic": "https://music.apple.com/gb/artist/ksi/489704062"
-    },
-    "email": null
+    }
   },
   "kwai-post": {
     "platform": "kwai",
