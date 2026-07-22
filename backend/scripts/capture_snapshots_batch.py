@@ -328,8 +328,8 @@ def batch4_phase1() -> list[tuple[str, str, dict]]:
         ("truth-social-profile", "/v1/truth-social/profile", {"url": "@realDonaldTrump"}),
         ("truth-social-user-posts", "/v1/truth-social/user-posts", {"url": "@realDonaldTrump", "limit": 5}),
         # International Kwai web model — actor expects kwai.com/@handle, not kuaishou.com/profile/<id>.
-        ("kwai-profile", "/v1/kwai/profile", {"url": "https://www.kwai.com/@easycashindonesia"}),
-        ("kwai-user-posts", "/v1/kwai/user-posts", {"url": "https://www.kwai.com/@easycashindonesia", "limit": 5}),
+        ("kwai-profile", "/v1/kwai/profile", {"url": "https://www.kwai.com/@topfilmeseseriesnatv"}),
+        ("kwai-user-posts", "/v1/kwai/user-posts", {"url": "https://www.kwai.com/@topfilmeseseriesnatv", "limit": 5}),
         ("reddit-post-transcript", "/v1/reddit/post-transcript", {"url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/", "limit": 5}),
         ("tiktok-shop-products", "/v1/tiktok-shop/shop-products", {"url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079", "limit": 5}),
         ("linktree-page", "/v1/linktree/page", {"url": "https://linktr.ee/selenagomez"}),
@@ -421,8 +421,8 @@ def batch_fix_phase1() -> list[tuple[str, str, dict]]:
     return [
         ("tiktok-search-suggestions", "/v1/tiktok/search-suggestions", {"q": "makeup", "country": "US", "language": "en-US", "limit": 5}),
         ("instagram-basic-profile", "/v1/instagram/basic-profile", {"userId": "314216"}),
-        ("kwai-profile", "/v1/kwai/profile", {"url": "https://www.kwai.com/@easycashindonesia"}),
-        ("kwai-user-posts", "/v1/kwai/user-posts", {"url": "https://www.kwai.com/@easycashindonesia", "limit": 5}),
+        ("kwai-profile", "/v1/kwai/profile", {"url": "https://www.kwai.com/@topfilmeseseriesnatv"}),
+        ("kwai-user-posts", "/v1/kwai/user-posts", {"url": "https://www.kwai.com/@topfilmeseseriesnatv", "limit": 5}),
     ]
 
 

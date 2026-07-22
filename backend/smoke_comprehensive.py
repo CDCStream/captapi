@@ -64,7 +64,7 @@ async def main() -> None:
         ("pinterest",    "/v1/pinterest/user-pins",         {"url": "https://www.pinterest.com/nasa/", "limit": 5}, False),
         ("linkedin",     "/v1/linkedin/profile",            {"url": "https://www.linkedin.com/in/williamhgates"}, False),
         ("rumble",       "/v1/rumble/search",               {"q": "news", "limit": 5}, False),
-        ("kwai",         "/v1/kwai/profile",                {"url": "https://www.kwai.com/@easycashindonesia"}, False),
+        ("kwai",         "/v1/kwai/profile",                {"url": "https://www.kwai.com/@topfilmeseseriesnatv"}, False),
         ("twitch",       "/v1/twitch/profile",              {"url": "https://www.twitch.tv/ninja"}, False),
         ("spotify",      "/v1/spotify/search",              {"q": "Taylor Swift", "limit": 5}, False),
         ("soundcloud",   "/v1/soundcloud/artist",           {"url": "https://soundcloud.com/octobersveryown"}, False),

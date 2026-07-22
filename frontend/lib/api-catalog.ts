@@ -717,7 +717,7 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     blurb: "Extract Kwai profile details, user posts, and post metadata.",
     icon: "video",
     color: "text-orange-500",
-    exampleUrl: "https://www.kwai.com/@easycashindonesia",
+    exampleUrl: "https://www.kwai.com/@topfilmeseseriesnatv",
     endpoints: KWAI.map((s) => ({ ...s, platform: "kwai" as const })),
   },
   {
@@ -1213,8 +1213,8 @@ const TRUTH_PROFILE = "Truth Social profile URL or @username.";
 const TRUTH_POST = "Truth Social post URL or post ID.";
 const KICK_CLIP = "Kick clip URL, channel URL, or channel username.";
 const AMAZON_SHOP_URL = "Amazon seller storefront URL, seller profile URL, or seller ID.";
-const KWAI_PROFILE = "Kwai profile URL or @handle, e.g. https://www.kwai.com/@easycashindonesia.";
-const KWAI_POST = "Kwai video URL, e.g. https://www.kwai.com/@handle/video/5238962376325675745.";
+const KWAI_PROFILE = "Kwai profile URL or @handle, e.g. https://www.kwai.com/@topfilmeseseriesnatv.";
+const KWAI_POST = "Kwai video URL, e.g. https://www.kwai.com/@topfilmeseseriesnatv/video/5240932700689736196.";
 const CURSOR = { name: "cursor", type: "string" as const, required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." };
 const KOMI_PAGE = "Komi page URL or username.";
 const PILLAR_PAGE = "Pillar page URL or username.";
@@ -1719,7 +1719,7 @@ const PROFILE_URL: Record<PlatformId, string> = {
   amazon_shop: "https://www.amazon.com/s?me=ATVPDKIKX0DER",
   account: "https://captapi.com/dashboard",
   utilities: "https://www.tiktok.com/@tiktok/video/7234567890123456789",
-  kwai: "https://www.kwai.com/@easycashindonesia",
+  kwai: "https://www.kwai.com/@topfilmeseseriesnatv",
   komi: "https://komi.io/example",
   pillar: "https://pillar.io/example",
   linkbio: "https://lnk.bio/example",

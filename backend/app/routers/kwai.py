@@ -25,7 +25,7 @@ from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
 
-_PROFILE_EXAMPLE = "https://www.kwai.com/@easycashindonesia"
+_PROFILE_EXAMPLE = "https://www.kwai.com/@topfilmeseseriesnatv"
 _HANDLE_RE = re.compile(r"[A-Za-z0-9._-]{2,}")
 
 
@@ -81,7 +81,9 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
     author = _author(item)
     handle = author.get("username") or author.get("name")
     page_url = author.get("url") or (f"https://www.kwai.com/@{handle}" if handle else None)
-    return {
+    # Actor often omits videosCount now — drop empties instead of shipping null.
+    raw = {k: v for k, v in author.items() if v not in (None, "", [])} if isinstance(author, dict) else {}
+    out: dict[str, Any] = {
         "platform": "kwai",
         "id": safe_str(author.get("id")),
         "url": safe_str(page_url),
@@ -91,14 +93,20 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
         "followers": safe_int(author.get("followersCount")),
         "likedCount": safe_int(author.get("likesCount")),
         "postCount": safe_int(author.get("videosCount")),
-        "raw": author,
+        "raw": raw,
     }
+    if out.get("postCount") is None:
+        out.pop("postCount", None)
+    return out
 
 
 def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
     author = _author(item)
     duration = item.get("duration")
-    return {
+    raw = {k: v for k, v in item.items() if v not in (None, "", [])} if isinstance(item, dict) else item
+    if isinstance(raw, dict) and isinstance(raw.get("authorMeta"), dict):
+        raw["authorMeta"] = {k: v for k, v in raw["authorMeta"].items() if v not in (None, "", [])}
+    out: dict[str, Any] = {
         "platform": "kwai",
         "id": safe_str(item.get("id")),
         "url": safe_str(item.get("url")),
@@ -121,13 +129,17 @@ def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
             "comments": safe_int(item.get("commentCount")),
             "shares": safe_int(item.get("shareCount")),
         },
-        "raw": item,
+        "raw": raw,
     }
+    for key in ("text", "transcript", "durationSeconds", "thumbnailUrl", "videoUrl"):
+        if out.get(key) in (None, "", []):
+            out.pop(key, None)
+    return out
 
 
 @router.get("/profile", summary="Kwai profile")
 async def profile(
-    url: str = Query(..., description="Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)"),
+    url: str = Query(..., description="Kwai profile URL or @handle (e.g. https://www.kwai.com/@topfilmeseseriesnatv)"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -141,13 +153,13 @@ async def profile(
                 raise HTTPException(status_code=404, detail="Kwai profile not found")
             return _normalize_profile(items[0])
 
-        data = await cached_or_run("kwai.profile", {"url": profile_url, "v": 3}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("kwai.profile", {"url": profile_url, "v": 4}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 
 @router.get("/user-posts", summary="Kwai user posts")
 async def user_posts(
-    url: str = Query(..., description="Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)"),
+    url: str = Query(..., description="Kwai profile URL or @handle (e.g. https://www.kwai.com/@topfilmeseseriesnatv)"),
     limit: int = Query(20, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
@@ -163,7 +175,7 @@ async def user_posts(
             posts = [_normalize_post(i) for i in items[:limit]]
             return {"profileUrl": profile_url, "totalReturned": len(posts), "posts": posts}
 
-        data = await cached_or_run("kwai.user-posts", {"url": profile_url, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("kwai.user-posts", {"url": profile_url, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = max(2, math.ceil(len(data["posts"]) * 2.25))
         return ApiResponse(data=data)
 
@@ -184,5 +196,5 @@ async def post(
                 raise HTTPException(status_code=404, detail="Kwai post not found")
             return _normalize_post(items[0])
 
-        data = await cached_or_run("kwai.post", {"url": video_url, "v": 3}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("kwai.post", {"url": video_url, "v": 4}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
