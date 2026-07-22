@@ -142,6 +142,21 @@ _OMIT_IF_EMPTY = frozenset(
 )
 
 
+def _strip_empty_keys(value: Any) -> Any:
+    """Drop null/empty keys from actor raw payloads (search often ships null dates)."""
+    if isinstance(value, dict):
+        out: dict[str, Any] = {}
+        for key, child in value.items():
+            cleaned = _strip_empty_keys(child)
+            if cleaned in (None, "", []):
+                continue
+            out[key] = cleaned
+        return out
+    if isinstance(value, list):
+        return [_strip_empty_keys(child) for child in value]
+    return value
+
+
 def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
     stats = item.get("stats") or {}
     duration = item.get("duration") or {}
@@ -195,7 +210,7 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
         or (_image(album) if isinstance(album, dict) else None),
         "totalTracks": safe_int(tracks.get("totalCount") if isinstance(tracks, dict) else item.get("totalTracks")),
         "totalEpisodes": safe_int(episodes.get("totalCount") if isinstance(episodes, dict) else item.get("totalEpisodes")),
-        "raw": item,
+        "raw": _strip_empty_keys(item),
     }
     for key in _OMIT_BY_KIND.get(kind, frozenset()):
         out.pop(key, None)
@@ -261,7 +276,7 @@ async def artist(
 ):
     uri = _url(url, "artist")
     async with billed_call(caller=caller, endpoint="/v1/spotify/artist", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.artist", {"uri": uri, "v": 5}, lambda: _details("artist", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
+        data = await cached_or_run("spotify.artist", {"uri": uri, "v": 6}, lambda: _details("artist", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
         return ApiResponse(data=data)
 
 
@@ -273,7 +288,7 @@ async def track(
 ):
     uri = _url(url, "track")
     async with billed_call(caller=caller, endpoint="/v1/spotify/track", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.track", {"uri": uri, "v": 6}, lambda: _details("track", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
+        data = await cached_or_run("spotify.track", {"uri": uri, "v": 7}, lambda: _details("track", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
         return ApiResponse(data=data)
 
 
@@ -285,7 +300,7 @@ async def album(
 ):
     uri = _url(url, "album")
     async with billed_call(caller=caller, endpoint="/v1/spotify/album", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.album", {"uri": uri, "v": 5}, lambda: _details("album", uri, limit=1), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
+        data = await cached_or_run("spotify.album", {"uri": uri, "v": 6}, lambda: _details("album", uri, limit=1), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
         return ApiResponse(data=data)
 
 
@@ -298,7 +313,7 @@ async def podcast(
 ):
     uri = _url(url, "show")
     async with billed_call(caller=caller, endpoint="/v1/spotify/podcast", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.podcast", {"uri": uri, "limit": limit, "v": 5}, lambda: _details("podcast", uri, limit), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
+        data = await cached_or_run("spotify.podcast", {"uri": uri, "limit": limit, "v": 6}, lambda: _details("podcast", uri, limit), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
         return ApiResponse(data=data)
 
 
@@ -327,7 +342,7 @@ async def podcast_episodes(
             normalized = [_normalize(i, "episode") for i in rows]
             return {"platform": "spotify", "podcast": data, "totalReturned": len(normalized[:limit]), "episodes": normalized[:limit]}
 
-        data = await cached_or_run("spotify.podcast-episodes", {"uri": uri, "limit": limit, "v": 5}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("spotify.podcast-episodes", {"uri": uri, "limit": limit, "v": 6}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["episodes"]))
         return ApiResponse(data=data)
 
@@ -369,6 +384,6 @@ async def search(
             results = [_normalize(i, kind) for i in items[:limit] if not i.get("error")]
             return {"platform": "spotify", "query": q, "type": type, "totalReturned": len(results), "results": results}
 
-        data = await cached_or_run("spotify.search", {"q": q, "type": type, "limit": limit, "v": 5}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("spotify.search", {"q": q, "type": type, "limit": limit, "v": 6}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["results"]))
         return ApiResponse(data=data)

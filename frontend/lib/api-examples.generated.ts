@@ -7253,9 +7253,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "precision": "DAY"
       },
       "label": "Taylor Swift",
-      "courtesyLine": "",
       "isPreRelease": false,
-      "preReleaseEndDateTime": null,
       "saved": false,
       "playability": {
         "playable": true,
@@ -7384,7 +7382,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                 "playable": true
               },
               "playcount": "899652764",
-              "relinkingInformation": null,
               "saved": false,
               "trackNumber": 1,
               "uri": "spotify:track:5jQI2r1RdgtuT8S3iG8zFC"
@@ -7585,8 +7582,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             }
           }
         ]
-      },
-      "watchFeedEntrypoint": null
+      }
     }
   },
   "spotify-artist": {
@@ -7607,7 +7603,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "monthlyListeners": 101425762,
       "followers": 160956899,
       "worldRank": 7,
-      "verified": null,
       "biography": {
         "text": "And, baby, that’s show business for you. New album The Life of a Showgirl. Available now ❤️‍&#x1f525;",
         "type": "AUTOBIOGRAPHY"
@@ -7774,14 +7769,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           ]
         }
       },
-      "unmappedMusicVideos": null,
-      "preReleaseV2": null,
       "relatedMusicVideos": {
         "__typename": "MusicVideosPage",
-        "items": [],
-        "pagingInfo": {
-          "nextOffset": null
-        },
+        "pagingInfo": {},
         "totalCount": 0
       },
       "Popular Tracks": {
@@ -8044,7 +8034,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         ]
       },
       "Artist pick": {
-        "backgroundImageV2": null,
         "comment": "From Toy Story 5 ",
         "itemV2": {
           "__typename": "AlbumResponseWrapper",
@@ -8070,7 +8059,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               ]
             },
             "name": "I Knew It, I Knew You (From \"Toy Story 5\")",
-            "preReleaseEndDateTime": null,
             "type": "SINGLE",
             "uri": "spotify:album:3ZLIShtR6Fjs4nTWFpBUB6"
           }
@@ -9129,9 +9117,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                     {
                       "sources": [
                         {
-                          "height": null,
-                          "url": "https://i.scdn.co/image/ab67706f00000002a101d896dc6e158b275c31ac",
-                          "width": null
+                          "url": "https://i.scdn.co/image/ab67706f00000002a101d896dc6e158b275c31ac"
                         }
                       ]
                     }
@@ -9158,9 +9144,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                     {
                       "sources": [
                         {
-                          "height": null,
-                          "url": "https://i.scdn.co/image/ab67706f00000002b2fcce8f3fce2910355ee501",
-                          "width": null
+                          "url": "https://i.scdn.co/image/ab67706f00000002b2fcce8f3fce2910355ee501"
                         }
                       ]
                     }
@@ -9187,9 +9171,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                     {
                       "sources": [
                         {
-                          "height": null,
-                          "url": "https://i.scdn.co/image/ab67706f00000002aef6c98652b0d8036e3aa1a5",
-                          "width": null
+                          "url": "https://i.scdn.co/image/ab67706f00000002aef6c98652b0d8036e3aa1a5"
                         }
                       ]
                     }
@@ -9216,9 +9198,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                     {
                       "sources": [
                         {
-                          "height": null,
-                          "url": "https://i.scdn.co/image/ab67706f000000027a65237286a84ba2ef29cb27",
-                          "width": null
+                          "url": "https://i.scdn.co/image/ab67706f000000027a65237286a84ba2ef29cb27"
                         }
                       ]
                     }
@@ -9245,9 +9225,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                     {
                       "sources": [
                         {
-                          "height": null,
-                          "url": "https://i.scdn.co/image/ab67706f00000002d941df29a8e568c32e99a87f",
-                          "width": null
+                          "url": "https://i.scdn.co/image/ab67706f00000002d941df29a8e568c32e99a87f"
                         }
                       ]
                     }
@@ -9270,12 +9248,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       },
       "On Tour": {
         "concerts": {
-          "items": [],
           "totalCount": 0
         },
-        "merch": {
-          "items": []
-        }
+        "merch": {}
       },
       "Discovered on": {
         "items": [
@@ -9299,9 +9274,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                   {
                     "sources": [
                       {
-                        "height": null,
-                        "url": "https://i.scdn.co/image/ab67706f00000002a101d896dc6e158b275c31ac",
-                        "width": null
+                        "url": "https://i.scdn.co/image/ab67706f00000002a101d896dc6e158b275c31ac"
                       }
                     ]
                   }
@@ -9333,9 +9306,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                   {
                     "sources": [
                       {
-                        "height": null,
-                        "url": "https://image-cdn-fa.spotifycdn.com/image/ab67706c0000d72c5ab505a1843fa09c168293aa",
-                        "width": null
+                        "url": "https://image-cdn-fa.spotifycdn.com/image/ab67706c0000d72c5ab505a1843fa09c168293aa"
                       }
                     ]
                   }
@@ -9366,9 +9337,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                   {
                     "sources": [
                       {
-                        "height": null,
-                        "url": "https://image-cdn-fa.spotifycdn.com/image/ab67706c0000d72c50c3581c282b1b2871248e85",
-                        "width": null
+                        "url": "https://image-cdn-fa.spotifycdn.com/image/ab67706c0000d72c50c3581c282b1b2871248e85"
                       }
                     ]
                   }
@@ -9393,9 +9362,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                   {
                     "sources": [
                       {
-                        "height": null,
-                        "url": "https://image-cdn-fa.spotifycdn.com/image/ab67706c0000d72c8810d6b470de5a439b491000",
-                        "width": null
+                        "url": "https://image-cdn-fa.spotifycdn.com/image/ab67706c0000d72c8810d6b470de5a439b491000"
                       }
                     ]
                   }
@@ -9420,9 +9387,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                   {
                     "sources": [
                       {
-                        "height": null,
-                        "url": "https://image-cdn-ak.spotifycdn.com/image/ab67706c0000d72cd17e192d4a08b8d87b6baa18",
-                        "width": null
+                        "url": "https://image-cdn-ak.spotifycdn.com/image/ab67706c0000d72cd17e192d4a08b8d87b6baa18"
                       }
                     ]
                   }
@@ -9441,15 +9406,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           {
             "data": {
               "__typename": "Playlist",
-              "description": "",
               "images": {
                 "items": [
                   {
                     "sources": [
                       {
-                        "height": null,
-                        "url": "https://image-cdn-ak.spotifycdn.com/image/ab67706c0000d72cdcef9bbc0ba7be550664fe13",
-                        "width": null
+                        "url": "https://image-cdn-ak.spotifycdn.com/image/ab67706c0000d72cdcef9bbc0ba7be550664fe13"
                       }
                     ]
                   }
@@ -10024,7 +9986,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         }
       },
       "mediaType": "MIXED",
-      "musicAndTalk": null,
       "consumptionOrderV2": "EPISODIC",
       "contentRatingV2": {
         "labels": [
@@ -10033,13 +9994,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       },
       "contentType": "CONTENT_TYPE_PODCAST",
       "description": "The official podcast of comedian Joe Rogan.",
-      "gatedEntityRelations": [],
-      "accessInfo": null,
       "htmlDescription": "<p>The official podcast of comedian Joe Rogan.</p>",
       "playability": {
         "playable": true,
-        "reason": "PLAYABLE",
-        "unplayabilityReasons": []
+        "reason": "PLAYABLE"
       },
       "saved": false,
       "sharingInfo": {
@@ -10085,14 +10043,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               "__typename": "EpisodeResponseWrapper",
               "data": {
                 "__typename": "Episode",
-                "creator": null,
                 "uri": "spotify:episode:25xKO33R8MuWDHon82THE0"
               }
             }
           }
         ]
       },
-      "trailerV2": null,
       "episodes": {
         "data": {
           "podcastUnionV2": {
@@ -10105,7 +10061,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                     "_uri": "spotify:episode:25xKO33R8MuWDHon82THE0",
                     "data": {
                       "__typename": "Episode",
-                      "accessInfo": null,
                       "audio": {
                         "items": [
                           {
@@ -10125,11 +10080,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           }
                         ]
                       },
-                      "contentInformation": null,
                       "contentRating": {
                         "label": "EXPLICIT"
                       },
-                      "contents": [],
                       "coverArt": {
                         "sources": [
                           {
@@ -10149,12 +10102,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           }
                         ]
                       },
-                      "creator": null,
                       "description": "Jimmy Donaldson, better known as MrBeast, is a YouTuber, entrepreneur, and philanthropist. He is the founder of Beast Industries and Beast Philanthropy, and the creator and host of the Prime Video competition series “Beast Games.”www.beastgames.comwww.beastphilanthropy.orgwww.youtube.com/@MrBeast      Learn more about your ad choices. Visit podcastchoices.com/adchoices",
                       "duration": {
                         "totalMilliseconds": 10123050
                       },
-                      "gatedEntityRelations": [],
                       "htmlDescription": "<p>Jimmy Donaldson, better known as MrBeast, is a YouTuber, entrepreneur, and philanthropist. He is the founder of Beast Industries and Beast Philanthropy, and the creator and host of the Prime Video competition series “Beast Games.”<br />www.beastgames.com<br />www.beastphilanthropy.org<br />www.youtube.com/&#64;MrBeast<br /></p><br/><p><br /><a href=\"https://pplx.ai/rogan\" rel=\"nofollow\"><br /></a><br /></p><br/><p><br /></p><br/><p><br /><a href=\"https://dkng.co/rogan\" rel=\"nofollow\"><br /></a><br /></p><br/><p><br /></p><br/><p><br /><a href=\"https://BlueChew.com\" rel=\"nofollow\"><br /></a><br /></p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
                       "id": "25xKO33R8MuWDHon82THE0",
                       "mediaTypes": [
@@ -10164,8 +10115,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "name": "#2527 - MrBeast",
                       "playability": {
                         "playable": true,
-                        "reason": "PLAYABLE",
-                        "unplayabilityReasons": []
+                        "reason": "PLAYABLE"
                       },
                       "playedState": {
                         "playPositionMilliseconds": 0,
@@ -10197,9 +10147,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           "showTypes": [
                             "SHOW_TYPE_EXCLUSIVE"
                           ],
-                          "trailerV2": null,
-                          "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-                          "accessInfo": null
+                          "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
                         }
                       },
                       "previewPlayback": {
@@ -10214,14 +10162,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "restrictions": {
                         "paywallContent": false
                       },
-                      "segments": null,
                       "sharingInfo": {
                         "shareId": "f9CZobdKTZWgo-MdQ0r5AA",
                         "shareUrl": "https://open.spotify.com/episode/25xKO33R8MuWDHon82THE0?si=f9CZobdKTZWgo-MdQ0r5AA"
                       },
-                      "transcripts": {
-                        "items": []
-                      },
+                      "transcripts": {},
                       "type": "PODCAST_EPISODE",
                       "uri": "spotify:episode:25xKO33R8MuWDHon82THE0",
                       "visualIdentity": {
@@ -10361,7 +10306,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                     "_uri": "spotify:episode:2J3m075zqKwZ43mysdezJK",
                     "data": {
                       "__typename": "Episode",
-                      "accessInfo": null,
                       "audio": {
                         "items": [
                           {
@@ -10381,11 +10325,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           }
                         ]
                       },
-                      "contentInformation": null,
                       "contentRating": {
                         "label": "EXPLICIT"
                       },
-                      "contents": [],
                       "coverArt": {
                         "sources": [
                           {
@@ -10405,12 +10347,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           }
                         ]
                       },
-                      "creator": null,
                       "description": "JD Vance is the Vice President of the United States, a Marine Corps veteran, former U.S. Senator from Ohio, and author. His latest book, “Communion: Finding My Way Back to Faith,” is available now.www.harpercollins.com/products/communion-j-d-vancewww.whitehouse.gov/administration/jd-vance  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  50% off your first box at https://www.thefarmersdog.com/rogan!  Sign up at https://foxnation.com to watch RAF 11! Learn more about your ad choices. Visit podcastchoices.com/adchoices",
                       "duration": {
                         "totalMilliseconds": 10414079
                       },
-                      "gatedEntityRelations": [],
                       "htmlDescription": "<p>JD Vance is the Vice President of the United States, a Marine Corps veteran, former U.S. Senator from Ohio, and author. His latest book, “Communion: Finding My Way Back to Faith,” is available now.<br />www.harpercollins.com/products/communion-j-d-vance<br />www.whitehouse.gov/administration/jd-vance</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>50% off your first box at <a href=\"https://www.thefarmersdog.com/rogan\" rel=\"nofollow\">https://www.thefarmersdog.com/rogan</a>!</p><br/><p><br /></p><br/><p>Sign up at <a href=\"https://foxnation.com\" rel=\"nofollow\">https://foxnation.com</a> to watch RAF 11!</p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
                       "id": "2J3m075zqKwZ43mysdezJK",
                       "mediaTypes": [
@@ -10420,8 +10360,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "name": "#2526 - JD Vance",
                       "playability": {
                         "playable": true,
-                        "reason": "PLAYABLE",
-                        "unplayabilityReasons": []
+                        "reason": "PLAYABLE"
                       },
                       "playedState": {
                         "playPositionMilliseconds": 0,
@@ -10453,9 +10392,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           "showTypes": [
                             "SHOW_TYPE_EXCLUSIVE"
                           ],
-                          "trailerV2": null,
-                          "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-                          "accessInfo": null
+                          "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
                         }
                       },
                       "previewPlayback": {
@@ -10470,14 +10407,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "restrictions": {
                         "paywallContent": false
                       },
-                      "segments": null,
                       "sharingInfo": {
                         "shareId": "05TB4XHXQUigtPyOHFOeZQ",
                         "shareUrl": "https://open.spotify.com/episode/2J3m075zqKwZ43mysdezJK?si=05TB4XHXQUigtPyOHFOeZQ"
                       },
-                      "transcripts": {
-                        "items": []
-                      },
+                      "transcripts": {},
                       "type": "PODCAST_EPISODE",
                       "uri": "spotify:episode:2J3m075zqKwZ43mysdezJK",
                       "visualIdentity": {
@@ -10617,7 +10551,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                     "_uri": "spotify:episode:10TcPJFzFUDyyBzsj72nxi",
                     "data": {
                       "__typename": "Episode",
-                      "accessInfo": null,
                       "audio": {
                         "items": [
                           {
@@ -10637,11 +10570,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           }
                         ]
                       },
-                      "contentInformation": null,
                       "contentRating": {
                         "label": "EXPLICIT"
                       },
-                      "contents": [],
                       "coverArt": {
                         "sources": [
                           {
@@ -10661,12 +10592,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           }
                         ]
                       },
-                      "creator": null,
                       "description": "Nick Bostrom is a philosopher whose work focuses on artificial intelligence, existential risk, and the future of humanity. He is Principal Researcher at the Macrostrategy Research Initiative and the author of several books, the most recent of which is “Deep Utopia: Life and Meaning in a Solved World.”www.simonandschuster.com/books/Deep-Utopia/Nick-Bostrom/9781646871643www.nickbostrom.com  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  Switch today at https://Visible.com for just 25/mo. Or Save $10 on your first month of Visible+ Pro with code ROGAN.  Learn more about your ad choices. Visit podcastchoices.com/adchoices",
                       "duration": {
                         "totalMilliseconds": 8081918
                       },
-                      "gatedEntityRelations": [],
                       "htmlDescription": "<p>Nick Bostrom is a philosopher whose work focuses on artificial intelligence, existential risk, and the future of humanity. He is Principal Researcher at the Macrostrategy Research Initiative and the author of several books, the most recent of which is “Deep Utopia: Life and Meaning in a Solved World.”<br />www.simonandschuster.com/books/Deep-Utopia/Nick-Bostrom/9781646871643<br />www.nickbostrom.com</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>Switch today at <a href=\"https://Visible.com\" rel=\"nofollow\">https://Visible.com</a> for just 25/mo. Or Save $10 on your first month of Visible&#43; Pro with code ROGAN. </p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
                       "id": "10TcPJFzFUDyyBzsj72nxi",
                       "mediaTypes": [
@@ -10676,8 +10605,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "name": "#2525 - Nick Bostrom",
                       "playability": {
                         "playable": true,
-                        "reason": "PLAYABLE",
-                        "unplayabilityReasons": []
+                        "reason": "PLAYABLE"
                       },
                       "playedState": {
                         "playPositionMilliseconds": 0,
@@ -10709,9 +10637,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           "showTypes": [
                             "SHOW_TYPE_EXCLUSIVE"
                           ],
-                          "trailerV2": null,
-                          "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-                          "accessInfo": null
+                          "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
                         }
                       },
                       "previewPlayback": {
@@ -10726,14 +10652,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "restrictions": {
                         "paywallContent": false
                       },
-                      "segments": null,
                       "sharingInfo": {
                         "shareId": "4bb5ZYciRSWTKpYK4QFTxQ",
                         "shareUrl": "https://open.spotify.com/episode/10TcPJFzFUDyyBzsj72nxi?si=4bb5ZYciRSWTKpYK4QFTxQ"
                       },
-                      "transcripts": {
-                        "items": []
-                      },
+                      "transcripts": {},
                       "type": "PODCAST_EPISODE",
                       "uri": "spotify:episode:10TcPJFzFUDyyBzsj72nxi",
                       "visualIdentity": {
@@ -10873,7 +10796,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                     "_uri": "spotify:episode:4imTpV50bg8l1lIccXTqoC",
                     "data": {
                       "__typename": "Episode",
-                      "accessInfo": null,
                       "audio": {
                         "items": [
                           {
@@ -10893,11 +10815,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           }
                         ]
                       },
-                      "contentInformation": null,
                       "contentRating": {
                         "label": "EXPLICIT"
                       },
-                      "contents": [],
                       "coverArt": {
                         "sources": [
                           {
@@ -10917,12 +10837,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           }
                         ]
                       },
-                      "creator": null,
                       "description": "Joe is joined by mixed martial artists John Rallo, Matt Serra, and Din Thomas. John Rallo owns Shogun Fights and is the owner and head coach of Ground Control Mixed Martial Arts Academy.www.groundcontrolbaltimore.comwww.shogunfights.com Matt Serra is a mixed martial artist and host of \"UFC Unfiltered\" with Jim Norton and \"Geeking Out with Matt Serra.\" He is the owner and an instructor at Serra BJJ.www.youtube.com/@MattSerraBJJwww.serrabjjacademy.com Din Thomas is a mixed martial arts analyst, actor, and host of \"Din Thomas' Fight Court.\"www.youtube.com/@FightCourt  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  Don’t miss out on all the action this week at DraftKings! Download the DraftKings app today! Sign-up using https://dkng.co/rogan or through my promo code ROGAN.  Get watch party snacks and groceries on Uber Eats. Learn more about your ad choices. Visit podcastchoices.com/adchoices",
                       "duration": {
                         "totalMilliseconds": 9543167
                       },
-                      "gatedEntityRelations": [],
                       "htmlDescription": "<p>Joe is joined by mixed martial artists John Rallo, Matt Serra, and Din Thomas.</p><br/><p>John Rallo owns Shogun Fights and is the owner and head coach of Ground Control Mixed Martial Arts Academy.<br />www.groundcontrolbaltimore.com<br />www.shogunfights.com</p><br/><p>Matt Serra is a mixed martial artist and host of &#34;UFC Unfiltered&#34; with Jim Norton and &#34;Geeking Out with Matt Serra.&#34; He is the owner and an instructor at Serra BJJ.<br />www.youtube.com/&#64;MattSerraBJJ<br />www.serrabjjacademy.com</p><br/><p>Din Thomas is a mixed martial arts analyst, actor, and host of &#34;Din Thomas&#39; Fight Court.&#34;<br />www.youtube.com/&#64;FightCourt</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>Don’t miss out on all the action this week at DraftKings! Download the DraftKings app today! Sign-up using <a href=\"https://dkng.co/rogan\" rel=\"nofollow\">https://dkng.co/rogan</a> or through my promo code ROGAN.</p><br/><p><br /></p><br/><p>Get watch party snacks and groceries on Uber Eats.</p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
                       "id": "4imTpV50bg8l1lIccXTqoC",
                       "mediaTypes": [
@@ -10932,8 +10850,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "name": "JRE MMA Show #182 - Protect Ya Neck",
                       "playability": {
                         "playable": true,
-                        "reason": "PLAYABLE",
-                        "unplayabilityReasons": []
+                        "reason": "PLAYABLE"
                       },
                       "playedState": {
                         "playPositionMilliseconds": 0,
@@ -10965,9 +10882,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           "showTypes": [
                             "SHOW_TYPE_EXCLUSIVE"
                           ],
-                          "trailerV2": null,
-                          "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-                          "accessInfo": null
+                          "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
                         }
                       },
                       "previewPlayback": {
@@ -10982,14 +10897,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "restrictions": {
                         "paywallContent": false
                       },
-                      "segments": null,
                       "sharingInfo": {
                         "shareId": "zWkvynLFRcelTJ2UN9PkVQ",
                         "shareUrl": "https://open.spotify.com/episode/4imTpV50bg8l1lIccXTqoC?si=zWkvynLFRcelTJ2UN9PkVQ"
                       },
-                      "transcripts": {
-                        "items": []
-                      },
+                      "transcripts": {},
                       "type": "PODCAST_EPISODE",
                       "uri": "spotify:episode:4imTpV50bg8l1lIccXTqoC",
                       "visualIdentity": {
@@ -11129,7 +11041,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                     "_uri": "spotify:episode:1f6tXaeR1XNYwSF0tqpEDT",
                     "data": {
                       "__typename": "Episode",
-                      "accessInfo": null,
                       "audio": {
                         "items": [
                           {
@@ -11149,11 +11060,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           }
                         ]
                       },
-                      "contentInformation": null,
                       "contentRating": {
                         "label": "EXPLICIT"
                       },
-                      "contents": [],
                       "coverArt": {
                         "sources": [
                           {
@@ -11173,12 +11082,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           }
                         ]
                       },
-                      "creator": null,
                       "description": "Rupert Lowe is a British politician who has served as the member of Parliament for Great Yarmouth since 2024 and the leader of Restore Britain.  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  onX Offroad: Try onX Offroad for 50% off- go to https://onXmaps.com/joerogan  This video is sponsored by BetterHelp. Visit https://BetterHelp.com/JRE Learn more about your ad choices. Visit podcastchoices.com/adchoices",
                       "duration": {
                         "totalMilliseconds": 7385641
                       },
-                      "gatedEntityRelations": [],
                       "htmlDescription": "<p>Rupert Lowe is a British politician who has served as the member of Parliament for Great Yarmouth since 2024 and the leader of Restore Britain.</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>onX Offroad: Try onX Offroad for 50% off- go to <a href=\"https://onXmaps.com/joerogan\" rel=\"nofollow\">https://onXmaps.com/joerogan</a></p><br/><p><br /></p><br/><p>This video is sponsored by BetterHelp. Visit <a href=\"https://BetterHelp.com/JRE\" rel=\"nofollow\">https://BetterHelp.com/JRE</a></p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
                       "id": "1f6tXaeR1XNYwSF0tqpEDT",
                       "mediaTypes": [
@@ -11188,8 +11095,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "name": "#2524 - Rupert Lowe",
                       "playability": {
                         "playable": true,
-                        "reason": "PLAYABLE",
-                        "unplayabilityReasons": []
+                        "reason": "PLAYABLE"
                       },
                       "playedState": {
                         "playPositionMilliseconds": 0,
@@ -11221,9 +11127,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                           "showTypes": [
                             "SHOW_TYPE_EXCLUSIVE"
                           ],
-                          "trailerV2": null,
-                          "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-                          "accessInfo": null
+                          "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
                         }
                       },
                       "previewPlayback": {
@@ -11238,14 +11142,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "restrictions": {
                         "paywallContent": false
                       },
-                      "segments": null,
                       "sharingInfo": {
                         "shareId": "TQUavn2-RQiCrTXWK4mFRg",
                         "shareUrl": "https://open.spotify.com/episode/1f6tXaeR1XNYwSF0tqpEDT?si=TQUavn2-RQiCrTXWK4mFRg"
                       },
-                      "transcripts": {
-                        "items": []
-                      },
+                      "transcripts": {},
                       "type": "PODCAST_EPISODE",
                       "uri": "spotify:episode:1f6tXaeR1XNYwSF0tqpEDT",
                       "visualIdentity": {
@@ -11391,8 +11292,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
           }
         }
-      },
-      "recommended_shows": null
+      }
     }
   },
   "spotify-podcast-episodes": {
@@ -11430,7 +11330,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           }
         },
         "mediaType": "MIXED",
-        "musicAndTalk": null,
         "consumptionOrderV2": "EPISODIC",
         "contentRatingV2": {
           "labels": [
@@ -11439,13 +11338,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "contentType": "CONTENT_TYPE_PODCAST",
         "description": "The official podcast of comedian Joe Rogan.",
-        "gatedEntityRelations": [],
-        "accessInfo": null,
         "htmlDescription": "<p>The official podcast of comedian Joe Rogan.</p>",
         "playability": {
           "playable": true,
-          "reason": "PLAYABLE",
-          "unplayabilityReasons": []
+          "reason": "PLAYABLE"
         },
         "saved": false,
         "sharingInfo": {
@@ -11491,14 +11387,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                 "__typename": "EpisodeResponseWrapper",
                 "data": {
                   "__typename": "Episode",
-                  "creator": null,
                   "uri": "spotify:episode:25xKO33R8MuWDHon82THE0"
                 }
               }
             }
           ]
         },
-        "trailerV2": null,
         "episodes": {
           "data": {
             "podcastUnionV2": {
@@ -11511,7 +11405,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "_uri": "spotify:episode:25xKO33R8MuWDHon82THE0",
                       "data": {
                         "__typename": "Episode",
-                        "accessInfo": null,
                         "audio": {
                           "items": [
                             {
@@ -11531,11 +11424,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             }
                           ]
                         },
-                        "contentInformation": null,
                         "contentRating": {
                           "label": "EXPLICIT"
                         },
-                        "contents": [],
                         "coverArt": {
                           "sources": [
                             {
@@ -11555,12 +11446,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             }
                           ]
                         },
-                        "creator": null,
                         "description": "Jimmy Donaldson, better known as MrBeast, is a YouTuber, entrepreneur, and philanthropist. He is the founder of Beast Industries and Beast Philanthropy, and the creator and host of the Prime Video competition series “Beast Games.”www.beastgames.comwww.beastphilanthropy.orgwww.youtube.com/@MrBeast      Learn more about your ad choices. Visit podcastchoices.com/adchoices",
                         "duration": {
                           "totalMilliseconds": 10123050
                         },
-                        "gatedEntityRelations": [],
                         "htmlDescription": "<p>Jimmy Donaldson, better known as MrBeast, is a YouTuber, entrepreneur, and philanthropist. He is the founder of Beast Industries and Beast Philanthropy, and the creator and host of the Prime Video competition series “Beast Games.”<br />www.beastgames.com<br />www.beastphilanthropy.org<br />www.youtube.com/&#64;MrBeast<br /></p><br/><p><br /><a href=\"https://pplx.ai/rogan\" rel=\"nofollow\"><br /></a><br /></p><br/><p><br /></p><br/><p><br /><a href=\"https://dkng.co/rogan\" rel=\"nofollow\"><br /></a><br /></p><br/><p><br /></p><br/><p><br /><a href=\"https://BlueChew.com\" rel=\"nofollow\"><br /></a><br /></p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
                         "id": "25xKO33R8MuWDHon82THE0",
                         "mediaTypes": [
@@ -11570,8 +11459,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                         "name": "#2527 - MrBeast",
                         "playability": {
                           "playable": true,
-                          "reason": "PLAYABLE",
-                          "unplayabilityReasons": []
+                          "reason": "PLAYABLE"
                         },
                         "playedState": {
                           "playPositionMilliseconds": 0,
@@ -11603,9 +11491,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             "showTypes": [
                               "SHOW_TYPE_EXCLUSIVE"
                             ],
-                            "trailerV2": null,
-                            "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-                            "accessInfo": null
+                            "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
                           }
                         },
                         "previewPlayback": {
@@ -11620,14 +11506,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                         "restrictions": {
                           "paywallContent": false
                         },
-                        "segments": null,
                         "sharingInfo": {
                           "shareId": "crkbtVYVRVelIsPXFLjhig",
                           "shareUrl": "https://open.spotify.com/episode/25xKO33R8MuWDHon82THE0?si=crkbtVYVRVelIsPXFLjhig"
                         },
-                        "transcripts": {
-                          "items": []
-                        },
+                        "transcripts": {},
                         "type": "PODCAST_EPISODE",
                         "uri": "spotify:episode:25xKO33R8MuWDHon82THE0",
                         "visualIdentity": {
@@ -11767,7 +11650,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "_uri": "spotify:episode:2J3m075zqKwZ43mysdezJK",
                       "data": {
                         "__typename": "Episode",
-                        "accessInfo": null,
                         "audio": {
                           "items": [
                             {
@@ -11787,11 +11669,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             }
                           ]
                         },
-                        "contentInformation": null,
                         "contentRating": {
                           "label": "EXPLICIT"
                         },
-                        "contents": [],
                         "coverArt": {
                           "sources": [
                             {
@@ -11811,12 +11691,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             }
                           ]
                         },
-                        "creator": null,
                         "description": "JD Vance is the Vice President of the United States, a Marine Corps veteran, former U.S. Senator from Ohio, and author. His latest book, “Communion: Finding My Way Back to Faith,” is available now.www.harpercollins.com/products/communion-j-d-vancewww.whitehouse.gov/administration/jd-vance  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  50% off your first box at https://www.thefarmersdog.com/rogan!  Sign up at https://foxnation.com to watch RAF 11! Learn more about your ad choices. Visit podcastchoices.com/adchoices",
                         "duration": {
                           "totalMilliseconds": 10414079
                         },
-                        "gatedEntityRelations": [],
                         "htmlDescription": "<p>JD Vance is the Vice President of the United States, a Marine Corps veteran, former U.S. Senator from Ohio, and author. His latest book, “Communion: Finding My Way Back to Faith,” is available now.<br />www.harpercollins.com/products/communion-j-d-vance<br />www.whitehouse.gov/administration/jd-vance</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>50% off your first box at <a href=\"https://www.thefarmersdog.com/rogan\" rel=\"nofollow\">https://www.thefarmersdog.com/rogan</a>!</p><br/><p><br /></p><br/><p>Sign up at <a href=\"https://foxnation.com\" rel=\"nofollow\">https://foxnation.com</a> to watch RAF 11!</p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
                         "id": "2J3m075zqKwZ43mysdezJK",
                         "mediaTypes": [
@@ -11826,8 +11704,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                         "name": "#2526 - JD Vance",
                         "playability": {
                           "playable": true,
-                          "reason": "PLAYABLE",
-                          "unplayabilityReasons": []
+                          "reason": "PLAYABLE"
                         },
                         "playedState": {
                           "playPositionMilliseconds": 0,
@@ -11859,9 +11736,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             "showTypes": [
                               "SHOW_TYPE_EXCLUSIVE"
                             ],
-                            "trailerV2": null,
-                            "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-                            "accessInfo": null
+                            "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
                           }
                         },
                         "previewPlayback": {
@@ -11876,14 +11751,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                         "restrictions": {
                           "paywallContent": false
                         },
-                        "segments": null,
                         "sharingInfo": {
                           "shareId": "jrpMxrx5R5SB9qjTByvPJA",
                           "shareUrl": "https://open.spotify.com/episode/2J3m075zqKwZ43mysdezJK?si=jrpMxrx5R5SB9qjTByvPJA"
                         },
-                        "transcripts": {
-                          "items": []
-                        },
+                        "transcripts": {},
                         "type": "PODCAST_EPISODE",
                         "uri": "spotify:episode:2J3m075zqKwZ43mysdezJK",
                         "visualIdentity": {
@@ -12023,7 +11895,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "_uri": "spotify:episode:10TcPJFzFUDyyBzsj72nxi",
                       "data": {
                         "__typename": "Episode",
-                        "accessInfo": null,
                         "audio": {
                           "items": [
                             {
@@ -12043,11 +11914,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             }
                           ]
                         },
-                        "contentInformation": null,
                         "contentRating": {
                           "label": "EXPLICIT"
                         },
-                        "contents": [],
                         "coverArt": {
                           "sources": [
                             {
@@ -12067,12 +11936,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             }
                           ]
                         },
-                        "creator": null,
                         "description": "Nick Bostrom is a philosopher whose work focuses on artificial intelligence, existential risk, and the future of humanity. He is Principal Researcher at the Macrostrategy Research Initiative and the author of several books, the most recent of which is “Deep Utopia: Life and Meaning in a Solved World.”www.simonandschuster.com/books/Deep-Utopia/Nick-Bostrom/9781646871643www.nickbostrom.com  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  Switch today at https://Visible.com for just 25/mo. Or Save $10 on your first month of Visible+ Pro with code ROGAN.  Learn more about your ad choices. Visit podcastchoices.com/adchoices",
                         "duration": {
                           "totalMilliseconds": 8081918
                         },
-                        "gatedEntityRelations": [],
                         "htmlDescription": "<p>Nick Bostrom is a philosopher whose work focuses on artificial intelligence, existential risk, and the future of humanity. He is Principal Researcher at the Macrostrategy Research Initiative and the author of several books, the most recent of which is “Deep Utopia: Life and Meaning in a Solved World.”<br />www.simonandschuster.com/books/Deep-Utopia/Nick-Bostrom/9781646871643<br />www.nickbostrom.com</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>Switch today at <a href=\"https://Visible.com\" rel=\"nofollow\">https://Visible.com</a> for just 25/mo. Or Save $10 on your first month of Visible&#43; Pro with code ROGAN. </p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
                         "id": "10TcPJFzFUDyyBzsj72nxi",
                         "mediaTypes": [
@@ -12082,8 +11949,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                         "name": "#2525 - Nick Bostrom",
                         "playability": {
                           "playable": true,
-                          "reason": "PLAYABLE",
-                          "unplayabilityReasons": []
+                          "reason": "PLAYABLE"
                         },
                         "playedState": {
                           "playPositionMilliseconds": 0,
@@ -12115,9 +11981,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             "showTypes": [
                               "SHOW_TYPE_EXCLUSIVE"
                             ],
-                            "trailerV2": null,
-                            "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-                            "accessInfo": null
+                            "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
                           }
                         },
                         "previewPlayback": {
@@ -12132,14 +11996,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                         "restrictions": {
                           "paywallContent": false
                         },
-                        "segments": null,
                         "sharingInfo": {
                           "shareId": "byEZRMiRS4aX_MSrQ-fxgQ",
                           "shareUrl": "https://open.spotify.com/episode/10TcPJFzFUDyyBzsj72nxi?si=byEZRMiRS4aX_MSrQ-fxgQ"
                         },
-                        "transcripts": {
-                          "items": []
-                        },
+                        "transcripts": {},
                         "type": "PODCAST_EPISODE",
                         "uri": "spotify:episode:10TcPJFzFUDyyBzsj72nxi",
                         "visualIdentity": {
@@ -12279,7 +12140,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "_uri": "spotify:episode:4imTpV50bg8l1lIccXTqoC",
                       "data": {
                         "__typename": "Episode",
-                        "accessInfo": null,
                         "audio": {
                           "items": [
                             {
@@ -12299,11 +12159,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             }
                           ]
                         },
-                        "contentInformation": null,
                         "contentRating": {
                           "label": "EXPLICIT"
                         },
-                        "contents": [],
                         "coverArt": {
                           "sources": [
                             {
@@ -12323,12 +12181,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             }
                           ]
                         },
-                        "creator": null,
                         "description": "Joe is joined by mixed martial artists John Rallo, Matt Serra, and Din Thomas. John Rallo owns Shogun Fights and is the owner and head coach of Ground Control Mixed Martial Arts Academy.www.groundcontrolbaltimore.comwww.shogunfights.com Matt Serra is a mixed martial artist and host of \"UFC Unfiltered\" with Jim Norton and \"Geeking Out with Matt Serra.\" He is the owner and an instructor at Serra BJJ.www.youtube.com/@MattSerraBJJwww.serrabjjacademy.com Din Thomas is a mixed martial arts analyst, actor, and host of \"Din Thomas' Fight Court.\"www.youtube.com/@FightCourt  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  Don’t miss out on all the action this week at DraftKings! Download the DraftKings app today! Sign-up using https://dkng.co/rogan or through my promo code ROGAN.  Get watch party snacks and groceries on Uber Eats. Learn more about your ad choices. Visit podcastchoices.com/adchoices",
                         "duration": {
                           "totalMilliseconds": 9543167
                         },
-                        "gatedEntityRelations": [],
                         "htmlDescription": "<p>Joe is joined by mixed martial artists John Rallo, Matt Serra, and Din Thomas.</p><br/><p>John Rallo owns Shogun Fights and is the owner and head coach of Ground Control Mixed Martial Arts Academy.<br />www.groundcontrolbaltimore.com<br />www.shogunfights.com</p><br/><p>Matt Serra is a mixed martial artist and host of &#34;UFC Unfiltered&#34; with Jim Norton and &#34;Geeking Out with Matt Serra.&#34; He is the owner and an instructor at Serra BJJ.<br />www.youtube.com/&#64;MattSerraBJJ<br />www.serrabjjacademy.com</p><br/><p>Din Thomas is a mixed martial arts analyst, actor, and host of &#34;Din Thomas&#39; Fight Court.&#34;<br />www.youtube.com/&#64;FightCourt</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>Don’t miss out on all the action this week at DraftKings! Download the DraftKings app today! Sign-up using <a href=\"https://dkng.co/rogan\" rel=\"nofollow\">https://dkng.co/rogan</a> or through my promo code ROGAN.</p><br/><p><br /></p><br/><p>Get watch party snacks and groceries on Uber Eats.</p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
                         "id": "4imTpV50bg8l1lIccXTqoC",
                         "mediaTypes": [
@@ -12338,8 +12194,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                         "name": "JRE MMA Show #182 - Protect Ya Neck",
                         "playability": {
                           "playable": true,
-                          "reason": "PLAYABLE",
-                          "unplayabilityReasons": []
+                          "reason": "PLAYABLE"
                         },
                         "playedState": {
                           "playPositionMilliseconds": 0,
@@ -12371,9 +12226,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             "showTypes": [
                               "SHOW_TYPE_EXCLUSIVE"
                             ],
-                            "trailerV2": null,
-                            "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-                            "accessInfo": null
+                            "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
                           }
                         },
                         "previewPlayback": {
@@ -12388,14 +12241,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                         "restrictions": {
                           "paywallContent": false
                         },
-                        "segments": null,
                         "sharingInfo": {
                           "shareId": "-Bi4yBNXRnenXdEttOlHwQ",
                           "shareUrl": "https://open.spotify.com/episode/4imTpV50bg8l1lIccXTqoC?si=-Bi4yBNXRnenXdEttOlHwQ"
                         },
-                        "transcripts": {
-                          "items": []
-                        },
+                        "transcripts": {},
                         "type": "PODCAST_EPISODE",
                         "uri": "spotify:episode:4imTpV50bg8l1lIccXTqoC",
                         "visualIdentity": {
@@ -12535,7 +12385,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       "_uri": "spotify:episode:1f6tXaeR1XNYwSF0tqpEDT",
                       "data": {
                         "__typename": "Episode",
-                        "accessInfo": null,
                         "audio": {
                           "items": [
                             {
@@ -12555,11 +12404,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             }
                           ]
                         },
-                        "contentInformation": null,
                         "contentRating": {
                           "label": "EXPLICIT"
                         },
-                        "contents": [],
                         "coverArt": {
                           "sources": [
                             {
@@ -12579,12 +12426,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             }
                           ]
                         },
-                        "creator": null,
                         "description": "Rupert Lowe is a British politician who has served as the member of Parliament for Great Yarmouth since 2024 and the leader of Restore Britain.  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  onX Offroad: Try onX Offroad for 50% off- go to https://onXmaps.com/joerogan  This video is sponsored by BetterHelp. Visit https://BetterHelp.com/JRE Learn more about your ad choices. Visit podcastchoices.com/adchoices",
                         "duration": {
                           "totalMilliseconds": 7385641
                         },
-                        "gatedEntityRelations": [],
                         "htmlDescription": "<p>Rupert Lowe is a British politician who has served as the member of Parliament for Great Yarmouth since 2024 and the leader of Restore Britain.</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>onX Offroad: Try onX Offroad for 50% off- go to <a href=\"https://onXmaps.com/joerogan\" rel=\"nofollow\">https://onXmaps.com/joerogan</a></p><br/><p><br /></p><br/><p>This video is sponsored by BetterHelp. Visit <a href=\"https://BetterHelp.com/JRE\" rel=\"nofollow\">https://BetterHelp.com/JRE</a></p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
                         "id": "1f6tXaeR1XNYwSF0tqpEDT",
                         "mediaTypes": [
@@ -12594,8 +12439,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                         "name": "#2524 - Rupert Lowe",
                         "playability": {
                           "playable": true,
-                          "reason": "PLAYABLE",
-                          "unplayabilityReasons": []
+                          "reason": "PLAYABLE"
                         },
                         "playedState": {
                           "playPositionMilliseconds": 0,
@@ -12627,9 +12471,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                             "showTypes": [
                               "SHOW_TYPE_EXCLUSIVE"
                             ],
-                            "trailerV2": null,
-                            "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-                            "accessInfo": null
+                            "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
                           }
                         },
                         "previewPlayback": {
@@ -12644,14 +12486,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                         "restrictions": {
                           "paywallContent": false
                         },
-                        "segments": null,
                         "sharingInfo": {
                           "shareId": "Co0hsETLQr2JxhnuJeQp-g",
                           "shareUrl": "https://open.spotify.com/episode/1f6tXaeR1XNYwSF0tqpEDT?si=Co0hsETLQr2JxhnuJeQp-g"
                         },
-                        "transcripts": {
-                          "items": []
-                        },
+                        "transcripts": {},
                         "type": "PODCAST_EPISODE",
                         "uri": "spotify:episode:1f6tXaeR1XNYwSF0tqpEDT",
                         "visualIdentity": {
@@ -12797,8 +12636,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
             }
           }
-        },
-        "recommended_shows": null
+        }
       }
     },
     "totalReturned": 5,
@@ -12815,7 +12653,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "image": "https://i.scdn.co/image/ab6765630000f68dae7eda3fb0261372fba3e18c",
         "raw": {
           "__typename": "Episode",
-          "accessInfo": null,
           "audio": {
             "items": [
               {
@@ -12835,11 +12672,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               }
             ]
           },
-          "contentInformation": null,
           "contentRating": {
             "label": "EXPLICIT"
           },
-          "contents": [],
           "coverArt": {
             "sources": [
               {
@@ -12859,12 +12694,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               }
             ]
           },
-          "creator": null,
           "description": "Jimmy Donaldson, better known as MrBeast, is a YouTuber, entrepreneur, and philanthropist. He is the founder of Beast Industries and Beast Philanthropy, and the creator and host of the Prime Video competition series “Beast Games.”www.beastgames.comwww.beastphilanthropy.orgwww.youtube.com/@MrBeast      Learn more about your ad choices. Visit podcastchoices.com/adchoices",
           "duration": {
             "totalMilliseconds": 10123050
           },
-          "gatedEntityRelations": [],
           "htmlDescription": "<p>Jimmy Donaldson, better known as MrBeast, is a YouTuber, entrepreneur, and philanthropist. He is the founder of Beast Industries and Beast Philanthropy, and the creator and host of the Prime Video competition series “Beast Games.”<br />www.beastgames.com<br />www.beastphilanthropy.org<br />www.youtube.com/&#64;MrBeast<br /></p><br/><p><br /><a href=\"https://pplx.ai/rogan\" rel=\"nofollow\"><br /></a><br /></p><br/><p><br /></p><br/><p><br /><a href=\"https://dkng.co/rogan\" rel=\"nofollow\"><br /></a><br /></p><br/><p><br /></p><br/><p><br /><a href=\"https://BlueChew.com\" rel=\"nofollow\"><br /></a><br /></p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
           "id": "25xKO33R8MuWDHon82THE0",
           "mediaTypes": [
@@ -12874,8 +12707,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "name": "#2527 - MrBeast",
           "playability": {
             "playable": true,
-            "reason": "PLAYABLE",
-            "unplayabilityReasons": []
+            "reason": "PLAYABLE"
           },
           "playedState": {
             "playPositionMilliseconds": 0,
@@ -12907,9 +12739,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               "showTypes": [
                 "SHOW_TYPE_EXCLUSIVE"
               ],
-              "trailerV2": null,
-              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-              "accessInfo": null
+              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
             }
           },
           "previewPlayback": {
@@ -12924,14 +12754,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "restrictions": {
             "paywallContent": false
           },
-          "segments": null,
           "sharingInfo": {
             "shareId": "crkbtVYVRVelIsPXFLjhig",
             "shareUrl": "https://open.spotify.com/episode/25xKO33R8MuWDHon82THE0?si=crkbtVYVRVelIsPXFLjhig"
           },
-          "transcripts": {
-            "items": []
-          },
+          "transcripts": {},
           "type": "PODCAST_EPISODE",
           "uri": "spotify:episode:25xKO33R8MuWDHon82THE0",
           "visualIdentity": {
@@ -13076,7 +12903,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "image": "https://i.scdn.co/image/ab6765630000f68dca6df7e6f0bea75e26aa81e8",
         "raw": {
           "__typename": "Episode",
-          "accessInfo": null,
           "audio": {
             "items": [
               {
@@ -13096,11 +12922,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               }
             ]
           },
-          "contentInformation": null,
           "contentRating": {
             "label": "EXPLICIT"
           },
-          "contents": [],
           "coverArt": {
             "sources": [
               {
@@ -13120,12 +12944,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               }
             ]
           },
-          "creator": null,
           "description": "JD Vance is the Vice President of the United States, a Marine Corps veteran, former U.S. Senator from Ohio, and author. His latest book, “Communion: Finding My Way Back to Faith,” is available now.www.harpercollins.com/products/communion-j-d-vancewww.whitehouse.gov/administration/jd-vance  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  50% off your first box at https://www.thefarmersdog.com/rogan!  Sign up at https://foxnation.com to watch RAF 11! Learn more about your ad choices. Visit podcastchoices.com/adchoices",
           "duration": {
             "totalMilliseconds": 10414079
           },
-          "gatedEntityRelations": [],
           "htmlDescription": "<p>JD Vance is the Vice President of the United States, a Marine Corps veteran, former U.S. Senator from Ohio, and author. His latest book, “Communion: Finding My Way Back to Faith,” is available now.<br />www.harpercollins.com/products/communion-j-d-vance<br />www.whitehouse.gov/administration/jd-vance</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>50% off your first box at <a href=\"https://www.thefarmersdog.com/rogan\" rel=\"nofollow\">https://www.thefarmersdog.com/rogan</a>!</p><br/><p><br /></p><br/><p>Sign up at <a href=\"https://foxnation.com\" rel=\"nofollow\">https://foxnation.com</a> to watch RAF 11!</p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
           "id": "2J3m075zqKwZ43mysdezJK",
           "mediaTypes": [
@@ -13135,8 +12957,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "name": "#2526 - JD Vance",
           "playability": {
             "playable": true,
-            "reason": "PLAYABLE",
-            "unplayabilityReasons": []
+            "reason": "PLAYABLE"
           },
           "playedState": {
             "playPositionMilliseconds": 0,
@@ -13168,9 +12989,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               "showTypes": [
                 "SHOW_TYPE_EXCLUSIVE"
               ],
-              "trailerV2": null,
-              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-              "accessInfo": null
+              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
             }
           },
           "previewPlayback": {
@@ -13185,14 +13004,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "restrictions": {
             "paywallContent": false
           },
-          "segments": null,
           "sharingInfo": {
             "shareId": "jrpMxrx5R5SB9qjTByvPJA",
             "shareUrl": "https://open.spotify.com/episode/2J3m075zqKwZ43mysdezJK?si=jrpMxrx5R5SB9qjTByvPJA"
           },
-          "transcripts": {
-            "items": []
-          },
+          "transcripts": {},
           "type": "PODCAST_EPISODE",
           "uri": "spotify:episode:2J3m075zqKwZ43mysdezJK",
           "visualIdentity": {
@@ -13337,7 +13153,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "image": "https://i.scdn.co/image/ab6765630000f68d010b1c625a39274e7a41e347",
         "raw": {
           "__typename": "Episode",
-          "accessInfo": null,
           "audio": {
             "items": [
               {
@@ -13357,11 +13172,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               }
             ]
           },
-          "contentInformation": null,
           "contentRating": {
             "label": "EXPLICIT"
           },
-          "contents": [],
           "coverArt": {
             "sources": [
               {
@@ -13381,12 +13194,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               }
             ]
           },
-          "creator": null,
           "description": "Nick Bostrom is a philosopher whose work focuses on artificial intelligence, existential risk, and the future of humanity. He is Principal Researcher at the Macrostrategy Research Initiative and the author of several books, the most recent of which is “Deep Utopia: Life and Meaning in a Solved World.”www.simonandschuster.com/books/Deep-Utopia/Nick-Bostrom/9781646871643www.nickbostrom.com  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  Switch today at https://Visible.com for just 25/mo. Or Save $10 on your first month of Visible+ Pro with code ROGAN.  Learn more about your ad choices. Visit podcastchoices.com/adchoices",
           "duration": {
             "totalMilliseconds": 8081918
           },
-          "gatedEntityRelations": [],
           "htmlDescription": "<p>Nick Bostrom is a philosopher whose work focuses on artificial intelligence, existential risk, and the future of humanity. He is Principal Researcher at the Macrostrategy Research Initiative and the author of several books, the most recent of which is “Deep Utopia: Life and Meaning in a Solved World.”<br />www.simonandschuster.com/books/Deep-Utopia/Nick-Bostrom/9781646871643<br />www.nickbostrom.com</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>Switch today at <a href=\"https://Visible.com\" rel=\"nofollow\">https://Visible.com</a> for just 25/mo. Or Save $10 on your first month of Visible&#43; Pro with code ROGAN. </p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
           "id": "10TcPJFzFUDyyBzsj72nxi",
           "mediaTypes": [
@@ -13396,8 +13207,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "name": "#2525 - Nick Bostrom",
           "playability": {
             "playable": true,
-            "reason": "PLAYABLE",
-            "unplayabilityReasons": []
+            "reason": "PLAYABLE"
           },
           "playedState": {
             "playPositionMilliseconds": 0,
@@ -13429,9 +13239,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               "showTypes": [
                 "SHOW_TYPE_EXCLUSIVE"
               ],
-              "trailerV2": null,
-              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-              "accessInfo": null
+              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
             }
           },
           "previewPlayback": {
@@ -13446,14 +13254,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "restrictions": {
             "paywallContent": false
           },
-          "segments": null,
           "sharingInfo": {
             "shareId": "byEZRMiRS4aX_MSrQ-fxgQ",
             "shareUrl": "https://open.spotify.com/episode/10TcPJFzFUDyyBzsj72nxi?si=byEZRMiRS4aX_MSrQ-fxgQ"
           },
-          "transcripts": {
-            "items": []
-          },
+          "transcripts": {},
           "type": "PODCAST_EPISODE",
           "uri": "spotify:episode:10TcPJFzFUDyyBzsj72nxi",
           "visualIdentity": {
@@ -13598,7 +13403,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "image": "https://i.scdn.co/image/ab6765630000f68dc31c4e7f94756b105c94914c",
         "raw": {
           "__typename": "Episode",
-          "accessInfo": null,
           "audio": {
             "items": [
               {
@@ -13618,11 +13422,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               }
             ]
           },
-          "contentInformation": null,
           "contentRating": {
             "label": "EXPLICIT"
           },
-          "contents": [],
           "coverArt": {
             "sources": [
               {
@@ -13642,12 +13444,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               }
             ]
           },
-          "creator": null,
           "description": "Joe is joined by mixed martial artists John Rallo, Matt Serra, and Din Thomas. John Rallo owns Shogun Fights and is the owner and head coach of Ground Control Mixed Martial Arts Academy.www.groundcontrolbaltimore.comwww.shogunfights.com Matt Serra is a mixed martial artist and host of \"UFC Unfiltered\" with Jim Norton and \"Geeking Out with Matt Serra.\" He is the owner and an instructor at Serra BJJ.www.youtube.com/@MattSerraBJJwww.serrabjjacademy.com Din Thomas is a mixed martial arts analyst, actor, and host of \"Din Thomas' Fight Court.\"www.youtube.com/@FightCourt  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  Don’t miss out on all the action this week at DraftKings! Download the DraftKings app today! Sign-up using https://dkng.co/rogan or through my promo code ROGAN.  Get watch party snacks and groceries on Uber Eats. Learn more about your ad choices. Visit podcastchoices.com/adchoices",
           "duration": {
             "totalMilliseconds": 9543167
           },
-          "gatedEntityRelations": [],
           "htmlDescription": "<p>Joe is joined by mixed martial artists John Rallo, Matt Serra, and Din Thomas.</p><br/><p>John Rallo owns Shogun Fights and is the owner and head coach of Ground Control Mixed Martial Arts Academy.<br />www.groundcontrolbaltimore.com<br />www.shogunfights.com</p><br/><p>Matt Serra is a mixed martial artist and host of &#34;UFC Unfiltered&#34; with Jim Norton and &#34;Geeking Out with Matt Serra.&#34; He is the owner and an instructor at Serra BJJ.<br />www.youtube.com/&#64;MattSerraBJJ<br />www.serrabjjacademy.com</p><br/><p>Din Thomas is a mixed martial arts analyst, actor, and host of &#34;Din Thomas&#39; Fight Court.&#34;<br />www.youtube.com/&#64;FightCourt</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>Don’t miss out on all the action this week at DraftKings! Download the DraftKings app today! Sign-up using <a href=\"https://dkng.co/rogan\" rel=\"nofollow\">https://dkng.co/rogan</a> or through my promo code ROGAN.</p><br/><p><br /></p><br/><p>Get watch party snacks and groceries on Uber Eats.</p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
           "id": "4imTpV50bg8l1lIccXTqoC",
           "mediaTypes": [
@@ -13657,8 +13457,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "name": "JRE MMA Show #182 - Protect Ya Neck",
           "playability": {
             "playable": true,
-            "reason": "PLAYABLE",
-            "unplayabilityReasons": []
+            "reason": "PLAYABLE"
           },
           "playedState": {
             "playPositionMilliseconds": 0,
@@ -13690,9 +13489,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               "showTypes": [
                 "SHOW_TYPE_EXCLUSIVE"
               ],
-              "trailerV2": null,
-              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-              "accessInfo": null
+              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
             }
           },
           "previewPlayback": {
@@ -13707,14 +13504,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "restrictions": {
             "paywallContent": false
           },
-          "segments": null,
           "sharingInfo": {
             "shareId": "-Bi4yBNXRnenXdEttOlHwQ",
             "shareUrl": "https://open.spotify.com/episode/4imTpV50bg8l1lIccXTqoC?si=-Bi4yBNXRnenXdEttOlHwQ"
           },
-          "transcripts": {
-            "items": []
-          },
+          "transcripts": {},
           "type": "PODCAST_EPISODE",
           "uri": "spotify:episode:4imTpV50bg8l1lIccXTqoC",
           "visualIdentity": {
@@ -13859,7 +13653,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "image": "https://i.scdn.co/image/ab6765630000f68d0531ec0d584e51f31ca132ed",
         "raw": {
           "__typename": "Episode",
-          "accessInfo": null,
           "audio": {
             "items": [
               {
@@ -13879,11 +13672,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               }
             ]
           },
-          "contentInformation": null,
           "contentRating": {
             "label": "EXPLICIT"
           },
-          "contents": [],
           "coverArt": {
             "sources": [
               {
@@ -13903,12 +13694,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               }
             ]
           },
-          "creator": null,
           "description": "Rupert Lowe is a British politician who has served as the member of Parliament for Great Yarmouth since 2024 and the leader of Restore Britain.  Perplexity: Download the app or ask Perplexity anything at https://pplx.ai/rogan.  onX Offroad: Try onX Offroad for 50% off- go to https://onXmaps.com/joerogan  This video is sponsored by BetterHelp. Visit https://BetterHelp.com/JRE Learn more about your ad choices. Visit podcastchoices.com/adchoices",
           "duration": {
             "totalMilliseconds": 7385641
           },
-          "gatedEntityRelations": [],
           "htmlDescription": "<p>Rupert Lowe is a British politician who has served as the member of Parliament for Great Yarmouth since 2024 and the leader of Restore Britain.</p><br/><p><br /></p><br/><p>Perplexity: Download the app or ask Perplexity anything at <a href=\"https://pplx.ai/rogan\" rel=\"nofollow\">https://pplx.ai/rogan</a>.</p><br/><p><br /></p><br/><p>onX Offroad: Try onX Offroad for 50% off- go to <a href=\"https://onXmaps.com/joerogan\" rel=\"nofollow\">https://onXmaps.com/joerogan</a></p><br/><p><br /></p><br/><p>This video is sponsored by BetterHelp. Visit <a href=\"https://BetterHelp.com/JRE\" rel=\"nofollow\">https://BetterHelp.com/JRE</a></p><p> </p><p>Learn more about your ad choices. Visit <a href=\"https://podcastchoices.com/adchoices\" rel=\"nofollow\">podcastchoices.com/adchoices</a></p>",
           "id": "1f6tXaeR1XNYwSF0tqpEDT",
           "mediaTypes": [
@@ -13918,8 +13707,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "name": "#2524 - Rupert Lowe",
           "playability": {
             "playable": true,
-            "reason": "PLAYABLE",
-            "unplayabilityReasons": []
+            "reason": "PLAYABLE"
           },
           "playedState": {
             "playPositionMilliseconds": 0,
@@ -13951,9 +13739,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               "showTypes": [
                 "SHOW_TYPE_EXCLUSIVE"
               ],
-              "trailerV2": null,
-              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk",
-              "accessInfo": null
+              "uri": "spotify:show:4rOoJ6Egrf8K2IrywzwOMk"
             }
           },
           "previewPlayback": {
@@ -13968,14 +13754,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "restrictions": {
             "paywallContent": false
           },
-          "segments": null,
           "sharingInfo": {
             "shareId": "Co0hsETLQr2JxhnuJeQp-g",
             "shareUrl": "https://open.spotify.com/episode/1f6tXaeR1XNYwSF0tqpEDT?si=Co0hsETLQr2JxhnuJeQp-g"
           },
-          "transcripts": {
-            "items": []
-          },
+          "transcripts": {},
           "type": "PODCAST_EPISODE",
           "uri": "spotify:episode:1f6tXaeR1XNYwSF0tqpEDT",
           "visualIdentity": {
@@ -14136,13 +13919,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "artists": "Yoylecake Michael, 111robloxdude",
           "albumName": "Nightmote (Lofi Remix)",
           "albumArt": "https://i.scdn.co/image/ab67616d0000b2735d372fc451453e8b83900014",
-          "releaseDate": null,
           "duration": 207620,
           "durationFormatted": "3:27",
-          "playCount": null,
           "isExplicit": false,
           "isPlayable": true,
-          "audioPreviewUrl": null,
           "url": "https://open.spotify.com/track/1S7FNazOUQc21EaQyh5nJT",
           "scrapedAt": "2026-07-18T11:28:01.801Z",
           "searchTerm": "lofi beats"
@@ -14167,13 +13947,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "artists": "Lofi Sleep Chill & Study",
           "albumName": "Wave Heart: Chill Lofi Music",
           "albumArt": "https://i.scdn.co/image/ab67616d0000b27391027e42977d144b3db3f705",
-          "releaseDate": null,
           "duration": 120000,
           "durationFormatted": "2:00",
-          "playCount": null,
           "isExplicit": false,
           "isPlayable": true,
-          "audioPreviewUrl": null,
           "url": "https://open.spotify.com/track/6AOXQYGPpd7KIIBxCCZzUx",
           "scrapedAt": "2026-07-18T11:28:01.901Z",
           "searchTerm": "lofi beats"
@@ -14198,13 +13975,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "artists": "Lo Fi Hip Hop",
           "albumName": "Lofi Dreams: Soft Lofi Beats",
           "albumArt": "https://i.scdn.co/image/ab67616d0000b2730cea6601096d5b32c8b28f71",
-          "releaseDate": null,
           "duration": 120000,
           "durationFormatted": "2:00",
-          "playCount": null,
           "isExplicit": false,
           "isPlayable": true,
-          "audioPreviewUrl": null,
           "url": "https://open.spotify.com/track/5yw15MbdXGw2ngbqmd7E3m",
           "scrapedAt": "2026-07-18T11:28:01.961Z",
           "searchTerm": "lofi beats"
@@ -14231,13 +14005,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "artists": "Secret Potion, Lofi Beats To Chill Study Sleep, Nostalgiacore",
           "albumName": "Frutiger Aero Remixes",
           "albumArt": "https://i.scdn.co/image/ab67616d0000b27365bc1eef471caed82cd5c3d9",
-          "releaseDate": null,
           "duration": 162897,
           "durationFormatted": "2:42",
-          "playCount": null,
           "isExplicit": false,
           "isPlayable": true,
-          "audioPreviewUrl": null,
           "url": "https://open.spotify.com/track/7zGzS7L6LnI5qQqMm8wTPB",
           "scrapedAt": "2026-07-18T11:28:02.011Z",
           "searchTerm": "lofi beats"
@@ -14262,13 +14033,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "artists": "ourchase",
           "albumName": "slow river",
           "albumArt": "https://i.scdn.co/image/ab67616d0000b273396a89f358a81646ed6259b8",
-          "releaseDate": null,
           "duration": 103317,
           "durationFormatted": "1:43",
-          "playCount": null,
           "isExplicit": false,
           "isPlayable": true,
-          "audioPreviewUrl": null,
           "url": "https://open.spotify.com/track/4LQ0TjIFk38xXNJVNoonSW",
           "scrapedAt": "2026-07-18T11:28:02.289Z",
           "searchTerm": "lofi beats"
@@ -14316,8 +14084,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "saved": false,
       "associationsV3": {
         "audioAssociations": {
-          "__typename": "TrackAudioAssociationPage",
-          "items": []
+          "__typename": "TrackAudioAssociationPage"
         },
         "videoAssociations": {
           "totalCount": 1
@@ -14337,7 +14104,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           ],
           "totalCount": 2
         },
-        "courtesyLine": "",
         "id": "151w1FgRZfnKZA9FEcg9Z3",
         "date": {
           "isoString": "2022-10-21T00:00:00Z",
@@ -15936,8 +15702,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       },
                       "associationsV3": {
                         "audioAssociations": {
-                          "__typename": "TrackAudioAssociationPage",
-                          "items": []
+                          "__typename": "TrackAudioAssociationPage"
                         },
                         "videoAssociations": {
                           "totalCount": 1
@@ -16009,8 +15774,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       },
                       "associationsV3": {
                         "audioAssociations": {
-                          "__typename": "TrackAudioAssociationPage",
-                          "items": []
+                          "__typename": "TrackAudioAssociationPage"
                         },
                         "videoAssociations": {
                           "totalCount": 1
@@ -16082,8 +15846,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       },
                       "associationsV3": {
                         "audioAssociations": {
-                          "__typename": "TrackAudioAssociationPage",
-                          "items": []
+                          "__typename": "TrackAudioAssociationPage"
                         },
                         "videoAssociations": {
                           "totalCount": 1
@@ -16155,8 +15918,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       },
                       "associationsV3": {
                         "audioAssociations": {
-                          "__typename": "TrackAudioAssociationPage",
-                          "items": []
+                          "__typename": "TrackAudioAssociationPage"
                         },
                         "videoAssociations": {
                           "totalCount": 0
@@ -16228,8 +15990,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
                       },
                       "associationsV3": {
                         "audioAssociations": {
-                          "__typename": "TrackAudioAssociationPage",
-                          "items": []
+                          "__typename": "TrackAudioAssociationPage"
                         },
                         "videoAssociations": {
                           "totalCount": 1
@@ -16439,9 +16200,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         ],
         "totalCount": 1
       },
-      "otherArtists": {
-        "items": []
-      }
+      "otherArtists": {}
     }
   },
   "threads-post-details": {
