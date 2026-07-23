@@ -5676,137 +5676,133 @@
     "status": 200,
     "credits": null,
     "data": {
-      "query": "nike",
+      "query": "election",
       "country": "US",
       "totalReturned": 5,
       "ads": [
         {
           "platform": "facebook_ad_library",
-          "id": "1046730950862281",
-          "url": "https://www.facebook.com/ads/library/?id=1046730950862281",
-          "text": "SUKEBAN at @animeexpo \n07/05/25 Los Angeles \n\n🎬 @complicasian \nMC @kunichi_nomura \nMusic / yoyo @okamotoreiji @ecec_fc @haroodiy \nCostumes @olympialetan @softskinlatex @dawnamatrix\nSneakers @nike \nHats @stephenjonesmillinery \nMakeup @kalikennedy \nHair @dennisvlanni\nNails @nailsbymei \nProduction @exposureny \n#thisissukeban #sukebanxanimeexpo",
-          "headline": null,
-          "cta": "Visit Instagram profile",
-          "landingUrl": "http://instagram.com/sukeban_world",
-          "adFormat": "VIDEO",
-          "firstShown": "2025-07-09T07:00:00.000Z",
-          "lastShown": "2025-11-21T08:00:00.000Z",
-          "impressions": null,
-          "spend": null,
-          "country": null,
-          "advertiser": {
-            "id": "146705838515566",
-            "name": "Sukeban World",
-            "url": "https://www.facebook.com/61551864263186/",
-            "logo": "https://scontent-dfw5-2.xx.fbcdn.net/v/t39.35426-6/517640014_2104272360362331_1464623957160374455_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=s8L3o8yjOrAQ7kNvwHJkkuN&_nc_oc=AdpYmVrd7z59Ekh3tRU1f5m2vm89Jw3SwCs01IwJecf9AKYL7H64ISCrJDhX5gcHFPo&_nc_zt=14&_nc_ht=scontent-dfw5-2.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQBfU3V6EzBFPG9lWdW_4AF_45IiMxtdyCHLBjtk-9FkFQ&oe=6A677EA3"
-          },
-          "media": [
-            "https://video-dfw5-2.xx.fbcdn.net/o1/v/t2/f2/m86/AQO4PhvVEMTGXeGEZyfq0tXFynq7j1eWL-FzTX5W5Z1AeBes5zrbxyqHmQBuXB_iP-WLDh2rwtW9cCYOqcwkOhcKjhD5Dk2n1kX12bk.mp4?_nc_cat=104&_nc_sid=b66105&_nc_ht=video-dfw5-2.xx.fbcdn.net&_nc_ohc=gcvCGlRdB0oQ7kNvwE7sz9m&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMTI3OC5kYXNoX2Jhc2VsaW5lXzFfdjEiLCJ4cHZfYXNzZXRfaWQiOjE3NjQ4MTU2NjA4MjgxMDAsImFzc2V0X2FnZV9kYXlzIjozNzgsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjo4MSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=6a7726380c03e491&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC9GMTRCNjRCQzAyREZGQzhDRjdFQjM0NTUyQjBDNUZCMl92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYRmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC8xMjM2MDc3NzU0MzI0NDkxXzUxNTUzMjEyMTgwMDQ5MzAxMC5tcDQVAgLIARIAKAAYABsCiAd1c2Vfb2lsATEScHJvZ3Jlc3NpdmVfcmVjaXBlATEVAAAmiJf2qOXFogYVAigCQzMsF0BURU_fO2RaGBJkYXNoX2Jhc2VsaW5lXzFfdjERAHUAZeadAQA&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&_nc_zt=28&oh=00_AQBMUXcJvlxhMwbmXRP3WbhRyBG2Jg3cTU6ZNvJ4zRz64A&oe=6A6382FD",
-            "https://video-dfw5-2.xx.fbcdn.net/o1/v/t2/f2/m86/AQMnlu68POBBXfZ__Eay3UVx0tXUHjEYM_Ue7FVfJmqzgJjf0WOCvVUtn3rtz7hUijTMtoAW3XfK20M2iSSFhwEWCCxCPADMExZVOss.mp4?_nc_cat=104&_nc_sid=b66105&_nc_ht=video-dfw5-2.xx.fbcdn.net&_nc_ohc=R1X5UMDiMXgQ7kNvwFQ1x7k&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuNjM4LmRhc2hfYmFzZWxpbmVfM192MSIsInhwdl9hc3NldF9pZCI6MTc2NDgxNTY2MDgyODEwMCwiYXNzZXRfYWdlX2RheXMiOjM3OCwidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjgxLCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&vs=c95c77148100653c&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC9ERjRFNEEyN0FFOTg0MEQ2M0ZBQzdDNzY2MTk4Mzk5Q192aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYRmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC8xMjM2MDc3NzU0MzI0NDkxXzUxNTUzMjEyMTgwMDQ5MzAxMC5tcDQVAgLIARIAKAAYABsCiAd1c2Vfb2lsATEScHJvZ3Jlc3NpdmVfcmVjaXBlATEVAAAmiJf2qOXFogYVAigCQzMsF0BURU_fO2RaGBJkYXNoX2Jhc2VsaW5lXzNfdjERAHUAZeadAQA&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&_nc_zt=28&oh=00_AQAIXZrh9fQJ5LHVajep-f01DTOvSmQ-q6Rsqt_lh4-99g&oe=6A6396E5",
-            "https://scontent-dfw6-2.xx.fbcdn.net/v/t39.35426-6/517397592_1383736762890761_1045473052856121784_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=o27vnuOG7BkQ7kNvwEoEsut&_nc_oc=Adp--YIz3p-E5SjYvNyiAABXn9bpNKxPV2d761MxvZd0Gw449Xvny8seDTEPeXbYh4k&_nc_zt=14&_nc_ht=scontent-dfw6-2.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQBwFIe97MDR76Go9YimA36MifIa3oT9lqt2eD8fIrlUuw&oe=6A6795AC"
-          ]
-        },
-        {
-          "platform": "facebook_ad_library",
-          "id": "1869276447125570",
-          "url": "https://www.facebook.com/ads/library/?id=1869276447125570",
-          "text": "Celebra tu cumpleaños con Nike y obtén acceso a productos exclusivos, MSI, envío y devoluciones gratis el resto del año.",
-          "headline": "Nike: Shoes, Apparel, Stories",
-          "cta": "Install now",
-          "landingUrl": "http://itunes.apple.com/app/id1095459556",
-          "adFormat": "DPA",
-          "firstShown": "2026-03-17T07:00:00.000Z",
-          "lastShown": "2026-07-22T07:00:00.000Z",
-          "impressions": null,
-          "spend": null,
-          "country": null,
-          "advertiser": {
-            "id": "15087023444",
-            "name": "Nike",
-            "url": "https://www.facebook.com/nike/",
-            "logo": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.35426-6/652199725_4272879182992735_6541322108052099081_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=106&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=5VTjSt2IaecQ7kNvwFoDnzU&_nc_oc=Adpf0wMoyQy6YlBwuFJHNCEJ5aeb3QmvVtZwIzQG_KrCuzq6lasuuA2Ua5RBtjk5wXQ&_nc_zt=14&_nc_ht=scontent-dfw5-1.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQAjs6hzdkjlMrkBC3X4qYLp-8tUodKWB4mx9sw5zHuhvg&oe=6A677E16"
-          },
-          "media": [
-            "https://scontent-dfw5-2.xx.fbcdn.net/v/t39.35426-6/654443227_972251608460754_4278374614935464096_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=9C4cKgJfZTkQ7kNvwEpLysw&_nc_oc=Adrlb5KkPXjLVgJJrFNc5KQBgeVDc-7GZGVB5159RKaZJ6m2KirjvVuB84jbhc0FWlk&_nc_zt=14&_nc_ht=scontent-dfw5-2.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQADqw8PeCiR9wVNDQXRUDDPZ-uICkzoZSPfscCNhqa2Pw&oe=6A679A43",
-            "https://scontent-dfw5-2.xx.fbcdn.net/v/t39.35426-6/653880909_1570376514188243_4937913491292868202_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=T-dROZ7W0AcQ7kNvwH9xY4f&_nc_oc=AdpULp8yQNFbFh-FbgepEGbykjfLZFhM8bQmjuaBCOwWfcIIAiSd8ldp5LH3akSgZOw&_nc_zt=14&_nc_ht=scontent-dfw5-2.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQA5GrtcH_FB2ZToq_x5K1SLG2VZKHBrE-5jfwOY-hYOPw&oe=6A67A1E0",
-            "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.35426-6/652742521_1247659504137883_8558841199802689482_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=Tnd0f1_fBBIQ7kNvwH5xALc&_nc_oc=Adq91TJC0kn17frKxxacMOhqwEG0Pg9TMYg-mm5d0vwmj9KwK4vj4hstzetaERiYB8E&_nc_zt=14&_nc_ht=scontent-dfw5-1.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQBtdUS77-5FyWXaof1YywK3iArR-LRmeY6L2hFTVaL8TQ&oe=6A67966F"
-          ]
-        },
-        {
-          "platform": "facebook_ad_library",
-          "id": "308819044896583",
-          "url": "https://www.facebook.com/ads/library/?id=308819044896583",
-          "text": "Entra a Nike.com y encuentra actualizaciones semanales de producto con envío gratis.",
-          "headline": "Compra tus productos favoritos de Nike aquí",
+          "id": "317161109571794",
+          "url": "https://www.facebook.com/ads/library/?id=317161109571794",
+          "text": "The Voting Information Center—one-tap voting registration information from election experts and authorities in one place.",
+          "headline": "Voting Information Center",
           "cta": "Learn more",
-          "landingUrl": "https://fb.com/canvas_doc/1357532171781925",
-          "adFormat": "DPA",
-          "firstShown": "2023-08-15T07:00:00.000Z",
-          "lastShown": "2025-07-24T07:00:00.000Z",
-          "impressions": null,
-          "spend": null,
-          "country": null,
+          "landingUrl": "http://facebook.com/votinginformationcenter",
+          "adFormat": "VIDEO",
+          "firstShown": "2020-09-22T07:00:00.000Z",
+          "lastShown": "2020-10-05T07:00:00.000Z",
+          "impressions": ">1M",
+          "spend": ">$1M",
+          "country": "US",
           "advertiser": {
-            "id": "15087023444",
-            "name": "Nike",
-            "url": "https://www.facebook.com/nike/",
-            "logo": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.35426-6/366635364_819887626183060_5665913834577832309_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=106&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=DnOnoPg-iokQ7kNvwG_DxvQ&_nc_oc=Adqda5fVxN5_6asHyspPGrAmaPt1pQJAEm5JLm2aXCX0_DZYqEAMw8iPKjGg-W-qFGU&_nc_zt=14&_nc_ht=scontent-dfw5-1.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQCnBao0CSfqNE9sa_8nFHF6SxUpOqCPxpindzapHfCiMQ&oe=6A678266"
+            "id": "108824017345866",
+            "name": "Meta",
+            "url": "https://www.facebook.com/Meta/",
+            "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qaRlosGC9wUQ7kNvwHuGOSN&_nc_oc=AdpUTiQHP0F2DQWlJJsFhLjPwiKgiTaMBS9Gf3J_Ogy1Z6nYv2kt_BhKXvw8jPupOMg&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQCbS0Qc_-2kHNJh8Yysq78dbBXaaJS4Osw3-xA3_SHVlw&oe=6A89438E"
           },
           "media": [
-            "https://scontent-dfw5-2.xx.fbcdn.net/v/t39.35426-6/367481989_814253196740837_1147205676461564759_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=DXx9yj03gfYQ7kNvwFf1d7c&_nc_oc=AdqyLldEsh-_hThJdSk2263XX85c1ee8EAN8eOU6fELRwNidy_xe5oYb3j_NnAkjLjM&_nc_zt=14&_nc_ht=scontent-dfw5-2.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQCzibwodPtHxc1PF_ehEmWqRx3U9Mj25FVEbOgNq7fBvw&oe=6A677F44",
-            "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.35426-6/366679209_629455172620772_8343810991754776257_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=djXWpeihHycQ7kNvwFN16Ba&_nc_oc=AdpapPY9okWLLiGGa8CcYex2rTw0RCViORD8Gig26ysjoBDI_Nuw6nb2p5kdbtyNAIQ&_nc_zt=14&_nc_ht=scontent-dfw5-1.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQBKOp80dCzKuDxVx6QHUyIzRPVutfxsHQo_1k2IYNnm6A&oe=6A678455",
-            "https://scontent-dfw6-2.xx.fbcdn.net/v/t39.35426-6/366848777_1409747912936375_4534185630540138839_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=pQ1e5AW16eYQ7kNvwF07NbC&_nc_oc=AdqFudYa2Yl58l8trOg1alYW_VytrQii_JRQBa5cZTW9rv8DZ-gbL7NLRld9-Mh7B2k&_nc_zt=14&_nc_ht=scontent-dfw6-2.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQA9RkcY8-pXHHHmlon-WUTQx_OAUgMalsRXd5N-WN09CA&oe=6A679A8D"
+            "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4?_nc_cat=106&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=VIhm6QH6QpYQ7kNvwEGz32Z&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4MzE0MTAwMzMxNDk2MzYsImFzc2V0X2FnZV9kYXlzIjoyMzcsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQBmg1RWfbVvJ3MUBSfprUeNw4A1j1otLN5iP3DoZ8RxIw&oe=6A677448",
+            "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=XJsOGtccv7UQ7kNvwFOmuvH&_nc_oc=AdqJh0Avn_pYIk_hzhEW3QS1dyOrrTJn4nBpQ38NLoUvb1OE8Kwj7qy75S7f1QbV1cs&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQBESYOW184a4FJWDENcSYwQSBzwkH5yonZh3U5v6ZZEgA&oe=6A67964A"
           ]
         },
         {
           "platform": "facebook_ad_library",
-          "id": "161966936869658",
-          "url": "https://www.facebook.com/ads/library/?id=161966936869658",
-          "text": "Entra a Nike.com y encuentra actualizaciones semanales de producto con envío gratis.",
-          "headline": "{{product.name}}",
-          "cta": "Shop now",
-          "landingUrl": "https://ad.doubleclick.net/ddm/trackclk/N8893.2410306FACEBOOKADS/B30448992.373431644;dc_trk_aid=564542764;dc_trk_cid=196659869;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;ltd=;dc_tdv=1",
-          "adFormat": "DPA",
-          "firstShown": "2023-08-15T07:00:00.000Z",
-          "lastShown": "2026-03-30T07:00:00.000Z",
-          "impressions": null,
-          "spend": null,
-          "country": null,
+          "id": "372804137235499",
+          "url": "https://www.facebook.com/ads/library/?id=372804137235499",
+          "text": "The Voting Information Center on Facebook—one-tap voting info from election experts and authorities in one place.",
+          "headline": "Voting Information Center",
+          "cta": "Learn more",
+          "landingUrl": "http://facebook.com/votinginformationcenter",
+          "adFormat": "VIDEO",
+          "firstShown": "2020-10-05T07:00:00.000Z",
+          "lastShown": "2020-10-13T07:00:00.000Z",
+          "impressions": ">1M",
+          "spend": ">$1M",
+          "country": "US",
           "advertiser": {
-            "id": "15087023444",
-            "name": "Nike",
-            "url": "https://www.facebook.com/nike/",
-            "logo": "https://scontent-dfw5-2.xx.fbcdn.net/v/t39.35426-6/367720191_2495585077311562_2373799605258111663_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=104&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=U7NgUY3GqmcQ7kNvwHisd24&_nc_oc=AdrhI10nsd2qKRSzadIP-suYk4KO_9Per7csqm4JJE5AFyhaLs0u3Z7PNxYEa4So30I&_nc_zt=14&_nc_ht=scontent-dfw5-2.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQApk7C0Hl9okwjG8pBKXAGoUj44Gddl2J4qlSYj2pCJ1Q&oe=6A678F28"
+            "id": "108824017345866",
+            "name": "Meta",
+            "url": "https://www.facebook.com/Meta/",
+            "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qaRlosGC9wUQ7kNvwHuGOSN&_nc_oc=AdpUTiQHP0F2DQWlJJsFhLjPwiKgiTaMBS9Gf3J_Ogy1Z6nYv2kt_BhKXvw8jPupOMg&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQCbS0Qc_-2kHNJh8Yysq78dbBXaaJS4Osw3-xA3_SHVlw&oe=6A89438E"
           },
           "media": [
-            "https://scontent-dfw5-2.xx.fbcdn.net/v/t39.35426-6/367963819_652036496870561_3033983014718682847_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=ScQUnRY9UlQQ7kNvwFkPTwc&_nc_oc=AdrV1xxDcghEa8Zh3n6lwq-Dx_49ntjWI-Jy56MTUWvoagw9BJ2S7BmSBP6Jv07ASjo&_nc_zt=14&_nc_ht=scontent-dfw5-2.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQDsWDCFxl8DcWzQRT8gFnsWEZV7x2yDBEs0Oe5TJdoBTw&oe=6A67A29A",
-            "https://scontent-dfw6-1.xx.fbcdn.net/v/t39.35426-6/367750235_981618649557195_7119924792787874591_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=FEQMmZmt0twQ7kNvwEV2pdA&_nc_oc=Adpbmmqv3oo5ooqQv1aWjltgEte-VU32w7fZihvDMbphSQoWkbe42d48Hl8-f8MTRqo&_nc_zt=14&_nc_ht=scontent-dfw6-1.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQAn9gM9K_U9QmfSliMNgzaMSyFwFC5yBrURT17x-gJ_0Q&oe=6A678557",
-            "https://scontent-dfw6-2.xx.fbcdn.net/v/t39.35426-6/367047967_607783308209677_5484532650414513812_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=gtH8RRufQuwQ7kNvwHG-XxN&_nc_oc=AdpISxFeUx3ouA3x2yVFCE1B5F-zaEmvlljDKCL2tdoYYsap_-5Wbo509eMn5oGGJ3Y&_nc_zt=14&_nc_ht=scontent-dfw6-2.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQBn4h1hQtYSx8S_w1WSxd0qkEbJHoQgeAbUBi1ETk9enw&oe=6A678E2C"
+            "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQPYrtdWcXYzwK9kZxgDiAgoU_IImyeS9Q8adbGcircR7RR1dDdUBrAQ0LiHO2OJoauE5pf8F4GyEcPVDLQ94uo.mp4?_nc_cat=100&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=TJVBi21FSYoQ7kNvwGc3J8g&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4OTE2MjkwMDA0NTQwNDEsImFzc2V0X2FnZV9kYXlzIjoxNTcsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNCwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQCMG2KnWhkyJxkleqImsnYBBqDKo2-gU04sjFZY6UOemA&oe=6A678682",
+            "https://scontent-atl3-1.xx.fbcdn.net/v/t39.35426-6/120439450_1980569842077757_2547343747583380554_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=ghBwQrPN7IYQ7kNvwEK1Ioe&_nc_oc=Adq-eL0xdnXQzWG8i4nmzYYnwcV_Aa55yUcMBwzE5_rk0sejWdtPX_5QJKW6xounlWk&_nc_zt=14&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQB1w19aEluVfs5pAiHsky2u5dZ4bgAW_AohS8QzRc8Wkg&oe=6A678BF4"
           ]
         },
         {
           "platform": "facebook_ad_library",
-          "id": "1785179045778580",
-          "url": "https://www.facebook.com/ads/library/?id=1785179045778580",
-          "text": "❤️Aesthetic presets for your phone✨",
-          "headline": "🥰a FREE and personalized APP for you",
-          "cta": "Install now",
-          "landingUrl": "http://play.google.com/store/apps/details?id=com.icontrol.easy.widgets.themes",
-          "adFormat": "IMAGE",
-          "firstShown": "2026-05-07T07:00:00.000Z",
-          "lastShown": "2026-06-29T07:00:00.000Z",
-          "impressions": null,
-          "spend": null,
-          "country": null,
+          "id": "352695862528588",
+          "url": "https://www.facebook.com/ads/library/?id=352695862528588",
+          "text": "Queen Latifah hosts a series of candid conversations honoring the 57th anniversary of the #MarchOnWashington and this new era of the civil rights movement. Change Together features notable civil rights leaders such as Patrisse Cullors, Reverend Al Sharpton, and Kendrick Sampson, as well as social justice advocates Amanda Seales, Common and musical guest, CHIKA. Let’s come together to #LiftBlackVoices, learn and move as one toward equality and freedom.",
+          "headline": "Change Together: From the March on Washington to Today",
+          "cta": null,
+          "landingUrl": null,
+          "adFormat": "VIDEO",
+          "firstShown": "2020-08-27T07:00:00.000Z",
+          "lastShown": "2020-08-30T07:00:00.000Z",
+          "impressions": ">1M",
+          "spend": ">$1M",
+          "country": "US",
           "advertiser": {
-            "id": "721404351056614",
-            "name": "IControl: Easy Widgets Themes",
-            "url": "https://www.facebook.com/61578892468353/",
-            "logo": "https://scontent-dfw5-2.xx.fbcdn.net/v/t39.35426-6/695177587_1511487320476777_920753808075681498_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=q7V15Mx6Dw8Q7kNvwFI7MZX&_nc_oc=Adrtf1VDRhd6TgTx9VJ_yn0-TxjwCHIJa2jHKsfA0MWStFTjS97ZcfVrAeucaBjkoOE&_nc_zt=14&_nc_ht=scontent-dfw5-2.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQDKdKgWKtmQDGbSwMimJgK0miznvKRGHCPDqYttPk8J7w&oe=6A678E27"
+            "id": "20531316728",
+            "name": "Facebook",
+            "url": "https://www.facebook.com/facebook/",
+            "logo": "https://scontent-atl3-3.xx.fbcdn.net/v/t39.35426-6/123254501_376431443560946_8642123156381274111_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=uPcoVSVedoQQ7kNvwHgmWWe&_nc_oc=AdqwXTjc5hWqxKmTPliHRnVkbtl62MNcyuFRVtYt5e11rm_kKl_7cbhn2U6FxOqfz_4&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQAwgOXSH-Za4uSlnK2E_DN8SP8iELP-mBG2Fa6sq_k6fA&oe=6A678FB0"
           },
           "media": [
-            "https://scontent-dfw6-2.xx.fbcdn.net/v/t39.35426-6/689490050_1634784394244050_4061783363464973915_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=JLTALIlqFwMQ7kNvwHxWAdR&_nc_oc=AdplzrJNE89xFh_hjEKnfXgmla7ALlDb4tJruyw2tTVQucrOiAVJG17e0fWqDujhmYM&_nc_zt=14&_nc_ht=scontent-dfw6-2.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQDSd7vkkh8xAyneHdnmYm7HHkNLuij4SnEGlsUtxtFLoA&oe=6A678CA2",
-            "https://scontent-dfw5-2.xx.fbcdn.net/v/t39.35426-6/691720374_1271927545153646_3430531868792486708_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=EUePDXvGCqEQ7kNvwHeCyuq&_nc_oc=AdqsNmuqFsBvIg8ggXL_TUp6PGSebeFb9994MEQIWNvEU0FExpw1534UR8SMUiQsHvM&_nc_zt=14&_nc_ht=scontent-dfw5-2.xx&_nc_gid=dnGAackbO3Ls2GThicyLRw&_nc_ss=72289&oh=00_AQCRrn2qGBfHcB8COW76XvgMur6QU3ycoc0kZLiWqOlbOg&oe=6A6790B5"
+            "https://video-atl3-3.xx.fbcdn.net/o1/v/t2/f2/m412/AQOhKuKthAVVa0rFEi41ggsiGpIjueM36xj6WP_vqqtBOe-ys_sa5nUBYG9fKBArU14yCLHp-zR-F0aBPcYRtpg.mp4?_nc_cat=107&_nc_sid=ef5aa3&_nc_ht=video-atl3-3.xx.fbcdn.net&_nc_ohc=_t6jTcvDRokQ7kNvwGEF3JZ&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuNDAwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjoxMDUzMzI1NDAzNjA2NjM5LCJhc3NldF9hZ2VfZGF5cyI6Mzg1LCJ2aV91c2VjYXNlX2lkIjoxMDY4MCwiZHVyYXRpb25fcyI6MzY5OSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQB-yxRDZCNErGWI1fXJCz3c7uPPshjVivWZcuMY_fXKRg&oe=6A6795FF",
+            "https://scontent-atl3-3.xx.fbcdn.net/v/t39.35426-6/123131854_3586232378268717_4745383357747290556_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=CBujsK3_RAYQ7kNvwGLIslX&_nc_oc=AdqugE8L4r1IjoIQfZPloPL5zYCw9T2PvW36W--FM6EwKE0s97CMYl5vHS5uvgucOB8&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQCdtQbYirMkwB6MPN1xoagoP9ljGYKRFTeMNVXwrXJFng&oe=6A678230"
+          ]
+        },
+        {
+          "platform": "facebook_ad_library",
+          "id": "661142788113430",
+          "url": "https://www.facebook.com/ads/library/?id=661142788113430",
+          "text": "Get ready to vote and make your voice heard! Liza Koshy hosts Will Smith, Matthew McConaughey, Alicia Keys and more in Vote-A-Thon 2020, a #NationalVoterRegistrationDay celebration. \n\nFor information from election authorities, visit fb.com/votinginfocenter #Vote2020",
+          "headline": "Vote-A-Thon 2020: Get Ready to Vote!",
+          "cta": null,
+          "landingUrl": null,
+          "adFormat": "VIDEO",
+          "firstShown": "2020-09-23T07:00:00.000Z",
+          "lastShown": "2020-09-29T07:00:00.000Z",
+          "impressions": ">1M",
+          "spend": "$600K - $700K",
+          "country": "US",
+          "advertiser": {
+            "id": "20531316728",
+            "name": "Facebook App",
+            "url": "https://www.facebook.com/facebook/",
+            "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/58818464_10158354585756729_7126855515920924672_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=cYlKOt4-GcUQ7kNvwEj2rPB&_nc_oc=AdoHGqorRQuAh1NodHbHYx2T0SKwlVlZZE9WmznEqmn2uvvLFB0aMuR8fLJef7D2itA&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQDFaJlAcj-4tia3IQ417oX2bxs7hepULywCIcQUtORkmQ&oe=6A893E2F"
+          },
+          "media": [
+            "https://video-atl3-2.xx.fbcdn.net/o1/v/t2/f2/m560/AQPTgFuknRcBF4Lc_DtMcH-qlZGFfCQi83pEJd1S2Rx7uirTcJhniVVQrX29KTbwpbmeEofg6qllV-Nw4oOwynbGFVZfEUoYqWo.mp4?_nc_cat=104&_nc_sid=ef5aa3&_nc_ht=video-atl3-2.xx.fbcdn.net&_nc_ohc=LAgfvy6KENoQ7kNvwG84FTD&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuNDI0LmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo5ODIzODk2MDc3OTIzNDQsImFzc2V0X2FnZV9kYXlzIjo5NiwidmlfdXNlY2FzZV9pZCI6MTA2ODAsImR1cmF0aW9uX3MiOjE5MzAsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQBP9B0O5L1XPrYbIA2nQ2YSQw58tY1oD2VaGk-pgOling&oe=6A63B26A",
+            "https://scontent-atl3-1.xx.fbcdn.net/v/t39.35426-6/125381272_280240523411642_8369623856772259236_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=XyRK_lkth9MQ7kNvwGlTTfu&_nc_oc=AdpyKVXDhj9Y251dtE2MPybdoOcTQgK5aQOVfVoqrYjtlDDpADiKgCuUxnHKDgfCHj4&_nc_zt=14&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQAo0Nzhu6femzVim7KW66JDEQAcuBXpTFdCPmF5uUi0RQ&oe=6A677FEC"
+          ]
+        },
+        {
+          "platform": "facebook_ad_library",
+          "id": "475114446742483",
+          "url": "https://www.facebook.com/ads/library/?id=475114446742483",
+          "text": "Have you reviewed your ballot? Get to know what's on your ballot before Election Day through the Voting Information Center.",
+          "headline": "Double-Check Your Ballot",
+          "cta": "Learn more",
+          "landingUrl": "http://facebook.com/votinginfocenter/ballot?entry_point=Qmx1ZV9PTlA=",
+          "adFormat": "VIDEO",
+          "firstShown": "2020-10-23T07:00:00.000Z",
+          "lastShown": "2020-11-03T08:00:00.000Z",
+          "impressions": ">1M",
+          "spend": "$600K - $700K",
+          "country": "US",
+          "advertiser": {
+            "id": "20531316728",
+            "name": "Facebook App",
+            "url": "https://www.facebook.com/facebook/",
+            "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/58818464_10158354585756729_7126855515920924672_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=cYlKOt4-GcUQ7kNvwEj2rPB&_nc_oc=AdoHGqorRQuAh1NodHbHYx2T0SKwlVlZZE9WmznEqmn2uvvLFB0aMuR8fLJef7D2itA&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQDFaJlAcj-4tia3IQ417oX2bxs7hepULywCIcQUtORkmQ&oe=6A893E2F"
+          },
+          "media": [
+            "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQODMEZl7iplcGXJPBxXGuuh-WjlAPqsPLHH9EB0i7PARypul43ZBvenVloxoYkD-IUaEdBSmyDbTc5-kHBNxECY.mp4?_nc_cat=103&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=aQxYnWw9DrwQ7kNvwFxGOa7&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjozNjE0ODg2NTI1MzE5NjczLCJhc3NldF9hZ2VfZGF5cyI6MjQwLCJ2aV91c2VjYXNlX2lkIjoxMDY4MCwiZHVyYXRpb25fcyI6MTUsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQDqlY-6Yt6F59kxtTMPrLsinAzaSpmAW9wChSkDXKdL_w&oe=6A67715C",
+            "https://scontent-atl3-3.xx.fbcdn.net/v/t39.35426-6/122569736_390651732307808_5011321040623151549_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=s0Jpfvn4SlgQ7kNvwFI6q5l&_nc_oc=Adq5xXs14dBn6M1y89p-mhFN_7LDpRUUYu4kxAyvKoR9GkLwN7rCAW9i2mxTNW3UcqE&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQAgInYoqIeK9Jq1kfsK47MfkfCHaI7EtgSg_lCE8MlVuQ&oe=6A6773AC"
           ]
         }
       ]
@@ -6343,28 +6339,27 @@
     "credits": null,
     "data": {
       "platform": "facebook_ad_library",
-      "id": "1046730950862281",
-      "url": "https://www.facebook.com/ads/library/?id=1046730950862281",
-      "text": "SUKEBAN at @animeexpo \n07/05/25 Los Angeles \n\n🎬 @complicasian \nMC @kunichi_nomura \nMusic / yoyo @okamotoreiji @ecec_fc @haroodiy \nCostumes @olympialetan @softskinlatex @dawnamatrix\nSneakers @nike \nHats @stephenjonesmillinery \nMakeup @kalikennedy \nHair @dennisvlanni\nNails @nailsbymei \nProduction @exposureny \n#thisissukeban #sukebanxanimeexpo",
-      "headline": null,
-      "cta": "Visit Instagram profile",
-      "landingUrl": "http://instagram.com/sukeban_world",
+      "id": "317161109571794",
+      "url": "https://www.facebook.com/ads/library/?id=317161109571794",
+      "text": "The Voting Information Center—one-tap voting registration information from election experts and authorities in one place.",
+      "headline": "Voting Information Center",
+      "cta": "Learn more",
+      "landingUrl": "http://facebook.com/votinginformationcenter",
       "adFormat": "VIDEO",
-      "firstShown": "2025-07-09T07:00:00.000Z",
-      "lastShown": "2025-11-21T08:00:00.000Z",
-      "impressions": null,
-      "spend": null,
-      "country": null,
+      "firstShown": "2020-09-22T07:00:00.000Z",
+      "lastShown": "2020-10-05T07:00:00.000Z",
+      "impressions": ">1M",
+      "spend": ">$1M",
+      "country": "US",
       "advertiser": {
-        "id": "146705838515566",
-        "name": "Sukeban World",
-        "url": "https://www.facebook.com/61551864263186/",
-        "logo": "https://scontent-ord5-3.xx.fbcdn.net/v/t39.35426-6/517640014_2104272360362331_1464623957160374455_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=zj4Fm9x6lhEQ7kNvwFDW6Vf&_nc_oc=AdrV4Koh9wRZgr_WVROu-VdneLQ2wUOsVHofGKz79ErfyY_aaY7GK0muo10FTNCUNgU&_nc_zt=14&_nc_ht=scontent-ord5-3.xx&_nc_gid=EIiOgGeDq9Y_gQBAryntfw&_nc_ss=72289&oh=00_AQCiHGZ-irrTKQVITjHJIrt72izLiVXjxwJVLGcIx30CiA&oe=6A611F63"
+        "id": "108824017345866",
+        "name": "Meta",
+        "url": "https://www.facebook.com/Meta/",
+        "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qaRlosGC9wUQ7kNvwHuGOSN&_nc_oc=AdpUTiQHP0F2DQWlJJsFhLjPwiKgiTaMBS9Gf3J_Ogy1Z6nYv2kt_BhKXvw8jPupOMg&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQCbS0Qc_-2kHNJh8Yysq78dbBXaaJS4Osw3-xA3_SHVlw&oe=6A89438E"
       },
       "media": [
-        "https://video-ord5-2.xx.fbcdn.net/o1/v/t2/f2/m86/AQO4PhvVEMTGXeGEZyfq0tXFynq7j1eWL-FzTX5W5Z1AeBes5zrbxyqHmQBuXB_iP-WLDh2rwtW9cCYOqcwkOhcKjhD5Dk2n1kX12bk.mp4?_nc_cat=104&_nc_sid=b66105&_nc_ht=video-ord5-2.xx.fbcdn.net&_nc_ohc=GMmkGmjmAgwQ7kNvwF1oPci&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMTI3OC5kYXNoX2Jhc2VsaW5lXzFfdjEiLCJ4cHZfYXNzZXRfaWQiOjE3NjQ4MTU2NjA4MjgxMDAsImFzc2V0X2FnZV9kYXlzIjozNzMsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjo4MSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=6a7726380c03e491&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC9GMTRCNjRCQzAyREZGQzhDRjdFQjM0NTUyQjBDNUZCMl92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYRmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC8xMjM2MDc3NzU0MzI0NDkxXzUxNTUzMjEyMTgwMDQ5MzAxMC5tcDQVAgLIARIAKAAYABsCiAd1c2Vfb2lsATEScHJvZ3Jlc3NpdmVfcmVjaXBlATEVAAAmiJf2qOXFogYVAigCQzMsF0BURU_fO2RaGBJkYXNoX2Jhc2VsaW5lXzFfdjERAHUAZeadAQA&_nc_gid=EIiOgGeDq9Y_gQBAryntfw&_nc_ss=72289&_nc_zt=28&oh=00_AQDOBUOnqh00HDvZMHCZmHXKQyTD0DVZQ4Et68rMbg86sw&oe=6A5D5BFD",
-        "https://video-ord5-2.xx.fbcdn.net/o1/v/t2/f2/m86/AQMnlu68POBBXfZ__Eay3UVx0tXUHjEYM_Ue7FVfJmqzgJjf0WOCvVUtn3rtz7hUijTMtoAW3XfK20M2iSSFhwEWCCxCPADMExZVOss.mp4?_nc_cat=104&_nc_sid=b66105&_nc_ht=video-ord5-2.xx.fbcdn.net&_nc_ohc=Xb0BOd7XXHwQ7kNvwEXNAA9&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuNjM4LmRhc2hfYmFzZWxpbmVfM192MSIsInhwdl9hc3NldF9pZCI6MTc2NDgxNTY2MDgyODEwMCwiYXNzZXRfYWdlX2RheXMiOjM3MywidmlfdXNlY2FzZV9pZCI6MTAwOTksImR1cmF0aW9uX3MiOjgxLCJ1cmxnZW5fc291cmNlIjoid3d3In0%3D&ccb=17-1&vs=c95c77148100653c&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC9ERjRFNEEyN0FFOTg0MEQ2M0ZBQzdDNzY2MTk4Mzk5Q192aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYRmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC8xMjM2MDc3NzU0MzI0NDkxXzUxNTUzMjEyMTgwMDQ5MzAxMC5tcDQVAgLIARIAKAAYABsCiAd1c2Vfb2lsATEScHJvZ3Jlc3NpdmVfcmVjaXBlATEVAAAmiJf2qOXFogYVAigCQzMsF0BURU_fO2RaGBJkYXNoX2Jhc2VsaW5lXzNfdjERAHUAZeadAQA&_nc_gid=EIiOgGeDq9Y_gQBAryntfw&_nc_ss=72289&_nc_zt=28&oh=00_AQDAd_93jGzsfiUTePmet9zLRoyoi0ivuUJNQ6i-1LoP_w&oe=6A5D37A5",
-        "https://scontent-ord5-3.xx.fbcdn.net/v/t39.35426-6/517397592_1383736762890761_1045473052856121784_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=8WwBUUwLpS8Q7kNvwFwT880&_nc_oc=Adolptl79XZ9UPfdrpvceLwoVmnbwnQAUQ2jbvEzVteATnpkWZlmaJAuSKdWbKkRcVM&_nc_zt=14&_nc_ht=scontent-ord5-3.xx&_nc_gid=EIiOgGeDq9Y_gQBAryntfw&_nc_ss=72289&oh=00_AQC58doTpPORjtWWSXR7g0mupOausERVOb-Kj8nn-84AbA&oe=6A61366C"
+        "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4?_nc_cat=106&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=VIhm6QH6QpYQ7kNvwEGz32Z&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4MzE0MTAwMzMxNDk2MzYsImFzc2V0X2FnZV9kYXlzIjoyMzcsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQBmg1RWfbVvJ3MUBSfprUeNw4A1j1otLN5iP3DoZ8RxIw&oe=6A677448",
+        "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=XJsOGtccv7UQ7kNvwFOmuvH&_nc_oc=AdqJh0Avn_pYIk_hzhEW3QS1dyOrrTJn4nBpQ38NLoUvb1OE8Kwj7qy75S7f1QbV1cs&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQBESYOW184a4FJWDENcSYwQSBzwkH5yonZh3U5v6ZZEgA&oe=6A67964A"
       ]
     }
   },

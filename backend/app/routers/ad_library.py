@@ -323,6 +323,9 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
         item.get("regions"),
         item.get("targetCountries"),
         item.get("countries"),
+        item.get("targetedOrReachedCountries"),
+        snapshot.get("countryIsoCode"),
+        snapshot.get("country"),
     )
     if isinstance(country_value, list):
         country_value = ", ".join(str(c) for c in country_value if c) or None
@@ -409,6 +412,8 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
         "impressions": _first(
             item.get("impressions"),
             item.get("impressionsRange"),
+            _dig(item, "impressionsWithIndex", "impressionsText"),
+            item.get("reachEstimate"),
             item.get("reach"),
             item.get("reachRange"),
             item.get("impressionRange"),
@@ -416,6 +421,7 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             item.get("impressionsMin"),
             item.get("uniqueUsersSeen"),
             item.get("estimatedAudience"),
+            item.get("euTotalReach"),
         ),
         "spend": _first(item.get("spend"), item.get("spendRange"), item.get("adSpent"), item.get("budgetRange")),
         "country": safe_str(country_value),
@@ -511,7 +517,7 @@ async def facebook_search(
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.facebook.search", {"q": q, "country": country, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("ad-library.facebook.search", {"q": q, "country": country, "limit": limit, "v": 5}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 

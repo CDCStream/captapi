@@ -156,7 +156,8 @@ def batch2_phase1() -> list[tuple[str, str, dict]]:
         ("tiktok-shop-search", "/v1/tiktok-shop/shop-search", {"q": "phone case", "region": "US", "limit": 5}),
         ("tiktok-shop-user-showcase", "/v1/tiktok-shop/user-showcase", {"username": "jeffreestar", "limit": 5}),
         ("tiktok-ad-library-search", "/v1/ad-library/tiktok/search", {"q": "fashion", "limit": 5}),
-        ("facebook-ad-library-search", "/v1/ad-library/facebook/search", {"q": "nike", "country": "US", "limit": 5}),
+        # Political/issue ads expose spend + impressions in Meta Ad Library; brand ads usually don't.
+        ("facebook-ad-library-search", "/v1/ad-library/facebook/search", {"q": "election", "country": "US", "limit": 5}),
         ("facebook-ad-library-search-companies", "/v1/ad-library/facebook/search-companies", {"q": "nike", "limit": 5}),
         ("facebook-ad-library-company-ads", "/v1/ad-library/facebook/company-ads", {"url": "https://www.facebook.com/nike", "limit": 5}),
         ("google-ad-library-company-ads", "/v1/ad-library/google/company-ads", {"advertiser": "nike", "country": "US", "limit": 5}),
