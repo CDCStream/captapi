@@ -64,6 +64,45 @@ def _listify(value: Any) -> list[Any]:
     return [value]
 
 
+# Prefer original/HD assets first; keep media as URL strings only.
+_MEDIA_URL_KEYS = (
+    "originalImageUrl",
+    "videoHdUrl",
+    "videoSdUrl",
+    "videoUrl",
+    "adVideoUrl",
+    "resizedImageUrl",
+    "videoPreviewImageUrl",
+    "imageUrl",
+    "thumbnailUrl",
+    "coverImageUrl",
+    "previewUrl",
+    "url",
+    "src",
+)
+
+
+def _flatten_media(values: list[Any]) -> list[str]:
+    """Normalize mixed media (URL strings + actor image/video objects) to http URLs."""
+    seen: set[str] = set()
+    out: list[str] = []
+
+    def add(raw: Any) -> None:
+        url = safe_str(raw)
+        if not url or not url.startswith("http") or url in seen:
+            return
+        seen.add(url)
+        out.append(url)
+
+    for value in values:
+        if isinstance(value, str):
+            add(value)
+        elif isinstance(value, dict):
+            for key in _MEDIA_URL_KEYS:
+                add(value.get(key))
+    return out
+
+
 def _facebook_ad_url(value: str) -> str:
     _reject_ad_platform_mismatch(value, "facebook", "https://www.facebook.com/ads/library/?id=123456789")
     value = value.strip()
@@ -187,6 +226,8 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
                 ]
                 if m
             )
+
+    media = _flatten_media(media)
 
     ad_id = safe_str(
         _first(
@@ -470,7 +511,7 @@ async def facebook_search(
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.facebook.search", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("ad-library.facebook.search", {"q": q, "country": country, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
@@ -495,7 +536,7 @@ async def facebook_company_ads(
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
             return {"url": url, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.facebook.company-ads", {"url": url, "country": country, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("ad-library.facebook.company-ads", {"url": url, "country": country, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
@@ -546,7 +587,7 @@ async def facebook_ad_details(
                 raise HTTPException(status_code=404, detail="Ad not found")
             return _normalize_ad(items[0], "facebook_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.facebook.ad-details", {"url": ad_url, "v": 3}, _run, ctx, use_cache=cache))
+        return ApiResponse(data=await cached_or_run("ad-library.facebook.ad-details", {"url": ad_url, "v": 4}, _run, ctx, use_cache=cache))
 
 
 @router.get("/facebook/ad-transcript", summary="Meta/Facebook ad transcript / creative text")
