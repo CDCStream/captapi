@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BugReportDialog } from "@/components/bug-report-dialog";
+import { FeatureRequestDialog } from "@/components/feature-request-dialog";
 import {
   ALL_ENDPOINTS,
   PLATFORM_PAGES,
@@ -303,12 +304,20 @@ export default async function ApiDetailPage({
         <section className="mt-12">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-2xl font-semibold">Try it</h2>
-            <BugReportDialog
-              defaultEndpointSlug={ep.slug}
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-foreground"
-            />
+            <div className="flex flex-wrap items-center gap-1">
+              <FeatureRequestDialog
+                defaultEndpointSlug={ep.slug}
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+              />
+              <BugReportDialog
+                defaultEndpointSlug={ep.slug}
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+              />
+            </div>
           </div>
           <p className="mt-2 mb-4 max-w-3xl text-sm text-muted-foreground">
             Fill in the parameters below and copy a ready-to-run request in your

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BugReportDialog } from "@/components/bug-report-dialog";
+import { FeatureRequestDialog } from "@/components/feature-request-dialog";
 import { LogoutButton } from "@/components/logout-button";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
@@ -26,7 +27,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1">
           <SidebarNav />
         </div>
-        <div className="mt-4 pt-4 border-t">
+        <div className="mt-4 pt-4 border-t space-y-0.5">
+          <FeatureRequestDialog
+            loggedIn
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-3 px-2 text-muted-foreground hover:text-foreground"
+          />
           <BugReportDialog
             loggedIn
             variant="ghost"
