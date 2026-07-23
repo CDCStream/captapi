@@ -1436,7 +1436,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-shop-user-showcase": [{ name: "username", type: "string", required: true, description: "TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug." }, lp(20, 200)],
   // Ad Library
   "facebook-ad-library-search": [qp("Keyword, brand, or advertiser to search Meta Ad Library (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
-  "facebook-ad-library-company-ads": [up("Facebook page URL or Meta Ad Library URL."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
+  "facebook-ad-library-company-ads": [up("Facebook page URL or Meta Ad Library URL, e.g. https://www.facebook.com/Meta."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
   "facebook-ad-library-search-companies": [qp("Company or brand name to search for (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
   "facebook-ad-library-ad-details": [up("Meta Ad Library ad URL or ad ID.")],
   "facebook-ad-library-ad-transcript": [up("Meta Ad Library ad URL or ad ID.")],
