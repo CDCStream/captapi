@@ -161,6 +161,23 @@ def _google_ids(value: str) -> tuple[str | None, str | None]:
     )
 
 
+def _google_impressions(item: dict[str, Any]) -> str | None:
+    """Google ATC often exposes impressionsMin/Max rather than a single count."""
+    direct = _first(
+        item.get("impressions"),
+        item.get("impressionsRange"),
+        item.get("impressionRange"),
+        item.get("totalImpressionsInterval"),
+    )
+    if direct not in (None, "", [], {}):
+        return safe_str(direct) or str(direct)
+    lo = safe_str(item.get("impressionsMin"))
+    hi = safe_str(item.get("impressionsMax"))
+    if lo and hi and lo != hi:
+        return f"{lo}-{hi}"
+    return lo or hi
+
+
 def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
     snapshot = item.get("snapshot") if isinstance(item.get("snapshot"), dict) else {}
     advertiser = (
@@ -409,7 +426,9 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
                 item.get("adEndDate"),
             )
         ),
-        "impressions": _first(
+        "impressions": _google_impressions(item)
+        if platform == "google_ad_library"
+        else _first(
             item.get("impressions"),
             item.get("impressionsRange"),
             _dig(item, "impressionsWithIndex", "impressionsText"),
@@ -475,11 +494,15 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
     adv = normalized["advertiser"]
     if platform == "google_ad_library" and not adv["url"] and adv["id"]:
         adv["url"] = f"https://adstransparency.google.com/advertiser/{adv['id']}"
-    # LinkedIn / TikTok libraries often withhold spend/impressions/CTA. Prefer
-    # omitting always-null metadata over shipping dead keys. Facebook/Google
-    # sometimes return these, so keep explicit null when missing.
+    # LinkedIn / TikTok withhold most delivery metadata. Google ATC never
+    # returns CTA/spend and only sometimes impressions — omit empties.
+    # Facebook sometimes returns spend/impressions, so keep explicit nulls there.
     if platform in {"tiktok_ad_library", "linkedin_ad_library"}:
         for key in ("cta", "landingUrl", "firstShown", "lastShown", "impressions", "spend", "country", "headline"):
+            if normalized.get(key) in (None, "", [], {}):
+                normalized.pop(key, None)
+    elif platform == "google_ad_library":
+        for key in ("cta", "spend", "impressions"):
             if normalized.get(key) in (None, "", [], {}):
                 normalized.pop(key, None)
     # Advertiser logo is never supplied by Google Ads Transparency; omit empty
@@ -733,7 +756,7 @@ async def google_company_ads(
             ads = [_normalize_ad(i, "google_ad_library") for i in items]
             return {"advertiser": advertiser, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.google.company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("ad-library.google.company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = _scaled(len(data["ads"]), RATE_GOOGLE_COMPANY_ADS)
         return ApiResponse(data=data)
 
@@ -757,7 +780,7 @@ async def google_ad_details(
                     return _normalize_ad(item, "google_ad_library")
             raise HTTPException(status_code=404, detail="Ad not found")
 
-        return ApiResponse(data=await cached_or_run("ad-library.google.ad-details", {"creative_id": creative_id, "country": country, "v": 3}, _run, ctx, use_cache=cache))
+        return ApiResponse(data=await cached_or_run("ad-library.google.ad-details", {"creative_id": creative_id, "country": country, "v": 4}, _run, ctx, use_cache=cache))
 
 
 @router.get("/google/advertiser-search", summary="Search Google Ads advertisers")

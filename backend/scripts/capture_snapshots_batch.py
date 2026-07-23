@@ -161,7 +161,8 @@ def batch2_phase1() -> list[tuple[str, str, dict]]:
         ("facebook-ad-library-search-companies", "/v1/ad-library/facebook/search-companies", {"q": "nike", "limit": 5}),
         # Meta/issue advertisers disclose spend + impressions; brand pages usually don't.
         ("facebook-ad-library-company-ads", "/v1/ad-library/facebook/company-ads", {"url": "https://www.facebook.com/Meta", "country": "US", "limit": 5}),
-        ("google-ad-library-company-ads", "/v1/ad-library/google/company-ads", {"advertiser": "nike", "country": "US", "limit": 5}),
+        # Domain form avoids false matches like "NIKE SRL" (unrelated Italian advertiser).
+        ("google-ad-library-company-ads", "/v1/ad-library/google/company-ads", {"advertiser": "nike.com", "country": "US", "limit": 5}),
         ("google-ad-library-advertiser-search", "/v1/ad-library/google/advertiser-search", {"q": "nike", "limit": 5}),
         ("threads-profile", "/v1/threads/profile", {"url": "@zuck"}),
         ("threads-user-posts", "/v1/threads/user-posts", {"url": "@zuck", "limit": 5}),

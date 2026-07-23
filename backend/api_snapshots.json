@@ -5979,132 +5979,108 @@
     "status": 200,
     "credits": null,
     "data": {
-      "advertiser": "nike",
+      "advertiser": "nike.com",
       "country": "US",
       "totalReturned": 5,
       "ads": [
         {
           "platform": "google_ad_library",
-          "id": "CR04305201326893039617",
-          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409/creative/CR04305201326893039617",
-          "text": "Nilufar Edition features+100 pieces across keyfurniture categories.Contact us for info.",
-          "headline": "Nina Yashar’sCurated Gems",
-          "cta": null,
-          "landingUrl": "https://nilufar.com/designers/nilufar-edition/",
-          "adFormat": "image",
-          "firstShown": "2025-06-18T07:25:50.000Z",
-          "lastShown": "2025-08-14T10:08:07.000Z",
-          "impressions": null,
-          "spend": null,
-          "country": "United States",
-          "advertiser": {
-            "id": "AR17365672681860497409",
-            "name": "NIKE SRL",
-            "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
-          },
-          "media": [
-            "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/681805071230715799/index.html",
-            "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/3215303594946302854/index.html",
-            "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/11741205795627771587/index.html",
-            "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/681805071230715799/index.html"
-          ]
-        },
-        {
-          "platform": "google_ad_library",
-          "id": "CR13104710050692202497",
-          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409/creative/CR13104710050692202497",
-          "text": "Celebra con noi i 10 anni di Nilufar Depot e registrati subito all’evento del 30 settembre",
-          "headline": "30 September 2025 - Book launch on Sept 30, 2025",
-          "cta": null,
-          "landingUrl": "www.nilufar.com/",
+          "id": "CR00209668689799151617",
+          "url": "https://adstransparency.google.com/advertiser/AR14612997888104464385/creative/CR00209668689799151617",
+          "text": "Sponsored Nike www.nike.com/ Shop The Nike Sale - Nike Running Philippines Run in Pegasus . Run in Vomero . Run in Structure . Shop all - new Nike Running shoes .",
+          "headline": "Shop The Nike Sale - Nike Running Philippines",
+          "landingUrl": "www.nike.com/",
           "adFormat": "text",
-          "firstShown": "2025-09-18T16:36:06.000Z",
-          "lastShown": "2025-09-29T09:23:54.000Z",
-          "impressions": "100000",
-          "spend": null,
-          "country": "Netherlands, Croatia, Lithuania, Belgium, Saudi Arabia, Finland, Slovakia, Portugal, Malta, Hungary, Romania, Germany, Australia, Norway, Austria, Switzerland, Iceland, Denmark, Greece, Czechia, Luxembourg, United Kingdom, India, Estonia, Sweden, Spain, Ireland, Italy, Slovenia, France, Cyprus, United States, Latvia, Canada, Israel, Bulgaria, Poland",
+          "firstShown": "2022-08-17T03:34:27.000Z",
+          "lastShown": "2026-07-23T06:09:34.000Z",
+          "impressions": "1000",
+          "country": "United Arab Emirates, Germany, Poland, Canada, Netherlands, Norway, Czechia, France, United States, Philippines, Hungary, Italy, Saudi Arabia, Ireland, Spain",
           "advertiser": {
-            "id": "AR17365672681860497409",
-            "name": "NIKE SRL",
-            "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
+            "id": "AR14612997888104464385",
+            "name": "NIKE GLOBAL TRADING B.V. SINGAPORE BRANCH",
+            "url": "https://adstransparency.google.com/advertiser/AR14612997888104464385"
           },
           "media": [
-            "https://tpc.googlesyndication.com/archive/simgad/3592989990789891796"
+            "https://tpc.googlesyndication.com/archive/simgad/7435144562488407676"
           ]
         },
         {
           "platform": "google_ad_library",
-          "id": "CR00017566880097107969",
-          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409/creative/CR00017566880097107969",
-          "text": "Sponsored Nilufar NILUFAR www.nilufar.com/ From 25 Nov To 25 Dec 2025 - Let the Light In Nilufar offers a bespoke gifting experience both on our website and in our Milano Gallery .",
-          "headline": "From 25 Nov To 25 Dec 2025 - Let the",
-          "cta": null,
-          "landingUrl": "www.nilufar.com/",
+          "id": "CR08395356613392728065",
+          "url": "https://adstransparency.google.com/advertiser/AR18378488041124659201/creative/CR08395356613392728065",
+          "text": "Discover {KeyWord:Nike Shoes} Online At Nike.com. Shop The Official Nike Site.",
+          "headline": "{KeyWord:Nike Vomero}",
+          "landingUrl": "nike.com",
           "adFormat": "text",
-          "firstShown": "2025-12-05T04:56:43.000Z",
-          "lastShown": "2025-12-22T22:59:54.000Z",
-          "impressions": "125000",
-          "spend": null,
-          "country": "France, Serbia, Lithuania, Slovenia, Brazil, Netherlands, Malta, Bulgaria, Poland, Portugal, Israel, United States, Croatia, Belgium, India, Ireland, Slovakia, Singapore, Luxembourg, Canada, Italy, Estonia, United Arab Emirates, Spain, Cyprus, Sweden, Argentina, Switzerland, Latvia, Australia, Norway, Austria, Iceland, United Kingdom, Czechia, South Korea, Denmark, Greece, Finland, Turkey, Mexico, Saudi Arabia, Romania, Hungary, Germany",
+          "firstShown": "2025-09-19T13:04:37.000Z",
+          "lastShown": "2026-07-23T06:18:08.000Z",
+          "impressions": "7000-8000",
+          "country": "Malta, United Arab Emirates, Cyprus, Belgium, United Kingdom, Czechia, Hungary, United States, Iceland, Ireland, Italy, Sweden, India, Spain, Greece, Croatia, Bulgaria, Portugal, Denmark, Lithuania, Poland, Netherlands, Germany, Australia, Norway, France, Romania",
           "advertiser": {
-            "id": "AR17365672681860497409",
-            "name": "NIKE SRL",
-            "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
+            "id": "AR18378488041124659201",
+            "name": "Nike Retail BV",
+            "url": "https://adstransparency.google.com/advertiser/AR18378488041124659201"
+          },
+          "media": []
+        },
+        {
+          "platform": "google_ad_library",
+          "id": "CR03268897341242867713",
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR03268897341242867713",
+          "text": "Sponsored Nike www.nike.com/ Training & Gym Shoes . Nike.com Comfy , Durable & Responsive Designs To Help You Achieve The Best Performance . Nike Training Shoes Nike Training Gear",
+          "headline": "Comfy , Durable & Responsive Designs To Help You Achieve The Best Performance .",
+          "landingUrl": "www.nike.com/",
+          "adFormat": "text",
+          "firstShown": "2022-11-30T14:51:14.000Z",
+          "lastShown": "2026-07-23T06:07:23.000Z",
+          "country": "United States",
+          "advertiser": {
+            "id": "AR16735076323512287233",
+            "name": "Nike, Inc.",
+            "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
           },
           "media": [
-            "https://tpc.googlesyndication.com/archive/simgad/5369694199582718379"
+            "https://tpc.googlesyndication.com/archive/simgad/1035901140936769333"
           ]
         },
         {
           "platform": "google_ad_library",
-          "id": "CR03821618520811110401",
-          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409/creative/CR03821618520811110401",
-          "text": "Nilufar Edition features+100 pieces across keyfurniture categories.Contact us for info.",
-          "headline": "Nina Yashar’sCurated Gems",
-          "cta": null,
-          "landingUrl": "https://nilufar.com/designers/nilufar-edition/",
-          "adFormat": "image",
-          "firstShown": "2025-06-18T07:25:47.000Z",
-          "lastShown": "2025-07-22T09:50:42.000Z",
-          "impressions": null,
-          "spend": null,
+          "id": "CR04226045723872854017",
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR04226045723872854017",
+          "text": "Nike www.nike.com/shop/nike-by-you Shop Nike® Back To School Use promo code DAYONE to get an extra 25 % off on select styles . Elevate your collection with new NikeⓇ drops & top sellers . Shop now . NikeⓇ Running Shoes . Rating for nike.com On - time delivery 4.7 ( 6,273 ) 99 % + Available on the App Store ✓ Install",
+          "headline": "Shop Nike® Back To School Use promo code DAYONE to get an extra 25 % off on select styles . Elevate your collection with new NikeⓇ drops & top sellers . Shop now . NikeⓇ Running Shoes . On - time delivery",
+          "landingUrl": "www.nike.com/shop/nike-by-you",
+          "adFormat": "text",
+          "firstShown": "2026-07-21T03:48:09.000Z",
+          "lastShown": "2026-07-23T06:16:32.000Z",
           "country": "United States",
           "advertiser": {
-            "id": "AR17365672681860497409",
-            "name": "NIKE SRL",
-            "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
+            "id": "AR16735076323512287233",
+            "name": "Nike, Inc.",
+            "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
           },
           "media": [
-            "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/7848753873335385669/index.html",
-            "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/16531313993389071624/index.html",
-            "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/345750742345164759/index.html",
-            "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/7848753873335385669/index.html"
+            "https://tpc.googlesyndication.com/archive/simgad/13746662843098201720"
           ]
         },
         {
           "platform": "google_ad_library",
-          "id": "CR12196624977859969025",
-          "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409/creative/CR12196624977859969025",
-          "text": "Nilufar Edition features+100 pieces across keyfurniture categories.Contact us for info.",
-          "headline": "Nina Yashar’sCurated Gems",
-          "cta": null,
-          "landingUrl": "https://nilufar.com/designers/nilufar-edition/",
-          "adFormat": "image",
-          "firstShown": "2025-06-18T07:25:49.000Z",
-          "lastShown": "2025-08-14T10:08:09.000Z",
-          "impressions": null,
-          "spend": null,
+          "id": "CR05898133529371344897",
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR05898133529371344897",
+          "text": "Nike www.nike.com/shop/accessories Shop NikeⓇ Back To School - NikeⓇ Golf Collection Use promo code DAYONE to get an extra 25 % off on select styles . Designed and created to enable outstanding performance , the NikeⓇ golf collection . Empower your game . Athletes ' top pick . Live Support Available . Styles : Performance Golf Shoes , Dri - FIT ... Rating for nike.com 4.7 ( 6,273 ) Order accuracy 95-100 % The Nike® Golf Collection Nike® Golf Accessories",
+          "headline": "Shop NikeⓇ Back To School - NikeⓇ Golf Collection Use promo code DAYONE to get an extra 25 % off on select styles . Designed and created to enable outstanding performance , the NikeⓇ golf collection . Empower your game . Athletes ' top pick . Live Support Available . Styles : Performance Golf Shoes , Dri - FIT ... ( 6,273 )",
+          "landingUrl": "www.nike.com/shop/accessories",
+          "adFormat": "text",
+          "firstShown": "2026-07-21T02:52:46.000Z",
+          "lastShown": "2026-07-23T06:13:54.000Z",
           "country": "United States",
           "advertiser": {
-            "id": "AR17365672681860497409",
-            "name": "NIKE SRL",
-            "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
+            "id": "AR16735076323512287233",
+            "name": "Nike, Inc.",
+            "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
           },
           "media": [
-            "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/15365961693456714934/index.html",
-            "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/5910113829614128690/index.html",
-            "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/7515544785159092185/index.html",
-            "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/15365961693456714934/index.html"
+            "https://tpc.googlesyndication.com/archive/simgad/5045243300331953334"
           ]
         }
       ]
@@ -6395,29 +6371,22 @@
     "credits": null,
     "data": {
       "platform": "google_ad_library",
-      "id": "CR04305201326893039617",
-      "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409/creative/CR04305201326893039617",
-      "text": "Nilufar Edition features+100 pieces across keyfurniture categories.Contact us for info.",
-      "headline": "Nina Yashar’sCurated Gems",
-      "cta": null,
-      "landingUrl": "https://nilufar.com/designers/nilufar-edition/",
-      "adFormat": "image",
-      "firstShown": "2025-06-18T07:25:50.000Z",
-      "lastShown": "2025-08-14T10:08:07.000Z",
-      "impressions": null,
-      "spend": null,
-      "country": "United States",
+      "id": "CR08395356613392728065",
+      "url": "https://adstransparency.google.com/advertiser/AR18378488041124659201/creative/CR08395356613392728065",
+      "text": "Discover {KeyWord:Nike Shoes} Online At Nike.com. Shop The Official Nike Site.",
+      "headline": "{KeyWord:Nike Vomero}",
+      "landingUrl": "nike.com",
+      "adFormat": "text",
+      "firstShown": "2025-09-19T13:04:37.000Z",
+      "lastShown": "2026-07-23T06:18:08.000Z",
+      "impressions": "7000-8000",
+      "country": "Malta, United Arab Emirates, Cyprus, Belgium, United Kingdom, Czechia, Hungary, United States, Iceland, Ireland, Italy, Sweden, India, Spain, Greece, Croatia, Bulgaria, Portugal, Denmark, Lithuania, Poland, Netherlands, Germany, Australia, Norway, France, Romania",
       "advertiser": {
-        "id": "AR17365672681860497409",
-        "name": "NIKE SRL",
-        "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
+        "id": "AR18378488041124659201",
+        "name": "Nike Retail BV",
+        "url": "https://adstransparency.google.com/advertiser/AR18378488041124659201"
       },
-      "media": [
-        "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/681805071230715799/index.html",
-        "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/3215303594946302854/index.html",
-        "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/11741205795627771587/index.html",
-        "https://tpc.googlesyndication.com/archive/sadbundle/$csp%3Darchive$/681805071230715799/index.html"
-      ]
+      "media": []
     }
   },
   "threads-post-details": {
