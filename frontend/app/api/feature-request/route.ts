@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Feature requests land in Supabase feature_requests.
+
 export async function POST(req: NextRequest) {
   const sb = getServiceClient();
   if (!sb) {
