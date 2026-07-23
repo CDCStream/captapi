@@ -26,8 +26,8 @@ export type PlatformId =
   | "rumble"
   | "tiktok_shop"
   | "github"
-  | "ad_library"
   | "twitch"
+  | "ad_library"
   | "spotify"
   | "soundcloud"
   | "linktree"
@@ -176,8 +176,8 @@ const PLATFORM_LABEL: Record<PlatformId, string> = {
   rumble: "Rumble",
   tiktok_shop: "TikTok Shop",
   github: "GitHub",
-  ad_library: "Ad Library",
   twitch: "Twitch",
+  ad_library: "Ad Library",
   spotify: "Spotify",
   soundcloud: "SoundCloud",
   linktree: "Linktree",
@@ -631,6 +631,15 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     endpoints: TWITCH.map((s) => ({ ...s, platform: "twitch" as const })),
   },
   {
+    id: "ad_library",
+    name: "Ad Library",
+    blurb: "Search public Meta, TikTok, Google, and LinkedIn ad libraries for competitor creative intelligence.",
+    icon: "megaphone",
+    color: "text-amber-600",
+    exampleUrl: "https://adstransparency.google.com/",
+    endpoints: AD_LIBRARY.map((s) => ({ ...s, platform: "ad_library" as const })),
+  },
+  {
     id: "spotify",
     name: "Spotify",
     blurb: "Extract Spotify artist, track, album, podcast, episode, and search metadata.",
@@ -755,15 +764,6 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     color: "text-blue-500",
     exampleUrl: "https://link.me/example",
     endpoints: LINKME.map((s) => ({ ...s, platform: "linkme" as const })),
-  },
-  {
-    id: "ad_library",
-    name: "Ad Library",
-    blurb: "Search public Meta, TikTok, Google, and LinkedIn ad libraries for competitor creative intelligence.",
-    icon: "megaphone",
-    color: "text-amber-600",
-    exampleUrl: "https://adstransparency.google.com/",
-    endpoints: AD_LIBRARY.map((s) => ({ ...s, platform: "ad_library" as const })),
   },
 ];
 
@@ -1708,8 +1708,8 @@ const PROFILE_URL: Record<PlatformId, string> = {
   rumble: "https://rumble.com/c/Bongino",
   tiktok_shop: "https://shop.tiktok.com/us/pdp/example-product/1234567890",
   github: "https://github.com/vercel/next.js",
-  ad_library: "https://adstransparency.google.com/",
   twitch: "https://www.twitch.tv/shroud",
+  ad_library: "https://adstransparency.google.com/",
   spotify: "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02",
   soundcloud: "https://soundcloud.com/nasa",
   linktree: "https://linktr.ee/tonyhawk",
