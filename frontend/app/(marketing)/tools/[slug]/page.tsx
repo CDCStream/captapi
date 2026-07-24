@@ -102,7 +102,18 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
 
       <TranscriptToolContent tool={t} />
 
-      <ToolCTA />
+      <ToolCTA
+        headline={
+          slug === "tiktok-transcript"
+            ? "API key = ~100× cheaper automation"
+            : undefined
+        }
+        sub={
+          slug === "tiktok-transcript"
+            ? "Free tries are capped on purpose. With your own key, TikTok transcripts are 5 credits each (cache hits free) — build bots, n8n flows, and pipelines without the daily wall."
+            : undefined
+        }
+      />
     </div>
   );
 }

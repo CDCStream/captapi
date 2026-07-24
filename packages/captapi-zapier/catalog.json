@@ -620,7 +620,7 @@
     "platform": "TikTok",
     "name": "TikTok Transcript",
     "path": "/v1/tiktok/transcript",
-    "credits": 2,
+    "credits": 5,
     "summary": "Transcript of a TikTok video (via captions).",
     "params": [
       {
@@ -639,7 +639,7 @@
         "name": "cache",
         "type": "boolean",
         "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+        "description": "Serve from the 24h shared cache when available (0 credits on hit). Default true — set false to always fetch fresh."
       }
     ]
   },

@@ -226,7 +226,7 @@ const YOUTUBE: Spec[] = [
 ];
 
 const TIKTOK: Spec[] = [
-  { slug: "tiktok-transcript", name: "TikTok Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/tiktok/transcript", credits: 2 },
+  { slug: "tiktok-transcript", name: "TikTok Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/tiktok/transcript", credits: 5 },
   { slug: "tiktok-summarizer", name: "TikTok Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/tiktok/summarize", credits: 4 },
   { slug: "tiktok-video-details", name: "TikTok Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/tiktok/video-details", credits: 1, tagline: "Get everything about one TikTok video from its URL — caption, view/like/comment/share/save counts, creator, sound, hashtags, and thumbnail.", longDescription: "Paste any public TikTok video URL and the TikTok Video Details API returns the full picture as clean JSON: the caption, when it was posted, how long it runs, and its engagement — views, likes, comments, shares, and saves. You also get the creator (username, display name, follower count, verified badge, and avatar), the sound/music name, the list of hashtags, and a thumbnail image. Use it to build analytics dashboards, track a campaign, or enrich a content database. This endpoint focuses on metadata and stats. No TikTok login and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Caption, publish date, and video duration", "Views, likes, comments, shares, and saves", "Creator profile — handle, name, followers, verified, avatar", "Sound name, hashtags, and thumbnail image"] },
   { slug: "tiktok-comments", name: "TikTok Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/tiktok/comments", credits: 2, tagline: "Get the comments on any TikTok video — text, author, avatar, likes, and timestamp for each one, with cursor pagination to page through them all.", longDescription: "Paste a public TikTok video URL and the TikTok Comments API returns its comments as clean JSON. Each comment includes the text, the author's username and avatar, how many likes it has, and when it was posted. The response also reports totalComments — the video's full comment count. Fetch up to 500 comments per call with the limit parameter, then pass the returned nextCursor value back in to page through the rest — a flat 2 credits per call, no matter how many comments you fetch. Need replies under a specific comment? Pass that comment's id to the TikTok Comment Replies API. Ideal for sentiment analysis, social listening, moderation, and spotting engaged fans. No TikTok login and no proxies or infrastructure to maintain on your side.", delivers: ["Comment text, author username, and avatar", "Like count and publish time per comment", "totalComments plus cursor pagination (nextCursor) through every comment", "limit up to 500 — a flat 2 credits per call", "Pair with Comment Replies to pull replies"] },
@@ -1190,8 +1190,18 @@ const langUi = (): ApiParam => ({ name: "language", type: "string", required: fa
 const cid = (): ApiParam => ({ name: "comment_id", type: "string", required: true, description: "ID of the parent comment to fetch replies for (from the comments endpoint)." });
 const fastRss = (): ApiParam => ({ name: "fast", type: "boolean", required: false, description: "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters." });
 const cacheP = (): ApiParam => ({ name: "cache", type: "boolean", required: false, description: "Set true to serve from the 24h response cache. Default false — always fetch fresh data." });
+/** TikTok transcript defaults to cache=true (0 credits on hit). */
+const cachePDefaultTrue = (): ApiParam => ({
+  name: "cache",
+  type: "boolean",
+  required: false,
+  description:
+    "Serve from the 24h shared cache when available (0 credits on hit). Default true — set false to always fetch fresh.",
+});
 const CACHE_NOTE =
   "Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.";
+const CACHE_NOTE_DEFAULT_TRUE =
+  "Cache is on by default (0 credits on hit); pass cache=false to always fetch fresh.";
 
 const YT_VIDEO = "Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL.";
 const YT_SHORTS = "Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL.";
@@ -1246,7 +1256,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-community-post-details": [up("YouTube community post URL.")],
   "youtube-video-sponsors": [up(YT_VIDEO)],
   // TikTok
-  "tiktok-transcript": [up(TT_VIDEO), lang(), cacheP()],
+  "tiktok-transcript": [up(TT_VIDEO), lang(), cachePDefaultTrue()],
   "tiktok-summarizer": [up(TT_VIDEO), langOut(), cacheP()],
   "tiktok-video-details": [up(TT_VIDEO)],
   "tiktok-comments": [up(TT_VIDEO), lpFlat(50, 500, 2), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset, e.g. 50). A null nextCursor means the end of the comments." }],
@@ -2038,7 +2048,9 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
                 ? `Billing is 1 credit per minute of audio (rounded up) plus 1 credit for the AI summary. Failed or empty results are never charged.`
                 : ep.creditsPerResult
                   ? `At the default limit this endpoint costs ${ep.credits} credits (${ep.creditsPerResult} per result). Billing scales with how many results you request. ${CACHE_NOTE} Failed or empty results are never charged.`
-                  : `Each successful call costs ${ep.credits} credit${ep.credits === 1 ? "" : "s"}. ${CACHE_NOTE} Failed or empty results are never charged.`,
+                  : `Each successful call costs ${ep.credits} credit${ep.credits === 1 ? "" : "s"}. ${
+                      ep.slug === "tiktok-transcript" ? CACHE_NOTE_DEFAULT_TRUE : CACHE_NOTE
+                    } Failed or empty results are never charged.`,
     },
     {
       q: `Do I need a ${platform} API key or OAuth?`,

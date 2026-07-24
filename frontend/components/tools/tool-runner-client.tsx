@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
-import { Loader2, Copy, Download, Search, RefreshCw } from "lucide-react";
+import { Loader2, Copy, Download, Search, RefreshCw, KeyRound, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 type TranscriptData = {
@@ -34,10 +35,14 @@ export function ToolRunnerClient({
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paywalled, setPaywalled] = useState(false);
   const [data, setData] = useState<ResultData | null>(null);
+  const [showApiCta, setShowApiCta] = useState(false);
   // Ref guard blocks a second submit (e.g. rapid Enter) before React flushes
   // the loading state — more reliable than reading `loading` alone.
   const inFlight = useRef(false);
+
+  const isTikTokTranscript = endpoint === "/v1/tiktok/transcript";
 
   const run = useCallback(async () => {
     if (inFlight.current) return;
@@ -48,7 +53,9 @@ export function ToolRunnerClient({
     inFlight.current = true;
     setLoading(true);
     setError(null);
+    setPaywalled(false);
     setData(null);
+    setShowApiCta(false);
     try {
       const res = await fetch("/api/tool-run", {
         method: "POST",
@@ -56,15 +63,24 @@ export function ToolRunnerClient({
         body: JSON.stringify({ endpoint, url: url.trim() }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Request failed. Please try again.");
+      if (!res.ok) {
+        const code = json?.code as string | undefined;
+        if (res.status === 429 || code === "soft_paywall" || code === "anon_daily_limit") {
+          setPaywalled(true);
+          setError(json?.error || "Daily free limit reached. Sign up to continue.");
+          return;
+        }
+        throw new Error(json?.error || "Request failed. Please try again.");
+      }
       setData(json.data as ResultData);
+      if (isTikTokTranscript) setShowApiCta(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setLoading(false);
       inFlight.current = false;
     }
-  }, [endpoint, url]);
+  }, [endpoint, url, isTikTokTranscript]);
 
   const fullText =
     kind === "transcript"
@@ -110,7 +126,7 @@ export function ToolRunnerClient({
             onKeyDown={(e) => {
               if (e.key === "Enter" && !loading) run();
             }}
-            disabled={loading}
+            disabled={loading || paywalled}
             placeholder={placeholder || `Paste a ${platform} video URL`}
             aria-label={`${platform} video URL`}
             className="w-full rounded-lg border border-white/15 bg-zinc-900 py-2.5 pl-9 pr-3 text-sm text-white placeholder:text-gray-500 outline-none focus:border-primary disabled:opacity-60"
@@ -119,7 +135,7 @@ export function ToolRunnerClient({
         <button
           type="button"
           onClick={run}
-          disabled={loading}
+          disabled={loading || paywalled}
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
         >
           {loading ? <Loader2 className="size-4 animate-spin" /> : null}
@@ -127,19 +143,39 @@ export function ToolRunnerClient({
         </button>
       </div>
       <p className="mt-2 text-center text-xs text-gray-500 sm:text-left">
-        Free · no sign-up required · public videos only
+        {isTikTokTranscript
+          ? "3 free tries / day · then sign up for API credits"
+          : "Free · no sign-up required · public videos only"}
       </p>
 
-      {error && (
+      {(error || paywalled) && (
         <div className="mt-4 flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-zinc-950 p-6 text-center">
           <p className="text-sm text-rose-400">{error}</p>
-          <button
-            type="button"
-            onClick={run}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-white/15 px-3 py-1.5 text-sm text-gray-200 hover:bg-white/10"
-          >
-            <RefreshCw className="size-3.5" /> Try again
-          </button>
+          {paywalled ? (
+            <div className="mt-4 flex flex-col items-center gap-3 sm:flex-row">
+              <Link
+                href="/signup"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
+              >
+                <KeyRound className="size-4" />
+                Get free API credits
+              </Link>
+              <Link
+                href="/apis/tiktok-transcript"
+                className="inline-flex items-center gap-1.5 text-sm text-gray-300 hover:text-white"
+              >
+                API docs <ArrowRight className="size-3.5" />
+              </Link>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={run}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-white/15 px-3 py-1.5 text-sm text-gray-200 hover:bg-white/10"
+            >
+              <RefreshCw className="size-3.5" /> Try again
+            </button>
+          )}
         </div>
       )}
 
@@ -202,6 +238,32 @@ export function ToolRunnerClient({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {showApiCta && (
+            <div className="mt-5 rounded-xl border border-primary/30 bg-primary/5 p-4 text-center sm:text-left">
+              <p className="text-sm font-medium text-white">
+                With an API key, the same transcript is ~100× cheaper to automate
+              </p>
+              <p className="mt-1 text-xs text-gray-400">
+                5 credits per call · cache hits are free · build bots, n8n, and pipelines without the free-tool limit.
+              </p>
+              <div className="mt-3 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+                <Link
+                  href="/signup"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+                >
+                  <KeyRound className="size-4" />
+                  Get free API credits
+                </Link>
+                <Link
+                  href="/dashboard/tools/tiktok-transcript"
+                  className="inline-flex items-center justify-center gap-1.5 text-sm text-gray-300 hover:text-white"
+                >
+                  Open in dashboard <ArrowRight className="size-3.5" />
+                </Link>
+              </div>
             </div>
           )}
         </div>

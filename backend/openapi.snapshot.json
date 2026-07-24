@@ -1753,11 +1753,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
-              "default": false,
+              "description": "Serve from the 24h shared cache when available (0 credits on hit). Default true — set false to always fetch fresh.",
+              "default": true,
               "title": "Cache"
             },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+            "description": "Serve from the 24h shared cache when available (0 credits on hit). Default true — set false to always fetch fresh."
           }
         ],
         "responses": {

@@ -112,7 +112,11 @@ export function ApiPlayground({
                       missing ? "border-rose-400/60" : ""
                     }`}
                   >
-                    <option value="">default (false / fresh)</option>
+                    <option value="">
+                      {/default true/i.test(p.description)
+                        ? "default (true / cache)"
+                        : "default (false / fresh)"}
+                    </option>
                     <option value="true">true</option>
                     <option value="false">false</option>
                   </select>

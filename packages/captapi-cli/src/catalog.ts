@@ -167,7 +167,7 @@ const YOUTUBE: Omit<Endpoint, "platform">[] = [
 ];
 
 const TIKTOK: Omit<Endpoint, "platform">[] = [
-  { tool: "tiktok_transcript", name: "TikTok Transcript", path: "/v1/tiktok/transcript", credits: 2, summary: "Transcript of a TikTok video (via captions).", params: [url(TT_VIDEO), language(), cacheParam()] },
+  { tool: "tiktok_transcript", name: "TikTok Transcript", path: "/v1/tiktok/transcript", credits: 5, summary: "Transcript of a TikTok video (via captions).", params: [url(TT_VIDEO), language(), { name: "cache", type: "boolean", required: false, description: "Serve from the 24h shared cache when available (0 credits on hit). Default true — set false to always fetch fresh." }] },
   { tool: "tiktok_summarize", name: "TikTok Summarizer", path: "/v1/tiktok/summarize", credits: 4, summary: "AI summary of a TikTok video.", params: [url(TT_VIDEO), language(), cacheParam()] },
   { tool: "tiktok_video_details", name: "TikTok Video Details", path: "/v1/tiktok/video-details", credits: 1, summary: "Metadata + stats for a TikTok video.", params: [url(TT_VIDEO)] },
   { tool: "tiktok_comments", name: "TikTok Comments", path: "/v1/tiktok/comments", credits: 2, summary: "Comments on a TikTok video — text, author, avatar, likes, and timestamp, plus totalComments and cursor pagination (limit up to 500).", params: [url(TT_VIDEO), limitFlat(50, 500, 2), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset)." }] },

@@ -10,11 +10,12 @@ from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import quote_plus
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
+from app.core.quota import check_daily_quota, consume_daily_quota
 from app.schemas.common import ApiResponse
 from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
@@ -54,7 +55,7 @@ from app.utils.url import (
 
 router = APIRouter()
 
-CREDIT_TRANSCRIPT = 2
+CREDIT_TRANSCRIPT = 5
 CREDIT_SUMMARIZE = 4
 CREDIT_VIDEO_DETAILS = 1
 CREDIT_CHANNEL_DETAILS = 1
@@ -792,17 +793,50 @@ async def _fetch_tiktok_transcript(
 
 @router.get("/transcript", summary="TikTok video transcript (via auto-captions)")
 async def tiktok_transcript(
+    request: Request,
     url: str = Query(...),
     language: str | None = Query(
         None,
         description="Optional ISO-639-1 hint (e.g. 'tr') to pin the speech language",
         max_length=8,
     ),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    cache: bool = Query(
+        True,
+        description=(
+            "Serve from the 24h shared cache when available (0 credits on hit). "
+            "Default true — set false to always fetch fresh."
+        ),
+    ),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_tiktok_video_url(url)
     lang = (language or "").strip().lower() or None
+    settings = get_settings()
+
+    # Public free-tool proxy: daily per-client cap (counts every successful try).
+    anon_client = _anon_tool_client(request, settings.TOOL_PROXY_SECRET)
+    if anon_client:
+        await check_daily_quota(
+            f"anon.tiktok.transcript:{anon_client}",
+            limit=settings.ANON_TIKTOK_TRANSCRIPT_DAILY,
+            error="anon_daily_limit",
+            upgrade_url="/signup",
+        )
+
+    # Free plan: separate low daily quota on billable (non-cache) transcript calls.
+    free_quota = (
+        settings.FREE_TIKTOK_TRANSCRIPT_DAILY
+        if (caller.plan or "").lower() == "free" and not anon_client
+        else 0
+    )
+    if free_quota:
+        await check_daily_quota(
+            f"free.tiktok.transcript:{caller.user_id}",
+            limit=free_quota,
+            error="free_transcript_daily_quota",
+            upgrade_url="/dashboard/billing",
+        )
+
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/transcript",
@@ -829,7 +863,29 @@ async def tiktok_transcript(
             ctx=ctx,
             use_cache=cache,
         )
+
+        if anon_client:
+            await consume_daily_quota(
+                f"anon.tiktok.transcript:{anon_client}",
+                limit=settings.ANON_TIKTOK_TRANSCRIPT_DAILY,
+            )
+        elif free_quota and not ctx.get("cache_hit"):
+            await consume_daily_quota(
+                f"free.tiktok.transcript:{caller.user_id}",
+                limit=free_quota,
+            )
+
         return ApiResponse(data=data)
+
+
+def _anon_tool_client(request: Request, secret: str) -> str | None:
+    """Return the anon client id when the request is from the trusted tool proxy."""
+    if not secret:
+        return None
+    if request.headers.get("x-captapi-tool-secret") != secret:
+        return None
+    client = (request.headers.get("x-captapi-client") or "").strip()
+    return client[:128] if client else None
 
 
 @router.get("/summarize", summary="AI summary of a TikTok video")

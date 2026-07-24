@@ -117,7 +117,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `tiktok_transcript` | `/v1/tiktok/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 2 |
+| `tiktok_transcript` | `/v1/tiktok/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 5 |
 | `tiktok_summarize` | `/v1/tiktok/summarize` | `url` (string), `language`? (string), `cache`? (boolean) | 4 |
 | `tiktok_video_details` | `/v1/tiktok/video-details` | `url` (string), `cache`? (boolean) | 1 |
 | `tiktok_comments` | `/v1/tiktok/comments` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 2 |

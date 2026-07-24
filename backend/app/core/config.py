@@ -374,6 +374,13 @@ class Settings(BaseSettings):
     RATE_LIMIT_PRO: int = 300
     RATE_LIMIT_BUSINESS: int = 600
 
+    # Free-plan daily cap on billable TikTok transcript calls (cache hits free).
+    FREE_TIKTOK_TRANSCRIPT_DAILY: int = 5
+    # Public free-tool (anon) daily tries per client fingerprint.
+    ANON_TIKTOK_TRANSCRIPT_DAILY: int = 3
+    # Shared secret: Next.js /api/tool-run → backend. When set, anon IP quotas apply.
+    TOOL_PROXY_SECRET: str = ""
+
     MAX_VIDEO_UPLOAD_MB: int = 200
     MAX_VIDEO_DURATION_MINUTES: int = 60
 

@@ -43,11 +43,13 @@ export const TOOLS: Record<string, Tool> = {
   "tiktok-transcript": {
     slug: "tiktok-transcript",
     title: "Free TikTok Transcript Extractor",
-    description: "Extract speech and captions from any public TikTok video as clean, copyable text. Free and no sign-up — AI transcribes the audio when there are no captions.",
+    description: "Extract speech and captions from any public TikTok video as clean, copyable text. Free with a few daily tries — AI transcribes the audio when there are no captions.",
     platform: "TikTok",
     apiEndpoint: "/v1/tiktok/transcript",
     faq: [
       { q: "What if the TikTok has no captions?", a: "We use AI to transcribe the audio." },
+      { q: "How many free tries do I get?", a: "3 free transcripts per day without an account. Sign up for 100 free credits — each API call costs 5 credits, and cached repeats are free." },
+      { q: "Why use the API instead?", a: "An API key is far cheaper for automation (batch jobs, n8n, bots) and removes the daily free-tool limit. Same endpoint, your credits." },
     ],
   },
   "tiktok-summarizer": {
