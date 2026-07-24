@@ -26,11 +26,14 @@ export function ToolRunnerClient({
   platform,
   kind,
   placeholder,
+  toolSlug,
 }: {
   endpoint: string;
   platform: string;
   kind: "transcript" | "summary";
   placeholder?: string;
+  /** Catalog slug for dashboard / docs deep links, e.g. tiktok-transcript */
+  toolSlug?: string;
 }) {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -38,11 +41,14 @@ export function ToolRunnerClient({
   const [paywalled, setPaywalled] = useState(false);
   const [data, setData] = useState<ResultData | null>(null);
   const [showApiCta, setShowApiCta] = useState(false);
-  // Ref guard blocks a second submit (e.g. rapid Enter) before React flushes
-  // the loading state — more reliable than reading `loading` alone.
   const inFlight = useRef(false);
 
-  const isTikTokTranscript = endpoint === "/v1/tiktok/transcript";
+  const slug =
+    toolSlug ||
+    endpoint
+      .replace(/^\/v1\//, "")
+      .replace(/\//g, "-")
+      .replace("summarize", "summarizer");
 
   const run = useCallback(async () => {
     if (inFlight.current) return;
@@ -73,14 +79,14 @@ export function ToolRunnerClient({
         throw new Error(json?.error || "Request failed. Please try again.");
       }
       setData(json.data as ResultData);
-      if (isTikTokTranscript) setShowApiCta(true);
+      setShowApiCta(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
       setLoading(false);
       inFlight.current = false;
     }
-  }, [endpoint, url, isTikTokTranscript]);
+  }, [endpoint, url]);
 
   const fullText =
     kind === "transcript"
@@ -143,9 +149,7 @@ export function ToolRunnerClient({
         </button>
       </div>
       <p className="mt-2 text-center text-xs text-gray-500 sm:text-left">
-        {isTikTokTranscript
-          ? "3 free tries / day · then sign up for API credits"
-          : "Free · no sign-up required · public videos only"}
+        3 free tries / day across all free tools · then sign up for API credits
       </p>
 
       {(error || paywalled) && (
@@ -161,7 +165,7 @@ export function ToolRunnerClient({
                 Get free API credits
               </Link>
               <Link
-                href="/apis/tiktok-transcript"
+                href={`/apis/${slug}`}
                 className="inline-flex items-center gap-1.5 text-sm text-gray-300 hover:text-white"
               >
                 API docs <ArrowRight className="size-3.5" />
@@ -232,7 +236,10 @@ export function ToolRunnerClient({
               {data.topics && data.topics.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {data.topics.map((t, i) => (
-                    <span key={i} className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-gray-300">
+                    <span
+                      key={i}
+                      className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-gray-300"
+                    >
                       {t}
                     </span>
                   ))}
@@ -244,10 +251,10 @@ export function ToolRunnerClient({
           {showApiCta && (
             <div className="mt-5 rounded-xl border border-primary/30 bg-primary/5 p-4 text-center sm:text-left">
               <p className="text-sm font-medium text-white">
-                With an API key, the same transcript is ~100× cheaper to automate
+                With an API key, the same result is far cheaper to automate
               </p>
               <p className="mt-1 text-xs text-gray-400">
-                5 credits per call · cache hits are free · build bots, n8n, and pipelines without the free-tool limit.
+                Cache hits are free · build bots, n8n, and pipelines without the free-tool daily limit.
               </p>
               <div className="mt-3 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
                 <Link
@@ -258,7 +265,7 @@ export function ToolRunnerClient({
                   Get free API credits
                 </Link>
                 <Link
-                  href="/dashboard/tools/tiktok-transcript"
+                  href={`/dashboard/tools/${slug}`}
                   className="inline-flex items-center justify-center gap-1.5 text-sm text-gray-300 hover:text-white"
                 >
                   Open in dashboard <ArrowRight className="size-3.5" />

@@ -5,9 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, Copy, Download, Search, RefreshCw, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-import { ALL_ENDPOINTS, requestUrl } from "@/lib/api-catalog";
-
-const ENDPOINT = ALL_ENDPOINTS.find((e) => e.slug === "tiktok-transcript")!;
+import { ALL_ENDPOINTS, requestUrl, type ApiEndpoint } from "@/lib/api-catalog";
+import type { Tool } from "@/lib/tools";
 
 type TranscriptData = {
   title?: string | null;
@@ -16,12 +15,24 @@ type TranscriptData = {
   segments?: number;
   language?: string | null;
 };
+type SummaryData = {
+  title?: string | null;
+  summary?: string;
+  keyPoints?: string[];
+  topics?: string[];
+  sentiment?: string;
+};
+type ResultData = TranscriptData & SummaryData;
 
-export function DashboardTikTokTranscriptTool() {
+export function DashboardToolRunner({ tool }: { tool: Tool }) {
+  const endpoint: ApiEndpoint | undefined = ALL_ENDPOINTS.find((e) => e.slug === tool.slug);
+  const kind = tool.kind ?? "transcript";
+  const credits = endpoint?.credits ?? 0;
+
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<TranscriptData | null>(null);
+  const [data, setData] = useState<ResultData | null>(null);
   const [creditsUsed, setCreditsUsed] = useState<number | null>(null);
   const [cacheHit, setCacheHit] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
@@ -40,9 +51,7 @@ export function DashboardTikTokTranscriptTool() {
         .eq("user_id", user.id)
         .maybeSingle();
       if (row) {
-        setBalance(
-          (row.subscription_credits ?? 0) + (row.topup_credits ?? 0),
-        );
+        setBalance((row.subscription_credits ?? 0) + (row.topup_credits ?? 0));
       }
     } catch {
       /* ignore */
@@ -54,9 +63,9 @@ export function DashboardTikTokTranscriptTool() {
   }, [refreshBalance]);
 
   const run = useCallback(async () => {
-    if (inFlight.current) return;
+    if (inFlight.current || !endpoint) return;
     if (!url.trim()) {
-      toast.error("Please paste a TikTok video URL.");
+      toast.error(`Please paste a ${tool.platform} video URL.`);
       return;
     }
     inFlight.current = true;
@@ -76,7 +85,7 @@ export function DashboardTikTokTranscriptTool() {
         return;
       }
       const res = await fetch(
-        requestUrl(ENDPOINT, { url: url.trim(), cache: "true" }),
+        requestUrl(endpoint, { url: url.trim(), cache: "true" }),
         { headers: { Authorization: `Bearer ${session.access_token}` } },
       );
       const json = await res.json().catch(() => null);
@@ -86,15 +95,14 @@ export function DashboardTikTokTranscriptTool() {
           typeof detail === "string"
             ? detail
             : detail?.error === "free_transcript_daily_quota"
-              ? "Free plan daily transcript limit reached (5/day). Upgrade or wait until tomorrow."
+              ? "Free plan daily limit reached. Upgrade or wait until tomorrow."
               : detail?.error === "insufficient_credits"
                 ? "Not enough credits. Top up or upgrade your plan."
                 : detail?.error || json?.error || `Request failed (HTTP ${res.status})`;
         setError(String(msg));
         return;
       }
-      const payload = (json?.data ?? json) as TranscriptData;
-      setData(payload);
+      setData((json?.data ?? json) as ResultData);
       const usedHeader = res.headers.get("x-captapi-credits");
       const hitHeader = res.headers.get("x-captapi-cache");
       if (usedHeader != null) setCreditsUsed(parseInt(usedHeader, 10) || 0);
@@ -106,9 +114,18 @@ export function DashboardTikTokTranscriptTool() {
       setLoading(false);
       inFlight.current = false;
     }
-  }, [url, refreshBalance]);
+  }, [endpoint, url, tool.platform, refreshBalance]);
 
-  const fullText = data?.transcript || "";
+  const fullText =
+    kind === "transcript"
+      ? data?.transcript || ""
+      : [
+          data?.summary,
+          data?.keyPoints?.length ? "\nKey points:\n" + data.keyPoints.map((k) => `• ${k}`).join("\n") : "",
+          data?.topics?.length ? "\nTopics: " + data.topics.join(", ") : "",
+        ]
+          .filter(Boolean)
+          .join("\n");
 
   const copyText = async () => {
     if (!fullText) return;
@@ -125,16 +142,29 @@ export function DashboardTikTokTranscriptTool() {
     const blob = new Blob([fullText], { type: "text/plain;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `tiktok-transcript-${Date.now()}.txt`;
+    a.download = `${tool.slug}-${Date.now()}.txt`;
     a.click();
     toast.success("Downloaded .txt");
   };
+
+  if (!endpoint) {
+    return (
+      <p className="text-sm text-destructive">
+        This tool is not linked to an API endpoint yet. Use the{" "}
+        <Link href="/dashboard/playground" className="underline">
+          Playground
+        </Link>{" "}
+        instead.
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
         <p>
-          Uses your account credits · <span className="font-medium text-foreground">5 credits</span>{" "}
+          Uses your account credits ·{" "}
+          <span className="font-medium text-foreground">{credits} credit{credits === 1 ? "" : "s"}</span>{" "}
           per call · cache hits are free
         </p>
         {balance != null && (
@@ -160,8 +190,8 @@ export function DashboardTikTokTranscriptTool() {
               if (e.key === "Enter" && !loading) void run();
             }}
             disabled={loading}
-            placeholder="https://www.tiktok.com/@user/video/…"
-            aria-label="TikTok video URL"
+            placeholder={tool.urlPlaceholder || `Paste a ${tool.platform} video URL`}
+            aria-label={`${tool.platform} video URL`}
             className="w-full rounded-lg border bg-background py-2.5 pl-9 pr-3 text-sm outline-none focus:border-primary disabled:opacity-60"
           />
         </div>
@@ -172,13 +202,13 @@ export function DashboardTikTokTranscriptTool() {
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
         >
           {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-          {loading ? "Working…" : "Get transcript"}
+          {loading ? "Working…" : kind === "transcript" ? "Get transcript" : "Summarize"}
         </button>
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Free plan: max 5 billable transcripts / day.{" "}
-        <Link href="/apis/tiktok-transcript" className="underline underline-offset-2">
+        {tool.slug === "tiktok-transcript" ? "Free plan: max 5 billable TikTok transcripts / day. " : null}
+        <Link href={`/apis/${tool.slug}`} className="underline underline-offset-2">
           API docs
         </Link>
         {" · "}
@@ -214,8 +244,11 @@ export function DashboardTikTokTranscriptTool() {
             <div className="min-w-0">
               {data.title && <p className="truncate font-medium">{data.title}</p>}
               <p className="text-xs text-muted-foreground">
-                {data.wordCount?.toLocaleString() ?? "—"} words · {data.segments ?? "—"} segments
-                {data.language ? ` · ${data.language}` : ""}
+                {kind === "transcript"
+                  ? `${data.wordCount?.toLocaleString() ?? "—"} words · ${data.segments ?? "—"} segments${
+                      data.language ? ` · ${data.language}` : ""
+                    }`
+                  : "AI summary"}
                 {creditsUsed != null
                   ? ` · ${cacheHit || creditsUsed === 0 ? "0 credits (cache)" : `${creditsUsed} credits`}`
                   : null}
@@ -238,11 +271,37 @@ export function DashboardTikTokTranscriptTool() {
               </button>
             </div>
           </div>
-          <textarea
-            readOnly
-            value={fullText}
-            className="h-72 w-full resize-y rounded-lg border bg-muted/40 p-3 text-sm leading-relaxed outline-none"
-          />
+
+          {kind === "transcript" ? (
+            <textarea
+              readOnly
+              value={fullText}
+              className="h-72 w-full resize-y rounded-lg border bg-muted/40 p-3 text-sm leading-relaxed outline-none"
+            />
+          ) : (
+            <div className="space-y-4 text-sm">
+              {data.summary && <p className="leading-relaxed">{data.summary}</p>}
+              {data.keyPoints && data.keyPoints.length > 0 && (
+                <div>
+                  <p className="mb-1 font-medium">Key points</p>
+                  <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
+                    {data.keyPoints.map((k, i) => (
+                      <li key={i}>{k}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {data.topics && data.topics.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {data.topics.map((t, i) => (
+                    <span key={i} className="rounded-full border bg-muted/40 px-3 py-1 text-xs">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

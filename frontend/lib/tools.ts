@@ -7,6 +7,8 @@ export interface Tool {
   faq: { q: string; a: string }[];
   /** Whether the live widget returns a transcript or an AI summary. */
   kind?: "transcript" | "summary";
+  /** Short label for dashboard nav, e.g. "TikTok Transcript". */
+  shortTitle?: string;
   /** SEO keywords for <meta keywords> + content. */
   keywords?: string[];
   /** Example URL shown in the input placeholder. */
@@ -95,10 +97,13 @@ const URL_PLACEHOLDERS: Record<string, string> = {
   Facebook: "https://www.facebook.com/watch/?v=1234567890",
 };
 
-// Fill derived fields (kind, keywords, urlPlaceholder) so each entry stays terse.
+// Fill derived fields (kind, keywords, urlPlaceholder, shortTitle) so each entry stays terse.
 for (const t of Object.values(TOOLS)) {
   if (!t.kind) t.kind = t.apiEndpoint.includes("summarize") ? "summary" : "transcript";
   if (!t.urlPlaceholder) t.urlPlaceholder = URL_PLACEHOLDERS[t.platform];
+  if (!t.shortTitle) {
+    t.shortTitle = `${t.platform} ${t.kind === "summary" ? "Summarizer" : "Transcript"}`;
+  }
   if (!t.keywords) {
     const p = t.platform.toLowerCase();
     t.keywords =
@@ -125,7 +130,7 @@ export function toolFaqs(t: Tool): { q: string; a: string }[] {
     ? [
         {
           q: `Is the ${p} summarizer free?`,
-          a: `Yes. The on-site tool is free with no sign-up — paste a public ${p} URL and summarize right here. For API automation or higher volume, sign up for 100 free credits (no credit card required).`,
+          a: `Yes — you get a few free tries per day with no sign-up. Paste a public ${p} URL and summarize right here. For more volume or automation, sign up for 100 free credits (no credit card required).`,
         },
         {
           q: `How does the ${p} AI summary work?`,
@@ -139,7 +144,7 @@ export function toolFaqs(t: Tool): { q: string; a: string }[] {
     : [
         {
           q: `Is the ${p} transcript tool free?`,
-          a: `Yes. The on-site tool is free with no sign-up — paste a public ${p} URL and get the full text here. For API access or higher volume, sign up for 100 free credits (no card required).`,
+          a: `Yes — you get a few free tries per day with no sign-up. Paste a public ${p} URL and get the full text here. For API access or higher volume, sign up for 100 free credits (no card required).`,
         },
         {
           q: `How do I get a transcript from a ${p} video?`,
@@ -158,7 +163,7 @@ export function toolFaqs(t: Tool): { q: string; a: string }[] {
     },
     {
       q: "Do I need an account or to install anything?",
-      a: "No. The tool runs in your browser with no login or install. An account is only needed if you want to call the API programmatically.",
+      a: "No for the first few daily tries — the tool runs in your browser. After that, sign up for free API credits to keep going (or use the Tools section in the dashboard).",
     },
     {
       q: `Does it work for long ${p} videos?`,
