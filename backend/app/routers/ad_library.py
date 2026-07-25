@@ -15,6 +15,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
+from app.services import google_ads_native
 from app.utils.formatters import safe_int, safe_str
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
@@ -22,7 +23,9 @@ router = APIRouter()
 
 RATE_AD_LIST = 3.5
 RATE_GOOGLE_COMPANY_ADS = 3.35
-RATE_GOOGLE_ADVERTISER = 4.5
+# Native ATC SearchSuggestions (~proxy only). Was 4.5 when Apify-backed.
+RATE_GOOGLE_ADVERTISER = 0.5
+CREDIT_GOOGLE_ADVERTISER_MIN = 2
 
 
 def _scaled(limit: int, rate: float = RATE_AD_LIST, minimum: int = 2) -> int:
@@ -792,18 +795,61 @@ async def google_advertiser_search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/google/advertiser-search", platform="google_ad_library", resource_url=None, base_credits=_scaled(limit, RATE_GOOGLE_ADVERTISER)) as ctx:
+    cost = _scaled(limit, RATE_GOOGLE_ADVERTISER, CREDIT_GOOGLE_ADVERTISER_MIN)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/ad-library/google/advertiser-search",
+        platform="google_ad_library",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2, {"advertisers": [q], "region": country.upper(), "maxResults": limit}, limit)
-            advertisers = {}
+            # 1) Native ATC SearchSuggestions (proxy/direct) — ~ms, ~$0.
+            native = await google_ads_native.search_advertisers(
+                q, country=country, limit=limit
+            )
+            if native is not None:
+                ctx["source"] = "direct"
+                return {
+                    "query": q,
+                    "country": country.upper(),
+                    "totalReturned": len(native),
+                    "advertisers": native,
+                }
+
+            # 2) Apify last resort.
+            items = await _run_actor(
+                settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2,
+                {"advertisers": [q], "region": country.upper(), "maxResults": limit},
+                limit,
+            )
+            advertisers: dict[str, Any] = {}
             for item in items:
                 ad = _normalize_ad(item, "google_ad_library")
-                name = ad["advertiser"]["name"] or ad["advertiser"]["id"]
+                name = ad["advertiser"].get("name") or ad["advertiser"].get("id")
                 if name:
                     advertisers[name] = ad["advertiser"]
-            return {"query": q, "country": country.upper(), "totalReturned": len(advertisers), "advertisers": list(advertisers.values())}
+            ctx["source"] = "apify"
+            return {
+                "query": q,
+                "country": country.upper(),
+                "totalReturned": len(advertisers),
+                "advertisers": list(advertisers.values()),
+            }
 
-        return ApiResponse(data=await cached_or_run("ad-library.google.advertiser-search", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx, use_cache=cache))
+        data = await cached_or_run(
+            "ad-library.google.advertiser-search",
+            {"q": q, "country": country, "limit": limit, "v": 4},
+            _run,
+            ctx,
+            use_cache=cache,
+        )
+        ctx["credits_override"] = _scaled(
+            len(data.get("advertisers") or []),
+            RATE_GOOGLE_ADVERTISER,
+            CREDIT_GOOGLE_ADVERTISER_MIN,
+        )
+        return ApiResponse(data=data)
 
 
 @router.get("/linkedin/search-ads", summary="Search LinkedIn Ad Library")

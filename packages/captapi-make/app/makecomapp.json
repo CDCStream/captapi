@@ -2928,7 +2928,7 @@
       },
       "googleAdLibraryAdvertiserSearch": {
         "label": "Google Advertiser Search",
-        "description": "Search Google Ads advertisers. Costs ~45 credits (cached results free, failures never charged).",
+        "description": "Search Google Ads advertisers. Costs ~5 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
