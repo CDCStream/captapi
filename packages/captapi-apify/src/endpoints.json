@@ -4317,7 +4317,7 @@
     "platform": "ad_library",
     "name": "Facebook Ad Library Search",
     "path": "/v1/ad-library/facebook/search",
-    "credits": 70,
+    "credits": 2,
     "summary": "Search Meta/Facebook ads by keyword.",
     "params": [
       {
@@ -4351,7 +4351,7 @@
     "platform": "ad_library",
     "name": "Facebook Company Ads",
     "path": "/v1/ad-library/facebook/company-ads",
-    "credits": 70,
+    "credits": 2,
     "summary": "Ads for a Facebook page or Meta Ad Library URL.",
     "params": [
       {
@@ -4385,7 +4385,7 @@
     "platform": "ad_library",
     "name": "Facebook Ad Library Search Companies",
     "path": "/v1/ad-library/facebook/search-companies",
-    "credits": 70,
+    "credits": 2,
     "summary": "Find advertisers/pages in the Meta Ad Library by name.",
     "params": [
       {
@@ -4621,7 +4621,7 @@
     "platform": "ad_library",
     "name": "LinkedIn Ad Library Search",
     "path": "/v1/ad-library/linkedin/search-ads",
-    "credits": 70,
+    "credits": 2,
     "summary": "Search LinkedIn Ad Library ads.",
     "params": [
       {

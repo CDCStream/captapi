@@ -2775,7 +2775,7 @@
       },
       "facebookAdLibrarySearch": {
         "label": "Facebook Ad Library Search",
-        "description": "Search Meta/Facebook ads by keyword. Costs ~70 credits (cached results free, failures never charged).",
+        "description": "Search Meta/Facebook ads by keyword. Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2792,7 +2792,7 @@
       },
       "facebookAdLibraryCompanyAds": {
         "label": "Facebook Company Ads",
-        "description": "Ads for a Facebook page or Meta Ad Library URL. Costs ~70 credits (cached results free, failures never charged).",
+        "description": "Ads for a Facebook page or Meta Ad Library URL. Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2809,7 +2809,7 @@
       },
       "facebookAdLibrarySearchCompanies": {
         "label": "Facebook Ad Library Search Companies",
-        "description": "Find advertisers/pages in the Meta Ad Library by name. Costs ~70 credits (cached results free, failures never charged).",
+        "description": "Find advertisers/pages in the Meta Ad Library by name. Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -2945,7 +2945,7 @@
       },
       "linkedinAdLibrarySearchAds": {
         "label": "LinkedIn Ad Library Search",
-        "description": "Search LinkedIn Ad Library ads. Costs ~70 credits (cached results free, failures never charged).",
+        "description": "Search LinkedIn Ad Library ads. Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

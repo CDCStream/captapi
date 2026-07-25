@@ -383,9 +383,9 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `facebook_ad_library_search` | `/v1/ad-library/facebook/search` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 70 |
-| `facebook_ad_library_company_ads` | `/v1/ad-library/facebook/company-ads` | `url` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 70 |
-| `facebook_ad_library_search_companies` | `/v1/ad-library/facebook/search-companies` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 70 |
+| `facebook_ad_library_search` | `/v1/ad-library/facebook/search` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `facebook_ad_library_company_ads` | `/v1/ad-library/facebook/company-ads` | `url` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `facebook_ad_library_search_companies` | `/v1/ad-library/facebook/search-companies` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `facebook_ad_library_ad_details` | `/v1/ad-library/facebook/ad-details` | `url` (string), `cache`? (boolean) | 17 |
 | `facebook_ad_library_ad_transcript` | `/v1/ad-library/facebook/ad-transcript` | `url` (string), `cache`? (boolean) | 17 |
 | `tiktok_ad_library_search` | `/v1/ad-library/tiktok/search` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 70 |
@@ -393,7 +393,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `google_ad_library_company_ads` | `/v1/ad-library/google/company-ads` | `advertiser` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 67 |
 | `google_ad_library_ad_details` | `/v1/ad-library/google/ad-details` | `creative_id` (string), `country`? (string), `cache`? (boolean) | 17 |
 | `google_ad_library_advertiser_search` | `/v1/ad-library/google/advertiser-search` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 1 |
-| `linkedin_ad_library_search_ads` | `/v1/ad-library/linkedin/search-ads` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 70 |
+| `linkedin_ad_library_search_ads` | `/v1/ad-library/linkedin/search-ads` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `linkedin_ad_library_ad_details` | `/v1/ad-library/linkedin/ad-details` | `url` (string), `cache`? (boolean) | 17 |
 
 ---

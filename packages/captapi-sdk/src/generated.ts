@@ -2263,15 +2263,15 @@ export interface LinkedinAdLibraryAdDetailsParams {
 
 export class AdLibraryApi {
   constructor(private readonly core: HttpCore) {}
-  /** Facebook Ad Library Search — Search Meta/Facebook ads by keyword. (70 credits) */
+  /** Facebook Ad Library Search — Search Meta/Facebook ads by keyword. (2 credits) */
   facebookSearch(params: FacebookAdLibrarySearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/facebook/search", params);
   }
-  /** Facebook Company Ads — Ads for a Facebook page or Meta Ad Library URL. (70 credits) */
+  /** Facebook Company Ads — Ads for a Facebook page or Meta Ad Library URL. (2 credits) */
   facebookCompanyAds(params: FacebookAdLibraryCompanyAdsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/facebook/company-ads", params);
   }
-  /** Facebook Ad Library Search Companies — Find advertisers/pages in the Meta Ad Library by name. (70 credits) */
+  /** Facebook Ad Library Search Companies — Find advertisers/pages in the Meta Ad Library by name. (2 credits) */
   facebookSearchCompanies(params: FacebookAdLibrarySearchCompaniesParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/facebook/search-companies", params);
   }
@@ -2303,7 +2303,7 @@ export class AdLibraryApi {
   googleAdvertiserSearch(params: GoogleAdLibraryAdvertiserSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/google/advertiser-search", params);
   }
-  /** LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (70 credits) */
+  /** LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (2 credits) */
   linkedinSearchAds(params: LinkedinAdLibrarySearchAdsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/linkedin/search-ads", params);
   }

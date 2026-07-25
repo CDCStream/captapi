@@ -1,0 +1,268 @@
+"""Native Meta Ad Library search via Decodo JS-rendered HTML (no Apify).
+
+Facebook blocks plain datacenter/residential fetches (403). Decodo with
+``headless=html`` returns the hydrated Ad Library page, which embeds
+``collated_results`` JSON we can parse. Cost is one Decodo render per call.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+from datetime import datetime, timezone
+from typing import Any
+from urllib.parse import parse_qs, urlencode, urlparse
+
+import structlog
+
+from app.services import decodo_fetch
+
+log = structlog.get_logger(__name__)
+
+_LIBRARY = "https://www.facebook.com/ads/library/"
+
+
+def search_url(q: str, country: str, *, active_status: str = "all") -> str:
+    params = {
+        "active_status": active_status,
+        "ad_type": "all",
+        "country": (country or "US").upper(),
+        "q": q,
+        "search_type": "keyword_unordered",
+        "media_type": "all",
+    }
+    return f"{_LIBRARY}?{urlencode(params)}"
+
+
+def company_library_url(url_or_page: str, country: str) -> str:
+    """Build an Ad Library URL for a page / existing library link."""
+    raw = (url_or_page or "").strip()
+    country = (country or "US").upper()
+    if not raw:
+        return search_url("", country)
+
+    if "ads/library" in raw.lower():
+        parsed = urlparse(raw)
+        qs = parse_qs(parsed.query)
+        if "country" not in qs:
+            sep = "&" if parsed.query else "?"
+            return f"{raw}{sep}country={country}"
+        return raw
+
+    page_id = None
+    m = re.search(r"(?:profile\.php\?id=|page_id=|view_all_page_id=)(\d+)", raw, re.I)
+    if m:
+        page_id = m.group(1)
+    elif re.fullmatch(r"\d{5,}", raw):
+        page_id = raw
+    if page_id:
+        params = {
+            "active_status": "all",
+            "ad_type": "all",
+            "country": country,
+            "view_all_page_id": page_id,
+            "media_type": "all",
+        }
+        return f"{_LIBRARY}?{urlencode(params)}"
+
+    m = re.search(r"facebook\.com/([^/?#]+)", raw, re.I)
+    slug = m.group(1) if m else raw
+    if slug.lower() in {"pages", "people", "watch", "groups", "events"}:
+        slug = raw
+    return search_url(slug, country)
+
+
+def _json_array_at(html: str, start: int) -> list[Any] | None:
+    """Parse a JSON array starting at ``start`` (index of '[')."""
+    if start < 0 or start >= len(html) or html[start] != "[":
+        return None
+    depth = 0
+    i = start
+    n = len(html)
+    while i < n:
+        ch = html[i]
+        if ch == "[":
+            depth += 1
+        elif ch == "]":
+            depth -= 1
+            if depth == 0:
+                try:
+                    data = json.loads(html[start : i + 1])
+                except ValueError:
+                    return None
+                return data if isinstance(data, list) else None
+        elif ch == '"':
+            i += 1
+            while i < n:
+                if html[i] == "\\":
+                    i += 2
+                    continue
+                if html[i] == '"':
+                    break
+                i += 1
+        i += 1
+    return None
+
+
+def extract_collated_ads(html: str) -> list[dict[str, Any]]:
+    """Pull unique ad objects from embedded ``collated_results`` arrays."""
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for m in re.finditer(r'"collated_results"\s*:\s*\[', html):
+        arr = _json_array_at(html, m.end() - 1)
+        if not arr:
+            continue
+        for item in arr:
+            if not isinstance(item, dict):
+                continue
+            aid = str(item.get("ad_archive_id") or item.get("adArchiveId") or "").strip()
+            if not aid or aid in seen:
+                continue
+            seen.add(aid)
+            out.append(item)
+    return out
+
+
+def _unix_iso(value: Any) -> str | None:
+    if value in (None, "", 0, "0"):
+        return None
+    try:
+        ts = int(value)
+    except (TypeError, ValueError):
+        return str(value) if value else None
+    if ts > 10_000_000_000:  # ms
+        ts //= 1000
+    return datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
+
+def to_normalize_shape(item: dict[str, Any]) -> dict[str, Any]:
+    """Map Meta ``collated_results`` row → shape ``_normalize_ad`` understands."""
+    snap_in = item.get("snapshot") if isinstance(item.get("snapshot"), dict) else {}
+    body = snap_in.get("body")
+    body_text = body.get("text") if isinstance(body, dict) else body
+
+    cards_out: list[dict[str, Any]] = []
+    for card in snap_in.get("cards") or []:
+        if not isinstance(card, dict):
+            continue
+        cards_out.append(
+            {
+                "body": card.get("body"),
+                "title": card.get("title"),
+                "ctaText": card.get("cta_text") or card.get("ctaText"),
+                "linkUrl": card.get("link_url") or card.get("linkUrl"),
+                "originalImageUrl": card.get("original_image_url") or card.get("originalImageUrl"),
+                "videoHdUrl": card.get("video_hd_url") or card.get("videoHdUrl"),
+                "videoSdUrl": card.get("video_sd_url") or card.get("videoSdUrl"),
+                "videoPreviewImageUrl": card.get("video_preview_image_url")
+                or card.get("videoPreviewImageUrl"),
+            }
+        )
+
+    images = []
+    for img in snap_in.get("images") or []:
+        if isinstance(img, dict):
+            images.append(
+                {
+                    "originalImageUrl": img.get("original_image_url") or img.get("originalImageUrl"),
+                    "resizedImageUrl": img.get("resized_image_url") or img.get("resizedImageUrl"),
+                }
+            )
+        elif isinstance(img, str):
+            images.append(img)
+
+    videos = []
+    for vid in snap_in.get("videos") or []:
+        if isinstance(vid, dict):
+            videos.append(
+                {
+                    "videoHdUrl": vid.get("video_hd_url") or vid.get("videoHdUrl"),
+                    "videoSdUrl": vid.get("video_sd_url") or vid.get("videoSdUrl"),
+                    "videoPreviewImageUrl": vid.get("video_preview_image_url")
+                    or vid.get("videoPreviewImageUrl"),
+                }
+            )
+
+    page_name = item.get("page_name") or snap_in.get("page_name")
+    page_id = item.get("page_id") or snap_in.get("page_id")
+
+    return {
+        "adArchiveId": item.get("ad_archive_id") or item.get("adArchiveId"),
+        "pageId": page_id,
+        "pageName": page_name,
+        "startDate": _unix_iso(item.get("start_date") or item.get("startDate")),
+        "endDate": _unix_iso(item.get("end_date") or item.get("endDate")),
+        "impressionsWithIndex": item.get("impressions_with_index") or item.get("impressionsWithIndex"),
+        "spend": item.get("spend"),
+        "reachEstimate": item.get("reach_estimate") or item.get("reachEstimate"),
+        "targetedOrReachedCountries": item.get("targeted_or_reached_countries")
+        or item.get("targetedOrReachedCountries"),
+        "snapshot": {
+            "pageName": page_name,
+            "pageProfileUri": snap_in.get("page_profile_uri") or snap_in.get("pageProfileUri"),
+            "pageProfilePictureUrl": snap_in.get("page_profile_picture_url")
+            or snap_in.get("pageProfilePictureUrl"),
+            "ctaText": snap_in.get("cta_text") or snap_in.get("ctaText"),
+            "linkUrl": snap_in.get("link_url") or snap_in.get("linkUrl"),
+            "title": snap_in.get("title"),
+            "displayFormat": snap_in.get("display_format") or snap_in.get("displayFormat"),
+            "body": {"text": body_text} if body_text else snap_in.get("body"),
+            "cards": cards_out,
+            "images": images,
+            "videos": videos,
+        },
+    }
+
+
+async def _fetch_ads(library_url: str, *, limit: int) -> list[dict[str, Any]] | None:
+    if not decodo_fetch.enabled():
+        return None
+    got = await decodo_fetch.fetch_url(library_url, timeout=120.0, headless="html")
+    if not got:
+        return None
+    status, html = got
+    if status != 200 or len(html) < 5000:
+        log.warning("facebook_ads_native_weak", status=status, length=len(html))
+        return None
+    raw = extract_collated_ads(html)
+    if not raw:
+        # Valid empty result page (no matches) vs parse failure.
+        if "ad_library" in html.lower() or "ads/library" in html.lower():
+            return []
+        log.warning("facebook_ads_native_no_ads", length=len(html))
+        return None
+    want = max(0, int(limit))
+    mapped = [to_normalize_shape(a) for a in raw]
+    return mapped[:want] if want else mapped
+
+
+async def search_ads(q: str, *, country: str = "US", limit: int = 20) -> list[dict[str, Any]] | None:
+    query = (q or "").strip()
+    if len(query) < 2:
+        return []
+    url = search_url(query, country, active_status="active")
+    rows = await _fetch_ads(url, limit=limit)
+    if rows is not None:
+        log.info("facebook_ads_native_search_ok", count=len(rows), q=query[:40], country=country)
+    return rows
+
+
+async def company_ads(
+    url_or_page: str, *, country: str = "US", limit: int = 20
+) -> list[dict[str, Any]] | None:
+    url = company_library_url(url_or_page, country)
+    rows = await _fetch_ads(url, limit=limit)
+    if rows is not None:
+        log.info("facebook_ads_native_company_ok", count=len(rows), country=country)
+    return rows
+
+
+async def search_companies(
+    q: str, *, country: str = "US", limit: int = 20
+) -> list[dict[str, Any]] | None:
+    """Search ads then unique advertisers (same shape as Apify path input)."""
+    # Pull a wider ad window so company dedupe has enough pages.
+    ads = await search_ads(q, country=country, limit=max(limit * 3, limit))
+    if ads is None:
+        return None
+    return ads

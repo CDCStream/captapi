@@ -3130,7 +3130,7 @@ class AdLibraryApi:
         self._t = transport
 
     def facebook_search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Ad Library Search — Search Meta/Facebook ads by keyword. (70 credits)
+        """Facebook Ad Library Search — Search Meta/Facebook ads by keyword. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
@@ -3140,7 +3140,7 @@ class AdLibraryApi:
         return self._t.get("/v1/ad-library/facebook/search", {"q": q, "country": country, "limit": limit, "cache": cache})
 
     def facebook_company_ads(self, *, url: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Company Ads — Ads for a Facebook page or Meta Ad Library URL. (70 credits)
+        """Facebook Company Ads — Ads for a Facebook page or Meta Ad Library URL. (2 credits)
 
         :param url: Facebook page URL or Meta Ad Library URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param country: ISO country code. Default US.
@@ -3150,7 +3150,7 @@ class AdLibraryApi:
         return self._t.get("/v1/ad-library/facebook/company-ads", {"url": url, "country": country, "limit": limit, "cache": cache})
 
     def facebook_search_companies(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Ad Library Search Companies — Find advertisers/pages in the Meta Ad Library by name. (70 credits)
+        """Facebook Ad Library Search Companies — Find advertisers/pages in the Meta Ad Library by name. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
@@ -3224,7 +3224,7 @@ class AdLibraryApi:
         return self._t.get("/v1/ad-library/google/advertiser-search", {"q": q, "country": country, "limit": limit, "cache": cache})
 
     def linkedin_search_ads(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (70 credits)
+        """LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
@@ -3247,7 +3247,7 @@ class AsyncAdLibraryApi:
         self._t = transport
 
     async def facebook_search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Ad Library Search — Search Meta/Facebook ads by keyword. (70 credits)
+        """Facebook Ad Library Search — Search Meta/Facebook ads by keyword. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
@@ -3257,7 +3257,7 @@ class AsyncAdLibraryApi:
         return await self._t.get("/v1/ad-library/facebook/search", {"q": q, "country": country, "limit": limit, "cache": cache})
 
     async def facebook_company_ads(self, *, url: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Company Ads — Ads for a Facebook page or Meta Ad Library URL. (70 credits)
+        """Facebook Company Ads — Ads for a Facebook page or Meta Ad Library URL. (2 credits)
 
         :param url: Facebook page URL or Meta Ad Library URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param country: ISO country code. Default US.
@@ -3267,7 +3267,7 @@ class AsyncAdLibraryApi:
         return await self._t.get("/v1/ad-library/facebook/company-ads", {"url": url, "country": country, "limit": limit, "cache": cache})
 
     async def facebook_search_companies(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Ad Library Search Companies — Find advertisers/pages in the Meta Ad Library by name. (70 credits)
+        """Facebook Ad Library Search Companies — Find advertisers/pages in the Meta Ad Library by name. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
@@ -3341,7 +3341,7 @@ class AsyncAdLibraryApi:
         return await self._t.get("/v1/ad-library/google/advertiser-search", {"q": q, "country": country, "limit": limit, "cache": cache})
 
     async def linkedin_search_ads(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (70 credits)
+        """LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.

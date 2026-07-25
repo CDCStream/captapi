@@ -489,9 +489,9 @@ const LINKME: Spec[] = [
 ];
 
 const AD_LIBRARY: Spec[] = [
-  { slug: "facebook-ad-library-search", name: "Facebook Ad Library Search API", shortName: "Facebook Search", category: "search", method: "GET", path: "/v1/ad-library/facebook/search", credits: 70, creditsPerResult: 3.5 },
-  { slug: "facebook-ad-library-company-ads", name: "Facebook Company Ads API", shortName: "Facebook Company Ads", category: "list", method: "GET", path: "/v1/ad-library/facebook/company-ads", credits: 70, creditsPerResult: 3.5 },
-  { slug: "facebook-ad-library-search-companies", name: "Facebook Ad Library Search Companies API", shortName: "Facebook Search Companies", category: "search", method: "GET", path: "/v1/ad-library/facebook/search-companies", credits: 70, creditsPerResult: 3.5 },
+  { slug: "facebook-ad-library-search", name: "Facebook Ad Library Search API", shortName: "Facebook Search", category: "search", method: "GET", path: "/v1/ad-library/facebook/search", credits: 2 },
+  { slug: "facebook-ad-library-company-ads", name: "Facebook Company Ads API", shortName: "Facebook Company Ads", category: "list", method: "GET", path: "/v1/ad-library/facebook/company-ads", credits: 2 },
+  { slug: "facebook-ad-library-search-companies", name: "Facebook Ad Library Search Companies API", shortName: "Facebook Search Companies", category: "search", method: "GET", path: "/v1/ad-library/facebook/search-companies", credits: 2 },
   { slug: "facebook-ad-library-ad-details", name: "Facebook Ad Details API", shortName: "Facebook Ad Details", category: "details", method: "GET", path: "/v1/ad-library/facebook/ad-details", credits: 17 , tagline: "Get a Meta Ad Library ad — creative text, media, advertiser, and delivery fields as structured JSON." },
   { slug: "facebook-ad-library-ad-transcript", name: "Facebook Ad Transcript API", shortName: "Facebook Ad Transcript", category: "transcript", method: "GET", path: "/v1/ad-library/facebook/ad-transcript", credits: 17 },
   { slug: "tiktok-ad-library-search", name: "TikTok Ad Library Search API", shortName: "TikTok Search", category: "search", method: "GET", path: "/v1/ad-library/tiktok/search", credits: 70, creditsPerResult: 3.5 },
@@ -499,7 +499,7 @@ const AD_LIBRARY: Spec[] = [
   { slug: "google-ad-library-company-ads", name: "Google Company Ads API", shortName: "Google Company Ads", category: "list", method: "GET", path: "/v1/ad-library/google/company-ads", credits: 67, creditsPerResult: 3.35 },
   { slug: "google-ad-library-ad-details", name: "Google Ad Details API", shortName: "Google Ad Details", category: "details", method: "GET", path: "/v1/ad-library/google/ad-details", credits: 17 , tagline: "Get a Google Ads Transparency ad — creative, advertiser, and delivery fields as structured JSON." },
   { slug: "google-ad-library-advertiser-search", name: "Google Advertiser Search API", shortName: "Google Advertiser Search", category: "search", method: "GET", path: "/v1/ad-library/google/advertiser-search", credits: 1 },
-  { slug: "linkedin-ad-library-search-ads", name: "LinkedIn Ad Library Search API", shortName: "LinkedIn Search Ads", category: "search", method: "GET", path: "/v1/ad-library/linkedin/search-ads", credits: 70, creditsPerResult: 3.5 },
+  { slug: "linkedin-ad-library-search-ads", name: "LinkedIn Ad Library Search API", shortName: "LinkedIn Search Ads", category: "search", method: "GET", path: "/v1/ad-library/linkedin/search-ads", credits: 2 },
   { slug: "linkedin-ad-library-ad-details", name: "LinkedIn Ad Details API", shortName: "LinkedIn Ad Details", category: "details", method: "GET", path: "/v1/ad-library/linkedin/ad-details", credits: 17 , tagline: "Get a LinkedIn Ad Library ad — creative, advertiser, and delivery fields as structured JSON." },
 ];
 

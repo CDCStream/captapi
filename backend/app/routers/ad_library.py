@@ -15,7 +15,12 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
-from app.services import google_ads_native
+from app.services import (
+    facebook_ads_native,
+    google_ads_native,
+    linkedin_ads_native,
+    tiktok_ads_native,
+)
 from app.utils.formatters import safe_int, safe_str
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
@@ -26,6 +31,10 @@ RATE_GOOGLE_COMPANY_ADS = 3.35
 # Native ATC SearchSuggestions: one proxied RPC (~$0.001). At $0.0045/credit
 # with 120% markup → ceil(0.001 * 2.2 / 0.0045) = 1 credit flat.
 CREDIT_GOOGLE_ADVERTISER = 1
+# FB/LI Ad Library lists: one Decodo headless render (~$0.001–0.0015 Premium+JS).
+# 120% markup → ~1 credit; bill 2 flat when native succeeds. Apify fallback keeps
+# the legacy per-result RATE_AD_LIST scale.
+CREDIT_AD_LIBRARY_NATIVE = 2
 
 
 def _scaled(limit: int, rate: float = RATE_AD_LIST, minimum: int = 2) -> int:
@@ -533,18 +542,33 @@ async def facebook_search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/search", platform="facebook_ad_library", resource_url=None, base_credits=_scaled(limit)) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/ad-library/facebook/search",
+        platform="facebook_ad_library",
+        resource_url=None,
+        base_credits=_scaled(limit),
+    ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await facebook_ads_native.search_ads(q, country=country, limit=limit)
+            if native is not None:
+                ctx["source"] = "direct"
+                ads = [_normalize_ad(i, "facebook_ad_library") for i in native]
+                ctx["credits_override"] = CREDIT_AD_LIBRARY_NATIVE
+                return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
+
             items = await _run_actor(
                 settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2,
                 {"startUrls": [{"url": _facebook_search_url(q, country)}], "resultsLimit": limit, "isDetailsPerAd": False},
                 limit,
             )
+            ctx["source"] = "apify"
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.facebook.search", {"q": q, "country": country, "limit": limit, "v": 5}, _run, ctx, use_cache=cache)
-        ctx["credits_override"] = _scaled(len(data["ads"]))
+        data = await cached_or_run("ad-library.facebook.search", {"q": q, "country": country, "limit": limit, "v": 6}, _run, ctx, use_cache=cache)
+        if ctx.get("source") != "direct":
+            ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
 
@@ -558,18 +582,33 @@ async def facebook_company_ads(
 ):
     _reject_ad_platform_mismatch(url, "facebook", "https://www.facebook.com/ads/library/?id=123456789")
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/company-ads", platform="facebook_ad_library", resource_url=url, base_credits=_scaled(limit)) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/ad-library/facebook/company-ads",
+        platform="facebook_ad_library",
+        resource_url=url,
+        base_credits=_scaled(limit),
+    ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await facebook_ads_native.company_ads(url, country=country, limit=limit)
+            if native is not None:
+                ctx["source"] = "direct"
+                ads = [_normalize_ad(i, "facebook_ad_library") for i in native]
+                ctx["credits_override"] = CREDIT_AD_LIBRARY_NATIVE
+                return {"url": url, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
+
             items = await _run_actor(
                 settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2,
                 {"startUrls": [{"url": url}], "resultsLimit": limit, "isDetailsPerAd": True},
                 limit,
             )
+            ctx["source"] = "apify"
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
             return {"url": url, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.facebook.company-ads", {"url": url, "country": country, "limit": limit, "v": 5}, _run, ctx, use_cache=cache)
-        ctx["credits_override"] = _scaled(len(data["ads"]))
+        data = await cached_or_run("ad-library.facebook.company-ads", {"url": url, "country": country, "limit": limit, "v": 6}, _run, ctx, use_cache=cache)
+        if ctx.get("source") != "direct":
+            ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
 
@@ -582,25 +621,42 @@ async def facebook_search_companies(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/search-companies", platform="facebook_ad_library", resource_url=None, base_credits=_scaled(limit)) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/ad-library/facebook/search-companies",
+        platform="facebook_ad_library",
+        resource_url=None,
+        base_credits=_scaled(limit),
+    ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(
-                settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2,
-                {"startUrls": [{"url": _facebook_search_url(q, country)}], "resultsLimit": limit, "isDetailsPerAd": False},
-                limit,
-            )
+            native = await facebook_ads_native.search_companies(q, country=country, limit=limit)
+            items = native
+            if native is not None:
+                ctx["source"] = "direct"
+                ctx["credits_override"] = CREDIT_AD_LIBRARY_NATIVE
+            else:
+                items = await _run_actor(
+                    settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2,
+                    {"startUrls": [{"url": _facebook_search_url(q, country)}], "resultsLimit": limit, "isDetailsPerAd": False},
+                    limit,
+                )
+                ctx["source"] = "apify"
+
             advertisers: dict[str, Any] = {}
-            for item in items:
+            for item in items or []:
                 ad = _normalize_ad(item, "facebook_ad_library")
                 adv = ad["advertiser"]
-                key = adv["id"] or adv["name"]
+                key = adv.get("id") or adv.get("name")
                 if key and key not in advertisers:
                     advertisers[key] = adv
+                if len(advertisers) >= limit:
+                    break
             companies = list(advertisers.values())
             return {"query": q, "country": country.upper(), "totalReturned": len(companies), "companies": companies}
 
-        data = await cached_or_run("ad-library.facebook.search-companies", {"q": q, "country": country, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
-        ctx["credits_override"] = _scaled(len(data["companies"]))
+        data = await cached_or_run("ad-library.facebook.search-companies", {"q": q, "country": country, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
+        if ctx.get("source") != "direct":
+            ctx["credits_override"] = _scaled(len(data["companies"]))
         return ApiResponse(data=data)
 
 
@@ -677,12 +733,26 @@ async def tiktok_search(
     settings = get_settings()
     async with billed_call(caller=caller, endpoint="/v1/ad-library/tiktok/search", platform="tiktok_ad_library", resource_url=None, base_credits=_scaled(limit)) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY, {"source": "both", "searchTerms": [q], "countries": [country.upper()], "maxResults": limit}, limit)
+            # Public DSA JSON API — often 421 from our exits; Apify remains fallback.
+            native = await tiktok_ads_native.search_ads(q, country=country, limit=limit)
+            if native is not None:
+                ctx["source"] = "direct"
+                ads = [_normalize_ad(i, "tiktok_ad_library") for i in native]
+                ctx["credits_override"] = CREDIT_AD_LIBRARY_NATIVE
+                return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
+
+            items = await _run_actor(
+                settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY,
+                {"source": "both", "searchTerms": [q], "countries": [country.upper()], "maxResults": limit},
+                limit,
+            )
+            ctx["source"] = "apify"
             ads = [_normalize_ad(i, "tiktok_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.tiktok.search", {"q": q, "country": country, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
-        ctx["credits_override"] = _scaled(len(data["ads"]))
+        data = await cached_or_run("ad-library.tiktok.search", {"q": q, "country": country, "limit": limit, "v": 5}, _run, ctx, use_cache=cache)
+        if ctx.get("source") != "direct":
+            ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
 
@@ -856,14 +926,33 @@ async def linkedin_search_ads(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/linkedin/search-ads", platform="linkedin_ad_library", resource_url=None, base_credits=_scaled(limit)) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/ad-library/linkedin/search-ads",
+        platform="linkedin_ad_library",
+        resource_url=None,
+        base_credits=_scaled(limit),
+    ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_LINKEDIN_AD_LIBRARY, {"search": q, "country": country.upper(), "sort": "NEWEST"}, limit)
+            native = await linkedin_ads_native.search_ads(q, country=country, limit=limit)
+            if native is not None:
+                ctx["source"] = "direct"
+                ads = [_normalize_ad(i, "linkedin_ad_library") for i in native]
+                ctx["credits_override"] = CREDIT_AD_LIBRARY_NATIVE
+                return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
+
+            items = await _run_actor(
+                settings.APIFY_ACTOR_LINKEDIN_AD_LIBRARY,
+                {"search": q, "country": country.upper(), "sort": "NEWEST"},
+                limit,
+            )
+            ctx["source"] = "apify"
             ads = [_normalize_ad(i, "linkedin_ad_library") for i in items]
             return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.linkedin.search-ads", {"q": q, "country": country, "limit": limit, "v": 5}, _run, ctx, use_cache=cache)
-        ctx["credits_override"] = _scaled(len(data["ads"]))
+        data = await cached_or_run("ad-library.linkedin.search-ads", {"q": q, "country": country, "limit": limit, "v": 6}, _run, ctx, use_cache=cache)
+        if ctx.get("source") != "direct":
+            ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)
 
 

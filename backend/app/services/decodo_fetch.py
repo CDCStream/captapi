@@ -40,18 +40,30 @@ def _auth_header() -> str | None:
     return None
 
 
-async def fetch_url(url: str, timeout: float = 30.0) -> tuple[int, str] | None:
+async def fetch_url(
+    url: str,
+    timeout: float = 30.0,
+    *,
+    headless: str | None = None,
+) -> tuple[int, str] | None:
     """Fetch ``url`` via Decodo. Returns ``(upstream_status, body_text)`` or
-    ``None`` when Decodo is unconfigured / errored, so callers can fall back."""
+    ``None`` when Decodo is unconfigured / errored, so callers can fall back.
+
+    Pass ``headless="html"`` to enable JavaScript rendering (needed for Meta /
+    LinkedIn Ad Library pages that hydrate search results client-side).
+    """
     auth_header = _auth_header()
     if not auth_header:
         return None
     settings = get_settings()
+    body: dict[str, Any] = {"url": url}
+    if headless:
+        body["headless"] = headless
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
             response = await client.post(
                 f"{settings.DECODO_BASE.rstrip('/')}/scrape",
-                json={"url": url},
+                json=body,
                 headers={"Accept": "application/json", "Authorization": auth_header},
             )
     except httpx.HTTPError as exc:
@@ -63,6 +75,15 @@ async def fetch_url(url: str, timeout: float = 30.0) -> tuple[int, str] | None:
     try:
         payload = response.json()
     except ValueError:
+        return None
+    # Failed scrape tasks return HTTP 200 with status=failed and no results.
+    if isinstance(payload, dict) and payload.get("status") == "failed":
+        log.warning(
+            "decodo_fetch_task_failed",
+            url=url,
+            status_code=payload.get("status_code"),
+            message=str(payload.get("message") or "")[:160],
+        )
         return None
     results = payload.get("results") if isinstance(payload, dict) else None
     if not (isinstance(results, list) and results and isinstance(results[0], dict)):
