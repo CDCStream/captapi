@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, MailCheck } from "lucide-react";
 import { GoogleButton } from "@/components/auth/google-button";
@@ -13,7 +14,11 @@ import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics";
 
-export default function SignupPage() {
+function SignupForm() {
+  const searchParams = useSearchParams();
+  const fromTools = searchParams.get("from") === "tools";
+  const afterAuth = fromTools ? "/dashboard/billing" : "/dashboard";
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -26,6 +31,12 @@ export default function SignupPage() {
     const blocked = ["web-library.net","mailinator.com","guerrillamail.com","tempmail.com","throwaway.email","temp-mail.org","10minutemail.com","trashmail.com","yopmail.com","sharklasers.com","guerrillamailblock.com","grr.la","dispostable.com","mailnesia.com","maildrop.cc","fakeinbox.com","mailcatch.com","tempail.com","tempr.email","discard.email","tmpmail.net","tmpmail.org","emailondeck.com","mohmal.com","getnada.com","burnermail.io","mailsac.com","inboxkitten.com","mytemp.email","spam4.me","tmail.ws"];
     const domain = addr.split("@")[1]?.toLowerCase();
     return domain ? blocked.includes(domain) : false;
+  }
+
+  function callbackUrl() {
+    const params = new URLSearchParams({ next: afterAuth });
+    if (fromTools) params.set("from", "tools");
+    return `${window.location.origin}/auth/callback?${params.toString()}`;
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -46,11 +57,12 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        emailRedirectTo: callbackUrl(),
         data: {
           first_name: first,
           last_name: last,
           full_name: [first, last].filter(Boolean).join(" "),
+          ...(fromTools ? { from_tools: true } : {}),
         },
       },
     });
@@ -59,7 +71,7 @@ export default function SignupPage() {
       toast.error(error.message);
       return;
     }
-    track("signup", { method: "password" });
+    track("signup", { method: "password", from_tools: fromTools });
     setSentTo(email);
   }
 
@@ -70,7 +82,7 @@ export default function SignupPage() {
     const { error } = await sb.auth.resend({
       type: "signup",
       email: sentTo,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
+      options: { emailRedirectTo: callbackUrl() },
     });
     setResending(false);
     if (error) {
@@ -91,7 +103,8 @@ export default function SignupPage() {
           <CardDescription>
             We sent a verification link to{" "}
             <span className="font-medium text-foreground">{sentTo}</span>. Click it to
-            activate your account.
+            activate your account
+            {fromTools ? ", then choose a plan on Billing." : "."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -120,10 +133,14 @@ export default function SignupPage() {
     <Card className="w-full max-w-sm">
       <CardHeader>
         <CardTitle>Create your account</CardTitle>
-        <CardDescription>100 free credits to get you started.</CardDescription>
+        <CardDescription>
+          {fromTools
+            ? "Create an account to continue — pick a plan on Billing after signup."
+            : "100 free credits to get you started."}
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <GoogleButton />
+        <GoogleButton next={afterAuth} from={fromTools ? "tools" : undefined} />
         <div className="my-4 flex items-center gap-3">
           <span className="h-px flex-1 bg-border" />
           <span className="text-xs text-muted-foreground">or</span>
@@ -163,5 +180,22 @@ export default function SignupPage() {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle>Create your account</CardTitle>
+            <CardDescription>Loading…</CardDescription>
+          </CardHeader>
+        </Card>
+      }
+    >
+      <SignupForm />
+    </Suspense>
   );
 }

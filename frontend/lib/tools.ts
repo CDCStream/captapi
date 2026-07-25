@@ -50,7 +50,7 @@ export const TOOLS: Record<string, Tool> = {
     apiEndpoint: "/v1/tiktok/transcript",
     faq: [
       { q: "What if the TikTok has no captions?", a: "We use AI to transcribe the audio." },
-      { q: "How many free tries do I get?", a: "3 free transcripts per day without an account. Sign up for 100 free credits — each API call costs 5 credits, and cached repeats are free." },
+      { q: "How many free tries do I get?", a: "3 free transcripts per day without an account. For more volume, create an account and pick a plan — each API call costs 2 credits, and cached repeats are free." },
       { q: "Why use the API instead?", a: "An API key is far cheaper for automation (batch jobs, n8n, bots) and removes the daily free-tool limit. Same endpoint, your credits." },
     ],
   },
@@ -130,7 +130,7 @@ export function toolFaqs(t: Tool): { q: string; a: string }[] {
     ? [
         {
           q: `Is the ${p} summarizer free?`,
-          a: `Yes — you get a few free tries per day with no sign-up. Paste a public ${p} URL and summarize right here. For more volume or automation, sign up for 100 free credits (no credit card required).`,
+          a: `Yes — you get a few free tries per day with no sign-up. Paste a public ${p} URL and summarize right here. For more volume or automation, create an account and pick a plan on Billing.`,
         },
         {
           q: `How does the ${p} AI summary work?`,
@@ -144,7 +144,7 @@ export function toolFaqs(t: Tool): { q: string; a: string }[] {
     : [
         {
           q: `Is the ${p} transcript tool free?`,
-          a: `Yes — you get a few free tries per day with no sign-up. Paste a public ${p} URL and get the full text here. For API access or higher volume, sign up for 100 free credits (no card required).`,
+          a: `Yes — you get a few free tries per day with no sign-up. Paste a public ${p} URL and get the full text here. For API access or higher volume, create an account and pick a plan on Billing.`,
         },
         {
           q: `How do I get a transcript from a ${p} video?`,

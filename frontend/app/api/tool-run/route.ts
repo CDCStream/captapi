@@ -17,7 +17,19 @@ function useCacheByDefault(endpoint: string): boolean {
 }
 
 const ANON_COOKIE = "captapi_tool_free";
+const NO_WELCOME_COOKIE = "captapi_no_welcome";
 const ANON_DAILY_LIMIT = 3;
+const SIGNUP_FROM_TOOLS = "/signup?from=tools";
+
+function cookieOpts() {
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24,
+  };
+}
 
 function clientFingerprint(req: Request): string {
   const forwarded = req.headers.get("x-forwarded-for") || "";
@@ -55,15 +67,17 @@ export async function POST(req: Request) {
   }
 
   if (cookieCount(req) >= ANON_DAILY_LIMIT) {
-    return NextResponse.json(
+    const blocked = NextResponse.json(
       {
         error:
-          "You've used today's free tries. Sign up for an API key — the same tools cost far less with your own credits.",
+          "You've used today's free tries. Create an account and pick a plan to keep going — same tools, billed to your credits.",
         code: "soft_paywall",
-        upgrade_url: "/signup",
+        upgrade_url: SIGNUP_FROM_TOOLS,
       },
       { status: 429 },
     );
+    blocked.cookies.set(NO_WELCOME_COOKIE, "1", cookieOpts());
+    return blocked;
   }
 
   const apiKey = process.env.CAPTAPI_TOOL_API_KEY;
@@ -114,7 +128,7 @@ export async function POST(req: Request) {
         {
           error: String(detail),
           code,
-          upgrade_url: "/signup",
+          upgrade_url: SIGNUP_FROM_TOOLS,
         },
         { status },
       );
@@ -122,17 +136,14 @@ export async function POST(req: Request) {
 
     const response = NextResponse.json({ data: json?.data ?? json });
     const next = Math.min(ANON_DAILY_LIMIT, cookieCount(req) + 1);
-    response.cookies.set(ANON_COOKIE, String(next), {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: 60 * 60 * 24,
-    });
+    response.cookies.set(ANON_COOKIE, String(next), cookieOpts());
     // Migrate away from the older TikTok-only cookie name.
     response.cookies.set("captapi_tool_tt", "", { path: "/", maxAge: 0 });
+    if (next >= ANON_DAILY_LIMIT) {
+      response.cookies.set(NO_WELCOME_COOKIE, "1", cookieOpts());
+    }
     response.headers.set("X-Captapi-Free-Tries-Left", String(Math.max(0, ANON_DAILY_LIMIT - next)));
-    return response;
+    return response
   } catch {
     return NextResponse.json({ error: "Couldn't reach the service. Please try again." }, { status: 502 });
   }

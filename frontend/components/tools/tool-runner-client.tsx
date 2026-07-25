@@ -149,7 +149,7 @@ export function ToolRunnerClient({
         </button>
       </div>
       <p className="mt-2 text-center text-xs text-gray-500 sm:text-left">
-        3 free tries / day across all free tools · then sign up for API credits
+        3 free tries / day across all free tools · then create an account to continue
       </p>
 
       {(error || paywalled) && (
@@ -158,11 +158,11 @@ export function ToolRunnerClient({
           {paywalled ? (
             <div className="mt-4 flex flex-col items-center gap-3 sm:flex-row">
               <Link
-                href="/signup"
+                href="/signup?from=tools"
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
               >
                 <KeyRound className="size-4" />
-                Get free API credits
+                Create account & pick a plan
               </Link>
               <Link
                 href={`/apis/${slug}`}
@@ -254,15 +254,15 @@ export function ToolRunnerClient({
                 With an API key, the same result is far cheaper to automate
               </p>
               <p className="mt-1 text-xs text-gray-400">
-                Cache hits are free · build bots, n8n, and pipelines without the free-tool daily limit.
+                TikTok transcripts are 2 credits · cache hits free · automate without the daily free-tool limit.
               </p>
               <div className="mt-3 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
                 <Link
-                  href="/signup"
+                  href="/signup?from=tools"
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
                 >
                   <KeyRound className="size-4" />
-                  Get free API credits
+                  Create account & pick a plan
                 </Link>
                 <Link
                   href={`/dashboard/tools/${slug}`}

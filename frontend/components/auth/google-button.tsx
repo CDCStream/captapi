@@ -8,22 +8,32 @@ import { track } from "@/lib/analytics";
 
 export function GoogleButton({
   next,
+  from,
   className = "w-full",
 }: {
   next?: string;
+  /** e.g. "tools" — free-tool signup (no welcome credits). */
+  from?: string;
   className?: string;
 }) {
   const [loading, setLoading] = useState(false);
 
   async function signInWithGoogle() {
     setLoading(true);
-    track("cta_click", { cta: "continue_with_google", next: next ?? "/dashboard" });
+    track("cta_click", {
+      cta: "continue_with_google",
+      next: next ?? "/dashboard",
+      from: from ?? null,
+    });
     const sb = createClient();
-    const params = next ? `?next=${encodeURIComponent(next)}` : "";
+    const params = new URLSearchParams();
+    if (next) params.set("next", next);
+    if (from) params.set("from", from);
+    const qs = params.toString() ? `?${params.toString()}` : "";
     const { error } = await sb.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback${params}`,
+        redirectTo: `${window.location.origin}/auth/callback${qs}`,
       },
     });
     if (error) {

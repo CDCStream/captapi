@@ -620,7 +620,7 @@
     "platform": "tiktok",
     "name": "TikTok Transcript",
     "path": "/v1/tiktok/transcript",
-    "credits": 5,
+    "credits": 2,
     "summary": "Transcript of a TikTok video (via captions).",
     "params": [
       {
