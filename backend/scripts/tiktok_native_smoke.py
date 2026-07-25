@@ -25,6 +25,8 @@ CALLS = [
     ("video-details", "/v1/tiktok/video-details", {"url": VIDEO}),
     ("channel-details", "/v1/tiktok/channel-details", {"url": PROFILE}),
     ("profile-region", "/v1/tiktok/profile-region", {"url": PROFILE}),
+    # Prefer native WebVTT (source=direct). cache=false + unique query bustes CDN.
+    ("transcript", "/v1/tiktok/transcript", {"url": VIDEO, "cache": "false"}),
 ]
 
 
@@ -54,6 +56,12 @@ def main() -> None:
                     summary = f"followers={data.get('followers')} posts={data.get('postCount')}"
                 elif name == "profile-region":
                     summary = f"region={data.get('region')} lang={data.get('language')}"
+                elif name == "transcript":
+                    summary = (
+                        f"words={data.get('wordCount')} segs={data.get('segments')} "
+                        f"lang={data.get('language')} "
+                        f"hdr_source={r.headers.get('x-captapi-source')}"
+                    )
                 print(f"{name:<16} {r.status_code} {el:4.1f}s  {summary}")
 
         # Give the async request-log insert a moment, then read source column.

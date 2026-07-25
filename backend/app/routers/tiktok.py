@@ -724,19 +724,30 @@ def _tiktok_transcript_segments(item: dict[str, Any]) -> tuple[str, list[dict[st
 
 async def _fetch_tiktok_transcript(
     url: str, language: str | None = None
-) -> tuple[str, list[dict[str, Any]], str | None]:
-    """Return (full transcript, timestamped segments, language).
+) -> tuple[str, list[dict[str, Any]], str | None, str]:
+    """Return (full transcript, timestamped segments, language, source).
 
-    Cascade: native download + our Whisper (hallucination-filtered, language
-    retries) -> fast native-caption actor -> Whisper-capable actor.
+    Cascade (cheapest first):
+      1. Native TikTok WebVTT caption track (proxy only) → source ``direct``
+      2. Native MP4 download + our Whisper → source ``openai``
+      3. Apify fast caption actor → source ``apify``
+      4. Apify Whisper-capable actor → source ``apify``
     """
     settings = get_settings()
     apify = get_apify()
 
-    # Primary: fetch the media ourselves and run our own Whisper pipeline.
-    # The actors' Whisper has no language handling and mislabels e.g. Turkish
-    # speech over music as Russian; ours retries with the detected/pinned
-    # language and filters hallucinations.
+    # 1) Free/fast: TikTok's own subtitleInfos / claInfo WebVTT.
+    native = await tiktok_native.transcript_native(url, language=language)
+    if native and native.get("transcript"):
+        return (
+            native["transcript"],
+            native.get("transcriptSegments") or [],
+            safe_str(native.get("language")),
+            "direct",
+        )
+
+    # 2) Caption-less videos: download media + our Whisper (language retries /
+    # hallucination filter). Prefer this over Apify Whisper for cost/quality.
     raw = await tiktok_native.fetch_video_bytes(url, max_bytes=WHISPER_MAX_BYTES)
     if raw:
         result = await transcribe_audio(raw, filename="tiktok.mp4", language=language)
@@ -745,13 +756,10 @@ async def _fetch_tiktok_transcript(
                 result["transcript"],
                 result["transcriptSegments"],
                 safe_str(result.get("language")),
+                "openai",
             )
-        # Our Whisper heard no speech; trust that over the actors' output
-        # only when a language wasn't forced (actors may still have captions).
 
-    # Fast path: native caption track over plain HTTP. Measured 8.8s vs 33.6s
-    # for identical text on the same video. Fails/returns hasCaption=false for
-    # caption-less videos, in which case we fall through to Whisper.
+    # 3) Apify last resort: native-caption actor (~$1/1k).
     try:
         items = await apify.run_actor_sync(
             settings.APIFY_ACTOR_TIKTOK_TRANSCRIPT_FAST,
@@ -763,8 +771,9 @@ async def _fetch_tiktok_transcript(
     if items and items[0].get("hasCaption"):
         full, segments = _tiktok_transcript_segments(items[0])
         if full:
-            return full, segments, safe_str(items[0].get("language"))
+            return full, segments, safe_str(items[0].get("language")), "apify"
 
+    # 4) Apify Whisper-capable actor (~$3/1k) — final paid fallback.
     try:
         items = await apify.run_actor_sync(
             settings.APIFY_ACTOR_TIKTOK_TRANSCRIPT,
@@ -776,7 +785,7 @@ async def _fetch_tiktok_transcript(
     if items:
         full, segments = _tiktok_transcript_segments(items[0])
         if full:
-            return full, segments, safe_str(items[0].get("languageCode"))
+            return full, segments, safe_str(items[0].get("languageCode")), "apify"
 
     # Confirm the video exists to give an accurate 404 vs 422. The base
     # scraper's `text` field is the post CAPTION, not speech, so it is
@@ -845,7 +854,10 @@ async def tiktok_transcript(
         base_credits=CREDIT_TRANSCRIPT,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            full, segments, detected = await _fetch_tiktok_transcript(url, language=lang)
+            full, segments, detected, source = await _fetch_tiktok_transcript(
+                url, language=lang
+            )
+            ctx["source"] = source
             return {
                 "platform": "tiktok",
                 "url": url,
@@ -858,7 +870,7 @@ async def tiktok_transcript(
 
         data = await cached_or_run(
             endpoint="tiktok.transcript",
-            params={"url": url, "language": lang, "v": 6},
+            params={"url": url, "language": lang, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -909,7 +921,10 @@ async def tiktok_summarize(
         base_credits=CREDIT_SUMMARIZE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            text, _segments, _detected = await _fetch_tiktok_transcript(url, language=lang)
+            text, _segments, _detected, source = await _fetch_tiktok_transcript(
+                url, language=lang
+            )
+            ctx["source"] = source
             ai = await summarize_transcript(text, language=lang or "en")
             return {
                 "platform": "tiktok",
@@ -922,7 +937,7 @@ async def tiktok_summarize(
 
         data = await cached_or_run(
             endpoint="tiktok.summarize",
-            params={"url": url, "language": lang, "v": 5},
+            params={"url": url, "language": lang, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

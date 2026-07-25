@@ -27,7 +27,36 @@ import httpx
 
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.http_fetch import proxy_for
-from app.utils.formatters import safe_float, safe_int, safe_str
+from app.utils.formatters import normalize_language_code, safe_float, safe_int, safe_str
+
+# TikTok often returns ISO-639-2 (eng) instead of ISO-639-1 (en).
+_ISO639_2_TO_1 = {
+    "eng": "en",
+    "spa": "es",
+    "fra": "fr",
+    "deu": "de",
+    "tur": "tr",
+    "por": "pt",
+    "ita": "it",
+    "nld": "nl",
+    "jpn": "ja",
+    "kor": "ko",
+    "zho": "zh",
+    "ara": "ar",
+    "hin": "hi",
+    "rus": "ru",
+    "ind": "id",
+    "vie": "vi",
+    "tha": "th",
+    "pol": "pl",
+}
+
+
+def _normalize_tt_lang(value: str | None) -> str | None:
+    code = normalize_language_code(value)
+    if not code:
+        return None
+    return _ISO639_2_TO_1.get(code, code)
 
 TT_HEADERS: dict[str, str] = {
     "User-Agent": (
@@ -161,8 +190,6 @@ async def fetch_video_bytes(url: str, max_bytes: int) -> bytes | None:
     page response (``tt_chain_token`` et al.) and from the same IP, so both
     requests must share one client + proxy connection.
     """
-    from app.services.http_fetch import proxy_for
-
     proxy = proxy_for("datacenter")
     try:
         async with httpx.AsyncClient(
@@ -193,6 +220,249 @@ async def fetch_video_bytes(url: str, max_bytes: int) -> bytes | None:
             return media.content
     except httpx.HTTPError:
         return None
+
+
+# WebVTT cue timing: HH:MM:SS.mmm or MM:SS.mmm
+_VTT_TS = re.compile(
+    r"(?:(\d{2,}):)?(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(?:(\d{2,}):)?(\d{2}):(\d{2})\.(\d{3})"
+)
+_VTT_TAG_RE = re.compile(r"<[^>]+>")
+
+
+def _vtt_timestamp_to_seconds(
+    hours: str | None, minutes: str, seconds: str, millis: str
+) -> float:
+    return (
+        int(hours or 0) * 3600
+        + int(minutes) * 60
+        + int(seconds)
+        + int(millis) / 1000.0
+    )
+
+
+def _parse_webvtt(body: str) -> list[dict[str, Any]]:
+    """Parse WebVTT cues into the API segment shape (start/duration/end/text)."""
+    if not body or "-->" not in body:
+        return []
+    # Normalize newlines; drop BOM / WEBVTT header noise.
+    text = body.lstrip("\ufeff").replace("\r\n", "\n").replace("\r", "\n")
+    blocks = re.split(r"\n\s*\n", text.strip())
+    segments: list[dict[str, Any]] = []
+    for block in blocks:
+        lines = [ln.strip() for ln in block.split("\n") if ln.strip()]
+        if not lines:
+            continue
+        # Cue id line is optional; find the timing line.
+        timing_idx = next((i for i, ln in enumerate(lines) if "-->" in ln), -1)
+        if timing_idx < 0:
+            continue
+        m = _VTT_TS.search(lines[timing_idx])
+        if not m:
+            continue
+        start = _vtt_timestamp_to_seconds(m.group(1), m.group(2), m.group(3), m.group(4))
+        end = _vtt_timestamp_to_seconds(m.group(5), m.group(6), m.group(7), m.group(8))
+        payload = " ".join(lines[timing_idx + 1 :])
+        payload = _VTT_TAG_RE.sub("", payload)
+        payload = (
+            payload.replace("&amp;", "&")
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&nbsp;", " ")
+            .strip()
+        )
+        if not payload:
+            continue
+        start_r = round(start, 3)
+        end_r = round(max(end, start), 3)
+        mm, ss = int(start_r // 60), int(start_r % 60)
+        segments.append(
+            {
+                "text": payload,
+                "start": start_r,
+                "duration": round(max(end_r - start_r, 0), 3),
+                "end": end_r,
+                "timestamp": f"{mm:02d}:{ss:02d}",
+            }
+        )
+    return segments
+
+
+def _subtitle_tracks_from_video(video: dict[str, Any]) -> list[dict[str, Any]]:
+    """Collect caption track URLs from subtitleInfos and claInfo.captionInfos."""
+    tracks: list[dict[str, Any]] = []
+
+    for info in video.get("subtitleInfos") or []:
+        if not isinstance(info, dict):
+            continue
+        url = safe_str(info.get("Url") or info.get("url"))
+        if not url:
+            continue
+        fmt = (safe_str(info.get("Format") or info.get("format")) or "webvtt").lower()
+        if "json" in fmt or fmt == "creator_caption":
+            continue  # not WebVTT speech tracks
+        lang = safe_str(
+            info.get("LanguageCodeName")
+            or info.get("languageCodeName")
+            or info.get("LanguageCode")
+            or info.get("language")
+        )
+        source = (safe_str(info.get("Source") or info.get("source")) or "").lower()
+        tracks.append(
+            {
+                "url": url,
+                "language": lang,
+                "source": source,
+                "format": fmt,
+                "original": bool(
+                    info.get("IsOriginalCaption")
+                    or info.get("isOriginalCaption")
+                    or source in {"asr", "auto", "mt_asr"}
+                ),
+            }
+        )
+
+    cla = video.get("claInfo") or {}
+    if isinstance(cla, dict):
+        for info in cla.get("captionInfos") or cla.get("captions") or []:
+            if not isinstance(info, dict):
+                continue
+            url = safe_str(info.get("url") or info.get("Url"))
+            if not url:
+                url_list = info.get("urlList")
+                if isinstance(url_list, list) and url_list:
+                    url = safe_str(url_list[0])
+            if not url:
+                continue
+            lang = safe_str(
+                info.get("language")
+                or info.get("languageCode")
+                or info.get("LanguageCodeName")
+            )
+            tracks.append(
+                {
+                    "url": url,
+                    "language": lang,
+                    "source": (
+                        safe_str(info.get("captionFormat") or info.get("source")) or ""
+                    ).lower(),
+                    "format": "webvtt",
+                    "original": bool(
+                        info.get("isAutoGenerated") or info.get("isOriginalCaption")
+                    ),
+                }
+            )
+
+    # Deduplicate by URL.
+    seen: set[str] = set()
+    unique: list[dict[str, Any]] = []
+    for t in tracks:
+        if t["url"] in seen:
+            continue
+        seen.add(t["url"])
+        unique.append(t)
+    return unique
+
+
+def _pick_subtitle_track(
+    tracks: list[dict[str, Any]], language: str | None
+) -> dict[str, Any] | None:
+    if not tracks:
+        return None
+    want = (language or "").strip().lower()
+    if want:
+        # Exact / prefix match on LanguageCodeName (e.g. en, en-US).
+        for t in tracks:
+            code = (t.get("language") or "").lower()
+            if code == want or code.startswith(want + "-") or code.split("-")[0] == want:
+                return t
+    # Prefer original / ASR tracks, then any WebVTT.
+    for t in tracks:
+        if t.get("original"):
+            return t
+    for t in tracks:
+        src = t.get("source") or ""
+        if "asr" in src or src in {"1", "auto"}:
+            return t
+    return tracks[0]
+
+
+def _transcript_proxy_candidates() -> list[str | None]:
+    """Datacenter first, then Evomi US/NL residential (caption CDN soft-blocks)."""
+    out: list[str | None] = []
+    dc = proxy_for("datacenter")
+    if dc:
+        out.append(dc)
+    for country in ("US", "NL"):
+        rp = _residential_proxy(country)
+        if rp and rp not in out:
+            out.append(rp)
+    if not out:
+        out.append(None)
+    return out
+
+
+async def _transcript_once(
+    url: str, language: str | None, proxy: str | None
+) -> dict[str, Any] | None:
+    """Page rehydration + WebVTT fetch on one client (shared cookies/IP)."""
+    try:
+        async with httpx.AsyncClient(
+            timeout=20, follow_redirects=True, headers=TT_HEADERS, proxy=proxy
+        ) as client:
+            resp = await client.get(url)
+            if resp.status_code >= 400:
+                return None
+            m = _UNIVERSAL_RE.search(resp.text)
+            if not m:
+                return None
+            try:
+                scope = json.loads(m.group(1)).get("__DEFAULT_SCOPE__") or {}
+            except ValueError:
+                return None
+            vd = scope.get("webapp.video-detail") or {}
+            status = vd.get("statusCode")
+            if status is not None and status != 0:
+                return None  # deleted / private / region-locked
+            item = ((vd.get("itemInfo") or {}).get("itemStruct")) or {}
+            if not item.get("id"):
+                return None
+            video = item.get("video") or {}
+            track = _pick_subtitle_track(_subtitle_tracks_from_video(video), language)
+            if not track:
+                return None
+            vtt_resp = await client.get(
+                track["url"],
+                headers={**TT_HEADERS, "Accept": "text/vtt,text/plain,*/*"},
+            )
+            if vtt_resp.status_code >= 400 or not vtt_resp.text:
+                return None
+            segments = _parse_webvtt(vtt_resp.text)
+            if not segments:
+                return None
+            full = " ".join(s["text"] for s in segments).strip()
+            if not full:
+                return None
+            return {
+                "transcript": full,
+                "transcriptSegments": segments,
+                "language": _normalize_tt_lang(track.get("language")),
+            }
+    except httpx.HTTPError:
+        return None
+
+
+async def transcript_native(url: str, language: str | None = None) -> dict[str, Any] | None:
+    """Pull TikTok's own caption track (WebVTT) without Apify or Whisper.
+
+    Returns ``{transcript, transcriptSegments, language}`` or ``None`` when the
+    video has no usable captions / page fetch fails. Callers fall through to
+    Whisper then Apify.
+    """
+    for proxy in _transcript_proxy_candidates():
+        result = await _transcript_once(url, language, proxy)
+        if result:
+            return result
+    return None
 
 
 async def _user_info(handle: str) -> dict[str, Any] | None:
