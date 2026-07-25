@@ -695,47 +695,15 @@ async def tiktok_video_details(
         return ApiResponse(data=data)
 
 
-def _tiktok_transcript_segments(item: dict[str, Any]) -> tuple[str, list[dict[str, Any]]]:
-    """Normalize a transcript actor item's ``segments`` (start/end shape)."""
-    segments = []
-    parts = []
-    for s in item.get("segments") or []:
-        if not isinstance(s, dict):
-            continue
-        text = safe_str(s.get("text")).strip()
-        if not text:
-            continue
-        start = round(safe_float(s.get("start")) or 0, 3)
-        end = round(safe_float(s.get("end")) or 0, 3)
-        mm, ss = int(start // 60), int(start % 60)
-        segments.append(
-            {
-                "text": text,
-                "start": start,
-                "duration": round(max(end - start, 0), 3),
-                "end": round(max(end, start), 3),
-                "timestamp": f"{mm:02d}:{ss:02d}",
-            }
-        )
-        parts.append(text)
-    full = (safe_str(item.get("transcript")) or " ".join(parts)).strip()
-    return full, segments
-
-
 async def _fetch_tiktok_transcript(
     url: str, language: str | None = None
 ) -> tuple[str, list[dict[str, Any]], str | None, str]:
     """Return (full transcript, timestamped segments, language, source).
 
-    Cascade (cheapest first):
+    Cascade (no Apify):
       1. Native TikTok WebVTT caption track (proxy only) → source ``direct``
       2. Native MP4 download + our Whisper → source ``openai``
-      3. Apify fast caption actor → source ``apify``
-      4. Apify Whisper-capable actor → source ``apify``
     """
-    settings = get_settings()
-    apify = get_apify()
-
     # 1) Free/fast: TikTok's own subtitleInfos / claInfo WebVTT.
     native = await tiktok_native.transcript_native(url, language=language)
     if native and native.get("transcript"):
@@ -746,8 +714,7 @@ async def _fetch_tiktok_transcript(
             "direct",
         )
 
-    # 2) Caption-less videos: download media + our Whisper (language retries /
-    # hallucination filter). Prefer this over Apify Whisper for cost/quality.
+    # 2) Caption-less videos: download media + our Whisper.
     raw = await tiktok_native.fetch_video_bytes(url, max_bytes=WHISPER_MAX_BYTES)
     if raw:
         result = await transcribe_audio(raw, filename="tiktok.mp4", language=language)
@@ -759,43 +726,9 @@ async def _fetch_tiktok_transcript(
                 "openai",
             )
 
-    # 3) Apify last resort: native-caption actor (~$1/1k).
-    try:
-        items = await apify.run_actor_sync(
-            settings.APIFY_ACTOR_TIKTOK_TRANSCRIPT_FAST,
-            {"videoUrls": [url], "proxyConfiguration": {"useApifyProxy": True}},
-            max_items=1,
-        )
-    except Exception:  # noqa: BLE001
-        items = []
-    if items and items[0].get("hasCaption"):
-        full, segments = _tiktok_transcript_segments(items[0])
-        if full:
-            return full, segments, safe_str(items[0].get("language")), "apify"
-
-    # 4) Apify Whisper-capable actor (~$3/1k) — final paid fallback.
-    try:
-        items = await apify.run_actor_sync(
-            settings.APIFY_ACTOR_TIKTOK_TRANSCRIPT,
-            {"postUrls": [url], "useWhisperFallback": True},
-            max_items=1,
-        )
-    except Exception:  # noqa: BLE001
-        items = []
-    if items:
-        full, segments = _tiktok_transcript_segments(items[0])
-        if full:
-            return full, segments, safe_str(items[0].get("languageCode")), "apify"
-
-    # Confirm the video exists to give an accurate 404 vs 422. The base
-    # scraper's `text` field is the post CAPTION, not speech, so it is
-    # deliberately NOT returned as a transcript.
-    items = await apify.run_actor_sync(
-        settings.APIFY_ACTOR_TIKTOK,
-        {"postURLs": [url], "resultsPerPage": 1, "shouldDownloadSubtitles": True},
-        max_items=1,
-    )
-    if not items:
+    # Distinguish missing video (404) vs no usable speech/captions (422).
+    details = await video_details_native(url)
+    if details is None:
         raise HTTPException(status_code=404, detail="Video not found")
     raise HTTPException(status_code=422, detail="No speech/captions available for this TikTok")
 

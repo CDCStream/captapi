@@ -456,7 +456,7 @@ async def transcript_native(url: str, language: str | None = None) -> dict[str, 
 
     Returns ``{transcript, transcriptSegments, language}`` or ``None`` when the
     video has no usable captions / page fetch fails. Callers fall through to
-    Whisper then Apify.
+    Whisper.
     """
     for proxy in _transcript_proxy_candidates():
         result = await _transcript_once(url, language, proxy)

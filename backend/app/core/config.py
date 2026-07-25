@@ -53,14 +53,7 @@ class Settings(BaseSettings):
     APIFY_ACTOR_YOUTUBE_DOWNLOAD_FALLBACK: str = "streamers/youtube-video-downloader"
 
     APIFY_ACTOR_TIKTOK: str = "clockworks/tiktok-scraper"
-    # Fast-first transcript actor: pulls TikTok's native caption track over
-    # plain HTTP (~5-9s, $1/1k, caption-less rows free). Young actor, so any
-    # failure/empty result falls through to the Whisper-capable actor below.
-    APIFY_ACTOR_TIKTOK_TRANSCRIPT_FAST: str = "aticode/tiktok-transcript-scraper"
-    # Whisper-capable transcript actor: native captions + speech-to-text
-    # fallback for caption-less videos (~35-80s, $3/1k). Kept as the quality
-    # fallback behind the fast actor.
-    APIFY_ACTOR_TIKTOK_TRANSCRIPT: str = "crawlerbros/tiktok-transcript-scraper"
+    # TikTok /transcript no longer uses Apify (native WebVTT → Whisper only).
     APIFY_ACTOR_TIKTOK_COMMENTS: str = "clockworks/tiktok-comments-scraper"
     # Dedicated comment+reply scraper with a real reply API (parentCommentId
     # linking); far more reliable for fetching replies than the base comments
