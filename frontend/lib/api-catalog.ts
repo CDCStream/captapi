@@ -408,7 +408,7 @@ const KICK: Spec[] = [
 ];
 
 const AMAZON_SHOP: Spec[] = [
-  { slug: "amazon-shop-page", name: "Amazon Shop Page API", shortName: "Shop Page", category: "list", method: "GET", path: "/v1/amazon-shop/page", credits: 89, creditsPerResult: 4.45 , tagline: "List products from an Amazon Shop / influencer storefront page — title, price, and product URL for each item." },
+  { slug: "amazon-shop-page", name: "Amazon Shop Page API", shortName: "Shop Page", category: "list", method: "GET", path: "/v1/amazon-shop/page", credits: 2, tagline: "List products from an Amazon Shop / influencer storefront page — title, price, and product URL for each item." },
 ];
 
 const ACCOUNT: Spec[] = [

@@ -16,10 +16,16 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
+from app.services import amazon_shop_native
 from app.utils.formatters import safe_float, safe_int, safe_str
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
+
+# Native storefront HTML ≈ $0.002/page via DC proxy. 120% markup @ $0.0045/credit
+# → ~1 credit/page (~16 products). Was 4.45/result on Apify.
+CREDIT_PER_PAGE = 1
+NATIVE_PAGE_SIZE = 16
 
 
 _PRODUCT_OMIT_IF_EMPTY = frozenset(
@@ -47,6 +53,12 @@ def _drop_empty(obj: dict[str, Any], keys: frozenset[str]) -> dict[str, Any]:
     return obj
 
 
+def _credits_for_limit(limit: int) -> int:
+    if limit <= 0:
+        return CREDIT_PER_PAGE
+    return max(CREDIT_PER_PAGE, math.ceil(limit / NATIVE_PAGE_SIZE) * CREDIT_PER_PAGE)
+
+
 def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
     price = item.get("price") or item.get("priceValue")
     currency = safe_str(item.get("currency") or item.get("currencyCode"))
@@ -72,7 +84,7 @@ def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
 def _normalize_shop(items: list[dict[str, Any]], url: str, marketplace: str) -> dict[str, Any]:
     first = items[0] if items else {}
     seller_src = first.get("seller") if isinstance(first.get("seller"), dict) else first
-    products = [_normalize_product(i) for i in items]
+    products = [_normalize_product(i) for i in items if i.get("asin") or i.get("title")]
     # Product rows expose sellerId only — do not reuse product rating/url as seller fields.
     seller = _drop_empty(
         {
@@ -85,7 +97,7 @@ def _normalize_shop(items: list[dict[str, Any]], url: str, marketplace: str) -> 
         _SELLER_OMIT_IF_EMPTY,
     )
     raw = None
-    if isinstance(first, dict) and first:
+    if isinstance(first, dict) and first and (first.get("asin") or first.get("title")):
         raw = _drop_empty(dict(first), _RAW_OMIT_IF_EMPTY)
         # Drop remaining null/empty noise keys from the debug payload.
         raw = {k: v for k, v in raw.items() if v not in (None, "", [])}
@@ -135,13 +147,14 @@ async def _public_shop_metadata(url: str, marketplace: str) -> dict[str, Any] | 
     image = _meta(resp.text, "og:image")
     if not (title or image):
         return None
+    seller_id = amazon_shop_native.extract_seller_id(url) or ""
     return {
         "platform": "amazon_shop",
         "url": safe_str(str(resp.url) or url),
         "marketplace": marketplace.upper(),
         "seller": _drop_empty(
             {
-                "id": "",
+                "id": seller_id,
                 "name": safe_str(title),
                 "url": safe_str(str(resp.url) or url),
             },
@@ -168,23 +181,69 @@ async def amazon_shop_page(
             detail=platform_mismatch_detail(url, "amazon_shop", "https://www.amazon.com/shop/storefront"),
         )
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/amazon-shop/page", platform="amazon_shop", resource_url=url, base_credits=max(5, math.ceil(limit * 4.45))) as ctx:
+    cost = _credits_for_limit(limit)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/amazon-shop/page",
+        platform="amazon_shop",
+        resource_url=url,
+        base_credits=cost,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
-            max_products = limit if limit > 0 else 1
+            max_products = limit if limit > 0 else 0
+
+            # 1) Native /s?me= storefront HTML (proxy / Decodo).
+            native = await amazon_shop_native.fetch_shop_products(
+                url, marketplace=marketplace, limit=max_products if max_products > 0 else 0
+            )
+            if native is not None:
+                ctx["source"] = "direct"
+                items = native.get("items") or []
+                if max_products == 0:
+                    sid = native.get("seller_id") or amazon_shop_native.extract_seller_id(url) or ""
+                    return {
+                        "platform": "amazon_shop",
+                        "url": safe_str(url),
+                        "marketplace": marketplace.upper(),
+                        "seller": _drop_empty({"id": sid}, _SELLER_OMIT_IF_EMPTY),
+                        "totalReturned": 0,
+                        "products": [],
+                        "rawFirstItem": None,
+                    }
+                if items:
+                    return _normalize_shop(items[:max_products], url, marketplace)
+
+            # 2) Apify last resort.
             try:
                 items = await get_apify().run_actor_sync(
                     settings.APIFY_ACTOR_AMAZON_SHOP,
-                    {"sellerUrls": [url], "marketplace": marketplace.upper(), "maxProducts": max_products},
-                    max_items=max_products,
+                    {
+                        "sellerUrls": [url],
+                        "marketplace": marketplace.upper(),
+                        "maxProducts": max(max_products, 1),
+                    },
+                    max_items=max(max_products, 1),
                 )
             except (ApifyError, httpx.HTTPError):
                 items = []
-            if not items:
-                metadata = await _public_shop_metadata(url, marketplace)
-                if metadata:
-                    return metadata
-                raise HTTPException(status_code=404, detail="Amazon Shop page not found")
-            return _normalize_shop(items[:max_products], url, marketplace)
+            if items:
+                ctx["source"] = "apify"
+                return _normalize_shop(items[: max(max_products, 1)], url, marketplace)
 
-        data = await cached_or_run("amazon-shop.page", {"url": url, "marketplace": marketplace.upper(), "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
+            metadata = await _public_shop_metadata(url, marketplace)
+            if metadata:
+                ctx["source"] = "direct"
+                return metadata
+            raise HTTPException(status_code=404, detail="Amazon Shop page not found")
+
+        data = await cached_or_run(
+            "amazon-shop.page",
+            {"url": url, "marketplace": marketplace.upper(), "limit": limit, "v": 4},
+            _run,
+            ctx,
+            use_cache=cache,
+        )
+        # Bill by pages actually needed for returned products.
+        n = int(data.get("totalReturned") or 0)
+        ctx["credits_override"] = _credits_for_limit(n if limit > 0 else 0)
         return ApiResponse(data=data)

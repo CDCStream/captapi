@@ -2804,7 +2804,7 @@ class AmazonShopApi:
         self._t = transport
 
     def page(self, *, url: str, marketplace: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Amazon Shop Page — Amazon seller storefront metadata and product listings. (89 credits)
+        """Amazon Shop Page — Amazon seller storefront metadata and product listings. (2 credits)
 
         :param url: Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param marketplace: Amazon marketplace code. Default US.
@@ -2819,7 +2819,7 @@ class AsyncAmazonShopApi:
         self._t = transport
 
     async def page(self, *, url: str, marketplace: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Amazon Shop Page — Amazon seller storefront metadata and product listings. (89 credits)
+        """Amazon Shop Page — Amazon seller storefront metadata and product listings. (2 credits)
 
         :param url: Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param marketplace: Amazon marketplace code. Default US.

@@ -367,7 +367,7 @@ const KICK: Omit<Endpoint, "platform">[] = [
 ];
 
 const AMAZON_SHOP_ENDPOINTS: Omit<Endpoint, "platform">[] = [
-  { tool: "amazon_shop_page", name: "Amazon Shop Page", path: "/v1/amazon-shop/page", credits: 89, summary: "Amazon seller storefront metadata and product listings.", params: [url(AMAZON_SHOP), { name: "marketplace", type: "string", required: false, description: "Amazon marketplace code. Default US." }, limit(20, 200)] },
+  { tool: "amazon_shop_page", name: "Amazon Shop Page", path: "/v1/amazon-shop/page", credits: 2, summary: "Amazon seller storefront metadata and product listings.", params: [url(AMAZON_SHOP), { name: "marketplace", type: "string", required: false, description: "Amazon marketplace code. Default US." }, limit(20, 200)] },
 ];
 
 const ACCOUNT: Omit<Endpoint, "platform">[] = [

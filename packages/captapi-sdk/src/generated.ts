@@ -1958,7 +1958,7 @@ export interface AmazonShopPageParams {
 
 export class AmazonShopApi {
   constructor(private readonly core: HttpCore) {}
-  /** Amazon Shop Page — Amazon seller storefront metadata and product listings. (89 credits) */
+  /** Amazon Shop Page — Amazon seller storefront metadata and product listings. (2 credits) */
   page(params: AmazonShopPageParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/amazon-shop/page", params);
   }

@@ -336,7 +336,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `amazon_shop_page` | `/v1/amazon-shop/page` | `url` (string), `marketplace`? (string), `limit`? (number), `cache`? (boolean) | 89 |
+| `amazon_shop_page` | `/v1/amazon-shop/page` | `url` (string), `marketplace`? (string), `limit`? (number), `cache`? (boolean) | 2 |
 
 ### Kwai
 

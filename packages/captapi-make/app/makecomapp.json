@@ -2503,7 +2503,7 @@
       },
       "amazonShopPage": {
         "label": "Amazon Shop Page",
-        "description": "Amazon seller storefront metadata and product listings. Costs ~89 credits (cached results free, failures never charged).",
+        "description": "Amazon seller storefront metadata and product listings. Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
