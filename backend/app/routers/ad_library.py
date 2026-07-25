@@ -23,9 +23,9 @@ router = APIRouter()
 
 RATE_AD_LIST = 3.5
 RATE_GOOGLE_COMPANY_ADS = 3.35
-# Native ATC SearchSuggestions (~proxy only). Was 4.5 when Apify-backed.
-RATE_GOOGLE_ADVERTISER = 0.5
-CREDIT_GOOGLE_ADVERTISER_MIN = 2
+# Native ATC SearchSuggestions: one proxied RPC (~$0.001). At $0.0045/credit
+# with 120% markup → ceil(0.001 * 2.2 / 0.0045) = 1 credit flat.
+CREDIT_GOOGLE_ADVERTISER = 1
 
 
 def _scaled(limit: int, rate: float = RATE_AD_LIST, minimum: int = 2) -> int:
@@ -795,13 +795,12 @@ async def google_advertiser_search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled(limit, RATE_GOOGLE_ADVERTISER, CREDIT_GOOGLE_ADVERTISER_MIN)
     async with billed_call(
         caller=caller,
         endpoint="/v1/ad-library/google/advertiser-search",
         platform="google_ad_library",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_GOOGLE_ADVERTISER,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # 1) Native ATC SearchSuggestions (proxy/direct) — ~ms, ~$0.
@@ -817,7 +816,7 @@ async def google_advertiser_search(
                     "advertisers": native,
                 }
 
-            # 2) Apify last resort.
+            # 2) Apify last resort (rare; still billed at the native flat rate).
             items = await _run_actor(
                 settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2,
                 {"advertisers": [q], "region": country.upper(), "maxResults": limit},
@@ -837,19 +836,15 @@ async def google_advertiser_search(
                 "advertisers": list(advertisers.values()),
             }
 
-        data = await cached_or_run(
-            "ad-library.google.advertiser-search",
-            {"q": q, "country": country, "limit": limit, "v": 4},
-            _run,
-            ctx,
-            use_cache=cache,
+        return ApiResponse(
+            data=await cached_or_run(
+                "ad-library.google.advertiser-search",
+                {"q": q, "country": country, "limit": limit, "v": 5},
+                _run,
+                ctx,
+                use_cache=cache,
+            )
         )
-        ctx["credits_override"] = _scaled(
-            len(data.get("advertisers") or []),
-            RATE_GOOGLE_ADVERTISER,
-            CREDIT_GOOGLE_ADVERTISER_MIN,
-        )
-        return ApiResponse(data=data)
 
 
 @router.get("/linkedin/search-ads", summary="Search LinkedIn Ad Library")

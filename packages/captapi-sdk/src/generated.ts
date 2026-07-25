@@ -2299,7 +2299,7 @@ export class AdLibraryApi {
   googleAdDetails(params: GoogleAdLibraryAdDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/google/ad-details", params);
   }
-  /** Google Advertiser Search — Search Google Ads advertisers. (5 credits) */
+  /** Google Advertiser Search — Search Google Ads advertisers. (1 credit) */
   googleAdvertiserSearch(params: GoogleAdLibraryAdvertiserSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/google/advertiser-search", params);
   }

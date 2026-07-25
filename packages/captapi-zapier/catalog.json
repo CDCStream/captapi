@@ -4587,7 +4587,7 @@
     "platform": "Ad Library",
     "name": "Google Advertiser Search",
     "path": "/v1/ad-library/google/advertiser-search",
-    "credits": 5,
+    "credits": 1
     "summary": "Search Google Ads advertisers.",
     "params": [
       {

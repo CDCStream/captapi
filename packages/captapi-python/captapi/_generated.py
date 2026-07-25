@@ -3214,7 +3214,7 @@ class AdLibraryApi:
         return self._t.get("/v1/ad-library/google/ad-details", {"creative_id": creative_id, "country": country, "cache": cache})
 
     def google_advertiser_search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Advertiser Search — Search Google Ads advertisers. (5 credits)
+        """Google Advertiser Search — Search Google Ads advertisers. (1 credit)
 
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
@@ -3331,7 +3331,7 @@ class AsyncAdLibraryApi:
         return await self._t.get("/v1/ad-library/google/ad-details", {"creative_id": creative_id, "country": country, "cache": cache})
 
     async def google_advertiser_search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Advertiser Search — Search Google Ads advertisers. (5 credits)
+        """Google Advertiser Search — Search Google Ads advertisers. (1 credit)
 
         :param q: Search query or keywords (min 2 chars).
         :param country: ISO country code. Default US.
