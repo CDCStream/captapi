@@ -73,7 +73,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/channel-videos", {"url": url, "limit": limit, "fast": fast, "cache": cache})
 
     def playlist_videos(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Playlist Videos — List videos in a YouTube playlist. (50 credits)
+        """YouTube Playlist Videos — List videos in a YouTube playlist. (2 credits)
 
         :param url: YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
@@ -83,7 +83,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/playlist-videos", {"url": url, "limit": limit, "fast": fast, "cache": cache})
 
     def playlist(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Playlist — Playlist metadata plus videos from a YouTube playlist. (50 credits)
+        """YouTube Playlist — Playlist metadata plus videos from a YouTube playlist. (2 credits)
 
         :param url: YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
@@ -276,7 +276,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/channel-videos", {"url": url, "limit": limit, "fast": fast, "cache": cache})
 
     async def playlist_videos(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Playlist Videos — List videos in a YouTube playlist. (50 credits)
+        """YouTube Playlist Videos — List videos in a YouTube playlist. (2 credits)
 
         :param url: YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
@@ -286,7 +286,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/playlist-videos", {"url": url, "limit": limit, "fast": fast, "cache": cache})
 
     async def playlist(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Playlist — Playlist metadata plus videos from a YouTube playlist. (50 credits)
+        """YouTube Playlist — Playlist metadata plus videos from a YouTube playlist. (2 credits)
 
         :param url: YouTube playlist URL, e.g. https://youtube.com/playlist?list=ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.

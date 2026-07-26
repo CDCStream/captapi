@@ -23,7 +23,7 @@ from urllib.parse import parse_qs, urlparse
 
 import httpx
 
-from app.services.http_fetch import fetch as proxy_fetch, post_json
+from app.services.http_fetch import fetch as proxy_fetch, post_json, proxy_for
 from app.utils.formatters import safe_int, safe_list, safe_str
 
 YT_HEADERS: dict[str, str] = {
@@ -322,39 +322,56 @@ def find_continuation_token(data: Any) -> str | None:
     return None
 
 
+def _proxy_tiers() -> list[str]:
+    """Datacenter first (cheap/fast); residential if configured."""
+    tiers: list[str] = ["datacenter"]
+    if proxy_for("residential"):
+        tiers.append("residential")
+    return tiers
+
+
 async def fetch_page_data(url: str, *, timeout: float = 12.0) -> tuple[dict[str, Any] | None, str]:
     """GET a YouTube page and return (ytInitialData, raw html)."""
-    try:
-        resp = await proxy_fetch(
-            url, tier="datacenter", headers=YT_HEADERS, cookies=YT_COOKIES, timeout=timeout
-        )
-    except httpx.HTTPError:
-        return None, ""
-    if resp.status_code >= 400:
-        return None, ""
-    return extract_initial_json(resp.text, "ytInitialData"), resp.text
+    last_html = ""
+    for tier in _proxy_tiers():
+        try:
+            resp = await proxy_fetch(
+                url, tier=tier, headers=YT_HEADERS, cookies=YT_COOKIES, timeout=timeout  # type: ignore[arg-type]
+            )
+        except httpx.HTTPError:
+            continue
+        if resp.status_code >= 400:
+            continue
+        last_html = resp.text or ""
+        data = extract_initial_json(last_html, "ytInitialData")
+        if data is not None:
+            return data, last_html
+    return None, last_html
 
 
 async def innertube(endpoint: str, body: dict[str, Any], *, timeout: float = 12.0) -> dict[str, Any] | None:
     """POST to InnerTube (web client). ``endpoint``: search | browse | next."""
-    try:
-        resp = await post_json(
-            f"https://www.youtube.com/youtubei/v1/{endpoint}",
-            {"context": _INNERTUBE_CONTEXT, **body},
-            tier="datacenter",
-            headers={**YT_HEADERS, "X-Youtube-Client-Name": "1", "X-Youtube-Client-Version": "2.20240701.00.00"},
-            params={"prettyPrint": "false"},
-            timeout=timeout,
-        )
-    except httpx.HTTPError:
-        return None
-    if resp.status_code >= 400:
-        return None
-    try:
-        data = resp.json()
-    except ValueError:
-        return None
-    return data if isinstance(data, dict) else None
+    for tier in _proxy_tiers():
+        try:
+            resp = await post_json(
+                f"https://www.youtube.com/youtubei/v1/{endpoint}",
+                {"context": _INNERTUBE_CONTEXT, **body},
+                tier=tier,  # type: ignore[arg-type]
+                headers={**YT_HEADERS, "X-Youtube-Client-Name": "1", "X-Youtube-Client-Version": "2.20240701.00.00"},
+                params={"prettyPrint": "false"},
+                timeout=timeout,
+            )
+        except httpx.HTTPError:
+            continue
+        if resp.status_code >= 400:
+            continue
+        try:
+            data = resp.json()
+        except ValueError:
+            continue
+        if isinstance(data, dict):
+            return data
+    return None
 
 
 async def _paginate(

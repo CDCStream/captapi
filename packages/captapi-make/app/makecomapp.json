@@ -140,7 +140,7 @@
       },
       "youtubePlaylistVideos": {
         "label": "YouTube Playlist Videos",
-        "description": "List videos in a YouTube playlist. Costs ~50 credits (cached results free, failures never charged).",
+        "description": "List videos in a YouTube playlist. Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -157,7 +157,7 @@
       },
       "youtubePlaylist": {
         "label": "YouTube Playlist",
-        "description": "Playlist metadata plus videos from a YouTube playlist. Costs ~50 credits (cached results free, failures never charged).",
+        "description": "Playlist metadata plus videos from a YouTube playlist. Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

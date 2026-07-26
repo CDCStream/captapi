@@ -229,11 +229,11 @@ export class YoutubeApi {
   channelVideos(params: YoutubeChannelVideosParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/channel-videos", params);
   }
-  /** YouTube Playlist Videos — List videos in a YouTube playlist. (50 credits) */
+  /** YouTube Playlist Videos — List videos in a YouTube playlist. (2 credits) */
   playlistVideos(params: YoutubePlaylistVideosParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/playlist-videos", params);
   }
-  /** YouTube Playlist — Playlist metadata plus videos from a YouTube playlist. (50 credits) */
+  /** YouTube Playlist — Playlist metadata plus videos from a YouTube playlist. (2 credits) */
   playlist(params: YoutubePlaylistParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/playlist", params);
   }

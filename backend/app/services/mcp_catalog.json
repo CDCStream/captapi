@@ -200,7 +200,7 @@
     "platform": "youtube",
     "name": "YouTube Playlist Videos",
     "path": "/v1/youtube/playlist-videos",
-    "credits": 50,
+    "credits": 2,
     "summary": "List videos in a YouTube playlist.",
     "params": [
       {
@@ -234,7 +234,7 @@
     "platform": "youtube",
     "name": "YouTube Playlist",
     "path": "/v1/youtube/playlist",
-    "credits": 50,
+    "credits": 2,
     "summary": "Playlist metadata plus videos from a YouTube playlist.",
     "params": [
       {

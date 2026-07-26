@@ -52,6 +52,10 @@ CREDIT_TRANSCRIPT = 1
 CREDIT_SUMMARIZE = 3
 CREDIT_VIDEO_DETAILS = 1
 CREDIT_CHANNEL_DETAILS = 1
+# Playlist pages + InnerTube continuations via datacenter proxy (~$0.001).
+# At $0.0045/credit with 120% markup → ~1 credit; bill 2 flat when native/RSS
+# succeeds. Apify fallback keeps RATE_YT_VIDEO per-result scale.
+CREDIT_YT_PLAYLIST_NATIVE = 2
 
 # YouTube list endpoints hit per-result Apify actors:
 #   streamers/youtube-scraper          $2.40/1k WITH an Apify sub ($5/1k without)
@@ -1252,12 +1256,15 @@ async def youtube_playlist_videos(
 
         data = await cached_or_run(
             endpoint="youtube.playlist-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 9},
+            params={"url": url, "limit": limit, "fast": fast, "v": 10},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["videos"]), RATE_YT_VIDEO, 2)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_YT_PLAYLIST_NATIVE
+        else:
+            ctx["credits_override"] = _scaled_credits(len(data["videos"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
 
 
@@ -1342,12 +1349,15 @@ async def youtube_playlist(
 
         data = await cached_or_run(
             endpoint="youtube.playlist",
-            params={"url": url, "limit": limit, "fast": fast, "v": 8},
+            params={"url": url, "limit": limit, "fast": fast, "v": 9},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["videos"]), RATE_YT_VIDEO, 5)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_YT_PLAYLIST_NATIVE
+        else:
+            ctx["credits_override"] = _scaled_credits(len(data["videos"]), RATE_YT_VIDEO, 5)
         return ApiResponse(data=data)
 
 
