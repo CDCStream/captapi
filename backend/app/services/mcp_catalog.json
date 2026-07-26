@@ -968,7 +968,7 @@
     "platform": "tiktok",
     "name": "TikTok Music Posts",
     "path": "/v1/tiktok/music-posts",
-    "credits": 32,
+    "credits": 2,
     "summary": "Posts using a specific TikTok sound/music.",
     "params": [
       {
@@ -981,7 +981,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
       },
       {
         "name": "cache",

@@ -1190,3 +1190,118 @@ async def search_suggestions_native(
         if len(out) >= limit:
             break
     return out if out else None
+
+# --- Music posts (mobile music/aweme API, cursor-paginated) -----------------
+#
+# Sound pages hydrate poorly without JS; the mobile ``/aweme/v1/music/aweme/``
+# endpoint returns logged-out aweme rows for a ``music_id`` with the same
+# residential soft-block pattern as channel posts / comments.
+_TT_MUSIC_HOSTS = (
+    "https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/music/aweme/",
+    "https://api22-normal-c-useast2a.tiktokv.com/aweme/v1/music/aweme/",
+    "https://api19-normal-c-useast1a.tiktokv.com/aweme/v1/music/aweme/",
+    "https://api31-normal-useast2a.tiktokv.com/aweme/v1/music/aweme/",
+    "https://api.tiktokv.com/aweme/v1/music/aweme/",
+)
+
+_MUSIC_ID_RE = re.compile(r"(\d{6,})")
+
+
+def parse_music_id(url_or_id: str) -> str | None:
+    """Extract a TikTok music/sound id from a URL or bare numeric id."""
+    raw = (url_or_id or "").strip()
+    if not raw:
+        return None
+    if raw.isdigit() and len(raw) >= 6:
+        return raw
+    m = _MUSIC_ID_RE.search(raw)
+    return m.group(1) if m else None
+
+
+def _music_page_ok(page: dict[str, Any], *, expect_items: bool) -> bool:
+    awemes = page.get("aweme_list")
+    if not isinstance(awemes, list):
+        return False
+    if awemes:
+        return True
+    return not expect_items
+
+
+async def _music_page(
+    music_id: str, cursor: str, count: int, *, expect_items: bool
+) -> dict[str, Any] | None:
+    headers = {"User-Agent": _TT_MOBILE_UA, "Accept": "application/json"}
+    rounds = 3 if cursor not in ("", "0") else 2
+    concurrency = 12
+    geos = ("US", "NL")
+
+    async def _attempt(host: str, country: str) -> dict[str, Any] | None:
+        did = str(random.randint(10**18, 10**19 - 1))
+        params = {
+            **_TT_COMMENT_PARAMS,
+            "device_id": did,
+            "iid": did,
+            "music_id": music_id,
+            "count": str(max(1, min(count, 30))),
+            "cursor": str(cursor or "0"),
+        }
+        return await _comment_once(host, params, headers, _residential_proxy(country))
+
+    for _ in range(rounds):
+        tasks = [
+            asyncio.create_task(
+                _attempt(_TT_MUSIC_HOSTS[i % len(_TT_MUSIC_HOSTS)], geos[i % len(geos)])
+            )
+            for i in range(concurrency)
+        ]
+        try:
+            for coro in asyncio.as_completed(tasks):
+                res = await coro
+                if res is not None and _music_page_ok(res, expect_items=expect_items):
+                    return res
+        finally:
+            for t in tasks:
+                t.cancel()
+        await asyncio.sleep(0.15)
+    return None
+
+
+async def music_posts_native(music_id_or_url: str, limit: int) -> list[dict[str, Any]] | None:
+    """Fetch up to ``limit`` videos that use a TikTok sound.
+
+    Returns mapped post dicts (same shape as ``channel_posts_native``), or
+    ``None`` when the first page cannot be loaded (caller falls back to Apify).
+    """
+    if limit <= 0:
+        return []
+    music_id = parse_music_id(music_id_or_url)
+    if not music_id:
+        return None
+
+    collected: list[dict[str, Any]] = []
+    cur = "0"
+    max_pages = max(3, limit // 8 + 2)
+    for page_i in range(max_pages):
+        if len(collected) >= limit:
+            break
+        want = min(30, limit - len(collected))
+        page = await _music_page(music_id, cur, want, expect_items=True)
+        if page is None:
+            return None if not collected else collected[:limit]
+        for raw in page.get("aweme_list") or []:
+            if not isinstance(raw, dict):
+                continue
+            mapped = _map_aweme_post(raw)
+            if mapped:
+                collected.append(mapped)
+                if len(collected) >= limit:
+                    break
+        if not bool(page.get("has_more")):
+            break
+        nxt = page.get("cursor")
+        if nxt is None:
+            break
+        cur = str(nxt)
+        if page_i == 0 and not collected:
+            return None
+    return collected[:limit] if collected else None

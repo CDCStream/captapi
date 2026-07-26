@@ -32,6 +32,7 @@ from app.services.tiktok_native import (
     channel_posts_native,
     coerce_stats_v2,
     comment_replies_native,
+    music_posts_native,
     profile_region_native,
     search_suggestions_native,
     video_details_native,
@@ -62,6 +63,7 @@ CREDIT_CHANNEL_DETAILS = 1
 CREDIT_COMMENTS = 2  # native (TikTok's own API); flat fee, our cost ~$0
 CREDIT_COMMENT_REPLIES = 2  # native comment/list/reply; flat fee, our cost ~$0
 CREDIT_CHANNEL_POSTS = 2  # native aweme/post; flat fee, our cost ~$0
+CREDIT_MUSIC_POSTS = 2  # native music/aweme; flat fee, our cost ~$0
 CREDIT_PROFILE_REGION = 2  # native profile page + fast LLM region estimate
 CREDIT_AUDIENCE = 3  # video list (actor) + native commenter-region sampling
 CREDIT_SEARCH = 2
@@ -86,7 +88,6 @@ AUDIENCE_TARGET_TOTAL = 500
 RATE_FOLLOWERS = 0.4       # clockworks followers-scraper  $1.00/1k ($0.001)
 RATE_COMMENTS = 0.2        # clockworks comments-scraper   $0.50/1k ($0.0005)
 RATE_CHANNEL_POSTS = 0.7   # clockworks tiktok-scraper     $1.70/1k ($0.0017)
-RATE_MUSIC_POSTS = 1.6     # clockworks sound-scraper      $4.00/1k ($0.004)
 RATE_USER_SEARCH = 0.4     # clockworks user search (per profile)
 # Trending/popular endpoints hit a third-party HTTP actor; cost not yet verified
 # in the Apify console, so rates are conservative until confirmed.
@@ -1857,21 +1858,40 @@ async def tiktok_user_followings(
 @router.get("/music-posts", summary="Posts using a TikTok sound/music")
 async def tiktok_music_posts(
     url: str = Query(..., description="TikTok music/sound URL"),
-    limit: int = Query(20, ge=1, le=200),
+    limit: int = Query(
+        20,
+        ge=1,
+        le=200,
+        description="How many videos using this sound to return (1–200). Flat 2 credits per call.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = _require_tiktok_music_url(url)
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_MUSIC_POSTS, 3)
+    # Flat fee: native music/aweme is ~$0; Apify fallback is rare and covered
+    # by the same 2-credit charge (same model as channel-posts / comments).
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/music-posts",
         platform="tiktok",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_MUSIC_POSTS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await music_posts_native(url, limit)
+            if native is not None:
+                posts = [strip_empty(p) for p in native]
+                sound_title = next((p.get("musicName") for p in posts if p.get("musicName")), None)
+                if not sound_title:
+                    sound_title = _music_name_from_url(url)
+                if sound_title:
+                    for post in posts:
+                        if not post.get("musicName"):
+                            post["musicName"] = sound_title
+                ctx["source"] = "direct"
+                return {"url": url, "totalReturned": len(posts), "posts": posts}
+
             apify = get_apify()
             items, _actor = await apify.run_with_fallback(
                 _tiktok_music_candidates(settings, url, limit),
@@ -1886,16 +1906,16 @@ async def tiktok_music_posts(
                 for post in posts:
                     if not post.get("musicName"):
                         post["musicName"] = sound_title
+            ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
             endpoint="tiktok.music-posts",
-            params={"url": url, "limit": limit, "v": 6},
+            params={"url": url, "limit": limit, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_MUSIC_POSTS, 3)
         return ApiResponse(data=data)
 
 
