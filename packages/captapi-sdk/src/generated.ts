@@ -1530,7 +1530,7 @@ export class TiktokShopApi {
   search(params: TiktokShopSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok-shop/shop-search", params);
   }
-  /** TikTok Shop Products — List products from a TikTok Shop store. (56 credits) */
+  /** TikTok Shop Products — List products from a TikTok Shop store. (2 credits) */
   products(params: TiktokShopProductsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok-shop/shop-products", params);
   }

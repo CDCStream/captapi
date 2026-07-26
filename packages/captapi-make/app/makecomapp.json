@@ -1942,7 +1942,7 @@
       },
       "tiktokShopProducts": {
         "label": "TikTok Shop Products",
-        "description": "List products from a TikTok Shop store. Costs ~56 credits (cached results free, failures never charged).",
+        "description": "List products from a TikTok Shop store. Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

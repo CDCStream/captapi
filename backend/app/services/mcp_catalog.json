@@ -3108,7 +3108,7 @@
     "platform": "tiktok_shop",
     "name": "TikTok Shop Products",
     "path": "/v1/tiktok-shop/shop-products",
-    "credits": 56,
+    "credits": 2,
     "summary": "List products from a TikTok Shop store.",
     "params": [
       {

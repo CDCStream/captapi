@@ -2124,7 +2124,7 @@ class TiktokShopApi:
         return self._t.get("/v1/tiktok-shop/shop-search", {"q": q, "region": region, "limit": limit, "cache": cache})
 
     def products(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop Products — List products from a TikTok Shop store. (56 credits)
+        """TikTok Shop Products — List products from a TikTok Shop store. (2 credits)
 
         :param url: TikTok Shop store URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -2174,7 +2174,7 @@ class AsyncTiktokShopApi:
         return await self._t.get("/v1/tiktok-shop/shop-search", {"q": q, "region": region, "limit": limit, "cache": cache})
 
     async def products(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop Products — List products from a TikTok Shop store. (56 credits)
+        """TikTok Shop Products — List products from a TikTok Shop store. (2 credits)
 
         :param url: TikTok Shop store URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.

@@ -15,6 +15,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
+from app.services import tiktok_shop_native
 from app.utils.formatters import safe_float, safe_int, safe_str
 from app.utils.url import detect_url_platform, extract_tiktok_username, platform_mismatch_detail
 
@@ -22,6 +23,9 @@ router = APIRouter()
 
 RATE_SHOP = 2.8
 RATE_REVIEWS = 2.25
+# Native store SSR (datacenter HTML). Search stays on Apify — TikTok Shop search
+# pages are WAF/captcha gated on Evomi/Webshare/Decodo.
+CREDIT_SHOP_NATIVE = tiktok_shop_native.CREDIT_SHOP_NATIVE
 
 
 def _scaled(limit: int, rate: float, minimum: int = 2) -> int:
@@ -271,12 +275,36 @@ async def shop_products(
         raise HTTPException(status_code=400, detail="Invalid TikTok Shop URL. Pass a TikTok Shop URL like https://www.tiktok.com/shop/store.")
     async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/shop-products", platform="tiktok_shop", resource_url=url, base_credits=_scaled(limit, RATE_SHOP)) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_shop("shop_catalog", {"shopUrls": [url], "maxResults": limit}, limit)
-            products = [_normalize_product(i, catalog_mode=True) for i in items]
-            return {"url": url, "totalReturned": len(products), "products": products}
+            # 1) Native store SSR (datacenter → residential → Decodo).
+            # SSR ships ~30 products; prefer it for typical limits so we skip Apify.
+            native = await tiktok_shop_native.fetch_shop_products(url, limit=limit)
+            if native:
+                if len(native) >= limit or limit <= 30:
+                    ctx["source"] = "direct"
+                    products = [_normalize_product(i, catalog_mode=True) for i in native]
+                    return {"url": url, "totalReturned": len(products), "products": products}
 
-        data = await cached_or_run("tiktok-shop.shop-products", {"url": url, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
-        ctx["credits_override"] = _scaled(len(data["products"]), RATE_SHOP)
+            # 2) Apify when native misses or caller wants more than one SSR page.
+            items = await _run_shop("shop_catalog", {"shopUrls": [url], "maxResults": limit}, limit)
+            if items:
+                ctx["source"] = "apify"
+                products = [_normalize_product(i, catalog_mode=True) for i in items]
+                return {"url": url, "totalReturned": len(products), "products": products}
+
+            # 3) Partial native is better than empty.
+            if native:
+                ctx["source"] = "direct"
+                products = [_normalize_product(i, catalog_mode=True) for i in native]
+                return {"url": url, "totalReturned": len(products), "products": products}
+
+            ctx["source"] = "apify"
+            return {"url": url, "totalReturned": 0, "products": []}
+
+        data = await cached_or_run("tiktok-shop.shop-products", {"url": url, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_SHOP_NATIVE
+        else:
+            ctx["credits_override"] = _scaled(len(data["products"]), RATE_SHOP)
         return ApiResponse(data=data)
 
 
