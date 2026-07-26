@@ -413,6 +413,20 @@ async def search_native(q: str, limit: int) -> list[dict[str, Any]]:
     return await _paginate(data, limit=limit, continuation_endpoint="search")
 
 
+async def search_shorts_native(q: str, limit: int) -> list[dict[str, Any]] | None:
+    """Shorts-filtered YouTube search (sp=EgIYAQ==) via Innertube HTML."""
+    from urllib.parse import quote
+
+    seed = (q or "").strip() or "trending"
+    data, _ = await fetch_page_data(
+        f"https://www.youtube.com/results?search_query={quote(seed)}&sp=EgIYAQ%3D%3D"
+    )
+    if data is None:
+        return None
+    cards = await _paginate(data, limit=limit, continuation_endpoint="search", shorts=True)
+    return cards if cards else None
+
+
 # ---------------------------------------------------------------- playlist -
 async def playlist_native(url: str, limit: int) -> dict[str, Any] | None:
     """Videos (plus title/channel) straight from a /playlist page."""

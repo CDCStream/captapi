@@ -64,6 +64,7 @@ CREDIT_COMMENTS = 2  # native (TikTok's own API); flat fee, our cost ~$0
 CREDIT_COMMENT_REPLIES = 2  # native comment/list/reply; flat fee, our cost ~$0
 CREDIT_CHANNEL_POSTS = 2  # native aweme/post; flat fee, our cost ~$0
 CREDIT_MUSIC_POSTS = 2  # native music/aweme; flat fee, our cost ~$0
+CREDIT_SEARCH_SUGGESTIONS = 2  # native search preview; flat fee, our cost ~$0
 CREDIT_PROFILE_REGION = 2  # native profile page + fast LLM region estimate
 CREDIT_AUDIENCE = 3  # video list (actor) + native commenter-region sampling
 CREDIT_SEARCH = 2
@@ -1341,13 +1342,14 @@ async def tiktok_search_suggestions(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_TREND_MARGIN, 2)
+    # Flat fee: native search preview is ~$0; Apify fallback is rare and covered
+    # by the same 2-credit charge.
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/search-suggestions",
         platform="tiktok",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_SEARCH_SUGGESTIONS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Native first — TikTok's public search preview. Apify actor is a
@@ -1399,12 +1401,11 @@ async def tiktok_search_suggestions(
 
         data = await cached_or_run(
             endpoint="tiktok.search-suggestions",
-            params={"q": q, "country": country.upper(), "language": language, "limit": limit, "v": 3},
+            params={"q": q, "country": country.upper(), "language": language, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["suggestions"]), RATE_TREND_MARGIN, 2)
         return ApiResponse(data=data)
 
 

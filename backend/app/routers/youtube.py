@@ -33,6 +33,7 @@ from app.services.youtube_native import (
     parse_count_text,
     playlist_native,
     search_native,
+    search_shorts_native,
     text_of,
     transcript_native,
     video_details_native,
@@ -1420,20 +1421,31 @@ async def youtube_search(
 @router.get("/trending-shorts", summary="Trending YouTube Shorts")
 async def youtube_trending_shorts(
     q: str = Query("trending", min_length=2, description="Seed keyword for trending Shorts"),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(
+        20,
+        ge=1,
+        le=100,
+        description="How many Shorts to return (1–100). Flat 2 credits per call.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_YT_MARGIN, 2)
+    # Flat fee: native shorts search is ~$0; Apify browser actor is rare fallback.
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/trending-shorts",
         platform="youtube",
         resource_url=None,
-        base_credits=cost,
+        base_credits=2,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await search_shorts_native(q, limit)
+            if native is not None:
+                ctx["source"] = "direct"
+                shorts = [_video_card(v) for v in native[:limit]]
+                return {"platform": "youtube", "query": q, "totalReturned": len(shorts), "shorts": shorts}
+
             # Browser-based actor regularly needs >120s; the default sync
             # timeout turns those runs into 502s. When even 280s is not
             # enough, reuse the actor's latest successful run instead of
@@ -1468,7 +1480,7 @@ async def youtube_trending_shorts(
 
         data = await cached_or_run(
             endpoint="youtube.trending-shorts",
-            params={"q": q, "limit": limit, "v": 4},
+            params={"q": q, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             # Trending actor runs take minutes; serve the last list instantly
@@ -1476,7 +1488,6 @@ async def youtube_trending_shorts(
             stale_while_revalidate=True,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["shorts"]), RATE_YT_MARGIN, 2)
         return ApiResponse(data=data)
 
 

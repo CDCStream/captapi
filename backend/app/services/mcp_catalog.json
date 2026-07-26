@@ -402,7 +402,7 @@
     "platform": "youtube",
     "name": "YouTube Trending Shorts",
     "path": "/v1/youtube/trending-shorts",
-    "credits": 28,
+    "credits": 2,
     "summary": "Discover trending YouTube Shorts by seed keyword.",
     "params": [
       {
@@ -415,7 +415,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 100. Billed per result."
+        "description": "Max items to return. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -798,7 +798,7 @@
     "platform": "tiktok",
     "name": "TikTok Search Suggestions",
     "path": "/v1/tiktok/search-suggestions",
-    "credits": 28,
+    "credits": 2,
     "summary": "The autocomplete terms TikTok suggests in its search bar for a seed keyword — the real phrases people search, ranked. Localize by country + language.",
     "params": [
       {
@@ -823,7 +823,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Upper bound on suggestions to return (1-100, default 20). TikTok surfaces only a limited number of real autocomplete suggestions per keyword, so you'll often get fewer. Billed per result."
+        "description": "Max items to return. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -1896,7 +1896,7 @@
     "platform": "facebook",
     "name": "Facebook Marketplace Search",
     "path": "/v1/facebook/marketplace-search",
-    "credits": 28,
+    "credits": 2,
     "summary": "Search Facebook Marketplace listings by keyword and location.",
     "params": [
       {
@@ -1915,7 +1915,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Flat 2 credits per call."
       },
       {
         "name": "details",
@@ -3784,7 +3784,7 @@
     "platform": "soundcloud",
     "name": "SoundCloud Artist Tracks",
     "path": "/v1/soundcloud/artist-tracks",
-    "credits": 28,
+    "credits": 2,
     "summary": "Tracks from a SoundCloud artist profile, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
@@ -3797,7 +3797,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 100. Billed per result."
+        "description": "Max items to return. Flat 2 credits per call."
       },
       {
         "name": "cursor",

@@ -16,12 +16,16 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
-from app.services import facebook_comments_native, facebook_events_native
+from app.services import (
+    facebook_comments_native,
+    facebook_events_native,
+    facebook_marketplace_native,
+)
 from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
-from app.utils.formatters import normalize_language_code, safe_float, safe_int, safe_str
+from app.utils.formatters import normalize_language_code, safe_float, safe_int, safe_str, strip_empty
 from app.utils.url import (
     detect_url_platform,
     extract_facebook_page,
@@ -47,6 +51,7 @@ RATE_FB_MARKETPLACE = 1.4
 RATE_FB_EVENTS = 2.0
 CREDIT_FB_EVENTS_NATIVE = facebook_events_native.CREDIT_FB_EVENTS_NATIVE
 CREDIT_FB_COMMENTS_NATIVE = facebook_comments_native.CREDIT_FB_COMMENTS_NATIVE
+CREDIT_FB_MARKETPLACE_NATIVE = facebook_marketplace_native.CREDIT_FB_MARKETPLACE_NATIVE
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -1648,22 +1653,46 @@ async def facebook_marketplace_item(
 async def facebook_marketplace_search(
     q: str = Query(..., min_length=2, description="Product/keyword to search for"),
     location: str = Query(..., min_length=2, description="City or place name, e.g. 'Austin, TX'"),
-    limit: int = Query(20, ge=1, le=200),
-    details: bool = Query(False, description="Fetch full description, photos & coordinates per listing (slower, costs more)"),
+    limit: int = Query(
+        20,
+        ge=1,
+        le=200,
+        description="How many listings to return (1–200). Flat 2 credits when details=false.",
+    ),
+    details: bool = Query(
+        False,
+        description=(
+            "When true, fetch fuller listing fields via the backup path "
+            "(description/photos/coordinates; billed per result). "
+            "Default false uses the native list path at flat 2 credits."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
     rate = RATE_FB_MARKETPLACE * (2 if details else 1)
-    cost = _scaled_credits(limit, rate, 2)
+    # Native list path is flat 2; details=true still uses Apify per-result pricing.
+    base = CREDIT_FB_MARKETPLACE_NATIVE if not details else _scaled_credits(limit, rate, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/marketplace-search",
         platform="facebook",
         resource_url=None,
-        base_credits=cost,
+        base_credits=base,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            if not details:
+                native = await facebook_marketplace_native.marketplace_search_native(q, location, limit)
+                if native is not None:
+                    ctx["source"] = "direct"
+                    return {
+                        "query": q,
+                        "location": location,
+                        "totalReturned": len(native),
+                        "listings": native,
+                    }
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_FACEBOOK_MARKETPLACE,
@@ -1675,18 +1704,23 @@ async def facebook_marketplace_search(
                 },
                 max_items=limit,
             )
-            listings = [_normalize_listing(i) for i in items[:limit] if not i.get("error")]
+            listings = [
+                strip_empty(_normalize_listing(i))
+                for i in items[:limit]
+                if not i.get("error")
+            ]
             ctx["source"] = "apify"
             return {"query": q, "location": location, "totalReturned": len(listings), "listings": listings}
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-search",
-            params={"q": q, "location": location, "limit": limit, "details": details, "v": 3},
+            params={"q": q, "location": location, "limit": limit, "details": details, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["listings"]), rate, 2)
+        if details or ctx.get("source") == "apify":
+            ctx["credits_override"] = _scaled_credits(len(data["listings"]), rate, 2)
         return ApiResponse(data=data)
 
 

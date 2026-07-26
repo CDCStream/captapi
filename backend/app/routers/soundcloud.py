@@ -20,6 +20,7 @@ from app.utils.url import detect_url_platform, platform_mismatch_detail
 router = APIRouter()
 
 RATE = 1.4
+CREDIT_ARTIST_TRACKS = 2  # native api-v2; flat fee, our cost ~$0
 
 
 def _scaled(n: int, rate: float = RATE, minimum: int = 2) -> int:
@@ -173,8 +174,15 @@ async def artist_tracks(
     caller: ApiCaller = Depends(require_api_key),
 ):
     profile = _profile_url(url)
-    cost = _scaled(limit)
-    async with billed_call(caller=caller, endpoint="/v1/soundcloud/artist-tracks", platform="soundcloud", resource_url=profile, base_credits=cost) as ctx:
+    # Flat fee: native api-v2 is ~$0; Apify fallback is rare and covered by
+    # the same 2-credit charge.
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/soundcloud/artist-tracks",
+        platform="soundcloud",
+        resource_url=profile,
+        base_credits=CREDIT_ARTIST_TRACKS,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
             resolved = await native.resolve(profile)
             if isinstance(resolved, dict) and resolved.get("kind") == "user" and resolved.get("id"):
@@ -217,12 +225,11 @@ async def artist_tracks(
 
         data = await cached_or_run(
             "soundcloud.artist-tracks",
-            {"url": profile, "limit": limit, "cursor": cursor or "", "v": 7},
+            {"url": profile, "limit": limit, "cursor": cursor or "", "v": 8},
             _run,
             ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled(len(data["tracks"]))
         return ApiResponse(data=data)
 
 

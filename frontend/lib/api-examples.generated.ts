@@ -1095,137 +1095,115 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "listings": [
       {
         "platform": "facebook",
-        "id": "1684056162810328",
-        "title": "Desk chair",
-        "url": "https://www.facebook.com/marketplace/item/1684056162810328/",
-        "price": 35,
-        "priceFormatted": "$35",
+        "id": "1023091973955138",
+        "title": "MCM Atomic Chrome Swivel Office Chair",
+        "url": "https://www.facebook.com/marketplace/item/1023091973955138/",
+        "price": 150.0,
+        "priceFormatted": "$150",
         "currency": "USD",
-        "location": "Washington D.C.",
-        "city": "Washington",
-        "state": "DC",
-        "latitude": 38.910827636719,
-        "longitude": -77.019653320312,
+        "location": "Austin, TX",
+        "city": "Austin",
+        "state": "TX",
         "isSold": false,
         "isLive": true,
         "deliveryTypes": [
           "IN_PERSON"
         ],
-        "image": "https://scontent-lga3-2.xx.fbcdn.net/v/t39.84726-6/729099259_2600662523665021_2872679799686599261_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=V5k2eiTB5BoQ7kNvwFLiJxd&_nc_oc=AdovkHj4V_t8y--LdWGaSNQBYwNCTxxnsYHFaK2nc-V1FCPFvnrjRRaJAkFWNz6zJEE&_nc_zt=14&_nc_ht=scontent-lga3-2.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQCLOSQwHpC18Kn75hmJxJ5kETXqDgfjIoeWyvNOuIP_LQ&oe=6A62A57D",
+        "image": "https://scontent-cdg4-1.xx.fbcdn.net/v/t45.5328-4/755951223_1861937971878382_7371499039634355416_n.jpg?stp=c0.82.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=247b10&_nc_ohc=iS2R-9GEaf0Q7kNvwEL6juq&_nc_oc=AdoqGHjak_iTFrRMTFiTIfP9gJ0C02Lrs8E10_5hr-cGHRGwxE34jj0_d7sc4YVnggo&_nc_zt=23&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQBY7zuItKb-MwsWVAB1gXEbITj-pNmvrR3-tFbTKO8FYA&oe=6A6C2954",
         "photos": [
-          "https://scontent-lga3-2.xx.fbcdn.net/v/t39.84726-6/729099259_2600662523665021_2872679799686599261_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=V5k2eiTB5BoQ7kNvwFLiJxd&_nc_oc=AdovkHj4V_t8y--LdWGaSNQBYwNCTxxnsYHFaK2nc-V1FCPFvnrjRRaJAkFWNz6zJEE&_nc_zt=14&_nc_ht=scontent-lga3-2.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQCLOSQwHpC18Kn75hmJxJ5kETXqDgfjIoeWyvNOuIP_LQ&oe=6A62A57D",
-          "https://scontent-lga3-2.xx.fbcdn.net/v/t39.84726-6/729099259_2600662523665021_2872679799686599261_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=V5k2eiTB5BoQ7kNvwEMVUlO&_nc_oc=AdrCb-HbT-bjIWEu_xrQFmwLbqkuJvYlu_GSAGjQ1oRd4C-mBIC5_mtq_fhDA4N75xk&_nc_zt=14&_nc_ht=scontent-lga3-2.xx&_nc_gid=ToC15gYSkjp7VVfCM3W7eg&_nc_ss=7f289&oh=00_AQBHbdSjxkXoc6ysX6CHu3jo-GaIOQUGHbfd6HGFW1uw8A&oe=6A62A57D"
+          "https://scontent-cdg4-1.xx.fbcdn.net/v/t45.5328-4/755951223_1861937971878382_7371499039634355416_n.jpg?stp=c0.82.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=247b10&_nc_ohc=iS2R-9GEaf0Q7kNvwEL6juq&_nc_oc=AdoqGHjak_iTFrRMTFiTIfP9gJ0C02Lrs8E10_5hr-cGHRGwxE34jj0_d7sc4YVnggo&_nc_zt=23&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQBY7zuItKb-MwsWVAB1gXEbITj-pNmvrR3-tFbTKO8FYA&oe=6A6C2954"
         ],
-        "description": "Really comfortable adjustable desk chair",
-        "createdAt": "2026-06-27T00:23:01.000Z"
+        "createdAt": "2026-07-23T21:20:09+00:00"
       },
       {
         "platform": "facebook",
-        "id": "877314832116342",
-        "title": "Desk chair",
-        "url": "https://www.facebook.com/marketplace/item/877314832116342/",
-        "price": 20,
-        "priceFormatted": "$20",
+        "id": "1533101124374941",
+        "title": "Serta Office Chair",
+        "url": "https://www.facebook.com/marketplace/item/1533101124374941/",
+        "price": 50.0,
+        "priceFormatted": "$50",
         "currency": "USD",
-        "location": "Washington D.C.",
-        "city": "Washington",
-        "state": "DC",
-        "latitude": 38.888854980469,
-        "longitude": -76.986694335938,
+        "location": "Austin, TX",
+        "city": "Austin",
+        "state": "TX",
         "isSold": false,
         "isLive": true,
         "deliveryTypes": [
           "IN_PERSON"
         ],
-        "image": "https://scontent-lga3-3.xx.fbcdn.net/v/t39.84726-6/749629401_1344371334550487_4988145909938674869_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=LmF34sVytpEQ7kNvwH0Bltm&_nc_oc=AdoV2vMUB1vlfeyVK_0v9OhIfkUW6bsy5B_6zfO7NckM4x8BGvcGtq-FIDEyzfREspI&_nc_zt=14&_nc_ht=scontent-lga3-3.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQCP0pnEc5FXLKC4HapyZ6Z1C9ECuNPNJaiKv3wSNCIkMA&oe=6A628B71",
+        "image": "https://scontent-cdg4-1.xx.fbcdn.net/v/t39.84726-6/757399214_1031644829731524_4603068134504050190_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=102&ccb=1-7&_nc_sid=92e707&_nc_ohc=zCCGEoZ3sFQQ7kNvwGzIsYW&_nc_oc=AdpnI5LGrygL5GaY33ihdUIkM_Ik5iRVhjFftWTnp9J51H_THzqey8iKLmTK2nlH7lM&_nc_zt=14&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQBcc_63EF_bnVfFnrVeGFYzSp29ye1Wp4xyNJhV11Y_BA&oe=6A6C2FC6",
         "photos": [
-          "https://scontent-lga3-3.xx.fbcdn.net/v/t39.84726-6/749629401_1344371334550487_4988145909938674869_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=LmF34sVytpEQ7kNvwH0Bltm&_nc_oc=AdoV2vMUB1vlfeyVK_0v9OhIfkUW6bsy5B_6zfO7NckM4x8BGvcGtq-FIDEyzfREspI&_nc_zt=14&_nc_ht=scontent-lga3-3.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQCP0pnEc5FXLKC4HapyZ6Z1C9ECuNPNJaiKv3wSNCIkMA&oe=6A628B71",
-          "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/749629401_1344371334550487_4988145909938674869_n.jpg?stp=dst-jpg_s960x960_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=LmF34sVytpEQ7kNvwHFukl5&_nc_oc=AdrCtCUoNcltHSzpH9Mo7QU8cdRIHc3Nn0qL1fcYsTDw6e8qjLj1s4cCpYQuThXEU28&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=iMN8C3m2i3TGWtNqNh_ADw&_nc_ss=7f289&oh=00_AQDQlfYJF_FFF7sqVxOMtZnjNmobq30O6QfwzBJH7tkocQ&oe=6A628B71",
-          "https://scontent-bos5-1.xx.fbcdn.net/v/t45.5328-4/750294112_1784797239214942_5973269997469875794_n.jpg?stp=dst-jpg_s960x960_tt6&_nc_cat=110&ccb=1-7&_nc_sid=247b10&_nc_ohc=0sfjWL_C59kQ7kNvwGnLkWq&_nc_oc=AdqV5qjK9LCjf9bhID45xd8HyKPuV4nwNBi-ABhSZBz0bZ-uGexBCNCuPoVhWU_7Z6Q&_nc_zt=23&_nc_ht=scontent-bos5-1.xx&_nc_gid=iMN8C3m2i3TGWtNqNh_ADw&_nc_ss=7f289&oh=00_AQBkBi5wap91FC9HV8yEAK2xbsxYPivNHchM2Xl9SlEhaQ&oe=6A627ED4"
+          "https://scontent-cdg4-1.xx.fbcdn.net/v/t39.84726-6/757399214_1031644829731524_4603068134504050190_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=102&ccb=1-7&_nc_sid=92e707&_nc_ohc=zCCGEoZ3sFQQ7kNvwGzIsYW&_nc_oc=AdpnI5LGrygL5GaY33ihdUIkM_Ik5iRVhjFftWTnp9J51H_THzqey8iKLmTK2nlH7lM&_nc_zt=14&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQBcc_63EF_bnVfFnrVeGFYzSp29ye1Wp4xyNJhV11Y_BA&oe=6A6C2FC6"
         ],
-        "description": "Black leather chair with adjustable high and tilt.\n\nMinor tear in back (photo #2) but otherwise like new.",
-        "createdAt": "2026-07-17T14:23:42.000Z"
+        "createdAt": "2026-07-26T17:31:22+00:00"
       },
       {
         "platform": "facebook",
-        "id": "2173975559828091",
-        "title": "Office Chair",
-        "url": "https://www.facebook.com/marketplace/item/2173975559828091/",
-        "price": 20,
-        "priceFormatted": "$20",
-        "currency": "USD",
-        "location": "Washington D.C.",
-        "city": "Washington",
-        "state": "DC",
-        "latitude": 38.905334472656,
-        "longitude": -77.030639648438,
-        "isSold": false,
-        "isLive": true,
-        "deliveryTypes": [
-          "IN_PERSON"
-        ],
-        "image": "https://scontent-lga3-3.xx.fbcdn.net/v/t39.84726-6/752488808_2377501942774136_7478534201953725773_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=102&ccb=1-7&_nc_sid=92e707&_nc_ohc=RjYR0L7jJ4EQ7kNvwEFb8F2&_nc_oc=AdrawdvdKGC2xkYBqkoJpIs8RYFzrvK3s1A_fYHH8J-owoWb7x4SvX30UtmD1x1n-AY&_nc_zt=14&_nc_ht=scontent-lga3-3.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQBSVENBUuvKKE2XVsalevHFxqcfvlEoLxBVOQT_eWqnwA&oe=6A62A28B",
-        "photos": [
-          "https://scontent-lga3-3.xx.fbcdn.net/v/t39.84726-6/752488808_2377501942774136_7478534201953725773_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=102&ccb=1-7&_nc_sid=92e707&_nc_ohc=RjYR0L7jJ4EQ7kNvwEFb8F2&_nc_oc=AdrawdvdKGC2xkYBqkoJpIs8RYFzrvK3s1A_fYHH8J-owoWb7x4SvX30UtmD1x1n-AY&_nc_zt=14&_nc_ht=scontent-lga3-3.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQBSVENBUuvKKE2XVsalevHFxqcfvlEoLxBVOQT_eWqnwA&oe=6A62A28B",
-          "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/752488808_2377501942774136_7478534201953725773_n.jpg?stp=dst-jpg_s960x960_tt6&_nc_cat=102&ccb=1-7&_nc_sid=92e707&_nc_ohc=RjYR0L7jJ4EQ7kNvwHLCZ86&_nc_oc=Adr-Xd2oJThLHhThQaYrNXEWutIbl_KwrcAmf1tBZLZkEltGuoniVjOkkeqZbo_Uv_E&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=8JndLgoJzjJ3lICJqdzk_g&_nc_ss=7f289&oh=00_AQA69xS_8ZUh_q71u2Admizlypex5ksoQZXNGflG6hXXAA&oe=6A62A28B"
-        ],
-        "description": "Moving out, must go by July 23 — office chair for sale, pickup in Logan Circle.",
-        "createdAt": "2026-07-18T19:26:17.000Z"
-      },
-      {
-        "platform": "facebook",
-        "id": "1171247105206893",
-        "title": "Office chair",
-        "url": "https://www.facebook.com/marketplace/item/1171247105206893/",
-        "price": 5,
-        "priceFormatted": "$5",
-        "currency": "USD",
-        "location": "Arlington, Virginia",
-        "city": "Arlington",
-        "state": "VA",
-        "latitude": 38.877868652344,
-        "longitude": -77.096557617188,
-        "isSold": false,
-        "isLive": true,
-        "deliveryTypes": [
-          "IN_PERSON"
-        ],
-        "image": "https://scontent-lga3-2.xx.fbcdn.net/v/t39.84726-6/746327331_1083912260825853_9122859599853642446_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=d7TdRnNRQEcQ7kNvwFu5v6M&_nc_oc=Adow19m9FEdNbCRKCgnI6WTQ23OHgkXCCfnID9UWL32luBHklb2A_ZnFMfdOfqRqZ4I&_nc_zt=14&_nc_ht=scontent-lga3-2.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQAvmjDz0Liqkye3FnH3Yvnu6UFvCXvWdHUaxfZ4dveVvA&oe=6A62745F",
-        "photos": [
-          "https://scontent-lga3-2.xx.fbcdn.net/v/t39.84726-6/746327331_1083912260825853_9122859599853642446_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=d7TdRnNRQEcQ7kNvwFu5v6M&_nc_oc=Adow19m9FEdNbCRKCgnI6WTQ23OHgkXCCfnID9UWL32luBHklb2A_ZnFMfdOfqRqZ4I&_nc_zt=14&_nc_ht=scontent-lga3-2.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQAvmjDz0Liqkye3FnH3Yvnu6UFvCXvWdHUaxfZ4dveVvA&oe=6A62745F",
-          "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/746327331_1083912260825853_9122859599853642446_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=100&ccb=1-7&_nc_sid=92e707&_nc_ohc=d7TdRnNRQEcQ7kNvwGMQNEI&_nc_oc=Adr7ABAoty0KSFwiDK3sPb-pQOnZcyCUEwefb4Jj2q9DMAiWW3RABqj9wguJSx5KVYE&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=hRI4eETpBcYnbWdG44reDg&_nc_ss=7f289&oh=00_AQClK45Ga4mj1DnOvjOsjsqTwxnKKPqVXkMp4Q96wvUa7w&oe=6A62745F",
-          "https://scontent-bos5-1.xx.fbcdn.net/v/t45.5328-4/745540977_1624106143058627_707116389057658717_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=109&ccb=1-7&_nc_sid=247b10&_nc_ohc=3wDiuhgDig8Q7kNvwH6H5wa&_nc_oc=AdrCWR4z3jQYxEnR-UNfVnSc39_2EL50GlYPnTwMYTaT7DgA6qnaV05FVRFxVdI7-C8&_nc_zt=23&_nc_ht=scontent-bos5-1.xx&_nc_gid=hRI4eETpBcYnbWdG44reDg&_nc_ss=7f289&oh=00_AQBx0ZiZcsXpUthwjDsLyyOHBzHKgU_VylCahBEaUUcz3A&oe=6A6295A7"
-        ],
-        "description": "Had for about a year. The lever was installed wrong so it doesn’t work but can be fixed by someone handier than me. Pick up only.",
-        "createdAt": "2026-07-13T22:35:32.000Z"
-      },
-      {
-        "platform": "facebook",
-        "id": "4364170703849117",
-        "title": "Grey Swivel Desk Chair",
-        "url": "https://www.facebook.com/marketplace/item/4364170703849117/",
-        "price": 30,
+        "id": "1566650898588175",
+        "title": "Desk Chair",
+        "url": "https://www.facebook.com/marketplace/item/1566650898588175/",
+        "price": 30.0,
         "priceFormatted": "$30",
         "currency": "USD",
-        "location": "Washington D.C.",
-        "city": "Washington",
-        "state": "DC",
-        "latitude": 38.894348144531,
-        "longitude": -77.041625976562,
+        "location": "Austin, TX",
+        "city": "Austin",
+        "state": "TX",
+        "isSold": false,
+        "isLive": true,
+        "deliveryTypes": [
+          "IN_PERSON",
+          "DOOR_PICKUP"
+        ],
+        "image": "https://scontent-cdg4-3.xx.fbcdn.net/v/t39.84726-6/754015548_1682037223082191_5648936842361625036_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=110&ccb=1-7&_nc_sid=92e707&_nc_ohc=Xt7CL7MSfV0Q7kNvwHViL7E&_nc_oc=AdqQ_s3xEOlUDJs59MBQEsPjhXxRBUNT4XSfFG6M0jVFl9gBt6VQJNRCK0OSex4Bmr0&_nc_zt=14&_nc_ht=scontent-cdg4-3.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQDevzQYEUxQjd0MoLR-37bq4-BjrEgoh_RPke8J6O0DLA&oe=6A6C293E",
+        "photos": [
+          "https://scontent-cdg4-3.xx.fbcdn.net/v/t39.84726-6/754015548_1682037223082191_5648936842361625036_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=110&ccb=1-7&_nc_sid=92e707&_nc_ohc=Xt7CL7MSfV0Q7kNvwHViL7E&_nc_oc=AdqQ_s3xEOlUDJs59MBQEsPjhXxRBUNT4XSfFG6M0jVFl9gBt6VQJNRCK0OSex4Bmr0&_nc_zt=14&_nc_ht=scontent-cdg4-3.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQDevzQYEUxQjd0MoLR-37bq4-BjrEgoh_RPke8J6O0DLA&oe=6A6C293E"
+        ],
+        "createdAt": "2026-07-24T15:57:10+00:00"
+      },
+      {
+        "platform": "facebook",
+        "id": "2004670837585145",
+        "title": "Pink desk chair",
+        "url": "https://www.facebook.com/marketplace/item/2004670837585145/",
+        "price": 50.0,
+        "priceFormatted": "$50",
+        "currency": "USD",
+        "location": "Austin, TX",
+        "city": "Austin",
+        "state": "TX",
+        "isSold": false,
+        "isLive": true,
+        "deliveryTypes": [
+          "IN_PERSON",
+          "DOOR_PICKUP"
+        ],
+        "image": "https://scontent-cdg4-1.xx.fbcdn.net/v/t39.84726-6/753583645_1039687612146944_6256711315481793218_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=TgNT-PsmgoQQ7kNvwGCI4-m&_nc_oc=AdoXoAjYeQCQq0VPOYJOWPAcbIaMe-o0SZfZUU67qARG1O9UwQpjme1XSm6bF7oelS0&_nc_zt=14&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQBe7BMXFnD-HN-JknCFdw9K3RYJ9DPCvi8_zQtAQgVOhw&oe=6A6C2C09",
+        "photos": [
+          "https://scontent-cdg4-1.xx.fbcdn.net/v/t39.84726-6/753583645_1039687612146944_6256711315481793218_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=TgNT-PsmgoQQ7kNvwGCI4-m&_nc_oc=AdoXoAjYeQCQq0VPOYJOWPAcbIaMe-o0SZfZUU67qARG1O9UwQpjme1XSm6bF7oelS0&_nc_zt=14&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQBe7BMXFnD-HN-JknCFdw9K3RYJ9DPCvi8_zQtAQgVOhw&oe=6A6C2C09"
+        ],
+        "createdAt": "2026-07-24T19:31:45+00:00"
+      },
+      {
+        "platform": "facebook",
+        "id": "1584011809800878",
+        "title": "MCM desk chair",
+        "url": "https://www.facebook.com/marketplace/item/1584011809800878/",
+        "price": 100.0,
+        "priceFormatted": "$100",
+        "currency": "USD",
+        "location": "Austin, TX",
+        "city": "Austin",
+        "state": "TX",
         "isSold": false,
         "isLive": true,
         "deliveryTypes": [
           "IN_PERSON"
         ],
-        "image": "https://scontent-lga3-1.xx.fbcdn.net/v/t39.84726-6/746164526_1785812285741106_8949820118797834424_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=103&ccb=1-7&_nc_sid=92e707&_nc_ohc=Ae_B1u7tqdUQ7kNvwGmYanm&_nc_oc=AdondR3xKfZRnZSXry5O9eXFXxMnG8o6KnEyhsVVuvlHAuWZ70c9mqirqg63RqnYSbo&_nc_zt=14&_nc_ht=scontent-lga3-1.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQBMUByNFhQFlPOSdWy4WY6Ehhf8UPp4a70OyoCYO9uKog&oe=6A626F98",
+        "image": "https://scontent-cdg4-1.xx.fbcdn.net/v/t39.84726-6/752488797_879146811526501_8218767426310547436_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=sJaQtNKyPKYQ7kNvwEu89ms&_nc_oc=AdobGnX8VaIQdb80CmnYrb5Cfy6JhSlKc2eun-j26T5rJ5bpqq13ITx-fKkzgb1ALfQ&_nc_zt=14&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQAzBl4MNhR9_EkMwe8DKJdNW2shrzeoDoi4FN-P7HgqZA&oe=6A6C3912",
         "photos": [
-          "https://scontent-lga3-1.xx.fbcdn.net/v/t39.84726-6/746164526_1785812285741106_8949820118797834424_n.jpg?stp=c0.43.261.261a_dst-jpg_p261x260_tt6&_nc_cat=103&ccb=1-7&_nc_sid=92e707&_nc_ohc=Ae_B1u7tqdUQ7kNvwGmYanm&_nc_oc=AdondR3xKfZRnZSXry5O9eXFXxMnG8o6KnEyhsVVuvlHAuWZ70c9mqirqg63RqnYSbo&_nc_zt=14&_nc_ht=scontent-lga3-1.xx&_nc_gid=iN3eGGI8DqxVSoN5IVw5UA&_nc_ss=7f289&oh=00_AQBMUByNFhQFlPOSdWy4WY6Ehhf8UPp4a70OyoCYO9uKog&oe=6A626F98",
-          "https://scontent-bos5-1.xx.fbcdn.net/v/t39.84726-6/746164526_1785812285741106_8949820118797834424_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=103&ccb=1-7&_nc_sid=92e707&_nc_ohc=Ae_B1u7tqdUQ7kNvwHluI3F&_nc_oc=AdpeBRMgGaLOeXu8blpxlUic2fmYUazE5IkfbPRFq4W_zNiZ2SZCXmLUHqsRWraNWYY&_nc_zt=14&_nc_ht=scontent-bos5-1.xx&_nc_gid=ypPppJpemGiz3RilPT-pMg&_nc_ss=7f289&oh=00_AQDDMaNKYFlmL7SDSXT0ZjOsoMZJDelhZGh1i3fFi7qC6A&oe=6A626F98",
-          "https://scontent-bos5-1.xx.fbcdn.net/v/t45.5328-4/747589906_2901995200133298_2451643044658583225_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=105&ccb=1-7&_nc_sid=247b10&_nc_ohc=8FBA-Kj9v5wQ7kNvwHcXYAM&_nc_oc=Adp-zLUsR-PI_If_ruyx-l7Un3uG6vhxGArKBtCH_8TVoAmgSU3I49ZNJalMlWj3fpw&_nc_zt=23&_nc_ht=scontent-bos5-1.xx&_nc_gid=ypPppJpemGiz3RilPT-pMg&_nc_ss=7f289&oh=00_AQDCMHTTqii13eumwO8GlfKRVyn57qLoaww4MQP0nJ--GA&oe=6A627C9B",
-          "https://scontent-bos5-1.xx.fbcdn.net/v/t45.5328-4/741411782_1035847442427331_515430543211366405_n.jpg?stp=dst-jpg_p720x720_tt6&_nc_cat=103&ccb=1-7&_nc_sid=247b10&_nc_ohc=0ZFdcSUazNMQ7kNvwEqjhw8&_nc_oc=Adr01krWc7e3_8p639BdxWTfS5wY9hipxuvSsMq3MOvrtKWTYtJef5KkhMgDUer_8XY&_nc_zt=23&_nc_ht=scontent-bos5-1.xx&_nc_gid=ypPppJpemGiz3RilPT-pMg&_nc_ss=7f289&oh=00_AQBIHWLiuR4hVPEBqAXGdoW8XXlRVVijgTVmwJ-Que6MkQ&oe=6A626FF8"
+          "https://scontent-cdg4-1.xx.fbcdn.net/v/t39.84726-6/752488797_879146811526501_8218767426310547436_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=sJaQtNKyPKYQ7kNvwEu89ms&_nc_oc=AdobGnX8VaIQdb80CmnYrb5Cfy6JhSlKc2eun-j26T5rJ5bpqq13ITx-fKkzgb1ALfQ&_nc_zt=14&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQAzBl4MNhR9_EkMwe8DKJdNW2shrzeoDoi4FN-P7HgqZA&oe=6A6C3912"
         ],
-        "description": "Like new and recently cleaned. Moving and needing to down size. Price negotiable just w￼want to get rid of it by the end of the month! \n\nUpholstered swivel office chair with grey textured fabric. The chair has a polished chrome five-point base with black rolling casters. It includes a pneumatic lever for height adjustment and a contoured bucket-style seat with integrated armrests.\nW",
-        "createdAt": "2026-07-12T20:50:14.000Z"
+        "createdAt": "2026-07-21T22:20:20+00:00"
       }
     ]
   },
@@ -6212,9 +6190,46 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "platform": "soundcloud",
     "artistUrl": "https://soundcloud.com/nasa",
     "totalReturned": 5,
-    "nextCursor": "https://api-v2.soundcloud.com/users/112904040/tracks?offset=2026-07-10T14%3A04%3A27.000Z%2Ctracks%2C00000000002357377652&limit=5",
+    "nextCursor": "https://api-v2.soundcloud.com/users/112904040/tracks?offset=2026-07-13T13%3A25%3A32.000Z%2Ctracks%2C00000000002359662548&limit=5",
     "hasMore": true,
     "tracks": [
+      {
+        "platform": "soundcloud",
+        "id": "2367219119",
+        "url": "https://soundcloud.com/nasa/houston-we-have-a-podcast-iss-results-materials-science",
+        "title": "Houston We Have a Podcast: ISS Results: Materials Science",
+        "description": "On episode 430, Kim de Groh and Sylvie Crowell review what researchers have learned and published from the Materials International Space Station Experiment (MISSE) platform that tests how materials perform in the harsh environment of space.",
+        "genre": "Science",
+        "artist": "NASA",
+        "artistUrl": "https://soundcloud.com/nasa",
+        "artistAvatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
+        "artistFollowers": 158701,
+        "artistVerified": true,
+        "durationMs": 2928970,
+        "plays": 129,
+        "likes": 5,
+        "reposts": 2,
+        "downloads": 0,
+        "comments": 2,
+        "publishedAt": "2026-07-24T14:22:31Z",
+        "license": "all-rights-reserved",
+        "downloadable": true,
+        "streamable": true,
+        "waveformUrl": "https://wave.sndcdn.com/lDzXvlHMrahi_m.json",
+        "artwork": "https://i1.sndcdn.com/artworks-yGpNDB5MzaAUMCB2-e6NVdg-large.jpg",
+        "tags": [
+          "johnson",
+          "space",
+          "center",
+          "jsc",
+          "houston",
+          "podcast",
+          "international space station",
+          "iss",
+          "results",
+          "stem"
+        ]
+      },
       {
         "platform": "soundcloud",
         "id": "2364347957",
@@ -6225,11 +6240,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "artist": "NASA",
         "artistUrl": "https://soundcloud.com/nasa",
         "artistAvatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
-        "artistFollowers": 158684,
+        "artistFollowers": 158701,
         "artistVerified": true,
         "durationMs": 3026998,
-        "plays": 122,
-        "likes": 5,
+        "plays": 184,
+        "likes": 4,
         "reposts": 2,
         "downloads": 0,
         "comments": 6,
@@ -6256,10 +6271,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "artist": "NASA",
         "artistUrl": "https://soundcloud.com/nasa",
         "artistAvatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
-        "artistFollowers": 158684,
+        "artistFollowers": 158701,
         "artistVerified": true,
         "durationMs": 3026998,
-        "plays": 49,
+        "plays": 77,
         "likes": 1,
         "reposts": 1,
         "downloads": 0,
@@ -6286,12 +6301,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "artist": "NASA",
         "artistUrl": "https://soundcloud.com/nasa",
         "artistAvatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
-        "artistFollowers": 158684,
+        "artistFollowers": 158701,
         "artistVerified": true,
         "durationMs": 3896506,
-        "plays": 185,
-        "likes": 4,
-        "reposts": 1,
+        "plays": 218,
+        "likes": 7,
+        "reposts": 2,
         "downloads": 2,
         "comments": 1,
         "publishedAt": "2026-07-17T14:14:16Z",
@@ -6319,10 +6334,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "artist": "NASA",
         "artistUrl": "https://soundcloud.com/nasa",
         "artistAvatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
-        "artistFollowers": 158684,
+        "artistFollowers": 158701,
         "artistVerified": true,
         "durationMs": 1030088,
-        "plays": 222,
+        "plays": 236,
         "likes": 5,
         "reposts": 1,
         "downloads": 0,
@@ -6338,43 +6353,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "podcast",
           "aeronautics",
           "concept"
-        ]
-      },
-      {
-        "platform": "soundcloud",
-        "id": "2357377652",
-        "url": "https://soundcloud.com/nasa/houston-we-have-a-podcast-space-runs-in-the-family",
-        "title": "Houston We Have a Podcast: Space Runs in the Family",
-        "description": "On episode 428, NASA astronaut Anil Menon discusses his journey ahead of his first spaceflight to the International Space Station aboard Soyuz MS-29.",
-        "genre": "Science",
-        "artist": "NASA",
-        "artistUrl": "https://soundcloud.com/nasa",
-        "artistAvatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
-        "artistFollowers": 158684,
-        "artistVerified": true,
-        "durationMs": 2009566,
-        "plays": 233,
-        "likes": 5,
-        "reposts": 1,
-        "downloads": 1,
-        "comments": 2,
-        "publishedAt": "2026-07-10T14:04:27Z",
-        "license": "all-rights-reserved",
-        "downloadable": true,
-        "streamable": true,
-        "waveformUrl": "https://wave.sndcdn.com/LS9EWPGvzB8l_m.json",
-        "artwork": "https://i1.sndcdn.com/artworks-xuGj37jpSSDBvdqy-gYuJYw-large.jpg",
-        "tags": [
-          "Johnson",
-          "space",
-          "center",
-          "jsc",
-          "houston",
-          "podcast",
-          "international space station",
-          "iss",
-          "astronaut",
-          "anil menon"
         ]
       }
     ]
@@ -16504,9 +16482,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "suggestions": [
       {
         "seed": "makeup",
-        "suggestion": "makeup tutorials",
+        "suggestion": "makeup tutorial",
         "rank": 1,
-        "searchUrl": "https://www.tiktok.com/search?q=makeup+tutorials",
+        "searchUrl": "https://www.tiktok.com/search?q=makeup+tutorial",
         "region": "US",
         "language": "en-US"
       },
@@ -16528,17 +16506,17 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       },
       {
         "seed": "makeup",
-        "suggestion": "makeup",
+        "suggestion": "makeup ideas",
         "rank": 4,
-        "searchUrl": "https://www.tiktok.com/search?q=makeup",
+        "searchUrl": "https://www.tiktok.com/search?q=makeup+ideas",
         "region": "US",
         "language": "en-US"
       },
       {
         "seed": "makeup",
-        "suggestion": "makeup for women over 40",
+        "suggestion": "makeup transition",
         "rank": 5,
-        "searchUrl": "https://www.tiktok.com/search?q=makeup+for+women+over+40",
+        "searchUrl": "https://www.tiktok.com/search?q=makeup+transition",
         "region": "US",
         "language": "en-US"
       }
@@ -18978,36 +18956,29 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "totalReturned": 5,
     "shorts": [
       {
-        "url": "https://www.youtube.com/shorts/9pLk3OU6bOs",
-        "title": "This morning routine is scientifically proven to make you limitless.",
-        "viewCount": 1300000,
-        "thumbnailUrl": "https://i.ytimg.com/vi/9pLk3OU6bOs/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLDiXBnjUzZ_6Iqszq8ReeL74YuBcQ",
-        "channelName": "SpoonFedStudy"
+        "url": "https://www.youtube.com/shorts/ggMTGsuaooU",
+        "title": "GO CRAZY! 👀 2026 Group Dance Trend #Shorts #Dance #Squad #Trending #fypシ Kaido Gia Chowbaby & more",
+        "viewCount": 121000
       },
       {
-        "url": "https://www.youtube.com/shorts/ABuFOn1PJ-M",
-        "title": "Productive Weekend routine for 10 to 18 years old (Perfect guide) ⋆.𐙚 ̊💗",
-        "viewCount": 360000,
-        "thumbnailUrl": "https://i.ytimg.com/vi/ABuFOn1PJ-M/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLDwvgnfGJ0W20jmRJ07IQqGe08GvQ",
-        "channelName": "GlowzzTips"
+        "url": "https://www.youtube.com/shorts/O07T9_5VIRI",
+        "title": "who remembers this trend?😳 #trending #viral #tiktok #funny",
+        "viewCount": 23000000
       },
       {
-        "url": "https://www.youtube.com/shorts/1XeZTJ2lS28",
-        "title": "The PERFECT School Morning Routine That will ♡ Motivate You ♡",
-        "viewCount": 314000,
-        "thumbnailUrl": "https://yt3.ggpht.com/8w81XroNqOF9W3erjDB3xS7halYtbDmfR680j0AfRF7hkuFjP-dzJmMv2oEbic94kGdI_TEpfw=s176-c-k-c0x00ffffff-no-rj"
+        "url": "https://www.youtube.com/shorts/ERXFiAub3jE",
+        "title": "What's Trending Across America Right Now?",
+        "viewCount": 11
       },
       {
-        "url": "https://www.youtube.com/shorts/A24QBJr3qRE",
-        "title": "*THAT GIRL* glow up morning routine | tips + habits to level up mentally and physically",
-        "viewCount": 592000,
-        "thumbnailUrl": "https://yt3.ggpht.com/V75KuC2kX2yXiFtYgXFU5Xi0obmZOGvhQlubrCh9pes1kwW8jGUwnPVLXZPvE_Sn2oqpjvlF=s176-c-k-c0x00ffffff-no-rj"
+        "url": "https://www.youtube.com/shorts/7c4L1eQeJi4",
+        "title": "TikTok Trends Edits ☘️🔥 #trend #edit #shorts",
+        "viewCount": 14000000
       },
       {
-        "url": "https://www.youtube.com/shorts/1QgC0xhSIF8",
-        "title": "The ONLY morning routine that ACTUALLY changed my life",
-        "viewCount": 896000,
-        "thumbnailUrl": "https://yt3.ggpht.com/ayAaCsdT2qIRCJJGUxGkGDwfsqmEYSJBRGROlWWIVsopvAnFtxS8Zku208D59apsUpvYiLoQ-A=s176-c-k-c0x00ffffff-no-rj"
+        "url": "https://www.youtube.com/shorts/14pQPufUzj4",
+        "title": "BEN EAGLE - Heartbreaking carelessness #MartialArts #ActionComedy #KungFu #Kindness #Trending #Viral",
+        "viewCount": 7300000
       }
     ]
   },
