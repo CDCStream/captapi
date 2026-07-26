@@ -16,6 +16,7 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
+from app.services import facebook_events_native
 from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
@@ -44,6 +45,7 @@ RATE_FB_POSTS = 0.6
 RATE_FB_MARKETPLACE = 1.4
 # Events billed at $13/1k = $0.013/event -> 2 credits/event.
 RATE_FB_EVENTS = 2.0
+CREDIT_FB_EVENTS_NATIVE = facebook_events_native.CREDIT_FB_EVENTS_NATIVE
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -758,7 +760,7 @@ def _normalize_event(item: dict) -> dict:
         st = re.search(r",\s*([A-Z]{2})\b", city)
         if st and st.group(1) in _US_STATE_ABBR:
             country = "US"
-    return {
+    out: dict[str, Any] = {
         "platform": "facebook",
         "id": safe_str(item.get("id") or item.get("event_id") or item.get("eventId")),
         "url": safe_str(item.get("url") or item.get("event_url") or item.get("eventUrl")),
@@ -807,6 +809,21 @@ def _normalize_event(item: dict) -> dict:
         "categories": categories,
         "externalLinks": external_links,
     }
+    # Omit empties so native (Decodo) and Apify share the same sparse shape —
+    # never emit null keys for fields upstream did not provide.
+    loc_out = out["location"]
+    if isinstance(loc_out, dict):
+        for key in list(loc_out.keys()):
+            if loc_out.get(key) in (None, "", [], {}):
+                loc_out.pop(key, None)
+        if not loc_out:
+            out.pop("location", None)
+    for key in list(out.keys()):
+        if key == "location":
+            continue
+        if out.get(key) in (None, "", [], {}):
+            out.pop(key, None)
+    return out
 
 
 @router.get("/details", summary="Facebook video/post details")
@@ -1420,9 +1437,14 @@ async def facebook_profile_events(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # The actor needs the page's /events listing (a bare page URL
-            # yields nothing) and, being browser-based, can outlive the global
-            # 120s sync timeout.
+            # 1) Decodo JS-rendered page /events (DC/residential return 400).
+            native = await facebook_events_native.fetch_page_events(url, limit=limit)
+            if native:
+                ctx["source"] = "direct"
+                events = [_normalize_event(i) for i in native]
+                return {"platform": "facebook", "url": url, "totalReturned": len(events), "events": events}
+
+            # 2) Apify fallback — browser actor; can outlive the 120s sync timeout.
             events_url = url.rstrip("/") + "/events"
             items = await ApifyClient(timeout=280).run_actor_sync(
                 settings.APIFY_ACTOR_FACEBOOK_EVENTS,
@@ -1435,7 +1457,7 @@ async def facebook_profile_events(
 
         data = await cached_or_run(
             endpoint="facebook.profile-events",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             # Events actor runs take minutes (280s timeout); serve the last
@@ -1443,7 +1465,10 @@ async def facebook_profile_events(
             stale_while_revalidate=True,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["events"]), RATE_FB_EVENTS, 4)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_FB_EVENTS_NATIVE
+        else:
+            ctx["credits_override"] = _scaled_credits(len(data["events"]), RATE_FB_EVENTS, 4)
         return ApiResponse(data=data)
 
 
@@ -1723,10 +1748,14 @@ async def facebook_event_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # The official events scraper is browser-based and routinely needs
-            # ~2-3 minutes; the global sync timeout (120s) cut it off mid-run.
-            # When even 280s is not enough, reuse the latest successful run
-            # instead of failing.
+            # 1) Decodo JS render of /events/?q= (search/?q= shell is empty).
+            native = await facebook_events_native.fetch_search_events(q, limit=limit)
+            if native:
+                ctx["source"] = "direct"
+                events = [_normalize_event(i) for i in native]
+                return {"query": q, "totalReturned": len(events), "events": events}
+
+            # 2) Apify fallback — browser actor; on timeout reuse last success.
             apify = ApifyClient(timeout=280, max_attempts=1)
             try:
                 items = await apify.run_actor_sync(
@@ -1748,7 +1777,7 @@ async def facebook_event_search(
 
         data = await cached_or_run(
             endpoint="facebook.event-search",
-            params={"q": q, "limit": limit, "v": 2},
+            params={"q": q, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             # Browser-based events actor takes 2-3 min (p95 ~101s); serve the
@@ -1757,7 +1786,10 @@ async def facebook_event_search(
             stale_while_revalidate=True,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["events"]), RATE_FB_EVENTS, 4)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_FB_EVENTS_NATIVE
+        else:
+            ctx["credits_override"] = _scaled_credits(len(data["events"]), RATE_FB_EVENTS, 4)
         return ApiResponse(data=data)
 
 

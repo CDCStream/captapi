@@ -517,7 +517,9 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             if normalized.get(key) in (None, "", [], {}):
                 normalized.pop(key, None)
     elif platform == "google_ad_library":
-        for key in ("cta", "spend", "impressions"):
+        # SearchCreatives (native) returns image/video creatives without copy /
+        # landing / country; detail actors sometimes fill those — omit empties.
+        for key in ("cta", "spend", "impressions", "text", "headline", "landingUrl", "country"):
             if normalized.get(key) in (None, "", [], {}):
                 normalized.pop(key, None)
     # Advertiser logo is never supplied by Google Ads Transparency; omit empty

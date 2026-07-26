@@ -227,8 +227,14 @@ def _normalize_review(item: dict[str, Any]) -> dict[str, Any]:
         "country": safe_str(item.get("review_country") or item.get("country")),
     }
     # Review actor almost never returns reviewer identity / images — omit empty shells.
+    # Native SSR may include masked reviewer_name without avatar; drop null avatar.
     if author_name or author_avatar:
-        out["author"] = {"name": author_name, "avatar": author_avatar}
+        author: dict[str, Any] = {}
+        if author_name:
+            author["name"] = author_name
+        if author_avatar:
+            author["avatar"] = author_avatar
+        out["author"] = author
     if images:
         out["images"] = images
     return out
@@ -362,8 +368,15 @@ async def product_reviews(
         raise HTTPException(status_code=400, detail="Invalid TikTok Shop product URL. Pass a TikTok Shop product URL like https://www.tiktok.com/shop/pdp/product/123.")
     async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/product-reviews", platform="tiktok_shop", resource_url=url, base_credits=_scaled(limit, RATE_REVIEWS)) as ctx:
         async def _run() -> dict[str, Any]:
-            # Dedicated review actor first: the generic scraper's
-            # product_reviews mode usually returns 0 rows.
+            # 1) PDP SSR embeds ~3 product_reviews (datacenter → residential → Decodo).
+            # Prefer native when the requested limit fits that preview window.
+            native = await tiktok_shop_native.fetch_product_reviews(url, limit=limit)
+            if native and (len(native) >= limit or limit <= 3):
+                ctx["source"] = "direct"
+                reviews = [_normalize_review(i) for i in native]
+                return {"url": url, "totalReturned": len(reviews), "reviews": reviews}
+
+            # 2) Apify for deeper pagination / when SSR is empty.
             items: list[dict[str, Any]] = []
             try:
                 items = await get_apify().run_actor_sync(
@@ -374,12 +387,30 @@ async def product_reviews(
             except Exception:  # noqa: BLE001 — fall through to the generic scraper
                 items = []
             if not items:
-                items = await _run_shop("product_reviews", {"productUrls": [url], "maxReviews": limit, "maxResults": limit}, limit)
-            reviews = [_normalize_review(i) for i in items[:limit]]
-            return {"url": url, "totalReturned": len(reviews), "reviews": reviews}
+                items = await _run_shop(
+                    "product_reviews",
+                    {"productUrls": [url], "maxReviews": limit, "maxResults": limit},
+                    limit,
+                )
+            if items:
+                ctx["source"] = "apify"
+                reviews = [_normalize_review(i) for i in items[:limit]]
+                return {"url": url, "totalReturned": len(reviews), "reviews": reviews}
 
-        data = await cached_or_run("tiktok-shop.product-reviews", {"url": url, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
-        ctx["credits_override"] = _scaled(len(data["reviews"]), RATE_REVIEWS)
+            # 3) Partial native beats empty.
+            if native:
+                ctx["source"] = "direct"
+                reviews = [_normalize_review(i) for i in native]
+                return {"url": url, "totalReturned": len(reviews), "reviews": reviews}
+
+            ctx["source"] = "apify"
+            return {"url": url, "totalReturned": 0, "reviews": []}
+
+        data = await cached_or_run("tiktok-shop.product-reviews", {"url": url, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_SHOP_NATIVE
+        else:
+            ctx["credits_override"] = _scaled(len(data["reviews"]), RATE_REVIEWS)
         return ApiResponse(data=data)
 
 

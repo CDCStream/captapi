@@ -2875,7 +2875,7 @@
           "publishedAt": "1 year ago",
           "viewCount": 2500000000,
           "durationSeconds": 174,
-          "thumbnailUrl": "https://i.ytimg.com/vi/ekr2nIex040/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAGOIiF5_VBAohlLuE0eX2GETvquA",
+          "thumbnailUrl": "https://i.ytimg.com/vi/ekr2nIex040/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDzyvnY8qeogjw9kGhO1TPZkM12-A",
           "channelName": "ROSÉ and Bruno Mars"
         },
         {
@@ -2884,7 +2884,7 @@
           "publishedAt": "1 year ago",
           "viewCount": 1700000000,
           "durationSeconds": 253,
-          "thumbnailUrl": "https://i.ytimg.com/vi/kPa7bsKwL-c/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAQiJs48T0874m4PwpyLlb_MVZ0zg",
+          "thumbnailUrl": "https://i.ytimg.com/vi/kPa7bsKwL-c/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDF3iMqsC6OQclYtXdkxhPQUpKHUA",
           "channelName": "Lady Gaga"
         },
         {
@@ -2893,25 +2893,25 @@
           "publishedAt": "9 years ago",
           "viewCount": 2000000000,
           "durationSeconds": 206,
-          "thumbnailUrl": "https://i.ytimg.com/vi/euCqAq6BRa4/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLB8IBtgvbeQ-xURUIN8TLQPFBTRog",
+          "thumbnailUrl": "https://i.ytimg.com/vi/euCqAq6BRa4/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDohgpb2pBRT0I2x0NJiDghKYbSkA",
           "channelName": "DJ Snake"
         },
         {
           "url": "https://www.youtube.com/watch?v=V9PVRfjEBTI",
           "title": "Billie Eilish - BIRDS OF A FEATHER (Official Music Video)",
           "publishedAt": "1 year ago",
-          "viewCount": 886000000,
+          "viewCount": 894000000,
           "durationSeconds": 231,
-          "thumbnailUrl": "https://i.ytimg.com/vi/V9PVRfjEBTI/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBpMnebcHXNH5Yh78c2l8hPhCsv1w",
+          "thumbnailUrl": "https://i.ytimg.com/vi/V9PVRfjEBTI/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLBvvxAwBQjBvuWLg_hCUQMH6nfFXA",
           "channelName": "Billie Eilish"
         },
         {
           "url": "https://www.youtube.com/watch?v=q4lU1N3oqYQ",
           "title": "Madison Beer - lovergirl (Official Music Video)",
           "publishedAt": "2 months ago",
-          "viewCount": 2300000,
+          "viewCount": 2400000,
           "durationSeconds": 202,
-          "thumbnailUrl": "https://i.ytimg.com/vi/q4lU1N3oqYQ/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLATSnpFkpljA86Ciqq3ltJ8cYrdlA",
+          "thumbnailUrl": "https://i.ytimg.com/vi/q4lU1N3oqYQ/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDHwDbvQb7vLyC4A9CadeUa1Zit0w",
           "channelName": "Madison Beer"
         }
       ]
@@ -5985,102 +5985,82 @@
       "ads": [
         {
           "platform": "google_ad_library",
-          "id": "CR00209668689799151617",
-          "url": "https://adstransparency.google.com/advertiser/AR14612997888104464385/creative/CR00209668689799151617",
-          "text": "Sponsored Nike www.nike.com/ Shop The Nike Sale - Nike Running Philippines Run in Pegasus . Run in Vomero . Run in Structure . Shop all - new Nike Running shoes .",
-          "headline": "Shop The Nike Sale - Nike Running Philippines",
-          "landingUrl": "www.nike.com/",
-          "adFormat": "text",
-          "firstShown": "2022-08-17T03:34:27.000Z",
-          "lastShown": "2026-07-23T06:09:34.000Z",
-          "impressions": "1000",
-          "country": "United Arab Emirates, Germany, Poland, Canada, Netherlands, Norway, Czechia, France, United States, Philippines, Hungary, Italy, Saudi Arabia, Ireland, Spain",
-          "advertiser": {
-            "id": "AR14612997888104464385",
-            "name": "NIKE GLOBAL TRADING B.V. SINGAPORE BRANCH",
-            "url": "https://adstransparency.google.com/advertiser/AR14612997888104464385"
-          },
-          "media": [
-            "https://tpc.googlesyndication.com/archive/simgad/7435144562488407676"
-          ]
-        },
-        {
-          "platform": "google_ad_library",
-          "id": "CR08395356613392728065",
-          "url": "https://adstransparency.google.com/advertiser/AR18378488041124659201/creative/CR08395356613392728065",
-          "text": "Discover {KeyWord:Nike Shoes} Online At Nike.com. Shop The Official Nike Site.",
-          "headline": "{KeyWord:Nike Vomero}",
-          "landingUrl": "nike.com",
-          "adFormat": "text",
-          "firstShown": "2025-09-19T13:04:37.000Z",
-          "lastShown": "2026-07-23T06:18:08.000Z",
-          "impressions": "7000-8000",
-          "country": "Malta, United Arab Emirates, Cyprus, Belgium, United Kingdom, Czechia, Hungary, United States, Iceland, Ireland, Italy, Sweden, India, Spain, Greece, Croatia, Bulgaria, Portugal, Denmark, Lithuania, Poland, Netherlands, Germany, Australia, Norway, France, Romania",
-          "advertiser": {
-            "id": "AR18378488041124659201",
-            "name": "Nike Retail BV",
-            "url": "https://adstransparency.google.com/advertiser/AR18378488041124659201"
-          },
-          "media": []
-        },
-        {
-          "platform": "google_ad_library",
-          "id": "CR03268897341242867713",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR03268897341242867713",
-          "text": "Sponsored Nike www.nike.com/ Training & Gym Shoes . Nike.com Comfy , Durable & Responsive Designs To Help You Achieve The Best Performance . Nike Training Shoes Nike Training Gear",
-          "headline": "Comfy , Durable & Responsive Designs To Help You Achieve The Best Performance .",
-          "landingUrl": "www.nike.com/",
-          "adFormat": "text",
-          "firstShown": "2022-11-30T14:51:14.000Z",
-          "lastShown": "2026-07-23T06:07:23.000Z",
-          "country": "United States",
+          "id": "CR13596485266373083137",
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR13596485266373083137",
+          "adFormat": "image",
+          "firstShown": "2022-11-30T14:47:01.000Z",
+          "lastShown": "2026-07-26T13:01:42.000Z",
           "advertiser": {
             "id": "AR16735076323512287233",
             "name": "Nike, Inc.",
             "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
           },
           "media": [
-            "https://tpc.googlesyndication.com/archive/simgad/1035901140936769333"
+            "https://tpc.googlesyndication.com/archive/simgad/1889619096914274581"
           ]
         },
         {
           "platform": "google_ad_library",
-          "id": "CR04226045723872854017",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR04226045723872854017",
-          "text": "Nike www.nike.com/shop/nike-by-you Shop Nike® Back To School Use promo code DAYONE to get an extra 25 % off on select styles . Elevate your collection with new NikeⓇ drops & top sellers . Shop now . NikeⓇ Running Shoes . Rating for nike.com On - time delivery 4.7 ( 6,273 ) 99 % + Available on the App Store ✓ Install",
-          "headline": "Shop Nike® Back To School Use promo code DAYONE to get an extra 25 % off on select styles . Elevate your collection with new NikeⓇ drops & top sellers . Shop now . NikeⓇ Running Shoes . On - time delivery",
-          "landingUrl": "www.nike.com/shop/nike-by-you",
-          "adFormat": "text",
-          "firstShown": "2026-07-21T03:48:09.000Z",
-          "lastShown": "2026-07-23T06:16:32.000Z",
-          "country": "United States",
+          "id": "CR00101170943954518017",
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR00101170943954518017",
+          "adFormat": "image",
+          "firstShown": "2022-11-30T18:54:18.000Z",
+          "lastShown": "2026-07-26T12:53:39.000Z",
           "advertiser": {
             "id": "AR16735076323512287233",
             "name": "Nike, Inc.",
             "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
           },
           "media": [
-            "https://tpc.googlesyndication.com/archive/simgad/13746662843098201720"
+            "https://tpc.googlesyndication.com/archive/simgad/3850814477191431652"
           ]
         },
         {
           "platform": "google_ad_library",
-          "id": "CR05898133529371344897",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR05898133529371344897",
-          "text": "Nike www.nike.com/shop/accessories Shop NikeⓇ Back To School - NikeⓇ Golf Collection Use promo code DAYONE to get an extra 25 % off on select styles . Designed and created to enable outstanding performance , the NikeⓇ golf collection . Empower your game . Athletes ' top pick . Live Support Available . Styles : Performance Golf Shoes , Dri - FIT ... Rating for nike.com 4.7 ( 6,273 ) Order accuracy 95-100 % The Nike® Golf Collection Nike® Golf Accessories",
-          "headline": "Shop NikeⓇ Back To School - NikeⓇ Golf Collection Use promo code DAYONE to get an extra 25 % off on select styles . Designed and created to enable outstanding performance , the NikeⓇ golf collection . Empower your game . Athletes ' top pick . Live Support Available . Styles : Performance Golf Shoes , Dri - FIT ... ( 6,273 )",
-          "landingUrl": "www.nike.com/shop/accessories",
-          "adFormat": "text",
-          "firstShown": "2026-07-21T02:52:46.000Z",
-          "lastShown": "2026-07-23T06:13:54.000Z",
-          "country": "United States",
+          "id": "CR11855191862560161793",
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR11855191862560161793",
+          "adFormat": "image",
+          "firstShown": "2022-11-30T14:47:41.000Z",
+          "lastShown": "2026-07-26T12:29:26.000Z",
           "advertiser": {
             "id": "AR16735076323512287233",
             "name": "Nike, Inc.",
             "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
           },
           "media": [
-            "https://tpc.googlesyndication.com/archive/simgad/5045243300331953334"
+            "https://tpc.googlesyndication.com/archive/simgad/10582874225811561496"
+          ]
+        },
+        {
+          "platform": "google_ad_library",
+          "id": "CR10403323179404623873",
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR10403323179404623873",
+          "adFormat": "image",
+          "firstShown": "2022-11-30T14:47:37.000Z",
+          "lastShown": "2026-07-26T12:28:37.000Z",
+          "advertiser": {
+            "id": "AR16735076323512287233",
+            "name": "Nike, Inc.",
+            "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
+          },
+          "media": [
+            "https://tpc.googlesyndication.com/archive/simgad/11551318734521008902"
+          ]
+        },
+        {
+          "platform": "google_ad_library",
+          "id": "CR15203746965809528833",
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR15203746965809528833",
+          "adFormat": "image",
+          "firstShown": "2022-11-30T15:11:07.000Z",
+          "lastShown": "2026-07-26T12:27:34.000Z",
+          "advertiser": {
+            "id": "AR16735076323512287233",
+            "name": "Nike, Inc.",
+            "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
+          },
+          "media": [
+            "https://tpc.googlesyndication.com/archive/simgad/12062534195836224920"
           ]
         }
       ]
@@ -6218,7 +6198,7 @@
     "credits": null,
     "data": {
       "url": "https://www.tiktok.com/shop/pdp/1731962298839634826",
-      "totalReturned": 5,
+      "totalReturned": 3,
       "reviews": [
         {
           "platform": "tiktok_shop",
@@ -6228,7 +6208,16 @@
           "createdAt": "2026-05-15T21:49:56.991000+00:00",
           "verifiedPurchase": true,
           "sku": "Thicc 16oz | Ice Cream",
-          "country": "US"
+          "country": "US",
+          "author": {
+            "name": "C**e"
+          },
+          "images": [
+            "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/bc7a80f5766e438e8698430bdff2b55c~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
+            "https://p19-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/7c513b397e2f4b019995d95dd7506914~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
+            "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/2fcfd52f6a694575974084d055c318a6~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
+            "https://p19-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/b5cf78b2ce824b329bba9a0a1e2a9fbb~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839"
+          ]
         },
         {
           "platform": "tiktok_shop",
@@ -6238,7 +6227,16 @@
           "createdAt": "2026-01-24T20:50:51.887000+00:00",
           "verifiedPurchase": true,
           "sku": "To-Go | Duck-It",
-          "country": "US"
+          "country": "US",
+          "author": {
+            "name": "M**e"
+          },
+          "images": [
+            "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/c51c9bdf430e4991aaa5d947300410de~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
+            "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/f3ef2a7c10ec4dc7bd3446c373868f7e~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
+            "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/6b1f7a234b4d4016b7b7ed9401132223~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
+            "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/09ca5668b59b4770beb90dc8b735a83c~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839"
+          ]
         },
         {
           "platform": "tiktok_shop",
@@ -6248,27 +6246,15 @@
           "createdAt": "2026-05-24T14:26:17.644000+00:00",
           "verifiedPurchase": true,
           "sku": "Thicc 40oz | Lavender Fields",
-          "country": "US"
-        },
-        {
-          "platform": "tiktok_shop",
-          "id": "7637664681263646477",
-          "rating": 3,
-          "text": "I love frost buddy cup and use them  but this one has some issues. I haven't even had it a week and has only been hand washed and it's chipping off in multiple places. I'm very disappointed because I absolutely love this design.",
-          "createdAt": "2026-05-08T23:19:53.797000+00:00",
-          "verifiedPurchase": true,
-          "sku": "Bottle Buddy 24oz | I Scream 4 Ice Cream",
-          "country": "US"
-        },
-        {
-          "platform": "tiktok_shop",
-          "id": "7604624285583410957",
-          "rating": 5,
-          "text": "I love this “cup holder”. It’s amazing. Works on all size drink cups. Keeps your drink cold longer. I can’t wait to buy my next one.",
-          "createdAt": "2026-02-08T22:26:41.623000+00:00",
-          "verifiedPurchase": true,
-          "sku": "To-Go | White *Lid Not Included",
-          "country": "US"
+          "country": "US",
+          "author": {
+            "name": "i**u"
+          },
+          "images": [
+            "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/3dbcc73d208c46bfb1ef5e6cb74fe593~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
+            "https://p19-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/b3d3128fff1f4872a913652a6d6827da~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
+            "https://p19-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/7cb7186b70c94b93af0aa7f66f227554~tplv-fhlh96nyum-crop-webp:300:300.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839"
+          ]
         }
       ]
     }
@@ -7189,270 +7175,58 @@
       "events": [
         {
           "platform": "facebook",
-          "id": "815684684546480",
-          "url": "https://www.facebook.com/events/815684684546480/",
+          "id": "1270386418439478",
+          "url": "https://www.facebook.com/events/1270386418439478/",
           "name": "Bon Jovi: Forever Tour",
-          "description": "PLEASE NOTE: Pricing is all-in and includes fees (before taxes if applicable). By purchasing tickets to this event, you agree to abide by the health and safety measures in effect at the time of the event. Government mandates, venue protocols, and event requirements are subject to change. For more information, please search your event on msg.com. This event may have immersive elements, which may include flashing or strobe lights, intense lighting, visual effects, loud noises, smoke and/or fog. Such elements may aggravate certain medical or physical conditions, and guests should take this into consideration if they have a history of discomfort or physical symptoms when experiencing these elements.\n\nSale Dates and Times:\n\nPublic Onsale : Fri, 31 Oct 2025 at 10:00 AM\n\nArtist Presale : Wed, 29 Oct 2025 at 10:00 AM\n\nChase Cardholder Preferred Tickets : Fri, 31 Oct 2025 at 10:00 AM\n\nVerizon Access Featured Venues : Fri, 31 Oct 2025 at 10:00 AM\n\nVIP Package Presale : Wed, 29 Oct 2025 at 10:00 AM\n\nTravel VIP Package Presale : Wed, 29 Oct 2025 at 10:00 AM\n\nVIP Package Onsale : Fri, 31 Oct 2025 at 10:00 AM\n\nTravel VIP Package Onsale : Fri, 31 Oct 2025 at 10:00 AM\n\nSiriusXM Presale : Wed, 29 Oct 2025 at 10:00 AM\n\nChase Cardholder Preferred Tickets : Wed, 29 Oct 2025 at 10:00 AM\n\nLIVE NATION PRESALE : Thu, 30 Oct 2025 at 10:00 AM\n\nTicketmaster Presale : Thu, 30 Oct 2025 at 10:00 AM\n\nVenue Presale : Thu, 30 Oct 2025 at 10:00 AM\n\nNew York Knicks STM Presale : Thu, 30 Oct 2025 at 10:00 AM\n\nNew York Rangers STM Presale : Thu, 30 Oct 2025 at 10:00 AM\n\nNew Jersey Transit Presale : Thu, 30 Oct 2025 at 10:00 AM",
-          "startDate": "2026-07-21T23:30:00.000Z",
-          "startTime": "Tue, Jul 21 at 7:30 PM EDT",
-          "duration": null,
-          "eventType": "PUBLIC",
-          "isOnline": false,
-          "isPast": false,
-          "isCanceled": false,
-          "address": null,
-          "image": "https://scontent.fcgb12-1.fna.fbcdn.net/v/t39.30808-6/571309356_1262913312546475_6356839846581472062_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=101&ccb=1-7&_nc_sid=75d36f&_nc_ohc=BJyqoVNzSMcQ7kNvwFWg_Yt&_nc_oc=Adp5KGUhoCgPQpEmgm5ls5n9kg67Olnflg6m78GWBQwpR9UMCL8pLN8SU8p8TeI_8vw&_nc_zt=23&_nc_ht=scontent.fcgb12-1.fna&_nc_gid=G2mgQuG8AYltfmoocGSVFg&_nc_ss=72289&oh=00_AQD4KOyfkFNngDMX7SbDlH1NA8KgAgv4nyQFXL0vakBNuQ&oe=6A613B36",
-          "usersGoing": 130,
-          "usersInterested": 600,
-          "usersResponded": 730,
+          "startTime": "Sun, Jul 26 at 7:30 PM EDT",
+          "address": "Madison Square Garden",
           "location": {
-            "name": "Madison Square Garden",
-            "city": "New York, NY",
-            "latitude": 40.750513547361,
-            "longitude": -73.992893513651,
-            "countryCode": "US"
-          },
-          "organizer": "Event by Madison Square Garden, Live Nation Concerts and Bon Jovi",
-          "organizers": [
-            {
-              "id": "100064834536765",
-              "name": "Madison Square Garden",
-              "url": "https://www.facebook.com/TheGarden",
-              "verified": true
-            },
-            {
-              "id": "100064501372099",
-              "name": "Live Nation Concerts",
-              "url": "https://www.facebook.com/LiveNation",
-              "verified": true
-            },
-            {
-              "id": "100044199891801",
-              "name": "Bon Jovi",
-              "url": "https://www.facebook.com/BonJovi",
-              "verified": true
-            }
-          ],
-          "ticketsUrl": "https://ticketmaster.evyy.net/c/253158/264167/4272?u=https%3A%2F%2Fwww.ticketmaster.com%2Fbon-jovi-forever-tour-new-york-new-york-07-21-2026%2Fevent%2F3B0063549BCB31B2&utm_medium=affiliate",
-          "categories": [],
-          "externalLinks": [
-            "http://msg.com/"
-          ]
+            "name": "Madison Square Garden"
+          }
         },
         {
           "platform": "facebook",
-          "id": "2329826087529589",
-          "url": "https://www.facebook.com/events/2329826087529589/",
+          "id": "1426952632010473",
+          "url": "https://www.facebook.com/events/1426952632010473/",
           "name": "Phish",
-          "description": "PLEASE NOTE: Pricing is all-in and includes fees (before taxes if applicable). There is a strict 4 ticket limit per show. Additional orders exceeding the ticket limit may be cancelled without notice. This includes orders associated with the same name, e-mail address, billing address, credit card number, and/or other info. By purchasing tickets to this event, you agree to abide by the health and safety measures in effect at the time of the event. Government mandates, venue protocols, and event requirements are subject to change. For more information, please search your event on msg.com. This event may have immersive elements, which may include flashing or strobe lights, intense lighting, visual effects, loud noises, smoke and/or fog. Such elements may aggravate certain medical or physical conditions, and guests should take this into consideration if they have a history of discomfort or physical symptoms when experiencing these elements.\n\nSale Dates and Times:\n\nPublic Onsale : Fri, 27 Feb 2026 at 11:00 AM",
-          "startDate": "2026-07-22T23:30:00.000Z",
-          "startTime": "Wed, Jul 22 at 7:30 PM EDT",
-          "duration": null,
-          "eventType": "PUBLIC",
-          "isOnline": false,
-          "isPast": false,
-          "isCanceled": false,
-          "address": "Madison Square Garden Tour Experience, W 31st St, New York, NY 10001, United States",
-          "image": "https://scontent-ord5-2.xx.fbcdn.net/v/t39.30808-6/639681258_1358570532980752_8663342427717267492_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=102&ccb=1-7&_nc_sid=75d36f&_nc_ohc=qRUyEYJnx3oQ7kNvwHUDNMd&_nc_oc=Adrimc4hjEnPaScYhfhrIChZexGMRmUpV3yeWLGJoUkTJ8KR-zJ6hn9KBJ2EN0ZeOE4&_nc_zt=23&_nc_ht=scontent-ord5-2.xx&_nc_gid=MxGp1-33StemzFy6iZ1l6A&_nc_ss=72289&oh=00_AQB_3vN6JM6_XPOZY3_79YMq7sFi5SQmLyIWpd-1ntsJhg&oe=6A614581",
-          "usersGoing": 88,
-          "usersInterested": 214,
-          "usersResponded": 302,
+          "startTime": "Mon, Jul 27 at 7:30 PM EDT",
+          "address": "Madison Square Garden",
           "location": {
-            "name": "Madison Square Garden",
-            "city": "New York, NY",
-            "latitude": 40.750513547361,
-            "longitude": -73.992893513651,
-            "countryCode": "US"
-          },
-          "organizer": "Event by Madison Square Garden, Live Nation Concerts and Phish",
-          "organizers": [
-            {
-              "id": "100064834536765",
-              "name": "Madison Square Garden",
-              "url": "https://www.facebook.com/TheGarden",
-              "verified": true
-            },
-            {
-              "id": "100064501372099",
-              "name": "Live Nation Concerts",
-              "url": "https://www.facebook.com/LiveNation",
-              "verified": true
-            },
-            {
-              "id": "100044347813145",
-              "name": "Phish",
-              "url": "https://www.facebook.com/phish",
-              "verified": true
-            }
-          ],
-          "ticketsUrl": "https://ticketmaster.evyy.net/c/253158/264167/4272?u=https%3A%2F%2Fwww.ticketmaster.com%2Fphish-new-york-new-york-07-22-2026%2Fevent%2F3B00644DC1CB6EA3&utm_medium=affiliate",
-          "categories": [
-            {
-              "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCIxODIxOTQ4MjYxNDA0NDgxXCJ9In0%3D&q=Music",
-              "label": "Music"
-            }
-          ],
-          "externalLinks": [
-            "http://msg.com/"
-          ]
+            "name": "Madison Square Garden"
+          }
         },
         {
           "platform": "facebook",
-          "id": "1058297040385012",
-          "url": "https://www.facebook.com/events/1058297040385012/",
-          "name": "WWE Saturday Night's Main Event",
-          "description": "On July 18th, for the first time in nearly two decades, WWE Saturday Night's Main Event is coming to New York City! Witness this historic event LIVE at Madison Square Garden.\n\nSale Dates and Times:\n\nPublic Onsale : Thu, 2 Apr 2026 at 10:00 AM\n\nWWE Presale : Wed, 1 Apr 2026 at 10:00 AM\n\nChase Cardholder Preferred Tickets : Thu, 2 Apr 2026 at 10:00 AM",
-          "startDate": "2026-07-18T23:30:00.000Z",
-          "startTime": "Sat, Jul 18 at 7:30 PM EDT",
-          "duration": null,
-          "eventType": "PUBLIC",
-          "isOnline": false,
-          "isPast": false,
-          "isCanceled": false,
-          "address": null,
-          "image": "https://scontent.fpkr1-1.fna.fbcdn.net/v/t39.30808-6/747889206_1484524180385386_5816454715713560067_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=109&ccb=1-7&_nc_sid=75d36f&_nc_ohc=03FkxSgqtW8Q7kNvwHCmGsF&_nc_oc=Adq0t-To2nqGcI35ejLiIwR1u0BOEOIMcmySCeeimCm3AV_bwjVj9nc04-4fASGDRCI&_nc_zt=23&_nc_ht=scontent.fpkr1-1.fna&_nc_gid=GwfJTzVa9SuEoVLgvnATPw&_nc_ss=72289&oh=00_AQD9VGwerp_fFM7Bu18QV2oRfgwdmbJR80twMonWECrE9g&oe=6A6131C8",
-          "usersGoing": 366,
-          "usersInterested": 6007,
-          "usersResponded": 6373,
+          "id": "1217913490078179",
+          "url": "https://www.facebook.com/events/1217913490078179/",
+          "name": "RUSH: Fifty Something",
+          "startTime": "Tue, Jul 28 at 7:30 PM EDT",
+          "address": "Madison Square Garden",
           "location": {
-            "name": "Madison Square Garden",
-            "city": "New York, NY",
-            "latitude": 40.750513547361,
-            "longitude": -73.992893513651,
-            "countryCode": "US"
-          },
-          "organizer": "Event by Madison Square Garden and WWE",
-          "organizers": [
-            {
-              "id": "100064834536765",
-              "name": "Madison Square Garden",
-              "url": "https://www.facebook.com/TheGarden",
-              "verified": true
-            },
-            {
-              "id": "100044147213783",
-              "name": "WWE",
-              "url": "https://www.facebook.com/wwe",
-              "verified": true
-            }
-          ],
-          "ticketsUrl": "https://ticketmaster.evyy.net/c/253158/264167/4272?u=https%3A%2F%2Fwww.ticketmaster.com%2Fwwe-saturday-nights-main-event-new-york-new-york-07-18-2026%2Fevent%2F3B00647AD481519C&utm_medium=affiliate",
-          "categories": [
-            {
-              "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCI2MDc5OTk0MTYwNTczNjVcIn0ifQ%3D%3D&q=Sports",
-              "label": "Sports"
-            }
-          ],
-          "externalLinks": []
+            "name": "Madison Square Garden"
+          }
         },
         {
           "platform": "facebook",
-          "id": "2549571848830137",
-          "url": "https://www.facebook.com/events/2549571848830137/",
-          "name": "Phish 5-Day Ticket (07/22-07/29) VALID ALL 5 DAYS, CANNOT SPLIT BY DAY",
-          "description": "Purchasing this package will provide you the same seat for all 5 performances. PLEASE NOTE: Pricing is all-in and includes fees (before taxes if applicable). There is a strict 4 ticket limit per show. Additional orders exceeding the ticket limit may be cancelled without notice. This includes orders associated with the same name, e-mail address, billing address, credit card number, and/or other info. By purchasing tickets to this event, you agree to abide by the health and safety measures in effect at the time of the event. Government mandates, venue protocols, and event requirements are subject to change. For more information, please search your event on msg.com.\n\nSale Dates and Times:\n\nPublic Onsale : Fri, 27 Feb 2026 at 11:00 AM",
-          "startDate": "2026-07-22T04:00:00.000Z",
-          "startTime": "Wed, Jul 22 at 12:00 AM EDT",
-          "duration": null,
-          "eventType": "PUBLIC",
-          "isOnline": false,
-          "isPast": false,
-          "isCanceled": false,
-          "address": null,
-          "image": "https://scontent.fgdl11-1.fna.fbcdn.net/v/t39.30808-6/639695499_1358571812980624_1704769367809943233_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=109&ccb=1-7&_nc_sid=75d36f&_nc_ohc=xHs2WliuMaMQ7kNvwEj4vM2&_nc_oc=Adq377RrqHqBxxfL7pTUEUUE19O_4iasvOYU1Fw1hNr4_jla9RsCSZq_Qa4ZQR5mHpk&_nc_zt=23&_nc_ht=scontent.fgdl11-1.fna&_nc_gid=uTbxLkzCLgC0af6pboK-aQ&_nc_ss=72289&oh=00_AQB4sDA5nVfcvBEUrRIWtrYSiFeokQM_KlUKl9I-wM8MQg&oe=6A6140FF",
-          "usersGoing": 28,
-          "usersInterested": 96,
-          "usersResponded": 124,
+          "id": "1957542368474959",
+          "url": "https://www.facebook.com/events/1957542368474959/",
+          "name": "Phish",
+          "startTime": "Wed, Jul 29 at 7:30 PM EDT",
+          "address": "Madison Square Garden",
           "location": {
-            "name": "Madison Square Garden",
-            "city": "New York, NY",
-            "latitude": 40.750513547361,
-            "longitude": -73.992893513651,
-            "countryCode": "US"
-          },
-          "organizer": "Event by Madison Square Garden, Live Nation Concerts and Phish",
-          "organizers": [
-            {
-              "id": "100064834536765",
-              "name": "Madison Square Garden",
-              "url": "https://www.facebook.com/TheGarden",
-              "verified": true
-            },
-            {
-              "id": "100064501372099",
-              "name": "Live Nation Concerts",
-              "url": "https://www.facebook.com/LiveNation",
-              "verified": true
-            },
-            {
-              "id": "100044347813145",
-              "name": "Phish",
-              "url": "https://www.facebook.com/phish",
-              "verified": true
-            }
-          ],
-          "ticketsUrl": "https://ticketmaster.evyy.net/c/253158/264167/4272?u=https%3A%2F%2Fwww.ticketmaster.com%2Fphish-5day-ticket-07220729-valid-all-new-york-new-york-07-22-2026%2Fevent%2F3B00644DC21E6EE0&utm_medium=affiliate",
-          "categories": [
-            {
-              "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCIxODIxOTQ4MjYxNDA0NDgxXCJ9In0%3D&q=Music",
-              "label": "Music"
-            }
-          ],
-          "externalLinks": [
-            "http://msg.com/"
-          ]
+            "name": "Madison Square Garden"
+          }
         },
         {
           "platform": "facebook",
-          "id": "1340205331090052",
-          "url": "https://www.facebook.com/events/1340205331090052/",
-          "name": "Bon Jovi: Forever Tour",
-          "description": "PLEASE NOTE: Pricing is all-in and includes fees (before taxes if applicable). By purchasing tickets to this event, you agree to abide by the health and safety measures in effect at the time of the event. Government mandates, venue protocols, and event requirements are subject to change. For more information, please search your event on msg.com. This event may have immersive elements, which may include flashing or strobe lights, intense lighting, visual effects, loud noises, smoke and/or fog. Such elements may aggravate certain medical or physical conditions, and guests should take this into consideration if they have a history of discomfort or physical symptoms when experiencing these elements.\n\nSale Dates and Times:\n\nPublic Onsale : Fri, 31 Oct 2025 at 10:00 AM\n\nArtist Presale : Wed, 29 Oct 2025 at 10:00 AM\n\nChase Cardholder Preferred Tickets : Fri, 31 Oct 2025 at 10:00 AM\n\nVerizon Access Featured Venues : Fri, 31 Oct 2025 at 10:00 AM\n\nVIP Package Presale : Wed, 29 Oct 2025 at 10:00 AM\n\nTravel VIP Package Presale : Wed, 29 Oct 2025 at 10:00 AM\n\nVIP Package Onsale : Fri, 31 Oct 2025 at 10:00 AM\n\nTravel VIP Package Onsale : Fri, 31 Oct 2025 at 10:00 AM\n\nSiriusXM Presale : Wed, 29 Oct 2025 at 10:00 AM\n\nChase Cardholder Preferred Tickets : Wed, 29 Oct 2025 at 10:00 AM\n\nLIVE NATION PRESALE : Thu, 30 Oct 2025 at 10:00 AM\n\nTicketmaster Presale : Thu, 30 Oct 2025 at 10:00 AM\n\nVenue Presale : Thu, 30 Oct 2025 at 10:00 AM\n\nNew York Knicks STM Presale : Thu, 30 Oct 2025 at 10:00 AM\n\nNew York Rangers STM Presale : Thu, 30 Oct 2025 at 10:00 AM\n\nNew Jersey Transit Presale : Thu, 30 Oct 2025 at 10:00 AM",
-          "startDate": "2026-07-19T23:30:00.000Z",
-          "startTime": "Sun, 19 Jul at 19:30 EDT",
-          "duration": null,
-          "eventType": "PUBLIC",
-          "isOnline": false,
-          "isPast": false,
-          "isCanceled": false,
-          "address": "Madison Square Garden Tour Experience, W 31st St, New York, NY 10001, United States",
-          "image": "https://scontent.fccs3-1.fna.fbcdn.net/v/t39.30808-6/572523289_1262059195965220_2207565016731228386_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s1200x628&_nc_cat=106&ccb=1-7&_nc_sid=75d36f&_nc_ohc=1_dizUVF8DMQ7kNvwF4UWC7&_nc_oc=Adrgxn72WEjV2HhNM1ngd3356QkfgeSGSLg3B2b7iSFVXKqQk2-GjqNwTXKb7LaRQY0&_nc_zt=23&_nc_ht=scontent.fccs3-1.fna&_nc_gid=6HIbLPZEj3q4E4D25BwvCQ&_nc_ss=7c289&oh=00_AQB6vcIagWsQ8oLlX8L5uUtZckdlUtW5BzRedQrqBp3t_A&oe=6A6122A8",
-          "usersGoing": 252,
-          "usersInterested": 2346,
-          "usersResponded": 2598,
+          "id": "847403967774434",
+          "url": "https://www.facebook.com/events/847403967774434/",
+          "name": "RUSH: Fifty Something",
+          "startTime": "Thu, Jul 30 at 7:30 PM EDT",
+          "address": "Madison Square Garden",
           "location": {
-            "name": "Madison Square Garden",
-            "city": "New York, NY",
-            "latitude": 40.750513547361,
-            "longitude": -73.992893513651,
-            "countryCode": "US"
-          },
-          "organizer": "Event by Bon Jovi, Madison Square Garden and Live Nation Concerts",
-          "organizers": [
-            {
-              "id": "100044199891801",
-              "name": "Bon Jovi",
-              "url": "https://www.facebook.com/BonJovi",
-              "verified": true
-            },
-            {
-              "id": "100064834536765",
-              "name": "Madison Square Garden",
-              "url": "https://www.facebook.com/TheGarden",
-              "verified": true
-            },
-            {
-              "id": "100064501372099",
-              "name": "Live Nation Concerts",
-              "url": "https://www.facebook.com/LiveNation",
-              "verified": true
-            }
-          ],
-          "ticketsUrl": "https://ticketmaster.evyy.net/c/253158/264167/4272?u=https%3A%2F%2Fwww.ticketmaster.com%2Fbon-jovi-forever-tour-new-york-new-york-07-19-2026%2Fevent%2F3B0063549BC431AA&utm_medium=affiliate",
-          "categories": [],
-          "externalLinks": [
-            "http://msg.com/"
-          ]
+            "name": "Madison Square Garden"
+          }
         }
       ]
     }
@@ -16736,215 +16510,71 @@
       "events": [
         {
           "platform": "facebook",
-          "id": "1501904507609251",
-          "url": "https://www.facebook.com/events/1501904507609251/",
-          "name": "The Best of Chicago Comedy Showcase at Zanies Rosemont",
-          "description": "Get ready for an unforgettable evening of laughter as Chicago's comedy scene brings its A-game to the stage! \"The Best of Chicago Showcase\" features a dynamic lineup of the city's funniest stand-up comedians, delivering a blend of fresh, cutting-edge material and beloved, time-tested jokes.",
-          "startDate": "2026-08-20T00:00:00.000Z",
-          "startTime": "Wed, Aug 19 at 7:00 PM CDT",
-          "duration": "1 hr 30 min",
-          "eventType": "PUBLIC",
-          "isOnline": false,
+          "id": "1032731593052809",
+          "url": "https://www.facebook.com/events/1032731593052809/",
+          "name": "Worship 7/26/26",
+          "startDate": "2026-07-26T15:00:00Z",
+          "startTime": "Happening now",
+          "eventType": "PUBLIC_TYPE",
+          "isOnline": true,
           "isPast": false,
-          "isCanceled": false,
-          "address": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
-          "image": "https://scontent-sea5-1.xx.fbcdn.net/v/t39.30808-6/729939829_1455156393312553_7424802617478099383_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=108&ccb=1-7&_nc_sid=75d36f&_nc_ohc=NbH0PON4qgEQ7kNvwFfvEOL&_nc_oc=AdpblZwvmxosIcgc3OwGO0KjQseyyVe21EPOrqu2fhpvUR-sZ3bAnl4ubUcR25LODxg&_nc_zt=23&_nc_ht=scontent-sea5-1.xx&_nc_gid=dsvaDf_Vqhs1laFmDRMHrA&_nc_ss=72289&oh=00_AQDxeLI7lcoll0cTxWrYx65N2zGshRydR8chEsYlq1olQw&oe=6A62C921",
+          "image": "https://scontent-ord5-1.xx.fbcdn.net/v/t39.30808-6/729784843_1477362577754903_401694802381250350_n.jpg?stp=c0.47.1640.782a_dst-jpg_tt6&cstp=mx1640x782&ctp=s320x320&_nc_cat=101&ccb=1-7&_nc_sid=75d36f&_nc_ohc=6svKiDO2hVoQ7kNvwHjAlFx&_nc_oc=Adrs2rdq3CgIbPLXRlU5a0xVHUuey7lwAVdgpSxj7-fa3XGPZsdFBnUw7t8dgFeQLzo&_nc_zt=23&_nc_ht=scontent-ord5-1.xx&_nc_gid=ZJcMLEDMfuHRFLFJrYmanw&_nc_ss=7b289&oh=00_AQCUn-lzpgnqH0uhjhE6MWQWKlFJn71UKBsSHV-Uo_oxzw&oe=6A6BEE8A",
+          "usersGoing": 3,
+          "usersInterested": 1
+        },
+        {
+          "platform": "facebook",
+          "id": "1020197857054108",
+          "url": "https://www.facebook.com/events/1020197857054108/",
+          "name": "In-Person and Online Worship Experience",
+          "startDate": "2026-07-26T16:00:00Z",
+          "startTime": "Sun, Jul 26 at 11:00 AM CDT",
+          "eventType": "PUBLIC_TYPE",
+          "isOnline": true,
+          "isPast": false,
+          "image": "https://scontent-ord5-3.xx.fbcdn.net/v/t39.30808-6/744332103_1423888923105270_3051096675327242426_n.jpg?stp=c0.19.1200.573a_dst-jpg_tt6&cstp=mx1200x573&ctp=s320x320&_nc_cat=109&ccb=1-7&_nc_sid=75d36f&_nc_ohc=yib12OViOYUQ7kNvwE_daPf&_nc_oc=AdobfdQpY8SDFjT_xffOD9zJrsspqBb4B3Zycu79SvflFYdBXd_TpK-XKLASAXhgncM&_nc_zt=23&_nc_ht=scontent-ord5-3.xx&_nc_gid=ZJcMLEDMfuHRFLFJrYmanw&_nc_ss=7b289&oh=00_AQCpkrtpEZGrupU8PePBJk5UM-MlMsiV0T956Jq0JAmViA&oe=6A6C0BDE",
           "usersGoing": 1,
-          "usersInterested": 2,
-          "usersResponded": 3,
-          "location": {
-            "name": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
-            "city": "Rosemont, IL",
-            "latitude": 41.97826,
-            "longitude": -87.86738,
-            "countryCode": "US"
-          },
-          "organizer": "Event by Zanies Rosemont Comedy Club",
-          "organizers": [
-            {
-              "id": "100064546187809",
-              "name": "Zanies Rosemont Comedy Club",
-              "url": "https://www.facebook.com/RosemontZanies",
-              "verified": false
-            }
-          ],
-          "ticketsUrl": "https://www.etix.com/ticket/p/74170542/the-best-of-chicago-showcase-rosemont-zanies-rosemont",
-          "categories": [
-            {
-              "label": "Comedy",
-              "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCI2NjAwMzI2MTc1MzYzNzNcIn0ifQ%3D%3D&q=Comedy"
-            }
-          ],
-          "externalLinks": []
+          "usersInterested": 1
         },
         {
           "platform": "facebook",
-          "id": "971576128806626",
-          "url": "https://www.facebook.com/events/971576128806626/",
-          "name": "Seth Payne presents Chicago Comedy Takeover 2 @ The 9th Ward",
-          "description": "Seth Payne presents the Chicago Comedy Takeover 2 live in The 9th Ward\n\n7pm Doors, 8pm Show\n\nTickets: General Admission Seated $26, available at TixR.com (convenience fees apply) or in person at the Babeville Box Office (M-F 11a-5p- in person fee free cash sales, 3% credit/debit card fee).\n\n \n\nSeth Payne, Buffalo/Chicago Comedian, is Back with another edition of Comedy Takeover at Babeville–Seth brings the Funniest and Wildest comics from Chicago to the 716 for a night of Hilarity!\n\nFeaturing: John Gasper, Grace Piotrowski, Ron Hexagon, Des Mulrooney, and Seth Payne.\n\nBe sure to buy your tickets in advance, this event has sold out the past two years!",
-          "startDate": "2026-08-29T00:00:00.000Z",
-          "startTime": "Fri, 28 Aug at 20:00 EDT",
-          "duration": null,
-          "eventType": "PUBLIC",
-          "isOnline": false,
+          "id": "1411120507064710",
+          "url": "https://www.facebook.com/events/1411120507064710/",
+          "name": "Sanjeevani4U Monthly Support Group",
+          "startDate": "2026-07-26T20:30:00Z",
+          "startTime": "Sun, Jul 26 at 3:30 PM CDT",
+          "eventType": "PUBLIC_TYPE",
+          "isOnline": true,
           "isPast": false,
-          "isCanceled": false,
-          "address": "341 Delaware Ave, Buffalo, NY 14202-1871, United States",
-          "image": "https://scontent.fsgn2-5.fna.fbcdn.net/v/t39.30808-6/708154827_1400877588752622_6546879548206933579_n.jpg?stp=dst-jpg_tt6&cstp=mx800x800&ctp=s800x800&_nc_cat=111&ccb=1-7&_nc_sid=75d36f&_nc_ohc=JSKaef_PQwUQ7kNvwH4LIyk&_nc_oc=Adpy8tKeKfT1pniJyGi1JRpeV2Ob58pyzb0XNj8wdakQN3xGOIqyLT20pSY5knklueI&_nc_zt=23&_nc_ht=scontent.fsgn2-5.fna&_nc_gid=TzsbnHI7PgTm9A67Uv5nOg&_nc_ss=7c289&oh=00_AQDsrk_ZKQ3-b_2dsNIB4rQFZacJYhgX4mkKLdHFg-5KtQ&oe=6A62CBBB",
-          "usersGoing": 2,
-          "usersInterested": 4,
-          "usersResponded": 6,
-          "location": {
-            "name": "341 Delaware Ave, Buffalo, NY, United States, New York 14202",
-            "city": "Buffalo, NY",
-            "latitude": 42.89368,
-            "longitude": -78.87527,
-            "countryCode": "US"
-          },
-          "organizer": "Event by Babeville",
-          "organizers": [
-            {
-              "id": "100064911815653",
-              "name": "Babeville",
-              "url": "https://www.facebook.com/babeville",
-              "verified": false
-            }
-          ],
-          "ticketsUrl": "https://tixr.com/e/191413",
-          "categories": [
-            {
-              "label": "Comedy",
-              "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCI2NjAwMzI2MTc1MzYzNzNcIn0ifQ%3D%3D&q=Comedy"
-            }
-          ],
-          "externalLinks": [
-            "http://TixR.com/"
-          ]
+          "image": "https://scontent-ord5-1.xx.fbcdn.net/v/t39.30808-6/613646701_1298582932295083_3210622313165210617_n.jpg?stp=c0.346.1024.488a_dst-jpg_tt6&cstp=mx1024x488&ctp=s320x320&_nc_cat=101&ccb=1-7&_nc_sid=75d36f&_nc_ohc=lwwuvCXsIw4Q7kNvwFMpt-c&_nc_oc=AdrRTviYP5UFmTyuWzFJZLH1ak6ofRtzwqOFOuG8gd-lsL-yslvJuSX7cUKqSKAYFuA&_nc_zt=23&_nc_ht=scontent-ord5-1.xx&_nc_gid=ZJcMLEDMfuHRFLFJrYmanw&_nc_ss=7b289&oh=00_AQCBrwR61TAz3t76nzzrYrX7s-IY5O2rfsoqBdftoIwt_A&oe=6A6C01E6",
+          "usersGoing": 1
         },
         {
           "platform": "facebook",
-          "id": "1674511060258204",
-          "url": "https://www.facebook.com/events/1674511060258204/",
-          "name": "The Best of Chicago Comedy Showcase at Zanies Rosemont",
-          "description": "Get ready for an unforgettable evening of laughter as Chicago's comedy scene brings its A-game to the stage! \"The Best of Chicago Showcase\" features a dynamic lineup of the city's funniest stand-up comedians, delivering a blend of fresh, cutting-edge material and beloved, time-tested jokes.",
-          "startDate": "2026-07-30T01:00:00.000Z",
-          "startTime": "Wed, Jul 29 at 7:00 PM MDT",
-          "duration": "1 hr 30 min",
-          "eventType": "PUBLIC",
-          "isOnline": false,
+          "id": "1552110089604110",
+          "url": "https://www.facebook.com/events/1552110089604110/",
+          "name": "The Big Picture of the Bible",
+          "startDate": "2026-07-28T00:45:00Z",
+          "startTime": "Mon, Jul 27 at 7:45 PM CDT",
+          "eventType": "PUBLIC_TYPE",
+          "isOnline": true,
           "isPast": false,
-          "isCanceled": false,
-          "address": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
-          "image": "https://scontent-sea5-1.xx.fbcdn.net/v/t39.99422-6/730487643_1004057258666671_2184297960507075071_n.png?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=102&ccb=1-7&_nc_sid=75d36f&_nc_ohc=OFGNg8Lg_gMQ7kNvwEcjFSW&_nc_oc=Adq903FJip2_no3zK0IqKsV9JjAkn1FnF1xaBGKzrqyXXmaQa_55avB5vC86M3Gugxg&_nc_zt=14&_nc_ht=scontent-sea5-1.xx&_nc_gid=XZXxGTCEfI4DfHrlXKjxqA&_nc_ss=72289&oh=00_AQBb3QX63nZXkrBKTQtW7igb2yVH0WCm0f_udjqXSkW9dA&oe=6A62A3F3",
+          "image": "https://scontent-ord5-3.xx.fbcdn.net/v/t39.30808-6/723103611_1437329531770331_3863440088136803669_n.jpg?stp=c0.275.1080.516a_dst-jpg_tt6&cstp=mx1080x516&ctp=s320x320&_nc_cat=107&ccb=1-7&_nc_sid=75d36f&_nc_ohc=qi1dWulJN-QQ7kNvwGdr1lG&_nc_oc=Adpno_IqyRgRAlG3Z_Vfr1ul5XSlJdB1QrOjGKeBBwzYjz1oVZ5D4dS7sGlh-wdp23k&_nc_zt=23&_nc_ht=scontent-ord5-3.xx&_nc_gid=ZJcMLEDMfuHRFLFJrYmanw&_nc_ss=7b289&oh=00_AQDroLHQxAlYptc7KJaSOkLp9E3J3aGMZv5JD9viL4DmaA&oe=6A6BF0D4",
           "usersGoing": 1,
-          "usersInterested": 4,
-          "usersResponded": 5,
-          "location": {
-            "name": "5437 Park Place, Rosemont, IL, United States, Illinois 60018",
-            "city": "Rosemont, IL",
-            "latitude": 41.97826,
-            "longitude": -87.86738,
-            "countryCode": "US"
-          },
-          "organizer": "Event by Zanies Rosemont Comedy Club",
-          "organizers": [
-            {
-              "id": "100064546187809",
-              "name": "Zanies Rosemont Comedy Club",
-              "url": "https://www.facebook.com/RosemontZanies",
-              "verified": false
-            }
-          ],
-          "ticketsUrl": "https://www.etix.com/ticket/p/33724290/the-best-of-chicago-showcase-rosemont-zanies-rosemont",
-          "categories": [
-            {
-              "label": "Comedy",
-              "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCI2NjAwMzI2MTc1MzYzNzNcIn0ifQ%3D%3D&q=Comedy"
-            }
-          ],
-          "externalLinks": []
+          "usersInterested": 2
         },
         {
           "platform": "facebook",
-          "id": "2905221439853710",
-          "url": "https://www.facebook.com/events/2905221439853710/",
-          "name": "Comedy Dance Chicago",
-          "description": "Experience the Best of Comedy Dance Chicago! This high-energy laugh-riot features fan favorites and hilarious hits from the group's first decade of performances. A joyful mashup of sketch comedy, physical humor, music, and dance, this feel-good show is sure to have you smiling, laughing, and bopping in your seat. You might even end up on stage!With over 105 million views on social media, these dancin' fools have delighted audiences both online and on stage with their relatable humor and infectious energy. From pumpkin spice lattes to good old-fashioned staring contests, Comedy Dance Chicago turns everyday moments into delightfully absurd comedy.Get ready for an endorphin-releasing experience packed with big laughs, big moves, and hilariously unforgettable antics! Rated PG-13.\r\n\r\n\r\nTICKETS: $35.00 (Including Fees)\r\n\r\nCall the Opera House Box Office: (815) 338-5300 or email tickets@woodstockil.gov  with any questions",
-          "startDate": "2026-09-20T00:30:00.000Z",
-          "startTime": "Sat, Sep 19 at 7:30 PM CDT",
-          "duration": null,
-          "eventType": "PUBLIC",
-          "isOnline": false,
+          "id": "2448238608938396",
+          "url": "https://www.facebook.com/events/2448238608938396/",
+          "name": "Virtual 8 Week Tarot Class - A Fool's Journey",
+          "startDate": "2026-07-30T00:00:00Z",
+          "startTime": "Wed, Jul 29 at 7:00 PM CDT",
+          "eventType": "PUBLIC_TYPE",
+          "isOnline": true,
           "isPast": false,
-          "isCanceled": false,
-          "address": "121 West Van Buren Street\r\nWoodstock, IL 60098",
-          "image": "https://scontent.ftzl1-1.fna.fbcdn.net/v/t39.30808-6/730584696_1593348489465875_6836066750615974362_n.jpg?stp=dst-jpg_tt6&cstp=mx1200x628&ctp=s960x960&_nc_cat=106&ccb=1-7&_nc_sid=75d36f&_nc_ohc=7q8kVsMfR9gQ7kNvwFD4Q9N&_nc_oc=AdoJeeJqCrH4of9590C1oyFfW7-4mwSTNcGVPUGX0pT8sivvfAFAldTlS2IxcSxf3KA&_nc_zt=23&_nc_ht=scontent.ftzl1-1.fna&_nc_gid=ZJzm78hodizGfBYDMfyB_g&_nc_ss=7c289&oh=00_AQA9AJ6vsk1x19i9CGAvyPrZtVd8OWWQFvUPoUF4eLItIw&oe=6A629C5C",
-          "usersGoing": 1,
-          "usersInterested": 7,
-          "usersResponded": 8,
-          "location": {
-            "name": "121 West Van Buren Street\r\nWoodstock, IL 60098",
-            "city": "Woodstock, IL",
-            "latitude": 42.31422,
-            "longitude": -88.44763,
-            "countryCode": "US"
-          },
-          "organizer": "Event by Woodstock Opera House",
-          "organizers": [
-            {
-              "id": "100063722163729",
-              "name": "Woodstock Opera House",
-              "url": "https://www.facebook.com/woodstockoperahouse",
-              "verified": false
-            }
-          ],
-          "ticketsUrl": "https://www.etix.com/ticket/servlet/s/38224498",
-          "categories": [
-            {
-              "label": "Comedy",
-              "url": "https://www.facebook.com/events/search/?filters=eyJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5OjAiOiJ7XCJuYW1lXCI6XCJmaWx0ZXJfZXZlbnRzX2NhdGVnb3J5XCIsXCJhcmdzXCI6XCI2NjAwMzI2MTc1MzYzNzNcIn0ifQ%3D%3D&q=Comedy"
-            }
-          ],
-          "externalLinks": []
-        },
-        {
-          "platform": "facebook",
-          "id": "1553174396203117",
-          "url": "https://www.facebook.com/events/1553174396203117/",
-          "name": "Auntie Hammy The Comedy Bar Chicago",
-          "description": "Come out and enjoy an explosive comedy set by Auntie Hammy 🦉 HOOT HOOT",
-          "startDate": "2026-07-19T23:00:00.000Z",
-          "startTime": "Sun, Jul 19 at 7:00 PM EDT",
-          "duration": null,
-          "eventType": "PUBLIC",
-          "isOnline": false,
-          "isPast": false,
-          "isCanceled": false,
-          "address": "162 E Superior St, Chicago, IL 60654",
-          "image": "https://scontent-mad1-1.xx.fbcdn.net/v/t39.30808-6/736455705_1551607669854746_6960960816332759417_n.jpg?stp=dst-jpg_tt6&cstp=mx1640x2048&ctp=s960x960&_nc_cat=101&ccb=1-7&_nc_sid=75d36f&_nc_ohc=QnWcz9lz-0UQ7kNvwErg835&_nc_oc=AdrmoPgxRVvgireZ1Jb3dplfu7GmpHgAK2ogaUiIkFVjMbIT5ir0Hxhl_3SHcnsxSUE&_nc_zt=23&_nc_ht=scontent-mad1-1.xx&_nc_gid=6h4iehjym9JrGb6waeAvpA&_nc_ss=72289&oh=00_AQB-vh_1pEllmeODv4AOi_WvLVBhWw1GGjGAgLR8-XVvFw&oe=6A62BFEE",
-          "usersGoing": 15,
-          "usersInterested": 80,
-          "usersResponded": 95,
-          "location": {
-            "name": "The Comedy Bar",
-            "city": "Chicago, IL, United States",
-            "latitude": 41.891,
-            "longitude": -87.63293,
-            "countryCode": "US"
-          },
-          "organizer": "Event by Auntie HAMMY",
-          "organizers": [
-            {
-              "id": "100050165843552",
-              "name": "Auntie HAMMY",
-              "url": "https://www.facebook.com/auntiehammyTV",
-              "verified": true
-            }
-          ],
-          "ticketsUrl": "https://www.eventbrite.com/e/sunday-july-19-auntie-hammy-tickets-1988430523222?aff=oddtdtcreator&utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZnRzaASxIkJwZG9mAmV4dG4DYWVtAjExAHNydGMGYXBwX2lkDzEyNDAyNDU3NDI4NzQxNAABp7K8Gu6wihl4I0yJtI0lcHqHuFApklnUw2zTS7OfPdZNRW_AIuTA4GZduNWk_aem_WbU94zbhspIG66IbtVNvXA",
-          "categories": [],
-          "externalLinks": []
+          "image": "https://scontent-ord5-1.xx.fbcdn.net/v/t39.30808-6/700483218_122234764490315776_10588253747618528_n.jpg?stp=c0.177.1024.488a_dst-jpg_tt6&cstp=mx1024x488&ctp=s320x320&_nc_cat=106&ccb=1-7&_nc_sid=75d36f&_nc_ohc=LCRzJKfWiKsQ7kNvwFgKR6w&_nc_oc=Adr0yn7Dhw7TfiWnVXaiYKjY79rqYJ7O0ci5ovVd8gxV0JLjAWxLsc5d_elJVsJ9zKk&_nc_zt=23&_nc_ht=scontent-ord5-1.xx&_nc_gid=ZJcMLEDMfuHRFLFJrYmanw&_nc_ss=7b289&oh=00_AQD5PDmVcflFNfOcCytfj6iAK7Q2t_Ol4M2xCzz26mezCg&oe=6A6C025D",
+          "usersGoing": 1
         }
       ]
     }
@@ -17475,52 +17105,52 @@
       "platform": "youtube",
       "url": "https://www.youtube.com/playlist?list=PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj",
       "title": "Pop Music Playlist - Timeless Pop Songs (Updated Weekly 2026)",
-      "channelName": "ROSÉ",
+      "channelName": "ROSÉ and Bruno Mars",
       "totalReturned": 5,
       "videos": [
         {
           "url": "https://www.youtube.com/watch?v=ekr2nIex040",
           "title": "ROSÉ & Bruno Mars - APT. (Official Music Video)",
-          "publishedAt": "1y ago",
+          "publishedAt": "1 year ago",
           "viewCount": 2500000000,
           "durationSeconds": 174,
-          "thumbnailUrl": "https://i.ytimg.com/vi/ekr2nIex040/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC9xg=&rs=AOn4CLDOxMZ68w4g4Q4NxGMybOB1PofIMg",
-          "channelName": "ROSÉ"
+          "thumbnailUrl": "https://i.ytimg.com/vi/ekr2nIex040/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDzyvnY8qeogjw9kGhO1TPZkM12-A",
+          "channelName": "ROSÉ and Bruno Mars"
         },
         {
           "url": "https://www.youtube.com/watch?v=kPa7bsKwL-c",
           "title": "Lady Gaga, Bruno Mars - Die With A Smile (Official Music Video)",
-          "publishedAt": "1y ago",
+          "publishedAt": "1 year ago",
           "viewCount": 1700000000,
           "durationSeconds": 253,
-          "thumbnailUrl": "https://i.ytimg.com/vi/kPa7bsKwL-c/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC9xg=&rs=AOn4CLAcTzxEC0D1FIs3JGm9_4BbtOvEMg",
+          "thumbnailUrl": "https://i.ytimg.com/vi/kPa7bsKwL-c/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDF3iMqsC6OQclYtXdkxhPQUpKHUA",
           "channelName": "Lady Gaga"
         },
         {
           "url": "https://www.youtube.com/watch?v=euCqAq6BRa4",
           "title": "DJ Snake - Let Me Love You (Official Music Video) ft. Justin Bieber",
-          "publishedAt": "9y ago",
+          "publishedAt": "9 years ago",
           "viewCount": 2000000000,
           "durationSeconds": 206,
-          "thumbnailUrl": "https://i.ytimg.com/vi/euCqAq6BRa4/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC9xg=&rs=AOn4CLAgsWEpI_bvmwOJrr_goE3elCWOXA",
+          "thumbnailUrl": "https://i.ytimg.com/vi/euCqAq6BRa4/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDohgpb2pBRT0I2x0NJiDghKYbSkA",
           "channelName": "DJ Snake"
         },
         {
           "url": "https://www.youtube.com/watch?v=V9PVRfjEBTI",
           "title": "Billie Eilish - BIRDS OF A FEATHER (Official Music Video)",
-          "publishedAt": "1y ago",
-          "viewCount": 886000000,
+          "publishedAt": "1 year ago",
+          "viewCount": 894000000,
           "durationSeconds": 231,
-          "thumbnailUrl": "https://i.ytimg.com/vi/V9PVRfjEBTI/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC9xg=&rs=AOn4CLANC3Dkrh-z37HPX5RNlMtIeVBpkQ",
+          "thumbnailUrl": "https://i.ytimg.com/vi/V9PVRfjEBTI/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLBvvxAwBQjBvuWLg_hCUQMH6nfFXA",
           "channelName": "Billie Eilish"
         },
         {
           "url": "https://www.youtube.com/watch?v=q4lU1N3oqYQ",
           "title": "Madison Beer - lovergirl (Official Music Video)",
-          "publishedAt": "2mo ago",
-          "viewCount": 2300000,
+          "publishedAt": "2 months ago",
+          "viewCount": 2400000,
           "durationSeconds": 202,
-          "thumbnailUrl": "https://i.ytimg.com/vi/q4lU1N3oqYQ/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC9xg=&rs=AOn4CLAJPoekBp9aMPQLY0ZFJ9aanlyvFA",
+          "thumbnailUrl": "https://i.ytimg.com/vi/q4lU1N3oqYQ/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDHwDbvQb7vLyC4A9CadeUa1Zit0w",
           "channelName": "Madison Beer"
         }
       ]
@@ -19009,16 +18639,16 @@
         {
           "platform": "tiktok_shop",
           "id": "1729527313880355335",
-          "url": "https://www.tiktok.com/shop/pdp/1729527313880355335",
+          "url": "https://www.tiktok.com/shop/pdp/ashwagandha-gummies-by-goli-ksm-66-mixed-berry-vegan-non-gmo/1729527313880355335",
           "title": "Goli Ashwagandha & Vitamin D Gummy - Mixed Berry, KSM-66, Vegan, Plant Based, Non-GMO, Gluten-Free & Gelatin Free. America's #1 Ashwagandha Brand",
           "price": 14.98,
-          "originalPrice": 24.99,
+          "originalPrice": 19.0,
           "currency": "USD",
-          "discount": "40%",
+          "discount": "21%",
           "rating": 4.5,
-          "reviews": 94226,
-          "sold": 1294820,
-          "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/27ecee8e289b49ab907cef6980b9f768~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
+          "reviews": 94266,
+          "sold": 1295902,
+          "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/2bc69aa9f6084480beee1bb4a8db3a69~tplv-fhlh96nyum-crop-webp:1500:1500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=a6e80448&idc=useast5&from=2378011839",
           "seller": {
             "id": "7495794203056835079",
             "name": "Goli Nutrition",
@@ -19028,16 +18658,16 @@
         {
           "platform": "tiktok_shop",
           "id": "1731194857673101831",
-          "url": "https://www.tiktok.com/shop/pdp/1731194857673101831",
+          "url": "https://www.tiktok.com/shop/pdp/zero-sugar-best-seller-trio-goli-ashwagandha-gummies-vegan-non-gmo/1731194857673101831",
           "title": "Zero Sugar Best Seller Trio - World's First 3-in-1 Pre, Post, Probiotic, Apple Cider Vinegar with Vitamin B12 and Probiotics To Address Bloating, Ashwagandha & L-Theanine, Vitamin D gummies. Gluten-Free, Vegan, Non-GMO & Gelatin-Free",
-          "price": 32.3,
-          "originalPrice": 105,
+          "price": 35.8,
+          "originalPrice": 105.0,
           "currency": "USD",
-          "discount": "69%",
+          "discount": "66%",
           "rating": 4.5,
-          "reviews": 44251,
-          "sold": 977259,
-          "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/c347c31449564ea4a0300adb2d0cdaa9~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
+          "reviews": 45933,
+          "sold": 984345,
+          "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/c347c31449564ea4a0300adb2d0cdaa9~tplv-fhlh96nyum-crop-webp:1500:1500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=a6e80448&idc=useast5&from=2378011839",
           "seller": {
             "id": "7495794203056835079",
             "name": "Goli Nutrition",
@@ -19047,16 +18677,16 @@
         {
           "platform": "tiktok_shop",
           "id": "1729587769570529799",
-          "url": "https://www.tiktok.com/shop/pdp/1729587769570529799",
+          "url": "https://www.tiktok.com/shop/pdp/goli-ashwagandha-gummies-with-vitamin-d-ksm-66-vegan-non-gmo/1729587769570529799",
           "title": "3 Bottles of Goli Ashwagandha & Vitamin D Gummy - Mixed Berry, KSM-66, Vegan, Plant Based, Non-GMO, Gluten & Gelatin Free",
           "price": 44.98,
-          "originalPrice": 74.94,
+          "originalPrice": 57.0,
           "currency": "USD",
-          "discount": "40%",
+          "discount": "21%",
           "rating": 4.7,
-          "reviews": 71615,
-          "sold": 861113,
-          "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/b0d9acd7ae184c8d89e2e498941485b6~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
+          "reviews": 71655,
+          "sold": 861565,
+          "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/b0d9acd7ae184c8d89e2e498941485b6~tplv-fhlh96nyum-crop-webp:1500:1500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=a6e80448&idc=useast5&from=2378011839",
           "seller": {
             "id": "7495794203056835079",
             "name": "Goli Nutrition",
@@ -19066,16 +18696,16 @@
         {
           "platform": "tiktok_shop",
           "id": "1729589345444205063",
-          "url": "https://www.tiktok.com/shop/pdp/1729589345444205063",
+          "url": "https://www.tiktok.com/shop/pdp/goli-new-year-bundle-ashwagandha-apple-cider-vinegar-matcha-mind/1729589345444205063",
           "title": "3 Bottles of Goli Best Seller Bundle: Ashwagandha KSM-66, Apple Cider Vinegar, Matcha Mind supplement with Cognizin, Vitamins D2 and B12",
-          "price": 31.8,
+          "price": 32.8,
           "originalPrice": 74.97,
           "currency": "USD",
-          "discount": "58%",
+          "discount": "56%",
           "rating": 4.6,
-          "reviews": 40716,
-          "sold": 544224,
-          "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/7a85d8aa9e2c4faab75a09fd9e5bff42~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
+          "reviews": 40190,
+          "sold": 545614,
+          "image": "https://p19-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/7a85d8aa9e2c4faab75a09fd9e5bff42~tplv-fhlh96nyum-crop-webp:1500:1500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=a6e80448&idc=useast5&from=2378011839",
           "seller": {
             "id": "7495794203056835079",
             "name": "Goli Nutrition",
@@ -19085,16 +18715,16 @@
         {
           "platform": "tiktok_shop",
           "id": "1729527774874997255",
-          "url": "https://www.tiktok.com/shop/pdp/1729527774874997255",
+          "url": "https://www.tiktok.com/shop/pdp/gummy-pre-post-probiotics-by-goli-nutrition-vegan-gluten-free-formula/1729527774874997255",
           "title": "Goli Pre, Post, Probiotics Gummy - World's First 3-in-1 Gluten-Free, Vegan, Non-GMO, and Gelatin-Free.",
           "price": 14.98,
-          "originalPrice": 24.97,
+          "originalPrice": 19.0,
           "currency": "USD",
-          "discount": "40%",
+          "discount": "21%",
           "rating": 4.5,
-          "reviews": 11487,
-          "sold": 205178,
-          "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/3939c5be64484010b5c2a3183ecfbec3~tplv-fhlh96nyum-crop-webp:500:500.webp?dr=12190&t=555f072d&ps=933b5bde&shp=837c8b87&shcp=9b759fb9&idc=useast5&from=2205977479",
+          "reviews": 11787,
+          "sold": 205636,
+          "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/3939c5be64484010b5c2a3183ecfbec3~tplv-fhlh96nyum-crop-webp:3000:3000.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=a6e80448&idc=useast5&from=2378011839",
           "seller": {
             "id": "7495794203056835079",
             "name": "Goli Nutrition",

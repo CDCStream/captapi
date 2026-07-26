@@ -1970,7 +1970,7 @@
     "platform": "facebook",
     "name": "Facebook Event Search",
     "path": "/v1/facebook/event-search",
-    "credits": 40,
+    "credits": 2,
     "summary": "Search Facebook events by topic and/or location.",
     "params": [
       {
@@ -1983,7 +1983,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits on native success."
       },
       {
         "name": "cache",
@@ -2048,7 +2048,7 @@
     "platform": "facebook",
     "name": "Facebook Profile Events",
     "path": "/v1/facebook/profile-events",
-    "credits": 40,
+    "credits": 2,
     "summary": "Events from a Facebook profile or page.",
     "params": [
       {
@@ -2061,7 +2061,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits on native success."
       },
       {
         "name": "cache",

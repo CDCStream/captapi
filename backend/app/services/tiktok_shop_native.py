@@ -1,8 +1,9 @@
-"""Native TikTok Shop store catalog via SSR HTML (no Apify).
+"""Native TikTok Shop store catalog + PDP reviews via SSR HTML (no Apify).
 
 Store pages embed a Remix/loader JSON blob with ``component_data.products``.
+PDP pages embed a short ``product_reviews`` preview (~3 rows).
 Datacenter proxy usually returns the full page; residential/Decodo are
-fallbacks. Search pages are WAF/captcha gated   keep those on Apify.
+fallbacks. Search / deep review pagination / showcase stay on Apify.
 """
 
 from __future__ import annotations
@@ -26,7 +27,7 @@ _SHOP_URL_RE = re.compile(
 _SCRIPT_RE = re.compile(r"<script[^>]*>(.*?)</script>", re.S)
 
 # Flat bill when native succeeds. One proxied HTML fetch is well under $0.001;
-# at $0.0045/credit with 120% markup �! 1 credit; bill 2 for headroom.
+# at $0.0045/credit with 120% markup → ~1 credit; bill 2 for headroom.
 CREDIT_SHOP_NATIVE = 2
 
 
@@ -186,7 +187,7 @@ async def _fetch_html(url: str) -> str | None:
         if resp.status_code != 200:
             continue
         text = resp.text or ""
-        if "product_id" in text:
+        if "product_id" in text or "review_id" in text:
             return text
     if decodo_fetch.enabled():
         for headless in (None, "html"):
@@ -194,7 +195,7 @@ async def _fetch_html(url: str) -> str | None:
             if not got:
                 continue
             status, body = got
-            if status == 200 and body and "product_id" in body:
+            if status == 200 and body and ("product_id" in body or "review_id" in body):
                 return body
     return None
 
@@ -227,4 +228,103 @@ async def fetch_shop_products(url: str, *, limit: int = 20) -> list[dict[str, An
     if not out:
         return None
     log.info("tiktok_shop_native_ok", url=fetch_url[:120], n=len(out))
+    return out
+
+
+_PDP_URL_RE = re.compile(
+    r'(?:tiktok\.com|shop\.tiktok\.com)/shop/pdp/(?:[^/?#]+/)?(\d+)',
+    re.IGNORECASE,
+)
+
+
+def parse_product_url(url: str) -> str | None:
+    if not url:
+        return None
+    m = _PDP_URL_RE.search(unquote(url.strip()))
+    return m.group(1) if m else None
+
+
+def _find_review_lists(obj: Any) -> list[list[dict[str, Any]]]:
+    found: list[list[dict[str, Any]]] = []
+    if isinstance(obj, dict):
+        reviews = obj.get('product_reviews')
+        if (
+            isinstance(reviews, list)
+            and reviews
+            and isinstance(reviews[0], dict)
+            and ('review_id' in reviews[0] or 'review_text' in reviews[0])
+        ):
+            found.append([r for r in reviews if isinstance(r, dict)])
+        for v in obj.values():
+            found.extend(_find_review_lists(v))
+    elif isinstance(obj, list):
+        for v in obj[:80]:
+            found.extend(_find_review_lists(v))
+    return found
+
+
+def extract_reviews_from_html(html: str) -> list[dict[str, Any]]:
+    best: list[dict[str, Any]] = []
+    for m in _SCRIPT_RE.finditer(html or ''):
+        blob = (m.group(1) or '').strip()
+        if not blob.startswith('{') or 'review_id' not in blob:
+            continue
+        try:
+            data = json.loads(blob)
+        except ValueError:
+            continue
+        for reviews in _find_review_lists(data):
+            if len(reviews) > len(best):
+                best = reviews
+    return best
+
+
+def normalize_raw_review(raw: dict[str, Any]) -> dict[str, Any]:
+    images = raw.get('review_images') or []
+    if not isinstance(images, list):
+        images = []
+    display = raw.get('display_image_url')
+    if display and not images:
+        images = [display]
+    return {
+        'id': raw.get('review_id') or raw.get('reviewId'),
+        'review_id': raw.get('review_id') or raw.get('reviewId'),
+        'review_rating': raw.get('review_rating') or raw.get('rating'),
+        'review_text': raw.get('review_text') or raw.get('text'),
+        'review_time': raw.get('review_time') or raw.get('createdAt'),
+        'is_verified_purchase': raw.get('is_verified_purchase'),
+        'sku_specification': raw.get('sku_specification') or raw.get('sku'),
+        'review_country': raw.get('review_country') or raw.get('country'),
+        "reviewer_name": raw.get("reviewer_name"),
+        "reviewer_avatar_url": raw.get("reviewer_avatar_url"),
+        "review_images": images,
+        "authorName": raw.get("reviewer_name"),
+    }
+
+
+async def fetch_product_reviews(url: str, *, limit: int = 20) -> list[dict[str, Any]] | None:
+    """Fetch PDP review preview from SSR HTML.
+
+    Returns Apify-shaped raw review dicts, or ``None`` when the page could not
+    be fetched/parsed. SSR typically embeds ~3 reviews; deeper lists need Apify.
+    """
+    if limit <= 0:
+        return []
+    product_id = parse_product_url(url)
+    fetch_url = url.strip()
+    if product_id:
+        fetch_url = f"https://www.tiktok.com/shop/pdp/{product_id}"
+
+    html = await _fetch_html(fetch_url)
+    if not html:
+        return None
+    raw = extract_reviews_from_html(html)
+    if not raw:
+        log.info("tiktok_shop_native_no_reviews", url=fetch_url[:120])
+        return None
+    out = [normalize_raw_review(r) for r in raw[:limit]]
+    out = [r for r in out if r.get("id") or r.get("review_text")]
+    if not out:
+        return None
+    log.info("tiktok_shop_native_reviews_ok", url=fetch_url[:120], n=len(out))
     return out
