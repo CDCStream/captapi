@@ -41,41 +41,61 @@ function CreativePricing({
   title = "Make Short Videos That Pop",
   description = "Edit, enhance, and go viral in minutes",
   tiers,
+  compact = false,
 }: {
   tag?: string;
   title?: string;
   description?: string;
   tiers: PricingTier[];
+  /** Tighter spacing for modals / constrained layouts. */
+  compact?: boolean;
 }) {
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 overflow-x-clip">
-      <div className="text-center space-y-6 mb-16">
-        <div className="font-handwritten text-xl text-blue-500 rotate-[-1deg]">
+    <div className={cn("w-full max-w-6xl mx-auto overflow-x-clip", compact ? "px-1" : "px-4")}>
+      <div className={cn("text-center", compact ? "space-y-3 mb-8" : "space-y-6 mb-16")}>
+        <div className={cn("font-handwritten text-blue-500 rotate-[-1deg]", compact ? "text-base" : "text-xl")}>
           {tag}
         </div>
         <div className="relative">
-          <h2 className="text-4xl md:text-5xl font-bold font-handwritten text-zinc-900 dark:text-white rotate-[-1deg]">
+          <h2
+            className={cn(
+              "font-bold font-handwritten text-zinc-900 dark:text-white rotate-[-1deg]",
+              compact ? "text-2xl md:text-3xl" : "text-4xl md:text-5xl",
+            )}
+          >
             {title}
-            <div className="absolute -right-12 top-0 text-amber-500 rotate-12">
-              ✨
-            </div>
-            <div className="absolute -left-8 bottom-0 text-blue-500 -rotate-12">
-              ⭐️
-            </div>
+            {!compact && (
+              <>
+                <div className="absolute -right-12 top-0 text-amber-500 rotate-12">
+                  ✨
+                </div>
+                <div className="absolute -left-8 bottom-0 text-blue-500 -rotate-12">
+                  ⭐️
+                </div>
+              </>
+            )}
           </h2>
-          <div
-            className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-44 h-3 bg-blue-500/20 
-                        rotate-[-1deg] rounded-full blur-sm"
-          />
+          {!compact && (
+            <div
+              className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-44 h-3 bg-blue-500/20 
+                          rotate-[-1deg] rounded-full blur-sm"
+            />
+          )}
         </div>
-        <p className="font-handwritten text-xl text-zinc-600 dark:text-zinc-400 rotate-[-1deg]">
+        <p
+          className={cn(
+            "font-handwritten text-zinc-600 dark:text-zinc-400 rotate-[-1deg]",
+            compact ? "text-base max-w-xl mx-auto" : "text-xl",
+          )}
+        >
           {description}
         </p>
       </div>
 
       <div
         className={cn(
-          "grid grid-cols-1 gap-8 mx-auto",
+          "grid grid-cols-1 mx-auto",
+          compact ? "gap-5" : "gap-8",
           GRID_COLS[tiers.length] ?? "md:grid-cols-3",
         )}
       >

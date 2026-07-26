@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -8,6 +9,7 @@ import { LogoutButton } from "@/components/logout-button";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { WelcomePing } from "@/components/dashboard/welcome-ping";
+import { BuyCreditsDialog } from "@/components/dashboard/buy-credits-dialog";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const sb = await createClient();
@@ -17,6 +19,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen flex bg-muted/30">
       <WelcomePing />
+      <Suspense fallback={null}>
+        <BuyCreditsDialog />
+      </Suspense>
       <aside className="hidden md:flex flex-col w-60 shrink-0 border-r bg-background p-4 sticky top-0 h-screen">
         <Link href="/" className="flex items-center gap-2 mb-6 px-2">
           <Image src="/logo.png" alt="Captapi" width={28} height={28} className="size-7 rounded-md" />

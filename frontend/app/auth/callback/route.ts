@@ -177,14 +177,15 @@ export async function GET(request: Request) {
       if (user?.email && user?.email_confirmed_at) {
         if (skipWelcome) {
           await revokeWelcomeCredits(user.id, user.created_at);
-          next = "/dashboard/billing";
+          // Landing flag opens the buy-credits pricing modal on the dashboard.
+          next = "/dashboard/billing?from=tools";
         } else {
           await grantWelcomeCredits(user.id, user.email);
         }
       } else if (skipWelcome) {
         // OAuth may confirm immediately; password signup confirms via this link.
         // If somehow unconfirmed + skip, still send them to billing after.
-        next = "/dashboard/billing";
+        next = "/dashboard/billing?from=tools";
       }
 
       const forwardedHost = request.headers.get("x-forwarded-host");
