@@ -2291,7 +2291,7 @@ export class AdLibraryApi {
   tiktokAdDetails(params: TiktokAdLibraryAdDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/tiktok/ad-details", params);
   }
-  /** Google Company Ads — Google Ads Transparency Center ads for an advertiser. (67 credits) */
+  /** Google Company Ads — Google Ads Transparency Center ads for an advertiser. (2 credits) */
   googleCompanyAds(params: GoogleAdLibraryCompanyAdsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/google/company-ads", params);
   }

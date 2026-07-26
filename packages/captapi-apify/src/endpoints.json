@@ -4525,7 +4525,7 @@
     "platform": "ad_library",
     "name": "Google Company Ads",
     "path": "/v1/ad-library/google/company-ads",
-    "credits": 67,
+    "credits": 2,
     "summary": "Google Ads Transparency Center ads for an advertiser.",
     "params": [
       {

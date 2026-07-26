@@ -31,6 +31,9 @@ RATE_GOOGLE_COMPANY_ADS = 3.35
 # Native ATC SearchSuggestions: one proxied RPC (~$0.001). At $0.0045/credit
 # with 120% markup → ceil(0.001 * 2.2 / 0.0045) = 1 credit flat.
 CREDIT_GOOGLE_ADVERTISER = 1
+# Native ATC SearchCreatives (+ resolve): a few proxied RPCs (~$0.001–0.003).
+# 120% markup → ~1–2 credits; bill 2 flat when native succeeds.
+CREDIT_GOOGLE_COMPANY_ADS = 2
 # FB/LI Ad Library lists: one Decodo headless render (~$0.001–0.0015 Premium+JS).
 # 120% markup → ~1 credit; bill 2 flat when native succeeds. Apify fallback keeps
 # the legacy per-result RATE_AD_LIST scale.
@@ -823,14 +826,48 @@ async def google_company_ads(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/google/company-ads", platform="google_ad_library", resource_url=None, base_credits=_scaled(limit, RATE_GOOGLE_COMPANY_ADS)) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/ad-library/google/company-ads",
+        platform="google_ad_library",
+        resource_url=None,
+        base_credits=_scaled(limit, RATE_GOOGLE_COMPANY_ADS),
+    ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2, {"advertisers": [advertiser], "region": country.upper(), "maxResults": limit}, limit)
+            # 1) Native ATC SearchCreatives (proxy/direct) — ~ms–seconds, ~$0.
+            native = await google_ads_native.fetch_company_ads(
+                advertiser, country=country, limit=limit
+            )
+            if native is not None:
+                ctx["source"] = "direct"
+                ads = [_normalize_ad(i, "google_ad_library") for i in native]
+                ctx["credits_override"] = CREDIT_GOOGLE_COMPANY_ADS
+                return {
+                    "advertiser": advertiser,
+                    "country": country.upper(),
+                    "totalReturned": len(ads),
+                    "ads": ads,
+                }
+
+            # 2) Apify last resort.
+            items = await _run_actor(
+                settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2,
+                {"advertisers": [advertiser], "region": country.upper(), "maxResults": limit},
+                limit,
+            )
+            ctx["source"] = "apify"
             ads = [_normalize_ad(i, "google_ad_library") for i in items]
             return {"advertiser": advertiser, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.google.company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
-        ctx["credits_override"] = _scaled(len(data["ads"]), RATE_GOOGLE_COMPANY_ADS)
+        data = await cached_or_run(
+            "ad-library.google.company-ads",
+            {"advertiser": advertiser, "country": country, "limit": limit, "v": 5},
+            _run,
+            ctx,
+            use_cache=cache,
+        )
+        if ctx.get("source") != "direct":
+            ctx["credits_override"] = _scaled(len(data["ads"]), RATE_GOOGLE_COMPANY_ADS)
         return ApiResponse(data=data)
 
 

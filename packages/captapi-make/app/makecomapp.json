@@ -2894,7 +2894,7 @@
       },
       "googleAdLibraryCompanyAds": {
         "label": "Google Company Ads",
-        "description": "Google Ads Transparency Center ads for an advertiser. Costs ~67 credits (cached results free, failures never charged).",
+        "description": "Google Ads Transparency Center ads for an advertiser. Costs ~2 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

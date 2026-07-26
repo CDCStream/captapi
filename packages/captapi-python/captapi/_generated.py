@@ -3195,7 +3195,7 @@ class AdLibraryApi:
         return self._t.get("/v1/ad-library/tiktok/ad-details", {"url": url, "country": country, "cache": cache})
 
     def google_company_ads(self, *, advertiser: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Company Ads — Google Ads Transparency Center ads for an advertiser. (67 credits)
+        """Google Company Ads — Google Ads Transparency Center ads for an advertiser. (2 credits)
 
         :param advertiser: Advertiser name, domain, or Google advertiser ID.
         :param country: ISO country code. Default US.
@@ -3312,7 +3312,7 @@ class AsyncAdLibraryApi:
         return await self._t.get("/v1/ad-library/tiktok/ad-details", {"url": url, "country": country, "cache": cache})
 
     async def google_company_ads(self, *, advertiser: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Company Ads — Google Ads Transparency Center ads for an advertiser. (67 credits)
+        """Google Company Ads — Google Ads Transparency Center ads for an advertiser. (2 credits)
 
         :param advertiser: Advertiser name, domain, or Google advertiser ID.
         :param country: ISO country code. Default US.
