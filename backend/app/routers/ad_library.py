@@ -835,10 +835,12 @@ async def google_company_ads(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # 1) Native ATC SearchCreatives (proxy/direct) — ~ms–seconds, ~$0.
+            # Empty list means "resolved but no creatives" after soft-region
+            # retry; only transport failure (None) falls through to Apify.
             native = await google_ads_native.fetch_company_ads(
                 advertiser, country=country, limit=limit
             )
-            if native is not None:
+            if native:
                 ctx["source"] = "direct"
                 ads = [_normalize_ad(i, "google_ad_library") for i in native]
                 ctx["credits_override"] = CREDIT_GOOGLE_COMPANY_ADS
@@ -849,7 +851,7 @@ async def google_company_ads(
                     "ads": ads,
                 }
 
-            # 2) Apify last resort.
+            # 2) Apify last resort (also when native returned []).
             items = await _run_actor(
                 settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2,
                 {"advertisers": [advertiser], "region": country.upper(), "maxResults": limit},
@@ -861,7 +863,7 @@ async def google_company_ads(
 
         data = await cached_or_run(
             "ad-library.google.company-ads",
-            {"advertiser": advertiser, "country": country, "limit": limit, "v": 5},
+            {"advertiser": advertiser, "country": country, "limit": limit, "v": 6},
             _run,
             ctx,
             use_cache=cache,

@@ -490,55 +490,19 @@ async def resolve_advertiser_ids(
     return ids
 
 
-async def fetch_company_ads(
-    advertiser: str,
+async def _collect_creatives(
+    ids: list[str],
     *,
-    country: str | None = None,
-    limit: int = 20,
-) -> list[dict[str, Any]] | None:
-    """Fetch creatives for an advertiser name, domain, or AR id.
-
-    Returns rows shaped for ``_normalize_ad(..., google_ad_library)``, or
-    ``None`` when every transport tier fails (caller should fall back to Apify).
-    """
-    want = max(0, int(limit))
-    if want == 0:
-        return []
-
-    ids = await resolve_advertiser_ids(advertiser, country=country, max_ids=3)
-    if ids is None:
-        return None
-    if not ids:
-        return []
-
-    region_enums = _region_enums(country)
-    page_size = min(40, max(want, 10))
+    want: int,
+    page_size: int,
+    region_enums: list[int] | None,
+    proxy: str | None,
+) -> list[dict[str, Any]]:
+    """Page SearchCreatives for ``ids`` on one proxy; may return []."""
     collected: list[dict[str, Any]] = []
     seen: set[str] = set()
 
-    # Try tiers until the first page succeeds; keep that proxy for pagination.
-    working: tuple[str, str | None] | None = None
-    first_payload: dict[str, Any] | None = None
-    for tier, proxy in _proxy_tiers():
-        payload = await _post_creatives(
-            ids[:1],
-            page_size=page_size,
-            cursor=None,
-            region_enums=region_enums,
-            proxy=proxy,
-        )
-        if payload is None:
-            continue
-        working = (tier, proxy)
-        first_payload = payload
-        break
-
-    if working is None or first_payload is None:
-        return None
-
-    tier_used, proxy = working
-
-    async def _consume(payload: dict[str, Any], remaining_ids: list[str]) -> Any:
+    def _consume(payload: dict[str, Any]) -> Any:
         rows = payload.get("1")
         if not isinstance(rows, list):
             return payload.get("2")
@@ -557,41 +521,122 @@ async def fetch_company_ads(
                 return None
         return payload.get("2")
 
-    # Page first advertiser, then fill from additional resolved advertisers.
-    cursor = await _consume(first_payload, ids)
-    while cursor is not None and len(collected) < want:
-        payload = await _post_creatives(
-            ids[:1],
-            page_size=page_size,
-            cursor=cursor,
-            region_enums=region_enums,
-            proxy=proxy,
-        )
-        if payload is None:
-            break
-        cursor = await _consume(payload, ids)
-        if cursor is None:
-            break
-
-    for extra_id in ids[1:]:
+    for index, adv_id in enumerate(ids):
         if len(collected) >= want:
             break
-        payload = await _post_creatives(
-            [extra_id],
-            page_size=min(page_size, want - len(collected)),
+        cursor: Any = None
+        first = True
+        while first or cursor is not None:
+            first = False
+            if len(collected) >= want:
+                break
+            payload = await _post_creatives(
+                [adv_id],
+                page_size=page_size if index == 0 else min(page_size, want - len(collected)),
+                cursor=cursor,
+                region_enums=region_enums,
+                proxy=proxy,
+            )
+            if payload is None:
+                break
+            cursor = _consume(payload)
+            # Only paginate the primary advertiser; extras are one page each.
+            if index > 0:
+                break
+    return collected
+
+
+async def fetch_company_ads(
+    advertiser: str,
+    *,
+    country: str | None = None,
+    limit: int = 20,
+) -> list[dict[str, Any]] | None:
+    """Fetch creatives for an advertiser name, domain, or AR id.
+
+    Returns rows shaped for ``_normalize_ad(..., google_ad_library)``, or
+    ``None`` when every transport tier fails (caller should fall back to Apify).
+
+    Country is a soft preference: ATC often resolves brands to non-US legal
+    entities whose creatives vanish under a hard region filter. We try the
+    requested region first, then retry without a region filter when empty.
+    """
+    want = max(0, int(limit))
+    if want == 0:
+        return []
+
+    ids = await resolve_advertiser_ids(advertiser, country=country, max_ids=3)
+    if ids is None:
+        return None
+    if not ids:
+        return []
+
+    region_enums = _region_enums(country)
+    page_size = min(40, max(want, 10))
+
+    # Pick a working proxy with a probe request (region preferred).
+    working: tuple[str, str | None] | None = None
+    for tier, proxy in _proxy_tiers():
+        probe = await _post_creatives(
+            ids[:1],
+            page_size=min(10, page_size),
             cursor=None,
             region_enums=region_enums,
             proxy=proxy,
         )
-        if payload is None:
+        if probe is None and region_enums is not None:
+            # Region filter may 400/empty-transport on some exits; try bare.
+            probe = await _post_creatives(
+                ids[:1],
+                page_size=min(10, page_size),
+                cursor=None,
+                region_enums=None,
+                proxy=proxy,
+            )
+        if probe is None:
             continue
-        await _consume(payload, [extra_id])
+        working = (tier, proxy)
+        break
+
+    if working is None:
+        return None
+
+    tier_used, proxy = working
+    collected = await _collect_creatives(
+        ids,
+        want=want,
+        page_size=page_size,
+        region_enums=region_enums,
+        proxy=proxy,
+    )
+    used_region = bool(region_enums)
+
+    # Soft country: resolved AR ids are often foreign entities with ads that
+    # ATC's region filter hides (e.g. "Samsung" → MY entity, country=US → 0).
+    if not collected and region_enums is not None:
+        collected = await _collect_creatives(
+            ids,
+            want=want,
+            page_size=page_size,
+            region_enums=None,
+            proxy=proxy,
+        )
+        used_region = False
+        if collected:
+            log.info(
+                "google_ads_creatives_region_fallback",
+                tier=tier_used,
+                count=len(collected),
+                q=advertiser[:40],
+                country=country,
+            )
 
     log.info(
         "google_ads_creatives_ok",
         tier=tier_used,
         count=len(collected),
         advertisers=len(ids),
+        region_filter=used_region,
         q=advertiser[:40],
     )
     return collected[:want]
