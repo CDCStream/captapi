@@ -21,6 +21,7 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
+from app.services import rumble_comments_native
 from app.utils.formatters import first_present, parse_compact_count, safe_int, safe_str
 from app.utils.url import (
     extract_rumble_channel,
@@ -31,6 +32,7 @@ from app.utils.url import (
 router = APIRouter()
 
 CREDIT_DETAILS = 1
+CREDIT_COMMENTS_NATIVE = rumble_comments_native.CREDIT_RUMBLE_COMMENTS_NATIVE
 RATE = 0.6
 
 
@@ -324,21 +326,32 @@ async def channel_videos(
 @router.get("/comments", summary="Rumble video comments")
 async def comments(
     url: str = Query(..., description="Rumble video URL"),
-    limit: int = Query(50, ge=1, le=500),
+    limit: int = Query(
+        50,
+        ge=1,
+        le=500,
+        description="How many top-level comments to return (1–500). Flat 2 credits per call.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_rumble_video_url(url)
     settings = get_settings()
-    cost = _scaled(limit, RATE, 2)
+    # Flat fee: Decodo HTML path is cheap; Apify fallback is rare and covered
+    # by the same 2-credit charge.
     async with billed_call(
         caller=caller,
         endpoint="/v1/rumble/comments",
         platform="rumble",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_COMMENTS_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await rumble_comments_native.comments_native(url, limit)
+            if native is not None:
+                ctx["source"] = "direct"
+                return {"url": url, "totalReturned": len(native), "comments": native}
+
             apify = get_apify()
             # The all-inclusive scraper embeds the comment thread on the video
             # row itself; prefer it since the keyword actor often returns none.
@@ -372,16 +385,16 @@ async def comments(
                     if (i.get("type") == "comment" or i.get("comment") or i.get("commentId"))
                 ]
             comments = [_normalize_comment(i) for i in comment_items][:limit]
+            ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(comments), "comments": comments}
 
         data = await cached_or_run(
             endpoint="rumble.comments",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled(len(data["comments"]), RATE, 2)
         return ApiResponse(data=data)
 
 

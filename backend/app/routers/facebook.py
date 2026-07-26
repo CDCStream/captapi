@@ -16,7 +16,7 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
-from app.services import facebook_events_native
+from app.services import facebook_comments_native, facebook_events_native
 from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
@@ -46,6 +46,7 @@ RATE_FB_MARKETPLACE = 1.4
 # Events billed at $13/1k = $0.013/event -> 2 credits/event.
 RATE_FB_EVENTS = 2.0
 CREDIT_FB_EVENTS_NATIVE = facebook_events_native.CREDIT_FB_EVENTS_NATIVE
+CREDIT_FB_COMMENTS_NATIVE = facebook_comments_native.CREDIT_FB_COMMENTS_NATIVE
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -1010,21 +1011,37 @@ async def facebook_summarize(
 @router.get("/comments", summary="Facebook post comments")
 async def facebook_comments(
     url: str = Query(...),
-    limit: int = Query(50, ge=1, le=500),
+    limit: int = Query(
+        50,
+        ge=1,
+        le=500,
+        description="How many top-level comments to return (1–500). Flat 2 credits per call.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/page/posts/123")
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_FB_COMMENTS, 2)
+    # Flat fee: Decodo HTML path is cheap; Apify fallback is rare and covered
+    # by the same 2-credit charge.
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/comments",
         platform="facebook",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_FB_COMMENTS_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await facebook_comments_native.comments_native(url, limit)
+            if native is not None:
+                ctx["source"] = "direct"
+                return {
+                    "platform": "facebook",
+                    "url": url,
+                    "totalReturned": len(native),
+                    "comments": native,
+                }
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_FACEBOOK_COMMENTS,
@@ -1056,12 +1073,11 @@ async def facebook_comments(
 
         data = await cached_or_run(
             endpoint="facebook.comments",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["comments"]), RATE_FB_COMMENTS, 2)
         return ApiResponse(data=data)
 
 
@@ -1277,21 +1293,36 @@ async def facebook_group_posts(
 async def facebook_comment_replies(
     url: str = Query(..., description="Facebook post URL the comment belongs to"),
     comment_id: str = Query(..., description="ID of the parent comment"),
-    limit: int = Query(50, ge=1, le=500),
+    limit: int = Query(
+        50,
+        ge=1,
+        le=500,
+        description="How many direct replies to return (1–500). Flat 2 credits per call.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/page/posts/123")
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_FB_COMMENTS, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/comment-replies",
         platform="facebook",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_FB_COMMENTS_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await facebook_comments_native.comment_replies_native(url, comment_id, limit)
+            if native is not None:
+                ctx["source"] = "direct"
+                return {
+                    "platform": "facebook",
+                    "url": url,
+                    "commentId": comment_id,
+                    "totalReturned": len(native),
+                    "replies": native,
+                }
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_FACEBOOK_COMMENTS,
@@ -1330,12 +1361,11 @@ async def facebook_comment_replies(
 
         data = await cached_or_run(
             endpoint="facebook.comment-replies",
-            params={"url": url, "comment_id": comment_id, "limit": limit, "v": 2},
+            params={"url": url, "comment_id": comment_id, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["replies"]), RATE_FB_COMMENTS, 2)
         return ApiResponse(data=data)
 
 

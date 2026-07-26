@@ -1728,7 +1728,7 @@
     "platform": "facebook",
     "name": "Facebook Comments",
     "path": "/v1/facebook/comments",
-    "credits": 30,
+    "credits": 2,
     "summary": "Comments on a Facebook post.",
     "params": [
       {
@@ -1741,7 +1741,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 50, max 500. Billed per result."
+        "description": "Max items to return. Default 50, max 500. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -1862,7 +1862,7 @@
     "platform": "facebook",
     "name": "Facebook Comment Replies",
     "path": "/v1/facebook/comment-replies",
-    "credits": 30,
+    "credits": 2,
     "summary": "Replies to a specific Facebook comment.",
     "params": [
       {
@@ -1881,7 +1881,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 50, max 500. Billed per result."
+        "description": "Max items to return. Default 50, max 500. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -3046,7 +3046,7 @@
     "platform": "rumble",
     "name": "Rumble Comments",
     "path": "/v1/rumble/comments",
-    "credits": 30,
+    "credits": 2,
     "summary": "Comments on a Rumble video.",
     "params": [
       {
@@ -3059,7 +3059,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 50, max 500. Billed per result."
+        "description": "Max items to return. Default 50, max 500. Flat 2 credits per call."
       },
       {
         "name": "cache",

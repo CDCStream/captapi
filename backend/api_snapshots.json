@@ -2553,199 +2553,88 @@
   "facebook-comments": {
     "ok": true,
     "status": 200,
-    "credits": null,
+    "credits": 2,
     "data": {
       "platform": "facebook",
       "url": "https://www.facebook.com/NASA/posts/pfbid02skzNsrLf5atYZfzvzHAK9gHwDnZC5u4pDZMLQ1u3iJmfoA8tNsGpT7Uj6WPs6K3Rl",
-      "totalReturned": 10,
+      "totalReturned": 5,
       "comments": [
         {
           "id": "1003271445544158",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=1003271445544158",
+          "url": "https://www.facebook.com/NASA/posts/pfbid0ozvoLoowKvCysA2CZkXKTAVCRLoVECcrC7W8eQbQYvxBNKMCQAzV8baSgDa8t5Hol?comment_id=1003271445544158",
           "text": "how is this different from JWST?",
           "author": "Jack Ryan Miller",
-          "authorUrl": null,
-          "authorAvatarUrl": "https://scontent-lga3-3.xx.fbcdn.net/v/t39.30808-1/692472460_26663220403348161_6124206666765972294_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x960&ctp=s32x32&_nc_cat=102&ccb=1-7&_nc_sid=e99d92&_nc_ohc=d8gNfUMGQpkQ7kNvwGCmvw7&_nc_oc=AdrzxpmcFDLwBliIIzZ9rK7qODcDwTCslB_HiujEINZoS3xuTk07somGR1DaTdLpS-c&_nc_zt=24&_nc_ht=scontent-lga3-3.xx&_nc_gid=NDDEMd-zvvrxDXE4mWGeGg&_nc_ss=72289&oh=00_AQDhR5PlDm2xc8sEM_ZP4s136NQYAetxrt7aw6TlWewofw&oe=6A4DAF69",
+          "authorAvatarUrl": "https://scontent.fsgn24-1.fna.fbcdn.net/v/t39.30808-1/692472460_26663220403348161_6124206666765972294_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x960&ctp=s32x32&_nc_cat=102&ccb=1-7&_nc_sid=e99d92&_nc_ohc=3HNDMjGZhBIQ7kNvwH_Yi6V&_nc_oc=AdoxMiMSoY_ToCduVunc3YCOZtk_SXSgox578bFFqLiP_4rQwkwI465-N_iYgGAJFKc&_nc_zt=24&_nc_ht=scontent.fsgn24-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQDnijJpCb3QQr1TMy3wnG3ZpT2laUi0wvxSIlu-E9nHXw&oe=6A6C3A29",
           "likeCount": 7,
-          "publishedAt": "2026-06-02T19:30:33.000Z",
+          "publishedAt": "2026-06-02T19:30:33+00:00",
           "replyCount": 6
         },
         {
           "id": "1565653145168639",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=1565653145168639",
+          "url": "https://www.facebook.com/NASA/posts/pfbid0ozvoLoowKvCysA2CZkXKTAVCRLoVECcrC7W8eQbQYvxBNKMCQAzV8baSgDa8t5Hol?comment_id=1565653145168639",
           "text": "You had me at Roman",
           "author": "Mike Harwick",
-          "authorUrl": null,
-          "authorAvatarUrl": "https://scontent-lga3-2.xx.fbcdn.net/v/t39.30808-1/708345356_26903531449306692_9193818255719987217_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x960&ctp=s32x32&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=2R8B2A4Q9v4Q7kNvwHheESe&_nc_oc=Ado8G1jVQjwWgb2472nxoRMNn5LkeqMcZKwsLz5qNU-0zQY9tWdiI8wLPtXcAvOPmVA&_nc_zt=24&_nc_ht=scontent-lga3-2.xx&_nc_gid=NDDEMd-zvvrxDXE4mWGeGg&_nc_ss=72289&oh=00_AQB3bWNAdGchRPoAQwI2PZ4KgajEx526nlG21jxAXMYrRg&oe=6A4DBFD4",
+          "authorAvatarUrl": "https://scontent.fsgn13-1.fna.fbcdn.net/v/t39.30808-1/708345356_26903531449306692_9193818255719987217_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x960&ctp=s32x32&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=TzWa-f368dwQ7kNvwEMPaUV&_nc_oc=AdpdLHrvXy7m167xxHhinaiUIlBoo2jzN-yKoz2hmtKPDhZMy8t4wFudGRE1dEwFuas&_nc_zt=24&_nc_ht=scontent.fsgn13-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQCw8rv9R1a-kXHBcH09C7AdRzTbIlhxf4mps8XzaYwIlQ&oe=6A6C1254",
           "likeCount": 3,
-          "publishedAt": "2026-06-03T12:30:24.000Z",
-          "replyCount": 0
-        },
-        {
-          "id": "2545567982564356",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=2545567982564356",
-          "text": "For those confused about whom this was named after. Nancy Grace Roman (May 16, 1925 – December 25, 2018) was an American astronomer who made important contributions to stellar classification and stellar motions. The first female executive at NASA, Roman served as NASA's first Chief of Astronomy throughout the 1960s and 1970s, establishing her as one of the \"visionary founders of the US civilian space program\"",
-          "author": "Michael Johnson",
-          "authorUrl": null,
-          "authorAvatarUrl": "https://scontent-lga3-2.xx.fbcdn.net/v/t39.30808-1/715464960_1534487678342523_3205477696229619791_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1200x1200&ctp=s32x32&_nc_cat=101&ccb=1-7&_nc_sid=e99d92&_nc_ohc=rlfUfVuSX3AQ7kNvwHGCZZY&_nc_oc=AdqibTW46-J6jDQycx21xiQpJ9PR5Hoc6clsgkWjUykXDJ4w0uK0Oqo3XXS7ekmYcz4&_nc_zt=24&_nc_ht=scontent-lga3-2.xx&_nc_gid=NDDEMd-zvvrxDXE4mWGeGg&_nc_ss=72289&oh=00_AQBkIBV0dg_ERT9bl3n7ByAoxhYewIPHmITmvk4m5M0qnQ&oe=6A4DC58B",
-          "likeCount": 5,
-          "publishedAt": "2026-06-05T19:10:38.000Z",
+          "publishedAt": "2026-06-03T12:30:24+00:00",
           "replyCount": 0
         },
         {
           "id": "3207368056140091",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=3207368056140091",
+          "url": "https://www.facebook.com/NASA/posts/pfbid0ozvoLoowKvCysA2CZkXKTAVCRLoVECcrC7W8eQbQYvxBNKMCQAzV8baSgDa8t5Hol?comment_id=3207368056140091",
           "text": "This is the era of space initiatives. 👏",
           "author": "Megan Kelly",
-          "authorUrl": null,
-          "authorAvatarUrl": "https://scontent-lga3-3.xx.fbcdn.net/v/t39.30808-1/699650025_27974478592140854_2536163107065285396_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1536x1539&ctp=s32x32&_nc_cat=108&ccb=1-7&_nc_sid=e99d92&_nc_ohc=tbqyy3KAvYEQ7kNvwHlS58I&_nc_oc=AdqNmfmG0DHZcM5qhkRH3gACPM1cJJuatbfKW3OAq0s8ZWOsSUHPawkrnqIZVWTLhAo&_nc_zt=24&_nc_ht=scontent-lga3-3.xx&_nc_gid=NDDEMd-zvvrxDXE4mWGeGg&_nc_ss=72289&oh=00_AQA-auJ1P7MpdCJxQQLZPoNHlQWxCqgtMjZ0pp-u7cFJxA&oe=6A4DB689",
+          "authorAvatarUrl": "https://scontent.fsgn13-2.fna.fbcdn.net/v/t39.30808-1/699650025_27974478592140854_2536163107065285396_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1536x1539&ctp=s32x32&_nc_cat=108&ccb=1-7&_nc_sid=e99d92&_nc_ohc=DLdsVhSx314Q7kNvwFPFx_P&_nc_oc=AdoywI2Pu2eRocI1x08wKLm5TPLL1p0dcZv2yCYoyXem_bje8s-ShUWiB9XjGXJ4DjY&_nc_zt=24&_nc_ht=scontent.fsgn13-2.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQAx63COUzJwva3qfF26jgiDtZQTS3ztq6nx5_jg4waN-Q&oe=6A6C0909",
           "likeCount": 4,
-          "publishedAt": "2026-06-03T13:15:11.000Z",
+          "publishedAt": "2026-06-03T13:15:11+00:00",
+          "replyCount": 0
+        },
+        {
+          "id": "2545567982564356",
+          "url": "https://www.facebook.com/NASA/posts/pfbid0ozvoLoowKvCysA2CZkXKTAVCRLoVECcrC7W8eQbQYvxBNKMCQAzV8baSgDa8t5Hol?comment_id=2545567982564356",
+          "text": "For those confused about whom this was named after. Nancy Grace Roman (May 16, 1925 – December 25, 2018) was an American astronomer who made important contributions to stellar classification and stellar motions. The first female executive at NASA, Roman served as NASA's first Chief of Astronomy throughout the 1960s and 1970s, establishing her as one of the \"visionary founders of the US civilian space program\"",
+          "author": "Michael Johnson",
+          "authorAvatarUrl": "https://scontent.fsgn4-1.fna.fbcdn.net/v/t39.30808-1/715464960_1534487678342523_3205477696229619791_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1200x1200&ctp=s32x32&_nc_cat=101&ccb=1-7&_nc_sid=e99d92&_nc_ohc=CJj1uW-M8GwQ7kNvwEtSEkj&_nc_oc=AdqxXLSgPh7vA23eS3lVfR0fcPu5vszVJRfA1BgRw1bFuOuA89aeo3wyIsF17qX4b3g&_nc_zt=24&_nc_ht=scontent.fsgn4-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQCKv92W24kCoyyAyQ5pt-ZgDDeNu4IqJ9g6RbFvJd9qfQ&oe=6A6C180B",
+          "likeCount": 5,
+          "publishedAt": "2026-06-05T19:10:38+00:00",
           "replyCount": 0
         },
         {
           "id": "1009195248315125",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=1009195248315125",
+          "url": "https://www.facebook.com/NASA/posts/pfbid0ozvoLoowKvCysA2CZkXKTAVCRLoVECcrC7W8eQbQYvxBNKMCQAzV8baSgDa8t5Hol?comment_id=1009195248315125",
           "text": "Anxious to see what the new scope sees.",
           "author": "Richard Alexandrowich",
           "authorUrl": "https://www.facebook.com/richard.alexandrowich.1",
-          "authorAvatarUrl": "https://scontent-lga3-2.xx.fbcdn.net/v/t39.30808-1/449687176_1970527473417419_1705720154636413099_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x957&ctp=s32x32&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=25mjsrWPI24Q7kNvwHK9wMZ&_nc_oc=Adq0tkmzElFjiLVTBzfbc39TkfQ2vS42BV89O2aUBf7ryYLH6vPJgQxvHhTYw7FlyKY&_nc_zt=24&_nc_ht=scontent-lga3-2.xx&_nc_gid=NDDEMd-zvvrxDXE4mWGeGg&_nc_ss=72289&oh=00_AQBTQe7yogIemboS_dtKxWbR_nslC8CcrxVMtBuvQt3CFw&oe=6A4DA704",
+          "authorAvatarUrl": "https://scontent.fsgn13-1.fna.fbcdn.net/v/t39.30808-1/449687176_1970527473417419_1705720154636413099_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x957&ctp=s32x32&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=bCu8aO2reIoQ7kNvwHtIyP4&_nc_oc=Ado8EmORytYJyvsPBBz8rKe1pliFYfaZhRWBiXTfIt1RBjFh-vpPtTWvhICw9rQTuUg&_nc_zt=24&_nc_ht=scontent.fsgn13-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQBA1O-NdA_rsrXqOjaw5n4Nvuuk27jRjIyAC9M0AgwvyQ&oe=6A6C31C4",
           "likeCount": 3,
-          "publishedAt": "2026-06-03T02:04:15.000Z",
+          "publishedAt": "2026-06-03T02:04:15+00:00",
           "replyCount": 7
-        },
-        {
-          "id": "1002105058890776",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=1002105058890776",
-          "text": "Congratulations, NASA! 👏👏🔭 Wishing great success to the Nancy Grace Roman Space Telescope mission. We look forward to new discoveries that will help us better understand the universe. The future of space exploration is truly inspiring. ✨",
-          "author": "Shaafici Yuusuf Isaxaaq",
-          "authorUrl": "https://www.facebook.com/people/Shaafici-Yuusuf-Isaxaaq/pfbid0eESdgWovgikQ6hqSpGiRxqw2BGbyS5LoqsUmZe9X8f6ywW7spjtzZXXn4na9Cuwxl/",
-          "authorAvatarUrl": "https://scontent-lga3-3.xx.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png&cstp=mx2048x2048&ctp=s32x32&_nc_cat=1&ccb=1-7&_nc_sid=136b72&_nc_ohc=ysO1ZV-VvVsQ7kNvwE9oW_3&_nc_oc=AdrK4s32AKaoPwwp8lstFlPFeOeirKgnzORz--SMgE4OSUmI_E1LELs0S0e_QJAmVEU&_nc_zt=24&_nc_ht=scontent-lga3-3.xx&_nc_ss=72289&oh=00_AQAnmtdghSEDny9DGLjfGj_X4oWovIhrP54zDXY2LSc9Dg&oe=6A6F3DFA",
-          "likeCount": 3,
-          "publishedAt": "2026-06-02T19:59:30.000Z",
-          "replyCount": 0
-        },
-        {
-          "id": "2588022801599649",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=2588022801599649",
-          "text": "Best Wishes: NASA :)",
-          "author": "Bharat Gupte",
-          "authorUrl": null,
-          "authorAvatarUrl": "https://scontent-lga3-1.xx.fbcdn.net/v/t39.30808-1/369676819_3101434540166215_6134137925538258367_n.jpg?stp=c0.0.1032.1032a_cp0_dst-jpg_tt6&cstp=mx1032x1032&ctp=s32x32&_nc_cat=109&ccb=1-7&_nc_sid=e99d92&_nc_ohc=PzpCGM6kwXUQ7kNvwE4AIn9&_nc_oc=Adr3e1QR4GSsMcJAsvqtq4VgJZHTwPZ7W4TYkOcjpqHv198arYj7xT875z_HKWhQujI&_nc_zt=24&_nc_ht=scontent-lga3-1.xx&_nc_gid=NDDEMd-zvvrxDXE4mWGeGg&_nc_ss=72289&oh=00_AQAVYVePWcvn9nlWqQLpPvwEADo1USrqj-2SHhc5bhcYPQ&oe=6A4DBFB9",
-          "likeCount": 4,
-          "publishedAt": "2026-06-02T19:13:18.000Z",
-          "replyCount": 0
-        },
-        {
-          "id": "2065327014385245",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=2065327014385245",
-          "text": "So excited!!!!!",
-          "author": "Omar Velez Cruz",
-          "authorUrl": null,
-          "authorAvatarUrl": "https://scontent-lga3-3.xx.fbcdn.net/v/t39.30808-1/666204534_10165870909217323_1446294414061896309_n.jpg?stp=cp6_dst-jpg_tt6&cstp=mx2048x2048&ctp=s32x32&_nc_cat=106&ccb=1-7&_nc_sid=1d2534&_nc_ohc=mgWAFgIhgDgQ7kNvwEuVTtX&_nc_oc=AdpUa268YE1IiPjS-Bn6SzYjYaN5DmPUOfkSX0h6QeaGnHUPFqi6oCWktBOUPkMzMzM&_nc_zt=24&_nc_ht=scontent-lga3-3.xx&_nc_gid=NDDEMd-zvvrxDXE4mWGeGg&_nc_ss=72289&oh=00_AQAnLQocPxNf2ACuG12mfpz52hALkCYy8EZhoHzZ6mAFMA&oe=6A4D9AA2",
-          "likeCount": 5,
-          "publishedAt": "2026-06-02T19:14:01.000Z",
-          "replyCount": 0
-        },
-        {
-          "id": "1223091789783822",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=1223091789783822",
-          "text": "Superb! ⭐✨ ⭐",
-          "author": "Joshua Furchner",
-          "authorUrl": "https://www.facebook.com/joshua.furchner",
-          "authorAvatarUrl": "https://scontent-lga3-2.xx.fbcdn.net/v/t39.30808-1/736413473_10167616880043852_1821425717597838096_n.jpg?stp=c0.120.720.720a_cp0_dst-jpg_tt6&cstp=mx720x720&ctp=s32x32&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=ScLRyGVqaUAQ7kNvwEpJ-mK&_nc_oc=AdrKAa9eO7Kg0Uk7DDYONGeCAfPf6u8o3eGBqq-XJ-tq1OrWy1zSS-ryTieYjZBKlVc&_nc_zt=24&_nc_ht=scontent-lga3-2.xx&_nc_gid=NDDEMd-zvvrxDXE4mWGeGg&_nc_ss=72289&oh=00_AQAguYRPu1UIE2Wws3QfsPYb81BS6LbOmgIi234lEYLjug&oe=6A4DADD2",
-          "likeCount": 6,
-          "publishedAt": "2026-06-02T20:58:50.000Z",
-          "replyCount": 0
-        },
-        {
-          "id": "974877578687126",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=974877578687126",
-          "text": "Cool 😎.",
-          "author": "Paul Smith",
-          "authorUrl": null,
-          "authorAvatarUrl": "https://scontent-lga3-3.xx.fbcdn.net/v/t39.30808-1/514400895_3128556083960795_3070587807461343248_n.jpg?stp=c0.0.183.183a_cp0_dst-jpg_tt6&cstp=mx183x183&ctp=s32x32&_nc_cat=106&ccb=1-7&_nc_sid=e99d92&_nc_ohc=c4n99BSyADIQ7kNvwGpocIU&_nc_oc=AdrkDzcDhh3A4_ccotuY4dZ4Xq0U2Snn5WQ4gXOCRYI6VZJIb6syk3xe1T3ego20KKc&_nc_zt=24&_nc_ht=scontent-lga3-3.xx&_nc_gid=NDDEMd-zvvrxDXE4mWGeGg&_nc_ss=72289&oh=00_AQBrifFxt3CWk7galuN8AtxK9sEiJ7ovYhojfLGMrsJ-MA&oe=6A4DC6EA",
-          "likeCount": 2,
-          "publishedAt": "2026-06-04T21:54:48.000Z",
-          "replyCount": 0
         }
       ]
-    },
-    "error": null
+    }
   },
   "facebook-comment-replies": {
     "ok": true,
     "status": 200,
-    "credits": null,
+    "credits": 2,
     "data": {
       "platform": "facebook",
       "url": "https://www.facebook.com/NASA/posts/pfbid02skzNsrLf5atYZfzvzHAK9gHwDnZC5u4pDZMLQ1u3iJmfoA8tNsGpT7Uj6WPs6K3Rl",
-      "commentId": "Y29tbWVudDoxNTQxNzUzNTIzOTg2Njg1XzEwMDkxOTUyNDgzMTUxMjU=",
-      "totalReturned": 6,
+      "commentId": "1009195248315125",
+      "totalReturned": 1,
       "replies": [
         {
           "id": "1042165238137511",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=1009195248315125&reply_comment_id=1042165238137511",
+          "url": "https://www.facebook.com/NASA/posts/pfbid0ozvoLoowKvCysA2CZkXKTAVCRLoVECcrC7W8eQbQYvxBNKMCQAzV8baSgDa8t5Hol?comment_id=1009195248315125&reply_comment_id=1042165238137511",
           "text": "Richard Alexandrowich why?",
           "author": "Lachlan Cryer",
-          "authorUrl": "https://www.facebook.com/people/Lachlan-Cryer/pfbid037Fw8AwytJZwABgAyKqXvg6n6HsH5EBh31CJy2LqYKGFZP4gGpqDdgrGSepb5JA2Dl/",
-          "authorAvatarUrl": "https://scontent-ord5-1.xx.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png&cstp=mx2048x2048&ctp=s32x32&_nc_cat=1&ccb=1-7&_nc_sid=136b72&_nc_ohc=ysO1ZV-VvVsQ7kNvwGQat2w&_nc_oc=AdqyOpt7sgxS1GOXfVnh4AGru5ZrcQBOdLVPCIU95LbKWTvSKm-KRt8hbQu7aAF0xIU&_nc_zt=24&_nc_ht=scontent-ord5-1.xx&_nc_ss=72289&oh=00_AQAvHcbCnbHot7JhZP-1RRO-OZMlN7tEnwZ-5LTb8dTk7A&oe=6A6F3DFA",
+          "authorUrl": "https://www.facebook.com/people/Lachlan-Cryer/pfbid0375uAsq1qky7hMLXQqGc7jjTkqBfPXimoWiegNFtifpGUVNAbGSCJUfTuE2pFLUbrl/",
+          "authorAvatarUrl": "https://scontent.fgua9-1.fna.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png&cstp=mx2048x2048&ctp=s32x32&_nc_cat=1&ccb=1-7&_nc_sid=136b72&_nc_ohc=YYd_HsBfn6kQ7kNvwExKFZn&_nc_oc=AdqMYmSyRUE01D1xr5lyzA2HCr-qEDfBccvNnTFqTcwN9d6sZq2e9gUxP6FqN2yBlOg&_nc_zt=24&_nc_ht=scontent.fgua9-1.fna&_nc_ss=7b289&oh=00_AQC7tyTMaBqs0n4gldLDuXTonuW4u8g9hyfiQqxHLmbKJA&oe=6A8DC8BA",
           "likeCount": 1,
-          "publishedAt": "2026-06-03T07:43:21.000Z"
-        },
-        {
-          "id": "862001559702967",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=1009195248315125&reply_comment_id=862001559702967",
-          "text": "Lachlan Cryer astronomy opens up the mind.  Aren't you curious about our universe?  That's a bizarre answer.  Why?  Be realistic.",
-          "author": "Richard Alexandrowich",
-          "authorUrl": "https://www.facebook.com/richard.alexandrowich.1",
-          "authorAvatarUrl": "https://scontent-ord5-3.xx.fbcdn.net/v/t39.30808-1/449687176_1970527473417419_1705720154636413099_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x957&ctp=s32x32&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=25mjsrWPI24Q7kNvwFACZDA&_nc_oc=Ado-GFX2ImuxH9sxcjtiak-EgsIIcUVqX_E87VQYTMagMKpO5WpzpUjq4p-iXH7zwR8&_nc_zt=24&_nc_ht=scontent-ord5-3.xx&_nc_gid=NIIM6fx5SgvnG1k9kta5zw&_nc_ss=72289&oh=00_AQAXfWvzNWOEM2rph99sGQLkJK2GRuIAitSXOvIsvSX1IQ&oe=6A4DA704",
-          "likeCount": 4,
-          "publishedAt": "2026-06-03T08:28:16.000Z"
-        },
-        {
-          "id": "2085300562423547",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=1009195248315125&reply_comment_id=2085300562423547",
-          "text": "Richard Alexandrowich yeah cross dimensional communication tech done the trick for me I bet nasa wish they had it",
-          "author": "Lachlan Cryer",
-          "authorUrl": "https://www.facebook.com/people/Lachlan-Cryer/pfbid037Fw8AwytJZwABgAyKqXvg6n6HsH5EBh31CJy2LqYKGFZP4gGpqDdgrGSepb5JA2Dl/",
-          "authorAvatarUrl": "https://scontent-ord5-1.xx.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png&cstp=mx2048x2048&ctp=s32x32&_nc_cat=1&ccb=1-7&_nc_sid=136b72&_nc_ohc=ysO1ZV-VvVsQ7kNvwGQat2w&_nc_oc=AdqyOpt7sgxS1GOXfVnh4AGru5ZrcQBOdLVPCIU95LbKWTvSKm-KRt8hbQu7aAF0xIU&_nc_zt=24&_nc_ht=scontent-ord5-1.xx&_nc_ss=72289&oh=00_AQAvHcbCnbHot7JhZP-1RRO-OZMlN7tEnwZ-5LTb8dTk7A&oe=6A6F3DFA",
-          "likeCount": 1,
-          "publishedAt": "2026-06-03T08:33:50.000Z"
-        },
-        {
-          "id": "1294286436201104",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=1009195248315125&reply_comment_id=1294286436201104",
-          "text": "Lachlan Cryer I didn't understand a word you said.",
-          "author": "Richard Alexandrowich",
-          "authorUrl": "https://www.facebook.com/richard.alexandrowich.1",
-          "authorAvatarUrl": "https://scontent-ord5-3.xx.fbcdn.net/v/t39.30808-1/449687176_1970527473417419_1705720154636413099_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x957&ctp=s32x32&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=25mjsrWPI24Q7kNvwFACZDA&_nc_oc=Ado-GFX2ImuxH9sxcjtiak-EgsIIcUVqX_E87VQYTMagMKpO5WpzpUjq4p-iXH7zwR8&_nc_zt=24&_nc_ht=scontent-ord5-3.xx&_nc_gid=NIIM6fx5SgvnG1k9kta5zw&_nc_ss=72289&oh=00_AQAXfWvzNWOEM2rph99sGQLkJK2GRuIAitSXOvIsvSX1IQ&oe=6A4DA704",
-          "likeCount": 2,
-          "publishedAt": "2026-06-03T09:13:27.000Z"
-        },
-        {
-          "id": "1373392837992731",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=1009195248315125&reply_comment_id=1373392837992731",
-          "text": "Richard Alexandrowich",
-          "author": "Lachlan Cryer",
-          "authorUrl": "https://www.facebook.com/people/Lachlan-Cryer/pfbid037Fw8AwytJZwABgAyKqXvg6n6HsH5EBh31CJy2LqYKGFZP4gGpqDdgrGSepb5JA2Dl/",
-          "authorAvatarUrl": "https://scontent-ord5-1.xx.fbcdn.net/v/t1.30497-1/453178253_471506465671661_2781666950760530985_n.png?stp=cp0_dst-png&cstp=mx2048x2048&ctp=s32x32&_nc_cat=1&ccb=1-7&_nc_sid=136b72&_nc_ohc=ysO1ZV-VvVsQ7kNvwGQat2w&_nc_oc=AdqyOpt7sgxS1GOXfVnh4AGru5ZrcQBOdLVPCIU95LbKWTvSKm-KRt8hbQu7aAF0xIU&_nc_zt=24&_nc_ht=scontent-ord5-1.xx&_nc_ss=72289&oh=00_AQAvHcbCnbHot7JhZP-1RRO-OZMlN7tEnwZ-5LTb8dTk7A&oe=6A6F3DFA",
-          "likeCount": 1,
-          "publishedAt": "2026-06-03T14:45:35.000Z"
-        },
-        {
-          "id": "1194713802729629",
-          "url": "https://www.facebook.com/NASA/posts/pfbid02sYSwFx8buCZPUWBSu4R21XWs6dbEM8aZmq4m4pJXi1MgGED8ZEVbh2gtwKen47GLl?comment_id=1009195248315125&reply_comment_id=1194713802729629",
-          "text": "Lachlan Cryer   Someone is off their meds. 🙄",
-          "author": "Don Magarian",
-          "authorUrl": null,
-          "authorAvatarUrl": "https://scontent-ord5-3.xx.fbcdn.net/v/t39.30808-1/662882588_26721162167509050_7868451136913084385_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1000x1000&ctp=s32x32&_nc_cat=110&ccb=1-7&_nc_sid=e99d92&_nc_ohc=uzUzY8UwBjcQ7kNvwF_ym_D&_nc_oc=AdquHUcmiHEPV6M_cCCZ3HZu83s088NbiPEQ64Y034qFJR0jHfi-FgCnJRWt4f4OX0Y&_nc_zt=24&_nc_ht=scontent-ord5-3.xx&_nc_gid=NIIM6fx5SgvnG1k9kta5zw&_nc_ss=72289&oh=00_AQC-yUmeKeO3Cr1QPfiFJhgoArVfH5xXgJAhSZHgA5EnLg&oe=6A4DCC2D",
-          "likeCount": 1,
-          "publishedAt": "2026-06-06T07:08:31.000Z"
+          "publishedAt": "2026-06-03T07:43:21+00:00"
         }
       ]
-    },
-    "error": null
+    }
   },
   "youtube-search": {
     "ok": true,
@@ -19322,75 +19211,75 @@
   "rumble-comments": {
     "ok": true,
     "status": 200,
-    "credits": null,
+    "credits": 2,
     "data": {
       "url": "https://rumble.com/v7cv2cc-now-i-can-finally-talk-about-it-ep.-2555-07172026.html",
       "totalReturned": 5,
       "comments": [
         {
           "platform": "rumble",
-          "id": "614574144",
-          "text": "I live in The Keystone State of Morons.",
+          "id": "614445110",
+          "text": "Ballot harvesting at nursing homes is a prime reason the Dems fight against election integrity",
           "author": {
-            "name": "lindafosselman",
-            "url": "https://rumble.com/user/lindafosselman",
+            "name": "KMac170",
+            "url": "https://rumble.com/user/KMac170",
+            "verified": false
+          },
+          "likes": 216,
+          "replyCount": 14,
+          "createdAt": "Friday, July 17, 2026 08:33 AM -04"
+        },
+        {
+          "platform": "rumble",
+          "id": "614648184",
+          "text": "And guess how that aid votes 🙄",
+          "author": {
+            "name": "Bonniekost",
+            "url": "https://rumble.com/user/Bonniekost",
+            "verified": false
+          },
+          "likes": 0,
+          "replyCount": 1,
+          "createdAt": "Monday, July 20, 2026 07:48 PM -04"
+        },
+        {
+          "platform": "rumble",
+          "id": "614672888",
+          "text": "The aides and/or the house mother often overseeing  5  of these homes housing 3 people.  Every one of their votes cancels out a citizens vote.  This is not right and it was added into \"The No Child Left Behind\" legislation.",
+          "author": {
+            "name": "connier1014",
+            "url": "https://rumble.com/user/connier1014",
             "verified": false
           },
           "likes": 0,
           "replyCount": 0,
-          "createdAt": "2026-07-19T17:37:54+00:00"
+          "createdAt": "Tuesday, July 21, 2026 07:11 AM -04"
         },
         {
           "platform": "rumble",
-          "id": "614573008",
-          "text": "Dan, I remember you speaking of this a long time ago. Am I wrong?",
+          "id": "614463480",
+          "text": "yep, I worked on a campaign in TX & they(democrats) were using kids to go into nursing homes because they thought that if they were caught, the government wouldn't charge minors for voter fraud. They were paying homeless ppl to vote",
           "author": {
-            "name": "holly1217",
-            "url": "https://rumble.com/user/holly1217",
+            "name": "Samoanqueen",
+            "url": "https://rumble.com/user/Samoanqueen",
             "verified": false
           },
-          "likes": 0,
+          "likes": 18,
           "replyCount": 0,
-          "createdAt": "2026-07-19T17:14:39+00:00"
+          "createdAt": "Friday, July 17, 2026 01:41 PM -04"
         },
         {
           "platform": "rumble",
-          "id": "614571510",
-          "text": "So...when are you calling FuXNews out for burying the lead Dan??  All weekend and NOT ONE WORD any of the intel that Trump released on FuXNews.  So the Lefty media is full court press to discredit this data, and FuXNews SILENT...confirming what a lot of us already knew...FuXNews is a part of the deep state.  They are controlled opposition.",
+          "id": "614477216",
+          "text": "Don’t forget the paid ballot box stuffers paid by Zuckerberg bucks… That were caught on film and Geo tracked",
           "author": {
-            "name": "faamecanic",
-            "url": "https://rumble.com/user/faamecanic",
-            "verified": true
-          },
-          "likes": 0,
-          "replyCount": 0,
-          "createdAt": "2026-07-19T16:41:22+00:00"
-        },
-        {
-          "platform": "rumble",
-          "id": "614570684",
-          "text": "If Trump does not use that speech and that evidence, particularly the Democratic states who refused to turn over their information, as a Segway into getting rid of the filibuster next week and passing the SAVE act, he’s missing a massive opportunity. I hope he’s too smart for that",
-          "author": {
-            "name": "SOC",
-            "url": "https://rumble.com/user/SOC",
+            "name": "ThHess",
+            "url": "https://rumble.com/user/ThHess",
             "verified": false
           },
-          "likes": 0,
-          "replyCount": 0,
-          "createdAt": "2026-07-19T16:23:49+00:00"
-        },
-        {
-          "platform": "rumble",
-          "id": "614568452",
-          "text": "can you comment on this guy Jack Hinkle?  seems like scum.",
-          "author": {
-            "name": "bhornet",
-            "url": "https://rumble.com/user/bhornet",
-            "verified": false
-          },
-          "likes": 0,
-          "replyCount": 0,
-          "createdAt": "2026-07-19T15:34:24+00:00"
+          "likes": 17,
+          "replyCount": 1,
+          "createdAt": "Friday, July 17, 2026 05:46 PM -04"
         }
       ]
     }
