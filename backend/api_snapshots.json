@@ -17355,63 +17355,78 @@
       "videos": [
         {
           "platform": "twitch",
-          "id": "2822327261",
-          "url": "https://www.twitch.tv/videos/2822327261",
-          "embedUrl": "https://player.twitch.tv/?video=2822327261&parent=captapi.com",
-          "title": "SLAY SQUAD IS READY FOR TWITCH RIVALS",
-          "createdAt": "2026-07-17T18:02:41Z",
-          "durationSeconds": 27603,
-          "views": 252034,
-          "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/ab15105c80354605d662_shroud_317655371096_1784311356//thumb/thumb0-320x180.jpg",
-          "game": "VALORANT"
+          "id": "2827992810",
+          "url": "https://www.twitch.tv/videos/2827992810",
+          "embedUrl": "https://player.twitch.tv/?video=2827992810&parent=captapi.com",
+          "title": "ME N THE GIRLS R GONNA POP OFF IN THIS 100K TWITCH RIVALS",
+          "createdAt": "2026-07-24T17:56:52Z",
+          "durationSeconds": 20988,
+          "views": 185949,
+          "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/c43d1ce993fae5a15f69_shroud_317074350583_1784915807//thumb/thumb0-{width}x{height}.jpg",
+          "game": "VALORANT",
+          "language": "en",
+          "broadcaster": "shroud",
+          "broadcasterProfileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png"
         },
         {
           "platform": "twitch",
-          "id": "2820701541",
-          "url": "https://www.twitch.tv/videos/2820701541",
-          "embedUrl": "https://player.twitch.tv/?video=2820701541&parent=captapi.com",
-          "title": "playing the WORST RE to see if it gets BETTER with my BROY in CRIME (CRIMINALS)",
-          "createdAt": "2026-07-15T17:06:14Z",
-          "durationSeconds": 20459,
-          "views": 159880,
-          "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/d2db6f270365e5d9cdb8_shroud_319522039392_1784135169//thumb/thumb0-320x180.jpg",
-          "game": "Resident Evil 6"
+          "id": "2827192082",
+          "url": "https://www.twitch.tv/videos/2827192082",
+          "embedUrl": "https://player.twitch.tv/?video=2827192082&parent=captapi.com",
+          "title": "HALO CE REMAKE! TIME TO CO-OP LEGENDARY AND GET OUR MEAT BEAT",
+          "createdAt": "2026-07-23T18:19:36Z",
+          "durationSeconds": 20254,
+          "views": 174697,
+          "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/43c3501090df2005acdf_shroud_319635395040_1784830770//thumb/thumb0-{width}x{height}.jpg",
+          "game": "Halo: Campaign Evolved",
+          "language": "en",
+          "broadcaster": "shroud",
+          "broadcasterProfileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png"
         },
         {
           "platform": "twitch",
-          "id": "2819944258",
-          "url": "https://www.twitch.tv/videos/2819944258",
-          "embedUrl": "https://player.twitch.tv/?video=2819944258&parent=captapi.com",
-          "title": "beating old school games with my broy",
-          "createdAt": "2026-07-14T17:47:00Z",
-          "durationSeconds": 21466,
-          "views": 163663,
-          "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/d44528ef11380710aeb9_shroud_317000664311_1784051215//thumb/thumb0-320x180.jpg",
-          "game": "Resident Evil 5"
+          "id": "2827054673",
+          "url": "https://www.twitch.tv/videos/2827054673",
+          "embedUrl": "https://player.twitch.tv/?video=2827054673&parent=captapi.com",
+          "title": "HALO CE REMAKE! TIME TO CO-OP LEGENDARY AND GET OUR MEAT BEAT",
+          "createdAt": "2026-07-23T14:57:52Z",
+          "durationSeconds": 12076,
+          "views": 163661,
+          "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/6c4ca61b9211a873ec53_shroud_319633557216_1784818667//thumb/thumb0-{width}x{height}.jpg",
+          "game": "Halo: Campaign Evolved",
+          "language": "en",
+          "broadcaster": "shroud",
+          "broadcasterProfileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png"
         },
         {
           "platform": "twitch",
-          "id": "2819140044",
-          "url": "https://www.twitch.tv/videos/2819140044",
-          "embedUrl": "https://player.twitch.tv/?video=2819140044&parent=captapi.com",
-          "title": "co-op with the first BROY",
-          "createdAt": "2026-07-13T17:29:21Z",
-          "durationSeconds": 21962,
-          "views": 197923,
-          "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/e23cdc24ddcf120f3527_shroud_319426227036_1783963756//thumb/thumb0-320x180.jpg",
-          "game": "Resident Evil 5"
+          "id": "2826283398",
+          "url": "https://www.twitch.tv/videos/2826283398",
+          "embedUrl": "https://player.twitch.tv/?video=2826283398&parent=captapi.com",
+          "title": "BEATING LEGENDARY INFINITE CO-OP BEFORE HALO CE REMAKE TMRW",
+          "createdAt": "2026-07-22T16:18:24Z",
+          "durationSeconds": 15014,
+          "views": 116325,
+          "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2vi6trrdongqn/52e9715af5a3a208de07_shroud_319620010720_1784737099//thumb/thumb0-{width}x{height}.jpg",
+          "game": "Halo Infinite",
+          "language": "en",
+          "broadcaster": "shroud",
+          "broadcasterProfileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png"
         },
         {
           "platform": "twitch",
-          "id": "2817597094",
-          "url": "https://www.twitch.tv/videos/2817597094",
-          "embedUrl": "https://player.twitch.tv/?video=2817597094&parent=captapi.com",
-          "title": "beating this game again for my 19 year old self",
-          "createdAt": "2026-07-11T17:52:37Z",
-          "durationSeconds": 18457,
-          "views": 183579,
-          "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/ecda5af60c31e1859242_shroud_318433704663_1783792352//thumb/thumb0-320x180.jpg",
-          "game": "Assassin's Creed Black Flag Resynced"
+          "id": "2824697770",
+          "url": "https://www.twitch.tv/videos/2824697770",
+          "embedUrl": "https://player.twitch.tv/?video=2824697770&parent=captapi.com",
+          "title": "LEGENDARY CAMPAIGN BEFORE HALO 1 REMAKE with my bROY",
+          "createdAt": "2026-07-20T17:20:23Z",
+          "durationSeconds": 24019,
+          "views": 238598,
+          "thumbnail": "https://static-cdn.jtvnw.net/cf_vods/d2nvs31859zcd8/08ea9e21bb94f98046e1_shroud_317044416375_1784568018//thumb/thumb0-{width}x{height}.jpg",
+          "game": "Halo Infinite",
+          "language": "en",
+          "broadcaster": "shroud",
+          "broadcasterProfileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/c754eebf-745b-4e0a-814a-10bcaecaabbc-profile_image-300x300.png"
         }
       ]
     }
@@ -18820,346 +18835,112 @@
       "channelUrl": "https://kick.com/xqc",
       "clip": {
         "platform": "kick",
-        "id": "clip_01KXS6PSXRPRM5W50HCB6MM7C3",
-        "url": "https://kick.com/xqc/clips/clip_01KXS6PSXRPRM5W50HCB6MM7C3",
-        "title": "rivals",
-        "createdAt": "2026-07-17T23:31:25.591822Z",
-        "durationSeconds": 55,
-        "views": 3,
+        "id": "clip_01KYEQQZ850JYNJHP3ZEQCP2JH",
+        "url": "https://kick.com/xqc/clips/clip_01KYEQQZ850JYNJHP3ZEQCP2JH",
+        "title": ":-)",
+        "createdAt": "2026-07-26T08:13:34.458304Z",
+        "durationSeconds": 180,
+        "views": 6,
         "likes": 0,
-        "thumbnailUrl": "https://clips.kick.com/clips/39/clip_01KXS6PSXRPRM5W50HCB6MM7C3/thumbnail.webp",
-        "videoUrl": "https://clips.kick.com/clips/39/clip_01KXS6PSXRPRM5W50HCB6MM7C3/playlist.m3u8",
+        "thumbnailUrl": "https://clips.kick.com/clips/67/clip_01KYEQQZ850JYNJHP3ZEQCP2JH/thumbnail.webp",
+        "videoUrl": "https://clips.kick.com/clips/67/clip_01KYEQQZ850JYNJHP3ZEQCP2JH/playlist.m3u8",
         "category": "Just Chatting",
         "channel": {
           "username": "xqc",
           "name": "xQc",
           "url": "https://kick.com/xqc"
-        },
-        "raw": {
-          "id": "clip_01KXS6PSXRPRM5W50HCB6MM7C3",
-          "livestream_id": "117758226",
-          "category_id": "15",
-          "channel_id": 668,
-          "user_id": 61475,
-          "title": "rivals",
-          "clip_url": "https://clips.kick.com/clips/39/clip_01KXS6PSXRPRM5W50HCB6MM7C3/playlist.m3u8",
-          "thumbnail_url": "https://clips.kick.com/clips/39/clip_01KXS6PSXRPRM5W50HCB6MM7C3/thumbnail.webp",
-          "privacy": "public",
-          "likes": 0,
-          "liked": false,
-          "views": 3,
-          "duration": 55,
-          "started_at": "0001-01-01T00:00:00Z",
-          "created_at": "2026-07-17T23:31:25.591822Z",
-          "vod_starts_at": 0,
-          "is_mature": false,
-          "video_url": "https://clips.kick.com/clips/39/clip_01KXS6PSXRPRM5W50HCB6MM7C3/playlist.m3u8",
-          "view_count": 3,
-          "likes_count": 0,
-          "category": {
-            "id": 15,
-            "name": "Just Chatting",
-            "slug": "just-chatting",
-            "parent_category": "irl"
-          },
-          "creator": {
-            "id": 61475,
-            "username": "shultz",
-            "slug": "shultz"
-          },
-          "channel": {
-            "id": 668,
-            "username": "xQc",
-            "slug": "xqc",
-            "profile_picture": "https://files.kick.com/images/user/676/profile_image/conversion/151f289a-5bff-4f31-b125-0c54c542519e-thumb.webp"
-          }
         }
       },
-      "totalReturned": 10,
+      "totalReturned": 5,
       "clips": [
         {
           "platform": "kick",
-          "id": "clip_01KXS6PSXRPRM5W50HCB6MM7C3",
-          "url": "https://kick.com/xqc/clips/clip_01KXS6PSXRPRM5W50HCB6MM7C3",
-          "title": "rivals",
-          "createdAt": "2026-07-17T23:31:25.591822Z",
-          "durationSeconds": 55,
-          "views": 3,
-          "likes": 0,
-          "thumbnailUrl": "https://clips.kick.com/clips/39/clip_01KXS6PSXRPRM5W50HCB6MM7C3/thumbnail.webp",
-          "videoUrl": "https://clips.kick.com/clips/39/clip_01KXS6PSXRPRM5W50HCB6MM7C3/playlist.m3u8",
-          "category": "Just Chatting",
-          "channel": {
-            "username": "xqc",
-            "name": "xQc",
-            "url": "https://kick.com/xqc"
-          },
-          "raw": {
-            "id": "clip_01KXS6PSXRPRM5W50HCB6MM7C3",
-            "livestream_id": "117758226",
-            "category_id": "15",
-            "channel_id": 668,
-            "user_id": 61475,
-            "title": "rivals",
-            "clip_url": "https://clips.kick.com/clips/39/clip_01KXS6PSXRPRM5W50HCB6MM7C3/playlist.m3u8",
-            "thumbnail_url": "https://clips.kick.com/clips/39/clip_01KXS6PSXRPRM5W50HCB6MM7C3/thumbnail.webp",
-            "privacy": "public",
-            "likes": 0,
-            "liked": false,
-            "views": 3,
-            "duration": 55,
-            "started_at": "0001-01-01T00:00:00Z",
-            "created_at": "2026-07-17T23:31:25.591822Z",
-            "vod_starts_at": 0,
-            "is_mature": false,
-            "video_url": "https://clips.kick.com/clips/39/clip_01KXS6PSXRPRM5W50HCB6MM7C3/playlist.m3u8",
-            "view_count": 3,
-            "likes_count": 0,
-            "category": {
-              "id": 15,
-              "name": "Just Chatting",
-              "slug": "just-chatting",
-              "parent_category": "irl"
-            },
-            "creator": {
-              "id": 61475,
-              "username": "shultz",
-              "slug": "shultz"
-            },
-            "channel": {
-              "id": 668,
-              "username": "xQc",
-              "slug": "xqc",
-              "profile_picture": "https://files.kick.com/images/user/676/profile_image/conversion/151f289a-5bff-4f31-b125-0c54c542519e-thumb.webp"
-            }
-          }
-        },
-        {
-          "platform": "kick",
-          "id": "clip_01KXS6G3FACR646214FTMEQ894",
-          "url": "https://kick.com/xqc/clips/clip_01KXS6G3FACR646214FTMEQ894",
-          "title": "fortnite",
-          "createdAt": "2026-07-17T23:27:46.41867Z",
-          "durationSeconds": 34,
-          "views": null,
-          "likes": 0,
-          "thumbnailUrl": "https://clips.kick.com/clips/00/clip_01KXS6G3FACR646214FTMEQ894/thumbnail.webp",
-          "videoUrl": "https://clips.kick.com/clips/00/clip_01KXS6G3FACR646214FTMEQ894/playlist.m3u8",
-          "category": "Just Chatting",
-          "channel": {
-            "username": "xqc",
-            "name": "xQc",
-            "url": "https://kick.com/xqc"
-          },
-          "raw": {
-            "id": "clip_01KXS6G3FACR646214FTMEQ894",
-            "livestream_id": "117758226",
-            "category_id": "15",
-            "channel_id": 668,
-            "user_id": 61475,
-            "title": "fortnite",
-            "clip_url": "https://clips.kick.com/clips/00/clip_01KXS6G3FACR646214FTMEQ894/playlist.m3u8",
-            "thumbnail_url": "https://clips.kick.com/clips/00/clip_01KXS6G3FACR646214FTMEQ894/thumbnail.webp",
-            "privacy": "public",
-            "likes": 0,
-            "liked": false,
-            "views": 0,
-            "duration": 34,
-            "started_at": "0001-01-01T00:00:00Z",
-            "created_at": "2026-07-17T23:27:46.41867Z",
-            "vod_starts_at": 0,
-            "is_mature": false,
-            "video_url": "https://clips.kick.com/clips/00/clip_01KXS6G3FACR646214FTMEQ894/playlist.m3u8",
-            "view_count": 0,
-            "likes_count": 0,
-            "category": {
-              "id": 15,
-              "name": "Just Chatting",
-              "slug": "just-chatting",
-              "parent_category": "irl"
-            },
-            "creator": {
-              "id": 61475,
-              "username": "shultz",
-              "slug": "shultz"
-            },
-            "channel": {
-              "id": 668,
-              "username": "xQc",
-              "slug": "xqc",
-              "profile_picture": "https://files.kick.com/images/user/676/profile_image/conversion/151f289a-5bff-4f31-b125-0c54c542519e-thumb.webp"
-            }
-          }
-        },
-        {
-          "platform": "kick",
-          "id": "clip_01KXS2ZNZQTDHP1HZM0K53K4PM",
-          "url": "https://kick.com/xqc/clips/clip_01KXS2ZNZQTDHP1HZM0K53K4PM",
-          "title": "l0l",
-          "createdAt": "2026-07-17T22:26:41.266358Z",
-          "durationSeconds": 30,
-          "views": 4,
-          "likes": 0,
-          "thumbnailUrl": "https://clips.kick.com/clips/93/clip_01KXS2ZNZQTDHP1HZM0K53K4PM/thumbnail.webp",
-          "videoUrl": "https://clips.kick.com/clips/93/clip_01KXS2ZNZQTDHP1HZM0K53K4PM/playlist.m3u8",
-          "category": "Just Chatting",
-          "channel": {
-            "username": "xqc",
-            "name": "xQc",
-            "url": "https://kick.com/xqc"
-          },
-          "raw": {
-            "id": "clip_01KXS2ZNZQTDHP1HZM0K53K4PM",
-            "livestream_id": "117758226",
-            "category_id": "15",
-            "channel_id": 668,
-            "user_id": 5114,
-            "title": "l0l",
-            "clip_url": "https://clips.kick.com/clips/93/clip_01KXS2ZNZQTDHP1HZM0K53K4PM/playlist.m3u8",
-            "thumbnail_url": "https://clips.kick.com/clips/93/clip_01KXS2ZNZQTDHP1HZM0K53K4PM/thumbnail.webp",
-            "privacy": "public",
-            "likes": 0,
-            "liked": false,
-            "views": 4,
-            "duration": 30,
-            "started_at": "0001-01-01T00:00:00Z",
-            "created_at": "2026-07-17T22:26:41.266358Z",
-            "vod_starts_at": 0,
-            "is_mature": false,
-            "video_url": "https://clips.kick.com/clips/93/clip_01KXS2ZNZQTDHP1HZM0K53K4PM/playlist.m3u8",
-            "view_count": 4,
-            "likes_count": 0,
-            "category": {
-              "id": 15,
-              "name": "Just Chatting",
-              "slug": "just-chatting",
-              "parent_category": "irl"
-            },
-            "creator": {
-              "id": 5114,
-              "username": "PlebsRepresentative",
-              "slug": "plebsrepresentative"
-            },
-            "channel": {
-              "id": 668,
-              "username": "xQc",
-              "slug": "xqc",
-              "profile_picture": "https://files.kick.com/images/user/676/profile_image/conversion/151f289a-5bff-4f31-b125-0c54c542519e-thumb.webp"
-            }
-          }
-        },
-        {
-          "platform": "kick",
-          "id": "clip_01KXRG7M319NGMD7MPF92XK1VT",
-          "url": "https://kick.com/xqc/clips/clip_01KXRG7M319NGMD7MPF92XK1VT",
-          "title": "hddngdn",
-          "createdAt": "2026-07-17T16:59:50.16294Z",
-          "durationSeconds": 113,
-          "views": 7241,
-          "likes": 0,
-          "thumbnailUrl": "https://clips.kick.com/clips/e8/clip_01KXRG7M319NGMD7MPF92XK1VT/thumbnail.webp",
-          "videoUrl": "https://clips.kick.com/clips/e8/clip_01KXRG7M319NGMD7MPF92XK1VT/playlist.m3u8",
-          "category": "Just Chatting",
-          "channel": {
-            "username": "xqc",
-            "name": "xQc",
-            "url": "https://kick.com/xqc"
-          },
-          "raw": {
-            "id": "clip_01KXRG7M319NGMD7MPF92XK1VT",
-            "livestream_id": "117758226",
-            "category_id": "15",
-            "channel_id": 668,
-            "user_id": 96865912,
-            "title": "hddngdn",
-            "clip_url": "https://clips.kick.com/clips/e8/clip_01KXRG7M319NGMD7MPF92XK1VT/playlist.m3u8",
-            "thumbnail_url": "https://clips.kick.com/clips/e8/clip_01KXRG7M319NGMD7MPF92XK1VT/thumbnail.webp",
-            "privacy": "public",
-            "likes": 0,
-            "liked": false,
-            "views": 7241,
-            "duration": 113,
-            "started_at": "0001-01-01T00:00:00Z",
-            "created_at": "2026-07-17T16:59:50.16294Z",
-            "vod_starts_at": 0,
-            "is_mature": false,
-            "video_url": "https://clips.kick.com/clips/e8/clip_01KXRG7M319NGMD7MPF92XK1VT/playlist.m3u8",
-            "view_count": 7241,
-            "likes_count": 0,
-            "category": {
-              "id": 15,
-              "name": "Just Chatting",
-              "slug": "just-chatting",
-              "parent_category": "irl"
-            },
-            "creator": {
-              "id": 96865912,
-              "username": "plutotrades111",
-              "slug": "plutotrades111"
-            },
-            "channel": {
-              "id": 668,
-              "username": "xQc",
-              "slug": "xqc",
-              "profile_picture": "https://files.kick.com/images/user/676/profile_image/conversion/151f289a-5bff-4f31-b125-0c54c542519e-thumb.webp"
-            }
-          }
-        },
-        {
-          "platform": "kick",
-          "id": "clip_01KXRENKQ23W61PZ65M90RAF0W",
-          "url": "https://kick.com/xqc/clips/clip_01KXRENKQ23W61PZ65M90RAF0W",
-          "title": "XQC - 300K WIN DON VITO",
-          "createdAt": "2026-07-17T16:32:19.154915Z",
-          "durationSeconds": 38,
+          "id": "clip_01KYEQQZ850JYNJHP3ZEQCP2JH",
+          "url": "https://kick.com/xqc/clips/clip_01KYEQQZ850JYNJHP3ZEQCP2JH",
+          "title": ":-)",
+          "createdAt": "2026-07-26T08:13:34.458304Z",
+          "durationSeconds": 180,
           "views": 6,
           "likes": 0,
-          "thumbnailUrl": "https://clips.kick.com/clips/35/clip_01KXRENKQ23W61PZ65M90RAF0W/thumbnail.webp",
-          "videoUrl": "https://clips.kick.com/clips/35/clip_01KXRENKQ23W61PZ65M90RAF0W/playlist.m3u8",
+          "thumbnailUrl": "https://clips.kick.com/clips/67/clip_01KYEQQZ850JYNJHP3ZEQCP2JH/thumbnail.webp",
+          "videoUrl": "https://clips.kick.com/clips/67/clip_01KYEQQZ850JYNJHP3ZEQCP2JH/playlist.m3u8",
           "category": "Just Chatting",
           "channel": {
             "username": "xqc",
             "name": "xQc",
             "url": "https://kick.com/xqc"
-          },
-          "raw": {
-            "id": "clip_01KXRENKQ23W61PZ65M90RAF0W",
-            "livestream_id": "117758226",
-            "category_id": "15",
-            "channel_id": 668,
-            "user_id": 17568,
-            "title": "XQC - 300K WIN DON VITO",
-            "clip_url": "https://clips.kick.com/clips/35/clip_01KXRENKQ23W61PZ65M90RAF0W/playlist.m3u8",
-            "thumbnail_url": "https://clips.kick.com/clips/35/clip_01KXRENKQ23W61PZ65M90RAF0W/thumbnail.webp",
-            "privacy": "public",
-            "likes": 0,
-            "liked": false,
-            "views": 6,
-            "duration": 38,
-            "started_at": "0001-01-01T00:00:00Z",
-            "created_at": "2026-07-17T16:32:19.154915Z",
-            "vod_starts_at": 0,
-            "is_mature": false,
-            "video_url": "https://clips.kick.com/clips/35/clip_01KXRENKQ23W61PZ65M90RAF0W/playlist.m3u8",
-            "view_count": 6,
-            "likes_count": 0,
-            "category": {
-              "id": 15,
-              "name": "Just Chatting",
-              "slug": "just-chatting",
-              "parent_category": "irl"
-            },
-            "creator": {
-              "id": 17568,
-              "username": "eyitsmeava_edxn",
-              "slug": "eyitsmeava-edxn"
-            },
-            "channel": {
-              "id": 668,
-              "username": "xQc",
-              "slug": "xqc",
-              "profile_picture": "https://files.kick.com/images/user/676/profile_image/conversion/151f289a-5bff-4f31-b125-0c54c542519e-thumb.webp"
-            }
+          }
+        },
+        {
+          "platform": "kick",
+          "id": "clip_01KYEQN56SHAPHCZJPGZZ4EPCE",
+          "url": "https://kick.com/xqc/clips/clip_01KYEQN56SHAPHCZJPGZZ4EPCE",
+          "title": ":-)",
+          "createdAt": "2026-07-26T08:12:12.509191Z",
+          "durationSeconds": 180,
+          "views": 1,
+          "likes": 0,
+          "thumbnailUrl": "https://clips.kick.com/clips/79/clip_01KYEQN56SHAPHCZJPGZZ4EPCE/thumbnail.webp",
+          "videoUrl": "https://clips.kick.com/clips/79/clip_01KYEQN56SHAPHCZJPGZZ4EPCE/playlist.m3u8",
+          "category": "Just Chatting",
+          "channel": {
+            "username": "xqc",
+            "name": "xQc",
+            "url": "https://kick.com/xqc"
+          }
+        },
+        {
+          "platform": "kick",
+          "id": "clip_01KYEP9TDDTCX4SEN8Q1HSJRPB",
+          "url": "https://kick.com/xqc/clips/clip_01KYEP9TDDTCX4SEN8Q1HSJRPB",
+          "title": "xqc",
+          "createdAt": "2026-07-26T07:48:33.803946Z",
+          "durationSeconds": 140,
+          "views": 9,
+          "likes": 0,
+          "thumbnailUrl": "https://clips.kick.com/clips/5f/clip_01KYEP9TDDTCX4SEN8Q1HSJRPB/thumbnail.webp",
+          "videoUrl": "https://clips.kick.com/clips/5f/clip_01KYEP9TDDTCX4SEN8Q1HSJRPB/playlist.m3u8",
+          "category": "Just Chatting",
+          "channel": {
+            "username": "xqc",
+            "name": "xQc",
+            "url": "https://kick.com/xqc"
+          }
+        },
+        {
+          "platform": "kick",
+          "id": "clip_01KYEP0H4ZW5YYGRTJHZT0FQZY",
+          "url": "https://kick.com/xqc/clips/clip_01KYEP0H4ZW5YYGRTJHZT0FQZY",
+          "title": "xqc",
+          "createdAt": "2026-07-26T07:43:15.086082Z",
+          "durationSeconds": 146,
+          "views": 4,
+          "likes": 0,
+          "thumbnailUrl": "https://clips.kick.com/clips/af/clip_01KYEP0H4ZW5YYGRTJHZT0FQZY/thumbnail.webp",
+          "videoUrl": "https://clips.kick.com/clips/af/clip_01KYEP0H4ZW5YYGRTJHZT0FQZY/playlist.m3u8",
+          "category": "Just Chatting",
+          "channel": {
+            "username": "xqc",
+            "name": "xQc",
+            "url": "https://kick.com/xqc"
+          }
+        },
+        {
+          "platform": "kick",
+          "id": "clip_01KYEN390NKRFHY0VG5YHV1ATT",
+          "url": "https://kick.com/xqc/clips/clip_01KYEN390NKRFHY0VG5YHV1ATT",
+          "title": "xqc",
+          "createdAt": "2026-07-26T07:27:22.035986Z",
+          "durationSeconds": 99,
+          "views": 4,
+          "likes": 0,
+          "thumbnailUrl": "https://clips.kick.com/clips/6e/clip_01KYEN390NKRFHY0VG5YHV1ATT/thumbnail.webp",
+          "videoUrl": "https://clips.kick.com/clips/6e/clip_01KYEN390NKRFHY0VG5YHV1ATT/playlist.m3u8",
+          "category": "Just Chatting",
+          "channel": {
+            "username": "xqc",
+            "name": "xQc",
+            "url": "https://kick.com/xqc"
           }
         }
       ]

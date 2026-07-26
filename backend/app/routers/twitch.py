@@ -24,6 +24,8 @@ from app.utils.url import detect_url_platform, platform_mismatch_detail
 router = APIRouter()
 
 RATE = 1.7
+# Public GQL (datacenter) is ~free; flat 2 credits on native success.
+CREDIT_TWITCH_NATIVE = 2
 
 
 def _scaled(n: int, rate: float = RATE, minimum: int = 2) -> int:
@@ -267,24 +269,49 @@ async def user_videos(
     cost = _scaled(limit)
     async with billed_call(caller=caller, endpoint="/v1/twitch/user-videos", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=cost) as ctx:
         async def _run() -> dict[str, Any]:
+            # 1) Public Twitch web GraphQL (datacenter) — no Apify.
             native = await channel_native(username, video_limit=limit)
             if native is not None:
                 ctx["source"] = "direct"
-                videos = native.get("recentVideos") or []
-                return {"platform": "twitch", "username": username, "totalReturned": len(videos[:limit]), "videos": videos[:limit]}
+                videos = [strip_empty(v) for v in (native.get("recentVideos") or [])[:limit]]
+                return {
+                    "platform": "twitch",
+                    "username": username,
+                    "totalReturned": len(videos),
+                    "videos": videos,
+                }
 
+            # 2) Apify fallback.
             settings = get_settings()
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_TWITCH,
                 _run_input("channels", [username], limit),
                 max_items=1,
             )
-            videos = [_video(v) for v in (items[0].get("recentVideos") if items else []) or [] if isinstance(v, dict)]
+            videos = [
+                _video(v)
+                for v in (items[0].get("recentVideos") if items else []) or []
+                if isinstance(v, dict)
+            ]
             ctx["source"] = "apify"
-            return {"platform": "twitch", "username": username, "totalReturned": len(videos), "videos": videos[:limit]}
+            return {
+                "platform": "twitch",
+                "username": username,
+                "totalReturned": len(videos),
+                "videos": videos[:limit],
+            }
 
-        data = await cached_or_run("twitch.user-videos", {"username": username, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
-        ctx["credits_override"] = _scaled(len(data["videos"]))
+        data = await cached_or_run(
+            "twitch.user-videos",
+            {"username": username, "limit": limit, "v": 4},
+            _run,
+            ctx,
+            use_cache=cache,
+        )
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_TWITCH_NATIVE
+        else:
+            ctx["credits_override"] = _scaled(len(data["videos"]))
         return ApiResponse(data=data)
 
 

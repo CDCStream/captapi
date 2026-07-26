@@ -369,7 +369,7 @@ const GITHUB: Spec[] = [
 
 const TWITCH: Spec[] = [
   { slug: "twitch-profile", name: "Twitch Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/twitch/profile", credits: 1 },
-  { slug: "twitch-user-videos", name: "Twitch User Videos API", shortName: "User Videos", category: "list", method: "GET", path: "/v1/twitch/user-videos", credits: 34, creditsPerResult: 1.7 },
+  { slug: "twitch-user-videos", name: "Twitch User Videos API", shortName: "User Videos", category: "list", method: "GET", path: "/v1/twitch/user-videos", credits: 2 },
   { slug: "twitch-user-schedule", name: "Twitch User Schedule API", shortName: "User Schedule", category: "list", method: "GET", path: "/v1/twitch/user-schedule", credits: 1 },
   { slug: "twitch-clip", name: "Twitch Clip API", shortName: "Clip", category: "details", method: "GET", path: "/v1/twitch/clip", credits: 1 , tagline: "Get a Twitch clip — title, broadcaster, views, duration, and thumbnail as structured JSON." },
 ];
@@ -404,7 +404,7 @@ const TRUTH_SOCIAL: Spec[] = [
 ];
 
 const KICK: Spec[] = [
-  { slug: "kick-clip", name: "Kick Clip API", shortName: "Clip", category: "details", method: "GET", path: "/v1/kick/clip", credits: 34 , tagline: "Get a Kick clip — title, channel, views, duration, and thumbnail as structured JSON." },
+  { slug: "kick-clip", name: "Kick Clip API", shortName: "Clip", category: "details", method: "GET", path: "/v1/kick/clip", credits: 2 , tagline: "Get a Kick clip — title, channel, views, duration, and thumbnail as structured JSON." },
 ];
 
 const AMAZON_SHOP: Spec[] = [
@@ -1362,7 +1362,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "rumble-comments": [up("Rumble video URL, e.g. https://rumble.com/vXXXX-title.html."), lp(50, 500)],
   // Twitch
   "twitch-profile": [up(TWITCH_PROFILE)],
-  "twitch-user-videos": [up(TWITCH_PROFILE), lp(20, 30)],
+  "twitch-user-videos": [up(TWITCH_PROFILE), lpFlat(20, 30, 2)],
   "twitch-user-schedule": [up(TWITCH_PROFILE)],
   "twitch-clip": [up("Twitch clip URL, channel URL, or username.")],
   // Spotify
@@ -1383,7 +1383,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "truth-social-profile": [up(TRUTH_PROFILE)],
   "truth-social-user-posts": [up(TRUTH_PROFILE), lp(20, 80), CURSOR],
   "truth-social-post": [up(TRUTH_POST)],
-  "kick-clip": [up(KICK_CLIP), lpFlat(30, 100, 34)],
+  "kick-clip": [up(KICK_CLIP), lpFlat(30, 100, 2)],
   "amazon-shop-page": [up(AMAZON_SHOP_URL), { name: "marketplace", type: "string", required: false, description: "Amazon marketplace code. Default US." }, lp(20, 200)],
   // Account
   "account-balance": [],

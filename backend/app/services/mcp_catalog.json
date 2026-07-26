@@ -3534,7 +3534,7 @@
     "platform": "twitch",
     "name": "Twitch User Videos",
     "path": "/v1/twitch/user-videos",
-    "credits": 34,
+    "credits": 2,
     "summary": "Recent Twitch VODs for a channel.",
     "params": [
       {
@@ -3547,7 +3547,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 30. Billed per result."
+        "description": "Max items to return. Default 20, max 30. Flat 2 credits on native success."
       },
       {
         "name": "cache",
@@ -3962,7 +3962,7 @@
     "platform": "kick",
     "name": "Kick Clip",
     "path": "/v1/kick/clip",
-    "credits": 34,
+    "credits": 2,
     "summary": "Kick clip metadata from a clip URL or recent channel clips.",
     "params": [
       {
@@ -3975,7 +3975,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 30, max 100. Flat 34 credits per call."
+        "description": "Max items to return. Default 30, max 100. Flat 2 credits on native success."
       },
       {
         "name": "cache",

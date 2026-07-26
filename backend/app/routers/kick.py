@@ -12,12 +12,16 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
+from app.services import kick_native
 from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
-from app.utils.formatters import safe_int, safe_str
+from app.utils.formatters import safe_int, safe_str, strip_empty
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
+
+CREDIT_KICK_NATIVE = kick_native.CREDIT_KICK_NATIVE
+CREDIT_KICK_APIFY = 34
 
 
 def _channel_url(value: str) -> str | None:
@@ -48,42 +52,36 @@ def _normalize_clip(item: dict[str, Any]) -> dict[str, Any]:
     web_url = safe_str(item.get("url") or item.get("clipUrl"))
     if not web_url and slug and clip_id:
         web_url = f"https://kick.com/{slug}/clips/{clip_id}"
-    return {
-        "platform": "kick",
-        "id": clip_id,
-        "url": web_url,
-        "title": safe_str(item.get("title")),
-        "createdAt": safe_str(item.get("createdAt") or item.get("created_at")),
-        "durationSeconds": safe_int(item.get("duration") or item.get("durationSeconds")),
-        "views": safe_int(item.get("view_count") or item.get("views") or item.get("viewCount")),
-        "likes": safe_int(item.get("likes_count") or item.get("likes")),
-        "thumbnailUrl": safe_str(item.get("thumbnail") or item.get("thumbnailUrl") or item.get("thumbnail_url")),
-        "videoUrl": safe_str(item.get("videoUrl") or item.get("sourceUrl") or item.get("video_url") or item.get("clip_url")),
-        "category": safe_str((item.get("category") or {}).get("name") if isinstance(item.get("category"), dict) else item.get("category")),
-        "channel": {
-            "username": slug,
-            "name": safe_str(channel.get("name") or channel.get("username") or item.get("channelName")) or slug,
-            "url": safe_str(channel.get("url") or item.get("channelUrl")) or (f"https://kick.com/{slug}" if slug else None),
-        },
-        "raw": item,
-    }
-
-
-async def _kick_api_clips(channel: str, limit: int) -> list[dict[str, Any]]:
-    slug = channel.rstrip("/").rsplit("/", 1)[-1]
-    headers = {"User-Agent": "Captapi/1.0 (+https://captapi.com)"}
-    try:
-        async with httpx.AsyncClient(timeout=8.0, follow_redirects=True, headers=headers) as client:
-            resp = await client.get(f"https://kick.com/api/v2/channels/{slug}/clips", params={"limit": limit})
-    except httpx.HTTPError:
-        return []
-    if resp.status_code >= 400:
-        return []
-    payload = resp.json()
-    raw_items = payload.get("clips") or payload.get("data") or payload.get("items") or payload
-    if not isinstance(raw_items, list):
-        return []
-    return raw_items[:limit]
+    return strip_empty(
+        {
+            "platform": "kick",
+            "id": clip_id,
+            "url": web_url,
+            "title": safe_str(item.get("title")),
+            "createdAt": safe_str(item.get("createdAt") or item.get("created_at")),
+            "durationSeconds": safe_int(item.get("duration") or item.get("durationSeconds")),
+            "views": safe_int(item.get("view_count") or item.get("views") or item.get("viewCount")),
+            "likes": safe_int(item.get("likes_count") or item.get("likes")),
+            "thumbnailUrl": safe_str(
+                item.get("thumbnail") or item.get("thumbnailUrl") or item.get("thumbnail_url")
+            ),
+            "videoUrl": safe_str(
+                item.get("videoUrl") or item.get("sourceUrl") or item.get("video_url") or item.get("clip_url")
+            ),
+            "category": safe_str(
+                (item.get("category") or {}).get("name")
+                if isinstance(item.get("category"), dict)
+                else item.get("category")
+            ),
+            "channel": {
+                "username": slug,
+                "name": safe_str(channel.get("name") or channel.get("username") or item.get("channelName"))
+                or slug,
+                "url": safe_str(channel.get("url") or item.get("channelUrl"))
+                or (f"https://kick.com/{slug}" if slug else None),
+            },
+        }
+    )
 
 
 @router.get("/clip", summary="Kick clip metadata")
@@ -98,10 +96,21 @@ async def kick_clip(
         raise HTTPException(status_code=400, detail="Invalid Kick URL or username")
     wanted = _clip_key(url) if "/clips/" in url.lower() or "/clip/" in url.lower() else ""
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/kick/clip", platform="kick", resource_url=url, base_credits=34) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/kick/clip",
+        platform="kick",
+        resource_url=url,
+        base_credits=CREDIT_KICK_APIFY,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _kick_api_clips(channel, limit)
-            if not items:
+            # 1) Kick public clips API via Decodo (direct/DC/res return 403).
+            slug = channel.rstrip("/").rsplit("/", 1)[-1]
+            items = await kick_native.fetch_channel_clips(slug, limit=limit)
+            if items:
+                ctx["source"] = "direct"
+            else:
+                # 2) Apify last resort.
                 try:
                     items = await get_apify().run_actor_sync(
                         settings.APIFY_ACTOR_KICK,
@@ -110,13 +119,19 @@ async def kick_clip(
                     )
                 except (ApifyError, httpx.HTTPError):
                     items = []
-            clips = [_normalize_clip(i) for i in items[:limit] if not i.get("error")]
+                ctx["source"] = "apify"
+
+            clips = [_normalize_clip(i) for i in (items or [])[:limit] if not i.get("error")]
             selected = None
             if wanted:
                 selected = next(
                     (
-                        c for c in clips
-                        if any(wanted in candidate for candidate in ((c.get("url") or "").lower(), (c.get("id") or "").lower()))
+                        c
+                        for c in clips
+                        if any(
+                            wanted in candidate
+                            for candidate in ((c.get("url") or "").lower(), (c.get("id") or "").lower())
+                        )
                     ),
                     None,
                 )
@@ -125,5 +140,9 @@ async def kick_clip(
                 raise HTTPException(status_code=404, detail="Kick clip not found")
             return {"channelUrl": channel, "clip": selected, "totalReturned": len(clips), "clips": clips}
 
-        data = await cached_or_run("kick.clip", {"url": url, "limit": limit, "v": 2}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("kick.clip", {"url": url, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_KICK_NATIVE
+        else:
+            ctx["credits_override"] = CREDIT_KICK_APIFY
         return ApiResponse(data=data)
