@@ -3672,7 +3672,7 @@
     "platform": "spotify",
     "name": "Spotify Search",
     "path": "/v1/spotify/search",
-    "credits": 23,
+    "credits": 2,
     "summary": "Search Spotify tracks, albums, artists, podcasts or episodes.",
     "params": [
       {
@@ -3691,7 +3691,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 50. Billed per result."
+        "description": "Max items to return. Default 20, max 50. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -3734,7 +3734,7 @@
     "platform": "spotify",
     "name": "Spotify Podcast Episodes",
     "path": "/v1/spotify/podcast-episodes",
-    "credits": 23,
+    "credits": 2,
     "summary": "List episodes for a Spotify podcast/show.",
     "params": [
       {
@@ -3747,7 +3747,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 50. Billed per result."
+        "description": "Max items to return. Default 20, max 50. Flat 2 credits per call."
       },
       {
         "name": "cache",

@@ -15,12 +15,15 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
+from app.services import spotify_native
 from app.utils.formatters import safe_int, safe_str
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
 
 RATE = 1.15
+# Native Pathfinder (web-player) — flat fee; our cost ~$0.
+CREDIT_NATIVE = 2
 
 
 def _scaled(n: int, rate: float = RATE, minimum: int = 2) -> int:
@@ -325,13 +328,32 @@ async def podcast_episodes(
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "show")
-    cost = _scaled(limit)
-    async with billed_call(caller=caller, endpoint="/v1/spotify/podcast-episodes", platform="spotify", resource_url=uri, base_credits=cost) as ctx:
+    # Flat fee: native Pathfinder first; Apify only on fallthrough.
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/spotify/podcast-episodes",
+        platform="spotify",
+        resource_url=uri,
+        base_credits=CREDIT_NATIVE,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await spotify_native.podcast_episodes_native(uri, limit)
+            if native is not None:
+                podcast_raw, episode_rows = native
+                podcast = _normalize(podcast_raw, "podcast")
+                episodes = [_normalize(i, "episode") for i in episode_rows]
+                ctx["source"] = "direct"
+                return {
+                    "platform": "spotify",
+                    "podcast": podcast,
+                    "totalReturned": len(episodes),
+                    "episodes": episodes,
+                }
+
             data = await _details("podcast", uri, limit)
             raw = data.get("raw") or {}
-            episodes = _episodes_v2(raw) or raw.get("items") or raw.get("content") or {}
-            items = episodes.get("items") if isinstance(episodes, dict) else episodes
+            episodes_block = _episodes_v2(raw) or raw.get("items") or raw.get("content") or {}
+            items = episodes_block.get("items") if isinstance(episodes_block, dict) else episodes_block
             rows: list[dict[str, Any]] = []
             for entry in items if isinstance(items, list) else []:
                 if not isinstance(entry, dict):
@@ -340,10 +362,23 @@ async def podcast_episodes(
                 entity = (entry.get("entity") or {}).get("data") if isinstance(entry.get("entity"), dict) else None
                 rows.append(entity if isinstance(entity, dict) else entry)
             normalized = [_normalize(i, "episode") for i in rows]
-            return {"platform": "spotify", "podcast": data, "totalReturned": len(normalized[:limit]), "episodes": normalized[:limit]}
+            ctx["source"] = "apify"
+            return {
+                "platform": "spotify",
+                "podcast": data,
+                "totalReturned": len(normalized[:limit]),
+                "episodes": normalized[:limit],
+            }
 
-        data = await cached_or_run("spotify.podcast-episodes", {"uri": uri, "limit": limit, "v": 6}, _run, ctx, use_cache=cache)
-        ctx["credits_override"] = _scaled(len(data["episodes"]))
+        data = await cached_or_run(
+            "spotify.podcast-episodes",
+            {"uri": uri, "limit": limit, "v": 7},
+            _run,
+            ctx,
+            use_cache=cache,
+        )
+        if ctx.get("source") != "direct":
+            ctx["credits_override"] = _scaled(len(data["episodes"]))
         return ApiResponse(data=data)
 
 
@@ -356,9 +391,28 @@ async def search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled(limit)
-    async with billed_call(caller=caller, endpoint="/v1/spotify/search", platform="spotify", resource_url=f"spotify:search:{q}", base_credits=cost) as ctx:
+    # Flat fee on native; Apify fallthrough keeps the old per-result scale.
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/spotify/search",
+        platform="spotify",
+        resource_url=f"spotify:search:{q}",
+        base_credits=CREDIT_NATIVE,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
+            kind = type[:-1] if type.endswith("s") else type
+            native_items = await spotify_native.search_native(q, type, limit)
+            if native_items is not None:
+                results = [_normalize(i, kind) for i in native_items]
+                ctx["source"] = "direct"
+                return {
+                    "platform": "spotify",
+                    "query": q,
+                    "type": type,
+                    "totalReturned": len(results),
+                    "results": results,
+                }
+
             apify = get_apify()
             if type in ("tracks", "albums", "artists"):
                 items = await apify.run_actor_sync(
@@ -380,10 +434,17 @@ async def search(
                     },
                     max_items=limit,
                 )
-            kind = type[:-1] if type.endswith("s") else type
             results = [_normalize(i, kind) for i in items[:limit] if not i.get("error")]
+            ctx["source"] = "apify"
             return {"platform": "spotify", "query": q, "type": type, "totalReturned": len(results), "results": results}
 
-        data = await cached_or_run("spotify.search", {"q": q, "type": type, "limit": limit, "v": 6}, _run, ctx, use_cache=cache)
-        ctx["credits_override"] = _scaled(len(data["results"]))
+        data = await cached_or_run(
+            "spotify.search",
+            {"q": q, "type": type, "limit": limit, "v": 7},
+            _run,
+            ctx,
+            use_cache=cache,
+        )
+        if ctx.get("source") != "direct":
+            ctx["credits_override"] = _scaled(len(data["results"]))
         return ApiResponse(data=data)
