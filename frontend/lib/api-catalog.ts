@@ -270,7 +270,6 @@ const INSTAGRAM: Spec[] = [
 
 const FACEBOOK: Spec[] = [
   { slug: "facebook-details", name: "Facebook Details API", shortName: "Details", category: "details", method: "GET", path: "/v1/facebook/details", credits: 2 , tagline: "Get a Facebook post or video — caption, engagement, author, and media fields as structured JSON." },
-  { slug: "facebook-transcript", name: "Facebook Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/facebook/transcript", credits: 2 },
   { slug: "facebook-summarizer", name: "Facebook Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/facebook/summarize", credits: 4 },
   { slug: "facebook-comments", name: "Facebook Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/facebook/comments", credits: 2 },
   { slug: "facebook-page-details", name: "Facebook Page Details API", shortName: "Page Details", category: "channel", method: "GET", path: "/v1/facebook/page-details", credits: 2 },
@@ -534,7 +533,7 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
   {
     id: "facebook",
     name: "Facebook",
-    blurb: "Pull details, transcripts, summaries, and comments from public Facebook videos and pages.",
+    blurb: "Pull details, summaries, and comments from public Facebook videos and pages.",
     icon: "facebook",
     color: "text-blue-600",
     exampleUrl: "https://www.facebook.com/watch/?v=1234567890123456",
@@ -1301,7 +1300,6 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "instagram-basic-profile": [{ name: "userId", type: "string", required: true, description: "Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically." }],
   // Facebook
   "facebook-details": [up(FB_VIDEO)],
-  "facebook-transcript": [up(FB_VIDEO), cacheP()],
   "facebook-summarizer": [up(FB_VIDEO), cacheP()],
   "facebook-comments": [up(FB_VIDEO), lpFlat(50, 500, 2)],
   "facebook-page-details": [up("Facebook page URL, @handle, or page name, e.g. https://facebook.com/PageName.")],

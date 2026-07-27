@@ -402,7 +402,7 @@
     "platform": "youtube",
     "name": "YouTube Trending Shorts",
     "path": "/v1/youtube/trending-shorts",
-    "credits": 28,
+    "credits": 2,
     "summary": "Discover trending YouTube Shorts by seed keyword.",
     "params": [
       {
@@ -415,7 +415,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 100. Billed per result."
+        "description": "Max items to return. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -798,7 +798,7 @@
     "platform": "tiktok",
     "name": "TikTok Search Suggestions",
     "path": "/v1/tiktok/search-suggestions",
-    "credits": 28,
+    "credits": 2,
     "summary": "The autocomplete terms TikTok suggests in its search bar for a seed keyword — the real phrases people search, ranked. Localize by country + language.",
     "params": [
       {
@@ -823,7 +823,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Upper bound on suggestions to return (1-100, default 20). TikTok surfaces only a limited number of real autocomplete suggestions per keyword, so you'll often get fewer. Billed per result."
+        "description": "Max items to return. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -968,7 +968,7 @@
     "platform": "tiktok",
     "name": "TikTok Music Posts",
     "path": "/v1/tiktok/music-posts",
-    "credits": 32,
+    "credits": 2,
     "summary": "Posts using a specific TikTok sound/music.",
     "params": [
       {
@@ -981,7 +981,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -1662,30 +1662,8 @@
     "platform": "facebook",
     "name": "Facebook Details",
     "path": "/v1/facebook/details",
-    "credits": 1,
-    "summary": "Details for a Facebook video or post.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "facebook_transcript",
-    "platform": "facebook",
-    "name": "Facebook Transcript",
-    "path": "/v1/facebook/transcript",
     "credits": 2,
-    "summary": "Transcript of a Facebook video.",
+    "summary": "Details for a Facebook video or post.",
     "params": [
       {
         "name": "url",
@@ -1728,7 +1706,7 @@
     "platform": "facebook",
     "name": "Facebook Comments",
     "path": "/v1/facebook/comments",
-    "credits": 30,
+    "credits": 2,
     "summary": "Comments on a Facebook post.",
     "params": [
       {
@@ -1741,7 +1719,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 50, max 500. Billed per result."
+        "description": "Max items to return. Default 50, max 500. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -1756,7 +1734,7 @@
     "platform": "facebook",
     "name": "Facebook Page Details",
     "path": "/v1/facebook/page-details",
-    "credits": 1,
+    "credits": 2,
     "summary": "Info & stats for a Facebook page.",
     "params": [
       {
@@ -1778,7 +1756,7 @@
     "platform": "facebook",
     "name": "Facebook Profile Posts",
     "path": "/v1/facebook/profile-posts",
-    "credits": 12,
+    "credits": 2,
     "summary": "Latest posts from a Facebook profile/page.",
     "params": [
       {
@@ -1791,7 +1769,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -1806,7 +1784,7 @@
     "platform": "facebook",
     "name": "Facebook Profile Reels",
     "path": "/v1/facebook/profile-reels",
-    "credits": 36,
+    "credits": 2,
     "summary": "Latest Reels from a Facebook profile/page.",
     "params": [
       {
@@ -1819,7 +1797,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -1834,7 +1812,7 @@
     "platform": "facebook",
     "name": "Facebook Group Posts",
     "path": "/v1/facebook/group-posts",
-    "credits": 12,
+    "credits": 2,
     "summary": "Posts from a public Facebook group.",
     "params": [
       {
@@ -1847,7 +1825,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -1862,7 +1840,7 @@
     "platform": "facebook",
     "name": "Facebook Comment Replies",
     "path": "/v1/facebook/comment-replies",
-    "credits": 30,
+    "credits": 2,
     "summary": "Replies to a specific Facebook comment.",
     "params": [
       {
@@ -1881,7 +1859,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 50, max 500. Billed per result."
+        "description": "Max items to return. Default 50, max 500. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -1896,8 +1874,8 @@
     "platform": "facebook",
     "name": "Facebook Marketplace Search",
     "path": "/v1/facebook/marketplace-search",
-    "credits": 28,
-    "summary": "Search Facebook Marketplace listings by keyword and location.",
+    "credits": 2,
+    "summary": "Search Facebook Marketplace listings by keyword and location. details=true adds description/coords/photos (2 + 2 per listing).",
     "params": [
       {
         "name": "q",
@@ -1915,13 +1893,13 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Flat 2 credits per call."
       },
       {
         "name": "details",
         "type": "string",
         "required": false,
-        "description": "Set true to fetch full description, photos and coordinates per listing (slower, costs more)."
+        "description": "Set true to enrich each listing with description, photos and coordinates (2 + 2 credits per listing)."
       },
       {
         "name": "cache",
@@ -1936,7 +1914,7 @@
     "platform": "facebook",
     "name": "Facebook Marketplace Location Search",
     "path": "/v1/facebook/marketplace-location-search",
-    "credits": 17,
+    "credits": 2,
     "summary": "Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34).",
     "params": [
       {
@@ -1949,13 +1927,13 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 10, max 50. Flat 17 credits per call."
+        "description": "Max items to return. Default 10, max 50. Flat 2 credits per call."
       },
       {
         "name": "details",
         "type": "string",
         "required": false,
-        "description": "Set true to include latitude/longitude per location (slower; doubles cost to 34 credits)."
+        "description": "Set true to include latitude/longitude per location (slower; doubles cost to 2 credits)."
       },
       {
         "name": "cache",
@@ -1970,7 +1948,7 @@
     "platform": "facebook",
     "name": "Facebook Event Search",
     "path": "/v1/facebook/event-search",
-    "credits": 40,
+    "credits": 2,
     "summary": "Search Facebook events by topic and/or location.",
     "params": [
       {
@@ -1983,7 +1961,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits on native success."
       },
       {
         "name": "cache",
@@ -2020,7 +1998,7 @@
     "platform": "facebook",
     "name": "Facebook Profile Photos",
     "path": "/v1/facebook/profile-photos",
-    "credits": 12,
+    "credits": 2,
     "summary": "Photos from a Facebook profile or page.",
     "params": [
       {
@@ -2033,7 +2011,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -2048,7 +2026,7 @@
     "platform": "facebook",
     "name": "Facebook Profile Events",
     "path": "/v1/facebook/profile-events",
-    "credits": 40,
+    "credits": 2,
     "summary": "Events from a Facebook profile or page.",
     "params": [
       {
@@ -2061,7 +2039,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits on native success."
       },
       {
         "name": "cache",
@@ -2076,8 +2054,8 @@
     "platform": "facebook",
     "name": "Facebook Marketplace Item",
     "path": "/v1/facebook/marketplace-item",
-    "credits": 1,
-    "summary": "Details for a single Facebook Marketplace listing.",
+    "credits": 2,
+    "summary": "Details for a single Facebook Marketplace listing (title, price, description, condition, photos, location).",
     "params": [
       {
         "name": "url",
@@ -3046,7 +3024,7 @@
     "platform": "rumble",
     "name": "Rumble Comments",
     "path": "/v1/rumble/comments",
-    "credits": 30,
+    "credits": 2,
     "summary": "Comments on a Rumble video.",
     "params": [
       {
@@ -3059,7 +3037,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 50, max 500. Billed per result."
+        "description": "Max items to return. Default 50, max 500. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -3534,7 +3512,7 @@
     "platform": "twitch",
     "name": "Twitch User Videos",
     "path": "/v1/twitch/user-videos",
-    "credits": 34,
+    "credits": 2,
     "summary": "Recent Twitch VODs for a channel.",
     "params": [
       {
@@ -3547,7 +3525,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 30. Billed per result."
+        "description": "Max items to return. Default 20, max 30. Flat 2 credits on native success."
       },
       {
         "name": "cache",
@@ -3606,7 +3584,7 @@
     "platform": "spotify",
     "name": "Spotify Artist",
     "path": "/v1/spotify/artist",
-    "credits": 6,
+    "credits": 2,
     "summary": "Spotify artist details, followers and listener metadata.",
     "params": [
       {
@@ -3628,7 +3606,7 @@
     "platform": "spotify",
     "name": "Spotify Track",
     "path": "/v1/spotify/track",
-    "credits": 6,
+    "credits": 2,
     "summary": "Spotify track metadata, artists, album and play count when available.",
     "params": [
       {
@@ -3650,7 +3628,7 @@
     "platform": "spotify",
     "name": "Spotify Album",
     "path": "/v1/spotify/album",
-    "credits": 6,
+    "credits": 2,
     "summary": "Spotify album metadata and track count.",
     "params": [
       {
@@ -3672,7 +3650,7 @@
     "platform": "spotify",
     "name": "Spotify Search",
     "path": "/v1/spotify/search",
-    "credits": 23,
+    "credits": 2,
     "summary": "Search Spotify tracks, albums, artists, podcasts or episodes.",
     "params": [
       {
@@ -3691,7 +3669,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 50. Billed per result."
+        "description": "Max items to return. Default 20, max 50. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -3706,7 +3684,7 @@
     "platform": "spotify",
     "name": "Spotify Podcast",
     "path": "/v1/spotify/podcast",
-    "credits": 6,
+    "credits": 2,
     "summary": "Spotify podcast/show details and episode summary metadata.",
     "params": [
       {
@@ -3734,7 +3712,7 @@
     "platform": "spotify",
     "name": "Spotify Podcast Episodes",
     "path": "/v1/spotify/podcast-episodes",
-    "credits": 23,
+    "credits": 2,
     "summary": "List episodes for a Spotify podcast/show.",
     "params": [
       {
@@ -3747,7 +3725,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 50. Billed per result."
+        "description": "Max items to return. Default 20, max 50. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -3784,7 +3762,7 @@
     "platform": "soundcloud",
     "name": "SoundCloud Artist Tracks",
     "path": "/v1/soundcloud/artist-tracks",
-    "credits": 28,
+    "credits": 2,
     "summary": "Tracks from a SoundCloud artist profile, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
@@ -3797,7 +3775,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 100. Billed per result."
+        "description": "Max items to return. Flat 2 credits per call."
       },
       {
         "name": "cursor",
@@ -3962,7 +3940,7 @@
     "platform": "kick",
     "name": "Kick Clip",
     "path": "/v1/kick/clip",
-    "credits": 34,
+    "credits": 2,
     "summary": "Kick clip metadata from a clip URL or recent channel clips.",
     "params": [
       {
@@ -3975,7 +3953,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 30, max 100. Flat 34 credits per call."
+        "description": "Max items to return. Default 30, max 100. Flat 2 credits on native success."
       },
       {
         "name": "cache",
@@ -4317,7 +4295,7 @@
     "platform": "ad_library",
     "name": "Facebook Ad Library Search",
     "path": "/v1/ad-library/facebook/search",
-    "credits": 2,
+    "credits": 70,
     "summary": "Search Meta/Facebook ads by keyword.",
     "params": [
       {
@@ -4351,7 +4329,7 @@
     "platform": "ad_library",
     "name": "Facebook Company Ads",
     "path": "/v1/ad-library/facebook/company-ads",
-    "credits": 2,
+    "credits": 70,
     "summary": "Ads for a Facebook page or Meta Ad Library URL.",
     "params": [
       {
@@ -4385,7 +4363,7 @@
     "platform": "ad_library",
     "name": "Facebook Ad Library Search Companies",
     "path": "/v1/ad-library/facebook/search-companies",
-    "credits": 2,
+    "credits": 70,
     "summary": "Find advertisers/pages in the Meta Ad Library by name.",
     "params": [
       {
@@ -4419,8 +4397,8 @@
     "platform": "ad_library",
     "name": "Facebook Ad Details",
     "path": "/v1/ad-library/facebook/ad-details",
-    "credits": 17,
-    "summary": "Meta/Facebook ad details.",
+    "credits": 2,
+    "summary": "Meta/Facebook Ad Library ad details (creative text, media, advertiser).",
     "params": [
       {
         "name": "url",
@@ -4441,7 +4419,7 @@
     "platform": "ad_library",
     "name": "Facebook Ad Transcript",
     "path": "/v1/ad-library/facebook/ad-transcript",
-    "credits": 17,
+    "credits": 2,
     "summary": "Extract creative text from a Meta/Facebook ad as transcript text.",
     "params": [
       {
@@ -4525,7 +4503,7 @@
     "platform": "ad_library",
     "name": "Google Company Ads",
     "path": "/v1/ad-library/google/company-ads",
-    "credits": 2,
+    "credits": 67,
     "summary": "Google Ads Transparency Center ads for an advertiser.",
     "params": [
       {
@@ -4621,7 +4599,7 @@
     "platform": "ad_library",
     "name": "LinkedIn Ad Library Search",
     "path": "/v1/ad-library/linkedin/search-ads",
-    "credits": 2,
+    "credits": 70,
     "summary": "Search LinkedIn Ad Library ads.",
     "params": [
       {

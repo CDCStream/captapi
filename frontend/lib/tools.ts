@@ -80,14 +80,6 @@ export const TOOLS: Record<string, Tool> = {
     apiEndpoint: "/v1/instagram/summarize",
     faq: [],
   },
-  "facebook-transcript": {
-    slug: "facebook-transcript",
-    title: "Free Facebook Video Transcript",
-    description: "Get a clean, timestamped transcript from any public Facebook video in seconds. Free, no sign-up — copy or download the text for subtitles, notes, or research.",
-    platform: "Facebook",
-    apiEndpoint: "/v1/facebook/transcript",
-    faq: [],
-  },
 };
 
 const URL_PLACEHOLDERS: Record<string, string> = {

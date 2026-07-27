@@ -32,7 +32,7 @@ from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript
-from app.utils.formatters import normalize_language_code, safe_float, safe_int, safe_str, strip_empty
+from app.utils.formatters import safe_float, safe_int, safe_str, strip_empty
 from app.utils.url import (
     detect_url_platform,
     extract_facebook_page,
@@ -42,7 +42,6 @@ from app.utils.url import (
 
 router = APIRouter()
 
-CREDIT_TRANSCRIPT = 2
 CREDIT_SUMMARIZE = 4
 CREDIT_DETAILS = facebook_details_native.CREDIT_FB_DETAILS_NATIVE
 CREDIT_PAGE_DETAILS = facebook_page_native.CREDIT_FB_PAGE_NATIVE
@@ -873,93 +872,6 @@ async def facebook_details(
         )
         return ApiResponse(data=data)
 
-
-@router.get("/transcript", summary="Facebook video transcript")
-async def facebook_transcript(
-    url: str = Query(...),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
-    caller: ApiCaller = Depends(require_api_key),
-):
-    _reject_facebook_platform_mismatch(url, "https://www.facebook.com/watch/?v=123")
-    settings = get_settings()
-    async with billed_call(
-        caller=caller,
-        endpoint="/v1/facebook/transcript",
-        platform="facebook",
-        resource_url=url,
-        base_credits=CREDIT_TRANSCRIPT,
-    ) as ctx:
-        async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            language = None
-            # Primary: AI transcript extractor (works for /watch, /reel and
-            # video post URLs; returns Whisper segments with timestamps).
-            items: list[dict[str, Any]] = []
-            try:
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_FACEBOOK_TRANSCRIPT,
-                    {"facebookUrl": url},
-                    max_items=1,
-                )
-            except Exception:  # noqa: BLE001
-                items = []
-            segments: list[dict[str, Any]] = []
-            full = ""
-            if items:
-                item = items[0]
-                for s in item.get("normalizedSegments") or []:
-                    if not isinstance(s, dict):
-                        continue
-                    text = safe_str(s.get("text")).strip()
-                    if not text:
-                        continue
-                    start = round(float(s.get("start") or 0), 3)
-                    end = round(float(s.get("end") or 0), 3)
-                    mm, ss = int(start // 60), int(start % 60)
-                    segments.append(
-                        {
-                            "text": text,
-                            "start": start,
-                            "duration": round(max(end - start, 0), 3),
-                            "end": round(max(end, start), 3),
-                            "timestamp": f"{mm:02d}:{ss:02d}",
-                        }
-                    )
-                full = (safe_str(item.get("transcript")) or " ".join(s["text"] for s in segments)).strip()
-                language = normalize_language_code(safe_str(item.get("detected_language")))
-
-            if not full:
-                # Fallback for text-only posts: use the post body.
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_FACEBOOK_POSTS,
-                    {"startUrls": [{"url": url}], "resultsLimit": 1},
-                    max_items=1,
-                )
-                if not items:
-                    raise HTTPException(status_code=404, detail="Post not found")
-                full = safe_str(items[0].get("text")) or ""
-                segments = []
-            if not full:
-                raise HTTPException(status_code=422, detail="No transcript available")
-            ctx["source"] = "apify"
-            return {
-                "platform": "facebook",
-                "url": url,
-                "transcript": full,
-                "transcriptSegments": segments,
-                "wordCount": len(full.split()),
-                "segments": len(segments),
-                "language": language,
-            }
-
-        data = await cached_or_run(
-            endpoint="facebook.transcript",
-            params={"url": url, "v": 4},
-            runner=_run,
-            ctx=ctx,
-            use_cache=cache,
-        )
-        return ApiResponse(data=data)
 
 
 @router.get("/summarize", summary="AI summary of Facebook video/post")

@@ -88,7 +88,6 @@ const INPUTS = {
   "kwai-user-posts": ["--url", KWAI_PROFILE, "--limit", L],
 
   "facebook-details": ["--url", FB_POST],
-  "facebook-transcript": ["--url", FB_POST],
   "facebook-summarize": ["--url", FB_POST],
   "facebook-comments": ["--url", FB_POST, "--limit", L],
   "facebook-page-details": ["--url", FB_PAGE],

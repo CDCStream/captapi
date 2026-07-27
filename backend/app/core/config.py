@@ -133,10 +133,6 @@ class Settings(BaseSettings):
     DECODO_GEO: str = ""
 
     APIFY_ACTOR_FACEBOOK_POSTS: str = "apify/facebook-posts-scraper"
-    # AI transcript extractor for FB videos/reels (Whisper): returns full
-    # transcript + timestamped normalizedSegments. The posts scraper never
-    # returns subtitles, so it only serves as a text-post fallback.
-    APIFY_ACTOR_FACEBOOK_TRANSCRIPT: str = "sian.agency/facebook-ai-transcript-extractor"
     APIFY_ACTOR_FACEBOOK_PAGES: str = "apify/facebook-pages-scraper"
     APIFY_ACTOR_FACEBOOK_COMMENTS: str = "apify/facebook-comments-scraper"
     # Reels are filtered out of the official posts scraper's feed (no separate

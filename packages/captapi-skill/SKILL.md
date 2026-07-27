@@ -165,7 +165,6 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
 | `facebook_details` | `/v1/facebook/details` | `url` (string), `cache`? (boolean) | 1 |
-| `facebook_transcript` | `/v1/facebook/transcript` | `url` (string), `cache`? (boolean) | 2 |
 | `facebook_summarize` | `/v1/facebook/summarize` | `url` (string), `cache`? (boolean) | 4 |
 | `facebook_comments` | `/v1/facebook/comments` | `url` (string), `limit`? (number), `cache`? (boolean) | 30 |
 | `facebook_page_details` | `/v1/facebook/page-details` | `url` (string), `cache`? (boolean) | 1 |

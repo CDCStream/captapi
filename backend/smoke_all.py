@@ -107,7 +107,6 @@ async def main() -> None:
         ("IG reels-search",       "/v1/instagram/reels-search",   {"q": "travel", "limit": 5}),
         # ---------- FACEBOOK ----------
         ("FB details",            "/v1/facebook/details",         {"url": FACEBOOK_POST}),
-        ("FB transcript",         "/v1/facebook/transcript",      {"url": FACEBOOK_POST}),
         ("FB summarize",          "/v1/facebook/summarize",       {"url": FACEBOOK_POST}),
         ("FB comments",           "/v1/facebook/comments",        {"url": FACEBOOK_POST, "limit": 5}),
         ("FB page-details",       "/v1/facebook/page-details",    {"url": FACEBOOK_PAGE}),

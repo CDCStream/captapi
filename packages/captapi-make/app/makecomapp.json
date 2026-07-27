@@ -1039,23 +1039,6 @@
           "scope": null
         }
       },
-      "facebookTranscript": {
-        "label": "Facebook Transcript",
-        "description": "Transcript of a Facebook video. Costs ~2 credits (cached results free, failures never charged).",
-        "connection": "captapi",
-        "altConnection": null,
-        "webhook": null,
-        "moduleType": "action",
-        "actionCrud": "read",
-        "codeFiles": {
-          "communication": "modules/facebookTranscript/communication.iml.json",
-          "staticParams": null,
-          "mappableParams": "modules/facebookTranscript/mappable-params.iml.json",
-          "interface": null,
-          "samples": null,
-          "scope": null
-        }
-      },
       "facebookSummarize": {
         "label": "Facebook Summarizer",
         "description": "AI summary of a Facebook video or post. Costs ~4 credits (cached results free, failures never charged).",

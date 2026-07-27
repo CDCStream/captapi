@@ -77,7 +77,6 @@
     "label": "Facebook",
     "modules": [
       "facebookDetails",
-      "facebookTranscript",
       "facebookSummarize",
       "facebookComments",
       "facebookPageDetails",

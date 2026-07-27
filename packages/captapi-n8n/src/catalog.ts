@@ -211,7 +211,6 @@ const INSTAGRAM: Omit<Endpoint, "platform">[] = [
 
 const FACEBOOK: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_details", name: "Facebook Details", path: "/v1/facebook/details", credits: 1, summary: "Details for a Facebook video or post.", params: [url(FB_VIDEO)] },
-  { tool: "facebook_transcript", name: "Facebook Transcript", path: "/v1/facebook/transcript", credits: 2, summary: "Transcript of a Facebook video.", params: [url(FB_VIDEO), cacheParam()] },
   { tool: "facebook_summarize", name: "Facebook Summarizer", path: "/v1/facebook/summarize", credits: 4, summary: "AI summary of a Facebook video or post.", params: [url(FB_VIDEO), cacheParam()] },
   { tool: "facebook_comments", name: "Facebook Comments", path: "/v1/facebook/comments", credits: 30, summary: "Comments on a Facebook post.", params: [url(FB_VIDEO), limit(50, 500)] },
   { tool: "facebook_page_details", name: "Facebook Page Details", path: "/v1/facebook/page-details", credits: 1, summary: "Info & stats for a Facebook page.", params: [url("Facebook page URL, e.g. https://facebook.com/PageName.")] },

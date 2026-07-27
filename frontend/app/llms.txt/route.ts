@@ -22,7 +22,6 @@ const TOOLS: { slug: string; name: string; desc: string }[] = [
   { slug: "tiktok-summarizer", name: "TikTok Summarizer", desc: "Free AI summary of any TikTok video." },
   { slug: "instagram-transcript", name: "Instagram Transcript Generator", desc: "Free Instagram Reel transcript." },
   { slug: "instagram-summarizer", name: "Instagram Summarizer", desc: "Free AI summary of any Instagram Reel." },
-  { slug: "facebook-transcript", name: "Facebook Transcript Generator", desc: "Free Facebook video transcript." },
   ...MAKER_TOOLS.map((t) => ({ slug: t.slug, name: t.name, desc: t.blurb })),
 ];
 

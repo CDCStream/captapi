@@ -25,7 +25,6 @@ const FEATURED = [
   "instagram_comments",
   "instagram_channel_details",
   "instagram_channel_posts",
-  "facebook_transcript",
   "facebook_page_details",
   "twitter_tweet_details",
   "twitter_profile",

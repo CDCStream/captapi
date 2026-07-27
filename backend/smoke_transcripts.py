@@ -119,21 +119,7 @@ async def main() -> None:
             if found:
                 break
 
-        print("\n" + "=" * 80)
-        print("STEP 3: Test Facebook video transcript with known video URLs")
-        print("=" * 80)
-        for u in FACEBOOK_VIDEO_CANDIDATES:
-            print(f"\n  Trying: {u}")
-            tr = await client.get(f"{BASE}/v1/facebook/transcript", params={"url": u})
-            if tr.status_code == 200:
-                td = tr.json()["data"]
-                wc = td.get("wordCount", 0)
-                print(f"  [OK] TRANSCRIPT ({wc} words): {td.get('transcript','')[:200]}")
-                sr = await client.get(f"{BASE}/v1/facebook/summarize", params={"url": u})
-                print(f"  [OK] Summarize: {sr.status_code} | {sr.text[:200]}")
-                break
-            else:
-                print(f"  [skip] {tr.status_code} {tr.text[:200]}")
+    
 
     bal = sb.table("credit_balances").select("subscription_credits").eq(
         "user_id", user.id

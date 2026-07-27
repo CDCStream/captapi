@@ -789,12 +789,6 @@ export interface FacebookDetailsParams {
   cache?: boolean;
 }
 
-export interface FacebookTranscriptParams {
-  /** Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
 
 export interface FacebookSummarizeParams {
   /** Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
@@ -927,10 +921,6 @@ export class FacebookApi {
   /** Facebook Details — Details for a Facebook video or post. (1 credit) */
   details(params: FacebookDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/details", params);
-  }
-  /** Facebook Transcript — Transcript of a Facebook video. (2 credits) */
-  transcript(params: FacebookTranscriptParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/facebook/transcript", params);
   }
   /** Facebook Summarizer — AI summary of a Facebook video or post. (4 credits) */
   summarize(params: FacebookSummarizeParams): Promise<ApiEnvelope> {

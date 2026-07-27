@@ -75,7 +75,6 @@ Kontrol: 200 doner mi - JSON alanlari dolu mu - sure makul mu (test URL'leri: do
 ## Facebook (16)
 
 - [ ] Details — `GET /v1/facebook/details`
-- [ ] Transcript — `GET /v1/facebook/transcript`
 - [ ] Summarizer — `GET /v1/facebook/summarize`
 - [ ] Comments — `GET /v1/facebook/comments`
 - [ ] Page Details — `GET /v1/facebook/page-details`

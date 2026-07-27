@@ -4984,63 +4984,6 @@
         }
       }
     },
-    "/v1/facebook/transcript": {
-      "get": {
-        "tags": [
-          "Facebook"
-        ],
-        "summary": "Facebook video transcript",
-        "operationId": "facebook_transcript_v1_facebook_transcript_get",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "url",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Url"
-            }
-          },
-          {
-            "name": "cache",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
-              "default": false,
-              "title": "Cache"
-            },
-            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/facebook/summarize": {
       "get": {
         "tags": [

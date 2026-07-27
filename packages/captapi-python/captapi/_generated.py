@@ -1111,13 +1111,6 @@ class FacebookApi:
         """
         return self._t.get("/v1/facebook/details", {"url": url, "cache": cache})
 
-    def transcript(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Transcript — Transcript of a Facebook video. (2 credits)
-
-        :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/facebook/transcript", {"url": url, "cache": cache})
 
     def summarize(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Summarizer — AI summary of a Facebook video or post. (4 credits)
@@ -1258,13 +1251,6 @@ class AsyncFacebookApi:
         """
         return await self._t.get("/v1/facebook/details", {"url": url, "cache": cache})
 
-    async def transcript(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Transcript — Transcript of a Facebook video. (2 credits)
-
-        :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/facebook/transcript", {"url": url, "cache": cache})
 
     async def summarize(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Summarizer — AI summary of a Facebook video or post. (4 credits)

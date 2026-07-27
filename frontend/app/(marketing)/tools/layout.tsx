@@ -9,7 +9,6 @@ const tools = [
   { slug: "tiktok-summarizer",   name: "TikTok Video Summarizer" },
   { slug: "instagram-transcript",name: "Instagram Reel Transcript" },
   { slug: "instagram-summarizer",name: "Instagram Reel Summarizer" },
-  { slug: "facebook-transcript", name: "Facebook Video Transcript" },
   ...MAKER_TOOLS.map((t) => ({ slug: t.slug, name: t.name })),
 ];
 

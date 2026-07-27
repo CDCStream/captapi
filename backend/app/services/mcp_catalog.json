@@ -1680,28 +1680,6 @@
     ]
   },
   {
-    "tool": "facebook_transcript",
-    "platform": "facebook",
-    "name": "Facebook Transcript",
-    "path": "/v1/facebook/transcript",
-    "credits": 2,
-    "summary": "Transcript of a Facebook video.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
     "tool": "facebook_summarize",
     "platform": "facebook",
     "name": "Facebook Summarizer",
