@@ -665,22 +665,80 @@ async def facebook_search_companies(
         return ApiResponse(data=data)
 
 
+def _transcript_from_ad(ad: dict[str, Any], ad_url: str) -> dict[str, Any]:
+    segments = []
+    parts = []
+    for label, value in (
+        ("headline", ad.get("headline")),
+        ("body", ad.get("text")),
+        ("cta", ad.get("cta")),
+        ("landingUrl", ad.get("landingUrl")),
+    ):
+        text = (value or "").strip() if isinstance(value, str) else ""
+        if not text:
+            continue
+        parts.append(f"{label}: {text}")
+        segments.append({"speaker": label, "text": text, "start": 0, "duration": 0, "timestamp": "00:00"})
+    transcript = "\n".join(parts).strip()
+    if not transcript:
+        raise HTTPException(status_code=422, detail="No transcript text available for this ad")
+    return {
+        "platform": "facebook_ad_library",
+        "url": ad.get("url") or ad_url,
+        "adId": ad.get("id"),
+        "transcript": transcript,
+        "transcriptSegments": segments,
+        "wordCount": len(transcript.split()),
+        "segments": len(segments),
+        "advertiser": ad.get("advertiser"),
+    }
+
+
+async def _facebook_ad_native_or_apify(ad_url: str, ctx: dict[str, Any]) -> dict[str, Any]:
+    """Native Decodo detail first; Apify fallthrough (17 credits)."""
+    settings = get_settings()
+    native = await facebook_ads_native.ad_details(ad_url)
+    if native is not None:
+        ctx["source"] = "direct"
+        return _normalize_ad(native, "facebook_ad_library")
+    items = await _run_actor(
+        settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2,
+        {"startUrls": [{"url": ad_url}], "resultsLimit": 1, "isDetailsPerAd": True},
+        1,
+    )
+    if not items:
+        raise HTTPException(status_code=404, detail="Ad not found")
+    ctx["source"] = "apify"
+    ctx["credits_override"] = 17
+    return _normalize_ad(items[0], "facebook_ad_library")
+
+
 @router.get("/facebook/ad-details", summary="Meta/Facebook ad details")
 async def facebook_ad_details(
     url: str = Query(..., description="Meta Ad Library ad URL or ad ID"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    settings = get_settings()
     ad_url = _facebook_ad_url(url)
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/ad-details", platform="facebook_ad_library", resource_url=ad_url, base_credits=17) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/ad-library/facebook/ad-details",
+        platform="facebook_ad_library",
+        resource_url=ad_url,
+        base_credits=CREDIT_AD_LIBRARY_NATIVE,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2, {"startUrls": [{"url": ad_url}], "resultsLimit": 1, "isDetailsPerAd": True}, 1)
-            if not items:
-                raise HTTPException(status_code=404, detail="Ad not found")
-            return _normalize_ad(items[0], "facebook_ad_library")
+            return await _facebook_ad_native_or_apify(ad_url, ctx)
 
-        return ApiResponse(data=await cached_or_run("ad-library.facebook.ad-details", {"url": ad_url, "v": 4}, _run, ctx, use_cache=cache))
+        return ApiResponse(
+            data=await cached_or_run(
+                "ad-library.facebook.ad-details",
+                {"url": ad_url, "v": 5},
+                _run,
+                ctx,
+                use_cache=cache,
+            )
+        )
 
 
 @router.get("/facebook/ad-transcript", summary="Meta/Facebook ad transcript / creative text")
@@ -689,42 +747,27 @@ async def facebook_ad_transcript(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    settings = get_settings()
     ad_url = _facebook_ad_url(url)
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/facebook/ad-transcript", platform="facebook_ad_library", resource_url=ad_url, base_credits=17) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/ad-library/facebook/ad-transcript",
+        platform="facebook_ad_library",
+        resource_url=ad_url,
+        base_credits=CREDIT_AD_LIBRARY_NATIVE,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2, {"startUrls": [{"url": ad_url}], "resultsLimit": 1, "isDetailsPerAd": True}, 1)
-            if not items:
-                raise HTTPException(status_code=404, detail="Ad not found")
-            ad = _normalize_ad(items[0], "facebook_ad_library")
-            segments = []
-            parts = []
-            for label, value in (
-                ("headline", ad.get("headline")),
-                ("body", ad.get("text")),
-                ("cta", ad.get("cta")),
-                ("landingUrl", ad.get("landingUrl")),
-            ):
-                text = (value or "").strip() if isinstance(value, str) else ""
-                if not text:
-                    continue
-                parts.append(f"{label}: {text}")
-                segments.append({"speaker": label, "text": text, "start": 0, "duration": 0, "timestamp": "00:00"})
-            transcript = "\n".join(parts).strip()
-            if not transcript:
-                raise HTTPException(status_code=422, detail="No transcript text available for this ad")
-            return {
-                "platform": "facebook_ad_library",
-                "url": ad.get("url") or ad_url,
-                "adId": ad.get("id"),
-                "transcript": transcript,
-                "transcriptSegments": segments,
-                "wordCount": len(transcript.split()),
-                "segments": len(segments),
-                "advertiser": ad.get("advertiser"),
-            }
+            ad = await _facebook_ad_native_or_apify(ad_url, ctx)
+            return _transcript_from_ad(ad, ad_url)
 
-        return ApiResponse(data=await cached_or_run("ad-library.facebook.ad-transcript", {"url": ad_url, "v": 3}, _run, ctx, use_cache=cache))
+        return ApiResponse(
+            data=await cached_or_run(
+                "ad-library.facebook.ad-transcript",
+                {"url": ad_url, "v": 4},
+                _run,
+                ctx,
+                use_cache=cache,
+            )
+        )
 
 
 @router.get("/tiktok/search", summary="Search TikTok Ad Library")

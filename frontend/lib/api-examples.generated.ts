@@ -384,48 +384,55 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "id": "108824017345866",
       "name": "Meta",
       "url": "https://www.facebook.com/Meta/",
-      "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qaRlosGC9wUQ7kNvwHuGOSN&_nc_oc=AdpUTiQHP0F2DQWlJJsFhLjPwiKgiTaMBS9Gf3J_Ogy1Z6nYv2kt_BhKXvw8jPupOMg&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQCbS0Qc_-2kHNJh8Yysq78dbBXaaJS4Osw3-xA3_SHVlw&oe=6A89438E"
+      "logo": "https://scontent-dfw5-2.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=ZqrAiU5uA1sQ7kNvwHsXpf9&_nc_oc=AdqVVq_tCCm9QfdHEQa5d82UKJTt9DT4LxrW9m95vTx7VJLcyuQH74gIZv0WeiJgIfo&_nc_zt=23&_nc_ht=scontent-dfw5-2.xx&_nc_gid=oKi5rqU7-78Y6XFLpAVqvA&_nc_ss=79289&oh=00_AQDIgONmGu5lj1i0jpr_nH9fjb7afatDtlB-wsXtBQNtZQ&oe=6A8F324E"
     },
     "media": [
-      "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4?_nc_cat=106&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=VIhm6QH6QpYQ7kNvwEGz32Z&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4MzE0MTAwMzMxNDk2MzYsImFzc2V0X2FnZV9kYXlzIjoyMzcsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQBmg1RWfbVvJ3MUBSfprUeNw4A1j1otLN5iP3DoZ8RxIw&oe=6A677448",
-      "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=XJsOGtccv7UQ7kNvwFOmuvH&_nc_oc=AdqJh0Avn_pYIk_hzhEW3QS1dyOrrTJn4nBpQ38NLoUvb1OE8Kwj7qy75S7f1QbV1cs&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQBESYOW184a4FJWDENcSYwQSBzwkH5yonZh3U5v6ZZEgA&oe=6A67964A"
+      "https://video-dfw5-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4?_nc_cat=106&_nc_sid=ef5aa3&_nc_ht=video-dfw5-1.xx.fbcdn.net&_nc_ohc=DeBVZh2ChkAQ7kNvwELM_GV&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4MzE0MTAwMzMxNDk2MzYsImFzc2V0X2FnZV9kYXlzIjoyNDEsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=oKi5rqU7-78Y6XFLpAVqvA&_nc_ss=79289&_nc_zt=28&oh=00_AQB-CUR53tb21BEWdlRLg5BhAauE3-hDDO9zmz06SvSAdg&oe=6A6D9B48",
+      "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=JCEJHIw0engQ7kNvwEcgh1o&_nc_oc=Ado6Dn6wrEd2aZKTiM6OLVJyx_BYbHRC0Bmv70xAZp21Pm2Enab2l80KoUSxQZAs1Ow&_nc_zt=14&_nc_ht=scontent-dfw5-1.xx&_nc_gid=oKi5rqU7-78Y6XFLpAVqvA&_nc_ss=79289&oh=00_AQAw5ZEVUbeJYpBcx6Qa4wV6V-hZRjNvtI487nUdgq8UZA&oe=6A6D850A"
     ]
   },
   "facebook-ad-library-ad-transcript": {
     "platform": "facebook_ad_library",
-    "url": "https://www.facebook.com/ads/library/?id=1046730950862281",
-    "adId": "1046730950862281",
-    "transcript": "body: SUKEBAN at @animeexpo \n07/05/25 Los Angeles \n\n🎬 @complicasian \nMC @kunichi_nomura \nMusic / yoyo @okamotoreiji @ecec_fc @haroodiy \nCostumes @olympialetan @softskinlatex @dawnamatrix\nSneakers @nike \nHats @stephenjonesmillinery \nMakeup @kalikennedy \nHair @dennisvlanni\nNails @nailsbymei \nProduction @exposureny \n#thisissukeban #sukebanxanimeexpo\ncta: Visit Instagram profile\nlandingUrl: http://instagram.com/sukeban_world",
+    "url": "https://www.facebook.com/ads/library/?id=317161109571794",
+    "adId": "317161109571794",
+    "transcript": "headline: Voting Information Center\nbody: The Voting Information Center—one-tap voting registration information from election experts and authorities in one place.\ncta: Learn more\nlandingUrl: http://facebook.com/votinginformationcenter",
     "transcriptSegments": [
       {
+        "speaker": "headline",
+        "text": "Voting Information Center",
+        "start": 0,
+        "duration": 0,
+        "timestamp": "00:00"
+      },
+      {
         "speaker": "body",
-        "text": "SUKEBAN at @animeexpo \n07/05/25 Los Angeles \n\n🎬 @complicasian \nMC @kunichi_nomura \nMusic / yoyo @okamotoreiji @ecec_fc @haroodiy \nCostumes @olympialetan @softskinlatex @dawnamatrix\nSneakers @nike \nHats @stephenjonesmillinery \nMakeup @kalikennedy \nHair @dennisvlanni\nNails @nailsbymei \nProduction @exposureny \n#thisissukeban #sukebanxanimeexpo",
+        "text": "The Voting Information Center—one-tap voting registration information from election experts and authorities in one place.",
         "start": 0,
         "duration": 0,
         "timestamp": "00:00"
       },
       {
         "speaker": "cta",
-        "text": "Visit Instagram profile",
+        "text": "Learn more",
         "start": 0,
         "duration": 0,
         "timestamp": "00:00"
       },
       {
         "speaker": "landingUrl",
-        "text": "http://instagram.com/sukeban_world",
+        "text": "http://facebook.com/votinginformationcenter",
         "start": 0,
         "duration": 0,
         "timestamp": "00:00"
       }
     ],
-    "wordCount": 41,
-    "segments": 3,
+    "wordCount": 25,
+    "segments": 4,
     "advertiser": {
-      "id": "146705838515566",
-      "name": "Sukeban World",
-      "url": "https://www.facebook.com/61551864263186/",
-      "logo": "https://scontent.fsac1-1.fna.fbcdn.net/v/t39.35426-6/517640014_2104272360362331_1464623957160374455_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=zj4Fm9x6lhEQ7kNvwGX5CM5&_nc_oc=AdoC2MrM9oIhVikCRsi3wj6nkC9NVYXpe-tkygNO6a0KIBU6t1iNVzlaer6gq8RfjyU&_nc_zt=14&_nc_ht=scontent.fsac1-1.fna&_nc_gid=hpXXb2jeX_Z3VwLBka30uw&_nc_ss=72289&oh=00_AQCrkNl-5JFg_6timeMj_ZxeKknQryina34Y2N27l2RlyA&oe=6A611F63"
+      "id": "108824017345866",
+      "name": "Meta",
+      "url": "https://www.facebook.com/Meta/",
+      "logo": "https://scontent-dfw5-2.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=ZqrAiU5uA1sQ7kNvwHsXpf9&_nc_oc=AdqVVq_tCCm9QfdHEQa5d82UKJTt9DT4LxrW9m95vTx7VJLcyuQH74gIZv0WeiJgIfo&_nc_zt=23&_nc_ht=scontent-dfw5-2.xx&_nc_gid=oKi5rqU7-78Y6XFLpAVqvA&_nc_ss=79289&oh=00_AQDIgONmGu5lj1i0jpr_nH9fjb7afatDtlB-wsXtBQNtZQ&oe=6A8F324E"
     }
   },
   "facebook-ad-library-company-ads": {

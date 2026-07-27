@@ -4419,8 +4419,8 @@
     "platform": "ad_library",
     "name": "Facebook Ad Details",
     "path": "/v1/ad-library/facebook/ad-details",
-    "credits": 17,
-    "summary": "Meta/Facebook ad details.",
+    "credits": 2,
+    "summary": "Meta/Facebook Ad Library ad details (creative text, media, advertiser).",
     "params": [
       {
         "name": "url",
@@ -4441,7 +4441,7 @@
     "platform": "ad_library",
     "name": "Facebook Ad Transcript",
     "path": "/v1/ad-library/facebook/ad-transcript",
-    "credits": 17,
+    "credits": 2,
     "summary": "Extract creative text from a Meta/Facebook ad as transcript text.",
     "params": [
       {

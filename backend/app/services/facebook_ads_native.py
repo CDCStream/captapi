@@ -1,8 +1,9 @@
-"""Native Meta Ad Library search via Decodo JS-rendered HTML (no Apify).
+"""Native Meta Ad Library via Decodo JS-rendered HTML (no Apify).
 
 Facebook blocks plain datacenter/residential fetches (403). Decodo with
 ``headless=html`` returns the hydrated Ad Library page, which embeds
-``collated_results`` JSON we can parse. Cost is one Decodo render per call.
+``collated_results`` (search) or a deeplinked ad object (``?id=``). Cost is
+one Decodo render per call.
 """
 
 from __future__ import annotations
@@ -20,6 +21,7 @@ from app.services import decodo_fetch
 log = structlog.get_logger(__name__)
 
 _LIBRARY = "https://www.facebook.com/ads/library/"
+_AD_ID_RE = re.compile(r"(?:[?&]id=|/ads/library/.*?id=)(\d{5,})", re.I)
 
 
 def search_url(q: str, country: str, *, active_status: str = "all") -> str:
@@ -32,6 +34,26 @@ def search_url(q: str, country: str, *, active_status: str = "all") -> str:
         "media_type": "all",
     }
     return f"{_LIBRARY}?{urlencode(params)}"
+
+
+def ad_id_from_url(url_or_id: str) -> str | None:
+    raw = (url_or_id or "").strip()
+    if not raw:
+        return None
+    if raw.isdigit() and len(raw) >= 5:
+        return raw
+    m = _AD_ID_RE.search(raw)
+    if m:
+        return m.group(1)
+    m = re.search(r"\b(\d{10,})\b", raw)
+    return m.group(1) if m else None
+
+
+def ad_library_url(url_or_id: str, *, country: str = "US") -> str | None:
+    aid = ad_id_from_url(url_or_id)
+    if not aid:
+        return None
+    return f"{_LIBRARY}?{urlencode({'id': aid, 'country': (country or 'US').upper()})}"
 
 
 def company_library_url(url_or_page: str, country: str) -> str:
@@ -121,6 +143,42 @@ def extract_collated_ads(html: str) -> list[dict[str, Any]]:
             seen.add(aid)
             out.append(item)
     return out
+
+
+def extract_ad_by_id(html: str, ad_id: str) -> dict[str, Any] | None:
+    """Find the deeplinked / embedded ad object for ``ad_id``."""
+    aid = str(ad_id or "").strip()
+    if not aid or not html:
+        return None
+
+    # Prefer matching collated_results rows when present.
+    for item in extract_collated_ads(html):
+        if str(item.get("ad_archive_id") or item.get("adArchiveId") or "") == aid:
+            return item
+
+    # Deeplink pages often embed the target outside collated_results.
+    for needle in (f'"ad_archive_id":"{aid}"', f'"ad_archive_id": "{aid}"'):
+        pos = html.find(needle)
+        if pos < 0:
+            continue
+        depth = 0
+        start = pos
+        for j in range(pos, max(0, pos - 900_000), -1):
+            ch = html[j]
+            if ch == "}":
+                depth += 1
+            elif ch == "{":
+                if depth == 0:
+                    start = j
+                    break
+                depth -= 1
+        try:
+            obj, _end = json.JSONDecoder().raw_decode(html[start:])
+        except ValueError:
+            continue
+        if isinstance(obj, dict) and str(obj.get("ad_archive_id") or "") == aid:
+            return obj
+    return None
 
 
 def _unix_iso(value: Any) -> str | None:
@@ -266,3 +324,28 @@ async def search_companies(
     if ads is None:
         return None
     return ads
+
+
+async def ad_details(url_or_id: str, *, country: str = "US") -> dict[str, Any] | None:
+    """Fetch one Meta Ad Library ad by id/URL → ``_normalize_ad`` input shape."""
+    page_url = ad_library_url(url_or_id, country=country)
+    aid = ad_id_from_url(url_or_id)
+    if not page_url or not aid or not decodo_fetch.enabled():
+        return None
+    got = await decodo_fetch.fetch_url(page_url, timeout=120.0, headless="html")
+    if not got:
+        return None
+    status, html = got
+    if status != 200 or len(html) < 5000:
+        log.warning("facebook_ads_native_detail_weak", status=status, length=len(html), ad_id=aid)
+        return None
+    raw = extract_ad_by_id(html, aid)
+    if not raw:
+        log.warning("facebook_ads_native_detail_miss", ad_id=aid, length=len(html))
+        return None
+    mapped = to_normalize_shape(raw)
+    # Country is sometimes omitted on deeplink blobs; keep the request country.
+    if not mapped.get("targetedOrReachedCountries"):
+        mapped["targetedOrReachedCountries"] = [(country or "US").upper()]
+    log.info("facebook_ads_native_detail_ok", ad_id=aid)
+    return mapped
