@@ -334,11 +334,11 @@ const TWITCH: Omit<Endpoint, "platform">[] = [
 ];
 
 const SPOTIFY: Omit<Endpoint, "platform">[] = [
-  { tool: "spotify_artist", name: "Spotify Artist", path: "/v1/spotify/artist", credits: 6, summary: "Spotify artist details, followers and listener metadata.", params: [url(SPOTIFY_URL), cacheParam()] },
-  { tool: "spotify_track", name: "Spotify Track", path: "/v1/spotify/track", credits: 6, summary: "Spotify track metadata, artists, album and play count when available.", params: [url(SPOTIFY_URL), cacheParam()] },
-  { tool: "spotify_album", name: "Spotify Album", path: "/v1/spotify/album", credits: 6, summary: "Spotify album metadata and track count.", params: [url(SPOTIFY_URL), cacheParam()] },
+  { tool: "spotify_artist", name: "Spotify Artist", path: "/v1/spotify/artist", credits: 2, summary: "Spotify artist details, followers and listener metadata.", params: [url(SPOTIFY_URL), cacheParam()] },
+  { tool: "spotify_track", name: "Spotify Track", path: "/v1/spotify/track", credits: 2, summary: "Spotify track metadata, artists, album and play count when available.", params: [url(SPOTIFY_URL), cacheParam()] },
+  { tool: "spotify_album", name: "Spotify Album", path: "/v1/spotify/album", credits: 2, summary: "Spotify album metadata and track count.", params: [url(SPOTIFY_URL), cacheParam()] },
   { tool: "spotify_search", name: "Spotify Search", path: "/v1/spotify/search", credits: 23, summary: "Search Spotify tracks, albums, artists, podcasts or episodes.", params: [q(), { name: "type", type: "string", required: false, description: "tracks, albums, artists, podcasts, or episodes. Default tracks." }, limit(20, 50)] },
-  { tool: "spotify_podcast", name: "Spotify Podcast", path: "/v1/spotify/podcast", credits: 6, summary: "Spotify podcast/show details and episode summary metadata.", params: [url(SPOTIFY_URL), limitFlat(20, 50, 6), cacheParam()] },
+  { tool: "spotify_podcast", name: "Spotify Podcast", path: "/v1/spotify/podcast", credits: 2, summary: "Spotify podcast/show details and episode summary metadata.", params: [url(SPOTIFY_URL), limitFlat(20, 50, 6), cacheParam()] },
   { tool: "spotify_podcast_episodes", name: "Spotify Podcast Episodes", path: "/v1/spotify/podcast-episodes", credits: 23, summary: "List episodes for a Spotify podcast/show.", params: [url(SPOTIFY_URL), limit(20, 50)] },
 ];
 

@@ -90,10 +90,13 @@ def _year_of(value: Any) -> int | None:
 
 def _episodes_v2(item: dict[str, Any]) -> dict[str, Any]:
     """Unwrap the podcast's episodes GraphQL envelope
-    (episodes.data.podcastUnionV2.episodesV2)."""
+    (episodes.data.podcastUnionV2.episodesV2) or top-level episodesV2."""
+    top = item.get("episodesV2")
+    if isinstance(top, dict) and top.get("totalCount") is not None:
+        return top
     block = item.get("episodes")
     if not isinstance(block, dict):
-        return {}
+        return top if isinstance(top, dict) else {}
     union = (block.get("data") or {}).get("podcastUnionV2") if isinstance(block.get("data"), dict) else None
     v2 = (union or {}).get("episodesV2")
     if isinstance(v2, dict):
@@ -241,10 +244,16 @@ async def _oembed_details(kind: str, uri: str) -> dict[str, Any]:
     return _normalize(payload, kind)
 
 
-async def _details(kind: str, uri: str, limit: int | None = None) -> dict[str, Any]:
+async def _details(kind: str, uri: str, limit: int | None = None, *, ctx: dict[str, Any] | None = None) -> dict[str, Any]:
     settings = get_settings()
-    # The actor's *_get_limit fields require a minimum of 1 - passing 0 fails
-    # input validation and every call used to drop to the bare oembed fallback.
+    # 1) Native Pathfinder (same stack as search / podcast-episodes).
+    native = await spotify_native.details_native(kind, uri, episode_limit=max(1, limit or 1))
+    if native is not None:
+        if ctx is not None:
+            ctx["source"] = "direct"
+        return _normalize(native, kind)
+
+    # 2) Apify details actor.
     album_limit = max(1, limit or 1) if kind == "album" else 1
     podcast_limit = max(1, limit or 1) if kind == "podcast" else 1
     run_input: dict[str, Any] = {
@@ -265,9 +274,15 @@ async def _details(kind: str, uri: str, limit: int | None = None) -> dict[str, A
             max_items=1,
         )
     except (ApifyError, httpx.HTTPError):
+        if ctx is not None:
+            ctx["source"] = "oembed"
         return await _oembed_details(kind, uri)
     if not items or items[0].get("error"):
+        if ctx is not None:
+            ctx["source"] = "oembed"
         return await _oembed_details(kind, uri)
+    if ctx is not None:
+        ctx["source"] = "apify"
     return _normalize(items[0], kind)
 
 
@@ -278,8 +293,18 @@ async def artist(
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "artist")
-    async with billed_call(caller=caller, endpoint="/v1/spotify/artist", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.artist", {"uri": uri, "v": 6}, lambda: _details("artist", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
+    async with billed_call(caller=caller, endpoint="/v1/spotify/artist", platform="spotify", resource_url=uri, base_credits=CREDIT_NATIVE) as ctx:
+        async def _run() -> dict[str, Any]:
+            return await _details("artist", uri, ctx=ctx)
+
+        data = await cached_or_run(
+            "spotify.artist",
+            {"uri": uri, "v": 7},
+            _run,
+            ctx,
+            ttl=get_settings().CACHE_TTL_STATIC,
+            use_cache=cache,
+        )
         return ApiResponse(data=data)
 
 
@@ -290,8 +315,18 @@ async def track(
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "track")
-    async with billed_call(caller=caller, endpoint="/v1/spotify/track", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.track", {"uri": uri, "v": 7}, lambda: _details("track", uri), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
+    async with billed_call(caller=caller, endpoint="/v1/spotify/track", platform="spotify", resource_url=uri, base_credits=CREDIT_NATIVE) as ctx:
+        async def _run() -> dict[str, Any]:
+            return await _details("track", uri, ctx=ctx)
+
+        data = await cached_or_run(
+            "spotify.track",
+            {"uri": uri, "v": 8},
+            _run,
+            ctx,
+            ttl=get_settings().CACHE_TTL_STATIC,
+            use_cache=cache,
+        )
         return ApiResponse(data=data)
 
 
@@ -302,8 +337,18 @@ async def album(
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "album")
-    async with billed_call(caller=caller, endpoint="/v1/spotify/album", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.album", {"uri": uri, "v": 6}, lambda: _details("album", uri, limit=1), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
+    async with billed_call(caller=caller, endpoint="/v1/spotify/album", platform="spotify", resource_url=uri, base_credits=CREDIT_NATIVE) as ctx:
+        async def _run() -> dict[str, Any]:
+            return await _details("album", uri, limit=1, ctx=ctx)
+
+        data = await cached_or_run(
+            "spotify.album",
+            {"uri": uri, "v": 7},
+            _run,
+            ctx,
+            ttl=get_settings().CACHE_TTL_STATIC,
+            use_cache=cache,
+        )
         return ApiResponse(data=data)
 
 
@@ -315,8 +360,18 @@ async def podcast(
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "show")
-    async with billed_call(caller=caller, endpoint="/v1/spotify/podcast", platform="spotify", resource_url=uri, base_credits=6) as ctx:
-        data = await cached_or_run("spotify.podcast", {"uri": uri, "limit": limit, "v": 6}, lambda: _details("podcast", uri, limit), ctx, ttl=get_settings().CACHE_TTL_STATIC, use_cache=cache)
+    async with billed_call(caller=caller, endpoint="/v1/spotify/podcast", platform="spotify", resource_url=uri, base_credits=CREDIT_NATIVE) as ctx:
+        async def _run() -> dict[str, Any]:
+            return await _details("podcast", uri, limit, ctx=ctx)
+
+        data = await cached_or_run(
+            "spotify.podcast",
+            {"uri": uri, "limit": limit, "v": 7},
+            _run,
+            ctx,
+            ttl=get_settings().CACHE_TTL_STATIC,
+            use_cache=cache,
+        )
         return ApiResponse(data=data)
 
 

@@ -1,4 +1,4 @@
-"""Native Spotify search + podcast episodes via the web-player Pathfinder API.
+"""Native Spotify search, entity details, and podcast episodes via Pathfinder.
 
 Flow (no Apify, no residential proxy required in practice):
   1. Anonymous web-player access token (TOTP handshake + ThetaDev secrets)
@@ -503,3 +503,101 @@ async def podcast_episodes_native(
         if not rows and podcast.get("__typename") != "Podcast":
             return None
         return podcast, rows[:limit]
+
+
+def _entity_uri(url_or_uri: str, kind: str) -> str | None:
+    """Normalize URL/URI/ID to ``spotify:{kind}:{id}``.
+
+    ``kind`` is the Spotify URI type: artist, track, album, show.
+    """
+    value = (url_or_uri or "").strip()
+    if not value:
+        return None
+    if value.startswith(f"spotify:{kind}:"):
+        return value
+    m = re.search(
+        rf"(?:open\.spotify\.com/{re.escape(kind)}/|spotify:{re.escape(kind)}:)([A-Za-z0-9]+)",
+        value,
+        re.I,
+    )
+    if m:
+        return f"spotify:{kind}:{m.group(1)}"
+    if re.fullmatch(r"[A-Za-z0-9]{22}", value):
+        return f"spotify:{kind}:{value}"
+    return None
+
+
+async def details_native(
+    kind: str, url_or_uri: str, *, episode_limit: int = 1
+) -> dict[str, Any] | None:
+    """Hydrate one entity for ``_normalize``. ``kind``: artist|track|album|podcast.
+
+    Returns None when Pathfinder auth/query fails (caller may oembed/Apify).
+    """
+    uri_kind = {"artist": "artist", "track": "track", "album": "album", "podcast": "show"}.get(
+        kind
+    )
+    if not uri_kind:
+        return None
+    uri = _entity_uri(url_or_uri, uri_kind)
+    if not uri:
+        return None
+
+    async with httpx.AsyncClient(timeout=25, follow_redirects=True, headers=_UA) as client:
+        await _refresh_hashes(client)
+        token = await _get_token(client)
+        if not token:
+            return None
+
+        if kind == "track":
+            rows = await _hydrate_tracks(client, token, [uri])
+            return rows[0] if rows else None
+        if kind == "album":
+            rows = await _hydrate_albums(client, token, [uri])
+            return rows[0] if rows else None
+        if kind == "artist":
+            rows = await _hydrate_artists(client, token, [uri])
+            return rows[0] if rows else None
+        if kind == "podcast":
+            meta = await _pathfinder(
+                client,
+                token,
+                "queryShowMetadataV2",
+                {
+                    "uri": uri,
+                    "includeContentCapabilityTrait": False,
+                    "includeEpisodeContentRatingsV2": False,
+                },
+            )
+            podcast_union = (meta or {}).get("podcastUnionV2")
+            if not isinstance(podcast_union, dict) or podcast_union.get("__typename") == "NotFound":
+                packed = await podcast_episodes_native(uri, max(1, episode_limit))
+                if packed is None:
+                    return None
+                return packed[0]
+            podcast = _with_url(dict(podcast_union))
+            if not podcast.get("uri"):
+                podcast["uri"] = uri
+            has_total = podcast.get("totalEpisodes") is not None or (
+                isinstance(podcast.get("episodesV2"), dict)
+                and podcast["episodesV2"].get("totalCount") is not None
+            )
+            if not has_total:
+                eps = await _pathfinder(
+                    client,
+                    token,
+                    "queryPodcastEpisodes",
+                    {
+                        "uri": uri,
+                        "offset": 0,
+                        "limit": max(1, min(episode_limit, 50)),
+                        "includeEpisodeContentRatingsV2": False,
+                    },
+                )
+                v2 = (eps or {}).get("podcastUnionV2") or {}
+                block = v2.get("episodesV2") if isinstance(v2, dict) else None
+                if isinstance(block, dict):
+                    podcast["episodesV2"] = block
+            return podcast
+        return None
+

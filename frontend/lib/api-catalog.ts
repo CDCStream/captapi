@@ -375,11 +375,11 @@ const TWITCH: Spec[] = [
 ];
 
 const SPOTIFY: Spec[] = [
-  { slug: "spotify-artist", name: "Spotify Artist API", shortName: "Artist", category: "channel", method: "GET", path: "/v1/spotify/artist", credits: 6 },
-  { slug: "spotify-track", name: "Spotify Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/spotify/track", credits: 6 , tagline: "Get a Spotify track — title, artists, album, duration, and popularity as structured JSON." },
-  { slug: "spotify-album", name: "Spotify Album API", shortName: "Album", category: "details", method: "GET", path: "/v1/spotify/album", credits: 6 , tagline: "Get a Spotify album — title, artists, tracks, release date, and cover art as structured JSON." },
+  { slug: "spotify-artist", name: "Spotify Artist API", shortName: "Artist", category: "channel", method: "GET", path: "/v1/spotify/artist", credits: 2 },
+  { slug: "spotify-track", name: "Spotify Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/spotify/track", credits: 2 , tagline: "Get a Spotify track — title, artists, album, duration, and popularity as structured JSON." },
+  { slug: "spotify-album", name: "Spotify Album API", shortName: "Album", category: "details", method: "GET", path: "/v1/spotify/album", credits: 2 , tagline: "Get a Spotify album — title, artists, tracks, release date, and cover art as structured JSON." },
   { slug: "spotify-search", name: "Spotify Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/spotify/search", credits: 2 },
-  { slug: "spotify-podcast", name: "Spotify Podcast API", shortName: "Podcast", category: "details", method: "GET", path: "/v1/spotify/podcast", credits: 6 , tagline: "Get a Spotify podcast show — title, publisher, description, and episode counts as structured JSON." },
+  { slug: "spotify-podcast", name: "Spotify Podcast API", shortName: "Podcast", category: "details", method: "GET", path: "/v1/spotify/podcast", credits: 2 , tagline: "Get a Spotify podcast show — title, publisher, description, and episode counts as structured JSON." },
   { slug: "spotify-podcast-episodes", name: "Spotify Podcast Episodes API", shortName: "Podcast Episodes", category: "list", method: "GET", path: "/v1/spotify/podcast-episodes", credits: 2 },
 ];
 
@@ -1370,7 +1370,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "spotify-track": [up(SPOTIFY_URL), cacheP()],
   "spotify-album": [up(SPOTIFY_URL), cacheP()],
   "spotify-search": [qp(), { name: "type", type: "string", required: false, description: "tracks, albums, artists, podcasts, or episodes. Default tracks." }, lp(20, 50)],
-  "spotify-podcast": [up(SPOTIFY_URL), lpFlat(20, 50, 6), cacheP()],
+  "spotify-podcast": [up(SPOTIFY_URL), lpFlat(20, 50, 2), cacheP()],
   "spotify-podcast-episodes": [up(SPOTIFY_URL), lp(20, 50)],
   // SoundCloud
   "soundcloud-artist": [up(SC_PROFILE)],
