@@ -12795,29 +12795,29 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "twitter-tweet-details": {
     "platform": "twitter",
-    "url": "https://x.com/NASA/status/2078226501024227542",
-    "id": "2078226501024227542",
-    "text": "RT @NASASpox: Full steam ahead this week at @NASA 🚀\n\n🧑‍🚀 @Astro_Anil arrives at the ISS\n🪐 Dragonfly progress\n✈️ Future of autonomous flight…",
+    "url": "https://x.com/NASASpox/status/2078224758781751775",
+    "id": "2078224758781751775",
+    "text": "Full steam ahead this week at @NASA 🚀\n\n🧑‍🚀 @Astro_Anil arrives at the ISS\n🪐 Dragonfly progress\n✈️ Future of autonomous flight\n🤝 70 Artemis Accords signatories\n\nHere's your NASA Minute! https://t.co/GAZ4sUqfbZ",
     "lang": "en",
-    "publishedAt": "Fri Jul 17 21:13:04 +0000 2026",
+    "publishedAt": "2026-07-17T21:06:08.000Z",
     "author": {
-      "username": "NASA",
-      "displayName": "NASA",
-      "url": "https://x.com/NASA",
-      "followers": 92198306,
+      "username": "NASASpox",
+      "displayName": "Bethany Stevens",
+      "url": "https://x.com/NASASpox",
+      "followers": null,
       "verified": true,
-      "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
+      "profileImage": "https://pbs.twimg.com/profile_images/2030158374625759233/3fWyLDjS_normal.jpg"
     },
     "engagement": {
-      "views": 58460,
-      "likes": 0,
-      "replies": 0,
-      "retweets": 59,
-      "quotes": 0,
-      "bookmarks": 0
+      "views": null,
+      "likes": 603,
+      "replies": 52,
+      "retweets": null,
+      "quotes": null,
+      "bookmarks": null
     },
     "isReply": false,
-    "isRetweet": true,
+    "isRetweet": null,
     "hashtags": [],
     "media": [
       "https://pbs.twimg.com/media/HNdWSZ3XsAEekpT.jpg"

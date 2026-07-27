@@ -1,6 +1,6 @@
 """Twitter / X endpoints (tweets, timelines, search, profiles).
 
-Backed by the apidojo Tweet Scraper V2 (tweets, search, per-handle timelines)
+Tweet details/transcript prefer the public syndication API; list endpoints use apidojo Tweet Scraper V2 (tweets, search, per-handle timelines)
 and the apidojo Twitter User Scraper (profiles). Field mappings are defensive —
 both actors expose several aliases for the same value across versions.
 """
@@ -75,14 +75,22 @@ def _require_twitter_handle(value: str) -> str:
 
 def _author(a: dict[str, Any]) -> dict[str, Any]:
     username = a.get("userName") or a.get("screen_name") or a.get("username")
+    verified = first_present(
+        a.get("isVerified"),
+        a.get("isBlueVerified"),
+        a.get("is_blue_verified"),
+        a.get("verified"),
+    )
     return {
         "username": safe_str(username),
         "displayName": safe_str(a.get("name") or a.get("fullName")),
         "url": safe_str(a.get("url"))
         or (f"https://x.com/{username}" if username else None),
-        "followers": safe_int(a.get("followers") or a.get("followersCount")),
-        "verified": a.get("isVerified") or a.get("isBlueVerified") or a.get("verified"),
-        "profileImage": safe_str(a.get("profilePicture") or a.get("profile_image_url_https")),
+        "followers": safe_int(a.get("followers") or a.get("followersCount") or a.get("followers_count")),
+        "verified": bool(verified) if verified is not None else None,
+        "profileImage": safe_str(
+            a.get("profilePicture") or a.get("profile_image_url_https") or a.get("profileImage")
+        ),
     }
 
 
@@ -163,10 +171,20 @@ def _tweet_hashtags(item: dict[str, Any]) -> list[str]:
 
 
 def _raw_media(item: dict[str, Any]) -> list[Any]:
-    """Media list from top-level, extendedEntities, or entities.media."""
+    """Media list from top-level, syndication, extendedEntities, or entities.media."""
     direct = safe_list(item.get("media"))
     if direct:
         return direct
+    # Syndication: mediaDetails[] / photos[] / video.poster
+    details = safe_list(item.get("mediaDetails"))
+    if details:
+        return details
+    photos = safe_list(item.get("photos"))
+    if photos:
+        return photos
+    video = item.get("video")
+    if isinstance(video, dict) and video.get("poster"):
+        return [{"media_url_https": video.get("poster")}]
     for container_key in ("extendedEntities", "entities"):
         container = item.get(container_key)
         if isinstance(container, dict):
@@ -187,7 +205,13 @@ def _tweet_media(item: dict[str, Any]) -> list[str]:
     for m in raw:
         if isinstance(m, dict):
             # Prefer still/thumbnail URL over t.co permalink in `url`.
-            u = safe_str(m.get("media_url_https") or m.get("mediaUrl") or m.get("url"))
+            u = safe_str(
+                m.get("media_url_https")
+                or m.get("mediaUrl")
+                or m.get("media_url")
+                or (m.get("url") if not str(m.get("url") or "").startswith("https://t.co/") else None)
+                or m.get("url")
+            )
         else:
             u = safe_str(m)
         if u:
@@ -208,7 +232,9 @@ def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
         }
     url = safe_str(item.get("url") or item.get("twitterUrl"))
     if not url:
-        username = author.get("userName") if isinstance(author, dict) else None
+        username = None
+        if isinstance(author, dict):
+            username = author.get("userName") or author.get("screen_name") or author.get("username")
         tweet_id = item.get("id") or item.get("id_str")
         if username and tweet_id:
             url = f"https://x.com/{username}/status/{tweet_id}"
@@ -226,8 +252,16 @@ def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
             "views": safe_int(
                 first_present(item.get("viewCount"), item.get("views"), item.get("view_count"))
             ),
-            "likes": safe_int(first_present(item.get("likeCount"), item.get("favoriteCount"), item.get("favorite_count"))),
-            "replies": safe_int(first_present(item.get("replyCount"), item.get("reply_count"))),
+            "likes": safe_int(
+                first_present(item.get("likeCount"), item.get("favoriteCount"), item.get("favorite_count"))
+            ),
+            "replies": safe_int(
+                first_present(
+                    item.get("replyCount"),
+                    item.get("reply_count"),
+                    item.get("conversation_count"),
+                )
+            ),
             "retweets": safe_int(first_present(item.get("retweetCount"), item.get("retweet_count"))),
             "quotes": safe_int(first_present(item.get("quoteCount"), item.get("quote_count"))),
             "bookmarks": safe_int(first_present(item.get("bookmarkCount"), item.get("bookmark_count"))),
@@ -295,7 +329,7 @@ async def twitter_tweet_details(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    _require_tweet_url(url)
+    tweet_id = _require_tweet_url(url)
     settings = get_settings()
     async with billed_call(
         caller=caller,
@@ -305,19 +339,25 @@ async def twitter_tweet_details(
         base_credits=CREDIT_TWEET_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
+            # Free public syndication first (same path as /transcript).
+            syn = await native.tweet_result(tweet_id)
+            if syn:
+                ctx["source"] = "direct"
+                return _normalize_tweet(syn)
+
+            items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_TWITTER_TWEET,
                 {"startUrls": [url], "maxItems": 1},
                 max_items=1,
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Tweet not found")
+            ctx["source"] = "apify"
             return _normalize_tweet(items[0])
 
         data = await cached_or_run(
             endpoint="twitter.tweet-details",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -1,14 +1,13 @@
 """Native tweet lookup via Twitter's public syndication endpoint.
 
 ``cdn.syndication.twimg.com/tweet-result`` is the same unauthenticated API
-that powers embedded tweets. It returns the tweet text, author, timestamp,
-language, entities and media — everything a transcript/text extraction needs,
-for free and in ~200ms.
+that powers embedded tweets. It returns text, author, timestamp, language,
+entities, media, ``favorite_count`` and ``conversation_count`` for free in
+~200ms.
 
-It does NOT expose full engagement metrics (retweets, quotes, views,
-bookmarks) or follower counts, so it is only suitable for the text-only
-transcript path — not the engagement-rich ``tweet-details`` endpoint, which
-stays on the Apify actor.
+It does NOT expose retweets/quotes/views/bookmarks or author follower counts;
+those fields stay null on the native path. ``tweet-details`` and ``transcript``
+both prefer syndication and fall through to Apify when it misses.
 """
 
 from __future__ import annotations
