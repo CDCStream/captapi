@@ -45,12 +45,14 @@ async def fetch_url(
     timeout: float = 30.0,
     *,
     headless: str | None = None,
+    browser_actions: list[dict[str, Any]] | None = None,
 ) -> tuple[int, str] | None:
     """Fetch ``url`` via Decodo. Returns ``(upstream_status, body_text)`` or
     ``None`` when Decodo is unconfigured / errored, so callers can fall back.
 
     Pass ``headless="html"`` to enable JavaScript rendering (needed for Meta /
     LinkedIn Ad Library pages that hydrate search results client-side).
+    Optional ``browser_actions`` runs Decodo interactions (scroll/wait) first.
     """
     auth_header = _auth_header()
     if not auth_header:
@@ -59,6 +61,8 @@ async def fetch_url(
     body: dict[str, Any] = {"url": url}
     if headless:
         body["headless"] = headless
+    if browser_actions:
+        body["browser_actions"] = browser_actions
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
             response = await client.post(

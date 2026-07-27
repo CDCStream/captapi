@@ -22,6 +22,7 @@ from app.services import (
     facebook_events_native,
     facebook_marketplace_native,
     facebook_page_native,
+    facebook_profile_posts_native,
 )
 from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services.apify_proxy import fetch_via_residential
@@ -54,6 +55,7 @@ RATE_FB_EVENTS = 2.0
 CREDIT_FB_EVENTS_NATIVE = facebook_events_native.CREDIT_FB_EVENTS_NATIVE
 CREDIT_FB_COMMENTS_NATIVE = facebook_comments_native.CREDIT_FB_COMMENTS_NATIVE
 CREDIT_FB_MARKETPLACE_NATIVE = facebook_marketplace_native.CREDIT_FB_MARKETPLACE_NATIVE
+CREDIT_FB_PROFILE_POSTS_NATIVE = facebook_profile_posts_native.CREDIT_FB_PROFILE_POSTS_NATIVE
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -1121,34 +1123,28 @@ async def facebook_profile_posts(
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = _require_facebook_page(url)
-    settings = get_settings()
-    cost = _scaled_credits(limit, RATE_FB_POSTS, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/profile-posts",
         platform="facebook",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_FB_PROFILE_POSTS_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_FACEBOOK_POSTS,
-                {"startUrls": [{"url": url}], "resultsLimit": limit},
-                max_items=limit,
-            )
-            posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
-            ctx["source"] = "apify"
+            raws = await facebook_profile_posts_native.profile_posts_native(url, limit)
+            if raws is None:
+                raise HTTPException(status_code=404, detail="Posts not found")
+            posts = [strip_empty(_normalize_post(i)) for i in raws]
+            ctx["source"] = "direct"
             return {"url": url, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
             endpoint="facebook.profile-posts",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_FB_POSTS, 2)
         return ApiResponse(data=data)
 
 
