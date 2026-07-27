@@ -1897,7 +1897,7 @@
     "name": "Facebook Marketplace Search",
     "path": "/v1/facebook/marketplace-search",
     "credits": 2,
-    "summary": "Search Facebook Marketplace listings by keyword and location.",
+    "summary": "Search Facebook Marketplace listings by keyword and location. details=true adds description/coords/photos (2 + 2 per listing).",
     "params": [
       {
         "name": "q",
@@ -1921,7 +1921,7 @@
         "name": "details",
         "type": "string",
         "required": false,
-        "description": "Set true to fetch full description, photos and coordinates per listing (slower, costs more)."
+        "description": "Set true to enrich each listing with description, photos and coordinates (2 + 2 credits per listing)."
       },
       {
         "name": "cache",
@@ -2076,8 +2076,8 @@
     "platform": "facebook",
     "name": "Facebook Marketplace Item",
     "path": "/v1/facebook/marketplace-item",
-    "credits": 1,
-    "summary": "Details for a single Facebook Marketplace listing.",
+    "credits": 2,
+    "summary": "Details for a single Facebook Marketplace listing (title, price, description, condition, photos, location).",
     "params": [
       {
         "name": "url",

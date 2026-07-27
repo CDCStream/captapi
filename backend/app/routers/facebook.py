@@ -52,13 +52,12 @@ CREDIT_PAGE_DETAILS = facebook_page_native.CREDIT_FB_PAGE_NATIVE
 RATE_FB_COMMENTS = 0.6
 # Posts / reels / group posts scrapers are billed per result (~$0.0015-0.002).
 RATE_FB_POSTS = 0.6
-# Marketplace listings billed at $4.50/1k = $0.0045/result -> 1 credit/listing.
-RATE_FB_MARKETPLACE = 1.4
 # Events billed at $13/1k = $0.013/event -> 2 credits/event.
 RATE_FB_EVENTS = 2.0
 CREDIT_FB_EVENTS_NATIVE = facebook_events_native.CREDIT_FB_EVENTS_NATIVE
 CREDIT_FB_COMMENTS_NATIVE = facebook_comments_native.CREDIT_FB_COMMENTS_NATIVE
 CREDIT_FB_MARKETPLACE_NATIVE = facebook_marketplace_native.CREDIT_FB_MARKETPLACE_NATIVE
+CREDIT_FB_MARKETPLACE_ITEM_NATIVE = facebook_marketplace_native.CREDIT_FB_MARKETPLACE_ITEM_NATIVE
 CREDIT_FB_PROFILE_POSTS_NATIVE = facebook_profile_posts_native.CREDIT_FB_PROFILE_POSTS_NATIVE
 CREDIT_FB_PROFILE_REELS_NATIVE = facebook_profile_reels_native.CREDIT_FB_PROFILE_REELS_NATIVE
 CREDIT_FB_GROUP_POSTS_NATIVE = facebook_group_posts_native.CREDIT_FB_GROUP_POSTS_NATIVE
@@ -1467,95 +1466,23 @@ async def facebook_marketplace_item(
         "https://www.facebook.com/marketplace/item/123456789",
         "Marketplace item",
     )
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/marketplace-item",
         platform="facebook",
         resource_url=url,
-        base_credits=1,  # native: OG scrape from the public listing page, no actor
+        base_credits=CREDIT_FB_MARKETPLACE_ITEM_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Fast path: scrape OpenGraph metadata from the public listing page.
-            # Facebook serves OG tags to residential IPs but login-walls
-            # datacenter IPs, so try the Apify residential proxy first and fall
-            # back to a direct fetch. This avoids waiting on a full marketplace
-            # actor run for single-item detail pages.
-            headers = {
-                "User-Agent": (
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                    "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
-                )
-            }
-            resp = None
-            try:
-                resp = await fetch_via_residential(url, headers=headers, timeout=8)
-            except Exception:  # noqa: BLE001
-                resp = None
-
-            def _og_fields(page: str) -> tuple[str | None, str | None, str | None]:
-                return (
-                    _og_meta(page, "og:title"),
-                    _og_meta(page, "og:description"),
-                    _og_meta(page, "og:image"),
-                )
-
-            title = description = image = None
-            if resp is not None and resp.status_code < 400:
-                title, description, image = _og_fields(resp.text)
-            if not (title or description or image):
-                async with httpx.AsyncClient(timeout=6, follow_redirects=True, headers=headers) as client:
-                    resp = await client.get(url)
-                if resp.status_code < 400:
-                    title, description, image = _og_fields(resp.text)
-            item_id = None
-            m = re.search(r"/marketplace/item/(\d+)", url)
-            if m:
-                item_id = m.group(1)
-
-            # Prefer the details actor whenever possible — OG rarely has price/
-            # coords, and neither path reliably returns listing photos.
-            apify = get_apify()
-            items = []
-            if item_id:
-                try:
-                    items = await apify.run_actor_sync(
-                        settings.APIFY_ACTOR_FACEBOOK_MARKETPLACE_ITEM,
-                        {"listingId": item_id},
-                        max_items=1,
-                    )
-                except (ApifyError, httpx.HTTPError):
-                    items = []
-            if items and not items[0].get("error"):
-                ctx["source"] = "apify"
-                return _normalize_marketplace_detail(items[0], url)
-
-            if title or description:
-                page = resp.text if resp is not None else ""
+            native = await facebook_marketplace_native.marketplace_item_native(url)
+            if native:
                 ctx["source"] = "direct"
-                return {
-                    "platform": "facebook",
-                    "id": safe_str(item_id),
-                    "url": safe_str(_og_meta(page, "og:url") or url),
-                    "title": safe_str(title),
-                    "description": safe_str(description),
-                    "price": None,
-                    "priceFormatted": None,
-                    "currency": None,
-                    "condition": None,
-                    "location": None,
-                    "latitude": None,
-                    "longitude": None,
-                    "isSold": None,
-                    "isLive": None,
-                    "deliveryTypes": [],
-                    "createdAt": None,
-                }
+                return native
             raise HTTPException(status_code=404, detail="Listing not found")
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-item",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1571,23 +1498,28 @@ async def facebook_marketplace_search(
         20,
         ge=1,
         le=200,
-        description="How many listings to return (1–200). Flat 2 credits when details=false.",
+        description=(
+            "How many listings to return (1–200). Flat 2 credits when details=false; "
+            "with details=true billed as 2 + 2 per listing."
+        ),
     ),
     details: bool = Query(
         False,
         description=(
-            "When true, fetch fuller listing fields via the backup path "
-            "(description/photos/coordinates; billed per result). "
-            "Default false uses the native list path at flat 2 credits."
+            "When true, enrich each listing with description, condition, coordinates, "
+            "and photos via native item pages (2 + 2 credits per listing). "
+            "Default false → list cards only at flat 2 credits."
         ),
     ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    settings = get_settings()
-    rate = RATE_FB_MARKETPLACE * (2 if details else 1)
-    # Native list path is flat 2; details=true still uses Apify per-result pricing.
-    base = CREDIT_FB_MARKETPLACE_NATIVE if not details else _scaled_credits(limit, rate, 2)
+    # Reserve max; override to actual returned count after the run.
+    base = (
+        facebook_marketplace_native.credits_for_details(limit)
+        if details
+        else CREDIT_FB_MARKETPLACE_NATIVE
+    )
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/marketplace-search",
@@ -1596,45 +1528,38 @@ async def facebook_marketplace_search(
         base_credits=base,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            if not details:
-                native = await facebook_marketplace_native.marketplace_search_native(q, location, limit)
-                if native is not None:
-                    ctx["source"] = "direct"
-                    return {
-                        "query": q,
-                        "location": location,
-                        "totalReturned": len(native),
-                        "listings": native,
-                    }
-
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_FACEBOOK_MARKETPLACE,
-                {
-                    "queries": [q],
-                    "locationName": location,
-                    "maxResultsPerQuery": limit,
-                    "fetchItemDetails": details,
-                },
-                max_items=limit,
-            )
-            listings = [
-                strip_empty(_normalize_listing(i))
-                for i in items[:limit]
-                if not i.get("error")
-            ]
-            ctx["source"] = "apify"
-            return {"query": q, "location": location, "totalReturned": len(listings), "listings": listings}
+            if details:
+                native = await facebook_marketplace_native.marketplace_search_details_native(
+                    q, location, limit
+                )
+            else:
+                native = await facebook_marketplace_native.marketplace_search_native(
+                    q, location, limit
+                )
+            if native is None:
+                raise HTTPException(
+                    status_code=502,
+                    detail="Facebook Marketplace search temporarily unavailable",
+                )
+            ctx["source"] = "direct"
+            return {
+                "query": q,
+                "location": location,
+                "totalReturned": len(native),
+                "listings": native,
+            }
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-search",
-            params={"q": q, "location": location, "limit": limit, "details": details, "v": 4},
+            params={"q": q, "location": location, "limit": limit, "details": details, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        if details or ctx.get("source") == "apify":
-            ctx["credits_override"] = _scaled_credits(len(data["listings"]), rate, 2)
+        if details:
+            ctx["credits_override"] = facebook_marketplace_native.credits_for_details(
+                len(data["listings"])
+            )
         return ApiResponse(data=data)
 
 
