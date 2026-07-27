@@ -1756,7 +1756,7 @@
     "platform": "facebook",
     "name": "Facebook Page Details",
     "path": "/v1/facebook/page-details",
-    "credits": 1,
+    "credits": 2,
     "summary": "Info & stats for a Facebook page.",
     "params": [
       {

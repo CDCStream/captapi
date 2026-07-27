@@ -21,6 +21,7 @@ from app.services import (
     facebook_details_native,
     facebook_events_native,
     facebook_marketplace_native,
+    facebook_page_native,
 )
 from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services.apify_proxy import fetch_via_residential
@@ -39,7 +40,7 @@ router = APIRouter()
 CREDIT_TRANSCRIPT = 2
 CREDIT_SUMMARIZE = 4
 CREDIT_DETAILS = facebook_details_native.CREDIT_FB_DETAILS_NATIVE
-CREDIT_PAGE_DETAILS = 1
+CREDIT_PAGE_DETAILS = facebook_page_native.CREDIT_FB_PAGE_NATIVE
 
 # apify/facebook-comments-scraper is billed per result ($1.50/1k = $0.0015).
 # 0.6 credit/comment = ~80% markup (0.6 * $0.0045 = $0.0027 vs $0.0015).
@@ -1088,7 +1089,6 @@ async def facebook_page_details(
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = _require_facebook_page(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/page-details",
@@ -1097,67 +1097,15 @@ async def facebook_page_details(
         base_credits=CREDIT_PAGE_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_FACEBOOK_PAGES,
-                {"startUrls": [{"url": url}]},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Page not found")
-            p = items[0]
-            if p.get("error"):
-                # The actor reports deleted/restricted pages as an error row
-                # ({"error": "not_available", ...}); returning it would produce
-                # an all-null 200 that then gets cached.
+            data = await facebook_page_native.page_details_native(url)
+            if data is None:
                 raise HTTPException(status_code=404, detail="Page not found or not public")
-            verified = p.get("verified") or p.get("isPageVerified")
-            if verified is None and (p.get("confirmed_owner") or p.get("CONFIRMED_OWNER_LABEL")):
-                # The pages scraper has no blue-badge flag; a confirmed Page
-                # owner label is the closest verification signal it exposes.
-                verified = True
-            username = safe_str(
-                p.get("pageUsername")
-                or p.get("username")
-                or _fb_username_from_url(p.get("pageUrl") or p.get("facebookUrl"))
-            )
-            page_name = safe_str(p.get("pageName"))
-            if page_name and page_name.lower() in {"people", "pages", "profile", "home"}:
-                # profile.php-style pages come back with a junk pageName (the
-                # site section, e.g. "people"); the real name lives in title.
-                page_name = None
-            display_name = page_name or safe_str(p.get("title") or p.get("name"))
-            if not display_name:
-                # Safety net: the first info line reads "<Page name>. N likes".
-                info = p.get("info")
-                first_line = safe_str(info[0]) if isinstance(info, list) and info else None
-                if first_line:
-                    display_name = first_line.rsplit(".", 1)[0].strip() or None
-            display_name = display_name or username
-            ctx["source"] = "apify"
-            return {
-                "platform": "facebook",
-                "url": safe_str(p.get("pageUrl") or p.get("facebookUrl")) or url,
-                "username": username,
-                "name": display_name,
-                "displayName": display_name,
-                "fullName": safe_str(p.get("title")) or display_name,
-                "bio": safe_str(p.get("intro") or p.get("about")),
-                "followers": safe_int(p.get("followersCount") or p.get("followers")),
-                "following": safe_int(p.get("followings")),
-                "likes": safe_int(p.get("likesCount") or p.get("likes")),
-                "verified": verified,
-                "profileImage": safe_str(p.get("profilePictureUrl") or p.get("profilePicUrl")),
-                "coverImage": safe_str(p.get("coverPhotoUrl")),
-                "category": safe_str(p.get("category")),
-                "website": safe_str(p.get("website")),
-                "email": safe_str(p.get("email")),
-                "createdAt": safe_str(p.get("creation_date")),
-            }
+            ctx["source"] = "direct"
+            return data
 
         data = await cached_or_run(
             endpoint="facebook.page-details",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
