@@ -1460,59 +1460,319 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "facebook-profile-reels": {
     "url": "https://www.facebook.com/NASA",
-    "totalReturned": 2,
+    "totalReturned": 12,
     "reels": [
       {
         "platform": "facebook",
-        "url": "https://www.facebook.com/reel/1376651124309650/",
+        "url": "https://www.facebook.com/reel/1380134307388381",
+        "id": "1584419709720066",
+        "caption": "During his eight months aboard the International Space Station, NASA astronaut Chris Williams conducted numerous experiments to improve life on Earth and prepare us for missions to the Moon and Mars.\n\nFrom cancer research to advancing technology, read about Williams’ work during his first time in space: https://go.nasa.gov/3RavGXj",
+        "description": "During his eight months aboard the International Space Station, NASA astronaut Chris Williams conducted numerous experiments to improve life on Earth and prepare us for missions to the Moon and Mars.\n\nFrom cancer research to advancing technology, read about Williams’ work during his first time in space: https://go.nasa.gov/3RavGXj",
+        "publishedAt": "2026-07-23T16:31:54.000Z",
+        "durationSeconds": 112.946,
+        "thumbnailUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t15.5256-10/754970839_803020196231197_5928609298551288000_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=102&ccb=1-7&_nc_sid=be830...",
+        "videoUrl": "https://video-iad6-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQNNFuni8clCeMB5VeV07ZDIzXWkhBI5ozM_78otCALjoD72HsRW7yvnWXM_b0WGcKAjPk-KGDhCqRkGsaoZ57noEirZQ7LpYHZZbTVu3jMMQg.mp4?_nc_cat=106&_nc...",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA - National Aeronautics and Space Administration",
+          "url": "https://www.facebook.com/NASA",
+          "profileImage": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s40x40&_nc_cat=108&ccb=1-7&_nc_sid=2d3e12&...",
+          "verified": true
+        },
+        "engagement": {
+          "views": 411000,
+          "likes": 5597,
+          "comments": 170,
+          "shares": 240
+        },
+        "isVideo": true,
+        "link": "https://go.nasa.gov/3RavGXj"
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/reel/1376651124309650",
         "id": "1567272851434752",
         "caption": "There will be more than just fireworks to see in the night sky this month!\n\nYou can look forward to these celestial sights in July:\n- A lunar-planetary alignment\n- A visiting comet\n- A good look at Saturn and the Milky Way\n\nHappy skywatching! https://go.nasa.gov/3QvQc4k",
         "description": "There will be more than just fireworks to see in the night sky this month!\n\nYou can look forward to these celestial sights in July:\n- A lunar-planetary alignment\n- A visiting comet\n- A good look at Saturn and the Milky Way\n\nHappy skywatching! https://go.nasa.gov/3QvQc4k",
-        "publishedAt": "2026-07-02T15:05:43.000Z",
+        "publishedAt": "2026-07-02T15:03:11.000Z",
         "durationSeconds": 200.016,
-        "thumbnailUrl": "https://scontent-bos5-1.xx.fbcdn.net/v/t15.5256-10/735149954_4435586749988646_521208314578416779_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=111&ccb=1-7&_nc_sid=d2b52d&_nc_ohc=6MV2S-Q4fcMQ7kNvwHUD1Ln&_nc_oc=AdpXb8qprBwK20yJ9tgNT6ZSzHZm_PZcNU4xyKQzXFsG81NA5VJ3aMAlSlPxg2kJu4w&_nc_zt=23&_nc_ht=scontent-bos5-1.xx&_nc_gid=PNgF9H_FVzoGswSu2HmYvQ&_nc_ss=72289&oh=00_AQDWjxhDD1ni-8A_WMtAJWUx_whVdt5gxQ8o8sRq4gvCsA&oe=6A4DBA2C",
-        "videoUrl": "https://video-bos5-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQOh7ZLRZfB5SIGETu_uz2jbsqvY3dW7G3sGdKsNsX627DpYoTuCxs26FyYE4T4rDzRdvIV2tOCYJi5hs8Gs1EaQEL7_LhQnAXKuILiY508JFg.mp4?_nc_cat=103&_nc_sid=5e9851&_nc_ht=video-bos5-1.xx.fbcdn.net&_nc_ohc=tWxbSmhPK1oQ7kNvwEXRFiW&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5GQUNFQk9PSy4uQzMuMTI4MC5kYXNoX2gyNjQtYmFzaWMtZ2VuMl83MjBwIiwieHB2X2Fzc2V0X2lkIjoxMzQ3ODY4NzYwMDA4MjE2LCJhc3NldF9hZ2VfZGF5cyI6MSwidmlfdXNlY2FzZV9pZCI6MTAxMjIsImR1cmF0aW9uX3MiOjIwMCwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=c53b4168a8d58285&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC80QjQyOEYzOTg3NDFDRkNGM0UzNzQ4QkZDMDY4QTU4QV9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50LzAxNEExNzM2QkY1RkU3NTNDMjU1QkUyMjg3RUMzOEE0X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACawmKfqpPjkBBUCKAJDMywXQGkBDlYEGJMYGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUCZZSeAQA&_nc_gid=PNgF9H_FVzoGswSu2HmYvQ&_nc_ss=72289&_nc_zt=28&oh=00_AQA4l4owwG4LQ0hGS_ReOWlRbfe0XFeVTW6SB1RVDkaGDA&oe=6A4DA1B5&bitrate=733579&tag=dash_h264-basic-gen2_720p",
+        "thumbnailUrl": "https://scontent-iad3-2.xx.fbcdn.net/v/t15.5256-10/735149954_4435586749988646_521208314578416779_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=111&ccb=1-7&_nc_sid=be830...",
+        "videoUrl": "https://video-iad3-2.xx.fbcdn.net/o1/v/t2/f2/m366/AQOh7ZLRZfB5SIGETu_uz2jbsqvY3dW7G3sGdKsNsX627DpYoTuCxs26FyYE4T4rDzRdvIV2tOCYJi5hs8Gs1EaQEL7_LhQnAXKuILiY508JFg.mp4?_nc_cat=103&_nc...",
         "author": {
           "username": "NASA",
-          "displayName": "NASA",
-          "url": "https://www.facebook.com/100044561550831",
-          "profileImage": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s50x50&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=ZOjc8KcuDOgQ7kNvwG_8vPI&_nc_oc=AdqUnqwdESMsGbZzgpuitYPjFGLRwynSAjh1kkALksTCcvqHI4icQz4v318xRYFM1Z0&_nc_zt=24&_nc_ht=scontent-bos5-1.xx&_nc_gid=PNgF9H_FVzoGswSu2HmYvQ&_nc_ss=72289&oh=00_AQDjpT3WOadjpdyqZVPoURrDtYcc_FRhwT08_baK9bmpNg&oe=6A4DA615",
-          "verified": null
+          "displayName": "NASA - National Aeronautics and Space Administration",
+          "url": "https://www.facebook.com/NASA",
+          "profileImage": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s40x40&_nc_cat=108&ccb=1-7&_nc_sid=2d3e12&...",
+          "verified": true
         },
         "engagement": {
-          "views": 216100,
-          "likes": 2761,
-          "comments": 52,
-          "shares": 265
+          "views": 598000,
+          "likes": 6582,
+          "comments": 89,
+          "shares": 531
         },
         "isVideo": true,
         "link": "https://go.nasa.gov/3QvQc4k"
       },
       {
         "platform": "facebook",
-        "url": "https://www.facebook.com/reel/1023344310547434/",
+        "url": "https://www.facebook.com/reel/1023344310547434",
         "id": "1565523918276312",
         "caption": "Come watch a spacewalk with us!\n\nNASA astronauts Chris Williams and Jessica Meir are stepping outside the International Space Station for about six and a half hours to make repairs to the station's Canadarm2 robotic arm. Tune in: https://youtu.be/D0dd8X4g3Eg",
         "description": "Come watch a spacewalk with us!\n\nNASA astronauts Chris Williams and Jessica Meir are stepping outside the International Space Station for about six and a half hours to make repairs to the station's Canadarm2 robotic arm. Tune in: https://youtu.be/D0dd8X4g3Eg",
-        "publishedAt": "2026-06-30T14:01:41.000Z",
+        "publishedAt": "2026-06-30T14:00:41.000Z",
         "durationSeconds": 16.362,
-        "thumbnailUrl": "https://scontent-bos5-1.xx.fbcdn.net/v/t15.5256-10/736384680_1034463129116372_1847611548688510946_n.jpg?stp=dst-jpg_tt6&cstp=mx3840x2160&ctp=s960x960&_nc_cat=100&ccb=1-7&_nc_sid=d2b52d&_nc_ohc=fin1lQjoaeMQ7kNvwG69Qnp&_nc_oc=AdrTqLT54AqsvMlIKXQF95H0x-glXp9VmceumxAE86g4Vx0SAyP5BI9Fh9lLD1aKyyo&_nc_zt=23&_nc_ht=scontent-bos5-1.xx&_nc_gid=PNgF9H_FVzoGswSu2HmYvQ&_nc_ss=72289&oh=00_AQAenGnHpNozdJy63FEkCenBGTi540iH-jogaD20ubUeAg&oe=6A4DB383",
-        "videoUrl": "https://video-bos5-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQNuYSZM6m65K0Fk1iuF6LfY4iw2glvoNgX93Y-dmgWocy6hgsX_5hBee2XwT2P17RKnX8kug-hdZWZOgsxFOs6KpmZMXw8ZoqZxkouUJIzbRQ.mp4?_nc_cat=106&_nc_sid=5e9851&_nc_ht=video-bos5-1.xx.fbcdn.net&_nc_ohc=Ei2QYiDiU1oQ7kNvwEqQyan&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5GQUNFQk9PSy4uQzMuMTI4MC5kYXNoX2gyNjQtYmFzaWMtZ2VuMl83MjBwIiwieHB2X2Fzc2V0X2lkIjo5ODU2MDY1NzA5MDk2OTgsImFzc2V0X2FnZV9kYXlzIjozLCJ2aV91c2VjYXNlX2lkIjoxMDEyMiwiZHVyYXRpb25fcyI6MTYsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=dc73e529fd61335f&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC84QzQ0ODU5MTYxRDZENEUyQUI1MzhCRDI1RjQxQ0JBOV9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50LzVFNDk0QTFDRDI5N0NDNEU2MTdFODk1MTZGQUMxQ0E2X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACaEgOGY7ZnAAxUCKAJDMywXQDBIMSbpeNUYGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUCZZSeAQA&_nc_gid=PNgF9H_FVzoGswSu2HmYvQ&_nc_ss=72289&_nc_zt=28&oh=00_AQD2JfpVQS3_JSfLNobk_yCvPd9oS2vdH5E-Aeew7SZAjg&oe=6A4D90DE&bitrate=2713929&tag=dash_h264-basic-gen2_720p",
+        "thumbnailUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t15.5256-10/736384680_1034463129116372_1847611548688510946_n.jpg?stp=dst-jpg_tt6&cstp=mx3840x2160&ctp=s960x960&_nc_cat=100&ccb=1-7&_nc_sid=be...",
+        "videoUrl": "https://video-iad6-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQNuYSZM6m65K0Fk1iuF6LfY4iw2glvoNgX93Y-dmgWocy6hgsX_5hBee2XwT2P17RKnX8kug-hdZWZOgsxFOs6KpmZMXw8ZoqZxkouUJIzbRQ.mp4?_nc_cat=106&_nc...",
         "author": {
           "username": "NASA",
-          "displayName": "NASA",
-          "url": "https://www.facebook.com/100044561550831",
-          "profileImage": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s50x50&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=ZOjc8KcuDOgQ7kNvwG_8vPI&_nc_oc=AdqUnqwdESMsGbZzgpuitYPjFGLRwynSAjh1kkALksTCcvqHI4icQz4v318xRYFM1Z0&_nc_zt=24&_nc_ht=scontent-bos5-1.xx&_nc_gid=PNgF9H_FVzoGswSu2HmYvQ&_nc_ss=72289&oh=00_AQDjpT3WOadjpdyqZVPoURrDtYcc_FRhwT08_baK9bmpNg&oe=6A4DA615",
-          "verified": null
+          "displayName": "NASA - National Aeronautics and Space Administration",
+          "url": "https://www.facebook.com/NASA",
+          "profileImage": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s80x80&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_n...",
+          "verified": true
         },
         "engagement": {
-          "views": 4446711,
-          "likes": 67169,
-          "comments": 1841,
-          "shares": 1693
+          "views": 5000000,
+          "likes": 75356,
+          "comments": 1960,
+          "shares": 1900
         },
         "isVideo": true,
         "link": "https://youtu.be/D0dd8X4g3Eg"
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/reel/1736519150699488",
+        "id": "1561248945370476",
+        "caption": "We are at the Great American State Fair in Washington, D.C.!\n \nDiscover the technology and science driving our most exciting missions by visiting the NASA Pavilion—today through July 10: https://www.nasa.gov/freedom250/#american-state-fair",
+        "description": "We are at the Great American State Fair in Washington, D.C.!\n \nDiscover the technology and science driving our most exciting missions by visiting the NASA Pavilion—today through July 10: https://www.nasa.gov/freedom250/#american-state-fair",
+        "publishedAt": "2026-06-25T16:14:35.000Z",
+        "durationSeconds": 120.0,
+        "thumbnailUrl": "https://scontent.fagc1-1.fna.fbcdn.net/v/t15.5256-10/730182605_1314642917513572_6743020664352329210_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=103&ccb=1-7&_nc_sid=be...",
+        "videoUrl": "https://video.fagc1-1.fna.fbcdn.net/o1/v/t2/f2/m366/AQNw1vJID4pcVr5SpV62MejQDC3RWwcnlksqsPLAyq80dayfLcF2ZrUq_2WUXkvRjeDWpROR6cNqkK_ViG-PJvhZRxdrheFypJ1tHPUXtaqYMg.mp4?_nc_cat=110&_...",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA - National Aeronautics and Space Administration",
+          "url": "https://www.facebook.com/NASA",
+          "profileImage": "https://scontent.fagc1-2.fna.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s80x80&_nc_cat=108&ccb=1-7&_nc_sid=2d3e1...",
+          "verified": true
+        },
+        "engagement": {
+          "views": 426000,
+          "likes": 3600,
+          "comments": 124,
+          "shares": 199
+        },
+        "isVideo": true,
+        "link": "https://www.nasa.gov/freedom250/#american-state-fair"
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/reel/1284450976822099",
+        "id": "1556903142471723",
+        "caption": "The official FIFA World Cup ball went to space! \n\nWe're working to inspire the next generation by showing how space exploration inspires innovation in sports science — and everyday life. Learn more: https://go.nasa.gov/43G4Bhc",
+        "description": "The official FIFA World Cup ball went to space! \n\nWe're working to inspire the next generation by showing how space exploration inspires innovation in sports science — and everyday life. Learn more: https://go.nasa.gov/43G4Bhc",
+        "publishedAt": "2026-06-20T14:00:00.000Z",
+        "durationSeconds": 32.265,
+        "thumbnailUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t15.5256-10/725733247_1380772853937295_3761258904677594278_n.jpg?stp=dst-jpg_tt6&cstp=mx1920x1080&ctp=s960x960&_nc_cat=102&ccb=1-7&_nc_sid=be...",
+        "videoUrl": "https://video-iad3-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQPQKyLHqF5Wqx429Aupk5vSBIi8Fn5ZJlsk0t70-dGunM6qNJJ6X0h59alUxvB-NhU530Ni3B170IMkX5nvGlw5Igi0wUR6d3kODwjPB2xNcQ.mp4?_nc_cat=104&_nc...",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA - National Aeronautics and Space Administration",
+          "url": "https://www.facebook.com/NASA",
+          "profileImage": "https://scontent-iad3-2.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s40x40&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_n...",
+          "verified": true
+        },
+        "engagement": {
+          "views": 859000,
+          "likes": 18191,
+          "comments": 484,
+          "shares": 1300
+        },
+        "isVideo": true,
+        "link": "https://go.nasa.gov/43G4Bhc"
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/reel/2043044306290042",
+        "id": "1548129933349044",
+        "caption": "Get ready for Earth joy!\n \nEarlier today, we announced the four astronauts who will go to space as part of Artemis III. This mission will undertake a series of challenging tests in low Earth orbit in 2027, setting future NASA Artemis missions up to return humanity to the Moon. \n\nLearn more about Artemis III: https://www.nasa.gov/mission/artemis-iii/",
+        "description": "Get ready for Earth joy!\n \nEarlier today, we announced the four astronauts who will go to space as part of Artemis III. This mission will undertake a series of challenging tests in low Earth orbit in 2027, setting future NASA Artemis missions up to return humanity to the Moon. \n\nLearn more about Artemis III: https://www.nasa.gov/mission/artemis-iii/",
+        "publishedAt": "2026-06-10T00:54:38.000Z",
+        "durationSeconds": 127.193,
+        "thumbnailUrl": "https://scontent.fagc1-1.fna.fbcdn.net/v/t15.5256-10/719149300_1675536716897455_292426081350600923_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=110&ccb=1-7&_nc_sid=be8...",
+        "videoUrl": "https://video.fagc1-1.fna.fbcdn.net/o1/v/t2/f2/m366/AQP-Z-CqEDushDYS5jpmhA9iX8oIbOZhr92oG3Wdy2sJFaqYdRq0BGyx1fay6WOwqylaGAGHAgYHh7Moy7o040YBl84wTMGQL7VG7K5xgzT-KA.mp4?_nc_cat=103&_...",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA - National Aeronautics and Space Administration",
+          "url": "https://www.facebook.com/NASA",
+          "profileImage": "https://scontent.fagc1-2.fna.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s80x80&_nc_cat=108&ccb=1-7&_nc_sid=2d3e1...",
+          "verified": true
+        },
+        "engagement": {
+          "views": 920000,
+          "likes": 12349,
+          "comments": 1093,
+          "shares": 1300
+        },
+        "isVideo": true,
+        "link": "https://www.nasa.gov/mission/artemis-iii/"
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/reel/301780235537207",
+        "id": "826144325547612",
+        "caption": "Say hi to the sky in July!\n\nA full moon starts the month, Jupiter and Saturn will be early birds and night owls, and while Venus and Mars go low in the west, Saturn will go high in the southern sky. The Red Planet will also cozy up with the star Regulus: http://go.nasa.gov/whatsup",
+        "description": "Say hi to the sky in July!\n\nA full moon starts the month, Jupiter and Saturn will be early birds and night owls, and while Venus and Mars go low in the west, Saturn will go high in the southern sky. The Red Planet will also cozy up with the star Regulus: http://go.nasa.gov/whatsup",
+        "publishedAt": "2023-06-30T20:01:28.000Z",
+        "durationSeconds": 219.861,
+        "thumbnailUrl": "https://scontent-iad3-2.xx.fbcdn.net/v/t15.5256-10/356554141_986264672797682_5974416453073306813_n.jpg?stp=dst-jpg_tt6&cstp=mx1280x720&ctp=s960x960&_nc_cat=111&ccb=1-7&_nc_sid=be83...",
+        "videoUrl": "https://video-iad6-1.xx.fbcdn.net/o1/v/t2/f2/m266/AQOUIkXk2x1VD4EVBVejlA1xVbfTIA1arB34khhIAwmPsMnW6PMdZJHXwj4FqL7H9RXoOQO3fylBHDpYpihT9E0aSBMCkWNdHHY.mp4?strext=1&_nc_cat=100&_nc_s...",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA - National Aeronautics and Space Administration",
+          "url": "https://www.facebook.com/NASA",
+          "profileImage": "https://scontent-iad3-2.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s40x40&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_n...",
+          "verified": true
+        },
+        "engagement": {
+          "views": 82000,
+          "likes": 5105,
+          "comments": 146,
+          "shares": 1000
+        },
+        "isVideo": true,
+        "link": "http://go.nasa.gov/whatsup"
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/reel/576845513639244",
+        "id": "10159527591111772",
+        "caption": "🍂  Fall weather have you itching to step outside? You're in luck! This month, you'll have a chance to see several groupings of the Moon, planets, and stars at sunrise and sunset. That's not all – check out October skywatching tips from NASA Solar System Exploration: https://youtu.be/25XHe13OevA",
+        "description": "🍂  Fall weather have you itching to step outside? You're in luck! This month, you'll have a chance to see several groupings of the Moon, planets, and stars at sunrise and sunset. That's not all – check out October skywatching tips from NASA Solar System Exploration: https://youtu.be/25XHe13OevA",
+        "publishedAt": "2021-10-02T00:05:32.000Z",
+        "durationSeconds": 190.037,
+        "thumbnailUrl": "https://scontent-iad3-1.xx.fbcdn.net/v/t15.5256-10/243070133_576850643638731_8781286937420261312_n.jpg?stp=dst-jpg_tt6&cstp=mx1920x1080&ctp=s960x960&_nc_cat=104&ccb=1-7&_nc_sid=50c...",
+        "videoUrl": "https://video-iad3-1.xx.fbcdn.net/o1/v/t2/f2/m266/AQMZIq7NX0AcsstdcTxi8_W5WUGU1qldPdwQX4Jv6uuKI_lbZwyJVP1zG3pGRRuBWu48jlnGluiUlyXPoKe9Q_nDnhDABjnUZVo.mp4?strext=1&_nc_cat=104&_nc_s...",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA - National Aeronautics and Space Administration",
+          "url": "https://www.facebook.com/NASA",
+          "profileImage": "https://scontent-iad3-2.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s40x40&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_n...",
+          "verified": true
+        },
+        "engagement": {
+          "views": 162000,
+          "likes": 4566,
+          "comments": 126,
+          "shares": 836
+        },
+        "isVideo": true,
+        "link": "https://youtu.be/25XHe13OevA"
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/reel/490611381989026",
+        "id": "10159165907746772",
+        "caption": "This week...\n\n🗳️ Confirming the nomination of our next administrator\n🌊 NASA's SpaceX Crew-1 mission set to undock from the International Space Station & splash down\n🌔 Remembering Apollo 11 and Gemini X astronaut Michael Collins\n\nWatch: youtu.be/PnEvu9jpkeE",
+        "description": "This week...\n\n🗳️ Confirming the nomination of our next administrator\n🌊 NASA's SpaceX Crew-1 mission set to undock from the International Space Station & splash down\n🌔 Remembering Apollo 11 and Gemini X astronaut Michael Collins\n\nWatch: youtu.be/PnEvu9jpkeE",
+        "publishedAt": "2021-05-01T23:26:01.000Z",
+        "durationSeconds": 265.898,
+        "thumbnailUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t15.5256-10/166283079_490612745322223_1081077117587264621_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=109&ccb=1-7&_nc_sid=50ce4...",
+        "videoUrl": "https://video-iad3-1.xx.fbcdn.net/o1/v/t2/f2/m266/AQPrktfEwojyopOci8curfS5tVHNy1a2fCOTpa5FBgPslvhZGTrUpxCgOEUEDnOQDsPaN74tam6wOoyqqDa93JO92Cj8icJBOcM.mp4?strext=1&_nc_cat=110&_nc_s...",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA - National Aeronautics and Space Administration",
+          "url": "https://www.facebook.com/NASA",
+          "profileImage": "https://scontent-iad3-2.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s40x40&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_n...",
+          "verified": true
+        },
+        "engagement": {
+          "views": 52000,
+          "likes": 1865,
+          "comments": 103,
+          "shares": 180
+        },
+        "isVideo": true,
+        "link": "http://youtu.be/PnEvu9jpkeE"
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/reel/161382045774196",
+        "id": "10159114517846772",
+        "caption": "🌟 We've been busy.\n\n- President Joe Biden announces NASA funding request, our Ingenuity #MarsHelicopter preps for flight, and a new crew arrives at the International Space Station.\n\nAll that and more This Week @ NASA: https://youtu.be/66RYpY_adnw",
+        "description": "🌟 We've been busy.\n\n- President Joe Biden announces NASA funding request, our Ingenuity #MarsHelicopter preps for flight, and a new crew arrives at the International Space Station.\n\nAll that and more This Week @ NASA: https://youtu.be/66RYpY_adnw",
+        "publishedAt": "2021-04-10T01:13:23.000Z",
+        "durationSeconds": 292.778,
+        "thumbnailUrl": "https://scontent-iad3-1.xx.fbcdn.net/v/t15.5256-10/167839033_161383285774072_3853125686945722505_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=104&ccb=1-7&_nc_sid=50ce4...",
+        "videoUrl": "https://video-iad6-1.xx.fbcdn.net/o1/v/t2/f2/m266/AQP_fXZEVPLTkMAKkZhBNif6MzZ7TBWFRps0njClmbV4Q7KTXgfQrPAlPzRFwJyOeHPJ1UgciMT5RiOjrPEnX6KZJwPUfZlzbSA.mp4?strext=1&_nc_cat=100&_nc_s...",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA - National Aeronautics and Space Administration",
+          "url": "https://www.facebook.com/NASA",
+          "profileImage": "https://scontent-iad3-2.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s40x40&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_n...",
+          "verified": true
+        },
+        "engagement": {
+          "views": 74000,
+          "likes": 3447,
+          "comments": 133,
+          "shares": 340
+        },
+        "isVideo": true,
+        "link": "https://youtu.be/66RYpY_adnw"
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/reel/292683338958803",
+        "id": "10159096097556772",
+        "caption": "This week…\n\n🧪 NASA Ames Research Center prepares the first long-duration biology experiment in deep space\n👩‍🔬 The International Space Station welcomes Robyn Gatens as its program director\n🛰️  A major component of our Psyche mission arrives at the NASA Jet Propulsion Laboratory\n\nWant details? Watch: youtu.be/g4tld6ppv7Q",
+        "description": "This week…\n\n🧪 NASA Ames Research Center prepares the first long-duration biology experiment in deep space\n👩‍🔬 The International Space Station welcomes Robyn Gatens as its program director\n🛰️  A major component of our Psyche mission arrives at the NASA Jet Propulsion Laboratory\n\nWant details? Watch: youtu.be/g4tld6ppv7Q",
+        "publishedAt": "2021-04-03T01:05:52.000Z",
+        "durationSeconds": 177.322,
+        "thumbnailUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t15.5256-10/151480839_292684862291984_7183282246301731065_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=102&ccb=1-7&_nc_sid=50ce4...",
+        "videoUrl": "https://video-iad6-1.xx.fbcdn.net/o1/v/t2/f2/m266/AQNbHDfeXuZ4RrTQI-iY_6LUzVXLUdIydPY0GhL8xVjwTHbP-z6F5fJmxrLzHEs-QayHRP9bdadao2ai9wjv77-99tsqAhXAbY8.mp4?strext=1&_nc_cat=106&_nc_s...",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA - National Aeronautics and Space Administration",
+          "url": "https://www.facebook.com/NASA",
+          "profileImage": "https://scontent-iad3-2.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s40x40&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_n...",
+          "verified": true
+        },
+        "engagement": {
+          "views": 56000,
+          "likes": 2925,
+          "comments": 137,
+          "shares": 304
+        },
+        "isVideo": true,
+        "link": "http://youtu.be/g4tld6ppv7Q"
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/reel/452499129200583",
+        "id": "10159065692406772",
+        "caption": "This week...\n\n🔥 Our NASA's Artemis Program Moon rocket core stage fires up\n📰 A nomination announcement for the next NASA Administrator\n🛰️ A spacecraft relocates to make room for the next International Space Station crew\n\nWatch: youtu.be/nPmQbhlVeMs",
+        "description": "This week...\n\n🔥 Our NASA's Artemis Program Moon rocket core stage fires up\n📰 A nomination announcement for the next NASA Administrator\n🛰️ A spacecraft relocates to make room for the next International Space Station crew\n\nWatch: youtu.be/nPmQbhlVeMs",
+        "publishedAt": "2021-03-20T17:03:07.000Z",
+        "durationSeconds": 252.693,
+        "thumbnailUrl": "https://scontent.fosu2-1.fna.fbcdn.net/v/t15.5256-10/151732125_452501232533706_4250162638341106018_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=107&ccb=1-7&_nc_sid=50c...",
+        "videoUrl": "https://video.fosu2-2.fna.fbcdn.net/o1/v/t2/f2/m366/AQN5raZBMqbux04LlwAz7U2GIpcszVwAZRA8y2LnkTEFZ-zShBYjfhRbk5_Y7EqnFd4LkhgPiQi9vHV2qAzXJ06tMu9GNrIs_FN_pPdHXyR3Og.mp4?_nc_cat=101&_...",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA - National Aeronautics and Space Administration",
+          "url": "https://www.facebook.com/NASA",
+          "profileImage": "https://scontent.fosu2-1.fna.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s40x40&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&...",
+          "verified": true
+        },
+        "engagement": {
+          "views": 12000,
+          "likes": 838,
+          "comments": 65,
+          "shares": 156
+        },
+        "isVideo": true,
+        "link": "http://youtu.be/nPmQbhlVeMs"
       }
     ]
   },

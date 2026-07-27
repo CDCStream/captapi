@@ -23,6 +23,7 @@ from app.services import (
     facebook_marketplace_native,
     facebook_page_native,
     facebook_profile_posts_native,
+    facebook_profile_reels_native,
 )
 from app.services.apify_client import ApifyClient, ApifyError, get_apify
 from app.services.apify_proxy import fetch_via_residential
@@ -56,6 +57,7 @@ CREDIT_FB_EVENTS_NATIVE = facebook_events_native.CREDIT_FB_EVENTS_NATIVE
 CREDIT_FB_COMMENTS_NATIVE = facebook_comments_native.CREDIT_FB_COMMENTS_NATIVE
 CREDIT_FB_MARKETPLACE_NATIVE = facebook_marketplace_native.CREDIT_FB_MARKETPLACE_NATIVE
 CREDIT_FB_PROFILE_POSTS_NATIVE = facebook_profile_posts_native.CREDIT_FB_PROFILE_POSTS_NATIVE
+CREDIT_FB_PROFILE_REELS_NATIVE = facebook_profile_reels_native.CREDIT_FB_PROFILE_REELS_NATIVE
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -1156,41 +1158,28 @@ async def facebook_profile_reels(
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = _require_facebook_page(url)
-    settings = get_settings()
-    # Reels are a subset of the feed, so we over-fetch posts and filter. Cost is
-    # driven by posts fetched, not reels returned.
-    n_fetch = min(limit * 3, 100)
-    cost = _scaled_credits(n_fetch, RATE_FB_POSTS, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/profile-reels",
         platform="facebook",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_FB_PROFILE_REELS_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_FACEBOOK_REELS,
-                {"startUrls": [{"url": url}], "resultsLimit": n_fetch},
-                max_items=n_fetch,
-            )
-            reels = [
-                _normalize_post(i)
-                for i in items
-                if not i.get("error") and _is_reel(i)
-            ][:limit]
-            ctx["source"] = "apify"
+            raws = await facebook_profile_reels_native.profile_reels_native(url, limit)
+            if raws is None:
+                raise HTTPException(status_code=404, detail="Reels not found")
+            reels = [strip_empty(_normalize_post(i)) for i in raws]
+            ctx["source"] = "direct"
             return {"url": url, "totalReturned": len(reels), "reels": reels}
 
         data = await cached_or_run(
             endpoint="facebook.profile-reels",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = cost
         return ApiResponse(data=data)
 
 

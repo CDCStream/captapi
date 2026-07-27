@@ -1806,7 +1806,7 @@
     "platform": "facebook",
     "name": "Facebook Profile Reels",
     "path": "/v1/facebook/profile-reels",
-    "credits": 36,
+    "credits": 2,
     "summary": "Latest Reels from a Facebook profile/page.",
     "params": [
       {
@@ -1819,7 +1819,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
       },
       {
         "name": "cache",
