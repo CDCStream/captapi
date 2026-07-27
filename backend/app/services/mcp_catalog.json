@@ -1834,7 +1834,7 @@
     "platform": "facebook",
     "name": "Facebook Group Posts",
     "path": "/v1/facebook/group-posts",
-    "credits": 12,
+    "credits": 2,
     "summary": "Posts from a public Facebook group.",
     "params": [
       {
@@ -1847,7 +1847,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
       },
       {
         "name": "cache",

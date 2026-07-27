@@ -20,6 +20,7 @@ from app.services import (
     facebook_comments_native,
     facebook_details_native,
     facebook_events_native,
+    facebook_group_posts_native,
     facebook_marketplace_native,
     facebook_page_native,
     facebook_profile_posts_native,
@@ -58,6 +59,7 @@ CREDIT_FB_COMMENTS_NATIVE = facebook_comments_native.CREDIT_FB_COMMENTS_NATIVE
 CREDIT_FB_MARKETPLACE_NATIVE = facebook_marketplace_native.CREDIT_FB_MARKETPLACE_NATIVE
 CREDIT_FB_PROFILE_POSTS_NATIVE = facebook_profile_posts_native.CREDIT_FB_PROFILE_POSTS_NATIVE
 CREDIT_FB_PROFILE_REELS_NATIVE = facebook_profile_reels_native.CREDIT_FB_PROFILE_REELS_NATIVE
+CREDIT_FB_GROUP_POSTS_NATIVE = facebook_group_posts_native.CREDIT_FB_GROUP_POSTS_NATIVE
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -1191,34 +1193,28 @@ async def facebook_group_posts(
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/groups/group-name")
-    settings = get_settings()
-    cost = _scaled_credits(limit, RATE_FB_POSTS, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/group-posts",
         platform="facebook",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_FB_GROUP_POSTS_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_FACEBOOK_GROUPS,
-                {"startUrls": [{"url": url}], "resultsLimit": limit},
-                max_items=limit,
-            )
-            posts = [_normalize_post(i) for i in items[:limit] if not i.get("error")]
-            ctx["source"] = "apify"
+            raws = await facebook_group_posts_native.group_posts_native(url, limit)
+            if raws is None:
+                raise HTTPException(status_code=404, detail="Group posts not found")
+            posts = [strip_empty(_normalize_post(i)) for i in raws]
+            ctx["source"] = "direct"
             return {"url": url, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
             endpoint="facebook.group-posts",
-            params={"url": url, "limit": limit, "v": 5},
+            params={"url": url, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_FB_POSTS, 2)
         return ApiResponse(data=data)
 
 

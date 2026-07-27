@@ -937,111 +937,161 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "facebook-group-posts": {
     "url": "https://www.facebook.com/groups/dogspotting",
-    "totalReturned": 4,
+    "totalReturned": 8,
     "posts": [
       {
         "platform": "facebook",
-        "url": "https://www.facebook.com/groups/dogspotting/permalink/10165879070869467/",
-        "id": "UzpfSTEwMDAwOTQyMjkyMTg1NjpWSzoxMDE2NTg3OTA3MDg2OTQ2Nw==",
-        "caption": "A noisy boy spotted in Santa Ponca, Majorca! 🇪🇸 🐕",
-        "description": "A noisy boy spotted in Santa Ponca, Majorca! 🇪🇸 🐕",
-        "publishedAt": "2026-07-18T00:30:13.000Z",
-        "durationSeconds": 7.521,
-        "thumbnailUrl": "https://scontent-hou1-1.xx.fbcdn.net/v/t15.5256-10/750814963_1771867270652695_257464611092456235_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1920&ctp=s960x960&_nc_cat=100&ccb=1-7&_nc_sid=117846&_nc_ohc=bC1NW9r7TOEQ7kNvwGcakXw&_nc_oc=AdpyUrWLK9RUAQ4jafUKynMDpKeGQNqdlOGGgdp9z6OBppco3KJeP6HrCkNF6HDZazM&_nc_zt=23&_nc_ht=scontent-hou1-1.xx&_nc_gid=hW9s5ywbMewQBWmarnrQjQ&_nc_ss=72289&oh=00_AQCLOWeo_fhV1rxviiINySL7kei7VuDR1WuceU8SslDQyw&oe=6A629065",
-        "videoUrl": "https://video-hou1-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQNiovKi5AqkyvA38ngh692gNhpxeI_LjhMK6vhKOYNc8a7Pac4cAwVXYTg9jho-mIfRhkVyhjQx5WF6LTe07x7HcXPmd-0420EwphRWR6BXfQ.mp4?_nc_cat=102&_nc_sid=5e9851&_nc_ht=video-hou1-1.xx.fbcdn.net&_nc_ohc=XTzct5gCtnMQ7kNvwG-DQqJ&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5GQUNFQk9PSy4uQzMuNzIwLmRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHAiLCJ4cHZfYXNzZXRfaWQiOjEwMDYzODE1MTg2OTE0MDYsImFzc2V0X2FnZV9kYXlzIjoxLCJ2aV91c2VjYXNlX2lkIjoxMDEyMSwiZHVyYXRpb25fcyI6NywidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=b707fd3e1650534e&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC8wNjQ4RkZCOUU3QzlFM0I4MUE1NjFFQTYxMDRBMThBQl9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50LzFBNEQxRDZDODM3RUI1NzgzMERGNTczNDYzMEFDMEI5X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACac8fDOjtPJAxUCKAJDMywXQB4hysCDEm8YGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUCZZKeAQA&_nc_gid=hW9s5ywbMewQBWmarnrQjQ&_nc_ss=72289&_nc_zt=28&oh=00_AQA1HMRfd-xtMJu_9dVeJDsW_nzZ763r9DATjb9HLXyhKg&oe=6A62869E&bitrate=893911&tag=dash_h264-basic-gen2_720p",
+        "url": "https://www.facebook.com/groups/dogspotting/posts/10165927007174467/",
+        "id": "10165927007174467",
+        "caption": "Dog in a basket…I repeat…dog in a basket!",
+        "description": "Dog in a basket…I repeat…dog in a basket!",
+        "publishedAt": "2026-07-27T16:34:51.000Z",
         "author": {
-          "username": null,
-          "displayName": "Kaitlin Morton",
-          "url": null,
-          "profileImage": "https://scontent-hou1-1.xx.fbcdn.net/v/t39.30808-1/651270203_4489525084704878_7896016252183241824_n.jpg?stp=cp6_dst-jpg_tt6&cstp=mx2048x2048&ctp=s50x50&_nc_cat=107&ccb=1-7&_nc_sid=e99d92&_nc_ohc=cx1xhiJ4uPQQ7kNvwF6bJ9p&_nc_oc=AdpKM_uSk2cCufhEP6D7fZImx1e9ba5wnRGsB1UJQHm9b85FGcI-ciTSBRLd_nfVFTs&_nc_zt=24&_nc_ht=scontent-hou1-1.xx&_nc_gid=hW9s5ywbMewQBWmarnrQjQ&_nc_ss=72289&oh=00_AQAyxftQHNMtyJC5fMkONPaLrom_jVyo2o7EQ4301yWZIg&oe=6A628510",
-          "verified": null
+          "displayName": "Beth Oxford"
         },
         "engagement": {
-          "views": 0,
-          "likes": 114,
-          "comments": 2,
-          "shares": 1
-        },
-        "isVideo": true,
-        "link": null
-      },
-      {
-        "platform": "facebook",
-        "url": "https://www.facebook.com/groups/dogspotting/permalink/10165886760864467/",
-        "id": "UzpfSTEwMDAwMDEwODI0ODIzNTpWSzoxMDE2NTg4Njc2MDg2NDQ2Nw==",
-        "caption": "Good hair day",
-        "description": "Good hair day",
-        "publishedAt": "2026-07-19T10:38:11.000Z",
-        "durationSeconds": null,
-        "thumbnailUrl": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-6/753007373_28503628642557364_7791533682344408914_n.jpg?stp=dst-jpg_tt6&cstp=mx1206x1278&ctp=p180x540&_nc_cat=110&ccb=1-7&_nc_sid=aa7b47&_nc_ohc=vodNf8nAt1IQ7kNvwGiaVZk&_nc_oc=AdpTpQXhiXJlKYH_jLWu4G0BnWnO7uoTFjLood3796Z8NENS_IZbaJX5PbLJsGukc9QKVUPERITAun5-B-GebhO1&_nc_zt=23&_nc_ht=scontent-iad3-1.xx&_nc_gid=Xq42ghMkY9TiGv0_1wC85A&_nc_ss=72289&oh=00_AQCwwume8yLYo0U0WvLy0qKd7ew1u_WE1pNQOIG-mWQP2g&oe=6A626CA6",
-        "videoUrl": null,
-        "author": {
-          "username": null,
-          "displayName": "Kylie Green",
-          "url": null,
-          "profileImage": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.30808-1/504350545_24477566361830299_2634417055039944345_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx2048x2048&ctp=s50x50&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=Sh4oaa55-OoQ7kNvwF82BQ5&_nc_oc=AdrUUkN_tYWmWbPsiAsPCU_PjkN_2kWeQzNOvFji3RbvJM77Vv9SviTT7Zk2zfJcYypwC-b8Vz9qzNPmZSUYvEU9&_nc_zt=24&_nc_ht=scontent-iad6-1.xx&_nc_gid=Xq42ghMkY9TiGv0_1wC85A&_nc_ss=72289&oh=00_AQCYCjURd_tnF4W-l8_VcEiygS-Chl27r5FTXErmxz_ZNg&oe=6A627077",
-          "verified": null
-        },
-        "engagement": {
-          "views": null,
-          "likes": 6,
+          "likes": 87,
           "comments": 0,
           "shares": 0
         },
-        "isVideo": false,
-        "link": null
+        "isVideo": false
       },
       {
         "platform": "facebook",
-        "url": "https://www.facebook.com/groups/dogspotting/permalink/10165885784674467/",
-        "id": "UzpfSTEwMDAyNDExOTUwNDE1MDpWSzoxMDE2NTg4NTc4NDY3NDQ2Nw==",
-        "caption": "Thought i saw a loaf needing rescue\nDamn his human was there… 🥲\n\nI mean so happy he has a home 🙃",
-        "description": "Thought i saw a loaf needing rescue\nDamn his human was there… 🥲\n\nI mean so happy he has a home 🙃",
-        "publishedAt": "2026-07-19T04:15:27.000Z",
-        "durationSeconds": null,
-        "thumbnailUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.30808-6/749535316_2239349396879022_5352846328425280474_n.jpg?stp=dst-jpg_tt6&cstp=mx2048x1536&ctp=s590x590&_nc_cat=107&ccb=1-7&_nc_sid=aa7b47&_nc_ohc=hZ44ut1kTagQ7kNvwFEkahV&_nc_oc=AdpHhSw51w7UXRjev5634qV9RcyNDY_v8ss86M07I0qi8FK5qq9WldQUkCcVJ1UOmIvwfRUGWn16s8CytglLthww&_nc_zt=23&_nc_ht=scontent-iad6-1.xx&_nc_gid=Xq42ghMkY9TiGv0_1wC85A&_nc_ss=72289&oh=00_AQDnbpkg7GdVcCcBxw-IgcNUU275oapSbbiQtxgoDmYh_Q&oe=6A627371",
-        "videoUrl": null,
+        "url": "https://www.facebook.com/groups/dogspotting/posts/10165913663824467/",
+        "id": "10165913663824467",
+        "caption": "Waiting patiently in the Mustang.",
+        "description": "Waiting patiently in the Mustang.",
+        "publishedAt": "2026-07-24T22:16:11.000Z",
+        "thumbnailUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.30808-6/754824625_10163571025602896_890543610805686018_n.jpg?stp=dst-jpg_tt6&cstp=mx2048x1536&ctp=p600x600&_nc_cat=107&ccb=1-7&_nc_sid=63...",
         "author": {
-          "username": null,
-          "displayName": "Hannah Lo",
-          "url": null,
-          "profileImage": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.30808-1/470622835_1773382490142384_5611274486657366606_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1152x1152&ctp=s50x50&_nc_cat=102&ccb=1-7&_nc_sid=e99d92&_nc_ohc=HUZyuIR8C5UQ7kNvwFDxPhm&_nc_oc=AdoTnlkVUgeF-7LZtLMurzv2483USo4lSaJtLcTKPgkILTCz2caYEV7LM7l1xk7Ngp433iGqpVuLLUpAiVpumhfZ&_nc_zt=24&_nc_ht=scontent-iad6-1.xx&_nc_gid=Xq42ghMkY9TiGv0_1wC85A&_nc_ss=72289&oh=00_AQCF-jFtD2kNFjDTukL42iJKNXYsMFti4huUN7WTUn9_nQ&oe=6A6275DD",
-          "verified": null
+          "username": "dogspotting",
+          "displayName": "Chet Rhodes"
         },
         "engagement": {
-          "views": null,
-          "likes": 88,
-          "comments": 1,
+          "likes": 36,
+          "comments": 2,
           "shares": 0
         },
-        "isVideo": false,
-        "link": null
+        "isVideo": false
       },
       {
         "platform": "facebook",
-        "url": "https://www.facebook.com/groups/dogspotting/permalink/10165878400114467/",
-        "id": "UzpfSTEwMDAwMDUxNjU2MTgzMTpWSzoxMDE2NTg3ODQwMDExNDQ2Nw==",
-        "caption": "sausage spotting…Austin Tx 🩷",
-        "description": "sausage spotting…Austin Tx 🩷",
-        "publishedAt": "2026-07-17T17:56:36.000Z",
-        "durationSeconds": 4.201,
-        "thumbnailUrl": "https://scontent-atl3-3.xx.fbcdn.net/v/t15.5256-10/750550517_1023701473698102_4209954529057645990_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1920&ctp=s960x960&_nc_cat=110&ccb=1-7&_nc_sid=117846&_nc_ohc=04xYCacnpuIQ7kNvwHmHK9L&_nc_oc=AdrlDPB9BDeMqZpIOLivtsetk4qnaVvs03VCyWGT3655pf6ZGrIFIYLKkVKZJ3dTSfF4PzMede4x5xvWEKQdoLCx&_nc_zt=23&_nc_ht=scontent-atl3-3.xx&_nc_gid=hdl6p70Q6JirFuClh-i4Jw&_nc_ss=72289&oh=00_AQAS1PpbOnZ1AlqZR5sB2BaJ10NP83xLE8sMA9dN3yddzw&oe=6A626BD5",
-        "videoUrl": "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQNjgkga0kjcVL5rWdrzWx-Jk7BkLGyhcv_gnO9ACSHOQS8ixNFS9TlBMuGzTGs9nGKp22xSalmorww_9zjYyz9l5-dwlybjMXtnpHV39fHuuA.mp4?_nc_cat=103&_nc_sid=5e9851&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=ihZXdBjAHj4Q7kNvwGPPnJd&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5GQUNFQk9PSy4uQzMuNzIwLmRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHAiLCJ4cHZfYXNzZXRfaWQiOjEwMjAwODMzMzM5OTk2OTMsImFzc2V0X2FnZV9kYXlzIjoxLCJ2aV91c2VjYXNlX2lkIjoxMDEyMSwiZHVyYXRpb25fcyI6NCwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=50dbdc42ac36a4a7&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC9CMTRBQjMzNjAwODM3ODc2QjBBQTU2QTk0OTFFMzg5RF9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50L0VDNDcwRTI0OTk4OTNEODhGQTU5QkE0QTRGODVBOUI4X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACaasZ2M1fDPAxUCKAJDMywXQBDul41P3zsYGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUCZZKeAQA&_nc_gid=hdl6p70Q6JirFuClh-i4Jw&_nc_ss=72289&_nc_zt=28&oh=00_AQAqJiYxYh48c0RUdE0E1X5VZTMU2r1ryUlP-9qVR9iJKA&oe=6A629FC1&bitrate=2004314&tag=dash_h264-basic-gen2_720p",
+        "url": "https://www.facebook.com/groups/dogspotting/posts/10165912136809467/",
+        "id": "10165912136809467",
+        "caption": "🥹",
+        "description": "🥹",
+        "publishedAt": "2026-07-24T15:45:47.000Z",
+        "thumbnailUrl": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-6/753343843_27704228762540395_7618880549288864734_n.jpg?stp=cp6_dst-jpg_tt6&cstp=mx1536x2048&ctp=p526x296&_nc_cat=108&ccb=1-7&_nc_s...",
         "author": {
-          "username": null,
-          "displayName": "Alexis Langston",
-          "url": null,
-          "profileImage": "https://scontent-atl3-3.xx.fbcdn.net/v/t39.30808-1/646941458_27018386404428546_3512895333164850332_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1242x1242&ctp=s50x50&_nc_cat=109&ccb=1-7&_nc_sid=e99d92&_nc_ohc=xEkm9wzVXkIQ7kNvwHxdJF_&_nc_oc=Adon-kFDFDQr-pkuzM9HGKv0P92uj3uz35iZa9wSYTFfLlfUlMQgKHo8dYDYlJU7s6Dej-5f4LOyv1gT6GrBp7Tz&_nc_zt=24&_nc_ht=scontent-atl3-3.xx&_nc_gid=hdl6p70Q6JirFuClh-i4Jw&_nc_ss=72289&oh=00_AQAq-NoCSBoD_QxoD020A5S89bytoeP-XPUYR7jCwJV_rg&oe=6A628C34",
-          "verified": null
+          "username": "dogspotting",
+          "displayName": "Dóra Almási"
         },
         "engagement": {
-          "views": 0,
-          "likes": 166,
-          "comments": 7,
-          "shares": 1
+          "likes": 182,
+          "comments": 2,
+          "shares": 0
         },
-        "isVideo": true,
-        "link": null
+        "isVideo": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/groups/dogspotting/posts/10165911376684467/",
+        "id": "10165911376684467",
+        "caption": "Konbini (7/11) doggo! 🐕",
+        "description": "Konbini (7/11) doggo! 🐕",
+        "publishedAt": "2026-07-24T11:52:33.000Z",
+        "thumbnailUrl": "https://scontent-lga3-2.xx.fbcdn.net/v/t39.30808-6/753702691_963642156683059_393037493943314975_n.jpg?stp=dst-jpg_tt6&cstp=mx750x1334&ctp=p526x296&_nc_cat=100&ccb=1-7&_nc_sid=aa7b4...",
+        "author": {
+          "username": "dogspotting",
+          "displayName": "Adam Steele",
+          "url": "https://www.facebook.com/100091118505588"
+        },
+        "engagement": {
+          "likes": 115,
+          "comments": 2,
+          "shares": 0
+        },
+        "isVideo": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/groups/dogspotting/posts/10161487929709467/",
+        "id": "10161487929709467",
+        "caption": "Hey guys, happy pride month! We ban for anti-LGBT posts and comments, thanks and have a good June! I forgot to post this in Dogspotting. \n\nRemember, Dogspotting is definitely the gay agenda. \n*dog photo stolen from another mod*",
+        "description": "Hey guys, happy pride month! We ban for anti-LGBT posts and comments, thanks and have a good June! I forgot to post this in Dogspotting. \n\nRemember, Dogspotting is definitely the gay agenda. \n*dog photo stolen from another mod*",
+        "publishedAt": "2023-06-04T23:32:57.000Z",
+        "thumbnailUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.30808-6/499529333_10229703762722775_2097200119742123101_n.jpg?stp=dst-jpg_tt6&cstp=mx626x636&ctp=p526x296&_nc_cat=109&ccb=1-7&_nc_sid=aa7...",
+        "author": {
+          "username": "dogspotting",
+          "displayName": "Tiberius Bertea"
+        },
+        "engagement": {
+          "likes": 516,
+          "comments": 26,
+          "shares": 0
+        },
+        "isVideo": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/groups/dogspotting/posts/10161384058399467/",
+        "id": "10161384058399467",
+        "caption": "Hello all, \n\nYou’re probably familiar with our admin Amber, affectionately known to her friends as Yams. Amber is an incredibly caring and special person who pours her all into her hobbies, convictions, and her friendships. Whenever something happens, she’s the first to jump in determining how to help others. This rings especially true in her efforts to support peers in emergencies, and her work fostering pups for the Humane Society.\n\nToday, Amber needs our help. She was injured in a tragic accident and is presently in the hospital. So we’re reaching out to the communities she’s spent many years putting love into, in the hopes that we can help her now. \n\nThank you for your time in reading this, and thank you if you choose to give. Anything helps.",
+        "description": "Hello all, \n\nYou’re probably familiar with our admin Amber, affectionately known to her friends as Yams. Amber is an incredibly caring and special person who pours her all into her hobbies, convictions, and her friendships. Whenever something happens, she’s the first to jump in determining how to help others. This rings especially true in her efforts to support peers in emergencies, and her work fostering pups for the Humane Society.\n\nToday, Amber needs our help. She was injured in a tragic accident and is presently in the hospital. So we’re reaching out to the communities she’s spent many years putting love into, in the hopes that we can help her now. \n\nThank you for your time in reading this, and thank you if you choose to give. Anything helps.",
+        "publishedAt": "2023-04-21T17:50:53.000Z",
+        "thumbnailUrl": "https://scontent-iad3-2.xx.fbcdn.net/v/t1.6435-9/103961332_2591579321116865_8247201645454706872_n.jpg?stp=dst-jpg_tt6&cstp=mx960x502&ctp=s960x502&_nc_cat=103&ccb=1-7&_nc_sid=0b1479...",
+        "author": {
+          "username": "dogspotting",
+          "displayName": "Dogspotting",
+          "url": "https://www.facebook.com/100069522984491"
+        },
+        "engagement": {
+          "likes": 70,
+          "comments": 19,
+          "shares": 0
+        },
+        "isVideo": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/groups/dogspotting/posts/10159514349104467/",
+        "id": "10159514349104467",
+        "caption": "**Happy New Year, spotters! We have an exciting update for everyone [🐶](https://emojipedia.org/dog-face/)**\n\nThis past year has been a difficult one for everyone, and like many others, we wanted to ring in the new year with a fresh start. What this means for the group is an awesome new points system!\n\nMany from the last iteration of bonus points remain, but we’ve added some new ones and brought back some old favorites. We’ve created an instructional Powerpoint for everyone to learn about these changes, as well as a handy cheat sheet to take with you as you spot!\n\nFeel free to post your own dog or a favorite spot in the comments and let us know which new bonus point is your favorite!\n\nMay the Dogs flow!",
+        "description": "**Happy New Year, spotters! We have an exciting update for everyone [🐶](https://emojipedia.org/dog-face/)**\n\nThis past year has been a difficult one for everyone, and like many others, we wanted to ring in the new year with a fresh start. What this means for the group is an awesome new points system!\n\nMany from the last iteration of bonus points remain, but we’ve added some new ones and brought back some old favorites. We’ve created an instructional Powerpoint for everyone to learn about these changes, as well as a handy cheat sheet to take with you as you spot!\n\nFeel free to post your own dog or a favorite spot in the comments and let us know which new bonus point is your favorite!\n\nMay the Dogs flow!",
+        "publishedAt": "2021-01-01T05:00:02.000Z",
+        "thumbnailUrl": "https://scontent-hou1-1.xx.fbcdn.net/v/t1.6435-9/133293956_2757029211238541_8556362737627446916_n.jpg?stp=dst-jpg_tt6&cstp=mx1178x664&ctp=p600x600&_nc_cat=103&ccb=1-7&_nc_sid=9fe6e...",
+        "author": {
+          "username": "dogspotting",
+          "displayName": "Dogspotting",
+          "url": "https://www.facebook.com/100069522984491"
+        },
+        "engagement": {
+          "likes": 214,
+          "comments": 53,
+          "shares": 0
+        },
+        "isVideo": false
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/groups/dogspotting/posts/10159050659364467/",
+        "id": "10159050659364467",
+        "caption": "Welcome to Dogspotting, the sport of spotting unknown dogs! ***Please click on or tap the following images to review our introduction, rules, list of team members, and scoring information.***",
+        "description": "Welcome to Dogspotting, the sport of spotting unknown dogs! ***Please click on or tap the following images to review our introduction, rules, list of team members, and scoring information.***",
+        "publishedAt": "2020-07-12T07:32:41.000Z",
+        "thumbnailUrl": "https://scontent.fagc1-1.fna.fbcdn.net/v/t1.6435-9/109276728_2614404018834395_7966348785768951769_n.jpg?stp=dst-jpg_tt6&cstp=mx820x820&ctp=s600x600&_nc_cat=101&ccb=1-7&_nc_sid=9fe6...",
+        "author": {
+          "username": "dogspotting",
+          "displayName": "Dogspotting",
+          "url": "https://www.facebook.com/100069522984491"
+        },
+        "engagement": {
+          "likes": 131,
+          "comments": 10,
+          "shares": 0
+        },
+        "isVideo": false
       }
     ]
   },
