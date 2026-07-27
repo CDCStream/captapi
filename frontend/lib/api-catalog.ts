@@ -376,7 +376,7 @@ const TWITCH: Spec[] = [
 
 const SPOTIFY: Spec[] = [
   { slug: "spotify-artist", name: "Spotify Artist API", shortName: "Artist", category: "channel", method: "GET", path: "/v1/spotify/artist", credits: 2 },
-  { slug: "spotify-track", name: "Spotify Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/spotify/track", credits: 2 , tagline: "Get a Spotify track — title, artists, album, duration, and popularity as structured JSON." },
+  { slug: "spotify-track", name: "Spotify Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/spotify/track", credits: 2 , tagline: "Get a Spotify track — title, artists, album, and duration as structured JSON." },
   { slug: "spotify-album", name: "Spotify Album API", shortName: "Album", category: "details", method: "GET", path: "/v1/spotify/album", credits: 2 , tagline: "Get a Spotify album — title, artists, tracks, release date, and cover art as structured JSON." },
   { slug: "spotify-search", name: "Spotify Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/spotify/search", credits: 2 },
   { slug: "spotify-podcast", name: "Spotify Podcast API", shortName: "Podcast", category: "details", method: "GET", path: "/v1/spotify/podcast", credits: 2 , tagline: "Get a Spotify podcast show — title, publisher, description, and episode counts as structured JSON." },

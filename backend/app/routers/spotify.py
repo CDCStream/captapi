@@ -107,21 +107,20 @@ def _episodes_v2(item: dict[str, Any]) -> dict[str, Any]:
 # Fields that never apply to a given entity type — omit rather than null.
 _OMIT_BY_KIND: dict[str, frozenset[str]] = {
     "artist": frozenset(
-        {"artists", "album", "durationMs", "playCount", "releaseYear", "totalTracks", "totalEpisodes"}
+        {"artists", "album", "durationMs", "releaseYear", "totalTracks", "totalEpisodes"}
     ),
     "track": frozenset({"followers", "monthlyListeners", "totalTracks", "totalEpisodes"}),
     "album": frozenset(
-        {"album", "durationMs", "playCount", "followers", "monthlyListeners", "totalEpisodes"}
+        {"album", "durationMs", "followers", "monthlyListeners", "totalEpisodes"}
     ),
     "podcast": frozenset(
-        {"album", "durationMs", "playCount", "followers", "monthlyListeners", "releaseYear", "totalTracks"}
+        {"album", "durationMs", "followers", "monthlyListeners", "releaseYear", "totalTracks"}
     ),
     # Episode creators/play counts are almost never present in this actor payload.
     "episode": frozenset(
         {
             "album",
             "artists",
-            "playCount",
             "followers",
             "monthlyListeners",
             "totalTracks",
@@ -137,7 +136,6 @@ _OMIT_IF_EMPTY = frozenset(
         "artists",
         "album",
         "durationMs",
-        "playCount",
         "followers",
         "monthlyListeners",
         "releaseYear",
@@ -207,7 +205,6 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
         "artists": artists,
         "album": safe_str(album.get("name") if isinstance(album, dict) else None) or safe_str(item.get("albumName")),
         "durationMs": duration_ms,
-        "playCount": safe_int(item.get("playcount") or item.get("playCount")),
         "followers": safe_int(stats.get("followers") or item.get("followers")),
         "monthlyListeners": safe_int(stats.get("monthlyListeners") or item.get("monthlyListeners")),
         "releaseYear": release_year,
