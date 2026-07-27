@@ -1117,24 +1117,16 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "createdAt": "2026-07-17T18:23:51+00:00"
   },
   "facebook-marketplace-location-search": {
-    "query": "Austin",
-    "totalReturned": 2,
+    "query": "Austin, TX",
+    "totalReturned": 1,
     "locations": [
       {
-        "id": "washington d.c.|washington|dc",
-        "name": "Washington D.C.",
-        "city": "Washington",
-        "state": "DC",
-        "latitude": 38.894348144531,
-        "longitude": -77.041625976562
-      },
-      {
-        "id": "annandale, virginia|annandale|va",
-        "name": "Annandale, Virginia",
-        "city": "Annandale",
-        "state": "VA",
-        "latitude": 38.828430175781,
-        "longitude": -77.206420898438
+        "id": "austin, tx|austin|tx",
+        "name": "Austin, TX",
+        "city": "Austin",
+        "state": "TX",
+        "latitude": 30.2677,
+        "longitude": -97.7475
       }
     ]
   },
@@ -1338,43 +1330,80 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     ]
   },
   "facebook-profile-photos": {
-    "url": "https://www.facebook.com/nasa",
-    "totalReturned": 5,
+    "url": "https://www.facebook.com/NASA",
+    "totalReturned": 8,
     "photos": [
       {
         "platform": "facebook",
-        "id": "YXBwX2l0ZW06MTAwMDQ0NTYxNTUwODMxOjIzMDUyNzI3MzI6NTo6MTU3ODIyNDk1MDMzOTU0Mg==",
-        "url": "https://www.facebook.com/photo.php?fbid=1578224950339542&set=pb.100044561550831.-2207520000&type=3",
-        "image": "https://scontent-hou1-1.xx.fbcdn.net/v/t39.99422-6/747931162_1667321021008266_4517886636206841967_n.png?stp=dst-jpg_tt6&cstp=mx2048x1365&ctp=s2048x1365&_nc_cat=111&ccb=1-7&_nc_sid=127cfc&_nc_ohc=YjF8MXPlL24Q7kNvwHBP0gg&_nc_oc=AdqTcBFSz8fVLAYV3H8S-Qe052BfBV3HG3bd8tPrJhAmJnAQKRiK5D1ICajVnvCDpNzaz6vSP7gFGpcWTJFm3T-V&_nc_zt=14&_nc_ht=scontent-hou1-1.xx&_nc_gid=7v6S0A37THlCU7QNEX4B2w&_nc_ss=72289&oh=00_AQDczV9mLh2bkVl8AX3hfE9AAt_dhw2AmUI9B0jAJyfr8A&oe=6A614D8D",
-        "caption": "Anil and Anna Menon pose for a photograph at the Cosmonaut Hotel in Baikonur. Anil, in pre-launch quarantine at the time of this photo, is behind glass, but Anil and Anna are leaning close to each other. Both Anil and Anna are looking at the camera with big grins. Credit: NASA/John Kraus"
+        "id": "1587644152730955",
+        "url": "https://www.facebook.com/photo.php?fbid=1587644152730955",
+        "image": "https://scontent-dfw6-2.xx.fbcdn.net/v/t39.99422-6/758964186_1384158170473704_9008748322111971488_n.png?stp=dst-jpg_tt6&cstp=mx2047x1012&ctp=s2047x1012&_nc_cat=1&ccb=1-7&_nc_sid=12...",
+        "caption": "A galaxy cluster in deep space. It is filled with elliptical galaxies: small, bright white glowing ovals. The two largest elliptical galaxies, left and right of center, are bright cores that radiate light. Unrelated, distant galaxies are scattered around as red smudges and dots. Many of these are stretched out into red arcs and lines by the galaxy cluster’s strong gravity, creating multiple images in places. Numerous spiral galaxies and bright stars appear in the foreground. Credit: ESA/Webb, NASA & CSA, S. Fujimoto",
+        "width": 2047,
+        "height": 1012
       },
       {
         "platform": "facebook",
-        "id": "YXBwX2l0ZW06MTAwMDQ0NTYxNTUwODMxOjIzMDUyNzI3MzI6NTo6MTU3ODIyNDkyMDMzOTU0NQ==",
-        "url": "https://www.facebook.com/photo.php?fbid=1578224920339545&set=pb.100044561550831.-2207520000&type=3",
-        "image": "https://scontent-hou1-1.xx.fbcdn.net/v/t39.99422-6/748527781_2080772216199706_6612040318485045639_n.png?stp=dst-jpg_tt6&cstp=mx2048x1365&ctp=s2048x1365&_nc_cat=106&ccb=1-7&_nc_sid=127cfc&_nc_ohc=eXiVKHdCRa0Q7kNvwHtokmG&_nc_oc=Adp1pOhQp-nxvNmJoDJwjhzjNXxB2i2trufcYXNlbLjV8tEMyANYnmBIGTVzDXWUMCknj_X3uQU-u182fg5zeSuE&_nc_zt=14&_nc_ht=scontent-hou1-1.xx&_nc_gid=7v6S0A37THlCU7QNEX4B2w&_nc_ss=72289&oh=00_AQDJCfUCxh9YPBVxvkyBnn8DMYqZB1KkFpjYncL3jVY1XA&oe=6A611BD4",
-        "caption": "Astronaut candidate Anna Menon and her two children watch a Soyuz rocket lift off in the distance. The three are standing in the middle of a scrubby field, wearing dark t-shirts with \"Team Menon\" on the back; Anna is carrying one of her children on her shoulders. Credit: NASA/John Kraus"
+        "id": "1586655189496518",
+        "url": "https://www.facebook.com/photo.php?fbid=1586655189496518",
+        "image": "https://scontent-dfw6-2.xx.fbcdn.net/v/t39.30808-6/756229023_1586655192829851_1923291187225748989_n.jpg?stp=dst-jpg_tt6&cstp=mx1884x1054&ctp=s1884x1054&_nc_cat=110&ccb=1-7&_nc_sid=...",
+        "caption": "An aerial view of a spacecraft about to land on Earth; the capsule is barely visible, but a large white-and-red parachute billows above it. The plain around it is flat and featureless. Credit: NASA+",
+        "width": 1884,
+        "height": 1054
       },
       {
         "platform": "facebook",
-        "id": "YXBwX2l0ZW06MTAwMDQ0NTYxNTUwODMxOjIzMDUyNzI3MzI6NTo6MTU3ODIyNDkwNzAwNjIxMw==",
-        "url": "https://www.facebook.com/photo.php?fbid=1578224907006213&set=pb.100044561550831.-2207520000&type=3",
-        "image": "https://scontent-hou1-1.xx.fbcdn.net/v/t39.99422-6/746343278_880948677971054_703395191772258474_n.png?stp=dst-jpg_tt6&cstp=mx2048x1365&ctp=s2048x1365&_nc_cat=106&ccb=1-7&_nc_sid=127cfc&_nc_ohc=PTptv6EBhhcQ7kNvwFA6Kr_&_nc_oc=Adomq1q_DCJurh5Gw-Y43pzDKA-0BaWFVlyA0VgrhfVS63MOomvzyKDwypCGxcLAhOay7TsuapSXozIyHSG0DQP0&_nc_zt=14&_nc_ht=scontent-hou1-1.xx&_nc_gid=7v6S0A37THlCU7QNEX4B2w&_nc_ss=72289&oh=00_AQDBuT75nUGRVlPgJ079SdeMMTDJocqSaBBAH5ebNdbI-g&oe=6A61376C",
-        "caption": "A closer shot of the Soyuz lifting off at Baikonur. Its flaming rockets flare out from a central column, with the spacecraft on top. Two large, antenna-like stands frame the rocket, with metal tracks running from the launch site into the foreground. Credit: NASA/Bill Ingalls"
+        "id": "1585138822981488",
+        "url": "https://www.facebook.com/photo.php?fbid=1585138822981488",
+        "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/754498097_1529437744896067_7884542055079848706_n.png?stp=dst-jpg_tt6&cstp=mx2048x2048&ctp=s2048x2048&_nc_cat=111&ccb=1-7&_nc_sid=...",
+        "caption": "The scene is cloaked in a cool, blue haze, decorated with the warm light of galaxies and stars. Around the center is a jagged ring where the haze appears absent and dark space peeks through. Credit: NASA, ESA, M.J. Jee and H. Ford (Johns Hopkins University)",
+        "width": 2048,
+        "height": 2048
       },
       {
         "platform": "facebook",
-        "id": "YXBwX2l0ZW06MTAwMDQ0NTYxNTUwODMxOjIzMDUyNzI3MzI6NTo6MTU3NjU5Nzc1MzgzNTU5NQ==",
-        "url": "https://www.facebook.com/photo.php?fbid=1576597753835595&set=pb.100044561550831.-2207520000&type=3",
-        "image": "https://scontent-hou1-1.xx.fbcdn.net/v/t39.99422-6/746761573_1119531051252847_1127771889534710176_n.png?stp=dst-jpg_tt6&cstp=mx1920x1080&ctp=s1920x1080&_nc_cat=106&ccb=1-7&_nc_sid=127cfc&_nc_ohc=I8MNydUq90IQ7kNvwGehrfP&_nc_oc=AdrY8-OZP2ivSoFxbSDpxtBgZeMuMJzOSAkQB3DQ_Y0_i5KTpKzdj5VSzxkTGlUfXa3NYK4MQ58bzO-PLfi1jypk&_nc_zt=14&_nc_ht=scontent-hou1-1.xx&_nc_gid=7v6S0A37THlCU7QNEX4B2w&_nc_ss=72289&oh=00_AQAr-5F_NtcECN05aiDMnHQitGB7P3-oop3Acqiz5M887g&oe=6A613E58",
-        "caption": "The Menon family poses for a photo while on a hike. Anna Menon, left, and Anil Menon, right, each carry a child in a back carrier. The orange leaves of a tree frame the left side of the image. The words \"Houston We Have a Podcast\" are written in capital letters at the top middle of the image, while the NASA meatball logo is in the top right corner. Credit: NASA"
+        "id": "1583701686458535",
+        "url": "https://www.facebook.com/photo.php?fbid=1583701686458535",
+        "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/752620057_1361351692793736_6372731408048785122_n.png?stp=dst-jpg_tt6&cstp=mx2048x1713&ctp=s2048x1713&_nc_cat=105&ccb=1-7&_nc_sid=...",
+        "caption": "The Lighthouse Nebula (upper left) and a pulsar (lower right) are illuminated against a spotty starfield. The part of the nebula shown in this image looks like a diffuse, purple cloud with a bright star in the center. The pulsar looks like a bright white streak of light with a purple jet extending from one end, forming the shape of a checkmark. Credits: X-ray: Chandra: NASA/CXC/Stanford Univ./J.T. Dinsmore et al.; IXPE: NASA/MSFC/J.T. Dinsmore et al., Radio: CSIRO/ATNF/ATCA; Optical: 2MASS/UMass/IPAC-Caltech/NASA/NSF; Image processing: NASA/CXC/SAO/L. Frattare",
+        "width": 2048,
+        "height": 1713
       },
       {
         "platform": "facebook",
-        "id": "YXBwX2l0ZW06MTAwMDQ0NTYxNTUwODMxOjIzMDUyNzI3MzI6NTo6MTU3MzM0Mzk2NzQ5NDMwNw==",
-        "url": "https://www.facebook.com/photo.php?fbid=1573343967494307&set=pb.100044561550831.-2207520000&type=3",
-        "image": "https://scontent-hou1-1.xx.fbcdn.net/v/t39.99422-6/741606712_4349771278626355_1808273560693510738_n.png?stp=dst-jpg_tt6&cstp=mx3181x1317&ctp=s3181x1317&_nc_cat=109&ccb=1-7&_nc_sid=127cfc&_nc_ohc=NvnpmDZUUpAQ7kNvwEYY6fx&_nc_oc=AdpwoV0Psgwm4Pc_Y9nwFnE7RCu5fjJBuMUdX7T5KlliZBX1kCGfIYPNxmQS8oHkOUhxqY54Fs3abh-028gJdgWn&_nc_zt=14&_nc_ht=scontent-hou1-1.xx&_nc_gid=7v6S0A37THlCU7QNEX4B2w&_nc_ss=72289&oh=00_AQCb2SUItop9eDXN6rHxG_uubKUZ-1t2t4NBVpe1glpHyQ&oe=6A61200E",
-        "caption": "A photo of Centaurus A revealing its intricate, highly-detailed inner structure. Rings of gas and stars glow white and twist around a swirling, pinkish center. Distant stars and galaxies densely dot the background with purple light. Credits: Image: NASA, ESA, CSA, STScI; Image Processing: Alyssa Pagan (STScI), Joseph DePasquale (STScI), Macarena Garcia Marin (ESA Office at STScI)"
+        "id": "1582125049949532",
+        "url": "https://www.facebook.com/photo.php?fbid=1582125049949532",
+        "image": "https://scontent-dfw6-2.xx.fbcdn.net/v/t39.30808-6/752699303_1582125053282865_6907261101135459632_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=110&ccb=1-7&_nc_sid=...",
+        "caption": "Astronaut Buzz Aldrin, wearing his spacesuit, descends the ladder of the Apollo 11 Lunar Module, a large structure with golden foil covering its lower half. The Moon's surface is bright and flat; above the horizon, which slopes downward from right-to-left, the sky is completely black. Credit: NASA",
+        "width": 1080,
+        "height": 1080
+      },
+      {
+        "platform": "facebook",
+        "id": "1578224950339542",
+        "url": "https://www.facebook.com/photo.php?fbid=1578224950339542",
+        "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/747931162_1667321021008266_4517886636206841967_n.png?stp=dst-jpg_tt6&cstp=mx2048x1365&ctp=s2048x1365&_nc_cat=111&ccb=1-7&_nc_sid=...",
+        "caption": "Anil and Anna Menon pose for a photograph at the Cosmonaut Hotel in Baikonur. Anil, in pre-launch quarantine at the time of this photo, is behind glass, but Anil and Anna are leaning close to each other. Both Anil and Anna are looking at the camera with big grins. Credit: NASA/John Kraus",
+        "width": 2048,
+        "height": 1365
+      },
+      {
+        "platform": "facebook",
+        "id": "1578224920339545",
+        "url": "https://www.facebook.com/photo.php?fbid=1578224920339545",
+        "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/748527781_2080772216199706_6612040318485045639_n.png?stp=dst-jpg_tt6&cstp=mx2048x1365&ctp=s2048x1365&_nc_cat=106&ccb=1-7&_nc_sid=...",
+        "caption": "Astronaut candidate Anna Menon and her two children watch a Soyuz rocket lift off in the distance. The three are standing in the middle of a scrubby field, wearing dark t-shirts with \"Team Menon\" on the back; Anna is carrying one of her children on her shoulders. Credit: NASA/John Kraus",
+        "width": 2048,
+        "height": 1365
+      },
+      {
+        "platform": "facebook",
+        "id": "1578224907006213",
+        "url": "https://www.facebook.com/photo.php?fbid=1578224907006213",
+        "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/746343278_880948677971054_703395191772258474_n.png?stp=dst-jpg_tt6&cstp=mx2048x1365&ctp=s2048x1365&_nc_cat=106&ccb=1-7&_nc_sid=12...",
+        "caption": "A closer shot of the Soyuz lifting off at Baikonur. Its flaming rockets flare out from a central column, with the spacecraft on top. Two large, antenna-like stands frame the rocket, with metal tracks running from the launch site into the foreground. Credit: NASA/Bill Ingalls",
+        "width": 2048,
+        "height": 1365
       }
     ]
   },
@@ -1828,17 +1857,25 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "facebook-summarizer": {
     "platform": "facebook",
-    "url": "https://www.facebook.com/NASA/posts/pfbid02skzNsrLf5atYZfzvzHAK9gHwDnZC5u4pDZMLQ1u3iJmfoA8tNsGpT7Uj6WPs6K3Rl",
-    "summary": "The upcoming launch of the Nancy Grace Roman Space Telescope marks a significant advancement in astronomical observation. Set to launch later this year, this telescope will have a field of view that is at least 100 times wider than that of the Hubble Space Telescope, allowing for both broad and detailed observations of distant celestial bodies. This capability promises to enhance our understanding of the universe by capturing a more comprehensive view of cosmic phenomena.\n\nIn ...",
+    "url": "https://www.facebook.com/NASA/posts/pfbid0TBwRTPkxfaLhYBjfsK1xApVksSVHddNrpqUqcqNsKxVvKjqT6dAG8HnxWGA3odp5l",
+    "summary": "The video discusses the concept of a galaxy cluster, which consists of multiple galaxies grouped together. Specifically, it focuses on a galaxy cluster made up of two sub-clusters of similar mass that are currently interacting and separating in a complex manner. This dynamic relationship is significant for scientific study, as it provides insights into the behavior of galaxies in close proximity to one another. Eventually, these sub-clusters are expected to merge, further contributing to our understanding of galaxy formation and evolution.\n\nAdditionally, the video highlights the phenomenon of gravitational lensing, where the concentrated mass of the cluster bends light due to its gravitational pull. This effect allows astronomers to observe distant and faint background galaxies and stars that would otherwise be invisible, enhancing our ability to study the universe and its structures. The interplay of these two sub-clusters not only illustrates the chaotic nature of cosmic interactions but also serves as a valuable tool for astronomical research.",
     "keyPoints": [
-      "The Nancy Grace Roman Space Telescope will launch later this year.",
-      "It has a field of view at least 100 times wider than Hubble's."
+      "A galaxy cluster consists of multiple galaxies grouped together.",
+      "The featured cluster contains two sub-clusters of similar mass interacting and separating.",
+      "The relationship between the sub-clusters is complex but crucial for scientific study.",
+      "Gravitational lensing occurs due to the cluster's mass, bending and focusing light.",
+      "This lensing effect allows the observation of faint background galaxies and stars.",
+      "The merging of the sub-clusters will provide further insights into galaxy evolution."
     ],
     "topics": [
-      "space telescope",
-      "Nancy Grace Roman"
+      "galaxy cluster",
+      "gravitational lensing",
+      "cosmic interactions",
+      "astronomy",
+      "galaxy formation",
+      "space science"
     ],
-    "sentiment": "positive"
+    "sentiment": "neutral"
   },
   "facebook-transcript": {
     "platform": "facebook",

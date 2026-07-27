@@ -1936,7 +1936,7 @@
     "platform": "facebook",
     "name": "Facebook Marketplace Location Search",
     "path": "/v1/facebook/marketplace-location-search",
-    "credits": 17,
+    "credits": 2,
     "summary": "Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34).",
     "params": [
       {
@@ -1949,13 +1949,13 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 10, max 50. Flat 17 credits per call."
+        "description": "Max items to return. Default 10, max 50. Flat 2 credits per call."
       },
       {
         "name": "details",
         "type": "string",
         "required": false,
-        "description": "Set true to include latitude/longitude per location (slower; doubles cost to 34 credits)."
+        "description": "Set true to include latitude/longitude per location (slower; doubles cost to 2 credits)."
       },
       {
         "name": "cache",
@@ -2020,7 +2020,7 @@
     "platform": "facebook",
     "name": "Facebook Profile Photos",
     "path": "/v1/facebook/profile-photos",
-    "credits": 12,
+    "credits": 2,
     "summary": "Photos from a Facebook profile or page.",
     "params": [
       {
@@ -2033,7 +2033,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
       },
       {
         "name": "cache",

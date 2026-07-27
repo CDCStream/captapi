@@ -21,8 +21,10 @@ from app.services import (
     facebook_details_native,
     facebook_events_native,
     facebook_group_posts_native,
+    facebook_marketplace_location_native,
     facebook_marketplace_native,
     facebook_page_native,
+    facebook_profile_photos_native,
     facebook_profile_posts_native,
     facebook_profile_reels_native,
 )
@@ -60,6 +62,8 @@ CREDIT_FB_MARKETPLACE_NATIVE = facebook_marketplace_native.CREDIT_FB_MARKETPLACE
 CREDIT_FB_PROFILE_POSTS_NATIVE = facebook_profile_posts_native.CREDIT_FB_PROFILE_POSTS_NATIVE
 CREDIT_FB_PROFILE_REELS_NATIVE = facebook_profile_reels_native.CREDIT_FB_PROFILE_REELS_NATIVE
 CREDIT_FB_GROUP_POSTS_NATIVE = facebook_group_posts_native.CREDIT_FB_GROUP_POSTS_NATIVE
+CREDIT_FB_PROFILE_PHOTOS_NATIVE = facebook_profile_photos_native.CREDIT_FB_PROFILE_PHOTOS_NATIVE
+CREDIT_FB_MARKETPLACE_LOCATION_NATIVE = facebook_marketplace_location_native.CREDIT_FB_MARKETPLACE_LOCATION_NATIVE
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -966,7 +970,6 @@ async def facebook_summarize(
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/watch/?v=123")
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/summarize",
@@ -975,27 +978,19 @@ async def facebook_summarize(
         base_credits=CREDIT_SUMMARIZE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_FACEBOOK_POSTS,
-                {"startUrls": [{"url": url}], "shouldDownloadSubtitles": True, "resultsLimit": 1},
-                max_items=1,
-            )
-            if not items:
+            raw = await facebook_details_native.details_native(url)
+            if raw is None:
                 raise HTTPException(status_code=404, detail="Post not found")
-            item = items[0]
-            subs = item.get("subtitles") or []
-            parts = []
-            if isinstance(subs, list):
-                for s in subs:
-                    text = ((s.get("text") if isinstance(s, dict) else str(s)) or "").strip()
-                    if text:
-                        parts.append(text)
-            text = (" ".join(parts) or safe_str(item.get("text")) or "").strip()
+            text = (
+                safe_str(raw.get("text"))
+                or safe_str(raw.get("message"))
+                or safe_str(raw.get("caption"))
+                or ""
+            ).strip()
             if not text:
                 raise HTTPException(status_code=422, detail="No content to summarize")
-            ai = await summarize_transcript(text, title=safe_str(item.get("text")))
-            ctx["source"] = "apify"
+            ai = await summarize_transcript(text, title=text[:200])
+            ctx["source"] = "direct"
             return {
                 "platform": "facebook",
                 "url": url,
@@ -1007,7 +1002,7 @@ async def facebook_summarize(
 
         data = await cached_or_run(
             endpoint="facebook.summarize",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1347,35 +1342,30 @@ async def facebook_profile_photos(
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = _require_facebook_page(url)
-    settings = get_settings()
-    cost = _scaled_credits(limit, RATE_FB_POSTS, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/profile-photos",
         platform="facebook",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_FB_PROFILE_PHOTOS_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_FACEBOOK_PHOTOS,
-                {"startUrls": [{"url": url}], "resultsLimit": limit},
-                max_items=limit,
-            )
-            photos = [_normalize_photo(i) for i in items[:limit] if not i.get("error")]
-            ctx["source"] = "apify"
+            raws = await facebook_profile_photos_native.profile_photos_native(url, limit)
+            if raws is None:
+                raise HTTPException(status_code=404, detail="Photos not found")
+            photos = [strip_empty(_normalize_photo(i)) for i in raws]
+            ctx["source"] = "direct"
             return {"url": url, "totalReturned": len(photos), "photos": photos}
 
         data = await cached_or_run(
             endpoint="facebook.profile-photos",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["photos"]), RATE_FB_POSTS, 2)
         return ApiResponse(data=data)
+
 
 
 @router.get("/profile-events", summary="Events from a Facebook profile/page")
@@ -1655,68 +1645,48 @@ async def facebook_marketplace_location_search(
     details: bool = Query(
         False,
         description=(
-            "When true, fetches listing details so each location includes "
-            "latitude/longitude (slower; doubles credit cost)."
+            "Legacy flag. Coordinates are always included when Facebook exposes them. "
+            "Flat 2 credits either way."
         ),
     ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    settings = get_settings()
-    # Flat fee: 17 without coords, 34 with details=true (Apify fetchItemDetails).
-    cost = 34 if details else 17
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/marketplace-location-search",
         platform="facebook",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_FB_MARKETPLACE_LOCATION_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_FACEBOOK_MARKETPLACE,
-                {
-                    "queries": ["chair"],
-                    "locationName": q,
-                    "maxResultsPerQuery": min(max(limit, 5), 50),
-                    "fetchItemDetails": details,
-                },
-                max_items=min(max(limit, 5), 50),
+            _ = details  # accepted for API compat; coords come from marketplace page.
+            results = await facebook_marketplace_location_native.marketplace_location_search_native(
+                q, limit=limit
             )
-            locations: dict[str, dict] = {}
-            for item in items:
-                if item.get("error"):
-                    continue
-                loc = _normalize_marketplace_location(item)
-                if not loc:
-                    continue
-                existing = locations.get(loc["id"])
-                if existing is None:
-                    locations[loc["id"]] = loc
-                elif existing.get("latitude") is None and loc.get("latitude") is not None:
-                    locations[loc["id"]] = loc
-            results = list(locations.values())[:limit]
             if not results:
-                fallback = {
-                    "id": q.strip().lower(),
-                    "name": q.strip(),
-                    "city": q.strip(),
-                    "state": None,
-                    "latitude": None,
-                    "longitude": None,
-                }
-                results = [fallback]
-            ctx["source"] = "apify"
+                results = [
+                    {
+                        "id": q.strip().lower(),
+                        "name": q.strip(),
+                        "city": q.strip(),
+                        "state": None,
+                        "latitude": None,
+                        "longitude": None,
+                    }
+                ]
+            ctx["source"] = "direct"
             return {"query": q, "totalReturned": len(results), "locations": results}
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-location-search",
-            params={"q": q, "limit": limit, "details": details, "v": 3},
+            params={"q": q, "limit": limit, "details": details, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
         return ApiResponse(data=data)
+
 
 
 @router.get("/event-search", summary="Search Facebook events by keyword/location")
