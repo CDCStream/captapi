@@ -12804,21 +12804,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "username": "NASASpox",
       "displayName": "Bethany Stevens",
       "url": "https://x.com/NASASpox",
-      "followers": null,
       "verified": true,
       "profileImage": "https://pbs.twimg.com/profile_images/2030158374625759233/3fWyLDjS_normal.jpg"
     },
     "engagement": {
-      "views": null,
       "likes": 603,
-      "replies": 52,
-      "retweets": null,
-      "quotes": null,
-      "bookmarks": null
+      "replies": 52
     },
     "isReply": false,
-    "isRetweet": null,
-    "hashtags": [],
     "media": [
       "https://pbs.twimg.com/media/HNdWSZ3XsAEekpT.jpg"
     ]

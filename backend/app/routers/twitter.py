@@ -20,7 +20,7 @@ from app.schemas.common import ApiResponse
 from app.services import twitter_native as native
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
-from app.utils.formatters import first_present, safe_int, safe_list, safe_str
+from app.utils.formatters import first_present, safe_int, safe_list, safe_str, strip_empty
 from app.utils.url import (
     detect_url_platform,
     extract_tweet_id,
@@ -238,7 +238,9 @@ def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
         tweet_id = item.get("id") or item.get("id_str")
         if username and tweet_id:
             url = f"https://x.com/{username}/status/{tweet_id}"
-    return {
+    # Omit null engagement / author fields (syndication never has views,
+    # retweets, quotes, bookmarks, or followers — keep 0 when Apify provides it).
+    return strip_empty({
         "platform": "twitter",
         "url": url,
         "id": safe_str(item.get("id") or item.get("id_str") or item.get("tweetId")),
@@ -270,7 +272,7 @@ def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
         "isRetweet": first_present(item.get("isRetweet"), _as_bool(item.get("is_retweet"))),
         "hashtags": _tweet_hashtags(item),
         "media": _tweet_media(item),
-    }
+    })
 
 
 def _entities_website(item: dict[str, Any]) -> str | None:
