@@ -1662,7 +1662,7 @@
     "platform": "facebook",
     "name": "Facebook Details",
     "path": "/v1/facebook/details",
-    "credits": 1,
+    "credits": 2,
     "summary": "Details for a Facebook video or post.",
     "params": [
       {

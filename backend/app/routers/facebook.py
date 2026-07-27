@@ -18,6 +18,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services import (
     facebook_comments_native,
+    facebook_details_native,
     facebook_events_native,
     facebook_marketplace_native,
 )
@@ -37,7 +38,7 @@ router = APIRouter()
 
 CREDIT_TRANSCRIPT = 2
 CREDIT_SUMMARIZE = 4
-CREDIT_DETAILS = 1
+CREDIT_DETAILS = facebook_details_native.CREDIT_FB_DETAILS_NATIVE
 CREDIT_PAGE_DETAILS = 1
 
 # apify/facebook-comments-scraper is billed per result ($1.50/1k = $0.0015).
@@ -839,7 +840,6 @@ async def facebook_details(
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/page/posts/123")
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/details",
@@ -848,20 +848,15 @@ async def facebook_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_FACEBOOK_POSTS,
-                {"startUrls": [{"url": url}], "resultsLimit": 1},
-                max_items=1,
-            )
-            if not items:
+            raw = await facebook_details_native.details_native(url)
+            if raw is None:
                 raise HTTPException(status_code=404, detail="Post not found")
-            ctx["source"] = "apify"
-            return _normalize_post(items[0])
+            ctx["source"] = "direct"
+            return strip_empty(_normalize_post(raw))
 
         data = await cached_or_run(
             endpoint="facebook.details",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

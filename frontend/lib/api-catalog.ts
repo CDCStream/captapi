@@ -269,7 +269,7 @@ const INSTAGRAM: Spec[] = [
 ];
 
 const FACEBOOK: Spec[] = [
-  { slug: "facebook-details", name: "Facebook Details API", shortName: "Details", category: "details", method: "GET", path: "/v1/facebook/details", credits: 1 , tagline: "Get a Facebook post or video — caption, engagement, author, and media fields as structured JSON." },
+  { slug: "facebook-details", name: "Facebook Details API", shortName: "Details", category: "details", method: "GET", path: "/v1/facebook/details", credits: 2 , tagline: "Get a Facebook post or video — caption, engagement, author, and media fields as structured JSON." },
   { slug: "facebook-transcript", name: "Facebook Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/facebook/transcript", credits: 2 },
   { slug: "facebook-summarizer", name: "Facebook Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/facebook/summarize", credits: 4 },
   { slug: "facebook-comments", name: "Facebook Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/facebook/comments", credits: 2 },
