@@ -3955,167 +3955,153 @@
     "status": 200,
     "credits": null,
     "data": {
-      "query": "artificial intelligence",
+      "query": "NASA",
       "totalReturned": 5,
       "results": [
         {
           "platform": "twitter",
-          "url": "https://x.com/blatam_/status/2077911343433121881",
-          "id": "2077911343433121881",
-          "text": "Artificial Intelligence is a vast field encompassing Machine Learning and Deep Learning. Deep Learning further breaks down into various model categories, driving innovation across industries. #ArtificialIntelligence #MachineLearning https://t.co/LiHD2ey6Th",
+          "url": "https://x.com/NASA/status/2040468080686424396",
+          "id": "2040468080686424396",
+          "text": "This view just hits different 🌍\n \n@Astro_Christina and @astro_reid take a moment to look back at Earth as they continue deep into space toward the Moon. https://t.co/NMDeLj256K",
           "lang": "en",
-          "publishedAt": "Fri Jul 17 00:20:44 +0000 2026",
+          "publishedAt": "Sat Apr 04 16:34:35 +0000 2026",
           "author": {
-            "username": "blatam_",
-            "displayName": "Blatam",
-            "url": "https://x.com/blatam_",
-            "followers": 9757,
-            "verified": null,
-            "profileImage": "https://pbs.twimg.com/profile_images/1591619270315835392/AmQ2CCIu_normal.jpg"
+            "username": "NASA",
+            "displayName": "NASA",
+            "url": "https://x.com/NASA",
+            "followers": 92218898,
+            "verified": true,
+            "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
           },
           "engagement": {
-            "views": 214,
-            "likes": 1,
-            "replies": 0,
-            "retweets": 0,
-            "quotes": 0,
-            "bookmarks": 0
+            "views": 26603803,
+            "likes": 196279,
+            "replies": 3348,
+            "retweets": 29253,
+            "quotes": 2908,
+            "bookmarks": 11266
           },
           "isReply": false,
           "isRetweet": false,
-          "hashtags": [
-            "ArtificialIntelligence",
-            "MachineLearning"
-          ],
           "media": [
-            "https://pbs.twimg.com/amplify_video_thumb/2077911330095353856/img/zbXY6CblL626j2-b.jpg"
+            "https://pbs.twimg.com/media/HFEy5njWsAArPaK.jpg",
+            "https://pbs.twimg.com/media/HFEy56IXwAAnG2M.jpg"
           ]
         },
         {
           "platform": "twitter",
-          "url": "https://x.com/meisshaily/status/2077981464726245381",
-          "id": "2077981464726245381",
-          "text": "Artificial General Intelligence (#AGI) is predicted to surpass human #intelligence and trigger rapid technological progress beyond our control.  — @meisshaily \n\nhttps://t.co/tkqTBL8SIq\n\n#ArtificialIntelligence #AI #TechNews #TEchNology #Tech",
-          "lang": "en",
-          "publishedAt": "Fri Jul 17 04:59:22 +0000 2026",
+          "url": "https://x.com/NASA_es/status/2080691982725165465",
+          "id": "2080691982725165465",
+          "text": "Todo empieza en el Pacífico, pero sus efectos pueden sentirse en todo el mundo. 🌎 \n\nDurante un episodio de El Niño, las aguas del Pacífico central y oriental se calientan más de lo habitual, alterando los vientos y las condiciones atmosféricas. \n\nAprende más: https://t.co/ZYhYA80OPL",
+          "lang": "es",
+          "publishedAt": "Fri Jul 24 16:30:00 +0000 2026",
           "author": {
-            "username": "meisshaily",
-            "displayName": "Shailendraa Kumar",
-            "url": "https://x.com/meisshaily",
-            "followers": 76728,
+            "username": "NASA_es",
+            "displayName": "NASA en español",
+            "url": "https://x.com/NASA_es",
+            "followers": 2127798,
             "verified": true,
-            "profileImage": "https://pbs.twimg.com/profile_images/1640506780823490560/vpKI_AMn_normal.jpg"
+            "profileImage": "https://pbs.twimg.com/profile_images/1597637362267340800/U6B1DIqL_normal.jpg"
           },
           "engagement": {
-            "views": 252,
-            "likes": 1,
-            "replies": 1,
-            "retweets": 1,
-            "quotes": 0,
-            "bookmarks": 0
+            "views": 91914,
+            "likes": 1566,
+            "replies": 16,
+            "retweets": 639,
+            "quotes": 22,
+            "bookmarks": 213
           },
           "isReply": false,
           "isRetweet": false,
-          "hashtags": [
-            "AGI",
-            "intelligence",
-            "ArtificialIntelligence",
-            "AI",
-            "TechNews"
-          ],
-          "media": []
-        },
-        {
-          "platform": "twitter",
-          "url": "https://x.com/BLS_gov/status/2077898575229374631",
-          "id": "2077898575229374631",
-          "text": "Artificial intelligence, information technology, and employment, 2024–34 #BLSData https://t.co/PwIRncj01X https://t.co/LhnW3ASFM4",
-          "lang": "en",
-          "publishedAt": "Thu Jul 16 23:30:00 +0000 2026",
-          "author": {
-            "username": "BLS_gov",
-            "displayName": "BLS-Labor Statistics",
-            "url": "https://x.com/BLS_gov",
-            "followers": 107813,
-            "verified": true,
-            "profileImage": "https://pbs.twimg.com/profile_images/1542848480024166400/o6d_LR9a_normal.jpg"
-          },
-          "engagement": {
-            "views": 3156,
-            "likes": 7,
-            "replies": 0,
-            "retweets": 3,
-            "quotes": 1,
-            "bookmarks": 2
-          },
-          "isReply": false,
-          "isRetweet": false,
-          "hashtags": [
-            "BLSData"
-          ],
           "media": [
-            "https://pbs.twimg.com/media/HNWPNE5XIAAQYJR.jpg"
+            "https://pbs.twimg.com/amplify_video_thumb/2080522799836282880/img/8Rac9bGdCmVJaFVQ.jpg"
           ]
         },
         {
           "platform": "twitter",
-          "url": "https://x.com/heyalexmoore/status/2077039378602627525",
-          "id": "2077039378602627525",
-          "text": "All Paid Courses (Free for First 4500 People)\n\n 𝗣𝗮𝗶𝗱 𝗖𝗼𝘂𝗿𝘀𝗲 𝗙𝗥𝗘𝗘 (PART - 1)\n 1. Artificial Intelligence\n 2. Machine Learning\n 3. Prompt Engineering\n 4. Claude,Chatgpt,Grok\n5. Data Analytics\n6. AWS Certified\n 7. Data Science\n8. BIG DATA\n9. Python\n 10. Ethical Hacking https://t.co/OqFWODxsAo",
+          "url": "https://x.com/NASA/status/2042791040516845925",
+          "id": "2042791040516845925",
+          "text": "Big smiles from Christina and Victor on the deck of the USS John P. Murtha, as they waited to be escorted for their routine post-mission medical checks. https://t.co/3KwZFXTLhI",
           "lang": "en",
-          "publishedAt": "Tue Jul 14 14:35:52 +0000 2026",
+          "publishedAt": "Sat Apr 11 02:25:11 +0000 2026",
           "author": {
-            "username": "heyalexmoore",
-            "displayName": "Alex Moore",
-            "url": "https://x.com/heyalexmoore",
-            "followers": 181689,
+            "username": "NASA",
+            "displayName": "NASA",
+            "url": "https://x.com/NASA",
+            "followers": 92218898,
             "verified": true,
-            "profileImage": "https://pbs.twimg.com/profile_images/2002782930415026177/AQXbO75J_normal.jpg"
+            "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
           },
           "engagement": {
-            "views": 283359,
-            "likes": 1897,
-            "replies": 1856,
-            "retweets": 873,
-            "quotes": 10,
-            "bookmarks": 664
+            "views": 6420403,
+            "likes": 209244,
+            "replies": 1499,
+            "retweets": 24407,
+            "quotes": 681,
+            "bookmarks": 5156
           },
           "isReply": false,
           "isRetweet": false,
-          "hashtags": [],
           "media": [
-            "https://pbs.twimg.com/media/HNMgTsRa4AA-Pte.jpg"
+            "https://pbs.twimg.com/amplify_video_thumb/2042790194324344836/img/6KUbLH-ujJtTMM7f.jpg"
           ]
         },
         {
           "platform": "twitter",
-          "url": "https://x.com/GavinSBaker/status/2078110934740980193",
-          "id": "2078110934740980193",
-          "text": "Kimi K3 may be an important inflection point for AI. Potentially negative for Anthropic and OpenAI while being net positive for essentially every other company in the world. I mean that very literally. Although the real “Sputnik moment” would be an open-source frontier model that https://t.co/tdAkU4oRgo",
+          "url": "https://x.com/NASAHubble/status/2080654232886116631",
+          "id": "2080654232886116631",
+          "text": "A one-sided spiral 🌀\n\nLocated about 72 million light-years away, the spiral galaxy NGC 4654 belongs to the Virgo Cluster of galaxies.\n\nIts asymmetric shape is caused by pressure it encounters as the galaxy moves through gas in its cluster: https://t.co/eN12F6Zn7p https://t.co/vRooW1msYH",
           "lang": "en",
-          "publishedAt": "Fri Jul 17 13:33:50 +0000 2026",
+          "publishedAt": "Fri Jul 24 14:00:00 +0000 2026",
           "author": {
-            "username": "GavinSBaker",
-            "displayName": "Gavin Baker",
-            "url": "https://x.com/GavinSBaker",
-            "followers": 281946,
+            "username": "NASAHubble",
+            "displayName": "Hubble",
+            "url": "https://x.com/NASAHubble",
+            "followers": 8908452,
             "verified": true,
-            "profileImage": "https://pbs.twimg.com/profile_images/1396219525754937345/5L4n5L3O_normal.jpg"
+            "profileImage": "https://pbs.twimg.com/profile_images/3468011581/efb985f24af0a814a722457a768f3cc5_normal.jpeg"
           },
           "engagement": {
-            "views": 1775228,
-            "likes": 6718,
-            "replies": 455,
-            "retweets": 1008,
-            "quotes": 270,
-            "bookmarks": 4601
+            "views": 129049,
+            "likes": 1986,
+            "replies": 42,
+            "retweets": 343,
+            "quotes": 15,
+            "bookmarks": 111
           },
           "isReply": false,
           "isRetweet": false,
-          "hashtags": [],
           "media": [
-            "https://pbs.twimg.com/media/HNbu4bhWoAATDPF.jpg",
-            "https://pbs.twimg.com/media/HNbu4bjXkAADZnh.jpg"
+            "https://pbs.twimg.com/media/HN7BH9XXAAA9H5c.jpg"
+          ]
+        },
+        {
+          "platform": "twitter",
+          "url": "https://x.com/NASA/status/2047791699582156835",
+          "id": "2047791699582156835",
+          "text": "Let's see… a five-letter word for happiness: space! 🦀\n \n@NASAHubble captures the intricate structure of the Krab, er, Crab Nebula in this image. https://t.co/3JIT5TezDc",
+          "lang": "en",
+          "publishedAt": "Fri Apr 24 21:36:01 +0000 2026",
+          "author": {
+            "username": "NASA",
+            "displayName": "NASA",
+            "url": "https://x.com/NASA",
+            "followers": 92218898,
+            "verified": true,
+            "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
+          },
+          "engagement": {
+            "views": 2086009,
+            "likes": 44195,
+            "replies": 2365,
+            "retweets": 6750,
+            "quotes": 226,
+            "bookmarks": 1971
+          },
+          "isReply": false,
+          "isRetweet": false,
+          "media": [
+            "https://pbs.twimg.com/media/HGs3sk5XwAErXCs.jpg"
           ]
         }
       ]

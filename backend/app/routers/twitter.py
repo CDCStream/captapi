@@ -569,18 +569,28 @@ async def twitter_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Guest-token SearchTimeline first (Top, matches prior Apify sort).
+            native_items = await native.search(q, limit=limit, product="Top")
+            if native_items:
+                ctx["source"] = "direct"
+                results = [_normalize_tweet(t) for t in native_items[:limit]]
+                return {"query": q, "totalReturned": len(results), "results": results}
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TWITTER_TWEET,
                 {"searchTerms": [q], "maxItems": limit, "sort": "Top"},
                 max_items=limit,
             )
+            if not items:
+                raise HTTPException(status_code=404, detail="No tweets found")
+            ctx["source"] = "apify"
             results = [_normalize_tweet(t) for t in items[:limit]]
             return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="twitter.search",
-            params={"q": q, "limit": limit, "v": 2},
+            params={"q": q, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

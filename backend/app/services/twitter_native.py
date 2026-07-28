@@ -6,6 +6,8 @@ likes, replies, media). Public profile pages embed schema.org microdata
 Decodo when datacenter IPs are login-walled — can parse for follower / tweet
 stats. Profile timelines come from the public syndication embed
 (``syndication.twitter.com/srv/timeline-profile``) — typically ~20 recent posts.
+Keyword search uses the public web client's guest-token GraphQL
+``SearchTimeline`` (query id scraped from the current ``main.*.js`` bundle).
 """
 
 from __future__ import annotations
@@ -13,6 +15,7 @@ from __future__ import annotations
 import json
 import math
 import re
+import time
 from html import unescape
 from typing import Any
 from urllib.parse import urlparse
@@ -28,7 +31,7 @@ log = structlog.get_logger(__name__)
 _UA = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        "(KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
     ),
     "Accept-Language": "en-US,en;q=0.9",
 }
@@ -36,6 +39,29 @@ _BASE = "https://cdn.syndication.twimg.com/tweet-result"
 _TIMELINE_BASE = "https://syndication.twitter.com/srv/timeline-profile/screen-name"
 _SCRIPT_RE = re.compile(r"<script[^>]*>([\s\S]*?)</script>", re.I)
 _HANDLE_RE = re.compile(r"^[A-Za-z0-9_]{1,15}$")
+# Public web-client bearer embedded in x.com JS (not a user secret).
+_PUBLIC_BEARER = (
+    "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs"
+    "%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
+)
+_MAIN_JS_RE = re.compile(
+    r"https://abs\.twimg\.com/responsive-web/client-web/main\.[^\"']+\.js"
+)
+_SEARCH_META_RE = re.compile(
+    r'queryId:"([A-Za-z0-9_-]+)",operationName:"SearchTimeline",'
+    r'operationType:"query",metadata:\{featureSwitches:(\[[^\]]+\])'
+)
+_FALLBACK_SEARCH_QID = "BGd0T_j7oVwlW5U79tO_0A"
+_SEARCH_META_TTL_S = 6 * 3600
+_search_meta_cache: dict[str, Any] = {"qid": None, "features": None, "fetched_at": 0.0}
+_FALSE_FEATURE_FLAGS = {
+    "verified_phone_label_enabled",
+    "tweet_awards_web_tipping_enabled",
+    "creator_subscriptions_quote_tweet_preview_enabled",
+    "responsive_web_enhance_cards_enabled",
+    "responsive_web_media_download_video_enabled",
+    "responsive_web_graphql_skip_user_profile_image_extensions_enabled",
+}
 _DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz"
 _META_RE = re.compile(
     r"<meta[^>]+>",
@@ -338,3 +364,356 @@ async def user_tweets(handle: str, limit: int = 20) -> list[dict[str, Any]] | No
     out = tweets[:capped]
     log.info("twitter_timeline_native_ok", handle=raw, returned=len(out), available=len(tweets))
     return out
+
+
+def _features_from_switches(switches: list[str]) -> dict[str, bool]:
+    features = {name: (name not in _FALSE_FEATURE_FLAGS) for name in switches}
+    # Always include common flags the endpoint expects even if metadata omits them.
+    for name in (
+        "rweb_tipjar_consumption_enabled",
+        "responsive_web_graphql_exclude_directive_enabled",
+        "creator_subscriptions_tweet_preview_api_enabled",
+        "responsive_web_graphql_timeline_navigation_enabled",
+        "communities_web_enable_tweet_community_results_fetch",
+        "c9s_tweet_anatomy_moderator_badge_enabled",
+        "articles_preview_enabled",
+        "responsive_web_edit_tweet_api_enabled",
+        "graphql_is_translatable_rweb_tweet_is_translatable_enabled",
+        "view_counts_everywhere_api_enabled",
+        "longform_notetweets_consumption_enabled",
+        "responsive_web_twitter_article_tweet_consumption_enabled",
+        "freedom_of_speech_not_reach_fetch_enabled",
+        "standardized_nudges_misinfo",
+        "tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled",
+        "rweb_video_timestamps_enabled",
+        "longform_notetweets_rich_text_read_enabled",
+        "longform_notetweets_inline_media_enabled",
+    ):
+        features.setdefault(name, name not in _FALSE_FEATURE_FLAGS)
+    for name in _FALSE_FEATURE_FLAGS:
+        features[name] = False
+    return features
+
+
+async def _guest_token(client: httpx.AsyncClient) -> tuple[str, str] | None:
+    """Return ``(guest_token, cookie_header)`` from a public x.com visit."""
+    try:
+        resp = await client.get("https://x.com/")
+    except httpx.HTTPError as exc:
+        log.info("twitter_guest_home_fail", error=str(exc))
+        return None
+    gt = resp.cookies.get("gt")
+    if not gt:
+        m = re.search(r"gt=(\d{15,})", resp.text or "")
+        gt = m.group(1) if m else None
+    if not gt:
+        log.info("twitter_guest_token_miss", status=resp.status_code)
+        return None
+    cookie = "; ".join(f"{k}={v}" for k, v in resp.cookies.items())
+    return gt, cookie
+
+
+async def _resolve_main_js(client: httpx.AsyncClient) -> str | None:
+    for url in (
+        "https://x.com/explore",
+        "https://x.com/search?q=a&src=typed_query&f=live",
+        "https://x.com/",
+    ):
+        try:
+            resp = await client.get(url)
+        except httpx.HTTPError:
+            continue
+        m = _MAIN_JS_RE.search(resp.text or "")
+        if m:
+            return m.group(0)
+    # Last resort: Decodo-rendered shell often embeds the main bundle URL.
+    if decodo_fetch.enabled():
+        got = await decodo_fetch.fetch_url(
+            "https://x.com/search?q=a&src=typed_query&f=live",
+            timeout=90.0,
+            headless="html",
+        )
+        if got:
+            _status, body = got
+            m = _MAIN_JS_RE.search(body or "")
+            if m:
+                return m.group(0)
+    return None
+
+
+async def _load_search_meta(
+    client: httpx.AsyncClient, *, force: bool = False
+) -> tuple[str, dict[str, bool]]:
+    now = time.time()
+    cached_qid = _search_meta_cache.get("qid")
+    cached_features = _search_meta_cache.get("features")
+    fetched_at = float(_search_meta_cache.get("fetched_at") or 0)
+    if (
+        not force
+        and cached_qid
+        and isinstance(cached_features, dict)
+        and now - fetched_at < _SEARCH_META_TTL_S
+    ):
+        return str(cached_qid), cached_features
+
+    qid = _FALLBACK_SEARCH_QID
+    features = _features_from_switches([])
+    main_url = await _resolve_main_js(client)
+    if main_url:
+        try:
+            resp = await client.get(main_url)
+            if resp.status_code == 200 and resp.text:
+                m = _SEARCH_META_RE.search(resp.text)
+                if m:
+                    qid = m.group(1)
+                    try:
+                        switches = json.loads(m.group(2))
+                    except ValueError:
+                        switches = []
+                    if isinstance(switches, list):
+                        features = _features_from_switches(
+                            [s for s in switches if isinstance(s, str)]
+                        )
+        except httpx.HTTPError as exc:
+            log.info("twitter_search_main_js_fail", error=str(exc))
+
+    _search_meta_cache["qid"] = qid
+    _search_meta_cache["features"] = features
+    _search_meta_cache["fetched_at"] = now
+    return qid, features
+
+
+def _gql_user(user: dict[str, Any]) -> dict[str, Any]:
+    core = user.get("core") if isinstance(user.get("core"), dict) else {}
+    legacy = user.get("legacy") if isinstance(user.get("legacy"), dict) else {}
+    rel = user.get("relationship_counts") if isinstance(user.get("relationship_counts"), dict) else {}
+    avatar = user.get("avatar") if isinstance(user.get("avatar"), dict) else {}
+    verification = user.get("verification") if isinstance(user.get("verification"), dict) else {}
+    return {
+        "screen_name": core.get("screen_name") or legacy.get("screen_name"),
+        "name": core.get("name") or legacy.get("name"),
+        "followers_count": rel.get("followers") or legacy.get("followers_count"),
+        "is_blue_verified": user.get("is_blue_verified"),
+        "verified": verification.get("verified") if "verified" in verification else legacy.get("verified"),
+        "profile_image_url_https": avatar.get("image_url") or legacy.get("profile_image_url_https"),
+    }
+
+
+def _gql_result_to_tweet(result: dict[str, Any]) -> dict[str, Any] | None:
+    if not isinstance(result, dict) or not result:
+        return None
+    if result.get("__typename") == "TweetWithVisibilityResults":
+        nested = result.get("tweet")
+        if not isinstance(nested, dict):
+            return None
+        result = nested
+    legacy = result.get("legacy") if isinstance(result.get("legacy"), dict) else {}
+    tid = safe_str(legacy.get("id_str")) or safe_str(result.get("rest_id"))
+    if not tid:
+        return None
+    user_result = (
+        ((result.get("core") or {}).get("user_results") or {}).get("result")
+        if isinstance(result.get("core"), dict)
+        else None
+    )
+    user = _gql_user(user_result) if isinstance(user_result, dict) else {}
+    views = result.get("views") if isinstance(result.get("views"), dict) else {}
+    out: dict[str, Any] = {
+        "id_str": tid,
+        "full_text": legacy.get("full_text") or legacy.get("text"),
+        "created_at": legacy.get("created_at"),
+        "lang": legacy.get("lang"),
+        "favorite_count": legacy.get("favorite_count"),
+        "reply_count": legacy.get("reply_count"),
+        "retweet_count": legacy.get("retweet_count"),
+        "quote_count": legacy.get("quote_count"),
+        "bookmark_count": legacy.get("bookmark_count"),
+        "view_count": safe_int(views.get("count")),
+        "entities": legacy.get("entities"),
+        "extended_entities": legacy.get("extended_entities"),
+        "in_reply_to_status_id": legacy.get("in_reply_to_status_id_str"),
+        "user": user,
+    }
+    rt_shell = result.get("retweeted_status_result") or legacy.get("retweeted_status_result")
+    if isinstance(rt_shell, dict):
+        rt_result = rt_shell.get("result") if isinstance(rt_shell.get("result"), dict) else rt_shell
+        rt_tweet = _gql_result_to_tweet(rt_result) if isinstance(rt_result, dict) else None
+        if rt_tweet:
+            out["retweeted_status"] = rt_tweet
+            out["is_retweet"] = True
+    return out
+
+
+def _parse_search_timeline(payload: dict[str, Any]) -> tuple[list[dict[str, Any]], str | None]:
+    instructions = (
+        (((payload.get("data") or {}).get("search_by_raw_query") or {}).get("search_timeline") or {})
+        .get("timeline")
+        or {}
+    ).get("instructions") or []
+    tweets: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    cursor: str | None = None
+    for instruction in instructions:
+        if not isinstance(instruction, dict):
+            continue
+        entries = list(instruction.get("entries") or [])
+        entry = instruction.get("entry")
+        if isinstance(entry, dict):
+            entries.append(entry)
+        for item in entries:
+            if not isinstance(item, dict):
+                continue
+            eid = str(item.get("entryId") or "")
+            content = item.get("content") if isinstance(item.get("content"), dict) else {}
+            if "cursor-bottom" in eid:
+                cursor = safe_str(content.get("value")) or cursor
+                continue
+            result = (
+                ((content.get("itemContent") or {}).get("tweet_results") or {}).get("result")
+                if isinstance(content.get("itemContent"), dict)
+                else None
+            )
+            tweet = _gql_result_to_tweet(result) if isinstance(result, dict) else None
+            if not tweet:
+                continue
+            tid = tweet.get("id_str")
+            if not tid or tid in seen:
+                continue
+            seen.add(str(tid))
+            tweets.append(tweet)
+    return tweets, cursor
+
+
+async def _search_page(
+    client: httpx.AsyncClient,
+    *,
+    query: str,
+    limit: int,
+    product: str,
+    guest_token: str,
+    cookie: str,
+    qid: str,
+    features: dict[str, bool],
+    cursor: str | None = None,
+) -> tuple[list[dict[str, Any]], str | None, int]:
+    variables: dict[str, Any] = {
+        "rawQuery": query,
+        "count": max(1, min(limit, 20)),
+        "querySource": "typed_query",
+        "product": product,
+        "withGrokTranslatedBio": False,
+    }
+    if cursor:
+        variables["cursor"] = cursor
+    headers = {
+        **_UA,
+        "authorization": _PUBLIC_BEARER,
+        "content-type": "application/json",
+        "x-guest-token": guest_token,
+        # Required for guest SearchTimeline on api.x.com (plain guest → empty 404).
+        "x-twitter-auth-type": "OAuth2Session",
+        "x-twitter-active-user": "yes",
+        "x-twitter-client-language": "en",
+        "Origin": "https://x.com",
+        "Referer": f"https://x.com/search?q={query}&src=typed_query&f=live",
+        "cookie": cookie,
+    }
+    # Guest search is accepted on api.x.com; x.com/i/api often 403/404s the same payload.
+    url = f"https://api.x.com/graphql/{qid}/SearchTimeline"
+    resp = await client.post(
+        url,
+        headers=headers,
+        json={"variables": variables, "queryId": qid, "features": features},
+    )
+    if resp.status_code != 200:
+        return [], None, resp.status_code
+    try:
+        payload = resp.json()
+    except ValueError:
+        return [], None, resp.status_code
+    if not isinstance(payload, dict):
+        return [], None, resp.status_code
+    tweets, next_cursor = _parse_search_timeline(payload)
+    return tweets, next_cursor, resp.status_code
+
+
+async def search(
+    query: str,
+    limit: int = 20,
+    *,
+    product: str = "Top",
+) -> list[dict[str, Any]] | None:
+    """Public keyword search via guest-token GraphQL SearchTimeline."""
+    q = (query or "").strip()
+    if len(q) < 2:
+        return None
+    capped = max(1, min(int(limit or 20), 200))
+    product = "Latest" if str(product).lower() == "latest" else "Top"
+
+    try:
+        async with httpx.AsyncClient(timeout=25, headers=_UA, follow_redirects=True) as client:
+            guest = await _guest_token(client)
+            if not guest:
+                return None
+            guest_token, cookie = guest
+            qid, features = await _load_search_meta(client)
+
+            collected: list[dict[str, Any]] = []
+            seen: set[str] = set()
+            cursor: str | None = None
+            max_pages = min(10, (capped + 19) // 20 + 1)
+
+            for page in range(max_pages):
+                page_tweets, cursor, status = await _search_page(
+                    client,
+                    query=q,
+                    limit=capped - len(collected),
+                    product=product,
+                    guest_token=guest_token,
+                    cookie=cookie,
+                    qid=qid,
+                    features=features,
+                    cursor=cursor,
+                )
+                if status == 404 and page == 0:
+                    # Query id rotated — refresh main.js once and retry.
+                    qid, features = await _load_search_meta(client, force=True)
+                    page_tweets, cursor, status = await _search_page(
+                        client,
+                        query=q,
+                        limit=capped,
+                        product=product,
+                        guest_token=guest_token,
+                        cookie=cookie,
+                        qid=qid,
+                        features=features,
+                        cursor=None,
+                    )
+                if status != 200:
+                    log.info("twitter_search_gql_miss", status=status, page=page, query=q[:80])
+                    break
+                added = 0
+                for tweet in page_tweets:
+                    tid = str(tweet.get("id_str") or "")
+                    if not tid or tid in seen:
+                        continue
+                    seen.add(tid)
+                    collected.append(tweet)
+                    added += 1
+                    if len(collected) >= capped:
+                        break
+                if len(collected) >= capped or not cursor or added == 0:
+                    break
+
+            if not collected:
+                return None
+            log.info(
+                "twitter_search_native_ok",
+                query=q[:80],
+                returned=len(collected[:capped]),
+                product=product,
+            )
+            return collected[:capped]
+    except httpx.HTTPError as exc:
+        log.info("twitter_search_native_fail", error=str(exc))
+        return None
