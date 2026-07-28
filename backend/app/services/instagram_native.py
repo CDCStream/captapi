@@ -259,6 +259,77 @@ def _normalize_ig_session_id(raw: str) -> str:
     return value.strip()
 
 
+async def _fetch_item_with_session(shortcode: str, session_id: str) -> dict[str, Any] | None:
+    """Polaris shortcode media via GraphQL using ``IG_SESSION_ID`` cookies.
+
+    Logged-out GraphQL often 401s on datacenter IPs (e.g. Railway); the same
+    doc_id succeeds when a valid session cookie is attached.
+    """
+    ds_user_id = session_id.split(":", 1)[0] if ":" in session_id else ""
+    cookies: dict[str, str] = {"sessionid": session_id}
+    if ds_user_id.isdigit():
+        cookies["ds_user_id"] = ds_user_id
+    tiers: list[str | None] = [None, "datacenter", "residential"]
+    for tier in tiers:
+        try:
+            async with httpx.AsyncClient(
+                timeout=15,
+                proxy=proxy_for(tier) if tier else None,
+                follow_redirects=True,
+                cookies=cookies,
+            ) as client:
+                await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
+                csrf = client.cookies.get("csrftoken")
+                if not csrf:
+                    continue
+                resp = await client.post(
+                    "https://www.instagram.com/graphql/query",
+                    data={
+                        "doc_id": _POST_DOC_ID,
+                        "variables": json.dumps(
+                            {
+                                "shortcode": shortcode,
+                                "__relay_internal__pv__PolarisAIGMMediaWebLabelEnabledrelayprovider": False,
+                            },
+                            separators=(",", ":"),
+                        ),
+                    },
+                    headers={
+                        "User-Agent": _UA,
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-IG-App-ID": _IG_APP_ID,
+                        "X-CSRFToken": csrf,
+                        "Accept": "application/json",
+                        "Referer": f"https://www.instagram.com/p/{shortcode}/",
+                    },
+                )
+        except httpx.HTTPError as exc:
+            log.info(
+                "ig_session_media_transport",
+                tier=tier or "direct",
+                error=str(exc)[:120],
+            )
+            continue
+        if resp.status_code != 200:
+            log.info(
+                "ig_session_media_http",
+                tier=tier or "direct",
+                status=resp.status_code,
+            )
+            continue
+        try:
+            payload = resp.json()
+        except ValueError:
+            continue
+        info = (payload.get("data") or {}).get(
+            "xdt_api__v1__media__shortcode__web_info"
+        ) or {}
+        items = info.get("items") or []
+        if items and isinstance(items[0], dict):
+            return items[0]
+    return None
+
+
 async def comments_session_native(url: str, *, limit: int = 50) -> dict[str, Any] | None:
     """Full comment thread via ``api/v1/media/{pk}/comments/`` + ``IG_SESSION_ID``.
 
@@ -273,8 +344,12 @@ async def comments_session_native(url: str, *, limit: int = 50) -> dict[str, Any
     shortcode = extract_instagram_shortcode(url)
     if not shortcode:
         return None
+    # Prefer logged-out hydrate; on datacenter blocks fall back to session GraphQL.
     media = await _fetch_item(shortcode)
     if media is None:
+        media = await _fetch_item_with_session(shortcode, session)
+    if media is None:
+        log.info("ig_comments_session_no_media", shortcode=shortcode)
         return None
     media_id = safe_str(media.get("pk") or media.get("id"))
     if not media_id:
