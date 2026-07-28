@@ -20,6 +20,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
+from app.services import pinterest_native as native
 from app.utils.formatters import safe_int, safe_str, strip_empty
 from app.utils.url import (
     detect_url_platform,
@@ -155,6 +156,10 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
                     or item.get("pinner_username")
                     or item.get("creator")
                     or item.get("creatorUsername")
+                    or (
+                        (safe_str(pinner.get("profile_url")) or "").rstrip("/").rsplit("/", 1)[-1]
+                        or None
+                    )
                 ),
                 "displayName": safe_str(
                     pinner.get("full_name")
@@ -464,16 +469,26 @@ async def user_pins(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native_items = await native.user_pins_native(username, limit=limit)
+            if native_items:
+                ctx["source"] = "direct"
+                pins = _prefer_enriched([_normalize_pin(i) for i in native_items])[:limit]
+                pins = await _enrich_sparse_pins(pins)
+                return {"username": username, "totalReturned": len(pins), "pins": pins}
+
             items = await _run_pinterest_actor(
                 {"mode": "userPins", "usernames": [username], "maxItems": limit}, limit
             )
             pins = _prefer_enriched([_normalize_pin(i) for i in items if i.get("recordType") != "board"])[:limit]
             pins = await _enrich_sparse_pins(pins)
+            if not pins:
+                raise HTTPException(status_code=404, detail="No pins found")
+            ctx["source"] = "apify"
             return {"username": username, "totalReturned": len(pins), "pins": pins}
 
         data = await cached_or_run(
             endpoint="pinterest.user-pins",
-            params={"username": username, "limit": limit, "v": 4},
+            params={"username": username, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -555,15 +570,24 @@ async def pinterest_user_boards(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native_items = await native.user_boards_native(username, limit=limit)
+            if native_items:
+                ctx["source"] = "direct"
+                boards = [_normalize_board(i, username) for i in native_items][:limit]
+                return {"username": username, "totalReturned": len(boards), "boards": boards}
+
             items = await _run_pinterest_actor(
                 {"mode": "userBoards", "usernames": [username], "maxItems": limit}, limit
             )
             boards = [_normalize_board(i, username) for i in items][:limit]
+            if not boards:
+                raise HTTPException(status_code=404, detail="No boards found")
+            ctx["source"] = "apify"
             return {"username": username, "totalReturned": len(boards), "boards": boards}
 
         data = await cached_or_run(
             endpoint="pinterest.user-boards",
-            params={"username": username, "limit": limit, "v": 4},
+            params={"username": username, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -602,16 +626,26 @@ async def pinterest_board(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native_items = await native.board_pins_native(url, limit=limit)
+            if native_items:
+                ctx["source"] = "direct"
+                pins = _prefer_enriched([_normalize_pin(i) for i in native_items])[:limit]
+                pins = await _enrich_sparse_pins(pins)
+                return {"board": url, "totalReturned": len(pins), "pins": pins}
+
             items = await _run_pinterest_actor(
                 {"mode": "boardPins", "boardUrls": [url], "maxItems": limit}, limit
             )
             pins = _prefer_enriched([_normalize_pin(i) for i in items if i.get("recordType") != "board"])[:limit]
             pins = await _enrich_sparse_pins(pins)
+            if not pins:
+                raise HTTPException(status_code=404, detail="No pins found")
+            ctx["source"] = "apify"
             return {"board": url, "totalReturned": len(pins), "pins": pins}
 
         data = await cached_or_run(
             endpoint="pinterest.board",
-            params={"url": url, "limit": limit, "v": 4},
+            params={"url": url, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
