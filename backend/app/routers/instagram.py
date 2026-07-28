@@ -1275,7 +1275,8 @@ async def instagram_trending_reels(
             # out the request budget before returning a clear retry hint.
             client = ApifyClient(timeout=280, max_attempts=1)
             actor = settings.APIFY_ACTOR_INSTAGRAM_TRENDING
-            run_input = {"max_results": limit, "download_medias": "none", "country": country}
+            # Actor schema dropped download_medias; only max_results + country.
+            run_input = {"max_results": limit, "country": country}
             match = {"country": country}
 
             def _payload(items: list[dict[str, Any]]) -> dict[str, Any]:
