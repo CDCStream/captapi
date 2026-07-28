@@ -2,17 +2,20 @@
 
 Public profile pages hydrate a Relay payload
 (``BarcelonaProfilePageDirectQueryRelayPreloader``) that includes username,
-display name, bio, follower count, verified flag, and avatar. Logged-out
-datacenter GETs usually redirect to login — Decodo ``headless=html`` returns
-the hydrated HTML.
+display name, bio, follower count, verified flag, and avatar. The same HTML
+also embeds recent posts under ``thread_items`` (soft-capped by the page).
+Logged-out datacenter GETs usually redirect to login — Decodo
+``headless=html`` returns the hydrated HTML.
 """
 
 from __future__ import annotations
 
 import json
 import re
+from datetime import datetime, timezone
 from html import unescape
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 import structlog
@@ -31,21 +34,22 @@ _UA = {
 }
 _HANDLE_RE = re.compile(r"^[A-Za-z0-9._]{1,30}$")
 _PROFILE_MARKER = "BarcelonaProfilePageDirectQueryRelayPreloader"
+_THREAD_ITEMS_RE = re.compile(r'"thread_items"\s*:\s*\[')
 _OG_TITLE_RE = re.compile(
-    r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']',
+    r"<meta[^>]+property=['\"]og:title['\"][^>]+content=['\"]([^'\"]+)['\"]",
     re.I,
 )
 _OG_DESC_RE = re.compile(
-    r'<meta[^>]+(?:property=["\']og:description["\']|name=["\']description["\'])'
-    r'[^>]+content=["\']([^"\']*)["\']',
+    r"<meta[^>]+(?:property=['\"]og:description['\"]|name=['\"]description['\"])"
+    r"[^>]+content=['\"]([^'\"]*)['\"]",
     re.I,
 )
 _OG_IMAGE_RE = re.compile(
-    r'<meta[^>]+property=["\']og:image(?::secure_url)?["\'][^>]+content=["\']([^"\']+)["\']',
+    r"<meta[^>]+property=['\"]og:image(?::secure_url)?['\"][^>]+content=['\"]([^'\"]+)['\"]",
     re.I,
 )
 _OG_URL_RE = re.compile(
-    r'<meta[^>]+property=["\']og:url["\'][^>]+content=["\']([^"\']+)["\']',
+    r"<meta[^>]+property=['\"]og:url['\"][^>]+content=['\"]([^'\"]+)['\"]",
     re.I,
 )
 
@@ -53,8 +57,6 @@ _OG_URL_RE = re.compile(
 def _normalize_handle(handle: str) -> str | None:
     raw = (handle or "").strip().lstrip("@")
     if "://" in raw or "/" in raw:
-        from urllib.parse import urlparse
-
         path = urlparse(raw if "://" in raw else f"https://www.threads.net/{raw}").path
         parts = [p for p in path.split("/") if p]
         if parts and parts[0].startswith("@"):
@@ -95,10 +97,37 @@ def _extract_json_object(source: str, brace_start: int) -> str | None:
     return None
 
 
+def _extract_json_array(source: str, bracket_start: int) -> str | None:
+    if bracket_start < 0 or bracket_start >= len(source) or source[bracket_start] != "[":
+        return None
+    depth = 0
+    in_str = False
+    esc = False
+    for idx in range(bracket_start, len(source)):
+        ch = source[idx]
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+            continue
+        if ch == "[":
+            depth += 1
+        elif ch == "]":
+            depth -= 1
+            if depth == 0:
+                return source[bracket_start : idx + 1]
+    return None
+
+
 def _profile_pic(user: dict[str, Any]) -> str | None:
     versions = user.get("hd_profile_pic_versions")
     if isinstance(versions, list) and versions:
-        # Prefer the largest declared width.
         best = None
         best_w = -1
         for item in versions:
@@ -145,7 +174,11 @@ def parse_profile_html(html: str, handle: str) -> dict[str, Any] | None:
         username = safe_str(user.get("username") or user.get("userName"))
         if not username or username.lower() != needle:
             continue
-        if user.get("follower_count") is None and user.get("biography") is None and not user.get("full_name"):
+        if (
+            user.get("follower_count") is None
+            and user.get("biography") is None
+            and not user.get("full_name")
+        ):
             continue
         return {
             "username": username,
@@ -174,7 +207,6 @@ def parse_profile_og(html: str, handle: str) -> dict[str, Any] | None:
     image = unescape(image_m.group(1)).replace("&amp;", "&").strip() if image_m else None
     og_url = unescape(url_m.group(1)).strip() if url_m else None
 
-    # "Mark Zuckerberg (@zuck) • Threads, Say more"
     name = None
     username = handle
     m = re.match(r"^(.*?)\s*\(@([^)]+)\)", title)
@@ -182,11 +214,10 @@ def parse_profile_og(html: str, handle: str) -> dict[str, Any] | None:
         name = m.group(1).strip() or None
         username = m.group(2).strip() or handle
 
-    # "5.7M Followers • 151 Threads • Mostly superintelligence..."
     bio = None
     followers = None
     if desc:
-        parts = [p.strip() for p in desc.split("•")]
+        parts = [p.strip() for p in re.split(r"\s*[•\u2022]\s*", desc) if p.strip()]
         for part in parts:
             low = part.lower()
             if "follower" in low:
@@ -220,22 +251,182 @@ def parse_profile_og(html: str, handle: str) -> dict[str, Any] | None:
     }
 
 
+def _unix_to_iso(value: Any) -> str | None:
+    try:
+        ts = int(value)
+    except (TypeError, ValueError):
+        return safe_str(value)
+    if ts <= 0:
+        return None
+    if ts > 10_000_000_000:
+        ts = ts // 1000
+    return datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
+
+def _media_urls(post: dict[str, Any]) -> list[str]:
+    urls: list[str] = []
+    seen: set[str] = set()
+
+    def _add(url: str | None) -> None:
+        u = safe_str(url)
+        if u and u not in seen:
+            seen.add(u)
+            urls.append(u)
+
+    versions = post.get("video_versions")
+    if isinstance(versions, list):
+        for item in versions:
+            if isinstance(item, dict):
+                _add(item.get("url"))
+
+    carousel = post.get("carousel_media")
+    if isinstance(carousel, list):
+        for item in carousel:
+            if not isinstance(item, dict):
+                continue
+            iv = item.get("image_versions2") if isinstance(item.get("image_versions2"), dict) else {}
+            cands = iv.get("candidates") if isinstance(iv.get("candidates"), list) else []
+            if cands and isinstance(cands[0], dict):
+                _add(cands[0].get("url"))
+            vv = item.get("video_versions")
+            if isinstance(vv, list) and vv and isinstance(vv[0], dict):
+                _add(vv[0].get("url"))
+
+    iv = post.get("image_versions2") if isinstance(post.get("image_versions2"), dict) else {}
+    cands = iv.get("candidates") if isinstance(iv.get("candidates"), list) else []
+    best = None
+    best_w = -1
+    for cand in cands:
+        if not isinstance(cand, dict):
+            continue
+        try:
+            width = int(cand.get("width") or 0)
+        except (TypeError, ValueError):
+            width = 0
+        url = safe_str(cand.get("url"))
+        if url and width >= best_w:
+            best = url
+            best_w = width
+    _add(best)
+
+    info = post.get("text_post_app_info") if isinstance(post.get("text_post_app_info"), dict) else {}
+    linked = info.get("linked_inline_media")
+    if isinstance(linked, dict):
+        liv = linked.get("image_versions2") if isinstance(linked.get("image_versions2"), dict) else {}
+        lcands = liv.get("candidates") if isinstance(liv.get("candidates"), list) else []
+        if lcands and isinstance(lcands[0], dict):
+            _add(lcands[0].get("url"))
+    return urls
+
+
+def _caption_text(post: dict[str, Any]) -> str | None:
+    caption = post.get("caption")
+    if isinstance(caption, dict):
+        return safe_str(caption.get("text"))
+    if isinstance(caption, str):
+        return safe_str(caption)
+    info = post.get("text_post_app_info") if isinstance(post.get("text_post_app_info"), dict) else {}
+    frags = ((info.get("text_fragments") or {}).get("fragments") or [])
+    parts: list[str] = []
+    if isinstance(frags, list):
+        for frag in frags:
+            if isinstance(frag, dict) and frag.get("plaintext"):
+                parts.append(str(frag["plaintext"]))
+    return safe_str("".join(parts)) if parts else None
+
+
+def _normalize_relay_post(post: dict[str, Any]) -> dict[str, Any] | None:
+    if not isinstance(post, dict):
+        return None
+    code = safe_str(post.get("code"))
+    pk = safe_str(post.get("pk") or post.get("id"))
+    if not code and not pk:
+        return None
+    user = post.get("user") if isinstance(post.get("user"), dict) else {}
+    info = post.get("text_post_app_info") if isinstance(post.get("text_post_app_info"), dict) else {}
+    media = _media_urls(post)
+    return {
+        "pk": pk,
+        "code": code,
+        "caption": _caption_text(post),
+        "taken_at": _unix_to_iso(post.get("taken_at")),
+        "user": {
+            "username": safe_str(user.get("username") or user.get("userName")),
+            "full_name": safe_str(user.get("full_name") or user.get("fullName") or user.get("name")),
+            "is_verified": bool(user.get("is_verified") or user.get("isVerified")),
+            "profile_pic_url": _profile_pic(user) or safe_str(user.get("profile_pic_url")),
+        },
+        "like_count": safe_int(post.get("like_count") or post.get("likeCount")),
+        "reply_count": safe_int(info.get("direct_reply_count") or info.get("reply_count")),
+        "repost_count": safe_int(info.get("repost_count") or info.get("reshare_count")),
+        "quote_count": safe_int(info.get("quote_count")),
+        "media": [{"url": u} for u in media],
+    }
+
+
+def parse_user_posts_html(html: str, handle: str, limit: int = 20) -> list[dict[str, Any]]:
+    """Extract unique posts from Relay ``thread_items`` blobs on a profile page."""
+    if not html or not handle:
+        return []
+    needle = handle.lower()
+    capped = max(1, min(int(limit or 20), 100))
+    posts: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for match in _THREAD_ITEMS_RE.finditer(html):
+        arr_s = _extract_json_array(html, match.end() - 1)
+        if not arr_s:
+            continue
+        try:
+            items = json.loads(arr_s)
+        except ValueError:
+            continue
+        if not isinstance(items, list):
+            continue
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            post = item.get("post")
+            if not isinstance(post, dict):
+                continue
+            user = post.get("user") if isinstance(post.get("user"), dict) else {}
+            username = safe_str(user.get("username") or user.get("userName"))
+            if username and username.lower() != needle:
+                continue
+            normalized = _normalize_relay_post(post)
+            if not normalized:
+                continue
+            key = normalized.get("code") or normalized.get("pk")
+            if not key or key in seen:
+                continue
+            seen.add(str(key))
+            posts.append(normalized)
+            if len(posts) >= capped:
+                return posts
+    return posts[:capped]
+
+
 async def _fetch_profile_html(handle: str) -> str | None:
     url = f"https://www.threads.net/@{handle}"
-    # Direct GETs almost always land on /login without the Relay profile blob.
     if decodo_fetch.enabled():
         got = await decodo_fetch.fetch_url(url, timeout=120.0, headless="html")
         if got:
             status, body = got
             if status == 200 and body and (
-                _PROFILE_MARKER in body or "follower_count" in body or "og:title" in body
+                _PROFILE_MARKER in body
+                or "thread_items" in body
+                or "follower_count" in body
+                or "og:title" in body
             ):
                 return body
     try:
         async with httpx.AsyncClient(timeout=20, headers=_UA, follow_redirects=True) as client:
             resp = await client.get(url)
         if resp.status_code == 200 and len(resp.text) > 2000:
-            if _PROFILE_MARKER in resp.text or "follower_count" in resp.text:
+            if (
+                _PROFILE_MARKER in resp.text
+                or "thread_items" in resp.text
+                or "follower_count" in resp.text
+            ):
                 return resp.text
     except httpx.HTTPError as exc:
         log.info("threads_profile_direct_fail", handle=handle, error=str(exc))
@@ -243,7 +434,7 @@ async def _fetch_profile_html(handle: str) -> str | None:
 
 
 async def profile_by_handle(handle: str) -> dict[str, Any] | None:
-    """Fetch a public Threads profile via hydrated HTML (Decodo → direct)."""
+    """Fetch a public Threads profile via hydrated HTML (Decodo -> direct)."""
     raw = _normalize_handle(handle)
     if not raw:
         return None
@@ -261,3 +452,19 @@ async def profile_by_handle(handle: str) -> dict[str, Any] | None:
     else:
         log.warning("threads_profile_native_parse_miss", handle=raw, length=len(html))
     return parsed
+
+
+async def user_posts(handle: str, limit: int = 20) -> list[dict[str, Any]] | None:
+    """Recent public posts from a Threads profile page (Decodo -> direct)."""
+    raw = _normalize_handle(handle)
+    if not raw:
+        return None
+    html = await _fetch_profile_html(raw)
+    if not html:
+        return None
+    posts = parse_user_posts_html(html, raw, limit=limit)
+    if not posts:
+        log.warning("threads_user_posts_native_parse_miss", handle=raw, length=len(html))
+        return None
+    log.info("threads_user_posts_native_ok", handle=raw, returned=len(posts))
+    return posts

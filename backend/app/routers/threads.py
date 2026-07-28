@@ -252,18 +252,28 @@ async def threads_user_posts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Hydrated profile HTML embeds recent thread_items (soft-capped).
+            native_items = await native.user_posts(handle, limit=limit)
+            if native_items:
+                ctx["source"] = "direct"
+                posts = [_normalize_post(i) for i in native_items][:limit]
+                return {"handle": handle, "totalReturned": len(posts), "posts": posts}
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_THREADS,
                 {"username": handle, "maxPosts": limit},
                 max_items=limit,
             )
+            if not items:
+                raise HTTPException(status_code=404, detail="No posts found")
+            ctx["source"] = "apify"
             posts = [_normalize_post(i) for i in items][:limit]
             return {"handle": handle, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
             endpoint="threads.user-posts",
-            params={"handle": handle, "limit": limit, "v": 4},
+            params={"handle": handle, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
