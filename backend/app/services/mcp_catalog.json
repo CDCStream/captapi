@@ -2121,7 +2121,7 @@
     "name": "Twitter/X Profile",
     "path": "/v1/twitter/profile",
     "credits": 1,
-    "summary": "Profile info & stats for a Twitter/X account.",
+    "summary": "Public Twitter/X profile — bio, followers, following, tweet count, avatar.",
     "params": [
       {
         "name": "url",

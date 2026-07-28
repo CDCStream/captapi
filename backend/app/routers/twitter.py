@@ -1,8 +1,8 @@
 """Twitter / X endpoints (tweets, timelines, search, profiles).
 
-Tweet details/transcript prefer the public syndication API; list endpoints use apidojo Tweet Scraper V2 (tweets, search, per-handle timelines)
-and the apidojo Twitter User Scraper (profiles). Field mappings are defensive —
-both actors expose several aliases for the same value across versions.
+Tweet details/transcript prefer the public syndication API; profile prefers
+x.com HTML microdata (direct → Decodo). List endpoints still use apidojo Tweet
+Scraper V2. Field mappings are defensive across native and actor shapes.
 """
 
 from __future__ import annotations
@@ -300,29 +300,38 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
     verified = _verified_flag(item)
     # apidojo/twitter-user-scraper often only emits `verified` / `isVerified`.
     # On today's X that flag is the blue checkmark, so mirror it for isBlueVerified.
+    # Public HTML microdata does not expose verified / likes / media / listed / banner.
     blue = first_present(item.get("isBlueVerified"), item.get("isVerified"), item.get("verified"))
-    return {
-        "platform": "twitter",
-        "url": safe_str(item.get("url"))
-        or (f"https://x.com/{username}" if username else None),
-        "id": safe_str(item.get("id") or item.get("id_str")),
-        "username": safe_str(username),
-        "name": safe_str(item.get("name") or item.get("fullName")),
-        "bio": safe_str(item.get("description") or item.get("bio")),
-        "location": safe_str(item.get("location")),
-        "verified": verified,
-        "followers": safe_int(first_present(item.get("followers"), item.get("followersCount"))),
-        "following": safe_int(first_present(item.get("following"), item.get("followingCount"), item.get("friendsCount"))),
-        "tweetCount": safe_int(first_present(item.get("statusesCount"), item.get("tweetsCount"), item.get("statuses_count"))),
-        "likesCount": safe_int(first_present(item.get("favouritesCount"), item.get("favourites_count"), item.get("likesCount"))),
-        "mediaCount": safe_int(first_present(item.get("mediaCount"), item.get("media_count"))),
-        "listedCount": safe_int(first_present(item.get("listedCount"), item.get("listed_count"))),
-        "isBlueVerified": bool(blue) if blue is not None else None,
-        "website": safe_str(item.get("website")) or _entities_website(item),
-        "profileImage": safe_str(item.get("profilePicture") or item.get("profile_image_url_https")),
-        "bannerImage": safe_str(item.get("coverPicture") or item.get("profile_banner_url")),
-        "createdAt": safe_str(item.get("createdAt") or item.get("created_at")),
-    }
+    return strip_empty(
+        {
+            "platform": "twitter",
+            "url": safe_str(item.get("url"))
+            or (f"https://x.com/{username}" if username else None),
+            "id": safe_str(item.get("id") or item.get("id_str")),
+            "username": safe_str(username),
+            "name": safe_str(item.get("name") or item.get("fullName")),
+            "bio": safe_str(item.get("description") or item.get("bio")),
+            "location": safe_str(item.get("location")),
+            "verified": verified,
+            "followers": safe_int(first_present(item.get("followers"), item.get("followersCount"))),
+            "following": safe_int(
+                first_present(item.get("following"), item.get("followingCount"), item.get("friendsCount"))
+            ),
+            "tweetCount": safe_int(
+                first_present(item.get("statusesCount"), item.get("tweetsCount"), item.get("statuses_count"))
+            ),
+            "likesCount": safe_int(
+                first_present(item.get("favouritesCount"), item.get("favourites_count"), item.get("likesCount"))
+            ),
+            "mediaCount": safe_int(first_present(item.get("mediaCount"), item.get("media_count"))),
+            "listedCount": safe_int(first_present(item.get("listedCount"), item.get("listed_count"))),
+            "isBlueVerified": bool(blue) if blue is not None else None,
+            "website": safe_str(item.get("website")) or _entities_website(item),
+            "profileImage": safe_str(item.get("profilePicture") or item.get("profile_image_url_https")),
+            "bannerImage": safe_str(item.get("coverPicture") or item.get("profile_banner_url")),
+            "createdAt": safe_str(item.get("createdAt") or item.get("created_at")),
+        }
+    )
 
 
 @router.get("/tweet-details", summary="Tweet metadata + engagement stats")
@@ -453,8 +462,13 @@ async def twitter_profile(
         base_credits=CREDIT_PROFILE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            apify = get_apify()
-            items = await apify.run_actor_sync(
+            # Public profile HTML microdata first (direct → Decodo).
+            native_profile = await native.profile_by_handle(handle)
+            if native_profile:
+                ctx["source"] = "direct"
+                return _normalize_profile(native_profile)
+
+            items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_TWITTER_PROFILE,
                 {"twitterHandles": [handle], "startUrls": [f"https://x.com/{handle}"], "maxItems": 1},
                 max_items=1,
@@ -466,13 +480,11 @@ async def twitter_profile(
 
         data = await cached_or_run(
             endpoint="twitter.profile",
-            params={"handle": handle, "v": 4},
+            params={"handle": handle, "v": 5},
             runner=_run,
             ctx=ctx,
-            # The apidojo actor cold-starts at ~14s. Profiles are polled
-            # repeatedly (monitoring dashboards) and follower counts drift
-            # slowly, so serve the last copy instantly after the 1h TTL and
-            # refresh in the background instead of making every caller wait.
+            # Profiles are polled repeatedly; follower counts drift slowly, so
+            # serve the last copy instantly after TTL and refresh in background.
             stale_while_revalidate=True,
             use_cache=cache,
         )

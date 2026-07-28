@@ -248,7 +248,7 @@ const RB_CHANNEL = "Rumble channel URL, e.g. https://rumble.com/c/name.";
 const TWITTER: Omit<Endpoint, "platform">[] = [
   { tool: "twitter_tweet_details", name: "Twitter/X Tweet Details", path: "/v1/twitter/tweet-details", credits: 1, summary: "Metadata + engagement stats for a tweet.", params: [url(TW_TWEET)] },
   { tool: "twitter_transcript", name: "Twitter/X Transcript", path: "/v1/twitter/transcript", credits: 1, summary: "Extract tweet text as transcript text.", params: [url(TW_TWEET), cacheParam()] },
-  { tool: "twitter_profile", name: "Twitter/X Profile", path: "/v1/twitter/profile", credits: 1, summary: "Profile info & stats for a Twitter/X account.", params: [url(TW_PROFILE)] },
+  { tool: "twitter_profile", name: "Twitter/X Profile", path: "/v1/twitter/profile", credits: 1, summary: "Public Twitter/X profile — bio, followers, following, tweet count, avatar.", params: [url(TW_PROFILE)] },
   { tool: "twitter_user_tweets", name: "Twitter/X User Tweets", path: "/v1/twitter/user-tweets", credits: 14, summary: "Recent tweets from a Twitter/X profile.", params: [url(TW_PROFILE), limit(20, 200)] },
   { tool: "twitter_search", name: "Twitter/X Search", path: "/v1/twitter/search", credits: 14, summary: "Search public tweets on X by keyword — text, author, engagement, hashtags, and media.", params: [q(), limit(20, 200)] },
   { tool: "twitter_community", name: "Twitter/X Community", path: "/v1/twitter/community", credits: 1, summary: "Details for an X (Twitter) community.", params: [url(TW_COMMUNITY)] },

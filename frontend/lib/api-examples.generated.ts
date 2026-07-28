@@ -12313,18 +12313,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "name": "NASA",
     "bio": "Making the seemingly impossible, possible. ✨",
     "location": "Pale Blue Dot",
-    "verified": true,
-    "followers": 92198419,
+    "followers": 92219438,
     "following": 119,
-    "tweetCount": 74231,
-    "likesCount": 16882,
-    "mediaCount": 28039,
-    "listedCount": 97049,
-    "isBlueVerified": true,
+    "tweetCount": 74261,
     "website": "http://www.nasa.gov/",
-    "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg",
-    "bannerImage": "https://pbs.twimg.com/profile_banners/11348282/1775567134",
-    "createdAt": "Wed Dec 19 20:20:32 +0000 2007"
+    "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_400x400.jpg",
+    "createdAt": "2007-12-19T20:20:32.000Z"
   },
   "twitter-search": {
     "query": "artificial intelligence",
