@@ -4117,27 +4117,36 @@
       "url": "https://x.com/i/communities/1493446837214187523",
       "name": "Build in Public",
       "description": "Share what you're working on. Get feedback. Help each other move forward. – Sponsored by bolt.new ⚡",
-      "memberCount": 262696,
+      "memberCount": 263468,
       "createdAt": "2022-02-15T04:47:27.551000+00:00",
       "creator": "marckohlbrugge",
       "joinPolicy": "Open",
       "isNsfw": false,
-      "bannerImage": null,
+      "bannerImage": "https://pbs.twimg.com/community_banner_img/1915033378811772928/KdaKUaRP?format=png&name=orig",
       "rules": [
         {
-          "name": "Share what you're working on"
+          "name": "Share what you're working on",
+          "description": "Don't be scared to share unfinished work"
         },
         {
-          "name": "Screenshots, screencasts, drafts, etc"
+          "name": "Screenshots, screencasts, drafts, etc",
+          "description": "Visual tweets tend to grab people's attention"
         },
         {
-          "name": "No self-promotion"
+          "name": "No self-promotion",
+          "description": "Don't ask for upvotes or advertise your products/services."
         },
         {
-          "name": "Stay on-topic"
+          "name": "Stay on-topic",
+          "description": "Only post about building in public. No politics or other off-topic posts. There are other communities for that."
         },
         {
-          "name": "No engagement farming"
+          "name": "No engagement farming",
+          "description": "If your goal is to get replies, likes, etc, don’t post it here. Don’t ask super generic questions like “what’s everyone working on?”"
+        },
+        {
+          "name": "Use a personal account",
+          "description": "No company accounts. No logos. Use your own name. No promotion or URLs in your name."
         }
       ]
     }
@@ -4152,153 +4161,148 @@
       "tweets": [
         {
           "platform": "twitter",
-          "url": "https://x.com/MalikSarran/status/2078438834728280149",
-          "id": "2078438834728280149",
-          "text": "One thing that surprised me while building WorkoAI:Even with powerful agents, human oversight is still extremely important.That’s why we built a proper Approval Center where sensitive actions (sending emails, updating CRMs, creating invoices, etc.) pause for review with full",
+          "url": "https://x.com/NickDevFE/status/2080189136917672064",
+          "id": "2080189136917672064",
+          "text": "img2threejs v1.3 is now available. 🎋\n\nOne photo → procedural Three.js code. No meshes. No manual modeling.\n\nGitHub: https://t.co/eYHfZST8DC\n\nv1.3 brings major improvements to geometry reconstruction, material generation, validation, and overall output quality.\n\nFor this demo, I https://t.co/6q2xpbwXrj",
           "lang": "en",
-          "publishedAt": "Sat Jul 18 11:16:48 +0000 2026",
+          "publishedAt": "Thu Jul 23 07:11:52 +0000 2026",
           "author": {
-            "username": "MalikSarran",
-            "displayName": "Sarran Haider",
-            "url": "https://x.com/MalikSarran",
-            "followers": 26,
+            "username": "NickDevFE",
+            "displayName": "Nick",
+            "url": "https://x.com/NickDevFE",
+            "followers": 1759,
             "verified": true,
-            "profileImage": "https://pbs.twimg.com/profile_images/2078121972320669696/lIPzAttX_normal.jpg"
+            "profileImage": "https://pbs.twimg.com/profile_images/1972545424990035968/HKjUZtwo_normal.jpg"
           },
           "engagement": {
-            "views": 6,
-            "likes": 0,
-            "replies": 0,
-            "retweets": 0,
-            "quotes": 0,
-            "bookmarks": 0
+            "views": 683643,
+            "likes": 3654,
+            "replies": 96,
+            "retweets": 378,
+            "quotes": 22,
+            "bookmarks": 4401
           },
           "isReply": false,
           "isRetweet": false,
-          "hashtags": [
-            "BuildInPublic",
-            "AIagents",
-            "StartupToolsThis"
-          ],
-          "media": []
-        },
-        {
-          "platform": "twitter",
-          "url": "https://x.com/thesukhjitbajwa/status/2078438809226867013",
-          "id": "2078438809226867013",
-          "text": "Sidebar... Inspired by OG @mannupaaji https://t.co/V363iOhYHS",
-          "lang": "no",
-          "publishedAt": "Sat Jul 18 11:16:42 +0000 2026",
-          "author": {
-            "username": "thesukhjitbajwa",
-            "displayName": "Sukhjit Singh",
-            "url": "https://x.com/thesukhjitbajwa",
-            "followers": 96,
-            "verified": false,
-            "profileImage": "https://pbs.twimg.com/profile_images/1972680378327470080/lTY8zD1q_normal.jpg"
-          },
-          "engagement": {
-            "views": 3,
-            "likes": 0,
-            "replies": 0,
-            "retweets": 0,
-            "quotes": 0,
-            "bookmarks": 0
-          },
-          "isReply": false,
-          "isRetweet": false,
-          "hashtags": [],
           "media": [
-            "https://pbs.twimg.com/media/HNgYLEVaMAA7A46.png",
-            "https://pbs.twimg.com/media/HNgYx14acAE1Dm1.png"
+            "https://pbs.twimg.com/amplify_video_thumb/2080188862962532353/img/52EZv7mlg22s98Dw.jpg"
           ]
         },
         {
           "platform": "twitter",
-          "url": "https://x.com/nirvanaxjude/status/2078438505118589399",
-          "id": "2078438505118589399",
-          "text": "Ban like 15 words and the AI Sound dies instantly.\n\nThe fastest tone fix I know takes one line in your prompt and it strips out maybe 70% of that AI smell.\n\nNot a rewrite. Not some fancy system prompt. A ban list.\n\nHere's the thing about prompting most people never learn..... https://t.co/FMBgXNAe1M",
+          "url": "https://x.com/FilipPanoski/status/2079929462565568648",
+          "id": "2079929462565568648",
+          "text": "pov: you built a product people actually want https://t.co/Ruw8RhZhM1",
           "lang": "en",
-          "publishedAt": "Sat Jul 18 11:15:29 +0000 2026",
+          "publishedAt": "Wed Jul 22 14:00:01 +0000 2026",
           "author": {
-            "username": "nirvanaxjude",
-            "displayName": "Jude Olaboboye",
-            "url": "https://x.com/nirvanaxjude",
-            "followers": 115,
+            "username": "FilipPanoski",
+            "displayName": "Filip Panoski",
+            "url": "https://x.com/FilipPanoski",
+            "followers": 3221,
             "verified": true,
-            "profileImage": "https://pbs.twimg.com/profile_images/1992886110142255104/fLkDOyqI_normal.jpg"
+            "profileImage": "https://pbs.twimg.com/profile_images/1842181486587297792/Ia5ilmNs_normal.jpg"
           },
           "engagement": {
-            "views": 11,
-            "likes": 0,
-            "replies": 0,
-            "retweets": 0,
-            "quotes": 0,
-            "bookmarks": 0
+            "views": 23033,
+            "likes": 404,
+            "replies": 111,
+            "retweets": 1,
+            "quotes": 1,
+            "bookmarks": 86
           },
           "isReply": false,
           "isRetweet": false,
-          "hashtags": [],
           "media": [
-            "https://pbs.twimg.com/media/HNgYaOEWkAAMOS0.jpg"
+            "https://pbs.twimg.com/media/HN1k0g1WQAAeouE.jpg"
           ]
         },
         {
           "platform": "twitter",
-          "url": "https://x.com/authorityvortex/status/2078438464715133008",
-          "id": "2078438464715133008",
-          "text": "Hey outbounders and SaaS builders.\n\nYou probably know I run ReachVortex? An outbound platform that does all for you, prospect, verify, enrich, signals (soon to be added), send emails and submit forms.\n\nI'm going to dive more into agentic prospecting but I use a hybrid model of",
+          "url": "https://x.com/juiceboy_of_abj/status/2079796903055626348",
+          "id": "2079796903055626348",
+          "text": "Not everything has to be celebrated publicly,  I just hit 5k followers here on x and i never said anything about it.\n\nThat’s maturity!. \nGood morning Techies 🤗 https://t.co/lg4iL25WFl",
           "lang": "en",
-          "publishedAt": "Sat Jul 18 11:15:20 +0000 2026",
+          "publishedAt": "Wed Jul 22 05:13:17 +0000 2026",
           "author": {
-            "username": "authorityvortex",
-            "displayName": "Dennis H",
-            "url": "https://x.com/authorityvortex",
-            "followers": 531,
+            "username": "juiceboy_of_abj",
+            "displayName": "Elijah 🌊",
+            "url": "https://x.com/juiceboy_of_abj",
+            "followers": 5059,
             "verified": true,
-            "profileImage": "https://pbs.twimg.com/profile_images/2072639180363153408/YkHz5kcz_normal.jpg"
+            "profileImage": "https://pbs.twimg.com/profile_images/2047368553309798400/e19Qhn0y_normal.jpg"
           },
           "engagement": {
-            "views": 4,
-            "likes": 0,
-            "replies": 0,
-            "retweets": 0,
-            "quotes": 0,
-            "bookmarks": 0
+            "views": 19963,
+            "likes": 304,
+            "replies": 157,
+            "retweets": 30,
+            "quotes": 1,
+            "bookmarks": 3
           },
           "isReply": false,
           "isRetweet": false,
-          "hashtags": [],
-          "media": []
+          "media": [
+            "https://pbs.twimg.com/media/HNzsQV0WkAEfUow.jpg"
+          ]
         },
         {
           "platform": "twitter",
-          "url": "https://x.com/MrPugo/status/2078438351955284152",
-          "id": "2078438351955284152",
-          "text": "I added a Brand Palette Maker to Dopely a while ago.\n\nCustomers have been using it and they seem to really like v1.\n\nNow I’m thinking about what to add next.\n\nIf you were using a tool like this for your SaaS, brand, template shop, or product — what would you expect it to include? https://t.co/91dYxnDT1p",
+          "url": "https://x.com/NickDevFE/status/2078392573639737713",
+          "id": "2078392573639737713",
+          "text": "img2threejs - turn one object photo into a code-only procedural Three.js model\n\nOpen-source toolkit that rebuilds the object in a single reference image as procedural Three.js code (no mesh downloads), quality-gated by a render-vs-reference loop - strong for hard-surface objects https://t.co/NtQBLVzMPO",
           "lang": "en",
-          "publishedAt": "Sat Jul 18 11:14:53 +0000 2026",
+          "publishedAt": "Sat Jul 18 08:12:58 +0000 2026",
           "author": {
-            "username": "MrPugo",
-            "displayName": "Mr. Pugo",
-            "url": "https://x.com/MrPugo",
-            "followers": 351,
+            "username": "NickDevFE",
+            "displayName": "Nick",
+            "url": "https://x.com/NickDevFE",
+            "followers": 1759,
             "verified": true,
-            "profileImage": "https://pbs.twimg.com/profile_images/1696963891941486592/EswqfXk7_normal.jpg"
+            "profileImage": "https://pbs.twimg.com/profile_images/1972545424990035968/HKjUZtwo_normal.jpg"
           },
           "engagement": {
-            "views": 1,
-            "likes": 0,
-            "replies": 0,
-            "retweets": 0,
-            "quotes": 0,
-            "bookmarks": 0
+            "views": 12628,
+            "likes": 262,
+            "replies": 11,
+            "retweets": 18,
+            "quotes": 2,
+            "bookmarks": 240
           },
           "isReply": false,
           "isRetweet": false,
-          "hashtags": [],
           "media": [
-            "https://pbs.twimg.com/amplify_video_thumb/2078436738029006848/img/ycw33LUWKACiBFN_.jpg"
+            "https://pbs.twimg.com/amplify_video_thumb/2078392549635678208/img/z88HQqtAHlpxS9qx.jpg"
+          ]
+        },
+        {
+          "platform": "twitter",
+          "url": "https://x.com/juiceboy_of_abj/status/2079072002283819465",
+          "id": "2079072002283819465",
+          "text": "Good morning techie 🧑‍💻 ❤️\nLet’s do more today 💪\n\nDo have a productive day ❤️ https://t.co/bgiXFDUHte",
+          "lang": "en",
+          "publishedAt": "Mon Jul 20 05:12:47 +0000 2026",
+          "author": {
+            "username": "juiceboy_of_abj",
+            "displayName": "Elijah 🌊",
+            "url": "https://x.com/juiceboy_of_abj",
+            "followers": 5059,
+            "verified": true,
+            "profileImage": "https://pbs.twimg.com/profile_images/2047368553309798400/e19Qhn0y_normal.jpg"
+          },
+          "engagement": {
+            "views": 18160,
+            "likes": 215,
+            "replies": 117,
+            "retweets": 31,
+            "quotes": 2,
+            "bookmarks": 2
+          },
+          "isReply": false,
+          "isRetweet": false,
+          "media": [
+            "https://pbs.twimg.com/media/HNpY9mkXMAAbgHm.jpg",
+            "https://pbs.twimg.com/media/HNpY9jMWEAAR0AG.jpg"
           ]
         }
       ]

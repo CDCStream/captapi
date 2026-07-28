@@ -628,6 +628,11 @@ async def twitter_community(
         base_credits=1,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native_community = await native.community(community_id)
+            if native_community and native_community.get("name"):
+                ctx["source"] = "direct"
+                return strip_empty(native_community)
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TWITTER_COMMUNITY,
@@ -636,11 +641,12 @@ async def twitter_community(
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Community not found")
+            ctx["source"] = "apify"
             c = items[0]
             banner = c.get("banner")
             if isinstance(banner, dict):
                 banner = banner.get("url") or banner.get("media_url_https")
-            return {
+            return strip_empty({
                 "platform": "twitter",
                 "id": safe_str(c.get("id") or c.get("community_id") or community_id),
                 "url": f"https://x.com/i/communities/{community_id}",
@@ -657,11 +663,11 @@ async def twitter_community(
                     banner or c.get("bannerUrl") or c.get("banner_url") or c.get("coverImage")
                 ),
                 "rules": c.get("rules") or [],
-            }
+            })
 
         data = await cached_or_run(
             endpoint="twitter.community",
-            params={"community_id": community_id, "v": 3},
+            params={"community_id": community_id, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -690,6 +696,14 @@ async def twitter_community_tweets(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native_items = await native.community_tweets(
+                community_id, limit=limit, ranking_mode="Recency"
+            )
+            if native_items:
+                ctx["source"] = "direct"
+                tweets = [_normalize_tweet(t) for t in native_items[:limit]]
+                return {"communityId": community_id, "totalReturned": len(tweets), "tweets": tweets}
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TWITTER_COMMUNITY,
@@ -701,12 +715,15 @@ async def twitter_community_tweets(
                 },
                 max_items=limit,
             )
+            if not items:
+                raise HTTPException(status_code=404, detail="No tweets found")
+            ctx["source"] = "apify"
             tweets = [_normalize_tweet(t) for t in items[:limit]]
             return {"communityId": community_id, "totalReturned": len(tweets), "tweets": tweets}
 
         data = await cached_or_run(
             endpoint="twitter.community-tweets",
-            params={"community_id": community_id, "limit": limit, "v": 3},
+            params={"community_id": community_id, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

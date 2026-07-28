@@ -8,6 +8,8 @@ stats. Profile timelines come from the public syndication embed
 (``syndication.twitter.com/srv/timeline-profile``) — typically ~20 recent posts.
 Keyword search uses the public web client's guest-token GraphQL
 ``SearchTimeline`` (query id scraped from the current ``main.*.js`` bundle).
+Communities use guest GraphQL ``CommunitiesFetchOneQuery`` /
+``CommunityTweetsTimeline`` (with known query-id fallbacks).
 """
 
 from __future__ import annotations
@@ -16,6 +18,7 @@ import json
 import math
 import re
 import time
+from datetime import datetime, timezone
 from html import unescape
 from typing import Any
 from urllib.parse import urlparse
@@ -62,6 +65,29 @@ _FALSE_FEATURE_FLAGS = {
     "responsive_web_media_download_video_enabled",
     "responsive_web_graphql_skip_user_profile_image_extensions_enabled",
 }
+# Community ops live in lazy bundles; keep a short working fallback chain.
+_COMMUNITY_DETAIL_QIDS = (
+    "UlgIZeglRXC9tZBYlwV3Dw",
+    "wYwM9x1NTCQKPx50Ih35Tg",
+    "Mt033iulrkGz0nqtHmXZvQ",
+)
+_COMMUNITY_TWEETS_QIDS = (
+    "PUinTHtCGWmECLX57lhRHA",
+    "rDsqfuibxL_NXh33IiTvzQ",
+    "rp4YNcEs-BXdkm1DA4PMhw",
+)
+_OG_TITLE_RE = re.compile(
+    r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']',
+    re.I,
+)
+_OG_DESC_RE = re.compile(
+    r'<meta[^>]+(?:property=["\']og:description["\']|name=["\']description["\'])[^>]+content=["\']([^"\']*)["\']',
+    re.I,
+)
+_OG_IMAGE_RE = re.compile(
+    r'<meta[^>]+property=["\']og:image(?::secure_url)?["\'][^>]+content=["\']([^"\']+)["\']',
+    re.I,
+)
 _DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz"
 _META_RE = re.compile(
     r"<meta[^>]+>",
@@ -544,15 +570,14 @@ def _gql_result_to_tweet(result: dict[str, Any]) -> dict[str, Any] | None:
     return out
 
 
-def _parse_search_timeline(payload: dict[str, Any]) -> tuple[list[dict[str, Any]], str | None]:
-    instructions = (
-        (((payload.get("data") or {}).get("search_by_raw_query") or {}).get("search_timeline") or {})
-        .get("timeline")
-        or {}
-    ).get("instructions") or []
+def _parse_timeline_instructions(
+    instructions: Any,
+) -> tuple[list[dict[str, Any]], str | None]:
     tweets: list[dict[str, Any]] = []
     seen: set[str] = set()
     cursor: str | None = None
+    if not isinstance(instructions, list):
+        return tweets, cursor
     for instruction in instructions:
         if not isinstance(instruction, dict):
             continue
@@ -582,6 +607,350 @@ def _parse_search_timeline(payload: dict[str, Any]) -> tuple[list[dict[str, Any]
             seen.add(str(tid))
             tweets.append(tweet)
     return tweets, cursor
+
+
+def _parse_search_timeline(payload: dict[str, Any]) -> tuple[list[dict[str, Any]], str | None]:
+    instructions = (
+        (((payload.get("data") or {}).get("search_by_raw_query") or {}).get("search_timeline") or {})
+        .get("timeline")
+        or {}
+    ).get("instructions") or []
+    return _parse_timeline_instructions(instructions)
+
+
+def _guest_headers(guest_token: str, cookie: str, referer: str) -> dict[str, str]:
+    return {
+        **_UA,
+        "authorization": _PUBLIC_BEARER,
+        "content-type": "application/json",
+        "x-guest-token": guest_token,
+        "x-twitter-auth-type": "OAuth2Session",
+        "x-twitter-active-user": "yes",
+        "x-twitter-client-language": "en",
+        "Origin": "https://x.com",
+        "Referer": referer,
+        "cookie": cookie,
+    }
+
+
+async def _gql_post(
+    client: httpx.AsyncClient,
+    *,
+    operation: str,
+    qid: str,
+    variables: dict[str, Any],
+    features: dict[str, bool],
+    guest_token: str,
+    cookie: str,
+    referer: str,
+) -> tuple[int, dict[str, Any] | None]:
+    url = f"https://api.x.com/graphql/{qid}/{operation}"
+    try:
+        resp = await client.post(
+            url,
+            headers=_guest_headers(guest_token, cookie, referer),
+            json={"variables": variables, "queryId": qid, "features": features},
+        )
+    except httpx.HTTPError as exc:
+        log.info("twitter_gql_post_fail", operation=operation, error=str(exc))
+        return 0, None
+    if resp.status_code != 200:
+        return resp.status_code, None
+    try:
+        payload = resp.json()
+    except ValueError:
+        return resp.status_code, None
+    return resp.status_code, payload if isinstance(payload, dict) else None
+
+
+def _ms_to_iso(value: Any) -> str | None:
+    try:
+        ms = int(value)
+    except (TypeError, ValueError):
+        return safe_str(value)
+    if ms <= 0:
+        return None
+    # X ships community created_at in milliseconds.
+    if ms > 10_000_000_000:
+        ms = ms / 1000
+    return datetime.fromtimestamp(ms, tz=timezone.utc).isoformat()
+
+
+def _community_banner(result: dict[str, Any]) -> str | None:
+    for key in ("custom_banner_media", "default_banner_media", "banner"):
+        media = result.get(key)
+        if not isinstance(media, dict):
+            continue
+        info = media.get("media_info") if isinstance(media.get("media_info"), dict) else media
+        url = safe_str(
+            info.get("original_img_url")
+            or info.get("url")
+            or info.get("media_url_https")
+        )
+        if url:
+            return url
+    return None
+
+
+def _normalize_community_result(result: dict[str, Any], community_id: str) -> dict[str, Any] | None:
+    if not isinstance(result, dict) or result.get("__typename") == "CommunityUnavailable":
+        return None
+    cid = safe_str(result.get("id_str") or result.get("rest_id") or community_id)
+    if not cid:
+        return None
+    creator_user = ((result.get("creator_results") or {}).get("result") or {})
+    creator_user = creator_user if isinstance(creator_user, dict) else {}
+    creator_core = creator_user.get("core") if isinstance(creator_user.get("core"), dict) else {}
+    creator_legacy = creator_user.get("legacy") if isinstance(creator_user.get("legacy"), dict) else {}
+    creator_username = safe_str(
+        creator_core.get("screen_name")
+        or creator_legacy.get("screen_name")
+        or result.get("creator_username")
+        or result.get("creatorUsername")
+    )
+    rules_out: list[dict[str, str]] = []
+    for rule in result.get("rules") or []:
+        if not isinstance(rule, dict):
+            continue
+        name = safe_str(rule.get("name"))
+        if not name:
+            continue
+        item: dict[str, str] = {"name": name}
+        desc = safe_str(rule.get("description"))
+        if desc:
+            item["description"] = desc
+        rules_out.append(item)
+    return {
+        "platform": "twitter",
+        "id": cid,
+        "url": f"https://x.com/i/communities/{cid}",
+        "name": safe_str(result.get("name")),
+        "description": safe_str(result.get("description")),
+        "memberCount": safe_int(result.get("member_count") or result.get("memberCount")),
+        "createdAt": _ms_to_iso(result.get("created_at") or result.get("createdAt")),
+        "creator": creator_username,
+        "joinPolicy": safe_str(result.get("join_policy") or result.get("joinPolicy")),
+        "isNsfw": bool(result.get("is_nsfw") or result.get("isNsfw") or False),
+        "bannerImage": _community_banner(result),
+        "rules": rules_out,
+    }
+
+
+def parse_community_html(html: str, community_id: str) -> dict[str, Any] | None:
+    """OG-tag fallback when GraphQL community detail is unavailable."""
+    if not html or not community_id:
+        return None
+    title_m = _OG_TITLE_RE.search(html)
+    desc_m = _OG_DESC_RE.search(html)
+    image_m = _OG_IMAGE_RE.search(html)
+    name = unescape(title_m.group(1)).strip() if title_m else None
+    if name and name.endswith(" on X"):
+        name = name[: -len(" on X")].strip()
+    description = unescape(desc_m.group(1)).strip() if desc_m else None
+    banner = unescape(image_m.group(1)).replace("&amp;", "&").strip() if image_m else None
+    if not name and not description:
+        return None
+    return {
+        "platform": "twitter",
+        "id": community_id,
+        "url": f"https://x.com/i/communities/{community_id}",
+        "name": name,
+        "description": description,
+        "memberCount": None,
+        "createdAt": None,
+        "creator": None,
+        "joinPolicy": None,
+        "isNsfw": None,
+        "bannerImage": banner,
+        "rules": [],
+    }
+
+
+def _community_result_from_payload(payload: dict[str, Any]) -> dict[str, Any] | None:
+    return (((payload.get("data") or {}).get("communityResults") or {}).get("result") or None)
+
+
+def _community_timeline_instructions(payload: dict[str, Any]) -> list[Any]:
+    result = _community_result_from_payload(payload)
+    if not isinstance(result, dict):
+        return []
+    for key in ("ranked_community_timeline", "community_timeline", "timeline"):
+        block = result.get(key)
+        if isinstance(block, dict):
+            timeline = block.get("timeline") if isinstance(block.get("timeline"), dict) else block
+            instructions = timeline.get("instructions") if isinstance(timeline, dict) else None
+            if isinstance(instructions, list):
+                return instructions
+    return []
+
+
+async def community(community_id: str) -> dict[str, Any] | None:
+    """Public community details via guest GraphQL (HTML OG fallback)."""
+    cid = (community_id or "").strip()
+    if not cid.isdigit():
+        return None
+    referer = f"https://x.com/i/communities/{cid}"
+    try:
+        async with httpx.AsyncClient(timeout=25, headers=_UA, follow_redirects=True) as client:
+            guest = await _guest_token(client)
+            if guest:
+                guest_token, cookie = guest
+                _, features = await _load_search_meta(client)
+                for qid in _COMMUNITY_DETAIL_QIDS:
+                    for operation in ("CommunitiesFetchOneQuery", "CommunityByRestId"):
+                        status, payload = await _gql_post(
+                            client,
+                            operation=operation,
+                            qid=qid,
+                            variables={"communityId": cid},
+                            features=features,
+                            guest_token=guest_token,
+                            cookie=cookie,
+                            referer=referer,
+                        )
+                        if status == 404:
+                            continue
+                        if not payload:
+                            continue
+                        result = _community_result_from_payload(payload)
+                        parsed = _normalize_community_result(result, cid) if isinstance(result, dict) else None
+                        if parsed and parsed.get("name"):
+                            log.info(
+                                "twitter_community_native_ok",
+                                community_id=cid,
+                                members=parsed.get("memberCount"),
+                                source="graphql",
+                            )
+                            return parsed
+    except httpx.HTTPError as exc:
+        log.info("twitter_community_native_fail", error=str(exc))
+
+    # OG tags from Decodo / direct page — name + description + banner only.
+    html: str | None = None
+    try:
+        async with httpx.AsyncClient(timeout=20, headers=_UA, follow_redirects=True) as client:
+            resp = await client.get(referer)
+            if resp.status_code == 200 and len(resp.text) > 1000:
+                html = resp.text
+    except httpx.HTTPError:
+        html = None
+    if (not html or "og:title" not in html) and decodo_fetch.enabled():
+        got = await decodo_fetch.fetch_url(referer, timeout=120.0, headless="html")
+        if got and got[0] == 200 and got[1]:
+            html = got[1]
+    parsed = parse_community_html(html or "", cid)
+    if parsed:
+        log.info("twitter_community_native_ok", community_id=cid, source="html")
+    return parsed
+
+
+async def community_tweets(
+    community_id: str,
+    limit: int = 25,
+    *,
+    ranking_mode: str = "Recency",
+) -> list[dict[str, Any]] | None:
+    """Community timeline via guest GraphQL CommunityTweetsTimeline."""
+    cid = (community_id or "").strip()
+    if not cid.isdigit():
+        return None
+    capped = max(1, min(int(limit or 25), 200))
+    ranking = "Relevance" if str(ranking_mode).lower() in {"relevance", "top"} else "Recency"
+    referer = f"https://x.com/i/communities/{cid}"
+
+    try:
+        async with httpx.AsyncClient(timeout=25, headers=_UA, follow_redirects=True) as client:
+            guest = await _guest_token(client)
+            if not guest:
+                return None
+            guest_token, cookie = guest
+            _, features = await _load_search_meta(client)
+
+            working_qid: str | None = None
+            tweets: list[dict[str, Any]] = []
+            cursor: str | None = None
+            for qid in _COMMUNITY_TWEETS_QIDS:
+                status, payload = await _gql_post(
+                    client,
+                    operation="CommunityTweetsTimeline",
+                    qid=qid,
+                    variables={
+                        "communityId": cid,
+                        "count": min(capped, 20),
+                        "displayLocation": "Community",
+                        "rankingMode": ranking,
+                        "withCommunity": True,
+                    },
+                    features=features,
+                    guest_token=guest_token,
+                    cookie=cookie,
+                    referer=referer,
+                )
+                if status == 404 or not payload:
+                    continue
+                tweets, cursor = _parse_timeline_instructions(
+                    _community_timeline_instructions(payload)
+                )
+                if tweets:
+                    working_qid = qid
+                    break
+            else:
+                log.info("twitter_community_tweets_miss", community_id=cid)
+                return None
+
+            collected = list(tweets)
+            seen = {str(t.get("id_str")) for t in collected if t.get("id_str")}
+            max_pages = min(10, (capped + 19) // 20 + 1)
+            page = 1
+            while len(collected) < capped and cursor and page < max_pages:
+                status, payload = await _gql_post(
+                    client,
+                    operation="CommunityTweetsTimeline",
+                    qid=working_qid or _COMMUNITY_TWEETS_QIDS[0],
+                    variables={
+                        "communityId": cid,
+                        "count": min(capped - len(collected), 20),
+                        "cursor": cursor,
+                        "displayLocation": "Community",
+                        "rankingMode": ranking,
+                        "withCommunity": True,
+                    },
+                    features=features,
+                    guest_token=guest_token,
+                    cookie=cookie,
+                    referer=referer,
+                )
+                page += 1
+                if status != 200 or not payload:
+                    break
+                more, cursor = _parse_timeline_instructions(
+                    _community_timeline_instructions(payload)
+                )
+                added = 0
+                for tweet in more:
+                    tid = str(tweet.get("id_str") or "")
+                    if not tid or tid in seen:
+                        continue
+                    seen.add(tid)
+                    collected.append(tweet)
+                    added += 1
+                    if len(collected) >= capped:
+                        break
+                if added == 0:
+                    break
+
+            if not collected:
+                return None
+            log.info(
+                "twitter_community_tweets_native_ok",
+                community_id=cid,
+                returned=len(collected[:capped]),
+                ranking=ranking,
+            )
+            return collected[:capped]
+    except httpx.HTTPError as exc:
+        log.info("twitter_community_tweets_native_fail", error=str(exc))
+        return None
 
 
 async def _search_page(
