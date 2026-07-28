@@ -1363,22 +1363,54 @@ async def instagram_tagged_posts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            async def _apify() -> dict[str, Any]:
-                apify = get_apify()
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_INSTAGRAM_TAGGED,
-                    {"username": [handle], "resultsLimit": limit},
-                    max_items=limit,
-                )
-                posts = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
-                return {"url": url, "totalReturned": len(posts), "posts": posts}
+            user = await instagram_native.fetch_web_profile_info(handle)
+            user_id = safe_str((user or {}).get("id") or (user or {}).get("pk"))
+            if user_id:
+                collected: list[dict[str, Any]] = []
+                next_max: str | None = None
+                for _ in range(_IG_FEED_MAX_PAGES):
+                    page = await instagram_native.fetch_usertags_page(
+                        user_id, next_max, count=min(33, limit)
+                    )
+                    if page is None:
+                        break
+                    items, next_max_id, more = page
+                    for raw in items:
+                        collected.append(
+                            decodo.strip_null_post_fields(
+                                instagram_native.map_feed_post(raw, profile_user_id=user_id)
+                            )
+                        )
+                        if len(collected) >= limit:
+                            break
+                    next_max = next_max_id if more and next_max_id else None
+                    if len(collected) >= limit or next_max is None:
+                        break
+                if collected:
+                    ctx["source"] = "direct"
+                    return {
+                        "url": url,
+                        "totalReturned": len(collected[:limit]),
+                        "posts": collected[:limit],
+                    }
 
+            apify = get_apify()
+            items = await apify.run_actor_sync(
+                settings.APIFY_ACTOR_INSTAGRAM_TAGGED,
+                {"username": [handle], "resultsLimit": limit},
+                max_items=limit,
+            )
+            posts = [
+                decodo.strip_null_post_fields(_normalize_post(i))
+                for i in items[:limit]
+                if not i.get("error")
+            ]
             ctx["source"] = "apify"
-            return await _apify()
+            return {"url": url, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
             endpoint="instagram.tagged-posts",
-            params={"url": url, "limit": limit, "v": 9},
+            params={"url": url, "limit": limit, "v": 10},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

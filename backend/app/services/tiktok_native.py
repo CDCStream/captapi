@@ -1677,104 +1677,147 @@ async def song_details_native(music_id_or_url: str) -> dict[str, Any] | None:
     }
 
 
-async def live_status_native(handle: str) -> dict[str, Any] | None:
-    """Live status from profile rehydration ``user.roomId``.
+def _extract_stream_urls(live_room: dict[str, Any]) -> list[str]:
+    """Pull flv/hls URLs out of ``api-live/user/room`` streamData blobs."""
+    urls: list[str] = []
+    seen: set[str] = set()
 
-    TikTok sets ``roomId`` to a non-empty string while the creator is live and
-    ``\"\"`` when offline. That is enough for ``isLive`` + creator fields without
-    Apify. Room title/viewers/stream URLs need a separate webcast call (often
-    signed / flaky), so when live we only guarantee ``room.id``; callers can
-    still fall through to Apify if they need full room media.
-    """
-    ui = await _user_info(handle)
-    if ui is None:
+    def _add(raw: Any) -> None:
+        u = safe_str(raw)
+        if u and u.startswith("http") and u not in seen:
+            seen.add(u)
+            urls.append(u)
+
+    for key in ("streamData", "hevcStreamData"):
+        blob = live_room.get(key)
+        if not isinstance(blob, dict):
+            continue
+        pull = blob.get("pull_data") if isinstance(blob.get("pull_data"), dict) else {}
+        raw = pull.get("stream_data")
+        parsed: Any = None
+        if isinstance(raw, str) and raw.strip():
+            try:
+                parsed = json.loads(raw)
+            except ValueError:
+                parsed = None
+        elif isinstance(raw, dict):
+            parsed = raw
+        if not isinstance(parsed, dict):
+            continue
+        data = parsed.get("data") if isinstance(parsed.get("data"), dict) else {}
+        for quality in data.values():
+            if not isinstance(quality, dict):
+                continue
+            main = quality.get("main") if isinstance(quality.get("main"), dict) else quality
+            if not isinstance(main, dict):
+                continue
+            for k in ("flv", "hls", "cmaf", "dash"):
+                _add(main.get(k))
+    return urls
+
+
+async def _fetch_live_room_api(handle: str) -> dict[str, Any] | None:
+    """Signer ``/api-live/user/room/`` — room meta + stream pull URLs."""
+    from app.services import tiktok_signer
+
+    if not handle or not tiktok_signer.enabled():
         return None
-    user = ui.get("user") or {}
-    stats_v2 = ui.get("statsV2") or {}
-    stats = ui.get("stats") or {}
-    username = safe_str(user.get("uniqueId")) or handle
+    api = (
+        "https://www.tiktok.com/api-live/user/room/"
+        f"?aid=1988&sourceType=54&uniqueId={urllib.parse.quote(handle)}"
+    )
+    page = await tiktok_signer.fetch_api(api)
+    if not isinstance(page, dict):
+        return None
+    data = page.get("data")
+    return data if isinstance(data, dict) else None
+
+
+async def live_status_native(handle: str) -> dict[str, Any] | None:
+    """Live status via ``api-live/user/room`` (streams) + profile fallback.
+
+    Prefer the signed live-room API (title/viewers/stream URLs). ``status == 2``
+    means currently live; other statuses keep room metadata but ``isLive=false``.
+    Profile ``roomId`` is a secondary signal when the live API is unavailable.
+    """
+    username = (handle or "").lstrip("@").strip()
     if not username:
         return None
+
+    live_api = await _fetch_live_room_api(username)
+    ui = await _user_info(username)
+    user = (ui or {}).get("user") if isinstance(ui, dict) else {}
+    if not isinstance(user, dict):
+        user = {}
+    stats_v2 = (ui or {}).get("statsV2") if isinstance(ui, dict) else {}
+    stats = (ui or {}).get("stats") if isinstance(ui, dict) else {}
+    if not isinstance(stats_v2, dict):
+        stats_v2 = {}
+    if not isinstance(stats, dict):
+        stats = {}
+
+    api_user = (live_api or {}).get("user") if isinstance(live_api, dict) else {}
+    if not isinstance(api_user, dict):
+        api_user = {}
+    api_stats = (live_api or {}).get("stats") if isinstance(live_api, dict) else {}
+    if not isinstance(api_stats, dict):
+        api_stats = {}
+    live_room = (live_api or {}).get("liveRoom") if isinstance(live_api, dict) else {}
+    if not isinstance(live_room, dict):
+        live_room = {}
+
+    username = (
+        safe_str(api_user.get("uniqueId") or user.get("uniqueId")) or username
+    )
+    if not username and live_api is None and ui is None:
+        return None
+
     room_id = safe_str(user.get("roomId"))
-    is_live = bool(room_id)
+    status = safe_int(live_room.get("status"))
+    # TikTok liveRoom.status: 2 = currently live.
+    is_live = status == 2 or bool(room_id)
+
+    room_stats = live_room.get("liveRoomStats") if isinstance(live_room.get("liveRoomStats"), dict) else {}
+    stream_urls = _extract_stream_urls(live_room) if live_room else []
     room: dict[str, Any] = {}
-    if is_live:
-        room["id"] = room_id
-        enriched = await _enrich_live_room(room_id)
-        if enriched:
-            room.update(enriched)
+    if live_room:
+        room = {
+            "id": safe_str(live_room.get("roomId") or live_room.get("streamId") or room_id),
+            "title": safe_str(live_room.get("title")),
+            "startedAt": _iso(live_room.get("startTime")),
+            "viewerCount": safe_int(room_stats.get("userCount") or live_room.get("userCount")),
+            "totalEnterCount": safe_int(room_stats.get("enterCount") or live_room.get("enterCount")),
+            "coverUrl": safe_str(live_room.get("coverUrl") or live_room.get("squareCoverImg")),
+            "streamUrls": stream_urls or None,
+        }
+        room = {k: v for k, v in room.items() if v is not None and v != "" and v != []}
+    elif room_id:
+        room = {"id": room_id}
+
     return {
         "platform": "tiktok",
         "username": username,
         "isLive": is_live,
         "creator": {
-            "displayName": safe_str(user.get("nickname")),
-            "followers": _stat(stats_v2, stats, "followerCount"),
-            "verified": bool(user.get("verified")) if user.get("verified") is not None else None,
-            "avatar": safe_str(
-                user.get("avatarLarger") or user.get("avatarMedium") or user.get("avatarThumb")
+            "displayName": safe_str(api_user.get("nickname") or user.get("nickname")),
+            "followers": safe_int(api_stats.get("followerCount"))
+            or _stat(stats_v2, stats, "followerCount"),
+            "verified": (
+                bool(api_user.get("verified"))
+                if api_user.get("verified") is not None
+                else (bool(user.get("verified")) if user.get("verified") is not None else None)
             ),
-            "bio": safe_str(user.get("signature")),
+            "avatar": safe_str(
+                api_user.get("avatarLarger")
+                or api_user.get("avatarMedium")
+                or user.get("avatarLarger")
+                or user.get("avatarMedium")
+                or user.get("avatarThumb")
+            ),
+            "bio": safe_str(api_user.get("signature") or user.get("signature")),
         },
         "room": room,
     }
-
-
-async def _enrich_live_room(room_id: str) -> dict[str, Any] | None:
-    """Best-effort room metadata via signer webcast endpoints."""
-    from app.services import tiktok_signer
-
-    if not room_id or not tiktok_signer.enabled():
-        return None
-    candidates = [
-        (
-            "https://webcast.tiktok.com/webcast/room/info/"
-            f"?aid=1988&room_id={urllib.parse.quote(room_id)}"
-        ),
-        (
-            "https://www.tiktok.com/api/live/detail/"
-            f"?aid=1988&roomID={urllib.parse.quote(room_id)}"
-        ),
-    ]
-    for api in candidates:
-        page = await tiktok_signer.fetch_api(api)
-        if not isinstance(page, dict):
-            continue
-        data = page.get("data") if isinstance(page.get("data"), dict) else page
-        if not isinstance(data, dict):
-            continue
-        owner = data.get("owner") if isinstance(data.get("owner"), dict) else {}
-        stream_url = data.get("stream_url") if isinstance(data.get("stream_url"), dict) else {}
-        urls: list[str] = []
-        for key in ("flv_pull_url", "hls_pull_url_map", "rtmp_pull_url"):
-            blob = stream_url.get(key)
-            if isinstance(blob, dict):
-                urls.extend(safe_str(v) for v in blob.values() if safe_str(v))
-            elif safe_str(blob):
-                urls.append(safe_str(blob))
-        title = safe_str(data.get("title") or data.get("room_title"))
-        cover_raw = data.get("cover_url")
-        cover_obj = data.get("cover")
-        if not cover_raw and isinstance(cover_obj, dict):
-            cover_list = cover_obj.get("url_list") or cover_obj.get("urlList") or []
-            cover_raw = cover_list[0] if isinstance(cover_list, list) and cover_list else None
-        elif not cover_raw:
-            cover_raw = cover_obj
-        cover = safe_str(cover_raw)
-        out = {
-            "title": title,
-            "startedAt": _iso(data.get("start_time") or data.get("create_time")),
-            "viewerCount": safe_int(
-                data.get("user_count") or data.get("viewer_count") or owner.get("follow_info")
-            ),
-            "totalEnterCount": safe_int(data.get("enter_count") or data.get("total_user")),
-            "likeCount": safe_int(data.get("like_count")),
-            "coverUrl": cover,
-            "streamUrls": urls or None,
-        }
-        if any(out.values()):
-            return {k: v for k, v in out.items() if v is not None and v != "" and v != []}
-    return None
 
 
 def _map_trend_video(item: dict[str, Any], *, rank: int) -> dict[str, Any] | None:
@@ -1863,6 +1906,122 @@ async def trending_feed_native(
         nxt = safe_int(page.get("cursor"))
         cursor = nxt if nxt is not None else cursor + len(items)
     return collected[:limit] if collected else None
+
+
+_FOLLOWER_RANGES: dict[str, tuple[int, int | None]] = {
+    "10k-100k": (10_000, 100_000),
+    "100k-1m": (100_000, 1_000_000),
+    "1m-10m": (1_000_000, 10_000_000),
+    ">10m": (10_000_000, None),
+}
+
+
+async def popular_creators_native(
+    country: str = "US",
+    *,
+    sort: str = "follower",
+    follower_count: str | None = None,
+    limit: int = 20,
+) -> list[dict[str, Any]] | None:
+    """Popular creators derived from the native For-You feed + profile hydrate.
+
+    Creative Center's public creator ranking API is deprecated; this ranks
+    creators appearing in ``recommend/item_list`` for ``country``, hydrates
+    follower/like counts from profile rehydration, then sorts. Apify remains
+    the fallthrough for Creative-Center-shaped lists.
+    """
+    feed = await trending_feed_native(country, limit=max(limit * 3, 40))
+    if not feed:
+        return None
+
+    by_author: dict[str, dict[str, Any]] = {}
+    for row in feed:
+        username = safe_str(row.get("author"))
+        if not username:
+            continue
+        slot = by_author.setdefault(
+            username,
+            {
+                "username": username,
+                "displayName": safe_str(row.get("authorName")),
+                "views": 0,
+                "posts": 0,
+            },
+        )
+        slot["views"] += safe_int(row.get("views")) or 0
+        slot["posts"] += 1
+        if not slot.get("displayName") and row.get("authorName"):
+            slot["displayName"] = safe_str(row.get("authorName"))
+
+    if not by_author:
+        return None
+
+    # Hydrate the busiest authors first (most FYP appearances / views).
+    candidates = sorted(
+        by_author.values(),
+        key=lambda s: (s["posts"], s["views"]),
+        reverse=True,
+    )[: max(limit * 2, limit)]
+
+    creators: list[dict[str, Any]] = []
+    for slot in candidates:
+        ui = await _user_info(slot["username"])
+        if ui is None:
+            continue
+        user = ui.get("user") or {}
+        stats_v2 = ui.get("statsV2") or {}
+        stats = ui.get("stats") or {}
+        username = safe_str(user.get("uniqueId")) or slot["username"]
+        followers = _stat(stats_v2, stats, "followerCount")
+        if follower_count:
+            bounds = _FOLLOWER_RANGES.get(follower_count.lower())
+            if bounds and followers is not None:
+                lo, hi = bounds
+                if followers < lo or (hi is not None and followers >= hi):
+                    continue
+        likes = _stat(stats_v2, stats, "heartCount")
+        videos = _stat(stats_v2, stats, "videoCount")
+        avg_views = int(slot["views"] / slot["posts"]) if slot["posts"] else 0
+        eng = None
+        if followers and likes is not None and followers > 0:
+            eng = round(likes / followers, 4)
+        creators.append(
+            {
+                "username": username,
+                "displayName": safe_str(user.get("nickname")) or slot.get("displayName"),
+                "url": f"https://www.tiktok.com/@{username}",
+                "bio": safe_str(user.get("signature")),
+                "followers": followers,
+                "engagementRate": eng,
+                "likes": likes,
+                "videos": videos,
+                "country": (country or "US").upper(),
+                "verified": bool(user.get("verified")) if user.get("verified") is not None else None,
+                "profileImage": safe_str(
+                    user.get("avatarLarger") or user.get("avatarMedium") or user.get("avatarThumb")
+                ),
+                "_avgViews": avg_views,
+                "_posts": slot["posts"],
+            }
+        )
+
+    if not creators:
+        return None
+
+    sort_key = (sort or "follower").lower()
+    if sort_key == "engagement":
+        creators.sort(key=lambda c: (c.get("engagementRate") or 0, c.get("followers") or 0), reverse=True)
+    elif sort_key == "popularity":
+        creators.sort(key=lambda c: (c.get("_avgViews") or 0, c.get("followers") or 0), reverse=True)
+    else:
+        creators.sort(key=lambda c: (c.get("followers") or 0, c.get("_avgViews") or 0), reverse=True)
+
+    out: list[dict[str, Any]] = []
+    for i, c in enumerate(creators[:limit]):
+        c = {k: v for k, v in c.items() if not k.startswith("_")}
+        c["rank"] = i + 1
+        out.append(c)
+    return out
 
 
 async def popular_hashtags_native(

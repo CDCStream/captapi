@@ -397,6 +397,58 @@ async def _fetch_feed_once(
     return items, safe_str(payload.get("next_max_id")) or None, bool(payload.get("more_available"))
 
 
+async def fetch_usertags_page(
+    user_id: str, max_id: str | None = None, count: int = 12
+) -> tuple[list[dict[str, Any]], str | None, bool] | None:
+    """One page of posts that tag ``user_id`` (``/api/v1/usertags/{id}/feed/``).
+
+    Same residential + csrf session pattern as :func:`fetch_user_feed_page`.
+    Returns ``(raw items, next_max_id, more_available)`` or ``None``.
+    """
+    params: dict[str, Any] = {"count": max(1, min(count, 33))}
+    if max_id:
+        params["max_id"] = max_id
+    for attempt in range(3):
+        result = await _fetch_usertags_once(user_id, params, attempt)
+        if result is not None:
+            return result
+    return None
+
+
+async def _fetch_usertags_once(
+    user_id: str, params: dict[str, Any], attempt: int
+) -> tuple[list[dict[str, Any]], str | None, bool] | None:
+    try:
+        async with httpx.AsyncClient(
+            timeout=12, proxy=proxy_for("residential"), follow_redirects=True
+        ) as client:
+            await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
+            resp = await client.get(
+                f"https://www.instagram.com/api/v1/usertags/{user_id}/feed/",
+                params=params,
+                headers={
+                    "User-Agent": _UA,
+                    "X-IG-App-ID": "936619743392459",
+                    "X-CSRFToken": client.cookies.get("csrftoken") or "",
+                    "Referer": "https://www.instagram.com/",
+                },
+            )
+    except httpx.HTTPError as exc:
+        log.info("ig_usertags_transport_error", attempt=attempt, error=str(exc)[:120])
+        return None
+    if resp.status_code != 200:
+        log.info("ig_usertags_http_error", attempt=attempt, status=resp.status_code)
+        return None
+    try:
+        payload = resp.json()
+    except ValueError:
+        return None
+    items = payload.get("items")
+    if not isinstance(items, list):
+        return None
+    return items, safe_str(payload.get("next_max_id")) or None, bool(payload.get("more_available"))
+
+
 async def _fetch_item(shortcode: str) -> dict[str, Any] | None:
     for tier in _TIERS:
         try:

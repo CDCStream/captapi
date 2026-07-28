@@ -35,6 +35,7 @@ from app.services.tiktok_native import (
     hashtag_posts_native,
     live_status_native,
     music_posts_native,
+    popular_creators_native,
     popular_hashtags_native,
     profile_region_native,
     trending_feed_native,
@@ -1321,15 +1322,17 @@ async def tiktok_live_info(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             native = await live_status_native(handle)
-            if native is not None and not native.get("isLive"):
+            # Prefer native whenever we have stream URLs (or a definitive offline).
+            native_streams = ((native or {}).get("room") or {}).get("streamUrls") or []
+            if native is not None and (not native.get("isLive") or native_streams):
                 ctx["source"] = "direct"
                 return strip_empty(
                     {
                         **native,
-                        "streamUrls": (native.get("room") or {}).get("streamUrls") or [],
+                        "streamUrls": native_streams,
                     }
                 )
-            # Live rooms: prefer Apify for stream URLs / full room payload.
+            # Still-live but no pull URLs yet — Apify for full room media.
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK_LIVE,
                 {"handles": [handle], "include_stream_urls": True},
@@ -1472,6 +1475,22 @@ async def tiktok_popular_creators(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await popular_creators_native(
+                country.upper(),
+                sort=sort,
+                follower_count=follower_count,
+                limit=limit,
+            )
+            if native:
+                ctx["source"] = "direct"
+                return {
+                    "platform": "tiktok",
+                    "country": country.upper(),
+                    "sort": sort,
+                    "totalReturned": len(native),
+                    "creators": native,
+                }
+
             # Creative Center trends actor: only trendType/countryCode/maxResults
             # are supported; sort/follower filters apply to fallback actors only.
             run_input: dict[str, Any] = {
@@ -1504,6 +1523,7 @@ async def tiktok_popular_creators(
             ]
             if not creators:
                 raise HTTPException(status_code=404, detail="No popular creators found for this country")
+            ctx["source"] = "apify"
             return {
                 "platform": "tiktok",
                 "country": country.upper(),
@@ -1514,7 +1534,7 @@ async def tiktok_popular_creators(
 
         data = await cached_or_run(
             endpoint="tiktok.popular-creators",
-            params={"country": country.upper(), "sort": sort, "follower_count": follower_count or "", "limit": limit, "v": 5},
+            params={"country": country.upper(), "sort": sort, "follower_count": follower_count or "", "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
