@@ -427,6 +427,12 @@ async def threads_post_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Hydrated permalink HTML embeds the post under thread_items.
+            native_post = await native.post_details(url)
+            if native_post and native_post.get("code"):
+                ctx["source"] = "direct"
+                return _normalize_post(native_post)
+
             apify = get_apify()
             # When the URL names the author, the posts-mode scraper gives full
             # engagement + text; the downloader fallback only has media.
@@ -445,6 +451,7 @@ async def threads_post_details(
                     None,
                 )
                 if match:
+                    ctx["source"] = "apify"
                     return _normalize_post(match)
             dl_url = f"https://www.threads.com/@{author}/post/{code}" if author else url
             items = await apify.run_actor_sync(
@@ -455,11 +462,12 @@ async def threads_post_details(
             result = (items[0].get("result") or {}) if items else {}
             if not items or (isinstance(result, dict) and result.get("error")):
                 raise HTTPException(status_code=404, detail="Post not found")
+            ctx["source"] = "apify"
             return _normalize_post_download(items[0])
 
         data = await cached_or_run(
             endpoint="threads.post-details",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

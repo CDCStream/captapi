@@ -12,6 +12,9 @@ posts under ``thread_items`` (soft-capped ~20 per page render).
 ``search-users`` derives distinct authors from that same search HTML
 (Users-tab GraphQL is deferred / not hydrated for logged-out scrapes).
 
+Permalink pages hydrate ``BarcelonaPostPageDirectQueryRelayPreloader``
+with the target post under ``thread_items``.
+
 Logged-out datacenter GETs usually redirect to login — Decodo
 ``headless=html`` returns the hydrated HTML.
 """
@@ -41,6 +44,13 @@ _UA = {
     "Accept-Language": "en-US,en;q=0.9",
 }
 _HANDLE_RE = re.compile(r"^[A-Za-z0-9._]{1,30}$")
+_POST_CODE_RE = re.compile(r"^[A-Za-z0-9_-]{5,20}$")
+_POST_URL_RE = re.compile(
+    r"(?:https?://)?(?:www\.)?threads\.(?:net|com)/"
+    r"(?:@(?P<author>[A-Za-z0-9._]+)/post/|(?:t/))"
+    r"(?P<code>[A-Za-z0-9_-]+)",
+    re.I,
+)
 _PROFILE_MARKER = "BarcelonaProfilePageDirectQueryRelayPreloader"
 _THREAD_ITEMS_RE = re.compile(r'"thread_items"\s*:\s*\[')
 _OG_TITLE_RE = re.compile(
@@ -435,6 +445,74 @@ def parse_search_html(html: str, limit: int = 25) -> list[dict[str, Any]]:
     return _posts_from_thread_items(html, handle=None, limit=limit)
 
 
+def parse_post_code(url_or_code: str) -> tuple[str | None, str | None]:
+    """Return ``(author, code)`` from a Threads post URL or bare shortcode."""
+    raw = (url_or_code or "").strip()
+    if not raw:
+        return None, None
+    m = _POST_URL_RE.search(raw)
+    if m:
+        author = m.group("author")
+        code = m.group("code")
+        return (author.lower() if author else None), code
+    # bare code
+    code = raw.split("/")[-1].split("?")[0].strip()
+    if _POST_CODE_RE.fullmatch(code):
+        return None, code
+    return None, None
+
+
+def parse_post_html(html: str, code: str) -> dict[str, Any] | None:
+    """Extract a single post by shortcode from a permalink page HTML."""
+    if not html or not code:
+        return None
+    needle = code.strip()
+    # Prefer thread_items (full engagement payload).
+    for match in _THREAD_ITEMS_RE.finditer(html):
+        arr_s = _extract_json_array(html, match.end() - 1)
+        if not arr_s:
+            continue
+        try:
+            items = json.loads(arr_s)
+        except ValueError:
+            continue
+        if not isinstance(items, list):
+            continue
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            post = item.get("post")
+            if not isinstance(post, dict):
+                continue
+            if safe_str(post.get("code")) != needle:
+                continue
+            normalized = _normalize_relay_post(post)
+            if normalized:
+                return normalized
+    # Fallback: scan for post objects containing the code.
+    for m in re.finditer(r'"code"\s*:\s*"' + re.escape(needle) + r'"', html):
+        brace = html.rfind("{", max(0, m.start() - 4000), m.start())
+        if brace < 0:
+            continue
+        raw = _extract_json_object(html, brace)
+        if not raw:
+            continue
+        try:
+            obj = json.loads(raw)
+        except ValueError:
+            continue
+        if not isinstance(obj, dict) or safe_str(obj.get("code")) != needle:
+            continue
+        if obj.get("like_count") is None and obj.get("caption") is None and not obj.get("user"):
+            continue
+        normalized = _normalize_relay_post(obj)
+        if normalized:
+            return normalized
+    return None
+
+
+
+
 
 async def _fetch_profile_html(handle: str) -> str | None:
     url = f"https://www.threads.net/@{handle}"
@@ -583,4 +661,56 @@ async def search_users(query: str, limit: int = 20) -> list[dict[str, Any]] | No
         return None
     log.info("threads_search_users_native_ok", query=q[:80], returned=len(users))
     return users
+
+async def _fetch_post_html(author: str | None, code: str) -> str | None:
+    if author:
+        url = f"https://www.threads.net/@{author}/post/{code}"
+    else:
+        url = f"https://www.threads.net/t/{code}"
+    if decodo_fetch.enabled():
+        got = await decodo_fetch.fetch_url(url, timeout=120.0, headless="html")
+        if got:
+            status, body = got
+            if status == 200 and body and (
+                code in body
+                or "BarcelonaPostPageDirectQuery" in body
+                or "thread_items" in body
+            ):
+                return body
+    try:
+        async with httpx.AsyncClient(timeout=20, headers=_UA, follow_redirects=True) as client:
+            resp = await client.get(url)
+        if resp.status_code == 200 and len(resp.text) > 2000 and (
+            code in resp.text
+            or "BarcelonaPostPageDirectQuery" in resp.text
+            or "thread_items" in resp.text
+        ):
+            return resp.text
+    except httpx.HTTPError as exc:
+        log.info("threads_post_direct_fail", code=code, error=str(exc))
+    return None
+
+
+async def post_details(url_or_code: str) -> dict[str, Any] | None:
+    """Public post metadata via hydrated permalink HTML (Decodo -> direct)."""
+    author, code = parse_post_code(url_or_code)
+    if not code:
+        return None
+    html = await _fetch_post_html(author, code)
+    if not html and author:
+        # Retry short /t/CODE form when author URL failed.
+        html = await _fetch_post_html(None, code)
+    if not html:
+        return None
+    parsed = parse_post_html(html, code)
+    if not parsed:
+        log.warning("threads_post_native_parse_miss", code=code, length=len(html))
+        return None
+    log.info(
+        "threads_post_native_ok",
+        code=code,
+        likes=parsed.get("like_count"),
+        author=(parsed.get("user") or {}).get("username"),
+    )
+    return parsed
 
