@@ -32,10 +32,14 @@ from app.services.tiktok_native import (
     channel_posts_native,
     coerce_stats_v2,
     comment_replies_native,
+    hashtag_posts_native,
     music_posts_native,
     profile_region_native,
     search_suggestions_native,
+    search_users_native,
     song_details_native,
+    top_search_native,
+    user_connections_native,
     video_details_native,
 )
 from app.utils.countries import country_name
@@ -1783,6 +1787,11 @@ async def tiktok_user_followers(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await user_connections_native(handle, mode="followers", limit=limit)
+            if native is not None:
+                ctx["source"] = "direct"
+                return {"url": url, "totalReturned": len(native), "followers": native}
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK_FOLLOWERS,
@@ -1798,11 +1807,12 @@ async def tiktok_user_followers(
                 for i in items
                 if i.get("connectionType") == "follower"
             ][:limit]
+            ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(users), "followers": users}
 
         data = await cached_or_run(
             endpoint="tiktok.user-followers",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1829,6 +1839,11 @@ async def tiktok_user_followings(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await user_connections_native(handle, mode="followings", limit=limit)
+            if native is not None:
+                ctx["source"] = "direct"
+                return {"url": url, "totalReturned": len(native), "followings": native}
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK_FOLLOWINGS,
@@ -1844,11 +1859,12 @@ async def tiktok_user_followings(
                 for i in items
                 if i.get("connectionType") == "following"
             ][:limit]
+            ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(users), "followings": users}
 
         data = await cached_or_run(
             endpoint="tiktok.user-followings",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1938,6 +1954,12 @@ async def tiktok_top_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await top_search_native(q, limit=limit)
+            if native is not None:
+                results = [strip_empty(p) for p in native]
+                ctx["source"] = "direct"
+                return {"query": q, "totalReturned": len(results), "results": results}
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK,
@@ -1945,11 +1967,12 @@ async def tiktok_top_search(
                 max_items=limit,
             )
             results = [_normalize(i) for i in items[:limit]]
+            ctx["source"] = "apify"
             return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="tiktok.top-search",
-            params={"q": q, "limit": limit, "v": 2},
+            params={"q": q, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1987,6 +2010,23 @@ async def tiktok_search_by_hashtag(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # First page: Decodo captures TikTok's own signed
+            # /api/challenge/item_list/ XHR (~20-40s). Deeper offset pages and
+            # soft-blocked Decodo runs fall through to Apify.
+            if cursor == 0:
+                native = await hashtag_posts_native(q, limit=limit)
+                if native is not None:
+                    posts, has_more, _tt_cursor = native
+                    results = [strip_empty(p) for p in posts]
+                    ctx["source"] = "direct"
+                    return {
+                        "query": q,
+                        "totalReturned": len(results),
+                        "hasMore": has_more,
+                        "nextCursor": limit if has_more else None,
+                        "results": results,
+                    }
+
             apify = get_apify()
             # The actor always starts from the top of the hashtag feed, so we
             # fetch cursor+limit rows and slice the requested page. hasMore is
@@ -2005,6 +2045,7 @@ async def tiktok_search_by_hashtag(
             page = items[cursor : cursor + limit]
             results = [_normalize(i) for i in page]
             has_more = len(items) > cursor + limit
+            ctx["source"] = "apify"
             return {
                 "query": q,
                 "totalReturned": len(results),
@@ -2015,7 +2056,7 @@ async def tiktok_search_by_hashtag(
 
         data = await cached_or_run(
             endpoint="tiktok.search-hashtag",
-            params={"q": q, "limit": limit, "cursor": cursor, "region": region_code, "v": 1},
+            params={"q": q, "limit": limit, "cursor": cursor, "region": region_code, "v": 2},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2046,6 +2087,18 @@ async def tiktok_search_users(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await search_users_native(q, limit=limit, cursor=cursor)
+            if native is not None:
+                users, has_more, next_cursor = native
+                ctx["source"] = "direct"
+                return {
+                    "query": q,
+                    "totalReturned": len(users),
+                    "hasMore": has_more,
+                    "nextCursor": next_cursor if has_more else None,
+                    "users": users,
+                }
+
             apify = get_apify()
             want = cursor + limit
             items = await apify.run_actor_sync(
@@ -2061,6 +2114,7 @@ async def tiktok_search_users(
             page = items[cursor : cursor + limit]
             users = [_normalize_user(i) for i in page]
             has_more = len(items) > cursor + limit
+            ctx["source"] = "apify"
             return {
                 "query": q,
                 "totalReturned": len(users),
@@ -2071,7 +2125,7 @@ async def tiktok_search_users(
 
         data = await cached_or_run(
             endpoint="tiktok.search-users",
-            params={"q": q, "limit": limit, "cursor": cursor, "v": 1},
+            params={"q": q, "limit": limit, "cursor": cursor, "v": 2},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

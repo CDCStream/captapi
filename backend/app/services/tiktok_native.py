@@ -19,6 +19,7 @@ import asyncio
 import json
 import random
 import re
+import urllib.parse
 from collections import Counter
 from datetime import datetime, timezone
 from typing import Any
@@ -1305,6 +1306,278 @@ async def music_posts_native(music_id_or_url: str, limit: int) -> list[dict[str,
         if page_i == 0 and not collected:
             return None
     return collected[:limit] if collected else None
+
+
+async def _sec_uid_for_handle(handle: str) -> str | None:
+    """Resolve ``secUid`` from the public profile rehydration blob."""
+    scope = await _fetch_scope(f"https://www.tiktok.com/@{handle.lstrip('@')}")
+    user = (((scope or {}).get("webapp.user-detail") or {}).get("userInfo") or {}).get(
+        "user"
+    ) or {}
+    return safe_str(user.get("secUid") or user.get("sec_uid"))
+
+
+def _map_connection_user(row: dict[str, Any]) -> dict[str, Any] | None:
+    """Map ``/api/user/list/`` userList row → followers/followings shape."""
+    user = row.get("user") if isinstance(row.get("user"), dict) else row
+    if not isinstance(user, dict):
+        return None
+    stats = row.get("stats") if isinstance(row.get("stats"), dict) else {}
+    username = safe_str(user.get("uniqueId") or user.get("unique_id"))
+    if not username:
+        return None
+    avatar = (
+        _url_list_first(user.get("avatarLarger") or user.get("avatar_larger"))
+        or _url_list_first(user.get("avatarMedium") or user.get("avatar_medium"))
+        or _url_list_first(user.get("avatarThumb") or user.get("avatar_thumb"))
+        or safe_str(user.get("avatarLarger") or user.get("avatarMedium"))
+    )
+    return {
+        "username": username,
+        "displayName": safe_str(user.get("nickname") or user.get("nickName")),
+        "bio": safe_str(user.get("signature")),
+        "url": f"https://www.tiktok.com/@{username}",
+        "followers": safe_int(
+            stats.get("followerCount")
+            or stats.get("follower_count")
+            or user.get("followerCount")
+        ),
+        "following": safe_int(
+            stats.get("followingCount")
+            or stats.get("following_count")
+            or user.get("followingCount")
+        ),
+        "verified": bool(user.get("verified")) if user.get("verified") is not None else None,
+        "profileImage": avatar,
+    }
+
+
+async def user_connections_native(
+    handle: str, *, mode: str, limit: int
+) -> list[dict[str, Any]] | None:
+    """Followers (scene=67) or followings (scene=21) via the signer sidecar.
+
+    Returns mapped user rows, or ``None`` when the signer is unset / blocked.
+    """
+    from app.services import tiktok_signer
+
+    if limit <= 0 or not tiktok_signer.enabled():
+        return None
+    scene = "67" if mode == "followers" else "21"
+    sec = await _sec_uid_for_handle(handle)
+    if not sec:
+        return None
+
+    collected: list[dict[str, Any]] = []
+    min_cursor = "0"
+    for _ in range(max(3, limit // 15 + 2)):
+        if len(collected) >= limit:
+            break
+        count = min(30, limit - len(collected))
+        api = (
+            "https://www.tiktok.com/api/user/list/"
+            f"?aid=1988&app_name=tiktok_web&device_platform=web_pc"
+            f"&secUid={sec}&count={count}&minCursor={min_cursor}&maxCursor=0"
+            f"&scene={scene}&user_is_login=false"
+        )
+        page = await tiktok_signer.fetch_api(api)
+        if page is None:
+            return None if not collected else collected[:limit]
+        rows = page.get("userList") or []
+        if not isinstance(rows, list) or not rows:
+            break
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            mapped = _map_connection_user(row)
+            if mapped:
+                collected.append(mapped)
+            if len(collected) >= limit:
+                break
+        if not bool(page.get("hasMore")):
+            break
+        nxt = page.get("minCursor")
+        if nxt is None:
+            break
+        min_cursor = str(nxt)
+    return collected[:limit] if collected else None
+
+
+def _map_search_user(row: dict[str, Any]) -> dict[str, Any] | None:
+    """Map ``/api/search/user/full/`` user_list row → search-users shape."""
+    info = row.get("user_info") or row.get("user") or row
+    if not isinstance(info, dict):
+        return None
+    username = safe_str(info.get("unique_id") or info.get("uniqueId"))
+    if not username:
+        return None
+    avatar = (
+        _url_list_first(info.get("avatar_thumb") or info.get("avatarThumb"))
+        or _url_list_first(info.get("avatar_medium") or info.get("avatarMedium"))
+        or safe_str(info.get("avatar_thumb") or info.get("avatarThumb"))
+    )
+    verified = info.get("custom_verify") or info.get("verification_type") or info.get("verified")
+    return {
+        "username": username,
+        "displayName": safe_str(info.get("nickname") or info.get("nickName")),
+        "bio": safe_str(info.get("signature")),
+        "url": f"https://www.tiktok.com/@{username}",
+        "followers": safe_int(
+            info.get("follower_count") or info.get("followerCount")
+        ),
+        "verified": bool(verified) if verified not in (None, "", 0, "0") else False,
+        "profileImage": avatar,
+    }
+
+
+async def search_users_native(
+    q: str, *, limit: int = 20, cursor: int = 0
+) -> tuple[list[dict[str, Any]], bool, int | None] | None:
+    """User search via signer ``/api/search/user/full/``."""
+    from app.services import tiktok_signer
+
+    seed = (q or "").strip()
+    if not seed or limit <= 0 or not tiktok_signer.enabled():
+        return None
+    api = (
+        "https://www.tiktok.com/api/search/user/full/"
+        f"?aid=1988&app_name=tiktok_web&device_platform=web_pc"
+        f"&keyword={urllib.parse.quote(seed)}&cursor={max(0, cursor)}"
+        f"&count={max(1, min(limit, 30))}&user_is_login=false"
+    )
+    page = await tiktok_signer.fetch_api(api)
+    if page is None:
+        return None
+    rows = page.get("user_list") or page.get("userList") or []
+    if not isinstance(rows, list) or not rows:
+        return None
+    users: list[dict[str, Any]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        mapped = _map_search_user(row)
+        if mapped:
+            users.append(mapped)
+        if len(users) >= limit:
+            break
+    if not users:
+        return None
+    has_more = bool(page.get("has_more") or page.get("hasMore"))
+    next_cursor = safe_int(page.get("cursor"))
+    return users, has_more, next_cursor
+
+
+async def top_search_native(q: str, *, limit: int = 20) -> list[dict[str, Any]] | None:
+    """Mixed top search via signer ``/api/search/general/full/`` (video rows)."""
+    from app.services import tiktok_signer
+
+    seed = (q or "").strip()
+    if not seed or limit <= 0 or not tiktok_signer.enabled():
+        return None
+    collected: list[dict[str, Any]] = []
+    offset = 0
+    for _ in range(max(2, limit // 10 + 1)):
+        if len(collected) >= limit:
+            break
+        count = min(20, limit - len(collected))
+        api = (
+            "https://www.tiktok.com/api/search/general/full/"
+            f"?aid=1988&app_name=tiktok_web&device_platform=web_pc"
+            f"&keyword={urllib.parse.quote(seed)}&offset={offset}"
+            f"&count={count}&user_is_login=false"
+        )
+        page = await tiktok_signer.fetch_api(api)
+        if page is None:
+            return None if not collected else collected[:limit]
+        rows = page.get("data") or []
+        if not isinstance(rows, list) or not rows:
+            break
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            item = row.get("item") if isinstance(row.get("item"), dict) else None
+            if not item:
+                continue
+            mapped = _map_aweme_post(item)
+            if mapped:
+                collected.append(mapped)
+            if len(collected) >= limit:
+                break
+        if not bool(page.get("has_more") or page.get("hasMore")):
+            break
+        nxt = safe_int(page.get("cursor"))
+        if nxt is None:
+            break
+        offset = nxt
+    return collected[:limit] if collected else None
+
+
+async def hashtag_posts_native(
+    hashtag: str, *, limit: int = 20
+) -> tuple[list[dict[str, Any]], bool, int | None] | None:
+    """First page of a TikTok hashtag feed via Decodo ``fetch_resource``.
+
+    Opens ``/tag/{hashtag}`` in a headless browser and captures the signed
+    ``/api/challenge/item_list/`` XHR TikTok itself fires. Returns
+    ``(mapped_posts, has_more, next_cursor)`` or ``None`` so the caller can
+    fall back to Apify. Deeper pages need a fresh signed request (Apify).
+    """
+    from app.services import decodo_fetch
+
+    tag = (hashtag or "").lstrip("#").strip()
+    if not tag or not decodo_fetch.enabled():
+        return None
+    url = f"https://www.tiktok.com/tag/{tag}"
+    fetched = None
+    for attempt in range(2):
+        fetched = await decodo_fetch.fetch_url(
+            url,
+            timeout=150.0,
+            target="universal",
+            headless="html",
+            browser_actions=[
+                {
+                    "type": "fetch_resource",
+                    "filter": "api/challenge/item_list",
+                    "on_error": "error",
+                }
+            ],
+        )
+        if fetched is not None:
+            break
+    if fetched is None:
+        return None
+    _status, content = fetched
+    try:
+        payload = json.loads(content)
+    except ValueError:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    raw_items = payload.get("itemList")
+    if not isinstance(raw_items, list) or not raw_items:
+        return None
+
+    posts: list[dict[str, Any]] = []
+    for raw in raw_items:
+        if not isinstance(raw, dict):
+            continue
+        mapped = _map_aweme_post(raw)
+        if mapped:
+            posts.append(mapped)
+        if len(posts) >= limit:
+            break
+    if not posts:
+        return None
+
+    has_more = bool(payload.get("hasMore"))
+    next_cursor = safe_int(payload.get("cursor"))
+    # Soft-cap: if we truncated to ``limit`` but TikTok still has more on this
+    # page, surface hasMore so clients can page (via Apify for cursor > 0).
+    if len(raw_items) > limit:
+        has_more = True
+        next_cursor = limit if next_cursor is None else next_cursor
+    return posts, has_more, next_cursor
 
 
 async def song_details_native(music_id_or_url: str) -> dict[str, Any] | None:

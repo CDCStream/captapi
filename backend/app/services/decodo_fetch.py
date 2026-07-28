@@ -46,6 +46,8 @@ async def fetch_url(
     *,
     headless: str | None = None,
     browser_actions: list[dict[str, Any]] | None = None,
+    target: str | None = None,
+    xhr: bool = False,
 ) -> tuple[int, str] | None:
     """Fetch ``url`` via Decodo. Returns ``(upstream_status, body_text)`` or
     ``None`` when Decodo is unconfigured / errored, so callers can fall back.
@@ -53,14 +55,20 @@ async def fetch_url(
     Pass ``headless="html"`` to enable JavaScript rendering (needed for Meta /
     LinkedIn Ad Library pages that hydrate search results client-side).
     Optional ``browser_actions`` runs Decodo interactions (scroll/wait) first.
+    ``target="universal"`` is required for most ``browser_actions`` payloads.
+    ``xhr=True`` returns captured XHR JSON (as a string) instead of HTML.
     """
     auth_header = _auth_header()
     if not auth_header:
         return None
     settings = get_settings()
     body: dict[str, Any] = {"url": url}
+    if target:
+        body["target"] = target
     if headless:
         body["headless"] = headless
+    if xhr:
+        body["xhr"] = True
     if browser_actions:
         body["browser_actions"] = browser_actions
     try:

@@ -131,6 +131,10 @@ class Settings(BaseSettings):
     DECODO_BASE: str = "https://scraper-api.decodo.com/v2"
     DECODO_LOCALE: str = "en-us"
     DECODO_GEO: str = ""
+    # Optional tiktok-signature sidecar (POST /fetch). When set, TikTok search /
+    # followers / followings use browser-signed web APIs instead of Apify.
+    # Example: http://127.0.0.1:8080
+    TIKTOK_SIGNER_URL: str = ""
 
     APIFY_ACTOR_FACEBOOK_POSTS: str = "apify/facebook-posts-scraper"
     APIFY_ACTOR_FACEBOOK_PAGES: str = "apify/facebook-pages-scraper"
