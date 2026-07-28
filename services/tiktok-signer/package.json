@@ -1,0 +1,12 @@
+{
+  "name": "captapi-tiktok-signer",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Railway sidecar wrapping tiktok-signature for CaptAPI",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "tiktok-signature": "4.3.6"
+  }
+}
