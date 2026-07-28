@@ -4,11 +4,13 @@
 likes, replies, media). Public profile pages embed schema.org microdata
 (``ProfilePage`` / ``Person`` + interaction counters) that a plain GET — or
 Decodo when datacenter IPs are login-walled — can parse for follower / tweet
-stats.
+stats. Profile timelines come from the public syndication embed
+(``syndication.twitter.com/srv/timeline-profile``) — typically ~20 recent posts.
 """
 
 from __future__ import annotations
 
+import json
 import math
 import re
 from html import unescape
@@ -31,6 +33,9 @@ _UA = {
     "Accept-Language": "en-US,en;q=0.9",
 }
 _BASE = "https://cdn.syndication.twimg.com/tweet-result"
+_TIMELINE_BASE = "https://syndication.twitter.com/srv/timeline-profile/screen-name"
+_SCRIPT_RE = re.compile(r"<script[^>]*>([\s\S]*?)</script>", re.I)
+_HANDLE_RE = re.compile(r"^[A-Za-z0-9_]{1,15}$")
 _DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz"
 _META_RE = re.compile(
     r"<meta[^>]+>",
@@ -217,15 +222,22 @@ async def _fetch_profile_html(handle: str) -> str | None:
     return None
 
 
-async def profile_by_handle(handle: str) -> dict[str, Any] | None:
-    """Fetch a public X profile via HTML microdata (direct, then Decodo)."""
+def _normalize_handle(handle: str) -> str | None:
     raw = (handle or "").strip().lstrip("@")
     if "://" in raw or "/" in raw:
         path = urlparse(raw if "://" in raw else f"https://x.com/{raw}").path
         parts = [p for p in path.split("/") if p]
         raw = parts[0] if parts else ""
     raw = raw.lstrip("@")
-    if not raw or not re.fullmatch(r"[A-Za-z0-9_]{1,15}", raw):
+    if not raw or not _HANDLE_RE.fullmatch(raw):
+        return None
+    return raw
+
+
+async def profile_by_handle(handle: str) -> dict[str, Any] | None:
+    """Fetch a public X profile via HTML microdata (direct, then Decodo)."""
+    raw = _normalize_handle(handle)
+    if not raw:
         return None
     html = await _fetch_profile_html(raw)
     if not html:
@@ -236,3 +248,93 @@ async def profile_by_handle(handle: str) -> dict[str, Any] | None:
     else:
         log.warning("twitter_profile_native_parse_miss", handle=raw, length=len(html))
     return parsed
+
+
+async def _fetch_timeline_html(handle: str) -> str | None:
+    url = f"{_TIMELINE_BASE}/{handle}"
+    try:
+        async with httpx.AsyncClient(timeout=20, headers=_UA, follow_redirects=True) as client:
+            resp = await client.get(url)
+        if resp.status_code == 200 and len(resp.text) > 2000:
+            return resp.text
+        log.info(
+            "twitter_timeline_direct_miss",
+            handle=handle,
+            status=resp.status_code,
+            length=len(resp.text),
+        )
+    except httpx.HTTPError as exc:
+        log.info("twitter_timeline_direct_fail", handle=handle, error=str(exc))
+
+    # Static Next.js HTML with JSON in <script> — no JS render needed.
+    # headless="html" often 613s on syndication; plain Decodo fetch works.
+    if decodo_fetch.enabled():
+        got = await decodo_fetch.fetch_url(url, timeout=120.0)
+        if got:
+            status, body = got
+            if status == 200 and body and len(body) > 2000:
+                return body
+    return None
+
+
+def parse_timeline_html(html: str) -> list[dict[str, Any]]:
+    """Extract unique tweet objects from a syndication timeline-profile page."""
+    best_entries: list[Any] | None = None
+    best_len = 0
+    for match in _SCRIPT_RE.finditer(html or ""):
+        raw = (match.group(1) or "").strip()
+        if not raw.startswith("{") or "timeline" not in raw:
+            continue
+        try:
+            data = json.loads(raw)
+        except ValueError:
+            continue
+        entries = (
+            ((data.get("props") or {}).get("pageProps") or {}).get("timeline") or {}
+        ).get("entries")
+        if isinstance(entries, list) and len(entries) > best_len:
+            best_entries = entries
+            best_len = len(entries)
+    if not best_entries:
+        return []
+
+    tweets: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for entry in best_entries:
+        if not isinstance(entry, dict):
+            continue
+        content = entry.get("content")
+        if not isinstance(content, dict):
+            continue
+        tweet = content.get("tweet")
+        if not isinstance(tweet, dict):
+            continue
+        tid = safe_str(tweet.get("id_str")) or safe_str(tweet.get("id"))
+        if not tid or tid == "0" or tid in seen:
+            continue
+        seen.add(tid)
+        # Syndication sometimes ships numeric id=0; keep id_str authoritative.
+        out = dict(tweet)
+        out["id_str"] = tid
+        if out.get("retweeted_status") is not None:
+            out["is_retweet"] = True
+        tweets.append(out)
+    return tweets
+
+
+async def user_tweets(handle: str, limit: int = 20) -> list[dict[str, Any]] | None:
+    """Recent public tweets via syndication timeline embed (direct → Decodo)."""
+    raw = _normalize_handle(handle)
+    if not raw:
+        return None
+    html = await _fetch_timeline_html(raw)
+    if not html:
+        return None
+    tweets = parse_timeline_html(html)
+    if not tweets:
+        log.warning("twitter_timeline_native_parse_miss", handle=raw, length=len(html))
+        return None
+    capped = max(1, min(int(limit or 20), 200))
+    out = tweets[:capped]
+    log.info("twitter_timeline_native_ok", handle=raw, returned=len(out), available=len(tweets))
+    return out

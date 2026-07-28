@@ -2143,7 +2143,7 @@
     "name": "Twitter/X User Tweets",
     "path": "/v1/twitter/user-tweets",
     "credits": 14,
-    "summary": "Recent tweets from a Twitter/X profile.",
+    "summary": "Recent public tweets from a Twitter/X profile — text, author, engagement, hashtags, and media.",
     "params": [
       {
         "name": "url",

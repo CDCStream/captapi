@@ -12539,146 +12539,137 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "tweets": [
       {
         "platform": "twitter",
-        "url": "https://x.com/NASA/status/2078226501024227542",
-        "id": "2078226501024227542",
-        "text": "RT @NASASpox: Full steam ahead this week at @NASA 🚀\n\n🧑‍🚀 @Astro_Anil arrives at the ISS\n🪐 Dragonfly progress\n✈️ Future of autonomous flight…",
+        "url": "https://x.com/NASA/status/2081860978694594863",
+        "id": "2081860978694594863",
+        "text": "The Andromeda galaxy isn't making stars like it used to. A new study using @NASAHubble data shows that star formation in Andromeda has been slowing down over the last 40 million years: https://t.co/nK1ndoydi7 https://t.co/1fmYXooDq2",
         "lang": "en",
-        "publishedAt": "Fri Jul 17 21:13:04 +0000 2026",
+        "publishedAt": "Mon Jul 27 21:55:11 +0000 2026",
         "author": {
           "username": "NASA",
           "displayName": "NASA",
-          "url": "https://x.com/NASA",
-          "followers": 92198300,
+          "url": "https://t.co/9NkQJKAVks",
+          "followers": 92218731,
           "verified": true,
           "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
         },
         "engagement": {
-          "views": 190126,
-          "likes": 354,
-          "replies": 23,
-          "retweets": 59,
-          "quotes": 5,
-          "bookmarks": 24
-        },
-        "isReply": false,
-        "isRetweet": true,
-        "hashtags": [],
-        "media": []
-      },
-      {
-        "platform": "twitter",
-        "url": "https://x.com/NASA/status/2078214686453985351",
-        "id": "2078214686453985351",
-        "text": "RT @NASADepAdmin: The Artemis Accords continue to bring the world together around a shared vision for the peaceful future of exploration.…",
-        "lang": "en",
-        "publishedAt": "Fri Jul 17 20:26:07 +0000 2026",
-        "author": {
-          "username": "NASA",
-          "displayName": "NASA",
-          "url": "https://x.com/NASA",
-          "followers": 92198300,
-          "verified": true,
-          "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
-        },
-        "engagement": {
-          "views": 189091,
-          "likes": 444,
-          "replies": 30,
-          "retweets": 48,
-          "quotes": 4,
-          "bookmarks": 30
-        },
-        "isReply": false,
-        "isRetweet": true,
-        "hashtags": [],
-        "media": []
-      },
-      {
-        "platform": "twitter",
-        "url": "https://x.com/NASA/status/2078130627925180568",
-        "id": "2078130627925180568",
-        "text": "Welcome to the Artemis Accords, Serbia! 🇷🇸\n\nSerbia has joined 68 other nations by signing the Artemis Accords, and in doing so, has committed to the safe and peaceful exploration of space. https://t.co/2saHrV7FYq https://t.co/17rUVniSLr",
-        "lang": "en",
-        "publishedAt": "Fri Jul 17 14:52:06 +0000 2026",
-        "author": {
-          "username": "NASA",
-          "displayName": "NASA",
-          "url": "https://x.com/NASA",
-          "followers": 92198300,
-          "verified": true,
-          "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
-        },
-        "engagement": {
-          "views": 613972,
-          "likes": 4325,
-          "replies": 234,
-          "retweets": 499,
-          "quotes": 102,
-          "bookmarks": 381
+          "likes": 2469,
+          "replies": 146,
+          "retweets": 388,
+          "quotes": 36
         },
         "isReply": false,
         "isRetweet": false,
-        "hashtags": [],
         "media": [
-          "https://pbs.twimg.com/media/HNcAyhEWkAA8I5p.jpg"
+          "https://pbs.twimg.com/media/HORBhKkWIAAFjOh.jpg"
         ]
       },
       {
         "platform": "twitter",
-        "url": "https://x.com/NASA/status/2077484000336118162",
-        "id": "2077484000336118162",
-        "text": "RT @NASASolarSystem: Join us live on July 16 at 2 p.m. ET to meet the team building NASA’s Dragonfly, learn how it will explore Titan’s ric…",
+        "url": "https://x.com/NASA/status/2081856004237545809",
+        "id": "2081856004237545809",
+        "text": "We've finished fueling up our @NASARoman telescope, bringing it one step closer to its targeted liftoff on Aug. 30.\n\nLearn more about the process and find out what's next for our mystery-solving mission: https://t.co/sd1VuCK9Yk https://t.co/Ytp0Yn8J1T",
         "lang": "en",
-        "publishedAt": "Wed Jul 15 20:02:38 +0000 2026",
+        "publishedAt": "Mon Jul 27 21:35:25 +0000 2026",
         "author": {
           "username": "NASA",
           "displayName": "NASA",
-          "url": "https://x.com/NASA",
-          "followers": 92198300,
+          "url": "https://t.co/9NkQJKAVks",
+          "followers": 92218731,
           "verified": true,
           "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
         },
         "engagement": {
-          "views": 311541,
-          "likes": 849,
-          "replies": 68,
-          "retweets": 187,
-          "quotes": 9,
-          "bookmarks": 61
-        },
-        "isReply": false,
-        "isRetweet": true,
-        "hashtags": [],
-        "media": []
-      },
-      {
-        "platform": "twitter",
-        "url": "https://x.com/NASA/status/2077465836214714677",
-        "id": "2077465836214714677",
-        "text": "Keep your eye on Dragonfly 👀\n\nWe’re going live from the clean room where we’re building Dragonfly, the rotorcraft that will fly on Saturn’s moon, Titan. Join us on Twitch to learn more about the mission on July 16 at 2pm ET (1800 UTC): https://t.co/ytO98jAIOf https://t.co/0Kx7c32ycw",
-        "lang": "en",
-        "publishedAt": "Wed Jul 15 18:50:27 +0000 2026",
-        "author": {
-          "username": "NASA",
-          "displayName": "NASA",
-          "url": "https://x.com/NASA",
-          "followers": 92198300,
-          "verified": true,
-          "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
-        },
-        "engagement": {
-          "views": 447253,
-          "likes": 1444,
-          "replies": 108,
-          "retweets": 279,
-          "quotes": 10,
-          "bookmarks": 74
+          "likes": 1873,
+          "replies": 114,
+          "retweets": 272,
+          "quotes": 19
         },
         "isReply": false,
         "isRetweet": false,
-        "hashtags": [],
         "media": [
-          "https://pbs.twimg.com/media/HNSkKwaWcAIRa8h.jpg"
+          "https://pbs.twimg.com/media/HOQ8_4KWYAA4fI4.jpg"
+        ]
+      },
+      {
+        "platform": "twitter",
+        "url": "https://x.com/NASA/status/2081832975524634937",
+        "id": "2081832975524634937",
+        "text": "RT @NASASolarSystem: On Aug. 12, a total solar eclipse will cross Greenland, Iceland, and Spain — and NASA science will be there! ☀️🌑🔭\n\nWe'…",
+        "lang": "en",
+        "publishedAt": "Mon Jul 27 20:03:54 +0000 2026",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA",
+          "url": "https://t.co/9NkQJKAVks",
+          "followers": 92218731,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
+        },
+        "engagement": {
+          "likes": 0,
+          "replies": 0,
+          "retweets": 225,
+          "quotes": 0
+        },
+        "isReply": false,
+        "isRetweet": true,
+        "media": [
+          "https://pbs.twimg.com/amplify_video_thumb/2081803656530190336/img/zUx_qij2E2oP-MsL.jpg"
+        ]
+      },
+      {
+        "platform": "twitter",
+        "url": "https://x.com/NASA/status/2081822391315935604",
+        "id": "2081822391315935604",
+        "text": "Watch with us on Aug. 4 as @Astro_ChrisW recaps his eight-month mission aboard the @Space_Station. His first spaceflight included research, tech demos, and two spacewalks. More detail: https://t.co/BddnMLUpD1 https://t.co/ONXdpTz2vu",
+        "lang": "en",
+        "publishedAt": "Mon Jul 27 19:21:51 +0000 2026",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA",
+          "url": "https://t.co/9NkQJKAVks",
+          "followers": 92218731,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
+        },
+        "engagement": {
+          "likes": 907,
+          "replies": 79,
+          "retweets": 106,
+          "quotes": 4
+        },
+        "isReply": false,
+        "isRetweet": false,
+        "media": [
+          "https://pbs.twimg.com/media/HOQebq0W0AAJ07G.jpg"
+        ]
+      },
+      {
+        "platform": "twitter",
+        "url": "https://x.com/NASA/status/2081772453093593253",
+        "id": "2081772453093593253",
+        "text": "This August, our astronauts will be stepping outside the @Space_Station three times! NASA experts will discuss our upcoming spacewalks at 2pm ET (1800 UTC) on July 30. Learn how to tune in: https://t.co/7CyQqEN9bF https://t.co/Dxa5zMAxzh",
+        "lang": "en",
+        "publishedAt": "Mon Jul 27 16:03:24 +0000 2026",
+        "author": {
+          "username": "NASA",
+          "displayName": "NASA",
+          "url": "https://t.co/9NkQJKAVks",
+          "followers": 92218731,
+          "verified": true,
+          "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_normal.jpg"
+        },
+        "engagement": {
+          "likes": 1973,
+          "replies": 119,
+          "retweets": 260,
+          "quotes": 10
+        },
+        "isReply": false,
+        "isRetweet": false,
+        "media": [
+          "https://pbs.twimg.com/media/HOPxABqXMAAvEjg.jpg"
         ]
       }
     ]

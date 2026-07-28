@@ -142,6 +142,18 @@ def _tweet_is_reply(item: dict[str, Any]) -> bool | None:
     return None
 
 
+def _tweet_is_retweet(item: dict[str, Any]) -> bool | None:
+    explicit = first_present(item.get("isRetweet"), _as_bool(item.get("is_retweet")))
+    if explicit is not None:
+        return bool(explicit)
+    if isinstance(item.get("retweeted_status"), dict):
+        return True
+    # Syndication timeline rows omit the flag on originals.
+    if "favorite_count" in item or "retweet_count" in item:
+        return False
+    return None
+
+
 def _nested_tweet(item: dict[str, Any]) -> dict[str, Any] | None:
     """Original tweet payload nested under a retweet/quote shell."""
     for key in ("retweet", "quote", "retweeted_status", "quoted_status", "quotedStatus"):
@@ -235,15 +247,16 @@ def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
         username = None
         if isinstance(author, dict):
             username = author.get("userName") or author.get("screen_name") or author.get("username")
-        tweet_id = item.get("id") or item.get("id_str")
+        tweet_id = item.get("id_str") or item.get("id")
         if username and tweet_id:
             url = f"https://x.com/{username}/status/{tweet_id}"
-    # Omit null engagement / author fields (syndication never has views,
-    # retweets, quotes, bookmarks, or followers — keep 0 when Apify provides it).
+    # Omit null engagement / author fields. Tweet-result syndication often lacks
+    # views/retweets/quotes/bookmarks; timeline-profile usually has likes/replies/
+    # retweets/quotes + author followers. Keep 0 when Apify provides it.
     return strip_empty({
         "platform": "twitter",
         "url": url,
-        "id": safe_str(item.get("id") or item.get("id_str") or item.get("tweetId")),
+        "id": safe_str(item.get("id_str") or item.get("id") or item.get("tweetId")),
         "text": safe_str(item.get("fullText") or item.get("text") or item.get("full_text")),
         "lang": safe_str(item.get("lang")),
         "publishedAt": safe_str(item.get("createdAt") or item.get("created_at")),
@@ -269,7 +282,7 @@ def _normalize_tweet(item: dict[str, Any]) -> dict[str, Any]:
             "bookmarks": safe_int(first_present(item.get("bookmarkCount"), item.get("bookmark_count"))),
         },
         "isReply": _tweet_is_reply(item),
-        "isRetweet": first_present(item.get("isRetweet"), _as_bool(item.get("is_retweet"))),
+        "isRetweet": _tweet_is_retweet(item),
         "hashtags": _tweet_hashtags(item),
         "media": _tweet_media(item),
     })
@@ -509,18 +522,28 @@ async def twitter_user_tweets(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Public syndication timeline embed first (~20 recent posts).
+            native_items = await native.user_tweets(handle, limit=limit)
+            if native_items:
+                ctx["source"] = "direct"
+                tweets = [_normalize_tweet(t) for t in native_items[:limit]]
+                return {"handle": handle, "totalReturned": len(tweets), "tweets": tweets}
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TWITTER_TWEET,
                 {"twitterHandles": [handle], "maxItems": limit, "sort": "Latest"},
                 max_items=limit,
             )
+            if not items:
+                raise HTTPException(status_code=404, detail="No tweets found")
+            ctx["source"] = "apify"
             tweets = [_normalize_tweet(t) for t in items[:limit]]
             return {"handle": handle, "totalReturned": len(tweets), "tweets": tweets}
 
         data = await cached_or_run(
             endpoint="twitter.user-tweets",
-            params={"handle": handle, "limit": limit, "v": 2},
+            params={"handle": handle, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
