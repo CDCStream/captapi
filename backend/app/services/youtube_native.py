@@ -9,8 +9,8 @@ Approach:
   one continuation via InnerTube when the caller wants more than one page.
 - Channel metadata comes from the channel page (``channelMetadataRenderer``)
   plus the About popup fetched through InnerTube ``browse``.
-- Transcripts come from InnerTube ANDROID player caption tracks (the web watch
-  page's timedtext URLs need a proof-of-origin token and return empty bodies).
+- Transcripts come from InnerTube ANDROID player caption tracks (direct egress
+  first — proxy IPs often get LOGIN_REQUIRED; web watch timedtext needs a PoT).
 - Community posts come from the channel ``/posts`` tab ``ytInitialData`` plus
   InnerTube browse continuations.
 """
@@ -367,6 +367,20 @@ def _proxy_tiers() -> list[str]:
     tiers: list[str] = ["datacenter"]
     if proxy_for("residential"):
         tiers.append("residential")
+    return tiers
+
+
+def _player_tiers() -> list[str]:
+    """Egress order for InnerTube ``player`` / timedtext.
+
+    Proxy IPs often get ``LOGIN_REQUIRED`` ("confirm you're not a bot") while
+    the host's own IP still returns ``OK`` + caption tracks. Try direct first,
+    then the configured proxy pools.
+    """
+    tiers: list[str] = ["none"]
+    for t in _proxy_tiers():
+        if t not in tiers:
+            tiers.append(t)
     return tiers
 
 
@@ -866,9 +880,14 @@ async def _player_innertube(
     *,
     context: dict[str, Any],
     headers: dict[str, str],
-) -> dict[str, Any] | None:
-    """InnerTube ``player`` across proxy tiers (DC → residential)."""
-    for tier in _proxy_tiers():
+) -> tuple[dict[str, Any] | None, str | None]:
+    """InnerTube ``player`` across tiers (direct → DC → residential).
+
+    Returns ``(player, tier)``. Skips ``LOGIN_REQUIRED`` / empty-caption bot
+    walls so a later tier can still succeed.
+    """
+    fallback: tuple[dict[str, Any], str] | None = None
+    for tier in _player_tiers():
         try:
             resp = await post_json(
                 "https://www.youtube.com/youtubei/v1/player",
@@ -891,12 +910,30 @@ async def _player_innertube(
             data = resp.json()
         except ValueError:
             continue
-        if isinstance(data, dict) and data:
-            return data
-    return None
+        if not isinstance(data, dict) or not data:
+            continue
+        status = ((data.get("playabilityStatus") or {}).get("status") or "").upper()
+        tracks = _caption_tracks(data) if status == "OK" else []
+        if status == "OK" and tracks:
+            return data, tier
+        if status == "OK" and fallback is None:
+            fallback = (data, tier)
+        # LOGIN_REQUIRED / ERROR: keep trying other egress IPs.
+    if fallback:
+        return fallback
+    return None, None
 
 
 async def _player_android(video_id: str) -> dict[str, Any] | None:
+    player, _tier = await _player_innertube(
+        video_id, context=_ANDROID_CONTEXT, headers=_ANDROID_HEADERS
+    )
+    return player
+
+
+async def _player_android_with_tier(
+    video_id: str,
+) -> tuple[dict[str, Any] | None, str | None]:
     return await _player_innertube(
         video_id, context=_ANDROID_CONTEXT, headers=_ANDROID_HEADERS
     )
@@ -954,12 +991,22 @@ def _with_timedtext_fmt(url: str, fmt: str) -> str:
 
 
 async def _fetch_timedtext(
-    base_url: str, *, headers: dict[str, str]
+    base_url: str,
+    *,
+    headers: dict[str, str],
+    prefer_tier: str | None = None,
 ) -> list[dict[str, Any]]:
-    """GET a caption URL across proxy tiers and fmt variants."""
+    """GET a caption URL across proxy tiers and fmt variants.
+
+    Prefer the same egress that produced the player response — caption
+    ``baseUrl`` tokens can be sensitive to IP changes.
+    """
+    tiers = list(_player_tiers())
+    if prefer_tier:
+        tiers = [prefer_tier] + [t for t in tiers if t != prefer_tier]
     for fmt in ("json3", "srv3"):
         url = _with_timedtext_fmt(base_url, fmt)
-        for tier in _proxy_tiers():
+        for tier in tiers:
             try:
                 cap = await proxy_fetch(url, tier=tier, headers=headers, timeout=15)  # type: ignore[arg-type]
             except httpx.HTTPError:
@@ -1000,15 +1047,16 @@ def _rank_caption_tracks(
 async def transcript_native(norm_url: str, language: str | None) -> dict[str, Any] | None:
     """Transcript via InnerTube ANDROID caption tracks (timedtext).
 
-    Tries every caption track (lang-ranked) and fmt=json3/srv3 across proxy
-    tiers before giving up so callers hit Apify less often.
+    Tries every caption track (lang-ranked) and fmt=json3/srv3 across egress
+    tiers (direct first — proxy IPs often trip YouTube bot-check) before
+    giving up so callers hit Apify less often.
     """
     m = re.search(r"(?:v=|shorts/|youtu\.be/)([\w-]{11})", norm_url)
     if not m:
         return None
     video_id = m.group(1)
 
-    player = await _player_android(video_id)
+    player, player_tier = await _player_android_with_tier(video_id)
     if not player:
         return None
     if ((player.get("playabilityStatus") or {}).get("status")) != "OK":
@@ -1029,7 +1077,9 @@ async def transcript_native(norm_url: str, language: str | None) -> dict[str, An
         if not base_url:
             continue
         url = f"{base_url}&tlang={language}" if use_tlang and language else base_url
-        segments = await _fetch_timedtext(url, headers=_ANDROID_HEADERS)
+        segments = await _fetch_timedtext(
+            url, headers=_ANDROID_HEADERS, prefer_tier=player_tier
+        )
         if not segments:
             continue
         title = safe_str((player.get("videoDetails") or {}).get("title"))
