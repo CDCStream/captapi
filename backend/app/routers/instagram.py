@@ -1363,7 +1363,11 @@ async def instagram_tagged_posts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Resolve user id: native web_profile_info first, Decodo GraphQL profile
+            # as fallthrough (same pattern as channel-posts when IG rate-limits).
             user = await instagram_native.fetch_web_profile_info(handle)
+            if user is None:
+                user = await decodo._profile(handle)
             user_id = safe_str((user or {}).get("id") or (user or {}).get("pk"))
             if user_id:
                 collected: list[dict[str, Any]] = []
