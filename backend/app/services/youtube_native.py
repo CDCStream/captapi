@@ -840,46 +840,66 @@ def _links_from_html(html: str) -> list[dict[str, str]]:
 # Caption URLs served on the web watch page require a proof-of-origin token
 # since ~2025 and return empty bodies to plain HTTP clients. The ANDROID
 # InnerTube client still hands out working (signed) timedtext URLs.
+# Keep this on a version that still returns captionTracks (newer clients 400).
+_ANDROID_CLIENT_VERSION = "20.10.38"
 _ANDROID_CONTEXT = {
     "client": {
         "clientName": "ANDROID",
-        "clientVersion": "20.10.38",
+        "clientVersion": _ANDROID_CLIENT_VERSION,
         "androidSdkVersion": 30,
         "hl": "en",
         "gl": "US",
     }
 }
 _ANDROID_HEADERS = {
-    "User-Agent": "com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip",
+    "User-Agent": (
+        f"com.google.android.youtube/{_ANDROID_CLIENT_VERSION} "
+        "(Linux; U; Android 11) gzip"
+    ),
     "X-Youtube-Client-Name": "3",
-    "X-Youtube-Client-Version": "20.10.38",
+    "X-Youtube-Client-Version": _ANDROID_CLIENT_VERSION,
 }
 
 
+async def _player_innertube(
+    video_id: str,
+    *,
+    context: dict[str, Any],
+    headers: dict[str, str],
+) -> dict[str, Any] | None:
+    """InnerTube ``player`` across proxy tiers (DC → residential)."""
+    for tier in _proxy_tiers():
+        try:
+            resp = await post_json(
+                "https://www.youtube.com/youtubei/v1/player",
+                {
+                    "context": context,
+                    "videoId": video_id,
+                    "contentCheckOk": True,
+                    "racyCheckOk": True,
+                },
+                tier=tier,  # type: ignore[arg-type]
+                headers=headers,
+                params={"prettyPrint": "false"},
+                timeout=15,
+            )
+        except httpx.HTTPError:
+            continue
+        if resp.status_code >= 400:
+            continue
+        try:
+            data = resp.json()
+        except ValueError:
+            continue
+        if isinstance(data, dict) and data:
+            return data
+    return None
+
+
 async def _player_android(video_id: str) -> dict[str, Any] | None:
-    try:
-        resp = await post_json(
-            "https://www.youtube.com/youtubei/v1/player",
-            {
-                "context": _ANDROID_CONTEXT,
-                "videoId": video_id,
-                "contentCheckOk": True,
-                "racyCheckOk": True,
-            },
-            tier="datacenter",
-            headers=_ANDROID_HEADERS,
-            params={"prettyPrint": "false"},
-            timeout=12,
-        )
-    except httpx.HTTPError:
-        return None
-    if resp.status_code >= 400:
-        return None
-    try:
-        data = resp.json()
-    except ValueError:
-        return None
-    return data if isinstance(data, dict) else None
+    return await _player_innertube(
+        video_id, context=_ANDROID_CONTEXT, headers=_ANDROID_HEADERS
+    )
 
 
 def _parse_timedtext(body: str) -> list[dict[str, Any]]:
@@ -924,65 +944,103 @@ def _parse_timedtext(body: str) -> list[dict[str, Any]]:
     return segments
 
 
-async def transcript_native(norm_url: str, language: str | None) -> dict[str, Any] | None:
-    """Transcript via InnerTube ANDROID caption tracks (timedtext).
+def _with_timedtext_fmt(url: str, fmt: str) -> str:
+    if not url:
+        return url
+    if re.search(r"[?&]fmt=", url):
+        return re.sub(r"([?&])fmt=[^&]*", rf"\1fmt={fmt}", url)
+    sep = "&" if "?" in url else "?"
+    return f"{url}{sep}fmt={fmt}"
 
-    Returns ``{segments: [{text, start, duration}], title, language}`` or None
-    (no captions / fetch failed) so the caller can fall back to actors.
-    """
-    m = re.search(r"(?:v=|shorts/|youtu\.be/)([\w-]{11})", norm_url)
-    if not m:
-        return None
-    player = await _player_android(m.group(1))
-    if not player:
-        return None
-    if ((player.get("playabilityStatus") or {}).get("status")) != "OK":
-        return None
 
-    tracks = (
-        ((player.get("captions") or {}).get("playerCaptionsTracklistRenderer") or {}).get("captionTracks")
+async def _fetch_timedtext(
+    base_url: str, *, headers: dict[str, str]
+) -> list[dict[str, Any]]:
+    """GET a caption URL across proxy tiers and fmt variants."""
+    for fmt in ("json3", "srv3"):
+        url = _with_timedtext_fmt(base_url, fmt)
+        for tier in _proxy_tiers():
+            try:
+                cap = await proxy_fetch(url, tier=tier, headers=headers, timeout=15)  # type: ignore[arg-type]
+            except httpx.HTTPError:
+                continue
+            if cap.status_code >= 400 or not (cap.text or "").strip():
+                continue
+            segments = _parse_timedtext(cap.text)
+            if segments:
+                return segments
+    return []
+
+
+def _caption_tracks(player: dict[str, Any]) -> list[dict[str, Any]]:
+    return list(
+        ((player.get("captions") or {}).get("playerCaptionsTracklistRenderer") or {}).get(
+            "captionTracks"
+        )
         or []
     )
-    if not tracks:
-        return None
 
-    def track_score(t: dict[str, Any]) -> tuple[int, int]:
+
+def _rank_caption_tracks(
+    tracks: list[dict[str, Any]], language: str | None
+) -> list[dict[str, Any]]:
+    def score(t: dict[str, Any]) -> tuple[int, int]:
         code = (t.get("languageCode") or "").lower()
         is_asr = 1 if t.get("kind") == "asr" else 0
         if language:
-            match = 0 if code.startswith(language.lower()[:2]) else 1
+            want = language.lower()[:2]
+            match = 0 if code.startswith(want) else 1
         else:
             match = 0 if code.startswith("en") else 1
         return (match, is_asr)
 
-    track = sorted(tracks, key=track_score)[0]
-    base_url = track.get("baseUrl")
-    if not base_url:
-        return None
-    if language and not (track.get("languageCode") or "").lower().startswith(language.lower()[:2]):
-        # Requested language not among tracks; ask timedtext to translate.
-        base_url += f"&tlang={language}"
+    return sorted(tracks, key=score)
 
-    try:
-        cap = await proxy_fetch(base_url, tier="datacenter", headers=_ANDROID_HEADERS, timeout=12)
-    except httpx.HTTPError:
+
+async def transcript_native(norm_url: str, language: str | None) -> dict[str, Any] | None:
+    """Transcript via InnerTube ANDROID caption tracks (timedtext).
+
+    Tries every caption track (lang-ranked) and fmt=json3/srv3 across proxy
+    tiers before giving up so callers hit Apify less often.
+    """
+    m = re.search(r"(?:v=|shorts/|youtu\.be/)([\w-]{11})", norm_url)
+    if not m:
         return None
-    if cap.status_code >= 400 or not cap.text.strip():
+    video_id = m.group(1)
+
+    player = await _player_android(video_id)
+    if not player:
+        return None
+    if ((player.get("playabilityStatus") or {}).get("status")) != "OK":
+        return None
+    tracks = _caption_tracks(player)
+    if not tracks:
         return None
 
-    segments = _parse_timedtext(cap.text)
-    if not segments:
-        return None
+    ranked = _rank_caption_tracks(tracks, language)
+    attempts: list[tuple[dict[str, Any], bool]] = [(t, False) for t in ranked]
+    if language:
+        want = language.lower()[:2]
+        if not any((t.get("languageCode") or "").lower().startswith(want) for t in ranked):
+            attempts.append((ranked[0], True))
 
-    title = None
-    details = player.get("videoDetails") or {}
-    if details.get("title"):
-        title = safe_str(details["title"])
-    return {
-        "segments": segments,
-        "title": title,
-        "language": safe_str(language or track.get("languageCode")),
-    }
+    for track, use_tlang in attempts:
+        base_url = safe_str(track.get("baseUrl"))
+        if not base_url:
+            continue
+        url = f"{base_url}&tlang={language}" if use_tlang and language else base_url
+        segments = await _fetch_timedtext(url, headers=_ANDROID_HEADERS)
+        if not segments:
+            continue
+        title = safe_str((player.get("videoDetails") or {}).get("title"))
+        return {
+            "segments": segments,
+            "title": title,
+            "language": safe_str(
+                language if use_tlang else (track.get("languageCode") or language)
+            ),
+        }
+    return None
 
 
 

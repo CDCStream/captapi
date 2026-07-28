@@ -135,6 +135,10 @@ class Settings(BaseSettings):
     # followers / followings use browser-signed web APIs instead of Apify.
     # Example: http://127.0.0.1:8080
     TIKTOK_SIGNER_URL: str = ""
+    # Optional Instagram session cookie for full comment pagination (logged-out
+    # Polaris only embeds ~2 preview_comments). Paste the ``sessionid`` value
+    # from a browser cookie jar. Leave empty to keep Apify fallthrough.
+    IG_SESSION_ID: str = ""
 
     APIFY_ACTOR_FACEBOOK_POSTS: str = "apify/facebook-posts-scraper"
     APIFY_ACTOR_FACEBOOK_PAGES: str = "apify/facebook-pages-scraper"

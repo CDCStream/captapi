@@ -709,7 +709,7 @@ async def youtube_transcript(
 
         data = await cached_or_run(
             endpoint="youtube.transcript",
-            params={"url": norm_url, "language": language or "", "v": 4},
+            params={"url": norm_url, "language": language or "", "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

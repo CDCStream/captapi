@@ -249,6 +249,130 @@ async def comments_native(url: str, *, limit: int = 50) -> dict[str, Any] | None
     }
 
 
+async def comments_session_native(url: str, *, limit: int = 50) -> dict[str, Any] | None:
+    """Full comment thread via ``api/v1/media/{pk}/comments/`` + ``IG_SESSION_ID``.
+
+    Returns None when session is unset / invalid so callers can fall to Apify.
+    """
+    from app.core.config import get_settings
+    from app.utils.url import extract_instagram_shortcode
+
+    session = (get_settings().IG_SESSION_ID or "").strip()
+    if not session or limit <= 0:
+        return None
+    shortcode = extract_instagram_shortcode(url)
+    if not shortcode:
+        return None
+    media = await _fetch_item(shortcode)
+    if media is None:
+        return None
+    media_id = safe_str(media.get("pk") or media.get("id"))
+    if not media_id:
+        return None
+    post_url = f"https://www.instagram.com/p/{shortcode}/"
+    total = safe_int(media.get("comment_count")) or 0
+
+    comments: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    min_id: str | None = None
+    for page in range(20):
+        batch, next_min, more = await _fetch_comments_page(
+            media_id, session_id=session, min_id=min_id
+        )
+        if batch is None:
+            if page == 0:
+                return None
+            break
+        for raw in batch:
+            mapped = _map_preview_comment(raw, post_url=post_url)
+            if not mapped or not mapped.get("text"):
+                continue
+            cid = mapped["id"] or mapped["text"]
+            if cid in seen:
+                continue
+            seen.add(cid)
+            comments.append(mapped)
+            if len(comments) >= limit:
+                break
+        if len(comments) >= limit or not more or not next_min:
+            break
+        min_id = next_min
+
+    if not comments:
+        return None
+    return {
+        "platform": "instagram",
+        "url": url,
+        "totalReturned": len(comments[:limit]),
+        "totalComments": total or len(comments),
+        "hasMore": (total or 0) > len(comments[:limit]),
+        "comments": comments[:limit],
+    }
+
+
+async def _fetch_comments_page(
+    media_id: str,
+    *,
+    session_id: str,
+    min_id: str | None = None,
+) -> tuple[list[dict[str, Any]] | None, str | None, bool]:
+    """One page of ``/api/v1/media/{id}/comments/``. ``(items, next_min_id, more)``."""
+    params: dict[str, Any] = {
+        "can_support_threading": "true",
+        "permalink_enabled": "false",
+    }
+    if min_id:
+        params["min_id"] = min_id
+    for attempt in range(3):
+        try:
+            async with httpx.AsyncClient(
+                timeout=15,
+                proxy=proxy_for("residential"),
+                follow_redirects=True,
+                cookies={"sessionid": session_id},
+            ) as client:
+                await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
+                csrf = client.cookies.get("csrftoken") or ""
+                resp = await client.get(
+                    f"https://www.instagram.com/api/v1/media/{media_id}/comments/",
+                    params=params,
+                    headers={
+                        "User-Agent": _UA,
+                        "X-IG-App-ID": _IG_APP_ID,
+                        "X-CSRFToken": csrf,
+                        "Referer": "https://www.instagram.com/",
+                    },
+                )
+        except httpx.HTTPError as exc:
+            log.info("ig_comments_session_transport", attempt=attempt, error=str(exc)[:120])
+            continue
+        if resp.status_code in (401, 403):
+            log.info("ig_comments_session_auth", status=resp.status_code)
+            return None, None, False
+        if resp.status_code != 200:
+            log.info("ig_comments_session_http", status=resp.status_code, attempt=attempt)
+            continue
+        ctype = (resp.headers.get("content-type") or "").lower()
+        if "json" not in ctype:
+            log.info("ig_comments_session_non_json", attempt=attempt)
+            return None, None, False
+        try:
+            payload = resp.json()
+        except ValueError:
+            return None, None, False
+        items = payload.get("comments") or payload.get("items") or []
+        if not isinstance(items, list):
+            return None, None, False
+        next_min = safe_str(
+            payload.get("next_min_id")
+            or payload.get("min_id")
+            or (payload.get("next_max_id"))
+        ) or None
+        more = bool(payload.get("has_more_comments") or payload.get("has_more") or next_min)
+        return [i for i in items if isinstance(i, dict)], next_min, more
+    return None, None, False
+
+
 async def fetch_highlight_reel(highlight_id: str) -> dict[str, Any] | None:
     """Details for one Story Highlight album via the logged-out reels_media
     endpoint. ``highlight_id`` is the numeric id (no ``highlight:`` prefix).
