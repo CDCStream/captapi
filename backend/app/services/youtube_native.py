@@ -39,9 +39,25 @@ YT_HEADERS: dict[str, str] = {
 # parses predictably.
 YT_COOKIES: dict[str, str] = {"CONSENT": "YES+1", "SOCS": "CAI", "PREF": "hl=en&gl=US"}
 
+_INNERTUBE_CLIENT_VERSION = "2.20250313.00.00"
 _INNERTUBE_CONTEXT = {
-    "client": {"clientName": "WEB", "clientVersion": "2.20240701.00.00", "hl": "en", "gl": "US"}
+    "client": {
+        "clientName": "WEB",
+        "clientVersion": _INNERTUBE_CLIENT_VERSION,
+        "hl": "en",
+        "gl": "US",
+    }
 }
+# Channel tab browse ``params`` (protobuf) — same values yt-dlp / web UI use.
+_CHANNEL_TAB_PARAMS: dict[str, str] = {
+    "videos": "EgZ2aWRlb3PyBgQKAjoA",
+    "shorts": "EgZzaG9ydHPyBgUKA5oBAA%3D%3D",
+    "streams": "EgdzdHJlYW1z8gYECgJ6AA%3D%3D",
+    "playlists": "EglwbGF5bGlzdHPyBgQKAkIA",
+    "about": "EgVhYm91dPIGBAoCEgA%3D",
+}
+# Shorts filter for InnerTube ``search`` (same as ``sp=EgIYAQ==`` on /results).
+_SEARCH_SHORTS_PARAMS = "EgIYAQ=="
 
 _JSON_DECODER = json.JSONDecoder()
 
@@ -306,6 +322,19 @@ def collect_video_cards(data: Any, *, shorts: bool = False) -> list[dict[str, An
             add(_normalize_shorts_lockup(lk))
         for r in walk_find(data, "reelItemRenderer"):
             add(_normalize_reel_item(r))
+        # Some Shorts tabs / filtered search still emit video lockups.
+        for vr in walk_find(data, "videoRenderer"):
+            card = normalize_video_renderer(vr)
+            if card:
+                vid = card["url"].rsplit("v=", 1)[-1]
+                card["url"] = f"https://www.youtube.com/shorts/{vid}"
+                add(card)
+        for lk in walk_find(data, "lockupViewModel"):
+            card = _normalize_video_lockup(lk)
+            if card:
+                vid = card["url"].rsplit("v=", 1)[-1]
+                card["url"] = f"https://www.youtube.com/shorts/{vid}"
+                add(card)
     else:
         for vr in walk_find(data, "videoRenderer"):
             add(normalize_video_renderer(vr))
@@ -316,12 +345,21 @@ def collect_video_cards(data: Any, *, shorts: bool = False) -> list[dict[str, An
     return cards
 
 
-def find_continuation_token(data: Any) -> str | None:
+def find_continuation_tokens(data: Any) -> list[str]:
+    """All continuation tokens in document order (deduped)."""
+    out: list[str] = []
+    seen: set[str] = set()
     for c in walk_find(data, "continuationCommand"):
         token = safe_str(c.get("token"))
-        if token:
-            return token
-    return None
+        if token and token not in seen:
+            seen.add(token)
+            out.append(token)
+    return out
+
+
+def find_continuation_token(data: Any) -> str | None:
+    tokens = find_continuation_tokens(data)
+    return tokens[0] if tokens else None
 
 
 def _proxy_tiers() -> list[str]:
@@ -359,7 +397,11 @@ async def innertube(endpoint: str, body: dict[str, Any], *, timeout: float = 12.
                 f"https://www.youtube.com/youtubei/v1/{endpoint}",
                 {"context": _INNERTUBE_CONTEXT, **body},
                 tier=tier,  # type: ignore[arg-type]
-                headers={**YT_HEADERS, "X-Youtube-Client-Name": "1", "X-Youtube-Client-Version": "2.20240701.00.00"},
+                headers={
+                    **YT_HEADERS,
+                    "X-Youtube-Client-Name": "1",
+                    "X-Youtube-Client-Version": _INNERTUBE_CLIENT_VERSION,
+                },
                 params={"prettyPrint": "false"},
                 timeout=timeout,
             )
@@ -382,33 +424,82 @@ async def _paginate(
     limit: int,
     continuation_endpoint: str,
     shorts: bool = False,
-    max_hops: int = 6,
+    max_hops: int = 8,
 ) -> list[dict[str, Any]]:
     """Cards from the initial tree plus InnerTube continuations up to limit."""
     cards = collect_video_cards(first_page, shorts=shorts)
-    token = find_continuation_token(first_page)
+    pending = find_continuation_tokens(first_page)
     hops = 0
-    while token and len(cards) < limit and hops < max_hops:
+    while pending and len(cards) < limit and hops < max_hops:
+        token = pending.pop(0)
         payload = await innertube(continuation_endpoint, {"continuation": token})
         if payload is None:
-            break
+            continue
         new_cards = collect_video_cards(payload, shorts=shorts)
         existing = {c["url"] for c in cards}
         added = [c for c in new_cards if c["url"] not in existing]
-        if not added:
-            break
-        cards.extend(added)
-        token = find_continuation_token(payload)
         hops += 1
+        if not added:
+            # Wrong token (shelf / related) — try the next candidate.
+            for nxt in find_continuation_tokens(payload):
+                if nxt not in pending:
+                    pending.append(nxt)
+            continue
+        cards.extend(added)
+        pending = find_continuation_tokens(payload) + pending
+        # Dedupe pending while preserving order.
+        seen_tok: set[str] = set()
+        uniq: list[str] = []
+        for t in pending:
+            if t not in seen_tok:
+                seen_tok.add(t)
+                uniq.append(t)
+        pending = uniq
     return cards[:limit]
+
+
+async def resolve_channel_id(url: str) -> str | None:
+    """Resolve ``UC…`` from a channel URL, @handle, or bare channel id."""
+    raw = (url or "").strip()
+    if not raw:
+        return None
+    if re.fullmatch(r"UC[\w-]{20,}", raw):
+        return raw
+    m = re.search(r"youtube\.com/channel/(UC[\w-]+)", raw)
+    if m:
+        return m.group(1)
+    # Need a page (or redirect) for @handles / custom URLs.
+    page = raw if "://" in raw else f"https://www.youtube.com/{raw.lstrip('/')}"
+    data, html = await fetch_page_data(page, timeout=15.0)
+    if data:
+        meta = next(walk_find(data, "channelMetadataRenderer"), {}) or {}
+        cid = safe_str(meta.get("externalId"))
+        if cid:
+            return cid
+    if html:
+        found = re.search(r'"externalId":"(UC[\w-]+)"', html) or re.search(
+            r'"channelId":"(UC[\w-]+)"', html
+        )
+        if found:
+            return found.group(1)
+    return None
 
 
 # ---------------------------------------------------------------- search ---
 async def search_native(q: str, limit: int) -> list[dict[str, Any]]:
     from urllib.parse import quote
 
+    query = (q or "").strip()
+    if not query:
+        return []
+    # InnerTube search avoids HTML 429s on /results.
+    data = await innertube("search", {"query": query}, timeout=15)
+    if data is not None:
+        cards = await _paginate(data, limit=limit, continuation_endpoint="search")
+        if cards:
+            return cards
     data, _ = await fetch_page_data(
-        f"https://www.youtube.com/results?search_query={quote(q)}"
+        f"https://www.youtube.com/results?search_query={quote(query)}"
     )
     if data is None:
         return []
@@ -416,10 +507,19 @@ async def search_native(q: str, limit: int) -> list[dict[str, Any]]:
 
 
 async def search_shorts_native(q: str, limit: int) -> list[dict[str, Any]] | None:
-    """Shorts-filtered YouTube search (sp=EgIYAQ==) via Innertube HTML."""
+    """Shorts-filtered YouTube search via InnerTube, then HTML ``sp=EgIYAQ==``."""
     from urllib.parse import quote
 
     seed = (q or "").strip() or "trending"
+    data = await innertube(
+        "search", {"query": seed, "params": _SEARCH_SHORTS_PARAMS}, timeout=15
+    )
+    if data is not None:
+        cards = await _paginate(
+            data, limit=limit, continuation_endpoint="search", shorts=True
+        )
+        if cards:
+            return cards
     data, _ = await fetch_page_data(
         f"https://www.youtube.com/results?search_query={quote(seed)}&sp=EgIYAQ%3D%3D"
     )
@@ -454,26 +554,131 @@ async def playlist_native(url: str, limit: int) -> dict[str, Any] | None:
 
 
 # ---------------------------------------------------- channel tab lists ---
-async def channel_tab_native(tab_url: str, limit: int, *, shorts: bool = False) -> list[dict[str, Any]]:
-    """Videos / streams / shorts tab of a channel."""
-    data, _ = await fetch_page_data(tab_url)
+async def channel_tab_native(
+    tab_url: str,
+    limit: int,
+    *,
+    shorts: bool = False,
+    tab: str | None = None,
+) -> list[dict[str, Any]]:
+    """Videos / streams / shorts tab of a channel.
+
+    Prefers InnerTube ``browse`` with known tab ``params`` (works when the
+    HTML tab is 429'd). Falls back to ``ytInitialData`` on the tab URL.
+    """
+    tab_key = (tab or "").strip().lower()
+    if not tab_key:
+        low = (tab_url or "").rstrip("/").lower()
+        for name in ("shorts", "streams", "videos", "playlists"):
+            if low.endswith("/" + name):
+                tab_key = name
+                break
+    params = _CHANNEL_TAB_PARAMS.get(tab_key) if tab_key else None
+    if params:
+        channel_id = await resolve_channel_id(tab_url)
+        if channel_id:
+            data = await innertube(
+                "browse",
+                {"browseId": channel_id, "params": params},
+                timeout=18,
+            )
+            if data is not None:
+                cards = await _paginate(
+                    data, limit=limit, continuation_endpoint="browse", shorts=shorts
+                )
+                if cards:
+                    return cards
+    data, _ = await fetch_page_data(tab_url, timeout=15.0)
     if data is None:
         return []
     return await _paginate(data, limit=limit, continuation_endpoint="browse", shorts=shorts)
+
+
+def collect_playlist_cards(data: Any) -> list[dict[str, Any]]:
+    """``LOCKUP_CONTENT_TYPE_PLAYLIST`` rows from a channel playlists tab."""
+    rows: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for lk in walk_find(data, "lockupViewModel"):
+        if lk.get("contentType") != "LOCKUP_CONTENT_TYPE_PLAYLIST":
+            continue
+        pid = safe_str(lk.get("contentId"))
+        if not pid or pid in seen:
+            continue
+        seen.add(pid)
+        meta = (lk.get("metadata") or {}).get("lockupMetadataViewModel") or {}
+        title = text_of(meta.get("title")) or ""
+        video_count = None
+        for badge in walk_find(lk, "thumbnailBadgeViewModel"):
+            video_count = parse_count_text(badge.get("text"))
+            if video_count is not None:
+                break
+        if video_count is None:
+            blob = json.dumps(lk)
+            m = re.search(r"([\d,.]+)\s+videos?", blob)
+            if m:
+                video_count = safe_int(m.group(1).replace(",", ""))
+        rows.append(
+            {
+                "url": f"https://www.youtube.com/playlist?list={pid}",
+                "title": title,
+                "videoCount": video_count,
+                "thumbnailUrl": _best_thumb(lk.get("contentImage")),
+            }
+        )
+    return rows
+
+
+async def channel_playlists_native(channel_url: str, limit: int) -> list[dict[str, Any]]:
+    """Channel playlists via InnerTube browse, then HTML tab parse."""
+    if limit <= 0:
+        return []
+    channel_id = await resolve_channel_id(channel_url)
+    params = _CHANNEL_TAB_PARAMS["playlists"]
+    if channel_id:
+        data = await innertube(
+            "browse",
+            {"browseId": channel_id, "params": params},
+            timeout=18,
+        )
+        if data is not None:
+            rows = collect_playlist_cards(data)
+            if rows:
+                return rows[:limit]
+    # HTML fallthrough (proxy-aware).
+    base = (channel_url or "").rstrip("/")
+    for suffix in (
+        "/videos",
+        "/shorts",
+        "/streams",
+        "/playlists",
+        "/featured",
+        "/posts",
+        "/community",
+    ):
+        if base.lower().endswith(suffix):
+            base = base[: -len(suffix)]
+            break
+    data, _ = await fetch_page_data(f"{base}/playlists", timeout=15.0)
+    if data is None:
+        return []
+    return collect_playlist_cards(data)[:limit]
 
 
 # ---------------------------------------------------------------- hashtag --
 async def hashtag_native(tag: str, limit: int) -> list[dict[str, Any]]:
     from urllib.parse import quote
 
-    data, _ = await fetch_page_data(f"https://www.youtube.com/hashtag/{quote(tag)}")
+    name = (tag or "").lstrip("#").strip()
+    if not name:
+        return []
+    data, _ = await fetch_page_data(f"https://www.youtube.com/hashtag/{quote(name)}")
     if data is None:
         return []
     return await _paginate(data, limit=limit, continuation_endpoint="browse")
 
 
 # --------------------------------------------------------- channel details --
-_ABOUT_PARAMS = "EgVhYm91dPIGBAoCEgA%3D"
+_ABOUT_PARAMS = _CHANNEL_TAB_PARAMS["about"]
 
 
 async def channel_details_native(url: str) -> dict[str, Any] | None:

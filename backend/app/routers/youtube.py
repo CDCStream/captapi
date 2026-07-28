@@ -24,6 +24,7 @@ from app.services.http_fetch import fetch as proxy_fetch
 from app.services.openai_client import summarize_transcript
 from app.services.youtube_native import (
     channel_details_native,
+    channel_playlists_native,
     channel_tab_native,
     comment_replies_native,
     comments_native,
@@ -84,10 +85,18 @@ def _scaled_credits(n: int, rate: float, minimum: int) -> int:
 
 
 def _channel_tab_url(url: str, tab: str) -> str:
-    """Build a channel sub-tab URL (videos / shorts / streams)."""
+    """Build a channel sub-tab URL (videos / shorts / streams / playlists)."""
     base = (url or "").rstrip("/")
-    for suffix in ("/videos", "/shorts", "/streams", "/featured"):
-        if base.endswith(suffix):
+    for suffix in (
+        "/videos",
+        "/shorts",
+        "/streams",
+        "/playlists",
+        "/featured",
+        "/posts",
+        "/community",
+    ):
+        if base.lower().endswith(suffix):
             base = base[: -len(suffix)]
             break
     return f"{base}/{tab}"
@@ -1163,10 +1172,17 @@ async def youtube_channel_videos(
                 if feed_videos:
                     ctx["source"] = "direct"
                     return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
-            native_videos = await channel_tab_native(_channel_tab_url(url, "videos"), limit)
+            native_videos = await channel_tab_native(
+                _channel_tab_url(url, "videos"), limit, tab="videos"
+            )
             if native_videos:
                 ctx["source"] = "direct"
                 return {"url": url, "totalReturned": len(native_videos), "videos": native_videos}
+            # RSS before Apify — thinner metadata but beats $2.40/1k scraper.
+            feed_videos = await _youtube_channel_feed(url, limit)
+            if feed_videos:
+                ctx["source"] = "direct"
+                return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
 
             apify = get_apify()
             items = await apify.run_actor_sync(
@@ -1191,7 +1207,7 @@ async def youtube_channel_videos(
 
         data = await cached_or_run(
             endpoint="youtube.channel-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 5},
+            params={"url": url, "limit": limit, "fast": fast, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1410,7 +1426,7 @@ async def youtube_search(
 
         data = await cached_or_run(
             endpoint="youtube.search",
-            params={"q": q, "limit": limit, "v": 2},
+            params={"q": q, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1481,7 +1497,7 @@ async def youtube_trending_shorts(
 
         data = await cached_or_run(
             endpoint="youtube.trending-shorts",
-            params={"q": q, "limit": limit, "v": 5},
+            params={"q": q, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             # Trending actor runs take minutes; serve the last list instantly
@@ -1511,7 +1527,9 @@ async def youtube_channel_shorts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native_shorts = await channel_tab_native(_channel_tab_url(url, "shorts"), limit, shorts=True)
+            native_shorts = await channel_tab_native(
+                _channel_tab_url(url, "shorts"), limit, shorts=True, tab="shorts"
+            )
             if native_shorts:
                 ctx["source"] = "direct"
                 return {"url": url, "totalReturned": len(native_shorts), "shorts": native_shorts}
@@ -1528,7 +1546,7 @@ async def youtube_channel_shorts(
 
         data = await cached_or_run(
             endpoint="youtube.channel-shorts",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1555,7 +1573,9 @@ async def youtube_channel_streams(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native_streams = await channel_tab_native(_channel_tab_url(url, "streams"), limit)
+            native_streams = await channel_tab_native(
+                _channel_tab_url(url, "streams"), limit, tab="streams"
+            )
             if native_streams:
                 ctx["source"] = "direct"
                 return {"url": url, "totalReturned": len(native_streams), "streams": native_streams}
@@ -1572,7 +1592,7 @@ async def youtube_channel_streams(
 
         data = await cached_or_run(
             endpoint="youtube.channel-streams",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1619,7 +1639,7 @@ async def youtube_hashtag_search(
 
         data = await cached_or_run(
             endpoint="youtube.hashtag-search",
-            params={"q": q, "limit": limit, "v": 2},
+            params={"q": q, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1752,7 +1772,6 @@ async def youtube_channel_playlists(
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = normalize_youtube_channel_url(url)
-    settings = get_settings()
     cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
     async with billed_call(
         caller=caller,
@@ -1762,36 +1781,19 @@ async def youtube_channel_playlists(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Primary: parse the playlists tab directly (the scraping actor
-            # can't — it silently returns the videos tab instead).
-            playlists = await _channel_playlists_native(url, limit)
+            # InnerTube browse + HTML. The SEARCH actor cannot read /playlists
+            # (it returns videos) — never fall through to it.
+            playlists = await channel_playlists_native(url, limit)
             if not playlists:
-                apify = get_apify()
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_YOUTUBE_SEARCH,
-                    {"startUrls": [{"url": _channel_tab_url(url, "playlists")}], "maxResults": limit},
-                    max_items=limit,
-                )
-                for p in items[:limit]:
-                    if p.get("type") and p.get("type") != "playlist":
-                        continue
-                    playlists.append(
-                        {
-                            "url": safe_str(p.get("url") or p.get("playlistUrl")),
-                            "title": safe_str(p.get("title")) or "",
-                            "videoCount": safe_int(p.get("videoCount") or p.get("numberOfVideos")),
-                            "thumbnailUrl": safe_str(p.get("thumbnailUrl")),
-                        }
-                    )
-                if playlists:
-                    ctx["source"] = "apify"
-            else:
-                ctx["source"] = "direct"
+                playlists = await _channel_playlists_native(url, limit)
+            if not playlists:
+                raise HTTPException(status_code=404, detail="No playlists found for this channel")
+            ctx["source"] = "direct"
             return {"url": url, "totalReturned": len(playlists), "playlists": playlists}
 
         data = await cached_or_run(
             endpoint="youtube.channel-playlists",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
