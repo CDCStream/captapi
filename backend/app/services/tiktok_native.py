@@ -1777,6 +1777,94 @@ async def _enrich_live_room(room_id: str) -> dict[str, Any] | None:
     return None
 
 
+def _map_trend_video(item: dict[str, Any], *, rank: int) -> dict[str, Any] | None:
+    """Map ``/api/recommend/item_list/`` row → trending-feed public shape."""
+    author = item.get("author") if isinstance(item.get("author"), dict) else {}
+    stats = item.get("stats") if isinstance(item.get("stats"), dict) else {}
+    stats_v2 = item.get("statsV2") if isinstance(item.get("statsV2"), dict) else {}
+    video = item.get("video") if isinstance(item.get("video"), dict) else {}
+    uid = safe_str(author.get("uniqueId") or author.get("unique_id"))
+    vid = safe_str(item.get("id") or item.get("videoId") or item.get("aweme_id"))
+    if not vid:
+        return None
+    url = safe_str(item.get("webVideoUrl") or item.get("url"))
+    if not url and uid:
+        url = f"https://www.tiktok.com/@{uid}/video/{vid}"
+    cover = video.get("cover") or video.get("originCover") or item.get("cover")
+    if isinstance(cover, dict):
+        cover = _url_list_first(cover) or safe_str(cover.get("url"))
+    else:
+        cover = safe_str(cover)
+    return {
+        "url": url,
+        "id": vid,
+        "title": safe_str(item.get("desc") or item.get("title") or item.get("text")),
+        "coverUrl": cover,
+        "author": uid,
+        "authorName": safe_str(author.get("nickname") or author.get("nickName")),
+        "views": _stat(stats_v2, stats, "playCount"),
+        "likes": _stat(stats_v2, stats, "diggCount"),
+        "comments": _stat(stats_v2, stats, "commentCount"),
+        "shares": _stat(stats_v2, stats, "shareCount"),
+        "rank": rank,
+    }
+
+
+async def trending_feed_native(
+    country: str = "US", *, limit: int = 20
+) -> list[dict[str, Any]] | None:
+    """For-You / recommend feed via signer ``/api/recommend/item_list/``.
+
+    ``country`` is passed as TikTok region hints; the browser session geo often
+    dominates, so results are best-effort localized. Returns ranked rows in the
+    ``/trending-feed`` shape, or ``None`` so the caller can fall back to Apify.
+    """
+    from app.services import tiktok_signer
+
+    if limit <= 0 or not tiktok_signer.enabled():
+        return None
+    region = (country or "US").strip().upper() or "US"
+    collected: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    cursor = 0
+    for _ in range(max(3, (limit // 10) + 2)):
+        if len(collected) >= limit:
+            break
+        count = min(20, max(10, limit - len(collected)))
+        api = (
+            "https://www.tiktok.com/api/recommend/item_list/"
+            f"?aid=1988&app_name=tiktok_web&device_platform=web_pc"
+            f"&count={count}&cursor={cursor}&user_is_login=false"
+            f"&region={region}&priority_region={region}"
+            f"&carrier_region={region}&sys_region={region}"
+        )
+        page = await tiktok_signer.fetch_api(api)
+        if page is None:
+            return None if not collected else collected[:limit]
+        items = page.get("itemList") or page.get("item_list") or []
+        if not isinstance(items, list) or not items:
+            break
+        added = 0
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            mapped = _map_trend_video(item, rank=len(collected) + 1)
+            if not mapped or not mapped.get("id") or mapped["id"] in seen:
+                continue
+            seen.add(mapped["id"])
+            collected.append(mapped)
+            added += 1
+            if len(collected) >= limit:
+                break
+        if added == 0:
+            break
+        if not bool(page.get("hasMore") if page.get("hasMore") is not None else page.get("has_more")):
+            break
+        nxt = safe_int(page.get("cursor"))
+        cursor = nxt if nxt is not None else cursor + len(items)
+    return collected[:limit] if collected else None
+
+
 async def popular_hashtags_native(
     query: str, *, limit: int = 20, n_videos: int = 25
 ) -> list[dict[str, Any]] | None:

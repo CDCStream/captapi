@@ -37,6 +37,7 @@ from app.services.tiktok_native import (
     music_posts_native,
     popular_hashtags_native,
     profile_region_native,
+    trending_feed_native,
     search_suggestions_native,
     search_users_native,
     song_details_native,
@@ -2471,6 +2472,15 @@ async def tiktok_trending_feed(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await trending_feed_native(country.upper(), limit=limit)
+            if native:
+                ctx["source"] = "direct"
+                return {
+                    "country": country.upper(),
+                    "totalReturned": len(native),
+                    "results": native,
+                }
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK_TRENDING,
@@ -2478,11 +2488,12 @@ async def tiktok_trending_feed(
                 max_items=limit,
             )
             results = [_normalize_trend_video(v) for v in items[:limit]]
+            ctx["source"] = "apify"
             return {"country": country.upper(), "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="tiktok.trending-feed",
-            params={"country": country.upper(), "limit": limit, "v": 2},
+            params={"country": country.upper(), "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
