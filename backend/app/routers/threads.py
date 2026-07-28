@@ -299,18 +299,28 @@ async def threads_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Hydrated /search HTML embeds matching thread_items (soft-capped).
+            native_items = await native.search(q, limit=limit)
+            if native_items:
+                ctx["source"] = "direct"
+                results = [_normalize_post(i, include_author_image=False) for i in native_items][:limit]
+                return {"query": q, "totalReturned": len(results), "results": results}
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_THREADS_SEARCH,
                 {"mode": "search", "searchQueries": [q], "maxPosts": limit},
                 max_items=limit,
             )
+            if not items:
+                raise HTTPException(status_code=404, detail="No posts found")
+            ctx["source"] = "apify"
             results = [_normalize_post(i, include_author_image=False) for i in items][:limit]
             return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="threads.search",
-            params={"q": q, "limit": limit, "v": 4},
+            params={"q": q, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

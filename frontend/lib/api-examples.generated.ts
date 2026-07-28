@@ -9870,114 +9870,115 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "results": [
       {
         "platform": "threads",
-        "id": "3792024121254209604",
-        "code": "DSf-djnEehE",
-        "url": "https://www.threads.net/@freecodecamp/post/DSf-djnEehE",
-        "text": "Machine Learning and Artificial Intelligence are hot topics right now. And this course will give you a solid foundation in ML & AI skills. You'll learn key concepts like overfitting & regularization, common algorithms, & you'll build some projects, too.\nhttps://www.freecodecamp.org/news/learn-the-foundations-of-machine-learning-and-artificial-intelligence/",
-        "publishedAt": "2025-12-20T21:02:08.000Z",
+        "id": "3928882651670873164",
+        "code": "DaGMfShCYRM",
+        "url": "https://www.threads.net/@aiwithanju/post/DaGMfShCYRM",
+        "text": "All Paid Courses (Free for First 4500 People)\n\n𝗣𝗮𝗶𝗱 𝗖𝗼𝘂𝗿𝘀𝗲 𝗙𝗥𝗘𝗘 (PART - 1)\n1. Artificial Intelligence\n2. Machine Learning\n3. Prompt Engineering\n4. Claude,Chatgpt,Grok\n5. Data Analytics\n6. AWS Certified\n7. Data Science\n8. BIG DATA\n9. Python\n10. Ethical Hacking\n\n(72 Hours only )\n\nLike + RT + comment 'Drive'\n\nMust Follow me so I can DM you.",
+        "publishedAt": "2026-06-27T16:55:31.000Z",
         "author": {
-          "username": "freecodecamp",
-          "displayName": "freeCodeCamp.org",
-          "verified": false
+          "username": "aiwithanju",
+          "displayName": "Anjana | AI Strategist & Coach",
+          "verified": true
         },
         "engagement": {
-          "likes": 217,
+          "likes": 591,
+          "replies": 668,
+          "reposts": 187,
+          "quotes": 4
+        },
+        "media": [
+          "https://scontent-iad3-1.cdninstagram.com/v/t51.82787-15/728627202_17977076481105005_209164695399005645_n.jpg?stp=c0.200.799.799a_dst-jpg_e35_s799x799_tt6&_nc_cat=108&ig_cache_key=MzkyODg4MjY1MTY3MDg3MzE2NA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNzk5LnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=UMllvfQx1EkQ7kNvwFF9ds9&_nc_oc=AdqXPX71ockRBl2OVRF5O6A7XUeFx-wy4HykpHzxP2mPrFg1NyTsC4-K4HpbZ7gB07g&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad3-1.cdninstagram.com&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_ss=7a22e&oh=00_AQDcDCZ_P25J_UxIJSHQ3BAKX2ikLzNcr-Sl_tCl_rPuhg&oe=6A6E18CF"
+        ]
+      },
+      {
+        "platform": "threads",
+        "id": "3945514045746596834",
+        "code": "DbBSB7RCkvi",
+        "url": "https://www.threads.net/@withclaudeprompts/post/DbBSB7RCkvi",
+        "text": "All Paid Courses (Free for First 4500 People)\n𝗣𝗮𝗶𝗱 𝗖𝗼𝘂𝗿𝘀𝗲 𝗙𝗥𝗘𝗘 (PART - 3)\n1. Artificial Intelligence\n2. Machine Learning\n3. Cloud Computing\n4. Ethical Hacking\n5. Data Analytics\n6. AWS Certified\n7. Data Science\n8. BIG DATA\n9. Python\n10. MBA\n(72 Hours only )\n\nTo get-\n1. Follow me\n@withclaudeprompts \n[MUST]\n2. Like & Retweet to get DM\n3. Reply \" All \"",
+        "publishedAt": "2026-07-20T15:39:08.000Z",
+        "author": {
+          "username": "withclaudeprompts",
+          "displayName": "With claude prompts",
+          "verified": null
+        },
+        "engagement": {
+          "likes": 222,
+          "replies": 366,
+          "reposts": 90,
+          "quotes": 3
+        },
+        "media": [
+          "https://scontent-iad3-2.cdninstagram.com/v/t51.82787-15/751181197_17932649175349487_5570522177976349227_n.jpg?stp=cp6_dst-jpg_e35_tt6&_nc_cat=103&ig_cache_key=Mzk0NTUxMzg2MDI0MzA5NDA2MA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTE3OS5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=JSwVzU_H3Q4Q7kNvwFxQo2_&_nc_oc=AdoFCfxIagstWXjF22IdoGQbWFw8UrQPTGqgDRxhw925PVjkv9PoKk5NWH20Uz_dmLw&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad3-2.cdninstagram.com&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_ss=7a22e&oh=00_AQDwgfkkK8UlEqqa3kg-i7hKm0WDbECiRP3-SsgpP2f2dg&oe=6A6E49BB",
+          "https://scontent-iad3-2.cdninstagram.com/v/t51.82787-15/752740928_17932649172349487_6765669894735858771_n.jpg?stp=cp6_dst-jpg_e35_tt6&_nc_cat=103&ig_cache_key=Mzk0NTUxMzg2MDE3NTkzMDg5MA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTE3OS5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=3hsiZ_5t8gkQ7kNvwHVuyyh&_nc_oc=AdoxW87GjLAqaQ5taO0PwwBdcaiQ2zxTtDxxV3FlNB96FKru_oASz-xezHNOzZ-R0C8&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad3-2.cdninstagram.com&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_ss=7a22e&oh=00_AQB_JsuMh4Ky5P3LDsFq0GLY5DosMUMgIDXHh1SUtmr8IQ&oe=6A6E26AD"
+        ]
+      },
+      {
+        "platform": "threads",
+        "id": "3557348422268871722",
+        "code": "DFePYrboeQq",
+        "url": "https://www.threads.net/@theartificialintelligence/post/DFePYrboeQq",
+        "text": "🇨🇳🇺🇸 DeepSeek tells the world that artificial intelligence is not American intelligence, and the United States has no right to monopolize the development of AI that belongs to all mankind.\n\n-Dr. Victor Gao",
+        "publishedAt": "2025-01-31T02:04:57.000Z",
+        "author": {
+          "username": "theartificialintelligence",
+          "displayName": "Artificial Intelligence | AI",
+          "verified": true
+        },
+        "engagement": {
+          "likes": 10771,
+          "replies": 823,
+          "reposts": 761,
+          "quotes": 50
+        },
+        "media": [
+          "https://scontent-iad6-1.cdninstagram.com/o1/v/t16/f2/m84/AQPR4zUqReqf-s4ildWOQeBb718tDuYqeErpvd3aGhr4jI7THlrcuR7esStJjWXCkmLl-XURcNSrf7AsUKFmac0NgM-QfunN0v1quQo.mp4?_nc_cat=109&_nc_sid=5e9851&_nc_ht=scontent-iad6-1.cdninstagram.com&_nc_ohc=3icBpA4DDyYQ7kNvwEn6MIV&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uRkVFRC5DMy4xMjgwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6OTU1NDY3MDkxNzkyNDE0MiwiYXNzZXRfYWdlX2RheXMiOjU0MywidmlfdXNlY2FzZV9pZCI6MTAxNjQsImR1cmF0aW9uX3MiOjI2MiwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=6df3e1b4c37b0184&_nc_vs=HBksFQIYTGlnX2JhY2tmaWxsX3RpbWVsaW5lX3ZvZC9FRjRCRkY3RkY3NEM5REZERjE1QUJDQUI1OEU4Rjk4Ql92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYOnBhc3N0aHJvdWdoX2V2ZXJzdG9yZS9HTFRwVkJ6VThfSDFnalVIQUtJNTJLZkhlbVZ2YmtZTEFBQUYVAgLIARIAKAAYABsCiAd1c2Vfb2lsATEScHJvZ3Jlc3NpdmVfcmVjaXBlATEVAAAm3NSR4IX7-CEVAigCQzMsF0BwYAAAAAAAGBJkYXNoX2Jhc2VsaW5lXzFfdjERAHXqB2XongEA&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_zt=28&_nc_ss=7a22e&oh=00_AQB1FVQj8uhA-qSKtliVH9A4okUJTCCDLGUwpQ_F9WoCFA&oe=6A6A352B",
+          "https://scontent-iad3-2.cdninstagram.com/v/t51.71878-15/474888843_486869244173785_943828438724363456_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=111&ig_cache_key=MzU1NzM0ODQyMjI2ODg3MTcyMg%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=0VAQZJ_qXi0Q7kNvwGqBNI3&_nc_oc=AdoH9VZA4GRIGWKMgL1yjXMwYI-Fyg1PezSOy1SBEJcSjjpPNYSj1lfGZc8BpNXYpao&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad3-2.cdninstagram.com&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_ss=7a22e&oh=00_AQA50Esw1q5yzm582T9AdRk2I27NSFt0AqFgSRDI6juCUg&oe=6A6E49AA"
+        ]
+      },
+      {
+        "platform": "threads",
+        "id": "3748832590774943568",
+        "code": "DQGh2EPjD9Q",
+        "url": "https://www.threads.net/@leon_paul_h/post/DQGh2EPjD9Q",
+        "text": "I hear a lot of people saying AI is good for nothing and shouldn’t exist. You’re probably thinking of Gen-AI. \nHere is the system I built with the same AI detecting lethal landmines, designed to look like leaves, amongst thousands of leaves. \nHumans cannot do this. This saves lives. This replaces a job no one wants to do. \nThis is AI.",
+        "publishedAt": "2025-10-22T06:51:14.000Z",
+        "author": {
+          "username": "leon_paul_h",
+          "displayName": "Leon",
+          "verified": null
+        },
+        "engagement": {
+          "likes": 12474,
+          "replies": 506,
+          "reposts": 514,
+          "quotes": 44
+        },
+        "media": [
+          "https://scontent-iad6-1.cdninstagram.com/o1/v/t16/f2/m69/AQOkoj6S3epfmd-hIhzbEIY3R2MGQFM-DV4GZz5V2s_jNTk_akx2OL8oxQCez-1O30MfEc1OK3Pzr7XjweTd5fRg.mp4?strext=1&_nc_cat=102&_nc_sid=8bf8fe&_nc_ht=scontent-iad6-1.cdninstagram.com&_nc_ohc=m-yQBUQLSScQ7kNvwFTNzNy&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uRkVFRC5DMy4xMjc2LnByb2dyZXNzaXZlX2gyNjQtYmFzaWMtZ2VuMl83MjBwIiwieHB2X2Fzc2V0X2lkIjoxODY5MzI3Njg3MzE3NTI3LCJhc3NldF9hZ2VfZGF5cyI6Mjc5LCJ2aV91c2VjYXNlX2lkIjoxMDE2NCwiZHVyYXRpb25fcyI6OCwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_zt=28&_nc_ss=7a22e&oh=00_AQCZHctHg62bx4zvKy6hZ2qWaUI-0cgM7_IatYkCxlYqqA&oe=6A6E297A",
+          "https://scontent-iad6-1.cdninstagram.com/v/t51.71878-15/570177049_4178982172340663_131830339174579264_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=102&ig_cache_key=Mzc0ODgzMjU5MDc3NDk0MzU2OA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=4XBG6uzac9AQ7kNvwHPWFtk&_nc_oc=AdqS88oNRMjiJZU4CKUXNkhX8CzqQnAayBIvLz-kV2rwX11StJEp0Dg2ow1RZNZk-kM&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad6-1.cdninstagram.com&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_ss=7a22e&oh=00_AQCr5Cad4aHBdMbIjO02dvjwzuJDhFbgScrkUDFZBnwb5A&oe=6A6E2363"
+        ]
+      },
+      {
+        "platform": "threads",
+        "id": "3733107777255010279",
+        "code": "DPOqb6biG_n",
+        "url": "https://www.threads.net/@mit/post/DPOqb6biG_n",
+        "text": "MIT researchers are seeking ways to mitigate AI’s ballooning carbon footprint, from boosting algorithms’ efficiency to rethinking data centers’ designs. “This is a once-in-a-lifetime opportunity to innovate and make AI systems less carbon-intense,” Jennifer Turliuk says. https://news.mit.edu/2025/responding-to-generative-ai-climate-impact-0930",
+        "publishedAt": "2025-09-30T14:05:53.000Z",
+        "author": {
+          "username": "mit",
+          "displayName": "MIT",
+          "verified": true
+        },
+        "engagement": {
+          "likes": 108,
           "replies": 2,
-          "reposts": 25,
-          "quotes": 1
+          "reposts": 10,
+          "quotes": null
         },
         "media": [
-          "https://scontent-dfw6-2.cdninstagram.com/v/t51.82787-15/603742719_17937667041108131_2100216512462729217_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=110&ig_cache_key=Mzc5MjAyNDEyMTI1NDIwOTYwNA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuMTQ0MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=iiT0ZuLOb3cQ7kNvwGmEM-L&_nc_oc=Adopk5Ej4_mGJejR7E2mPwmvLWsisser5Hi6U33pn0TYfJuFlTjEq9h5xJGz4N_jigE&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-dfw6-2.cdninstagram.com&_nc_gid=06d0J5yh67OrHyBW9M_u0A&_nc_ss=7a22e&oh=00_AQCh-SKkaxz7kmJ6iQazhSmw6PiC8gQuecsfBx4-zSWjyg&oe=6A6138A5"
-        ]
-      },
-      {
-        "platform": "threads",
-        "id": "3943927545955151732",
-        "code": "Da7pTUMiO90",
-        "url": "https://www.threads.net/@codexatechnologiez/post/Da7pTUMiO90",
-        "text": "Every successful technology company begins with a vision. \nCodexa Technologiez was created with the ambition to become a company that builds technology, develops talent, and creates meaningful digital solutions.\nOur journey starts today with practical technology education and will continue through software development, artificial intelligence, digital innovation, and products that make an impact. This is more than a launch.\nIt's the beginning of a long-term mission.",
-        "publishedAt": "2026-07-18T11:07:02.000Z",
-        "author": {
-          "username": "codexatechnologiez",
-          "displayName": "Codexa Technologiez",
-          "verified": false
-        },
-        "engagement": {
-          "likes": null,
-          "replies": 1,
-          "reposts": null,
-          "quotes": 0
-        },
-        "media": [
-          "https://scontent-dfw6-2.cdninstagram.com/v/t51.82787-15/748986639_18034621721655357_4326533963623913041_n.webp?_nc_cat=108&ig_cache_key=Mzk0MzkyNjgxMTc5NDIyNjM1Ng%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTA4MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=4hJU3v2DcjQQ7kNvwEH_1_5&_nc_oc=AdoPS1NiPmqnC2PzFSsknYesRlGvA-hj-RhiHvAbU9J9aZ-FSNJFfMj4P0dAcB0rATA&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-dfw6-2.cdninstagram.com&_nc_gid=06d0J5yh67OrHyBW9M_u0A&_nc_ss=7a22e&oh=00_AQAzH-V-Mz4RdSU06C76of36gp2oei4wqSTT4twoDG_I6Q&oe=6A61421C",
-          "https://scontent-dfw6-1.cdninstagram.com/v/t51.82787-15/749491374_18034621778655357_2081134736969502819_n.webp?_nc_cat=101&ig_cache_key=Mzk0MzkyNjgxNjUwMDI3NzQ4MQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTA4MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=ggtI0iFTnE8Q7kNvwEAdZVi&_nc_oc=AdoKkGNcI610gYvMQkadwHtmL6pfbb_g23yF-unIQruSVo3KbvUaC-erCB5HXUlAjQc&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-dfw6-1.cdninstagram.com&_nc_gid=06d0J5yh67OrHyBW9M_u0A&_nc_ss=7a22e&oh=00_AQBSY5owF9_74b8XBe8TKc--rL_-uFHoqjXPqKQ7W_H5aw&oe=6A612248",
-          "https://scontent-dfw5-1.cdninstagram.com/v/t51.82787-15/749198702_18034621766655357_4959843574080600666_n.webp?_nc_cat=106&ig_cache_key=Mzk0MzkyNjgxNjA2NDE0MDUxMQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTA4MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=1TpuuFsV-2sQ7kNvwE_ifNP&_nc_oc=Adrcdy6XLXhY_H_DWNA6YRLbF8a4VFOJnjYixS5eg2MrNOUmw531VSCE53uml9f7ovQ&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-dfw5-1.cdninstagram.com&_nc_gid=06d0J5yh67OrHyBW9M_u0A&_nc_ss=7a22e&oh=00_AQDCYdARmhKM2DTh-4-OsPSfjAelOu79iyZwMU6Evob21Q&oe=6A611A5B",
-          "https://scontent-dfw6-2.cdninstagram.com/v/t51.82787-15/749036110_18034621763655357_7027664120882207444_n.webp?_nc_cat=110&ig_cache_key=Mzk0MzkyNjgxMTQ3NTMyMTI1Ng%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTA4MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=ZTHBirFZ7oIQ7kNvwHwIJu0&_nc_oc=Adp89wZAKXhZkOPRC4iTqh__LVWtoQq3cKyG4MDkWJGhgmeEzGY6b1di0izWxkQU-N0&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-dfw6-2.cdninstagram.com&_nc_gid=06d0J5yh67OrHyBW9M_u0A&_nc_ss=7a22e&oh=00_AQA2Smjj_OtRg492iJoqphnR3ekR9hr7Ym17NZkyN6NhrQ&oe=6A612349",
-          "https://scontent-dfw5-2.cdninstagram.com/v/t51.82787-15/749174362_18034621769655357_1494874745810643816_n.webp?_nc_cat=100&ig_cache_key=Mzk0MzkyNjgxNTUxMDM4NDI3MA%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNBUk9VU0VMX0lURU0ueHBpZHMuMTA4MC5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=Emz9ezgSxaoQ7kNvwF3U21O&_nc_oc=AdrP6h_XOCmUSZlRcVWPV6G2B2iQDFjom3Sqm6uA__rEq3B2hIoqKSSotJCNr6ZfzpI&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-dfw5-2.cdninstagram.com&_nc_gid=06d0J5yh67OrHyBW9M_u0A&_nc_ss=7a22e&oh=00_AQDd8UJcctaWPkOFF2gP5noonLtm54ygUIesGl395S3ljg&oe=6A614A33"
-        ]
-      },
-      {
-        "platform": "threads",
-        "id": "3943315486901377933",
-        "code": "Da5eIryDZuN",
-        "url": "https://www.threads.net/@econ.omicbalance/post/Da5eIryDZuN",
-        "text": "Tech stocks are taking a massive hit right now. AI chips (semiconductors) are slumping as investors worry they are overpriced. 📉\nBut while Wall Street panics over chips, one hidden AI-adjacent sector is quietly thriving.\nHere is what’s actually happening to the economy: 🧵👇",
-        "publishedAt": "2026-07-17T14:50:59.000Z",
-        "author": {
-          "username": "econ.omicbalance",
-          "displayName": "economicbalance",
-          "verified": false
-        },
-        "engagement": {
-          "likes": null,
-          "replies": 4,
-          "reposts": null,
-          "quotes": 0
-        },
-        "media": []
-      },
-      {
-        "platform": "threads",
-        "id": "3943315517570151145",
-        "code": "Da5eJIWDfLp",
-        "url": "https://www.threads.net/@econ.omicbalance/post/Da5eJIWDfLp",
-        "text": "For the last two years, the AI boom was all about digital software and the chips that power it.\nBut smart money is rotating. According to Bespoke Investment Group, the new hot sector right now is Robotics & Automation. 🤖\nWhy? Because artificial intelligence is moving from your screen into the physical world.",
-        "publishedAt": "2026-07-17T14:51:03.000Z",
-        "author": {
-          "username": "econ.omicbalance",
-          "displayName": "economicbalance",
-          "verified": false
-        },
-        "engagement": {
-          "likes": null,
-          "replies": 1,
-          "reposts": null,
-          "quotes": 0
-        },
-        "media": [
-          "https://scontent-dfw6-1.cdninstagram.com/v/t51.82787-15/750975457_18151980097464079_4204741624122441632_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=102&ig_cache_key=Mzk0MzMxNTUxNzU3MDE1MTE0NQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuMTIwNi5zZHIucmVndWxhcl9waG90by5DMyJ9&_nc_ohc=ZonCEu_tYGkQ7kNvwEYacwi&_nc_oc=Adp7xmSD1D1MbOvITK6Q6sowIGmYSZa8Kh9rrciXsjfphMpOJqHxtJ6HD8ZMajWUR58&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-dfw6-1.cdninstagram.com&_nc_gid=06d0J5yh67OrHyBW9M_u0A&_nc_ss=7a22e&oh=00_AQATb3sTwdREZ6ksjMGHbYru3N6XPBpxJFSATv9h7zvegg&oe=6A614A22"
-        ]
-      },
-      {
-        "platform": "threads",
-        "id": "3943345558727570627",
-        "code": "Da5k-SWkjTD",
-        "url": "https://www.threads.net/@wwr9738/post/Da5k-SWkjTD",
-        "text": "🚀 Crypto analysis is entering a new era. 🤖\n\nThe market is moving faster than ever.\n\nMore data.\nMore volatility.\nMore decisions to make.\n\nOmniQuant AI combines artificial intelligence with quantitative strategies to help users explore digital asset markets with smarter tools.\n\n📊 AI-powered insights\n⚡ Automated strategy support\n🌎 Real-time market monitoring\n\nThe future of crypto research is being reshaped.\n\nWant to see how it works?\n\n💬 DM “AI”",
-        "publishedAt": "2026-07-17T15:52:15.000Z",
-        "author": {
-          "username": "wwr9738",
-          "displayName": "Learning AI Trading (Luna)",
-          "verified": false
-        },
-        "engagement": {
-          "likes": null,
-          "replies": 1,
-          "reposts": null,
-          "quotes": 0
-        },
-        "media": [
-          "https://scontent-dfw6-1.cdninstagram.com/v/t51.71878-15/748115062_1546361493641212_1000488345621503954_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=101&ig_cache_key=Mzk0MzM0NTU1ODcyNzU3MDYyNw%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNjQwLnNkci52aWRlb19kZWZhdWx0X2NvdmVyX2ZyYW1lLkMzIn0%3D&_nc_ohc=Zv9kD-rkiuUQ7kNvwFOqnBu&_nc_oc=AdoC0kF3ZCzNU9MR0BtBsITP1ETZo1Gh2KwyPKAxgzMOD37p1yJ72iaj_shsIfQVB9w&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-dfw6-1.cdninstagram.com&_nc_gid=06d0J5yh67OrHyBW9M_u0A&_nc_ss=7a22e&oh=00_AQCvbtwMts8S2SFcfYw0uUo4QRTslPtnrqEiAsSgAeIorQ&oe=6A611FD5"
+          "https://scontent-iad3-2.cdninstagram.com/v/t51.82787-15/556308117_17932509414097624_2819407881773503615_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=103&ig_cache_key=MzczMzEwNzc3NzI1NTAxMDI3OQ%3D%3D.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkZFRUQueHBpZHMuNTYyLnNkci5yZWd1bGFyX3Bob3RvLkMzIn0%3D&_nc_ohc=s4xe4qnpYlwQ7kNvwGEIVzr&_nc_oc=AdoV83RboiuCZsMATPzcgU2Za39mHVTgKYbZb-w5K4WrVuFW90XnYWujsEeuXQfbTAE&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-iad3-2.cdninstagram.com&_nc_gid=uxr3e_varhREv8ajgQ0rKQ&_nc_ss=7a22e&oh=00_AQDa6bfrSMsIC5jvxzuKierH2_-ZxpBOfWC1Wz57u46opQ&oe=6A6E304D"
         ]
       }
     ]

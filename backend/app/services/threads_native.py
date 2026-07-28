@@ -4,6 +4,11 @@ Public profile pages hydrate a Relay payload
 (``BarcelonaProfilePageDirectQueryRelayPreloader``) that includes username,
 display name, bio, follower count, verified flag, and avatar. The same HTML
 also embeds recent posts under ``thread_items`` (soft-capped by the page).
+
+Keyword search pages (``/search?q=...``) hydrate
+``BarcelonaSearchResultsQueryRelayPreloader`` and likewise embed matching
+posts under ``thread_items`` (soft-capped ~20 per page render).
+
 Logged-out datacenter GETs usually redirect to login — Decodo
 ``headless=html`` returns the hydrated HTML.
 """
@@ -364,11 +369,20 @@ def _normalize_relay_post(post: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
-def parse_user_posts_html(html: str, handle: str, limit: int = 20) -> list[dict[str, Any]]:
-    """Extract unique posts from Relay ``thread_items`` blobs on a profile page."""
-    if not html or not handle:
+def _posts_from_thread_items(
+    html: str,
+    *,
+    handle: str | None = None,
+    limit: int = 20,
+) -> list[dict[str, Any]]:
+    """Extract unique posts from Relay ``thread_items`` blobs.
+
+    When ``handle`` is set, keep only that author's posts (profile pages).
+    When omitted, keep every post (search pages).
+    """
+    if not html:
         return []
-    needle = handle.lower()
+    needle = handle.lower() if handle else None
     capped = max(1, min(int(limit or 20), 100))
     posts: list[dict[str, Any]] = []
     seen: set[str] = set()
@@ -388,10 +402,11 @@ def parse_user_posts_html(html: str, handle: str, limit: int = 20) -> list[dict[
             post = item.get("post")
             if not isinstance(post, dict):
                 continue
-            user = post.get("user") if isinstance(post.get("user"), dict) else {}
-            username = safe_str(user.get("username") or user.get("userName"))
-            if username and username.lower() != needle:
-                continue
+            if needle is not None:
+                user = post.get("user") if isinstance(post.get("user"), dict) else {}
+                username = safe_str(user.get("username") or user.get("userName"))
+                if username and username.lower() != needle:
+                    continue
             normalized = _normalize_relay_post(post)
             if not normalized:
                 continue
@@ -403,6 +418,19 @@ def parse_user_posts_html(html: str, handle: str, limit: int = 20) -> list[dict[
             if len(posts) >= capped:
                 return posts
     return posts[:capped]
+
+
+def parse_user_posts_html(html: str, handle: str, limit: int = 20) -> list[dict[str, Any]]:
+    """Extract unique posts from Relay ``thread_items`` blobs on a profile page."""
+    if not html or not handle:
+        return []
+    return _posts_from_thread_items(html, handle=handle, limit=limit)
+
+
+def parse_search_html(html: str, limit: int = 25) -> list[dict[str, Any]]:
+    """Extract unique posts from Relay ``thread_items`` on a search results page."""
+    return _posts_from_thread_items(html, handle=None, limit=limit)
+
 
 
 async def _fetch_profile_html(handle: str) -> str | None:
@@ -468,3 +496,51 @@ async def user_posts(handle: str, limit: int = 20) -> list[dict[str, Any]] | Non
         return None
     log.info("threads_user_posts_native_ok", handle=raw, returned=len(posts))
     return posts
+
+async def _fetch_search_html(query: str) -> str | None:
+    from urllib.parse import quote
+
+    q = (query or "").strip()
+    if not q:
+        return None
+    url = f"https://www.threads.net/search?q={quote(q)}&serp_type=default"
+    if decodo_fetch.enabled():
+        got = await decodo_fetch.fetch_url(url, timeout=120.0, headless="html")
+        if got:
+            status, body = got
+            if status == 200 and body and (
+                "thread_items" in body
+                or "BarcelonaSearchResults" in body
+                or "XDTSearchThread" in body
+            ):
+                return body
+    try:
+        async with httpx.AsyncClient(timeout=20, headers=_UA, follow_redirects=True) as client:
+            resp = await client.get(url)
+        if resp.status_code == 200 and len(resp.text) > 2000:
+            if (
+                "thread_items" in resp.text
+                or "BarcelonaSearchResults" in resp.text
+                or "XDTSearchThread" in resp.text
+            ):
+                return resp.text
+    except httpx.HTTPError as exc:
+        log.info("threads_search_direct_fail", query=q[:80], error=str(exc))
+    return None
+
+
+async def search(query: str, limit: int = 25) -> list[dict[str, Any]] | None:
+    """Public keyword search via hydrated search-page HTML (Decodo -> direct)."""
+    q = (query or "").strip()
+    if len(q) < 2:
+        return None
+    html = await _fetch_search_html(q)
+    if not html:
+        return None
+    posts = parse_search_html(html, limit=limit)
+    if not posts:
+        log.warning("threads_search_native_parse_miss", query=q[:80], length=len(html))
+        return None
+    log.info("threads_search_native_ok", query=q[:80], returned=len(posts))
+    return posts
+
