@@ -11,6 +11,8 @@ Approach:
   plus the About popup fetched through InnerTube ``browse``.
 - Transcripts come from InnerTube ANDROID player caption tracks (the web watch
   page's timedtext URLs need a proof-of-origin token and return empty bodies).
+- Community posts come from the channel ``/posts`` tab ``ytInitialData`` plus
+  InnerTube browse continuations.
 """
 
 from __future__ import annotations
@@ -1002,3 +1004,114 @@ async def comment_replies_native(norm_url: str, comment_id: str, limit: int) -> 
     for r in replies:
         r["replyToId"] = comment_id
     return replies[:limit]
+
+
+# --------------------------------------------------------- community posts --
+def _normalize_community_post(post: dict[str, Any]) -> dict[str, Any] | None:
+    """Shape matching ``/v1/youtube/community-posts`` list items."""
+    if not isinstance(post, dict):
+        return None
+    post_id = safe_str(post.get("postId"))
+    if not post_id:
+        return None
+    text = text_of(post.get("contentText")) or ""
+    images: list[str] = []
+    linked: list[dict[str, Any]] = []
+    post_type = "text"
+    attachment = post.get("backstageAttachment") or {}
+    for renderer in walk_find(attachment, "backstageImageRenderer"):
+        url = _best_thumb({"thumbnails": ((renderer.get("image") or {}).get("thumbnails") or [])})
+        if not url:
+            thumbs = (renderer.get("image") or {}).get("thumbnails") or []
+            if thumbs and isinstance(thumbs[-1], dict):
+                url = safe_str(thumbs[-1].get("url"))
+        if url:
+            if url.startswith("//"):
+                url = "https:" + url
+            images.append(url)
+            post_type = "image"
+    for key in ("videoRenderer", "compactVideoRenderer", "gridVideoRenderer"):
+        for vr in walk_find(attachment, key):
+            vid = safe_str(vr.get("videoId"))
+            if not vid:
+                continue
+            linked.append(
+                {
+                    "videoId": vid,
+                    "url": f"https://www.youtube.com/watch?v={vid}",
+                    "title": text_of(vr.get("title")),
+                }
+            )
+            post_type = "video"
+    # Deduplicate images while preserving order.
+    seen_img: set[str] = set()
+    uniq_images: list[str] = []
+    for img in images:
+        if img not in seen_img:
+            seen_img.add(img)
+            uniq_images.append(img)
+    hashtags = re.findall(r"#(\w+)", text)
+    return {
+        "id": post_id,
+        "author": text_of(post.get("authorText")),
+        "text": text.strip(),
+        "likeCount": text_of(post.get("voteCount")),
+        "hashtags": hashtags,
+        "linkedVideos": linked,
+        "publishedTime": text_of(post.get("publishedTimeText")),
+        "postType": post_type,
+        "images": uniq_images,
+        "sourceUrl": f"https://www.youtube.com/post/{post_id}",
+    }
+
+
+def _collect_community_posts(data: Any) -> list[dict[str, Any]]:
+    posts: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for raw in walk_find(data, "backstagePostRenderer"):
+        item = _normalize_community_post(raw)
+        if not item:
+            continue
+        pid = item["id"]
+        if pid in seen:
+            continue
+        seen.add(pid)
+        posts.append(item)
+    return posts
+
+
+def _posts_tab_url(channel_url: str) -> str:
+    base = (channel_url or "").strip().rstrip("/")
+    # Strip existing tab suffixes.
+    for suffix in ("/posts", "/community", "/videos", "/shorts", "/streams", "/playlists", "/about"):
+        if base.lower().endswith(suffix):
+            base = base[: -len(suffix)]
+            break
+    return f"{base}/posts"
+
+
+async def community_posts_native(channel_url: str, limit: int = 20) -> list[dict[str, Any]] | None:
+    """Channel community posts from the public ``/posts`` tab + continuations."""
+    capped = max(1, min(int(limit or 20), 200))
+    tab = _posts_tab_url(channel_url)
+    data, _ = await fetch_page_data(tab)
+    if data is None:
+        return None
+    posts = _collect_community_posts(data)
+    token = find_continuation_token(data)
+    hops = 0
+    while token and len(posts) < capped and hops < 8:
+        payload = await innertube("browse", {"continuation": token})
+        if payload is None:
+            break
+        existing = {p["id"] for p in posts}
+        added = [p for p in _collect_community_posts(payload) if p["id"] not in existing]
+        if not added:
+            break
+        posts.extend(added)
+        token = find_continuation_token(payload)
+        hops += 1
+    if not posts:
+        return None
+    return posts[:capped]
+

@@ -27,6 +27,7 @@ from app.services.youtube_native import (
     channel_tab_native,
     comment_replies_native,
     comments_native,
+    community_posts_native,
     find_continuation_token,
     hashtag_native,
     innertube,
@@ -1818,6 +1819,12 @@ async def youtube_community_posts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Public /posts tab ytInitialData + InnerTube continuations.
+            native_posts = await community_posts_native(url, limit=limit)
+            if native_posts:
+                ctx["source"] = "direct"
+                return {"url": url, "totalReturned": len(native_posts), "posts": native_posts}
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_YOUTUBE_COMMUNITY,
@@ -1846,12 +1853,14 @@ async def youtube_community_posts(
                         "sourceUrl": safe_str(p.get("post_url")) or url,
                     }
                 )
+            if not posts:
+                raise HTTPException(status_code=404, detail="No community posts found")
             ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
             endpoint="youtube.community-posts",
-            params={"url": url, "limit": limit, "v": 2},
+            params={"url": url, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
