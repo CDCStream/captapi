@@ -928,9 +928,198 @@ async def resolve_username(user_id: str) -> str | None:
     return None
 
 
+async def _fetch_web_profile_info_session(handle: str, session_id: str) -> dict[str, Any] | None:
+    """``web_profile_info`` with ``IG_SESSION_ID`` (bypasses logged-out 429 / require_login)."""
+    ds_user_id = session_id.split(":", 1)[0] if ":" in session_id else ""
+    cookies: dict[str, str] = {"sessionid": session_id}
+    if ds_user_id.isdigit():
+        cookies["ds_user_id"] = ds_user_id
+    url = (
+        "https://www.instagram.com/api/v1/users/web_profile_info/"
+        f"?username={urllib.parse.quote(handle)}"
+    )
+    referer = f"https://www.instagram.com/{handle}/"
+    tiers: list[str | None] = [None, "datacenter", "residential"]
+    for tier in tiers:
+        try:
+            async with httpx.AsyncClient(
+                timeout=20,
+                proxy=proxy_for(tier) if tier else None,
+                follow_redirects=True,
+                cookies=cookies,
+            ) as client:
+                await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
+                csrf = client.cookies.get("csrftoken") or ""
+                resp = await client.get(
+                    url,
+                    headers={
+                        "User-Agent": _UA,
+                        "X-IG-App-ID": _IG_APP_ID,
+                        "X-CSRFToken": csrf,
+                        "X-Requested-With": "XMLHttpRequest",
+                        "X-ASBD-ID": "129477",
+                        "Accept": "*/*",
+                        "Referer": referer,
+                        "Sec-Fetch-Dest": "empty",
+                        "Sec-Fetch-Mode": "cors",
+                        "Sec-Fetch-Site": "same-origin",
+                    },
+                )
+        except httpx.HTTPError as exc:
+            log.info(
+                "ig_wpi_session_transport",
+                tier=tier or "direct",
+                error=str(exc)[:120],
+            )
+            continue
+        if resp.status_code != 200:
+            log.info(
+                "ig_wpi_session_http",
+                tier=tier or "direct",
+                status=resp.status_code,
+                body=(resp.text or "")[:80],
+            )
+            continue
+        try:
+            payload = resp.json()
+        except ValueError:
+            continue
+        user = (payload.get("data") or {}).get("user") or payload.get("user")
+        if isinstance(user, dict) and (user.get("username") or user.get("id")):
+            return user
+    return None
+
+
+def parse_profile_from_html(html: str, handle: str) -> dict[str, Any] | None:
+    """Best-effort user dict from a rendered profile page (Decodo / browser HTML).
+
+    Used when ``web_profile_info`` is rate-limited or returns Instagram's
+    ``laser.provider`` 400 for some business accounts.
+    """
+    if not html or not handle:
+        return None
+    want = handle.lstrip("@").lower()
+    # Anchor on this profile's username — earlier "username" keys are often the viewer.
+    anchors = list(
+        re.finditer(rf'"username"\s*:\s*"{re.escape(want)}"', html, re.I)
+    )
+    if not anchors:
+        return None
+
+    def _from_window(window: str) -> dict[str, Any] | None:
+        def _str(key: str) -> str | None:
+            m = re.search(rf'"{key}"\s*:\s*"((?:\\.|[^"\\])*)"', window)
+            if not m:
+                return None
+            try:
+                return json.loads(f'"{m.group(1)}"')
+            except ValueError:
+                return m.group(1)
+
+        def _int(key: str) -> int | None:
+            m = re.search(rf'"{key}"\s*:\s*(\d+)', window)
+            return int(m.group(1)) if m else None
+
+        def _bool(key: str) -> bool | None:
+            m = re.search(rf'"{key}"\s*:\s*(true|false)', window)
+            if not m:
+                return None
+            return m.group(1) == "true"
+
+        followers = _int("follower_count")
+        if followers is None:
+            m = re.search(
+                r'"edge_followed_by"\s*:\s*\{\s*"count"\s*:\s*(\d+)',
+                window,
+            )
+            followers = int(m.group(1)) if m else None
+        following = _int("following_count")
+        if following is None:
+            m = re.search(r'"edge_follow"\s*:\s*\{\s*"count"\s*:\s*(\d+)', window)
+            following = int(m.group(1)) if m else None
+        media = _int("media_count") or _int("all_media_count")
+        if media is None:
+            m = re.search(
+                r'"edge_owner_to_timeline_media"\s*:\s*\{\s*"count"\s*:\s*(\d+)',
+                window,
+            )
+            media = int(m.group(1)) if m else None
+        bio = _str("biography")
+        full_name = _str("full_name")
+        pic = _str("profile_pic_url_hd") or _str("profile_pic_url")
+        external = _str("external_url")
+        verified = _bool("is_verified")
+        uid = _str("id")
+        if uid is None:
+            n = _int("id")
+            uid = str(n) if n is not None else None
+        if followers is None and not bio and not full_name:
+            return None
+        return {
+            "username": want,
+            "full_name": full_name,
+            "biography": bio,
+            "follower_count": followers,
+            "following_count": following,
+            "media_count": media,
+            "is_verified": verified,
+            "profile_pic_url": pic,
+            "external_url": external,
+            "id": uid,
+        }
+
+    fallback: dict[str, Any] | None = None
+    for anchor in anchors:
+        # follower_count often sits a few KB before the username key in the same node.
+        start = max(0, anchor.start() - 4000)
+        end = min(len(html), anchor.end() + 6000)
+        parsed = _from_window(html[start:end])
+        if not parsed:
+            continue
+        if parsed.get("follower_count") is not None:
+            return parsed
+        if fallback is None:
+            fallback = parsed
+    return fallback
+
+
+async def fetch_web_profile_info_via_decodo(username: str) -> dict[str, Any] | None:
+    """Render the profile page via Decodo and parse counts / bio from HTML."""
+    from app.services import decodo_fetch
+
+    handle = username.lstrip("@")
+    if not decodo_fetch.enabled() or not handle:
+        return None
+    got = await decodo_fetch.fetch_url(
+        f"https://www.instagram.com/{handle}/",
+        timeout=90.0,
+        headless="html",
+    )
+    if not got:
+        return None
+    status, body = got
+    if status != 200 or not body:
+        return None
+    user = parse_profile_from_html(body, handle)
+    if user:
+        log.info(
+            "ig_wpi_decodo_html_ok",
+            handle=handle,
+            followers=user.get("follower_count"),
+        )
+    else:
+        log.info("ig_wpi_decodo_html_miss", handle=handle, length=len(body))
+    return user
+
+
 async def fetch_web_profile_info(username: str) -> dict[str, Any] | None:
-    """Rich logged-out profile via users/web_profile_info/?username=. Returns
-    the raw ``user`` node (69+ fields incl. counts, bio, verification)."""
+    """Rich profile via users/web_profile_info/?username=.
+
+    Order: logged-out proxy tiers → ``IG_SESSION_ID`` (skips 429/login wall) →
+    Decodo HTML parse (covers business accounts that 400 on WPI).
+    """
+    from app.core.config import get_settings
+
     handle = username.lstrip("@")
     url = f"https://www.instagram.com/api/v1/users/web_profile_info/?username={urllib.parse.quote(handle)}"
     referer = f"https://www.instagram.com/{handle}/"
@@ -945,7 +1134,14 @@ async def fetch_web_profile_info(username: str) -> dict[str, Any] | None:
         user = (payload.get("data") or {}).get("user") or payload.get("user")
         if isinstance(user, dict) and (user.get("username") or user.get("id")):
             return user
-    return None
+
+    session = _normalize_ig_session_id(get_settings().IG_SESSION_ID or "")
+    if session:
+        user = await _fetch_web_profile_info_session(handle, session)
+        if user is not None:
+            return user
+
+    return await fetch_web_profile_info_via_decodo(handle)
 
 
 def _edge_count(value: Any) -> int | None:
