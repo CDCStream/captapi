@@ -658,6 +658,20 @@ async def instagram_comments(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Logged-out Polaris only embeds ~2 preview comments. Enough when
+            # the thread is tiny or limit is tiny; otherwise try Apify and fall
+            # back to the preview if Apify is over quota / failing.
+            native = await instagram_native.comments_native(url, limit=limit)
+            preview = (native or {}).get("comments") or []
+            if native is not None and (not native.get("hasMore") or limit <= len(preview)):
+                ctx["source"] = "direct"
+                return {
+                    "platform": "instagram",
+                    "url": url,
+                    "totalReturned": len(preview[:limit]),
+                    "comments": preview[:limit],
+                }
+
             async def _apify() -> dict[str, Any]:
                 apify = get_apify()
                 items = await apify.run_actor_sync(
@@ -688,12 +702,23 @@ async def instagram_comments(
                     "comments": comments,
                 }
 
-            ctx["source"] = "apify"
-            return await _apify()
+            try:
+                ctx["source"] = "apify"
+                return await _apify()
+            except ApifyError:
+                if native is not None and preview:
+                    ctx["source"] = "direct"
+                    return {
+                        "platform": "instagram",
+                        "url": url,
+                        "totalReturned": len(preview[:limit]),
+                        "comments": preview[:limit],
+                    }
+                raise
 
         data = await cached_or_run(
             endpoint="instagram.comments",
-            params={"url": url, "limit": limit, "v": 4},
+            params={"url": url, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

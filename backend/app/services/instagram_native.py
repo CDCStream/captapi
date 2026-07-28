@@ -167,6 +167,87 @@ async def fetch_post_details(shortcode: str) -> dict[str, Any] | None:
     }
 
 
+def _map_preview_comment(raw: dict[str, Any], *, post_url: str) -> dict[str, Any] | None:
+    """Map Polaris ``preview_comments`` / XDTCommentDict → comments API row."""
+    cid = safe_str(raw.get("pk") or raw.get("id"))
+    text = (raw.get("text") or "").strip()
+    if not cid and not text:
+        return None
+    user = raw.get("user") if isinstance(raw.get("user"), dict) else {}
+    author = safe_str(user.get("username"))
+    created = safe_int(raw.get("created_at") or raw.get("created_at_utc"))
+    published = (
+        datetime.fromtimestamp(created, tz=timezone.utc).isoformat().replace("+00:00", "Z")
+        if created
+        else None
+    )
+    return {
+        "id": cid,
+        "url": f"{post_url.rstrip('/')}/c/{cid}/" if cid and post_url else None,
+        "text": text,
+        "author": author,
+        "authorAvatarUrl": safe_str(user.get("profile_pic_url")),
+        "authorIsVerified": bool(user.get("is_verified")) if user.get("is_verified") is not None else False,
+        "likeCount": safe_int(raw.get("comment_like_count") or raw.get("like_count")) or 0,
+        "publishedAt": published,
+        "replyCount": safe_int(raw.get("child_comment_count") or raw.get("reply_count")) or 0,
+    }
+
+
+async def comments_native(url: str, *, limit: int = 50) -> dict[str, Any] | None:
+    """Logged-out comments from Polaris media ``preview_comments``.
+
+    Instagram only embeds ~2 preview comments on the public media payload.
+    Full pagination (``PolarisPostCommentsPaginationQuery`` / ``api/v1/.../comments``)
+    requires a real browser session or is soft-blocked (429 / login HTML).
+    Returns a partial list plus ``totalComments`` / ``hasMore`` so callers can
+    fall through to Apify when more rows are needed.
+    """
+    from app.utils.url import extract_instagram_shortcode
+
+    shortcode = extract_instagram_shortcode(url)
+    if not shortcode:
+        return None
+    media = await _fetch_item(shortcode)
+    if media is None:
+        return None
+    previews = media.get("preview_comments") or []
+    if not isinstance(previews, list) or not previews:
+        # Confirmed empty thread vs. gated — if comment_count is 0, succeed empty.
+        total = safe_int(media.get("comment_count")) or 0
+        if total == 0:
+            return {
+                "platform": "instagram",
+                "url": url,
+                "totalReturned": 0,
+                "totalComments": 0,
+                "hasMore": False,
+                "comments": [],
+            }
+        return None
+    post_url = f"https://www.instagram.com/p/{shortcode}/"
+    comments: list[dict[str, Any]] = []
+    for raw in previews:
+        if not isinstance(raw, dict):
+            continue
+        mapped = _map_preview_comment(raw, post_url=post_url)
+        if mapped and mapped.get("text"):
+            comments.append(mapped)
+        if len(comments) >= limit:
+            break
+    if not comments:
+        return None
+    total = safe_int(media.get("comment_count")) or len(comments)
+    return {
+        "platform": "instagram",
+        "url": url,
+        "totalReturned": len(comments),
+        "totalComments": total,
+        "hasMore": total > len(comments),
+        "comments": comments,
+    }
+
+
 async def fetch_highlight_reel(highlight_id: str) -> dict[str, Any] | None:
     """Details for one Story Highlight album via the logged-out reels_media
     endpoint. ``highlight_id`` is the numeric id (no ``highlight:`` prefix).
@@ -439,9 +520,15 @@ async def _fetch_usertags_once(
     if resp.status_code != 200:
         log.info("ig_usertags_http_error", attempt=attempt, status=resp.status_code)
         return None
+    # Logged-out IPs often get HTTP 200 with the login HTML shell instead of JSON.
+    ctype = (resp.headers.get("content-type") or "").lower()
+    if "text/html" in ctype or (resp.text[:32].lstrip().startswith("<!DOCTYPE") or resp.text[:32].lstrip().startswith("<html")):
+        log.info("ig_usertags_login_wall", attempt=attempt)
+        return None
     try:
         payload = resp.json()
     except ValueError:
+        log.info("ig_usertags_non_json", attempt=attempt)
         return None
     items = payload.get("items")
     if not isinstance(items, list):
