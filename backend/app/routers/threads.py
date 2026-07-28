@@ -16,9 +16,10 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
+from app.services import threads_native as native
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
-from app.utils.formatters import safe_int, safe_str
+from app.utils.formatters import safe_int, safe_str, strip_empty
 from app.utils.url import (
     detect_url_platform,
     extract_threads_post_code,
@@ -149,7 +150,10 @@ def _normalize_post(item: dict[str, Any], *, include_author_image: bool = True) 
 
 def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
     username = item.get("username") or item.get("userName")
-    return {
+    verified = item.get("is_verified")
+    if verified is None:
+        verified = item.get("isVerified")
+    return strip_empty({
         "platform": "threads",
         "username": safe_str(username),
         "url": safe_str(item.get("url"))
@@ -157,10 +161,10 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
         "id": safe_str(item.get("pk") or item.get("id") or item.get("userId") or item.get("user_id")),
         "name": safe_str(item.get("full_name") or item.get("fullName") or item.get("name")),
         "bio": safe_str(item.get("biography") or item.get("bio")),
-        "verified": item.get("is_verified") or item.get("isVerified"),
+        "verified": bool(verified) if verified is not None else None,
         "followers": safe_int(item.get("follower_count") or item.get("followerCount") or item.get("followers")),
         "profileImage": safe_str(item.get("profile_pic_url") or item.get("profilePicUrl")),
-    }
+    })
 
 
 def _normalize_post_download(item: dict[str, Any]) -> dict[str, Any]:
@@ -201,6 +205,12 @@ async def threads_profile(
         base_credits=CREDIT_PROFILE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Hydrated Threads profile HTML first (Decodo headless → Relay JSON).
+            native_profile = await native.profile_by_handle(handle)
+            if native_profile and native_profile.get("username"):
+                ctx["source"] = "direct"
+                return _normalize_profile(native_profile)
+
             apify = get_apify()
             # The automation-lab scraper has a dedicated profile mode with
             # followers/bio/verified; the user-media actor only emits posts.
@@ -211,11 +221,12 @@ async def threads_profile(
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Profile not found")
+            ctx["source"] = "apify"
             return _normalize_profile(items[0])
 
         data = await cached_or_run(
             endpoint="threads.profile",
-            params={"handle": handle, "v": 2},
+            params={"handle": handle, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

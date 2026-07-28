@@ -2457,7 +2457,7 @@
     "name": "Threads Profile",
     "path": "/v1/threads/profile",
     "credits": 1,
-    "summary": "Profile info & stats for a Threads account.",
+    "summary": "Public Threads profile — bio, followers, verified status, and avatar.",
     "params": [
       {
         "name": "url",

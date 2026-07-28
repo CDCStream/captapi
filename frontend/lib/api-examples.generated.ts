@@ -9856,13 +9856,13 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "threads-profile": {
     "platform": "threads",
     "username": "zuck",
-    "url": "https://www.threads.com/@zuck",
-    "id": "314216",
+    "url": "https://www.threads.net/@zuck",
+    "id": "63055343223",
     "name": "Mark Zuckerberg",
-    "bio": "I build stuff",
+    "bio": "Mostly superintelligence and MMA takes",
     "verified": true,
-    "followers": 16944245,
-    "profileImage": "https://scontent-iad3-1.cdninstagram.com/v/t51.82787-19/550234512_18532404670058217_8758519395071163708_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-iad3-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gHhCuv_UfyUzmhG3nLGseSYolPGdfSlm-A-WaXhNGv2y-z35btGPMl0TAWlAAByrRg&_nc_ohc=Y_4zRJVeNMAQ7kNvwHwpXbs&_nc_gid=N8H8oL674klY7Hz4oO99Qg&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQDBNj3Y8JrjPB62QX0RrPsaCxak_RnYlt4pIJWdcG_01w&oe=6A61336D&_nc_sid=8b3546"
+    "followers": 5678924,
+    "profileImage": "https://scontent-jnb2-1.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s640x640_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-jnb2-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gHgB_JnWjUcMF3ClGD3Nu7EeqbHtOfvRDMiZVytNZClmulwOSiZrKkL1AD3tKWycU0&_nc_ohc=vLH8jAZMCqoQ7kNvwFbrSGC&_nc_gid=gvP8XGFZH3cYku-7CAFvRg&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQA87udQfmdL7wcfVw31zEURt8uRpJ2kttrIdyNDf266rA&oe=6A6E2ABE&_nc_sid=10d13b"
   },
   "threads-search": {
     "query": "artificial intelligence",
