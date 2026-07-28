@@ -11385,8 +11385,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "original": true,
     "album": null,
     "duration": 29.0,
-    "coverUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-maliva-avt-0068/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter-q:1080:1080:q70.heic?dr=9608&idc=no1a&ps=87d6e48a&refresh_token=d7958f04&s=MUSIC_AWEME&sc=avatar&shcp=f6441914&shp=d05b14bd&t=223449c4&x-expires=1784541600&x-signature=LFiu8NxbOUIdZBttXi6v1ZbhslQ%3D",
-    "playUrl": "https://v77.tiktokcdn-eu.com/e00a69ba239f8d05e10183a517377999/6a5df7fe/video/tos/maliva/tos-maliva-ve-27dcd7c799-us/octh0vOCIFiDR7mlHFv5yoiVBJHAv7hAYMaE8/?a=1233&bti=ODszNWYuMDE6&&bt=125&ft=.NpOcInz7ThOtjDGXq8Zmo&mime_type=audio_mpeg&rc=aGc7aDc8Nzc1ZjQ2NjYzOkBpM2l5a3U5cjxoOzMzaTU8NEAzYGE0NTU2X14xMjFhMzIwYSNyNjUuMmRrcmNhLS1kMTJzcw%3D%3D&vvpl=1&l=2026071910264181AA1ADE74682C1427B6&btag=e00088000"
+    "coverUrl": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter-q:1080:1080:q70.webp?dr=10796&idc=my&ps=87d6e48a&refresh_token=765a9f29&s=MUSIC_AWEME&sc=avatar&shcp=f6441914&shp=d05b14bd&t=223449c4&x-expires=1785315600&x-signature=8LI4%2BlUJaaW%2FwmqFRm1LaQGCx%2FY%3D",
+    "playUrl": "https://sf16-ies-music-va.tiktokcdn.com/obj/ies-music-ttp-dup-us/tx27650420977368582943.mp3"
   },
   "tiktok-summarizer": {
     "platform": "tiktok",

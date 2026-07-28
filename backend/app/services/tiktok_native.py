@@ -1305,3 +1305,54 @@ async def music_posts_native(music_id_or_url: str, limit: int) -> list[dict[str,
         if page_i == 0 and not collected:
             return None
     return collected[:limit] if collected else None
+
+
+async def song_details_native(music_id_or_url: str) -> dict[str, Any] | None:
+    """Song/sound metadata from the first music/aweme row (same mobile API as
+    ``music_posts_native``). Returns the /v1/tiktok/song-details shape, or
+    ``None`` so the caller can fall back to Apify.
+    """
+    music_id = parse_music_id(music_id_or_url)
+    if not music_id:
+        return None
+    page = await _music_page(music_id, "0", 1, expect_items=True)
+    if page is None:
+        return None
+    awemes = page.get("aweme_list") or []
+    if not awemes or not isinstance(awemes[0], dict):
+        return None
+    music = awemes[0].get("music")
+    if not isinstance(music, dict):
+        return None
+
+    title = safe_str(music.get("title"))
+    original = music.get("is_original_sound")
+    if original is None:
+        original = music.get("is_original")
+    if original is None and title:
+        original = title.lower().startswith("original sound")
+
+    album = safe_str(music.get("album"))
+    cover = (
+        _url_list_first(music.get("cover_large"))
+        or _url_list_first(music.get("cover_medium"))
+        or _url_list_first(music.get("cover_thumb"))
+    )
+    play = _url_list_first(music.get("play_url"))
+    url = (
+        music_id_or_url
+        if music_id_or_url.startswith("http")
+        else f"https://www.tiktok.com/music/sound-{music_id}"
+    )
+    return {
+        "platform": "tiktok",
+        "url": url,
+        "id": safe_str(music.get("id_str") or music.get("id")) or music_id,
+        "title": title,
+        "author": safe_str(music.get("author") or music.get("owner_nickname")),
+        "original": bool(original) if original is not None else None,
+        "album": album or None,
+        "duration": safe_float(music.get("duration")),
+        "coverUrl": cover,
+        "playUrl": play,
+    }

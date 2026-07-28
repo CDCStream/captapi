@@ -35,6 +35,7 @@ from app.services.tiktok_native import (
     music_posts_native,
     profile_region_native,
     search_suggestions_native,
+    song_details_native,
     video_details_native,
 )
 from app.utils.countries import country_name
@@ -2095,6 +2096,13 @@ async def tiktok_song_details(
         base_credits=CREDIT_VIDEO_DETAILS + 1,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Primary: music/aweme mobile API (~1-3s). Same metadata the sound
+            # page uses; Apify actors stay as fallback for soft-blocked exits.
+            native = await song_details_native(url)
+            if native is not None and native.get("title"):
+                ctx["source"] = "direct"
+                return native
+
             apify = get_apify()
             # The TikTok music URL ends with the numeric sound id; parse it here
             # because apidojo returns the id as a JS number (precision loss).
@@ -2316,7 +2324,7 @@ async def tiktok_song_details(
 
         data = await cached_or_run(
             endpoint="tiktok.song-details",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
