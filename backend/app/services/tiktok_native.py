@@ -1430,10 +1430,60 @@ def _map_search_user(row: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
+def _collect_search_users(rows: list[Any], *, limit: int) -> list[dict[str, Any]]:
+    users: list[dict[str, Any]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        mapped = _map_search_user(row)
+        if mapped:
+            users.append(mapped)
+        if len(users) >= limit:
+            break
+    return users
+
+
+async def _search_users_via_general(
+    seed: str, *, limit: int, cursor: int
+) -> tuple[list[dict[str, Any]], bool, int | None] | None:
+    """Fallback: pull type=4 user cards from ``/api/search/general/full/``.
+
+    Railway IPs sometimes soft-block ``/search/user/full/`` (tiny empty JSON)
+    while general search still returns large payloads with user cards.
+    """
+    from app.services import tiktok_signer
+
+    api = (
+        "https://www.tiktok.com/api/search/general/full/"
+        f"?aid=1988&app_name=tiktok_web&device_platform=web_pc"
+        f"&keyword={urllib.parse.quote(seed)}&offset={max(0, cursor)}"
+        f"&count={max(12, min(limit * 2, 30))}&user_is_login=false"
+    )
+    page = await tiktok_signer.fetch_api(api)
+    if page is None:
+        return None
+    users: list[dict[str, Any]] = []
+    for row in page.get("data") or []:
+        if not isinstance(row, dict) or row.get("type") != 4:
+            continue
+        card_users = row.get("user_list") or row.get("userList") or []
+        if not isinstance(card_users, list):
+            continue
+        for mapped in _collect_search_users(card_users, limit=limit - len(users)):
+            users.append(mapped)
+        if len(users) >= limit:
+            break
+    if not users:
+        return None
+    has_more = bool(page.get("has_more") or page.get("hasMore"))
+    next_cursor = safe_int(page.get("cursor"))
+    return users, has_more, next_cursor
+
+
 async def search_users_native(
     q: str, *, limit: int = 20, cursor: int = 0
 ) -> tuple[list[dict[str, Any]], bool, int | None] | None:
-    """User search via signer ``/api/search/user/full/``."""
+    """User search via signer ``/api/search/user/full/`` (+ general fallback)."""
     from app.services import tiktok_signer
 
     seed = (q or "").strip()
@@ -1445,26 +1495,22 @@ async def search_users_native(
         f"&keyword={urllib.parse.quote(seed)}&cursor={max(0, cursor)}"
         f"&count={max(1, min(limit, 30))}&user_is_login=false"
     )
-    page = await tiktok_signer.fetch_api(api)
-    if page is None:
-        return None
-    rows = page.get("user_list") or page.get("userList") or []
-    if not isinstance(rows, list) or not rows:
-        return None
-    users: list[dict[str, Any]] = []
-    for row in rows:
-        if not isinstance(row, dict):
-            continue
-        mapped = _map_search_user(row)
-        if mapped:
-            users.append(mapped)
-        if len(users) >= limit:
-            break
-    if not users:
-        return None
-    has_more = bool(page.get("has_more") or page.get("hasMore"))
-    next_cursor = safe_int(page.get("cursor"))
-    return users, has_more, next_cursor
+    page = None
+    for _ in range(2):
+        page = await tiktok_signer.fetch_api(api)
+        if page is not None:
+            rows = page.get("user_list") or page.get("userList") or []
+            if isinstance(rows, list) and rows:
+                break
+        page = None
+    if page is not None:
+        rows = page.get("user_list") or page.get("userList") or []
+        users = _collect_search_users(rows if isinstance(rows, list) else [], limit=limit)
+        if users:
+            has_more = bool(page.get("has_more") or page.get("hasMore"))
+            next_cursor = safe_int(page.get("cursor"))
+            return users, has_more, next_cursor
+    return await _search_users_via_general(seed, limit=limit, cursor=cursor)
 
 
 async def top_search_native(q: str, *, limit: int = 20) -> list[dict[str, Any]] | None:
@@ -1629,3 +1675,147 @@ async def song_details_native(music_id_or_url: str) -> dict[str, Any] | None:
         "coverUrl": cover,
         "playUrl": play,
     }
+
+
+async def live_status_native(handle: str) -> dict[str, Any] | None:
+    """Live status from profile rehydration ``user.roomId``.
+
+    TikTok sets ``roomId`` to a non-empty string while the creator is live and
+    ``\"\"`` when offline. That is enough for ``isLive`` + creator fields without
+    Apify. Room title/viewers/stream URLs need a separate webcast call (often
+    signed / flaky), so when live we only guarantee ``room.id``; callers can
+    still fall through to Apify if they need full room media.
+    """
+    ui = await _user_info(handle)
+    if ui is None:
+        return None
+    user = ui.get("user") or {}
+    stats_v2 = ui.get("statsV2") or {}
+    stats = ui.get("stats") or {}
+    username = safe_str(user.get("uniqueId")) or handle
+    if not username:
+        return None
+    room_id = safe_str(user.get("roomId"))
+    is_live = bool(room_id)
+    room: dict[str, Any] = {}
+    if is_live:
+        room["id"] = room_id
+        enriched = await _enrich_live_room(room_id)
+        if enriched:
+            room.update(enriched)
+    return {
+        "platform": "tiktok",
+        "username": username,
+        "isLive": is_live,
+        "creator": {
+            "displayName": safe_str(user.get("nickname")),
+            "followers": _stat(stats_v2, stats, "followerCount"),
+            "verified": bool(user.get("verified")) if user.get("verified") is not None else None,
+            "avatar": safe_str(
+                user.get("avatarLarger") or user.get("avatarMedium") or user.get("avatarThumb")
+            ),
+            "bio": safe_str(user.get("signature")),
+        },
+        "room": room,
+    }
+
+
+async def _enrich_live_room(room_id: str) -> dict[str, Any] | None:
+    """Best-effort room metadata via signer webcast endpoints."""
+    from app.services import tiktok_signer
+
+    if not room_id or not tiktok_signer.enabled():
+        return None
+    candidates = [
+        (
+            "https://webcast.tiktok.com/webcast/room/info/"
+            f"?aid=1988&room_id={urllib.parse.quote(room_id)}"
+        ),
+        (
+            "https://www.tiktok.com/api/live/detail/"
+            f"?aid=1988&roomID={urllib.parse.quote(room_id)}"
+        ),
+    ]
+    for api in candidates:
+        page = await tiktok_signer.fetch_api(api)
+        if not isinstance(page, dict):
+            continue
+        data = page.get("data") if isinstance(page.get("data"), dict) else page
+        if not isinstance(data, dict):
+            continue
+        owner = data.get("owner") if isinstance(data.get("owner"), dict) else {}
+        stream_url = data.get("stream_url") if isinstance(data.get("stream_url"), dict) else {}
+        urls: list[str] = []
+        for key in ("flv_pull_url", "hls_pull_url_map", "rtmp_pull_url"):
+            blob = stream_url.get(key)
+            if isinstance(blob, dict):
+                urls.extend(safe_str(v) for v in blob.values() if safe_str(v))
+            elif safe_str(blob):
+                urls.append(safe_str(blob))
+        title = safe_str(data.get("title") or data.get("room_title"))
+        cover_raw = data.get("cover_url")
+        cover_obj = data.get("cover")
+        if not cover_raw and isinstance(cover_obj, dict):
+            cover_list = cover_obj.get("url_list") or cover_obj.get("urlList") or []
+            cover_raw = cover_list[0] if isinstance(cover_list, list) and cover_list else None
+        elif not cover_raw:
+            cover_raw = cover_obj
+        cover = safe_str(cover_raw)
+        out = {
+            "title": title,
+            "startedAt": _iso(data.get("start_time") or data.get("create_time")),
+            "viewerCount": safe_int(
+                data.get("user_count") or data.get("viewer_count") or owner.get("follow_info")
+            ),
+            "totalEnterCount": safe_int(data.get("enter_count") or data.get("total_user")),
+            "likeCount": safe_int(data.get("like_count")),
+            "coverUrl": cover,
+            "streamUrls": urls or None,
+        }
+        if any(out.values()):
+            return {k: v for k, v in out.items() if v is not None and v != "" and v != []}
+    return None
+
+
+async def popular_hashtags_native(
+    query: str, *, limit: int = 20, n_videos: int = 25
+) -> list[dict[str, Any]] | None:
+    """Co-hashtag ranking from a native seed hashtag page (Decodo)."""
+    seed = (query or "").lstrip("#").strip()
+    if not seed:
+        return None
+    native = await hashtag_posts_native(seed, limit=max(n_videos, limit))
+    if native is None:
+        return None
+    posts, _has_more, _cursor = native
+    if not posts:
+        return None
+    agg: dict[str, dict[str, int]] = {}
+    for post in posts:
+        tags = post.get("hashtags") or []
+        if not isinstance(tags, list):
+            continue
+        plays = safe_int((post.get("engagement") or {}).get("views") or post.get("views")) or 0
+        for t in tags:
+            name = safe_str(t.get("name") if isinstance(t, dict) else t)
+            if not name:
+                continue
+            name = name.lstrip("#").lower()
+            if not name:
+                continue
+            slot = agg.setdefault(name, {"count": 0, "plays": 0})
+            slot["count"] += 1
+            slot["plays"] += plays
+    if not agg:
+        return None
+    ranked = sorted(agg.items(), key=lambda kv: (kv[1]["count"], kv[1]["plays"]), reverse=True)
+    return [
+        {
+            "name": name,
+            "url": f"https://www.tiktok.com/tag/{name}",
+            "rank": i + 1,
+            "videoCount": slot["count"],
+            "totalPlays": slot["plays"],
+        }
+        for i, (name, slot) in enumerate(ranked[:limit])
+    ]

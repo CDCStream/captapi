@@ -33,7 +33,9 @@ from app.services.tiktok_native import (
     coerce_stats_v2,
     comment_replies_native,
     hashtag_posts_native,
+    live_status_native,
     music_posts_native,
+    popular_hashtags_native,
     profile_region_native,
     search_suggestions_native,
     search_users_native,
@@ -1266,6 +1268,14 @@ async def tiktok_live(
         base_credits=CREDIT_CHANNEL_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await live_status_native(handle)
+            # Offline status is complete natively. When live, prefer Apify only
+            # if we still lack a room id (shouldn't happen) — otherwise ship
+            # native isLive + creator (+ room.id / best-effort enrich).
+            if native is not None and (not native.get("isLive") or (native.get("room") or {}).get("id")):
+                ctx["source"] = "direct"
+                return native
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK_LIVE,
@@ -1277,11 +1287,12 @@ async def tiktok_live(
             item = items[0]
             if item.get("error"):
                 raise HTTPException(status_code=404, detail="Creator not found")
+            ctx["source"] = "apify"
             return _normalize_live(item, handle)
 
         data = await cached_or_run(
             endpoint="tiktok.live",
-            params={"handle": handle, "v": 4},
+            params={"handle": handle, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1308,17 +1319,44 @@ async def tiktok_live_info(
         base_credits=7,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await live_status_native(handle)
+            if native is not None and not native.get("isLive"):
+                ctx["source"] = "direct"
+                return strip_empty(
+                    {
+                        **native,
+                        "streamUrls": (native.get("room") or {}).get("streamUrls") or [],
+                    }
+                )
+            # Live rooms: prefer Apify for stream URLs / full room payload.
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_TIKTOK_LIVE,
                 {"handles": [handle], "include_stream_urls": True},
                 max_items=1,
             )
             if not items:
+                if native is not None:
+                    ctx["source"] = "direct"
+                    return strip_empty(
+                        {
+                            **native,
+                            "streamUrls": (native.get("room") or {}).get("streamUrls") or [],
+                        }
+                    )
                 raise HTTPException(status_code=404, detail="Creator not found")
             item = items[0]
             if item.get("error"):
+                if native is not None:
+                    ctx["source"] = "direct"
+                    return strip_empty(
+                        {
+                            **native,
+                            "streamUrls": (native.get("room") or {}).get("streamUrls") or [],
+                        }
+                    )
                 raise HTTPException(status_code=404, detail="Creator not found")
             normalized = _normalize_live(item, handle)
+            ctx["source"] = "apify"
             return strip_empty(
                 {
                     **normalized,
@@ -1329,7 +1367,7 @@ async def tiktok_live_info(
 
         data = await cached_or_run(
             endpoint="tiktok.live-info",
-            params={"handle": handle, "v": 4},
+            params={"handle": handle, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2472,12 +2510,17 @@ async def tiktok_popular_hashtags(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            seed = query.lstrip("#").strip()
+            native_tags = await popular_hashtags_native(seed, limit=limit, n_videos=n_videos)
+            if native_tags:
+                ctx["source"] = "direct"
+                return {"query": query, "totalReturned": len(native_tags), "hashtags": native_tags}
+
             apify = get_apify()
             # The keyword is used as a seed hashtag (coregent's search mode is
             # unreliable, but hashtag pages are solid). We then aggregate the
             # co-occurring hashtags on those videos and rank them by frequency
             # + total plays to surface related/trending hashtags.
-            seed = query.lstrip("#").strip()
             items, _actor = await apify.run_with_fallback(
                 [
                     (
@@ -2529,11 +2572,12 @@ async def tiktok_popular_hashtags(
                 }
                 for i, (name, slot) in enumerate(ranked[:limit])
             ]
+            ctx["source"] = "apify"
             return {"query": query, "totalReturned": len(hashtags), "hashtags": hashtags}
 
         data = await cached_or_run(
             endpoint="tiktok.popular-hashtags",
-            params={"query": query, "limit": limit, "v": 2},
+            params={"query": query, "limit": limit, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
