@@ -978,6 +978,7 @@ def _reply_continuation_for_thread(thread: dict[str, Any], comment_id: str) -> s
 
 
 async def comment_replies_native(norm_url: str, comment_id: str, limit: int) -> list[dict[str, Any]]:
+    """Paginate reply continuations for ``comment_id`` (no hard ~20 cap)."""
     token, _ = await _comments_entry_token(norm_url)
     if not token:
         return []
@@ -997,12 +998,27 @@ async def comment_replies_native(norm_url: str, comment_id: str, limit: int) -> 
 
     if not reply_token:
         return []
-    payload = await innertube("next", {"continuation": reply_token}, timeout=15)
-    if payload is None:
-        return []
-    replies = _comment_payloads(payload)
-    for r in replies:
-        r["replyToId"] = comment_id
+
+    replies: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    token = reply_token
+    max_hops = max(8, (limit // 15) + 3)
+    hops = 0
+    while token and len(replies) < limit and hops < max_hops:
+        payload = await innertube("next", {"continuation": token}, timeout=15)
+        if payload is None:
+            break
+        for row in _comment_payloads(payload):
+            rid = row["id"]
+            if rid in seen:
+                continue
+            seen.add(rid)
+            row["replyToId"] = comment_id
+            replies.append(row)
+            if len(replies) >= limit:
+                break
+        token = find_continuation_token(payload)
+        hops += 1
     return replies[:limit]
 
 

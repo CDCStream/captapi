@@ -144,8 +144,9 @@ async def billed_call(
         elapsed_ms = int((time.perf_counter() - started) * 1000)
         cache_hit = bool(ctx.get("cache_hit"))
         # Respect explicit 0 overrides (empty result sets); `or` would ignore them.
+        # Failed responses must never bill or log a positive credits_used.
         override = ctx.get("credits_override")
-        if cache_hit:
+        if status_code >= 400 or cache_hit:
             credits_used = 0
         elif override is not None:
             credits_used = int(override)

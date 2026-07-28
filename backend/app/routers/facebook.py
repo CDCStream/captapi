@@ -1609,6 +1609,12 @@ async def facebook_event_details(
         base_credits=2,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Decodo headless first (same path as event-search / profile-events).
+            native = await facebook_events_native.fetch_event_details(url)
+            if native:
+                ctx["source"] = "direct"
+                return _normalize_event(native)
+
             headers = {
                 "User-Agent": (
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -1620,21 +1626,16 @@ async def facebook_event_details(
                 resp = await fetch_via_residential(url, headers=headers, timeout=8)
                 if resp.status_code < 400:
                     partial_event = _partial_event_from_page(url, resp.text)
-                    if partial_event:
-                        ctx["source"] = "direct"
-                        return partial_event
             except Exception:  # noqa: BLE001
                 pass
-            try:
-                async with httpx.AsyncClient(timeout=6, follow_redirects=True, headers=headers) as client:
-                    resp = await client.get(url)
-                if resp.status_code < 400:
-                    partial_event = _partial_event_from_page(url, resp.text)
-                    if partial_event:
-                        ctx["source"] = "direct"
-                        return partial_event
-            except Exception:  # noqa: BLE001
-                pass
+            if partial_event is None:
+                try:
+                    async with httpx.AsyncClient(timeout=6, follow_redirects=True, headers=headers) as client:
+                        resp = await client.get(url)
+                    if resp.status_code < 400:
+                        partial_event = _partial_event_from_page(url, resp.text)
+                except Exception:  # noqa: BLE001
+                    pass
 
             apify = get_apify()
             items, _actor = await apify.run_with_fallback(
@@ -1656,7 +1657,7 @@ async def facebook_event_details(
 
         data = await cached_or_run(
             endpoint="facebook.event-details",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

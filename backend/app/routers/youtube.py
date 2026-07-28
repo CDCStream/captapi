@@ -1694,7 +1694,7 @@ async def youtube_comment_replies(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native_replies = await comment_replies_native(norm_url, comment_id, limit) if limit <= 20 else []
+            native_replies = await comment_replies_native(norm_url, comment_id, limit)
             if native_replies:
                 ctx["source"] = "direct"
                 return {
@@ -1734,7 +1734,7 @@ async def youtube_comment_replies(
 
         data = await cached_or_run(
             endpoint="youtube.comment-replies",
-            params={"url": norm_url, "comment_id": comment_id, "limit": limit, "v": 3},
+            params={"url": norm_url, "comment_id": comment_id, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

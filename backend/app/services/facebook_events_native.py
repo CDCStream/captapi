@@ -309,3 +309,39 @@ async def fetch_search_events(q: str, *, limit: int = 20) -> list[dict[str, Any]
         return None
     log.info("facebook_events_native_search_ok", q=query[:80], n=len(out))
     return out
+
+
+async def fetch_event_details(url: str) -> dict[str, Any] | None:
+    """Single event page via Decodo headless HTML (richer than OG stub)."""
+    target = (url or "").strip()
+    if not target:
+        return None
+    eid_match = re.search(r"/events/(\d+)", target)
+    eid = eid_match.group(1) if eid_match else None
+    html = await _fetch_html(target)
+    if not html:
+        return None
+    raw_list = extract_events_from_html(html)
+    chosen: dict[str, Any] | None = None
+    if eid:
+        for raw in raw_list:
+            rid = str(raw.get("id") or raw.get("event_id") or "")
+            if rid == eid:
+                chosen = raw
+                break
+    if chosen is None and raw_list:
+        chosen = raw_list[0]
+    if not chosen:
+        log.info("facebook_events_native_details_empty", url=target[:120])
+        return None
+    out = normalize_raw_event(chosen)
+    if not out.get("id") and eid:
+        out["id"] = eid
+        out["event_id"] = eid
+    if not out.get("url"):
+        out["url"] = target
+        out["eventUrl"] = target
+    if not out.get("name"):
+        return None
+    log.info("facebook_events_native_details_ok", url=target[:120], id=out.get("id"))
+    return out

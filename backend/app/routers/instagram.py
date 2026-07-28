@@ -1148,11 +1148,30 @@ async def instagram_reels_search(
                     return None
                 return {"query": q, "totalReturned": len(results), "results": results}
 
-            return await _try_decodo(ctx, _decodo_run, _apify)
+            async def _explore_hydrate() -> dict[str, Any] | None:
+                results = await instagram_native.hashtag_posts_native(
+                    q, limit=limit, reels_only=True
+                )
+                if not results:
+                    return None
+                return {"query": q, "totalReturned": len(results), "results": results}
+
+            # GraphQL target first (cheap); Explore headless+Polaris before Apify.
+            if decodo.enabled():
+                gql = await _decodo_run()
+                if gql is not None:
+                    ctx["source"] = "direct"
+                    return gql
+            explore = await _explore_hydrate()
+            if explore is not None:
+                ctx["source"] = "direct"
+                return explore
+            ctx["source"] = "apify"
+            return await _apify()
 
         data = await cached_or_run(
             endpoint="instagram.reels-search",
-            params={"q": q, "limit": limit, "v": 12},
+            params={"q": q, "limit": limit, "v": 13},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1338,17 +1357,10 @@ async def instagram_reels_by_audio_id(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            async def _apify() -> dict[str, Any]:
-                items = await get_apify().run_actor_sync(
-                    settings.APIFY_ACTOR_INSTAGRAM_AUDIO,
-                    {"audioUrls": [audio_url], "maxResults": limit, "downloadVideos": False},
-                    max_items=limit,
-                )
-                reels = [
-                    decodo.strip_null_post_fields(_normalize_audio_reel(i))
-                    for i in items[:limit]
-                    if not i.get("error")
-                ]
+            native = await instagram_native.reels_by_audio_native(audio_id, limit=limit)
+            if native:
+                reels = [decodo.strip_null_post_fields(r) for r in native[:limit]]
+                ctx["source"] = "direct"
                 return {
                     "platform": "instagram",
                     "audioId": audio_id,
@@ -1357,12 +1369,28 @@ async def instagram_reels_by_audio_id(
                     "reels": reels,
                 }
 
+            items = await get_apify().run_actor_sync(
+                settings.APIFY_ACTOR_INSTAGRAM_AUDIO,
+                {"audioUrls": [audio_url], "maxResults": limit, "downloadVideos": False},
+                max_items=limit,
+            )
+            reels = [
+                decodo.strip_null_post_fields(_normalize_audio_reel(i))
+                for i in items[:limit]
+                if not i.get("error")
+            ]
             ctx["source"] = "apify"
-            return await _apify()
+            return {
+                "platform": "instagram",
+                "audioId": audio_id,
+                "audioUrl": audio_url,
+                "totalReturned": len(reels),
+                "reels": reels,
+            }
 
         data = await cached_or_run(
             endpoint="instagram.reels-by-audio-id",
-            params={"audio_id": audio_id, "limit": limit, "v": 5},
+            params={"audio_id": audio_id, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1481,11 +1509,34 @@ async def instagram_hashtag_search(
                     return None
                 return {"query": q, "totalReturned": len(results), "results": results}
 
-            return await _try_decodo(ctx, _decodo_run, _apify)
+            async def _headless_hydrate() -> dict[str, Any] | None:
+                results = await instagram_native.hashtag_posts_native(
+                    q, limit=limit, reels_only=False
+                )
+                if not results:
+                    return None
+                return {"query": q, "totalReturned": len(results), "results": results}
+
+            if decodo.enabled():
+                gql = await _decodo_run()
+                if gql is not None:
+                    ctx["source"] = "direct"
+                    return gql
+                hydrated = await _headless_hydrate()
+                if hydrated is not None:
+                    ctx["source"] = "direct"
+                    return hydrated
+            else:
+                hydrated = await _headless_hydrate()
+                if hydrated is not None:
+                    ctx["source"] = "direct"
+                    return hydrated
+            ctx["source"] = "apify"
+            return await _apify()
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",
-            params={"q": q, "limit": limit, "v": 11},
+            params={"q": q, "limit": limit, "v": 12},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

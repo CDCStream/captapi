@@ -12,6 +12,7 @@ this doc_id is its replacement.
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import json
 import re
@@ -776,3 +777,120 @@ def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
         "private": False if private is None else bool(private),
         "profileImage": safe_str(user.get("profile_pic_url_hd") or user.get("profile_pic_url")),
     }
+
+
+# Logged-out api/v1 tags / clips-music endpoints return login HTML. Decodo
+# headless Explore/audio pages still emit /reel/{code}/ and /p/{code}/ links;
+# we collect those shortcodes and hydrate via PolarisPostRootQuery.
+# Explore/audio HTML often has href="/reel/CODE/… without a quote right after /.
+_HREF_SHORTCODE_RE = re.compile(
+    r'(?:href="|href=&quot;)/(?:reel|p)/([A-Za-z0-9_-]{5,})/',
+    re.IGNORECASE,
+)
+_AUDIO_ID_RE = re.compile(r"/reels/audio/(\d+)", re.IGNORECASE)
+
+
+def shortcodes_from_html(html: str, *, limit: int = 50) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    for code in _HREF_SHORTCODE_RE.findall(html or ""):
+        if code in seen:
+            continue
+        seen.add(code)
+        out.append(code)
+        if len(out) >= limit:
+            break
+    return out
+
+
+async def fetch_shortcodes_via_decodo(url: str, *, limit: int = 50) -> list[str] | None:
+    """JS-render ``url`` via Decodo and return Instagram shortcodes, or None."""
+    from app.services import decodo_fetch
+
+    if not decodo_fetch.enabled() or limit <= 0:
+        return None
+    got = await decodo_fetch.fetch_url(url, timeout=90.0, headless="html")
+    if not got:
+        return None
+    status, body = got
+    if status != 200 or not body:
+        return None
+    codes = shortcodes_from_html(body, limit=limit)
+    if not codes:
+        log.info("ig_decodo_shortcodes_empty", url=url[:120])
+        return None
+    log.info("ig_decodo_shortcodes_ok", url=url[:120], n=len(codes))
+    return codes
+
+
+async def hydrate_shortcodes(codes: list[str], *, limit: int) -> list[dict[str, Any]]:
+    """Resolve shortcodes through Polaris (bounded concurrency)."""
+    if not codes or limit <= 0:
+        return []
+    sem = asyncio.Semaphore(4)
+    selected = codes[:limit]
+
+    async def _one(code: str) -> dict[str, Any] | None:
+        async with sem:
+            return await fetch_post_details(code)
+
+    rows = await asyncio.gather(*[_one(c) for c in selected])
+    return [r for r in rows if r]
+
+
+async def reels_by_audio_native(audio_id: str, *, limit: int = 20) -> list[dict[str, Any]] | None:
+    """Reels that use ``audio_id`` via Decodo Explore audio page + Polaris hydrate.
+
+    Listing itself is not available logged-out on api/v1; Apify remains fallthrough.
+    """
+    raw = (audio_id or "").strip()
+    if not raw:
+        return None
+    if raw.startswith("http"):
+        match = _AUDIO_ID_RE.search(raw)
+        aid = match.group(1) if match else raw.rstrip("/").split("/")[-1]
+    else:
+        aid = raw
+    if not aid.isdigit():
+        return None
+    page_url = f"https://www.instagram.com/reels/audio/{aid}/"
+    codes = await fetch_shortcodes_via_decodo(page_url, limit=limit)
+    if not codes:
+        return None
+    posts = await hydrate_shortcodes(codes, limit=limit)
+    if not posts:
+        return None
+    for post in posts:
+        code = safe_str(post.get("id"))
+        if code:
+            post["url"] = f"https://www.instagram.com/reel/{code}/"
+        post["musicId"] = aid
+        post["musicUrl"] = page_url
+    return posts
+
+
+async def hashtag_posts_native(
+    tag: str, *, limit: int = 20, reels_only: bool = False
+) -> list[dict[str, Any]] | None:
+    """Hashtag Explore via Decodo headless + Polaris hydrate (graphql fallthrough)."""
+    name = (tag or "").lstrip("#").strip()
+    if not name:
+        return None
+    # Pull extra shortcodes when filtering to reels — many tag grids mix photos.
+    fetch_n = min(200, limit * 3 if reels_only else limit)
+    page_url = f"https://www.instagram.com/explore/tags/{urllib.parse.quote(name)}/"
+    codes = await fetch_shortcodes_via_decodo(page_url, limit=fetch_n)
+    if not codes:
+        return None
+    posts = await hydrate_shortcodes(codes, limit=fetch_n)
+    if not posts:
+        return None
+    if reels_only:
+        posts = [
+            p
+            for p in posts
+            if (p.get("postType") == "Video")
+            or (safe_str(p.get("productType")) in {"clips", "reel", "reels"})
+            or bool(p.get("videoUrl"))
+        ]
+    return posts[:limit] or None
