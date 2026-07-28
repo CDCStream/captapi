@@ -249,6 +249,16 @@ async def comments_native(url: str, *, limit: int = 50) -> dict[str, Any] | None
     }
 
 
+def _normalize_ig_session_id(raw: str) -> str:
+    """Decode URL-encoded session cookies (``%3A`` → ``:``) from env pastes."""
+    value = (raw or "").strip()
+    if not value:
+        return ""
+    if "%" in value:
+        value = urllib.parse.unquote(value)
+    return value.strip()
+
+
 async def comments_session_native(url: str, *, limit: int = 50) -> dict[str, Any] | None:
     """Full comment thread via ``api/v1/media/{pk}/comments/`` + ``IG_SESSION_ID``.
 
@@ -257,7 +267,7 @@ async def comments_session_native(url: str, *, limit: int = 50) -> dict[str, Any
     from app.core.config import get_settings
     from app.utils.url import extract_instagram_shortcode
 
-    session = (get_settings().IG_SESSION_ID or "").strip()
+    session = _normalize_ig_session_id(get_settings().IG_SESSION_ID or "")
     if not session or limit <= 0:
         return None
     shortcode = extract_instagram_shortcode(url)
@@ -269,6 +279,8 @@ async def comments_session_native(url: str, *, limit: int = 50) -> dict[str, Any
     media_id = safe_str(media.get("pk") or media.get("id"))
     if not media_id:
         return None
+    # ``id`` is sometimes ``{media_pk}_{user_id}``; comments API wants media pk.
+    media_id = media_id.split("_", 1)[0]
     post_url = f"https://www.instagram.com/p/{shortcode}/"
     total = safe_int(media.get("comment_count")) or 0
 
@@ -277,7 +289,7 @@ async def comments_session_native(url: str, *, limit: int = 50) -> dict[str, Any
     min_id: str | None = None
     for page in range(20):
         batch, next_min, more = await _fetch_comments_page(
-            media_id, session_id=session, min_id=min_id
+            media_id, session_id=session, min_id=min_id, referer=post_url
         )
         if batch is None:
             if page == 0:
@@ -315,21 +327,32 @@ async def _fetch_comments_page(
     *,
     session_id: str,
     min_id: str | None = None,
+    referer: str = "https://www.instagram.com/",
 ) -> tuple[list[dict[str, Any]] | None, str | None, bool]:
-    """One page of ``/api/v1/media/{id}/comments/``. ``(items, next_min_id, more)``."""
+    """One page of ``/api/v1/media/{id}/comments/``. ``(items, next_min_id, more)``.
+
+    Requires ``Accept: application/json`` — without it Instagram returns the SPA
+    HTML shell (200 text/html). Direct egress often works; proxies as fallback.
+    """
     params: dict[str, Any] = {
         "can_support_threading": "true",
         "permalink_enabled": "false",
     }
     if min_id:
         params["min_id"] = min_id
-    for attempt in range(3):
+    ds_user_id = session_id.split(":", 1)[0] if ":" in session_id else ""
+    cookies = {"sessionid": session_id}
+    if ds_user_id.isdigit():
+        cookies["ds_user_id"] = ds_user_id
+    # Direct first — residential IPs sometimes get HTML/challenge for session APIs.
+    tiers: list[str | None] = [None, "datacenter", "residential"]
+    for tier in tiers:
         try:
             async with httpx.AsyncClient(
-                timeout=15,
-                proxy=proxy_for("residential"),
+                timeout=20,
+                proxy=proxy_for(tier) if tier else None,
                 follow_redirects=True,
-                cookies={"sessionid": session_id},
+                cookies=cookies,
             ) as client:
                 await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
                 csrf = client.cookies.get("csrftoken") or ""
@@ -340,35 +363,64 @@ async def _fetch_comments_page(
                         "User-Agent": _UA,
                         "X-IG-App-ID": _IG_APP_ID,
                         "X-CSRFToken": csrf,
-                        "Referer": "https://www.instagram.com/",
+                        "X-Requested-With": "XMLHttpRequest",
+                        "X-ASBD-ID": "129477",
+                        "Accept": "application/json",
+                        "Referer": referer,
+                        "Sec-Fetch-Dest": "empty",
+                        "Sec-Fetch-Mode": "cors",
+                        "Sec-Fetch-Site": "same-origin",
                     },
                 )
         except httpx.HTTPError as exc:
-            log.info("ig_comments_session_transport", attempt=attempt, error=str(exc)[:120])
+            log.info(
+                "ig_comments_session_transport",
+                tier=tier or "direct",
+                error=str(exc)[:120],
+            )
             continue
         if resp.status_code in (401, 403):
-            log.info("ig_comments_session_auth", status=resp.status_code)
+            log.info("ig_comments_session_auth", status=resp.status_code, tier=tier or "direct")
             return None, None, False
         if resp.status_code != 200:
-            log.info("ig_comments_session_http", status=resp.status_code, attempt=attempt)
+            log.info(
+                "ig_comments_session_http",
+                status=resp.status_code,
+                tier=tier or "direct",
+            )
             continue
+        body = (resp.text or "").lstrip()
         ctype = (resp.headers.get("content-type") or "").lower()
-        if "json" not in ctype:
-            log.info("ig_comments_session_non_json", attempt=attempt)
-            return None, None, False
+        if "json" not in ctype and not body.startswith("{"):
+            log.info("ig_comments_session_non_json", tier=tier or "direct")
+            continue
         try:
             payload = resp.json()
         except ValueError:
-            return None, None, False
+            continue
+        if not isinstance(payload, dict):
+            continue
+        if payload.get("status") == "fail" and not payload.get("comments"):
+            log.info(
+                "ig_comments_session_fail",
+                tier=tier or "direct",
+                message=safe_str(payload.get("message"))[:80],
+            )
+            continue
         items = payload.get("comments") or payload.get("items") or []
         if not isinstance(items, list):
-            return None, None, False
+            continue
         next_min = safe_str(
             payload.get("next_min_id")
             or payload.get("min_id")
-            or (payload.get("next_max_id"))
+            or payload.get("next_max_id")
         ) or None
-        more = bool(payload.get("has_more_comments") or payload.get("has_more") or next_min)
+        more = bool(
+            payload.get("has_more_comments")
+            or payload.get("has_more")
+            or payload.get("has_more_headload_comments")
+            or next_min
+        )
         return [i for i in items if isinstance(i, dict)], next_min, more
     return None, None, False
 
