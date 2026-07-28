@@ -2,11 +2,13 @@
 
 Facebook returns 400 on plain datacenter/residential for /events pages.
 Decodo headless=html hydrates ScheduledServerJS payloads that embed event
-cards for page listings and discovery search (/events/?q=...).
+cards for page listings. Discovery search (/events/?q=...) is login-walled
+logged-out — callers should fall through to Apify for keyword search.
 """
 
 from __future__ import annotations
 
+import html as html_lib
 import json
 import re
 from datetime import datetime, timezone
@@ -22,10 +24,30 @@ log = structlog.get_logger(__name__)
 # One Decodo JS render is ~$0.001–0.01; flat 2 credits (~120% markup headroom).
 CREDIT_FB_EVENTS_NATIVE = 2
 
-_EVENT_URL_RE = re.compile(
-    r"https:\\/\\/www\.facebook\.com\\/events\\/(\d+)\\/?",
+_SCROLL_ACTIONS: list[dict[str, Any]] = [
+    {"type": "wait", "wait_time_s": 2},
+    {"type": "scroll", "x": 0, "y": 2800},
+    {"type": "wait", "wait_time_s": 2},
+    {"type": "scroll", "x": 0, "y": 2800},
+    {"type": "wait", "wait_time_s": 2},
+    {"type": "scroll", "x": 0, "y": 2800},
+    {"type": "wait", "wait_time_s": 2},
+]
+
+_EVENT_HREF_RE = re.compile(
+    r'href="https://www\.facebook\.com/events/(\d{6,})/?["?]',
     re.IGNORECASE,
 )
+_NOISE_TITLES = {
+    "events",
+    "upcoming",
+    "past",
+    "hosting",
+    "·",
+    "see all",
+    "log in",
+    "sign up",
+}
 
 
 def page_events_url(page_url: str) -> str:
@@ -38,7 +60,8 @@ def page_events_url(page_url: str) -> str:
 
 
 def search_events_url(q: str) -> str:
-    # /events/search/?q= returns an empty shell; /events/?q= embeds result cards.
+    # /events/search/?q= returns an empty shell; /events/?q= is the discovery UI
+    # (often login-walled logged-out — may still be worth a Decodo attempt).
     return f"https://www.facebook.com/events/?q={quote_plus((q or '').strip())}"
 
 
@@ -122,7 +145,7 @@ def _regex_fallback_events(html: str) -> list[dict[str, Any]]:
         if not name_m or not (ts_m or dts_m):
             continue
         name = _unescape_js_str(name_m.group(1))
-        if name.lower() in {"events", "upcoming", "past", "hosting"}:
+        if name.lower() in _NOISE_TITLES:
             continue
         eid = m.group(2)
         out.append(
@@ -134,6 +157,62 @@ def _regex_fallback_events(html: str) -> list[dict[str, Any]]:
                 "day_time_sentence": _unescape_js_str(dts_m.group(1)) if dts_m else None,
             }
         )
+    return out
+
+
+def _html_anchor_events(html: str) -> list[dict[str, Any]]:
+    """Titles (and optional venue) from rendered ``/events/{id}/`` anchors.
+
+    Relay JSON only embeds ~8 full cards; the scrolled DOM lists many more
+    as plain links with adjacent text nodes.
+    """
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for m in _EVENT_HREF_RE.finditer(html or ""):
+        eid = m.group(1)
+        if eid in seen:
+            continue
+        chunk = (html or "")[m.end() : m.end() + 700]
+        texts = [
+            html_lib.unescape(t).strip()
+            for t in re.findall(r">([^<>]{2,160})<", chunk)
+            if t and t.strip()
+        ]
+        cleaned: list[str] = []
+        for t in texts:
+            low = t.lower().strip()
+            if low in _NOISE_TITLES or low.isdigit():
+                continue
+            if "going" in low or "interested" in low:
+                continue
+            if re.fullmatch(r"[\d,.\s]+", t):
+                continue
+            cleaned.append(t)
+        if not cleaned:
+            continue
+        seen.add(eid)
+        place_name = cleaned[1] if len(cleaned) > 1 else None
+        # Second text is often a date sentence ("Sat, Aug 2") — keep as day_time.
+        day_time = None
+        venue = None
+        if place_name:
+            if re.search(
+                r"\b(mon|tue|wed|thu|fri|sat|sun|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b",
+                place_name,
+                re.I,
+            ) or re.search(r"\d{1,2}:\d{2}", place_name):
+                day_time = place_name
+            else:
+                venue = place_name
+        raw: dict[str, Any] = {
+            "id": eid,
+            "name": cleaned[0],
+            "eventUrl": f"https://www.facebook.com/events/{eid}/",
+            "day_time_sentence": day_time,
+        }
+        if venue:
+            raw["event_place"] = {"contextual_name": venue}
+        out.append(raw)
     return out
 
 
@@ -149,10 +228,10 @@ def extract_events_from_html(html: str) -> list[dict[str, Any]]:
         except ValueError:
             continue
         _walk_events(data, found)
-        if len(found) >= 8:
-            break
     if len(found) < 3:
         found.extend(_regex_fallback_events(html or ""))
+    # DOM anchors fill the long-tail the Relay blobs omit.
+    found.extend(_html_anchor_events(html or ""))
 
     by_id: dict[str, dict[str, Any]] = {}
     for raw in found:
@@ -164,11 +243,35 @@ def extract_events_from_html(html: str) -> list[dict[str, Any]]:
         if not eid:
             continue
         prev = by_id.get(eid)
-        if prev is None or (raw.get("name") and not prev.get("name")) or len(json.dumps(raw, default=str)) > len(
-            json.dumps(prev, default=str)
-        ):
+        if prev is None:
             by_id[eid] = raw
-    # Prefer chronological order when timestamps exist.
+            continue
+        # Prefer richer Relay cards (timestamp / place / cover) over anchors.
+        prev_score = (
+            (2 if prev.get("start_timestamp") or prev.get("startTimestamp") else 0)
+            + (1 if prev.get("event_place") or prev.get("cover_photo") else 0)
+            + (1 if prev.get("day_time_sentence") else 0)
+        )
+        raw_score = (
+            (2 if raw.get("start_timestamp") or raw.get("startTimestamp") else 0)
+            + (1 if raw.get("event_place") or raw.get("cover_photo") else 0)
+            + (1 if raw.get("day_time_sentence") else 0)
+        )
+        if raw_score > prev_score or (
+            raw_score == prev_score
+            and len(json.dumps(raw, default=str)) > len(json.dumps(prev, default=str))
+        ):
+            # Merge missing name/place from the thinner record.
+            merged = dict(prev)
+            merged.update({k: v for k, v in raw.items() if v is not None})
+            if not merged.get("name") and prev.get("name"):
+                merged["name"] = prev["name"]
+            by_id[eid] = merged
+        else:
+            # Keep rich prev; fill blanks from anchor.
+            for key in ("name", "day_time_sentence", "event_place"):
+                if prev.get(key) in (None, "", {}) and raw.get(key):
+                    prev[key] = raw[key]
     items = list(by_id.values())
     items.sort(key=lambda e: int(e.get("start_timestamp") or e.get("startTimestamp") or 0) or 10**12)
     return items
@@ -256,33 +359,78 @@ def normalize_raw_event(raw: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-async def _fetch_html(url: str) -> str | None:
+def _html_event_signal(body: str) -> int:
+    """Rough richness score — scrolled DOM usually wins over the Relay stub."""
+    if not body:
+        return 0
+    return len(_EVENT_HREF_RE.findall(body)) + body.count("eventUrl") + body.count("start_timestamp")
+
+
+async def _fetch_html(url: str, *, scroll: bool = True) -> str | None:
     if not decodo_fetch.enabled():
         return None
-    got = await decodo_fetch.fetch_url(url, timeout=120.0, headless="html")
-    if not got:
+    # Scroll first so we don't settle for the ~8-card Relay stub. Decodo
+    # sometimes wants ``target=universal`` for browser_actions; try both.
+    attempts: list[tuple[list[dict[str, Any]] | None, str | None]] = []
+    if scroll:
+        attempts.append((_SCROLL_ACTIONS, "universal"))
+        attempts.append((_SCROLL_ACTIONS, None))
+        attempts.append((_SCROLL_ACTIONS[:4], None))
+    attempts.append((None, None))
+
+    candidates: list[str] = []
+    for actions, target in attempts:
+        got = await decodo_fetch.fetch_url(
+            url,
+            timeout=180.0 if actions else 120.0,
+            headless="html",
+            browser_actions=actions,
+            target=target,
+        )
+        if not got:
+            log.info(
+                "facebook_events_fetch_miss",
+                url=url[:120],
+                scrolled=bool(actions),
+                target=target,
+            )
+            continue
+        status, body = got
+        if status != 200 or not body:
+            continue
+        if "eventUrl" not in body and "/events/" not in body:
+            continue
+        score = _html_event_signal(body)
+        log.info(
+            "facebook_events_fetch_ok",
+            url=url[:120],
+            scrolled=bool(actions),
+            target=target,
+            score=score,
+            chars=len(body),
+        )
+        candidates.append(body)
+        if actions is not None and score >= 20:
+            break
+    if not candidates:
         return None
-    status, body = got
-    if status != 200 or not body:
-        return None
-    if "eventUrl" not in body and "/events/" not in body:
-        return None
-    return body
+    return max(candidates, key=_html_event_signal)
 
 
 async def fetch_page_events(page_url: str, *, limit: int = 20) -> list[dict[str, Any]] | None:
     if limit <= 0:
         return []
     url = page_events_url(page_url)
-    html = await _fetch_html(url)
+    html = await _fetch_html(url, scroll=True)
     if not html:
         return None
     raw = extract_events_from_html(html)
     if not raw:
         log.info("facebook_events_native_page_empty", url=url[:120])
         return None
-    out = [normalize_raw_event(e) for e in raw[:limit]]
+    out = [normalize_raw_event(e) for e in raw[: max(limit, 40)]]
     out = [e for e in out if e.get("id") and e.get("name")]
+    out = out[:limit]
     if not out:
         return None
     log.info("facebook_events_native_page_ok", url=url[:120], n=len(out))
@@ -290,13 +438,17 @@ async def fetch_page_events(page_url: str, *, limit: int = 20) -> list[dict[str,
 
 
 async def fetch_search_events(q: str, *, limit: int = 20) -> list[dict[str, Any]] | None:
+    """Keyword search. Logged-out Decodo often hits a login shell — return None
+    so the router can serve Apify snapshots instead of burning a cold browser run.
+    """
     if limit <= 0:
         return []
     query = (q or "").strip()
     if len(query) < 2:
         return None
     url = search_events_url(query)
-    html = await _fetch_html(url)
+    # No scroll: discovery search rarely hydrates cards without a session.
+    html = await _fetch_html(url, scroll=False)
     if not html:
         return None
     raw = extract_events_from_html(html)
@@ -318,7 +470,7 @@ async def fetch_event_details(url: str) -> dict[str, Any] | None:
         return None
     eid_match = re.search(r"/events/(\d+)", target)
     eid = eid_match.group(1) if eid_match else None
-    html = await _fetch_html(target)
+    html = await _fetch_html(target, scroll=False)
     if not html:
         return None
     raw_list = extract_events_from_html(html)

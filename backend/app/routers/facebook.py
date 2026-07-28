@@ -1304,11 +1304,29 @@ async def facebook_profile_events(
                 events = [_normalize_event(i) for i in native]
                 return {"platform": "facebook", "url": url, "totalReturned": len(events), "events": events}
 
-            # 2) Apify fallback — browser actor; can outlive the 120s sync timeout.
+            # 2) Apify — prefer a recent snapshot before starting a 280s browser run.
             events_url = url.rstrip("/") + "/events"
-            items = await ApifyClient(timeout=280).run_actor_sync(
+            run_input = {"startUrls": [events_url], "maxEvents": limit}
+            client = ApifyClient(timeout=280, max_attempts=1)
+            cached_items = await client.last_succeeded_items(
                 settings.APIFY_ACTOR_FACEBOOK_EVENTS,
-                {"startUrls": [events_url], "maxEvents": limit},
+                max_age_secs=48 * 3600,
+                max_items=limit,
+                input_match={"startUrls": [events_url]},
+            )
+            if cached_items:
+                if not await client.find_active_run(
+                    settings.APIFY_ACTOR_FACEBOOK_EVENTS,
+                    input_match={"startUrls": [events_url]},
+                ):
+                    await client.start_run(settings.APIFY_ACTOR_FACEBOOK_EVENTS, run_input)
+                events = [_normalize_event(i) for i in cached_items[:limit] if not i.get("error")]
+                ctx["source"] = "apify"
+                return {"platform": "facebook", "url": url, "totalReturned": len(events), "events": events}
+
+            items = await client.run_actor_sync(
+                settings.APIFY_ACTOR_FACEBOOK_EVENTS,
+                run_input,
                 max_items=limit,
             )
             events = [_normalize_event(i) for i in items[:limit] if not i.get("error")]
@@ -1317,7 +1335,7 @@ async def facebook_profile_events(
 
         data = await cached_or_run(
             endpoint="facebook.profile-events",
-            params={"url": url, "limit": limit, "v": 4},
+            params={"url": url, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             # Events actor runs take minutes (280s timeout); serve the last
@@ -1543,19 +1561,38 @@ async def facebook_event_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # 1) Decodo JS render of /events/?q= (search/?q= shell is empty).
+            # 1) Decodo — usually login-walled for keyword search; try anyway.
             native = await facebook_events_native.fetch_search_events(q, limit=limit)
             if native:
                 ctx["source"] = "direct"
                 events = [_normalize_event(i) for i in native]
                 return {"query": q, "totalReturned": len(events), "events": events}
 
-            # 2) Apify fallback — browser actor; on timeout reuse last success.
+            # 2) Apify snapshot-first (same pattern as IG trending / profile-events).
+            # Logged-out Decodo cannot list search results; avoid a cold 280s run
+            # when a fresh-enough dataset already exists for this query.
+            run_input = {"searchQueries": [q], "maxEvents": limit}
             apify = ApifyClient(timeout=280, max_attempts=1)
+            cached_items = await apify.last_succeeded_items(
+                settings.APIFY_ACTOR_FACEBOOK_EVENTS,
+                max_age_secs=48 * 3600,
+                max_items=limit,
+                input_match={"searchQueries": [q]},
+            )
+            if cached_items:
+                if not await apify.find_active_run(
+                    settings.APIFY_ACTOR_FACEBOOK_EVENTS,
+                    input_match={"searchQueries": [q]},
+                ):
+                    await apify.start_run(settings.APIFY_ACTOR_FACEBOOK_EVENTS, run_input)
+                events = [_normalize_event(i) for i in cached_items[:limit] if not i.get("error")]
+                ctx["source"] = "apify"
+                return {"query": q, "totalReturned": len(events), "events": events}
+
             try:
                 items = await apify.run_actor_sync(
                     settings.APIFY_ACTOR_FACEBOOK_EVENTS,
-                    {"searchQueries": [q], "maxEvents": limit},
+                    run_input,
                     max_items=limit,
                 )
             except ApifyError:
@@ -1572,7 +1609,7 @@ async def facebook_event_search(
 
         data = await cached_or_run(
             endpoint="facebook.event-search",
-            params={"q": q, "limit": limit, "v": 3},
+            params={"q": q, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             # Browser-based events actor takes 2-3 min (p95 ~101s); serve the
