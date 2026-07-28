@@ -14083,46 +14083,31 @@
       "platform": "rumble",
       "id": "v7cv2cc",
       "url": "https://rumble.com/v7cv2cc-now-i-can-finally-talk-about-it-ep.-2555-07172026.html",
-      "embedUrl": "https://rumble.com/embed/v7cv2cc/",
+      "embedUrl": "https://rumble.com/embed/v7aoh22/",
       "title": "Now I Can Finally Talk About It (Ep. 2555) - 07/17/2026",
-      "description": null,
+      "description": "In this episode, I'll discuss the groundbreaking information President Trump revealed in his speech last night and what it means for our elections movingforward. 1776 Live Club: No purchase necessary.",
       "channel": "The Dan Bongino Show",
       "channelUrl": "https://rumble.com/c/bongino",
-      "channelFollowers": 3659432,
-      "channelVerified": true,
-      "views": 691224,
-      "likes": 13417,
-      "dislikes": 145,
-      "duration": "5185",
+      "channelFollowers": null,
+      "channelVerified": null,
+      "views": 930926,
+      "likes": 0,
+      "dislikes": 0,
+      "duration": "1:26:25",
       "publishedAt": "2026-07-17T12:18:39+00:00",
-      "thumbnail": "https://1a-1791.com/video/fwe2/7c/s8/1/C/w/c/H/CwcHA.OvCc-small-Now-I-Can-Finally-Talk-Abou..jpg",
-      "comments": 879,
+      "thumbnail": "https://1a-1791.com/video/fwe2/7c/s8/1/C/w/c/H/CwcHA.qR4e-small-Now-I-Can-Finally-Talk-Abou..jpg",
+      "comments": 0,
       "isLive": false,
       "streams": [
         {
-          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.aaa.rec.mp4?b=1&u=6",
+          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.caa.rec.mp4?u=3&b=0",
           "type": "mp4",
-          "quality": "1080p"
+          "quality": null
         },
         {
-          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.haa.rec.mp4?b=1&u=6",
+          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.Faa.rec.mp4",
           "type": "mp4",
-          "quality": "1080p"
-        },
-        {
-          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.gaa.rec.mp4?b=1&u=6",
-          "type": "mp4",
-          "quality": "720p"
-        },
-        {
-          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.caa.rec.mp4?b=1&u=6",
-          "type": "mp4",
-          "quality": "480p"
-        },
-        {
-          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.baa.rec.mp4?b=1&u=6",
-          "type": "mp4",
-          "quality": "360p"
+          "quality": null
         }
       ]
     }

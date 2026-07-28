@@ -21,7 +21,7 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.apify_proxy import fetch_via_residential
 from app.services.cached_runner import cached_or_run
-from app.services import rumble_comments_native
+from app.services import rumble_comments_native, rumble_video_native
 from app.utils.formatters import first_present, parse_compact_count, safe_int, safe_str
 from app.utils.url import (
     extract_rumble_channel,
@@ -253,6 +253,12 @@ async def video_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Decodo JSON-LD first (CF blocks datacenter/residential).
+            native = await rumble_video_native.video_details_native(_canonical_video_url(url))
+            if native and native.get("title"):
+                ctx["source"] = "direct"
+                return native
+
             apify = get_apify()
             try:
                 items = await apify.run_actor_sync(
@@ -264,12 +270,14 @@ async def video_details(
                 items = []
             rows = [i for i in items if isinstance(i, dict) and i.get("object_type") == "video"]
             if rows:
+                ctx["source"] = "apify"
                 return _normalize_az_video(rows[0])
+            ctx["source"] = "direct"
             return await _fetch_video_page(url)
 
         data = await cached_or_run(
             endpoint="rumble.video-details",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
