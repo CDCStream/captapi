@@ -423,6 +423,11 @@ async def rumble_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await rumble_video_native.search_native(q, limit=limit)
+            if native:
+                ctx["source"] = "direct"
+                return {"query": q, "totalReturned": len(native), "results": native}
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_RUMBLE,
@@ -430,11 +435,14 @@ async def rumble_search(
                 max_items=limit,
             )
             results = [_normalize_video(i) for i in items][:limit]
+            if not results:
+                raise HTTPException(status_code=404, detail="No videos found")
+            ctx["source"] = "apify"
             return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="rumble.search",
-            params={"q": q, "limit": limit, "v": 3},
+            params={"q": q, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

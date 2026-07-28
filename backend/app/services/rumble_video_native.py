@@ -3,6 +3,9 @@
 Datacenter / residential proxies usually hit Cloudflare 403. Decodo
 ``headless=html`` returns a page with ``VideoObject`` JSON-LD (title,
 description, views, duration, upload date, thumbnail, embed).
+
+Keyword search pages expose ``video-listing-entry`` cards with title,
+channel, duration, thumbnail, and publish time.
 """
 
 from __future__ import annotations
@@ -176,3 +179,90 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
         title=(parsed.get("title") or "")[:80],
     )
     return parsed
+
+
+_ENTRY_RE = re.compile(r'<li class="video-listing-entry">', re.I)
+_HREF_RE = re.compile(r'href="(/v[^"?]+\.html)', re.I)
+_TITLE_RE = re.compile(r'<h3 class="video-item--title">([^<]+)</h3>', re.I)
+_BY_RE = re.compile(
+    r'href="(/c/[^"?]+)[^"]*"[^>]*>\s*<div class="ellipsis-1">([^<]+)',
+    re.I,
+)
+_DURATION_ATTR_RE = re.compile(r'video-item--duration"[^>]*data-value="([^"]+)"', re.I)
+_TIME_RE = re.compile(
+    r'<time class="video-item--meta video-item--time"[^>]*datetime="([^"]+)"',
+    re.I,
+)
+_THUMB_RE = re.compile(r'<img class="video-item--img"[^>]+src="([^"]+)"', re.I)
+_VERIFIED_RE = re.compile(r"video-item--by-verified", re.I)
+
+
+def parse_search_html(html: str, limit: int = 20) -> list[dict[str, Any]]:
+    """Parse Rumble search result cards into video list items."""
+    if not html:
+        return []
+    capped = max(1, min(int(limit or 20), 200))
+    starts = list(_ENTRY_RE.finditer(html))
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for idx, match in enumerate(starts):
+        end = starts[idx + 1].start() if idx + 1 < len(starts) else min(len(html), match.start() + 6000)
+        chunk = html[match.start() : end]
+        href_m = _HREF_RE.search(chunk)
+        if not href_m:
+            continue
+        path = href_m.group(1)
+        if path in seen:
+            continue
+        seen.add(path)
+        title_m = _TITLE_RE.search(chunk)
+        by_m = _BY_RE.search(chunk)
+        dur_m = _DURATION_ATTR_RE.search(chunk)
+        time_m = _TIME_RE.search(chunk)
+        thumb_m = _THUMB_RE.search(chunk)
+        channel = safe_str(unescape(by_m.group(2))) if by_m else None
+        channel_url = f"https://rumble.com{by_m.group(1)}" if by_m else None
+        out.append(
+            {
+                "platform": "rumble",
+                "id": path.split("/")[-1].split("-")[0],
+                "url": f"https://rumble.com{path}",
+                "title": safe_str(unescape(title_m.group(1))) if title_m else None,
+                "channel": channel,
+                "channelUrl": channel_url,
+                "views": None,
+                "likes": None,
+                "dislikes": None,
+                "duration": safe_str(dur_m.group(1)) if dur_m else None,
+                "publishedAt": safe_str(time_m.group(1)) if time_m else None,
+                "thumbnail": safe_str(unescape(thumb_m.group(1))) if thumb_m else None,
+                "comments": None,
+            }
+        )
+        if len(out) >= capped:
+            break
+    return out
+
+
+async def search_native(query: str, limit: int = 20) -> list[dict[str, Any]] | None:
+    """Public keyword search via Decodo-rendered search HTML."""
+    from urllib.parse import quote
+
+    q = (query or "").strip()
+    if len(q) < 2 or not decodo_fetch.enabled():
+        return None
+    url = f"https://rumble.com/search/video?q={quote(q)}"
+    got = await decodo_fetch.fetch_url(url, timeout=90.0, headless="html")
+    if not got:
+        return None
+    status, body = got
+    if status != 200 or not body:
+        log.info("rumble_search_native_http", status=status, query=q[:80])
+        return None
+    results = parse_search_html(body, limit=limit)
+    if not results:
+        log.warning("rumble_search_native_parse_miss", query=q[:80], length=len(body))
+        return None
+    log.info("rumble_search_native_ok", query=q[:80], returned=len(results))
+    return results
+
