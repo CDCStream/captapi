@@ -1,0 +1,11 @@
+{
+  "url": "/v1/analytics/post",
+  "method": "GET",
+  "qs": {
+    "url": "{{parameters.url}}",
+    "cache": "{{parameters.cache}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

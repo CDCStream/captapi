@@ -1,0 +1,9 @@
+[
+  {
+    "name": "urls",
+    "type": "text",
+    "label": "Urls",
+    "required": true,
+    "help": "Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms."
+  }
+]

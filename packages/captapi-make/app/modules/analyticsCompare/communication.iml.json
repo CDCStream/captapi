@@ -1,0 +1,10 @@
+{
+  "url": "/v1/analytics/compare",
+  "method": "GET",
+  "qs": {
+    "urls": "{{parameters.urls}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

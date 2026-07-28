@@ -1,0 +1,10 @@
+{
+  "url": "/v1/video/transcript",
+  "method": "GET",
+  "qs": {
+    "file": "{{parameters.file}}"
+  },
+  "response": {
+    "output": "{{body.data}}"
+  }
+}

@@ -1,0 +1,9 @@
+[
+  {
+    "name": "file",
+    "type": "text",
+    "label": "File",
+    "required": true,
+    "help": "Local path or multipart file upload of the video/audio to transcribe."
+  }
+]
