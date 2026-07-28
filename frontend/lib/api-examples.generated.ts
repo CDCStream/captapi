@@ -9988,34 +9988,34 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "totalReturned": 5,
     "users": [
       {
+        "username": "red.rose.whiterose",
+        "displayName": null,
+        "url": "https://www.threads.net/@red.rose.whiterose",
+        "verified": false
+      },
+      {
+        "username": "vulnarex",
+        "displayName": null,
+        "url": "https://www.threads.net/@vulnarex",
+        "verified": false
+      },
+      {
+        "username": "alina_intech",
+        "displayName": "Alina",
+        "url": "https://www.threads.net/@alina_intech",
+        "verified": false
+      },
+      {
         "username": "eau.dreyy",
         "displayName": "O-Drey",
         "url": "https://www.threads.net/@eau.dreyy",
         "verified": true
       },
       {
-        "username": "regina.workabroad",
-        "displayName": "Regina Santana | Работа в Европе| LinkedIn • Резюме",
-        "url": "https://www.threads.net/@regina.workabroad",
+        "username": "blkjenius",
+        "displayName": "Jay D Miller",
+        "url": "https://www.threads.net/@blkjenius",
         "verified": true
-      },
-      {
-        "username": "polymath01os",
-        "displayName": "Polymath OS",
-        "url": "https://www.threads.net/@polymath01os",
-        "verified": false
-      },
-      {
-        "username": "sixfiguretechie",
-        "displayName": "Victoria Walker",
-        "url": "https://www.threads.net/@sixfiguretechie",
-        "verified": false
-      },
-      {
-        "username": "ashley_valerie_",
-        "displayName": "Ashley Valerie",
-        "url": "https://www.threads.net/@ashley_valerie_",
-        "verified": false
       }
     ]
   },

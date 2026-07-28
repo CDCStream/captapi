@@ -9,6 +9,9 @@ Keyword search pages (``/search?q=...``) hydrate
 ``BarcelonaSearchResultsQueryRelayPreloader`` and likewise embed matching
 posts under ``thread_items`` (soft-capped ~20 per page render).
 
+``search-users`` derives distinct authors from that same search HTML
+(Users-tab GraphQL is deferred / not hydrated for logged-out scrapes).
+
 Logged-out datacenter GETs usually redirect to login — Decodo
 ``headless=html`` returns the hydrated HTML.
 """
@@ -543,4 +546,41 @@ async def search(query: str, limit: int = 25) -> list[dict[str, Any]] | None:
         return None
     log.info("threads_search_native_ok", query=q[:80], returned=len(posts))
     return posts
+
+async def search_users(query: str, limit: int = 20) -> list[dict[str, Any]] | None:
+    """Distinct creators matching a keyword, derived from search-page posts."""
+    q = (query or "").strip()
+    if len(q) < 2:
+        return None
+    # Pull a wider post sample so unique authors can fill ``limit``.
+    post_limit = max(int(limit or 20) * 4, 25)
+    post_limit = min(post_limit, 100)
+    posts = await search(q, limit=post_limit)
+    if not posts:
+        return None
+    capped = max(1, min(int(limit or 20), 100))
+    users: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for post in posts:
+        user = post.get("user") if isinstance(post.get("user"), dict) else {}
+        username = safe_str(user.get("username") or user.get("userName"))
+        if not username or username in seen:
+            continue
+        seen.add(username)
+        users.append(
+            {
+                "username": username,
+                "full_name": safe_str(user.get("full_name") or user.get("fullName") or user.get("name")),
+                "is_verified": bool(user.get("is_verified") or user.get("isVerified")),
+                "profile_pic_url": safe_str(user.get("profile_pic_url") or user.get("profilePicUrl")),
+                "url": f"https://www.threads.net/@{username}",
+            }
+        )
+        if len(users) >= capped:
+            break
+    if not users:
+        log.warning("threads_search_users_native_empty", query=q[:80], posts=len(posts))
+        return None
+    log.info("threads_search_users_native_ok", query=q[:80], returned=len(users))
+    return users
 

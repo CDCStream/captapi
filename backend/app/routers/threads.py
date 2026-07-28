@@ -346,9 +346,24 @@ async def threads_search_users(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Native: distinct authors from hydrated search HTML (soft-capped).
+            native_users = await native.search_users(q, limit=limit)
+            if native_users:
+                ctx["source"] = "direct"
+                users = [
+                    {
+                        "username": u.get("username"),
+                        "displayName": u.get("full_name"),
+                        "url": u.get("url") or f"https://www.threads.net/@{u.get('username')}",
+                        "verified": u.get("is_verified"),
+                    }
+                    for u in native_users
+                    if u.get("username")
+                ][:limit]
+                return {"query": q, "totalReturned": len(users), "users": users}
+
             apify = get_apify()
-            # No dedicated user-search; derive distinct authors from a keyword
-            # search over a wider post sample.
+            # Fallthrough: derive distinct authors from Apify keyword search.
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_THREADS_SEARCH,
                 {"mode": "search", "searchQueries": [q], "maxPosts": limit * 4},
@@ -375,11 +390,14 @@ async def threads_search_users(
                 )
                 if len(users) >= limit:
                     break
+            if not users:
+                raise HTTPException(status_code=404, detail="No users found")
+            ctx["source"] = "apify"
             return {"query": q, "totalReturned": len(users), "users": users}
 
         data = await cached_or_run(
             endpoint="threads.search-users",
-            params={"q": q, "limit": limit, "v": 4},
+            params={"q": q, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
