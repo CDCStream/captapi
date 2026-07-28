@@ -1083,18 +1083,44 @@ async def instagram_channel_reels(
                     "hasMore": False,
                 }
 
+            # Native-first: hardened web_profile_info (session / Decodo HTML) →
+            # api/v1 feed filtered to reels. Decodo GraphQL channel_reels next.
+            user = await instagram_native.fetch_web_profile_info(handle)
+            user_id = safe_str((user or {}).get("pk") or (user or {}).get("id"))
+            followers = None
+            if user:
+                followers = safe_int(
+                    (user.get("edge_followed_by") or {}).get("count")
+                    if isinstance(user.get("edge_followed_by"), dict)
+                    else user.get("follower_count")
+                )
+            if user_id:
+                native = await _ig_feed_collect(
+                    user_id, None, limit, reels_only=True, followers=followers
+                )
+                if native is not None and native[0]:
+                    reels, next_cursor = native
+                    ctx["source"] = "direct"
+                    return {
+                        "url": url,
+                        "totalReturned": len(reels),
+                        "reels": reels,
+                        "nextCursor": next_cursor,
+                        "hasMore": next_cursor is not None,
+                    }
+
             async def _decodo_run() -> dict[str, Any] | None:
                 page = _ig_channel_page(await decodo.channel_reels(handle, limit), limit)
                 if page is None:
                     return None
-                reels, next_cursor, user_id, followers = page
+                reels, next_cursor, uid, fol = page
                 # Prefer the native feed for the whole page: the GraphQL
                 # timeline omits duration/play counts for clips and buries
                 # recent Reels under legacy IGTV uploads. The Decodo items
                 # only serve as a fallback when the feed is unreachable.
-                if user_id:
+                if uid:
                     native = await _ig_feed_collect(
-                        user_id, None, limit, reels_only=True, followers=followers
+                        uid, None, limit, reels_only=True, followers=fol
                     )
                     if native is not None and native[0]:
                         reels, next_cursor = native
@@ -1112,7 +1138,7 @@ async def instagram_channel_reels(
 
         data = await cached_or_run(
             endpoint="instagram.channel-reels",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 16},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 17},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1477,7 +1503,7 @@ async def instagram_tagged_posts(
 
         data = await cached_or_run(
             endpoint="instagram.tagged-posts",
-            params={"url": url, "limit": limit, "v": 10},
+            params={"url": url, "limit": limit, "v": 11},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -696,38 +696,76 @@ def _feed_page_degraded(items: list[dict[str, Any]]) -> bool:
     )
 
 
+def _ig_session_cookies() -> dict[str, str]:
+    """Optional ``IG_SESSION_ID`` cookies for feed / usertags login walls."""
+    from app.core.config import get_settings
+
+    session = _normalize_ig_session_id(get_settings().IG_SESSION_ID or "")
+    if not session:
+        return {}
+    cookies = {"sessionid": session}
+    ds = session.split(":", 1)[0]
+    if ds.isdigit():
+        cookies["ds_user_id"] = ds
+    return cookies
+
+
 async def _fetch_feed_once(
     user_id: str, params: dict[str, Any], attempt: int
 ) -> tuple[list[dict[str, Any]], str | None, bool] | None:
-    try:
-        async with httpx.AsyncClient(
-            timeout=12, proxy=proxy_for("residential"), follow_redirects=True
-        ) as client:
-            await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
-            resp = await client.get(
-                f"https://www.instagram.com/api/v1/feed/user/{user_id}/",
-                params=params,
-                headers={
-                    "User-Agent": _UA,
-                    "X-IG-App-ID": "936619743392459",
-                    "X-CSRFToken": client.cookies.get("csrftoken") or "",
-                    "Referer": "https://www.instagram.com/",
-                },
+    cookies = _ig_session_cookies()
+    # Prefer session+direct when available; residential logged-out is flaky.
+    tiers: list[tuple[str | None, dict[str, str]]] = []
+    if cookies:
+        tiers.append((None, cookies))
+        tiers.append(("residential", cookies))
+    tiers.append(("residential", {}))
+    last_status: int | None = None
+    for tier, cks in tiers:
+        try:
+            async with httpx.AsyncClient(
+                timeout=15,
+                proxy=proxy_for(tier) if tier else None,
+                follow_redirects=True,
+                cookies=cks,
+            ) as client:
+                await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
+                resp = await client.get(
+                    f"https://www.instagram.com/api/v1/feed/user/{user_id}/",
+                    params=params,
+                    headers={
+                        "User-Agent": _UA,
+                        "X-IG-App-ID": _IG_APP_ID,
+                        "X-CSRFToken": client.cookies.get("csrftoken") or "",
+                        "Accept": "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Referer": "https://www.instagram.com/",
+                    },
+                )
+        except httpx.HTTPError as exc:
+            log.info(
+                "ig_feed_transport_error",
+                attempt=attempt,
+                tier=tier or "direct",
+                error=str(exc)[:120],
             )
-    except httpx.HTTPError as exc:
-        log.info("ig_feed_transport_error", attempt=attempt, error=str(exc)[:120])
-        return None
-    if resp.status_code != 200:
-        log.info("ig_feed_http_error", attempt=attempt, status=resp.status_code)
-        return None
-    try:
-        payload = resp.json()
-    except ValueError:
-        return None
-    items = payload.get("items")
-    if not isinstance(items, list):
-        return None
-    return items, safe_str(payload.get("next_max_id")) or None, bool(payload.get("more_available"))
+            continue
+        last_status = resp.status_code
+        if resp.status_code != 200:
+            continue
+        body = (resp.text or "").lstrip()
+        if not body.startswith("{"):
+            continue
+        try:
+            payload = resp.json()
+        except ValueError:
+            continue
+        items = payload.get("items")
+        if not isinstance(items, list):
+            continue
+        return items, safe_str(payload.get("next_max_id")) or None, bool(payload.get("more_available"))
+    log.info("ig_feed_http_error", attempt=attempt, status=last_status)
+    return None
 
 
 async def fetch_usertags_page(
@@ -735,8 +773,8 @@ async def fetch_usertags_page(
 ) -> tuple[list[dict[str, Any]], str | None, bool] | None:
     """One page of posts that tag ``user_id`` (``/api/v1/usertags/{id}/feed/``).
 
-    Same residential + csrf session pattern as :func:`fetch_user_feed_page`.
-    Returns ``(raw items, next_max_id, more_available)`` or ``None``.
+    Logged-out calls usually get the login HTML shell; ``IG_SESSION_ID`` unlocks
+    JSON. Returns ``(raw items, next_max_id, more_available)`` or ``None``.
     """
     params: dict[str, Any] = {"count": max(1, min(count, 33))}
     if max_id:
@@ -751,41 +789,64 @@ async def fetch_usertags_page(
 async def _fetch_usertags_once(
     user_id: str, params: dict[str, Any], attempt: int
 ) -> tuple[list[dict[str, Any]], str | None, bool] | None:
-    try:
-        async with httpx.AsyncClient(
-            timeout=12, proxy=proxy_for("residential"), follow_redirects=True
-        ) as client:
-            await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
-            resp = await client.get(
-                f"https://www.instagram.com/api/v1/usertags/{user_id}/feed/",
-                params=params,
-                headers={
-                    "User-Agent": _UA,
-                    "X-IG-App-ID": "936619743392459",
-                    "X-CSRFToken": client.cookies.get("csrftoken") or "",
-                    "Referer": "https://www.instagram.com/",
-                },
+    cookies = _ig_session_cookies()
+    tiers: list[tuple[str | None, dict[str, str]]] = []
+    if cookies:
+        tiers.append((None, cookies))
+        tiers.append(("residential", cookies))
+    tiers.append(("residential", {}))
+    for tier, cks in tiers:
+        try:
+            async with httpx.AsyncClient(
+                timeout=15,
+                proxy=proxy_for(tier) if tier else None,
+                follow_redirects=True,
+                cookies=cks,
+            ) as client:
+                await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
+                resp = await client.get(
+                    f"https://www.instagram.com/api/v1/usertags/{user_id}/feed/",
+                    params=params,
+                    headers={
+                        "User-Agent": _UA,
+                        "X-IG-App-ID": _IG_APP_ID,
+                        "X-CSRFToken": client.cookies.get("csrftoken") or "",
+                        "Accept": "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Referer": "https://www.instagram.com/",
+                    },
+                )
+        except httpx.HTTPError as exc:
+            log.info(
+                "ig_usertags_transport_error",
+                attempt=attempt,
+                tier=tier or "direct",
+                error=str(exc)[:120],
             )
-    except httpx.HTTPError as exc:
-        log.info("ig_usertags_transport_error", attempt=attempt, error=str(exc)[:120])
-        return None
-    if resp.status_code != 200:
-        log.info("ig_usertags_http_error", attempt=attempt, status=resp.status_code)
-        return None
-    # Logged-out IPs often get HTTP 200 with the login HTML shell instead of JSON.
-    ctype = (resp.headers.get("content-type") or "").lower()
-    if "text/html" in ctype or (resp.text[:32].lstrip().startswith("<!DOCTYPE") or resp.text[:32].lstrip().startswith("<html")):
-        log.info("ig_usertags_login_wall", attempt=attempt)
-        return None
-    try:
-        payload = resp.json()
-    except ValueError:
-        log.info("ig_usertags_non_json", attempt=attempt)
-        return None
-    items = payload.get("items")
-    if not isinstance(items, list):
-        return None
-    return items, safe_str(payload.get("next_max_id")) or None, bool(payload.get("more_available"))
+            continue
+        if resp.status_code != 200:
+            log.info(
+                "ig_usertags_http_error",
+                attempt=attempt,
+                tier=tier or "direct",
+                status=resp.status_code,
+            )
+            continue
+        body = (resp.text or "").lstrip()
+        ctype = (resp.headers.get("content-type") or "").lower()
+        if "text/html" in ctype or body.startswith("<!DOCTYPE") or body.startswith("<html"):
+            log.info("ig_usertags_login_wall", attempt=attempt, tier=tier or "direct")
+            continue
+        try:
+            payload = resp.json()
+        except ValueError:
+            log.info("ig_usertags_non_json", attempt=attempt, tier=tier or "direct")
+            continue
+        items = payload.get("items")
+        if not isinstance(items, list):
+            continue
+        return items, safe_str(payload.get("next_max_id")) or None, bool(payload.get("more_available"))
+    return None
 
 
 async def _fetch_item(shortcode: str) -> dict[str, Any] | None:
@@ -990,6 +1051,22 @@ async def _fetch_web_profile_info_session(handle: str, session_id: str) -> dict[
     return None
 
 
+def _pick_ig_user_pk(window: str) -> str | None:
+    """Pick a feed-compatible user pk from a profile HTML window.
+
+    Prefer non-``17841…`` ids (those are XIG/Graph scoped) and shorter pks.
+    """
+    found = [m.group(1) for m in re.finditer(r'"id"\s*:\s*"?(\d{5,})"?', window)]
+    found += [m.group(1) for m in re.finditer(r'"pk"\s*:\s*"?(\d{5,})"?', window)]
+    if not found:
+        return None
+    ranked = sorted(
+        set(found),
+        key=lambda x: (x.startswith("17841"), len(x), x),
+    )
+    return ranked[0]
+
+
 def parse_profile_from_html(html: str, handle: str) -> dict[str, Any] | None:
     """Best-effort user dict from a rendered profile page (Decodo / browser HTML).
 
@@ -1049,10 +1126,9 @@ def parse_profile_from_html(html: str, handle: str) -> dict[str, Any] | None:
         pic = _str("profile_pic_url_hd") or _str("profile_pic_url")
         external = _str("external_url")
         verified = _bool("is_verified")
-        uid = _str("id")
-        if uid is None:
-            n = _int("id")
-            uid = str(n) if n is not None else None
+        # HTML embeds both the feed ``pk`` (e.g. 3621456554) and an XIG/Graph
+        # ``id`` (``17841…``). Feed / usertags APIs need the pk.
+        uid = _pick_ig_user_pk(window)
         if followers is None and not bio and not full_name:
             return None
         return {
@@ -1066,6 +1142,7 @@ def parse_profile_from_html(html: str, handle: str) -> dict[str, Any] | None:
             "profile_pic_url": pic,
             "external_url": external,
             "id": uid,
+            "pk": uid,
         }
 
     fallback: dict[str, Any] | None = None
