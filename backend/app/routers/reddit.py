@@ -213,6 +213,9 @@ def _parse_reddit_post_payload(data: Any, limit: int) -> tuple[dict[str, Any], l
     if not post_children:
         raise HTTPException(status_code=404, detail="Post not found")
     raw_post = post_children[0].get("data") or {}
+    created = raw_post.get("created_utc")
+    if isinstance(created, (int, float)):
+        created = datetime.fromtimestamp(int(created), tz=timezone.utc).isoformat()
     post = {
         "id": raw_post.get("id"),
         "url": f"https://www.reddit.com{raw_post.get('permalink')}" if raw_post.get("permalink") else raw_post.get("url"),
@@ -222,7 +225,9 @@ def _parse_reddit_post_payload(data: Any, limit: int) -> tuple[dict[str, Any], l
         "author": raw_post.get("author"),
         "score": raw_post.get("score") or raw_post.get("ups"),
         "numComments": raw_post.get("num_comments"),
-        "created": raw_post.get("created_utc"),
+        "created": created,
+        "flair": raw_post.get("link_flair_text"),
+        "nsfw": raw_post.get("over_18"),
         "thumbnail": raw_post.get("thumbnail"),
     }
 
@@ -622,7 +627,7 @@ async def post_details(
 
         data = await cached_or_run(
             endpoint="reddit.post-details",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
