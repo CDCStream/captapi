@@ -1194,7 +1194,6 @@ def _comment_payload_to_api(p: dict[str, Any]) -> dict[str, Any] | None:
         "replyCount": safe_int(toolbar.get("replyCount")) or parse_count_text(toolbar.get("replyCountA11y")) or 0,
         "hasCreatorHeart": bool(toolbar.get("heartActiveTooltip")),
         "publishedTimeText": safe_str(props.get("publishedTime")),
-        "replyToId": None,
     }
 
 

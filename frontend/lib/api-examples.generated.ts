@@ -13222,8 +13222,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 274000,
         "replyCount": 961,
         "hasCreatorHeart": true,
-        "publishedTimeText": "1 year ago",
-        "replyToId": null
+        "publishedTimeText": "1 year ago"
       },
       {
         "id": "UgyBphvOZuIgdVHgFvx4AaABAg",
@@ -13235,8 +13234,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 1200,
         "replyCount": 260,
         "hasCreatorHeart": true,
-        "publishedTimeText": "18 hours ago",
-        "replyToId": null
+        "publishedTimeText": "18 hours ago"
       },
       {
         "id": "UgyEnXfdC-umwvTt8JF4AaABAg",
@@ -13248,8 +13246,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 561000,
         "replyCount": 670,
         "hasCreatorHeart": true,
-        "publishedTimeText": "6 years ago",
-        "replyToId": null
+        "publishedTimeText": "6 years ago"
       },
       {
         "id": "Ugxzbv_ZeZXNRcfwsSF4AaABAg",
@@ -13261,8 +13258,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 288000,
         "replyCount": 635,
         "hasCreatorHeart": true,
-        "publishedTimeText": "6 years ago",
-        "replyToId": null
+        "publishedTimeText": "6 years ago"
       },
       {
         "id": "UgyOBSJT7Ca0h-XMMQ54AaABAg",
@@ -13274,8 +13270,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 94,
         "replyCount": 3,
         "hasCreatorHeart": true,
-        "publishedTimeText": "18 hours ago",
-        "replyToId": null
+        "publishedTimeText": "18 hours ago"
       }
     ]
   },
@@ -13617,8 +13612,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 69000,
         "replyCount": 907,
         "hasCreatorHeart": true,
-        "publishedTimeText": "3 months ago (edited)",
-        "replyToId": null
+        "publishedTimeText": "3 months ago (edited)"
       },
       {
         "id": "UgyQ5z9f7wcaa6tM1hB4AaABAg",
@@ -13630,8 +13624,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 20000,
         "replyCount": 70,
         "hasCreatorHeart": true,
-        "publishedTimeText": "3 months ago",
-        "replyToId": null
+        "publishedTimeText": "3 months ago"
       }
     ]
   },
