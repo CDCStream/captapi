@@ -456,24 +456,41 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
             break
 
     sold = None
-    sold_m = re.search(r'"sold_count"\s*:\s*(\d+)', html)
+    # Prefer bare integers (product aggregate) over quoted SKU stubs ("5").
+    sold_m = re.search(r'"sold_count"\s*:\s*(\d+)\s*[,}]', html) or re.search(
+        r'"sold_count"\s*:\s*"(\d+)"', html
+    )
     if sold_m:
         sold = int(sold_m.group(1))
 
-    # Unmasked price if present (masked values use "*").
-    price = None
-    currency = None
-    pm = re.search(r'"sale_price_decimal"\s*:\s*"([0-9.]+)"', html)
-    if pm:
+    def _decimal(pat: str) -> float | str | None:
+        m = re.search(pat, html)
+        if not m:
+            return None
+        raw = m.group(1)
+        if not raw or "*" in raw:
+            return None
         try:
-            price = float(pm.group(1))
+            return float(raw)
         except ValueError:
-            price = pm.group(1)
+            return raw
+
+    # Unmasked price if present (masked values use "*").
+    price = _decimal(r'"sale_price_decimal"\s*:\s*"([0-9.]+)"')
+    original_price = _decimal(r'"origin_price_decimal"\s*:\s*"([0-9.]+)"')
+    currency = None
     cm = re.search(r'"currency_name"\s*:\s*"([A-Z]{3})"', html)
     if cm:
         currency = cm.group(1)
+    discount = None
+    dm = re.search(r'"discount_format"\s*:\s*"([^"*]+)"', html)
+    if dm:
+        discount = dm.group(1).strip() or None
 
     if not title and not image:
+        return None
+    # Captcha / WAF interstitial — treat as miss so search can skip.
+    if (title or "").strip().lower() in {"security check", "tiktok shop", "tiktok"}:
         return None
 
     seller: dict[str, Any] = {}
@@ -495,12 +512,19 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
         "description": description,
         "url": canonical if canonical and "http" in canonical else f"https://www.tiktok.com/shop/pdp/{product_id}",
         "price": price,
+        "originalPrice": original_price,
         "currency": currency,
+        "discount": discount,
         "sold": sold,
         "image": image,
         "seller": seller,
     }
-    log.info("tiktok_shop_native_details_ok", product_id=product_id, has_price=price is not None)
+    log.info(
+        "tiktok_shop_native_details_ok",
+        product_id=product_id,
+        has_price=price is not None,
+        has_original=original_price is not None,
+    )
     return out
 
 
@@ -597,9 +621,12 @@ async def search_products_native(
             continue
         title = (row.get("title") or "").strip()
         # OG sometimes collapses to the site name when the PDP is gated.
-        if not title or title.lower() in {"tiktok shop", "tiktok"}:
+        if not title or title.lower() in {"tiktok shop", "tiktok", "security check"}:
             continue
         if not row.get("image") and len(title) < 12:
+            continue
+        # Drop captcha stubs that slipped through without a product image/price.
+        if not row.get("image") and row.get("price") is None:
             continue
         seen.add(pid)
         out.append(row)
