@@ -99,14 +99,71 @@ _CHANNEL_RE = re.compile(
     r'data-title="([^"]+)"\s+data-slug="([^"]+)"\s+data-id="\d+"\s+data-type="channel"',
     re.I,
 )
+# Shorts UI: creator link + lit-rendered name.
+_SHORTS_CREATOR_RE = re.compile(
+    r'data-testid="creator"\s+href="https?://(?:www\.)?rumble\.com/c/([^"/?]+)[^"]*"[^>]*>'
+    r'.*?<rum-text[^>]*>\s*(?:<!--.*?-->)?\s*([^<]+)',
+    re.I | re.S,
+)
+_FOLLOWERS_RE = re.compile(
+    r'media-heading-num-followers[^>]*>\s*([\d.,]+[KMBkmb]?)\s*followers?',
+    re.I,
+)
+_SHORTS_FOLLOWERS_RE = re.compile(
+    r'data-testid="followers-count"[^>]*>.*?([\d.,]+[KMBkmb]?)\s*followers?',
+    re.I | re.S,
+)
+_VERIFIED_RE_PAGE = re.compile(r'class="[^"]*media-heading-verified', re.I)
+_SHORTS_VERIFIED_RE = re.compile(
+    r'data-testid="creator"[^>]*>.{0,1200}?name="user__verified"',
+    re.I | re.S,
+)
 _MP4_RE = re.compile(r'https://[^"\'<>\s]+\.mp4[^"\'<>\s]*', re.I)
+# CDN filenames: Foo.haa.mp4 / Foo.caa.rec.mp4 — letter codes map to resolution.
+_STREAM_CODE_RE = re.compile(r"\.([A-Za-z])aa(?:\.rec)?\.mp4", re.I)
+_QUALITY_BY_CODE = {
+    "a": "1080p",
+    "h": "1080p",
+    "g": "720p",
+    "c": "480p",
+    "b": "360p",
+    "o": "240p",
+    "f": "180p",
+}
 
 
 def _channel_from_html(html: str) -> tuple[str | None, str | None]:
     m = _CHANNEL_RE.search(html or "")
-    if not m:
+    if m:
+        return safe_str(unescape(m.group(1))), safe_str(m.group(2))
+    sm = _SHORTS_CREATOR_RE.search(html or "")
+    if not sm:
         return None, None
-    return safe_str(unescape(m.group(1))), safe_str(m.group(2))
+    return safe_str(unescape(sm.group(2))), safe_str(sm.group(1))
+
+
+def _followers_from_html(html: str) -> int | None:
+    m = _FOLLOWERS_RE.search(html or "") or _SHORTS_FOLLOWERS_RE.search(html or "")
+    if not m:
+        return None
+    return _parse_count(m.group(1))
+
+
+def _verified_from_html(html: str) -> bool | None:
+    """True/False when a channel block is present; None if channel missing."""
+    if not html:
+        return None
+    has_channel = bool(_CHANNEL_RE.search(html) or _SHORTS_CREATOR_RE.search(html))
+    if not has_channel:
+        return None
+    return bool(_VERIFIED_RE_PAGE.search(html) or _SHORTS_VERIFIED_RE.search(html))
+
+
+def _quality_from_stream_url(url: str) -> str | None:
+    m = _STREAM_CODE_RE.search(url or "")
+    if not m:
+        return None
+    return _QUALITY_BY_CODE.get(m.group(1).lower())
 
 
 def _streams_from_html(html: str) -> list[dict[str, Any]]:
@@ -117,7 +174,13 @@ def _streams_from_html(html: str) -> list[dict[str, Any]]:
         if clean in seen:
             continue
         seen.add(clean)
-        out.append({"url": clean, "type": "mp4", "quality": None})
+        out.append(
+            {
+                "url": clean,
+                "type": "mp4",
+                "quality": _quality_from_stream_url(clean),
+            }
+        )
         if len(out) >= 8:
             break
     return out
@@ -164,8 +227,8 @@ def parse_video_html(html: str, url: str | None = None) -> dict[str, Any] | None
         "description": description,
         "channel": channel_name,
         "channelUrl": channel_url,
-        "channelFollowers": None,
-        "channelVerified": None,
+        "channelFollowers": _followers_from_html(html),
+        "channelVerified": _verified_from_html(html),
         "views": views or 0,
         "likes": 0,
         "dislikes": 0,

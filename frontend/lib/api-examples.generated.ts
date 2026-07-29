@@ -6002,9 +6002,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "description": "In this episode, I'll discuss the groundbreaking information President Trump revealed in his speech last night and what it means for our elections movingforward. 1776 Live Club: No purchase necessary.",
     "channel": "The Dan Bongino Show",
     "channelUrl": "https://rumble.com/c/bongino",
-    "channelFollowers": null,
-    "channelVerified": null,
-    "views": 930926,
+    "channelFollowers": 3660000,
+    "channelVerified": true,
+    "views": 935270,
     "likes": 0,
     "dislikes": 0,
     "duration": "1:26:25",
@@ -6016,12 +6016,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.caa.rec.mp4?u=3&b=0",
         "type": "mp4",
-        "quality": null
+        "quality": "480p"
       },
       {
         "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.Faa.rec.mp4",
         "type": "mp4",
-        "quality": null
+        "quality": "180p"
       }
     ]
   },
