@@ -12496,22 +12496,24 @@
   },
   "soundcloud-artist": {
     "ok": true,
+    "status": 200,
+    "credits": null,
     "data": {
       "platform": "soundcloud",
-      "id": "112904040",
-      "url": "https://soundcloud.com/nasa",
-      "username": "NASA",
-      "name": "NASA",
-      "description": "Hello, we’re NASA. You may have seen our astronauts, rocket launches, or Mars rovers — but have you heard our sounds? From interviews with astronauts and engineers to stories that take you on a tour of the galaxy, NASA’s audio offerings let you experience the thrill of space exploration without ever leaving Earth.",
-      "avatar": "https://i1.sndcdn.com/avatars-JUvAAPvAA86fmbVE-SH0i6g-large.jpg",
-      "city": null,
-      "countryCode": "US",
+      "id": "2976616",
+      "url": "https://soundcloud.com/flume",
+      "username": "Flume",
+      "name": "Flume",
+      "description": "Management: flume@threesixzero.com",
+      "avatar": "https://i1.sndcdn.com/avatars-sAZPcKyZpXJ0J0u5-JHfNSg-large.jpg",
+      "city": "Sydney",
+      "countryCode": "AU",
       "verified": true,
-      "followers": 158684,
-      "followings": 1,
-      "trackCount": 1500,
-      "playlistCount": 45,
-      "likesCount": 32
+      "followers": 2227656,
+      "followings": 203,
+      "trackCount": 307,
+      "playlistCount": 46,
+      "likesCount": 149
     }
   },
   "soundcloud-artist-tracks": {
