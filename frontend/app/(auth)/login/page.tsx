@@ -27,6 +27,12 @@ function LoginForm() {
     if (oauthError) {
       toast.error(oauthError);
     }
+    const reason = params.get("reason");
+    if (reason === "session-expired") {
+      toast.message("Your session expired. Please sign in again.");
+    } else if (reason === "account-missing") {
+      toast.message("Account data was reset. Please sign in again.");
+    }
   }, [params]);
 
   async function onSubmit(e: React.FormEvent) {

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { ensureCreditBalance, hasCreditBalance } from "@/lib/supabase/ensure-account";
 import { BugReportDialog } from "@/components/bug-report-dialog";
 import { FeatureRequestDialog } from "@/components/feature-request-dialog";
 import { LogoutButton } from "@/components/logout-button";
@@ -14,7 +15,28 @@ import { BuyCreditsDialog } from "@/components/dashboard/buy-credits-dialog";
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const sb = await createClient();
   const { data: { user } } = await sb.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) {
+    // Clear a ghost JWT the middleware may have missed, then send to login.
+    try {
+      await sb.auth.signOut();
+    } catch {
+      /* ignore */
+    }
+    redirect("/login?reason=session-expired");
+  }
+
+  const exists = await hasCreditBalance(user.id);
+  if (exists === false) {
+    const healed = await ensureCreditBalance(user.id);
+    if (!healed) {
+      try {
+        await sb.auth.signOut();
+      } catch {
+        /* ignore */
+      }
+      redirect("/login?reason=account-missing");
+    }
+  }
 
   return (
     <div className="min-h-screen flex bg-muted/30">

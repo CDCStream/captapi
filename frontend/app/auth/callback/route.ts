@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getServiceClient } from "@/lib/supabase/admin";
+import { ensureCreditBalance } from "@/lib/supabase/ensure-account";
 
 const INITIAL_CREDITS = 100;
 const ANON_TOOL_COOKIE = "captapi_tool_free";
@@ -173,6 +174,11 @@ export async function GET(request: Request) {
         data: { user },
       } = await supabase.auth.getUser();
       const skipWelcome = shouldSkipWelcome(request, next, fromParam);
+
+      if (user?.id) {
+        // Recreate credit_balances if Auth user survived a public-schema wipe.
+        await ensureCreditBalance(user.id);
+      }
 
       if (user?.email && user?.email_confirmed_at) {
         if (skipWelcome) {
