@@ -565,7 +565,6 @@ async def _subreddit_details_native(sub: str) -> dict[str, Any] | None:
         "title": safe_str(data.get("title")),
         "description": safe_str(data.get("public_description") or data.get("description")),
         "members": safe_int(data.get("subscribers")),
-        "activeUsers": safe_int(data.get("accounts_active") or data.get("active_user_count")),
         "category": safe_str(data.get("advertiser_category")),
         "language": safe_str(data.get("lang")),
         "type": safe_str(data.get("subreddit_type")),
@@ -600,7 +599,7 @@ async def subreddit_details(
 
         data = await cached_or_run(
             endpoint="reddit.subreddit-details",
-            params={"sub": sub, "v": 2},
+            params={"sub": sub, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

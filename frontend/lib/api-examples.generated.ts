@@ -5478,7 +5478,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "title": "/r/space: news, articles and discussion",
     "description": "Share & discuss informative content on:\n\n* Astrophysics\n* Cosmology\n* Space Exploration\n* Planetary Science\n* Astrobiology",
     "members": 27936127,
-    "activeUsers": null,
     "category": "Lifestyles",
     "language": "en",
     "type": "public",

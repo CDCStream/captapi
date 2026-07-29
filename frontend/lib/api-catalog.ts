@@ -2405,7 +2405,6 @@ const FIELD_DESCS: Record<string, string> = {
   // Reddit / community
   subreddit: "Subreddit the post belongs to.",
   flair: "Post flair.",
-  activeUsers: "Currently active user count.",
   moderatorCount: "Number of moderators.",
 
   // Links-in-bio
