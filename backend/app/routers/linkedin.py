@@ -471,9 +471,16 @@ async def linkedin_search_posts(
         endpoint="/v1/linkedin/search-posts",
         platform="linkedin",
         resource_url=None,
-        base_credits=_scaled(limit),
+        base_credits=CREDIT_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # 1) SERP → Decodo post hydrate (LI content search is auth-walled).
+            native = await linkedin_native.search_posts(q, sort=sort, limit=limit)
+            if native:
+                ctx["source"] = "direct"
+                posts = [_normalize_post_list_item(i, include_media=False) for i in native[:limit]]
+                return {"query": q, "sort": sort, "totalReturned": len(posts), "posts": posts}
+
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_LINKEDIN_POST_SEARCH,
                 {
@@ -485,16 +492,20 @@ async def linkedin_search_posts(
                 },
                 max_items=limit,
             )
+            ctx["source"] = "apify"
             # Search actor never returns media attachments.
             posts = [_normalize_post_list_item(i, include_media=False) for i in items[:limit]]
             return {"query": q, "sort": sort, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
             endpoint="linkedin.search-posts",
-            params={"q": q, "sort": sort, "limit": limit, "v": 4},
+            params={"q": q, "sort": sort, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled(len(data["posts"]))
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_NATIVE
+        else:
+            ctx["credits_override"] = _scaled(len(data["posts"]))
         return ApiResponse(data=data)

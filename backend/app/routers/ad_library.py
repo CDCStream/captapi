@@ -814,8 +814,19 @@ async def tiktok_ad_details(
     settings = get_settings()
     ad_id = _tiktok_ad_id(url)
     region = _tiktok_region(country)
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/tiktok/ad-details", platform="tiktok_ad_library", resource_url=ad_id, base_credits=17) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/ad-library/tiktok/ad-details",
+        platform="tiktok_ad_library",
+        resource_url=ad_id,
+        base_credits=CREDIT_AD_LIBRARY_NATIVE,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await tiktok_ads_native.ad_details(ad_id, country=region)
+            if native:
+                ctx["source"] = "direct"
+                return _normalize_ad(native, "tiktok_ad_library")
+
             candidates: list[tuple[str, dict[str, Any]]] = [
                 (
                     settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL,
@@ -857,9 +868,19 @@ async def tiktok_ad_details(
                     break
             if best is None:
                 raise HTTPException(status_code=404, detail="Ad not found")
+            ctx["source"] = "apify"
+            ctx["credits_override"] = 17
             return _normalize_ad(best, "tiktok_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.tiktok.ad-details", {"ad_id": ad_id, "country": region, "v": 4}, _run, ctx, use_cache=cache))
+        return ApiResponse(
+            data=await cached_or_run(
+                "ad-library.tiktok.ad-details",
+                {"ad_id": ad_id, "country": region, "v": 5},
+                _run,
+                ctx,
+                use_cache=cache,
+            )
+        )
 
 
 @router.get("/google/company-ads", summary="Google Ads Transparency Center company ads")

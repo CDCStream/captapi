@@ -1,15 +1,16 @@
 """Native LinkedIn public pages via Decodo headless HTML (no Apify).
 
 Company / profile / post URLs hydrate enough OG + JSON-LD for basic details.
-Search and deep engagement stay on Apify fallthrough in the router.
+Keyword search uses Google/DDG SERP → post hydrate; Apify remains fallthrough.
 """
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from typing import Any
-from urllib.parse import unquote
+from urllib.parse import quote_plus, unquote
 
 import structlog
 
@@ -337,3 +338,102 @@ async def fetch_company_posts(slug: str, *, limit: int = 20) -> list[dict[str, A
         return None
     log.info("linkedin_native_company_posts_ok", slug=handle, n=len(posts))
     return posts
+
+
+
+def _post_urls_from_serp_html(html: str, *, limit: int = 40) -> list[str]:
+    urls: list[str] = []
+    seen: set[str] = set()
+    for url in re.findall(
+        r"https://(?:www\.)?linkedin\.com/posts/[A-Za-z0-9_%\-.]+",
+        html or "",
+        re.I,
+    ):
+        clean = url.split("?")[0].rstrip(").,;'\"")
+        if clean in seen:
+            continue
+        if "activity" not in clean.lower():
+            continue
+        seen.add(clean)
+        urls.append(clean)
+        if len(urls) >= limit:
+            break
+    return urls
+
+
+async def _search_post_urls_via_serp(
+    q: str, *, sort: str = "relevance", limit: int = 40
+) -> list[str]:
+    """Google + DuckDuckGo site:linkedin.com/posts → post URLs."""
+    if not decodo_fetch.enabled():
+        return []
+    query = quote_plus(f"site:linkedin.com/posts {q}")
+    sources = [
+        f"https://www.google.com/search?q={query}&num={min(30, max(10, limit))}"
+        + ("&tbs=sbd:1" if sort == "date" else ""),
+        f"https://html.duckduckgo.com/html/?q={query}",
+    ]
+    seen: set[str] = set()
+    urls: list[str] = []
+    for url in sources:
+        got = await decodo_fetch.fetch_url(url, timeout=90.0, headless="html")
+        if not got:
+            continue
+        status, body = got
+        if status != 200 or not body:
+            continue
+        for post_url in _post_urls_from_serp_html(body, limit=limit):
+            if post_url in seen:
+                continue
+            seen.add(post_url)
+            urls.append(post_url)
+            if len(urls) >= limit:
+                break
+        if len(urls) >= min(8, limit):
+            break
+    log.info("linkedin_native_search_serp", q=q[:80], n=len(urls), sort=sort)
+    return urls
+
+
+async def search_posts(
+    q: str, *, sort: str = "relevance", limit: int = 20
+) -> list[dict[str, Any]] | None:
+    """Keyword post search via SERP → Decodo post hydrate.
+
+    LinkedIn's own content search is auth-walled logged-out.
+    """
+    query = (q or "").strip()
+    if len(query) < 2 or limit <= 0:
+        return None
+    sort_key = "date" if (sort or "").lower() == "date" else "relevance"
+    urls = await _search_post_urls_via_serp(
+        query, sort=sort_key, limit=min(40, max(15, limit * 2))
+    )
+    if not urls:
+        return None
+
+    sem = asyncio.Semaphore(3)
+    selected = urls[: max(limit * 2, limit + 5)]
+
+    async def _one(post_url: str) -> dict[str, Any] | None:
+        async with sem:
+            return await fetch_post(post_url)
+
+    rows = await asyncio.gather(*[_one(u) for u in selected])
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for row in rows:
+        if not row or not row.get("text"):
+            continue
+        key = safe_str(row.get("url") or row.get("id") or row.get("text"))
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        out.append(row)
+        if len(out) >= limit:
+            break
+    if not out:
+        log.info("linkedin_native_search_empty", q=query[:80])
+        return None
+    log.info("linkedin_native_search_ok", q=query[:80], n=len(out), sort=sort_key)
+    return out
