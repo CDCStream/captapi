@@ -22,18 +22,32 @@ from app.routers.facebook import _normalize_post as _fb_normalize
 from app.routers.instagram import _normalize_post as _ig_normalize
 from app.routers.linkedin import _normalize_post as _li_normalize
 from app.routers.pinterest import _normalize_pin as _pin_normalize
+from app.routers.reddit import _fetch_reddit_post_resilient as _rd_fetch_resilient
 from app.routers.reddit import _is_comment as _rd_is_comment
 from app.routers.reddit import _normalize_post as _rd_normalize
+from app.routers.reddit import _require_reddit_post_url as _rd_require_post
 from app.routers.rumble import _normalize_video as _rb_normalize
 from app.routers.threads import _normalize_post as _th_normalize
 from app.routers.tiktok import _normalize as _tiktok_normalize
 from app.routers.twitter import _normalize_tweet as _tw_normalize
 from app.schemas.common import ApiResponse
+from app.services import facebook_details_native
+from app.services import instagram_native
+from app.services import linkedin_native
+from app.services import pinterest_native
+from app.services import rumble_video_native
+from app.services import threads_native
+from app.services import tiktok_native
+from app.services import twitter_native
+from app.services import youtube_native
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
 from app.utils.url import (
     extract_bluesky_post,
+    extract_instagram_shortcode,
+    extract_pinterest_pin_id,
+    extract_tweet_id,
     extract_youtube_id,
     normalize_youtube_url,
 )
@@ -72,18 +86,7 @@ def _detect_platform(url: str) -> str | None:
     return None
 
 
-async def _fetch_youtube(url: str) -> dict[str, Any]:
-    settings = get_settings()
-    apify = get_apify()
-    norm = normalize_youtube_url(url)
-    items = await apify.run_actor_sync(
-        settings.APIFY_ACTOR_YOUTUBE_VIDEO,
-        {"startUrls": [{"url": norm}], "maxResults": 1},
-        max_items=1,
-    )
-    if not items:
-        raise HTTPException(status_code=404, detail="Video not found")
-    v = items[0]
+def _youtube_analytics_row(v: dict[str, Any], *, norm: str, video_id: str | None) -> dict[str, Any]:
     thumbs = v.get("thumbnails")
     thumb = safe_str(
         v.get("thumbnailUrl")
@@ -92,10 +95,11 @@ async def _fetch_youtube(url: str) -> dict[str, Any]:
     return {
         "platform": "youtube",
         "url": norm,
-        "id": safe_str(extract_youtube_id(url)),
+        "id": video_id or safe_str(v.get("id")),
         "caption": safe_str(v.get("title")),
         "publishedAt": safe_str(v.get("date") or v.get("publishedAt")),
         "thumbnailUrl": thumb,
+        "durationSeconds": safe_int(v.get("durationSeconds")),
         "author": {
             "username": safe_str(v.get("channelName") or v.get("channel")),
             "displayName": safe_str(v.get("channelName") or v.get("channel")),
@@ -110,58 +114,8 @@ async def _fetch_youtube(url: str) -> dict[str, Any]:
     }
 
 
-async def _fetch_tiktok(url: str) -> dict[str, Any]:
-    settings = get_settings()
-    apify = get_apify()
-    items = await apify.run_actor_sync(
-        settings.APIFY_ACTOR_TIKTOK,
-        {"postURLs": [url], "resultsPerPage": 1, "shouldDownloadVideos": False},
-        max_items=1,
-    )
-    if not items:
-        raise HTTPException(status_code=404, detail="Video not found")
-    return _tiktok_normalize(items[0])
-
-
-async def _fetch_instagram(url: str) -> dict[str, Any]:
-    settings = get_settings()
-    apify = get_apify()
-    items = await apify.run_actor_sync(
-        settings.APIFY_ACTOR_INSTAGRAM_POST,
-        {"directUrls": [url], "resultsLimit": 1},
-        max_items=1,
-    )
-    if not items:
-        raise HTTPException(status_code=404, detail="Post not found")
-    return _ig_normalize(items[0])
-
-
-async def _fetch_facebook(url: str) -> dict[str, Any]:
-    settings = get_settings()
-    apify = get_apify()
-    items = await apify.run_actor_sync(
-        settings.APIFY_ACTOR_FACEBOOK_POSTS,
-        {"startUrls": [{"url": url}], "resultsLimit": 1},
-        max_items=1,
-    )
-    if not items:
-        raise HTTPException(status_code=404, detail="Post not found")
-    return _fb_normalize(items[0])
-
-
-async def _fetch_twitter(url: str) -> dict[str, Any]:
-    settings = get_settings()
-    apify = get_apify()
-    items = await apify.run_actor_sync(
-        settings.APIFY_ACTOR_TWITTER_TWEET,
-        {"startUrls": [url], "maxItems": 1},
-        max_items=1,
-    )
-    if not items:
-        raise HTTPException(status_code=404, detail="Tweet not found")
-    n = _tw_normalize(items[0])
+def _twitter_analytics_row(n: dict[str, Any]) -> dict[str, Any]:
     eng = n.get("engagement") or {}
-    # Map Twitter-native engagement onto the shared metric names.
     retweets = eng.get("retweets") if isinstance(eng.get("retweets"), int) else 0
     quotes = eng.get("quotes") if isinstance(eng.get("quotes"), int) else 0
     return {
@@ -182,18 +136,7 @@ async def _fetch_twitter(url: str) -> dict[str, Any]:
     }
 
 
-async def _fetch_reddit(url: str) -> dict[str, Any]:
-    settings = get_settings()
-    apify = get_apify()
-    items = await apify.run_actor_sync(
-        settings.APIFY_ACTOR_REDDIT,
-        {"startUrls": [{"url": url}], "type": "posts", "maxItems": 1},
-        max_items=2,
-    )
-    posts = [i for i in items if not _rd_is_comment(i)]
-    if not posts:
-        raise HTTPException(status_code=404, detail="Post not found")
-    n = _rd_normalize(posts[0])
+def _reddit_analytics_row(n: dict[str, Any]) -> dict[str, Any]:
     return {
         "platform": "reddit",
         "url": n.get("url"),
@@ -212,17 +155,7 @@ async def _fetch_reddit(url: str) -> dict[str, Any]:
     }
 
 
-async def _fetch_threads(url: str) -> dict[str, Any]:
-    settings = get_settings()
-    apify = get_apify()
-    items = await apify.run_actor_sync(
-        settings.APIFY_ACTOR_THREADS,
-        {"urls": [url], "resultsType": "details", "resultsLimit": 1},
-        max_items=1,
-    )
-    if not items:
-        raise HTTPException(status_code=404, detail="Post not found")
-    n = _th_normalize(items[0])
+def _threads_analytics_row(n: dict[str, Any]) -> dict[str, Any]:
     eng = n.get("engagement") or {}
     return {
         "platform": "threads",
@@ -240,6 +173,125 @@ async def _fetch_threads(url: str) -> dict[str, Any]:
             "saves": None,
         },
     }
+
+
+async def _fetch_youtube(url: str) -> dict[str, Any]:
+    norm = normalize_youtube_url(url)
+    video_id = extract_youtube_id(url)
+    if video_id:
+        native = await youtube_native.video_details_native(video_id, norm)
+        if native and native.get("title"):
+            return _youtube_analytics_row(native, norm=norm, video_id=video_id)
+
+    settings = get_settings()
+    items = await get_apify().run_actor_sync(
+        settings.APIFY_ACTOR_YOUTUBE_VIDEO,
+        {"startUrls": [{"url": norm}], "maxResults": 1},
+        max_items=1,
+    )
+    if not items:
+        raise HTTPException(status_code=404, detail="Video not found")
+    return _youtube_analytics_row(items[0], norm=norm, video_id=video_id)
+
+
+async def _fetch_tiktok(url: str) -> dict[str, Any]:
+    native = await tiktok_native.video_details_native(url)
+    if native and native.get("id"):
+        return native
+    settings = get_settings()
+    items = await get_apify().run_actor_sync(
+        settings.APIFY_ACTOR_TIKTOK,
+        {"postURLs": [url], "resultsPerPage": 1, "shouldDownloadVideos": False},
+        max_items=1,
+    )
+    if not items:
+        raise HTTPException(status_code=404, detail="Video not found")
+    return _tiktok_normalize(items[0])
+
+
+async def _fetch_instagram(url: str) -> dict[str, Any]:
+    shortcode = extract_instagram_shortcode(url)
+    if shortcode:
+        native = await instagram_native.fetch_post_details(shortcode)
+        if native and native.get("id"):
+            return native
+    settings = get_settings()
+    items = await get_apify().run_actor_sync(
+        settings.APIFY_ACTOR_INSTAGRAM_POST,
+        {"directUrls": [url], "resultsLimit": 1},
+        max_items=1,
+    )
+    if not items:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return _ig_normalize(items[0])
+
+
+async def _fetch_facebook(url: str) -> dict[str, Any]:
+    native = await facebook_details_native.details_native(url)
+    if native:
+        return _fb_normalize(native)
+    settings = get_settings()
+    items = await get_apify().run_actor_sync(
+        settings.APIFY_ACTOR_FACEBOOK_POSTS,
+        {"startUrls": [{"url": url}], "resultsLimit": 1},
+        max_items=1,
+    )
+    if not items:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return _fb_normalize(items[0])
+
+
+async def _fetch_twitter(url: str) -> dict[str, Any]:
+    tweet_id = extract_tweet_id(url)
+    if tweet_id:
+        syn = await twitter_native.tweet_result(tweet_id)
+        if syn:
+            return _twitter_analytics_row(_tw_normalize(syn))
+    settings = get_settings()
+    items = await get_apify().run_actor_sync(
+        settings.APIFY_ACTOR_TWITTER_TWEET,
+        {"startUrls": [url], "maxItems": 1},
+        max_items=1,
+    )
+    if not items:
+        raise HTTPException(status_code=404, detail="Tweet not found")
+    return _twitter_analytics_row(_tw_normalize(items[0]))
+
+
+async def _fetch_reddit(url: str) -> dict[str, Any]:
+    try:
+        post_id = _rd_require_post(url)
+        post, _comments = await _rd_fetch_resilient(url, post_id, limit=1)
+        return _reddit_analytics_row(_rd_normalize(post))
+    except HTTPException:
+        raise
+    except Exception:  # noqa: BLE001 — fall through to Apify
+        pass
+    settings = get_settings()
+    items = await get_apify().run_actor_sync(
+        settings.APIFY_ACTOR_REDDIT,
+        {"startUrls": [{"url": url}], "type": "posts", "maxItems": 1},
+        max_items=2,
+    )
+    posts = [i for i in items if not _rd_is_comment(i)]
+    if not posts:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return _reddit_analytics_row(_rd_normalize(posts[0]))
+
+
+async def _fetch_threads(url: str) -> dict[str, Any]:
+    native = await threads_native.post_details(url)
+    if native and native.get("code"):
+        return _threads_analytics_row(_th_normalize(native))
+    settings = get_settings()
+    items = await get_apify().run_actor_sync(
+        settings.APIFY_ACTOR_THREADS,
+        {"urls": [url], "resultsType": "details", "resultsLimit": 1},
+        max_items=1,
+    )
+    if not items:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return _threads_analytics_row(_th_normalize(items[0]))
 
 
 async def _fetch_bluesky(url: str) -> dict[str, Any]:
@@ -278,22 +330,12 @@ async def _fetch_bluesky(url: str) -> dict[str, Any]:
     }
 
 
-async def _fetch_linkedin(url: str) -> dict[str, Any]:
-    settings = get_settings()
-    apify = get_apify()
-    items = await apify.run_actor_sync(
-        settings.APIFY_ACTOR_LINKEDIN_POST,
-        {"url": url},
-        max_items=1,
-    )
-    if not items:
-        raise HTTPException(status_code=404, detail="Post not found")
-    n = _li_normalize(items[0])
+def _linkedin_analytics_row(n: dict[str, Any]) -> dict[str, Any]:
     eng = n.get("engagement") or {}
     return {
         "platform": "linkedin",
         "url": n.get("url"),
-        "id": None,
+        "id": n.get("id"),
         "title": n.get("text"),
         "publishedAt": n.get("publishedAt"),
         "thumbnailUrl": None,
@@ -308,17 +350,7 @@ async def _fetch_linkedin(url: str) -> dict[str, Any]:
     }
 
 
-async def _fetch_pinterest(url: str) -> dict[str, Any]:
-    settings = get_settings()
-    apify = get_apify()
-    items = await apify.run_actor_sync(
-        settings.APIFY_ACTOR_PINTEREST,
-        {"startUrls": [{"url": url}], "maxItems": 1},
-        max_items=1,
-    )
-    if not items:
-        raise HTTPException(status_code=404, detail="Pin not found")
-    n = _pin_normalize(items[0])
+def _pinterest_analytics_row(n: dict[str, Any]) -> dict[str, Any]:
     return {
         "platform": "pinterest",
         "url": n.get("url"),
@@ -337,17 +369,7 @@ async def _fetch_pinterest(url: str) -> dict[str, Any]:
     }
 
 
-async def _fetch_rumble(url: str) -> dict[str, Any]:
-    settings = get_settings()
-    apify = get_apify()
-    items = await apify.run_actor_sync(
-        settings.APIFY_ACTOR_RUMBLE,
-        {"startUrls": [{"url": url}], "maxItems": 1},
-        max_items=1,
-    )
-    if not items:
-        raise HTTPException(status_code=404, detail="Video not found")
-    n = _rb_normalize(items[0])
+def _rumble_analytics_row(n: dict[str, Any]) -> dict[str, Any]:
     return {
         "platform": "rumble",
         "url": n.get("url"),
@@ -359,11 +381,59 @@ async def _fetch_rumble(url: str) -> dict[str, Any]:
         "engagement": {
             "views": n.get("views"),
             "likes": n.get("likes"),
-            "comments": None,
+            "comments": n.get("comments"),
             "shares": None,
             "saves": None,
         },
     }
+
+
+async def _fetch_linkedin(url: str) -> dict[str, Any]:
+    native = await linkedin_native.fetch_post(url)
+    if native:
+        return _linkedin_analytics_row(_li_normalize(native))
+    settings = get_settings()
+    items = await get_apify().run_actor_sync(
+        settings.APIFY_ACTOR_LINKEDIN_POST,
+        {"url": url},
+        max_items=1,
+    )
+    if not items:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return _linkedin_analytics_row(_li_normalize(items[0]))
+
+
+async def _fetch_pinterest(url: str) -> dict[str, Any]:
+    pin_id = extract_pinterest_pin_id(url)
+    if pin_id:
+        native = await pinterest_native.fetch_pin_info(pin_id)
+        if native:
+            return _pinterest_analytics_row(_pin_normalize(native))
+    settings = get_settings()
+    items = await get_apify().run_actor_sync(
+        settings.APIFY_ACTOR_PINTEREST,
+        {"startUrls": [{"url": url}], "maxItems": 1},
+        max_items=1,
+    )
+    if not items:
+        raise HTTPException(status_code=404, detail="Pin not found")
+    return _pinterest_analytics_row(_pin_normalize(items[0]))
+
+
+async def _fetch_rumble(url: str) -> dict[str, Any]:
+    native = await rumble_video_native.video_details_native(url)
+    if native and native.get("title"):
+        # Native already returns the router video shape.
+        return _rumble_analytics_row(native)
+    settings = get_settings()
+    items = await get_apify().run_actor_sync(
+        settings.APIFY_ACTOR_RUMBLE,
+        {"startUrls": [{"url": url}], "maxItems": 1},
+        max_items=1,
+    )
+    if not items:
+        raise HTTPException(status_code=404, detail="Video not found")
+    return _rumble_analytics_row(_rb_normalize(items[0]))
 
 
 _FETCHERS: dict[str, Callable[[str], Awaitable[dict[str, Any]]]] = {
@@ -457,7 +527,7 @@ async def post_analytics(
 
         data = await cached_or_run(
             endpoint=f"analytics.post.{platform}",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             ttl=get_settings().CACHE_TTL_DYNAMIC,
