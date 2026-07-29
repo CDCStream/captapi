@@ -23,8 +23,7 @@ router = APIRouter()
 
 RATE_SHOP = 2.8
 RATE_REVIEWS = 2.25
-# Native store SSR (datacenter HTML). Search stays on Apify — TikTok Shop search
-# pages are WAF/captcha gated on Evomi/Webshare/Decodo.
+# Native store SSR + SERP shop-search. Creator showcase stays on Apify (WAF).
 CREDIT_SHOP_NATIVE = tiktok_shop_native.CREDIT_SHOP_NATIVE
 
 
@@ -260,12 +259,46 @@ async def shop_search(
 ):
     async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/shop-search", platform="tiktok_shop", resource_url=None, base_credits=_scaled(limit, RATE_SHOP)) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_shop("shop_search", {"searchKeywords": [q], "region": region.upper(), "maxResults": limit}, limit)
-            products = [_normalize_product(i, search_mode=True) for i in items]
-            return {"query": q, "region": region.upper(), "totalReturned": len(products), "products": products}
+            # 1) SERP → PDP hydrate (Shop search HTML is WAF/captcha gated).
+            native = await tiktok_shop_native.search_products_native(
+                q, region=region.upper(), limit=limit
+            )
+            if native:
+                ctx["source"] = "direct"
+                products = [_normalize_product(i, search_mode=True) for i in native]
+                return {
+                    "query": q,
+                    "region": region.upper(),
+                    "totalReturned": len(products),
+                    "products": products,
+                }
 
-        data = await cached_or_run("tiktok-shop.shop-search", {"q": q, "region": region, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
-        ctx["credits_override"] = _scaled(len(data["products"]), RATE_SHOP)
+            # 2) Apify fallthrough.
+            items = await _run_shop(
+                "shop_search",
+                {"searchKeywords": [q], "region": region.upper(), "maxResults": limit},
+                limit,
+            )
+            ctx["source"] = "apify"
+            products = [_normalize_product(i, search_mode=True) for i in items]
+            return {
+                "query": q,
+                "region": region.upper(),
+                "totalReturned": len(products),
+                "products": products,
+            }
+
+        data = await cached_or_run(
+            "tiktok-shop.shop-search",
+            {"q": q, "region": region, "limit": limit, "v": 4},
+            _run,
+            ctx,
+            use_cache=cache,
+        )
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_SHOP_NATIVE
+        else:
+            ctx["credits_override"] = _scaled(len(data["products"]), RATE_SHOP)
         return ApiResponse(data=data)
 
 

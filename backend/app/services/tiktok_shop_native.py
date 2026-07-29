@@ -3,15 +3,18 @@
 Store pages embed a Remix/loader JSON blob with ``component_data.products``.
 PDP pages embed a short ``product_reviews`` preview (~3 rows).
 Datacenter proxy usually returns the full page; residential/Decodo are
-fallbacks. Product details use PDP OG/SSR; search / showcase stay on Apify (WAF).
+fallbacks. Product details use PDP OG/SSR. Keyword search uses Google/DDG
+SERP → PDP hydrate (Shop search HTML is WAF/captcha gated). Creator showcase
+stays on Apify.
 """
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from typing import Any
-from urllib.parse import unquote
+from urllib.parse import quote, unquote
 
 import structlog
 
@@ -474,4 +477,116 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
         "seller": {"name": seller_name} if seller_name else {},
     }
     log.info("tiktok_shop_native_details_ok", product_id=product_id, has_price=price is not None)
+    return out
+
+
+_SERP_PDP_ID_RE = re.compile(
+    r"tiktok\.com/shop/pdp/(?:[^/\"'?#\s]+/)?(\d{10,})",
+    re.I,
+)
+
+
+def _product_ids_from_serp_html(html: str, *, limit: int = 40) -> list[str]:
+    ids: list[str] = []
+    seen: set[str] = set()
+    for pid in _SERP_PDP_ID_RE.findall(html or ""):
+        if pid in seen:
+            continue
+        seen.add(pid)
+        ids.append(pid)
+        if len(ids) >= limit:
+            break
+    return ids
+
+
+async def _search_product_ids_via_serp(
+    q: str,
+    *,
+    region: str = "US",
+    limit: int = 40,
+) -> list[str]:
+    """Google/DDG ``site:tiktok.com/shop/pdp`` — avoids Shop search WAF."""
+    if not decodo_fetch.enabled():
+        return []
+    query = quote(f"site:tiktok.com/shop/pdp {q}", safe="")
+    geo = (region or "US").strip().upper() or "US"
+    sources = [
+        f"https://www.google.com/search?q={query}&num={min(30, max(10, limit))}&hl=en&gl={geo}",
+        f"https://html.duckduckgo.com/html/?q={query}",
+    ]
+    seen: set[str] = set()
+    ids: list[str] = []
+    for url in sources:
+        headless = "html" if "google.com" in url else None
+        got = await decodo_fetch.fetch_url(url, timeout=90.0, headless=headless, geo=geo)
+        if not got:
+            continue
+        status, body = got
+        if status != 200 or not body:
+            continue
+        for pid in _product_ids_from_serp_html(body, limit=limit):
+            if pid in seen:
+                continue
+            seen.add(pid)
+            ids.append(pid)
+            if len(ids) >= limit:
+                break
+        if len(ids) >= min(10, limit):
+            break
+    log.info("tiktok_shop_search_serp_ids", q=q[:80], region=geo, n=len(ids))
+    return ids
+
+
+async def search_products_native(
+    q: str,
+    *,
+    region: str = "US",
+    limit: int = 20,
+) -> list[dict[str, Any]] | None:
+    """Keyword shop search via SERP → PDP OG/SSR hydrate.
+
+    Shop search pages are captcha-gated; this path never hits them.
+    """
+    query = (q or "").strip()
+    if len(query) < 2 or limit <= 0:
+        return None
+    want = min(40, max(15, limit * 2))
+    ids = await _search_product_ids_via_serp(query, region=region, limit=want)
+    if not ids:
+        return None
+
+    sem = asyncio.Semaphore(5)
+    selected = ids[: max(limit * 2, limit + 4)]
+
+    async def _one(pid: str) -> dict[str, Any] | None:
+        async with sem:
+            return await fetch_product_details(f"https://www.tiktok.com/shop/pdp/{pid}")
+
+    rows = await asyncio.gather(*[_one(pid) for pid in selected])
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        pid = str(row.get("productId") or row.get("id") or "")
+        if not pid or pid in seen:
+            continue
+        title = (row.get("title") or "").strip()
+        # OG sometimes collapses to the site name when the PDP is gated.
+        if not title or title.lower() in {"tiktok shop", "tiktok"}:
+            continue
+        if not row.get("image") and len(title) < 12:
+            continue
+        seen.add(pid)
+        out.append(row)
+        if len(out) >= limit:
+            break
+    if not out:
+        return None
+    log.info(
+        "tiktok_shop_search_native_ok",
+        q=query[:80],
+        region=(region or "US").upper(),
+        n=len(out),
+    )
     return out
