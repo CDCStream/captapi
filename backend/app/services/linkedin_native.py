@@ -141,6 +141,20 @@ async def fetch_profile(slug: str) -> dict[str, Any] | None:
             name = name or core
     about = og.get("og:description") or safe_str(person.get("description"))
     followers_m = _FOLLOWERS_RE.search(html)
+    # Best-effort extras from JSON-LD / title — omit when unknown (no fake data).
+    location = None
+    addr = person.get("address")
+    if isinstance(addr, dict):
+        location = safe_str(
+            addr.get("addressLocality")
+            or addr.get("addressRegion")
+            or addr.get("addressCountry")
+        )
+    elif isinstance(addr, str):
+        location = safe_str(addr)
+    current_company = None
+    if headline and " at " in headline:
+        current_company = safe_str(headline.rsplit(" at ", 1)[-1])
 
     out = {
         "url": safe_str(person.get("url")) or url.rstrip("/"),
@@ -150,6 +164,8 @@ async def fetch_profile(slug: str) -> dict[str, Any] | None:
             "fullname": name,
             "headline": headline,
             "about": about,
+            "location": location,
+            "current_company": current_company,
             "follower_count": _parse_count(followers_m.group(1) if followers_m else None),
             "profile_picture_url": og.get("og:image"),
         },
@@ -198,6 +214,24 @@ async def fetch_company(slug: str) -> dict[str, Any] | None:
 
     if not name:
         return None
+    industry = None
+    inds = org.get("industry") or org.get("knowsAbout")
+    if isinstance(inds, list) and inds:
+        industry = safe_str(inds[0] if not isinstance(inds[0], dict) else inds[0].get("name"))
+    elif isinstance(inds, str):
+        industry = safe_str(inds)
+    hq = None
+    addr = org.get("address")
+    if isinstance(addr, dict):
+        hq = ", ".join(
+            x
+            for x in (
+                safe_str(addr.get("addressLocality")),
+                safe_str(addr.get("addressRegion")),
+                safe_str(addr.get("addressCountry")),
+            )
+            if x
+        ) or None
     out = {
         "basic_info": {
             "name": name,
@@ -206,12 +240,18 @@ async def fetch_company(slug: str) -> dict[str, Any] | None:
             "website": safe_str(org.get("sameAs"))
             if isinstance(org.get("sameAs"), str)
             else None,
+            "industry": industry,
+            "industries": [industry] if industry else None,
         },
         "stats": {
             "follower_count": _parse_count(followers_m.group(1) if followers_m else None),
             "employee_count": employee_count,
         },
-        "media": {"logo_url": _logo_url(org) or og.get("og:image")},
+        "media": {
+            "logo_url": _logo_url(org) or og.get("og:image"),
+            "cover_url": og.get("twitter:image") if og.get("twitter:image") != og.get("og:image") else None,
+        },
+        "locations": {"headquarters": {"city": hq}} if hq else {},
     }
     log.info("linkedin_native_company_ok", slug=handle)
     return out

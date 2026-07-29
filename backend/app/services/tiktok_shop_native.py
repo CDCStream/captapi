@@ -443,6 +443,18 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
         except ValueError:
             seller_name = sm.group(1)
 
+    seller_id = None
+    for pat in (
+        r'"seller_id"\s*:\s*"?(\d{5,})"?',
+        r'"shop_id"\s*:\s*"?(\d{5,})"?',
+        r'"sellerId"\s*:\s*"?(\d{5,})"?',
+        r'tiktok\.com/shop/store/[^"\'\s]+/(\d{5,})',
+    ):
+        sid_m = re.search(pat, html, re.I)
+        if sid_m:
+            seller_id = sid_m.group(1)
+            break
+
     sold = None
     sold_m = re.search(r'"sold_count"\s*:\s*(\d+)', html)
     if sold_m:
@@ -464,6 +476,18 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
     if not title and not image:
         return None
 
+    seller: dict[str, Any] = {}
+    if seller_name:
+        seller["name"] = seller_name
+    if seller_id:
+        seller["id"] = seller_id
+        if seller_name:
+            seller["url"] = (
+                f"https://www.tiktok.com/shop/store/{quote(str(seller_name))}/{seller_id}"
+            )
+        else:
+            seller["url"] = f"https://www.tiktok.com/shop/store/{seller_id}"
+
     out = {
         "id": product_id,
         "productId": product_id,
@@ -474,7 +498,7 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
         "currency": currency,
         "sold": sold,
         "image": image,
-        "seller": {"name": seller_name} if seller_name else {},
+        "seller": seller,
     }
     log.info("tiktok_shop_native_details_ok", product_id=product_id, has_price=price is not None)
     return out

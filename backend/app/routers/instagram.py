@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import math
 import re
+import time
 from datetime import datetime, timezone
 from typing import Any
 
@@ -27,6 +29,7 @@ from app.utils.formatters import (
     safe_list,
     safe_str,
 )
+from app.utils.retry import retry_none
 from app.utils.url import (
     detect_url_platform,
     extract_instagram_shortcode,
@@ -891,6 +894,11 @@ async def _ig_feed_collect(
     next_cursor = cursor
     for _ in range(_IG_FEED_MAX_PAGES):
         page = await instagram_native.fetch_user_feed_page(user_id, next_cursor, count=33)
+        if page is None and not collected:
+            # Soft-block / empty residential exits are common on page 2+;
+            # one short retry before declaring the feed unreachable.
+            await asyncio.sleep(0.4)
+            page = await instagram_native.fetch_user_feed_page(user_id, next_cursor, count=33)
         if page is None:
             return None if not collected else (collected[:limit], next_cursor)
         items, next_max_id, more = page
@@ -952,7 +960,11 @@ async def instagram_channel_posts(
         async def _run() -> dict[str, Any]:
             if cursor:
                 user_id = _IG_CURSOR_RE.match(cursor).group(1)
-                result = await _ig_feed_collect(user_id, cursor, limit)
+                result = await retry_none(
+                    lambda: _ig_feed_collect(user_id, cursor, limit),
+                    attempts=2,
+                    delay=0.45,
+                )
                 if result is None:
                     raise HTTPException(status_code=502, detail="Failed to fetch the next page. Retry shortly.")
                 posts, next_cursor = result
@@ -1002,7 +1014,8 @@ async def instagram_channel_posts(
                     "totalReturned": len(posts),
                     "posts": posts,
                     "nextCursor": None,
-                    "hasMore": False,
+                    "hasMore": None,
+                    "degraded": True,
                 }
 
             async def _decodo_run() -> dict[str, Any] | None:
@@ -1059,7 +1072,11 @@ async def instagram_channel_reels(
         async def _run() -> dict[str, Any]:
             if cursor:
                 user_id = _IG_CURSOR_RE.match(cursor).group(1)
-                result = await _ig_feed_collect(user_id, cursor, limit, reels_only=True)
+                result = await retry_none(
+                    lambda: _ig_feed_collect(user_id, cursor, limit, reels_only=True),
+                    attempts=2,
+                    delay=0.45,
+                )
                 if result is None:
                     raise HTTPException(status_code=502, detail="Failed to fetch the next page. Retry shortly.")
                 reels, next_cursor = result
@@ -1084,11 +1101,17 @@ async def instagram_channel_reels(
                     "totalReturned": len(reels),
                     "reels": reels,
                     "nextCursor": None,
-                    "hasMore": False,
+                    "hasMore": None,
+                    "degraded": True,
+                    "partial": True,
                 }
 
             # Native-first: hardened web_profile_info (session / Decodo HTML) →
             # api/v1 feed filtered to reels. Decodo GraphQL channel_reels next.
+            # Hard wall-clock budget: return what we have rather than sit to 180s.
+            t0 = time.monotonic()
+            budget_s = 45.0
+
             user = await instagram_native.fetch_web_profile_info(handle)
             user_id = safe_str((user or {}).get("pk") or (user or {}).get("id"))
             followers = None
@@ -1113,7 +1136,15 @@ async def instagram_channel_reels(
                         "hasMore": next_cursor is not None,
                     }
 
+            if time.monotonic() - t0 >= budget_s:
+                raise HTTPException(
+                    status_code=502,
+                    detail="Instagram reels temporarily unavailable. Retry shortly.",
+                )
+
             async def _decodo_run() -> dict[str, Any] | None:
+                if time.monotonic() - t0 >= budget_s:
+                    return None
                 page = _ig_channel_page(await decodo.channel_reels(handle, limit), limit)
                 if page is None:
                     return None
@@ -1122,7 +1153,7 @@ async def instagram_channel_reels(
                 # timeline omits duration/play counts for clips and buries
                 # recent Reels under legacy IGTV uploads. The Decodo items
                 # only serve as a fallback when the feed is unreachable.
-                if uid:
+                if uid and time.monotonic() - t0 < budget_s:
                     native = await _ig_feed_collect(
                         uid, None, limit, reels_only=True, followers=fol
                     )
@@ -1130,19 +1161,22 @@ async def instagram_channel_reels(
                         reels, next_cursor = native
                 if not reels:
                     return None
-                return {
+                out = {
                     "url": url,
                     "totalReturned": len(reels),
                     "reels": reels,
                     "nextCursor": next_cursor,
                     "hasMore": next_cursor is not None,
                 }
+                if time.monotonic() - t0 >= budget_s:
+                    out["partial"] = True
+                return out
 
             return await _try_decodo(ctx, _decodo_run, _apify)
 
         data = await cached_or_run(
             endpoint="instagram.channel-reels",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 17},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 18},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

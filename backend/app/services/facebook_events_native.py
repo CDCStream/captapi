@@ -13,6 +13,7 @@ import asyncio
 import html as html_lib
 import json
 import re
+import time
 from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import quote_plus
@@ -20,6 +21,7 @@ from urllib.parse import quote_plus
 import structlog
 
 from app.services import decodo_fetch
+from app.utils.formatters import safe_str
 
 log = structlog.get_logger(__name__)
 
@@ -317,6 +319,47 @@ def _social_counts(raw: dict[str, Any]) -> tuple[int | None, int | None]:
     return going, interested
 
 
+def _coerce_is_past(flag: Any, start_date: str | None) -> bool | None:
+    """Prefer Relay ``is_past``; otherwise derive from ``startDate`` vs now(UTC)."""
+    if isinstance(flag, bool):
+        return flag
+    if not start_date:
+        return None
+    try:
+        iso = start_date.replace("Z", "+00:00")
+        dt = datetime.fromisoformat(iso)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt < datetime.now(timezone.utc)
+    except (TypeError, ValueError):
+        return None
+
+
+def _prefer_upcoming(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Stable partition: upcoming → unknown → past (never drop past entirely)."""
+    upcoming: list[dict[str, Any]] = []
+    unknown: list[dict[str, Any]] = []
+    past: list[dict[str, Any]] = []
+    for ev in events:
+        flag = ev.get("isPast")
+        if flag is None:
+            start = (
+                safe_str(ev.get("startDate"))
+                or safe_str(ev.get("utcStartDate"))
+                or safe_str(ev.get("start_date"))
+            )
+            flag = _coerce_is_past(None, start)
+            if flag is not None:
+                ev = {**ev, "isPast": flag}
+        if flag is True:
+            past.append(ev)
+        elif flag is False:
+            upcoming.append(ev)
+        else:
+            unknown.append(ev)
+    return upcoming + unknown + past
+
+
 def normalize_raw_event(raw: dict[str, Any]) -> dict[str, Any]:
     """Map Relay event card → Apify-like fields for router._normalize_event."""
     eid = str(raw.get("id") or raw.get("event_id") or "").strip()
@@ -349,7 +392,10 @@ def normalize_raw_event(raw: dict[str, Any]) -> dict[str, Any]:
         "dateTimeSentence": raw.get("day_time_sentence"),
         "isOnline": is_online,
         "is_online": is_online,
-        "isPast": raw.get("is_past") if raw.get("is_past") is not None else raw.get("isPast"),
+        "isPast": _coerce_is_past(
+            raw.get("is_past") if raw.get("is_past") is not None else raw.get("isPast"),
+            start_date,
+        ),
         "eventType": raw.get("event_kind") or raw.get("eventType"),
         "imageUrl": _cover_image(raw),
         "image": _cover_image(raw),
@@ -511,10 +557,13 @@ def _event_ids_from_serp_html(html: str, *, limit: int = 40) -> list[str]:
     return ids
 
 
-async def _search_event_ids_via_serp(q: str, *, limit: int = 40) -> list[str]:
+async def _search_event_ids_via_serp(
+    q: str, *, limit: int = 40, deadline: float | None = None
+) -> list[str]:
     """SERP (via Decodo) site:facebook.com/events → event IDs.
 
     Google alone is flaky for this query; race Google (gl=US) + Yahoo + DDG.
+    ``deadline`` is ``time.monotonic()`` wall — stop when budget is spent.
     """
     if not decodo_fetch.enabled():
         return []
@@ -522,9 +571,10 @@ async def _search_event_ids_via_serp(q: str, *, limit: int = 40) -> list[str]:
     if len(query) < 2:
         return []
     num = min(30, max(10, limit))
+    # Bias SERP toward upcoming listings without inventing dates.
     variants = [
         f"site:facebook.com/events {query}",
-        f'site:facebook.com/events/ "{query}"',
+        f'site:facebook.com/events/ "{query}" upcoming',
     ]
     sources: list[tuple[str, str | None]] = []
     for v in variants:
@@ -539,7 +589,13 @@ async def _search_event_ids_via_serp(q: str, *, limit: int = 40) -> list[str]:
     seen: set[str] = set()
     ids: list[str] = []
     for url, headless in sources:
-        got = await decodo_fetch.fetch_url(url, timeout=90.0, headless=headless, geo="US")
+        if deadline is not None and time.monotonic() >= deadline:
+            break
+        # Keep each SERP fetch short so the whole search stays under budget.
+        remaining = 25.0 if deadline is None else max(5.0, deadline - time.monotonic())
+        got = await decodo_fetch.fetch_url(
+            url, timeout=min(25.0, remaining), headless=headless, geo="US"
+        )
         if not got:
             continue
         status, body = got
@@ -594,6 +650,9 @@ async def fetch_search_events(q: str, *, limit: int = 20) -> list[dict[str, Any]
 
     Logged-out /events/?q= often returns an unrelated feed; SERP is the reliable
     native path. Discovery is a second try (no scroll) for lucky shells.
+
+    Hard ~30s wall budget — event search should not sit near 100s for one result.
+    Upcoming events are preferred; past events are kept only to fill ``limit``.
     """
     if limit <= 0:
         return []
@@ -601,36 +660,44 @@ async def fetch_search_events(q: str, *, limit: int = 20) -> list[dict[str, Any]
     if len(query) < 2:
         return None
     tokens = _query_tokens(query)
+    deadline = time.monotonic() + 30.0
 
     # 1) Google SERP → native event-details (query-relevant IDs).
-    ids = await _search_event_ids_via_serp(query, limit=min(40, max(15, limit * 2)))
-    if ids:
+    ids = await _search_event_ids_via_serp(
+        query, limit=min(40, max(15, limit * 2)), deadline=deadline
+    )
+    if ids and time.monotonic() < deadline:
         hydrated = await _hydrate_event_ids(ids, limit=limit, tokens=tokens)
         if hydrated:
+            ranked = _prefer_upcoming(hydrated)[:limit]
             log.info(
                 "facebook_events_native_search_ok",
                 q=query[:80],
-                n=len(hydrated),
+                n=len(ranked),
                 path="serp",
             )
-            return hydrated
+            return ranked
 
     # 2) Facebook discovery shell — no scroll (scrolled feed is usually unrelated).
+    if time.monotonic() >= deadline:
+        log.info("facebook_events_native_search_empty", q=query[:80], reason="budget")
+        return None
     url = search_events_url(query)
     html = await _fetch_html(url, scroll=False)
     if html:
         raw = extract_events_from_html(html)
         matched = [e for e in raw if _event_matches_query(e, tokens)]
-        out = [normalize_raw_event(e) for e in matched[:limit]]
+        out = [normalize_raw_event(e) for e in matched]
         out = [e for e in out if e.get("id") and e.get("name")]
         if out:
+            ranked = _prefer_upcoming(out)[:limit]
             log.info(
                 "facebook_events_native_search_ok",
                 q=query[:80],
-                n=len(out),
+                n=len(ranked),
                 path="discovery",
             )
-            return out
+            return ranked
 
     log.info("facebook_events_native_search_empty", q=query[:80])
     return None

@@ -1338,10 +1338,15 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
         "bio": safe_str(user.get("biography")),
         "followers": _edge_count(user.get("edge_followed_by") or user.get("follower_count")),
         "following": _edge_count(user.get("edge_follow") or user.get("following_count")),
-        "postCount": _edge_count(user.get("edge_owner_to_timeline_media") or user.get("media_count")),
+        "postCount": _edge_count(
+            user.get("edge_owner_to_timeline_media")
+            or user.get("media_count")
+            or user.get("all_media_count")
+            or user.get("total_clips_count")
+        ),
         "verified": False if verified is None else bool(verified),
         "profileImage": pic,
-        "externalUrl": safe_str(user.get("external_url")) or "",
+        "externalUrl": safe_str(user.get("external_url")),
     }
 
 

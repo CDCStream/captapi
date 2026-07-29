@@ -39,14 +39,20 @@ TARGET_NATIVE_PCT = 98.2
 # Fixtures
 YT_VIDEO = "https://www.youtube.com/watch?v=kJQP7kiw5Fk"
 YT_VIDEO2 = "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+YT_VIDEO3 = "https://www.youtube.com/watch?v=9bZkp7q19f0"
 YT_CH = "https://www.youtube.com/@MrBeast"
+YT_CH2 = "https://www.youtube.com/@NASA"
 # Live post from @charlidamelio channel-posts (old 7228… id is dead → 404).
 TT_VIDEO_REAL = "https://www.tiktok.com/@charlidamelio/video/7667257618544495886"
+TT_VIDEO2 = "https://www.tiktok.com/@khaby.lame/video/7135723405012479238"
 TT_USER = "https://www.tiktok.com/@charlidamelio"
+TT_USER2 = "https://www.tiktok.com/@khaby.lame"
 IG_USER = "https://www.instagram.com/nasa/"
+IG_USER2 = "https://www.instagram.com/natgeo/"
 # Real NASA post from channel-posts (C8H0v1tNS9x was invalid → empty Apify stub).
 IG_POST = "https://www.instagram.com/p/DbTmwYKFkZo/"
 FB_PAGE = "https://www.facebook.com/Meta"
+FB_PAGE2 = "https://www.facebook.com/nintendo"
 TW_USER = "https://x.com/nasa"
 TW_TWEET = "https://x.com/jack/status/20"
 RD_SUB = "https://www.reddit.com/r/programming/"
@@ -82,15 +88,21 @@ def _ep(
 CATALOG: list[dict[str, Any]] = [
     _ep("youtube.video-details", "/v1/youtube/video-details", {"url": YT_VIDEO}, weight=2),
     _ep("youtube.video-details.b", "/v1/youtube/video-details", {"url": YT_VIDEO2}, weight=1),
+    _ep("youtube.video-details.c", "/v1/youtube/video-details", {"url": YT_VIDEO3}, weight=1),
     _ep("youtube.channel-details", "/v1/youtube/channel-details", {"url": YT_CH}, weight=2),
+    _ep("youtube.channel-details.b", "/v1/youtube/channel-details", {"url": YT_CH2}, weight=1),
     _ep("youtube.channel-videos", "/v1/youtube/channel-videos", {"url": YT_CH, "limit": 10}, paginated=True, weight=2),
     _ep("youtube.comments", "/v1/youtube/comments", {"url": YT_VIDEO, "limit": 20}, paginated=True, weight=2),
     _ep("youtube.search", "/v1/youtube/search", {"q": "lofi hip hop", "limit": 10}, weight=2),
     _ep("youtube.trending-shorts", "/v1/youtube/trending-shorts", {"limit": 10}, weight=1),
     _ep("tiktok.video-details", "/v1/tiktok/video-details", {"url": TT_VIDEO_REAL}, weight=2),
+    _ep("tiktok.video-details.b", "/v1/tiktok/video-details", {"url": TT_VIDEO2}, weight=1),
     _ep("tiktok.channel-details", "/v1/tiktok/channel-details", {"url": TT_USER}, weight=2),
+    _ep("tiktok.channel-details.b", "/v1/tiktok/channel-details", {"url": TT_USER2}, weight=1),
     _ep("tiktok.channel-posts", "/v1/tiktok/channel-posts", {"url": TT_USER, "limit": 10}, paginated=True, weight=2),
+    _ep("tiktok.channel-posts.b", "/v1/tiktok/channel-posts", {"url": TT_USER2, "limit": 10}, paginated=True, weight=1),
     _ep("tiktok.comments", "/v1/tiktok/comments", {"url": TT_VIDEO_REAL, "limit": 20}, paginated=True, weight=2),
+    _ep("tiktok.comments.b", "/v1/tiktok/comments", {"url": TT_VIDEO2}, weight=1),
     _ep("tiktok.top-search", "/v1/tiktok/top-search", {"q": "cooking", "limit": 10}, weight=1),
     _ep("tiktok.search-users", "/v1/tiktok/search/users", {"q": "nasa", "limit": 10}, weight=1),
     _ep("tiktok.trending-feed", "/v1/tiktok/trending-feed", {"limit": 10}, weight=1),
@@ -101,14 +113,18 @@ CATALOG: list[dict[str, Any]] = [
         weight=1,
     ),
     _ep("instagram.channel-details", "/v1/instagram/channel-details", {"url": IG_USER}, weight=2),
+    _ep("instagram.channel-details.b", "/v1/instagram/channel-details", {"url": IG_USER2}, weight=1),
     _ep("instagram.channel-posts", "/v1/instagram/channel-posts", {"url": IG_USER, "limit": 12}, paginated=True, weight=2),
+    _ep("instagram.channel-posts.b", "/v1/instagram/channel-posts", {"url": IG_USER2, "limit": 12}, paginated=True, weight=1),
     _ep("instagram.channel-reels", "/v1/instagram/channel-reels", {"url": IG_USER, "limit": 12}, paginated=True, weight=2),
     _ep("instagram.details", "/v1/instagram/details", {"url": IG_POST}, weight=1),
     _ep("instagram.trending-reels", "/v1/instagram/trending-reels", {"country": "US", "limit": 10}, weight=1),
     _ep("instagram.hashtag-search", "/v1/instagram/hashtag-search", {"q": "travel", "limit": 10}, weight=1),
     _ep("facebook.page-details", "/v1/facebook/page-details", {"url": FB_PAGE}, weight=2),
+    _ep("facebook.page-details.b", "/v1/facebook/page-details", {"url": FB_PAGE2}, weight=1),
     _ep("facebook.profile-posts", "/v1/facebook/profile-posts", {"url": FB_PAGE, "limit": 10}, weight=2),
     _ep("facebook.event-search", "/v1/facebook/event-search", {"q": FB_EVENT_Q, "limit": 8}, weight=1),
+    _ep("facebook.event-search.b", "/v1/facebook/event-search", {"q": "concert", "limit": 8}, weight=1),
     _ep(
         "facebook.marketplace-search",
         "/v1/facebook/marketplace-search",
@@ -190,6 +206,8 @@ async def _one(
     page: int,
     out_dir: Path,
     seq: int,
+    jsonl_path: Path,
+    jsonl_lock: asyncio.Lock,
 ) -> dict[str, Any]:
     async with sem:
         t0 = time.perf_counter()
@@ -223,7 +241,7 @@ async def _one(
         if isinstance(data, dict):
             next_cursor = data.get("nextCursor") or data.get("cursor") or data.get("next_cursor")
 
-        return {
+        row = {
             "seq": seq,
             "endpoint_id": eid,
             "path": path,
@@ -240,135 +258,22 @@ async def _one(
             "body_file": str(body_path.relative_to(out_dir)),
             "error": err,
         }
+        # Incremental append — process death must not lose the run.
+        line = json.dumps(row, ensure_ascii=False) + "\n"
+        async with jsonl_lock:
+            with jsonl_path.open("a", encoding="utf-8") as fh:
+                fh.write(line)
+        return row
 
 
-async def run_audit() -> Path:
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    out_dir = OUT_ROOT / stamp
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "bodies").mkdir(exist_ok=True)
-
-    sb = get_supabase()
-    bals = (
-        sb.table("credit_balances")
-        .select("user_id, subscription_credits, topup_credits")
-        .execute()
-    )
-    cands = [
-        b
-        for b in (bals.data or [])
-        if (b.get("subscription_credits") or 0) + (b.get("topup_credits") or 0) > 500
-    ]
-    cands.sort(
-        key=lambda b: (b.get("subscription_credits") or 0) + (b.get("topup_credits") or 0),
-        reverse=True,
-    )
-    if not cands:
-        raise SystemExit("No user with >500 credits for live audit")
-    user_id = cands[0]["user_id"]
-    credits_avail = (cands[0].get("subscription_credits") or 0) + (cands[0].get("topup_credits") or 0)
-    plain, kh, pfx = generate_api_key()
-    ins = (
-        sb.table("api_keys")
-        .insert({"user_id": user_id, "key_hash": kh, "key_prefix": pfx, "name": f"native-audit-{stamp}"})
-        .execute()
-    )
-    kid = ins.data[0]["id"]
-
-    quotas = _alloc_quotas(CATALOG, TOTAL)
-    by_id = {e["id"]: e for e in CATALOG}
-
-    print(f"Target {BASE}")
-    print(f"Credits available ~{credits_avail} | TOTAL={TOTAL} CONCURRENCY={CONCURRENCY}")
-    print(f"Endpoints {len(CATALOG)} | out {out_dir}")
-    print(f"Key prefix {pfx}...")
-
-    sem = asyncio.Semaphore(CONCURRENCY)
-    results: list[dict[str, Any]] = []
-    seq = 0
-    seq_lock = asyncio.Lock()
-
-    async def next_seq() -> int:
-        nonlocal seq
-        async with seq_lock:
-            seq += 1
-            return seq
-
-    headers = {"Authorization": f"Bearer {plain}"}
-    started = time.perf_counter()
-
-    async with httpx.AsyncClient(headers=headers, follow_redirects=True) as client:
-        async def run_endpoint(eid: str, n: int) -> list[dict[str, Any]]:
-            ep = by_id[eid]
-            local: list[dict[str, Any]] = []
-            starters = max(1, n // 3) if ep["paginated"] else n
-            done = 0
-            for _i in range(starters):
-                if done >= n:
-                    break
-                params = dict(ep["params"])
-                params["cache"] = "false"
-                s = await next_seq()
-                row = await _one(
-                    client, sem, eid=eid, path=ep["path"], params=params, page=1, out_dir=out_dir, seq=s
-                )
-                local.append(row)
-                done += 1
-                print(f"[{done}/{n} {eid}] p1 {row['status']} {row['source']} {row['elapsed_ms']}ms", flush=True)
-
-                if ep["paginated"] and row.get("ok") and row.get("next_cursor") and done < n:
-                    p2 = dict(params)
-                    p2["cursor"] = row["next_cursor"]
-                    s2 = await next_seq()
-                    row2 = await _one(
-                        client, sem, eid=eid, path=ep["path"], params=p2, page=2, out_dir=out_dir, seq=s2
-                    )
-                    local.append(row2)
-                    done += 1
-                    print(f"[{done}/{n} {eid}] p2 {row2['status']} {row2['source']} {row2['elapsed_ms']}ms", flush=True)
-
-                    if row2.get("ok") and row2.get("next_cursor") and done < n:
-                        p3 = dict(params)
-                        p3["cursor"] = row2["next_cursor"]
-                        s3 = await next_seq()
-                        row3 = await _one(
-                            client, sem, eid=eid, path=ep["path"], params=p3, page=3, out_dir=out_dir, seq=s3
-                        )
-                        local.append(row3)
-                        done += 1
-                        print(f"[{done}/{n} {eid}] p3 {row3['status']} {row3['source']} {row3['elapsed_ms']}ms", flush=True)
-
-            while done < n:
-                params = dict(ep["params"])
-                params["cache"] = "false"
-                if "q" in params and done % 2 == 1:
-                    params["q"] = f"{params['q']} tip"
-                s = await next_seq()
-                row = await _one(
-                    client, sem, eid=eid, path=ep["path"], params=params, page=1, out_dir=out_dir, seq=s
-                )
-                local.append(row)
-                done += 1
-                print(f"[{done}/{n} {eid}] p1 {row['status']} {row['source']} {row['elapsed_ms']}ms", flush=True)
-            return local
-
-        ep_sem = asyncio.Semaphore(3)
-
-        async def wrap(eid: str, n: int) -> list[dict[str, Any]]:
-            async with ep_sem:
-                return await run_endpoint(eid, n)
-
-        batches = await asyncio.gather(*[wrap(eid, n) for eid, n in quotas.items()])
-        for b in batches:
-            results.extend(b)
-
-    wall_s = time.perf_counter() - started
-
-    try:
-        sb.table("api_keys").delete().eq("id", kid).execute()
-    except Exception as exc:  # noqa: BLE001
-        print("key revoke warn:", exc)
-
+def _build_summary(
+    results: list[dict[str, Any]],
+    *,
+    stamp: str,
+    wall_s: float,
+    credits_avail: int,
+    partial: bool = False,
+) -> dict[str, Any]:
     by_ep: dict[str, dict[str, Any]] = {}
     source_counts: dict[str, int] = defaultdict(int)
     ok_rows = [r for r in results if r.get("ok")]
@@ -448,7 +353,7 @@ async def run_audit() -> Path:
     denom = direct_n + apify_n
     overall_native = round(100.0 * direct_n / denom, 2) if denom else None
 
-    summary = {
+    return {
         "target_base": BASE,
         "started_utc": stamp,
         "wall_seconds": round(wall_s, 1),
@@ -459,6 +364,7 @@ async def run_audit() -> Path:
         "target_native_pct": TARGET_NATIVE_PCT,
         "meets_target": bool(overall_native is not None and overall_native >= TARGET_NATIVE_PCT),
         "credits_available_before": credits_avail,
+        "partial": partial,
         "by_endpoint": scored,
         "worst_native_endpoints": [e for e in scored if e.get("below_target")],
         "slowest_endpoints": sorted(
@@ -466,17 +372,28 @@ async def run_audit() -> Path:
         )[:15],
     }
 
-    (out_dir / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
-    with (out_dir / "requests.jsonl").open("w", encoding="utf-8") as fh:
-        for r in results:
-            fh.write(json.dumps(r, ensure_ascii=False) + "\n")
 
+def _write_artifacts(
+    out_dir: Path,
+    summary: dict[str, Any],
+    *,
+    write_report: bool = True,
+) -> None:
+    tmp = out_dir / "summary.json.tmp"
+    tmp.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.replace(out_dir / "summary.json")
+    if not write_report:
+        return
+    scored = summary.get("by_endpoint") or []
     lines = [
-        f"# Native-first live audit {stamp}",
-        f"Base: {BASE}",
-        f"Requests: {len(results)} ok={len(ok_rows)} wall={wall_s:.0f}s",
-        f"Sources: {dict(source_counts)}",
-        f"Native% (direct/(direct+apify)): {overall_native}%  target={TARGET_NATIVE_PCT}%  meet={summary['meets_target']}",
+        f"# Native-first live audit {summary.get('started_utc')}",
+        f"Base: {summary.get('target_base')}",
+        f"Requests: {summary.get('total_requests')} ok={summary.get('ok')} wall={summary.get('wall_seconds')}s",
+        f"Sources: {summary.get('source_counts')}",
+        (
+            f"Native% (direct/(direct+apify)): {summary.get('native_pct_of_resolved')}%  "
+            f"target={summary.get('target_native_pct')}%  meet={summary.get('meets_target')}"
+        ),
         "",
         "## Per-endpoint (sorted by native% ascending)",
         "",
@@ -491,6 +408,164 @@ async def run_audit() -> Path:
         )
     report = "\n".join(lines) + "\n"
     (out_dir / "REPORT.md").write_text(report, encoding="utf-8")
+
+
+async def run_audit() -> Path:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    out_dir = OUT_ROOT / stamp
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "bodies").mkdir(exist_ok=True)
+
+    sb = get_supabase()
+    bals = (
+        sb.table("credit_balances")
+        .select("user_id, subscription_credits, topup_credits")
+        .execute()
+    )
+    cands = [
+        b
+        for b in (bals.data or [])
+        if (b.get("subscription_credits") or 0) + (b.get("topup_credits") or 0) > 500
+    ]
+    cands.sort(
+        key=lambda b: (b.get("subscription_credits") or 0) + (b.get("topup_credits") or 0),
+        reverse=True,
+    )
+    if not cands:
+        raise SystemExit("No user with >500 credits for live audit")
+    user_id = cands[0]["user_id"]
+    credits_avail = (cands[0].get("subscription_credits") or 0) + (cands[0].get("topup_credits") or 0)
+    plain, kh, pfx = generate_api_key()
+    ins = (
+        sb.table("api_keys")
+        .insert({"user_id": user_id, "key_hash": kh, "key_prefix": pfx, "name": f"native-audit-{stamp}"})
+        .execute()
+    )
+    kid = ins.data[0]["id"]
+
+    quotas = _alloc_quotas(CATALOG, TOTAL)
+    by_id = {e["id"]: e for e in CATALOG}
+
+    print(f"Target {BASE}")
+    print(f"Credits available ~{credits_avail} | TOTAL={TOTAL} CONCURRENCY={CONCURRENCY}")
+    print(f"Endpoints {len(CATALOG)} | out {out_dir}")
+    print(f"Key prefix {pfx}...")
+
+    sem = asyncio.Semaphore(CONCURRENCY)
+    results: list[dict[str, Any]] = []
+    results_lock = asyncio.Lock()
+    seq = 0
+    seq_lock = asyncio.Lock()
+    jsonl_path = out_dir / "requests.jsonl"
+    jsonl_path.write_text("", encoding="utf-8")
+    jsonl_lock = asyncio.Lock()
+
+    async def next_seq() -> int:
+        nonlocal seq
+        async with seq_lock:
+            seq += 1
+            return seq
+
+    async def record(row: dict[str, Any]) -> None:
+        async with results_lock:
+            results.append(row)
+            n = len(results)
+            if n % 25 == 0:
+                wall = time.perf_counter() - started
+                summary = _build_summary(
+                    list(results),
+                    stamp=stamp,
+                    wall_s=wall,
+                    credits_avail=credits_avail,
+                    partial=True,
+                )
+                _write_artifacts(out_dir, summary, write_report=False)
+
+    headers = {"Authorization": f"Bearer {plain}"}
+    started = time.perf_counter()
+
+    async with httpx.AsyncClient(headers=headers, follow_redirects=True) as client:
+        async def call_one(
+            *, eid: str, path: str, params: dict[str, Any], page: int
+        ) -> dict[str, Any]:
+            s = await next_seq()
+            row = await _one(
+                client,
+                sem,
+                eid=eid,
+                path=path,
+                params=params,
+                page=page,
+                out_dir=out_dir,
+                seq=s,
+                jsonl_path=jsonl_path,
+                jsonl_lock=jsonl_lock,
+            )
+            await record(row)
+            return row
+
+        async def run_endpoint(eid: str, n: int) -> list[dict[str, Any]]:
+            ep = by_id[eid]
+            local: list[dict[str, Any]] = []
+            starters = max(1, n // 3) if ep["paginated"] else n
+            done = 0
+            for _i in range(starters):
+                if done >= n:
+                    break
+                params = dict(ep["params"])
+                params["cache"] = "false"
+                row = await call_one(eid=eid, path=ep["path"], params=params, page=1)
+                local.append(row)
+                done += 1
+                print(f"[{done}/{n} {eid}] p1 {row['status']} {row['source']} {row['elapsed_ms']}ms", flush=True)
+
+                if ep["paginated"] and row.get("ok") and row.get("next_cursor") and done < n:
+                    p2 = dict(params)
+                    p2["cursor"] = row["next_cursor"]
+                    row2 = await call_one(eid=eid, path=ep["path"], params=p2, page=2)
+                    local.append(row2)
+                    done += 1
+                    print(f"[{done}/{n} {eid}] p2 {row2['status']} {row2['source']} {row2['elapsed_ms']}ms", flush=True)
+
+                    if row2.get("ok") and row2.get("next_cursor") and done < n:
+                        p3 = dict(params)
+                        p3["cursor"] = row2["next_cursor"]
+                        row3 = await call_one(eid=eid, path=ep["path"], params=p3, page=3)
+                        local.append(row3)
+                        done += 1
+                        print(f"[{done}/{n} {eid}] p3 {row3['status']} {row3['source']} {row3['elapsed_ms']}ms", flush=True)
+
+            while done < n:
+                params = dict(ep["params"])
+                params["cache"] = "false"
+                if "q" in params and done % 2 == 1:
+                    params["q"] = f"{params['q']} tip"
+                row = await call_one(eid=eid, path=ep["path"], params=params, page=1)
+                local.append(row)
+                done += 1
+                print(f"[{done}/{n} {eid}] p1 {row['status']} {row['source']} {row['elapsed_ms']}ms", flush=True)
+            return local
+
+        ep_sem = asyncio.Semaphore(3)
+
+        async def wrap(eid: str, n: int) -> list[dict[str, Any]]:
+            async with ep_sem:
+                return await run_endpoint(eid, n)
+
+        await asyncio.gather(*[wrap(eid, n) for eid, n in quotas.items()])
+
+    wall_s = time.perf_counter() - started
+
+    try:
+        sb.table("api_keys").delete().eq("id", kid).execute()
+    except Exception as exc:  # noqa: BLE001
+        print("key revoke warn:", exc)
+
+    summary = _build_summary(
+        results, stamp=stamp, wall_s=wall_s, credits_avail=credits_avail, partial=False
+    )
+    _write_artifacts(out_dir, summary, write_report=True)
+    report = (out_dir / "REPORT.md").read_text(encoding="utf-8")
     print("\n" + report)
     print(f"Artifacts: {out_dir}")
     return out_dir

@@ -789,6 +789,26 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
             if about_links:
                 links = about_links
 
+    # About popup is flaky; fall back to channel HTML / metadata JSON.
+    if view_count is None:
+        m = re.search(r"([\d.,]+[KMB]?)\s+views", html, re.I)
+        if m:
+            view_count = parse_count_text(m.group(1))
+    if country is None:
+        country = safe_str(meta.get("country")) or None
+        if country is None:
+            m = re.search(r'"country"\s*:\s*"([^"]+)"', html)
+            if m:
+                country = safe_str(m.group(1))
+    if joined is None:
+        m = re.search(r"Joined\s+([A-Za-z]+\s+\d{1,2},\s+\d{4})", html)
+        if m:
+            joined = safe_str(m.group(1))
+        else:
+            m = re.search(r'"joinedDateText"[^}]*?"simpleText"\s*:\s*"Joined\s+([^"]+)"', html)
+            if m:
+                joined = safe_str(m.group(1))
+
     if not links:
         links = _links_from_html(html)
 

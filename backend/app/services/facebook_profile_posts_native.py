@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import re
+import time
 from typing import Any
 from urllib.parse import urlparse
 
@@ -158,15 +159,24 @@ async def _hydrate_url(url: str, sem: asyncio.Semaphore) -> dict[str, Any] | Non
 
 
 async def profile_posts_native(url: str, limit: int) -> list[dict[str, Any]] | None:
-    """Return raw post dicts for ``_normalize_post`` (newest-first), or None."""
+    """Return raw post dicts for ``_normalize_post`` (newest-first), or None.
+
+    Wall-clock budget (~45s): if inline posts are already available, skip the
+    expensive per-URL hydrate rather than sitting until the 180s client timeout.
+    """
     if limit <= 0:
         return []
     if not url or not decodo_fetch.enabled():
         return None
 
+    t0 = time.monotonic()
+    budget_s = 45.0
+    # Cap the Decodo page fetch so we leave room to return inline posts.
+    page_timeout = min(40.0, budget_s)
+
     got = await decodo_fetch.fetch_url(
         url,
-        timeout=180.0,
+        timeout=page_timeout,
         headless="html",
         browser_actions=_SCROLL_ACTIONS,
     )
@@ -198,8 +208,13 @@ async def profile_posts_native(url: str, limit: int) -> list[dict[str, Any]] | N
     hydrate_n = max(0, min(limit, _MAX_HYDRATE) - len(inline))
     need = need[:hydrate_n]
 
+    # Enough inline posts and budget nearly spent → return partial (no hydrate).
+    elapsed = time.monotonic() - t0
+    if inline and (elapsed >= budget_s * 0.7 or (len(inline) >= limit and elapsed >= 20)):
+        need = []
+
     hydrated: list[dict[str, Any]] = []
-    if need:
+    if need and time.monotonic() - t0 < budget_s:
         sem = asyncio.Semaphore(_HYDRATE_CONCURRENCY)
         rows = await asyncio.gather(*[_hydrate_url(u, sem) for u in need])
         for row in rows:

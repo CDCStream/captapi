@@ -26,6 +26,7 @@ from app.services.openai_client import (
     transcribe_audio,
 )
 from app.services import tiktok_native
+from app.utils.retry import retry_none
 from app.services.tiktok_native import (
     audience_regions_native,
     channel_details_native,
@@ -918,8 +919,12 @@ async def tiktok_comments(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Primary: TikTok's own cursor-paginated mobile comment API (no actor
-            # cost). Falls back to the Apify actor if every proxy IP is blocked.
-            native = await tiktok_native.comments_native(aweme_id, cursor, limit)
+            # cost). Soft-block exits get one short retry before Apify / 502.
+            native = await retry_none(
+                lambda: tiktok_native.comments_native(aweme_id, cursor, limit),
+                attempts=2,
+                delay=0.45,
+            )
             if native is not None:
                 comments, next_cursor, total = native
                 # Soft-empty first page (no comments, unknown/zero total) is often
@@ -991,18 +996,20 @@ async def tiktok_comments(
             if not comments:
                 raise HTTPException(status_code=404, detail="Video not found or has no comments")
             ctx["source"] = "apify"
+            # Do not claim the thread is exhausted — Apify cannot page.
             return {
                 "platform": "tiktok",
                 "url": url,
                 "totalReturned": len(comments),
                 "comments": comments,
                 "nextCursor": None,
-                "hasMore": False,
+                "hasMore": None,
+                "degraded": True,
             }
 
         data = await cached_or_run(
             endpoint="tiktok.comments",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 5},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1639,7 +1646,11 @@ async def tiktok_channel_posts(
         base_credits=CREDIT_CHANNEL_POSTS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await channel_posts_native(handle, cursor, limit)
+            native = await retry_none(
+                lambda: channel_posts_native(handle, cursor, limit),
+                attempts=2,
+                delay=0.45,
+            )
             if native is not None:
                 posts, next_cursor = native
                 ctx["source"] = "direct"
@@ -1674,12 +1685,13 @@ async def tiktok_channel_posts(
                 "totalReturned": len(posts),
                 "posts": posts,
                 "nextCursor": None,
-                "hasMore": False,
+                "hasMore": None,
+                "degraded": True,
             }
 
         data = await cached_or_run(
             endpoint="tiktok.channel-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 5},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

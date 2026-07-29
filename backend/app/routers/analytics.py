@@ -488,12 +488,16 @@ def _unify(n: dict[str, Any]) -> dict[str, Any]:
     comments = eng.get("comments")
     shares = eng.get("shares")
     saves = eng.get("saves")
-    interactions = sum(
-        x for x in (likes, comments, shares, saves) if isinstance(x, int)
-    )
+    engagement_vals = [x for x in (likes, comments, shares, saves) if isinstance(x, int)]
+    interactions = sum(engagement_vals) if engagement_vals else None
+    # Never invent 0.0 engagement when every numerator is missing (YT native
+    # often has views but null likes/comments — a fake rate misleads clients).
     engagement_rate = (
         round(interactions / views, 4)
-        if isinstance(views, int) and views > 0
+        if isinstance(views, int)
+        and views > 0
+        and isinstance(interactions, int)
+        and engagement_vals
         else None
     )
     return {

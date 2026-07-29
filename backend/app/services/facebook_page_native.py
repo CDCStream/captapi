@@ -280,11 +280,34 @@ def _verified(blobs: list[Any], ctx: dict[str, list[str]]) -> bool | None:
 async def page_details_native(url: str) -> dict[str, Any] | None:
     if not url or not decodo_fetch.enabled():
         return None
-    got = await decodo_fetch.fetch_url(url, timeout=120.0, headless="html")
-    if not got:
+    # Keep the first attempt short so missing/private pages fail fast (<5–15s)
+    # instead of burning ~120s before a 404. One longer retry covers slow HTML.
+    html: str | None = None
+    for timeout in (12.0, 45.0):
+        got = await decodo_fetch.fetch_url(url, timeout=timeout, headless="html")
+        if not got:
+            continue
+        status, body = got
+        if status == 404:
+            return None
+        if status != 200 or not body:
+            continue
+        html = body
+        break
+    if not html:
         return None
-    status, html = got
-    if status != 200 or not html:
+    # Cheap negative signals before expensive blob parse.
+    low = html.lower()
+    if any(
+        marker in low
+        for marker in (
+            "content isn't available",
+            "this content isn't available",
+            "page isn't available",
+            "page not found",
+            "log in to continue",
+        )
+    ) and "category_name" not in html and "pageID" not in html:
         return None
     if "facebook.com" not in html and "category_name" not in html:
         return None

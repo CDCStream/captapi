@@ -837,6 +837,27 @@ def _parse_like_count(html: str) -> int | None:
     return None
 
 
+_COMMENT_COUNT_RES = (
+    re.compile(r'"commentCount"\s*:\s*\{\s*"simpleText"\s*:\s*"([\d.,]+[KMB]?)"', re.I),
+    re.compile(r'"contextOnTapCommand"[^]]*?"(\d[\d.,]*[KMB]?)\s+Comments"', re.I),
+    re.compile(r'content="([\d.,]+[KMB]?)\s+Comments"', re.I),
+)
+
+
+def _parse_comment_count(html: str) -> int | None:
+    """Best-effort comment count from watch-page JSON / labels."""
+    from app.services.youtube_native import parse_count_text
+
+    for rx in _COMMENT_COUNT_RES:
+        m = rx.search(html or "")
+        if not m:
+            continue
+        parsed = parse_count_text(m.group(1))
+        if parsed is not None:
+            return parsed
+    return None
+
+
 async def _watch_player_response(norm_url: str) -> tuple[dict[str, Any] | None, str]:
     """Parse ``ytInitialPlayerResponse`` from the watch page.
 
@@ -886,6 +907,8 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
         not android_ok
         or not android.get("genre")
         or android.get("likeCount") is None
+        or android.get("publishedAt") is None
+        or android.get("commentCount") is None
     )
     player, html = await _watch_player_response(norm_url) if need_page else (None, "")
     genre, tags = _genre_tags_from_player(player)
@@ -904,6 +927,11 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
             out["tags"] = tags
         if out.get("likeCount") is None and html:
             out["likeCount"] = _parse_like_count(html)
+        if out.get("publishedAt") is None and player:
+            micro = (player.get("microformat") or {}).get("playerMicroformatRenderer") or {}
+            out["publishedAt"] = safe_str(micro.get("publishDate") or micro.get("uploadDate"))
+        if out.get("commentCount") is None and html:
+            out["commentCount"] = _parse_comment_count(html)
         return out
 
     if player is None:
@@ -934,7 +962,7 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
         "durationFormatted": _format_duration(duration_seconds),
         "viewCount": safe_int(details.get("viewCount")),
         "likeCount": _parse_like_count(html) if html else None,
-        "commentCount": None,  # not exposed in page JSON; enrich via actor only if requested
+        "commentCount": _parse_comment_count(html) if html else None,
         "thumbnailUrl": safe_str(thumbs[-1].get("url")) if thumbs else None,
         "genre": genre,
         "tags": tags,

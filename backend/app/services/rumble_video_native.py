@@ -49,6 +49,27 @@ def _parse_iso_duration(value: str | None) -> str | None:
     return f"{minutes}:{seconds:02d}"
 
 
+def _parse_count(raw: str | None) -> int | None:
+    """Parse ``1.2K`` / ``3M`` / ``12,345`` view strings."""
+    if not raw:
+        return None
+    text = raw.strip().replace(",", "").upper()
+    mult = 1
+    if text.endswith("K"):
+        mult = 1_000
+        text = text[:-1]
+    elif text.endswith("M"):
+        mult = 1_000_000
+        text = text[:-1]
+    elif text.endswith("B"):
+        mult = 1_000_000_000
+        text = text[:-1]
+    try:
+        return int(float(text) * mult)
+    except ValueError:
+        return safe_int(re.sub(r"[^\d]", "", raw))
+
+
 def _og_map(html: str) -> dict[str, str]:
     out: dict[str, str] = {}
     for m in _OG_RE.finditer(html or ""):
@@ -195,6 +216,12 @@ _TIME_RE = re.compile(
 )
 _THUMB_RE = re.compile(r'<img class="video-item--img"[^>]+src="([^"]+)"', re.I)
 _VERIFIED_RE = re.compile(r"video-item--by-verified", re.I)
+_VIEWS_RE = re.compile(
+    r'video-item--views[^>]*>\s*([\d.,]+[KMBkmb]?)\s*<|'
+    r'data-views=["\']([\d.,]+[KMBkmb]?)["\']|'
+    r'>([\d.,]+[KMBkmb]?)\s+views?<',
+    re.I,
+)
 
 
 def parse_search_html(html: str, limit: int = 20) -> list[dict[str, Any]]:
@@ -220,6 +247,10 @@ def parse_search_html(html: str, limit: int = 20) -> list[dict[str, Any]]:
         dur_m = _DURATION_ATTR_RE.search(chunk)
         time_m = _TIME_RE.search(chunk)
         thumb_m = _THUMB_RE.search(chunk)
+        views_m = _VIEWS_RE.search(chunk)
+        views_raw = None
+        if views_m:
+            views_raw = next((g for g in views_m.groups() if g), None)
         channel = safe_str(unescape(by_m.group(2))) if by_m else None
         channel_url = f"https://rumble.com{by_m.group(1)}" if by_m else None
         out.append(
@@ -230,7 +261,7 @@ def parse_search_html(html: str, limit: int = 20) -> list[dict[str, Any]]:
                 "title": safe_str(unescape(title_m.group(1))) if title_m else None,
                 "channel": channel,
                 "channelUrl": channel_url,
-                "views": None,
+                "views": _parse_count(views_raw) if views_raw else None,
                 "likes": None,
                 "dislikes": None,
                 "duration": safe_str(dur_m.group(1)) if dur_m else None,

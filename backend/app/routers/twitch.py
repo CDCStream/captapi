@@ -148,8 +148,27 @@ def _video(item: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+def _empty_stream() -> dict[str, Any]:
+    return {
+        "title": None,
+        "game": None,
+        "viewers": None,
+        "startedAt": None,
+        "thumbnail": None,
+    }
+
+
+def _empty_last_broadcast() -> dict[str, Any]:
+    return {"title": None, "game": None, "startedAt": None}
+
+
 def _profile(item: dict[str, Any]) -> dict[str, Any]:
-    return strip_empty(
+    """Normalize Apify channel rows to the public profile contract.
+
+    ``strip_empty`` must not drop ``stream`` / ``topClips`` / ``schedule`` —
+    clients dereference those keys; missing keys crash harder than nulls.
+    """
+    out = strip_empty(
         {
             "platform": "twitch",
             "id": safe_str(item.get("id") or item.get("channelId")),
@@ -163,24 +182,31 @@ def _profile(item: dict[str, Any]) -> dict[str, Any]:
             "isPartner": bool(item.get("isPartner")),
             "isAffiliate": bool(item.get("isAffiliate")),
             "isLive": bool(item.get("isLive")),
-            "stream": {
-                "title": safe_str(item.get("streamTitle") or item.get("broadcastTitle")),
-                "game": safe_str(item.get("currentGame") or item.get("broadcastGameName")),
-                "viewers": safe_int(item.get("currentViewers") or item.get("viewersCount")),
-                "startedAt": safe_str(item.get("startedAt") or item.get("streamStartedAt")),
-                "thumbnail": safe_str(item.get("thumbnailUrl")),
-            },
-            "lastBroadcast": {
-                "title": safe_str(item.get("lastBroadcastTitle")),
-                "game": safe_str(item.get("lastBroadcastGame")),
-                "startedAt": safe_str(item.get("lastBroadcastDate") or item.get("lastBroadcastStartedAt")),
-            },
-            "recentVideos": [_video(v) for v in item.get("recentVideos", []) if isinstance(v, dict)],
-            "topClips": [_video(v) for v in item.get("topClips", []) if isinstance(v, dict)],
-            "schedule": _schedule_segments(item.get("nextSchedule") or item.get("schedule")),
             "createdAt": safe_str(item.get("createdAt")),
         }
     )
+    stream = {
+        "title": safe_str(item.get("streamTitle") or item.get("broadcastTitle")),
+        "game": safe_str(item.get("currentGame") or item.get("broadcastGameName")),
+        "viewers": safe_int(item.get("currentViewers") or item.get("viewersCount")),
+        "startedAt": safe_str(item.get("startedAt") or item.get("streamStartedAt")),
+        "thumbnail": safe_str(item.get("thumbnailUrl")),
+    }
+    last = {
+        "title": safe_str(item.get("lastBroadcastTitle")),
+        "game": safe_str(item.get("lastBroadcastGame")),
+        "startedAt": safe_str(item.get("lastBroadcastDate") or item.get("lastBroadcastStartedAt")),
+    }
+    out["stream"] = stream if any(v is not None for v in stream.values()) else _empty_stream()
+    out["lastBroadcast"] = (
+        last if any(v is not None for v in last.values()) else _empty_last_broadcast()
+    )
+    out["recentVideos"] = [
+        _video(v) for v in item.get("recentVideos", []) if isinstance(v, dict)
+    ]
+    out["topClips"] = [_video(v) for v in item.get("topClips", []) if isinstance(v, dict)]
+    out["schedule"] = _schedule_segments(item.get("nextSchedule") or item.get("schedule"))
+    return out
 
 
 def _schedule_segments(value: Any) -> list[dict[str, Any]]:
@@ -245,14 +271,24 @@ async def profile(
         raise HTTPException(status_code=400, detail="Invalid Twitch channel")
     async with billed_call(caller=caller, endpoint="/v1/twitch/profile", platform="twitch", resource_url=f"https://www.twitch.tv/{username}", base_credits=1) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await channel_native(username)
+            from app.utils.retry import retry_none
+
+            native = await retry_none(
+                lambda: channel_native(username), attempts=2, delay=0.35
+            )
             if native is not None:
+                # Contract keys always present (native already sets them).
+                native.setdefault("stream", _empty_stream())
+                native.setdefault("lastBroadcast", _empty_last_broadcast())
+                native.setdefault("recentVideos", [])
+                native.setdefault("topClips", [])
+                native.setdefault("schedule", [])
                 ctx["source"] = "direct"
                 return native
             ctx["source"] = "apify"
             return await _channel(username)
 
-        data = await cached_or_run("twitch.profile", {"username": username, "v": 4}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("twitch.profile", {"username": username, "v": 5}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 
