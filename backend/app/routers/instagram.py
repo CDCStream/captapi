@@ -753,10 +753,14 @@ async def instagram_channel_details(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Native first (same web_profile_info as basic-profile), then Decodo, then Apify/meta.
-            user = await instagram_native.fetch_web_profile_info(handle)
+            user, missing = await instagram_native.lookup_web_profile_info(handle)
             if user is not None:
                 ctx["source"] = "direct"
                 return instagram_native.map_channel_details(user, handle=handle)
+            # Dead / renamed handles: Instagram already said "Profile isn't available".
+            # Don't burn Apify credits reconstructing a stub.
+            if missing:
+                raise HTTPException(status_code=404, detail="Profile not found")
 
             async def _apify() -> dict[str, Any]:
                 apify = get_apify()
@@ -805,7 +809,7 @@ async def instagram_channel_details(
 
         data = await cached_or_run(
             endpoint="instagram.channel-details",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

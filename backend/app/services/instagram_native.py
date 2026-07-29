@@ -117,7 +117,14 @@ async def fetch_post_details(shortcode: str) -> dict[str, Any] | None:
     data) at ~3-4s instead of an actor run. Returns None so the caller can
     fall back to Apify.
     """
+    from app.core.config import get_settings
+
     media = await _fetch_item(shortcode)
+    if media is None:
+        # Railway/datacenter often 401s Polaris; session GraphQL recovers.
+        session = _normalize_ig_session_id(get_settings().IG_SESSION_ID or "")
+        if session:
+            media = await _fetch_item_with_session(shortcode, session)
     if media is None:
         return None
 
@@ -989,8 +996,13 @@ async def resolve_username(user_id: str) -> str | None:
     return None
 
 
-async def _fetch_web_profile_info_session(handle: str, session_id: str) -> dict[str, Any] | None:
-    """``web_profile_info`` with ``IG_SESSION_ID`` (bypasses logged-out 429 / require_login)."""
+async def _fetch_web_profile_info_session(
+    handle: str, session_id: str
+) -> tuple[dict[str, Any] | None, bool]:
+    """``web_profile_info`` with ``IG_SESSION_ID``.
+
+    Returns ``(user, confirmed_404)``. A logged-in 404 means the handle is gone.
+    """
     ds_user_id = session_id.split(":", 1)[0] if ":" in session_id else ""
     cookies: dict[str, str] = {"sessionid": session_id}
     if ds_user_id.isdigit():
@@ -1001,6 +1013,7 @@ async def _fetch_web_profile_info_session(handle: str, session_id: str) -> dict[
     )
     referer = f"https://www.instagram.com/{handle}/"
     tiers: list[str | None] = [None, "datacenter", "residential"]
+    saw_404 = False
     for tier in tiers:
         try:
             async with httpx.AsyncClient(
@@ -1033,6 +1046,10 @@ async def _fetch_web_profile_info_session(handle: str, session_id: str) -> dict[
                 error=str(exc)[:120],
             )
             continue
+        if resp.status_code == 404:
+            saw_404 = True
+            log.info("ig_wpi_session_http", tier=tier or "direct", status=404)
+            continue
         if resp.status_code != 200:
             log.info(
                 "ig_wpi_session_http",
@@ -1047,8 +1064,8 @@ async def _fetch_web_profile_info_session(handle: str, session_id: str) -> dict[
             continue
         user = (payload.get("data") or {}).get("user") or payload.get("user")
         if isinstance(user, dict) and (user.get("username") or user.get("id")):
-            return user
-    return None
+            return user, False
+    return None, saw_404
 
 
 def _pick_ig_user_pk(window: str) -> str | None:
@@ -1160,23 +1177,48 @@ def parse_profile_from_html(html: str, handle: str) -> dict[str, Any] | None:
     return fallback
 
 
-async def fetch_web_profile_info_via_decodo(username: str) -> dict[str, Any] | None:
-    """Render the profile page via Decodo and parse counts / bio from HTML."""
+def profile_unavailable_html(html: str) -> bool:
+    """True when Instagram's rendered profile page says the account is gone."""
+    if not html:
+        return False
+    lower = html.lower()
+    if "profile isn't available" in lower or "profile isn&#39;t available" in lower:
+        return True
+    if "sorry, this page isn't available" in lower:
+        return True
+    title_m = re.search(r"<title>([^<]+)</title>", html, re.I)
+    if title_m and "isn't available" in title_m.group(1).lower():
+        return True
+    return False
+
+
+async def fetch_web_profile_info_via_decodo(
+    username: str,
+) -> tuple[dict[str, Any] | None, bool]:
+    """Render the profile page via Decodo and parse counts / bio from HTML.
+
+    Returns ``(user, confirmed_missing)``.
+    """
     from app.services import decodo_fetch
 
     handle = username.lstrip("@")
     if not decodo_fetch.enabled() or not handle:
-        return None
+        return None, False
     got = await decodo_fetch.fetch_url(
         f"https://www.instagram.com/{handle}/",
         timeout=90.0,
         headless="html",
     )
     if not got:
-        return None
+        return None, False
     status, body = got
+    if status == 404:
+        return None, True
     if status != 200 or not body:
-        return None
+        return None, False
+    if profile_unavailable_html(body):
+        log.info("ig_wpi_decodo_unavailable", handle=handle)
+        return None, True
     user = parse_profile_from_html(body, handle)
     if user:
         log.info(
@@ -1184,16 +1226,18 @@ async def fetch_web_profile_info_via_decodo(username: str) -> dict[str, Any] | N
             handle=handle,
             followers=user.get("follower_count"),
         )
-    else:
-        log.info("ig_wpi_decodo_html_miss", handle=handle, length=len(body))
-    return user
+        return user, False
+    log.info("ig_wpi_decodo_html_miss", handle=handle, length=len(body))
+    return None, False
 
 
-async def fetch_web_profile_info(username: str) -> dict[str, Any] | None:
-    """Rich profile via users/web_profile_info/?username=.
+async def lookup_web_profile_info(
+    username: str,
+) -> tuple[dict[str, Any] | None, bool]:
+    """Rich profile lookup.
 
-    Order: logged-out proxy tiers → ``IG_SESSION_ID`` (skips 429/login wall) →
-    Decodo HTML parse (covers business accounts that 400 on WPI).
+    Returns ``(user, confirmed_missing)``. When ``confirmed_missing`` is True,
+    callers should 404 instead of spending Apify credits on a dead handle.
     """
     from app.core.config import get_settings
 
@@ -1210,15 +1254,29 @@ async def fetch_web_profile_info(username: str) -> dict[str, Any] | None:
             continue
         user = (payload.get("data") or {}).get("user") or payload.get("user")
         if isinstance(user, dict) and (user.get("username") or user.get("id")):
-            return user
+            return user, False
 
     session = _normalize_ig_session_id(get_settings().IG_SESSION_ID or "")
+    session_404 = False
     if session:
-        user = await _fetch_web_profile_info_session(handle, session)
+        user, session_404 = await _fetch_web_profile_info_session(handle, session)
         if user is not None:
-            return user
+            return user, False
 
-    return await fetch_web_profile_info_via_decodo(handle)
+    user, missing = await fetch_web_profile_info_via_decodo(handle)
+    if user is not None:
+        return user, False
+    return None, bool(missing or session_404)
+
+
+async def fetch_web_profile_info(username: str) -> dict[str, Any] | None:
+    """Rich profile via users/web_profile_info/?username=.
+
+    Order: logged-out proxy tiers → ``IG_SESSION_ID`` (skips 429/login wall) →
+    Decodo HTML parse (covers business accounts that 400 on WPI).
+    """
+    user, _missing = await lookup_web_profile_info(username)
+    return user
 
 
 def _edge_count(value: Any) -> int | None:
