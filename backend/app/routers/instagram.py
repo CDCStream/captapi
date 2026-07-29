@@ -1325,12 +1325,21 @@ async def instagram_trending_reels(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Explore runs take ~10-12 minutes - far beyond any request
-            # timeout - so a live sync wait can never finish. Instead: serve
-            # the newest finished snapshot for this country (<=48h old),
-            # kick off a background refresh once it is older than 6h, and for
-            # a cold country join the in-flight run (or start one) and wait
-            # out the request budget before returning a clear retry hint.
+            # 1) Native Explore (Decodo HTML ``code`` fields + Polaris hydrate).
+            native = await instagram_native.trending_reels_native(country, limit=limit)
+            if native:
+                reels = [decodo.strip_null_post_fields(r) for r in native[:limit]]
+                ctx["source"] = "direct"
+                return {
+                    "platform": "instagram",
+                    "country": country,
+                    "totalReturned": len(reels),
+                    "reels": reels,
+                }
+
+            # 2) Apify fallthrough — Explore actor runs take ~10-12 minutes, so
+            # serve a recent snapshot (<=48h), kick a background refresh when
+            # older than 6h, and for a cold country wait out the request budget.
             client = ApifyClient(timeout=280, max_attempts=1)
             actor = settings.APIFY_ACTOR_INSTAGRAM_TRENDING
             # Actor schema dropped download_medias; only max_results + country.
@@ -1365,15 +1374,17 @@ async def instagram_trending_reels(
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit, "v": 10},
+            params={"country": country, "limit": limit, "v": 11},
             runner=_run,
             ctx=ctx,
-            # Trending actor runs take minutes; serve the last list instantly
-            # after TTL expiry and refresh in the background.
+            # Native path is seconds; Apify path still SWR for long actor runs.
             stale_while_revalidate=True,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_MARGIN, 2)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_CHANNEL, 1)
+        else:
+            ctx["credits_override"] = _scaled_credits(len(data["reels"]), RATE_IG_MARGIN, 2)
         return ApiResponse(data=data)
 
 

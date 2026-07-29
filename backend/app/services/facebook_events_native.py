@@ -2,12 +2,14 @@
 
 Facebook returns 400 on plain datacenter/residential for /events pages.
 Decodo headless=html hydrates ScheduledServerJS payloads that embed event
-cards for page listings. Discovery search (/events/?q=...) is login-walled
-logged-out — callers should fall through to Apify for keyword search.
+cards for page listings. Keyword discovery (/events/?q=...) is often
+login-walled logged-out; we recover via Google SERP → event-details hydrate,
+with Apify as the router fallthrough.
 """
 
 from __future__ import annotations
 
+import asyncio
 import html as html_lib
 import json
 import re
@@ -437,30 +439,194 @@ async def fetch_page_events(page_url: str, *, limit: int = 20) -> list[dict[str,
     return out
 
 
+_SEARCH_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "at",
+    "by",
+    "for",
+    "in",
+    "of",
+    "on",
+    "or",
+    "the",
+    "to",
+    "near",
+    "events",
+    "event",
+}
+
+
+def _query_tokens(q: str) -> list[str]:
+    return [
+        t
+        for t in re.findall(r"[a-z0-9]{2,}", (q or "").lower())
+        if t not in _SEARCH_STOPWORDS
+    ]
+
+
+def _event_haystack(raw: dict[str, Any]) -> str:
+    place = raw.get("event_place") if isinstance(raw.get("event_place"), dict) else {}
+    loc = raw.get("location") if isinstance(raw.get("location"), dict) else {}
+    parts = [
+        raw.get("name"),
+        raw.get("title"),
+        raw.get("description"),
+        raw.get("day_time_sentence"),
+        place.get("contextual_name"),
+        place.get("name"),
+        place.get("city"),
+        loc.get("name"),
+        loc.get("city"),
+        raw.get("location_name"),
+        raw.get("location_city"),
+    ]
+    return " ".join(str(p) for p in parts if p).lower()
+
+
+def _event_matches_query(raw: dict[str, Any], tokens: list[str]) -> bool:
+    if not tokens:
+        return True
+    hay = _event_haystack(raw)
+    if not hay:
+        return False
+    # Require at least half the tokens (min 1) so "comedy Chicago" isn't
+    # satisfied by unrelated discovery feed cards.
+    need = max(1, (len(tokens) + 1) // 2)
+    hits = sum(1 for t in tokens if t in hay)
+    return hits >= need
+
+
+def _event_ids_from_serp_html(html: str, *, limit: int = 40) -> list[str]:
+    ids: list[str] = []
+    seen: set[str] = set()
+    for eid in re.findall(r"facebook\.com/events/(\d{8,})", html or "", re.I):
+        if eid in seen:
+            continue
+        seen.add(eid)
+        ids.append(eid)
+        if len(ids) >= limit:
+            break
+    return ids
+
+
+async def _search_event_ids_via_serp(q: str, *, limit: int = 40) -> list[str]:
+    """SERP (via Decodo) site:facebook.com/events → event IDs."""
+    if not decodo_fetch.enabled():
+        return []
+    q_enc = quote_plus(f"site:facebook.com/events {q}")
+    sources = [
+        f"https://www.google.com/search?q={q_enc}&num={min(30, max(10, limit))}",
+        f"https://html.duckduckgo.com/html/?q={q_enc}",
+    ]
+    seen: set[str] = set()
+    ids: list[str] = []
+    for url in sources:
+        got = await decodo_fetch.fetch_url(url, timeout=90.0, headless="html")
+        if not got:
+            continue
+        status, body = got
+        if status != 200 or not body:
+            continue
+        for eid in _event_ids_from_serp_html(body, limit=limit):
+            if eid in seen:
+                continue
+            seen.add(eid)
+            ids.append(eid)
+            if len(ids) >= limit:
+                break
+        if len(ids) >= min(8, limit):
+            break
+    log.info("facebook_events_serp_ids", q=q[:80], n=len(ids))
+    return ids
+
+
+async def _hydrate_event_ids(
+    ids: list[str], *, limit: int, tokens: list[str]
+) -> list[dict[str, Any]]:
+    if not ids or limit <= 0:
+        return []
+    sem = asyncio.Semaphore(3)
+    selected = ids[: max(limit * 2, limit + 5)]
+
+    async def _one(eid: str) -> dict[str, Any] | None:
+        async with sem:
+            return await fetch_event_details(f"https://www.facebook.com/events/{eid}/")
+
+    rows = await asyncio.gather(*[_one(eid) for eid in selected])
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for row in rows:
+        if not row or not row.get("id") or not row.get("name"):
+            continue
+        eid = str(row["id"])
+        if eid in seen:
+            continue
+        # Re-check relevance on hydrated fields (SERP titles can be noisy).
+        if tokens and not _event_matches_query(row, tokens):
+            continue
+        seen.add(eid)
+        out.append(row)
+        if len(out) >= limit:
+            break
+    return out
+
+
 async def fetch_search_events(q: str, *, limit: int = 20) -> list[dict[str, Any]] | None:
-    """Keyword search. Logged-out Decodo often hits a login shell — return None
-    so the router can serve Apify snapshots instead of burning a cold browser run.
+    """Keyword search: Google SERP → details, then relevance-filtered discovery.
+
+    Logged-out /events/?q= often returns an unrelated feed; SERP is the reliable
+    native path. Discovery is a second try (no scroll) for lucky shells.
     """
     if limit <= 0:
         return []
     query = (q or "").strip()
     if len(query) < 2:
         return None
+    tokens = _query_tokens(query)
+
+    # 1) Google SERP → native event-details (query-relevant IDs).
+    ids = await _search_event_ids_via_serp(query, limit=min(40, max(15, limit * 2)))
+    if ids:
+        hydrated = await _hydrate_event_ids(ids, limit=limit, tokens=tokens)
+        if hydrated:
+            log.info(
+                "facebook_events_native_search_ok",
+                q=query[:80],
+                n=len(hydrated),
+                path="serp",
+            )
+            return hydrated
+
+    # 2) Facebook discovery shell — no scroll (scrolled feed is usually unrelated).
     url = search_events_url(query)
-    # No scroll: discovery search rarely hydrates cards without a session.
     html = await _fetch_html(url, scroll=False)
-    if not html:
-        return None
-    raw = extract_events_from_html(html)
-    if not raw:
-        log.info("facebook_events_native_search_empty", q=query[:80])
-        return None
-    out = [normalize_raw_event(e) for e in raw[:limit]]
-    out = [e for e in out if e.get("id") and e.get("name")]
-    if not out:
-        return None
-    log.info("facebook_events_native_search_ok", q=query[:80], n=len(out))
-    return out
+    if html:
+        raw = extract_events_from_html(html)
+        matched = [e for e in raw if _event_matches_query(e, tokens)]
+        out = [normalize_raw_event(e) for e in matched[:limit]]
+        out = [e for e in out if e.get("id") and e.get("name")]
+        if out:
+            log.info(
+                "facebook_events_native_search_ok",
+                q=query[:80],
+                n=len(out),
+                path="discovery",
+            )
+            return out
+
+    log.info("facebook_events_native_search_empty", q=query[:80])
+    return None
+
+
+def _og_meta(html: str, key: str) -> str | None:
+    pattern = rf'<meta\s+(?:property|name)=["\']{re.escape(key)}["\']\s+content=["\']([^"\']*)["\']'
+    match = re.search(pattern, html or "", flags=re.IGNORECASE)
+    if not match:
+        pattern = rf'<meta\s+content=["\']([^"\']*)["\']\s+(?:property|name)=["\']{re.escape(key)}["\']'
+        match = re.search(pattern, html or "", flags=re.IGNORECASE)
+    return html_lib.unescape(match.group(1)).strip() if match else None
 
 
 async def fetch_event_details(url: str) -> dict[str, Any] | None:
@@ -481,16 +647,36 @@ async def fetch_event_details(url: str) -> dict[str, Any] | None:
             if rid == eid:
                 chosen = raw
                 break
-    if chosen is None and raw_list:
+            eurl = str(raw.get("eventUrl") or raw.get("url") or "")
+            if eid in eurl:
+                chosen = raw
+                break
+    if chosen is None and eid:
+        # Related-event cards often pollute Relay; prefer OG for this URL's id.
+        og_title = _og_meta(html, "og:title")
+        if og_title and og_title.lower() not in _NOISE_TITLES:
+            chosen = {
+                "id": eid,
+                "name": og_title,
+                "eventUrl": f"https://www.facebook.com/events/{eid}/",
+                "description": _og_meta(html, "og:description"),
+                "cover_photo": {
+                    "photo": {"image": {"uri": _og_meta(html, "og:image")}}
+                },
+            }
+    if chosen is None and raw_list and not eid:
         chosen = raw_list[0]
     if not chosen:
         log.info("facebook_events_native_details_empty", url=target[:120])
         return None
     out = normalize_raw_event(chosen)
-    if not out.get("id") and eid:
+    if eid:
+        # Never return a different event than the requested URL.
         out["id"] = eid
         out["event_id"] = eid
-    if not out.get("url"):
+        out["url"] = f"https://www.facebook.com/events/{eid}/"
+        out["eventUrl"] = out["url"]
+    elif not out.get("url"):
         out["url"] = target
         out["eventUrl"] = target
     if not out.get("name"):

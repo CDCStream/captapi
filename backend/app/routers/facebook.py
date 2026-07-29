@@ -1561,16 +1561,15 @@ async def facebook_event_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # 1) Decodo — usually login-walled for keyword search; try anyway.
+            # 1) Native — discovery (relevance-filtered) + Google SERP → details.
             native = await facebook_events_native.fetch_search_events(q, limit=limit)
             if native:
                 ctx["source"] = "direct"
                 events = [_normalize_event(i) for i in native]
                 return {"query": q, "totalReturned": len(events), "events": events}
 
-            # 2) Apify snapshot-first (same pattern as IG trending / profile-events).
-            # Logged-out Decodo cannot list search results; avoid a cold 280s run
-            # when a fresh-enough dataset already exists for this query.
+            # 2) Apify snapshot-first when native search is empty/login-walled.
+            # Avoid a cold 280s browser run when a fresh dataset already exists.
             run_input = {"searchQueries": [q], "maxEvents": limit}
             apify = ApifyClient(timeout=280, max_attempts=1)
             cached_items = await apify.last_succeeded_items(
@@ -1609,12 +1608,10 @@ async def facebook_event_search(
 
         data = await cached_or_run(
             endpoint="facebook.event-search",
-            params={"q": q, "limit": limit, "v": 4},
+            params={"q": q, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
-            # Browser-based events actor takes 2-3 min (p95 ~101s); serve the
-            # last result set instantly after TTL and refresh in the background
-            # rather than making the caller wait minutes, same as profile-events.
+            # Native SERP path is tens of seconds; Apify still SWR for long runs.
             stale_while_revalidate=True,
             use_cache=cache,
         )

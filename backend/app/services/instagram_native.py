@@ -1,4 +1,4 @@
-﻿"""Native Instagram reel media resolver.
+"""Native Instagram reel media resolver.
 
 Uses Instagram's public PolarisPostRootQuery GraphQL endpoint (the one the
 logged-out web player calls), which returns v1-format media incl.
@@ -1363,20 +1363,85 @@ def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
 
 # Logged-out api/v1 tags / clips-music endpoints return login HTML. Decodo
 # headless Explore/audio pages still emit /reel/{code}/ and /p/{code}/ links;
-# we collect those shortcodes and hydrate via PolarisPostRootQuery.
+# Explore also embeds media as JSON ``"code":"SHORTCODE"`` without hrefs.
+# We collect those shortcodes and hydrate via PolarisPostRootQuery.
 # Explore/audio HTML often has href="/reel/CODE/… without a quote right after /.
 _HREF_SHORTCODE_RE = re.compile(
     r'(?:href="|href=&quot;)/(?:reel|p)/([A-Za-z0-9_-]{5,})/',
     re.IGNORECASE,
 )
+_JSON_CODE_RE = re.compile(
+    r'"(?:code|shortcode)"\s*:\s*"([A-Za-z0-9_-]{8,15})"',
+)
+_LOCALE_CODE_RE = re.compile(r"^[a-z]{2}[_-][A-Z]{2}$")
 _AUDIO_ID_RE = re.compile(r"/reels/audio/(\d+)", re.IGNORECASE)
+
+# Trending actor country name → Decodo geo ISO (best-effort Explore localization).
+_TRENDING_GEO: dict[str, str] = {
+    "United States": "US",
+    "Canada": "CA",
+    "United Kingdom": "GB",
+    "Australia": "AU",
+    "Germany": "DE",
+    "France": "FR",
+    "Italy": "IT",
+    "Spain": "ES",
+    "Netherlands": "NL",
+    "Sweden": "SE",
+    "Norway": "NO",
+    "Denmark": "DK",
+    "Finland": "FI",
+    "Poland": "PL",
+    "Portugal": "PT",
+    "Brazil": "BR",
+    "Mexico": "MX",
+    "Argentina": "AR",
+    "Chile": "CL",
+    "Colombia": "CO",
+    "Japan": "JP",
+    "South Korea": "KR",
+    "Singapore": "SG",
+    "Hong Kong": "HK",
+    "Taiwan": "TW",
+    "India": "IN",
+    "Indonesia": "ID",
+    "Thailand": "TH",
+    "Philippines": "PH",
+    "Malaysia": "MY",
+    "Vietnam": "VN",
+    "United Arab Emirates": "AE",
+    "Saudi Arabia": "SA",
+    "Turkey": "TR",
+    "South Africa": "ZA",
+}
+
+
+def _looks_like_shortcode(code: str) -> bool:
+    if not code or len(code) < 8 or len(code) > 15:
+        return False
+    if _LOCALE_CODE_RE.fullmatch(code):
+        return False
+    # Locales / i18n keys sometimes slip into "code" fields (en_US, pt_BR…).
+    if "_" in code and code.split("_", 1)[0].islower() and len(code.split("_", 1)[0]) == 2:
+        return False
+    return True
 
 
 def shortcodes_from_html(html: str, *, limit: int = 50) -> list[str]:
     out: list[str] = []
     seen: set[str] = set()
     for code in _HREF_SHORTCODE_RE.findall(html or ""):
+        # href shortcodes can be 5–15 chars; reject locale-shaped noise.
+        if len(code) < 5 or _LOCALE_CODE_RE.fullmatch(code):
+            continue
         if code in seen:
+            continue
+        seen.add(code)
+        out.append(code)
+        if len(out) >= limit:
+            return out
+    for code in _JSON_CODE_RE.findall(html or ""):
+        if not _looks_like_shortcode(code) or code in seen:
             continue
         seen.add(code)
         out.append(code)
@@ -1385,13 +1450,17 @@ def shortcodes_from_html(html: str, *, limit: int = 50) -> list[str]:
     return out
 
 
-async def fetch_shortcodes_via_decodo(url: str, *, limit: int = 50) -> list[str] | None:
+async def fetch_shortcodes_via_decodo(
+    url: str, *, limit: int = 50, geo: str | None = None
+) -> list[str] | None:
     """JS-render ``url`` via Decodo and return Instagram shortcodes, or None."""
     from app.services import decodo_fetch
 
     if not decodo_fetch.enabled() or limit <= 0:
         return None
-    got = await decodo_fetch.fetch_url(url, timeout=90.0, headless="html")
+    got = await decodo_fetch.fetch_url(
+        url, timeout=90.0, headless="html", geo=geo
+    )
     if not got:
         return None
     status, body = got
@@ -1449,6 +1518,100 @@ async def reels_by_audio_native(audio_id: str, *, limit: int = 20) -> list[dict[
         post["musicId"] = aid
         post["musicUrl"] = page_url
     return posts
+
+
+def _as_trending_reel(post: dict[str, Any]) -> dict[str, Any]:
+    """Align Polaris post details with the trending-reels response shape."""
+    code = safe_str(post.get("id"))
+    product = safe_str(post.get("productType"))
+    post_type = safe_str(post.get("postType"))
+    is_reel = (
+        post_type == "Video"
+        or product in {"clips", "reel", "reels"}
+        or bool(post.get("videoUrl"))
+    )
+    url = safe_str(post.get("url"))
+    if code and is_reel:
+        url = f"https://www.instagram.com/reel/{code}/"
+    engagement = post.get("engagement") if isinstance(post.get("engagement"), dict) else {}
+    author = post.get("author") if isinstance(post.get("author"), dict) else {}
+    return {
+        "platform": "instagram",
+        "url": url,
+        "id": code,
+        "postType": post_type or ("Video" if is_reel else "Image"),
+        "productType": product,
+        "section": None,
+        "topic": None,
+        "caption": post.get("caption"),
+        "description": post.get("description") or post.get("caption"),
+        "publishedAt": post.get("publishedAt"),
+        "durationSeconds": post.get("durationSeconds"),
+        "thumbnailUrl": post.get("thumbnailUrl"),
+        "videoUrl": post.get("videoUrl"),
+        "author": {
+            "username": author.get("username"),
+            "url": author.get("url"),
+        },
+        "engagement": {
+            "views": engagement.get("views"),
+            "likes": engagement.get("likes"),
+            "comments": engagement.get("comments"),
+        },
+        "hashtags": post.get("hashtags") or [],
+        "mentions": post.get("mentions") or [],
+    }
+
+
+async def trending_reels_native(
+    country: str = "United States", *, limit: int = 20
+) -> list[dict[str, Any]] | None:
+    """Explore grid via Decodo (optional geo) + Polaris hydrate.
+
+    Explore HTML embeds media codes as JSON ``code`` fields (no /reel/ hrefs).
+    Apify remains fallthrough for cold countries / empty grids.
+    """
+    if limit <= 0:
+        return []
+    geo = _TRENDING_GEO.get((country or "").strip()) or None
+    # Over-fetch shortcodes — hydrate can 401 a few; Explore mixes photos.
+    fetch_n = min(200, max(limit * 2, limit + 10))
+    codes = await fetch_shortcodes_via_decodo(
+        "https://www.instagram.com/explore/",
+        limit=fetch_n,
+        geo=geo,
+    )
+    if not codes:
+        return None
+    posts = await hydrate_shortcodes(codes, limit=fetch_n)
+    if not posts:
+        return None
+    # Prefer Reels/clips first, then fill with remaining Explore posts.
+    reels: list[dict[str, Any]] = []
+    rest: list[dict[str, Any]] = []
+    for post in posts:
+        product = safe_str(post.get("productType"))
+        is_reel = (
+            post.get("postType") == "Video"
+            or product in {"clips", "reel", "reels"}
+            or bool(post.get("videoUrl"))
+        )
+        row = _as_trending_reel(post)
+        if is_reel:
+            reels.append(row)
+        else:
+            rest.append(row)
+    out = (reels + rest)[:limit]
+    if not out:
+        return None
+    log.info(
+        "ig_trending_native_ok",
+        country=country,
+        geo=geo,
+        n=len(out),
+        reels=len(reels),
+    )
+    return out
 
 
 async def hashtag_posts_native(

@@ -48,6 +48,7 @@ async def fetch_url(
     browser_actions: list[dict[str, Any]] | None = None,
     target: str | None = None,
     xhr: bool = False,
+    geo: str | None = None,
 ) -> tuple[int, str] | None:
     """Fetch ``url`` via Decodo. Returns ``(upstream_status, body_text)`` or
     ``None`` when Decodo is unconfigured / errored, so callers can fall back.
@@ -57,6 +58,7 @@ async def fetch_url(
     Optional ``browser_actions`` runs Decodo interactions (scroll/wait) first.
     ``target="universal"`` is required for most ``browser_actions`` payloads.
     ``xhr=True`` returns captured XHR JSON (as a string) instead of HTML.
+    ``geo`` is an optional ISO country code for localized egress (e.g. ``US``).
     """
     auth_header = _auth_header()
     if not auth_header:
@@ -71,6 +73,10 @@ async def fetch_url(
         body["xhr"] = True
     if browser_actions:
         body["browser_actions"] = browser_actions
+    if geo:
+        body["geo"] = geo.strip().upper()
+    elif settings.DECODO_GEO:
+        body["geo"] = settings.DECODO_GEO
     try:
         async with httpx.AsyncClient(timeout=timeout) as client:
             response = await client.post(
