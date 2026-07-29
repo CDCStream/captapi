@@ -12,6 +12,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
+from app.services import snapchat_native as native
 from app.utils.formatters import safe_int, safe_str
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
@@ -64,6 +65,11 @@ async def user_profile(
     settings = get_settings()
     async with billed_call(caller=caller, endpoint="/v1/snapchat/user-profile", platform="snapchat", resource_url=f"https://www.snapchat.com/@{username}", base_credits=11) as ctx:
         async def _run() -> dict[str, Any]:
+            native_row = await native.fetch_user_profile(username)
+            if native_row:
+                ctx["source"] = "direct"
+                return _normalize(native_row)
+
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_SNAPCHAT_PROFILE,
                 {"usernames": [username]},
@@ -71,7 +77,8 @@ async def user_profile(
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Snapchat profile not found")
+            ctx["source"] = "apify"
             return _normalize(items[0])
 
-        data = await cached_or_run("snapchat.user-profile", {"username": username, "v": 2}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("snapchat.user-profile", {"username": username, "v": 3}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
