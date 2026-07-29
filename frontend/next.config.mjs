@@ -75,6 +75,44 @@ const nextConfig = {
         destination: "/apis",
         permanent: true,
       },
+      // Blog posts often link bare platform hubs (/apis/youtube) instead of the
+      // real landing pages (/apis/youtube-api). Permanent redirects clear Ahrefs 404s.
+      {
+        source: "/apis/youtube",
+        destination: "/apis/youtube-api",
+        permanent: true,
+      },
+      {
+        source: "/apis/tiktok",
+        destination: "/apis/tiktok-api",
+        permanent: true,
+      },
+      {
+        source: "/apis/instagram",
+        destination: "/apis/instagram-api",
+        permanent: true,
+      },
+      {
+        source: "/apis/reddit",
+        destination: "/apis/reddit-api",
+        permanent: true,
+      },
+      {
+        source: "/apis/ad-library",
+        destination: "/apis/ad-library-api",
+        permanent: true,
+      },
+      // Renamed / shortened blog slugs still linked from older posts.
+      {
+        source: "/blog/top-10-data-collection-companies",
+        destination: "/blog/data-collection-companies",
+        permanent: true,
+      },
+      {
+        source: "/blog/master-social-media-engagement-metrics",
+        destination: "/blog/social-media-engagement-metrics",
+        permanent: true,
+      },
     ];
   },
 };
