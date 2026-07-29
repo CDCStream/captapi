@@ -112,7 +112,8 @@ def _normalize_company(c: dict[str, Any]) -> dict[str, Any]:
     industries = info.get("industries")
     industry = industries[0] if isinstance(industries, list) and industries else info.get("industry")
     hq_text = ", ".join(x for x in [hq.get("city"), hq.get("state"), hq.get("country")] if x) or None
-    verified = info.get("is_verified")
+    # Public company pages don't expose a reliable verified flag or cover URL
+    # in our native/Apify shapes — omit those fields.
     return {
         "platform": "linkedin",
         "type": "company",
@@ -126,9 +127,7 @@ def _normalize_company(c: dict[str, Any]) -> dict[str, Any]:
             stats.get("employee_count") or c.get("employeeCount") or c.get("staffCount") or c.get("companySize")
         ),
         "headquarters": safe_str(hq_text or c.get("headquarters") or c.get("location")),
-        "verified": verified if isinstance(verified, bool) else None,
         "logo": safe_str(media.get("logo_url") or c.get("logo") or c.get("logoUrl")),
-        "coverImage": safe_str(media.get("cover_url")),
     }
 
 
@@ -301,7 +300,7 @@ async def linkedin_company(
 
         data = await cached_or_run(
             endpoint="linkedin.company",
-            params={"slug": slug, "v": 3},
+            params={"slug": slug, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

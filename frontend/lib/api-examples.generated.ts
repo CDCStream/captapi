@@ -4614,9 +4614,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "followers": 28741583,
     "employees": 233242,
     "headquarters": "Redmond, Washington, US",
-    "verified": null,
-    "logo": "https://media.licdn.com/dms/image/v2/D560BAQH32RJQCl3dDQ/company-logo_200_200/B56ZYQ0mrGGoAM-/0/1744038948046/microsoft_logo?e=2147483647&v=beta&t=ts9MGrTk7Lz3R1bmAfzCL8euuuuPWPCoXfdiLA2_IzM",
-    "coverImage": null
+    "logo": "https://media.licdn.com/dms/image/v2/D560BAQH32RJQCl3dDQ/company-logo_200_200/B56ZYQ0mrGGoAM-/0/1744038948046/microsoft_logo?e=2147483647&v=beta&t=ts9MGrTk7Lz3R1bmAfzCL8euuuuPWPCoXfdiLA2_IzM"
   },
   "linkedin-company-posts": {
     "company": "microsoft",
