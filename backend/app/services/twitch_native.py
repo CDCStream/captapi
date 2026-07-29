@@ -100,10 +100,11 @@ def _video_node(
 ) -> dict[str, Any]:
     game = node.get("game") or {}
     video_id = safe_str(node.get("id"))
+    # VODs have no clip slug and no public MP4 URL (tokenized). Omit those
+    # keys rather than returning always-null placeholders; clips keep them.
     return {
         "platform": "twitch",
         "id": video_id,
-        "slug": None,
         "url": (f"https://www.twitch.tv/videos/{video_id}" if video_id else None),
         "embedUrl": (
             f"https://player.twitch.tv/?video={video_id}&parent=captapi.com" if video_id else None
@@ -113,8 +114,6 @@ def _video_node(
         "durationSeconds": safe_int(node.get("lengthSeconds")),
         "views": safe_int(node.get("viewCount")),
         "thumbnail": safe_str(node.get("previewThumbnailURL")),
-        # Twitch GraphQL does not expose a direct MP4 for VODs without a token.
-        "videoUrl": None,
         "game": safe_str(game.get("name") if isinstance(game, dict) else game),
         "language": safe_str(node.get("language")),
         "broadcaster": broadcaster,
