@@ -2,7 +2,7 @@
 
 - User pins / board pins: ``api.pinterest.com/v3/pidgets/...`` (soft-capped ~50).
 - User boards: Decodo-rendered ``/_boards/`` page (board cards in page JSON).
-- Search stays Apify-first for now (logged-out search HTML rarely hydrates pins).
+- Search: Google/DDG SERP → widgets pidgets hydrate (logged-out search HTML is empty).
 """
 
 from __future__ import annotations
@@ -240,3 +240,121 @@ async def user_boards_native(username: str, limit: int = 25) -> list[dict[str, A
         return None
     log.info("pinterest_user_boards_native_ok", username=user, returned=len(boards[:capped]))
     return boards[:capped]
+
+
+
+def _pin_ids_from_serp_html(html: str, *, limit: int = 40) -> list[str]:
+    ids: list[str] = []
+    seen: set[str] = set()
+    for pid in re.findall(r"pinterest\.com/pin/(\d{6,})", html or "", re.I):
+        if pid in seen:
+            continue
+        seen.add(pid)
+        ids.append(pid)
+        if len(ids) >= limit:
+            break
+    return ids
+
+
+async def _search_pin_ids_via_serp(q: str, *, limit: int = 40) -> list[str]:
+    if not decodo_fetch.enabled():
+        return []
+    query = quote(f"site:pinterest.com/pin {q}", safe="")
+    sources = [
+        f"https://www.google.com/search?q={query}&num={min(30, max(10, limit))}",
+        f"https://html.duckduckgo.com/html/?q={query}",
+    ]
+    seen: set[str] = set()
+    ids: list[str] = []
+    for url in sources:
+        got = await decodo_fetch.fetch_url(url, timeout=90.0, headless="html")
+        if not got:
+            continue
+        status, body = got
+        if status != 200 or not body:
+            continue
+        for pid in _pin_ids_from_serp_html(body, limit=limit):
+            if pid in seen:
+                continue
+            seen.add(pid)
+            ids.append(pid)
+            if len(ids) >= limit:
+                break
+        if len(ids) >= min(10, limit):
+            break
+    log.info("pinterest_search_serp_ids", q=q[:80], n=len(ids))
+    return ids
+
+
+async def fetch_pin_info(pin_id: str) -> dict[str, Any] | None:
+    """Public widgets pidgets pin info → Apify-like pin dict."""
+    pid = (pin_id or "").strip()
+    if not pid.isdigit():
+        return None
+    try:
+        async with httpx.AsyncClient(timeout=20, headers=_UA, follow_redirects=True) as client:
+            resp = await client.get(
+                "https://widgets.pinterest.com/v3/pidgets/pins/info/",
+                params={"pin_ids": pid},
+            )
+    except httpx.HTTPError as exc:
+        log.info("pinterest_pin_info_fail", pin_id=pid, error=str(exc))
+        return None
+    if resp.status_code != 200:
+        return None
+    try:
+        rows = (resp.json() or {}).get("data") or []
+    except ValueError:
+        return None
+    if not rows or not isinstance(rows[0], dict):
+        return None
+    pin = rows[0]
+    # Keep raw pidgets shape; router._normalize_pin already understands it.
+    if not pin.get("id"):
+        pin["id"] = pid
+    if not pin.get("url"):
+        pin["url"] = f"https://www.pinterest.com/pin/{pid}/"
+    return pin
+
+
+async def search_pins_native(q: str, *, limit: int = 25) -> list[dict[str, Any]] | None:
+    """Keyword pin search via Google/DDG SERP → pidgets hydrate.
+
+    Logged-out Pinterest search HTML does not hydrate pin grids.
+    """
+    query = (q or "").strip()
+    if len(query) < 2 or limit <= 0:
+        return None
+    ids = await _search_pin_ids_via_serp(query, limit=min(40, max(15, limit * 2)))
+    if not ids:
+        return None
+
+    import asyncio
+
+    sem = asyncio.Semaphore(6)
+    selected = ids[: max(limit * 2, limit + 5)]
+
+    async def _one(pid: str) -> dict[str, Any] | None:
+        async with sem:
+            return await fetch_pin_info(pid)
+
+    rows = await asyncio.gather(*[_one(pid) for pid in selected])
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        pid = str(row.get("id") or "")
+        if not pid or pid in seen:
+            continue
+        # Prefer rows with some substance.
+        if not (row.get("grid_title") or row.get("description") or row.get("images")):
+            continue
+        seen.add(pid)
+        out.append(row)
+        if len(out) >= limit:
+            break
+    if not out:
+        return None
+    log.info("pinterest_search_native_ok", q=query[:80], n=len(out))
+    return out

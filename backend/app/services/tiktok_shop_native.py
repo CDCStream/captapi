@@ -3,7 +3,7 @@
 Store pages embed a Remix/loader JSON blob with ``component_data.products``.
 PDP pages embed a short ``product_reviews`` preview (~3 rows).
 Datacenter proxy usually returns the full page; residential/Decodo are
-fallbacks. Search / deep review pagination / showcase stay on Apify.
+fallbacks. Product details use PDP OG/SSR; search / showcase stay on Apify (WAF).
 """
 
 from __future__ import annotations
@@ -327,4 +327,151 @@ async def fetch_product_reviews(url: str, *, limit: int = 20) -> list[dict[str, 
     if not out:
         return None
     log.info("tiktok_shop_native_reviews_ok", url=fetch_url[:120], n=len(out))
+    return out
+
+
+
+_PDP_ID_RE = re.compile(r"/pdp/(?:[^/?#]+/)?(\d{6,})", re.I)
+
+
+def parse_product_id(url: str) -> str | None:
+    raw = (url or "").strip()
+    if not raw:
+        return None
+    m = _PDP_ID_RE.search(unquote(raw))
+    if m:
+        return m.group(1)
+    tail = raw.rstrip("/").split("/")[-1]
+    return tail if tail.isdigit() else None
+
+
+def _og(html: str, key: str) -> str | None:
+    patterns = [
+        rf'<meta[^>]+(?:property|name)=["\']{re.escape(key)}["\'][^>]+content=["\']([^"\']+)["\']',
+        rf'<meta[^>]+content=["\']([^"\']+)["\'][^>]+(?:property|name)=["\']{re.escape(key)}["\']',
+        rf'<meta\s+(?:property|name)=["\']{re.escape(key)}["\']\s+content=["\']([^"\']+)["\']',
+        rf'<meta\s+content=["\']([^"\']+)["\']\s+(?:property|name)=["\']{re.escape(key)}["\']',
+    ]
+    for pat in patterns:
+        m = re.search(pat, html or "", re.I)
+        if m:
+            return m.group(1).strip() or None
+    return None
+
+
+async def _fetch_pdp_html(url: str) -> str | None:
+    """Like ``_fetch_html`` but accept OG-only PDPs (no product_id JSON)."""
+    for tier in ("datacenter", "residential"):
+        if not proxy_for(tier):  # type: ignore[arg-type]
+            continue
+        try:
+            resp = await fetch(url, tier=tier, timeout=25)  # type: ignore[arg-type]
+        except Exception as exc:  # noqa: BLE001
+            log.debug("tiktok_shop_pdp_fetch_error", tier=tier, error=str(exc)[:120])
+            continue
+        if resp.status_code == 200 and resp.text and len(resp.text) > 2000:
+            return resp.text
+    if decodo_fetch.enabled():
+        for headless in (None, "html"):
+            got = await decodo_fetch.fetch_url(url, timeout=90, headless=headless)
+            if not got:
+                continue
+            status, body = got
+            if status == 200 and body and len(body) > 2000:
+                return body
+    return None
+
+
+async def fetch_product_details(url: str) -> dict[str, Any] | None:
+    """PDP via HTML (OG + SSR hints). Prices are often masked as ``*`` in SSR.
+
+    Returns Apify-like product dict for ``_normalize_product(..., details_mode)``.
+    """
+    product_id = parse_product_id(url)
+    if not product_id:
+        return None
+    candidates = [
+        (url or "").strip(),
+        f"https://shop.tiktok.com/us/pdp/{product_id}",
+        f"https://www.tiktok.com/shop/pdp/{product_id}",
+    ]
+    html = None
+    fetch_url = candidates[0]
+    for candidate in candidates:
+        if not candidate:
+            continue
+        html = await _fetch_html(candidate) or await _fetch_pdp_html(candidate)
+        if html:
+            fetch_url = candidate
+            break
+    if not html:
+        return None
+
+    title = _og(html, "og:title") or _og(html, "twitter:title")
+    if not title:
+        # React-helmet sometimes emits content before property.
+        m = re.search(
+            r'<title[^>]*>\s*([^<]+?)\s*</title>',
+            html,
+            re.I,
+        )
+        if m:
+            title = m.group(1).strip()
+    if title:
+        title = re.sub(r"\s*[-|]\s*TikTok Shop\s*$", "", title, flags=re.I).strip()
+    description = _og(html, "og:description")
+    image = _og(html, "og:image")
+    if not image:
+        im = re.search(
+            r'(https://p16-oec[^"\s]+|https://[^"\s]+ttcdn[^"\s]+\.(?:jpg|jpeg|png|webp))',
+            html,
+            re.I,
+        )
+        if im:
+            image = im.group(1)
+    canonical = _og(html, "og:url") or fetch_url
+
+    # Best-effort seller / sold from nearby SSR text (when not masked).
+    seller_name = None
+    sm = re.search(r'"shop_name"\s*:\s*"((?:\\.|[^"\\])+)"', html)
+    if sm:
+        try:
+            seller_name = json.loads(f'"{sm.group(1)}"')
+        except ValueError:
+            seller_name = sm.group(1)
+
+    sold = None
+    sold_m = re.search(r'"sold_count"\s*:\s*(\d+)', html)
+    if sold_m:
+        sold = int(sold_m.group(1))
+
+    # Unmasked price if present (masked values use "*").
+    price = None
+    currency = None
+    pm = re.search(r'"sale_price_decimal"\s*:\s*"([0-9.]+)"', html)
+    if pm:
+        try:
+            price = float(pm.group(1))
+        except ValueError:
+            price = pm.group(1)
+    cm = re.search(r'"currency_name"\s*:\s*"([A-Z]{3})"', html)
+    if cm:
+        currency = cm.group(1)
+
+    if not title and not image:
+        return None
+
+    out = {
+        "id": product_id,
+        "productId": product_id,
+        "title": title,
+        "description": description,
+        "url": canonical if canonical and "http" in canonical else f"https://www.tiktok.com/shop/pdp/{product_id}",
+        "price": price,
+        "currency": currency,
+        "sold": sold,
+        "image": image,
+        "seller": {"name": seller_name} if seller_name else {},
+    }
+    log.info("tiktok_shop_native_details_ok", product_id=product_id, has_price=price is not None)
     return out

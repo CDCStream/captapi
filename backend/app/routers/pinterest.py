@@ -106,6 +106,8 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
                 or item.get("grid_title")
                 or item.get("closeup_unified_title")
                 or item.get("gridTitle")
+                # pidgets often only expose description for search-hydrated pins
+                or item.get("description")
             ),
             "description": safe_str(
                 item.get("description")
@@ -671,19 +673,31 @@ async def pinterest_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # 1) SERP → pidgets (logged-out Pinterest search HTML is empty).
+            native_items = await native.search_pins_native(q, limit=limit)
+            if native_items:
+                ctx["source"] = "direct"
+                results = _prefer_enriched([_normalize_pin(i) for i in native_items])[:limit]
+                results = await _enrich_sparse_pins(results, max_enrich=limit)
+                return {"query": q, "totalReturned": len(results), "results": results}
+
             items = await _run_pinterest_actor(
                 {"mode": "search", "keywords": [q], "maxItems": limit}, limit
             )
+            ctx["source"] = "apify"
             results = _prefer_enriched([_normalize_pin(i) for i in items if i.get("recordType") != "board"])[:limit]
             results = await _enrich_sparse_pins(results)
             return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="pinterest.search",
-            params={"q": q, "limit": limit, "v": 4},
+            params={"q": q, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled(len(data["results"]), RATE, 2)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = max(1, _scaled(len(data["results"]), RATE, 1))
+        else:
+            ctx["credits_override"] = _scaled(len(data["results"]), RATE, 2)
         return ApiResponse(data=data)

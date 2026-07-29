@@ -323,8 +323,22 @@ async def product_details(
     _reject_non_tiktok_url(url, "https://www.tiktok.com/shop/pdp/product/123")
     if "tiktok" not in url or "shop" not in url:
         raise HTTPException(status_code=400, detail="Invalid TikTok Shop product URL. Pass a TikTok Shop product URL like https://www.tiktok.com/shop/pdp/product/123.")
-    async with billed_call(caller=caller, endpoint="/v1/tiktok-shop/product-details", platform="tiktok_shop", resource_url=url, base_credits=14) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok-shop/product-details",
+        platform="tiktok_shop",
+        resource_url=url,
+        base_credits=CREDIT_SHOP_NATIVE,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
+            # 1) PDP OG/SSR (prices often masked as * — still beats empty stubs).
+            native = await tiktok_shop_native.fetch_product_details(url)
+            if native and native.get("title"):
+                ctx["source"] = "direct"
+                normalized = _normalize_product(native, details_mode=True)
+                normalized["url"] = normalized["url"] or url
+                return normalized
+
             apify = get_apify()
             # The mobile-API details actor returns title/price/images/stock; the
             # generic shop scraper's product_details mode often echoes the URL only.
@@ -345,15 +359,20 @@ async def product_details(
             if not items:
                 # Keep the endpoint useful with canonical basics for valid PDP URLs.
                 product_id = url.rstrip("/").split("/")[-1]
-                return _normalize_product(
-                    {"productUrl": url, "productId": product_id},
-                    details_mode=True,
-                )
+                ctx["source"] = "direct" if native else "apify"
+                base = native or {"productUrl": url, "productId": product_id}
+                return _normalize_product(base, details_mode=True)
+            ctx["source"] = "apify"
+            ctx["credits_override"] = 14
             normalized = _normalize_product(items[0], details_mode=True)
             normalized["url"] = normalized["url"] or url
             return normalized
 
-        return ApiResponse(data=await cached_or_run("tiktok-shop.product-details", {"url": url, "v": 4}, _run, ctx, use_cache=cache))
+        return ApiResponse(
+            data=await cached_or_run(
+                "tiktok-shop.product-details", {"url": url, "v": 5}, _run, ctx, use_cache=cache
+            )
+        )
 
 
 @router.get("/product-reviews", summary="TikTok Shop product reviews")
