@@ -5739,91 +5739,53 @@
     "data": {
       "query": "fashion",
       "country": "DE",
-      "totalReturned": 5,
+      "totalReturned": 3,
       "ads": [
         {
           "platform": "tiktok_ad_library",
-          "id": "1863713894906961",
-          "url": "https://library.tiktok.com/ads/detail/?ad_id=1863713894906961",
-          "text": null,
+          "id": "1872034324356433",
+          "url": "https://library.tiktok.com/ads/detail/?ad_id=1872034324356433",
+          "text": "#gandurilemele #foryoupage❤️❤️ Buna dimineața tuturor!Zi binecuvântata tuturor!🙏🙏🙏",
           "adFormat": "video",
-          "firstShown": "2026-04-29",
-          "lastShown": "2026-06-18",
+          "firstShown": "07/29/2026",
+          "lastShown": "07/29/2026",
+          "impressions": "0-1K",
           "advertiser": {
-            "name": "Samsung Electronics GmbH"
+            "name": "alyalina535"
           },
           "media": [
-            "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/oQs5EXu8gvzNAIVfprQX6bFsDOBhQJfNBOBSDA~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=e0de87d8&x-expires=1784394000&x-signature=KL8iemYdSycJnhHVVpYf%2Frt7sVg%3D&t=4d5b0474&ps=13740610&shp=0c75dd76&shcp=9b759fb9&idc=sg1",
-            "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/oQs5EXu8gvzNAIVfprQX6bFsDOBhQJfNBOBSDA~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=e0de87d8&x-expires=1784394000&x-signature=KL8iemYdSycJnhHVVpYf%2Frt7sVg%3D&t=4d5b0474&ps=13740610&shp=0c75dd76&shcp=9b759fb9&idc=sg1",
-            "https://library.tiktok.com/api/v1/cdn/1784373897/video/aHR0cHM6Ly92NzcudGlrdG9rY2RuLmNvbS9iZmZjOGFhNDgwNGRlY2JiNzg2ZDJmZjM3NDhhMmM0ZC82YTViYjZmOC92aWRlby90b3MvdXNlYXN0MmEvdG9zLXVzZWFzdDJhLXZlLTAwNTFjNzk5LWV1dHRwL293U3ZLZ1FEcEJOek9BT0ZFQ1pKYUFRWERCVmhmOGxnNk5JZm5zLw==/f38125d2-d88c-420a-88ea-a61eddf68c81?a=475769&bt=654&btag=e000b8000&bti=PDU2NmYwMy86&ft=.NpOcInz7ThvvelGXq8Zmo&l=20260718192456155FEC0875AEB7F7F046&mime_type=video_mp4&rc=OTY8ZDkzOzs3NDo2ZGY1N0Bpam07NWo5cjpkOjMzODYzNEAyNmM2M2I0XzUxYjAzYDZfYSNrcTQuMmRzLWxhLS1kMC1zcw%3D%3D&signature=gTw9yYylHoQzLFDGRaDYdTK%2BzqaQifnIa7UAhl9PRvQ%3D&vvpl=1"
+            "https://p16-common-sign.tiktokcdn.com/tos-useast2a-p-0037-euttp/og7D4rDZFh1nZXOfLR2MABlEJzgIQmBfQqyx8E~tplv-noop.image?dr=18692&refresh_token=07160d6b&x-expires=1785378043&x-signature=chp8LV05WtZMgn%2Foj9DEUlAt0HE%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&am"
           ]
         },
         {
           "platform": "tiktok_ad_library",
-          "id": "1865811372506145",
-          "url": "https://library.tiktok.com/ads/detail/?ad_id=1865811372506145",
-          "text": null,
+          "id": "1872081596639249",
+          "url": "https://library.tiktok.com/ads/detail/?ad_id=1872081596639249",
           "adFormat": "video",
-          "firstShown": "2026-06-30",
-          "lastShown": "2026-06-30",
+          "firstShown": "07/29/2026",
+          "lastShown": "07/29/2026",
+          "impressions": "0-1K",
           "advertiser": {
-            "name": "eBay Marketplaces GmbH"
+            "name": "ariana_s.loan"
           },
           "media": [
-            "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/okugAQ2GbHfQUAI8eqQHwidXYKZMGCWJgseDxE~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=a8f24bb0&x-expires=1784394000&x-signature=%2BSbGUeSXVvo2QNYALBJz0gZncbw%3D&t=4d5b0474&ps=13740610&shp=0c75dd76&shcp=9b759fb9&idc=sg1",
-            "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/okugAQ2GbHfQUAI8eqQHwidXYKZMGCWJgseDxE~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=a8f24bb0&x-expires=1784394000&x-signature=%2BSbGUeSXVvo2QNYALBJz0gZncbw%3D&t=4d5b0474&ps=13740610&shp=0c75dd76&shcp=9b759fb9&idc=sg1",
-            "https://library.tiktok.com/api/v1/cdn/1784373897/video/aHR0cHM6Ly92NzcudGlrdG9rY2RuLmNvbS80M2QxNmU3MGZjMDljOTU3ZTEwZDQzOTA5ZjNlZDAyMS82YTViYjZlZi92aWRlby90b3MvdXNlYXN0MmEvdG9zLXVzZWFzdDJhLXZlLTAwNTFjNzk5LWV1dHRwL280UFB4UWFDdDVBMnpZVUVPOGsxamxLQVZpakFnQnppRUlrd0gv/4598e477-f8c7-4208-9ebe-fb0514913d0b?a=475769&bt=397&btag=e000b0000&bti=PDU2NmYwMy86&ft=.NpOcInz7ThvvelGXq8Zmo&l=20260718192456155FEC0875AEB7F7F046&mime_type=video_mp4&rc=aDQ3OmQ2PGY6O2ZnNTZlOEBpMzl0M3c5cms4OzMzODYzNEAzNGJfMmFhXjYxL15jLTYxYSMtcDEuMmQ0ZDVhLS1kMC1zcw%3D%3D&signature=ZRgsc%2FCUIyOmno3F%2FxtzsD4shmEuJCUEEy4EEjr5IOA%3D&vvpl=1"
+            "https://p16-common-sign.tiktokcdn.com/tos-useast2a-p-0037-euttp/ocIpICBQICsNApB1EipZfAoCuW0CXiSozUI7At~tplv-noop.image?dr=18692&refresh_token=b141ba74&x-expires=1785378012&x-signature=%2BPg2gSRW9p1DJIiOmvO9Wnb5riU%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&"
           ]
         },
         {
           "platform": "tiktok_ad_library",
-          "id": "1863329941535073",
-          "url": "https://library.tiktok.com/ads/detail/?ad_id=1863329941535073",
-          "text": null,
+          "id": "1872034324355105",
+          "url": "https://library.tiktok.com/ads/detail/?ad_id=1872034324355105",
+          "text": "#foryoupage❤️❤️ Zi minunată tuturor!🙏🙏🙏",
           "adFormat": "video",
-          "firstShown": "2026-04-28",
-          "lastShown": "2026-05-25",
+          "firstShown": "07/29/2026",
+          "lastShown": "07/29/2026",
+          "impressions": "0-1K",
           "advertiser": {
-            "name": "GOOGLE LIMITED"
+            "name": "alyalina535"
           },
           "media": [
-            "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/oIApAAh9qirQoBYFI0iBzifXIu5zwEX7AorHym~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=463ae6af&x-expires=1784394000&x-signature=F2bnPQWc%2FQkqu9%2FIm35ZotV96As%3D&t=4d5b0474&ps=13740610&shp=0c75dd76&shcp=9b759fb9&idc=sg1",
-            "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/oIApAAh9qirQoBYFI0iBzifXIu5zwEX7AorHym~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=463ae6af&x-expires=1784394000&x-signature=F2bnPQWc%2FQkqu9%2FIm35ZotV96As%3D&t=4d5b0474&ps=13740610&shp=0c75dd76&shcp=9b759fb9&idc=sg1",
-            "https://library.tiktok.com/api/v1/cdn/1784373897/video/aHR0cHM6Ly92NzcudGlrdG9rY2RuLmNvbS82MTQyZDk2OGUxMDAwY2VkNjM3Mzk3MTlmMzFiYmRiZC82YTViYjcyZS92aWRlby90b3MvYWxpc2cvdG9zLWFsaXNnLXZlLTAwNTFjMDAxLXNnL284N0FqUUVYMGJBTWloWHJBemlpd0VCSEI5QW1Fdk5FSW9meW9ZLw==/0db3071e-e615-40f9-80e7-4ef7ee137197?a=475769&bt=499&btag=e00090000&bti=PDU2NmYwMy86&ft=.NpOcInz7ThvvelGXq8Zmo&l=20260718192456155FEC0875AEB7F7F046&mime_type=video_mp4&rc=ZWVoPDU7PDtoaWQ6PDNoNkBpMzRqOHI5cmhqOjMzODYzNEAxM2JgXl5iNWIxMS0zLmM0YSMtLWQzMmRzamlhLS1kMDFzcw%3D%3D&signature=wtPrOd95F7Gv7qY6RZqpL2xERfzOeUoz76ps8ozS8J4%3D&vvpl=1"
-          ]
-        },
-        {
-          "platform": "tiktok_ad_library",
-          "id": "1867892831042849",
-          "url": "https://library.tiktok.com/ads/detail/?ad_id=1867892831042849",
-          "text": null,
-          "adFormat": "video",
-          "firstShown": "2026-06-30",
-          "lastShown": "2026-06-30",
-          "advertiser": {
-            "name": "eBay Marketplaces GmbH"
-          },
-          "media": [
-            "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/oMmDBL7QhIAWVQJAOoaotfBYvgE8jBDYqEeNUF~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=ba7fc50b&x-expires=1784394000&x-signature=su%2FLsXIBx%2BB%2BBHeoMOqo22YjVZ8%3D&t=4d5b0474&ps=13740610&shp=0c75dd76&shcp=9b759fb9&idc=sg1",
-            "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/oMmDBL7QhIAWVQJAOoaotfBYvgE8jBDYqEeNUF~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=ba7fc50b&x-expires=1784394000&x-signature=su%2FLsXIBx%2BB%2BBHeoMOqo22YjVZ8%3D&t=4d5b0474&ps=13740610&shp=0c75dd76&shcp=9b759fb9&idc=sg1",
-            "https://library.tiktok.com/api/v1/cdn/1784373897/video/aHR0cHM6Ly92NzcudGlrdG9rY2RuLmNvbS83NDlmZWQzYzdkMTJkODRiOWFhYjA5YWUxOThkZjFjYS82YTViYjZmOC92aWRlby90b3MvdXNlYXN0MmEvdG9zLXVzZWFzdDJhLXZlLTAwNTFjNzk5LWV1dHRwL293M2ZJR1VXQVI1YkFRNE9VQ0lSQlNMbkc1RGFndGUxQ1dnZUdFLw==/15e38d07-58f4-405f-839d-0dc60dbb2a0e?a=475769&bt=563&btag=e000b8000&bti=PDU2NmYwMy86&ft=.NpOcInz7ThvvelGXq8Zmo&l=20260718192456155FEC0875AEB7F7F046&mime_type=video_mp4&rc=aDY0aTpnOTY8ZTllO2c2O0BpM2xxNWo5cmVwOzMzODYzNEBhLi8zNS00XjAxLl9jMDJeYSNiLTMuMmRjbGphLS1kMC1zcw%3D%3D&signature=igvn1EHA7eaand3nZBppGQ3zl6jgjXT8bViwD99K3jQ%3D&vvpl=1"
-          ]
-        },
-        {
-          "platform": "tiktok_ad_library",
-          "id": "1863717200996641",
-          "url": "https://library.tiktok.com/ads/detail/?ad_id=1863717200996641",
-          "text": null,
-          "adFormat": "video",
-          "firstShown": "2026-04-29",
-          "lastShown": "2026-06-18",
-          "advertiser": {
-            "name": "Samsung Electronics GmbH"
-          },
-          "media": [
-            "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/oQs5EXu8gvzNAIVfprQX6bFsDOBhQJfNBOBSDA~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=e0de87d8&x-expires=1784394000&x-signature=KL8iemYdSycJnhHVVpYf%2Frt7sVg%3D&t=4d5b0474&ps=13740610&shp=0c75dd76&shcp=9b759fb9&idc=sg1",
-            "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/oQs5EXu8gvzNAIVfprQX6bFsDOBhQJfNBOBSDA~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=e0de87d8&x-expires=1784394000&x-signature=KL8iemYdSycJnhHVVpYf%2Frt7sVg%3D&t=4d5b0474&ps=13740610&shp=0c75dd76&shcp=9b759fb9&idc=sg1",
-            "https://library.tiktok.com/api/v1/cdn/1784373897/video/aHR0cHM6Ly92NzcudGlrdG9rY2RuLmNvbS9iZmZjOGFhNDgwNGRlY2JiNzg2ZDJmZjM3NDhhMmM0ZC82YTViYjZmOC92aWRlby90b3MvdXNlYXN0MmEvdG9zLXVzZWFzdDJhLXZlLTAwNTFjNzk5LWV1dHRwL293U3ZLZ1FEcEJOek9BT0ZFQ1pKYUFRWERCVmhmOGxnNk5JZm5zLw==/d0c7bef9-8bf2-4f20-bef9-6c93a88863cb?a=475769&bt=654&btag=e000b8000&bti=PDU2NmYwMy86&ft=.NpOcInz7ThvvelGXq8Zmo&l=20260718192456155FEC0875AEB7F7F046&mime_type=video_mp4&rc=NmY1NDdoaDtmM2Q2aWk5NUBpM2c4dm05cnlkOjMzODYzNEA1YWAzYC9fNmAxYC9fLTAvYSNnL21rMmRrZGxhLS1kMC1zcw%3D%3D&signature=L9RYJAsyGeSCoXIW2HFDhxVZ5BJG3Sxp2F1fiVa7mik%3D&vvpl=1"
+            "https://p16-common-sign.tiktokcdn.com/tos-useast2a-p-0037-euttp/ocICop3RUGnfxAGf3FQABXQNYnMQ4oCBf8afhY~tplv-noop.image?dr=18692&refresh_token=5f676cca&x-expires=1785378035&x-signature=Jc1zp2g8pv1QCck5g5SjsSf%2Fp1g%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&am"
           ]
         }
       ]
@@ -6425,17 +6387,17 @@
     "credits": null,
     "data": {
       "platform": "tiktok_ad_library",
-      "id": "7644688945969053712",
-      "url": "https://library.tiktok.com/ads/detail/?ad_id=7644688945969053712",
-      "text": "Natural Cycles is the only FDA-cleared and CE-marked birth control app.   From NC° Birth Control to NC° Plan Pregnancy to NC° Perimenopause, Natural Cycles is there to support your long-term fertility journey.   Natural Cycles is 98% effective with perfect use and 93% effective with typical use.   Are you ready to take control of your fertility?  Sign up for Natural Cycles today and get a free NC° Band with your annual subscription. Offer available for new users only.",
+      "id": "1872034324356433",
+      "url": "https://library.tiktok.com/ads/detail/?ad_id=1872034324356433",
+      "text": "#gandurilemele #foryoupage❤️❤️ Buna dimineața tuturor!Zi binecuvântata tuturor!🙏🙏🙏",
       "adFormat": "video",
-      "spend": "HIGH",
+      "firstShown": "07/29/2026",
+      "lastShown": "07/29/2026",
       "advertiser": {
-        "name": "natural cycles"
+        "name": "alyalina535"
       },
       "media": [
-        "https://p16-common-sign.tiktokcdn.com/tos-maliva-p-0068c799-us/oQQE4pzAQd6ES7FBpueDfDuRHzAFJT1gUzXqQl~tplv-noop.image?dr=18692&refresh_token=05ceabac&x-expires=1784395683&x-signature=80hw5hLfBSwERVUIkE3ZuBQ4ZzE%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&shcp=317596d8&idc=my&VideoID=v12044gd0000d8bl3svog65t7cnhjkrg",
-        "https://v16m-default.tiktokcdn.com/d6a7322c9079b4c490f9dffbab876484/6a5bb7a3/video/tos/maliva/tos-maliva-ve-0068c799-us/owByRi9QjEUC5iZC0pZfA8J0EZD3AIwOX1I6AB/?a=0&bti=NTU4QDM1NGA%3D&&bt=841&ft=cApXJCz7ThWHRi_ALGZmo0P&mime_type=video_mp4&rc=ZjU1aDc5ZWdpODM2OGk7ZUBpam5rZnc5cnZvOzMzZzczNEA0XmEyMy9gNjUxXi5fY2BjYSNvZ2s0MmRzMF9hLS1kMS9zcw%3D%3D&vvpl=1&l=202607181927326A34D59FD13354FB8273&btag=e00090000"
+        "https://library.tiktok.com/api/v1/cdn/1785356384/video/aHR0cHM6Ly92NzcudGlrdG9rY2RuLmNvbS8zYTU3ZmRiZjYzZGIzYjY5Nzc1NzA5ZjQ0ZTMwOGZkNC82YTZhYjUwZS92aWRlby90b3MvdXNlYXN0MmEvdG9zLXVzZWFzdDJhLXZlLTAwNjgtZXV0dHAvbzRJMXRCVHdBNUVFNlEzMW01emlpY1NNSUE0ZjlLQW53b0JMQ2sv/7467d396-0387-4b9f-90c7-2d2cd26db171?a=475769&bt=1049&btag=e00090000&bti=PDU2NmYwMy86&ft=.NpOcInz7ThRcbuGXq8Zmo&l=20260730041944142876664F10EA1EB193&mime_type=video_mp4&rc=NWZoZWU8ZDM6NDU3OGk6ZEBpM3Q0aHM5cjxsPDMzZjczNUA2YWM2MF9eXmExMWBeYDFgYSNnMjNmMmRzcGdhLS1kMTNzcw%3D%3D&signature=Qzo7c7UEa5N40yYL1KKsuy%2BR%2BCnqSwFptCMo9QOZPtQ%3D&vvpl=1"
       ]
     }
   },

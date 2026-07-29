@@ -8,6 +8,7 @@ When the endpoint recovers this path is ~proxy bandwidth only.
 
 from __future__ import annotations
 
+import asyncio
 import re
 import time
 from urllib.parse import quote
@@ -53,6 +54,13 @@ def _to_normalize_shape(row: dict[str, Any]) -> dict[str, Any]:
                         u = item.get(k)
                         if isinstance(u, str) and u.startswith("http"):
                             media.append(u)
+    caption = (
+        row.get("ad_text")
+        or row.get("adText")
+        or row.get("caption")
+        or row.get("text")
+        or row.get("body")
+    )
     return {
         "adId": ad_id,
         "id": ad_id,
@@ -63,6 +71,8 @@ def _to_normalize_shape(row: dict[str, Any]) -> dict[str, Any]:
         "imageUrls": media,
         "videoUrl": next((m for m in media if "video" in m or "cdn" in m), None),
         "estimatedAudience": row.get("estimated_audience") or row.get("estimatedAudience"),
+        "text": caption,
+        "body": caption,
     }
 
 
@@ -135,6 +145,38 @@ def re_soft_limit(text: str) -> bool:
     )
 
 
+async def _hydrate_captions(
+    rows: list[dict[str, Any]],
+    *,
+    country: str,
+    concurrency: int = 3,
+) -> list[dict[str, Any]]:
+    """SERP/JSON search omit ad copy — fill ``text`` from each detail page."""
+    if not rows:
+        return rows
+    sem = asyncio.Semaphore(max(1, min(concurrency, 5)))
+
+    async def _one(row: dict[str, Any]) -> dict[str, Any]:
+        if row.get("text") or row.get("body") or row.get("caption"):
+            return row
+        aid = str(row.get("id") or row.get("adId") or "").strip()
+        if not aid.isdigit():
+            return row
+        async with sem:
+            detail = await ad_details(aid, country=country)
+        if not detail:
+            return row
+        caption = detail.get("text") or detail.get("body")
+        if not caption:
+            return row
+        out = dict(row)
+        out["text"] = caption
+        out["body"] = caption
+        return out
+
+    return list(await asyncio.gather(*[_one(r) for r in rows]))
+
+
 async def search_ads(
     q: str, *, country: str = "DE", limit: int = 20
 ) -> list[dict[str, Any]] | None:
@@ -150,6 +192,7 @@ async def search_ads(
         ("direct", None),
     ]
 
+    rows: list[dict[str, Any]] | None = None
     # Server caps page size at 12; first healthy tier wins (incl. empty list).
     for tier, proxy in tiers:
         if tier != "direct" and not proxy:
@@ -164,13 +207,29 @@ async def search_ads(
             q=query[:40],
             region=region,
         )
-        return page[:want]
+        rows = page[:want]
+        break
 
     # JSON API often 421 "system busy" — Decodo-rendered library SERP.
-    decodo_rows = await search_ads_via_decodo(query, country=region, limit=want)
-    if decodo_rows is not None:
-        return decodo_rows[:want]
-    return None
+    if rows is None:
+        decodo_rows = await search_ads_via_decodo(query, country=region, limit=want)
+        if decodo_rows is not None:
+            rows = decodo_rows[:want]
+
+    if rows is None:
+        return None
+    if not rows:
+        return []
+    hydrated = await _hydrate_captions(rows, country=region)
+    filled = sum(1 for r in hydrated if r.get("text") or r.get("body"))
+    log.info(
+        "tiktok_ads_native_search_captions",
+        q=query[:40],
+        region=region,
+        n=len(hydrated),
+        with_text=filled,
+    )
+    return hydrated
 
 
 
@@ -196,6 +255,22 @@ def _label_value(html: str, label: str) -> str | None:
     return None
 
 
+_CAPTION_RE = re.compile(
+    r"Ad caption[\s\S]{0,4000}?<div[^>]*>([^<]{1,500})</div>\s*<div[^>]*>\s*Call to action",
+    re.I,
+)
+
+
+def _caption_from_html(html: str) -> str | None:
+    """Detail pages put copy in the div between Ad caption and Call to action."""
+    m = _CAPTION_RE.search(html or "")
+    if m:
+        text = re.sub(r"\s+", " ", m.group(1)).strip()
+        if text and text not in {"-", "N/A", "n/a"}:
+            return text
+    return _label_value(html or "", "Ad caption")
+
+
 def extract_ad_details(html: str, *, ad_id: str) -> dict[str, Any] | None:
     """Parse hydrated library.tiktok.com detail HTML."""
     if not html or not ad_id:
@@ -212,7 +287,7 @@ def extract_ad_details(html: str, *, ad_id: str) -> dict[str, Any] | None:
     last_shown = _label_value(html, "Last shown")
     reach = _label_value(html, "Unique users seen")
     location = _label_value(html, "Advertiser's registered location")
-    caption = _label_value(html, "Ad caption")
+    caption = _caption_from_html(html)
 
     video_url = None
     vm = re.search(

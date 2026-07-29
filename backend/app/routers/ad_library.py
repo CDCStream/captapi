@@ -513,7 +513,17 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
     # returns CTA/spend and only sometimes impressions — omit empties.
     # Facebook sometimes returns spend/impressions, so keep explicit nulls there.
     if platform in {"tiktok_ad_library", "linkedin_ad_library"}:
-        for key in ("cta", "landingUrl", "firstShown", "lastShown", "impressions", "spend", "country", "headline"):
+        for key in (
+            "cta",
+            "landingUrl",
+            "firstShown",
+            "lastShown",
+            "impressions",
+            "spend",
+            "country",
+            "headline",
+            "text",
+        ):
             if normalized.get(key) in (None, "", [], {}):
                 normalized.pop(key, None)
     elif platform == "google_ad_library":
