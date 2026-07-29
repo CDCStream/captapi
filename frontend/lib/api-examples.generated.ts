@@ -13778,7 +13778,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "durationSeconds": 213,
     "viewCount": 1797826473,
     "likeCount": 19283915,
-    "commentCount": null,
+    "commentCount": 2400000,
     "thumbnailUrl": "https://i.ytimg.com/vi_webp/dQw4w9WgXcQ/sddefault.webp",
     "genre": "Music",
     "tags": [
