@@ -190,9 +190,10 @@ async def github_user(
         raise HTTPException(status_code=400, detail="Invalid GitHub username")
     async with billed_call(caller=caller, endpoint="/v1/github/user", platform="github", resource_url=f"https://github.com/{login}", base_credits=3) as ctx:
         async def _run() -> dict[str, Any]:
+            ctx["source"] = "direct"
             return _user(await _get(f"/users/{login}"))
 
-        return ApiResponse(data=await cached_or_run("github.user", {"login": login, "v": 2}, _run, ctx, use_cache=cache))
+        return ApiResponse(data=await cached_or_run("github.user", {"login": login, "v": 3}, _run, ctx, use_cache=cache))
 
 
 @router.get("/repositories", summary="List a GitHub user's repositories (cursor-paginated)")

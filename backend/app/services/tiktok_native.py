@@ -76,23 +76,37 @@ _UNIVERSAL_RE = re.compile(
 
 async def _fetch_scope(url: str) -> dict[str, Any] | None:
     """GET a TikTok page and return the ``__DEFAULT_SCOPE__`` dict."""
-    for _ in range(2):  # occasional empty shell page; one retry is cheap
-        try:
-            resp = await proxy_fetch(url, tier="datacenter", headers=TT_HEADERS, timeout=15)
-        except httpx.HTTPError:
-            return None
-        if resp.status_code >= 400:
-            return None
-        m = _UNIVERSAL_RE.search(resp.text)
+    from app.services import decodo_fetch
+
+    async def _parse(text: str) -> dict[str, Any] | None:
+        m = _UNIVERSAL_RE.search(text or "")
         if not m:
-            continue
+            return None
         try:
             data = json.loads(m.group(1))
         except ValueError:
-            continue
+            return None
         scope = data.get("__DEFAULT_SCOPE__")
-        if isinstance(scope, dict):
-            return scope
+        return scope if isinstance(scope, dict) else None
+
+    for tier in ("datacenter", "residential"):
+        for _ in range(2):  # occasional empty shell; one retry is cheap
+            try:
+                resp = await proxy_fetch(url, tier=tier, headers=TT_HEADERS, timeout=18)
+            except httpx.HTTPError:
+                break
+            if resp.status_code >= 400:
+                break
+            scope = await _parse(resp.text)
+            if scope is not None:
+                return scope
+
+    if decodo_fetch.enabled():
+        got = await decodo_fetch.fetch_url(url, timeout=60.0, headless="html", geo="US")
+        if got and got[0] == 200:
+            scope = await _parse(got[1])
+            if scope is not None:
+                return scope
     return None
 
 
@@ -972,11 +986,11 @@ async def _post_page(
     # ``max_cursor`` is the real pager; ``cursor`` is accepted as an alias on
     # some hosts. Deeper pages are softer-blocked, so we race harder for them.
     headers = {"User-Agent": _TT_MOBILE_UA, "Accept": "application/json"}
-    # Keep races short — the router falls back to Apify when we miss. US + NL
-    # are the Evomi geos that actually return aweme_list (GB/CA/DE soft-block).
-    rounds = 3 if max_cursor not in ("", "0") else 2
-    concurrency = 12
-    geos = ("US", "NL")
+    # Soft-block rate is high; race more exits. US/NL are best; FR/DE help
+    # occasionally. Caller may still fall through to signer / Decodo.
+    rounds = 5 if max_cursor not in ("", "0") else 4
+    concurrency = 16
+    geos = ("US", "NL", "FR", "DE")
 
     async def _attempt(host: str, country: str) -> dict[str, Any] | None:
         did = str(random.randint(10**18, 10**19 - 1))
@@ -1009,7 +1023,92 @@ async def _post_page(
         finally:
             for t in tasks:
                 t.cancel()
-        await asyncio.sleep(0.15)
+        await asyncio.sleep(0.2)
+    return None
+
+
+def _web_posts_as_aweme_page(page: dict[str, Any]) -> dict[str, Any] | None:
+    """Normalize web ``/api/post/item_list/`` JSON to the mobile aweme shape."""
+    items = page.get("itemList") or page.get("item_list") or page.get("aweme_list")
+    if not isinstance(items, list):
+        return None
+    cursor = page.get("cursor")
+    if cursor is None:
+        cursor = page.get("max_cursor") or page.get("maxCursor")
+    has_more = page.get("hasMore")
+    if has_more is None:
+        has_more = page.get("has_more")
+    return {
+        "status_code": 0,
+        "aweme_list": items,
+        "max_cursor": cursor,
+        "has_more": bool(has_more),
+    }
+
+
+async def _post_page_via_signer(
+    sec_user_id: str, max_cursor: str, count: int, *, expect_items: bool
+) -> dict[str, Any] | None:
+    """Signed web ``/api/post/item_list/`` — works when mobile aweme soft-blocks."""
+    from app.services import tiktok_signer
+
+    if not tiktok_signer.enabled() or not sec_user_id:
+        return None
+    cur = str(max_cursor or "0")
+    api = (
+        "https://www.tiktok.com/api/post/item_list/"
+        f"?aid=1988&count={max(1, min(count, 35))}"
+        f"&cursor={urllib.parse.quote(cur)}"
+        f"&secUid={urllib.parse.quote(sec_user_id)}"
+    )
+    for _ in range(2):
+        page = await tiktok_signer.fetch_api(api)
+        if not isinstance(page, dict):
+            continue
+        normalized = _web_posts_as_aweme_page(page)
+        if normalized is not None and _post_page_ok(normalized, expect_items=expect_items):
+            return normalized
+    return None
+
+
+async def _post_page_via_decodo(handle: str, *, expect_items: bool) -> dict[str, Any] | None:
+    """First-page posts via Decodo capturing ``api/post/item_list`` XHR."""
+    from app.services import decodo_fetch
+
+    username = (handle or "").lstrip("@").strip()
+    if not username or not decodo_fetch.enabled():
+        return None
+    url = f"https://www.tiktok.com/@{username}"
+    fetched = None
+    for _ in range(2):
+        fetched = await decodo_fetch.fetch_url(
+            url,
+            timeout=120.0,
+            target="universal",
+            headless="html",
+            geo="US",
+            browser_actions=[
+                {
+                    "type": "fetch_resource",
+                    "filter": "api/post/item_list",
+                    "on_error": "error",
+                }
+            ],
+        )
+        if fetched is not None:
+            break
+    if fetched is None:
+        return None
+    _status, content = fetched
+    try:
+        payload = json.loads(content)
+    except ValueError:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    normalized = _web_posts_as_aweme_page(payload)
+    if normalized is not None and _post_page_ok(normalized, expect_items=expect_items):
+        return normalized
     return None
 
 
@@ -1038,11 +1137,17 @@ async def channel_posts_native(
     collected: list[dict[str, Any]] = []
     cur = str(cursor) if cursor else "0"
     max_pages = max(3, limit // 10 + 3)
-    for _ in range(max_pages):
+    for page_i in range(max_pages):
         if len(collected) >= limit:
             break
         want = min(30, limit - len(collected))
         page = await _post_page(sec, cur, want, expect_items=expect_items)
+        if page is None:
+            page = await _post_page_via_signer(
+                sec, cur, want, expect_items=expect_items
+            )
+        if page is None and page_i == 0 and cur in ("", "0"):
+            page = await _post_page_via_decodo(handle, expect_items=expect_items)
         if page is None:
             return None if not collected else (collected, cur)
         for raw in page.get("aweme_list") or []:
@@ -2027,14 +2132,24 @@ async def popular_creators_native(
 async def popular_hashtags_native(
     query: str, *, limit: int = 20, n_videos: int = 25
 ) -> list[dict[str, Any]] | None:
-    """Co-hashtag ranking from a native seed hashtag page (Decodo)."""
+    """Co-hashtag ranking from a native seed hashtag page (Decodo).
+
+    Falls back to signed top-search video rows when the hashtag page misses.
+    """
     seed = (query or "").lstrip("#").strip()
     if not seed:
         return None
-    native = await hashtag_posts_native(seed, limit=max(n_videos, limit))
-    if native is None:
-        return None
-    posts, _has_more, _cursor = native
+    want = max(n_videos, limit)
+    posts: list[dict[str, Any]] = []
+    native = await hashtag_posts_native(seed, limit=want)
+    if native is not None:
+        posts, _has_more, _cursor = native
+    if not posts:
+        # ``trending`` / weak tags often soft-fail on challenge/item_list; search
+        # still yields videos with co-occurring hashtags.
+        searched = await top_search_native(seed, limit=want)
+        if searched:
+            posts = searched
     if not posts:
         return None
     agg: dict[str, dict[str, int]] = {}

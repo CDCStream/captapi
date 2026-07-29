@@ -512,18 +512,34 @@ def _event_ids_from_serp_html(html: str, *, limit: int = 40) -> list[str]:
 
 
 async def _search_event_ids_via_serp(q: str, *, limit: int = 40) -> list[str]:
-    """SERP (via Decodo) site:facebook.com/events → event IDs."""
+    """SERP (via Decodo) site:facebook.com/events → event IDs.
+
+    Google alone is flaky for this query; race Google (gl=US) + Yahoo + DDG.
+    """
     if not decodo_fetch.enabled():
         return []
-    q_enc = quote_plus(f"site:facebook.com/events {q}")
-    sources = [
-        f"https://www.google.com/search?q={q_enc}&num={min(30, max(10, limit))}",
-        f"https://html.duckduckgo.com/html/?q={q_enc}",
+    query = (q or "").strip()
+    if len(query) < 2:
+        return []
+    num = min(30, max(10, limit))
+    variants = [
+        f"site:facebook.com/events {query}",
+        f'site:facebook.com/events/ "{query}"',
     ]
+    sources: list[tuple[str, str | None]] = []
+    for v in variants:
+        q_enc = quote_plus(v)
+        sources.extend(
+            [
+                (f"https://www.google.com/search?q={q_enc}&num={num}&hl=en&gl=us&pws=0", "html"),
+                (f"https://search.yahoo.com/search?p={q_enc}&n={num}", "html"),
+                (f"https://html.duckduckgo.com/html/?q={q_enc}", None),
+            ]
+        )
     seen: set[str] = set()
     ids: list[str] = []
-    for url in sources:
-        got = await decodo_fetch.fetch_url(url, timeout=90.0, headless="html")
+    for url, headless in sources:
+        got = await decodo_fetch.fetch_url(url, timeout=90.0, headless=headless, geo="US")
         if not got:
             continue
         status, body = got
@@ -538,7 +554,7 @@ async def _search_event_ids_via_serp(q: str, *, limit: int = 40) -> list[str]:
                 break
         if len(ids) >= min(8, limit):
             break
-    log.info("facebook_events_serp_ids", q=q[:80], n=len(ids))
+    log.info("facebook_events_serp_ids", q=query[:80], n=len(ids))
     return ids
 
 

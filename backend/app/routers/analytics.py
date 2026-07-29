@@ -9,6 +9,7 @@ analytics dashboard or AI agent never has to special-case each network.
 from __future__ import annotations
 
 import asyncio
+from contextvars import ContextVar
 from typing import Any, Awaitable, Callable
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -16,6 +17,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
+
+# Stamped by per-platform fetchers so billed_call can set X-Captapi-Source.
+_analytics_source: ContextVar[str | None] = ContextVar("analytics_source", default=None)
+
+
+def _mark_source(source: str) -> None:
+    _analytics_source.set(source)
 from app.routers.bluesky import _normalize_post as _bs_normalize
 from app.routers.bluesky import _xrpc as _bs_xrpc
 from app.routers.facebook import _normalize_post as _fb_normalize
@@ -181,6 +189,7 @@ async def _fetch_youtube(url: str) -> dict[str, Any]:
     if video_id:
         native = await youtube_native.video_details_native(video_id, norm)
         if native and native.get("title"):
+            _mark_source("direct")
             return _youtube_analytics_row(native, norm=norm, video_id=video_id)
 
     settings = get_settings()
@@ -191,12 +200,14 @@ async def _fetch_youtube(url: str) -> dict[str, Any]:
     )
     if not items:
         raise HTTPException(status_code=404, detail="Video not found")
+    _mark_source("apify")
     return _youtube_analytics_row(items[0], norm=norm, video_id=video_id)
 
 
 async def _fetch_tiktok(url: str) -> dict[str, Any]:
     native = await tiktok_native.video_details_native(url)
     if native and native.get("id"):
+        _mark_source("direct")
         return native
     settings = get_settings()
     items = await get_apify().run_actor_sync(
@@ -206,6 +217,7 @@ async def _fetch_tiktok(url: str) -> dict[str, Any]:
     )
     if not items:
         raise HTTPException(status_code=404, detail="Video not found")
+    _mark_source("apify")
     return _tiktok_normalize(items[0])
 
 
@@ -214,6 +226,7 @@ async def _fetch_instagram(url: str) -> dict[str, Any]:
     if shortcode:
         native = await instagram_native.fetch_post_details(shortcode)
         if native and native.get("id"):
+            _mark_source("direct")
             return native
     settings = get_settings()
     items = await get_apify().run_actor_sync(
@@ -223,12 +236,14 @@ async def _fetch_instagram(url: str) -> dict[str, Any]:
     )
     if not items:
         raise HTTPException(status_code=404, detail="Post not found")
+    _mark_source("apify")
     return _ig_normalize(items[0])
 
 
 async def _fetch_facebook(url: str) -> dict[str, Any]:
     native = await facebook_details_native.details_native(url)
     if native:
+        _mark_source("direct")
         return _fb_normalize(native)
     settings = get_settings()
     items = await get_apify().run_actor_sync(
@@ -238,6 +253,7 @@ async def _fetch_facebook(url: str) -> dict[str, Any]:
     )
     if not items:
         raise HTTPException(status_code=404, detail="Post not found")
+    _mark_source("apify")
     return _fb_normalize(items[0])
 
 
@@ -246,6 +262,7 @@ async def _fetch_twitter(url: str) -> dict[str, Any]:
     if tweet_id:
         syn = await twitter_native.tweet_result(tweet_id)
         if syn:
+            _mark_source("direct")
             return _twitter_analytics_row(_tw_normalize(syn))
     settings = get_settings()
     items = await get_apify().run_actor_sync(
@@ -255,6 +272,7 @@ async def _fetch_twitter(url: str) -> dict[str, Any]:
     )
     if not items:
         raise HTTPException(status_code=404, detail="Tweet not found")
+    _mark_source("apify")
     return _twitter_analytics_row(_tw_normalize(items[0]))
 
 
@@ -262,6 +280,7 @@ async def _fetch_reddit(url: str) -> dict[str, Any]:
     try:
         post_id = _rd_require_post(url)
         post, _comments = await _rd_fetch_resilient(url, post_id, limit=1)
+        _mark_source("direct")
         return _reddit_analytics_row(_rd_normalize(post))
     except HTTPException:
         raise
@@ -276,12 +295,14 @@ async def _fetch_reddit(url: str) -> dict[str, Any]:
     posts = [i for i in items if not _rd_is_comment(i)]
     if not posts:
         raise HTTPException(status_code=404, detail="Post not found")
+    _mark_source("apify")
     return _reddit_analytics_row(_rd_normalize(posts[0]))
 
 
 async def _fetch_threads(url: str) -> dict[str, Any]:
     native = await threads_native.post_details(url)
     if native and native.get("code"):
+        _mark_source("direct")
         return _threads_analytics_row(_th_normalize(native))
     settings = get_settings()
     items = await get_apify().run_actor_sync(
@@ -291,6 +312,7 @@ async def _fetch_threads(url: str) -> dict[str, Any]:
     )
     if not items:
         raise HTTPException(status_code=404, detail="Post not found")
+    _mark_source("apify")
     return _threads_analytics_row(_th_normalize(items[0]))
 
 
@@ -312,6 +334,7 @@ async def _fetch_bluesky(url: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail="Post not found")
     n = _bs_normalize(posts[0])
     eng = n.get("engagement") or {}
+    _mark_source("direct")
     return {
         "platform": "bluesky",
         "url": url,
@@ -391,6 +414,7 @@ def _rumble_analytics_row(n: dict[str, Any]) -> dict[str, Any]:
 async def _fetch_linkedin(url: str) -> dict[str, Any]:
     native = await linkedin_native.fetch_post(url)
     if native:
+        _mark_source("direct")
         return _linkedin_analytics_row(_li_normalize(native))
     settings = get_settings()
     items = await get_apify().run_actor_sync(
@@ -400,6 +424,7 @@ async def _fetch_linkedin(url: str) -> dict[str, Any]:
     )
     if not items:
         raise HTTPException(status_code=404, detail="Post not found")
+    _mark_source("apify")
     return _linkedin_analytics_row(_li_normalize(items[0]))
 
 
@@ -408,6 +433,7 @@ async def _fetch_pinterest(url: str) -> dict[str, Any]:
     if pin_id:
         native = await pinterest_native.fetch_pin_info(pin_id)
         if native:
+            _mark_source("direct")
             return _pinterest_analytics_row(_pin_normalize(native))
     settings = get_settings()
     items = await get_apify().run_actor_sync(
@@ -417,6 +443,7 @@ async def _fetch_pinterest(url: str) -> dict[str, Any]:
     )
     if not items:
         raise HTTPException(status_code=404, detail="Pin not found")
+    _mark_source("apify")
     return _pinterest_analytics_row(_pin_normalize(items[0]))
 
 
@@ -424,6 +451,7 @@ async def _fetch_rumble(url: str) -> dict[str, Any]:
     native = await rumble_video_native.video_details_native(url)
     if native and native.get("title"):
         # Native already returns the router video shape.
+        _mark_source("direct")
         return _rumble_analytics_row(native)
     settings = get_settings()
     items = await get_apify().run_actor_sync(
@@ -433,6 +461,7 @@ async def _fetch_rumble(url: str) -> dict[str, Any]:
     )
     if not items:
         raise HTTPException(status_code=404, detail="Video not found")
+    _mark_source("apify")
     return _rumble_analytics_row(_rb_normalize(items[0]))
 
 
@@ -522,12 +551,14 @@ async def post_analytics(
         base_credits=CREDIT_POST_ANALYTICS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            _analytics_source.set(None)
             n = await _FETCHERS[platform](url)
+            ctx["source"] = _analytics_source.get() or "direct"
             return _unify(n)
 
         data = await cached_or_run(
             endpoint=f"analytics.post.{platform}",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             ttl=get_settings().CACHE_TTL_DYNAMIC,

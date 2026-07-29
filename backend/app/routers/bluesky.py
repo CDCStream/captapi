@@ -194,11 +194,12 @@ async def bluesky_profile(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             data = await _xrpc("app.bsky.actor.getProfile", {"actor": actor})
+            ctx["source"] = "direct"
             return _normalize_profile(data)
 
         result = await cached_or_run(
             endpoint="bluesky.profile",
-            params={"actor": actor, "v": 2},
+            params={"actor": actor, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
