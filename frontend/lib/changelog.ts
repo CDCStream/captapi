@@ -49,6 +49,20 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 /** Static mirror of the migration seed — used only when the table is unavailable. */
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
+    publishedAt: "2026-07-29",
+    category: "improvement",
+    title: "Cheaper pricing on native list and search endpoints",
+    description:
+      "Native-only list and search endpoints now bill a flat 2 credits per call instead of scaling per result. This covers YouTube comments, comment replies, channel videos, search, and channel playlists; TikTok top search and trending feed; Instagram hashtag search; Twitter/X user tweets and search; and Reddit subreddit posts, comments, transcript, search, and subreddit search. Apify-backed endpoints are unchanged.",
+    items: [
+      "YouTube comments, replies, channel videos, search, and playlists → flat 2 credits",
+      "TikTok top search and trending feed → flat 2 credits",
+      "Instagram hashtag search → flat 2 credits",
+      "Twitter/X user tweets and search → flat 2 credits",
+      "Reddit list, comments, transcript, and search endpoints → flat 2 credits",
+    ],
+  },
+  {
     publishedAt: "2026-07-17",
     category: "platform",
     title: "Retired media-download and privacy-workaround endpoints and tools",

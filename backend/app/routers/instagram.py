@@ -1488,13 +1488,13 @@ async def instagram_hashtag_search(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    cost = _scaled_credits(limit, RATE_IG_POSTS, CREDIT_SEARCH)
+    # Native/Decodo only — flat fee (no Apify fallthrough).
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/hashtag-search",
         platform="instagram",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_SEARCH,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             async def _decodo_run() -> dict[str, Any] | None:
@@ -1532,7 +1532,6 @@ async def instagram_hashtag_search(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_IG_POSTS, CREDIT_SEARCH)
         return ApiResponse(data=data)
 
 

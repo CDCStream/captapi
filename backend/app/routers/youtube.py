@@ -55,23 +55,20 @@ CREDIT_TRANSCRIPT = 1
 CREDIT_SUMMARIZE = 3
 CREDIT_VIDEO_DETAILS = 1
 CREDIT_CHANNEL_DETAILS = 1
+# Native InnerTube / RSS list endpoints (comments, search, channel-videos,
+# channel-playlists): ~$0–0.001 proxy cost → flat 2 keeps ~80%+ markup.
+CREDIT_YT_NATIVE_LIST = 2
 # Playlist pages + InnerTube continuations via datacenter proxy (~$0.001).
 # At $0.0045/credit with 120% markup → ~1 credit; bill 2 flat when native/RSS
 # succeeds. Apify fallback keeps RATE_YT_VIDEO per-result scale.
 CREDIT_YT_PLAYLIST_NATIVE = 2
 
-# YouTube list endpoints hit per-result Apify actors:
-#   streamers/youtube-scraper          $2.40/1k WITH an Apify sub ($5/1k without)
-#   streamers/youtube-comments-scraper $0.90/1k results (comments)
-# Rates target ~80% markup (rate = cost * 400) at the subscription price:
-#   videos:   1.0 * $0.0045 = $0.0045 vs $0.0024 -> ~88%. NOTE: requires the
-#             $29 Apify Starter sub; at the no-sub $5/1k it's break-even, so
-#             keep the subscription active.
-#   comments: 0.4 * $0.0045 = $0.0018 vs $0.0009 -> ~100%.
-# Charged via ctx["credits_override"] on the actual item count returned.
+# Per-result rates kept only for endpoints that still fall through to Apify
+# (channel-shorts/streams/hashtag, community-posts, playlist Apify path).
+#   streamers/youtube-scraper $2.40/1k → RATE_YT_VIDEO = 1.0 (~80% markup)
 RATE_YT_VIDEO = 1.0
 RATE_YT_MARGIN = 1.4
-RATE_YT_COMMENTS = 0.4
+RATE_YT_COMMENTS = 0.4  # legacy; comments/replies bill CREDIT_YT_NATIVE_LIST
 # Community posts use a third-party HTTP actor; cost not yet verified, so the
 # rate is conservative until confirmed in the Apify console.
 RATE_YT_COMMUNITY = 0.5
@@ -1018,14 +1015,13 @@ async def youtube_comments(
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, norm_url = _require_youtube_url(url)
-    cost = _scaled_credits(limit, RATE_YT_COMMENTS, 2)
 
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/comments",
         platform="youtube",
         resource_url=norm_url,
-        base_credits=cost,
+        base_credits=CREDIT_YT_NATIVE_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Native InnerTube only — Apify's streamers comments actor has no
@@ -1060,7 +1056,6 @@ async def youtube_comments(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["comments"]), RATE_YT_COMMENTS, 2)
         return ApiResponse(data=data)
 
 
@@ -1106,14 +1101,13 @@ async def youtube_channel_videos(
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = normalize_youtube_channel_url(url)
-    cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
 
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/channel-videos",
         platform="youtube",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_YT_NATIVE_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             if fast:
@@ -1141,7 +1135,6 @@ async def youtube_channel_videos(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["videos"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
 
 
@@ -1316,13 +1309,12 @@ async def youtube_search(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/search",
         platform="youtube",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_YT_NATIVE_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             native_results = await search_native(q, limit)
@@ -1341,7 +1333,6 @@ async def youtube_search(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
 
 
@@ -1614,13 +1605,12 @@ async def youtube_comment_replies(
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, norm_url = _require_youtube_url(url)
-    cost = _scaled_credits(limit, RATE_YT_COMMENTS, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/comment-replies",
         platform="youtube",
         resource_url=norm_url,
-        base_credits=cost,
+        base_credits=CREDIT_YT_NATIVE_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             native_replies = await comment_replies_native(norm_url, comment_id, limit)
@@ -1645,7 +1635,6 @@ async def youtube_comment_replies(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["replies"]), RATE_YT_COMMENTS, 2)
         return ApiResponse(data=data)
 
 
@@ -1658,13 +1647,12 @@ async def youtube_channel_playlists(
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = normalize_youtube_channel_url(url)
-    cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/channel-playlists",
         platform="youtube",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_YT_NATIVE_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # InnerTube browse + HTML. The SEARCH actor cannot read /playlists
@@ -1684,7 +1672,6 @@ async def youtube_channel_playlists(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["playlists"]), RATE_YT_VIDEO, 2)
         return ApiResponse(data=data)
 
 

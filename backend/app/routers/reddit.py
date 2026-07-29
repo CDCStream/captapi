@@ -5,7 +5,6 @@ Native-first via Reddit public JSON / OAuth; Decodo for blocked post fetches.
 
 from __future__ import annotations
 
-import math
 from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urlencode, urlparse
@@ -31,13 +30,8 @@ from app.utils.url import (
 router = APIRouter()
 
 CREDIT_DETAILS = 1
-RATE = 0.4
-
-
-def _scaled(n: int, rate: float, minimum: int) -> int:
-    if n <= 0:
-        return 0
-    return max(minimum, math.ceil(n * rate))
+# Native public JSON / OAuth / Decodo lists — flat 2 (Apify fallthrough removed).
+CREDIT_LIST = 2
 
 
 def _reject_reddit_platform_mismatch(value: str, example: str) -> None:
@@ -473,13 +467,12 @@ async def subreddit_posts(
     caller: ApiCaller = Depends(require_api_key),
 ):
     sub = _require_subreddit(url)
-    cost = _scaled(limit, RATE, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/reddit/subreddit-posts",
         platform="reddit",
         resource_url=f"https://www.reddit.com/r/{sub}",
-        base_credits=cost,
+        base_credits=CREDIT_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             posts, next_cursor = await _reddit_listing_json(
@@ -511,7 +504,6 @@ async def subreddit_posts(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled(len(data["posts"]), RATE, 2)
         return ApiResponse(data=data)
 
 
@@ -646,13 +638,12 @@ async def post_comments(
     caller: ApiCaller = Depends(require_api_key),
 ):
     post_id = _require_reddit_post_url(url)
-    cost = _scaled(limit, RATE, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/reddit/post-comments",
         platform="reddit",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             _, comments = await _fetch_reddit_post_resilient(url, post_id, limit=limit, ctx=ctx)
@@ -665,7 +656,6 @@ async def post_comments(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled(len(data["comments"]), RATE, 2)
         return ApiResponse(data=data)
 
 
@@ -677,19 +667,16 @@ async def post_transcript(
     caller: ApiCaller = Depends(require_api_key),
 ):
     post_id = _require_reddit_post_url(url)
-    cost = _scaled(max(limit, 1), RATE, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/reddit/post-transcript",
         platform="reddit",
         resource_url=url,
-        base_credits=cost,
+        base_credits=CREDIT_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             try:
-                # Resilient variant: falls back to the actor when Reddit's
-                # public JSON blocks the datacenter IP (as other reddit
-                # endpoints already do).
+                # Native JSON first; Decodo when Reddit blocks the datacenter IP.
                 post, comments = await _fetch_reddit_post_resilient(url, post_id, limit=max(limit, 1), ctx=ctx)
             except HTTPException as exc:
                 if exc.status_code in {502, 503, 504}:
@@ -737,7 +724,6 @@ async def post_transcript(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled(max(data.get("commentsIncluded", 0), 1), RATE, 2)
         return ApiResponse(data=data)
 
 
@@ -757,13 +743,12 @@ async def subreddit_search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     sub = _require_subreddit(url)
-    cost = _scaled(limit, RATE, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/reddit/subreddit-search",
         platform="reddit",
         resource_url=f"https://www.reddit.com/r/{sub}",
-        base_credits=cost,
+        base_credits=CREDIT_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             results, next_cursor = await _reddit_listing_json(
@@ -799,7 +784,6 @@ async def subreddit_search(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled(len(data["results"]), RATE, 2)
         return ApiResponse(data=data)
 
 
@@ -817,13 +801,12 @@ async def reddit_search(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    cost = _scaled(limit, RATE, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/reddit/search",
         platform="reddit",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             results, next_cursor = await _reddit_listing_json(
@@ -855,5 +838,4 @@ async def reddit_search(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled(len(data["results"]), RATE, 2)
         return ApiResponse(data=data)

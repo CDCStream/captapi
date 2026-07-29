@@ -1941,13 +1941,13 @@ async def tiktok_top_search(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    cost = _scaled_credits(limit, RATE_CHANNEL_POSTS, CREDIT_SEARCH)
+    # Native-only search — flat fee (same model as channel-posts).
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/top-search",
         platform="tiktok",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_SEARCH,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             native = await top_search_native(q, limit=limit)
@@ -1967,7 +1967,6 @@ async def tiktok_top_search(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_CHANNEL_POSTS, CREDIT_SEARCH)
         return ApiResponse(data=data)
 
 
@@ -2383,13 +2382,13 @@ async def tiktok_trending_feed(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    cost = _scaled_credits(limit, RATE_TREND, CREDIT_SEARCH)
+    # Native-only For You feed — flat fee.
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/trending-feed",
         platform="tiktok",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_SEARCH,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             native = await trending_feed_native(country.upper(), limit=limit)
@@ -2412,7 +2411,6 @@ async def tiktok_trending_feed(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_TREND, CREDIT_SEARCH)
         return ApiResponse(data=data)
 
 

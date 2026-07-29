@@ -32,8 +32,10 @@ router = APIRouter()
 
 CREDIT_TWEET_DETAILS = 1
 CREDIT_PROFILE = 1
-# apidojo tweet-scraper is billed per result (~$0.0004-0.0008/result). 0.7
-# credit/result keeps an ~80% markup at the $0.0045/credit sell price.
+# Native syndication/guest-token lists (user-tweets, search): flat 2.
+CREDIT_TWEET_LIST = 2
+# Community tweets still fall through to Apify; keep per-result rate.
+# apidojo tweet-scraper ~$0.0004-0.0008/result → 0.7 credit/result (~80% markup).
 RATE_TWEET = 0.7
 
 
@@ -481,13 +483,12 @@ async def twitter_user_tweets(
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_twitter_handle(url)
-    cost = _scaled_credits(limit, RATE_TWEET, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/twitter/user-tweets",
         platform="twitter",
         resource_url=f"https://x.com/{handle}",
-        base_credits=cost,
+        base_credits=CREDIT_TWEET_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Public syndication timeline embed (~20 recent posts, native-only).
@@ -505,7 +506,6 @@ async def twitter_user_tweets(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["tweets"]), RATE_TWEET, 2)
         return ApiResponse(data=data)
 
 
@@ -516,13 +516,12 @@ async def twitter_search(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    cost = _scaled_credits(limit, RATE_TWEET, 2)
     async with billed_call(
         caller=caller,
         endpoint="/v1/twitter/search",
         platform="twitter",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_TWEET_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Guest-token SearchTimeline (Top, native-only).
@@ -543,7 +542,6 @@ async def twitter_search(
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_TWEET, 2)
         return ApiResponse(data=data)
 
 
