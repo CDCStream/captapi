@@ -30,6 +30,8 @@ _OG_RE_ALT = re.compile(
     re.I,
 )
 _FOLLOWERS_RE = re.compile(r"([\d,.\s]+)\s+followers", re.I)
+_CONNECTIONS_RE = re.compile(r"([\d,.]+)\+?\s+connections?", re.I)
+_EXPERIENCE_RE = re.compile(r"Experience:\s*([^·\n|]{2,80})", re.I)
 _EMPLOYEES_RE = re.compile(r"([\d,.\s]+)\s+employees", re.I)
 _COMMENTS_OG_RE = re.compile(r"([\d,]+)\s+comments?", re.I)
 _ACTIVITY_RE = re.compile(r"activity[:-](\d{10,25})", re.I)
@@ -101,6 +103,42 @@ def _logo_url(org: dict[str, Any]) -> str | None:
     return safe_str(logo)
 
 
+def _unescape_html(value: str | None) -> str | None:
+    if not value:
+        return value
+    return (
+        value.replace("&amp;", "&")
+        .replace("&quot;", '"')
+        .replace("&#39;", "'")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+    )
+
+
+def _connections_from_text(*texts: str | None) -> int | None:
+    """Parse ``8 connections`` / ``500+ connections`` from OG / page copy."""
+    for text in texts:
+        m = _CONNECTIONS_RE.search(text or "")
+        if not m:
+            continue
+        n = _parse_count(m.group(1))
+        if n is not None:
+            return n
+    return None
+
+
+def _company_from_works_for(person: dict[str, Any]) -> str | None:
+    wf = person.get("worksFor")
+    items = wf if isinstance(wf, list) else ([wf] if isinstance(wf, dict) else [])
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        name = safe_str(item.get("name"))
+        if name:
+            return name.strip()
+    return None
+
+
 async def fetch_profile(slug: str) -> dict[str, Any] | None:
     """Public person profile → shape for ``_normalize_profile``."""
     handle = (slug or "").strip().strip("/")
@@ -115,17 +153,28 @@ async def fetch_profile(slug: str) -> dict[str, Any] | None:
         log.info("linkedin_native_profile_authwall", slug=handle)
         return None
 
+    # Prefer the richest Person node — many blocks only nest a thin
+    # ``author: {name, url}`` without worksFor / address / follower stats.
     person: dict[str, Any] = {}
+    best_score = -1
     for block in _ld_blocks(html):
         if not isinstance(block, dict):
             continue
+        candidates: list[dict[str, Any]] = []
+        if block.get("@type") == "Person":
+            candidates.append(block)
         author = block.get("author")
         if isinstance(author, dict) and author.get("@type") == "Person":
-            person = author
-            break
-        if block.get("@type") == "Person":
-            person = block
-            break
+            candidates.append(author)
+        for cand in candidates:
+            score = sum(
+                1
+                for key in ("worksFor", "address", "interactionStatistic", "jobTitle", "description")
+                if cand.get(key)
+            )
+            if score > best_score:
+                best_score = score
+                person = cand
 
     title = og.get("og:title") or ""
     # "Satya Nadella - Chairman and CEO at Microsoft | LinkedIn"
@@ -139,8 +188,9 @@ async def fetch_profile(slug: str) -> dict[str, Any] | None:
             headline = right.strip()
         else:
             name = name or core
-    about = og.get("og:description") or safe_str(person.get("description"))
-    followers_m = _FOLLOWERS_RE.search(html)
+    headline = _unescape_html(headline)
+    about = _unescape_html(og.get("og:description") or safe_str(person.get("description")))
+    followers_m = _FOLLOWERS_RE.search(about or "") or _FOLLOWERS_RE.search(html)
     # Best-effort extras from JSON-LD / title — omit when unknown (no fake data).
     location = None
     addr = person.get("address")
@@ -152,9 +202,13 @@ async def fetch_profile(slug: str) -> dict[str, Any] | None:
         )
     elif isinstance(addr, str):
         location = safe_str(addr)
-    current_company = None
-    if headline and " at " in headline:
+    current_company = _company_from_works_for(person)
+    if not current_company and headline and " at " in headline:
         current_company = safe_str(headline.rsplit(" at ", 1)[-1])
+    if not current_company and about:
+        exp = _EXPERIENCE_RE.search(about)
+        if exp:
+            current_company = safe_str(exp.group(1).strip())
 
     out = {
         "url": safe_str(person.get("url")) or url.rstrip("/"),
@@ -166,10 +220,20 @@ async def fetch_profile(slug: str) -> dict[str, Any] | None:
             "about": about,
             "location": location,
             "current_company": current_company,
+            "connection_count": _connections_from_text(about, html),
             "follower_count": _parse_count(followers_m.group(1) if followers_m else None),
             "profile_picture_url": og.get("og:image"),
         },
     }
+    # Prefer JSON-LD FollowAction count when the HTML "followers" scrape is tiny/wrong.
+    stats = person.get("interactionStatistic")
+    if isinstance(stats, dict) and "FollowAction" in str(stats.get("interactionType") or ""):
+        ld_followers = safe_int(stats.get("userInteractionCount"))
+        if ld_followers is not None and (
+            out["basic_info"]["follower_count"] is None
+            or ld_followers > (out["basic_info"]["follower_count"] or 0)
+        ):
+            out["basic_info"]["follower_count"] = ld_followers
     if not out["basic_info"]["fullname"]:
         return None
     log.info("linkedin_native_profile_ok", slug=handle)

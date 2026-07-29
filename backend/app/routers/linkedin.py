@@ -82,7 +82,7 @@ def _normalize_profile(p: dict[str, Any]) -> dict[str, Any]:
     location = info.get("location")
     if isinstance(location, dict):
         location = location.get("full") or location.get("city") or location.get("country")
-    verified = info.get("is_verified")
+    # Public HTML never exposes a reliable verified flag — omit the field.
     return {
         "platform": "linkedin",
         "type": "person",
@@ -95,7 +95,6 @@ def _normalize_profile(p: dict[str, Any]) -> dict[str, Any]:
         "about": safe_str(info.get("about") or p.get("summary")),
         "followers": safe_int(info.get("follower_count") or p.get("followers") or p.get("followerCount")),
         "connections": safe_int(info.get("connection_count") or p.get("connections") or p.get("connectionsCount")),
-        "verified": verified if isinstance(verified, bool) else None,
         "profileImage": safe_str(
             info.get("profile_picture_url") or p.get("profilePicture") or p.get("photoUrl") or p.get("avatar")
         ),
@@ -261,7 +260,7 @@ async def linkedin_profile(
 
         data = await cached_or_run(
             endpoint="linkedin.profile",
-            params={"slug": slug, "v": 3},
+            params={"slug": slug, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
