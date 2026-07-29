@@ -1222,13 +1222,33 @@ def _comments_section_token(data: Any) -> str | None:
 
 
 def _comments_total(data: Any) -> int | None:
-    """Best-effort total from commentsHeaderRenderer count text."""
+    """Best-effort total from comments header / engagement panel."""
     for header in walk_find(data, "commentsHeaderRenderer"):
         for key in ("countText", "commentsCount", "headerText"):
             n = parse_count_text(text_of(header.get(key)))
             if n is not None:
                 return n
+    # Current InnerTube ``next`` shape: engagementPanelTitleHeaderRenderer
+    # with title "Comments" and contextualInfo like "2.4M" / "10M".
+    for header in walk_find(data, "engagementPanelTitleHeaderRenderer"):
+        title = (text_of(header.get("title")) or "").strip().lower()
+        if title and title not in ("comments", "comment"):
+            continue
+        for key in ("contextualInfo", "subtitle", "countText", "headerText"):
+            n = parse_count_text(text_of(header.get(key)))
+            if n is not None:
+                return n
     return None
+
+
+async def comment_count_native(video_id: str) -> int | None:
+    """Resolve comment count via InnerTube ``next`` engagement panel."""
+    if not video_id:
+        return None
+    boot = await innertube("next", {"videoId": video_id}, timeout=15)
+    if boot is None:
+        return None
+    return _comments_total(boot)
 
 
 async def _comments_entry_token(norm_url: str) -> tuple[str | None, int | None]:

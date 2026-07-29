@@ -26,6 +26,7 @@ from app.services.youtube_native import (
     channel_details_native,
     channel_playlists_native,
     channel_tab_native,
+    comment_count_native,
     comment_replies_native,
     comments_native,
     community_posts_native,
@@ -838,6 +839,17 @@ _COMMENT_COUNT_RES = (
     re.compile(r'"commentCount"\s*:\s*\{\s*"simpleText"\s*:\s*"([\d.,]+[KMB]?)"', re.I),
     re.compile(r'"contextOnTapCommand"[^]]*?"(\d[\d.,]*[KMB]?)\s+Comments"', re.I),
     re.compile(r'content="([\d.,]+[KMB]?)\s+Comments"', re.I),
+    # engagementPanelTitleHeaderRenderer.contextualInfo runs (when HTML has it)
+    re.compile(
+        r'"title"\s*:\s*\{\s*"simpleText"\s*:\s*"Comments"\s*\}.{0,400}?'
+        r'"contextualInfo"\s*:\s*\{\s*"runs"\s*:\s*\[\s*\{\s*"text"\s*:\s*"([\d.,]+[KMB]?)"',
+        re.I | re.S,
+    ),
+    re.compile(
+        r'"contextualInfo"\s*:\s*\{\s*"runs"\s*:\s*\[\s*\{\s*"text"\s*:\s*"([\d.,]+[KMB]?)"'
+        r'.{0,200}?"title"\s*:\s*\{\s*"simpleText"\s*:\s*"Comments"',
+        re.I | re.S,
+    ),
 )
 
 
@@ -905,7 +917,6 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
         or not android.get("genre")
         or android.get("likeCount") is None
         or android.get("publishedAt") is None
-        or android.get("commentCount") is None
     )
     player, html = await _watch_player_response(norm_url) if need_page else (None, "")
     genre, tags = _genre_tags_from_player(player)
@@ -929,9 +940,13 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
             out["publishedAt"] = safe_str(micro.get("publishDate") or micro.get("uploadDate"))
         if out.get("commentCount") is None and html:
             out["commentCount"] = _parse_comment_count(html)
+        if out.get("commentCount") is None:
+            out["commentCount"] = await comment_count_native(vid)
         return out
 
     if player is None:
+        if isinstance(android, dict) and android.get("commentCount") is None:
+            android = {**android, "commentCount": await comment_count_native(vid)}
         return android
 
     details = player.get("videoDetails") or {}
@@ -945,6 +960,9 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
         except (TypeError, ValueError):
             duration_seconds = None
     channel_id = safe_str(details.get("channelId"))
+    comment_count = _parse_comment_count(html) if html else None
+    if comment_count is None:
+        comment_count = await comment_count_native(vid)
 
     return {
         "url": norm_url,
@@ -959,7 +977,7 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
         "durationFormatted": _format_duration(duration_seconds),
         "viewCount": safe_int(details.get("viewCount")),
         "likeCount": _parse_like_count(html) if html else None,
-        "commentCount": _parse_comment_count(html) if html else None,
+        "commentCount": comment_count,
         "thumbnailUrl": safe_str(thumbs[-1].get("url")) if thumbs else None,
         "genre": genre,
         "tags": tags,
