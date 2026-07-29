@@ -126,7 +126,8 @@ def _normalize_product(
 
     # Mode-specific omissions for fields the upstream actor never returns.
     include_description = not search_mode and not catalog_mode and not details_mode and not showcase_mode
-    include_rating_reviews = not search_mode and not details_mode and not showcase_mode
+    # Details now hydrates product rating from PDP review_model; still omit on search/showcase.
+    include_rating_reviews = not search_mode and not showcase_mode
     include_stock = not search_mode and not catalog_mode and not showcase_mode
     include_seller_rating = not search_mode and not catalog_mode and not showcase_mode
     include_list_pricing = not details_mode and not showcase_mode  # originalPrice / discount

@@ -11073,17 +11073,19 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "tiktok-shop-product-details": {
     "platform": "tiktok_shop",
-    "id": "1731743608991158724",
-    "url": "https://shop.tiktok.com/us/pdp/magsafe-magnetic-acrylic-case-for-iphone-17-12-series/1731743608991158724?source=product_detail&amp;enter_method=url_semantic_301",
-    "title": "MagSafe Military Grade Clear Case for iPhone 17 Pro Max",
-    "price": null,
+    "id": "1731098552908944370",
+    "url": "https://shop.tiktok.com/us/pdp/trendy-pink-ed-hardy-tough-phone-cases-impact-resistant-wireless-charging-shock-absorption/1731098552908944370?source=product_detail&amp;enter_method=url_semantic_301",
+    "title": "Trendy Pink Ed Hardy Inspired Tough Phone Cases, Phone Durable, Gift, Accessories Top Trendy Phone Cases Phone Cover Hard Case Tough 2-piece Phone Case",
+    "price": 10.3,
     "currency": "USD",
-    "sold": 189217,
-    "stock": null,
-    "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/99ec732d36e840219ad5ea1db2706843~tplv-fhlh96nyum-crop-webp:765:765.webp?dr=12190&amp;t=555f072d&amp;ps=933b5bde&amp;shp=8dbd94bf&amp;shcp=607f11de&amp;idc=useast5&amp;from=2378011839",
+    "rating": 4.6,
+    "reviews": 48,
+    "sold": 1488,
+    "stock": 2693,
+    "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/cc79ccfd6a324d548de31cb761b6c3c4~tplv-fhlh96nyum-crop-webp:794:794.webp?dr=12190&amp;t=555f072d&amp;ps=933b5bde&amp;shp=8dbd94bf&amp;shcp=e1be8f53&amp;idc=useast5&amp;from=2378011839",
     "seller": {
-      "name": "comittok",
-      "rating": null
+      "name": "Timeless Teapot Creations",
+      "rating": 4.6
     }
   },
   "tiktok-shop-product-reviews": {

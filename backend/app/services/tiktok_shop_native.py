@@ -487,6 +487,41 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
     if dm:
         discount = dm.group(1).strip() or None
 
+    # Sum unique SKU warehouse quantities (HTML often repeats the sku list).
+    stock: int | None = None
+    sku_qty: dict[str, int] = {}
+    for sid, qty in re.findall(
+        r'"sku_id"\s*:\s*"(\d+)".{0,800}?"available_quantity"\s*:\s*(\d+)',
+        html,
+        re.S,
+    ):
+        sku_qty[sid] = int(qty)
+    if sku_qty:
+        stock = sum(sku_qty.values())
+
+    # Product star score; treat 0 + zero reviews as unknown.
+    rating: float | None = None
+    score_m = re.search(r'"product_overall_score"\s*:\s*([0-9.]+)', html)
+    if score_m:
+        try:
+            rating = float(score_m.group(1))
+        except ValueError:
+            rating = None
+    review_count = None
+    rc_m = re.search(r'"product_review_count"\s*:\s*"?(\d+)"?', html)
+    if rc_m:
+        review_count = int(rc_m.group(1))
+    if rating == 0 and not review_count:
+        rating = None
+
+    shop_rating = None
+    sr_m = re.search(r'"shop_rating"\s*:\s*"([0-9.]+)"', html)
+    if sr_m:
+        try:
+            shop_rating = float(sr_m.group(1))
+        except ValueError:
+            shop_rating = sr_m.group(1)
+
     if not title and not image:
         return None
     # Captcha / WAF interstitial — treat as miss so search can skip.
@@ -504,6 +539,8 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
             )
         else:
             seller["url"] = f"https://www.tiktok.com/shop/store/{seller_id}"
+    if shop_rating is not None:
+        seller["rating"] = shop_rating
 
     out = {
         "id": product_id,
@@ -516,6 +553,9 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
         "currency": currency,
         "discount": discount,
         "sold": sold,
+        "stock": stock,
+        "rating": rating,
+        "reviewCount": review_count,
         "image": image,
         "seller": seller,
     }
@@ -524,6 +564,8 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
         product_id=product_id,
         has_price=price is not None,
         has_original=original_price is not None,
+        has_stock=stock is not None,
+        has_rating=rating is not None,
     )
     return out
 
