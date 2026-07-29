@@ -270,7 +270,6 @@ async def main() -> None:
             "fb_page_posts": actor(
                 settings.APIFY_ACTOR_FACEBOOK_POSTS, {"startUrls": [{"url": FB_PAGE_URL}], "resultsLimit": 12}, 12
             ),
-            "fb_page": actor(settings.APIFY_ACTOR_FACEBOOK_PAGES, {"startUrls": [{"url": FB_PAGE_URL}]}, 1),
             "fb_comments": actor(
                 settings.APIFY_ACTOR_FACEBOOK_COMMENTS, {"startUrls": [{"url": FB_POST_URL}], "resultsLimit": 10}, 10
             ),

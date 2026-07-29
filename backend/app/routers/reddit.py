@@ -1,7 +1,6 @@
 """Reddit endpoints (subreddit posts, post details, comments, search).
 
-Backed by the trudax "Reddit Scraper Lite" actor (config-driven slug). The
-actor returns mixed post/comment items; we split them by ``dataType``.
+Native-first via Reddit public JSON / OAuth; Decodo for blocked post fetches.
 """
 
 from __future__ import annotations
@@ -19,7 +18,6 @@ from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services import decodo_fetch
-from app.services.apify_client import ApifyClient, get_apify
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import first_present, safe_int, safe_str
@@ -297,89 +295,6 @@ def _epoch_to_iso(value: Any) -> Any:
 # an actor. The two actors run back-to-back in the resilient cascade; with the
 # global 120s sync timeout a deleted/blocked post could burn ~250s before
 # failing (measured). Cap each actor so the whole cascade stays well under a
-# typical client timeout, while still allowing genuinely large comment threads
-# (~70s observed) to finish.
-_REDDIT_ACTOR_TIMEOUT = 75.0
-
-
-def _reddit_actor_client() -> ApifyClient:
-    return ApifyClient(timeout=_REDDIT_ACTOR_TIMEOUT, max_attempts=1)
-
-
-async def _fetch_reddit_comments_actor_post(url: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    """Post + comment tree via the clearpath actor: real scores, parentId,
-    depth, and permalinks — everything the trudax lite actor drops."""
-    settings = get_settings()
-    items = await _reddit_actor_client().run_actor_sync(
-        settings.APIFY_ACTOR_REDDIT_COMMENTS,
-        {"postUrl": url, "maxCommentsPerPost": max(limit, 1), "sort": "top"},
-        max_items=max(limit, 1) + 1,
-    )
-    post_raw = next(
-        (i for i in items if isinstance(i, dict) and i.get("_type") != "comment" and i.get("title") is not None),
-        None,
-    )
-    comment_raws = [i for i in items if isinstance(i, dict) and i.get("_type") == "comment"]
-    if not post_raw and not comment_raws:
-        raise HTTPException(status_code=404, detail="Post not found")
-    post_raw = post_raw or {}
-    post = _normalize_post(
-        {
-            "id": post_raw.get("id") or post_raw.get("_post_id"),
-            "url": f"https://www.reddit.com{post_raw.get('permalink')}" if post_raw.get("permalink") else post_raw.get("url") or url,
-            "title": post_raw.get("title"),
-            "body": post_raw.get("selftext"),
-            "subreddit": post_raw.get("subreddit"),
-            "author": post_raw.get("author"),
-            "score": post_raw.get("score") or post_raw.get("ups"),
-            "numComments": post_raw.get("num_comments") or post_raw.get("commentCount"),
-            "created": _epoch_to_iso(post_raw.get("created_utc")),
-            "flair": post_raw.get("link_flair_text"),
-            "nsfw": post_raw.get("over_18"),
-            "thumbnail": post_raw.get("thumbnail"),
-        }
-    )
-    comments = [
-        _normalize_comment(
-            {
-                "id": raw.get("id"),
-                "author": raw.get("author"),
-                "body": raw.get("body"),
-                "score": raw.get("score"),
-                "createdAt": raw.get("createdAt"),
-                "url": f"https://www.reddit.com{raw.get('permalink')}" if raw.get("permalink") else None,
-                "parentId": raw.get("parentId"),
-                "depth": raw.get("depth"),
-                "isSubmitter": raw.get("isSubmitter"),
-                "edited": bool(raw.get("editedAt")),
-                "stickied": raw.get("isStickied"),
-            }
-        )
-        for raw in comment_raws[:limit]
-    ]
-    return post, comments
-
-
-async def _fetch_reddit_actor_post(url: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    settings = get_settings()
-    items = await _reddit_actor_client().run_actor_sync(
-        settings.APIFY_ACTOR_REDDIT,
-        {
-            "startUrls": [{"url": url}],
-            "type": "posts",
-            "maxItems": max(limit, 1),
-        },
-        max_items=max(limit, 1),
-    )
-    post_items = [i for i in items if not _is_comment(i)]
-    comment_items = [i for i in items if _is_comment(i)]
-    if not post_items and not comment_items:
-        raise HTTPException(status_code=404, detail="Post not found")
-    post = _normalize_post(post_items[0] if post_items else items[0])
-    comments = [_normalize_comment(c) for c in comment_items[:limit]]
-    return post, comments
-
-
 async def _reddit_post_exists_decodo(post_id: str) -> bool | None:
     """Authoritative existence probe via ``api/info.json`` through Decodo
     (~3s measured). Returns None when the probe itself failed.
@@ -449,28 +364,10 @@ async def _fetch_reddit_post_resilient(
         except HTTPException as exc:
             if exc.status_code not in {502, 503, 504}:
                 raise
-    try:
-        result = await _fetch_reddit_comments_actor_post(url, limit)
-        if ctx is not None:
-            ctx["source"] = "apify"
-        return result
-    except Exception:  # noqa: BLE001 — any failure falls through to trudax
-        pass
-    # Final fallback: the lite actor. Single bounded attempt — the previous
-    # retry-with-sleep stacked another ~120s onto already-slow deleted-post
-    # cascades for no real gain (both actors fail the same way on a dead post).
-    try:
-        result = await _fetch_reddit_actor_post(url, limit)
-        if ctx is not None:
-            ctx["source"] = "apify"
-        return result
-    except HTTPException:
-        raise
-    except Exception as exc:  # noqa: BLE001
-        raise HTTPException(
-            status_code=502,
-            detail=f"Reddit upstream error, please retry ({str(exc)[:120]})",
-        ) from exc
+    raise HTTPException(
+        status_code=502,
+        detail="Reddit upstream error, please retry",
+    )
 
 
 async def _reddit_listing_json(
@@ -561,20 +458,6 @@ async def _reddit_listing_json(
     return [], None
 
 
-async def _reddit_search_actor(query: str, limit: int) -> list[dict[str, Any]]:
-    """Score-rich actor fallback for listing endpoints (see config)."""
-    settings = get_settings()
-    try:
-        items = await get_apify().run_actor_sync(
-            settings.APIFY_ACTOR_REDDIT_SEARCH,
-            {"queries": [query], "maxItems": limit},
-            max_items=limit,
-        )
-    except Exception:  # noqa: BLE001 — fall through to the trudax actor
-        return []
-    return [_normalize_post(i) for i in items if _is_post(i)][:limit]
-
-
 @router.get("/subreddit-posts", summary="List recent posts in a subreddit (cursor-paginated)")
 async def subreddit_posts(
     url: str = Query(..., description="Subreddit URL, r/name, or bare name"),
@@ -590,7 +473,6 @@ async def subreddit_posts(
     caller: ApiCaller = Depends(require_api_key),
 ):
     sub = _require_subreddit(url)
-    settings = get_settings()
     cost = _scaled(limit, RATE, 2)
     async with billed_call(
         caller=caller,
@@ -605,37 +487,22 @@ async def subreddit_posts(
             )
             if posts:
                 ctx["source"] = "direct"
-            # Apify actors are not cursor-based — only serve the first page.
-            if not posts and cursor:
+                return {
+                    "subreddit": sub,
+                    "totalReturned": len(posts),
+                    "nextCursor": next_cursor,
+                    "hasMore": bool(next_cursor),
+                    "posts": posts,
+                }
+            if cursor:
                 raise HTTPException(
                     status_code=400,
                     detail="Cursor pagination is only available on the native Reddit feed. Start a new request without cursor.",
                 )
-            if not posts:
-                posts = await _reddit_search_actor(f"r/{sub}", limit)
-                if posts:
-                    ctx["source"] = "apify"
-            if not posts:
-                apify = get_apify()
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_REDDIT,
-                    {
-                        "startUrls": [{"url": f"https://www.reddit.com/r/{sub}/"}],
-                        "type": "posts",
-                        "sort": "new",
-                        "maxItems": limit,
-                    },
-                    max_items=limit,
-                )
-                posts = [_normalize_post(i) for i in items if _is_post(i)][:limit]
-                ctx["source"] = "apify"
-            return {
-                "subreddit": sub,
-                "totalReturned": len(posts),
-                "nextCursor": next_cursor if ctx.get("source") == "direct" else None,
-                "hasMore": bool(next_cursor) if ctx.get("source") == "direct" else False,
-                "posts": posts,
-            }
+            raise HTTPException(
+                status_code=502,
+                detail="Subreddit feed temporarily unavailable",
+            )
 
         data = await cached_or_run(
             endpoint="reddit.subreddit-posts",
@@ -646,31 +513,6 @@ async def subreddit_posts(
         )
         ctx["credits_override"] = _scaled(len(data["posts"]), RATE, 2)
         return ApiResponse(data=data)
-
-
-def _normalize_community(item: dict[str, Any]) -> dict[str, Any]:
-    """Map a community-profile actor record to our response shape."""
-    name = item.get("name") or item.get("display_name")
-    return {
-        "platform": "reddit",
-        "name": safe_str(name),
-        "url": (f"https://www.reddit.com/r/{name}" if name else None),
-        "title": safe_str(item.get("title")),
-        "description": safe_str(
-            item.get("about")
-            or item.get("public_description")
-            or item.get("description")
-        ),
-        "members": safe_int(item.get("subscribers")),
-        "activeUsers": safe_int(item.get("accounts_active") or item.get("active_user_count")),
-        "category": safe_str(item.get("category") or item.get("advertiser_category")),
-        "language": safe_str(item.get("language")),
-        "type": safe_str(item.get("type") or item.get("subreddit_type")),
-        "createdAt": safe_str(item.get("created") or item.get("created_utc")),
-        "nsfw": bool(item.get("over_18") or item.get("over18")),
-        "icon": safe_str(item.get("icon") or item.get("community_icon")),
-        "banner": safe_str(item.get("banner") or item.get("banner_background_image")),
-    }
 
 
 def _clean_reddit_image(value: Any) -> str | None:
@@ -743,7 +585,6 @@ async def subreddit_details(
     caller: ApiCaller = Depends(require_api_key),
 ):
     sub = _require_subreddit(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/reddit/subreddit-details",
@@ -752,26 +593,12 @@ async def subreddit_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Primary: public about.json (no actor cost, ~1s).
+            # Native-only: public about.json (~1s).
             native = await _subreddit_details_native(sub)
             if native is not None:
                 ctx["source"] = "direct"
                 return native
-
-            # Fallback: Apify community actor.
-            apify = get_apify()
-            try:
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_REDDIT_COMMUNITY,
-                    {"community": sub},
-                    max_items=1,
-                )
-            except Exception as exc:  # noqa: BLE001
-                raise HTTPException(status_code=502, detail="Subreddit lookup failed upstream") from exc
-            if not items or not (items[0].get("name") or items[0].get("subscribers")):
-                raise HTTPException(status_code=404, detail="Subreddit not found")
-            ctx["source"] = "apify"
-            return _normalize_community(items[0])
+            raise HTTPException(status_code=404, detail="Subreddit not found")
 
         data = await cached_or_run(
             endpoint="reddit.subreddit-details",
@@ -930,7 +757,6 @@ async def subreddit_search(
     caller: ApiCaller = Depends(require_api_key),
 ):
     sub = _require_subreddit(url)
-    settings = get_settings()
     cost = _scaled(limit, RATE, 2)
     async with billed_call(
         caller=caller,
@@ -948,38 +774,23 @@ async def subreddit_search(
             )
             if results:
                 ctx["source"] = "direct"
-            if not results and cursor:
+                return {
+                    "subreddit": sub,
+                    "query": q,
+                    "totalReturned": len(results),
+                    "nextCursor": next_cursor,
+                    "hasMore": bool(next_cursor),
+                    "results": results,
+                }
+            if cursor:
                 raise HTTPException(
                     status_code=400,
                     detail="Cursor pagination is only available on the native Reddit search. Start a new request without cursor.",
                 )
-            if not results:
-                results = await _reddit_search_actor(f"r/{sub} {q}", limit)
-                if results:
-                    ctx["source"] = "apify"
-            if not results:
-                apify = get_apify()
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_REDDIT,
-                    {
-                        "searches": [q],
-                        "searchCommunityName": sub,
-                        "type": "posts",
-                        "sort": "relevance",
-                        "maxItems": limit,
-                    },
-                    max_items=limit,
-                )
-                results = [_normalize_post(i) for i in items if _is_post(i)][:limit]
-                ctx["source"] = "apify"
-            return {
-                "subreddit": sub,
-                "query": q,
-                "totalReturned": len(results),
-                "nextCursor": next_cursor if ctx.get("source") == "direct" else None,
-                "hasMore": bool(next_cursor) if ctx.get("source") == "direct" else False,
-                "results": results,
-            }
+            raise HTTPException(
+                status_code=502,
+                detail="Subreddit search temporarily unavailable",
+            )
 
         data = await cached_or_run(
             endpoint="reddit.subreddit-search",
@@ -1006,7 +817,6 @@ async def reddit_search(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    settings = get_settings()
     cost = _scaled(limit, RATE, 2)
     async with billed_call(
         caller=caller,
@@ -1021,31 +831,22 @@ async def reddit_search(
             )
             if results:
                 ctx["source"] = "direct"
-            if not results and cursor:
+                return {
+                    "query": q,
+                    "totalReturned": len(results),
+                    "nextCursor": next_cursor,
+                    "hasMore": bool(next_cursor),
+                    "results": results,
+                }
+            if cursor:
                 raise HTTPException(
                     status_code=400,
                     detail="Cursor pagination is only available on the native Reddit search. Start a new request without cursor.",
                 )
-            if not results:
-                results = await _reddit_search_actor(q, limit)
-                if results:
-                    ctx["source"] = "apify"
-            if not results:
-                apify = get_apify()
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_REDDIT,
-                    {"searches": [q], "type": "posts", "sort": "relevance", "maxItems": limit},
-                    max_items=limit,
-                )
-                results = [_normalize_post(i) for i in items if _is_post(i)][:limit]
-                ctx["source"] = "apify"
-            return {
-                "query": q,
-                "totalReturned": len(results),
-                "nextCursor": next_cursor if ctx.get("source") == "direct" else None,
-                "hasMore": bool(next_cursor) if ctx.get("source") == "direct" else False,
-                "results": results,
-            }
+            raise HTTPException(
+                status_code=502,
+                detail="Reddit search temporarily unavailable",
+            )
 
         data = await cached_or_run(
             endpoint="reddit.search",

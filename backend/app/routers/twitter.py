@@ -354,7 +354,6 @@ async def twitter_tweet_details(
     caller: ApiCaller = Depends(require_api_key),
 ):
     tweet_id = _require_tweet_url(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/twitter/tweet-details",
@@ -363,21 +362,12 @@ async def twitter_tweet_details(
         base_credits=CREDIT_TWEET_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Free public syndication first (same path as /transcript).
+            # Free public syndication (native-only).
             syn = await native.tweet_result(tweet_id)
             if syn:
                 ctx["source"] = "direct"
                 return _normalize_tweet(syn)
-
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_TWITTER_TWEET,
-                {"startUrls": [url], "maxItems": 1},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Tweet not found")
-            ctx["source"] = "apify"
-            return _normalize_tweet(items[0])
+            raise HTTPException(status_code=404, detail="Tweet not found")
 
         data = await cached_or_run(
             endpoint="twitter.tweet-details",
@@ -396,7 +386,6 @@ async def twitter_transcript(
     caller: ApiCaller = Depends(require_api_key),
 ):
     tweet_id = _require_tweet_url(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/twitter/transcript",
@@ -418,8 +407,7 @@ async def twitter_transcript(
             }
 
         async def _run() -> dict[str, Any]:
-            # Transcript is text-only, so the free public syndication API is a
-            # perfect fit; only fall back to the paid actor if it misses.
+            # Transcript is text-only via free public syndication (native-only).
             syn = await native.tweet_result(tweet_id)
             if syn:
                 text = (syn.get("text") or "").strip()
@@ -434,20 +422,11 @@ async def twitter_transcript(
                         u,
                         safe_str(syn.get("created_at")),
                     )
-
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_TWITTER_TWEET,
-                {"startUrls": [url], "maxItems": 1},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Tweet not found")
-            tweet = _normalize_tweet(items[0])
-            text = (tweet.get("text") or "").strip()
-            if not text:
-                raise HTTPException(status_code=422, detail="No transcript text available for this tweet")
-            ctx["source"] = "apify"
-            return _payload(text, tweet.get("url") or url, tweet.get("id"), tweet.get("author"), tweet.get("publishedAt"))
+                raise HTTPException(
+                    status_code=422,
+                    detail="No transcript text available for this tweet",
+                )
+            raise HTTPException(status_code=404, detail="Tweet not found")
 
         data = await cached_or_run(
             endpoint="twitter.transcript",
@@ -466,7 +445,6 @@ async def twitter_profile(
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_twitter_handle(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/twitter/profile",
@@ -475,21 +453,12 @@ async def twitter_profile(
         base_credits=CREDIT_PROFILE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Public profile HTML microdata first (direct → Decodo).
+            # Public profile HTML microdata (native-only).
             native_profile = await native.profile_by_handle(handle)
             if native_profile:
                 ctx["source"] = "direct"
                 return _normalize_profile(native_profile)
-
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_TWITTER_PROFILE,
-                {"twitterHandles": [handle], "startUrls": [f"https://x.com/{handle}"], "maxItems": 1},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Profile not found")
-            ctx["source"] = "apify"
-            return _normalize_profile(items[0])
+            raise HTTPException(status_code=404, detail="Profile not found")
 
         data = await cached_or_run(
             endpoint="twitter.profile",
@@ -512,7 +481,6 @@ async def twitter_user_tweets(
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_twitter_handle(url)
-    settings = get_settings()
     cost = _scaled_credits(limit, RATE_TWEET, 2)
     async with billed_call(
         caller=caller,
@@ -522,24 +490,13 @@ async def twitter_user_tweets(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Public syndication timeline embed first (~20 recent posts).
+            # Public syndication timeline embed (~20 recent posts, native-only).
             native_items = await native.user_tweets(handle, limit=limit)
             if native_items:
                 ctx["source"] = "direct"
                 tweets = [_normalize_tweet(t) for t in native_items[:limit]]
                 return {"handle": handle, "totalReturned": len(tweets), "tweets": tweets}
-
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TWITTER_TWEET,
-                {"twitterHandles": [handle], "maxItems": limit, "sort": "Latest"},
-                max_items=limit,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="No tweets found")
-            ctx["source"] = "apify"
-            tweets = [_normalize_tweet(t) for t in items[:limit]]
-            return {"handle": handle, "totalReturned": len(tweets), "tweets": tweets}
+            raise HTTPException(status_code=404, detail="No tweets found")
 
         data = await cached_or_run(
             endpoint="twitter.user-tweets",
@@ -559,7 +516,6 @@ async def twitter_search(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    settings = get_settings()
     cost = _scaled_credits(limit, RATE_TWEET, 2)
     async with billed_call(
         caller=caller,
@@ -569,24 +525,16 @@ async def twitter_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Guest-token SearchTimeline first (Top, matches prior Apify sort).
+            # Guest-token SearchTimeline (Top, native-only).
             native_items = await native.search(q, limit=limit, product="Top")
             if native_items:
                 ctx["source"] = "direct"
                 results = [_normalize_tweet(t) for t in native_items[:limit]]
                 return {"query": q, "totalReturned": len(results), "results": results}
-
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TWITTER_TWEET,
-                {"searchTerms": [q], "maxItems": limit, "sort": "Top"},
-                max_items=limit,
+            raise HTTPException(
+                status_code=502,
+                detail="Twitter search temporarily unavailable",
             )
-            if not items:
-                raise HTTPException(status_code=404, detail="No tweets found")
-            ctx["source"] = "apify"
-            results = [_normalize_tweet(t) for t in items[:limit]]
-            return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="twitter.search",

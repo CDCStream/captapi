@@ -479,7 +479,6 @@ async def instagram_details(
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_instagram_post_url(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/details",
@@ -488,52 +487,14 @@ async def instagram_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Primary: Instagram's own GraphQL (~3-4s, no actor cost). Same
-            # upstream numbers as the actor; actor stays as fallback.
+            # Native-only: Instagram's own GraphQL (~3-4s).
             shortcode = extract_instagram_shortcode(url)
             if shortcode:
                 native = await instagram_native.fetch_post_details(shortcode)
                 if native:
                     ctx["source"] = "direct"
                     return native
-
-            apify = get_apify()
-            try:
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_INSTAGRAM_POST,
-                    {"directUrls": [url], "resultsLimit": 1},
-                    max_items=1,
-                )
-            except (ApifyError, httpx.HTTPError):
-                items = []
-            if not items:
-                meta = await _public_instagram_meta(url)
-                if meta:
-                    return {
-                        "platform": "instagram",
-                        "url": meta["url"] or url,
-                        "id": extract_instagram_shortcode(url) or "",
-                        "caption": meta["description"],
-                        "description": meta["description"],
-                        "publishedAt": "",
-                        "durationSeconds": 0,
-                        "thumbnailUrl": meta["image"],
-                        "videoUrl": "",
-                        "author": {"username": "", "displayName": meta["title"], "url": None, "verified": None, "profileImage": ""},
-                        "engagement": {"likes": 0, "comments": 0},
-                        "hashtags": [],
-                    }
-            if not items:
-                raise HTTPException(status_code=404, detail="Post not found")
-            ctx["source"] = "apify"
-            data = _normalize_post(items[0])
-            # Shape parity with the native result: `followers` isn't reliably
-            # available on a post lookup and `views` is hidden for clips, so
-            # neither is part of this endpoint (use channel-details for
-            # followers).
-            data["author"].pop("followers", None)
-            data["engagement"].pop("views", None)
-            return decodo.strip_null_post_fields(data)
+            raise HTTPException(status_code=404, detail="Post not found")
 
         data = await cached_or_run(
             endpoint="instagram.details",
@@ -746,7 +707,6 @@ async def instagram_channel_details(
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/channel-details",
@@ -755,60 +715,20 @@ async def instagram_channel_details(
         base_credits=CREDIT_CHANNEL,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Native first (same web_profile_info as basic-profile), then Decodo, then Apify/meta.
+            # Native first (same web_profile_info as basic-profile), then Decodo.
             user, missing = await instagram_native.lookup_web_profile_info(handle)
             if user is not None:
                 ctx["source"] = "direct"
                 return instagram_native.map_channel_details(user, handle=handle)
             # Dead / renamed handles: Instagram already said "Profile isn't available".
-            # Don't burn Apify credits reconstructing a stub.
             if missing:
                 raise HTTPException(status_code=404, detail="Profile not found")
-
-            async def _apify() -> dict[str, Any]:
-                apify = get_apify()
-                try:
-                    items = await apify.run_actor_sync(
-                        settings.APIFY_ACTOR_INSTAGRAM_PROFILE,
-                        {"usernames": [handle]},
-                        max_items=1,
-                    )
-                except (ApifyError, httpx.HTTPError):
-                    items = []
-                if not items:
-                    meta = await _public_instagram_meta(f"https://www.instagram.com/{handle}/")
-                    if not meta:
-                        raise HTTPException(status_code=404, detail="Profile not found")
-                    return {
-                        "platform": "instagram",
-                        "url": meta["url"] or f"https://instagram.com/{handle}",
-                        "username": handle,
-                        "displayName": meta["title"],
-                        "bio": meta["description"],
-                        "followers": 0,
-                        "following": 0,
-                        "postCount": 0,
-                        "verified": False,
-                        "profileImage": meta["image"],
-                        "externalUrl": "",
-                    }
-                p = items[0]
-                verified = p.get("verified")
-                return {
-                    "platform": "instagram",
-                    "url": f"https://instagram.com/{handle}",
-                    "username": safe_str(p.get("username") or handle),
-                    "displayName": safe_str(p.get("fullName")),
-                    "bio": safe_str(p.get("biography")),
-                    "followers": safe_int(p.get("followersCount")),
-                    "following": safe_int(p.get("followsCount")),
-                    "postCount": safe_int(p.get("postsCount")),
-                    "verified": False if verified is None else bool(verified),
-                    "profileImage": safe_str(p.get("profilePicUrl") or p.get("profilePicUrlHD")),
-                    "externalUrl": safe_str(p.get("externalUrl")) or "",
-                }
-
-            return await _try_decodo(ctx, lambda: decodo.channel_details(handle), _apify)
+            if decodo.enabled():
+                result = await decodo.channel_details(handle)
+                if result is not None:
+                    ctx["source"] = "direct"
+                    return result
+            raise HTTPException(status_code=404, detail="Profile not found")
 
         data = await cached_or_run(
             endpoint="instagram.channel-details",
@@ -1568,7 +1488,6 @@ async def instagram_hashtag_search(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    settings = get_settings()
     cost = _scaled_credits(limit, RATE_IG_POSTS, CREDIT_SEARCH)
     async with billed_call(
         caller=caller,
@@ -1578,15 +1497,6 @@ async def instagram_hashtag_search(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            async def _apify() -> dict[str, Any]:
-                apify = get_apify()
-                items, _actor = await apify.run_with_fallback(
-                    _instagram_hashtag_candidates(settings, q.lstrip("#"), limit, "posts"),
-                    max_items=limit,
-                )
-                results = [decodo.strip_null_post_fields(_normalize_post(i)) for i in items[:limit] if not i.get("error")]
-                return {"query": q, "totalReturned": len(results), "results": results}
-
             async def _decodo_run() -> dict[str, Any] | None:
                 results = await decodo.hashtag_medias(q, limit, reels_only=False)
                 if results is None:
@@ -1606,17 +1516,14 @@ async def instagram_hashtag_search(
                 if gql is not None:
                     ctx["source"] = "direct"
                     return gql
-                hydrated = await _headless_hydrate()
-                if hydrated is not None:
-                    ctx["source"] = "direct"
-                    return hydrated
-            else:
-                hydrated = await _headless_hydrate()
-                if hydrated is not None:
-                    ctx["source"] = "direct"
-                    return hydrated
-            ctx["source"] = "apify"
-            return await _apify()
+            hydrated = await _headless_hydrate()
+            if hydrated is not None:
+                ctx["source"] = "direct"
+                return hydrated
+            raise HTTPException(
+                status_code=502,
+                detail="Instagram hashtag search temporarily unavailable",
+            )
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",

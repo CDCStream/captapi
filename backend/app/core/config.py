@@ -41,16 +41,10 @@ class Settings(BaseSettings):
     APIFY_ACTOR_YT_TRANSCRIPT_1: str = "scrape-creators/best-youtube-transcripts-scraper"
     APIFY_ACTOR_YT_TRANSCRIPT_2: str = "automation-lab/youtube-transcript"
     APIFY_ACTOR_YOUTUBE_VIDEO: str = "streamers/youtube-scraper"
-    APIFY_ACTOR_YOUTUBE_COMMENTS: str = "streamers/youtube-comments-scraper"
     APIFY_ACTOR_YOUTUBE_SEARCH: str = "streamers/youtube-scraper"
     APIFY_ACTOR_YOUTUBE_PLAYLIST: str = "powerai/youtube-playlist-videos-scraper"
     APIFY_ACTOR_YOUTUBE_PLAYLIST_FALLBACK: str = "streamers/youtube-scraper"
     APIFY_ACTOR_YOUTUBE_CHANNEL: str = "streamers/youtube-channel-scraper"
-    APIFY_ACTOR_YOUTUBE_DOWNLOAD: str = "api-ninja/youtube-video-downloader"
-    # Fallback downloader (used only if the primary returns no link), so a
-    # single downloader outage doesn't break /video-download. Slower (~2min)
-    # but high-volume/reliable; returns discrete file URLs.
-    APIFY_ACTOR_YOUTUBE_DOWNLOAD_FALLBACK: str = "streamers/youtube-video-downloader"
 
     APIFY_ACTOR_TIKTOK: str = "clockworks/tiktok-scraper"
     # TikTok /transcript no longer uses Apify (native WebVTT → Whisper only).
@@ -75,9 +69,6 @@ class Settings(BaseSettings):
     # latter stays as the music-posts actor and a song-details fallback.
     APIFY_ACTOR_TIKTOK_SONG: str = "apidojo/tiktok-music-scraper"
     APIFY_ACTOR_TIKTOK_SONG_FAST_FALLBACK: str = "coregent/tiktok-sound-music-scraper"
-    # Trending (For You) video feed by region. HTTP-only, cheap pay-per-result.
-    # `content_type` ("video") + `country_code`.
-    APIFY_ACTOR_TIKTOK_TRENDING: str = "xtracto/tiktok-trending-scraper"
     # Popular/trending hashtag entity discovery. Pay-per-result ($1.60/1k),
     # no monthly rent. Input: searchQueries + includeHashtags.
     APIFY_ACTOR_TIKTOK_TREND_DISCOVERY: str = "coregent/tiktok-trend-discovery-scraper"
@@ -89,7 +80,6 @@ class Settings(BaseSettings):
     # last-resort fallbacks.
     APIFY_ACTOR_TIKTOK_POPULAR_CREATORS: str = "automation-lab/tiktok-trends-scraper"
     APIFY_ACTOR_TIKTOK_POPULAR_CREATORS_FALLBACK: str = "burbn/tiktok-trending-creators"
-    APIFY_ACTOR_TIKTOK_AUDIENCE: str = ""
 
     # spry_headset/instagram-page-post-scraper was disabled by its author
     # (every run now fails), so the official Apify scraper is primary and the
@@ -98,7 +88,6 @@ class Settings(BaseSettings):
     APIFY_ACTOR_INSTAGRAM_FALLBACK: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_REEL: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_REEL_FALLBACK: str = "apify/instagram-scraper"
-    APIFY_ACTOR_INSTAGRAM_PROFILE: str = "apify/instagram-profile-scraper"
     APIFY_ACTOR_INSTAGRAM_POST: str = "apify/instagram-scraper"
     APIFY_ACTOR_INSTAGRAM_COMMENT: str = "apify/instagram-comment-scraper"
     # Primary transcript actor: mature (2.4k users, 99.6% success), Whisper
@@ -117,8 +106,6 @@ class Settings(BaseSettings):
     # Dedicated reels-by-audio scraper (input: audioUrls). The generic
     # apify/instagram-scraper does not reliably resolve audio pages.
     APIFY_ACTOR_INSTAGRAM_AUDIO: str = "kinaesthetic_millionaire/instagram-reels-audio-scraper"
-    # Story highlights (list + expanded items). Input: `usernames`.
-    APIFY_ACTOR_INSTAGRAM_HIGHLIGHTS: str = "goat255/instagram-stories-highlights-scraper"
     APIFY_ACTOR_INSTAGRAM_TRENDING: str = "agentx/instagram-trending-scraper"
 
     # Decodo Social Media Scraping API — managed Instagram GraphQL scraping.
@@ -141,57 +128,25 @@ class Settings(BaseSettings):
     IG_SESSION_ID: str = ""
 
     APIFY_ACTOR_FACEBOOK_POSTS: str = "apify/facebook-posts-scraper"
-    APIFY_ACTOR_FACEBOOK_PAGES: str = "apify/facebook-pages-scraper"
     APIFY_ACTOR_FACEBOOK_COMMENTS: str = "apify/facebook-comments-scraper"
-    # Reels are filtered out of the official posts scraper's feed (no separate
-    # reels actor needed -> trusted, no full-permission grant, no monthly rent).
-    APIFY_ACTOR_FACEBOOK_REELS: str = "apify/facebook-posts-scraper"
-    APIFY_ACTOR_FACEBOOK_GROUPS: str = "apify/facebook-groups-scraper"
-    # Marketplace: keyword + location search (no login). Input: queries +
-    # locationName (or lat/lng) + fetchItemDetails. Events: official Apify
-    # actor; input: searchQueries / startUrls + maxEvents.
-    APIFY_ACTOR_FACEBOOK_MARKETPLACE: str = "unseenuser/fb-marketplace"
-    # Single-listing details by listingId (the search actor above has no
-    # per-item mode). Returns FB's raw GraphQL listing entity.
-    APIFY_ACTOR_FACEBOOK_MARKETPLACE_ITEM: str = "data-slayer/facebook-marketplace-details"
+    # Events: official Apify actor; input: searchQueries / startUrls + maxEvents.
+    # Page/group/marketplace/photos routes are native-only (no Apify fallthrough).
     APIFY_ACTOR_FACEBOOK_EVENTS: str = "apify/facebook-events-scraper"
     APIFY_ACTOR_FACEBOOK_EVENT_DETAILS: str = "crawlerbros/facebook-events-scraper"
-    APIFY_ACTOR_FACEBOOK_PHOTOS: str = "apify/facebook-photos-scraper"
 
     # YouTube community ("posts") tab. alpha-scraper is the cheapest rental
     # ($7.50/mo). Input: startUrls/usernames + maxposts.
     APIFY_ACTOR_YOUTUBE_COMMUNITY: str = "alpha-scraper/youtube-community-posts-scraper"
-    APIFY_ACTOR_YOUTUBE_TRENDING: str = "app.tanalytics/youtube-trending-videos"
     APIFY_ACTOR_YOUTUBE_SHORTS: str = "khadinakbar/youtube-shorts-scraper"
 
     # Twitter / X. apidojo "Tweet Scraper V2" handles tweets by URL, search
     # terms, and per-handle timelines (input: startUrls / searchTerms /
     # twitterHandles + maxItems). The user-scraper returns profile metadata.
     APIFY_ACTOR_TWITTER_TWEET: str = "apidojo/tweet-scraper"
-    APIFY_ACTOR_TWITTER_PROFILE: str = "apidojo/twitter-user-scraper"
     APIFY_ACTOR_TWITTER_COMMUNITY: str = "scrape.badger/twitter-community-scraper"
 
-    # Reddit. trudax "Reddit Scraper Lite" handles subreddit URLs, post URLs
-    # (with comments), and keyword search (input: startUrls / searches + type +
-    # maxItems). Slug is config-driven so it can be swapped without code edits.
+    # Reddit analytics / rare Apify post fetch (routers are native-only).
     APIFY_ACTOR_REDDIT: str = "trudax/reddit-scraper-lite"
-
-    # Score-rich post search (input: {"queries": ["keyword" | "r/sub" |
-    # "r/sub keyword"], "maxItems": n}). Unlike the trudax lite actor its rows
-    # include score / num_comments / over_18 / created_utc, so the listing
-    # endpoints prefer it when Reddit public JSON is unavailable.
-    APIFY_ACTOR_REDDIT_SEARCH: str = "fatihtahta/reddit-scraper-search-fast"
-
-    # Subreddit community profile (members, description, title, rules, flags).
-    # Input: {"community": "<name>"}. The trudax lite actor returns empty
-    # communities, so subreddit-details uses this dedicated profiler instead.
-    APIFY_ACTOR_REDDIT_COMMUNITY: str = "truefetch/reddit-community-profile"
-
-    # Post + full comment tree with real scores, threading (parentId/depth),
-    # and permalinks (input: {"postUrl", "maxCommentsPerPost", "sort"}). Used
-    # when Reddit's public JSON blocks our IPs, before the sparser trudax
-    # fallback which lacks comment scores entirely.
-    APIFY_ACTOR_REDDIT_COMMENTS: str = "clearpath/reddit-post-comments-bulk-scraper"
 
     # Threads (Meta). User media actor accepts username + maxPosts; post media
     # actor accepts direct post links.
@@ -257,12 +212,10 @@ class Settings(BaseSettings):
 
     # Public ad libraries. Kept separate because each platform has a different
     # public transparency surface and actor input schema.
-    APIFY_ACTOR_FACEBOOK_AD_LIBRARY: str = "scrapemint/facebook-ads-library-scraper"
     APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2: str = "apify/facebook-ads-scraper"
     APIFY_ACTOR_TIKTOK_AD_LIBRARY: str = "brilliant_gum/tiktok-ads-library-scraper"
     APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL: str = "jy-labs/tiktok-ad-library-fast-search"
     APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL_FALLBACK: str = "prodiger/tiktok-ads-library-scraper"
-    APIFY_ACTOR_GOOGLE_AD_LIBRARY: str = "automation-lab/google-ads-scraper"
     APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2: str = "unseenuser/google-ads"
     APIFY_ACTOR_LINKEDIN_AD_LIBRARY: str = "s-r/linkedin-ads-library"
     APIFY_ACTOR_LINKEDIN_AD_LIBRARY_DETAIL: str = "elliotpadfield/linkedin-ad-library-scraper"

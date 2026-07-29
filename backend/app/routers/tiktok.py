@@ -665,7 +665,6 @@ async def tiktok_video_details(
     caller: ApiCaller = Depends(require_api_key),
 ):
     _require_tiktok_video_url(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/video-details",
@@ -674,28 +673,12 @@ async def tiktok_video_details(
         base_credits=CREDIT_VIDEO_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Primary: parse the video page's embedded JSON (no actor cost, ~2s).
+            # Native-only: parse the video page's embedded JSON (~2s).
             native = await video_details_native(url)
             if native is not None and native["engagement"].get("views") is not None:
                 ctx["source"] = "direct"
                 return native
-
-            apify = get_apify()
-            try:
-                items = await apify.run_actor_sync(
-                    settings.APIFY_ACTOR_TIKTOK,
-                    {"postURLs": [url], "resultsPerPage": 1, "shouldDownloadVideos": False},
-                    max_items=1,
-                )
-            except ApifyError:
-                # Missing/private videos often surface as actor errors; treat as
-                # not-found rather than bubbling a 502/500 to the client.
-                raise HTTPException(status_code=404, detail="Video not found") from None
-            item = items[0] if items and isinstance(items[0], dict) else None
-            if not item or not (item.get("id") or item.get("videoId") or item.get("webVideoUrl")):
-                raise HTTPException(status_code=404, detail="Video not found")
-            ctx["source"] = "apify"
-            return _normalize(item)
+            raise HTTPException(status_code=404, detail="Video not found")
 
         data = await cached_or_run(
             endpoint="tiktok.video-details",
@@ -1024,7 +1007,6 @@ async def tiktok_channel_details(
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/channel-details",
@@ -1033,45 +1015,12 @@ async def tiktok_channel_details(
         base_credits=CREDIT_CHANNEL_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Primary: parse the profile page's embedded JSON (no actor cost).
+            # Native-only: parse the profile page's embedded JSON.
             native = await channel_details_native(handle, url)
             if native is not None and native.get("followers") is not None:
                 ctx["source"] = "direct"
                 return native
-
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_PROFILE,
-                {"profiles": [handle], "resultsPerPage": 1},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Profile not found")
-            ctx["source"] = "apify"
-            p = items[0]
-            # The profile scraper emits video items with the profile nested
-            # under `authorMeta`; older actor versions exposed it at top level.
-            a = p.get("authorMeta") or p
-            stats = p.get("authorStats") or p.get("stats") or {}
-            bio_link = a.get("bioLink")
-            if isinstance(bio_link, dict):
-                bio_link = bio_link.get("link")
-            return {
-                "platform": "tiktok",
-                "url": safe_str(a.get("profileUrl")) or url,
-                "username": safe_str(a.get("name") or a.get("uniqueId") or handle),
-                "displayName": safe_str(a.get("nickName") or a.get("nickname")),
-                "bio": safe_str(a.get("signature") or a.get("bio")),
-                "followers": safe_int(a.get("fans") or stats.get("followerCount")),
-                "following": safe_int(a.get("following") or stats.get("followingCount")),
-                "likes": safe_int(a.get("heart") or stats.get("heartCount")),
-                "postCount": safe_int(a.get("video") or stats.get("videoCount")),
-                "verified": a.get("verified"),
-                "private": a.get("privateAccount"),
-                "profileImage": safe_str(a.get("avatar") or a.get("avatarLarger") or a.get("originalAvatarUrl")),
-                "externalUrl": safe_str(bio_link),
-                "category": safe_str((a.get("commerceUserInfo") or {}).get("category")),
-            }
+            raise HTTPException(status_code=404, detail="Profile not found")
 
         data = await cached_or_run(
             endpoint="tiktok.channel-details",
@@ -1635,9 +1584,7 @@ async def tiktok_channel_posts(
             status_code=400,
             detail="Invalid cursor. Pass the nextCursor value from a previous response.",
         )
-    settings = get_settings()
-    # Flat fee: native path is ~$0; Apify first-page fallback is rare and
-    # covered by the same 2-credit charge (same model as comments).
+    # Flat fee: native path is ~$0 (same model as comments).
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/channel-posts",
@@ -1662,32 +1609,11 @@ async def tiktok_channel_posts(
                     "hasMore": next_cursor is not None,
                 }
 
-            # Apify actor is not cursor-based — only the first page can fall
-            # back. Deeper pages need a clean native exit; ask the client to
-            # retry shortly (same pattern as /comments).
-            if cursor:
-                raise HTTPException(
-                    status_code=502,
-                    detail="Failed to fetch the next page. Retry shortly.",
-                )
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK,
-                {"profiles": [handle], "resultsPerPage": limit, "shouldDownloadVideos": False},
-                max_items=limit,
+            # Native-only feed (including first page). Ask the client to retry.
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to fetch channel posts. Retry shortly.",
             )
-            posts = [_normalize(i) for i in items[:limit]]
-            for p in posts:
-                p.pop("videoUrl", None)
-            ctx["source"] = "apify"
-            return {
-                "url": url,
-                "totalReturned": len(posts),
-                "posts": posts,
-                "nextCursor": None,
-                "hasMore": None,
-                "degraded": True,
-            }
 
         data = await cached_or_run(
             endpoint="tiktok.channel-posts",
@@ -2015,7 +1941,6 @@ async def tiktok_top_search(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    settings = get_settings()
     cost = _scaled_credits(limit, RATE_CHANNEL_POSTS, CREDIT_SEARCH)
     async with billed_call(
         caller=caller,
@@ -2030,16 +1955,10 @@ async def tiktok_top_search(
                 results = [strip_empty(p) for p in native]
                 ctx["source"] = "direct"
                 return {"query": q, "totalReturned": len(results), "results": results}
-
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK,
-                {"searchQueries": [q], "searchSection": "", "resultsPerPage": limit},
-                max_items=limit,
+            raise HTTPException(
+                status_code=502,
+                detail="TikTok search temporarily unavailable",
             )
-            results = [_normalize(i) for i in items[:limit]]
-            ctx["source"] = "apify"
-            return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="tiktok.top-search",
@@ -2457,36 +2376,6 @@ async def tiktok_song_details(
         return ApiResponse(data=data)
 
 
-def _normalize_trend_video(v: dict) -> dict:
-    """Map an xtracto trending video row (TikTok Explore API shape).
-
-    Rows look like ``{id, desc, author:{uniqueId,nickname}, stats:{...},
-    video:{cover,playAddr}, _rank}`` — close to the clockworks shape but with
-    no top-level webVideoUrl, so we build the URL from author + id.
-    """
-    author = v.get("author") or {}
-    stats = v.get("stats") or {}
-    video = v.get("video") or {}
-    uid = author.get("uniqueId") or author.get("unique_id")
-    vid = v.get("id") or v.get("videoId")
-    url = v.get("webVideoUrl") or v.get("url")
-    if not url and uid and vid:
-        url = f"https://www.tiktok.com/@{uid}/video/{vid}"
-    return {
-        "url": safe_str(url),
-        "id": safe_str(vid),
-        "title": safe_str(v.get("desc") or v.get("title") or v.get("text")),
-        "coverUrl": safe_str(video.get("cover") or v.get("cover")),
-        "author": safe_str(uid),
-        "authorName": safe_str(author.get("nickname") or author.get("nickName")),
-        "views": safe_int(stats.get("playCount") or v.get("playCount")),
-        "likes": safe_int(stats.get("diggCount") or v.get("diggCount")),
-        "comments": safe_int(stats.get("commentCount") or v.get("commentCount")),
-        "shares": safe_int(stats.get("shareCount") or v.get("shareCount")),
-        "rank": safe_int(v.get("_rank") or v.get("rank")),
-    }
-
-
 @router.get("/trending-feed", summary="TikTok trending (For You) videos by region")
 async def tiktok_trending_feed(
     country: str = Query("US", min_length=2, max_length=2, description="ISO country code"),
@@ -2494,7 +2383,6 @@ async def tiktok_trending_feed(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    settings = get_settings()
     cost = _scaled_credits(limit, RATE_TREND, CREDIT_SEARCH)
     async with billed_call(
         caller=caller,
@@ -2512,16 +2400,10 @@ async def tiktok_trending_feed(
                     "totalReturned": len(native),
                     "results": native,
                 }
-
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_TIKTOK_TRENDING,
-                {"content_type": "video", "country_code": country.upper(), "limit": limit},
-                max_items=limit,
+            raise HTTPException(
+                status_code=502,
+                detail="TikTok trending feed temporarily unavailable",
             )
-            results = [_normalize_trend_video(v) for v in items[:limit]]
-            ctx["source"] = "apify"
-            return {"country": country.upper(), "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="tiktok.trending-feed",

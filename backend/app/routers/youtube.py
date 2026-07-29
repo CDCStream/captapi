@@ -976,7 +976,6 @@ async def youtube_video_details(
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, norm_url = _require_youtube_url(url)
-    settings = get_settings()
 
     async with billed_call(
         caller=caller,
@@ -986,57 +985,12 @@ async def youtube_video_details(
         base_credits=CREDIT_VIDEO_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Primary: parse the watch page ourselves (no actor cost, ~1-2s).
+            # Native-only: parse the watch page (~1-2s).
             native = await _video_details_native(vid, norm_url)
             if native is not None and native.get("viewCount") is not None:
                 ctx["source"] = "direct"
                 return native
-
-            # Fallback: Apify actor (also fills likeCount/commentCount).
-            apify = get_apify()
-            run_input = {"startUrls": [{"url": norm_url}], "maxResults": 1}
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_YOUTUBE_VIDEO, run_input, max_items=1
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Video not found")
-            v = items[0]
-            ctx["source"] = "apify"
-            duration_seconds = _duration_seconds(
-                v.get("duration")
-                if v.get("duration") is not None
-                else v.get("durationSeconds") or v.get("lengthSeconds")
-            )
-            if duration_seconds is None:
-                ms = safe_int(v.get("durationMs"))
-                duration_seconds = int(ms / 1000) if ms else None
-            genre = safe_str(v.get("genre") or v.get("category") or v.get("categoryName"))
-            tags = safe_list(v.get("tags") or v.get("keywords") or v.get("hashtags"))
-            # Actor often omits category; watch-page microformat still has it.
-            if not genre:
-                player, _ = await _watch_player_response(norm_url)
-                page_genre, page_tags = _genre_tags_from_player(player)
-                genre = page_genre
-                if not tags and page_tags:
-                    tags = page_tags
-            return {
-                "url": norm_url,
-                "id": vid,
-                "title": safe_str(v.get("title")) or "",
-                "description": safe_str(v.get("description") or v.get("text")),
-                "channelName": safe_str(v.get("channelName") or v.get("channel")),
-                "channelId": safe_str(v.get("channelId") or v.get("authorId")),
-                "channelUrl": safe_str(v.get("channelUrl")),
-                "publishedAt": safe_str(v.get("date") or v.get("publishedAt")),
-                "durationSeconds": duration_seconds,
-                "durationFormatted": _format_duration(duration_seconds),
-                "viewCount": safe_int(v.get("viewCount") or v.get("views")),
-                "likeCount": safe_int(v.get("likes") or v.get("likeCount")),
-                "commentCount": safe_int(v.get("commentsCount") or v.get("commentCount")),
-                "thumbnailUrl": safe_str(v.get("thumbnailUrl") or (v.get("thumbnails") or [{}])[-1].get("url")),
-                "genre": genre,
-                "tags": tags,
-            }
+            raise HTTPException(status_code=404, detail="Video not found")
 
         data = await cached_or_run(
             endpoint="youtube.video-details",
@@ -1118,7 +1072,6 @@ async def youtube_channel_details(
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = normalize_youtube_channel_url(url)
-    settings = get_settings()
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/channel-details",
@@ -1131,38 +1084,7 @@ async def youtube_channel_details(
             if native and native.get("id"):
                 ctx["source"] = "direct"
                 return native
-
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_YOUTUBE_CHANNEL,
-                {"startUrls": [{"url": url}]},
-                max_items=1,
-            )
-            if not items:
-                raise HTTPException(status_code=404, detail="Channel not found")
-            c = items[0]
-            ctx["source"] = "apify"
-            links = [
-                {"text": safe_str(link.get("text")), "url": safe_str(link.get("url"))}
-                for link in safe_list(c.get("channelDescriptionLinks"))
-                if isinstance(link, dict) and link.get("url")
-            ]
-            return {
-                "url": safe_str(c.get("channelUrl")) or url,
-                "id": safe_str(c.get("channelId") or c.get("id")),
-                "name": safe_str(c.get("channelName") or c.get("name")) or "",
-                "handle": safe_str(c.get("channelUsername")),
-                "description": safe_str(c.get("channelDescription") or c.get("description")),
-                "subscriberCount": safe_int(c.get("subscriberCount") or c.get("numberOfSubscribers")),
-                "videoCount": safe_int(c.get("channelTotalVideos") or c.get("videosCount") or c.get("videoCount")),
-                "viewCount": safe_int(c.get("channelTotalViews") or c.get("viewCount") or c.get("totalViews")),
-                "thumbnailUrl": safe_str(c.get("channelAvatarUrl") or c.get("avatarUrl") or c.get("thumbnailUrl")),
-                "bannerUrl": safe_str(c.get("channelBannerUrl") or c.get("bannerUrl")),
-                "country": safe_str(c.get("channelLocation") or c.get("country")),
-                "joinedDate": safe_str(c.get("channelJoinedDate")),
-                "verified": c.get("isChannelVerified"),
-                "links": links,
-            }
+            raise HTTPException(status_code=404, detail="Channel not found")
 
         data = await cached_or_run(
             endpoint="youtube.channel-details",
@@ -1184,7 +1106,6 @@ async def youtube_channel_videos(
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = normalize_youtube_channel_url(url)
-    settings = get_settings()
     cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
 
     async with billed_call(
@@ -1206,32 +1127,12 @@ async def youtube_channel_videos(
             if native_videos:
                 ctx["source"] = "direct"
                 return {"url": url, "totalReturned": len(native_videos), "videos": native_videos}
-            # RSS before Apify — thinner metadata but beats $2.40/1k scraper.
+            # RSS fallback — thinner metadata, no Apify.
             feed_videos = await _youtube_channel_feed(url, limit)
             if feed_videos:
                 ctx["source"] = "direct"
                 return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
-
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_YOUTUBE_SEARCH,
-                {"startUrls": [{"url": url}], "maxResults": limit},
-                max_items=limit,
-            )
-            videos = []
-            for v in items[:limit]:
-                videos.append(
-                    {
-                        "url": safe_str(v.get("url") or v.get("videoUrl")),
-                        "title": safe_str(v.get("title")) or "",
-                        "publishedAt": safe_str(v.get("date") or v.get("publishedAt")),
-                        "viewCount": safe_int(v.get("viewCount") or v.get("views")),
-                        "durationSeconds": _duration_seconds(v.get("duration") or v.get("lengthSeconds")),
-                        "thumbnailUrl": safe_str(v.get("thumbnailUrl")),
-                    }
-                )
-            ctx["source"] = "apify"
-            return {"url": url, "totalReturned": len(videos), "videos": videos}
+            raise HTTPException(status_code=404, detail="No videos found")
 
         data = await cached_or_run(
             endpoint="youtube.channel-videos",
@@ -1415,7 +1316,6 @@ async def youtube_search(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    settings = get_settings()
     cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
     async with billed_call(
         caller=caller,
@@ -1429,28 +1329,10 @@ async def youtube_search(
             if native_results:
                 ctx["source"] = "direct"
                 return {"query": q, "totalReturned": len(native_results), "results": native_results}
-
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_YOUTUBE_SEARCH,
-                {"searchQueries": [q], "maxResults": limit, "maxResultsShorts": 0},
-                max_items=limit,
+            raise HTTPException(
+                status_code=502,
+                detail="YouTube search temporarily unavailable",
             )
-            results = []
-            for v in items[:limit]:
-                results.append(
-                    {
-                        "url": safe_str(v.get("url") or v.get("videoUrl")),
-                        "title": safe_str(v.get("title")) or "",
-                        "channelName": safe_str(v.get("channelName") or v.get("channel")),
-                        "viewCount": safe_int(v.get("viewCount") or v.get("views")),
-                        "publishedAt": safe_str(v.get("date") or v.get("publishedAt")),
-                        "thumbnailUrl": safe_str(v.get("thumbnailUrl")),
-                        "durationSeconds": _duration_seconds(v.get("duration") or v.get("lengthSeconds")),
-                    }
-                )
-            ctx["source"] = "apify"
-            return {"query": q, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             endpoint="youtube.search",
@@ -1732,7 +1614,6 @@ async def youtube_comment_replies(
     caller: ApiCaller = Depends(require_api_key),
 ):
     vid, norm_url = _require_youtube_url(url)
-    settings = get_settings()
     cost = _scaled_credits(limit, RATE_YT_COMMENTS, 2)
     async with billed_call(
         caller=caller,
@@ -1752,33 +1633,10 @@ async def youtube_comment_replies(
                     "totalReturned": len(native_replies),
                     "replies": native_replies,
                 }
-
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_YOUTUBE_COMMENTS,
-                {"startUrls": [{"url": norm_url}], "maxComments": limit * 4, "includeReplies": True},
-                max_items=limit * 4,
+            raise HTTPException(
+                status_code=502,
+                detail="Failed to fetch comment replies. Retry shortly.",
             )
-            replies = []
-            for c in items:
-                parent = safe_str(c.get("replyToCid") or c.get("parentCommentId") or c.get("replyTo"))
-                nested = c.get("replies")
-                # Some actors nest replies inside the parent comment object.
-                if isinstance(nested, list) and safe_str(c.get("cid") or c.get("commentId") or c.get("id")) == comment_id:
-                    for r in nested:
-                        replies.append(_reply_payload(r))
-                elif parent == comment_id:
-                    replies.append(_reply_payload(c))
-                if len(replies) >= limit:
-                    break
-            ctx["source"] = "apify"
-            return {
-                "url": norm_url,
-                "videoId": vid,
-                "commentId": comment_id,
-                "totalReturned": len(replies[:limit]),
-                "replies": replies[:limit],
-            }
 
         data = await cached_or_run(
             endpoint="youtube.comment-replies",
