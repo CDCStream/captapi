@@ -533,6 +533,9 @@ async def channel_details_native(handle: str, url: str) -> dict[str, Any] | None
 _TT_COMMENT_HOSTS = (
     "https://api22-normal-c-useast2a.tiktokv.com/aweme/v1/comment/list/",
     "https://api16-normal-c-useast1a.tiktokv.com/aweme/v1/comment/list/",
+    "https://api19-normal-c-useast1a.tiktokv.com/aweme/v1/comment/list/",
+    "https://api31-normal-useast2a.tiktokv.com/aweme/v1/comment/list/",
+    "https://api.tiktokv.com/aweme/v1/comment/list/",
 )
 _TT_MOBILE_UA = (
     "com.zhiliaoapp.musically/2023600030 (Linux; U; Android 10; en; Pixel 4; "
@@ -624,29 +627,94 @@ async def _comment_once(
     return data if isinstance(data, dict) and data.get("status_code") == 0 else None
 
 
-async def _comment_page(aweme_id: str, cursor: str, count: int) -> dict[str, Any] | None:
+def _comment_page_ok(page: dict[str, Any], *, expect_items: bool) -> bool:
+    """Reject soft-block decoys: status_code 0 with an empty comment list."""
+    comments = page.get("comments")
+    if not isinstance(comments, list):
+        return False
+    if comments:
+        return True
+    return not expect_items
+
+
+async def _comment_page(
+    aweme_id: str, cursor: str, count: int, *, expect_items: bool = True
+) -> dict[str, Any] | None:
     """One page of the mobile comment API, or None if every attempt is blocked.
 
     The residential pool rotates its exit IP per connection but a large share of
     IPs are soft-blocked (status_code 2146) at any moment, so we fire a batch of
-    concurrent requests (each a fresh IP) and take the first clean response,
-    cancelling the rest. A second batch covers an unlucky first round.
+    concurrent requests (each a fresh IP + geo) and take the first clean response.
     """
-    params = {**_TT_COMMENT_PARAMS, "aweme_id": aweme_id, "cursor": str(cursor), "count": str(count)}
     headers = {"User-Agent": _TT_MOBILE_UA, "Accept": "application/json"}
-    for _ in range(2):
+    rounds = 5 if str(cursor) not in ("", "0") else 4
+    concurrency = 16
+    geos = ("US", "NL", "FR", "DE")
+
+    async def _attempt(host: str, country: str) -> dict[str, Any] | None:
+        did = str(random.randint(10**18, 10**19 - 1))
+        params = {
+            **_TT_COMMENT_PARAMS,
+            "device_id": did,
+            "iid": did,
+            "aweme_id": aweme_id,
+            "cursor": str(cursor),
+            "count": str(max(1, min(count, 50))),
+        }
+        return await _comment_once(host, params, headers, _residential_proxy(country))
+
+    for _ in range(rounds):
         tasks = [
-            asyncio.create_task(_comment_once(_TT_COMMENT_HOSTS[i % len(_TT_COMMENT_HOSTS)], params, headers))
-            for i in range(8)
+            asyncio.create_task(
+                _attempt(_TT_COMMENT_HOSTS[i % len(_TT_COMMENT_HOSTS)], geos[i % len(geos)])
+            )
+            for i in range(concurrency)
         ]
         try:
             for coro in asyncio.as_completed(tasks):
                 res = await coro
-                if res is not None:
+                if res is not None and _comment_page_ok(res, expect_items=expect_items):
                     return res
         finally:
             for t in tasks:
                 t.cancel()
+        await asyncio.sleep(0.2)
+    return None
+
+
+async def _comment_page_via_signer(
+    aweme_id: str, cursor: str, count: int, *, expect_items: bool = True
+) -> dict[str, Any] | None:
+    """Signed web ``/api/comment/list/`` when mobile aweme soft-blocks."""
+    from app.services import tiktok_signer
+
+    if not tiktok_signer.enabled() or not aweme_id:
+        return None
+    cur = str(cursor or "0")
+    api = (
+        "https://www.tiktok.com/api/comment/list/"
+        f"?aid=1988&aweme_id={urllib.parse.quote(aweme_id)}"
+        f"&count={max(1, min(count, 50))}&cursor={urllib.parse.quote(cur)}"
+    )
+    for _ in range(2):
+        page = await tiktok_signer.fetch_api(api)
+        if not isinstance(page, dict):
+            continue
+        # Web shape uses camelCase; normalize to mobile keys used by mapper.
+        comments = page.get("comments") or page.get("comment_list") or page.get("commentList")
+        if not isinstance(comments, list):
+            continue
+        normalized = {
+            "status_code": 0,
+            "comments": comments,
+            "cursor": page.get("cursor"),
+            "has_more": page.get("has_more")
+            if "has_more" in page
+            else page.get("hasMore"),
+            "total": page.get("total") or page.get("totalCount"),
+        }
+        if _comment_page_ok(normalized, expect_items=expect_items):
+            return normalized
     return None
 
 
@@ -664,11 +732,18 @@ async def comments_native(
     cur = str(cursor) if cursor else "0"
     total: int | None = None
     max_pages = limit // 15 + 3
-    for _ in range(max_pages):
+    for page_i in range(max_pages):
         if len(collected) >= limit:
             break
         want = min(30, limit - len(collected))
-        page = await _comment_page(aweme_id, cur, want)
+        # First page of a public video almost always has comments; empty soft-
+        # block decoys must be rejected. Later pages may legitimately be empty.
+        expect_items = page_i == 0 and cur in ("", "0")
+        page = await _comment_page(aweme_id, cur, want, expect_items=expect_items)
+        if page is None:
+            page = await _comment_page_via_signer(
+                aweme_id, cur, want, expect_items=expect_items
+            )
         if page is None:
             # Total failure on the first page -> let the caller use Apify.
             # A later-page failure returns what we have plus the resume cursor.

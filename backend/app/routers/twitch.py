@@ -252,7 +252,7 @@ async def profile(
             ctx["source"] = "apify"
             return await _channel(username)
 
-        data = await cached_or_run("twitch.profile", {"username": username, "v": 3}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("twitch.profile", {"username": username, "v": 4}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 
