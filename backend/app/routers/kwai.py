@@ -20,6 +20,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
+from app.services import kwai_native as native
 from app.utils.formatters import safe_int, safe_str
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
@@ -148,12 +149,17 @@ async def profile(
         raise HTTPException(status_code=400, detail="Invalid Kwai profile URL or handle")
     async with billed_call(caller=caller, endpoint="/v1/kwai/profile", platform="kwai", resource_url=url, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
+            native_row = await native.fetch_profile(profile_url)
+            if native_row:
+                ctx["source"] = "direct"
+                return _normalize_profile(native_row)
             items = _good_rows(await _run_kwai({"urls": [profile_url], "maxItems": 1}, max_items=1))
             if not items:
                 raise HTTPException(status_code=404, detail="Kwai profile not found")
+            ctx["source"] = "apify"
             return _normalize_profile(items[0])
 
-        data = await cached_or_run("kwai.profile", {"url": profile_url, "v": 4}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("kwai.profile", {"url": profile_url, "v": 5}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 
@@ -169,13 +175,19 @@ async def user_posts(
         raise HTTPException(status_code=400, detail="Invalid Kwai profile URL or handle")
     async with billed_call(caller=caller, endpoint="/v1/kwai/user-posts", platform="kwai", resource_url=url, base_credits=max(2, math.ceil(limit * 2.25))) as ctx:
         async def _run() -> dict[str, Any]:
+            native_items = await native.fetch_user_posts(profile_url, limit=limit)
+            if native_items:
+                ctx["source"] = "direct"
+                posts = [_normalize_post(i) for i in native_items[:limit]]
+                return {"profileUrl": profile_url, "totalReturned": len(posts), "posts": posts}
             items = _good_rows(await _run_kwai({"urls": [profile_url], "maxItems": limit}, max_items=limit))
             if not items:
                 raise HTTPException(status_code=404, detail="Kwai profile not found")
+            ctx["source"] = "apify"
             posts = [_normalize_post(i) for i in items[:limit]]
             return {"profileUrl": profile_url, "totalReturned": len(posts), "posts": posts}
 
-        data = await cached_or_run("kwai.user-posts", {"url": profile_url, "limit": limit, "v": 3}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("kwai.user-posts", {"url": profile_url, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = max(2, math.ceil(len(data["posts"]) * 2.25))
         return ApiResponse(data=data)
 
@@ -191,10 +203,15 @@ async def post(
         raise HTTPException(status_code=400, detail="Invalid Kwai post URL")
     async with billed_call(caller=caller, endpoint="/v1/kwai/post", platform="kwai", resource_url=url, base_credits=17) as ctx:
         async def _run() -> dict[str, Any]:
+            native_row = await native.fetch_post(video_url)
+            if native_row:
+                ctx["source"] = "direct"
+                return _normalize_post(native_row)
             items = _good_rows(await _run_kwai({"urls": [video_url], "maxItems": 1}, max_items=1))
             if not items:
                 raise HTTPException(status_code=404, detail="Kwai post not found")
+            ctx["source"] = "apify"
             return _normalize_post(items[0])
 
-        data = await cached_or_run("kwai.post", {"url": video_url, "v": 4}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("kwai.post", {"url": video_url, "v": 5}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
