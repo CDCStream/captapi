@@ -34,6 +34,7 @@ _CONNECTIONS_RE = re.compile(r"([\d,.]+)\+?\s+connections?", re.I)
 _EXPERIENCE_RE = re.compile(r"Experience:\s*([^·\n|]{2,80})", re.I)
 _EMPLOYEES_RE = re.compile(r"([\d,.\s]+)\s+employees", re.I)
 _COMMENTS_OG_RE = re.compile(r"([\d,]+)\s+comments?", re.I)
+_REACTIONS_RE = re.compile(r"([\d,.]+)\s+Reactions?", re.I)
 _ACTIVITY_RE = re.compile(r"activity[:-](\d{10,25})", re.I)
 
 
@@ -321,28 +322,60 @@ async def fetch_company(slug: str) -> dict[str, Any] | None:
     return out
 
 
+def _stats_from_interaction(block: dict[str, Any]) -> dict[str, int]:
+    """Map schema.org interactionStatistic → likes / comments / shares."""
+    out: dict[str, int] = {}
+    stats = block.get("interactionStatistic")
+    items = stats if isinstance(stats, list) else ([stats] if isinstance(stats, dict) else [])
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        itype = str(item.get("interactionType") or "")
+        n = safe_int(item.get("userInteractionCount"))
+        if n is None:
+            continue
+        if "LikeAction" in itype:
+            out["likes"] = n
+        elif "CommentAction" in itype:
+            out["comments"] = n
+        elif "ShareAction" in itype:
+            out["shares"] = n
+    if "comments" not in out:
+        n = safe_int(block.get("commentCount"))
+        if n is not None:
+            out["comments"] = n
+    if "comments" not in out:
+        comments = block.get("comment")
+        if isinstance(comments, list):
+            out["comments"] = len(comments)
+    return out
+
+
 def _post_from_social_ld(block: dict[str, Any], *, fallback_url: str) -> dict[str, Any] | None:
     text = safe_str(block.get("articleBody") or block.get("text") or block.get("headline"))
     url = safe_str(block.get("url") or block.get("@id") or fallback_url)
     if not text and not url:
         return None
     author = block.get("author") if isinstance(block.get("author"), dict) else {}
-    comments = block.get("comment")
-    comment_n = len(comments) if isinstance(comments, list) else None
     activity = None
     m = _ACTIVITY_RE.search(url or "")
     if m:
         activity = m.group(1)
+    author_out: dict[str, Any] = {
+        "name": safe_str(author.get("name")),
+        "url": safe_str(author.get("url")),
+    }
+    # Public post LD almost never includes job title; keep when present.
+    headline = safe_str(author.get("jobTitle") or author.get("description"))
+    if headline:
+        author_out["headline"] = headline
     return {
         "id": activity,
         "url": url,
         "text": text,
         "datePublished": safe_str(block.get("datePublished")),
-        "author": {
-            "name": safe_str(author.get("name")),
-            "url": safe_str(author.get("url")),
-        },
-        "stats": {"comments": comment_n} if comment_n is not None else {},
+        "author": author_out,
+        "stats": _stats_from_interaction(block),
     }
 
 
@@ -394,11 +427,18 @@ async def fetch_post(url: str) -> dict[str, Any] | None:
                 "comments": _parse_count(comments_m.group(1) if comments_m else None),
             },
         }
-    elif chosen.get("stats", {}).get("comments") is None:
-        comments_m = _COMMENTS_OG_RE.search(og.get("og:title") or "")
-        n = _parse_count(comments_m.group(1) if comments_m else None)
-        if n is not None:
-            chosen.setdefault("stats", {})["comments"] = n
+    else:
+        stats = chosen.setdefault("stats", {})
+        if stats.get("comments") is None:
+            comments_m = _COMMENTS_OG_RE.search(og.get("og:title") or "")
+            n = _parse_count(comments_m.group(1) if comments_m else None)
+            if n is not None:
+                stats["comments"] = n
+        if stats.get("likes") is None:
+            reactions_m = _REACTIONS_RE.search(html or "")
+            n = _parse_count(reactions_m.group(1) if reactions_m else None)
+            if n is not None:
+                stats["likes"] = n
 
     if not chosen.get("text"):
         return None

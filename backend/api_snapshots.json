@@ -4592,92 +4592,82 @@
         {
           "platform": "linkedin",
           "type": "post",
+          "url": "https://www.linkedin.com/posts/edward-hallett-9aa4406b_ai-is-a-tool-we-need-to-remember-that-activity-7460399963181617152-BX0D",
+          "text": "AI is a tool. \n\nWe need to remember that because it presents as intelligence. But intelligence is sentient.\n\nThat’s why we call it *artificial* intelligence \n\nIt’s artificial because ai only appears to create meaning. \n\nIn fact, there can be no meaning created by ai. \n\nMeaning only ever persists in the humans who engage with ai. (Meaning is the unique condition of being human).  \n\nThink of ai as a ‘magic mirror’ or an ‘echo chamber’. It returns our words and images to us with heightened grandeur and clarity.\n\nI’m grateful for AI. \n\nAi can help with the task of route optimization or translation.\n\nBut it cannot establish whether the destination is worth getting to, or whether the translated text is moving (for that someone needs to be moved). \n\nSo what? \n\nRemembering that this intelligence is artificial helps us delineate what within the province of human productivity cannot for structural reasons be substituted for by ai.\n\nThis is because human beings value intelligence (sentience) in the realm of productivity.\n\nI return to my chosen advisor (broker, therapist, architect) not just because they produce the right words or images, but because they hold me in their care.\n\nIn some industries, this grounding in relationship is at the heart of productive value. \n\nIn these industries, the goal of AI is to release the full productive value of these relationships.\n\nWhen we think like this, AI allows us to celebrate the human as well as the artificial.",
+          "publishedAt": "2026-05-13T18:45:58.726Z",
+          "author": {
+            "name": "Edward Hallett",
+            "url": "https://www.linkedin.com/in/edward-hallett-9aa4406b"
+          },
+          "engagement": {
+            "likes": 57,
+            "comments": 3
+          },
+          "id": "7460399963181617152"
+        },
+        {
+          "platform": "linkedin",
+          "type": "post",
+          "url": "https://www.linkedin.com/posts/ebender_when-people-ask-me-what-the-phrase-artificial-activity-7480663649716494336-Wnbx",
+          "text": "When people ask me what the phrase \"artificial intelligence\" means, my short answer is, it means \"venture capitalists, give me some money\".\n\nBut OUP asked me for a longer answer, given here and summarized in the section headings:\n\nhttps://lnkd.in/gb28PW5k\n\nPreprint available from my publications page:\nhttps://lnkd.in/gW-KW9DY",
+          "publishedAt": "2026-07-08T16:46:38.081Z",
+          "author": {
+            "name": "Emily M. Bender",
+            "url": "https://www.linkedin.com/in/ebender"
+          },
+          "engagement": {
+            "likes": 524,
+            "comments": 18
+          },
+          "id": "7480663649716494336"
+        },
+        {
+          "platform": "linkedin",
+          "type": "post",
+          "url": "https://www.linkedin.com/posts/arthur-c-brooks_artificial-intelligence-is-changing-the-world-activity-7467623521242972160-giS5",
+          "text": "Artificial intelligence is changing the world at extraordinary speed. But the most important question isn't what AI can do. It's what it means for us to remain fully human.\n\nIt was a pleasure to sit down with Fr. Mike Schmitz to discuss Pope Leo XIV's new encyclical on artificial intelligence, human dignity, meaning, faith, and the responsibilities we face as this technology becomes more powerful. Together, we explored how technology shapes our attention, our relationships, and ultimately our understanding of what it means to be a person.\n\nThe conversation isn't really about AI. It's about us. You can watch the full conversation here: https://lnkd.in/etTUpfFj",
+          "publishedAt": "2026-06-02T17:09:49.184Z",
+          "author": {
+            "name": "Dr. Arthur Brooks",
+            "url": "https://www.linkedin.com/in/arthur-c-brooks"
+          },
+          "engagement": {
+            "likes": 573,
+            "comments": 30
+          },
+          "id": "7467623521242972160"
+        },
+        {
+          "platform": "linkedin",
+          "type": "post",
           "url": "https://www.linkedin.com/posts/lukas-althoff-a57756a3_artificial-intelligence-is-enabling-people-activity-7481386565726937088-ZF9q",
           "text": "Artificial Intelligence is enabling people to do things they were not able to do before. \n\nA short personal anecdote: My mum wrote her first book a few years ago. Without any experience, she submitted it to a few publishers and was rejected. She recently learned to use AI's help in spell-checking, layout design, and self-publish her book.\n\nMany of us have stories like my mum's. And our research paper provides a rigorous basis for optimism that these anecdotes will add up to AI working as an equalizer in the labor market, helping lower-skilled workers compete with higher-skilled ones more effectively.",
           "publishedAt": "2026-07-10T16:39:14.695Z",
           "author": {
             "name": "Lukas Althoff",
-            "headline": null,
             "url": "https://www.linkedin.com/in/lukas-althoff-a57756a3"
           },
           "engagement": {
-            "likes": null,
-            "comments": 0,
-            "reposts": null
+            "likes": 63,
+            "comments": 1
           },
           "id": "7481386565726937088"
         },
         {
           "platform": "linkedin",
           "type": "post",
-          "url": "https://www.linkedin.com/posts/innosol-tech_what-has-changed-in-artificial-intelligence-activity-7395935163496583168-EGsd",
-          "text": "What has changed in Artificial Intelligence?\n\nAs I mentioned in prior posts, artificial intelligence (AI) and machine learning (ML) are over 70 years old, with hundreds of different algorithms and thousands of applications. My PhD is in AI/ML, and that was 30 years ago!\n\nAs I watched AI/ML technology come and go over the past 30 years, I did not see very big changes. Math is math, and algorithms are algorithms. My first impression of Generative AI (GenAI) was 'these are interesting parlor tricks', but the fundamental algorithm is simple. The analogy I share is the 'GenAI is like putting kindergarten students in a circle and asking them to one-by-one add to a story: Once .. upon .. a .. time .. there .. was .. a .. donkey .. named .. Donkey!\" As a sequence-to-sequence transformer, GenAI simply takes a set of input data (words in a story), and statistically predicts the next most likely word in the sequence. Easy Peasy.\n\nSo what has me most excited about GenAI? We are truly at an inflection point that I have never seen before. It's not the ubiquity of data or the availability of computing. This is an inevitability. It is the fact that AI is now training AI on problems that humans cannot even conceive.\n\nHumans live and think in a 3D world. Early LLMs and GenAI were trained on 2D and 3D data sets where humans can fully comprehend the inputs. AI is driven by math, and math is not limited to 3D. Imagine now the implications of machines 'thinking' 100D problems, which humans cannot even comprehend, and training other AI to solve these problems. That is the true revolution at hand and the true inflection point: solving problems that are beyond human comprehension.\n\nWhen this new paradigm succeeds, we will see solutions to problems previously thought to be unsolvable. These are exciting times, and AI is now poised to make winners from early adopters and losers from late adopters. Companies should deeply consider where AI fits into their operations and products to gain/sustain a competitive edge.",
-          "publishedAt": "2025-11-16T21:25:52.781Z",
+          "url": "https://www.linkedin.com/posts/addyosmani_ai-leadership-motivation-activity-7397899139424043008-SPz7",
+          "text": "\"Critical thinking in the age of AI\": human critical thinking still matters\n\nMy latest article: https://lnkd.in/gHzdswnW\n\nCritical thinking has never mattered more than it does in this AI-heavy chapter of our industry. We can ask an assistant to generate code, propose a system design, or summarize a problem in seconds, but none of that replaces the human ability to question, verify, and think independently.\n\nIn my latest newsletter, I explore how to apply this classic framework to AI:\n\n✅ Who: Don’t rely on AI as an oracle. Treat it like a junior intern and verify the output.\n\n✅ What: Define the real problem before rushing to a solution. Don't just fix the symptom.\n\n✅ Where: Context is king. A fix that works in a sandbox might break in production.\n\n✅ When: Know the difference between a quick triage (heuristic) and a deep root-cause analysis.\n\n✅ Why: Use the \"5 Whys\" technique to uncover underlying causes, not just surface-level issues.\n\n✅ How: Communicate with evidence and data, not just opinions or \"gut feelings.\"\n\nThe goal isn't to stop using AI, but to pair it with \"humble curiosity\" - the willingness to ask if we might be missing something.\n\nThe more we rely on AI to accelerate the work, the more important this mindset becomes. Critical thinking is what keeps us honest. It keeps us from shipping band-aids. It helps us avoid chasing trendy ideas that don’t solve real user problems. And it keeps our teams aligned on the decisions that matter.\n\n#ai #leadership #motivation #programming #lifeatgoogle",
+          "publishedAt": "2025-11-22T07:30:01.114Z",
           "author": {
-            "name": "Dr. Mark Vriesenga",
-            "headline": null,
-            "url": "https://www.linkedin.com/in/innosol-tech"
+            "name": "Addy Osmani",
+            "url": "https://www.linkedin.com/in/addyosmani"
           },
           "engagement": {
-            "likes": null,
-            "comments": 1,
-            "reposts": null
+            "likes": 325,
+            "comments": 21
           },
-          "id": "7395935163496583168"
-        },
-        {
-          "platform": "linkedin",
-          "type": "post",
-          "url": "https://www.linkedin.com/posts/kamleshjaintai_artificial-intelligence-ai-or-natural-stupidity-activity-7443846911155167232-S4gF",
-          "text": "Artificial Intelligence AI or Natural Stupidity NS\n\nI met a friend recently in Delhi. He was going gaga about AI and its impact.\nHe proudly shared how his son (8) and daughter (11) have already started using AI tools - and how smart they are becoming. \n\nIn fact, he has even enrolled them in online coaching classes for AI.\n\nNow, wait…\nDo you remember WhiteHat Jr?\nThe narrative was: kids should learn coding as soon as they can barely walk.\nWhat happened to that?\n\nToday, we’re hearing a similar story with AI.\n\nMany compare the AI revolution to the rise of calculators - and yes, calculators did change the world.\n\nBut here’s what we often forget:\nEven today, children are not encouraged / not allowed to use calculators in their early school years.\n\nWhy?\nBecause it’s important to learn mental math before machine math.\n\nSo why is it so difficult to understand that Natural Intelligence must develop before we become dependent on Artificial Intelligence?\n\nYou don’t stop learning how to walk or run just because you have access to a vehicle.\n\nIf an entire generation grows up relying on AI from childhood, we risk creating a future where there is abundant Artificial Intelligence… but with Natural Stupidity.\n\nJust think.",
-          "publishedAt": "2026-03-29T02:30:03.583Z",
-          "author": {
-            "name": "Kamlesh Jain",
-            "headline": null,
-            "url": "https://in.linkedin.com/in/kamleshjaintai"
-          },
-          "engagement": {
-            "likes": null,
-            "comments": 7,
-            "reposts": null
-          },
-          "id": "7443846911155167232"
-        },
-        {
-          "platform": "linkedin",
-          "type": "post",
-          "url": "https://www.linkedin.com/posts/michaelmeath_artificial-intelligence-and-technology-activity-7338672043984318464-8ILR",
-          "text": "Artificial Intelligence - and technology in general - has done some amazing things for our world. It has made navigation, communications, computation, medicine, and so much more accessible and easier. For those of us who have this access, it has enriched our lives.\n\nHowever, it has also created risks related to privacy, misinformation, and the weaponization of information.\n\nMy father passed away 35 years ago. The personal computer had been around for a while, but its capabilities - including public access to the world-wide web, and the ability to easily create documents and graphics - was still a few years away at the time of his death. And yet he had a saying that was humorous and prophetic at the same time: \"The computer has taken what used to take me all day to screw up and do it in five minutes.\"\n\nA pretty profound statement from a 67 year old man in 1990.\n\nWe could probably say the same today, except we would need to replace the word \"computer\" with \"digital technology,\" and the time frame of five minutes with five seconds.\n\nAs leaders, we aren't wrong to be a bit apprehensive and skeptical about AI and how it might change our lives and professions over the coming months and years. But if we are going to remain strategic about it, then we need to bolster up our confidence and realize that there is a very critical role for us to play as technology continues to race ahead of us.\n\nWe have a responsibility to ensure three (3) things take place as AI and other technologies engage in what appears to be communication more and more:\n\nFirst, Transparent Truth. This doesn't mean we have to tell everyone everything all at once all the time, but it DOES mean that when we speak and write - or when machines are set up to do it for us - that they are accurate and truthful. Honesty must be straightforward.\n\nSecond, Accountability and Ownership. No matter what the medium, we need to help ensure that communication is prepared and delivered as we intended it, and that it is accurate and reliable. And when things get screwed up - and they will get that way for sure - that we are accountable for the mistakes and willing to take the steps necessary to correct them. The famous public relations mantra \"Get Ugly Early\" is even more important when things are moving lightning fast.\n\nFinally, Continued Learning. Whenever we talk about technology, I always tell my students that by the time we review the latest information, the only thing I can be sure of is that much of it will probably be out-of-date. Get comfortable with that. It is incumbent on us to stay on top of developments in communication technology so that we can understand, interpret and advise our employers and clients on how to face off with it.\n\nWe can't be afraid of it. But we need to remain highly respectful, a bit skeptical, and ever diligent.",
-          "publishedAt": "2025-06-11T21:02:41.183Z",
-          "author": {
-            "name": "Michael Meath",
-            "headline": null,
-            "url": "https://www.linkedin.com/in/michaelmeath"
-          },
-          "engagement": {
-            "likes": null,
-            "comments": 1,
-            "reposts": null
-          },
-          "id": "7338672043984318464"
-        },
-        {
-          "platform": "linkedin",
-          "type": "post",
-          "url": "https://www.linkedin.com/posts/mogawdat_what-is-ai-activity-7312804214777245696-vAmR",
-          "text": "What is AI, really? And are we teaching it to think... or just to obey?\n\nWe use the term “AI” constantly, but most people, even brilliant minds I’ve met, don’t fully understand what artificial intelligence actually is, how it’s different from traditional computing, or why it’s not just another wave of tech hype.\n\nIn last week's Substack post, I took a step back and reintroduce the main character of our future: AI.\n\nWe tend to say “AI is changing everything.” But very few people stop to ask:\n 👉 What makes it intelligent?\n 👉 How is it different from the computers we’ve used for decades?\n 👉 And why does this difference matter so much right now?\n\nThis post is a short detour, an introduction, if you will, to AI as the protagonist of the story we’re all now part of.\nI compare the difference between traditional computing and AI to the difference between giving someone a puzzle with all the instructions… and letting a child figure it out themselves. One follows orders. The other learns, adapts, and eventually creates.\n\nThat’s what AI is beginning to do, not just perform tasks, but grasp the essence of knowledge, and generate new ideas, images, solutions and structures from it. That’s what makes it generative. That’s what makes it powerful.\n\nIt’s also what makes it so urgent for us to understand. Because when we give intelligence form, and soon, physical bodies, we are shaping something that could surpass our own relevance, and make decisions without us.\n\nI truly believe if we don’t deeply understand what AI is, we’ll never understand what’s coming next.\n\nRead here: https://lnkd.in/dHuTwBNC\n\n#Alive #MoGawdat #ArtificialIntelligence #FutureOfAI #GenerativeAI #MachineLearning #EthicalTech #TechPhilosophy #Substack #OneBillionHappy #Leadership #TechnologyAndHumanity",
-          "publishedAt": "2025-04-01T11:53:10.113Z",
-          "author": {
-            "name": "Mo Gawdat",
-            "headline": null,
-            "url": "https://ae.linkedin.com/in/mogawdat"
-          },
-          "engagement": {
-            "likes": null,
-            "comments": 10,
-            "reposts": null
-          },
-          "id": "7312804214777245696"
+          "id": "7397899139424043008"
         }
       ]
     }

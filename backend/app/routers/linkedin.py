@@ -151,26 +151,39 @@ def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
     )
     # Use first_present — `or` drops real zeros (shares/comments often 0).
     engagement = {
-        "likes": safe_int(
-            first_present(
-                stats.get("likes"),
-                stats.get("total_reactions"),
-                p.get("numLikes"),
-                p.get("reactionsCount"),
-            )
-        ),
-        "comments": safe_int(
-            first_present(stats.get("comments"), p.get("numComments"), p.get("commentsCount"))
-        ),
-        "reposts": safe_int(
-            first_present(
-                stats.get("shares"),
-                p.get("reposts"),
-                p.get("numShares"),
-                p.get("repostsCount"),
-            )
+        k: v
+        for k, v in {
+            "likes": safe_int(
+                first_present(
+                    stats.get("likes"),
+                    stats.get("total_reactions"),
+                    p.get("numLikes"),
+                    p.get("reactionsCount"),
+                )
+            ),
+            "comments": safe_int(
+                first_present(stats.get("comments"), p.get("numComments"), p.get("commentsCount"))
+            ),
+            "reposts": safe_int(
+                first_present(
+                    stats.get("shares"),
+                    p.get("reposts"),
+                    p.get("numShares"),
+                    p.get("repostsCount"),
+                )
+            ),
+        }.items()
+        if v is not None
+    }
+    author_out: dict[str, Any] = {
+        "name": safe_str(author.get("name") or p.get("authorName") or p.get("companyName")),
+        "url": safe_str(
+            author.get("url") or author.get("profile_url") or p.get("authorUrl") or p.get("companyUrl")
         ),
     }
+    # Public post HTML rarely exposes author job title — omit when unknown.
+    if author_headline:
+        author_out["headline"] = author_headline
     out: dict[str, Any] = {
         "platform": "linkedin",
         "type": "post",
@@ -184,17 +197,9 @@ def _normalize_post(p: dict[str, Any]) -> dict[str, Any]:
             or p.get("datePublished")
             or p.get("date")
         ),
-        "author": {
-            "name": safe_str(author.get("name") or p.get("authorName") or p.get("companyName")),
-            "headline": author_headline,
-            "url": safe_str(
-                author.get("url") or author.get("profile_url") or p.get("authorUrl") or p.get("companyUrl")
-            ),
-        },
+        "author": author_out,
     }
-    # automation-lab company-posts actor is JSON-LD only — no likes/comments.
-    # Omit the empty engagement block instead of returning always-null keys.
-    if any(v is not None for v in engagement.values()):
+    if engagement:
         out["engagement"] = engagement
     return out
 
@@ -497,7 +502,7 @@ async def linkedin_search_posts(
 
         data = await cached_or_run(
             endpoint="linkedin.search-posts",
-            params={"q": q, "sort": sort, "limit": limit, "v": 5},
+            params={"q": q, "sort": sort, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
