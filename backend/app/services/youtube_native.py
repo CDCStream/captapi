@@ -762,34 +762,48 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
         link_title = text_of(link.get("title"))
         if link_url:
             links.append({"text": safe_str(link_title) or "", "url": safe_str(link_url) or ""})
+    # About fields: InnerTube about-tab params often return the main channel
+    # browse without aboutChannelViewModel. Prefer that when present, else
+    # fetch /about (ytInitialData still embeds the about view model).
+    about: dict[str, Any] | None = None
     about_payload = await innertube(
         "browse", {"browseId": channel_id, "params": _ABOUT_PARAMS}
     )
     if about_payload:
         about = next(walk_find(about_payload, "aboutChannelViewModel"), None)
-        if about:
-            view_count = parse_count_text(about.get("viewCountText"))
-            joined = safe_str(text_of(about.get("joinedDateText")))
-            if joined:
-                joined = joined.replace("Joined ", "")
-            country = safe_str(text_of(about.get("country")))
-            if subscriber_count is None:
-                subscriber_count = parse_count_text(about.get("subscriberCountText"))
-            if video_count is None:
-                video_count = parse_count_text(about.get("videoCountText"))
-            if not description:
-                description = safe_str(text_of(about.get("description")))
-            about_links: list[dict[str, str]] = []
-            for link in about.get("links") or []:
-                view_model = link.get("channelExternalLinkViewModel") or {}
-                link_title = text_of(view_model.get("title"))
-                link_url = text_of(view_model.get("link"))
-                if link_url:
-                    about_links.append({"text": safe_str(link_title) or "", "url": safe_str(link_url) or ""})
-            if about_links:
-                links = about_links
+    if about is None:
+        about_data, about_html = await fetch_page_data(
+            f"https://www.youtube.com/channel/{channel_id}/about",
+            timeout=15,
+        )
+        if about_data:
+            about = next(walk_find(about_data, "aboutChannelViewModel"), None)
+        if about is None and about_html:
+            html = about_html  # use /about HTML for regex fallbacks below
 
-    # About popup is flaky; fall back to channel HTML / metadata JSON.
+    if about:
+        view_count = parse_count_text(about.get("viewCountText"))
+        joined = safe_str(text_of(about.get("joinedDateText")))
+        if joined:
+            joined = re.sub(r"^joined\s+", "", joined, flags=re.I).strip() or joined
+        country = safe_str(text_of(about.get("country"))) or safe_str(about.get("country"))
+        if subscriber_count is None:
+            subscriber_count = parse_count_text(about.get("subscriberCountText"))
+        if video_count is None:
+            video_count = parse_count_text(about.get("videoCountText"))
+        if not description:
+            description = safe_str(text_of(about.get("description")))
+        about_links: list[dict[str, str]] = []
+        for link in about.get("links") or []:
+            view_model = link.get("channelExternalLinkViewModel") or {}
+            link_title = text_of(view_model.get("title"))
+            link_url = text_of(view_model.get("link"))
+            if link_url:
+                about_links.append({"text": safe_str(link_title) or "", "url": safe_str(link_url) or ""})
+        if about_links:
+            links = about_links
+
+    # Last-resort fallbacks from page HTML / metadata JSON.
     if view_count is None:
         m = re.search(r"([\d.,]+[KMB]?)\s+views", html, re.I)
         if m:
@@ -805,7 +819,13 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
         if m:
             joined = safe_str(m.group(1))
         else:
-            m = re.search(r'"joinedDateText"[^}]*?"simpleText"\s*:\s*"Joined\s+([^"]+)"', html)
+            m = re.search(
+                r'"joinedDateText"\s*:\s*\{\s*"content"\s*:\s*"Joined\s+([^"]+)"',
+                html,
+            ) or re.search(
+                r'"joinedDateText"[^}]*?"simpleText"\s*:\s*"Joined\s+([^"]+)"',
+                html,
+            )
             if m:
                 joined = safe_str(m.group(1))
 
