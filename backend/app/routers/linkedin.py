@@ -18,6 +18,7 @@ from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
+from app.services import linkedin_native
 from app.utils.formatters import first_present, safe_int, safe_str
 from app.utils.url import (
     detect_url_platform,
@@ -30,6 +31,7 @@ router = APIRouter()
 
 CREDIT_PROFILE = 2
 CREDIT_DETAILS = 1
+CREDIT_NATIVE = linkedin_native.CREDIT_LINKEDIN_NATIVE
 RATE = 0.8
 
 
@@ -239,20 +241,27 @@ async def linkedin_profile(
         endpoint="/v1/linkedin/profile",
         platform="linkedin",
         resource_url=f"https://www.linkedin.com/in/{slug}",
-        base_credits=CREDIT_PROFILE,
+        base_credits=CREDIT_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await linkedin_native.fetch_profile(slug)
+            if native:
+                ctx["source"] = "direct"
+                return _normalize_profile(native)
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_LINKEDIN_PROFILE,
                 {"username": slug, "url": f"https://www.linkedin.com/in/{slug}"},
                 max_items=1,
             )
+            ctx["source"] = "apify"
+            ctx["credits_override"] = CREDIT_PROFILE
             return _normalize_profile(_first(items))
 
         data = await cached_or_run(
             endpoint="linkedin.profile",
-            params={"slug": slug, "v": 2},
+            params={"slug": slug, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -273,20 +282,27 @@ async def linkedin_company(
         endpoint="/v1/linkedin/company",
         platform="linkedin",
         resource_url=f"https://www.linkedin.com/company/{slug}",
-        base_credits=CREDIT_PROFILE,
+        base_credits=CREDIT_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await linkedin_native.fetch_company(slug)
+            if native:
+                ctx["source"] = "direct"
+                return _normalize_company(native)
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_LINKEDIN_COMPANY,
                 {"company": slug, "url": f"https://www.linkedin.com/company/{slug}"},
                 max_items=1,
             )
+            ctx["source"] = "apify"
+            ctx["credits_override"] = CREDIT_PROFILE
             return _normalize_company(_first(items))
 
         data = await cached_or_run(
             endpoint="linkedin.company",
-            params={"slug": slug, "v": 2},
+            params={"slug": slug, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -309,20 +325,27 @@ async def linkedin_post_details(
         endpoint="/v1/linkedin/post-details",
         platform="linkedin",
         resource_url=url,
-        base_credits=CREDIT_DETAILS,
+        base_credits=CREDIT_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await linkedin_native.fetch_post(url)
+            if native:
+                ctx["source"] = "direct"
+                return _normalize_post(native)
+
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_LINKEDIN_POST,
                 {"post_urls": [url]},
                 max_items=1,
             )
+            ctx["source"] = "apify"
+            ctx["credits_override"] = CREDIT_DETAILS
             return _normalize_post(_first(items))
 
         data = await cached_or_run(
             endpoint="linkedin.post-details",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -345,15 +368,22 @@ async def linkedin_post_transcript(
         endpoint="/v1/linkedin/post-transcript",
         platform="linkedin",
         resource_url=url,
-        base_credits=CREDIT_DETAILS,
+        base_credits=CREDIT_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_LINKEDIN_POST,
-                {"post_urls": [url]},
-                max_items=1,
-            )
-            post = _normalize_post(_first(items))
+            native = await linkedin_native.fetch_post(url)
+            if native:
+                post = _normalize_post(native)
+                ctx["source"] = "direct"
+            else:
+                items = await get_apify().run_actor_sync(
+                    settings.APIFY_ACTOR_LINKEDIN_POST,
+                    {"post_urls": [url]},
+                    max_items=1,
+                )
+                post = _normalize_post(_first(items))
+                ctx["source"] = "apify"
+                ctx["credits_override"] = CREDIT_DETAILS
             text = (post.get("text") or "").strip()
             if not text:
                 raise HTTPException(status_code=422, detail="No transcript text available for this LinkedIn post")
@@ -370,7 +400,7 @@ async def linkedin_post_transcript(
 
         data = await cached_or_run(
             endpoint="linkedin.post-transcript",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -393,25 +423,37 @@ async def linkedin_company_posts(
         endpoint="/v1/linkedin/company-posts",
         platform="linkedin",
         resource_url=company_url,
-        base_credits=_scaled(limit),
+        base_credits=CREDIT_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            # Homepage JSON-LD is thin (often 1 post); accept it when present,
+            # otherwise Apify company-posts scraper.
+            native = await linkedin_native.fetch_company_posts(slug, limit=limit)
+            if native:
+                ctx["source"] = "direct"
+                posts = [_normalize_company_post(i) for i in native[:limit]]
+                return {"company": slug, "totalReturned": len(posts), "posts": posts}
+
             items = await get_apify().run_actor_sync(
                 settings.APIFY_ACTOR_LINKEDIN_COMPANY_POSTS,
                 {"companyUrls": [company_url], "maxPostsPerCompany": limit},
                 max_items=limit,
             )
+            ctx["source"] = "apify"
             posts = [_normalize_company_post(i) for i in items[:limit]]
             return {"company": slug, "totalReturned": len(posts), "posts": posts}
 
         data = await cached_or_run(
             endpoint="linkedin.company-posts",
-            params={"slug": slug, "limit": limit, "v": 4},
+            params={"slug": slug, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled(len(data["posts"]))
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_NATIVE
+        else:
+            ctx["credits_override"] = _scaled(len(data["posts"]))
         return ApiResponse(data=data)
 
 

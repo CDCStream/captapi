@@ -929,15 +929,42 @@ async def google_ad_details(
     advertiser_id, creative = _google_ids(creative_id)
     if not advertiser_id or not creative:
         raise HTTPException(status_code=400, detail="Google ad details requires a Transparency Center URL containing both AR advertiser ID and CR creative ID")
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/google/ad-details", platform="google_ad_library", resource_url=creative_id, base_credits=17) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/ad-library/google/ad-details",
+        platform="google_ad_library",
+        resource_url=creative_id,
+        base_credits=CREDIT_GOOGLE_COMPANY_ADS,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
-            items = await _run_actor(settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2, {"advertisers": [advertiser_id], "region": country.upper(), "maxResults": 50}, 50)
+            native = await google_ads_native.fetch_ad_details(
+                advertiser_id, creative, country=country
+            )
+            if native:
+                ctx["source"] = "direct"
+                return _normalize_ad(native, "google_ad_library")
+
+            items = await _run_actor(
+                settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2,
+                {"advertisers": [advertiser_id], "region": country.upper(), "maxResults": 50},
+                50,
+            )
             for item in items:
                 if item.get("creativeId") == creative or item.get("adCreativeId") == creative:
+                    ctx["source"] = "apify"
+                    ctx["credits_override"] = 17
                     return _normalize_ad(item, "google_ad_library")
             raise HTTPException(status_code=404, detail="Ad not found")
 
-        return ApiResponse(data=await cached_or_run("ad-library.google.ad-details", {"creative_id": creative_id, "country": country, "v": 4}, _run, ctx, use_cache=cache))
+        return ApiResponse(
+            data=await cached_or_run(
+                "ad-library.google.ad-details",
+                {"creative_id": creative_id, "country": country, "v": 5},
+                _run,
+                ctx,
+                use_cache=cache,
+            )
+        )
 
 
 @router.get("/google/advertiser-search", summary="Search Google Ads advertisers")
@@ -1048,8 +1075,19 @@ async def linkedin_ad_details(
 ):
     settings = get_settings()
     ad_url = _linkedin_ad_url(url)
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/linkedin/ad-details", platform="linkedin_ad_library", resource_url=ad_url, base_credits=17) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/ad-library/linkedin/ad-details",
+        platform="linkedin_ad_library",
+        resource_url=ad_url,
+        base_credits=CREDIT_AD_LIBRARY_NATIVE,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
+            native = await linkedin_ads_native.ad_details(ad_url)
+            if native:
+                ctx["source"] = "direct"
+                return _normalize_ad(native, "linkedin_ad_library")
+
             # Only the elliotpadfield actor accepts adUrls input. The s-r
             # search actor 400s without `search`, and the silentflow fallback
             # is a rented actor we no longer have — both just burned retries.
@@ -1068,6 +1106,16 @@ async def linkedin_ad_details(
             )
             if not items:
                 raise HTTPException(status_code=404, detail="Ad not found")
+            ctx["source"] = "apify"
+            ctx["credits_override"] = 17
             return _normalize_ad(items[0], "linkedin_ad_library")
 
-        return ApiResponse(data=await cached_or_run("ad-library.linkedin.ad-details", {"url": ad_url, "v": 5}, _run, ctx, use_cache=cache))
+        return ApiResponse(
+            data=await cached_or_run(
+                "ad-library.linkedin.ad-details",
+                {"url": ad_url, "v": 6},
+                _run,
+                ctx,
+                use_cache=cache,
+            )
+        )

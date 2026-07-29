@@ -546,6 +546,89 @@ async def _collect_creatives(
     return collected
 
 
+async def fetch_ad_details(
+    advertiser_id: str,
+    creative_id: str,
+    *,
+    country: str | None = None,
+    max_pages: int = 8,
+) -> dict[str, Any] | None:
+    """Resolve one ATC creative (AR… + CR…) via SearchCreatives paging.
+
+    Returns ``_normalize_ad`` input shape, or ``None`` so the router can Apify.
+    """
+    adv = (advertiser_id or "").strip().upper()
+    cr = (creative_id or "").strip().upper()
+    if not adv.startswith("AR") or not cr.startswith("CR"):
+        return None
+
+    region_enums = _region_enums(country)
+    working_proxy: str | None | bool = False  # False = unset
+    for _tier, proxy in _proxy_tiers():
+        probe = await _post_creatives(
+            [adv],
+            page_size=10,
+            cursor=None,
+            region_enums=region_enums,
+            proxy=proxy,
+        )
+        if probe is None and region_enums is not None:
+            probe = await _post_creatives(
+                [adv],
+                page_size=10,
+                cursor=None,
+                region_enums=None,
+                proxy=proxy,
+            )
+            if probe is not None:
+                region_enums = None
+        if probe is None:
+            continue
+        working_proxy = proxy
+        break
+    if working_proxy is False:
+        return None
+
+    for regions in (region_enums, None):
+        cursor: Any = None
+        first = True
+        pages = 0
+        while first or cursor is not None:
+            first = False
+            if pages >= max_pages:
+                break
+            pages += 1
+            payload = await _post_creatives(
+                [adv],
+                page_size=40,
+                cursor=cursor,
+                region_enums=regions,
+                proxy=working_proxy,  # type: ignore[arg-type]
+            )
+            if payload is None:
+                break
+            rows = payload.get("1")
+            if isinstance(rows, list):
+                for row in rows:
+                    if not isinstance(row, dict):
+                        continue
+                    item = _to_normalize_shape(row)
+                    if item and item.get("id") == cr:
+                        log.info(
+                            "google_ads_detail_ok",
+                            advertiser=adv,
+                            creative=cr,
+                            page=pages,
+                        )
+                        return item
+            cursor = payload.get("2")
+        if region_enums is None:
+            break
+
+    log.info("google_ads_detail_miss", advertiser=adv, creative=cr)
+    return None
+
+
 async def fetch_company_ads(
     advertiser: str,
     *,
