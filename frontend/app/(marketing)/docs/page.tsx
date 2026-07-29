@@ -344,9 +344,9 @@ export default function DocsPage() {
       <p className="text-muted-foreground max-w-3xl">
         Credits are the unit of billing. Cost is{" "}
         <strong className="text-foreground">per endpoint</strong> (see each docs
-        page) — typically 1–4 for simple lookups, and higher for list/search/comment
-        endpoints (often 8–70). Many list endpoints also scale with the number of
-        results returned.{" "}
+        page) — typically 1–4 for simple lookups; many native list/search/comment
+        endpoints are a flat 2 credits per call, while some Apify-backed lists still
+        scale with results (often higher).{" "}
         <strong className="text-foreground">Failed and empty results are never charged.</strong>
       </p>
       <p className="mt-3 text-muted-foreground max-w-3xl">

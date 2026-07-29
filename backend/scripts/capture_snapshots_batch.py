@@ -513,6 +513,48 @@ def batch5_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
     return tests
 
 
+def batch_quality_phase1() -> list[tuple[str, str, dict]]:
+    """Live recapture for endpoints whose response quality was fixed (null/mapper)."""
+    fresh = {"cache": "false"}
+    return [
+        ("youtube-video-details", "/v1/youtube/video-details", {**fresh, "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
+        ("youtube-channel-details", "/v1/youtube/channel-details", {**fresh, "url": "https://www.youtube.com/@MrBeast"}),
+        ("youtube-channel-videos", "/v1/youtube/channel-videos", {**fresh, "url": "https://www.youtube.com/@MrBeast", "limit": 5}),
+        ("youtube-comments", "/v1/youtube/comments", {**fresh, "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "limit": 5}),
+        ("youtube-search", "/v1/youtube/search", {**fresh, "q": "space", "limit": 5}),
+        ("youtube-channel-playlists", "/v1/youtube/channel-playlists", {**fresh, "url": "https://www.youtube.com/@MrBeast", "limit": 5}),
+        ("instagram-details", "/v1/instagram/details", {**fresh, "url": "https://www.instagram.com/p/DbTmwYKFkZo/"}),
+        ("instagram-channel-details", "/v1/instagram/channel-details", {**fresh, "url": "https://www.instagram.com/nasa/"}),
+        ("instagram-channel-posts", "/v1/instagram/channel-posts", {**fresh, "url": "https://www.instagram.com/nasa/", "limit": 5}),
+        ("instagram-hashtag-search", "/v1/instagram/hashtag-search", {**fresh, "q": "nasa", "limit": 5}),
+        ("rumble-search", "/v1/rumble/search", {**fresh, "q": "space", "limit": 5}),
+        ("rumble-channel-videos", "/v1/rumble/channel-videos", {**fresh, "url": "https://rumble.com/c/Bongino", "limit": 5}),
+        ("linkedin-profile", "/v1/linkedin/profile", {**fresh, "url": "https://www.linkedin.com/in/williamhgates"}),
+        ("linkedin-company", "/v1/linkedin/company", {**fresh, "url": "https://www.linkedin.com/company/microsoft"}),
+        ("linkedin-search-posts", "/v1/linkedin/search-posts", {**fresh, "q": "artificial intelligence", "limit": 5}),
+        ("tiktok-shop-search", "/v1/tiktok-shop/shop-search", {**fresh, "q": "phone case", "limit": 5}),
+        ("tiktok-shop-product-details", "/v1/tiktok-shop/product-details", {**fresh, "url": "https://www.tiktok.com/shop/pdp/1731743608991158724"}),
+        ("twitch-profile", "/v1/twitch/profile", {**fresh, "url": "https://www.twitch.tv/shroud"}),
+        ("analytics-post", "/v1/analytics/post", {**fresh, "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
+        ("tiktok-top-search", "/v1/tiktok/top-search", {**fresh, "q": "nasa", "limit": 5}),
+        ("tiktok-trending-feed", "/v1/tiktok/trending-feed", {**fresh, "country": "US", "limit": 5}),
+        ("twitter-user-tweets", "/v1/twitter/user-tweets", {**fresh, "url": "https://x.com/nasa", "limit": 5}),
+        ("twitter-search", "/v1/twitter/search", {**fresh, "q": "nasa", "limit": 5}),
+        ("reddit-search", "/v1/reddit/search", {**fresh, "q": "james webb", "limit": 5}),
+        ("reddit-subreddit-details", "/v1/reddit/subreddit-details", {**fresh, "url": "r/space"}),
+    ]
+
+
+def batch_quality_retry_phase1() -> list[tuple[str, str, dict]]:
+    """Retry fixtures that failed in batch_quality."""
+    fresh = {"cache": "false"}
+    return [
+        ("instagram-details", "/v1/instagram/details", {**fresh, "url": "https://www.instagram.com/p/DbYaLffE2DD/"}),
+        ("instagram-hashtag-search", "/v1/instagram/hashtag-search", {**fresh, "q": "travel", "limit": 5}),
+        ("twitter-user-tweets", "/v1/twitter/user-tweets", {**fresh, "url": "https://x.com/NASA", "limit": 5}),
+    ]
+
+
 def batch_nullfix_phase1() -> list[tuple[str, str, dict]]:
     """Recapture endpoints whose normalizers were fixed for always-null fields."""
     return [
@@ -593,6 +635,9 @@ BATCHES = {
         lambda p1: [],
     ),
     "batch_nullfix": (batch_nullfix_phase1, lambda _p1: []),
+    # Fable-5 mapper/quality refresh: YT / IG / Rumble / LinkedIn / Shop / Twitch / analytics
+    "batch_quality": (batch_quality_phase1, lambda _p1: []),
+    "batch_quality_retry": (batch_quality_retry_phase1, lambda _p1: []),
 }
 
 
@@ -627,8 +672,8 @@ async def main() -> None:
     ).execute()
     key_id = ins.data[0]["id"]
 
-    # Heavy Apify batches (nullfix) need low concurrency to avoid 429s / timeouts.
-    conc = 3 if batch == "batch_nullfix" else 0
+    # Heavy Apify / slow native batches need low concurrency to avoid 429s / timeouts.
+    conc = 3 if batch in ("batch_nullfix", "batch_quality", "batch_quality_retry") else 0
     try:
         async with httpx.AsyncClient(headers={"Authorization": f"Bearer {plain}"}) as client:
             print("--- phase 1")
