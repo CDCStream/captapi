@@ -673,7 +673,7 @@ def generate_image(
 def generate_cover(slug: str, title: str, keyword: str) -> str:
     """Generate an Outrank-style sketch cover; fall back to the branded card."""
     prompt = COVER_STYLE.format(title=title, topic=keyword)
-    rendered = generate_image(title, prompt=prompt, quality="high")
+    rendered = generate_image(title, prompt=prompt, quality="medium")
     if rendered:
         image, content_type = rendered
         ext = "webp" if content_type == "image/webp" else "png"

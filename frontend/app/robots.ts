@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/api-catalog";
 
 // Block private/non-content areas everywhere.
-const DISALLOW = ["/dashboard/", "/auth/", "/login", "/signup", "/api/"];
+const DISALLOW = ["/dashboard/", "/auth/", "/api/"];
 
 // AI / answer-engine crawlers we explicitly welcome (GEO / AEO).
 const AI_BOTS = [
