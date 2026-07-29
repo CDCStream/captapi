@@ -1084,6 +1084,89 @@ def _pick_ig_user_pk(window: str) -> str | None:
     return ranked[0]
 
 
+_COMPACT_COUNT_RE = re.compile(
+    r"^\s*([\d.,]+)\s*([KMB])?\s*$",
+    re.IGNORECASE,
+)
+_COMPACT_MULT = {"K": 1_000, "M": 1_000_000, "B": 1_000_000_000}
+_OG_PROFILE_COUNTS_RE = re.compile(
+    r"([\d.,]+[KMB]?)\s+Followers?,\s*([\d.,]+[KMB]?)\s+Following,\s*([\d.,]+[KMB]?)\s+Posts?",
+    re.IGNORECASE,
+)
+
+
+def _parse_compact_count(value: str | None) -> int | None:
+    """Parse ``32K`` / ``1,667`` / ``269M`` style counts from og:description."""
+    if not value:
+        return None
+    m = _COMPACT_COUNT_RE.match(value.replace("\u00a0", " "))
+    if not m:
+        return None
+    try:
+        base = float(m.group(1).replace(",", ""))
+    except ValueError:
+        return None
+    suffix = (m.group(2) or "").upper()
+    return int(base * _COMPACT_MULT.get(suffix, 1))
+
+
+def _external_url_from_bio_links(html: str) -> str | None:
+    """First non-lynx URL from ``bio_links`` embedded in profile HTML."""
+    idx = html.find('"bio_links"')
+    if idx < 0:
+        return None
+    window = html[idx : idx + 4000]
+    urls: list[str] = []
+    for m in re.finditer(r'"url"\s*:\s*"((?:\\.|[^"\\])*)"', window):
+        try:
+            url = json.loads(f'"{m.group(1)}"')
+        except ValueError:
+            url = m.group(1).encode("utf-8").decode("unicode_escape", errors="ignore")
+        url = (url or "").strip()
+        if not url or not url.startswith("http"):
+            continue
+        if "l.instagram.com" in url or "instagram.com/_u/" in url:
+            continue
+        urls.append(url)
+    if urls:
+        return urls[0]
+    # Fallback: unwrap lynx redirect ``?u=``.
+    for m in re.finditer(r'"lynx_url"\s*:\s*"((?:\\.|[^"\\])*)"', window):
+        try:
+            lynx = json.loads(f'"{m.group(1)}"')
+        except ValueError:
+            continue
+        if not lynx or "u=" not in lynx:
+            continue
+        q = urllib.parse.parse_qs(urllib.parse.urlparse(lynx).query).get("u") or []
+        if q:
+            return urllib.parse.unquote(q[0])
+    return None
+
+
+def _counts_from_og_description(html: str) -> tuple[int | None, int | None, int | None]:
+    """``og:description`` → (followers, following, posts)."""
+    m = re.search(
+        r'<meta[^>]+property=["\']og:description["\'][^>]+content=["\']([^"\']+)["\']',
+        html,
+        re.I,
+    ) or re.search(
+        r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:description["\']',
+        html,
+        re.I,
+    )
+    if not m:
+        return None, None, None
+    cm = _OG_PROFILE_COUNTS_RE.search(m.group(1))
+    if not cm:
+        return None, None, None
+    return (
+        _parse_compact_count(cm.group(1)),
+        _parse_compact_count(cm.group(2)),
+        _parse_compact_count(cm.group(3)),
+    )
+
+
 def parse_profile_from_html(html: str, handle: str) -> dict[str, Any] | None:
     """Best-effort user dict from a rendered profile page (Decodo / browser HTML).
 
@@ -1099,6 +1182,9 @@ def parse_profile_from_html(html: str, handle: str) -> dict[str, Any] | None:
     )
     if not anchors:
         return None
+
+    og_followers, og_following, og_posts = _counts_from_og_description(html)
+    external_from_links = _external_url_from_bio_links(html)
 
     def _from_window(window: str) -> dict[str, Any] | None:
         def _str(key: str) -> str | None:
@@ -1163,18 +1249,34 @@ def parse_profile_from_html(html: str, handle: str) -> dict[str, Any] | None:
         }
 
     fallback: dict[str, Any] | None = None
+    parsed: dict[str, Any] | None = None
     for anchor in anchors:
         # follower_count often sits a few KB before the username key in the same node.
         start = max(0, anchor.start() - 4000)
         end = min(len(html), anchor.end() + 6000)
-        parsed = _from_window(html[start:end])
-        if not parsed:
+        candidate = _from_window(html[start:end])
+        if not candidate:
             continue
-        if parsed.get("follower_count") is not None:
-            return parsed
+        if candidate.get("follower_count") is not None:
+            parsed = candidate
+            break
         if fallback is None:
-            fallback = parsed
-    return fallback
+            fallback = candidate
+    parsed = parsed or fallback
+    if not parsed:
+        return None
+
+    # Logged-out HTML often omits media_count / external_url; og:description and
+    # bio_links still expose them.
+    if parsed.get("media_count") is None and og_posts is not None:
+        parsed["media_count"] = og_posts
+    if parsed.get("follower_count") is None and og_followers is not None:
+        parsed["follower_count"] = og_followers
+    if parsed.get("following_count") is None and og_following is not None:
+        parsed["following_count"] = og_following
+    if not parsed.get("external_url") and external_from_links:
+        parsed["external_url"] = external_from_links
+    return parsed
 
 
 def profile_unavailable_html(html: str) -> bool:
@@ -1325,6 +1427,27 @@ def map_basic_profile(user: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in out.items() if v is not None}
 
 
+def _external_url_from_user(user: dict[str, Any]) -> str | None:
+    direct = safe_str(user.get("external_url"))
+    if direct:
+        return direct
+    links = user.get("bio_links")
+    if not isinstance(links, list):
+        return None
+    for link in links:
+        if not isinstance(link, dict):
+            continue
+        url = safe_str(link.get("url"))
+        if url and url.startswith("http") and "l.instagram.com" not in url:
+            return url
+        lynx = safe_str(link.get("lynx_url"))
+        if lynx and "u=" in lynx:
+            q = urllib.parse.parse_qs(urllib.parse.urlparse(lynx).query).get("u") or []
+            if q:
+                return urllib.parse.unquote(q[0])
+    return None
+
+
 def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> dict[str, Any]:
     """Map a web_profile_info user node to the channel-details response shape."""
     username = safe_str(user.get("username")) or (handle or "").lstrip("@")
@@ -1346,7 +1469,7 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
         ),
         "verified": False if verified is None else bool(verified),
         "profileImage": pic,
-        "externalUrl": safe_str(user.get("external_url")),
+        "externalUrl": _external_url_from_user(user),
     }
 
 
