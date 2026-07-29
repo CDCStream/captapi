@@ -568,6 +568,35 @@ async def playlist_native(url: str, limit: int) -> dict[str, Any] | None:
 
 
 # ---------------------------------------------------- channel tab lists ---
+def _channel_title_from_data(data: Any) -> str | None:
+    """Channel display name from browse / channel-page ytInitialData."""
+    if not data:
+        return None
+    meta = next(walk_find(data, "channelMetadataRenderer"), None) or {}
+    title = safe_str(meta.get("title"))
+    if title:
+        return title
+    # pageHeaderViewModel.title.dynamicTextViewModel.text.content
+    for ph in walk_find(data, "pageHeaderViewModel"):
+        dyn = ((ph.get("title") or {}).get("dynamicTextViewModel") or {}).get("text")
+        title = safe_str(text_of(dyn))
+        if title:
+            return title
+    return None
+
+
+def _fill_missing_channel_name(
+    cards: list[dict[str, Any]], channel_name: str | None
+) -> list[dict[str, Any]]:
+    """Channel tabs omit byline; stamp the owning channel onto each card."""
+    if not channel_name:
+        return cards
+    for card in cards:
+        if not card.get("channelName"):
+            card["channelName"] = channel_name
+    return cards
+
+
 async def channel_tab_native(
     tab_url: str,
     limit: int,
@@ -601,11 +630,14 @@ async def channel_tab_native(
                     data, limit=limit, continuation_endpoint="browse", shorts=shorts
                 )
                 if cards:
-                    return cards
+                    return _fill_missing_channel_name(
+                        cards, _channel_title_from_data(data)
+                    )
     data, _ = await fetch_page_data(tab_url, timeout=15.0)
     if data is None:
         return []
-    return await _paginate(data, limit=limit, continuation_endpoint="browse", shorts=shorts)
+    cards = await _paginate(data, limit=limit, continuation_endpoint="browse", shorts=shorts)
+    return _fill_missing_channel_name(cards, _channel_title_from_data(data))
 
 
 def collect_playlist_cards(data: Any) -> list[dict[str, Any]]:

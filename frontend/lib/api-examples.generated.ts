@@ -12979,48 +12979,48 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "totalReturned": 5,
     "shorts": [
       {
-        "url": "https://www.youtube.com/watch?v=6Zy5VLcEbZc",
-        "title": "I Stranded 100 People In The Wilderness For $250,000",
-        "publishedAt": "2026-05-02T16:00:01.000Z",
-        "viewCount": 135166859,
-        "durationSeconds": 2220,
-        "thumbnailUrl": "https://i.ytimg.com/vi/6Zy5VLcEbZc/maxresdefault.jpg",
+        "url": "https://www.youtube.com/shorts/Df5Y-2ndQyU",
+        "title": "Read My Book, You Could Win $1,000,000",
+        "publishedAt": null,
+        "viewCount": 8900000,
+        "durationSeconds": null,
+        "thumbnailUrl": null,
         "channelName": "MrBeast"
       },
       {
-        "url": "https://www.youtube.com/watch?v=GpQSUjNsNm0",
-        "title": "7 Days Stranded in The Arctic",
-        "publishedAt": "2026-05-30T16:00:02.000Z",
-        "viewCount": 91519007,
-        "durationSeconds": 1935,
-        "thumbnailUrl": "https://i.ytimg.com/vi/GpQSUjNsNm0/maxresdefault.jpg",
+        "url": "https://www.youtube.com/shorts/egvLKQe6I4I",
+        "title": "Don't Pop the Balloon",
+        "publishedAt": null,
+        "viewCount": 90000000,
+        "durationSeconds": null,
+        "thumbnailUrl": null,
         "channelName": "MrBeast"
       },
       {
-        "url": "https://www.youtube.com/watch?v=iYlODtkyw_I",
-        "title": "Survive 30 Days Chained To A Stranger, Win $250,000",
-        "publishedAt": "2026-06-27T16:00:05.000Z",
-        "viewCount": 55908561,
-        "durationSeconds": 2104,
-        "thumbnailUrl": "https://i.ytimg.com/vi/iYlODtkyw_I/maxresdefault.jpg",
+        "url": "https://www.youtube.com/shorts/LgbyEFILLJI",
+        "title": "$1 vs $10,000 Cake",
+        "publishedAt": null,
+        "viewCount": 87000000,
+        "durationSeconds": null,
+        "thumbnailUrl": null,
         "channelName": "MrBeast"
       },
       {
-        "url": "https://www.youtube.com/watch?v=__fmDj0ZJ1Q",
-        "title": "50 YouTube Legends Fight For $1,000,000",
-        "publishedAt": "2026-06-13T16:00:00.000Z",
-        "viewCount": 69251098,
-        "durationSeconds": 1927,
-        "thumbnailUrl": "https://i.ytimg.com/vi/__fmDj0ZJ1Q/maxresdefault.jpg",
+        "url": "https://www.youtube.com/shorts/YA_kX8hu1gg",
+        "title": "This Plane Takes Off in 12 Seconds",
+        "publishedAt": null,
+        "viewCount": 31000000,
+        "durationSeconds": null,
+        "thumbnailUrl": null,
         "channelName": "MrBeast"
       },
       {
-        "url": "https://www.youtube.com/watch?v=AaMdXZMvT3w",
-        "title": "Survive 30 Days On An Island With Your Ex, Win $250,000",
-        "publishedAt": "2026-05-16T16:00:01.000Z",
-        "viewCount": 89925200,
-        "durationSeconds": 2349,
-        "thumbnailUrl": "https://i.ytimg.com/vi/AaMdXZMvT3w/maxresdefault.jpg",
+        "url": "https://www.youtube.com/shorts/XCGVurja73c",
+        "title": "I Raced The Fastest Man On Earth",
+        "publishedAt": null,
+        "viewCount": 87000000,
+        "durationSeconds": null,
+        "thumbnailUrl": null,
         "channelName": "MrBeast"
       }
     ]
@@ -13087,7 +13087,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "viewCount": 31000000,
         "durationSeconds": 875,
         "thumbnailUrl": "https://i.ytimg.com/vi/lVylRtlPOIE/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDEw9iu9Jqd9KZ9pBMfbkc-aipTog",
-        "channelName": null
+        "channelName": "MrBeast"
       },
       {
         "url": "https://www.youtube.com/watch?v=iYlODtkyw_I",
@@ -13096,7 +13096,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "viewCount": 81000000,
         "durationSeconds": 2105,
         "thumbnailUrl": "https://i.ytimg.com/vi/iYlODtkyw_I/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBr_mSSbkEXsEQf8rxuahzMDeW9Jg",
-        "channelName": null
+        "channelName": "MrBeast"
       },
       {
         "url": "https://www.youtube.com/watch?v=__fmDj0ZJ1Q",
@@ -13105,7 +13105,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "viewCount": 76000000,
         "durationSeconds": 1928,
         "thumbnailUrl": "https://i.ytimg.com/vi/__fmDj0ZJ1Q/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBfvcFZsIc7eS3Y5mxNTWGLYGjlVg",
-        "channelName": null
+        "channelName": "MrBeast"
       },
       {
         "url": "https://www.youtube.com/watch?v=GpQSUjNsNm0",
@@ -13114,7 +13114,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "viewCount": 104000000,
         "durationSeconds": 1935,
         "thumbnailUrl": "https://i.ytimg.com/vi/GpQSUjNsNm0/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDou7TMV8d2wG0J5_NdPxT_Z04_Iw",
-        "channelName": null
+        "channelName": "MrBeast"
       },
       {
         "url": "https://www.youtube.com/watch?v=AaMdXZMvT3w",
@@ -13123,7 +13123,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "viewCount": 96000000,
         "durationSeconds": 2349,
         "thumbnailUrl": "https://i.ytimg.com/vi/AaMdXZMvT3w/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAfwDXsWdeKhhuSk9s8s1TnaZVv0Q",
-        "channelName": null
+        "channelName": "MrBeast"
       }
     ]
   },

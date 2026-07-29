@@ -1148,7 +1148,7 @@ async def youtube_channel_videos(
 
         data = await cached_or_run(
             endpoint="youtube.channel-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 6},
+            params={"url": url, "limit": limit, "fast": fast, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1465,7 +1465,7 @@ async def youtube_channel_shorts(
 
         data = await cached_or_run(
             endpoint="youtube.channel-shorts",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1511,7 +1511,7 @@ async def youtube_channel_streams(
 
         data = await cached_or_run(
             endpoint="youtube.channel-streams",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
