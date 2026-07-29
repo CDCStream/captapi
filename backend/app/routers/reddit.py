@@ -124,8 +124,9 @@ def _normalize_comment(item: dict[str, Any]) -> dict[str, Any]:
         "parentId": safe_str(item.get("parentId") or item.get("parent_id")),
         "depth": safe_int(item.get("depth")),
         "isSubmitter": first_present(item.get("isSubmitter"), item.get("is_submitter")),
-        "edited": bool(item.get("edited")) or None,
-        "stickied": bool(item.get("stickied")) or None,
+        # Reddit may send edited as False or a timestamp; coerce to bool, keep False.
+        "edited": bool(item.get("edited")) if item.get("edited") is not None else None,
+        "stickied": bool(item.get("stickied")) if item.get("stickied") is not None else None,
     }
 
 
@@ -656,7 +657,7 @@ async def post_comments(
 
         data = await cached_or_run(
             endpoint="reddit.post-comments",
-            params={"url": url, "limit": limit, "v": 4},
+            params={"url": url, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
