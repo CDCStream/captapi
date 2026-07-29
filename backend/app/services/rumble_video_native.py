@@ -279,12 +279,29 @@ _TIME_RE = re.compile(
 )
 _THUMB_RE = re.compile(r'<img class="video-item--img"[^>]+src="([^"]+)"', re.I)
 _VERIFIED_RE = re.compile(r"video-item--by-verified", re.I)
+# Counters sit after an inline SVG inside the item div.
 _VIEWS_RE = re.compile(
+    r'video-item--views[^>]*>.*?</svg>\s*([\d.,]+[KMBkmb]?)|'
     r'video-item--views[^>]*>\s*([\d.,]+[KMBkmb]?)\s*<|'
-    r'data-views=["\']([\d.,]+[KMBkmb]?)["\']|'
-    r'>([\d.,]+[KMBkmb]?)\s+views?<',
+    r'data-views=["\']([\d.,]+[KMBkmb]?)["\']',
+    re.I | re.S,
+)
+_COMMENTS_RE = re.compile(
+    r'video-item--comments[^>]*>.*?</svg>\s*([\d.,]+[KMBkmb]?)|'
+    r'video-item--comments[^>]*>\s*([\d.,]+[KMBkmb]?)\s*<',
+    re.I | re.S,
+)
+_LIKES_DISLIKES_RE = re.compile(
+    r'title="([\d.,]+[KMBkmb]?)\s*Likes?\s*\|\s*([\d.,]+[KMBkmb]?)\s*Dislikes?"',
     re.I,
 )
+
+
+def _counter_from_match(match: re.Match[str] | None) -> int | None:
+    if not match:
+        return None
+    raw = next((g for g in match.groups() if g), None)
+    return _parse_count(raw) if raw else None
 
 
 def parse_search_html(html: str, limit: int = 20) -> list[dict[str, Any]]:
@@ -310,10 +327,9 @@ def parse_search_html(html: str, limit: int = 20) -> list[dict[str, Any]]:
         dur_m = _DURATION_ATTR_RE.search(chunk)
         time_m = _TIME_RE.search(chunk)
         thumb_m = _THUMB_RE.search(chunk)
-        views_m = _VIEWS_RE.search(chunk)
-        views_raw = None
-        if views_m:
-            views_raw = next((g for g in views_m.groups() if g), None)
+        votes_m = _LIKES_DISLIKES_RE.search(chunk)
+        likes = _parse_count(votes_m.group(1)) if votes_m else None
+        dislikes = _parse_count(votes_m.group(2)) if votes_m else None
         channel = safe_str(unescape(by_m.group(2))) if by_m else None
         channel_url = f"https://rumble.com{by_m.group(1)}" if by_m else None
         out.append(
@@ -324,13 +340,13 @@ def parse_search_html(html: str, limit: int = 20) -> list[dict[str, Any]]:
                 "title": safe_str(unescape(title_m.group(1))) if title_m else None,
                 "channel": channel,
                 "channelUrl": channel_url,
-                "views": _parse_count(views_raw) if views_raw else None,
-                "likes": None,
-                "dislikes": None,
+                "views": _counter_from_match(_VIEWS_RE.search(chunk)),
+                "likes": likes,
+                "dislikes": dislikes,
                 "duration": safe_str(dur_m.group(1)) if dur_m else None,
                 "publishedAt": safe_str(time_m.group(1)) if time_m else None,
                 "thumbnail": safe_str(unescape(thumb_m.group(1))) if thumb_m else None,
-                "comments": None,
+                "comments": _counter_from_match(_COMMENTS_RE.search(chunk)),
             }
         )
         if len(out) >= capped:
