@@ -15,7 +15,7 @@ from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.security import hash_api_key
-from app.services.supabase_client import get_supabase
+from app.services.supabase_client import get_supabase, sb_execute
 
 log = structlog.get_logger(__name__)
 
@@ -40,12 +40,15 @@ class ApiCaller:
 
 def _load_credits(user_id: str) -> dict:
     sb = get_supabase()
-    bal = (
-        sb.table("credit_balances")
-        .select("subscription_credits, topup_credits, plan")
-        .eq("user_id", user_id)
-        .limit(1)
-        .execute()
+    bal = sb_execute(
+        lambda: (
+            sb.table("credit_balances")
+            .select("subscription_credits, topup_credits, plan")
+            .eq("user_id", user_id)
+            .limit(1)
+            .execute()
+        ),
+        label="credit_balances",
     )
     if not bal.data:
         raise HTTPException(status_code=402, detail="No credit balance found")
@@ -55,12 +58,15 @@ def _load_credits(user_id: str) -> dict:
 async def _resolve_api_key(plain: str) -> ApiCaller:
     sb = get_supabase()
     key_hash = hash_api_key(plain)
-    res = (
-        sb.table("api_keys")
-        .select("id, user_id, revoked_at")
-        .eq("key_hash", key_hash)
-        .limit(1)
-        .execute()
+    res = sb_execute(
+        lambda: (
+            sb.table("api_keys")
+            .select("id, user_id, revoked_at")
+            .eq("key_hash", key_hash)
+            .limit(1)
+            .execute()
+        ),
+        label="api_keys.lookup",
     )
     if not res.data:
         raise HTTPException(status_code=401, detail="Invalid or revoked API key")
@@ -69,9 +75,15 @@ async def _resolve_api_key(plain: str) -> ApiCaller:
         raise HTTPException(status_code=401, detail="API key has been revoked")
 
     b = _load_credits(row["user_id"])
-    sb.table("api_keys").update({"last_used_at": datetime.utcnow().isoformat()}).eq(
-        "id", row["id"]
-    ).execute()
+    sb_execute(
+        lambda: (
+            sb.table("api_keys")
+            .update({"last_used_at": datetime.utcnow().isoformat()})
+            .eq("id", row["id"])
+            .execute()
+        ),
+        label="api_keys.touch",
+    )
 
     return ApiCaller(
         user_id=row["user_id"],

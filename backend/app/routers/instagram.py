@@ -352,8 +352,11 @@ async def _fetch_instagram_transcript(
     settings = get_settings()
     apify = get_apify()
 
+    heard_empty = False  # Whisper ran but found no usable speech on a media URL
+
     async def _whisper(media_url: str) -> tuple[str, list[dict[str, Any]], str | None] | None:
-        """Whisper a media URL; None = fetch failed / too large (try next)."""
+        """Whisper a media URL; None = fetch failed / too large / empty (try next)."""
+        nonlocal heard_empty
         try:
             tx = await transcribe_video_url(media_url, language=language)
         except Exception:  # noqa: BLE001
@@ -364,8 +367,9 @@ async def _fetch_instagram_transcript(
         if full:
             detected = normalize_language_code(safe_str(tx.get("language")) or language)
             return full, tx.get("transcriptSegments") or [], detected
-        # Whisper ran fine and heard nothing -> genuinely no speech.
-        raise HTTPException(status_code=422, detail="No speech found in this Reel")
+        # Empty after a successful Whisper run — try other tracks/actors first.
+        heard_empty = True
+        return None
 
     # Fast path: native GraphQL resolver gets the MP4 URL in ~1-2s.
     reel_item: dict[str, Any] | None = None
@@ -433,6 +437,8 @@ async def _fetch_instagram_transcript(
 
     if reel_item is None and native is None:
         raise HTTPException(status_code=404, detail="Reel not found")
+    if heard_empty:
+        raise HTTPException(status_code=422, detail="No speech found in this Reel")
     raise HTTPException(status_code=422, detail="No transcript available")
 
 
