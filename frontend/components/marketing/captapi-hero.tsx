@@ -143,7 +143,7 @@ export function CaptapiHero() {
               ))}
             </div>
             <p className="text-sm text-muted-foreground">
-              Used by <span className="font-semibold text-primary">200+</span> developers
+              Used by <span className="font-semibold text-primary">250+</span> developers
             </p>
           </div>
 
