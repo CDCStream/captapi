@@ -263,6 +263,11 @@ export default async function ApiDetailPage({
         </div>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button asChild size="lg">
+            <Link href={`/dashboard/playground?endpoint=${ep.slug}`}>
+              Try in Playground
+            </Link>
+          </Button>
+          <Button asChild size="lg" variant="outline">
             <Link href="/signup">Get your API key — free</Link>
           </Button>
           <Button asChild size="lg" variant="outline">
@@ -305,6 +310,11 @@ export default async function ApiDetailPage({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-2xl font-semibold">Try it</h2>
             <div className="flex flex-wrap items-center gap-1">
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/dashboard/playground?endpoint=${ep.slug}`}>
+                  Open in Playground
+                </Link>
+              </Button>
               <FeatureRequestDialog
                 defaultEndpointSlug={ep.slug}
                 variant="ghost"
@@ -320,8 +330,8 @@ export default async function ApiDetailPage({
             </div>
           </div>
           <p className="mt-2 mb-4 max-w-3xl text-sm text-muted-foreground">
-            Fill in the parameters below and copy a ready-to-run request in your
-            language of choice.
+            Fill in the parameters below and copy a ready-to-run request, or open
+            the live Playground to run it against your account (no API key paste).
           </p>
           <ApiPlayground ep={ep} />
         </section>

@@ -115,14 +115,24 @@ export async function middleware(request: NextRequest) {
   if (isProtected && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("redirect", path);
+    // Keep query string (e.g. ?endpoint=facebook-comments) so deep-links survive login.
+    const redirectTo = `${path}${request.nextUrl.search}`;
+    url.search = "";
+    url.searchParams.set("redirect", redirectTo);
     return NextResponse.redirect(url);
   }
 
   if (isAuthPage && user) {
+    const requested = request.nextUrl.searchParams.get("redirect");
+    const next =
+      requested && requested.startsWith("/") && !requested.startsWith("//")
+        ? requested
+        : "/dashboard";
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    url.search = "";
+    // Support deep-links like /dashboard/playground?endpoint=facebook-comments
+    const [pathname, qs] = next.split("?");
+    url.pathname = pathname || "/dashboard";
+    url.search = qs ? `?${qs}` : "";
     return NextResponse.redirect(url);
   }
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
   AtSign,
@@ -31,6 +32,7 @@ import {
   PLATFORM_GROUPS,
   creditLabel,
   requestUrl,
+  resolveEndpoint,
   type ApiEndpoint,
   type PlatformId,
 } from "@/lib/api-catalog";
@@ -135,13 +137,36 @@ const PLATFORM_FG: Record<PlatformId, string> = {
 const FIRST = PLATFORM_GROUPS[0].endpoints[0];
 
 export default function PlaygroundPage() {
-  const [selected, setSelected] = useState<ApiEndpoint>(FIRST);
+  return (
+    <Suspense fallback={null}>
+      <PlaygroundInner />
+    </Suspense>
+  );
+}
+
+function PlaygroundInner() {
+  const searchParams = useSearchParams();
+  const endpointRef = searchParams.get("endpoint");
+  const fromDeepLink = useMemo(
+    () => resolveEndpoint(endpointRef) ?? FIRST,
+    [endpointRef],
+  );
+  const [selected, setSelected] = useState<ApiEndpoint>(fromDeepLink);
   const [sessionReady, setSessionReady] = useState(false);
+
+  useEffect(() => {
+    setSelected(fromDeepLink);
+  }, [fromDeepLink]);
 
   useEffect(() => {
     const sb = createClient();
     sb.auth.getSession().then(({ data }) => setSessionReady(!!data.session));
   }, []);
+
+  useEffect(() => {
+    if (!endpointRef || !resolveEndpoint(endpointRef)) return;
+    track("playground_deeplink", { endpoint: endpointRef });
+  }, [endpointRef]);
 
   const totalCount = useMemo(
     () => PLATFORM_GROUPS.reduce((n, g) => n + g.endpoints.length, 0),

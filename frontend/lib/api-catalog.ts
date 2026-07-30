@@ -808,6 +808,18 @@ export function getEndpoint(slug: string): ApiEndpoint | undefined {
   return ALL_ENDPOINTS.find((e) => e.slug === slug);
 }
 
+/** Resolve an endpoint by marketing slug or by API path (e.g. /v1/facebook/comments). */
+export function resolveEndpoint(ref: string | null | undefined): ApiEndpoint | undefined {
+  if (!ref) return undefined;
+  const raw = ref.trim();
+  if (!raw) return undefined;
+  return (
+    getEndpoint(raw) ||
+    ALL_ENDPOINTS.find((e) => e.path === raw) ||
+    ALL_ENDPOINTS.find((e) => e.path === `/${raw.replace(/^\//, "")}`)
+  );
+}
+
 // Maps a catalog slug to its @captapi/mcp tool name. Most are the slug with
 // dashes turned into underscores; a few names differ from the marketing slug.
 const MCP_TOOL_OVERRIDES: Record<string, string> = {
