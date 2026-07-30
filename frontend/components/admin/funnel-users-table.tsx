@@ -8,6 +8,7 @@ export type FunnelUserRow = {
   requests: number;
   errors: number;
   events: number;
+  hasApiKey: boolean;
   lastAt: string | null;
   lastEndpoint: string | null;
   firstAt: string | null;
@@ -35,12 +36,14 @@ function fmtWhen(iso: string | null) {
 export function FunnelUsersTable({ users }: { users: FunnelUserRow[] }) {
   const [paidOnly, setPaidOnly] = useState(false);
   const [noApiOnly, setNoApiOnly] = useState(false);
+  const [noKeyOnly, setNoKeyOnly] = useState(false);
   const [q, setQ] = useState("");
 
   const filtered = useMemo(() => {
     let list = users;
     if (paidOnly) list = list.filter((u) => u.paid);
     if (noApiOnly) list = list.filter((u) => u.requests === 0);
+    if (noKeyOnly) list = list.filter((u) => !u.hasApiKey);
     const needle = q.trim().toLowerCase();
     if (needle) {
       list = list.filter(
@@ -51,10 +54,14 @@ export function FunnelUsersTable({ users }: { users: FunnelUserRow[] }) {
       );
     }
     return list;
-  }, [users, paidOnly, noApiOnly, q]);
+  }, [users, paidOnly, noApiOnly, noKeyOnly, q]);
 
   const noApiCount = useMemo(
     () => users.filter((u) => u.requests === 0).length,
+    [users],
+  );
+  const noKeyCount = useMemo(
+    () => users.filter((u) => !u.hasApiKey).length,
     [users],
   );
 
@@ -86,6 +93,15 @@ export function FunnelUsersTable({ users }: { users: FunnelUserRow[] }) {
           />
           No API call ({noApiCount})
         </label>
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <input
+            type="checkbox"
+            checked={noKeyOnly}
+            onChange={(e) => setNoKeyOnly(e.target.checked)}
+            className="size-4 rounded border"
+          />
+          No API key ({noKeyCount})
+        </label>
         <span className="text-xs text-muted-foreground">{filtered.length} users</span>
       </div>
 
@@ -95,6 +111,7 @@ export function FunnelUsersTable({ users }: { users: FunnelUserRow[] }) {
             <tr>
               <th className="px-3 py-2 font-medium">User</th>
               <th className="px-3 py-2 font-medium">Plan</th>
+              <th className="px-3 py-2 font-medium">API key</th>
               <th className="px-3 py-2 font-medium">Reqs</th>
               <th className="px-3 py-2 font-medium">Events</th>
               <th className="px-3 py-2 font-medium">Errors</th>
@@ -115,6 +132,15 @@ export function FunnelUsersTable({ users }: { users: FunnelUserRow[] }) {
                   </Link>
                 </td>
                 <td className="px-3 py-2 text-muted-foreground">{u.plan || "—"}</td>
+                <td className="px-3 py-2">
+                  {u.hasApiKey ? (
+                    <span className="text-emerald-700">yes</span>
+                  ) : (
+                    <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[11px] font-medium text-amber-700">
+                      no
+                    </span>
+                  )}
+                </td>
                 <td className="px-3 py-2">
                   {u.requests === 0 ? (
                     <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[11px] font-medium text-amber-700">
@@ -141,7 +167,7 @@ export function FunnelUsersTable({ users }: { users: FunnelUserRow[] }) {
             ))}
             {!filtered.length && (
               <tr>
-                <td colSpan={8} className="px-3 py-8 text-center text-muted-foreground">
+                <td colSpan={9} className="px-3 py-8 text-center text-muted-foreground">
                   No users in this window.
                 </td>
               </tr>

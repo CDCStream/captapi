@@ -18,6 +18,7 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
     { data: paidRows },
     { data: checkoutRows },
     { count: sampleCount },
+    { data: apiKeyRows },
   ] = await Promise.all([
     sb
       .from("events")
@@ -51,6 +52,12 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
       .select("*", { count: "exact", head: true })
       .gte("created_at", since)
       .not("user_id", "in", notIn),
+    sb
+      .from("api_keys")
+      .select("user_id, created_at")
+      .gte("created_at", since)
+      .not("user_id", "in", notIn)
+      .limit(5000),
   ]);
 
   const callers = new Set<string>();
@@ -66,6 +73,13 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
     }
     if (typeof row.response_time_ms === "number") times.push(row.response_time_ms);
     if ((row.status_code ?? 0) >= 400) errors += 1;
+  }
+
+  const keyHolders = new Set<string>();
+  for (const row of apiKeyRows || []) {
+    const uid = row.user_id as string;
+    if (!uid || excluded.has(uid)) continue;
+    keyHolders.add(uid);
   }
 
   const paidUsers = new Set(
@@ -98,6 +112,7 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
     excludedUserIds: excludeIds,
     funnel: {
       signups: signupEvents ?? 0,
+      apiKeyHolders: keyHolders.size,
       apiCallers: callers.size,
       checkoutStarted: checkoutUsers.size,
       paid: paidUsers.size,
@@ -117,6 +132,7 @@ export type FunnelUserAgg = {
   requests: number;
   errors: number;
   events: number;
+  hasApiKey: boolean;
   lastAt: string | null;
   lastEndpoint: string | null;
   firstAt: string | null;
@@ -141,6 +157,7 @@ export async function loadFunnelUsers(
     { data: paidRows },
     { data: balances },
     { data: eventRows },
+    { data: apiKeyRows },
   ] = await Promise.all([
     sb
       .from("requests")
@@ -172,6 +189,11 @@ export async function loadFunnelUsers(
       .not("user_id", "in", notIn)
       .order("created_at", { ascending: false })
       .limit(10000),
+    sb
+      .from("api_keys")
+      .select("user_id")
+      .not("user_id", "in", notIn)
+      .limit(5000),
   ]);
 
   const paidAt = new Map<string, string>();
@@ -192,11 +214,18 @@ export async function loadFunnelUsers(
     if (!lastEvent.has(uid)) lastEvent.set(uid, row.created_at as string);
   }
 
+  const usersWithKeys = new Set(
+    (apiKeyRows || [])
+      .map((r) => r.user_id as string)
+      .filter((id) => id && !excluded.has(id)),
+  );
+
   const emptyAgg = (uid: string): FunnelUserAgg => ({
     userId: uid,
     requests: 0,
     errors: 0,
     events: 0,
+    hasApiKey: usersWithKeys.has(uid),
     lastAt: null,
     lastEndpoint: null,
     firstAt: null,
@@ -234,10 +263,15 @@ export async function loadFunnelUsers(
   for (const uid of paidAt.keys()) {
     if (!byUser.has(uid)) byUser.set(uid, emptyAgg(uid));
   }
+  // Users who created a key but have no requests/events in window.
+  for (const uid of usersWithKeys) {
+    if (!byUser.has(uid)) byUser.set(uid, emptyAgg(uid));
+  }
 
   for (const agg of byUser.values()) {
     agg.events = eventCount.get(agg.userId) || 0;
     agg.lastEventAt = lastEvent.get(agg.userId) || null;
+    agg.hasApiKey = usersWithKeys.has(agg.userId);
   }
 
   const balMap = new Map(

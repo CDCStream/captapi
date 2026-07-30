@@ -62,14 +62,15 @@ export default async function AdminFunnelPage() {
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">Funnel (14 days)</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Signup → API usage → checkout → paid. Open a user to inspect their journey and
-          each request&apos;s response JSON.
+          Signup → API key → API usage → checkout → paid. Open a user to inspect their
+          journey and each request&apos;s response JSON.
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {[
           { label: "Signups", value: f.signups },
+          { label: "API key", value: f.apiKeyHolders },
           { label: "API callers", value: f.apiCallers },
           { label: "Checkout started", value: f.checkoutStarted },
           { label: "Paid", value: f.paid },
