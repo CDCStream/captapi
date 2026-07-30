@@ -284,7 +284,7 @@ export async function loadUserJourney(sb: SupabaseClient, userId: string) {
     sb.auth.admin.getUserById(userId),
     sb
       .from("credit_balances")
-      .select("plan, subscription_credits, topup_credits, renews_at")
+      .select("plan, subscription_credits, topup_credits, subscription_renews_at")
       .eq("user_id", userId)
       .maybeSingle(),
     sb
@@ -438,7 +438,7 @@ export async function loadUserJourney(sb: SupabaseClient, userId: string) {
       plan: balance?.plan ?? null,
       subscriptionCredits: balance?.subscription_credits ?? 0,
       topupCredits: balance?.topup_credits ?? 0,
-      renewsAt: balance?.renews_at ?? null,
+      renewsAt: balance?.subscription_renews_at ?? null,
     },
     stats: {
       events: eventJourney.length,
