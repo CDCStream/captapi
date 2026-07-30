@@ -11,6 +11,7 @@ import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { WelcomePing } from "@/components/dashboard/welcome-ping";
 import { BuyCreditsDialog } from "@/components/dashboard/buy-credits-dialog";
+import { isFunnelAdmin } from "@/lib/funnel-admin";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const sb = await createClient();
@@ -38,6 +39,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
     }
   }
 
+  const showAdminFunnel = isFunnelAdmin(user.id);
+
   return (
     <div className="min-h-screen flex bg-muted/30">
       <WelcomePing />
@@ -52,7 +55,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </span>
         </Link>
         <div className="flex-1 min-h-0 overflow-y-auto -mx-1 px-1">
-          <SidebarNav />
+          <SidebarNav showAdminFunnel={showAdminFunnel} />
         </div>
         <div className="mt-4 pt-4 border-t space-y-0.5">
           <FeatureRequestDialog
@@ -91,7 +94,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <span className="brand-wordmark">Capt<span className="gradient-text">api</span></span>
           </Link>
           <div className="flex items-center gap-1">
-            <MobileNav />
+            <MobileNav showAdminFunnel={showAdminFunnel} />
             <LogoutButton />
           </div>
         </header>

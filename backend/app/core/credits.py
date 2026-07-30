@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+import uuid
 from contextlib import asynccontextmanager
 from contextvars import ContextVar
 from typing import Any
@@ -59,6 +60,7 @@ def log_request(
     response_time_ms: int,
     error_message: str | None = None,
     source: str | None = None,
+    request_id: str | None = None,
 ) -> None:
     sb = get_supabase()
     try:
@@ -74,6 +76,8 @@ def log_request(
             "response_time_ms": response_time_ms,
             "error_message": error_message,
         }
+        if request_id:
+            row["id"] = request_id
         # Only sent when set, so logging keeps working if the 0015 migration
         # (requests.source column) hasn't been applied yet.
         if source:
@@ -164,6 +168,7 @@ async def billed_call(
                 error = "insufficient_credits"
 
         source = None if cache_hit else ctx.get("source")
+        request_id = str(uuid.uuid4())
 
         # Publish billing metadata for the response-header middleware. Runs in
         # the same context that serializes the response, so the middleware sees
@@ -192,11 +197,11 @@ async def billed_call(
                 response_time_ms=elapsed_ms,
                 error_message=error,
                 source=source,
+                request_id=request_id,
             )
         )
 
-        # Optional, sampled response-body capture for correctness auditing.
-        # Also fire-and-forget; no-op unless LOG_RESPONSE_BODIES is set.
+        # Optional response-body capture for funnel / auditing (fire-and-forget).
         maybe_capture(
             user_id=caller.user_id,
             api_key_id=caller.api_key_id,
@@ -208,6 +213,7 @@ async def billed_call(
             response_time_ms=elapsed_ms,
             cache_hit=cache_hit,
             data=ctx.get("data"),
+            request_id=request_id,
         )
 
     if deduct_failed:

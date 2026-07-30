@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 
-export function MobileNav() {
+export function MobileNav({ showAdminFunnel = false }: { showAdminFunnel?: boolean }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -31,7 +31,10 @@ export function MobileNav() {
           <DialogHeader>
             <DialogTitle>Menu</DialogTitle>
           </DialogHeader>
-          <SidebarNav onNavigate={() => setOpen(false)} />
+          <SidebarNav
+            onNavigate={() => setOpen(false)}
+            showAdminFunnel={showAdminFunnel}
+          />
         </DialogContent>
       </Dialog>
     </>

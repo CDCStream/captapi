@@ -8,6 +8,7 @@ import {
   Bot,
   ChevronDown,
   CreditCard,
+  Filter,
   Key,
   LayoutDashboard,
   LineChart,
@@ -31,7 +32,13 @@ export const DASHBOARD_NAV = [
 
 const TOOLS_HREF = "/dashboard/tools";
 
-export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
+export function SidebarNav({
+  onNavigate,
+  showAdminFunnel = false,
+}: {
+  onNavigate?: () => void;
+  showAdminFunnel?: boolean;
+}) {
   const pathname = usePathname();
   const toolsActive = pathname.startsWith(TOOLS_HREF);
   const [toolsOpen, setToolsOpen] = useState(toolsActive);
@@ -109,6 +116,16 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
       {DASHBOARD_NAV.slice(3).map((n) => (
         <NavLink key={n.href} href={n.href} label={n.label} icon={n.icon} pathname={pathname} onNavigate={onNavigate} />
       ))}
+
+      {showAdminFunnel && (
+        <NavLink
+          href="/dashboard/admin/funnel"
+          label="Funnel"
+          icon={Filter}
+          pathname={pathname}
+          onNavigate={onNavigate}
+        />
+      )}
     </nav>
   );
 }

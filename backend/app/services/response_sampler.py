@@ -1,13 +1,13 @@
-"""Fire-and-forget response-body sampling for correctness auditing.
+"""Fire-and-forget response-body sampling for funnel + correctness auditing.
 
 When ``LOG_RESPONSE_BODIES`` is on, a fraction (``LOG_RESPONSE_SAMPLE_RATE``) of
 endpoint responses is copied into ``public.response_samples`` so we can later
-evaluate scraper output quality (e.g. compare native vs Apify field coverage,
-optionally with AI). Writes run on a background thread task and never block or
-fail the request. Bodies larger than ``LOG_RESPONSE_MAX_BYTES`` are recorded as
-truncated (metadata only, no payload) to keep the table light.
+inspect journeys and scraper quality. Writes run on a background task and never
+block or fail the request. Bodies larger than ``LOG_RESPONSE_MAX_BYTES`` are
+recorded as truncated (metadata only).
 
-Meant to be temporary: flip the flag off and drop the table when done.
+Power users listed in ``RESPONSE_SAMPLE_EXCLUDE_USER_IDS`` /
+``RESPONSE_SAMPLE_EXCLUDE_API_KEY_IDS`` are never captured.
 """
 
 from __future__ import annotations
@@ -26,6 +26,10 @@ log = structlog.get_logger(__name__)
 
 # Keep references to in-flight tasks so they aren't garbage-collected mid-write.
 _tasks: set[asyncio.Task[Any]] = set()
+
+
+def _csv_ids(raw: str) -> set[str]:
+    return {part.strip() for part in (raw or "").split(",") if part.strip()}
 
 
 def _insert_sync(row: dict[str, Any]) -> None:
@@ -51,15 +55,20 @@ def maybe_capture(
     response_time_ms: int,
     cache_hit: bool,
     data: Any,
+    request_id: str | None = None,
 ) -> None:
-    """Schedule a sampled response-body write. Never raises, never blocks.
-
-    Only fires when the feature flag is on, the sample-rate lottery passes, and
-    we actually have a response body to store.
-    """
+    """Schedule a sampled response-body write. Never raises, never blocks."""
     settings = get_settings()
     if not settings.LOG_RESPONSE_BODIES or data is None:
         return
+
+    exclude_users = _csv_ids(settings.RESPONSE_SAMPLE_EXCLUDE_USER_IDS)
+    exclude_keys = _csv_ids(settings.RESPONSE_SAMPLE_EXCLUDE_API_KEY_IDS)
+    if user_id and user_id in exclude_users:
+        return
+    if api_key_id and api_key_id in exclude_keys:
+        return
+
     if random.random() > settings.LOG_RESPONSE_SAMPLE_RATE:
         return
 
@@ -76,9 +85,9 @@ def maybe_capture(
         "truncated": False,
         "response_json": None,
     }
+    if request_id:
+        row["request_id"] = request_id
 
-    # Size-cap on the serialized body; oversized payloads are logged as
-    # metadata-only so we can still see which endpoints blow the budget.
     try:
         encoded = json.dumps(data, default=str, ensure_ascii=False)
     except (TypeError, ValueError):
@@ -91,6 +100,6 @@ def maybe_capture(
     try:
         task = asyncio.get_running_loop().create_task(_write(row))
     except RuntimeError:
-        return  # no running loop (sync/test context) -- skip silently
+        return
     _tasks.add(task)
     task.add_done_callback(_tasks.discard)
