@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, Play, RotateCcw, Zap } from "lucide-react";
+import { ExternalLink, Loader2, Play, RotateCcw, Zap } from "lucide-react";
 import {
   params as getParams,
   exampleValues,
@@ -9,6 +10,8 @@ import {
   requestSamples,
   type ApiEndpoint,
 } from "@/lib/api-catalog";
+import { createClient } from "@/lib/supabase/client";
+import { track } from "@/lib/analytics";
 import { CodeTabs } from "./code-tabs";
 
 export interface RunResult {
@@ -31,11 +34,29 @@ export function ApiPlayground({
   const [apiKey, setApiKey] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RunResult | null>(null);
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
     setValues(defaults);
     setResult(null);
   }, [ep, defaults]);
+
+  // Docs mode only: detect session so we can offer "Run with your account".
+  useEffect(() => {
+    if (onRun) return;
+    let cancelled = false;
+    const sb = createClient();
+    sb.auth.getSession().then(({ data }) => {
+      if (!cancelled) setSignedIn(Boolean(data.session));
+    });
+    const { data: sub } = sb.auth.onAuthStateChange((_event, session) => {
+      setSignedIn(Boolean(session));
+    });
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, [onRun]);
 
   const samples = useMemo(
     () => requestSamples(ep, values, apiKey),
@@ -44,6 +65,7 @@ export function ApiPlayground({
 
   const missingRequired = eps.filter((p) => p.required && !values[p.name]?.trim());
   const canRun = missingRequired.length === 0;
+  const playgroundHref = `/dashboard/playground?endpoint=${encodeURIComponent(ep.slug)}`;
 
   const set = (name: string, value: string) =>
     setValues((v) => ({ ...v, [name]: value }));
@@ -140,25 +162,84 @@ export function ApiPlayground({
           })}
         </div>
 
-        {!onRun && (
-          <label className="mt-4 block border-t pt-4">
-            <span className="flex items-center gap-1.5">
-              <code className="font-mono text-xs font-semibold">API key</code>
-              <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                optional
+        {/* Docs mode: logged-in users run live via dashboard playground (no key paste). */}
+        {!onRun && signedIn === true && (
+          <div className="mt-4 space-y-3 border-t pt-4">
+            <Link
+              href={playgroundHref}
+              onClick={() =>
+                track("docs_run_with_account", { endpoint: ep.slug, path: ep.path })
+              }
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              <Play className="size-4" />
+              Run with your account
+              <ExternalLink className="size-3.5 opacity-80" />
+            </Link>
+            <p className="text-xs text-muted-foreground">
+              Opens the live Playground for this endpoint — authenticated with your
+              session, no API key paste.
+            </p>
+            <details className="text-sm">
+              <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
+                Or paste a key for copy-paste snippets
+              </summary>
+              <label className="mt-3 block">
+                <span className="flex items-center gap-1.5">
+                  <code className="font-mono text-xs font-semibold">API key</code>
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                    optional
+                  </span>
+                </span>
+                <input
+                  type="text"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="capt_live_..."
+                  className="mt-1.5 w-full rounded-md border bg-background px-3 py-2 font-mono text-xs outline-none transition-colors focus:border-primary sm:max-w-md"
+                />
+              </label>
+            </details>
+          </div>
+        )}
+
+        {/* Docs mode: logged-out — key paste + sign-in path. */}
+        {!onRun && signedIn !== true && (
+          <div className="mt-4 space-y-3 border-t pt-4">
+            <label className="block">
+              <span className="flex items-center gap-1.5">
+                <code className="font-mono text-xs font-semibold">API key</code>
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  optional
+                </span>
               </span>
-            </span>
-            <input
-              type="text"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="capt_live_..."
-              className="mt-1.5 w-full rounded-md border bg-background px-3 py-2 font-mono text-xs outline-none transition-colors focus:border-primary sm:max-w-md"
-            />
-            <span className="mt-1 block text-xs text-muted-foreground">
-              Paste your key to get a ready-to-run snippet. It stays in your browser.
-            </span>
-          </label>
+              <input
+                type="text"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="capt_live_..."
+                className="mt-1.5 w-full rounded-md border bg-background px-3 py-2 font-mono text-xs outline-none transition-colors focus:border-primary sm:max-w-md"
+              />
+              <span className="mt-1 block text-xs text-muted-foreground">
+                Paste your key to get a ready-to-run snippet. It stays in your browser.
+              </span>
+            </label>
+            <Link
+              href={playgroundHref}
+              onClick={() =>
+                track("docs_run_with_account", {
+                  endpoint: ep.slug,
+                  path: ep.path,
+                  signed_in: false,
+                })
+              }
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-md border bg-background px-4 text-sm font-medium transition-colors hover:bg-muted"
+            >
+              <Play className="size-3.5" />
+              Sign in to run live
+              <ExternalLink className="size-3.5 text-muted-foreground" />
+            </Link>
+          </div>
         )}
 
         {onRun && (
