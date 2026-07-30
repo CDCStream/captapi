@@ -1,6 +1,10 @@
 # Captapi Instagram AI avatar agent
 
-The agent creates one 9:16 Captapi developer ad every day:
+> **Retired (2026-07-30).** The HeyGen daily reel agent was unreliable and has
+> been disabled. The GitHub Actions schedule is off (`if: false` on the
+> workflow job). Do not re-enable until rendering/publishing is fixed.
+
+The agent created one 9:16 Captapi developer ad every day:
 
 1. Chooses a rotating content pillar based on the weekday.
 2. Reads recent Instagram captions to reduce repetition.
