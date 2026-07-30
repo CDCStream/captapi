@@ -107,9 +107,11 @@ export type FunnelUserAgg = {
   userId: string;
   requests: number;
   errors: number;
+  events: number;
   lastAt: string | null;
   lastEndpoint: string | null;
   firstAt: string | null;
+  lastEventAt: string | null;
   paid: boolean;
   paidCredits: number;
   plan: string | null;
@@ -123,29 +125,43 @@ export async function loadFunnelUsers(
   const since = funnelSinceIso(14);
   const exclude = FUNNEL_EXCLUDE_USER_ID;
 
-  const [{ data: requestRows }, { data: paidRows }, { data: balances }] =
-    await Promise.all([
-      sb
-        .from("requests")
-        .select("user_id, endpoint, status_code, created_at, response_time_ms")
-        .gte("created_at", since)
-        .neq("user_id", exclude)
-        .order("created_at", { ascending: false })
-        .limit(8000),
-      sb
-        .from("credit_transactions")
-        .select("user_id, amount, type, created_at")
-        .gte("created_at", since)
-        .gt("amount", 0)
-        .in("type", ["topup", "subscription_grant"])
-        .neq("user_id", exclude)
-        .limit(3000),
-      sb
-        .from("credit_balances")
-        .select("user_id, plan, subscription_credits, topup_credits")
-        .neq("user_id", exclude)
-        .limit(5000),
-    ]);
+  const [
+    { data: requestRows },
+    { data: paidRows },
+    { data: balances },
+    { data: eventRows },
+  ] = await Promise.all([
+    sb
+      .from("requests")
+      .select("user_id, endpoint, status_code, created_at, response_time_ms")
+      .gte("created_at", since)
+      .neq("user_id", exclude)
+      .order("created_at", { ascending: false })
+      .limit(8000),
+    sb
+      .from("credit_transactions")
+      .select("user_id, amount, type, created_at")
+      .gte("created_at", since)
+      .gt("amount", 0)
+      .in("type", ["topup", "subscription_grant"])
+      .neq("user_id", exclude)
+      .limit(3000),
+    sb
+      .from("credit_balances")
+      .select("user_id, plan, subscription_credits, topup_credits")
+      .neq("user_id", exclude)
+      .limit(5000),
+    // Logged-in activity (page views etc.) so users who signed up but never
+    // called the API still show up with an event journey.
+    sb
+      .from("events")
+      .select("user_id, created_at")
+      .gte("created_at", since)
+      .not("user_id", "is", null)
+      .neq("user_id", exclude)
+      .order("created_at", { ascending: false })
+      .limit(10000),
+  ]);
 
   const paidAt = new Map<string, string>();
   const paidAmount = new Map<string, number>();
@@ -156,24 +172,37 @@ export async function loadFunnelUsers(
     if (!paidAt.has(uid)) paidAt.set(uid, row.created_at as string);
   }
 
+  const eventCount = new Map<string, number>();
+  const lastEvent = new Map<string, string>();
+  for (const row of eventRows || []) {
+    const uid = row.user_id as string;
+    if (!uid || uid === exclude) continue;
+    eventCount.set(uid, (eventCount.get(uid) || 0) + 1);
+    if (!lastEvent.has(uid)) lastEvent.set(uid, row.created_at as string);
+  }
+
+  const emptyAgg = (uid: string): FunnelUserAgg => ({
+    userId: uid,
+    requests: 0,
+    errors: 0,
+    events: 0,
+    lastAt: null,
+    lastEndpoint: null,
+    firstAt: null,
+    lastEventAt: null,
+    paid: paidAt.has(uid),
+    paidCredits: paidAmount.get(uid) || 0,
+    plan: null,
+    creditsLeft: null,
+  });
+
   const byUser = new Map<string, FunnelUserAgg>();
   for (const row of requestRows || []) {
     const uid = row.user_id as string;
     if (!uid || uid === exclude) continue;
     let agg = byUser.get(uid);
     if (!agg) {
-      agg = {
-        userId: uid,
-        requests: 0,
-        errors: 0,
-        lastAt: null,
-        lastEndpoint: null,
-        firstAt: null,
-        paid: paidAt.has(uid),
-        paidCredits: paidAmount.get(uid) || 0,
-        plan: null,
-        creditsLeft: null,
-      };
+      agg = emptyAgg(uid);
       byUser.set(uid, agg);
     }
     agg.requests += 1;
@@ -186,21 +215,18 @@ export async function loadFunnelUsers(
     agg.firstAt = ts;
   }
 
+  // Users with logged-in events but zero API requests.
+  for (const uid of eventCount.keys()) {
+    if (!byUser.has(uid)) byUser.set(uid, emptyAgg(uid));
+  }
+  // Paid users with no requests in window.
   for (const uid of paidAt.keys()) {
-    if (!byUser.has(uid)) {
-      byUser.set(uid, {
-        userId: uid,
-        requests: 0,
-        errors: 0,
-        lastAt: null,
-        lastEndpoint: null,
-        firstAt: null,
-        paid: true,
-        paidCredits: paidAmount.get(uid) || 0,
-        plan: null,
-        creditsLeft: null,
-      });
-    }
+    if (!byUser.has(uid)) byUser.set(uid, emptyAgg(uid));
+  }
+
+  for (const agg of byUser.values()) {
+    agg.events = eventCount.get(agg.userId) || 0;
+    agg.lastEventAt = lastEvent.get(agg.userId) || null;
   }
 
   const balMap = new Map(
@@ -224,9 +250,13 @@ export async function loadFunnelUsers(
 
   let users = [...byUser.values()];
   if (opts?.paidOnly) users = users.filter((u) => u.paid);
-  users.sort((a, b) => (b.lastAt || "").localeCompare(a.lastAt || ""));
+  users.sort((a, b) => {
+    const aTs = a.lastAt || a.lastEventAt || "";
+    const bTs = b.lastAt || b.lastEventAt || "";
+    return bTs.localeCompare(aTs);
+  });
 
-  return { since, users: users.slice(0, 200) };
+  return { since, users: users.slice(0, 300) };
 }
 
 export async function loadUserJourney(sb: SupabaseClient, userId: string) {
@@ -281,6 +311,31 @@ export async function loadUserJourney(sb: SupabaseClient, userId: string) {
   ]);
 
   const profile = authUser.data?.user ?? null;
+
+  // Pre-signup / logged-out activity: events rows share the browser anon_id
+  // with the user's logged-in events, so pull anonymous rows for those ids too
+  // (signup fires before the session exists, so it only has anon_id).
+  const anonIds = [
+    ...new Set(
+      (events || [])
+        .map((e) => e.anon_id as string | null)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ].slice(0, 20);
+
+  let anonEvents: typeof events = [];
+  if (anonIds.length) {
+    const { data } = await sb
+      .from("events")
+      .select("id, event, path, properties, anon_id, created_at")
+      .is("user_id", null)
+      .in("anon_id", anonIds)
+      .gte("created_at", since)
+      .order("created_at", { ascending: true })
+      .limit(300);
+    anonEvents = data || [];
+  }
+
   const sampleByRequestId = new Map<string, NonNullable<typeof samples>[number]>();
   const sampleByEndpointTime: Array<{
     endpoint: string;
@@ -328,15 +383,23 @@ export async function loadUserJourney(sb: SupabaseClient, userId: string) {
     };
   });
 
-  const eventJourney = (events || []).map((e) => ({
-    kind: "event" as const,
-    id: e.id,
-    at: e.created_at,
-    event: e.event,
-    path: e.path,
-    properties: e.properties,
-    anonId: e.anon_id,
-  }));
+  const seenEventIds = new Set<string>();
+  const eventJourney = [...(anonEvents || []), ...(events || [])]
+    .filter((e) => {
+      const id = e.id as string;
+      if (seenEventIds.has(id)) return false;
+      seenEventIds.add(id);
+      return true;
+    })
+    .map((e) => ({
+      kind: "event" as const,
+      id: e.id,
+      at: e.created_at,
+      event: e.event,
+      path: e.path,
+      properties: e.properties,
+      anonId: e.anon_id,
+    }));
 
   const paymentJourney = (payments || []).map((p) => ({
     kind: "payment" as const,
@@ -367,7 +430,7 @@ export async function loadUserJourney(sb: SupabaseClient, userId: string) {
       renewsAt: balance?.renews_at ?? null,
     },
     stats: {
-      events: (events || []).length,
+      events: eventJourney.length,
       requests: (requests || []).length,
       samples: (samples || []).length,
       payments: (payments || []).length,
