@@ -281,7 +281,7 @@ export async function loadUserJourney(sb: SupabaseClient, userId: string) {
   ]);
 
   const profile = authUser.data?.user ?? null;
-  const sampleByRequestId = new Map<string, (typeof samples)[number]>();
+  const sampleByRequestId = new Map<string, NonNullable<typeof samples>[number]>();
   const sampleByEndpointTime: Array<{
     endpoint: string;
     created_at: string;
