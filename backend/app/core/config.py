@@ -126,6 +126,10 @@ class Settings(BaseSettings):
     # Polaris only embeds ~2 preview_comments). Paste the ``sessionid`` value
     # from a browser cookie jar. Leave empty to keep Apify fallthrough.
     IG_SESSION_ID: str = ""
+    # Optional pool of sessionid cookies (comma / newline / semicolon separated).
+    # Merged with IG_SESSION_ID. Native paths round-robin and fail over on
+    # 401/429/login wall so one banned account does not take down IG scraping.
+    IG_SESSION_IDS: str = ""
 
     APIFY_ACTOR_FACEBOOK_POSTS: str = "apify/facebook-posts-scraper"
     APIFY_ACTOR_FACEBOOK_COMMENTS: str = "apify/facebook-comments-scraper"

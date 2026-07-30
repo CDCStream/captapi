@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import itertools
 import json
 import re
 import urllib.parse
@@ -47,6 +48,8 @@ async def fetch_reel_media(shortcode: str) -> dict[str, Any] | None:
     or None (caller falls back to Apify).
     """
     media = await _fetch_item(shortcode)
+    if media is None:
+        media = await _fetch_item_with_session(shortcode)
     if media is None:
         return None
     # Reels can be carousels; the playable video lives on the cover child.
@@ -117,14 +120,10 @@ async def fetch_post_details(shortcode: str) -> dict[str, Any] | None:
     data) at ~3-4s instead of an actor run. Returns None so the caller can
     fall back to Apify.
     """
-    from app.core.config import get_settings
-
     media = await _fetch_item(shortcode)
     if media is None:
         # Railway/datacenter often 401s Polaris; session GraphQL recovers.
-        session = _normalize_ig_session_id(get_settings().IG_SESSION_ID or "")
-        if session:
-            media = await _fetch_item_with_session(shortcode, session)
+        media = await _fetch_item_with_session(shortcode)
     if media is None:
         return None
 
@@ -266,16 +265,76 @@ def _normalize_ig_session_id(raw: str) -> str:
     return value.strip()
 
 
-async def _fetch_item_with_session(shortcode: str, session_id: str) -> dict[str, Any] | None:
-    """Polaris shortcode media via GraphQL using ``IG_SESSION_ID`` cookies.
+_SESSION_RR = itertools.count()
+
+
+def _ig_session_pool() -> list[str]:
+    """Unique normalized sessionids from ``IG_SESSION_IDS`` + ``IG_SESSION_ID``."""
+    from app.core.config import get_settings
+
+    settings = get_settings()
+    parts: list[str] = []
+    multi = (settings.IG_SESSION_IDS or "").strip()
+    if multi:
+        parts.extend(re.split(r"[\s,;]+", multi))
+    single = (settings.IG_SESSION_ID or "").strip()
+    if single:
+        parts.append(single)
+    out: list[str] = []
+    seen: set[str] = set()
+    for part in parts:
+        sid = _normalize_ig_session_id(part)
+        if not sid or sid in seen:
+            continue
+        seen.add(sid)
+        out.append(sid)
+    return out
+
+
+def _cookies_for_session(session_id: str) -> dict[str, str]:
+    cookies: dict[str, str] = {"sessionid": session_id}
+    ds = session_id.split(":", 1)[0]
+    if ds.isdigit():
+        cookies["ds_user_id"] = ds
+    return cookies
+
+
+def _sessions_rotated(preferred: str | None = None) -> list[str]:
+    """Round-robin start order; optional preferred session first."""
+    pool = _ig_session_pool()
+    if not pool:
+        return []
+    if preferred and preferred in pool:
+        i = pool.index(preferred)
+        return pool[i:] + pool[:i]
+    i = next(_SESSION_RR) % len(pool)
+    return pool[i:] + pool[:i]
+
+
+def _pick_session() -> str | None:
+    rotated = _sessions_rotated()
+    return rotated[0] if rotated else None
+
+
+async def _fetch_item_with_session(
+    shortcode: str, session_id: str | None = None
+) -> dict[str, Any] | None:
+    """Polaris shortcode media via GraphQL using session cookies (pool failover).
 
     Logged-out GraphQL often 401s on datacenter IPs (e.g. Railway); the same
     doc_id succeeds when a valid session cookie is attached.
     """
-    ds_user_id = session_id.split(":", 1)[0] if ":" in session_id else ""
-    cookies: dict[str, str] = {"sessionid": session_id}
-    if ds_user_id.isdigit():
-        cookies["ds_user_id"] = ds_user_id
+    for sid in _sessions_rotated(session_id):
+        item = await _fetch_item_with_one_session(shortcode, sid)
+        if item is not None:
+            return item
+    return None
+
+
+async def _fetch_item_with_one_session(
+    shortcode: str, session_id: str
+) -> dict[str, Any] | None:
+    cookies = _cookies_for_session(session_id)
     tiers: list[str | None] = [None, "datacenter", "residential"]
     for tier in tiers:
         try:
@@ -314,9 +373,18 @@ async def _fetch_item_with_session(shortcode: str, session_id: str) -> dict[str,
             log.info(
                 "ig_session_media_transport",
                 tier=tier or "direct",
+                ds_user=session_id.split(":", 1)[0][:12],
                 error=str(exc)[:120],
             )
             continue
+        if resp.status_code in (401, 403, 429):
+            log.info(
+                "ig_session_media_auth",
+                tier=tier or "direct",
+                status=resp.status_code,
+                ds_user=session_id.split(":", 1)[0][:12],
+            )
+            break  # try next session in the pool
         if resp.status_code != 200:
             log.info(
                 "ig_session_media_http",
@@ -338,15 +406,14 @@ async def _fetch_item_with_session(shortcode: str, session_id: str) -> dict[str,
 
 
 async def comments_session_native(url: str, *, limit: int = 50) -> dict[str, Any] | None:
-    """Full comment thread via ``api/v1/media/{pk}/comments/`` + ``IG_SESSION_ID``.
+    """Full comment thread via ``api/v1/media/{pk}/comments/`` + session pool.
 
-    Returns None when session is unset / invalid so callers can fall to Apify.
+    Returns None when sessions are unset / invalid so callers can fall to Apify.
     """
-    from app.core.config import get_settings
     from app.utils.url import extract_instagram_shortcode
 
-    session = _normalize_ig_session_id(get_settings().IG_SESSION_ID or "")
-    if not session or limit <= 0:
+    sessions = _sessions_rotated()
+    if not sessions or limit <= 0:
         return None
     shortcode = extract_instagram_shortcode(url)
     if not shortcode:
@@ -354,7 +421,7 @@ async def comments_session_native(url: str, *, limit: int = 50) -> dict[str, Any
     # Prefer logged-out hydrate; on datacenter blocks fall back to session GraphQL.
     media = await _fetch_item(shortcode)
     if media is None:
-        media = await _fetch_item_with_session(shortcode, session)
+        media = await _fetch_item_with_session(shortcode)
     if media is None:
         log.info("ig_comments_session_no_media", shortcode=shortcode)
         return None
@@ -366,42 +433,46 @@ async def comments_session_native(url: str, *, limit: int = 50) -> dict[str, Any
     post_url = f"https://www.instagram.com/p/{shortcode}/"
     total = safe_int(media.get("comment_count")) or 0
 
-    comments: list[dict[str, Any]] = []
-    seen: set[str] = set()
-    min_id: str | None = None
-    for page in range(20):
-        batch, next_min, more = await _fetch_comments_page(
-            media_id, session_id=session, min_id=min_id, referer=post_url
-        )
-        if batch is None:
-            if page == 0:
-                return None
-            break
-        for raw in batch:
-            mapped = _map_preview_comment(raw, post_url=post_url)
-            if not mapped or not mapped.get("text"):
-                continue
-            cid = mapped["id"] or mapped["text"]
-            if cid in seen:
-                continue
-            seen.add(cid)
-            comments.append(mapped)
-            if len(comments) >= limit:
+    for session in sessions:
+        comments: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        min_id: str | None = None
+        auth_failed = False
+        for page in range(20):
+            batch, next_min, more = await _fetch_comments_page(
+                media_id, session_id=session, min_id=min_id, referer=post_url
+            )
+            if batch is None:
+                if page == 0:
+                    auth_failed = True
                 break
-        if len(comments) >= limit or not more or not next_min:
-            break
-        min_id = next_min
+            for raw in batch:
+                mapped = _map_preview_comment(raw, post_url=post_url)
+                if not mapped or not mapped.get("text"):
+                    continue
+                cid = mapped["id"] or mapped["text"]
+                if cid in seen:
+                    continue
+                seen.add(cid)
+                comments.append(mapped)
+                if len(comments) >= limit:
+                    break
+            if len(comments) >= limit or not more or not next_min:
+                break
+            min_id = next_min
 
-    if not comments:
-        return None
-    return {
-        "platform": "instagram",
-        "url": url,
-        "totalReturned": len(comments[:limit]),
-        "totalComments": total or len(comments),
-        "hasMore": (total or 0) > len(comments[:limit]),
-        "comments": comments[:limit],
-    }
+        if comments:
+            return {
+                "platform": "instagram",
+                "url": url,
+                "totalReturned": len(comments[:limit]),
+                "totalComments": total or len(comments),
+                "hasMore": (total or 0) > len(comments[:limit]),
+                "comments": comments[:limit],
+            }
+        if not auth_failed:
+            break  # got empty legitimately; don't burn the rest of the pool
+    return None
 
 
 async def _fetch_comments_page(
@@ -704,28 +775,20 @@ def _feed_page_degraded(items: list[dict[str, Any]]) -> bool:
 
 
 def _ig_session_cookies() -> dict[str, str]:
-    """Optional ``IG_SESSION_ID`` cookies for feed / usertags login walls."""
-    from app.core.config import get_settings
-
-    session = _normalize_ig_session_id(get_settings().IG_SESSION_ID or "")
-    if not session:
-        return {}
-    cookies = {"sessionid": session}
-    ds = session.split(":", 1)[0]
-    if ds.isdigit():
-        cookies["ds_user_id"] = ds
-    return cookies
+    """Round-robin session cookies for feed / usertags login walls."""
+    session = _pick_session()
+    return _cookies_for_session(session) if session else {}
 
 
 async def _fetch_feed_once(
     user_id: str, params: dict[str, Any], attempt: int
 ) -> tuple[list[dict[str, Any]], str | None, bool] | None:
-    cookies = _ig_session_cookies()
-    # Prefer session+direct when available; residential logged-out is flaky.
+    # Prefer session+direct when available; rotate through the pool on auth fails.
     tiers: list[tuple[str | None, dict[str, str]]] = []
-    if cookies:
-        tiers.append((None, cookies))
-        tiers.append(("residential", cookies))
+    for sid in _sessions_rotated():
+        cks = _cookies_for_session(sid)
+        tiers.append((None, cks))
+        tiers.append(("residential", cks))
     tiers.append(("residential", {}))
     last_status: int | None = None
     for tier, cks in tiers:
@@ -796,11 +859,11 @@ async def fetch_usertags_page(
 async def _fetch_usertags_once(
     user_id: str, params: dict[str, Any], attempt: int
 ) -> tuple[list[dict[str, Any]], str | None, bool] | None:
-    cookies = _ig_session_cookies()
     tiers: list[tuple[str | None, dict[str, str]]] = []
-    if cookies:
-        tiers.append((None, cookies))
-        tiers.append(("residential", cookies))
+    for sid in _sessions_rotated():
+        cks = _cookies_for_session(sid)
+        tiers.append((None, cks))
+        tiers.append(("residential", cks))
     tiers.append(("residential", {}))
     for tier, cks in tiers:
         try:
@@ -1358,12 +1421,14 @@ async def lookup_web_profile_info(
         if isinstance(user, dict) and (user.get("username") or user.get("id")):
             return user, False
 
-    session = _normalize_ig_session_id(get_settings().IG_SESSION_ID or "")
     session_404 = False
-    if session:
-        user, session_404 = await _fetch_web_profile_info_session(handle, session)
+    for sid in _sessions_rotated():
+        user, session_404 = await _fetch_web_profile_info_session(handle, sid)
         if user is not None:
             return user, False
+        if session_404:
+            # Confirmed missing handle — no point burning the rest of the pool.
+            break
 
     user, missing = await fetch_web_profile_info_via_decodo(handle)
     if user is not None:
@@ -1374,7 +1439,7 @@ async def lookup_web_profile_info(
 async def fetch_web_profile_info(username: str) -> dict[str, Any] | None:
     """Rich profile via users/web_profile_info/?username=.
 
-    Order: logged-out proxy tiers → ``IG_SESSION_ID`` (skips 429/login wall) →
+    Order: logged-out proxy tiers → session pool (skips 429/login wall) →
     Decodo HTML parse (covers business accounts that 400 on WPI).
     """
     user, _missing = await lookup_web_profile_info(username)
