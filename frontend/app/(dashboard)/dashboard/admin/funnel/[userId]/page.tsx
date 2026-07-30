@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getServiceClient } from "@/lib/supabase/admin";
-import { FUNNEL_EXCLUDE_USER_ID, isFunnelAdmin } from "@/lib/funnel-admin";
+import { isFunnelAdmin, isFunnelExcluded } from "@/lib/funnel-admin";
 import { loadUserJourney } from "@/lib/funnel-data";
 import { FunnelJourney } from "@/components/admin/funnel-journey";
 
@@ -34,7 +34,7 @@ export default async function AdminFunnelUserPage({ params }: Props) {
       </div>
     );
   }
-  if (!userId || userId === FUNNEL_EXCLUDE_USER_ID) {
+  if (!userId || isFunnelExcluded(userId)) {
     notFound();
   }
 

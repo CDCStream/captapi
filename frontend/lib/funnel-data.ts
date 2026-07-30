@@ -1,9 +1,16 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { FUNNEL_EXCLUDE_USER_ID, funnelSinceIso } from "@/lib/funnel-admin";
+import { funnelExcludeUserIds, funnelSinceIso } from "@/lib/funnel-admin";
+
+/** PostgREST `in` filter payload for the excluded account ids. */
+function excludeFilter(ids: string[]): string {
+  return `(${ids.join(",")})`;
+}
 
 export async function loadFunnelOverview(sb: SupabaseClient) {
   const since = funnelSinceIso(14);
-  const exclude = FUNNEL_EXCLUDE_USER_ID;
+  const excludeIds = funnelExcludeUserIds();
+  const excluded = new Set(excludeIds);
+  const notIn = excludeFilter(excludeIds);
 
   const [
     { count: signupEvents },
@@ -21,7 +28,7 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
       .from("requests")
       .select("user_id, endpoint, status_code, response_time_ms, created_at")
       .gte("created_at", since)
-      .neq("user_id", exclude)
+      .not("user_id", "in", notIn)
       .order("created_at", { ascending: false })
       .limit(5000),
     sb
@@ -30,7 +37,7 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
       .gte("created_at", since)
       .gt("amount", 0)
       .in("type", ["topup", "subscription_grant"])
-      .neq("user_id", exclude)
+      .not("user_id", "in", notIn)
       .limit(2000),
     sb
       .from("events")
@@ -43,7 +50,7 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
       .from("response_samples")
       .select("*", { count: "exact", head: true })
       .gte("created_at", since)
-      .neq("user_id", exclude),
+      .not("user_id", "in", notIn),
   ]);
 
   const callers = new Set<string>();
@@ -52,7 +59,7 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
   let errors = 0;
   for (const row of requestRows || []) {
     const uid = row.user_id as string;
-    if (!uid || uid === exclude) continue;
+    if (!uid || excluded.has(uid)) continue;
     callers.add(uid);
     if (!lastEndpoint.has(uid)) {
       lastEndpoint.set(uid, row.endpoint as string);
@@ -62,12 +69,14 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
   }
 
   const paidUsers = new Set(
-    (paidRows || []).map((r) => r.user_id as string).filter((id) => id && id !== exclude),
+    (paidRows || [])
+      .map((r) => r.user_id as string)
+      .filter((id) => id && !excluded.has(id)),
   );
   const checkoutUsers = new Set(
     (checkoutRows || [])
       .map((r) => r.user_id as string)
-      .filter((id) => id && id !== exclude),
+      .filter((id) => id && !excluded.has(id)),
   );
 
   const dropOff: Record<string, number> = {};
@@ -86,7 +95,7 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
 
   return {
     since,
-    excludeUserId: exclude,
+    excludedUserIds: excludeIds,
     funnel: {
       signups: signupEvents ?? 0,
       apiCallers: callers.size,
@@ -123,7 +132,9 @@ export async function loadFunnelUsers(
   opts?: { paidOnly?: boolean },
 ): Promise<{ since: string; users: FunnelUserAgg[] }> {
   const since = funnelSinceIso(14);
-  const exclude = FUNNEL_EXCLUDE_USER_ID;
+  const excludeIds = funnelExcludeUserIds();
+  const excluded = new Set(excludeIds);
+  const notIn = excludeFilter(excludeIds);
 
   const [
     { data: requestRows },
@@ -135,7 +146,7 @@ export async function loadFunnelUsers(
       .from("requests")
       .select("user_id, endpoint, status_code, created_at, response_time_ms")
       .gte("created_at", since)
-      .neq("user_id", exclude)
+      .not("user_id", "in", notIn)
       .order("created_at", { ascending: false })
       .limit(8000),
     sb
@@ -144,12 +155,12 @@ export async function loadFunnelUsers(
       .gte("created_at", since)
       .gt("amount", 0)
       .in("type", ["topup", "subscription_grant"])
-      .neq("user_id", exclude)
+      .not("user_id", "in", notIn)
       .limit(3000),
     sb
       .from("credit_balances")
       .select("user_id, plan, subscription_credits, topup_credits")
-      .neq("user_id", exclude)
+      .not("user_id", "in", notIn)
       .limit(5000),
     // Logged-in activity (page views etc.) so users who signed up but never
     // called the API still show up with an event journey.
@@ -158,7 +169,7 @@ export async function loadFunnelUsers(
       .select("user_id, created_at")
       .gte("created_at", since)
       .not("user_id", "is", null)
-      .neq("user_id", exclude)
+      .not("user_id", "in", notIn)
       .order("created_at", { ascending: false })
       .limit(10000),
   ]);
@@ -176,7 +187,7 @@ export async function loadFunnelUsers(
   const lastEvent = new Map<string, string>();
   for (const row of eventRows || []) {
     const uid = row.user_id as string;
-    if (!uid || uid === exclude) continue;
+    if (!uid || excluded.has(uid)) continue;
     eventCount.set(uid, (eventCount.get(uid) || 0) + 1);
     if (!lastEvent.has(uid)) lastEvent.set(uid, row.created_at as string);
   }
@@ -199,7 +210,7 @@ export async function loadFunnelUsers(
   const byUser = new Map<string, FunnelUserAgg>();
   for (const row of requestRows || []) {
     const uid = row.user_id as string;
-    if (!uid || uid === exclude) continue;
+    if (!uid || excluded.has(uid)) continue;
     let agg = byUser.get(uid);
     if (!agg) {
       agg = emptyAgg(uid);

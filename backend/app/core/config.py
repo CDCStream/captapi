@@ -253,8 +253,10 @@ class Settings(BaseSettings):
     LOG_RESPONSE_BODIES: bool = False
     LOG_RESPONSE_SAMPLE_RATE: float = 1.0
     LOG_RESPONSE_MAX_BYTES: int = 262144
+    # Loyal power user + tools@captapi.com free-tools service account.
     RESPONSE_SAMPLE_EXCLUDE_USER_IDS: str = (
-        "3f48e876-2044-465a-a517-81a9b34fb830"
+        "3f48e876-2044-465a-a517-81a9b34fb830,"
+        "111dc024-18cf-4a81-8041-827e1c684a41"
     )
     RESPONSE_SAMPLE_EXCLUDE_API_KEY_IDS: str = (
         "9efa68f6-6f98-4ef4-b2ed-bbd118db03be"

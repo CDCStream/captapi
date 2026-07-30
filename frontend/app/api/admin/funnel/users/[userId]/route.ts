@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { FUNNEL_EXCLUDE_USER_ID } from "@/lib/funnel-admin";
+import { isFunnelExcluded } from "@/lib/funnel-admin";
 import { loadUserJourney } from "@/lib/funnel-data";
 import { requireFunnelAdmin } from "@/lib/require-funnel-admin";
 
@@ -13,7 +13,7 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
   if (!gate.ok) return gate.response;
   const { userId } = await ctx.params;
 
-  if (!userId || userId === FUNNEL_EXCLUDE_USER_ID) {
+  if (!userId || isFunnelExcluded(userId)) {
     return NextResponse.json({ error: "user not available" }, { status: 404 });
   }
 
