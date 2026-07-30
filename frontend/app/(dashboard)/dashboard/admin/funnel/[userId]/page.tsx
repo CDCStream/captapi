@@ -16,8 +16,23 @@ export default async function AdminFunnelUserPage({ params }: Props) {
   const {
     data: { user },
   } = await auth.auth.getUser();
-  if (!user || !isFunnelAdmin(user.id)) {
+  if (!user) {
     redirect("/dashboard");
+  }
+  if (!isFunnelAdmin(user.id)) {
+    return (
+      <div className="mx-auto max-w-xl space-y-3">
+        <h1 className="text-2xl font-semibold">Funnel — access denied</h1>
+        <p className="text-sm text-muted-foreground">Your user id:</p>
+        <code className="block break-all rounded-md border bg-muted/40 px-3 py-2 text-xs">
+          {user.id}
+        </code>
+        <p className="text-xs text-muted-foreground">Email: {user.email || "—"}</p>
+        <Link href="/dashboard" className="text-sm text-primary hover:underline">
+          Back to dashboard
+        </Link>
+      </div>
+    );
   }
   if (!userId || userId === FUNNEL_EXCLUDE_USER_ID) {
     notFound();
