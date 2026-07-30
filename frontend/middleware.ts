@@ -14,6 +14,23 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
     );
 }
 
+/** Expire any Supabase auth cookies on the response (belt-and-suspenders). */
+function expireAuthCookies(request: NextRequest, response: NextResponse) {
+  for (const cookie of request.cookies.getAll()) {
+    const n = cookie.name;
+    if (
+      n.includes("-auth-token") ||
+      (n.startsWith("sb-") && n.includes("auth"))
+    ) {
+      response.cookies.set(n, "", {
+        path: "/",
+        maxAge: 0,
+        expires: new Date(0),
+      });
+    }
+  }
+}
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -41,6 +58,8 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
   const authCookie = hasSupabaseAuthCookie(request);
+  const isProtected = path.startsWith("/dashboard");
+  const isAuthPage = path === "/login" || path === "/signup";
 
   const copyAuthCookies = (target: NextResponse) => {
     supabaseResponse.cookies.getAll().forEach((cookie) => {
@@ -55,6 +74,12 @@ export async function middleware(request: NextRequest) {
     } catch {
       // Best-effort — still redirect and attach whatever cookie clears we got.
     }
+    // Already on login/signup: clear cookies in place — never redirect to self
+    // (that caused ERR_TOO_MANY_REDIRECTS when the JWT cookie was stale).
+    if (isAuthPage) {
+      expireAuthCookies(request, supabaseResponse);
+      return supabaseResponse;
+    }
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.search = "";
@@ -62,18 +87,18 @@ export async function middleware(request: NextRequest) {
     if (redirectPath?.startsWith("/")) {
       url.searchParams.set("redirect", redirectPath);
     }
-    return copyAuthCookies(NextResponse.redirect(url));
+    const res = copyAuthCookies(NextResponse.redirect(url));
+    expireAuthCookies(request, res);
+    return res;
   };
 
-  // Stale session: browser still has the JWT cookie but Auth user is gone
-  // (DB wipe / deleted account). Clear cookies so /login does not bounce
-  // the visitor into a ghost dashboard session.
+  // Stale session: browser still has the JWT cookie but Auth user is gone.
   if (authCookie && !user) {
-    return clearSessionToLogin("session-expired", path.startsWith("/dashboard") ? path : undefined);
+    return clearSessionToLogin(
+      "session-expired",
+      path.startsWith("/dashboard") ? path : undefined,
+    );
   }
-
-  const isProtected = path.startsWith("/dashboard");
-  const isAuthPage = path === "/login" || path === "/signup";
 
   // Auth user exists but app row was wiped — heal, or force a clean login.
   // Only on dashboard / auth pages so marketing traffic stays cheap.
