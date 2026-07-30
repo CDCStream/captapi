@@ -4,24 +4,24 @@ import { ensureCreditBalance, hasCreditBalance } from "@/lib/supabase/ensure-acc
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
+function isAuthTokenCookie(name: string): boolean {
+  // Real session cookies look like sb-<ref>-auth-token[.N]. Ignore PKCE
+  // leftovers such as *-auth-token-code-verifier which are not sessions.
+  if (name.includes("code-verifier")) return false;
+  return name.includes("-auth-token");
+}
+
 function hasSupabaseAuthCookie(request: NextRequest): boolean {
   return request.cookies
     .getAll()
-    .some(
-      (c) =>
-        c.name.includes("-auth-token") ||
-        (c.name.startsWith("sb-") && c.name.includes("auth")),
-    );
+    .some((c) => isAuthTokenCookie(c.name) && Boolean(c.value) && c.value.length > 20);
 }
 
 /** Expire any Supabase auth cookies on the response (belt-and-suspenders). */
 function expireAuthCookies(request: NextRequest, response: NextResponse) {
   for (const cookie of request.cookies.getAll()) {
     const n = cookie.name;
-    if (
-      n.includes("-auth-token") ||
-      (n.startsWith("sb-") && n.includes("auth"))
-    ) {
+    if (isAuthTokenCookie(n) || (n.startsWith("sb-") && n.includes("auth"))) {
       response.cookies.set(n, "", {
         path: "/",
         maxAge: 0,

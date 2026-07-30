@@ -17,13 +17,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const sb = await createClient();
   const { data: { user } } = await sb.auth.getUser();
   if (!user) {
-    // Clear a ghost JWT the middleware may have missed, then send to login.
-    try {
-      await sb.auth.signOut();
-    } catch {
-      /* ignore */
-    }
-    redirect("/login?reason=session-expired");
+    // Middleware clears stale cookies. Avoid signOut here — cookie writes from
+    // Server Components are unreliable and can leave a half-cleared session.
+    redirect("/login");
   }
 
   const exists = await hasCreditBalance(user.id);

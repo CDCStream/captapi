@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { GoogleButton } from "@/components/auth/google-button";
@@ -14,7 +14,6 @@ import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics";
 
 function LoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,8 +45,11 @@ function LoginForm() {
       return;
     }
     track("login", { method: "password" });
-    router.push(redirect);
-    router.refresh();
+    // Full navigation so the session cookies are on the next request.
+    // Soft router.push can hit /dashboard before cookies are visible server-side
+    // and bounce back to ?reason=session-expired.
+    const next = redirect.startsWith("/") ? redirect : "/dashboard";
+    window.location.assign(next);
   }
 
   return (
