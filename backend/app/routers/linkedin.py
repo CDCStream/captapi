@@ -531,9 +531,14 @@ async def linkedin_company_posts(
                 max(need, 30 if len(collected) < _LI_COMPANY_POSTS_MAX else need),
             )
             if len(collected) < apify_target:
+                # Actor returns a deeper set when both URL and slug are passed
+                # (URL-only often caps ~10; URL+slug yields ~20 for printi).
                 items = await get_apify().run_actor_sync(
                     settings.APIFY_ACTOR_LINKEDIN_COMPANY_POSTS,
-                    {"companyUrls": [company_url], "maxPostsPerCompany": apify_target},
+                    {
+                        "companyUrls": [company_url, slug],
+                        "maxPostsPerCompany": apify_target,
+                    },
                     max_items=apify_target,
                 )
                 if items:
@@ -552,7 +557,7 @@ async def linkedin_company_posts(
 
         data = await cached_or_run(
             endpoint="linkedin.company-posts",
-            params={"slug": slug, "limit": limit, "cursor": cursor or "", "v": 7},
+            params={"slug": slug, "limit": limit, "cursor": cursor or "", "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
