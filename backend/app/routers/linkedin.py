@@ -424,16 +424,62 @@ async def linkedin_post_transcript(
         return ApiResponse(data=data)
 
 
+_LI_COMPANY_POSTS_MAX = 100
+_LI_OFFSET_CURSOR_RE = re.compile(r"^\d{1,4}$")
+
+
+def _parse_company_posts_cursor(cursor: str | None) -> int:
+    if cursor is None or cursor == "":
+        return 0
+    if not _LI_OFFSET_CURSOR_RE.match(cursor):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid cursor. Pass the nextCursor value from a previous response.",
+        )
+    offset = int(cursor)
+    if offset >= _LI_COMPANY_POSTS_MAX:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid cursor. Pass the nextCursor value from a previous response.",
+        )
+    return offset
+
+
+def _slice_company_posts_page(
+    posts: list[dict[str, Any]], *, offset: int, limit: int
+) -> dict[str, Any]:
+    """Offset-page a fetched batch; nextCursor is the next offset string."""
+    page = posts[offset : offset + limit]
+    has_more = len(posts) > offset + limit
+    return {
+        "totalReturned": len(page),
+        "posts": page,
+        "nextCursor": str(offset + limit) if has_more else None,
+        "hasMore": has_more,
+    }
+
+
 @router.get("/company-posts", summary="LinkedIn company posts")
 async def linkedin_company_posts(
     url: str = Query(..., description="LinkedIn company URL, e.g. https://linkedin.com/company/slug"),
     limit: int = Query(20, ge=1, le=100),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the nextCursor "
+            "value returned in the previous response (numeric offset, e.g. 20). "
+            "A null nextCursor means the end of the list (max 100 posts)."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     slug = _require_linkedin_company_url(url)
     settings = get_settings()
     company_url = f"https://www.linkedin.com/company/{slug}"
+    offset = _parse_company_posts_cursor(cursor)
+    # +1 sentinel so we know whether another page exists without over-fetching.
+    need = min(_LI_COMPANY_POSTS_MAX, offset + limit + 1)
     async with billed_call(
         caller=caller,
         endpoint="/v1/linkedin/company-posts",
@@ -442,26 +488,31 @@ async def linkedin_company_posts(
         base_credits=CREDIT_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Homepage JSON-LD is thin (often 1 post); accept it when present,
-            # otherwise Apify company-posts scraper.
-            native = await linkedin_native.fetch_company_posts(slug, limit=limit)
-            if native:
-                ctx["source"] = "direct"
-                posts = [_normalize_company_post(i) for i in native[:limit]]
-                return {"company": slug, "totalReturned": len(posts), "posts": posts}
+            # Homepage JSON-LD is thin (often 1–3 posts). Only use it when it
+            # fills this page; otherwise Apify (up to 100) so cursor paging works.
+            collected: list[dict[str, Any]] | None = None
+            if offset == 0:
+                native = await linkedin_native.fetch_company_posts(slug, limit=need)
+                if native and len(native) >= need:
+                    collected = native
+                    ctx["source"] = "direct"
 
-            items = await get_apify().run_actor_sync(
-                settings.APIFY_ACTOR_LINKEDIN_COMPANY_POSTS,
-                {"companyUrls": [company_url], "maxPostsPerCompany": limit},
-                max_items=limit,
-            )
-            ctx["source"] = "apify"
-            posts = [_normalize_company_post(i) for i in items[:limit]]
-            return {"company": slug, "totalReturned": len(posts), "posts": posts}
+            if collected is None:
+                items = await get_apify().run_actor_sync(
+                    settings.APIFY_ACTOR_LINKEDIN_COMPANY_POSTS,
+                    {"companyUrls": [company_url], "maxPostsPerCompany": need},
+                    max_items=need,
+                )
+                collected = items or []
+                ctx["source"] = "apify"
+
+            posts = [_normalize_company_post(i) for i in collected]
+            page = _slice_company_posts_page(posts, offset=offset, limit=limit)
+            return {"company": slug, **page}
 
         data = await cached_or_run(
             endpoint="linkedin.company-posts",
-            params={"slug": slug, "limit": limit, "v": 5},
+            params={"slug": slug, "limit": limit, "cursor": cursor or "", "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

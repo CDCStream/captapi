@@ -334,7 +334,7 @@ const LINKEDIN: Spec[] = [
   { slug: "linkedin-company", name: "LinkedIn Company API", shortName: "Company", category: "channel", method: "GET", path: "/v1/linkedin/company", credits: 2 },
   { slug: "linkedin-post-details", name: "LinkedIn Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/linkedin/post-details", credits: 1 , tagline: "Get a LinkedIn post — text, author, reactions, and comments count as structured JSON." },
   { slug: "linkedin-post-transcript", name: "LinkedIn Post Transcript API", shortName: "Post Transcript", category: "transcript", method: "GET", path: "/v1/linkedin/post-transcript", credits: 1 },
-  { slug: "linkedin-company-posts", name: "LinkedIn Company Posts API", shortName: "Company Posts", category: "list", method: "GET", path: "/v1/linkedin/company-posts", credits: 16, creditsPerResult: 0.8 },
+  { slug: "linkedin-company-posts", name: "LinkedIn Company Posts API", shortName: "Company Posts", category: "list", method: "GET", path: "/v1/linkedin/company-posts", credits: 16, creditsPerResult: 0.8, tagline: "Get recent public posts from any LinkedIn company page — text, author, engagement, and publish time — with cursor pagination (nextCursor + hasMore) up to 100 posts.", longDescription: "Pass a LinkedIn company URL and get that page's recent public posts as structured JSON. Each post includes the LinkedIn URL and activity id, text, publish time, the company author, and engagement when available. Need more than the first page? Pass the nextCursor value from the previous response to keep paging (numeric offset), and use hasMore to know when you've reached the end — up to 100 posts total. Billed per result. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
   { slug: "linkedin-search-posts", name: "LinkedIn Search Posts API", shortName: "Search Posts", category: "search", method: "GET", path: "/v1/linkedin/search-posts", credits: 16, creditsPerResult: 0.8 },
 ];
 
@@ -1366,7 +1366,17 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "linkedin-company": [up("LinkedIn company URL, e.g. https://linkedin.com/company/slug.")],
   "linkedin-post-details": [up("LinkedIn post or activity URL.")],
   "linkedin-post-transcript": [up("LinkedIn post or activity URL.")],
-  "linkedin-company-posts": [up("LinkedIn company URL, e.g. https://linkedin.com/company/slug."), lp(20, 100)],
+  "linkedin-company-posts": [
+    up("LinkedIn company URL, e.g. https://linkedin.com/company/slug."),
+    lp(20, 100),
+    {
+      name: "cursor",
+      type: "string",
+      required: false,
+      description:
+        "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (numeric offset, e.g. 20). A null nextCursor means the end of the list (max 100 posts).",
+    },
+  ],
   "linkedin-search-posts": [qp(), { name: "sort", type: "string", required: false, description: "relevance or date. Default relevance." }, lp(20, 50)],
   // Rumble
   "rumble-video-details": [up("Rumble video URL, e.g. https://rumble.com/vXXXX-title.html.")],

@@ -292,7 +292,7 @@ const LINKEDIN: Omit<Endpoint, "platform">[] = [
   { tool: "linkedin_company", name: "LinkedIn Company", path: "/v1/linkedin/company", credits: 2, summary: "Public LinkedIn company page details.", params: [url(LI_COMPANY)] },
   { tool: "linkedin_post_details", name: "LinkedIn Post Details", path: "/v1/linkedin/post-details", credits: 1, summary: "Metadata + engagement for a LinkedIn post.", params: [url(LI_POST)] },
   { tool: "linkedin_post_transcript", name: "LinkedIn Post Transcript", path: "/v1/linkedin/post-transcript", credits: 1, summary: "Extract post text as a transcript for a LinkedIn post.", params: [url(LI_POST)] },
-  { tool: "linkedin_company_posts", name: "LinkedIn Company Posts", path: "/v1/linkedin/company-posts", credits: 16, summary: "Recent public posts from a LinkedIn company page.", params: [url(LI_COMPANY), limit(20, 100)] },
+  { tool: "linkedin_company_posts", name: "LinkedIn Company Posts", path: "/v1/linkedin/company-posts", credits: 16, summary: "Recent public posts from a LinkedIn company page, with cursor pagination (nextCursor + hasMore) up to 100 posts.", params: [url(LI_COMPANY), limit(20, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (numeric offset, e.g. 20)." }] },
   { tool: "linkedin_search_posts", name: "LinkedIn Search Posts", path: "/v1/linkedin/search-posts", credits: 16, summary: "Search public LinkedIn posts by keyword.", params: [q(), { name: "sort", type: "string", required: false, description: "relevance or date. Default relevance." }, limit(20, 50)] },
 ];
 

@@ -2885,7 +2885,7 @@
     "name": "LinkedIn Company Posts",
     "path": "/v1/linkedin/company-posts",
     "credits": 16,
-    "summary": "Recent public posts from a LinkedIn company page.",
+    "summary": "Recent public posts from a LinkedIn company page, with cursor pagination (nextCursor + hasMore) up to 100 posts.",
     "params": [
       {
         "name": "url",
@@ -2898,6 +2898,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (numeric offset, e.g. 20)."
       },
       {
         "name": "cache",
