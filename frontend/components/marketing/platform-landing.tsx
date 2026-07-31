@@ -1,24 +1,4 @@
 import Link from "next/link";
-import {
-  Youtube,
-  AtSign,
-  Cloud,
-  Music2,
-  Instagram,
-  Facebook,
-  Github,
-  Linkedin,
-  Megaphone,
-  MessagesSquare,
-  Pin,
-  ShoppingBag,
-  Twitter,
-  Video,
-  Search,
-  LinkIcon,
-  Ghost,
-  type LucideIcon,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CodeTabs } from "@/components/docs/code-tabs";
@@ -35,29 +15,8 @@ import {
   type ApiEndpoint,
 } from "@/lib/api-catalog";
 import { Tldr } from "@/components/marketing/tldr";
+import { PlatformGlyph } from "@/components/marketing/platform-glyph";
 import { CONTENT_UPDATED } from "@/lib/seo";
-
-const PLATFORM_ICONS: Record<string, LucideIcon> = {
-  youtube: Youtube,
-  music: Music2,
-  instagram: Instagram,
-  facebook: Facebook,
-  twitter: Twitter,
-  reddit: MessagesSquare,
-  threads: AtSign,
-  bluesky: Cloud,
-  pinterest: Pin,
-  linkedin: Linkedin,
-  rumble: Video,
-  github: Github,
-  megaphone: Megaphone,
-  shoppingBag: ShoppingBag,
-  video: Video,
-  cloud: Cloud,
-  search: Search,
-  link: LinkIcon,
-  ghost: Ghost,
-};
 
 /** Pick a representative endpoint (prefer a URL-input one) for hero examples. */
 function heroEndpoint(group: PlatformGroup): ApiEndpoint {
@@ -184,7 +143,6 @@ function jsonLd(group: PlatformGroup) {
 }
 
 export function PlatformLanding({ group }: { group: PlatformGroup }) {
-  const Icon = PLATFORM_ICONS[group.icon] ?? Search;
   const scripts = jsonLd(group);
   const others = PLATFORM_PAGES.filter((g) => g.id !== group.id);
 
@@ -215,7 +173,11 @@ export function PlatformLanding({ group }: { group: PlatformGroup }) {
         <div className="grid items-start gap-10 lg:grid-cols-2">
           <div>
             <Badge variant="secondary" className="gap-1.5">
-              <Icon className={`size-3.5 ${group.color}`} />
+              <PlatformGlyph
+                icon={group.icon}
+                colorClass={group.color}
+                size={14}
+              />
               {group.name} API
             </Badge>
             <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">

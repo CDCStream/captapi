@@ -131,7 +131,8 @@ export interface PlatformGroup {
     | "cloud"
     | "search"
     | "link"
-    | "ghost";
+    | "ghost"
+    | "captapi";
   /** brand color class for the icon */
   color: string;
   exampleUrl: string;
@@ -185,7 +186,7 @@ const PLATFORM_LABEL: Record<PlatformId, string> = {
   truth_social: "Truth Social",
   kick: "Kick",
   amazon_shop: "Amazon Shop",
-  account: "Account",
+  account: "CaptAPI Account",
   utilities: "Utilities",
   kwai: "Kwai",
   komi: "Komi",
@@ -703,9 +704,10 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
   },
   {
     id: "account",
-    name: "Account",
-    blurb: "Check credit balance, request history, daily usage, and most used API routes.",
-    icon: "search",
+    name: "CaptAPI Account",
+    blurb:
+      "Your key-scoped credit balance, request history, daily usage, and most-used routes — free, no credits charged.",
+    icon: "captapi",
     color: "text-emerald-600",
     exampleUrl: "https://captapi.com/dashboard",
     endpoints: ACCOUNT.map((s) => ({ ...s, platform: "account" as const })),
@@ -774,7 +776,7 @@ export const ALL_ENDPOINTS: ApiEndpoint[] = PLATFORM_GROUPS.flatMap(
 export const ENDPOINT_COUNT = ALL_ENDPOINTS.length;
 
 /**
- * Number of public data platforms. Excludes internal groups ("Account",
+ * Number of public data platforms. Excludes meta groups ("CaptAPI Account",
  * "Utilities") that are not social platforms.
  */
 export const PLATFORM_COUNT = PLATFORM_GROUPS.filter(
@@ -793,10 +795,11 @@ export function platformSlug(id: PlatformId): string {
 
 /**
  * Platform groups that get a public landing page and appear in the APIs nav
- * dropdown. Excludes internal "Account" and "Utilities" groups.
+ * dropdown. Excludes "Utilities" (analytics / video-file helpers).
+ * CaptAPI Account is included so users can discover balance & usage APIs.
  */
 export const PLATFORM_PAGES: PlatformGroup[] = PLATFORM_GROUPS.filter(
-  (g) => g.id !== "account" && g.id !== "utilities",
+  (g) => g.id !== "utilities",
 );
 
 /** Resolve a platform landing page from its URL slug (e.g. "truth-social-api"). */
@@ -974,7 +977,7 @@ function resourceLabel(ep: ApiEndpoint): string {
 
 /** What the user typically sends (for FAQ / longDescription). */
 function inputKind(ep: ApiEndpoint): string {
-  if (ep.platform === "account") return "Captapi account";
+  if (ep.platform === "account") return "CaptAPI Account";
   if (ep.platform === "utilities") {
     if (ep.slug.startsWith("video-")) return "uploaded video or audio file";
     return "post or video URL";

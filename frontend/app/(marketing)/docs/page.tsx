@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { CodeTabs } from "@/components/docs/code-tabs";
 import { IntegrationCards } from "@/components/docs/integration-cards";
+import { PlatformGlyph } from "@/components/marketing/platform-glyph";
 import {
   PLATFORM_GROUPS,
   PLATFORM_COUNT,
@@ -193,14 +194,25 @@ function ReferenceTable({
   id,
   endpoints,
   title,
+  icon,
 }: {
   id: string;
   endpoints: { method: string; path: string; credits: number | string; desc: string; slug?: string }[];
   title: string;
+  icon?: string;
 }) {
   return (
     <div className="mb-2">
-      <H3 id={id}>{title}</H3>
+      <H3 id={id}>
+        {icon ? (
+          <span className="inline-flex items-center gap-2">
+            <PlatformGlyph icon={icon} size={20} />
+            {title}
+          </span>
+        ) : (
+          title
+        )}
+      </H3>
       <div className="overflow-hidden rounded-lg border">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left">
@@ -414,6 +426,7 @@ export default function DocsPage() {
           key={g.id}
           id={platformAnchorId(g.id)}
           title={g.name}
+          icon={g.icon}
           endpoints={refRows(g.endpoints)}
         />
       ))}

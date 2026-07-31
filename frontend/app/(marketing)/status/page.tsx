@@ -101,7 +101,7 @@ function prettyPlatform(slug: string): string {
     "ad-library": "Ad Libraries",
     ad_library: "Ad Libraries",
     analytics: "Analytics",
-    account: "Account",
+    account: "CaptAPI Account",
     other: "Other",
   };
   return NAMES[slug] ?? slug.charAt(0).toUpperCase() + slug.slice(1);

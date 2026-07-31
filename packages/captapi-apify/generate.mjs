@@ -36,7 +36,7 @@ const PLATFORM_LABELS = {
   kick: "Kick",
   amazon_shop: "Amazon Shop",
   age_gender: "Age and Gender",
-  account: "Account",
+  account: "CaptAPI Account",
   kwai: "Kwai",
   komi: "Komi",
   pillar: "Pillar",

@@ -40,7 +40,7 @@ const PLATFORM_LABELS: Record<Platform, string> = {
 	kick: 'Kick',
 	amazon_shop: 'Amazon Shop',
 	age_gender: 'Age and Gender',
-	account: 'Account',
+	account: 'CaptAPI Account',
 	kwai: 'Kwai',
 	komi: 'Komi',
 	pillar: 'Pillar',

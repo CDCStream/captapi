@@ -3,49 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  ChevronDown,
-  Youtube,
-  AtSign,
-  Cloud,
-  Music2,
-  Instagram,
-  Facebook,
-  Github,
-  Linkedin,
-  Megaphone,
-  MessagesSquare,
-  Pin,
-  ShoppingBag,
-  Twitter,
-  Video,
-  Search,
-  LinkIcon,
-  Ghost,
-  type LucideIcon,
-} from "lucide-react";
-
-const ICONS: Record<string, LucideIcon> = {
-  youtube: Youtube,
-  music: Music2,
-  instagram: Instagram,
-  facebook: Facebook,
-  twitter: Twitter,
-  reddit: MessagesSquare,
-  threads: AtSign,
-  bluesky: Cloud,
-  pinterest: Pin,
-  linkedin: Linkedin,
-  rumble: Video,
-  github: Github,
-  megaphone: Megaphone,
-  shoppingBag: ShoppingBag,
-  video: Video,
-  cloud: Cloud,
-  search: Search,
-  link: LinkIcon,
-  ghost: Ghost,
-};
+import { ChevronDown } from "lucide-react";
+import { PlatformGlyph } from "@/components/marketing/platform-glyph";
 
 export interface NavPlatform {
   label: string;
@@ -112,7 +71,6 @@ export function ApisNavDropdown({ platforms }: { platforms: NavPlatform[] }) {
             </Link>
             <div className="my-1 border-t" />
             {platforms.map((p) => {
-              const Icon = ICONS[p.icon] ?? Search;
               const isExpanded = expanded === p.href;
               return (
                 <div key={p.href}>
@@ -121,7 +79,11 @@ export function ApisNavDropdown({ platforms }: { platforms: NavPlatform[] }) {
                       href={p.href}
                       className="flex flex-1 items-center gap-2.5 px-3 py-2 text-sm"
                     >
-                      <Icon className={`size-4 shrink-0 ${p.color}`} />
+                      <PlatformGlyph
+                        icon={p.icon}
+                        colorClass={p.color}
+                        size={16}
+                      />
                       <span>{p.label} API</span>
                     </Link>
                     <button

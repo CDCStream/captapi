@@ -3,27 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import {
-  AtSign,
-  ChevronRight,
-  Cloud,
-  Facebook,
-  Github,
-  Instagram,
-  Linkedin,
-  Megaphone,
-  MessagesSquare,
-  Music2,
-  Pin,
-  LinkIcon,
-  Ghost,
-  ShoppingBag,
-  ShieldCheck,
-  Terminal,
-  Twitter,
-  Video,
-  Youtube,
-} from "lucide-react";
+import { ChevronRight, ShieldCheck, Terminal } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics";
@@ -31,44 +11,14 @@ import { cn } from "@/lib/utils";
 import {
   PLATFORM_GROUPS,
   creditLabel,
+  getGroup,
   requestUrl,
   resolveEndpoint,
   type ApiEndpoint,
   type PlatformId,
 } from "@/lib/api-catalog";
 import { ApiPlayground, type RunResult } from "@/components/docs/api-playground";
-
-const PLATFORM_ICON: Record<PlatformId, typeof Youtube> = {
-  youtube: Youtube,
-  tiktok: Music2,
-  instagram: Instagram,
-  facebook: Facebook,
-  twitter: Twitter,
-  reddit: MessagesSquare,
-  threads: AtSign,
-  bluesky: Cloud,
-  pinterest: Pin,
-  linkedin: Linkedin,
-  rumble: Video,
-  tiktok_shop: ShoppingBag,
-  github: Github,
-  ad_library: Megaphone,
-  twitch: Video,
-  spotify: Music2,
-  soundcloud: Cloud,
-  linktree: LinkIcon,
-  snapchat: Ghost,
-  truth_social: AtSign,
-  kick: Video,
-  amazon_shop: ShoppingBag,
-  account: ShieldCheck,
-  utilities: Video,
-  kwai: Video,
-  komi: LinkIcon,
-  pillar: LinkIcon,
-  linkbio: LinkIcon,
-  linkme: LinkIcon,
-};
+import { PlatformGlyph } from "@/components/marketing/platform-glyph";
 
 const PLATFORM_BG: Record<PlatformId, string> = {
   youtube: "bg-red-500/10",
@@ -251,7 +201,6 @@ function PlaygroundInner() {
             </div>
             <div className="max-h-[70vh] space-y-4 overflow-y-auto pr-1">
               {PLATFORM_GROUPS.map((group) => {
-                const Icon = PLATFORM_ICON[group.id];
                 return (
                   <div key={group.id}>
                     <div className="flex items-center gap-2 px-2 py-1.5">
@@ -262,7 +211,11 @@ function PlaygroundInner() {
                           PLATFORM_FG[group.id],
                         )}
                       >
-                        <Icon className="size-3" />
+                        <PlatformGlyph
+                          icon={group.icon}
+                          colorClass={PLATFORM_FG[group.id]}
+                          size={12}
+                        />
                       </span>
                       <span className="text-xs font-medium text-muted-foreground">
                         {group.name}
@@ -330,10 +283,11 @@ function PlaygroundInner() {
                 PLATFORM_FG[selected.platform],
               )}
             >
-              {(() => {
-                const Icon = PLATFORM_ICON[selected.platform];
-                return <Icon className="size-3.5" />;
-              })()}
+              <PlatformGlyph
+                icon={getGroup(selected.platform).icon}
+                colorClass={PLATFORM_FG[selected.platform]}
+                size={14}
+              />
             </span>
             <span className="font-medium">{selected.name}</span>
             <code className="font-mono text-xs text-muted-foreground">

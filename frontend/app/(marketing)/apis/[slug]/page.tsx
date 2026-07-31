@@ -1,28 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  Youtube,
-  AtSign,
-  Cloud,
-  Music2,
-  Instagram,
-  Facebook,
-  Github,
-  Linkedin,
-  Megaphone,
-  MessagesSquare,
-  Pin,
-  ShoppingBag,
-  Twitter,
-  Video,
-  Search,
-  LinkIcon,
-  Ghost,
-  Check,
-  Coins,
-  type LucideIcon,
-} from "lucide-react";
+import { Check, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BugReportDialog } from "@/components/bug-report-dialog";
@@ -53,30 +32,9 @@ import {
 import { CodeTabs } from "@/components/docs/code-tabs";
 import { ApiPlayground } from "@/components/docs/api-playground";
 import { PlatformLanding } from "@/components/marketing/platform-landing";
+import { PlatformGlyph } from "@/components/marketing/platform-glyph";
 import { Tldr } from "@/components/marketing/tldr";
 import { CONTENT_UPDATED } from "@/lib/seo";
-
-const PLATFORM_ICONS: Record<string, LucideIcon> = {
-  youtube: Youtube,
-  music: Music2,
-  instagram: Instagram,
-  facebook: Facebook,
-  twitter: Twitter,
-  reddit: MessagesSquare,
-  threads: AtSign,
-  bluesky: Cloud,
-  pinterest: Pin,
-  linkedin: Linkedin,
-  rumble: Video,
-  github: Github,
-  megaphone: Megaphone,
-  shoppingBag: ShoppingBag,
-  video: Video,
-  cloud: Cloud,
-  search: Search,
-  link: LinkIcon,
-  ghost: Ghost,
-};
 
 export function generateStaticParams() {
   return [
@@ -208,7 +166,6 @@ export default async function ApiDetailPage({
   if (!ep) notFound();
 
   const group = getGroup(ep.platform);
-  const Icon = PLATFORM_ICONS[group.icon];
   const epParams = params(ep);
   const epFaqs = faqs(ep);
   const epResponse = responseStructure(ep);
@@ -246,7 +203,11 @@ export default async function ApiDetailPage({
         {/* Hero */}
         <div className="flex items-center gap-2 mb-3">
           <Badge variant="secondary" className="gap-1.5">
-            <Icon className={`size-3.5 ${group.color}`} />
+            <PlatformGlyph
+              icon={group.icon}
+              colorClass={group.color}
+              size={14}
+            />
             {platformLabel(ep.platform)}
           </Badge>
           <Badge variant="outline">

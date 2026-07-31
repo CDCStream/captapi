@@ -251,7 +251,7 @@
     ]
   },
   {
-    "label": "Account",
+    "label": "CaptAPI Account",
     "modules": [
       "accountBalance",
       "accountRequestHistory",

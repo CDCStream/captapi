@@ -1,27 +1,11 @@
 import Link from "next/link";
 import {
-  Youtube,
-  Github,
-  Megaphone,
-  Music2,
-  ShoppingBag,
-  Instagram,
-  Facebook,
-  Twitter,
-  Linkedin,
-  MessagesSquare,
-  AtSign,
-  Cloud,
-  Pin,
-  Video,
   FileText,
   Sparkles,
   BarChart3,
   MessageCircle,
   Users,
   Search,
-  LinkIcon,
-  Ghost,
   Clapperboard,
   type LucideIcon,
 } from "lucide-react";
@@ -30,28 +14,7 @@ import {
   type ApiEndpoint,
   type Category,
 } from "@/lib/api-catalog";
-
-const PLATFORM_ICONS: Record<string, LucideIcon> = {
-  youtube: Youtube,
-  music: Music2,
-  instagram: Instagram,
-  facebook: Facebook,
-  twitter: Twitter,
-  reddit: MessagesSquare,
-  threads: AtSign,
-  bluesky: Cloud,
-  pinterest: Pin,
-  linkedin: Linkedin,
-  rumble: Video,
-  github: Github,
-  megaphone: Megaphone,
-  shoppingBag: ShoppingBag,
-  video: Video,
-  cloud: Cloud,
-  search: Search,
-  link: LinkIcon,
-  ghost: Ghost,
-};
+import { PlatformGlyph } from "@/components/marketing/platform-glyph";
 
 const CATEGORY_ICONS: Record<Category, LucideIcon> = {
   transcript: FileText,
@@ -80,14 +43,18 @@ export function ApiCatalog() {
   return (
     <div className="space-y-6">
       {PLATFORM_GROUPS.map((group) => {
-        const Icon = PLATFORM_ICONS[group.icon];
         return (
           <div
             key={group.id}
             className="overflow-hidden rounded-xl border bg-card"
           >
             <div className="flex items-start gap-3 border-b bg-muted/30 px-4 py-4 md:px-6">
-              <Icon className={`size-7 shrink-0 ${group.color}`} />
+              <PlatformGlyph
+                icon={group.icon}
+                colorClass={group.color}
+                size={28}
+                className="mt-0.5"
+              />
               <div>
                 <h3 className="font-semibold leading-tight">{group.name}</h3>
                 <p className="mt-0.5 text-sm text-muted-foreground">
