@@ -62,23 +62,24 @@ export default async function AdminFunnelPage() {
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">Funnel (14 days)</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Visitors → signup → API key → API usage → checkout → paid. Includes anonymous
-          page traffic. Open a row to inspect the journey and response JSON.
+          Visitors → signup → API key → API usage → checkout → paid. Visitors = unique
+          browsers (anon_id). Table lists users plus browsers that have not signed up yet.
         </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {[
-          { label: "Visitors", value: f.visitors },
-          { label: "Signups", value: f.signups },
-          { label: "API key", value: f.apiKeyHolders },
-          { label: "API callers", value: f.apiCallers },
-          { label: "Checkout started", value: f.checkoutStarted },
-          { label: "Paid", value: f.paid },
+          { label: "Visitors", hint: "unique anon_id", value: f.visitors },
+          { label: "Signups", hint: "unique users", value: f.signups },
+          { label: "API key", hint: "created in window", value: f.apiKeyHolders },
+          { label: "API callers", hint: "unique users", value: f.apiCallers },
+          { label: "Checkout started", hint: "unique users", value: f.checkoutStarted },
+          { label: "Paid", hint: "unique users", value: f.paid },
         ].map((card) => (
           <div key={card.label} className="rounded-lg border bg-background px-4 py-3">
             <p className="text-xs text-muted-foreground">{card.label}</p>
             <p className="mt-1 text-2xl font-semibold tabular-nums">{card.value}</p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground">{card.hint}</p>
           </div>
         ))}
       </div>

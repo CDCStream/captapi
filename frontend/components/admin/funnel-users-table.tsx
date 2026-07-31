@@ -37,8 +37,8 @@ type Segment =
   | "no_key";
 
 const SEGMENTS: { id: Segment; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "visitors", label: "Visitors (anon)" },
+  { id: "all", label: "All rows" },
+  { id: "visitors", label: "Still anon" },
   { id: "signups", label: "Signups" },
   { id: "api_key", label: "API key created" },
   { id: "api_callers", label: "API callers" },

@@ -14,7 +14,7 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
 
   const [
     { data: visitorRows },
-    { count: signupEvents },
+    { data: signupRows },
     { data: requestRows },
     { data: paidRows },
     { data: checkoutRows },
@@ -30,9 +30,10 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
       .limit(20000),
     sb
       .from("events")
-      .select("*", { count: "exact", head: true })
+      .select("user_id")
       .eq("event", "signup")
-      .gte("created_at", since),
+      .gte("created_at", since)
+      .limit(5000),
     sb
       .from("requests")
       .select("user_id, endpoint, status_code, response_time_ms, created_at")
@@ -89,6 +90,12 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
     if (aid) visitors.add(aid);
   }
 
+  const signupUsers = new Set<string>();
+  for (const row of signupRows || []) {
+    const uid = row.user_id as string | null;
+    if (uid && !excluded.has(uid)) signupUsers.add(uid);
+  }
+
   const keyHolders = new Set<string>();
   for (const row of apiKeyRows || []) {
     const uid = row.user_id as string;
@@ -126,7 +133,7 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
     excludedUserIds: excludeIds,
     funnel: {
       visitors: visitors.size,
-      signups: signupEvents ?? 0,
+      signups: signupUsers.size,
       apiKeyHolders: keyHolders.size,
       apiCallers: callers.size,
       checkoutStarted: checkoutUsers.size,
@@ -180,6 +187,7 @@ export async function loadFunnelUsers(
     { data: balances },
     { data: eventRows },
     { data: apiKeyRows },
+    { data: anonPageViews },
     { data: anonEventRows },
     { data: checkoutEventRows },
     { data: signupEventRows },
@@ -212,12 +220,24 @@ export async function loadFunnelUsers(
       .not("user_id", "in", notIn)
       .order("created_at", { ascending: false })
       .limit(10000),
+    // Keys created in-window (same definition as overview "API key").
     sb
       .from("api_keys")
       .select("user_id")
+      .gte("created_at", since)
       .not("user_id", "in", notIn)
       .limit(5000),
-    // Anonymous page activity (not yet linked to a user_id).
+    // One row per anonymous browser page_view (matches overview Visitors).
+    sb
+      .from("events")
+      .select("anon_id, path, created_at")
+      .eq("event", "page_view")
+      .gte("created_at", since)
+      .is("user_id", null)
+      .not("anon_id", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(20000),
+    // Extra anon events (CTA clicks etc.) for event counts / last path.
     sb
       .from("events")
       .select("anon_id, event, path, created_at")
@@ -239,7 +259,7 @@ export async function loadFunnelUsers(
       .select("user_id, anon_id")
       .eq("event", "signup")
       .gte("created_at", since)
-      .limit(3000),
+      .limit(5000),
   ]);
 
   const paidAt = new Map<string, string>();
@@ -376,33 +396,36 @@ export async function loadFunnelUsers(
   }
 
   // Anonymous visitors (never claimed by a logged-in user in this window).
+  // Seed from page_view so the list matches overview Visitors (minus converters).
+  const emptyAnon = (aid: string): FunnelUserAgg => ({
+    id: aid,
+    kind: "anon",
+    userId: null,
+    anonId: aid,
+    requests: 0,
+    errors: 0,
+    events: 0,
+    hasApiKey: false,
+    signedUp: false,
+    checkoutStarted: false,
+    lastAt: null,
+    lastEndpoint: null,
+    lastPath: null,
+    firstAt: null,
+    lastEventAt: null,
+    paid: false,
+    paidCredits: 0,
+    plan: null,
+    creditsLeft: null,
+  });
+
   const byAnon = new Map<string, FunnelUserAgg>();
-  for (const row of anonEventRows || []) {
+  for (const row of anonPageViews || []) {
     const aid = row.anon_id as string;
     if (!aid || claimedAnons.has(aid)) continue;
     let agg = byAnon.get(aid);
     if (!agg) {
-      agg = {
-        id: aid,
-        kind: "anon",
-        userId: null,
-        anonId: aid,
-        requests: 0,
-        errors: 0,
-        events: 0,
-        hasApiKey: false,
-        signedUp: false,
-        checkoutStarted: false,
-        lastAt: null,
-        lastEndpoint: null,
-        lastPath: null,
-        firstAt: null,
-        lastEventAt: null,
-        paid: false,
-        paidCredits: 0,
-        plan: null,
-        creditsLeft: null,
-      };
+      agg = emptyAnon(aid);
       byAnon.set(aid, agg);
     }
     agg.events += 1;
@@ -413,6 +436,25 @@ export async function loadFunnelUsers(
     }
     agg.firstAt = ts;
   }
+  for (const row of anonEventRows || []) {
+    const aid = row.anon_id as string;
+    if (!aid || claimedAnons.has(aid)) continue;
+    let agg = byAnon.get(aid);
+    if (!agg) {
+      agg = emptyAnon(aid);
+      byAnon.set(aid, agg);
+    }
+    // page_view rows already counted above — only add non-page_view here
+    if ((row.event as string) !== "page_view") {
+      agg.events += 1;
+    }
+    const ts = row.created_at as string;
+    if (!agg.lastEventAt || ts > agg.lastEventAt) {
+      agg.lastEventAt = ts;
+      if (row.path) agg.lastPath = row.path as string;
+    }
+    if (!agg.firstAt || ts < agg.firstAt) agg.firstAt = ts;
+  }
 
   let users = [...byUser.values(), ...byAnon.values()];
   if (opts?.paidOnly) users = users.filter((u) => u.paid);
@@ -422,7 +464,7 @@ export async function loadFunnelUsers(
     return bTs.localeCompare(aTs);
   });
 
-  return { since, users: users.slice(0, 400) };
+  return { since, users };
 }
 
 export async function loadUserJourney(sb: SupabaseClient, userId: string) {
