@@ -76,6 +76,19 @@ def _first(items: list[dict[str, Any]]) -> dict[str, Any]:
     return items[0]
 
 
+def _require_person_profile(data: dict[str, Any]) -> dict[str, Any]:
+    """Reject Apify/native shells that have no identifying fields."""
+    if data.get("name") or data.get("username"):
+        return data
+    raise HTTPException(status_code=404, detail="Profile not found")
+
+
+def _require_company(data: dict[str, Any]) -> dict[str, Any]:
+    if data.get("name"):
+        return data
+    raise HTTPException(status_code=404, detail="Company not found")
+
+
 def _normalize_profile(p: dict[str, Any]) -> dict[str, Any]:
     # apimaestro/linkedin-profile-detail nests everything under basic_info.
     info = p.get("basic_info") if isinstance(p.get("basic_info"), dict) else p
@@ -250,7 +263,7 @@ async def linkedin_profile(
             native = await linkedin_native.fetch_profile(slug)
             if native:
                 ctx["source"] = "direct"
-                return _normalize_profile(native)
+                return _require_person_profile(_normalize_profile(native))
 
             apify = get_apify()
             items = await apify.run_actor_sync(
@@ -260,11 +273,11 @@ async def linkedin_profile(
             )
             ctx["source"] = "apify"
             ctx["credits_override"] = CREDIT_PROFILE
-            return _normalize_profile(_first(items))
+            return _require_person_profile(_normalize_profile(_first(items)))
 
         data = await cached_or_run(
             endpoint="linkedin.profile",
-            params={"slug": slug, "v": 4},
+            params={"slug": slug, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -291,7 +304,7 @@ async def linkedin_company(
             native = await linkedin_native.fetch_company(slug)
             if native:
                 ctx["source"] = "direct"
-                return _normalize_company(native)
+                return _require_company(_normalize_company(native))
 
             apify = get_apify()
             items = await apify.run_actor_sync(
@@ -301,11 +314,11 @@ async def linkedin_company(
             )
             ctx["source"] = "apify"
             ctx["credits_override"] = CREDIT_PROFILE
-            return _normalize_company(_first(items))
+            return _require_company(_normalize_company(_first(items)))
 
         data = await cached_or_run(
             endpoint="linkedin.company",
-            params={"slug": slug, "v": 4},
+            params={"slug": slug, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

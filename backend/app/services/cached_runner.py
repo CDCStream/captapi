@@ -111,11 +111,18 @@ def _spawn_refresh(
 
 
 def _looks_empty(result: Any) -> bool:
-    """True for list-endpoint payloads with zero rows.
+    """True for empty list payloads or all-null profile/company shells.
 
-    Upstream actors occasionally return an empty dataset on a transient
-    block/proxy failure; caching that would pin the endpoint to an empty
-    response for the whole TTL. Skipping the cache write only costs a re-run
-    on the next call.
+    Upstream actors occasionally return an empty dataset or a null-filled
+    person/company stub on a miss/block; caching that would pin the endpoint
+    to a useless response for the whole TTL.
     """
-    return isinstance(result, dict) and result.get("totalReturned") == 0
+    if not isinstance(result, dict):
+        return False
+    if result.get("totalReturned") == 0:
+        return True
+    if result.get("type") in {"person", "company"} and not (
+        result.get("name") or result.get("username")
+    ):
+        return True
+    return False
