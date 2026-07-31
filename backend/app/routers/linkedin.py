@@ -488,24 +488,26 @@ async def linkedin_company_posts(
         base_credits=CREDIT_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Homepage JSON-LD is thin (often 1–3 posts). Only use it when it
-            # fills this page; otherwise Apify (up to 100) so cursor paging works.
-            collected: list[dict[str, Any]] | None = None
-            if offset == 0:
-                native = await linkedin_native.fetch_company_posts(slug, limit=need)
-                if native and len(native) >= need:
-                    collected = native
-                    ctx["source"] = "direct"
+            # Prefer enriched native (homepage URLs hydrated). Apify often returns
+            # only 1 row lately — keep whichever batch is larger so cursor paging works.
+            native = await linkedin_native.fetch_company_posts(slug, limit=need)
+            collected: list[dict[str, Any]] = list(native or [])
+            source = "direct" if collected else None
 
-            if collected is None:
+            if len(collected) < need:
                 items = await get_apify().run_actor_sync(
                     settings.APIFY_ACTOR_LINKEDIN_COMPANY_POSTS,
                     {"companyUrls": [company_url], "maxPostsPerCompany": need},
                     max_items=need,
                 )
-                collected = items or []
-                ctx["source"] = "apify"
+                if items and len(items) > len(collected):
+                    collected = items
+                    source = "apify"
+                elif not collected:
+                    collected = items or []
+                    source = "apify"
 
+            ctx["source"] = source or "direct"
             posts = [_normalize_company_post(i) for i in collected]
             page = _slice_company_posts_page(posts, offset=offset, limit=limit)
             return {"company": slug, **page}

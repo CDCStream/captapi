@@ -474,8 +474,34 @@ async def fetch_post(url: str) -> dict[str, Any] | None:
     return chosen
 
 
+_COMPANY_POST_URL_RE = re.compile(
+    r"https://(?:www\.)?linkedin\.com/posts/[A-Za-z0-9_%\-.]+",
+    re.I,
+)
+
+
+def _company_post_urls_from_html(html: str, *, limit: int = 40) -> list[str]:
+    """Collect public post URLs embedded in the company homepage HTML."""
+    urls: list[str] = []
+    seen: set[str] = set()
+    for m in _COMPANY_POST_URL_RE.finditer(html or ""):
+        clean = m.group(0).split("?")[0].rstrip(").,;'\"")
+        if clean in seen or "activity" not in clean.lower():
+            continue
+        seen.add(clean)
+        urls.append(clean)
+        if len(urls) >= limit:
+            break
+    return urls
+
+
 async def fetch_company_posts(slug: str, *, limit: int = 20) -> list[dict[str, Any]] | None:
-    """Company homepage JSON-LD posts (thin vs Apify; Apify remains fallthrough)."""
+    """Company posts from homepage JSON-LD + hydrated post URLs found in HTML.
+
+    LinkedIn's guest JSON-LD is usually 1 post; the same HTML still embeds
+    several ``/posts/...activity-...`` links we can hydrate. Apify remains the
+    router fallthrough when this is still too thin.
+    """
     handle = (slug or "").strip().strip("/")
     if not handle or limit <= 0:
         return None
@@ -487,29 +513,80 @@ async def fetch_company_posts(slug: str, *, limit: int = 20) -> list[dict[str, A
     if _is_login_wall(html, og):
         return None
 
-    posts: list[dict[str, Any]] = []
-    seen: set[str] = set()
+    ld_by_url: dict[str, dict[str, Any]] = {}
+    ld_by_activity: dict[str, dict[str, Any]] = {}
     for block in _ld_blocks(html):
-        if not isinstance(block, dict):
-            continue
-        if block.get("@type") != "DiscussionForumPosting":
+        if not isinstance(block, dict) or block.get("@type") != "DiscussionForumPosting":
             continue
         row = _post_from_social_ld(block, fallback_url=url)
         if not row or not row.get("text"):
             continue
-        key = row.get("url") or row.get("text")
+        if row.get("url"):
+            ld_by_url[row["url"]] = row
+        if row.get("id"):
+            ld_by_activity[str(row["id"])] = row
+
+    html_urls = _company_post_urls_from_html(
+        html, limit=min(40, max(limit + 5, limit * 2))
+    )
+    # Preserve homepage order (usually newest first); fall back to LD-only.
+    ordered_urls = html_urls or list(ld_by_url.keys())
+    if not ordered_urls:
+        log.info("linkedin_native_company_posts_empty", slug=handle)
+        return None
+
+    planned: list[tuple[str, dict[str, Any] | str]] = []
+    for post_url in ordered_urls:
+        activity = None
+        m = _ACTIVITY_RE.search(post_url)
+        if m:
+            activity = m.group(1)
+        ready = ld_by_url.get(post_url) or (
+            ld_by_activity.get(activity) if activity else None
+        )
+        if ready and ready.get("text"):
+            planned.append(("ready", ready))
+        else:
+            planned.append(("fetch", post_url))
+        if len(planned) >= limit:
+            break
+
+    fetch_urls = [u for kind, u in planned if kind == "fetch" and isinstance(u, str)]
+    fetched: dict[str, dict[str, Any]] = {}
+    if fetch_urls:
+        sem = asyncio.Semaphore(3)
+
+        async def _one(post_url: str) -> tuple[str, dict[str, Any] | None]:
+            async with sem:
+                return post_url, await fetch_post(post_url)
+
+        for post_url, row in await asyncio.gather(*[_one(u) for u in fetch_urls]):
+            if row and row.get("text"):
+                fetched[post_url] = row
+
+    company_url = url.rstrip("/")
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for kind, val in planned:
+        row = val if kind == "ready" and isinstance(val, dict) else fetched.get(str(val))
+        if not row or not row.get("text"):
+            continue
+        key = safe_str(row.get("url") or row.get("id") or row.get("text"))
         if not key or key in seen:
             continue
         seen.add(key)
-        posts.append(row)
-        if len(posts) >= limit:
+        author = row.setdefault("author", {})
+        if isinstance(author, dict) and not author.get("url"):
+            author["url"] = company_url
+        out.append(row)
+        if len(out) >= limit:
             break
 
-    if not posts:
+    if not out:
         log.info("linkedin_native_company_posts_empty", slug=handle)
         return None
-    log.info("linkedin_native_company_posts_ok", slug=handle, n=len(posts))
-    return posts
+    log.info("linkedin_native_company_posts_ok", slug=handle, n=len(out))
+    return out
 
 
 
