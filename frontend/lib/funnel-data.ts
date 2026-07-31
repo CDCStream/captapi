@@ -13,6 +13,7 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
   const notIn = excludeFilter(excludeIds);
 
   const [
+    { data: visitorRows },
     { count: signupEvents },
     { data: requestRows },
     { data: paidRows },
@@ -20,6 +21,13 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
     { count: sampleCount },
     { data: apiKeyRows },
   ] = await Promise.all([
+    sb
+      .from("events")
+      .select("anon_id")
+      .eq("event", "page_view")
+      .gte("created_at", since)
+      .not("anon_id", "is", null)
+      .limit(20000),
     sb
       .from("events")
       .select("*", { count: "exact", head: true })
@@ -75,6 +83,12 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
     if ((row.status_code ?? 0) >= 400) errors += 1;
   }
 
+  const visitors = new Set<string>();
+  for (const row of visitorRows || []) {
+    const aid = row.anon_id as string | null;
+    if (aid) visitors.add(aid);
+  }
+
   const keyHolders = new Set<string>();
   for (const row of apiKeyRows || []) {
     const uid = row.user_id as string;
@@ -111,6 +125,7 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
     since,
     excludedUserIds: excludeIds,
     funnel: {
+      visitors: visitors.size,
       signups: signupEvents ?? 0,
       apiKeyHolders: keyHolders.size,
       apiCallers: callers.size,
@@ -128,13 +143,20 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
 }
 
 export type FunnelUserAgg = {
-  userId: string;
+  /** user uuid or anon_id */
+  id: string;
+  kind: "user" | "anon";
+  userId: string | null;
+  anonId: string | null;
   requests: number;
   errors: number;
   events: number;
   hasApiKey: boolean;
+  signedUp: boolean;
+  checkoutStarted: boolean;
   lastAt: string | null;
   lastEndpoint: string | null;
+  lastPath: string | null;
   firstAt: string | null;
   lastEventAt: string | null;
   paid: boolean;
@@ -158,6 +180,9 @@ export async function loadFunnelUsers(
     { data: balances },
     { data: eventRows },
     { data: apiKeyRows },
+    { data: anonEventRows },
+    { data: checkoutEventRows },
+    { data: signupEventRows },
   ] = await Promise.all([
     sb
       .from("requests")
@@ -179,11 +204,9 @@ export async function loadFunnelUsers(
       .select("user_id, plan, subscription_credits, topup_credits")
       .not("user_id", "in", notIn)
       .limit(5000),
-    // Logged-in activity (page views etc.) so users who signed up but never
-    // called the API still show up with an event journey.
     sb
       .from("events")
-      .select("user_id, created_at")
+      .select("user_id, anon_id, event, path, created_at")
       .gte("created_at", since)
       .not("user_id", "is", null)
       .not("user_id", "in", notIn)
@@ -194,6 +217,29 @@ export async function loadFunnelUsers(
       .select("user_id")
       .not("user_id", "in", notIn)
       .limit(5000),
+    // Anonymous page activity (not yet linked to a user_id).
+    sb
+      .from("events")
+      .select("anon_id, event, path, created_at")
+      .gte("created_at", since)
+      .is("user_id", null)
+      .not("anon_id", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(10000),
+    sb
+      .from("events")
+      .select("user_id")
+      .eq("event", "checkout_started")
+      .gte("created_at", since)
+      .not("user_id", "is", null)
+      .not("user_id", "in", notIn)
+      .limit(3000),
+    sb
+      .from("events")
+      .select("user_id, anon_id")
+      .eq("event", "signup")
+      .gte("created_at", since)
+      .limit(3000),
   ]);
 
   const paidAt = new Map<string, string>();
@@ -205,13 +251,40 @@ export async function loadFunnelUsers(
     if (!paidAt.has(uid)) paidAt.set(uid, row.created_at as string);
   }
 
+  const checkoutUsers = new Set(
+    (checkoutEventRows || [])
+      .map((r) => r.user_id as string)
+      .filter((id) => id && !excluded.has(id)),
+  );
+
+  const signedUpUsers = new Set<string>();
+  const signedUpAnons = new Set<string>();
+  for (const row of signupEventRows || []) {
+    const uid = row.user_id as string | null;
+    const aid = row.anon_id as string | null;
+    if (uid && !excluded.has(uid)) signedUpUsers.add(uid);
+    if (aid) signedUpAnons.add(aid);
+  }
+
+  // Anon ids that later appear on logged-in events — don't duplicate them as anon rows.
+  const claimedAnons = new Set<string>();
+  for (const row of eventRows || []) {
+    const aid = row.anon_id as string | null;
+    if (aid) claimedAnons.add(aid);
+  }
+  for (const aid of signedUpAnons) claimedAnons.add(aid);
+
   const eventCount = new Map<string, number>();
   const lastEvent = new Map<string, string>();
+  const lastPathByUser = new Map<string, string>();
   for (const row of eventRows || []) {
     const uid = row.user_id as string;
     if (!uid || excluded.has(uid)) continue;
     eventCount.set(uid, (eventCount.get(uid) || 0) + 1);
-    if (!lastEvent.has(uid)) lastEvent.set(uid, row.created_at as string);
+    if (!lastEvent.has(uid)) {
+      lastEvent.set(uid, row.created_at as string);
+      if (row.path) lastPathByUser.set(uid, row.path as string);
+    }
   }
 
   const usersWithKeys = new Set(
@@ -220,14 +293,20 @@ export async function loadFunnelUsers(
       .filter((id) => id && !excluded.has(id)),
   );
 
-  const emptyAgg = (uid: string): FunnelUserAgg => ({
+  const emptyUser = (uid: string): FunnelUserAgg => ({
+    id: uid,
+    kind: "user",
     userId: uid,
+    anonId: null,
     requests: 0,
     errors: 0,
     events: 0,
     hasApiKey: usersWithKeys.has(uid),
+    signedUp: signedUpUsers.has(uid),
+    checkoutStarted: checkoutUsers.has(uid),
     lastAt: null,
     lastEndpoint: null,
+    lastPath: null,
     firstAt: null,
     lastEventAt: null,
     paid: paidAt.has(uid),
@@ -242,7 +321,7 @@ export async function loadFunnelUsers(
     if (!uid || excluded.has(uid)) continue;
     let agg = byUser.get(uid);
     if (!agg) {
-      agg = emptyAgg(uid);
+      agg = emptyUser(uid);
       byUser.set(uid, agg);
     }
     agg.requests += 1;
@@ -255,23 +334,26 @@ export async function loadFunnelUsers(
     agg.firstAt = ts;
   }
 
-  // Users with logged-in events but zero API requests.
   for (const uid of eventCount.keys()) {
-    if (!byUser.has(uid)) byUser.set(uid, emptyAgg(uid));
+    if (!byUser.has(uid)) byUser.set(uid, emptyUser(uid));
   }
-  // Paid users with no requests in window.
   for (const uid of paidAt.keys()) {
-    if (!byUser.has(uid)) byUser.set(uid, emptyAgg(uid));
+    if (!byUser.has(uid)) byUser.set(uid, emptyUser(uid));
   }
-  // Users who created a key but have no requests/events in window.
   for (const uid of usersWithKeys) {
-    if (!byUser.has(uid)) byUser.set(uid, emptyAgg(uid));
+    if (!byUser.has(uid)) byUser.set(uid, emptyUser(uid));
+  }
+  for (const uid of signedUpUsers) {
+    if (!byUser.has(uid)) byUser.set(uid, emptyUser(uid));
   }
 
   for (const agg of byUser.values()) {
-    agg.events = eventCount.get(agg.userId) || 0;
-    agg.lastEventAt = lastEvent.get(agg.userId) || null;
-    agg.hasApiKey = usersWithKeys.has(agg.userId);
+    agg.events = eventCount.get(agg.userId!) || 0;
+    agg.lastEventAt = lastEvent.get(agg.userId!) || null;
+    agg.lastPath = lastPathByUser.get(agg.userId!) || null;
+    agg.hasApiKey = usersWithKeys.has(agg.userId!);
+    agg.signedUp = true; // present as a user row
+    agg.checkoutStarted = checkoutUsers.has(agg.userId!);
   }
 
   const balMap = new Map(
@@ -285,7 +367,7 @@ export async function loadFunnelUsers(
     ]),
   );
   for (const agg of byUser.values()) {
-    const bal = balMap.get(agg.userId);
+    const bal = balMap.get(agg.userId!);
     if (bal) {
       agg.plan = bal.plan;
       agg.creditsLeft =
@@ -293,7 +375,46 @@ export async function loadFunnelUsers(
     }
   }
 
-  let users = [...byUser.values()];
+  // Anonymous visitors (never claimed by a logged-in user in this window).
+  const byAnon = new Map<string, FunnelUserAgg>();
+  for (const row of anonEventRows || []) {
+    const aid = row.anon_id as string;
+    if (!aid || claimedAnons.has(aid)) continue;
+    let agg = byAnon.get(aid);
+    if (!agg) {
+      agg = {
+        id: aid,
+        kind: "anon",
+        userId: null,
+        anonId: aid,
+        requests: 0,
+        errors: 0,
+        events: 0,
+        hasApiKey: false,
+        signedUp: false,
+        checkoutStarted: false,
+        lastAt: null,
+        lastEndpoint: null,
+        lastPath: null,
+        firstAt: null,
+        lastEventAt: null,
+        paid: false,
+        paidCredits: 0,
+        plan: null,
+        creditsLeft: null,
+      };
+      byAnon.set(aid, agg);
+    }
+    agg.events += 1;
+    const ts = row.created_at as string;
+    if (!agg.lastEventAt) {
+      agg.lastEventAt = ts;
+      agg.lastPath = (row.path as string) || null;
+    }
+    agg.firstAt = ts;
+  }
+
+  let users = [...byUser.values(), ...byAnon.values()];
   if (opts?.paidOnly) users = users.filter((u) => u.paid);
   users.sort((a, b) => {
     const aTs = a.lastAt || a.lastEventAt || "";
@@ -301,7 +422,7 @@ export async function loadFunnelUsers(
     return bTs.localeCompare(aTs);
   });
 
-  return { since, users: users.slice(0, 300) };
+  return { since, users: users.slice(0, 400) };
 }
 
 export async function loadUserJourney(sb: SupabaseClient, userId: string) {
@@ -483,3 +604,39 @@ export async function loadUserJourney(sb: SupabaseClient, userId: string) {
     timeline,
   };
 }
+
+
+export async function loadAnonJourney(sb: SupabaseClient, anonId: string) {
+  const since = funnelSinceIso(14);
+
+  const { data: events } = await sb
+    .from("events")
+    .select("id, event, path, properties, anon_id, user_id, created_at")
+    .eq("anon_id", anonId)
+    .gte("created_at", since)
+    .order("created_at", { ascending: true })
+    .limit(500);
+
+  const timeline = (events || []).map((e) => ({
+    kind: "event" as const,
+    id: e.id,
+    at: e.created_at,
+    event: e.event,
+    path: e.path,
+    properties: e.properties,
+    anonId: e.anon_id,
+  }));
+
+  return {
+    since,
+    anonId,
+    stats: {
+      events: timeline.length,
+      requests: 0,
+      samples: 0,
+      payments: 0,
+    },
+    timeline,
+  };
+}
+

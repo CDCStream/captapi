@@ -62,13 +62,14 @@ export default async function AdminFunnelPage() {
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">Funnel (14 days)</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Signup → API key → API usage → checkout → paid. Open a user to inspect their
-          journey and each request&apos;s response JSON.
+          Visitors → signup → API key → API usage → checkout → paid. Includes anonymous
+          page traffic. Open a row to inspect the journey and response JSON.
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {[
+          { label: "Visitors", value: f.visitors },
           { label: "Signups", value: f.signups },
           { label: "API key", value: f.apiKeyHolders },
           { label: "API callers", value: f.apiCallers },
@@ -131,7 +132,7 @@ export default async function AdminFunnelPage() {
 
       <section className="space-y-3">
         <div className="flex items-end justify-between gap-3">
-          <h2 className="text-sm font-semibold">Users</h2>
+          <h2 className="text-sm font-semibold">Users & visitors</h2>
           <Link
             href="/dashboard"
             className="text-xs text-muted-foreground hover:text-foreground"
