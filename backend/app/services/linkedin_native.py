@@ -36,6 +36,16 @@ _EMPLOYEES_RE = re.compile(r"([\d,.\s]+)\s+employees", re.I)
 _COMMENTS_OG_RE = re.compile(r"([\d,]+)\s+comments?", re.I)
 _REACTIONS_RE = re.compile(r"([\d,.]+)\s+Reactions?", re.I)
 _ACTIVITY_RE = re.compile(r"activity[:-](\d{10,25})", re.I)
+# Guest company pages often omit industry from JSON-LD; it's still in the
+# About section and the top-card headline (e.g. "Design Services").
+_INDUSTRY_ABOUT_RE = re.compile(
+    r'data-test-id=["\']about-us__industry["\'][\s\S]*?<dd[^>]*>\s*([^<]+?)\s*</dd>',
+    re.I,
+)
+_INDUSTRY_HEADLINE_RE = re.compile(
+    r'class=["\'][^"\']*top-card-layout__headline[^"\']*["\'][^>]*>\s*([^<]+?)\s*</h2>',
+    re.I,
+)
 
 
 def _og_map(html: str) -> dict[str, str]:
@@ -95,6 +105,22 @@ async def _fetch_html(url: str) -> str | None:
     if status != 200 or not body or len(body) < 2000:
         return None
     return body
+
+
+def _industry_from_html(html: str) -> str | None:
+    """Extract company industry from guest HTML when JSON-LD omits it."""
+    m = _INDUSTRY_ABOUT_RE.search(html or "")
+    if m:
+        return safe_str(m.group(1))
+    m = _INDUSTRY_HEADLINE_RE.search(html or "")
+    if m:
+        # Headline is usually the industry; skip location/follower crumbs.
+        text = safe_str(m.group(1))
+        if text and "follower" not in text.lower() and "·" not in text:
+            return text
+        if text and "·" in text:
+            return safe_str(text.split("·", 1)[0])
+    return None
 
 
 def _logo_url(org: dict[str, Any]) -> str | None:
@@ -285,6 +311,8 @@ async def fetch_company(slug: str) -> dict[str, Any] | None:
         industry = safe_str(inds[0] if not isinstance(inds[0], dict) else inds[0].get("name"))
     elif isinstance(inds, str):
         industry = safe_str(inds)
+    if not industry:
+        industry = _industry_from_html(html)
     hq = None
     addr = org.get("address")
     if isinstance(addr, dict):
