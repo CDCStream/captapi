@@ -459,6 +459,39 @@ def _slice_company_posts_page(
     }
 
 
+def _company_post_row_key(row: dict[str, Any]) -> str | None:
+    """Stable id for merging native + Apify company-post rows."""
+    if not isinstance(row, dict):
+        return None
+    for key in ("url", "postUrl", "post_url"):
+        val = row.get(key)
+        if val:
+            m = _LI_ACTIVITY_RE.search(str(val))
+            return m.group(1) if m else str(val)
+    for key in ("id", "urn", "activity_id", "post_id"):
+        if row.get(key) is not None:
+            return str(row[key])
+    basic = row.get("basic_info") if isinstance(row.get("basic_info"), dict) else None
+    if basic and basic.get("url"):
+        m = _LI_ACTIVITY_RE.search(str(basic["url"]))
+        return m.group(1) if m else str(basic["url"])
+    text = row.get("text") or row.get("content") or row.get("commentary")
+    return str(text)[:120] if text else None
+
+
+def _merge_company_post_rows(*batches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for batch in batches:
+        for row in batch or []:
+            key = _company_post_row_key(row)
+            if not key or key in seen:
+                continue
+            seen.add(key)
+            out.append(row)
+    return out
+
+
 @router.get("/company-posts", summary="LinkedIn company posts")
 async def linkedin_company_posts(
     url: str = Query(..., description="LinkedIn company URL, e.g. https://linkedin.com/company/slug"),
@@ -488,33 +521,38 @@ async def linkedin_company_posts(
         base_credits=CREDIT_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Prefer enriched native (homepage URLs hydrated). Apify often returns
-            # only 1 row lately — keep whichever batch is larger so cursor paging works.
+            # Native covers homepage embeds (~10); Apify can return more for active
+            # pages (e.g. printi). Merge both so cursor paging isn't capped early.
             native = await linkedin_native.fetch_company_posts(slug, limit=need)
             collected: list[dict[str, Any]] = list(native or [])
-            source = "direct" if collected else None
-
-            if len(collected) < need:
+            used_apify = False
+            apify_target = min(
+                _LI_COMPANY_POSTS_MAX,
+                max(need, 30 if len(collected) < _LI_COMPANY_POSTS_MAX else need),
+            )
+            if len(collected) < apify_target:
                 items = await get_apify().run_actor_sync(
                     settings.APIFY_ACTOR_LINKEDIN_COMPANY_POSTS,
-                    {"companyUrls": [company_url], "maxPostsPerCompany": need},
-                    max_items=need,
+                    {"companyUrls": [company_url], "maxPostsPerCompany": apify_target},
+                    max_items=apify_target,
                 )
-                if items and len(items) > len(collected):
-                    collected = items
-                    source = "apify"
-                elif not collected:
-                    collected = items or []
-                    source = "apify"
+                if items:
+                    merged = _merge_company_post_rows(collected, items)
+                    if len(merged) > len(collected):
+                        used_apify = True
+                    collected = merged
+                    if not collected:
+                        collected = items
+                        used_apify = True
 
-            ctx["source"] = source or "direct"
+            ctx["source"] = "apify" if used_apify else "direct"
             posts = [_normalize_company_post(i) for i in collected]
             page = _slice_company_posts_page(posts, offset=offset, limit=limit)
             return {"company": slug, **page}
 
         data = await cached_or_run(
             endpoint="linkedin.company-posts",
-            params={"slug": slug, "limit": limit, "cursor": cursor or "", "v": 6},
+            params={"slug": slug, "limit": limit, "cursor": cursor or "", "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -474,8 +474,9 @@ async def fetch_post(url: str) -> dict[str, Any] | None:
     return chosen
 
 
+# Guest pages often use country subdomains (pt.linkedin.com, br.linkedin.com, …).
 _COMPANY_POST_URL_RE = re.compile(
-    r"https://(?:www\.)?linkedin\.com/posts/[A-Za-z0-9_%\-.]+",
+    r"https://(?:www\.|[a-z]{2}\.)?linkedin\.com/posts/[A-Za-z0-9_%\-.]+",
     re.I,
 )
 
@@ -594,7 +595,7 @@ def _post_urls_from_serp_html(html: str, *, limit: int = 40) -> list[str]:
     urls: list[str] = []
     seen: set[str] = set()
     for url in re.findall(
-        r"https://(?:www\.)?linkedin\.com/posts/[A-Za-z0-9_%\-.]+",
+        r"https://(?:www\.|[a-z]{2}\.)?linkedin\.com/posts/[A-Za-z0-9_%\-.]+",
         html or "",
         re.I,
     ):
