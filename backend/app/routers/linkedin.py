@@ -16,7 +16,7 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
-from app.services.apify_client import get_apify
+from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
 from app.services import linkedin_native
 from app.utils.formatters import first_present, safe_int, safe_str
@@ -547,8 +547,7 @@ async def linkedin_company_posts(
         base_credits=CREDIT_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Native covers homepage embeds (~10); Apify can return more for active
-            # pages (e.g. printi). Merge both so cursor paging isn't capped early.
+            # Native covers homepage embeds (~10); Apify/SERP extend for cursor depth.
             native = await linkedin_native.fetch_company_posts(slug, limit=need)
             collected: list[dict[str, Any]] = list(native or [])
             used_apify = False
@@ -559,15 +558,19 @@ async def linkedin_company_posts(
             if len(collected) < apify_target:
                 # Prefer maxPosts (vulnv / data-slayer); keep maxPostsPerCompany for
                 # legacy automation-lab actor compatibility.
-                items = await get_apify().run_actor_sync(
-                    settings.APIFY_ACTOR_LI_COMPANY_POSTS,
-                    {
-                        "companyUrls": [company_url],
-                        "maxPosts": apify_target,
-                        "maxPostsPerCompany": apify_target,
-                    },
-                    max_items=apify_target,
-                )
+                try:
+                    items = await get_apify().run_actor_sync(
+                        settings.APIFY_ACTOR_LI_COMPANY_POSTS,
+                        {
+                            "companyUrls": [company_url],
+                            "maxPosts": apify_target,
+                            "maxPostsPerCompany": apify_target,
+                        },
+                        max_items=apify_target,
+                    )
+                except ApifyError:
+                    # Quota / actor outage must not 502 when native already has posts.
+                    items = None
                 if items:
                     merged = _merge_company_post_rows(collected, items)
                     if len(merged) > len(collected):
@@ -576,6 +579,26 @@ async def linkedin_company_posts(
                     if not collected:
                         collected = items
                         used_apify = True
+
+            # When Apify is down/quota-hit, SERP can still deepen pagination.
+            if len(collected) < apify_target:
+                serp_rows = await linkedin_native.search_posts(
+                    slug, sort="date", limit=min(40, apify_target)
+                )
+                if serp_rows:
+                    slug_l = slug.lower()
+                    company_hits: list[dict[str, Any]] = []
+                    for row in serp_rows:
+                        purl = str(row.get("url") or "").lower()
+                        author = row.get("author") if isinstance(row.get("author"), dict) else {}
+                        aurl = str(author.get("url") or "").lower()
+                        if f"/posts/{slug_l}_" in purl or f"/company/{slug_l}" in aurl:
+                            company_hits.append(row)
+                    if company_hits:
+                        collected = _merge_company_post_rows(collected, company_hits)
+
+            if not collected:
+                raise HTTPException(status_code=404, detail="No public posts found for this company")
 
             ctx["source"] = "apify" if used_apify else "direct"
             posts = [
@@ -588,7 +611,7 @@ async def linkedin_company_posts(
 
         data = await cached_or_run(
             endpoint="linkedin.company-posts",
-            params={"slug": slug, "limit": limit, "cursor": cursor or "", "v": 9},
+            params={"slug": slug, "limit": limit, "cursor": cursor or "", "v": 10},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
