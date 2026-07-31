@@ -194,6 +194,15 @@ export async function GET(request: Request) {
         next = "/dashboard/billing?from=tools";
       }
 
+      // New accounts (OAuth or email confirm) → client fires Ads signup conversion.
+      const createdMs = user?.created_at
+        ? Date.now() - new Date(user.created_at).getTime()
+        : Number.POSITIVE_INFINITY;
+      if (Number.isFinite(createdMs) && createdMs < 60 * 60 * 1000) {
+        const sep = next.includes("?") ? "&" : "?";
+        next = `${next}${sep}ads_signup=1`;
+      }
+
       const forwardedHost = request.headers.get("x-forwarded-host");
       const isLocalEnv = process.env.NODE_ENV === "development";
       let redirectUrl: string;

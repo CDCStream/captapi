@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { track } from "@/lib/analytics";
+import { adsSignupConversion } from "@/lib/gtag";
 
 function SignupForm() {
   const searchParams = useSearchParams();
@@ -72,6 +73,7 @@ function SignupForm() {
       return;
     }
     track("signup", { method: "password", from_tools: fromTools });
+    adsSignupConversion();
     setSentTo(email);
   }
 

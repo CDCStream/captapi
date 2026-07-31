@@ -28,7 +28,7 @@ function fmt(n: number) {
 
 /**
  * Classic marketing funnel: stacked trapezoids, width proportional to count.
- * Designed to screenshot cleanly for X / build-in-public posts.
+ * Labels and values sit outside the bands so narrow steps never overlap.
  */
 export function FunnelViz({
   steps,
@@ -43,15 +43,6 @@ export function FunnelViz({
 }) {
   const max = Math.max(...steps.map((s) => s.value), 1);
   const top = steps[0]?.value || 1;
-  const W = 400;
-  const H = 52;
-  const GAP = 18;
-  const PAD_X = 8;
-  const MIN_HALF = W * 0.09;
-  const totalH = steps.length * H + Math.max(0, steps.length - 1) * GAP;
-
-  const halfFor = (value: number) =>
-    Math.max(MIN_HALF, (value / max) * (W / 2 - PAD_X));
 
   return (
     <div
@@ -85,73 +76,45 @@ export function FunnelViz({
         </p>
       </div>
 
-      <div className="relative mx-auto max-w-lg">
-        <svg
-          viewBox={`0 0 ${W} ${totalH}`}
-          className="h-auto w-full drop-shadow-sm"
-          role="img"
-          aria-label="Conversion funnel"
-        >
-          {steps.map((step, i) => {
-            const y = i * (H + GAP);
-            const topHalf = halfFor(step.value);
-            const next = steps[i + 1];
-            const botHalf = next ? halfFor(next.value) : Math.max(MIN_HALF * 0.7, topHalf * 0.55);
-            const cx = W / 2;
-            const x1 = cx - topHalf;
-            const x2 = cx + topHalf;
-            const x3 = cx + botHalf;
-            const x4 = cx - botHalf;
-            const fill = FILLS[i % FILLS.length];
-            const midY = y + H / 2;
+      <div className="relative mx-auto max-w-xl" role="img" aria-label="Conversion funnel">
+        {steps.map((step, i) => {
+          const next = steps[i + 1];
+          const widthPct = Math.max(18, (step.value / max) * 100);
+          const nextPct = next
+            ? Math.max(12, (next.value / max) * 100)
+            : Math.max(12, widthPct * 0.55);
+          const botInset = Math.max(0, ((widthPct - nextPct) / widthPct) * 50);
+          const fill = FILLS[i % FILLS.length];
+          const convert = next != null ? pct(next.value, step.value) : null;
 
-            return (
-              <g key={step.label}>
-                <polygon
-                  points={`${x1},${y} ${x2},${y} ${x3},${y + H} ${x4},${y + H}`}
-                  fill={fill}
-                />
-                <text
-                  x={cx - topHalf + 14}
-                  y={midY}
-                  dominantBaseline="middle"
-                  fill="white"
-                  fontSize="13"
-                  fontWeight="600"
-                  style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
-                >
+          return (
+            <div key={step.label}>
+              <div className="grid grid-cols-[minmax(4.5rem,7rem)_1fr_minmax(2.75rem,4rem)] items-center gap-2 sm:gap-3">
+                <p className="truncate text-right text-xs font-semibold text-zinc-700 sm:text-sm">
                   {step.label}
-                </text>
-                <text
-                  x={cx + topHalf - 14}
-                  y={midY}
-                  dominantBaseline="middle"
-                  textAnchor="end"
-                  fill="white"
-                  fontSize="16"
-                  fontWeight="700"
-                  style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
-                >
+                </p>
+                <div className="flex justify-center">
+                  <div
+                    className="h-12 w-full max-w-full shadow-sm sm:h-14"
+                    style={{
+                      width: `${widthPct}%`,
+                      background: fill,
+                      clipPath: `polygon(0 0, 100% 0, ${100 - botInset}% 100%, ${botInset}% 100%)`,
+                    }}
+                  />
+                </div>
+                <p className="text-left text-base font-bold tabular-nums text-zinc-900 sm:text-lg">
                   {fmt(step.value)}
-                </text>
-                {i < steps.length - 1 && (
-                  <text
-                    x={cx}
-                    y={y + H + GAP / 2 + 1}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fill="#71717a"
-                    fontSize="11"
-                    fontWeight="600"
-                    style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
-                  >
-                    {pct(steps[i + 1].value, step.value)}% convert
-                  </text>
-                )}
-              </g>
-            );
-          })}
-        </svg>
+                </p>
+              </div>
+              {convert != null && (
+                <p className="py-1.5 text-center text-[11px] font-semibold text-zinc-500">
+                  {convert}% convert
+                </p>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div className="relative mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">

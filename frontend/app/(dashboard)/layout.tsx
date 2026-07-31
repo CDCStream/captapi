@@ -11,6 +11,7 @@ import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { WelcomePing } from "@/components/dashboard/welcome-ping";
 import { BuyCreditsDialog } from "@/components/dashboard/buy-credits-dialog";
+import { SignupAdsConversion } from "@/components/analytics/signup-ads-conversion";
 import { isFunnelAdmin } from "@/lib/funnel-admin";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -40,6 +41,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen flex bg-muted/30">
       <WelcomePing />
+      <Suspense fallback={null}>
+        <SignupAdsConversion />
+      </Suspense>
       <Suspense fallback={null}>
         <BuyCreditsDialog />
       </Suspense>

@@ -11,6 +11,7 @@ import { GA_ID, ADS_ID } from "@/lib/gtag";
  *   NEXT_PUBLIC_GA_ID                     → GA4 measurement id  (G-XXXXXXXXXX)
  *   NEXT_PUBLIC_GOOGLE_ADS_ID             → Google Ads id       (AW-XXXXXXXXX)
  *   NEXT_PUBLIC_GOOGLE_ADS_SUBSCRIBE_LABEL→ Ads conversion label (subscribe)
+ *   NEXT_PUBLIC_GOOGLE_ADS_SIGNUP_LABEL   → Ads conversion label (signup)
  *
  * NOTE: Ahrefs Web Analytics is intentionally NOT loaded here. Its analytics.js
  * reads its key from `document.currentScript`, which is null for scripts that

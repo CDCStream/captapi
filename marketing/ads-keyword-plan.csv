@@ -1,0 +1,104 @@
+campaign,ad_group,keyword,match_type,volume,cpc,kd,landing_path,action,notes
+Search - Free Tools,TikTok Transcript Tool,tiktok transcript,Phrase|Exact,8100,0.94,3,/tools/tiktok-transcript,add,seed:free_tools
+Search - Expansion Platforms,Spotify API,spotify api,Phrase|Exact,6600,5.91,29,/apis/spotify-api,add,seed:spotify
+Search - Core Platforms,Reddit API,reddit api,Phrase|Exact,5400,4.17,18,/apis/reddit-api,add,seed:reddit
+Search - Core Platforms,LinkedIn API,linkedin api,Phrase|Exact,4400,26.41,21,/apis/linkedin-api,add,seed:linkedin
+Search - Expansion Platforms,GitHub API,github api,Phrase|Exact,3600,44.01,63,/apis/github-api,add,seed:github
+Search - Core Platforms,Instagram API,instagram api,Phrase|Exact,2900,12.41,20,/apis/instagram-api,add,seed:instagram
+Search - Core Platforms,Twitter X API,twitter api,Phrase|Exact,2900,6.96,34,/apis/twitter-api,add,seed:twitter
+Search - Core Platforms,TikTok API,tiktok api,Phrase|Exact,2400,14.25,32,/apis/tiktok-api,add,seed:tiktok
+Search - Free Tools,Instagram Transcript Tool,instagram transcript,Phrase|Exact,1600,2.58,2,/tools/instagram-transcript,add,seed:free_tools
+Search - Expansion Platforms,YouTube API,youtube data api,Phrase|Exact,1000,9.58,12,/apis/youtube-api,add,seed:youtube
+Search - Free Tools,TikTok Transcript Tool,tiktok to transcript,Phrase|Exact,1000,0.97,,/tools/tiktok-transcript,add,seed:free_tools
+Search - Expansion Platforms,Pinterest API,pinterest api,Phrase|Exact,880,18.33,23,/apis/pinterest-api,add,seed:pinterest
+Search - Expansion Platforms,Twitch API,twitch api,Phrase|Exact,880,,54,/apis/twitch-api,add,seed:twitch
+Search - Free Tools,TikTok Transcript Tool,tiktok video transcript,Phrase|Exact,880,2.03,8,/tools/tiktok-transcript,add,seed:free_tools
+Search - Free Tools,Instagram Transcript Tool,instagram reel transcript,Phrase|Exact,720,3.32,,/tools/instagram-transcript,add,seed:free_tools
+Search - Free Tools,TikTok Transcript Tool,transcribe tiktok video,Phrase|Exact,720,1.36,,/tools/tiktok-transcript,add,seed:free_tools
+Search - Expansion Platforms,SoundCloud API,soundcloud api,Phrase|Exact,590,14.38,12,/apis/soundcloud-api,add,seed:soundcloud
+Search - Expansion Platforms,Bluesky API,bluesky api,Phrase|Exact,480,12.63,13,/apis/bluesky-api,add,seed:bluesky
+Search - Expansion Platforms,Threads API,threads api,Phrase|Exact,390,34.23,,/apis/threads-api,add,seed:threads
+Search - Expansion Platforms,Snapchat API,snapchat api,Phrase|Exact,320,18.06,17,/apis/snapchat-api,add,seed:snapchat
+Search - Expansion Platforms,TikTok Shop API,tiktok shop api,Phrase|Exact,320,31.76,22,/apis/tiktok-shop-api,add,seed:tiktok_shop
+Search - Expansion Platforms,Truth Social API,truth social api,Phrase|Exact,320,16.19,,/apis/truth-social-api,add,seed:truth_social
+Search - Free Tools,Instagram Transcript Tool,transcribe instagram reel,Phrase|Exact,320,2.26,2,/tools/instagram-transcript,add,seed:free_tools
+Search - Expansion Platforms,YouTube API,youtube analytics api,Phrase|Exact,210,7.84,13,/apis/youtube-api,add,seed:youtube
+Search - Core Platforms,Reddit API,reddit data api,Phrase|Exact,140,23.87,13,/apis/reddit-api,add,seed:reddit
+Search - Brand + Competitor,Competitor,socialkit,Phrase|Exact,110,20.59,17,/alternatives,add,seed:brand_competitor
+Search - Brand + Competitor,Competitor,tikapi,Phrase|Exact,110,12.35,4,/alternatives,add,seed:brand_competitor
+Search - Expansion Platforms,Ad Library API,facebook ad library api,Phrase|Exact,110,13.3,27,/apis/ad-library-api,add,seed:ad_library
+Search - Brand + Competitor,Competitor,ensembledata,Phrase|Exact,90,12.6,10,/alternatives,add,seed:brand_competitor
+Search - Core Platforms,LinkedIn API,linkedin scraper api,Phrase|Exact,90,37.09,7,/apis/linkedin-api,add,seed:linkedin
+Search - Core Platforms,Facebook API,facebook page api,Phrase|Exact,70,,71,/apis/facebook-api,add,seed:facebook
+Search - Core Platforms,LinkedIn API,linkedin data api,Phrase|Exact,70,27.5,38,/apis/linkedin-api,add,seed:linkedin
+Search - Core Platforms,LinkedIn API,linkedin profile api,Phrase|Exact,70,25.33,26,/apis/linkedin-api,add,seed:linkedin
+Search - Expansion Platforms,Rumble API,rumble api,Phrase|Exact,70,,,/apis/rumble-api,add,seed:rumble
+Search - Expansion Platforms,YouTube API,youtube scraper api,Phrase|Exact,70,36.74,,/apis/youtube-api,add,seed:youtube
+Search - Core Platforms,Instagram API,instagram reels api,Phrase|Exact,50,11.79,,/apis/instagram-api,add,seed:instagram
+Search - Core Platforms,Twitter X API,twitter scraper api,Phrase|Exact,50,7.2,,/apis/twitter-api,add,seed:twitter
+Search - Expansion Platforms,Bluesky API,bsky api,Phrase|Exact,50,,69,/apis/bluesky-api,add,seed:bluesky
+Search - Expansion Platforms,YouTube API,youtube comments api,Phrase|Exact,50,15.81,8,/apis/youtube-api,add,seed:youtube
+Search - Core Platforms,Instagram API,instagram scraper api,Phrase|Exact,40,29.4,,/apis/instagram-api,add,seed:instagram
+Search - Core Platforms,LinkedIn API,linkedin analytics api,Phrase|Exact,40,111.52,19,/apis/linkedin-api,add,seed:linkedin
+Search - Core Platforms,TikTok API,tiktok analytics api,Phrase|Exact,40,71.87,27,/apis/tiktok-api,add,seed:tiktok
+Search - Core Platforms,TikTok API,tiktok data api,Phrase|Exact,40,10.78,31,/apis/tiktok-api,add,seed:tiktok
+Search - Core Platforms,TikTok API,tiktok scraper api,Phrase|Exact,40,22.39,15,/apis/tiktok-api,add,seed:tiktok
+Search - Expansion Platforms,Ad Library API,ad library api,Phrase|Exact,40,7.26,13,/apis/ad-library-api,add,seed:ad_library
+Search - Core Platforms,Facebook API,facebook scraper api,Phrase|Exact,30,27.49,14,/apis/facebook-api,add,seed:facebook
+Search - Core Platforms,Instagram API,instagram data api,Phrase|Exact,30,37.4,4,/apis/instagram-api,add,seed:instagram
+Search - Core Platforms,Reddit API,reddit scraper api,Phrase|Exact,30,16.25,2,/apis/reddit-api,add,seed:reddit
+Search - Core Platforms,Twitter X API,twitter data api,Phrase|Exact,30,6.28,19,/apis/twitter-api,add,seed:twitter
+Search - Expansion Platforms,TikTok Shop API,tiktok shop scraper,Phrase|Exact,30,11.97,3,/apis/tiktok-shop-api,add,seed:tiktok_shop
+Search - Core Platforms,Facebook API,facebook data api,Phrase|Exact,20,29.35,66,/apis/facebook-api,add,seed:facebook
+Search - Core Platforms,Facebook API,facebook video api,Phrase|Exact,20,,29,/apis/facebook-api,add,seed:facebook
+Search - Core Platforms,Instagram API,instagram comments api,Phrase|Exact,20,8.47,,/apis/instagram-api,add,seed:instagram
+Search - Core Platforms,Instagram API,instagram profile api,Phrase|Exact,20,23.0,9,/apis/instagram-api,add,seed:instagram
+Search - Core Platforms,TikTok API,tiktok comments api,Phrase|Exact,20,50.16,10,/apis/tiktok-api,add,seed:tiktok
+Search - Core Platforms,Twitter X API,twitter api alternative,Phrase|Exact,20,4.71,,/apis/twitter-api,add,seed:twitter
+Search - Free Tools,TikTok Transcript Tool,tiktok transcript api,Phrase|Exact,20,11.16,,/tools/tiktok-transcript,add,seed:free_tools
+Search - Core Platforms,Facebook API,facebook comments api,Phrase|Exact,10,15.02,14,/apis/facebook-api,add,seed:facebook
+Search - Core Platforms,Instagram API,instagram api without login,Phrase|Exact,10,,6,/apis/instagram-api,add,seed:instagram
+Search - Core Platforms,TikTok API,tiktok video api,Phrase|Exact,10,20.97,62,/apis/tiktok-api,add,seed:tiktok
+Search - Core Platforms,Twitter X API,x api twitter,Phrase|Exact,10,,44,/apis/twitter-api,add,seed:twitter
+Search - Expansion Platforms,Ad Library API,linkedin ad library api,Phrase|Exact,10,97.04,,/apis/ad-library-api,add,seed:ad_library
+Search - Brand + Competitor,Brand,capt api,Phrase|Exact,0,,,/,add,seed:brand_competitor
+Search - Brand + Competitor,Brand,captapi,Phrase|Exact,0,,,/,add,seed:brand_competitor
+Search - Brand + Competitor,Brand,captapi api,Phrase|Exact,0,,,/,add,seed:brand_competitor
+Search - Brand + Competitor,Brand,captapi pricing,Phrase|Exact,0,,,/,add,seed:brand_competitor
+Search - Brand + Competitor,Competitor,ensembledata alternative,Phrase|Exact,0,,,/alternatives,add,seed:brand_competitor
+Search - Brand + Competitor,Competitor,scrapecreators,Phrase|Exact,0,,,/alternatives,add,seed:brand_competitor
+Search - Brand + Competitor,Competitor,scrapecreators alternative,Phrase|Exact,0,,,/alternatives,add,seed:brand_competitor
+Search - Brand + Competitor,Competitor,tikapi alternative,Phrase|Exact,0,,,/alternatives,add,seed:brand_competitor
+Search - Core Platforms,Reddit API,reddit api alternative,Phrase|Exact,0,,,/apis/reddit-api,add,seed:reddit
+Search - Core Platforms,Reddit API,scrape reddit api,Phrase|Exact,0,,,/apis/reddit-api,add,seed:reddit
+Search - Core Platforms,TikTok API,tiktok profile api,Phrase|Exact,0,,,/apis/tiktok-api,add,seed:tiktok
+Search - Core Platforms,Twitter X API,tweet scraper api,Phrase|Exact,0,,,/apis/twitter-api,add,seed:twitter
+Search - Expansion Platforms,Bluesky API,bluesky scraper api,Phrase|Exact,0,,,/apis/bluesky-api,add,seed:bluesky
+Search - Expansion Platforms,GitHub API,github scraper api,Phrase|Exact,0,,,/apis/github-api,add,seed:github
+Search - Expansion Platforms,Kick API,kick api streaming,Phrase|Exact,0,,,/apis/kick-api,add,seed:kick
+Search - Expansion Platforms,Linktree API,linktree scraper,Phrase|Exact,0,,,/apis/linktree-api,add,seed:linktree
+Search - Expansion Platforms,Pinterest API,pinterest data api,Phrase|Exact,0,,,/apis/pinterest-api,add,seed:pinterest
+Search - Expansion Platforms,Rumble API,rumble scraper api,Phrase|Exact,0,,,/apis/rumble-api,add,seed:rumble
+Search - Expansion Platforms,Snapchat API,snapchat profile api,Phrase|Exact,0,,,/apis/snapchat-api,add,seed:snapchat
+Search - Expansion Platforms,Snapchat API,snapchat scraper api,Phrase|Exact,0,,,/apis/snapchat-api,add,seed:snapchat
+Search - Expansion Platforms,SoundCloud API,soundcloud scraper api,Phrase|Exact,0,,,/apis/soundcloud-api,add,seed:soundcloud
+Search - Expansion Platforms,Spotify API,spotify scraper api,Phrase|Exact,0,,,/apis/spotify-api,add,seed:spotify
+Search - Expansion Platforms,Threads API,threads scraper api,Phrase|Exact,0,,,/apis/threads-api,add,seed:threads
+Search - Expansion Platforms,Twitch API,twitch scraper api,Phrase|Exact,0,,,/apis/twitch-api,add,seed:twitch
+Search - Expansion Platforms,Linktree API,linktree api,Phrase|Exact,40,,1,/apis/linktree-api,skip,seed:linktree;low_volume
+Search - Expansion Platforms,Truth Social API,truth social scraper,Phrase|Exact,40,,,/apis/truth-social-api,skip,seed:truth_social;low_volume
+Search - Expansion Platforms,YouTube API,youtube channel api,Phrase|Exact,30,,18,/apis/youtube-api,skip,seed:youtube;low_volume
+Search - Expansion Platforms,Kick API,kick.com api,Phrase|Exact,20,,,/apis/kick-api,skip,seed:kick;low_volume
+Search - Expansion Platforms,Threads API,meta threads api,Phrase|Exact,20,,12,/apis/threads-api,skip,seed:threads;low_volume
+Search - Expansion Platforms,Ad Library API,google ad library api,Phrase|Exact,10,,51,/apis/ad-library-api,skip,seed:ad_library;low_volume
+Search - Expansion Platforms,Ad Library API,tiktok ad library api,Phrase|Exact,10,,,/apis/ad-library-api,skip,seed:ad_library;low_volume
+Search - Expansion Platforms,Pinterest API,pinterest scraper api,Phrase|Exact,10,,,/apis/pinterest-api,skip,seed:pinterest;low_volume
+Search - Expansion Platforms,Twitch API,twitch data api,Phrase|Exact,10,,,/apis/twitch-api,skip,seed:twitch;low_volume
+Search - Transcript API,YouTube Transcript (PAUSE),free youtube transcript api,Phrase|Exact,0,,,/,pause,youtube_transcript_removed_from_ads
+Search - Transcript API,YouTube Transcript (PAUSE),get youtube transcript api,Phrase|Exact,0,,,/,pause,youtube_transcript_removed_from_ads
+Search - Transcript API,YouTube Transcript (PAUSE),youtube api transcript,Phrase|Exact,0,,,/,pause,youtube_transcript_removed_from_ads
+Search - Transcript API,YouTube Transcript (PAUSE),youtube caption api,Phrase|Exact,0,,,/,pause,youtube_transcript_removed_from_ads
+Search - Transcript API,YouTube Transcript (PAUSE),youtube subtitle api,Phrase|Exact,0,,,/,pause,youtube_transcript_removed_from_ads
+Search - Transcript API,YouTube Transcript (PAUSE),youtube transcript,Phrase|Exact,0,,,/,pause,youtube_transcript_removed_from_ads
+Search - Transcript API,YouTube Transcript (PAUSE),youtube transcript api,Phrase|Exact,0,,,/,pause,youtube_transcript_removed_from_ads
+Search - Transcript API,YouTube Transcript (PAUSE),youtube transcript api free,Phrase|Exact,0,,,/,pause,youtube_transcript_removed_from_ads
