@@ -236,11 +236,37 @@ def _normalize_post_list_item(p: dict[str, Any], *, include_media: bool = True) 
 
 
 def _normalize_company_post(p: dict[str, Any]) -> dict[str, Any]:
-    """Company-posts actor is JSON-LD only — no author headline or media."""
-    base = _normalize_post_list_item(p, include_media=False)
+    """Normalize company-post rows from native / Apify actors into the shared shape."""
+    row = dict(p) if isinstance(p, dict) else {}
+    # vulnv/linkedin-company-posts uses post_text / date_posted / title.
+    if not (row.get("text") or row.get("content") or row.get("commentary")):
+        alt = row.get("post_text") or row.get("headline") or row.get("title")
+        if alt:
+            row["text"] = alt
+    if not row.get("url"):
+        row["url"] = row.get("postUrl") or row.get("post_url")
+    if not row.get("id"):
+        row["id"] = row.get("post_id") or row.get("urn") or row.get("activity_id")
+    if not (
+        row.get("publishedAt")
+        or row.get("datePublished")
+        or row.get("date")
+        or (isinstance(row.get("postedAt"), dict) and row["postedAt"].get("date"))
+    ):
+        if row.get("date_posted") or row.get("published_at"):
+            row["publishedAt"] = row.get("date_posted") or row.get("published_at")
+    base = _normalize_post_list_item(row, include_media=False)
     author = base.get("author")
     if isinstance(author, dict):
         author.pop("headline", None)
+        if not author.get("url"):
+            author["url"] = safe_str(
+                row.get("use_url") or row.get("author_company_url") or row.get("companyLinkedInUrl")
+            )
+        if not author.get("name"):
+            author["name"] = safe_str(
+                row.get("author_name") or row.get("companyName") or row.get("user_id")
+            )
     return base
 
 
@@ -531,12 +557,13 @@ async def linkedin_company_posts(
                 max(need, 30 if len(collected) < _LI_COMPANY_POSTS_MAX else need),
             )
             if len(collected) < apify_target:
-                # Actor returns a deeper set when both URL and slug are passed
-                # (URL-only often caps ~10; URL+slug yields ~20 for printi).
+                # Prefer maxPosts (vulnv / data-slayer); keep maxPostsPerCompany for
+                # legacy automation-lab actor compatibility.
                 items = await get_apify().run_actor_sync(
                     settings.APIFY_ACTOR_LINKEDIN_COMPANY_POSTS,
                     {
-                        "companyUrls": [company_url, slug],
+                        "companyUrls": [company_url],
+                        "maxPosts": apify_target,
                         "maxPostsPerCompany": apify_target,
                     },
                     max_items=apify_target,
@@ -551,13 +578,17 @@ async def linkedin_company_posts(
                         used_apify = True
 
             ctx["source"] = "apify" if used_apify else "direct"
-            posts = [_normalize_company_post(i) for i in collected]
+            posts = [
+                n
+                for i in collected
+                if (n := _normalize_company_post(i)).get("text") or n.get("url")
+            ]
             page = _slice_company_posts_page(posts, offset=offset, limit=limit)
             return {"company": slug, **page}
 
         data = await cached_or_run(
             endpoint="linkedin.company-posts",
-            params={"slug": slug, "limit": limit, "cursor": cursor or "", "v": 8},
+            params={"slug": slug, "limit": limit, "cursor": cursor or "", "v": 9},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

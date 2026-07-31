@@ -170,7 +170,7 @@ class Settings(BaseSettings):
     APIFY_ACTOR_LINKEDIN_PROFILE: str = "apimaestro/linkedin-profile-detail"
     APIFY_ACTOR_LINKEDIN_COMPANY: str = "apimaestro/linkedin-company-detail"
     APIFY_ACTOR_LINKEDIN_POST: str = "apimaestro/linkedin-post-detail"
-    APIFY_ACTOR_LINKEDIN_COMPANY_POSTS: str = "automation-lab/linkedin-company-posts-scraper"
+    APIFY_ACTOR_LINKEDIN_COMPANY_POSTS: str = "vulnv/linkedin-company-posts"
     APIFY_ACTOR_LINKEDIN_POST_SEARCH: str = "apimaestro/linkedin-posts-search-scraper-no-cookies"
 
     # Rumble. Input: searchQueries + maxItems.
