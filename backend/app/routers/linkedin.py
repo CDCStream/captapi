@@ -560,7 +560,7 @@ async def linkedin_company_posts(
                 # Prefer maxPosts (vulnv / data-slayer); keep maxPostsPerCompany for
                 # legacy automation-lab actor compatibility.
                 items = await get_apify().run_actor_sync(
-                    settings.APIFY_ACTOR_LINKEDIN_COMPANY_POSTS,
+                    settings.APIFY_ACTOR_LI_COMPANY_POSTS,
                     {
                         "companyUrls": [company_url],
                         "maxPosts": apify_target,

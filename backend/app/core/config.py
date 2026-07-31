@@ -170,7 +170,10 @@ class Settings(BaseSettings):
     APIFY_ACTOR_LINKEDIN_PROFILE: str = "apimaestro/linkedin-profile-detail"
     APIFY_ACTOR_LINKEDIN_COMPANY: str = "apimaestro/linkedin-company-detail"
     APIFY_ACTOR_LINKEDIN_POST: str = "apimaestro/linkedin-post-detail"
-    APIFY_ACTOR_LINKEDIN_COMPANY_POSTS: str = "vulnv/linkedin-company-posts"
+    # Legacy pin (often still set in Railway to automation-lab). Prefer the
+    # v2 key below so deploys pick up vulnv without rewriting production env.
+    APIFY_ACTOR_LINKEDIN_COMPANY_POSTS: str = "automation-lab/linkedin-company-posts-scraper"
+    APIFY_ACTOR_LI_COMPANY_POSTS: str = "vulnv/linkedin-company-posts"
     APIFY_ACTOR_LINKEDIN_POST_SEARCH: str = "apimaestro/linkedin-posts-search-scraper-no-cookies"
 
     # Rumble. Input: searchQueries + maxItems.
