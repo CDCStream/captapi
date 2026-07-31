@@ -539,6 +539,8 @@ async def linkedin_company_posts(
     offset = _parse_company_posts_cursor(cursor)
     # +1 sentinel so we know whether another page exists without over-fetching.
     need = min(_LI_COMPANY_POSTS_MAX, offset + limit + 1)
+    # Fetch a stable batch large enough for several cursor pages.
+    batch_target = min(_LI_COMPANY_POSTS_MAX, max(need, 40))
     async with billed_call(
         caller=caller,
         endpoint="/v1/linkedin/company-posts",
@@ -546,16 +548,12 @@ async def linkedin_company_posts(
         resource_url=company_url,
         base_credits=CREDIT_NATIVE,
     ) as ctx:
-        async def _run() -> dict[str, Any]:
+        async def _fetch_batch() -> dict[str, Any]:
             # Native covers homepage embeds (~10); Apify/SERP extend for cursor depth.
-            native = await linkedin_native.fetch_company_posts(slug, limit=need)
+            native = await linkedin_native.fetch_company_posts(slug, limit=batch_target)
             collected: list[dict[str, Any]] = list(native or [])
             used_apify = False
-            apify_target = min(
-                _LI_COMPANY_POSTS_MAX,
-                max(need, 30 if len(collected) < _LI_COMPANY_POSTS_MAX else need),
-            )
-            if len(collected) < apify_target:
+            if len(collected) < batch_target:
                 # Prefer maxPosts (vulnv / data-slayer); keep maxPostsPerCompany for
                 # legacy automation-lab actor compatibility.
                 try:
@@ -563,10 +561,10 @@ async def linkedin_company_posts(
                         settings.APIFY_ACTOR_LI_COMPANY_POSTS,
                         {
                             "companyUrls": [company_url],
-                            "maxPosts": apify_target,
-                            "maxPostsPerCompany": apify_target,
+                            "maxPosts": batch_target,
+                            "maxPostsPerCompany": batch_target,
                         },
-                        max_items=apify_target,
+                        max_items=batch_target,
                     )
                 except ApifyError:
                     # Quota / actor outage must not 502 when native already has posts.
@@ -581,9 +579,9 @@ async def linkedin_company_posts(
                         used_apify = True
 
             # When Apify is down/quota-hit, SERP can still deepen pagination.
-            if len(collected) < apify_target:
+            if len(collected) < batch_target:
                 serp_rows = await linkedin_native.search_posts(
-                    slug, sort="date", limit=min(40, apify_target)
+                    slug, sort="date", limit=min(40, batch_target)
                 )
                 if serp_rows:
                     slug_l = slug.lower()
@@ -606,16 +604,23 @@ async def linkedin_company_posts(
                 for i in collected
                 if (n := _normalize_company_post(i)).get("text") or n.get("url")
             ]
-            page = _slice_company_posts_page(posts, offset=offset, limit=limit)
-            return {"company": slug, **page}
+            # Stable order so offset cursors don't reshuffle across page fetches.
+            posts.sort(
+                key=lambda p: int(p["id"]) if str(p.get("id") or "").isdigit() else 0,
+                reverse=True,
+            )
+            return {"company": slug, "posts": posts}
 
-        data = await cached_or_run(
+        # Cursor pages reuse the same batch (even when cache=false on page 1).
+        batch = await cached_or_run(
             endpoint="linkedin.company-posts",
-            params={"slug": slug, "limit": limit, "cursor": cursor or "", "v": 10},
-            runner=_run,
+            params={"slug": slug, "batch": batch_target, "v": 11},
+            runner=_fetch_batch,
             ctx=ctx,
-            use_cache=cache,
+            use_cache=cache or bool(cursor),
         )
+        page = _slice_company_posts_page(batch.get("posts") or [], offset=offset, limit=limit)
+        data = {"company": batch.get("company") or slug, **page}
         if ctx.get("source") == "direct":
             ctx["credits_override"] = CREDIT_NATIVE
         else:
