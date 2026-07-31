@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getServiceClient } from "@/lib/supabase/admin";
 import { isFunnelAdmin } from "@/lib/funnel-admin";
-import { loadFunnelOverview, loadFunnelUsers } from "@/lib/funnel-data";
+import { loadFunnelOverview } from "@/lib/funnel-data";
 import { FunnelUsersTable } from "@/components/admin/funnel-users-table";
 
 export const dynamic = "force-dynamic";
@@ -48,10 +48,7 @@ export default async function AdminFunnelPage() {
     );
   }
 
-  const [overview, usersPayload] = await Promise.all([
-    loadFunnelOverview(sb),
-    loadFunnelUsers(sb),
-  ]);
+  const overview = await loadFunnelOverview(sb);
   const f = overview.funnel;
 
   return (
@@ -62,19 +59,19 @@ export default async function AdminFunnelPage() {
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">Funnel (14 days)</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Visitors → signup → API key → API usage → checkout → paid. Visitors = unique
-          browsers (anon_id). Table lists users plus browsers that have not signed up yet.
+          Visitors → signup → API key → API usage → checkout → paid. Top cards use the
+          same rows as the table filters (Visitors = All rows).
         </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {[
-          { label: "Visitors", hint: "unique anon_id", value: f.visitors },
-          { label: "Signups", hint: "unique users", value: f.signups },
+          { label: "Visitors", hint: "all rows", value: f.visitors },
+          { label: "Signups", hint: "users", value: f.signups },
           { label: "API key", hint: "created in window", value: f.apiKeyHolders },
-          { label: "API callers", hint: "unique users", value: f.apiCallers },
-          { label: "Checkout started", hint: "unique users", value: f.checkoutStarted },
-          { label: "Paid", hint: "unique users", value: f.paid },
+          { label: "API callers", hint: "users", value: f.apiCallers },
+          { label: "Checkout started", hint: "users", value: f.checkoutStarted },
+          { label: "Paid", hint: "users", value: f.paid },
         ].map((card) => (
           <div key={card.label} className="rounded-lg border bg-background px-4 py-3">
             <p className="text-xs text-muted-foreground">{card.label}</p>
@@ -141,7 +138,7 @@ export default async function AdminFunnelPage() {
             Back to dashboard
           </Link>
         </div>
-        <FunnelUsersTable users={usersPayload.users} />
+        <FunnelUsersTable users={overview.users} />
       </section>
     </div>
   );

@@ -12,28 +12,14 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
   const excluded = new Set(excludeIds);
   const notIn = excludeFilter(excludeIds);
 
+  // Funnel step counts come from the same row set as the users table so the
+  // cards and filter pills never disagree.
   const [
-    { data: visitorRows },
-    { data: signupRows },
+    usersPayload,
     { data: requestRows },
-    { data: paidRows },
-    { data: checkoutRows },
     { count: sampleCount },
-    { data: apiKeyRows },
   ] = await Promise.all([
-    sb
-      .from("events")
-      .select("anon_id")
-      .eq("event", "page_view")
-      .gte("created_at", since)
-      .not("anon_id", "is", null)
-      .limit(20000),
-    sb
-      .from("events")
-      .select("user_id")
-      .eq("event", "signup")
-      .gte("created_at", since)
-      .limit(5000),
+    loadFunnelUsers(sb),
     sb
       .from("requests")
       .select("user_id, endpoint, status_code, response_time_ms, created_at")
@@ -42,77 +28,27 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
       .order("created_at", { ascending: false })
       .limit(5000),
     sb
-      .from("credit_transactions")
-      .select("user_id, type, amount, created_at")
-      .gte("created_at", since)
-      .gt("amount", 0)
-      .in("type", ["topup", "subscription_grant"])
-      .not("user_id", "in", notIn)
-      .limit(2000),
-    sb
-      .from("events")
-      .select("user_id, created_at")
-      .eq("event", "checkout_started")
-      .gte("created_at", since)
-      .not("user_id", "is", null)
-      .limit(2000),
-    sb
       .from("response_samples")
       .select("*", { count: "exact", head: true })
       .gte("created_at", since)
       .not("user_id", "in", notIn),
-    sb
-      .from("api_keys")
-      .select("user_id, created_at")
-      .gte("created_at", since)
-      .not("user_id", "in", notIn)
-      .limit(5000),
   ]);
 
-  const callers = new Set<string>();
+  const paidUsers = new Set(
+    usersPayload.users.filter((u) => u.paid && u.userId).map((u) => u.userId!),
+  );
   const lastEndpoint = new Map<string, string>();
   const times: number[] = [];
   let errors = 0;
   for (const row of requestRows || []) {
     const uid = row.user_id as string;
     if (!uid || excluded.has(uid)) continue;
-    callers.add(uid);
     if (!lastEndpoint.has(uid)) {
       lastEndpoint.set(uid, row.endpoint as string);
     }
     if (typeof row.response_time_ms === "number") times.push(row.response_time_ms);
     if ((row.status_code ?? 0) >= 400) errors += 1;
   }
-
-  const visitors = new Set<string>();
-  for (const row of visitorRows || []) {
-    const aid = row.anon_id as string | null;
-    if (aid) visitors.add(aid);
-  }
-
-  const signupUsers = new Set<string>();
-  for (const row of signupRows || []) {
-    const uid = row.user_id as string | null;
-    if (uid && !excluded.has(uid)) signupUsers.add(uid);
-  }
-
-  const keyHolders = new Set<string>();
-  for (const row of apiKeyRows || []) {
-    const uid = row.user_id as string;
-    if (!uid || excluded.has(uid)) continue;
-    keyHolders.add(uid);
-  }
-
-  const paidUsers = new Set(
-    (paidRows || [])
-      .map((r) => r.user_id as string)
-      .filter((id) => id && !excluded.has(id)),
-  );
-  const checkoutUsers = new Set(
-    (checkoutRows || [])
-      .map((r) => r.user_id as string)
-      .filter((id) => id && !excluded.has(id)),
-  );
 
   const dropOff: Record<string, number> = {};
   for (const [uid, ep] of lastEndpoint) {
@@ -131,14 +67,8 @@ export async function loadFunnelOverview(sb: SupabaseClient) {
   return {
     since,
     excludedUserIds: excludeIds,
-    funnel: {
-      visitors: visitors.size,
-      signups: signupUsers.size,
-      apiKeyHolders: keyHolders.size,
-      apiCallers: callers.size,
-      checkoutStarted: checkoutUsers.size,
-      paid: paidUsers.size,
-    },
+    funnel: usersPayload.funnel,
+    users: usersPayload.users,
     traffic: {
       requests: (requestRows || []).length,
       errors,
@@ -172,10 +102,42 @@ export type FunnelUserAgg = {
   creditsLeft: number | null;
 };
 
+/** Funnel cards — must match the users table filter pills (same rows). */
+export function funnelStatsFromUsers(users: FunnelUserAgg[]) {
+  let signups = 0;
+  let apiKeyHolders = 0;
+  let apiCallers = 0;
+  let checkoutStarted = 0;
+  let paid = 0;
+  let stillAnon = 0;
+  for (const u of users) {
+    if (u.kind === "anon") stillAnon += 1;
+    if (u.kind === "user" || u.signedUp) signups += 1;
+    if (u.hasApiKey) apiKeyHolders += 1;
+    if (u.requests > 0) apiCallers += 1;
+    if (u.checkoutStarted) checkoutStarted += 1;
+    if (u.paid) paid += 1;
+  }
+  return {
+    /** Top of funnel = every identity in the table (anon + users). */
+    visitors: users.length,
+    stillAnon,
+    signups,
+    apiKeyHolders,
+    apiCallers,
+    checkoutStarted,
+    paid,
+  };
+}
+
 export async function loadFunnelUsers(
   sb: SupabaseClient,
   opts?: { paidOnly?: boolean },
-): Promise<{ since: string; users: FunnelUserAgg[] }> {
+): Promise<{
+  since: string;
+  users: FunnelUserAgg[];
+  funnel: ReturnType<typeof funnelStatsFromUsers>;
+}> {
   const since = funnelSinceIso(14);
   const excludeIds = funnelExcludeUserIds();
   const excluded = new Set(excludeIds);
@@ -436,15 +398,13 @@ export async function loadFunnelUsers(
     }
     agg.firstAt = ts;
   }
+  // Enrich existing page_view visitors only — do not invent extra anon rows
+  // from CTA/other events (that inflated the table past the Visitors card).
   for (const row of anonEventRows || []) {
     const aid = row.anon_id as string;
     if (!aid || claimedAnons.has(aid)) continue;
-    let agg = byAnon.get(aid);
-    if (!agg) {
-      agg = emptyAnon(aid);
-      byAnon.set(aid, agg);
-    }
-    // page_view rows already counted above — only add non-page_view here
+    const agg = byAnon.get(aid);
+    if (!agg) continue;
     if ((row.event as string) !== "page_view") {
       agg.events += 1;
     }
@@ -464,7 +424,7 @@ export async function loadFunnelUsers(
     return bTs.localeCompare(aTs);
   });
 
-  return { since, users };
+  return { since, users, funnel: funnelStatsFromUsers(users) };
 }
 
 export async function loadUserJourney(sb: SupabaseClient, userId: string) {
