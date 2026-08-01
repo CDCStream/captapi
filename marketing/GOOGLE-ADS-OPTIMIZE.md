@@ -294,7 +294,7 @@ Credentials were not in the agent environment when CSVs were first written.
 Some head-term volumes came from `keyword-bank.csv` (Ahrefs).
 
 ```powershell
-cd socialkit-clone
+cd captapi
 $env:DATAFORSEO_LOGIN="..."
 $env:DATAFORSEO_PASSWORD="..."
 python scripts/ads_keyword_research.py

@@ -33,8 +33,8 @@ export function priceFor(credits: number, rates: Rates): number {
 }
 
 /** Our estimated upstream cost. Native (self-scraped) and cache hits are ~free;
- *  only Apify-backed calls carry the per-credit cost basis. Unknown is treated
- *  as Apify (worst case) so savings aren't overstated. */
+ *  only third-party-sourced calls carry the per-credit cost basis. Unknown is
+ *  treated as paid path (worst case) so savings aren't overstated. */
 export function upstreamFor(credits: number, source: SourceGuess, rates: Rates): number {
   if (source === "direct" || source === "cache") return 0;
   return credits * rates.costPerCredit;

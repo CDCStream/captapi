@@ -42,3 +42,15 @@ Thumbs.db
 # Generated marketing-agent artifacts
 marketing/blog-drafts/
 marketing/instagram-runs/
+
+# Local probes / live audits (never publish)
+backend/_probe*.py
+backend/_audit*/
+backend/_live_*
+backend/_tmp*
+backend/_trend*
+**/comprehensive-live-audit*
+**/*-live-audit-report.json
+**/*-live-audit-live.jsonl
+scripts/.env
+scripts/_ad_library_ads_groups.py

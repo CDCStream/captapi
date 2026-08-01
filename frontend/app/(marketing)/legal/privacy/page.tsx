@@ -52,10 +52,14 @@ export default function PrivacyPage() {
       <ul>
         <li><strong>Supabase</strong> — authentication & database hosting</li>
         <li><strong>Paddle</strong> — our merchant of record for checkout, billing & payment processing</li>
-        <li><strong>Apify</strong> — infrastructure used to help deliver certain API responses</li>
         <li><strong>OpenAI</strong> — AI summarization (input transcripts only; OpenAI does not train on API data per their policy)</li>
         <li><strong>Upstash</strong> — caching & rate limiting</li>
         <li><strong>Sentry</strong> — error tracking (no request bodies sent)</li>
+        <li>
+          Additional infrastructure providers bound by DPA, used only as needed to
+          deliver the Service — a current list is available on request at{" "}
+          <a href="mailto:support@captapi.com">support@captapi.com</a>
+        </li>
       </ul>
 
       <h2>4. Data Retention</h2>

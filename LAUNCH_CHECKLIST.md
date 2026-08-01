@@ -64,7 +64,7 @@ A pragmatic launch playbook based on what works for API-as-a-Service products.
 - [ ] Zapier integration — submit for review (takes 2-4 weeks)
 - [x] Make.com app — local app built (packages/captapi-make), deploy via Make Apps Editor + submit for review
 - [x] n8n community node — published (n8n-nodes-captapi)
-- [x] Apify Actor — BYO-key wrapper built (packages/captapi-apify), `apify push` + publish as free Actor
+- [x] Apify Store client — BYO Captapi key (packages/captapi-apify), publish when ready
 - [ ] Publish Python SDK on PyPI
 - [ ] Publish Node SDK on npm
 - [ ] Free Chrome extension for transcript extraction (funnel to signup)
@@ -75,16 +75,16 @@ A pragmatic launch playbook based on what works for API-as-a-Service products.
 - Gross margin per active user (target: 80%+)
 - MRR growth week-over-week (target: 15-25%)
 - p95 latency
-- Apify cost / revenue ratio
+- Infrastructure cost / revenue ratio
 
 ## Failure modes to watch for
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| Sudden Apify cost spike | One user looping requests | Add per-user daily hard limit |
-| TikTok endpoint 429 from us | Actor blocked by TikTok | Failover to backup actor / pause endpoint |
+| Sudden infra cost spike | One user looping requests | Add per-user daily hard limit |
+| TikTok endpoint 429 from us | Platform rate limit / block | Failover path / pause endpoint |
 | Margin under 50% | Heavy users on cheap plan | Raise Starter price OR cap Starter credits |
-| Webhook missed → credits not granted | Stripe outage | Manual reconcile script via Stripe events.list |
+| Webhook missed → credits not granted | Billing provider outage | Manual reconcile via provider events |
 | GPT cost runaway | Huge transcripts | Already truncated to 60k chars; double-check |
 
 ## When to invest in...

@@ -94,7 +94,7 @@ export default function TermsPage() {
         We strive for high availability but do not guarantee uninterrupted service.
         The Service depends on third-party infrastructure and on the continued public
         availability of content on source platforms, which can change without notice.
-        We are not liable for downtime or data gaps caused by upstream providers or by
+        We are not liable for downtime or data gaps caused by third-party services or by
         changes on source platforms.
       </p>
 

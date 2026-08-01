@@ -2,105 +2,38 @@
 
 One REST API for structured public data across **27 platforms** and **174 endpoints** — transcripts, AI summaries, comments, profiles, search, commerce data, ad libraries, analytics helpers, and engagement metrics. Clean JSON, no OAuth, one Bearer key.
 
-## Architecture
+**Product:** [captapi.com](https://captapi.com) · **API docs:** [captapi.com/docs](https://captapi.com/docs) · **Catalog:** [captapi.com/apis](https://captapi.com/apis)
 
-- **Backend**: FastAPI (Python 3.12) — Apify data collection + OpenAI summarization
-- **Frontend**: Next.js 15 + Tailwind + shadcn/ui — landing, dashboard, billing
-- **DB / Auth**: Supabase (Postgres + Auth + Storage)
-- **Cache / Rate limit**: Upstash Redis
-- **Data collection**: Apify Actors
-- **AI**: OpenAI (gpt-4o-mini + Whisper)
-- **Billing**: Paddle (Merchant of Record — subscriptions + top-up credits; Dodo Payments kept as a dormant fallback)
+## What you get
 
-## Quick Start
+- Stable REST responses (`success`, `data`, billing meta) with consistent camelCase JSON
+- One Bearer key for YouTube, TikTok, Instagram, Facebook, X, Reddit, and 20+ more sources
+- MCP server, CLI, n8n, Make, and an optional Apify Store client (BYO Captapi key — calls this API; it does not scrape)
+- Credit-based pricing with a free tier — see [Pricing](https://captapi.com/pricing)
 
-### Prerequisites
+## Repository layout
 
-- Python 3.12+
-- Node.js 20+
-- Supabase project (free tier)
-- Apify account + API token
-- OpenAI API key
-- Paddle account (sandbox mode)
-- Upstash Redis (free tier)
+```
+.
+├── backend/       FastAPI API service
+├── frontend/      Next.js marketing site + dashboard
+├── packages/      MCP, CLI, n8n, Make, SDKs, Apify Store client
+├── supabase/      Database migrations
+└── playground/    Local API console for development
+```
 
-### 1. Supabase Setup
+## API (hosted)
+
+Base URL: `https://api.captapi.com`
 
 ```bash
-# Install Supabase CLI
-npm i -g supabase
-
-# Login and link your project
-supabase login
-supabase link --project-ref YOUR_PROJECT_REF
-
-# Push schema
-supabase db push
+curl -H "Authorization: Bearer capt_live_..." \
+  "https://api.captapi.com/v1/tiktok/video-details?url=https://www.tiktok.com/@x/video/123"
 ```
-
-### 2. Backend Setup
-
-```bash
-cd backend
-cp .env.example .env
-# Fill in env vars
-
-# Install dependencies (using uv)
-pip install uv
-uv pip install -e .
-
-# Run dev server
-uvicorn app.main:app --reload --port 8000
-```
-
-### 3. Frontend Setup
-
-```bash
-cd frontend
-cp .env.example .env.local
-# Fill in env vars
-
-npm install
-npm run dev
-```
-
-Open http://localhost:3000.
-
-## Project Structure
-
-```
-socialkit-clone/
-├── backend/                FastAPI service
-│   ├── app/
-│   │   ├── main.py         App entry
-│   │   ├── core/           Config, auth, credits, security
-│   │   ├── routers/        Endpoint handlers per platform
-│   │   ├── services/       Apify, OpenAI, Supabase, Cache, Paddle
-│   │   ├── schemas/        Pydantic models
-│   │   └── utils/          Helpers
-│   ├── pyproject.toml
-│   └── Dockerfile
-├── frontend/               Next.js 15 app
-│   ├── app/                App Router
-│   ├── components/         UI components
-│   └── lib/                Supabase + API client
-└── supabase/
-    └── migrations/         SQL schema
-```
-
-## API
-
-All endpoints require `Authorization: Bearer capt_live_...` (or `x-api-key`).
-
-Base URL: `https://api.captapi.com` (local: `http://localhost:8000`).
 
 Requests fetch fresh data by default. Pass `cache=true` for a free 24h cache hit.
 
-Full catalog (platforms, paths, credits, params): [frontend/lib/api-catalog.ts](frontend/lib/api-catalog.ts) and https://captapi.com/apis.
-
-### Platforms (27)
-
-YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, Rumble, TikTok Shop, GitHub, Ad Library, Twitch, Spotify, SoundCloud, Linktree, Snapchat, Truth Social, Kick, Amazon Shop, Kwai, Komi, Pillar, Linkbio, Linkme.
+Full endpoint catalog: [`frontend/lib/api-catalog.ts`](frontend/lib/api-catalog.ts) or https://captapi.com/apis.
 
 ### Example endpoints
 
@@ -111,23 +44,63 @@ YouTube, TikTok, Instagram, Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinte
 
 ### Account
 
-- `GET /v1/account/balance` — remaining credits
-- `GET /v1/account/request-history` — recent requests
-- `GET /v1/account/daily-usage` — day-by-day credit usage
-- `GET /v1/account/most-used-routes` — ranked endpoint usage
+- `GET /v1/account/balance`
+- `GET /v1/account/request-history`
+- `GET /v1/account/daily-usage`
+- `GET /v1/account/most-used-routes`
 
-## Pricing
+## Local development
 
-Credit-based. Prices mirror the live pricing page (`frontend/components/marketing/pricing-plans.tsx`).
+### Prerequisites
 
-| Plan      | Credits              | Notes                          |
-|-----------|----------------------|--------------------------------|
-| Free      | 100 lifetime         | No card required               |
-| Starter   | 2,000 / month        | Side projects                  |
-| Pro       | 6,000 / month        | Growing products               |
-| Business  | 20,000 / month       | Data pipelines                 |
+- Python 3.12+
+- Node.js 20+
+- Supabase project
+- OpenAI API key (summaries / Whisper fallbacks)
+- Paddle sandbox (billing)
+- Upstash Redis (cache / rate limits)
+- Provider credentials as required by your deployment (see `backend/.env.example`)
 
-One-time packs (never expire): Starter 2,000 · Growth 10,000 · Scale 50,000 credits.
+### Backend
+
+```bash
+cd backend
+cp .env.example .env   # fill in secrets — never commit .env
+pip install uv
+uv pip install -e .
+uvicorn app.main:app --reload --port 8000
+```
+
+### Frontend
+
+```bash
+cd frontend
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+Open http://localhost:3000.
+
+### Database
+
+```bash
+npm i -g supabase
+supabase login
+supabase link --project-ref YOUR_PROJECT_REF
+supabase db push
+```
+
+## Pricing (summary)
+
+| Plan     | Credits       |
+|----------|---------------|
+| Free     | 100 lifetime  |
+| Starter  | 2,000 / month |
+| Pro      | 6,000 / month |
+| Business | 20,000 / month|
+
+Details: https://captapi.com/pricing
 
 ## License
 

@@ -38,8 +38,10 @@ class Settings(BaseSettings):
     # actor started returning empty `{"data": []}` for every video, so we run
     # two independent actors for resilience. New names (not the legacy var) so
     # deployments that pinned APIFY_ACTOR_YOUTUBE_TRANSCRIPT still pick these up.
-    APIFY_ACTOR_YT_TRANSCRIPT_1: str = "scrape-creators/best-youtube-transcripts-scraper"
-    APIFY_ACTOR_YT_TRANSCRIPT_2: str = "automation-lab/youtube-transcript"
+    # Vendor resource IDs come from env in production. Defaults avoid naming
+    # third-party storefront brands in the public tree.
+    APIFY_ACTOR_YT_TRANSCRIPT_1: str = "automation-lab/youtube-transcript"
+    APIFY_ACTOR_YT_TRANSCRIPT_2: str = "pintostudio/youtube-transcript-scraper"
     APIFY_ACTOR_YOUTUBE_VIDEO: str = "streamers/youtube-scraper"
     APIFY_ACTOR_YOUTUBE_SEARCH: str = "streamers/youtube-scraper"
     APIFY_ACTOR_YOUTUBE_PLAYLIST: str = "powerai/youtube-playlist-videos-scraper"
