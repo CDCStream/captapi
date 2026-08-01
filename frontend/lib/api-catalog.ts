@@ -1324,7 +1324,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-transcript": [up(YT_VIDEO), lang(), cacheP()],
   "youtube-summarizer": [up(YT_VIDEO), lang(), cacheP()],
   "youtube-video-details": [up(YT_VIDEO)],
-  "youtube-comments": [up(YT_VIDEO), lp(50, 500), CURSOR],
+  "youtube-comments": [up(YT_VIDEO), lpFlat(50, 500, 2), CURSOR],
   "youtube-channel-details": [up(YT_CHANNEL)],
   "youtube-search": [qp(), lp(20, 200)],
   "youtube-channel-videos": [up(YT_CHANNEL), lp(20, 200), fastRss()],

@@ -359,6 +359,8 @@ def _reply_payload(r: dict) -> dict:
         "likeCount": safe_int(r.get("voteCount") or r.get("votes") or r.get("likeCount")) or 0,
         "hasCreatorHeart": bool(r.get("hasCreatorHeart")),
         "publishedTimeText": safe_str(r.get("publishedTimeText") or r.get("publishedAt")),
+        "publishedTime": safe_str(r.get("publishedTime")),
+        "authorChannelId": safe_str(r.get("authorChannelId") or r.get("channelId")),
     }
 
 
@@ -1076,6 +1078,8 @@ async def youtube_comments(
             ctx["source"] = "direct"
             comments = native["comments"]
             next_cursor = safe_str(native.get("nextCursor")) or None
+            from app.utils.media_urls import utc_now_iso
+
             return {
                 "url": norm_url,
                 "videoId": vid,
@@ -1084,11 +1088,12 @@ async def youtube_comments(
                 "nextCursor": next_cursor,
                 "hasMore": next_cursor is not None,
                 "comments": comments,
+                "fetchedAt": utc_now_iso(),
             }
 
         data = await cached_or_run(
             endpoint="youtube.comments",
-            params={"url": norm_url, "limit": limit, "cursor": cursor or "", "v": 4},
+            params={"url": norm_url, "limit": limit, "cursor": cursor or "", "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

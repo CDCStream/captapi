@@ -1348,26 +1348,113 @@ def _comment_author_avatar(author: dict[str, Any]) -> str | None:
     return _best_thumb(author.get("avatar")) or _best_thumb(author.get("thumbnail"))
 
 
+def _comment_author_channel_id(author: dict[str, Any]) -> str | None:
+    for key in ("channelId", "externalChannelId", "browseId"):
+        v = safe_str(author.get(key))
+        if v and (v.startswith("UC") or len(v) >= 18):
+            return v
+    for nest_key in ("channelCommand", "frameworkUpdates", "navigationEndpoint"):
+        nest = author.get(nest_key)
+        if not isinstance(nest, dict):
+            continue
+        browse = (
+            ((nest.get("innertubeCommand") or {}).get("browseEndpoint") or {})
+            if nest_key == "channelCommand"
+            else (nest.get("browseEndpoint") or {})
+        )
+        if not isinstance(browse, dict):
+            browse = ((nest.get("command") or {}).get("browseEndpoint") or {})
+        v = safe_str(browse.get("browseId"))
+        if v and v.startswith("UC"):
+            return v
+    channel_url = safe_str(author.get("channelUrl") or author.get("canonicalBaseUrl"))
+    if channel_url and "/channel/" in channel_url:
+        return channel_url.rstrip("/").split("/channel/")[-1] or None
+    return None
+
+
+def _comment_published_time(props: dict[str, Any]) -> tuple[str | None, str | None]:
+    """Return (publishedTimeText, publishedTime ISO or None)."""
+    text = text_of(props.get("publishedTime")) or safe_str(props.get("publishedTimeText"))
+    iso: str | None = None
+    for key in (
+        "publishedTimeSeconds",
+        "publishedTimestamp",
+        "timestamp",
+        "createTime",
+        "publishedAt",
+    ):
+        raw = props.get(key)
+        if isinstance(raw, str) and "T" in raw and ("Z" in raw or "+" in raw):
+            iso = raw
+            break
+        ts = safe_int(raw)
+        if ts and ts > 1_000_000_000:
+            from datetime import datetime, timezone
+
+            iso = datetime.fromtimestamp(ts, tz=timezone.utc).strftime(
+                "%Y-%m-%dT%H:%M:%S.000Z"
+            )
+            break
+    return text, iso
+
+
+def _has_creator_heart(toolbar: dict[str, Any]) -> bool:
+    """True only when the creator actually hearted the comment.
+
+    ``heartActiveTooltip`` is often a non-empty UI string even when inactive,
+    so ``bool(tooltip)`` false-positives — require an explicit heart object or
+    tooltip language that says the comment was hearted.
+    """
+    if toolbar.get("creatorHeart") or toolbar.get("isHeartedByCreator"):
+        return True
+    tip = toolbar.get("heartActiveTooltip")
+    if not isinstance(tip, str):
+        tip = text_of(tip) or ""
+    t = tip.strip().lower()
+    if not t:
+        return False
+    return any(
+        needle in t
+        for needle in (
+            "hearted",
+            "hearts this",
+            "loved by",
+            "❤",
+            "❤️",
+        )
+    )
+
+
 def _comment_payload_to_api(p: dict[str, Any]) -> dict[str, Any] | None:
     props = p.get("properties") or {}
     author = p.get("author") or {}
     toolbar = p.get("toolbar") or {}
+    if not isinstance(author, dict):
+        author = {}
+    if not isinstance(toolbar, dict):
+        toolbar = {}
+    if not isinstance(props, dict):
+        props = {}
     cid = safe_str(props.get("commentId"))
     text = text_of(props.get("content"))
     if not cid or text is None:
         return None
     like_count = parse_count_text(toolbar.get("likeCountLiked") or toolbar.get("likeCountNotliked") or toolbar.get("likeCountA11y"))
+    published_text, published_iso = _comment_published_time(props)
     return {
         "id": cid,
         "author": safe_str(author.get("displayName")),
-        "authorAvatarUrl": _comment_author_avatar(author if isinstance(author, dict) else {}),
+        "authorChannelId": _comment_author_channel_id(author),
+        "authorAvatarUrl": _comment_author_avatar(author),
         "authorIsVerified": bool(author.get("isVerified")),
         "authorIsChannelOwner": bool(author.get("isCreator")),
         "text": text.strip(),
         "likeCount": like_count or 0,
         "replyCount": safe_int(toolbar.get("replyCount")) or parse_count_text(toolbar.get("replyCountA11y")) or 0,
-        "hasCreatorHeart": bool(toolbar.get("heartActiveTooltip")),
-        "publishedTimeText": safe_str(props.get("publishedTime")),
+        "hasCreatorHeart": _has_creator_heart(toolbar),
+        "publishedTimeText": published_text,
+        "publishedTime": published_iso,
     }
 
 

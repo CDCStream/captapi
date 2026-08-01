@@ -751,7 +751,7 @@ async def instagram_channel_details(
 
         data = await cached_or_run(
             endpoint="instagram.channel-details",
-            params={"url": url, "v": 7},
+            params={"url": url, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

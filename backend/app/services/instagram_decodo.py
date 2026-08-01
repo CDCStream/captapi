@@ -291,23 +291,13 @@ async def _profile(handle: str) -> dict[str, Any] | None:
 
 
 async def channel_details(handle: str) -> dict[str, Any] | None:
+    # Keep field parity with instagram_native.map_channel_details (additive).
+    from app.services.instagram_native import map_channel_details
+
     user = await _profile(handle)
     if not user:
         return None
-    username = safe_str(user.get("username")) or handle
-    return {
-        "platform": "instagram",
-        "url": f"https://instagram.com/{username}",
-        "username": username,
-        "displayName": safe_str(user.get("full_name")),
-        "bio": safe_str(user.get("biography")),
-        "followers": _count(user.get("edge_followed_by")) or safe_int(user.get("followers")),
-        "following": _count(user.get("edge_follow")) or safe_int(user.get("following")),
-        "postCount": _count(user.get("edge_owner_to_timeline_media")) or safe_int(user.get("posts_count")),
-        "verified": user.get("is_verified"),
-        "profileImage": _image_url(user),
-        "externalUrl": safe_str(user.get("external_url")),
-    }
+    return map_channel_details(user, handle=handle)
 
 
 async def basic_profile(handle: str) -> dict[str, Any] | None:

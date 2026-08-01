@@ -1533,28 +1533,116 @@ def _external_url_from_user(user: dict[str, Any]) -> str | None:
     return None
 
 
+def _bio_links(user: dict[str, Any]) -> list[dict[str, Any]]:
+    raw = user.get("bio_links")
+    if not isinstance(raw, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for link in raw:
+        if not isinstance(link, dict):
+            continue
+        url = safe_str(link.get("url"))
+        if not url and safe_str(link.get("lynx_url")):
+            lynx = safe_str(link.get("lynx_url")) or ""
+            if "u=" in lynx:
+                q = urllib.parse.parse_qs(urllib.parse.urlparse(lynx).query).get("u") or []
+                if q:
+                    url = urllib.parse.unquote(q[0])
+        if not url:
+            continue
+        out.append(
+            {
+                "title": safe_str(link.get("title")),
+                "url": url,
+                "linkType": safe_str(link.get("link_type") or link.get("linkType")),
+            }
+        )
+    return out
+
+
+def _business_address(user: dict[str, Any]) -> dict[str, Any] | None:
+    raw = user.get("business_address_json") or user.get("business_address")
+    if isinstance(raw, str) and raw.strip():
+        try:
+            raw = json.loads(raw)
+        except (TypeError, ValueError):
+            return None
+    if not isinstance(raw, dict):
+        return None
+    city = safe_str(raw.get("city_name") or raw.get("cityName"))
+    zip_code = safe_str(raw.get("zip_code") or raw.get("zipCode"))
+    lat = raw.get("latitude")
+    lng = raw.get("longitude")
+    if not any([city, zip_code, lat is not None, lng is not None]):
+        return None
+    return {
+        "cityName": city,
+        "cityId": safe_str(raw.get("city_id") or raw.get("cityId")),
+        "latitude": lat if isinstance(lat, (int, float)) else safe_float(lat),
+        "longitude": lng if isinstance(lng, (int, float)) else safe_float(lng),
+        "zipCode": zip_code,
+    }
+
+
 def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> dict[str, Any]:
-    """Map a web_profile_info user node to the channel-details response shape."""
+    """Map a web_profile_info user node to the channel-details response shape.
+
+    Existing keys (platform…externalUrl) stay stable for customers; newer fields
+    are additive only.
+    """
+    from app.utils.media_urls import utc_now_iso
+
     username = safe_str(user.get("username")) or (handle or "").lstrip("@")
-    pic = safe_str(user.get("profile_pic_url_hd") or user.get("profile_pic_url"))
+    pic = safe_str(user.get("profile_pic_url"))
+    pic_hd = safe_str(user.get("profile_pic_url_hd"))
     verified = user.get("is_verified")
+    private = user.get("is_private")
+    followers = _edge_count(user.get("edge_followed_by") or user.get("follower_count"))
+    following = _edge_count(user.get("edge_follow") or user.get("following_count"))
+    post_count = _edge_count(
+        user.get("edge_owner_to_timeline_media")
+        or user.get("media_count")
+        or user.get("all_media_count")
+        or user.get("total_clips_count")
+    )
+    bio_links = _bio_links(user)
+    external = _external_url_from_user(user)
+    # Prefer HD for profileImage when available (previous behavior); expose both.
+    profile_image = pic_hd or pic
     return {
         "platform": "instagram",
         "url": f"https://instagram.com/{username}" if username else None,
         "username": username,
         "displayName": safe_str(user.get("full_name")),
         "bio": safe_str(user.get("biography")),
-        "followers": _edge_count(user.get("edge_followed_by") or user.get("follower_count")),
-        "following": _edge_count(user.get("edge_follow") or user.get("following_count")),
-        "postCount": _edge_count(
-            user.get("edge_owner_to_timeline_media")
-            or user.get("media_count")
-            or user.get("all_media_count")
-            or user.get("total_clips_count")
-        ),
+        "followers": followers,
+        "following": following,
+        "postCount": post_count,
         "verified": False if verified is None else bool(verified),
-        "profileImage": pic,
-        "externalUrl": _external_url_from_user(user),
+        "profileImage": profile_image,
+        "externalUrl": external,
+        # --- additive (non-breaking) ---
+        "id": safe_str(user.get("id") or user.get("pk")),
+        "fbid": safe_str(user.get("fbid") or user.get("fbid_v2")),
+        "isPrivate": False if private is None else bool(private),
+        "isBusinessAccount": (
+            None
+            if user.get("is_business_account") is None
+            else bool(user.get("is_business_account"))
+        ),
+        "isProfessionalAccount": (
+            None
+            if user.get("is_professional_account") is None
+            else bool(user.get("is_professional_account"))
+        ),
+        "categoryName": safe_str(user.get("category_name") or user.get("category")),
+        "bioLinks": bio_links,
+        "profileImageHd": pic_hd,
+        "businessAddress": _business_address(user),
+        "followersIsApproximate": False,
+        "followingIsApproximate": False,
+        "postCountIsApproximate": False,
+        "fetchedAt": utc_now_iso(),
     }
 
 
