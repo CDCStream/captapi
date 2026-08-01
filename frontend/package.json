@@ -9,7 +9,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "check:parity": "tsx ../scripts/check-catalog-parity.mts",
-    "audit:credits": "tsx ../scripts/audit-endpoint-credits.mts"
+    "audit:credits": "tsx ../scripts/audit-endpoint-credits.mts",
+    "sync:api-surface": "tsx ../scripts/sync-api-surface.mts"
   },
   "dependencies": {
     "@paddle/paddle-js": "^1.6.4",

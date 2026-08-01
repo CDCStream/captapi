@@ -1,0 +1,32 @@
+---
+description: After API router or catalog changes, run the docs/catalog sync pipeline before finishing.
+globs: backend/app/routers/**/*.py,frontend/lib/api-catalog.ts,packages/captapi-mcp/src/catalog.ts,packages/captapi-cli/src/catalog.ts,packages/captapi-n8n/src/catalog.ts
+alwaysApply: false
+---
+
+# API surface sync (do not skip)
+
+When you change an endpoint's path, query params, credits, or documented response fields, finish the docs pipeline in the **same turn** — do not ship router-only diffs like the early IG/TT/transcript rounds.
+
+## Before you stop
+
+1. Update source catalogs (hand-maintained):
+   - `frontend/lib/api-catalog.ts` (docs / llms.txt / playground)
+   - `packages/captapi-mcp/src/catalog.ts`
+   - `packages/captapi-cli/src/catalog.ts`
+   - `packages/captapi-n8n/src/catalog.ts`
+   - `frontend/lib/api-examples.generated.ts` when response shape changes
+   - `frontend/lib/changelog.ts` + Supabase changelog upsert script when user-facing
+2. Run the orchestrator from repo root:
+
+```bash
+npx tsx scripts/sync-api-surface.mts
+```
+
+That dumps `backend/openapi.snapshot.json`, regenerates hosted MCP + Zapier/Apify mirrors + SDKs, and runs `check-catalog-parity`.
+
+3. Do not commit until parity passes (0 HIGH).
+
+## Additive-only reminder
+
+Never rename/remove JSON keys customers already parse. Prefer additive fields + null over fake values.

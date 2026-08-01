@@ -54,3 +54,6 @@ backend/_trend*
 **/*-live-audit-live.jsonl
 scripts/.env
 scripts/_ad_library_ads_groups.py
+
+# Cursor API-surface sync marker
+.cursor/.api-surface-dirty

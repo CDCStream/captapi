@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "node .cursor/hooks/mark-api-surface-dirty.mjs"
+      }
+    ],
+    "stop": [
+      {
+        "command": "node .cursor/hooks/api-surface-sync-reminder.mjs",
+        "loop_limit": 2,
+        "timeout": 15
+      }
+    ]
+  }
+}
