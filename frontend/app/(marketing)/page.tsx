@@ -82,7 +82,7 @@ const faqs = [
   },
   {
     q: "What counts as a credit?",
-    a: "Each endpoint has its own credit cost (see the docs) — simple lookups are often 1–4 credits; many native list/search/comment endpoints are a flat 2 credits per call, while some Apify-backed lists still scale with results. Pass cache=true for a free 24h cache hit; default is always fresh.",
+    a: "Each endpoint has its own credit cost (see the docs) — simple lookups are often 1–4 credits; many list/search/comment endpoints are a flat 2 credits per call, while some list endpoints still scale with results. Pass cache=true for a free 24h cache hit; default is always fresh.",
   },
   {
     q: "What happens if a video has no captions?",

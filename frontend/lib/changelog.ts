@@ -51,9 +51,9 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-29",
     category: "improvement",
-    title: "Cheaper pricing on native list and search endpoints",
+    title: "Cheaper pricing on list and search endpoints",
     description:
-      "Native-only list and search endpoints now bill a flat 2 credits per call instead of scaling per result. This covers YouTube comments, comment replies, channel videos, search, and channel playlists; TikTok top search and trending feed; Instagram hashtag search; Twitter/X user tweets and search; and Reddit subreddit posts, comments, transcript, search, and subreddit search. Apify-backed endpoints are unchanged.",
+      "Many list and search endpoints now bill a flat 2 credits per call instead of scaling per result. This covers YouTube comments, comment replies, channel videos, search, and channel playlists; TikTok top search and trending feed; Instagram hashtag search; Twitter/X user tweets and search; and Reddit subreddit posts, comments, transcript, search, and subreddit search. Other endpoints keep their existing per-call or per-result pricing — see each docs page.",
     items: [
       "YouTube comments, replies, channel videos, search, and playlists → flat 2 credits",
       "TikTok top search and trending feed → flat 2 credits",
@@ -103,7 +103,7 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
     category: "improvement",
     title: "TikTok Audience Demographics is now native — a real country breakdown",
     description:
-      "The TikTok Audience Demographics API now returns a ranked breakdown of a creator's audience by country. TikTok never publishes follower geography, but every commenter's country is exposed on its own data, so we sample the people engaging across a creator's recent videos and tally their countries into audienceLocations — each with a country name, ISO countryCode, a raw count, and a percentage of the sample, plus videosSampled and sampleSize for transparency. It's computed natively from TikTok's own data (no third-party audience panel) and now costs a flat 3 credits.",
+      "The TikTok Audience Demographics API now returns a ranked breakdown of a creator's audience by country. TikTok never publishes follower geography, but every commenter's country is exposed on its own data, so we sample the people engaging across a creator's recent videos and tally their countries into audienceLocations — each with a country name, ISO countryCode, a raw count, and a percentage of the sample, plus videosSampled and sampleSize for transparency. It's computed from TikTok's own public engagement data and now costs a flat 3 credits.",
     items: [
       "New audienceLocations array: country, countryCode, count, and percentage",
       "Engagement-based country mix sampled from real commenters",
@@ -127,9 +127,9 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
     category: "improvement",
-    title: "Cheaper pricing on native endpoints",
+    title: "Cheaper pricing on high-volume endpoints",
     description:
-      "Endpoints that we serve directly from the platform's own data (no third-party actor) now cost far fewer credits. TikTok Comments drops to a flat 2 credits per call, and a range of native single-fetch endpoints drop to just 1 credit. Cached results are still free and failed or empty calls are never charged.",
+      "Several high-volume endpoints now cost far fewer credits. TikTok Comments drops to a flat 2 credits per call, and a range of single-fetch endpoints drop to just 1 credit. Cached results are still free and failed or empty calls are never charged.",
     items: [
       "TikTok Comments: flat 2 credits per call (was up to 10)",
       "YouTube Community Post Details: 1 credit",
@@ -141,11 +141,11 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
     category: "improvement",
-    title: "TikTok Comments is now native with cursor pagination",
+    title: "TikTok Comments gets cursor pagination",
     description:
-      "The TikTok Comments API now fetches straight from TikTok's own data (no third-party actor) and supports true cursor pagination. Each response includes totalComments (the video's full comment count) and a nextCursor — pass it back in the cursor parameter to page through every comment, up to 500 per call. Comments still return text, author username and avatar, like count, and publish time. Now billed as a flat 2 credits per call (no matter how many comments you fetch), and the API automatically falls back to the actor if the native path is unavailable.",
+      "The TikTok Comments API now fetches straight from TikTok's own public data and supports true cursor pagination. Each response includes totalComments (the video's full comment count) and a nextCursor — pass it back in the cursor parameter to page through every comment, up to 500 per call. Comments still return text, author username and avatar, like count, and publish time. Now billed as a flat 2 credits per call (no matter how many comments you fetch), with automatic retries if a fetch path is unavailable.",
     items: [
-      "Native TikTok source — no Apify actor on the hot path",
+      "Direct TikTok public data with automatic retries",
       "Cursor pagination: pass the returned nextCursor to fetch the next page",
       "New totalComments field with the video's full comment count",
       "Reply threads still available via the TikTok Comment Replies API",
@@ -166,13 +166,13 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
     category: "improvement",
-    title: "Instagram Basic Profile is now native, by user ID — richer fields",
+    title: "Instagram Basic Profile by user ID — richer fields",
     description:
-      "The Instagram Basic Profile API now takes an Instagram numeric user ID (e.g. 314216) and returns a much richer public profile — username, full name, biography, follower/following/media counts, verification and privacy flags, business/professional status, and standard + HD profile pictures — straight from Instagram's own data. A profile URL, @handle, or username is still accepted and resolved automatically. It runs on our native resolver (no third-party actor), still costs 1 credit, and null/empty fields are stripped for a tidy response.",
+      "The Instagram Basic Profile API now takes an Instagram numeric user ID (e.g. 314216) and returns a much richer public profile — username, full name, biography, follower/following/media counts, verification and privacy flags, business/professional status, and standard + HD profile pictures — straight from Instagram's own public data. A profile URL, @handle, or username is still accepted and resolved automatically. Still costs 1 credit, and null/empty fields are stripped for a tidy response.",
     items: [
       "Accepts a numeric userId (URL/@handle/username also work)",
       "Returns bio, counts, verification, business flags, pk/fbid, and HD profile pic",
-      "Native resolver — no Apify actor — with Decodo as a fallback",
+      "Faster profile resolution with automatic retries",
       "Null/empty fields are dropped, so you only see populated data",
     ],
   },
@@ -192,13 +192,13 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
     category: "improvement",
-    title: "Instagram Highlights Details is now native, by highlight ID — 1 credit",
+    title: "Instagram Highlights Details by highlight ID — 1 credit",
     description:
-      "The Instagram Highlights Details API now takes a single Highlight ID (the id returned by the Story Highlights API) and returns just that album's stories, straight from Instagram's own data. Pair it with Story Highlights: list a profile's albums, then pass an ID here to pull its contents. It's faster, richer, and the price dropped from 9 credits to 1.",
+      "The Instagram Highlights Details API now takes a single Highlight ID (the id returned by the Story Highlights API) and returns just that album's stories from Instagram's public data. Pair it with Story Highlights: list a profile's albums, then pass an ID here to pull its contents. It's faster, richer, and the price dropped from 9 credits to 1.",
     items: [
       "Now accepts id (e.g. highlight:18201653992314974) instead of a profile URL + limit",
       "Returns one highlight's stories with media/video URL, thumbnail, size, duration, and post date",
-      "Runs on our native resolver — ~1s, no third-party actor — and now costs 1 credit (was 9)",
+      "Faster responses (~1s) and now costs 1 credit (was 9)",
     ],
   },
   {
@@ -216,9 +216,9 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-07-16",
     category: "improvement",
-    title: "Instagram Profile Search is now native — 1 credit",
+    title: "Instagram Profile Search — 1 credit",
     description:
-      "The Instagram Profile Search API now runs on our native resolver instead of a third-party actor. Pass an account name, @handle, or profile URL and it resolves the matching public profile directly from Instagram. It's faster, more reliable, and the price dropped from 12 credits to 1.",
+      "The Instagram Profile Search API resolves a matching public profile directly from Instagram. Pass an account name, @handle, or profile URL. It's faster, more reliable, and the price dropped from 12 credits to 1.",
     items: [
       "Now costs 1 credit per lookup (was 12) and returns results in ~1s",
       "Accepts a name, @handle, or profile URL — e.g. nike, @nasa, instagram.com/natgeo",

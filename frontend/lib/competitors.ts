@@ -172,7 +172,7 @@ export const COMPETITORS: Record<string, Competitor> = {
     focus: "General-purpose scraping platform & actor marketplace",
     platforms: "Any (via individual actors)",
     intro:
-      "Apify is a powerful general-purpose scraping platform where you assemble and run individual \"actors\" per site. Captapi is the opposite trade-off: a single, ready-made REST API purpose-built for structured social, commerce, ad library, and creator data — transcripts, AI summaries, comments, search, profiles, commerce data, and engagement — with no actor selection, scaling or output-shape wrangling.",
+      "Apify is a powerful general-purpose scraping platform where you assemble and run individual \"actors\" per site. Captapi is the opposite trade-off: a single, ready-made REST API purpose-built for structured social, commerce, ad library, and creator data — transcripts, AI summaries, comments, search, profiles, commerce data, and engagement — without building or operating scrapers yourself.",
     transcripts: "varies",
     summaries: "varies",
     comments: "varies",
@@ -180,8 +180,8 @@ export const COMPETITORS: Record<string, Competitor> = {
     freeTier: "$5 free credit",
     pricing: "Platform usage + per-actor",
     edge: [
-      "One stable REST endpoint per task — no choosing, chaining or maintaining actors",
-      "Consistent, normalized JSON shape across every endpoint (we handle actor drift for you)",
+      "One stable REST endpoint per task — no assembling scrapers or normalizing output yourself",
+      "Consistent, normalized JSON shape across every endpoint",
       "Built-in transcripts and AI summaries, not just raw scrapes",
       "Predictable per-call credits — pass cache=true for a free 24h hit; default is always fresh",
       "100 free credits and free public tools to start, no platform to learn",
@@ -189,11 +189,11 @@ export const COMPETITORS: Record<string, Competitor> = {
     faqs: [
       {
         q: "Is Captapi a good Apify alternative?",
-        a: "If your goal is social-video data specifically, yes. Apify gives you maximum flexibility but you pick, configure and maintain actors and normalize their output yourself. Captapi wraps that work into one REST API with a stable response shape, built-in transcripts/summaries, and resilient multi-actor fallbacks behind the scenes.",
+        a: "If your goal is structured social, commerce, and ad-library data, yes. Apify is a general scraping platform where you pick and maintain actors and normalize results yourself. Captapi is a ready-made REST API with a stable response shape, built-in transcripts/summaries, and automatic retries — one key, clean JSON.",
       },
       {
-        q: "Can I use Captapi on top of Apify?",
-        a: "Captapi already runs on a curated set of battle-tested actors with automatic fallbacks, so you don't have to. You call one endpoint and get clean JSON — no Apify account, actor selection or scaling setup required.",
+        q: "Can I use Captapi on Apify?",
+        a: "Yes — as a distribution integration. The official Captapi Actor on Apify is a bring-your-own-key client that calls the Captapi REST API (it does not scrape). Set your capt_live_… key, pick an operation, and get the same structured JSON billed to your Captapi account.",
       },
     ],
   },
