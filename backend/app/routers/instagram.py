@@ -23,6 +23,7 @@ from app.services import instagram_native
 from app.services.cached_runner import cached_or_run
 from app.services.openai_client import summarize_transcript, transcribe_video_url
 from app.utils.formatters import (
+    first_present,
     normalize_language_code,
     safe_float,
     safe_int,
