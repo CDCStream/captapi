@@ -592,6 +592,8 @@ async def _user_info(handle: str) -> dict[str, Any] | None:
 
 
 async def channel_details_native(handle: str, url: str) -> dict[str, Any] | None:
+    from app.utils.media_urls import utc_now_iso
+
     ui = await _user_info(handle)
     if ui is None:
         return None
@@ -599,9 +601,17 @@ async def channel_details_native(handle: str, url: str) -> dict[str, Any] | None
     stats_v2 = ui.get("statsV2") or {}
     stats = ui.get("stats") or {}
     username = safe_str(user.get("uniqueId")) or handle
-    bio_link = user.get("bioLink")
-    if isinstance(bio_link, dict):
-        bio_link = bio_link.get("link")
+    bio_link_raw = user.get("bioLink")
+    external_url: str | None = None
+    bio_link_risk: Any = None
+    if isinstance(bio_link_raw, dict):
+        external_url = safe_str(bio_link_raw.get("link"))
+        bio_link_risk = bio_link_raw.get("risk")
+    elif bio_link_raw:
+        external_url = safe_str(bio_link_raw)
+    commerce = user.get("commerceUserInfo") or {}
+    profile_image = safe_str(user.get("avatarLarger") or user.get("avatarMedium"))
+    # Additive-only: keep the original 12 keys stable for existing parsers.
     return {
         "platform": "tiktok",
         "url": f"https://www.tiktok.com/@{username}",
@@ -614,9 +624,33 @@ async def channel_details_native(handle: str, url: str) -> dict[str, Any] | None
         "postCount": _stat(stats_v2, stats, "videoCount"),
         "verified": user.get("verified"),
         "private": user.get("privateAccount"),
-        "profileImage": safe_str(user.get("avatarLarger") or user.get("avatarMedium")),
-        "externalUrl": safe_str(bio_link),
-        "category": safe_str((user.get("commerceUserInfo") or {}).get("category")),
+        "profileImage": profile_image,
+        "externalUrl": external_url,
+        "category": safe_str(commerce.get("category")),
+        # --- additive identity / vetting / commerce ---
+        "id": safe_str(user.get("id")),
+        "secUid": safe_str(user.get("secUid")),
+        "createTime": _iso(user.get("createTime")),
+        "friendCount": _stat(stats_v2, stats, "friendCount"),
+        "diggCount": _stat(stats_v2, stats, "diggCount"),
+        "profileImageMedium": safe_str(user.get("avatarMedium")),
+        "profileImageThumb": safe_str(user.get("avatarThumb")),
+        "bioLinkRisk": bio_link_risk,
+        "isCommerceUser": bool(commerce.get("commerceUser"))
+        if commerce.get("commerceUser") is not None
+        else None,
+        "isSeller": user.get("ttSeller"),
+        "isOrganization": user.get("isOrganization"),
+        "isAdVirtual": user.get("isADVirtual"),
+        "language": safe_str(user.get("language")),
+        "commentSetting": user.get("commentSetting"),
+        "duetSetting": user.get("duetSetting"),
+        "stitchSetting": user.get("stitchSetting"),
+        "downloadSetting": user.get("downloadSetting"),
+        "followingVisibility": user.get("followingVisibility"),
+        "uniqueIdModifyTime": _iso(user.get("uniqueIdModifyTime")),
+        "nickNameModifyTime": _iso(user.get("nickNameModifyTime")),
+        "fetchedAt": utc_now_iso(),
     }
 
 

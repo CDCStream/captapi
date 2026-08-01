@@ -786,6 +786,13 @@ async def tiktok_transcript(
                 url, language=lang
             )
             ctx["source"] = source
+            # Additive body field for RAG weighting. Existing keys unchanged.
+            if source == "direct":
+                public_source = "captions"
+            elif source == "openai":
+                public_source = "whisper"
+            else:
+                public_source = source
             return {
                 "platform": "tiktok",
                 "url": url,
@@ -794,11 +801,12 @@ async def tiktok_transcript(
                 "wordCount": len(full.split()),
                 "segments": len(segments),
                 "language": normalize_language_code(detected),
+                "source": public_source,
             }
 
         data = await cached_or_run(
             endpoint="tiktok.transcript",
-            params={"url": url, "language": lang, "v": 7},
+            params={"url": url, "language": lang, "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1024,7 +1032,7 @@ async def tiktok_channel_details(
 
         data = await cached_or_run(
             endpoint="tiktok.channel-details",
-            params={"url": url, "v": 2},
+            params={"url": url, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
