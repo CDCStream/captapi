@@ -196,20 +196,25 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
     else:
         media_type = "video"
 
-    play_addr = video.get("playAddr")
-    if isinstance(play_addr, dict):
-        play_url = safe_str((play_addr.get("urlList") or [None])[0]) or safe_str(play_addr.get("uri"))
-    else:
-        play_url = safe_str(play_addr)
-    download_addr = video.get("downloadAddr")
-    if isinstance(download_addr, dict):
-        download_url = safe_str((download_addr.get("urlList") or [None])[0]) or safe_str(
-            download_addr.get("uri")
-        )
-    else:
-        download_url = safe_str(download_addr)
+    def _addr_url(addr: Any) -> str | None:
+        if isinstance(addr, dict):
+            return safe_str((addr.get("urlList") or [None])[0]) or safe_str(addr.get("uri"))
+        return safe_str(addr)
+
+    play_url = _addr_url(video.get("playAddr"))
+    # Web itemStruct downloadAddr is watermarked; true no-watermark usually needs
+    # a mobile aweme path (Phase 2). Surface both keys honestly.
+    download_url = _addr_url(video.get("downloadAddr"))
+    download_no_wm = _addr_url(
+        video.get("downloadAddrNoWatermark")
+        or video.get("downloadNoWatermarkAddr")
+        or video.get("playAddrNoWatermark")
+    )
     thumbnail_url = safe_str(video.get("cover") or video.get("originCover"))
     profile_image = safe_str(author.get("avatarLarger") or author.get("avatarMedium"))
+    author_id = safe_str(author.get("id") or author.get("uid"))
+    author_sec = safe_str(author.get("secUid"))
+    author_region = safe_str(author.get("region") or item.get("authorRegion"))
 
     music_title = safe_str(music.get("title"))
     is_original = bool(music.get("original")) or (
@@ -232,13 +237,16 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
         "height": safe_int(video.get("height")),
         "videoUrl": play_url,
         "downloadUrl": download_url,
-        "hasWatermark": True if download_url else None,
+        "downloadUrlNoWatermark": download_no_wm,
+        "hasWatermark": bool(download_url) and not download_no_wm,
         "mediaUrlsExpireAt": earliest_cdn_expires_at(
-            play_url, download_url, thumbnail_url, profile_image
+            play_url, download_url, download_no_wm, thumbnail_url, profile_image
         ),
+        "authorId": author_id,
+        "secUid": author_sec,
         "author": {
-            "id": safe_str(author.get("id") or author.get("uid")),
-            "secUid": safe_str(author.get("secUid")),
+            "id": author_id,
+            "secUid": author_sec,
             "username": username,
             "displayName": safe_str(author.get("nickname")),
             "url": f"https://www.tiktok.com/@{username}" if username else None,
@@ -246,7 +254,7 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
             "followersAsOf": fetched_at,
             "verified": False if author.get("verified") is None else bool(author.get("verified")),
             "profileImage": profile_image,
-            "region": safe_str(author.get("region") or item.get("authorRegion")),
+            "region": author_region,
         },
         "engagement": {
             "views": _stat(stats_v2, stats, "playCount"),
@@ -263,6 +271,7 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
         "musicAuthor": safe_str(music.get("authorName") or music.get("ownerNickname")),
         "isOriginalSound": is_original,
         "region": safe_str(item.get("locationCreated") or item.get("region")),
+        "authorRegion": author_region,
         "isAd": bool(item.get("isAd")),
         "isCommerce": bool(
             item.get("isCommerce")

@@ -36,8 +36,14 @@ class SocialVideoDetails(BaseModel):
     thumbnailUrl: str | None = None
     videoUrl: str | None = None
     downloadUrl: str | None = None
+    downloadUrlNoWatermark: str | None = None
+    hasWatermark: bool | None = None
     mediaType: str | None = None
+    width: int | None = None
+    height: int | None = None
     mediaUrlsExpireAt: str | None = None
+    authorId: str | None = None
+    secUid: str | None = None
     author: SocialAuthor | None = None
     engagement: SocialEngagement | None = None
     hashtags: list[str] = []
@@ -46,6 +52,12 @@ class SocialVideoDetails(BaseModel):
     musicId: str | None = None
     musicAuthor: str | None = None
     isOriginalSound: bool | None = None
+    region: str | None = None
+    authorRegion: str | None = None
+    isAd: bool | None = None
+    isCommerce: bool | None = None
+    isBrandedContent: bool | None = None
+    status: dict | None = None
     fetchedAt: str | None = None
 
 
