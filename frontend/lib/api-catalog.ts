@@ -120,6 +120,7 @@ export interface PlatformGroup {
   icon:
     | "youtube"
     | "music"
+    | "tiktok"
     | "instagram"
     | "facebook"
     | "twitter"
@@ -133,6 +134,8 @@ export interface PlatformGroup {
     | "github"
     | "megaphone"
     | "calendar"
+    | "google"
+    | "amazon"
     | "video"
     | "cloud"
     | "search"
@@ -543,8 +546,8 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "tiktok",
     name: "TikTok",
     blurb: "Analyze TikTok videos with transcripts, summaries, engagement metrics, and comments.",
-    icon: "music",
-    color: "text-pink-500",
+    icon: "tiktok",
+    color: "text-foreground",
     exampleUrl: "https://www.tiktok.com/@username/video/7311234567890123456",
     endpoints: TIKTOK.map((s) => ({ ...s, platform: "tiktok" as const })),
   },
@@ -633,8 +636,8 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "tiktok_shop",
     name: "TikTok Shop",
     blurb: "Research TikTok Shop products, reviews, stores, and creator showcases for ecommerce intelligence.",
-    icon: "shoppingBag",
-    color: "text-pink-500",
+    icon: "tiktok",
+    color: "text-foreground",
     exampleUrl: "https://shop.tiktok.com/us/pdp/example-product/1234567890",
     endpoints: TIKTOK_SHOP.map((s) => ({ ...s, platform: "tiktok_shop" as const })),
   },
@@ -642,7 +645,7 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "facebook_marketplace",
     name: "Facebook Marketplace",
     blurb: "Search Facebook Marketplace listings by keyword and location, resolve places, and fetch item details.",
-    icon: "shoppingBag",
+    icon: "facebook",
     color: "text-blue-600",
     exampleUrl: "https://www.facebook.com/marketplace/",
     endpoints: FACEBOOK_MARKETPLACE.map((s) => ({ ...s, platform: "facebook_marketplace" as const })),
@@ -651,7 +654,7 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "facebook_events",
     name: "Facebook Events",
     blurb: "Search Facebook events, pull event details, and list events from a public profile or page.",
-    icon: "calendar",
+    icon: "facebook",
     color: "text-blue-600",
     exampleUrl: "https://www.facebook.com/events/",
     endpoints: FACEBOOK_EVENTS.map((s) => ({ ...s, platform: "facebook_events" as const })),
@@ -660,7 +663,7 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "facebook_ad_library",
     name: "Facebook Ad Library",
     blurb: "Search Meta Ad Library creatives, advertisers, and company ads for competitor research.",
-    icon: "megaphone",
+    icon: "facebook",
     color: "text-blue-600",
     exampleUrl: "https://www.facebook.com/ads/library/",
     endpoints: FACEBOOK_AD_LIBRARY.map((s) => ({ ...s, platform: "facebook_ad_library" as const })),
@@ -669,8 +672,8 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "tiktok_ad_library",
     name: "TikTok Ad Library",
     blurb: "Search TikTok Ad Library and Creative Center ads, then fetch individual ad details.",
-    icon: "megaphone",
-    color: "text-pink-500",
+    icon: "tiktok",
+    color: "text-foreground",
     exampleUrl: "https://library.tiktok.com/",
     endpoints: TIKTOK_AD_LIBRARY.map((s) => ({ ...s, platform: "tiktok_ad_library" as const })),
   },
@@ -678,8 +681,8 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "google_ad_library",
     name: "Google Ad Library",
     blurb: "Search Google Ads Transparency Center advertisers and pull company ads or creative details.",
-    icon: "megaphone",
-    color: "text-amber-600",
+    icon: "google",
+    color: "text-foreground",
     exampleUrl: "https://adstransparency.google.com/",
     endpoints: GOOGLE_AD_LIBRARY.map((s) => ({ ...s, platform: "google_ad_library" as const })),
   },
@@ -687,7 +690,7 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "linkedin_ad_library",
     name: "LinkedIn Ad Library",
     blurb: "Search LinkedIn Ad Library ads and fetch creative details for B2B competitor intelligence.",
-    icon: "megaphone",
+    icon: "linkedin",
     color: "text-blue-700",
     exampleUrl: "https://www.linkedin.com/ad-library/",
     endpoints: LINKEDIN_AD_LIBRARY.map((s) => ({ ...s, platform: "linkedin_ad_library" as const })),
@@ -696,7 +699,7 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "amazon_shop",
     name: "Amazon Shop",
     blurb: "Fetch Amazon seller storefront metadata and product listings for commerce research.",
-    icon: "shoppingBag",
+    icon: "amazon",
     color: "text-amber-500",
     exampleUrl: "https://www.amazon.com/s?me=ATVPDKIKX0DER",
     endpoints: AMAZON_SHOP.map((s) => ({ ...s, platform: "amazon_shop" as const })),
