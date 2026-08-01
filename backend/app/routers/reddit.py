@@ -5,6 +5,7 @@ Native-first via Reddit public JSON / OAuth; Decodo for blocked post fetches.
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import urlencode, urlparse
@@ -19,7 +20,7 @@ from app.schemas.common import ApiResponse
 from app.services import decodo_fetch
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.cached_runner import cached_or_run
-from app.utils.formatters import first_present, safe_int, safe_str
+from app.utils.formatters import first_present, safe_float, safe_int, safe_str
 from app.utils.url import (
     detect_url_platform,
     extract_reddit_post_id,
@@ -90,10 +91,26 @@ def _is_post(item: dict[str, Any]) -> bool:
 _THUMB_PLACEHOLDERS = {"self", "default", "nsfw", "spoiler", "image"}
 
 
+def _epoch_to_iso(value: Any) -> Any:
+    if isinstance(value, (int, float)) and value > 0:
+        return datetime.fromtimestamp(int(value), tz=timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%S.000Z"
+        )
+    if isinstance(value, str) and re.fullmatch(r"\d+(?:\.\d+)?", value.strip()):
+        try:
+            return _epoch_to_iso(float(value))
+        except ValueError:
+            return value
+    return value
+
+
 def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
     thumbnail = safe_str(item.get("thumbnailUrl") or item.get("thumbnail"))
     if thumbnail in _THUMB_PLACEHOLDERS:
         thumbnail = None
+    published = _epoch_to_iso(item.get("createdAt") or item.get("created") or item.get("created_utc"))
+    if not isinstance(published, str):
+        published = safe_str(published)
     return {
         "platform": "reddit",
         "id": safe_str(item.get("id") or item.get("parsedId")),
@@ -106,7 +123,7 @@ def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
         "comments": safe_int(
             first_present(item.get("numberOfComments"), item.get("numComments"), item.get("num_comments"))
         ),
-        "publishedAt": safe_str(item.get("createdAt") or item.get("created") or item.get("created_utc")),
+        "publishedAt": published,
         "flair": safe_str(item.get("flair")),
         "nsfw": first_present(item.get("over18"), item.get("nsfw"), item.get("over_18")),
         "thumbnail": thumbnail,
@@ -114,12 +131,22 @@ def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
 
 
 def _normalize_comment(item: dict[str, Any]) -> dict[str, Any]:
+    published = item.get("createdAt") or item.get("created") or item.get("created_utc")
+    published = _epoch_to_iso(published)
+    if not isinstance(published, str):
+        published = safe_str(published)
+    score = safe_int(first_present(item.get("score"), item.get("ups"), item.get("upVotes")))
+    ups = safe_int(first_present(item.get("ups"), item.get("upVotes"), score))
     return {
         "id": safe_str(item.get("id")),
         "author": safe_str(item.get("username") or item.get("author")),
+        "authorFullname": safe_str(item.get("authorFullname") or item.get("author_fullname")),
         "text": safe_str(item.get("body") or item.get("text")),
-        "upvotes": safe_int(first_present(item.get("upVotes"), item.get("score"), item.get("ups"))),
-        "publishedAt": safe_str(item.get("createdAt") or item.get("created") or item.get("created_utc")),
+        # Keep upvotes for existing clients; prefer true ups when Reddit sends them.
+        "upvotes": ups,
+        "score": score,
+        "downs": safe_int(item.get("downs")),
+        "publishedAt": published,
         "url": safe_str(item.get("url") or item.get("permalink")),
         "parentId": safe_str(item.get("parentId") or item.get("parent_id")),
         "depth": safe_int(item.get("depth")),
@@ -127,6 +154,9 @@ def _normalize_comment(item: dict[str, Any]) -> dict[str, Any]:
         # Reddit may send edited as False or a timestamp; coerce to bool, keep False.
         "edited": bool(item.get("edited")) if item.get("edited") is not None else None,
         "stickied": bool(item.get("stickied")) if item.get("stickied") is not None else None,
+        "distinguished": safe_str(item.get("distinguished")),
+        "controversiality": safe_int(item.get("controversiality")),
+        "subreddit": safe_str(item.get("subreddit")),
     }
 
 
@@ -177,7 +207,9 @@ async def _reddit_oauth_headers() -> dict[str, str] | None:
         return None
 
 
-async def _fetch_reddit_json_url(url: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+async def _fetch_reddit_json_url(
+    url: str, limit: int
+) -> tuple[dict[str, Any], list[dict[str, Any]], bool]:
     headers = {"User-Agent": "CaptapiBot/1.0 (+https://captapi.com)"}
     if "oauth.reddit.com" in url:
         oauth = await _reddit_oauth_headers()
@@ -205,9 +237,11 @@ async def _fetch_reddit_json_url(url: str, limit: int) -> tuple[dict[str, Any], 
     return _parse_reddit_post_payload(resp.json(), limit)
 
 
-def _parse_reddit_post_payload(data: Any, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+def _parse_reddit_post_payload(
+    data: Any, limit: int
+) -> tuple[dict[str, Any], list[dict[str, Any]], bool]:
     """Normalize a ``/comments/<id>.json`` payload (shared by the direct and
-    Decodo fetch paths)."""
+    Decodo fetch paths). Returns ``(post, comments, has_more)``."""
     if not isinstance(data, list) or not data:
         raise HTTPException(status_code=404, detail="Post not found")
     post_children = (data[0].get("data") or {}).get("children") or []
@@ -224,45 +258,78 @@ def _parse_reddit_post_payload(data: Any, limit: int) -> tuple[dict[str, Any], l
         "body": raw_post.get("selftext"),
         "subreddit": raw_post.get("subreddit"),
         "author": raw_post.get("author"),
+        "author_fullname": raw_post.get("author_fullname"),
         "score": raw_post.get("score") or raw_post.get("ups"),
+        "ups": raw_post.get("ups"),
+        "downs": raw_post.get("downs"),
+        "upvote_ratio": raw_post.get("upvote_ratio"),
         "numComments": raw_post.get("num_comments"),
+        "subreddit_subscribers": raw_post.get("subreddit_subscribers"),
         "created": created,
         "flair": raw_post.get("link_flair_text"),
         "nsfw": raw_post.get("over_18"),
         "thumbnail": raw_post.get("thumbnail"),
+        "is_video": raw_post.get("is_video"),
     }
 
     comments: list[dict[str, Any]] = []
+    has_more = False
 
     def walk(children: list[dict[str, Any]]) -> None:
+        nonlocal has_more
         for child in children:
-            if child.get("kind") != "t1":
+            kind = child.get("kind")
+            if kind == "more":
+                has_more = True
+                continue
+            if kind != "t1":
                 continue
             raw = child.get("data") or {}
             comments.append({
                 "id": raw.get("id"),
                 "author": raw.get("author"),
+                "author_fullname": raw.get("author_fullname"),
                 "body": raw.get("body"),
-                "score": raw.get("score") or raw.get("ups"),
-                "created": raw.get("created_utc"),
+                "score": raw.get("score"),
+                "ups": raw.get("ups"),
+                "downs": raw.get("downs"),
+                "created": _epoch_to_iso(raw.get("created_utc")),
                 "url": f"https://www.reddit.com{raw.get('permalink')}" if raw.get("permalink") else None,
                 "parent_id": raw.get("parent_id"),
                 "depth": raw.get("depth"),
                 "is_submitter": raw.get("is_submitter"),
                 "edited": raw.get("edited"),
                 "stickied": raw.get("stickied"),
+                "distinguished": raw.get("distinguished"),
+                "controversiality": raw.get("controversiality"),
+                "subreddit": raw.get("subreddit"),
             })
             replies = raw.get("replies")
             reply_children = ((replies or {}).get("data") or {}).get("children") if isinstance(replies, dict) else []
             if isinstance(reply_children, list) and len(comments) < limit:
                 walk(reply_children)
+            elif isinstance(reply_children, list) and reply_children:
+                has_more = True
 
     comment_listing = data[1] if len(data) > 1 else {}
     walk(((comment_listing.get("data") or {}).get("children") or []))
-    return _normalize_post(post), [_normalize_comment(c) for c in comments[:limit]]
+    trimmed = comments[:limit]
+    if len(comments) > limit:
+        has_more = True
+    # Attach pagination hint on the post dict for the comments handler.
+    normalized_post = _normalize_post(post)
+    # Additive post fields used by post-comments (and harmless on post-details).
+    normalized_post["upvoteRatio"] = safe_float(post.get("upvote_ratio"))
+    normalized_post["authorFullname"] = safe_str(post.get("author_fullname"))
+    normalized_post["subscriberCount"] = safe_int(post.get("subreddit_subscribers"))
+    normalized_post["downs"] = safe_int(post.get("downs"))
+    normalized_post["isVideo"] = post.get("is_video")
+    return normalized_post, [_normalize_comment(c) for c in trimmed], has_more
 
 
-async def _fetch_reddit_json_post(url: str, post_id: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+async def _fetch_reddit_json_post(
+    url: str, post_id: str, limit: int
+) -> tuple[dict[str, Any], list[dict[str, Any]], bool]:
     """Fetch a post and comments from Reddit public JSON variants before actor fallback."""
     last_error: HTTPException | None = None
     seen: set[str] = set()
@@ -283,12 +350,6 @@ async def _fetch_reddit_json_post(url: str, post_id: str, limit: int) -> tuple[d
                 raise
             last_error = exc
     raise last_error or HTTPException(status_code=502, detail="Reddit upstream error")
-
-
-def _epoch_to_iso(value: Any) -> Any:
-    if isinstance(value, (int, float)) and value > 0:
-        return datetime.fromtimestamp(int(value), tz=timezone.utc).isoformat()
-    return value
 
 
 # Reddit's public JSON is datacenter-blocked, so post endpoints always land on
@@ -313,7 +374,9 @@ async def _reddit_post_exists_decodo(post_id: str) -> bool | None:
     return len(children) > 0
 
 
-async def _fetch_reddit_post_decodo(post_id: str, limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+async def _fetch_reddit_post_decodo(
+    post_id: str, limit: int
+) -> tuple[dict[str, Any], list[dict[str, Any]], bool]:
     """Post + comments via Decodo's scraping pool (~1-3s measured; Reddit
     doesn't fingerprint-block it, unlike our datacenter/residential proxies).
 
@@ -343,7 +406,7 @@ async def _fetch_reddit_post_resilient(
     post_id: str,
     limit: int,
     ctx: dict[str, Any] | None = None,
-) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+) -> tuple[dict[str, Any], list[dict[str, Any]], bool]:
     try:
         result = await _fetch_reddit_json_post(url, post_id, limit)
         if ctx is not None:
@@ -622,12 +685,12 @@ async def post_details(
         base_credits=CREDIT_DETAILS,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            post, _ = await _fetch_reddit_post_resilient(url, post_id, limit=1, ctx=ctx)
+            post, _, _ = await _fetch_reddit_post_resilient(url, post_id, limit=1, ctx=ctx)
             return post
 
         data = await cached_or_run(
             endpoint="reddit.post-details",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -651,12 +714,21 @@ async def post_comments(
         base_credits=CREDIT_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            _, comments = await _fetch_reddit_post_resilient(url, post_id, limit=limit, ctx=ctx)
-            return {"totalReturned": len(comments), "comments": comments}
+            post, comments, has_more = await _fetch_reddit_post_resilient(
+                url, post_id, limit=limit, ctx=ctx
+            )
+            return {
+                "totalReturned": len(comments),
+                "limit": limit,
+                "hasMore": has_more,
+                "nextCursor": None,
+                "post": post,
+                "comments": comments,
+            }
 
         data = await cached_or_run(
             endpoint="reddit.post-comments",
-            params={"url": url, "limit": limit, "v": 5},
+            params={"url": url, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -682,7 +754,9 @@ async def post_transcript(
         async def _run() -> dict[str, Any]:
             try:
                 # Native JSON first; Decodo when Reddit blocks the datacenter IP.
-                post, comments = await _fetch_reddit_post_resilient(url, post_id, limit=max(limit, 1), ctx=ctx)
+                post, comments, _ = await _fetch_reddit_post_resilient(
+                    url, post_id, limit=max(limit, 1), ctx=ctx
+                )
             except HTTPException as exc:
                 if exc.status_code in {502, 503, 504}:
                     raise HTTPException(

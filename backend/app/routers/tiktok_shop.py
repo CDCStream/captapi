@@ -16,7 +16,7 @@ from app.schemas.common import ApiResponse
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.services import tiktok_shop_native
-from app.utils.formatters import safe_float, safe_int, safe_str
+from app.utils.formatters import first_present, safe_float, safe_int, safe_str
 from app.utils.url import detect_url_platform, extract_tiktok_username, platform_mismatch_detail
 
 router = APIRouter()
@@ -125,14 +125,16 @@ def _normalize_product(
             seller_url = f"https://www.tiktok.com/shop/store/{slug}/{seller_id}"
 
     # Mode-specific omissions for fields the upstream actor never returns.
-    include_description = not search_mode and not catalog_mode and not details_mode and not showcase_mode
+    # details_mode used to strip description / list pricing / seller id — that
+    # hid native PDP fields competitors expose. Include them whenever present.
+    include_description = not search_mode and not catalog_mode and not showcase_mode
     # Details now hydrates product rating from PDP review_model; still omit on search/showcase.
     include_rating_reviews = not search_mode and not showcase_mode
     include_stock = not search_mode and not catalog_mode and not showcase_mode
     include_seller_rating = not search_mode and not catalog_mode and not showcase_mode
-    include_list_pricing = not details_mode and not showcase_mode  # originalPrice / discount
+    include_list_pricing = not showcase_mode  # originalPrice / discount
     include_sold = not showcase_mode
-    include_full_seller = not details_mode and not showcase_mode
+    include_full_seller = not showcase_mode
 
     out: dict[str, Any] = {
         "platform": "tiktok_shop",
@@ -188,11 +190,73 @@ def _normalize_product(
         }
         if include_seller_rating:
             out["seller"]["rating"] = seller.get("rating")
+        # Additive seller enrichment when native/Apify provides it.
+        for key, src in (
+            ("tiktokId", ("tiktokId", "tiktok_id", "tt_uid")),
+            ("tiktokUrl", ("tiktokUrl", "tiktok_url")),
+            ("location", ("location", "seller_location", "sellerLocation")),
+            ("productCount", ("productCount", "product_count", "on_sell_product_count")),
+        ):
+            val = first_present(*(seller.get(k) for k in src), *(item.get(k) for k in src))
+            if val not in (None, "", [], {}):
+                out["seller"][key] = safe_int(val) if key == "productCount" else safe_str(val)
     else:
-        # Details actor only returns store name + rating.
         out["seller"] = {"name": seller_name}
         if include_seller_rating:
             out["seller"]["rating"] = seller.get("rating")
+    # Additive SKU / gallery / shop rollup when upstream provides them.
+    skus_raw = item.get("skus") if isinstance(item.get("skus"), list) else None
+    if skus_raw:
+        skus_out: list[dict[str, Any]] = []
+        for sku in skus_raw:
+            if not isinstance(sku, dict):
+                continue
+            skus_out.append(
+                {
+                    "id": safe_str(sku.get("id") or sku.get("sku_id") or sku.get("skuId")),
+                    "stock": safe_int(
+                        sku.get("stock") or sku.get("available_quantity") or sku.get("quantity")
+                    ),
+                    "price": _coerce_price(
+                        sku.get("price") or sku.get("real_price") or sku.get("sale_price")
+                    ),
+                    "originalPrice": _coerce_price(
+                        sku.get("originalPrice") or sku.get("original_price") or sku.get("origin_price")
+                    ),
+                    "status": safe_str(sku.get("status")),
+                }
+            )
+        if skus_out:
+            out["skus"] = skus_out
+    images_list = item.get("images") if isinstance(item.get("images"), list) else None
+    if images_list:
+        out["images"] = [safe_str(i) for i in images_list if safe_str(i)]
+    shop_info = item.get("shopInfo") or item.get("shop_info")
+    if isinstance(shop_info, dict) and shop_info:
+        out["shopInfo"] = {
+            "name": safe_str(shop_info.get("shop_name") or shop_info.get("name")),
+            "rating": shop_info.get("shop_rating") or shop_info.get("rating"),
+            "sold": safe_int(shop_info.get("sold_count") or shop_info.get("sold")),
+            "followers": safe_int(shop_info.get("followers_count") or shop_info.get("followers")),
+            "productCount": safe_int(
+                shop_info.get("on_sell_product_count") or shop_info.get("product_count")
+            ),
+            "reviewCount": safe_int(shop_info.get("review_count") or shop_info.get("reviews")),
+            "url": safe_str(shop_info.get("shop_link") or shop_info.get("url")),
+            "region": safe_str(shop_info.get("region")),
+            "identityLabel": safe_str(
+                shop_info.get("shop_identity_label") or shop_info.get("identityLabel")
+            ),
+        }
+    related = item.get("relatedVideos") or item.get("related_videos")
+    if isinstance(related, list) and related:
+        out["relatedVideos"] = related
+    if item.get("region") or item.get("sale_region"):
+        out["region"] = safe_str(item.get("region") or item.get("sale_region"))
+    if item.get("status") is not None:
+        out["status"] = item.get("status")
+    if item.get("categories"):
+        out["categories"] = item.get("categories")
     return out
 
 
@@ -351,12 +415,19 @@ async def shop_products(
 @router.get("/product-details", summary="TikTok Shop product details")
 async def product_details(
     url: str = Query(..., description="TikTok Shop product URL"),
+    region: str = Query(
+        "US",
+        min_length=2,
+        max_length=2,
+        description="Market region ISO code for the Apify fallback path (default US).",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_non_tiktok_url(url, "https://www.tiktok.com/shop/pdp/product/123")
     if "tiktok" not in url or "shop" not in url:
         raise HTTPException(status_code=400, detail="Invalid TikTok Shop product URL. Pass a TikTok Shop product URL like https://www.tiktok.com/shop/pdp/product/123.")
+    region_code = (region or "US").upper()
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok-shop/product-details",
@@ -371,6 +442,7 @@ async def product_details(
                 ctx["source"] = "direct"
                 normalized = _normalize_product(native, details_mode=True)
                 normalized["url"] = normalized["url"] or url
+                normalized.setdefault("region", region_code)
                 return normalized
 
             apify = get_apify()
@@ -381,7 +453,11 @@ async def product_details(
                 try:
                     items = await apify.run_actor_sync(
                         get_settings().APIFY_ACTOR_TIKTOK_SHOP_DETAILS,
-                        {"productInput": url, "region": "US", "outputMode": "formatted_filtered"},
+                        {
+                            "productInput": url,
+                            "region": region_code,
+                            "outputMode": "formatted_filtered",
+                        },
                         max_items=1,
                     )
                 except Exception:  # noqa: BLE001
@@ -395,16 +471,23 @@ async def product_details(
                 product_id = url.rstrip("/").split("/")[-1]
                 ctx["source"] = "direct" if native else "apify"
                 base = native or {"productUrl": url, "productId": product_id}
-                return _normalize_product(base, details_mode=True)
+                normalized = _normalize_product(base, details_mode=True)
+                normalized.setdefault("region", region_code)
+                return normalized
             ctx["source"] = "apify"
             ctx["credits_override"] = 14
             normalized = _normalize_product(items[0], details_mode=True)
             normalized["url"] = normalized["url"] or url
+            normalized.setdefault("region", region_code)
             return normalized
 
         return ApiResponse(
             data=await cached_or_run(
-                "tiktok-shop.product-details", {"url": url, "v": 5}, _run, ctx, use_cache=cache
+                "tiktok-shop.product-details",
+                {"url": url, "region": region_code, "v": 6},
+                _run,
+                ctx,
+                use_cache=cache,
             )
         )
 

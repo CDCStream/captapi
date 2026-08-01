@@ -317,7 +317,17 @@ const RUMBLE: Omit<Endpoint, "platform">[] = [
 const TIKTOK_SHOP: Omit<Endpoint, "platform">[] = [
   { tool: "tiktok_shop_search", name: "TikTok Shop Search", path: "/v1/tiktok-shop/shop-search", credits: 56, summary: "Search TikTok Shop products by keyword.", params: [q("Product search query."), { name: "region", type: "string", required: false, description: "Two-letter TikTok Shop region. Default US." }, limit(20, 200)] },
   { tool: "tiktok_shop_products", name: "TikTok Shop Products", path: "/v1/tiktok-shop/shop-products", credits: 2, summary: "List products from a TikTok Shop store.", params: [url("TikTok Shop store URL."), limit(20, 200)] },
-  { tool: "tiktok_shop_product_details", name: "TikTok Shop Product Details", path: "/v1/tiktok-shop/product-details", credits: 14, summary: "Full TikTok Shop product details, seller and price metadata.", params: [url("TikTok Shop product URL.")] },
+  {
+    tool: "tiktok_shop_product_details",
+    name: "TikTok Shop Product Details",
+    path: "/v1/tiktok-shop/product-details",
+    credits: 14,
+    summary: "TikTok Shop product details with seller id, pricing, SKUs, and region.",
+    params: [
+      url("TikTok Shop product URL."),
+      { name: "region", type: "string", required: false, description: "Market region ISO code for Apify fallback (default US)." },
+    ],
+  },
   { tool: "tiktok_shop_product_reviews", name: "TikTok Shop Product Reviews", path: "/v1/tiktok-shop/product-reviews", credits: 45, summary: "Customer reviews for a TikTok Shop product.", params: [url("TikTok Shop product URL."), limit(20, 200)] },
   { tool: "tiktok_shop_user_showcase", name: "TikTok Shop User Showcase", path: "/v1/tiktok-shop/user-showcase", credits: 45, summary: "Products a TikTok creator promotes in their Shop showcase — URL, title, price, image, seller shop id.", params: [{ name: "username", type: "string", required: true, description: "TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug." }, limit(20, 200)] },
 ];

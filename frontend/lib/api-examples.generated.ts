@@ -4724,7 +4724,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     },
     "publishedAt": "2026-07-04 13:19:24"
   },
-  "linkedin-profile": {
+  "linkedin-profile":   {
     "platform": "linkedin",
     "type": "person",
     "url": "https://www.linkedin.com/in/williamhgates",
@@ -4732,9 +4732,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "name": "Bill Gates",
     "headline": "Chair, Gates Foundation and Founder, Breakthrough Energy",
     "location": "Seattle, Washington, United States",
-    "about": "Chair, Gates Foundation and Founder, Breakthrough Energy · Chair of the Gates Foundation. Founder of Breakthrough Energy. Co-founder of Microsoft. Voracious reader. Avid traveler. Active blogger. · Experience: Gates Foundation · Education: Harvard University · Location: Seattle · 8 connections on LinkedIn. View Bill Gates’ profile on LinkedIn, a professional community of 1 billion members.",
+    "about": "Chair of the Gates Foundation. Founder of Breakthrough Energy. Co-founder of Microsoft.",
     "followers": 40547195,
-    "connections": 8,
+    "connections": null,
     "profileImage": "https://media.licdn.com/dms/image/v2/D5603AQF-RYZP55jmXA/profile-displayphoto-shrink_200_200/B56ZRi8g.aGsAY-/0/1736826818802?e=2147483647&v=beta&t=bKWfN6UwwtiCqFWsG7rBELbd48qJOAMLdxhBzzkJV0k",
     "currentCompany": "Gates Foundation"
   },
@@ -5282,7 +5282,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   },
-  "reddit-post-comments": {
+  "reddit-post-comments":   {
     "totalReturned": 5,
     "comments": [
       {
@@ -5290,67 +5290,96 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "AutoModerator",
         "text": "Users often report submissions from this site for sensationalized articles. Readers have a responsibility to be skeptical, check sources, and comment on any flaws.\n\nYou can help improve this thread by linking to media that verifies or questions this article's claims. Your link could help readers better understand this issue.\n\n*I am a bot, and this action was performed automatically. Please [contact the moderators of this subreddit](/message/compose/?to=/r/worldnews) if you have any questions or concerns.*",
         "upvotes": 1,
-        "publishedAt": "1785330725.0",
+        "publishedAt": "2026-07-29T13:12:05.000Z",
         "url": "https://www.reddit.com/r/worldnews/comments/1v9vtop/japans_population_falls_below_120_million_for/p0gnsr6/",
         "parentId": "t3_1v9vtop",
         "depth": 0,
         "isSubmitter": false,
         "edited": false,
-        "stickied": true
+        "stickied": true,
+        "score": 1,
+        "downs": 0,
+        "authorFullname": "t2_example"
       },
       {
         "id": "p0gpy2l",
         "author": "Donnicton",
         "text": "Sorry, best we can do about it is symbolically send you home early one day this month to go make a kid or whatever.",
         "upvotes": 5045,
-        "publishedAt": "1785331342.0",
+        "publishedAt": "2026-07-29T13:22:22.000Z",
         "url": "https://www.reddit.com/r/worldnews/comments/1v9vtop/japans_population_falls_below_120_million_for/p0gpy2l/",
         "parentId": "t3_1v9vtop",
         "depth": 0,
         "isSubmitter": false,
         "edited": false,
-        "stickied": false
+        "stickied": false,
+        "score": 5045,
+        "downs": 0,
+        "authorFullname": "t2_example"
       },
       {
         "id": "p0gyjgf",
         "author": "Lietenantdan",
         "text": "And by early we mean the time you were actually supposed to leave.",
         "upvotes": 2259,
-        "publishedAt": "1785333738.0",
+        "publishedAt": "2026-07-29T14:02:18.000Z",
         "url": "https://www.reddit.com/r/worldnews/comments/1v9vtop/japans_population_falls_below_120_million_for/p0gyjgf/",
         "parentId": "t1_p0gpy2l",
         "depth": 1,
         "isSubmitter": false,
         "edited": false,
-        "stickied": false
+        "stickied": false,
+        "score": 2259,
+        "downs": 0,
+        "authorFullname": "t2_example"
       },
       {
         "id": "p0h5wrb",
         "author": "XVUltima",
         "text": "And by leave, we mean make you clock out but you really need to stay",
         "upvotes": 1065,
-        "publishedAt": "1785335690.0",
+        "publishedAt": "2026-07-29T14:34:50.000Z",
         "url": "https://www.reddit.com/r/worldnews/comments/1v9vtop/japans_population_falls_below_120_million_for/p0h5wrb/",
         "parentId": "t1_p0gyjgf",
         "depth": 2,
         "isSubmitter": false,
         "edited": false,
-        "stickied": false
+        "stickied": false,
+        "score": 1065,
+        "downs": 0,
+        "authorFullname": "t2_example"
       },
       {
         "id": "p0gwjcq",
         "author": "standardDeviator",
         "text": "They really need to stop making national go make a baby day  on the same day as national headache awareness day.",
         "upvotes": 401,
-        "publishedAt": "1785333190.0",
+        "publishedAt": "2026-07-29T13:53:10.000Z",
         "url": "https://www.reddit.com/r/worldnews/comments/1v9vtop/japans_population_falls_below_120_million_for/p0gwjcq/",
         "parentId": "t1_p0gpy2l",
         "depth": 1,
         "isSubmitter": false,
         "edited": false,
-        "stickied": false
+        "stickied": false,
+        "score": 401,
+        "downs": 0,
+        "authorFullname": "t2_example"
       }
-    ]
+    ],
+    "limit": 50,
+    "hasMore": false,
+    "nextCursor": null,
+    "post": {
+      "platform": "reddit",
+      "id": "1",
+      "title": "Example",
+      "subreddit": "example",
+      "author": "op",
+      "upvotes": 100,
+      "comments": 10,
+      "publishedAt": "2026-06-19T14:10:21.000Z",
+      "upvoteRatio": 0.95
+    }
   },
   "reddit-post-details": {
     "platform": "reddit",
@@ -11106,7 +11135,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   },
-  "tiktok-shop-product-details": {
+  "tiktok-shop-product-details":   {
     "platform": "tiktok_shop",
     "id": "1731098552908944370",
     "url": "https://shop.tiktok.com/us/pdp/trendy-pink-ed-hardy-tough-phone-cases-impact-resistant-wireless-charging-shock-absorption/1731098552908944370?source=product_detail&amp;enter_method=url_semantic_301",
@@ -11120,8 +11149,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/cc79ccfd6a324d548de31cb761b6c3c4~tplv-fhlh96nyum-crop-webp:794:794.webp?dr=12190&amp;t=555f072d&amp;ps=933b5bde&amp;shp=8dbd94bf&amp;shcp=e1be8f53&amp;idc=useast5&amp;from=2378011839",
     "seller": {
       "name": "Timeless Teapot Creations",
-      "rating": 4.6
-    }
+      "rating": 4.6,
+      "id": "123456",
+      "url": "https://www.tiktok.com/shop/store/example/123456"
+    },
+    "region": "US",
+    "originalPrice": 19.9,
+    "discount": "-47%",
+    "description": "Trendy Pink Ed Hardy Inspired Tough Phone Cases, Phone Durable, Gift, Accessories Top Trendy Phone Cases Phone Cover Hard Case Tough 2-piece Phone Case",
+    "skus": [
+      {
+        "id": "sku1",
+        "stock": 10,
+        "price": 10.3,
+        "originalPrice": 19.9,
+        "status": null
+      }
+    ],
+    "images": [
+      "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/cc79ccfd6a324d548de31cb761b6c3c4~tplv-fhlh96nyum-crop-webp:794:794.webp?dr=12190&amp;t=555f072d&amp;ps=933b5bde&amp;shp=8dbd94bf&amp;shcp=e1be8f53&amp;idc=useast5&amp;from=2378011839"
+    ]
   },
   "tiktok-shop-product-reviews": {
     "url": "https://www.tiktok.com/shop/pdp/1731962298839634826",

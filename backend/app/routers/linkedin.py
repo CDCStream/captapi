@@ -89,14 +89,82 @@ def _require_company(data: dict[str, Any]) -> dict[str, Any]:
     raise HTTPException(status_code=404, detail="Company not found")
 
 
+def _map_li_experience(raw: Any) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for item in raw if isinstance(raw, list) else []:
+        if not isinstance(item, dict):
+            continue
+        company = item.get("company") if isinstance(item.get("company"), dict) else {}
+        out.append(
+            {
+                "title": safe_str(item.get("title") or item.get("position") or item.get("name")),
+                "company": safe_str(
+                    item.get("company_name")
+                    or item.get("companyName")
+                    or company.get("name")
+                    or item.get("company")
+                ),
+                "url": safe_str(item.get("company_url") or item.get("url") or company.get("url")),
+                "location": safe_str(item.get("location") or item.get("company_location")),
+                "description": safe_str(item.get("description") or item.get("summary")),
+                "startDate": safe_str(item.get("start_date") or item.get("startDate")),
+                "endDate": safe_str(item.get("end_date") or item.get("endDate")),
+                "isCurrent": item.get("is_current")
+                if item.get("is_current") is not None
+                else item.get("isCurrent"),
+            }
+        )
+    return [x for x in out if x.get("title") or x.get("company")]
+
+
+def _map_li_education(raw: Any) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for item in raw if isinstance(raw, list) else []:
+        if not isinstance(item, dict):
+            continue
+        school = item.get("school") if isinstance(item.get("school"), dict) else {}
+        out.append(
+            {
+                "name": safe_str(
+                    item.get("school_name")
+                    or item.get("schoolName")
+                    or school.get("name")
+                    or item.get("name")
+                ),
+                "url": safe_str(item.get("school_url") or item.get("url") or school.get("url")),
+                "degree": safe_str(item.get("degree") or item.get("degree_name")),
+                "field": safe_str(item.get("field_of_study") or item.get("fieldOfStudy") or item.get("field")),
+                "startDate": safe_str(item.get("start_date") or item.get("startDate")),
+                "endDate": safe_str(item.get("end_date") or item.get("endDate")),
+            }
+        )
+    return [x for x in out if x.get("name")]
+
+
 def _normalize_profile(p: dict[str, Any]) -> dict[str, Any]:
     # apimaestro/linkedin-profile-detail nests everything under basic_info.
     info = p.get("basic_info") if isinstance(p.get("basic_info"), dict) else p
     location = info.get("location")
     if isinstance(location, dict):
         location = location.get("full") or location.get("city") or location.get("country")
+    about_raw = safe_str(info.get("about") or p.get("summary"))
+    # Guard Apify/legacy paths that still echo SEO meta into about.
+    # Never return the meta description (or its leading mash) as About.
+    seo_about = bool(about_raw and linkedin_native._is_seo_description(about_raw))
+    about = None if seo_about else about_raw
+    connections = safe_int(info.get("connection_count") or p.get("connections") or p.get("connectionsCount"))
+    # Drop connections that match SEO "N connections on LinkedIn" privacy filler.
+    seo_conn = linkedin_native._seo_connections_count(about_raw) if seo_about else None
+    if seo_conn is not None and connections == seo_conn:
+        connections = None
+    current_company = safe_str(info.get("current_company") or p.get("companyName") or p.get("company"))
+    if seo_about and about_raw and current_company:
+        # Drop company only when it was clearly scraped from SEO "Experience: X".
+        exp_m = re.search(r"Experience:\s*([^·\n|]{2,80})", about_raw, re.I)
+        if exp_m and safe_str(exp_m.group(1).strip()) == current_company:
+            current_company = None
     # Public HTML never exposes a reliable verified flag — omit the field.
-    return {
+    out = {
         "platform": "linkedin",
         "type": "person",
         "url": safe_str(info.get("profile_url") or p.get("url") or p.get("profileUrl") or p.get("linkedinUrl")),
@@ -105,14 +173,26 @@ def _normalize_profile(p: dict[str, Any]) -> dict[str, Any]:
                          or f"{info.get('first_name', '')} {info.get('last_name', '')}".strip()),
         "headline": safe_str(info.get("headline") or p.get("occupation")),
         "location": safe_str(location or p.get("locationName")),
-        "about": safe_str(info.get("about") or p.get("summary")),
+        "about": about,
         "followers": safe_int(info.get("follower_count") or p.get("followers") or p.get("followerCount")),
-        "connections": safe_int(info.get("connection_count") or p.get("connections") or p.get("connectionsCount")),
+        "connections": connections,
         "profileImage": safe_str(
             info.get("profile_picture_url") or p.get("profilePicture") or p.get("photoUrl") or p.get("avatar")
         ),
-        "currentCompany": safe_str(info.get("current_company") or p.get("companyName") or p.get("company")),
+        "currentCompany": current_company,
     }
+    # Additive: pass through richer Apify sections when present (native may omit).
+    experience = _map_li_experience(
+        p.get("experience") or p.get("experiences") or info.get("experience") or info.get("experiences")
+    )
+    education = _map_li_education(
+        p.get("education") or p.get("educations") or info.get("education") or info.get("educations")
+    )
+    if experience:
+        out["experience"] = experience
+    if education:
+        out["education"] = education
+    return out
 
 
 def _normalize_company(c: dict[str, Any]) -> dict[str, Any]:
@@ -303,7 +383,7 @@ async def linkedin_profile(
 
         data = await cached_or_run(
             endpoint="linkedin.profile",
-            params={"slug": slug, "v": 5},
+            params={"slug": slug, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

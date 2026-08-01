@@ -2008,13 +2008,14 @@ class TiktokShopApi:
         """
         return self._t.get("/v1/tiktok-shop/shop-products", {"url": url, "limit": limit, "cache": cache})
 
-    def product_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop Product Details — Full TikTok Shop product details, seller and price metadata. (14 credits)
+    def product_details(self, *, url: str, region: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Shop Product Details — TikTok Shop product details with seller id, pricing, SKUs, and region. (14 credits)
 
         :param url: TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param region: Market region ISO code for Apify fallback (default US).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/tiktok-shop/product-details", {"url": url, "cache": cache})
+        return self._t.get("/v1/tiktok-shop/product-details", {"url": url, "region": region, "cache": cache})
 
     def product_reviews(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Shop Product Reviews — Customer reviews for a TikTok Shop product. (45 credits)
@@ -2058,13 +2059,14 @@ class AsyncTiktokShopApi:
         """
         return await self._t.get("/v1/tiktok-shop/shop-products", {"url": url, "limit": limit, "cache": cache})
 
-    async def product_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop Product Details — Full TikTok Shop product details, seller and price metadata. (14 credits)
+    async def product_details(self, *, url: str, region: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Shop Product Details — TikTok Shop product details with seller id, pricing, SKUs, and region. (14 credits)
 
         :param url: TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param region: Market region ISO code for Apify fallback (default US).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/tiktok-shop/product-details", {"url": url, "cache": cache})
+        return await self._t.get("/v1/tiktok-shop/product-details", {"url": url, "region": region, "cache": cache})
 
     async def product_reviews(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Shop Product Reviews — Customer reviews for a TikTok Shop product. (45 credits)

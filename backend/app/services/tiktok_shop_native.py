@@ -542,6 +542,10 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
     if shop_rating is not None:
         seller["rating"] = shop_rating
 
+    skus = [
+        {"id": sid, "stock": qty}
+        for sid, qty in sorted(sku_qty.items(), key=lambda kv: kv[0])
+    ]
     out = {
         "id": product_id,
         "productId": product_id,
@@ -557,7 +561,9 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
         "rating": rating,
         "reviewCount": review_count,
         "image": image,
+        "images": [image] if image else [],
         "seller": seller,
+        "skus": skus,
     }
     log.info(
         "tiktok_shop_native_details_ok",

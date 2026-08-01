@@ -320,7 +320,19 @@ const TWITTER: Spec[] = [
 const REDDIT: Spec[] = [
   { slug: "reddit-subreddit-posts", name: "Reddit Subreddit Posts API", shortName: "Subreddit Posts", category: "list", method: "GET", path: "/v1/reddit/subreddit-posts", credits: 2 },
   { slug: "reddit-post-details", name: "Reddit Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/reddit/post-details", credits: 1 , tagline: "Get a Reddit post — title, body, score, comments count, subreddit, and author as structured JSON.", longDescription: "Paste a Reddit post URL and get the post as clean JSON: title, body text, score, comment count, subreddit, author, and flair when available. Flat 1 credit per call." },
-  { slug: "reddit-post-comments", name: "Reddit Post Comments API", shortName: "Post Comments", category: "comments", method: "GET", path: "/v1/reddit/post-comments", credits: 2 },
+  {
+    slug: "reddit-post-comments",
+    name: "Reddit Post Comments API",
+    shortName: "Post Comments",
+    category: "comments",
+    method: "GET",
+    path: "/v1/reddit/post-comments",
+    credits: 2,
+    tagline:
+      "Flat Reddit comment threads with depth/parentId, ISO timestamps, score, and the parent post in one call.",
+    longDescription:
+      "Fetch comments on a Reddit post as a flat list with depth and parentId (easy to store, rebuild the tree when you need it). publishedAt is ISO 8601 UTC. Each comment includes score/downs and authorFullname (t2_…) when Reddit exposes them. The response also includes the parent post (title, score, upvoteRatio, subscriberCount) plus hasMore when more comments exist beyond the limit. Flat 2 credits per call. Max 500 comments per request.",
+  },
   { slug: "reddit-post-transcript", name: "Reddit Post Transcript API", shortName: "Post Transcript", category: "transcript", method: "GET", path: "/v1/reddit/post-transcript", credits: 2 , tagline: "Get a Reddit post's discussion as readable text — title, body, and comments in one transcript-style payload. Flat 2 credits per call.", longDescription: "Paste a Reddit post URL and get the discussion as structured text: the post title and body plus comments flattened into a transcript-style response. This is discussion text, not speech-to-text from a video. Flat 2 credits per call." },
   { slug: "reddit-search", name: "Reddit Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/reddit/search", credits: 2, tagline: "Search Reddit posts site-wide by keyword — title, text, subreddit, author, upvotes, and comments, with cursor pagination. Flat 2 credits per call.", longDescription: "Pass a keyword or phrase and the Reddit Search API returns matching public posts from across Reddit as clean JSON — the same kind of site-wide search you'd run on reddit.com. Each result includes the post URL and id, title, body text when present, subreddit, author, upvotes, comment count, publish time, NSFW flag, flair, and thumbnail when available. Need more than the first page? Pass the nextCursor value from the previous response to keep paging, and use hasMore to know when you've reached the end. To search inside one community only, use Reddit Subreddit Search instead. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Public Reddit posts matching your keyword across all of Reddit", "Title, body text, subreddit, author, and post URL", "Upvotes, comment count, publish time, NSFW flag, and thumbnail", "Cursor pagination (nextCursor + hasMore) through every page"] },
   { slug: "reddit-subreddit-details", name: "Reddit Subreddit Details API", shortName: "Subreddit Details", category: "details", method: "GET", path: "/v1/reddit/subreddit-details", credits: 1 , tagline: "Get a subreddit — title, description, subscribers, and community rules signals as structured JSON." },
@@ -350,7 +362,19 @@ const PINTEREST: Spec[] = [
 ];
 
 const LINKEDIN: Spec[] = [
-  { slug: "linkedin-profile", name: "LinkedIn Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/linkedin/profile", credits: 2 },
+  {
+    slug: "linkedin-profile",
+    name: "LinkedIn Profile API",
+    shortName: "Profile",
+    category: "channel",
+    method: "GET",
+    path: "/v1/linkedin/profile",
+    credits: 2,
+    tagline:
+      "Public LinkedIn person profile — name, headline, about, followers, and company — without SEO meta pollution.",
+    longDescription:
+      "Return a public LinkedIn person profile as clean JSON. about comes from the real profile bio (JSON-LD), not LinkedIn's og:description SEO blurb. connections are only returned when LinkedIn exposes a trustworthy count (never the fake “N connections on LinkedIn” meta placeholder). When the Apify fallback has experience/education sections, those arrays are included additively. Native path bills 1 credit; catalog list price is 2.",
+  },
   { slug: "linkedin-company", name: "LinkedIn Company API", shortName: "Company", category: "channel", method: "GET", path: "/v1/linkedin/company", credits: 2 },
   { slug: "linkedin-post-details", name: "LinkedIn Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/linkedin/post-details", credits: 1 , tagline: "Get a LinkedIn post — text, author, reactions, and comments count as structured JSON." },
   { slug: "linkedin-post-transcript", name: "LinkedIn Post Transcript API", shortName: "Post Transcript", category: "transcript", method: "GET", path: "/v1/linkedin/post-transcript", credits: 1 },
@@ -368,7 +392,19 @@ const RUMBLE: Spec[] = [
 const TIKTOK_SHOP: Spec[] = [
   { slug: "tiktok-shop-search", name: "TikTok Shop Search API", shortName: "Shop Search", category: "search", method: "GET", path: "/v1/tiktok-shop/shop-search", credits: 56, creditsPerResult: 2.8 },
   { slug: "tiktok-shop-products", name: "TikTok Shop Products API", shortName: "Shop Products", category: "list", method: "GET", path: "/v1/tiktok-shop/shop-products", credits: 2 },
-  { slug: "tiktok-shop-product-details", name: "TikTok Shop Product Details API", shortName: "Product Details", category: "details", method: "GET", path: "/v1/tiktok-shop/product-details", credits: 14 , tagline: "Get a TikTok Shop product — title, price, images, seller, and sales signals as structured JSON." },
+  {
+    slug: "tiktok-shop-product-details",
+    name: "TikTok Shop Product Details API",
+    shortName: "Product Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/tiktok-shop/product-details",
+    credits: 14,
+    tagline:
+      "TikTok Shop product — float price + currency, seller id, originalPrice/discount, SKUs, and region.",
+    longDescription:
+      "Get a TikTok Shop PDP as structured JSON: title, numeric price + currency, originalPrice/discount when unmasked, stock, rating/reviews, seller id/url/rating, skus[], and images. Pass region (default US) for the Apify fallback market. Native HTML path bills 2 credits when it succeeds; Apify fallback is 14. Related affiliate videos are included when upstream provides them.",
+  },
   { slug: "tiktok-shop-product-reviews", name: "TikTok Shop Product Reviews API", shortName: "Product Reviews", category: "comments", method: "GET", path: "/v1/tiktok-shop/product-reviews", credits: 45, creditsPerResult: 2.25 },
   { slug: "tiktok-shop-user-showcase", name: "TikTok Shop User Showcase API", shortName: "User Showcase", category: "list", method: "GET", path: "/v1/tiktok-shop/user-showcase", credits: 45, creditsPerResult: 2.25, tagline: "List products a TikTok creator is promoting in their Shop showcase — product URL, title, price, image, and seller shop id for each item.", longDescription: "Pass a TikTok username (with or without @, or a profile URL) and the TikTok Shop User Showcase API returns the products that creator is featuring in their TikTok Shop showcase as clean JSON. This is the affiliate / creator storefront shelf — not the full inventory of a brand store. Each product includes the product URL and id, title, price, currency, thumbnail image, and the seller's shop id when available. For a brand's full catalog, use TikTok Shop Products with a store URL instead. For deeper product fields (stock, seller rating), call Product Details with a product URL. Billed per result — about 2.25 credits each. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Products a TikTok creator is promoting in their Shop showcase", "Product URL, id, title, price, currency, and image", "Seller shop id when TikTok exposes it", "Useful for affiliate tracking and creator commerce research", "Not a full brand store catalog — use Shop Products for that"] },
 ];
@@ -1426,7 +1462,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   // Reddit
   "reddit-subreddit-posts": [up("Subreddit URL, r/name, or bare name, e.g. r/technology."), lp(25, 200), CURSOR],
   "reddit-post-details": [up("Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/...")],
-  "reddit-post-comments": [up("Reddit post URL."), lp(50, 500)],
+  "reddit-post-comments": [up("Reddit post URL."), lpFlat(50, 500, 2)],
   "reddit-post-transcript": [up("Reddit post URL."), lp(50, 200)],
   "reddit-search": [qp("Keyword or phrase to search Reddit posts site-wide (min 2 characters)."), lp(25, 200), CURSOR],
   "reddit-subreddit-details": [up("Subreddit URL, r/name, or bare name, e.g. r/technology.")],
@@ -1550,7 +1586,15 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   // TikTok Shop
   "tiktok-shop-search": [qp("Product search query (min 2 characters)."), { name: "region", type: "string", required: false, description: "Two-letter ISO region code. Default US." }, lp(20, 200)],
   "tiktok-shop-products": [up("TikTok Shop store URL."), lp(20, 200)],
-  "tiktok-shop-product-details": [up("TikTok Shop product URL.")],
+  "tiktok-shop-product-details": [
+    up("TikTok Shop product URL."),
+    {
+      name: "region",
+      type: "string",
+      required: false,
+      description: "Market region ISO code for the Apify fallback path (default US).",
+    },
+  ],
   "tiktok-shop-product-reviews": [up("TikTok Shop product URL."), lp(20, 200)],
   "tiktok-shop-user-showcase": [{ name: "username", type: "string", required: true, description: "TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug." }, lp(20, 200)],
   // Ad Library
@@ -2497,7 +2541,6 @@ const FIELD_DESCS: Record<string, string> = {
   pageCategories: "Advertiser Page categories from Meta.",
   pageEntityType: "Advertiser entity type (e.g. PERSON_PROFILE, PAGE).",
   cards: "Carousel cards with per-card text, CTA, landing URL, and media.",
-  images: "Typed image assets ({url, resizedUrl}). media[] remains the flat URL list.",
   videos: "Typed video assets ({url, sdUrl, previewUrl}). media[] remains the flat URL list.",
   spendRange:
     "Parsed spend as {min, max, currency, raw}. Prefer this for sorting; spend stays the Meta display string. Usually null for commercial ads.",
@@ -2508,6 +2551,24 @@ const FIELD_DESCS: Record<string, string> = {
   nextCursor: "Pagination cursor for the next page when available; currently null for Facebook search.",
   status: "Delivery status filter applied to the search (ACTIVE, INACTIVE, or ALL).",
   limit: "Requested max items for this call.",
+  authorFullname: "Stable Reddit account fullname (t2_…). Prefer this over author for joins.",
+  score: "Reddit score (ups − downs when both are exposed).",
+  downs: "Downvote count when Reddit exposes it (often 0 on public JSON).",
+  distinguished: "moderator/admin distinction when present.",
+  controversiality: "Reddit controversiality flag (0 or 1).",
+  upvoteRatio: "Post upvote ratio (0–1) when Reddit exposes it.",
+  subscriberCount: "Subreddit subscriber count at fetch time.",
+  isVideo: "Whether the Reddit post is a video post.",
+  experience: "LinkedIn experience entries when available (title, company, dates, description).",
+  education: "LinkedIn education entries when available (school, degree, dates).",
+  currentCompany: "Current company inferred from LinkedIn worksFor / headline — not SEO meta.",
+  originalPrice: "List/original price before discount (numeric when unmasked).",
+  discount: "Discount display string when TikTok Shop exposes one (e.g. -47%).",
+  skus: "Per-variant SKU rows ({id, stock, price, originalPrice, status}).",
+  shopInfo: "Shop rollup (sold, followers, productCount, identityLabel) when available.",
+  relatedVideos: "Affiliate/related TikTok videos promoting the product when available.",
+  // Prefer context: Ad Library typed images, TikTok Shop gallery, or generic media.
+  images: "Image assets — typed {url,resizedUrl} on Ad Library, gallery URLs on TikTok Shop, else URL list.",
   summary: "AI-generated summary of the content.",
   keyPoints: "The most important takeaways.",
   sentiment: "Overall tone (positive, neutral, negative).",

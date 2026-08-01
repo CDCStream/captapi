@@ -1413,6 +1413,8 @@ export interface TiktokShopProductsParams {
 export interface TiktokShopProductDetailsParams {
   /** TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
+  /** Market region ISO code for Apify fallback (default US). */
+  region?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -1445,7 +1447,7 @@ export class TiktokShopApi {
   products(params: TiktokShopProductsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok-shop/shop-products", params);
   }
-  /** TikTok Shop Product Details — Full TikTok Shop product details, seller and price metadata. (14 credits) */
+  /** TikTok Shop Product Details — TikTok Shop product details with seller id, pricing, SKUs, and region. (14 credits) */
   productDetails(params: TiktokShopProductDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok-shop/product-details", params);
   }

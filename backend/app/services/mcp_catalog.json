@@ -2947,13 +2947,19 @@
     "name": "TikTok Shop Product Details",
     "path": "/v1/tiktok-shop/product-details",
     "credits": 14,
-    "summary": "Full TikTok Shop product details, seller and price metadata.",
+    "summary": "TikTok Shop product details with seller id, pricing, SKUs, and region.",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
         "description": "TikTok Shop product URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "required": false,
+        "description": "Market region ISO code for Apify fallback (default US)."
       },
       {
         "name": "cache",

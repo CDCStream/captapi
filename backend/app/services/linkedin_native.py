@@ -31,6 +31,19 @@ _OG_RE_ALT = re.compile(
 )
 _FOLLOWERS_RE = re.compile(r"([\d,.\s]+)\s+followers", re.I)
 _CONNECTIONS_RE = re.compile(r"([\d,.]+)\+?\s+connections?", re.I)
+# LinkedIn's og:description ends with SEO chrome — never treat as About / stats.
+_SEO_PROFILE_TRAILER_RE = re.compile(
+    r"(?:^|\s)(?:·\s*)?(?:Experience|Education|Location)\s*:",
+    re.I,
+)
+_SEO_VIEW_PROFILE_RE = re.compile(
+    r"View\s+.+\s+profile\s+on\s+LinkedIn",
+    re.I,
+)
+_SEO_CONNECTIONS_ON_LI_RE = re.compile(
+    r"([\d,.]+)\+?\s+connections?\s+on\s+LinkedIn",
+    re.I,
+)
 _EXPERIENCE_RE = re.compile(r"Experience:\s*([^·\n|]{2,80})", re.I)
 _EMPLOYEES_RE = re.compile(r"([\d,.\s]+)\s+employees", re.I)
 _COMMENTS_OG_RE = re.compile(r"([\d,]+)\s+comments?", re.I)
@@ -142,15 +155,74 @@ def _unescape_html(value: str | None) -> str | None:
     )
 
 
-def _connections_from_text(*texts: str | None) -> int | None:
-    """Parse ``8 connections`` / ``500+ connections`` from OG / page copy."""
+def _is_seo_description(text: str | None) -> bool:
+    """True when text looks like LinkedIn's public meta description, not About."""
+    if not text:
+        return False
+    if _SEO_VIEW_PROFILE_RE.search(text):
+        return True
+    if _SEO_CONNECTIONS_ON_LI_RE.search(text) and _SEO_PROFILE_TRAILER_RE.search(text):
+        return True
+    return False
+
+
+def _seo_connections_count(text: str | None) -> int | None:
+    """Number from SEO ``N connections on LinkedIn`` — never trust as real connections."""
+    if not text:
+        return None
+    m = _SEO_CONNECTIONS_ON_LI_RE.search(text)
+    if not m:
+        return None
+    return _parse_count(m.group(1))
+
+
+def _clean_about_text(text: str | None) -> str | None:
+    """Strip LinkedIn SEO trailers (Experience/Education/Location/View profile…).
+
+    If the source string *is* the SEO meta description, return None — the
+    leading headline mash is still not the profile About section.
+    """
+    if not text:
+        return None
+    if _is_seo_description(text):
+        return None
+    cleaned = text.strip()
+    # Cut at the first SEO field marker LinkedIn appends to og:description.
+    m = _SEO_PROFILE_TRAILER_RE.search(cleaned)
+    if m and m.start() > 20:
+        cleaned = cleaned[: m.start()].rstrip(" ·|")
+    cleaned = _SEO_VIEW_PROFILE_RE.split(cleaned)[0].rstrip(" ·|")
+    cleaned = _SEO_CONNECTIONS_ON_LI_RE.split(cleaned)[0].rstrip(" ·|")
+    cleaned = cleaned.strip()
+    return cleaned or None
+
+
+def _connections_from_text(*texts: str | None, allow_seo_meta: bool = False) -> int | None:
+    """Parse ``500+ connections`` from page copy.
+
+    Never trust ``N connections on LinkedIn`` inside og:description — LinkedIn
+    pads that SEO string with a fake/privacy number (e.g. Bill Gates → 8).
+    """
     for text in texts:
-        m = _CONNECTIONS_RE.search(text or "")
-        if not m:
+        if not text:
             continue
-        n = _parse_count(m.group(1))
-        if n is not None:
-            return n
+        if not allow_seo_meta and _is_seo_description(text):
+            # Still accept an explicit 500+ badge phrase outside the SEO trailer.
+            plus = re.search(r"([\d,.]+)\+\s+connections?", text, re.I)
+            if plus:
+                n = _parse_count(plus.group(1))
+                if n is not None:
+                    return n
+            continue
+        # Prefer non-SEO phrasing; skip "on LinkedIn" matches entirely.
+        for m in _CONNECTIONS_RE.finditer(text):
+            span_end = m.end()
+            tail = text[span_end : span_end + 16].lower()
+            if tail.lstrip().startswith("on linkedin"):
+                continue
+            n = _parse_count(m.group(1))
+            if n is not None:
+                return n
     return None
 
 
@@ -216,8 +288,28 @@ async def fetch_profile(slug: str) -> dict[str, Any] | None:
         else:
             name = name or core
     headline = _unescape_html(headline)
-    about = _unescape_html(og.get("og:description") or safe_str(person.get("description")))
-    followers_m = _FOLLOWERS_RE.search(about or "") or _FOLLOWERS_RE.search(html)
+    # Prefer JSON-LD Person.description (real About / bio). og:description is
+    # LinkedIn's SEO meta blurb — never salvage it into `about`.
+    ld_about = _unescape_html(safe_str(person.get("description")))
+    og_about = _unescape_html(og.get("og:description"))
+    if ld_about and not _is_seo_description(ld_about):
+        about = ld_about
+    elif og_about and not _is_seo_description(og_about):
+        about = _clean_about_text(og_about)
+    else:
+        about = None
+    if not headline:
+        jt = person.get("jobTitle")
+        if isinstance(jt, list):
+            headline = _unescape_html(safe_str(jt[0] if jt else None))
+        else:
+            headline = _unescape_html(safe_str(jt))
+    # Followers: never mine the SEO meta string (same pollution as connections).
+    followers_m = None
+    if about and not _is_seo_description(about):
+        followers_m = _FOLLOWERS_RE.search(about)
+    if not followers_m:
+        followers_m = _FOLLOWERS_RE.search(html)
     # Best-effort extras from JSON-LD / title — omit when unknown (no fake data).
     location = None
     addr = person.get("address")
@@ -229,13 +321,14 @@ async def fetch_profile(slug: str) -> dict[str, Any] | None:
         )
     elif isinstance(addr, str):
         location = safe_str(addr)
+    if not location and og_about:
+        loc_m = re.search(r"Location:\s*([^·\n|]{2,80})", og_about, re.I)
+        if loc_m:
+            location = safe_str(loc_m.group(1).strip())
     current_company = _company_from_works_for(person)
     if not current_company and headline and " at " in headline:
         current_company = safe_str(headline.rsplit(" at ", 1)[-1])
-    if not current_company and about:
-        exp = _EXPERIENCE_RE.search(about)
-        if exp:
-            current_company = safe_str(exp.group(1).strip())
+    # Do NOT scrape "Experience: X" from og:description — that is SEO chrome.
 
     out = {
         "url": safe_str(person.get("url")) or url.rstrip("/"),
@@ -247,7 +340,8 @@ async def fetch_profile(slug: str) -> dict[str, Any] | None:
             "about": about,
             "location": location,
             "current_company": current_company,
-            "connection_count": _connections_from_text(about, html),
+            # Connections from page body only — never from SEO meta description.
+            "connection_count": _connections_from_text(html),
             "follower_count": _parse_count(followers_m.group(1) if followers_m else None),
             "profile_picture_url": og.get("og:image"),
         },
