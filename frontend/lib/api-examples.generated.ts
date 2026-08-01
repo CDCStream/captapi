@@ -593,12 +593,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "facebook-ad-library-search": {
     "query": "election",
     "country": "US",
-    "status": "ALL",
-    "limit": 5,
     "totalReturned": 5,
-    "searchResultsCount": 50001,
-    "hasMore": true,
-    "nextCursor": null,
     "ads": [
       {
         "platform": "facebook_ad_library",
@@ -618,59 +613,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "id": "108824017345866",
           "name": "Meta",
           "url": "https://www.facebook.com/Meta/",
-          "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qaRlosGC9wUQ7kNvwHuGOSN&_nc_oc=AdpUTiQHP0F2DQWlJJsFhLjPwiKgiTaMBS9Gf3J_Ogy1Z6nYv2kt_BhKXvw8jPupOMg&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQCbS0Qc_-2kHNJh8Yysq78dbBXaaJS4Osw3-xA3_SHVlw&oe=6A89438E",
-          "likeCount": 128000000,
-          "categories": [
-            "Product/service"
-          ],
-          "entityType": "PAGE"
+          "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qaRlosGC9wUQ7kNvwHuGOSN&_nc_oc=AdpUTiQHP0F2DQWlJJsFhLjPwiKgiTaMBS9Gf3J_Ogy1Z6nYv2kt_BhKXvw8jPupOMg&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQCbS0Qc_-2kHNJh8Yysq78dbBXaaJS4Osw3-xA3_SHVlw&oe=6A89438E"
         },
         "media": [
           "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4?_nc_cat=106&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=VIhm6QH6QpYQ7kNvwEGz32Z&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4MzE0MTAwMzMxNDk2MzYsImFzc2V0X2FnZV9kYXlzIjoyMzcsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQBmg1RWfbVvJ3MUBSfprUeNw4A1j1otLN5iP3DoZ8RxIw&oe=6A677448",
           "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=XJsOGtccv7UQ7kNvwFOmuvH&_nc_oc=AdqJh0Avn_pYIk_hzhEW3QS1dyOrrTJn4nBpQ38NLoUvb1OE8Kwj7qy75S7f1QbV1cs&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQBESYOW184a4FJWDENcSYwQSBzwkH5yonZh3U5v6ZZEgA&oe=6A67964A"
-        ],
-        "isActive": false,
-        "publisherPlatforms": [
-          "FACEBOOK",
-          "INSTAGRAM"
-        ],
-        "caption": null,
-        "linkDescription": null,
-        "brandedContent": null,
-        "disclaimerLabel": null,
-        "byline": null,
-        "reachEstimate": null,
-        "reachEstimateRange": null,
-        "totalActiveTime": null,
-        "politicalCountries": [
-          "US"
-        ],
-        "pageLikeCount": 128000000,
-        "pageCategories": [
-          "Product/service"
-        ],
-        "pageEntityType": "PAGE",
-        "cards": [],
-        "images": [],
-        "videos": [
-          {
-            "url": "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4?_nc_cat=106&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=VIhm6QH6QpYQ7kNvwEGz32Z&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4MzE0MTAwMzMxNDk2MzYsImFzc2V0X2FnZV9kYXlzIjoyMzcsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQBmg1RWfbVvJ3MUBSfprUeNw4A1j1otLN5iP3DoZ8RxIw&oe=6A677448",
-            "sdUrl": null,
-            "previewUrl": "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=XJsOGtccv7UQ7kNvwFOmuvH&_nc_oc=AdqJh0Avn_pYIk_hzhEW3QS1dyOrrTJn4nBpQ38NLoUvb1OE8Kwj7qy75S7f1QbV1cs&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQBESYOW184a4FJWDENcSYwQSBzwkH5yonZh3U5v6ZZEgA&oe=6A67964A"
-          }
-        ],
-        "spendRange": {
-          "min": 1000000,
-          "max": null,
-          "currency": "USD",
-          "raw": ">$1M"
-        },
-        "impressionsRange": {
-          "min": 1000000,
-          "max": null,
-          "raw": ">1M"
-        },
-        "fetchedAt": "2026-08-01T12:00:00.000Z"
+        ]
       },
       {
         "platform": "facebook_ad_library",
@@ -875,7 +823,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   },
-  "facebook-details":   {
+  "facebook-details": {
     "platform": "facebook",
     "url": "https://www.facebook.com/reel/1376651124309650",
     "id": "1567272851434752",
@@ -890,8 +838,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "displayName": "NASA - National Aeronautics and Space Administration",
       "url": "https://www.facebook.com/NASA",
       "profileImage": "https://scontent-atl3-1.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s80x80&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=rc5kNRYek84Q7kNvwEOuwnr&_nc_oc=AdpqXBYPB1HBfYhXUuQXS0HKbYcQ4mDfRxLfg4yx6pslEIjKO3biNVlf9-En1zfMphg&_nc_zt=24&_nc_ht=scontent-atl3-1.xx&_nc_gid=Vj-hvWV9W_P8ZRNVd_Lj3A&_nc_ss=7b289&oh=00_AQC0BgaEp99KKXvgYYd9uVYMHC0XuzO-SVIyen4WTzBkyw&oe=6A6D8255",
-      "verified": true,
-      "id": "100000076236457"
+      "verified": true
     },
     "engagement": {
       "views": 598000,
@@ -900,30 +847,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "shares": 531
     },
     "isVideo": true,
-    "link": "https://go.nasa.gov/3QvQc4k",
-    "feedbackId": "feedback:1567272851434752",
-    "captionsUrl": "https://example.com/captions.srt",
-    "videoSdUrl": "https://example.com/video-sd.mp4",
-    "videoHdUrl": "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQOh7ZLRZfB5SIGETu_uz2jbsqvY3dW7G3sGdKsNsX627DpYoTuCxs26FyYE4T4rDzRdvIV2tOCYJi5hs8Gs1EaQEL7_LhQnAXKuILiY508JFg.mp4?_nc_cat=103&_nc_sid=5e9851&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=wPmj9ZUq47YQ7kNvwH_JIsW&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5GQUNFQk9PSy4uQzMuMTI4MC5kYXNoX2gyNjQtYmFzaWMtZ2VuMl83MjBwIiwieHB2X2Fzc2V0X2lkIjoxMzQ3ODY4NzYwMDA4MjE2LCJhc3NldF9hZ2VfZGF5cyI6MjUsInZpX3VzZWNhc2VfaWQiOjEwMTIyLCJkdXJhdGlvbl9zIjoyMDAsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=c53b4168a8d58285&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC80QjQyOEYzOTg3NDFDRkNGM0UzNzQ4QkZDMDY4QTU4QV9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50LzAxNEExNzM2QkY1RkU3NTNDMjU1QkUyMjg3RUMzOEE0X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACawmKfqpPjkBBUCKAJDMywXQGkBDlYEGJMYGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUCZZSeAQA&_nc_gid=Vj-hvWV9W_P8ZRNVd_Lj3A&_nc_ss=7b289&_nc_zt=28&oh=00_AQAFmAbpq3yKHMxyvUj4LDMndyCfVJXc4d0c8CQZ_UIBUw&oe=6A6D7DF5&bitrate=733579&tag=dash_h264-basic-gen2_720p",
-    "videoWidth": 720,
-    "videoHeight": 1280,
-    "music": {
-      "id": "123",
-      "type": "original_audio",
-      "trackTitle": "Original audio",
-      "albumArt": null
-    },
-    "video": {
-      "id": "1567272851434752",
-      "sdUrl": "https://example.com/video-sd.mp4",
-      "hdUrl": "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQOh7ZLRZfB5SIGETu_uz2jbsqvY3dW7G3sGdKsNsX627DpYoTuCxs26FyYE4T4rDzRdvIV2tOCYJi5hs8Gs1EaQEL7_LhQnAXKuILiY508JFg.mp4?_nc_cat=103&_nc_sid=5e9851&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=wPmj9ZUq47YQ7kNvwH_JIsW&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5GQUNFQk9PSy4uQzMuMTI4MC5kYXNoX2gyNjQtYmFzaWMtZ2VuMl83MjBwIiwieHB2X2Fzc2V0X2lkIjoxMzQ3ODY4NzYwMDA4MjE2LCJhc3NldF9hZ2VfZGF5cyI6MjUsInZpX3VzZWNhc2VfaWQiOjEwMTIyLCJkdXJhdGlvbl9zIjoyMDAsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=c53b4168a8d58285&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC80QjQyOEYzOTg3NDFDRkNGM0UzNzQ4QkZDMDY4QTU4QV9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50LzAxNEExNzM2QkY1RkU3NTNDMjU1QkUyMjg3RUMzOEE0X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACawmKfqpPjkBBUCKAJDMywXQGkBDlYEGJMYGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUCZZSeAQA&_nc_gid=Vj-hvWV9W_P8ZRNVd_Lj3A&_nc_ss=7b289&_nc_zt=28&oh=00_AQAFmAbpq3yKHMxyvUj4LDMndyCfVJXc4d0c8CQZ_UIBUw&oe=6A6D7DF5&bitrate=733579&tag=dash_h264-basic-gen2_720p",
-      "url": "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQOh7ZLRZfB5SIGETu_uz2jbsqvY3dW7G3sGdKsNsX627DpYoTuCxs26FyYE4T4rDzRdvIV2tOCYJi5hs8Gs1EaQEL7_LhQnAXKuILiY508JFg.mp4?_nc_cat=103&_nc_sid=5e9851&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=wPmj9ZUq47YQ7kNvwH_JIsW&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5GQUNFQk9PSy4uQzMuMTI4MC5kYXNoX2gyNjQtYmFzaWMtZ2VuMl83MjBwIiwieHB2X2Fzc2V0X2lkIjoxMzQ3ODY4NzYwMDA4MjE2LCJhc3NldF9hZ2VfZGF5cyI6MjUsInZpX3VzZWNhc2VfaWQiOjEwMTIyLCJkdXJhdGlvbl9zIjoyMDAsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=c53b4168a8d58285&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC80QjQyOEYzOTg3NDFDRkNGM0UzNzQ4QkZDMDY4QTU4QV9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50LzAxNEExNzM2QkY1RkU3NTNDMjU1QkUyMjg3RUMzOEE0X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACawmKfqpPjkBBUCKAJDMywXQGkBDlYEGJMYGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUCZZSeAQA&_nc_gid=Vj-hvWV9W_P8ZRNVd_Lj3A&_nc_ss=7b289&_nc_zt=28&oh=00_AQAFmAbpq3yKHMxyvUj4LDMndyCfVJXc4d0c8CQZ_UIBUw&oe=6A6D7DF5&bitrate=733579&tag=dash_h264-basic-gen2_720p",
-      "width": 720,
-      "height": 1280,
-      "durationSeconds": 200.016,
-      "thumbnailUrl": "https://scontent-atl3-3.xx.fbcdn.net/v/t15.5256-10/735149954_4435586749988646_521208314578416779_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=111&ccb=1-7&_nc_sid=be8305&_nc_ohc=lkSHcojZDSYQ7kNvwG18v3E&_nc_oc=Ado7Dqia8Fp3TMyoJP-nqzgoUUe3fuNq01u63ZrWrjBdYhVBfwfG-8TDKE-UDnBXYek&_nc_zt=23&_nc_ht=scontent-atl3-3.xx&_nc_gid=Vj-hvWV9W_P8ZRNVd_Lj3A&_nc_ss=7b289&oh=00_AQBLDKBELI40vp0Kckzx4q2eKic8tR46WwPCSFfbY5cwNw&oe=6A6D5E2C",
-      "captionsUrl": "https://example.com/captions.srt"
-    }
+    "link": "https://go.nasa.gov/3QvQc4k"
   },
   "facebook-event-details": {
     "platform": "facebook",
@@ -4748,19 +4672,19 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     },
     "publishedAt": "2026-07-04 13:19:24"
   },
-  "linkedin-profile":   {
+  "linkedin-profile": {
     "platform": "linkedin",
     "type": "person",
-    "url": "https://www.linkedin.com/in/williamhgates",
-    "username": "williamhgates",
-    "name": "Bill Gates",
-    "headline": "Chair, Gates Foundation and Founder, Breakthrough Energy",
-    "location": "Seattle, Washington, United States",
-    "about": "Chair of the Gates Foundation. Founder of Breakthrough Energy. Co-founder of Microsoft.",
-    "followers": 40547195,
-    "connections": null,
-    "profileImage": "https://media.licdn.com/dms/image/v2/D5603AQF-RYZP55jmXA/profile-displayphoto-shrink_200_200/B56ZRi8g.aGsAY-/0/1736826818802?e=2147483647&v=beta&t=bKWfN6UwwtiCqFWsG7rBELbd48qJOAMLdxhBzzkJV0k",
-    "currentCompany": "Gates Foundation"
+    "url": "https://www.linkedin.com/in/paul-martin-a5aa98",
+    "username": "paul-martin-a5aa98",
+    "name": "Paul Martin",
+    "headline": "Culver City, California, United States | Professional Profile",
+    "location": "Culver City, California, United States",
+    "about": null,
+    "followers": 5532,
+    "connections": 500,
+    "profileImage": "https://media.licdn.com/dms/image/v2/C5603AQERBmOpeQdTJg/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1603153614207?e=2147483647&v=beta&t=jmt32YrTWx2FRGXeRg6yYkMBcNR7iGokOvlfuVH5d3U",
+    "currentCompany": null
   },
   "linkedin-search-posts": {
     "query": "artificial intelligence",
@@ -5306,7 +5230,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   },
-  "reddit-post-comments":   {
+  "reddit-post-comments": {
     "totalReturned": 5,
     "comments": [
       {
@@ -5314,96 +5238,67 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "AutoModerator",
         "text": "Users often report submissions from this site for sensationalized articles. Readers have a responsibility to be skeptical, check sources, and comment on any flaws.\n\nYou can help improve this thread by linking to media that verifies or questions this article's claims. Your link could help readers better understand this issue.\n\n*I am a bot, and this action was performed automatically. Please [contact the moderators of this subreddit](/message/compose/?to=/r/worldnews) if you have any questions or concerns.*",
         "upvotes": 1,
-        "publishedAt": "2026-07-29T13:12:05.000Z",
+        "publishedAt": "1785330725.0",
         "url": "https://www.reddit.com/r/worldnews/comments/1v9vtop/japans_population_falls_below_120_million_for/p0gnsr6/",
         "parentId": "t3_1v9vtop",
         "depth": 0,
         "isSubmitter": false,
         "edited": false,
-        "stickied": true,
-        "score": 1,
-        "downs": 0,
-        "authorFullname": "t2_example"
+        "stickied": true
       },
       {
         "id": "p0gpy2l",
         "author": "Donnicton",
         "text": "Sorry, best we can do about it is symbolically send you home early one day this month to go make a kid or whatever.",
         "upvotes": 5045,
-        "publishedAt": "2026-07-29T13:22:22.000Z",
+        "publishedAt": "1785331342.0",
         "url": "https://www.reddit.com/r/worldnews/comments/1v9vtop/japans_population_falls_below_120_million_for/p0gpy2l/",
         "parentId": "t3_1v9vtop",
         "depth": 0,
         "isSubmitter": false,
         "edited": false,
-        "stickied": false,
-        "score": 5045,
-        "downs": 0,
-        "authorFullname": "t2_example"
+        "stickied": false
       },
       {
         "id": "p0gyjgf",
         "author": "Lietenantdan",
         "text": "And by early we mean the time you were actually supposed to leave.",
         "upvotes": 2259,
-        "publishedAt": "2026-07-29T14:02:18.000Z",
+        "publishedAt": "1785333738.0",
         "url": "https://www.reddit.com/r/worldnews/comments/1v9vtop/japans_population_falls_below_120_million_for/p0gyjgf/",
         "parentId": "t1_p0gpy2l",
         "depth": 1,
         "isSubmitter": false,
         "edited": false,
-        "stickied": false,
-        "score": 2259,
-        "downs": 0,
-        "authorFullname": "t2_example"
+        "stickied": false
       },
       {
         "id": "p0h5wrb",
         "author": "XVUltima",
         "text": "And by leave, we mean make you clock out but you really need to stay",
         "upvotes": 1065,
-        "publishedAt": "2026-07-29T14:34:50.000Z",
+        "publishedAt": "1785335690.0",
         "url": "https://www.reddit.com/r/worldnews/comments/1v9vtop/japans_population_falls_below_120_million_for/p0h5wrb/",
         "parentId": "t1_p0gyjgf",
         "depth": 2,
         "isSubmitter": false,
         "edited": false,
-        "stickied": false,
-        "score": 1065,
-        "downs": 0,
-        "authorFullname": "t2_example"
+        "stickied": false
       },
       {
         "id": "p0gwjcq",
         "author": "standardDeviator",
         "text": "They really need to stop making national go make a baby day  on the same day as national headache awareness day.",
         "upvotes": 401,
-        "publishedAt": "2026-07-29T13:53:10.000Z",
+        "publishedAt": "1785333190.0",
         "url": "https://www.reddit.com/r/worldnews/comments/1v9vtop/japans_population_falls_below_120_million_for/p0gwjcq/",
         "parentId": "t1_p0gpy2l",
         "depth": 1,
         "isSubmitter": false,
         "edited": false,
-        "stickied": false,
-        "score": 401,
-        "downs": 0,
-        "authorFullname": "t2_example"
+        "stickied": false
       }
-    ],
-    "limit": 50,
-    "hasMore": false,
-    "nextCursor": null,
-    "post": {
-      "platform": "reddit",
-      "id": "1",
-      "title": "Example",
-      "subreddit": "example",
-      "author": "op",
-      "upvotes": 100,
-      "comments": 10,
-      "publishedAt": "2026-06-19T14:10:21.000Z",
-      "upvoteRatio": 0.95
-    }
+    ]
   },
   "reddit-post-details": {
     "platform": "reddit",
@@ -9976,7 +9871,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "users": [
       {
         "username": "red.rose.whiterose",
-    "displayName": null,
+        "displayName": null,
         "url": "https://www.threads.net/@red.rose.whiterose",
         "verified": false
       },
@@ -10197,8 +10092,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "tiktok-audience-demographics": {
     "platform": "tiktok",
-          "username": "khaby.lame",
-          "url": "https://www.tiktok.com/@khaby.lame",
+    "username": "khaby.lame",
+    "url": "https://www.tiktok.com/@khaby.lame",
     "videosSampled": 12,
     "sampleSize": 269,
     "audienceLocations": [
@@ -10248,28 +10143,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "private": false,
     "profileImage": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/324924e171e481040a1ea202962f6e07~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=9640&refresh_token=1fa719b0&x-expires=1784628000&x-signature=DS9ZLakUPkqg%2Bzn8ZeXDLRmh%2Fhc%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=useast8",
     "externalUrl": "spr.ly/natgeotiktok",
-    "category": "Media & Entertainment",
-    "id": "6805942201646597122",
-    "secUid": "MS4wLjABAAAAexampleSecUid",
-    "createTime": "2016-09-20T00:00:00.000Z",
-    "friendCount": 12,
-    "diggCount": 420,
-    "profileImageMedium": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/324924e171e481040a1ea202962f6e07~tplv-tiktokx-cropcenter:720:720.jpeg",
-    "profileImageThumb": "https://p16-common-sign.tiktokcdn-us.com/tos-useast8-avt-0068-tx2/324924e171e481040a1ea202962f6e07~tplv-tiktokx-cropcenter:100:100.jpeg",
-    "bioLinkRisk": 0,
-    "isCommerceUser": true,
-    "isSeller": false,
-    "isOrganization": true,
-    "isAdVirtual": false,
-    "language": "en",
-    "commentSetting": 0,
-    "duetSetting": 0,
-    "stitchSetting": 0,
-    "downloadSetting": 0,
-    "followingVisibility": 1,
-    "uniqueIdModifyTime": null,
-    "nickNameModifyTime": null,
-    "fetchedAt": "2026-08-01T12:00:00.000Z"
+    "category": "Media & Entertainment"
   },
   "tiktok-channel-posts": {
     "url": "https://www.tiktok.com/@paw.dreams0",
@@ -11159,7 +11033,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   },
-  "tiktok-shop-product-details":   {
+  "tiktok-shop-product-details": {
     "platform": "tiktok_shop",
     "id": "1731098552908944370",
     "url": "https://shop.tiktok.com/us/pdp/trendy-pink-ed-hardy-tough-phone-cases-impact-resistant-wireless-charging-shock-absorption/1731098552908944370?source=product_detail&amp;enter_method=url_semantic_301",
@@ -11173,26 +11047,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/cc79ccfd6a324d548de31cb761b6c3c4~tplv-fhlh96nyum-crop-webp:794:794.webp?dr=12190&amp;t=555f072d&amp;ps=933b5bde&amp;shp=8dbd94bf&amp;shcp=e1be8f53&amp;idc=useast5&amp;from=2378011839",
     "seller": {
       "name": "Timeless Teapot Creations",
-      "rating": 4.6,
-      "id": "123456",
-      "url": "https://www.tiktok.com/shop/store/example/123456"
-    },
-    "region": "US",
-    "originalPrice": 19.9,
-    "discount": "-47%",
-    "description": "Trendy Pink Ed Hardy Inspired Tough Phone Cases, Phone Durable, Gift, Accessories Top Trendy Phone Cases Phone Cover Hard Case Tough 2-piece Phone Case",
-    "skus": [
-      {
-        "id": "sku1",
-        "stock": 10,
-        "price": 10.3,
-        "originalPrice": 19.9,
-        "status": null
-      }
-    ],
-    "images": [
-      "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/cc79ccfd6a324d548de31cb761b6c3c4~tplv-fhlh96nyum-crop-webp:794:794.webp?dr=12190&amp;t=555f072d&amp;ps=933b5bde&amp;shp=8dbd94bf&amp;shcp=e1be8f53&amp;idc=useast5&amp;from=2378011839"
-    ]
+      "rating": 4.6
+    }
   },
   "tiktok-shop-product-reviews": {
     "url": "https://www.tiktok.com/shop/pdp/1731962298839634826",
@@ -11749,8 +11605,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     ],
     "wordCount": 81,
     "segments": 5,
-    "language": "en",
-    "source": "captions"
+    "language": "en"
   },
   "tiktok-trending-feed": {
     "country": "US",
@@ -12960,7 +12815,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   },
-  "youtube-channel-details":   {
+  "youtube-channel-details": {
     "url": "https://www.youtube.com/channel/UCX6OQ3DkcsbYNE6H8uQQuVA",
     "id": "UCX6OQ3DkcsbYNE6H8uQQuVA",
     "name": "MrBeast",
@@ -12991,12 +12846,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "Facebook",
         "url": "facebook.com/mrbeast"
       }
-    ],
-    "email": null,
-    "tags": [
-      "mrbeast",
-      "challenge",
-      "philanthropy"
     ]
   },
   "youtube-channel-playlists": {
@@ -13789,14 +13638,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     ],
     "wordCount": 487,
     "segments": 61,
-    "language": "en",
-    "source": "captions",
-    "isAutoGenerated": false,
-    "isTranslated": false,
-    "availableLanguages": [
-      { "languageCode": "en", "languageName": "English", "isAutoGenerated": false },
-      { "languageCode": "en", "languageName": "English (auto-generated)", "isAutoGenerated": true }
-    ]
+    "language": "en"
   },
   "youtube-trending-shorts": {
     "platform": "youtube",

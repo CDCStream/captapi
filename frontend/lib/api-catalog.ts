@@ -1484,7 +1484,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "pinterest-board": [up("Pinterest board URL, e.g. https://pinterest.com/username/board-name/."), lp(25, 200)],
   "pinterest-user-boards": [up("Pinterest profile URL or username."), lp(25, 200)],
   // LinkedIn
-  "linkedin-profile": [up("LinkedIn profile URL, e.g. https://linkedin.com/in/slug.")],
+  "linkedin-profile": [up("LinkedIn profile URL, e.g. https://www.linkedin.com/in/paul-martin-a5aa98.")],
   "linkedin-company": [up("LinkedIn company URL, e.g. https://linkedin.com/company/slug.")],
   "linkedin-post-details": [up("LinkedIn post or activity URL.")],
   "linkedin-post-transcript": [up("LinkedIn post or activity URL.")],
@@ -1918,7 +1918,7 @@ const PROFILE_URL: Record<PlatformId, string> = {
   threads: "https://www.threads.net/@zuck",
   bluesky: "https://bsky.app/profile/bsky.app",
   pinterest: "https://www.pinterest.com/nasa",
-  linkedin: "https://www.linkedin.com/in/williamhgates",
+  linkedin: "https://www.linkedin.com/in/paul-martin-a5aa98",
   rumble: "https://rumble.com/c/Bongino",
   tiktok_shop: "https://shop.tiktok.com/us/pdp/example-product/1234567890",
   facebook_marketplace: "https://www.facebook.com/marketplace/",
