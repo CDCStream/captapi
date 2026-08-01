@@ -7,9 +7,10 @@ datacenter -> residential -> direct.
 
 from __future__ import annotations
 
+import base64
 import json
 import re
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Any
 from urllib.parse import quote
 
@@ -424,6 +425,62 @@ async def _post_creatives(
     return data if isinstance(data, dict) else None
 
 
+def _encode_page_cursor(payload: dict[str, Any]) -> str:
+    raw = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
+
+
+def _decode_page_cursor(value: str | None) -> dict[str, Any] | None:
+    if not value or not str(value).strip():
+        return None
+    raw = str(value).strip()
+    pad = "=" * (-len(raw) % 4)
+    try:
+        data = json.loads(base64.urlsafe_b64decode(raw + pad).decode("utf-8"))
+    except (ValueError, json.JSONDecodeError, UnicodeDecodeError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _parse_ymd(value: str | None) -> date | None:
+    if not value:
+        return None
+    try:
+        return date.fromisoformat(str(value).strip()[:10])
+    except ValueError:
+        return None
+
+
+def _iso_date(value: Any) -> date | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        return date.fromisoformat(text[:10])
+    except ValueError:
+        return None
+
+
+def _creative_in_date_window(item: dict[str, Any], start: date | None, end: date | None) -> bool:
+    """Keep creatives whose [firstShown, lastShown] overlaps [start, end]."""
+    if start is None and end is None:
+        return True
+    first = _iso_date(item.get("firstShown"))
+    last = _iso_date(item.get("lastShown")) or first
+    if first is None and last is None:
+        return False
+    if first is None:
+        first = last
+    if last is None:
+        last = first
+    assert first is not None and last is not None
+    if start is not None and last < start:
+        return False
+    if end is not None and first > end:
+        return False
+    return True
+
+
 async def resolve_advertiser_ids(
     query: str,
     *,
@@ -431,11 +488,29 @@ async def resolve_advertiser_ids(
     max_ids: int = 3,
 ) -> list[str] | None:
     """Resolve name/domain/AR id → one or more AR advertiser ids."""
+    meta = await resolve_advertisers(query, country=country, max_ids=max_ids)
+    if meta is None:
+        return None
+    return list(meta.get("ids") or [])
+
+
+async def resolve_advertisers(
+    query: str,
+    *,
+    country: str | None = None,
+    max_ids: int = 3,
+) -> dict[str, Any] | None:
+    """Resolve name/domain/AR id → advertiser ids + adsCount estimate.
+
+    Returns ``None`` on transport failure, or
+    ``{"ids": [...], "adsCountEstimate": int|None, "name": str|None}``.
+    """
     q = (query or "").strip()
     if not q:
-        return []
+        return {"ids": [], "adsCountEstimate": None, "name": None}
     if re.fullmatch(r"AR\d+", q, flags=re.I):
-        return [q.upper() if q.startswith("AR") else q]
+        aid = q.upper() if q.startswith("AR") else q
+        return {"ids": [aid], "adsCountEstimate": None, "name": None}
 
     brand = _brand_from_query(q)
     if _looks_like_domain(q):
@@ -487,7 +562,12 @@ async def resolve_advertiser_ids(
         ids.append(aid)
         if len(ids) >= max_ids:
             break
-    return ids
+    top = ranked[0] if ranked else None
+    return {
+        "ids": ids,
+        "adsCountEstimate": int(top["adsCount"]) if top and top.get("adsCount") is not None else None,
+        "name": (top or {}).get("name"),
+    }
 
 
 async def _collect_creatives(
@@ -497,34 +577,39 @@ async def _collect_creatives(
     page_size: int,
     region_enums: list[int] | None,
     proxy: str | None,
-) -> list[dict[str, Any]]:
-    """Page SearchCreatives for ``ids`` on one proxy; may return []."""
+    start_cursor: Any = None,
+    primary_only: bool = False,
+) -> tuple[list[dict[str, Any]], Any]:
+    """Page SearchCreatives for ``ids`` on one proxy; may return [].
+
+    Returns ``(items, next_raw_cursor)``. ``next_raw_cursor`` is ATC's opaque
+    page token for the primary advertiser when more pages exist.
+    """
     collected: list[dict[str, Any]] = []
     seen: set[str] = set()
+    next_raw: Any = None
 
     def _consume(payload: dict[str, Any]) -> Any:
+        """Ingest a full ATC page; return the next-page cursor (or None)."""
         rows = payload.get("1")
-        if not isinstance(rows, list):
-            return payload.get("2")
-        for row in rows:
-            if not isinstance(row, dict):
-                continue
-            item = _to_normalize_shape(row)
-            if not item:
-                continue
-            cid = item["id"]
-            if cid in seen:
-                continue
-            seen.add(cid)
-            collected.append(item)
-            if len(collected) >= want:
-                return None
+        if isinstance(rows, list):
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                item = _to_normalize_shape(row)
+                if not item:
+                    continue
+                cid = item["id"]
+                if cid in seen:
+                    continue
+                seen.add(cid)
+                collected.append(item)
         return payload.get("2")
 
     for index, adv_id in enumerate(ids):
         if len(collected) >= want:
             break
-        cursor: Any = None
+        cursor: Any = start_cursor if index == 0 else None
         first = True
         while first or cursor is not None:
             first = False
@@ -532,7 +617,7 @@ async def _collect_creatives(
                 break
             payload = await _post_creatives(
                 [adv_id],
-                page_size=page_size if index == 0 else min(page_size, want - len(collected)),
+                page_size=page_size if index == 0 else min(page_size, max(1, want - len(collected))),
                 cursor=cursor,
                 region_enums=region_enums,
                 proxy=proxy,
@@ -540,10 +625,14 @@ async def _collect_creatives(
             if payload is None:
                 break
             cursor = _consume(payload)
+            if index == 0:
+                next_raw = cursor
             # Only paginate the primary advertiser; extras are one page each.
-            if index > 0:
+            if index > 0 or primary_only:
                 break
-    return collected
+            if len(collected) >= want:
+                break
+    return collected, next_raw
 
 
 async def fetch_ad_details(
@@ -634,28 +723,91 @@ async def fetch_company_ads(
     *,
     country: str | None = None,
     limit: int = 20,
-) -> list[dict[str, Any]] | None:
+    cursor: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> dict[str, Any] | None:
     """Fetch creatives for an advertiser name, domain, or AR id.
 
-    Returns rows shaped for ``_normalize_ad(..., google_ad_library)``, or
-    ``None`` when every transport tier fails (caller should fall back to Apify).
+    Returns ``None`` when every transport tier fails (caller → Apify), else::
+
+        {
+          "ads": [...],                 # for _normalize_ad
+          "nextCursor": str | None,
+          "hasMore": bool,
+          "adsCountEstimate": int | None,
+          "resolvedName": str | None,
+        }
 
     Country is a soft preference: ATC often resolves brands to non-US legal
     entities whose creatives vanish under a hard region filter. We try the
     requested region first, then retry without a region filter when empty.
+
+    ``start_date`` / ``end_date`` (YYYY-MM-DD) filter creatives client-side by
+    firstShown/lastShown overlap — ATC's RPC date filters are unreliable.
     """
     want = max(0, int(limit))
+    start_d = _parse_ymd(start_date)
+    end_d = _parse_ymd(end_date)
+    page_cursor = _decode_page_cursor(cursor)
+    if cursor and page_cursor is None:
+        return {
+            "ads": [],
+            "nextCursor": None,
+            "hasMore": False,
+            "adsCountEstimate": None,
+            "resolvedName": None,
+            "error": "invalid_cursor",
+        }
+
     if want == 0:
-        return []
+        return {
+            "ads": [],
+            "nextCursor": None,
+            "hasMore": False,
+            "adsCountEstimate": None,
+            "resolvedName": None,
+        }
 
-    ids = await resolve_advertiser_ids(advertiser, country=country, max_ids=3)
-    if ids is None:
-        return None
-    if not ids:
-        return []
+    if page_cursor:
+        ids = [str(page_cursor.get("advertiserId") or "")]
+        ids = [i for i in ids if i.startswith("AR")]
+        estimate = page_cursor.get("adsCountEstimate")
+        resolved_name = page_cursor.get("name")
+        start_raw = page_cursor.get("rpcCursor")
+        region_mode = page_cursor.get("regionMode")  # "requested" | "any"
+        if not ids:
+            return {
+                "ads": [],
+                "nextCursor": None,
+                "hasMore": False,
+                "adsCountEstimate": estimate,
+                "resolvedName": resolved_name,
+            }
+        meta = {
+            "ids": ids,
+            "adsCountEstimate": estimate,
+            "name": resolved_name,
+        }
+    else:
+        meta = await resolve_advertisers(advertiser, country=country, max_ids=3)
+        if meta is None:
+            return None
+        ids = list(meta.get("ids") or [])
+        start_raw = None
+        region_mode = "requested"
+        if not ids:
+            return {
+                "ads": [],
+                "nextCursor": None,
+                "hasMore": False,
+                "adsCountEstimate": meta.get("adsCountEstimate"),
+                "resolvedName": meta.get("name"),
+            }
 
-    region_enums = _region_enums(country)
-    page_size = min(40, max(want, 10))
+    region_enums = _region_enums(country) if region_mode != "any" else None
+    # Match page size to limit so we don't drop leftover creatives on a fat page.
+    page_size = min(40, max(want, 1))
 
     # Pick a working proxy with a probe request (region preferred).
     working: tuple[str, str | None] | None = None
@@ -668,7 +820,6 @@ async def fetch_company_ads(
             proxy=proxy,
         )
         if probe is None and region_enums is not None:
-            # Region filter may 400/empty-transport on some exits; try bare.
             probe = await _post_creatives(
                 ids[:1],
                 page_size=min(10, page_size),
@@ -685,25 +836,25 @@ async def fetch_company_ads(
         return None
 
     tier_used, proxy = working
-    collected = await _collect_creatives(
-        ids,
-        want=want,
-        page_size=page_size,
-        region_enums=region_enums,
-        proxy=proxy,
-    )
     used_region = bool(region_enums)
+
+    async def _pull(regions: list[int] | None, rpc_cursor: Any) -> tuple[list[dict[str, Any]], Any]:
+        return await _collect_creatives(
+            ids,
+            want=want if not (start_d or end_d) else min(200, max(want * 4, 40)),
+            page_size=page_size if not (start_d or end_d) else 40,
+            region_enums=regions,
+            proxy=proxy,
+            start_cursor=rpc_cursor,
+            primary_only=bool(page_cursor),
+        )
+
+    collected, next_raw = await _pull(region_enums, start_raw)
 
     # Soft country: resolved AR ids are often foreign entities with ads that
     # ATC's region filter hides (e.g. "Samsung" → MY entity, country=US → 0).
-    if not collected and region_enums is not None:
-        collected = await _collect_creatives(
-            ids,
-            want=want,
-            page_size=page_size,
-            region_enums=None,
-            proxy=proxy,
-        )
+    if not collected and region_enums is not None and not page_cursor:
+        collected, next_raw = await _pull(None, None)
         used_region = False
         if collected:
             log.info(
@@ -714,12 +865,53 @@ async def fetch_company_ads(
                 country=country,
             )
 
+    if start_d or end_d:
+        # Keep paging while the filtered page is short and ATC still has rows.
+        filtered = [a for a in collected if _creative_in_date_window(a, start_d, end_d)]
+        safety = 0
+        while len(filtered) < want and next_raw is not None and safety < 8:
+            safety += 1
+            more, next_raw = await _collect_creatives(
+                ids[:1],
+                want=40,
+                page_size=40,
+                region_enums=region_enums if used_region else None,
+                proxy=proxy,
+                start_cursor=next_raw,
+                primary_only=True,
+            )
+            if not more:
+                break
+            filtered.extend(a for a in more if _creative_in_date_window(a, start_d, end_d))
+        collected = filtered
+
+    page = collected[:want]
+    next_cursor = None
+    if next_raw is not None and ids:
+        next_cursor = _encode_page_cursor(
+            {
+                "v": 1,
+                "advertiserId": ids[0],
+                "rpcCursor": next_raw,
+                "regionMode": "requested" if used_region else "any",
+                "adsCountEstimate": meta.get("adsCountEstimate"),
+                "name": meta.get("name"),
+            }
+        )
+
     log.info(
         "google_ads_creatives_ok",
         tier=tier_used,
-        count=len(collected),
+        count=len(page),
         advertisers=len(ids),
         region_filter=used_region,
+        has_more=bool(next_cursor),
         q=advertiser[:40],
     )
-    return collected[:want]
+    return {
+        "ads": page,
+        "nextCursor": next_cursor,
+        "hasMore": next_cursor is not None,
+        "adsCountEstimate": meta.get("adsCountEstimate"),
+        "resolvedName": meta.get("name"),
+    }

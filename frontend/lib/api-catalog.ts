@@ -570,7 +570,7 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
 ];
 
 const GOOGLE_AD_LIBRARY: Spec[] = [
-  { slug: "google-ad-library-company-ads", name: "Google Company Ads API", shortName: "Company Ads", category: "list", method: "GET", path: "/v1/ad-library/google/company-ads", credits: 2 },
+  { slug: "google-ad-library-company-ads", name: "Google Company Ads API", shortName: "Company Ads", category: "list", method: "GET", path: "/v1/ad-library/google/company-ads", credits: 2, tagline: "List an advertiser's Google Ads Transparency creatives with media — 2 credits, cursor paging, and date filters.", longDescription: "Pass an advertiser name, domain (nike.com), or AR… id and get public commercial creatives as clean JSON: nested advertiser{id,name,url}, firstShown/lastShown, adFormat, and media[] (creatives included — no 25-credit upcharge). Supports country/region, start_date/end_date (YYYY-MM-DD overlap filter), cursor pagination (nextCursor + hasMore), and adsCountEstimate from Google's advertiser suggestions. Returns only public Ads Transparency creatives — some ads require login and cannot be fetched; creative shapes can vary. Political ads are not available on this endpoint (topic=all only). Flat 2 credits on the native path (max 200 per page)." },
   { slug: "google-ad-library-ad-details", name: "Google Ad Details API", shortName: "Ad Details", category: "details", method: "GET", path: "/v1/ad-library/google/ad-details", credits: 17 , tagline: "Get a Google Ads Transparency ad — creative, advertiser, and delivery fields as structured JSON." },
   { slug: "google-ad-library-advertiser-search", name: "Google Advertiser Search API", shortName: "Advertiser Search", category: "search", method: "GET", path: "/v1/ad-library/google/advertiser-search", credits: 1 },
 ];
@@ -1653,7 +1653,16 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-ad-library-ad-details": [up("TikTok Ad Library URL or ad ID."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default DE." }],
   "linkedin-ad-library-search-ads": [qp("Keyword, company, or advertiser to search LinkedIn Ad Library (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
   "linkedin-ad-library-ad-details": [up("LinkedIn Ad Library URL or ad ID.")],
-  "google-ad-library-company-ads": [{ name: "advertiser", type: "string", required: true, description: "Advertiser name, domain, or Google advertiser ID." }, { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
+  "google-ad-library-company-ads": [
+    { name: "advertiser", type: "string", required: true, description: "Advertiser name, domain (e.g. nike.com), or Google advertiser ID (AR…)." },
+    { name: "country", type: "string", required: false, description: "Two-letter ISO country / region code (soft filter). Default US. Alias: region." },
+    { name: "region", type: "string", required: false, description: "Alias for country." },
+    { name: "start_date", type: "string", required: false, description: "YYYY-MM-DD — keep creatives whose shown window overlaps this start." },
+    { name: "end_date", type: "string", required: false, description: "YYYY-MM-DD — keep creatives whose shown window overlaps this end." },
+    { name: "cursor", type: "string", required: false, description: "Pagination cursor from nextCursor." },
+    { name: "topic", type: "string", required: false, description: 'Only "all" is supported (commercial ATC).' },
+    lp(20, 200),
+  ],
   "google-ad-library-ad-details": [{ name: "creative_id", type: "string", required: true, description: "Google Ads Transparency URL containing AR... advertiser and CR... creative IDs." }, { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }],
   "google-ad-library-advertiser-search": [qp("Advertiser or brand to search for (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(10, 50)],
 };

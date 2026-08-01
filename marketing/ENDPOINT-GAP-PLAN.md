@@ -116,3 +116,17 @@ SC 8 · Captapi 1 · Mixed 1. Shipped this batch: #8 SEO fix, #9 ISO+post, #10 S
 | music{} | P1 | Shipped when short_form audio present |
 | Docs: Reel view badge can lag post-page views | P1 | Shipped in catalog copy |
 | get_comments / get_transcript same-call params | P2 | Deferred (separate endpoints) |
+
+---
+
+## #15 Google GET /v1/ad-library/google/company-ads
+**Keep:** 2-credit media[] path, advertiser{id,name,url}, existing ad keys.
+
+| Field / param | Priority | Status |
+|---|---|---|
+| nextCursor / hasMore cursor paging | P0 | Shipped |
+| adsCountEstimate | P1 | Shipped (from suggestions) |
+| start_date / end_date overlap filter | P1 | Shipped (client-side on first/last shown) |
+| region alias for country | P1 | Shipped |
+| Docs: domain accepted; public-only honesty note | P1 | Shipped |
+| topic=political | P2 | Explicitly unsupported (400) |

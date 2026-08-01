@@ -1667,13 +1667,21 @@ export class TiktokAdLibraryApi {
 }
 
 export interface GoogleAdLibraryCompanyAdsParams {
-  /** Advertiser name, domain, or Google advertiser ID. */
+  /** Advertiser name, domain (e.g. nike.com), or AR id. */
   advertiser: string;
-  /** ISO country code. Default US. */
+  /** ISO country / region code. Default US. */
   country?: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
+  /** Alias for country. */
+  region?: string;
+  /** YYYY-MM-DD overlap filter start. */
+  start_date?: string;
+  /** YYYY-MM-DD overlap filter end. */
+  end_date?: string;
+  /** Pagination cursor from nextCursor. */
+  cursor?: string;
+  /** Max results per page (default 20, max 200). */
   limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  /** Serve from 24h cache when available. */
   cache?: boolean;
 }
 
@@ -1699,7 +1707,7 @@ export interface GoogleAdLibraryAdvertiserSearchParams {
 
 export class GoogleAdLibraryApi {
   constructor(private readonly core: HttpCore) {}
-  /** Google Company Ads — Google Ads Transparency Center ads for an advertiser. (2 credits) */
+  /** Google Company Ads — List Google Ads Transparency creatives for an advertiser (name, domain, or AR id) with media, cursor paging, and optional date filters. Public commercial ads only. (2 credits) */
   companyAds(params: GoogleAdLibraryCompanyAdsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/google/company-ads", params);
   }

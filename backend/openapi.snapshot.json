@@ -6673,10 +6673,10 @@
             "schema": {
               "type": "string",
               "minLength": 2,
-              "description": "Advertiser name, domain, or Google advertiser ID",
+              "description": "Advertiser name, domain (e.g. nike.com), or Google advertiser ID (AR…).",
               "title": "Advertiser"
             },
-            "description": "Advertiser name, domain, or Google advertiser ID"
+            "description": "Advertiser name, domain (e.g. nike.com), or Google advertiser ID (AR…)."
           },
           {
             "name": "country",
@@ -6685,10 +6685,32 @@
             "schema": {
               "type": "string",
               "minLength": 2,
-              "maxLength": 2,
+              "maxLength": 8,
+              "description": "Two-letter ISO country / region code (soft filter). Alias: region.",
               "default": "US",
               "title": "Country"
-            }
+            },
+            "description": "Two-letter ISO country / region code (soft filter). Alias: region."
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 8
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Alias for country (ISO code). When set, overrides country.",
+              "title": "Region"
+            },
+            "description": "Alias for country (ISO code). When set, overrides country."
           },
           {
             "name": "limit",
@@ -6701,6 +6723,72 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor from a previous response's nextCursor.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor from a previous response's nextCursor."
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional YYYY-MM-DD — keep creatives whose shown window overlaps this start.",
+              "title": "Start Date"
+            },
+            "description": "Optional YYYY-MM-DD — keep creatives whose shown window overlaps this start."
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional YYYY-MM-DD — keep creatives whose shown window overlaps this end.",
+              "title": "End Date"
+            },
+            "description": "Optional YYYY-MM-DD — keep creatives whose shown window overlaps this end."
+          },
+          {
+            "name": "topic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Ad topic filter. Only \"all\" is supported (commercial ATC). \"political\" is not available here.",
+              "default": "all",
+              "title": "Topic"
+            },
+            "description": "Ad topic filter. Only \"all\" is supported (commercial ATC). \"political\" is not available here."
           },
           {
             "name": "cache",

@@ -2503,7 +2503,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   },
-  "google-ad-library-company-ads": {
+  "google-ad-library-company-ads":   {
     "advertiser": "nike.com",
     "country": "US",
     "totalReturned": 5,
@@ -2588,7 +2588,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "https://tpc.googlesyndication.com/archive/simgad/12062534195836224920"
         ]
       }
-    ]
+    ],
+    "adsCountEstimate": 20000,
+    "hasMore": true,
+    "nextCursor": "eyJ2IjoxLCJhZHZlcnRpc2VySWQiOiJBUjE2NzM1MDc2MzIzNTEyMjg3MjMzIn0"
   },
   "instagram-basic-profile": {
     "id": "314216",

@@ -2385,15 +2385,19 @@ class GoogleAdLibraryApi:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
 
-    def company_ads(self, *, advertiser: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Company Ads — Google Ads Transparency Center ads for an advertiser. (2 credits)
+    def company_ads(self, *, advertiser: str, country: str | None = None, region: str | None = None, start_date: str | None = None, end_date: str | None = None, cursor: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Google Company Ads — List Google Ads Transparency creatives for an advertiser (name, domain, or AR id) with media, cursor paging, and optional date filters. Public commercial ads only. (2 credits)
 
-        :param advertiser: Advertiser name, domain, or Google advertiser ID.
-        :param country: ISO country code. Default US.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        :param advertiser: Advertiser name, domain (e.g. nike.com), or AR id.
+        :param country: ISO country / region code. Default US.
+        :param region: Alias for country.
+        :param start_date: YYYY-MM-DD overlap filter start.
+        :param end_date: YYYY-MM-DD overlap filter end.
+        :param cursor: Pagination cursor from nextCursor.
+        :param limit: Max results per page (default 20, max 200).
+        :param cache: Serve from 24h cache when available.
         """
-        return self._t.get("/v1/ad-library/google/company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "cache": cache})
+        return self._t.get("/v1/ad-library/google/company-ads", {"advertiser": advertiser, "country": country, "region": region, "start_date": start_date, "end_date": end_date, "cursor": cursor, "limit": limit, "cache": cache})
 
     def ad_details(self, *, creative_id: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Google Ad Details — Google ad details by Transparency Center URL. (17 credits)
@@ -2419,15 +2423,19 @@ class AsyncGoogleAdLibraryApi:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
 
-    async def company_ads(self, *, advertiser: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Company Ads — Google Ads Transparency Center ads for an advertiser. (2 credits)
+    async def company_ads(self, *, advertiser: str, country: str | None = None, region: str | None = None, start_date: str | None = None, end_date: str | None = None, cursor: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Google Company Ads — List Google Ads Transparency creatives for an advertiser (name, domain, or AR id) with media, cursor paging, and optional date filters. Public commercial ads only. (2 credits)
 
-        :param advertiser: Advertiser name, domain, or Google advertiser ID.
-        :param country: ISO country code. Default US.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        :param advertiser: Advertiser name, domain (e.g. nike.com), or AR id.
+        :param country: ISO country / region code. Default US.
+        :param region: Alias for country.
+        :param start_date: YYYY-MM-DD overlap filter start.
+        :param end_date: YYYY-MM-DD overlap filter end.
+        :param cursor: Pagination cursor from nextCursor.
+        :param limit: Max results per page (default 20, max 200).
+        :param cache: Serve from 24h cache when available.
         """
-        return await self._t.get("/v1/ad-library/google/company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/ad-library/google/company-ads", {"advertiser": advertiser, "country": country, "region": region, "start_date": start_date, "end_date": end_date, "cursor": cursor, "limit": limit, "cache": cache})
 
     async def ad_details(self, *, creative_id: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Google Ad Details — Google ad details by Transparency Center URL. (17 credits)

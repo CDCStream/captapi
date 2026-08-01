@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-01",
     category: "feature",
+    title: "Google company-ads: cursor paging, date filters, adsCountEstimate",
+    description:
+      "Google Ads Transparency company-ads keeps the 2-credit media[] response, and adds cursor pagination (nextCursor/hasMore), adsCountEstimate, region alias, and start_date/end_date overlap filters. Docs note public commercial creatives only — login-gated and political ads are out of scope.",
+    items: [
+      "Additive hasMore / nextCursor / adsCountEstimate",
+      "New params: cursor, region, start_date, end_date (topic=all only)",
+      "Honesty note: public ATC creatives only; shapes can vary",
+    ],
+  },
+  {
+    publishedAt: "2026-08-01",
+    category: "feature",
     title: "Richer Facebook details: author id, SD/HD, captions, music (non-breaking)",
     description:
       "Facebook details keeps every existing field (videoUrl, author.username, engagement), and adds stable author.id, feedbackId, captionsUrl, videoSdUrl/videoHdUrl, video dimensions, nested video{}, and music when Facebook exposes them. Docs note that some Reel view counts on the post page can lag the public Reels grid badge.",

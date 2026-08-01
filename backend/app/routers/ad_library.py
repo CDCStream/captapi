@@ -1216,13 +1216,62 @@ async def tiktok_ad_details(
 
 @router.get("/google/company-ads", summary="Google Ads Transparency Center company ads")
 async def google_company_ads(
-    advertiser: str = Query(..., min_length=2, description="Advertiser name, domain, or Google advertiser ID"),
-    country: str = Query("US", min_length=2, max_length=2),
+    advertiser: str = Query(
+        ...,
+        min_length=2,
+        description="Advertiser name, domain (e.g. nike.com), or Google advertiser ID (AR…).",
+    ),
+    country: str = Query(
+        "US",
+        min_length=2,
+        max_length=8,
+        description="Two-letter ISO country / region code (soft filter). Alias: region.",
+    ),
+    region: str | None = Query(
+        None,
+        min_length=2,
+        max_length=8,
+        description="Alias for country (ISO code). When set, overrides country.",
+    ),
     limit: int = Query(20, ge=1, le=200),
+    cursor: str | None = Query(
+        None,
+        description="Pagination cursor from a previous response's nextCursor.",
+    ),
+    start_date: str | None = Query(
+        None,
+        description="Optional YYYY-MM-DD — keep creatives whose shown window overlaps this start.",
+    ),
+    end_date: str | None = Query(
+        None,
+        description="Optional YYYY-MM-DD — keep creatives whose shown window overlaps this end.",
+    ),
+    topic: str = Query(
+        "all",
+        description='Ad topic filter. Only "all" is supported (commercial ATC). "political" is not available here.',
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
+    country_code = (region or country or "US").strip().upper()
+    if country_code in {"UK"}:
+        country_code = "GB"
+    topic_norm = (topic or "all").strip().lower()
+    if topic_norm not in {"all", "political"}:
+        raise HTTPException(status_code=400, detail='topic must be "all" or "political"')
+    if topic_norm == "political":
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Political ads are not available on this commercial Ads Transparency endpoint. "
+                "Use topic=all for public commercial creatives."
+            ),
+        )
+    for label, value in (("start_date", start_date), ("end_date", end_date)):
+        if value and google_ads_native._parse_ymd(value) is None:
+            raise HTTPException(status_code=400, detail=f"{label} must be YYYY-MM-DD")
+
     async with billed_call(
         caller=caller,
         endpoint="/v1/ad-library/google/company-ads",
@@ -1232,35 +1281,74 @@ async def google_company_ads(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # 1) Native ATC SearchCreatives (proxy/direct) — ~ms–seconds, ~$0.
-            # Empty list means "resolved but no creatives" after soft-region
-            # retry; only transport failure (None) falls through to Apify.
+            # Empty ads with a result envelope means "resolved but no creatives";
+            # only transport failure (None) falls through to Apify.
             native = await google_ads_native.fetch_company_ads(
-                advertiser, country=country, limit=limit
+                advertiser,
+                country=country_code,
+                limit=limit,
+                cursor=cursor,
+                start_date=start_date,
+                end_date=end_date,
             )
-            if native:
+            if native is not None:
+                if native.get("error") == "invalid_cursor":
+                    raise HTTPException(status_code=400, detail="Invalid cursor")
                 ctx["source"] = "direct"
-                ads = [_normalize_ad(i, "google_ad_library") for i in native]
+                ads = [_normalize_ad(i, "google_ad_library") for i in (native.get("ads") or [])]
                 ctx["credits_override"] = CREDIT_GOOGLE_COMPANY_ADS
                 return {
                     "advertiser": advertiser,
-                    "country": country.upper(),
+                    "country": country_code,
                     "totalReturned": len(ads),
+                    "adsCountEstimate": native.get("adsCountEstimate"),
+                    "hasMore": bool(native.get("hasMore")),
+                    "nextCursor": native.get("nextCursor"),
                     "ads": ads,
                 }
 
-            # 2) Apify last resort (also when native returned []).
+            # 2) Apify last resort (no cursor paging on this path).
+            if cursor:
+                raise HTTPException(
+                    status_code=502,
+                    detail="Google Ads Transparency unavailable for cursor continuation; retry without cursor.",
+                )
             items = await _run_actor(
                 settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2,
-                {"advertisers": [advertiser], "region": country.upper(), "maxResults": limit},
+                {"advertisers": [advertiser], "region": country_code, "maxResults": limit},
                 limit,
             )
             ctx["source"] = "apify"
             ads = [_normalize_ad(i, "google_ad_library") for i in items]
-            return {"advertiser": advertiser, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
+            if start_date or end_date:
+                start_d = google_ads_native._parse_ymd(start_date)
+                end_d = google_ads_native._parse_ymd(end_date)
+                ads = [
+                    a
+                    for a in ads
+                    if google_ads_native._creative_in_date_window(a, start_d, end_d)
+                ]
+            return {
+                "advertiser": advertiser,
+                "country": country_code,
+                "totalReturned": len(ads),
+                "adsCountEstimate": None,
+                "hasMore": False,
+                "nextCursor": None,
+                "ads": ads,
+            }
 
         data = await cached_or_run(
             "ad-library.google.company-ads",
-            {"advertiser": advertiser, "country": country, "limit": limit, "v": 6},
+            {
+                "advertiser": advertiser,
+                "country": country_code,
+                "limit": limit,
+                "cursor": cursor or "",
+                "start_date": start_date or "",
+                "end_date": end_date or "",
+                "v": 7,
+            },
             _run,
             ctx,
             use_cache=cache,
