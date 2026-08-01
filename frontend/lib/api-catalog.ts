@@ -220,7 +220,7 @@ const YOUTUBE: Spec[] = [
   { slug: "youtube-summarizer", name: "YouTube Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/youtube/summarize", credits: 3 },
   { slug: "youtube-video-details", name: "YouTube Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/youtube/video-details", credits: 1 },
   { slug: "youtube-comments", name: "YouTube Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/youtube/comments", credits: 2, tagline: "Get comments on any YouTube video — text, author, likes, and timestamp, with cursor pagination (nextCursor + hasMore). Flat 2 credits per call." },
-  { slug: "youtube-channel-details", name: "YouTube Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/youtube/channel-details", credits: 1 },
+  { slug: "youtube-channel-details", name: "YouTube Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/youtube/channel-details", credits: 1, tagline: "YouTube channel stats as real numbers plus handle, verified, banner, links, email, and SEO tags.", longDescription: "Pass a channel URL, handle, or UC id and get clean JSON: numeric subscriberCount / videoCount / viewCount, handle, verified, joinedDate, bannerUrl, structured links, plus additive email when present in About/description and tags from channel SEO keywords. Flat 1 credit per call." },
   { slug: "youtube-search", name: "YouTube Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/youtube/search", credits: 2 },
   { slug: "youtube-channel-videos", name: "YouTube Channel Videos API", shortName: "Channel Videos", category: "list", method: "GET", path: "/v1/youtube/channel-videos", credits: 2 },
   { slug: "youtube-playlist-videos", name: "YouTube Playlist Videos API", shortName: "Playlist Videos", category: "list", method: "GET", path: "/v1/youtube/playlist-videos", credits: 2 , tagline: "List the videos in a YouTube playlist — URL, title, and position for each item.", longDescription: "Paste a YouTube playlist URL and get the videos in that playlist as a structured list. Use Playlist when you also need playlist title and description in the same response. No YouTube OAuth required." },
@@ -2411,7 +2411,7 @@ const FIELD_DESCS: Record<string, string> = {
   mediaCount: "Total number of media posts.",
   location: "Location shown on the profile or item.",
   website: "Website listed on the profile.",
-  email: "Public email address, when exposed.",
+  email: "Public / business email when the creator exposes it in About/description. Null when only CAPTCHA-gated.",
   joinedDate: "When the account was created.",
 
   // Content

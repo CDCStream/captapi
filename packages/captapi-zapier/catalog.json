@@ -117,7 +117,7 @@
     "name": "YouTube Channel Details",
     "path": "/v1/youtube/channel-details",
     "credits": 1,
-    "summary": "Channel info & subscriber/stats for a YouTube channel.",
+    "summary": "Channel info & numeric stats for a YouTube channel — plus handle, verified, links, email, and SEO tags when available.",
     "params": [
       {
         "name": "url",

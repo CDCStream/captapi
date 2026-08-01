@@ -869,6 +869,19 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
         header_blob = json.dumps(data.get("header") or {})
         verified = "CHECK_CIRCLE" in header_blob or '"BADGE_STYLE_TYPE_VERIFIED"' in header_blob
 
+    # SEO keywords from channelMetadataRenderer (comma/space string or list).
+    tags = _channel_tags(meta.get("keywords"))
+    if not tags and html:
+        m = re.search(r'"keywords"\s*:\s*"([^"]+)"', html)
+        if m:
+            tags = _channel_tags(m.group(1))
+
+    # Business email when the creator put it in the About/description text or
+    # a mailto: link. YouTube's CAPTCHA "View email address" reveal is not scraped.
+    email = _email_from_texts(description, *(link.get("url") for link in links))
+    if email is None and html:
+        email = _email_from_texts(html[:200_000])
+
     return {
         "url": f"https://www.youtube.com/channel/{channel_id}",
         "id": channel_id,
@@ -884,7 +897,59 @@ async def channel_details_native(url: str) -> dict[str, Any] | None:
         "joinedDate": joined,
         "verified": verified,
         "links": links,
+        "email": email,
+        "tags": tags,
     }
+
+
+_EMAIL_RE = re.compile(
+    r"(?:mailto:)?([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})",
+    re.I,
+)
+# Skip obvious non-contact noise from page chrome / tracking.
+_EMAIL_BLOCKLIST = {
+    "noreply@",
+    "no-reply@",
+    "donotreply@",
+    "@youtube.com",
+    "@google.com",
+    "@sentry.io",
+    "@example.com",
+}
+
+
+def _channel_tags(raw: Any) -> list[str]:
+    """Normalize channel SEO keywords to a clean string list."""
+    if raw is None:
+        return []
+    if isinstance(raw, list):
+        out: list[str] = []
+        for item in raw:
+            s = safe_str(item)
+            if s:
+                out.append(s)
+        return out
+    text = safe_str(raw) or ""
+    if not text:
+        return []
+    # YouTube usually comma-separates; fall back to whitespace for rare shapes.
+    parts = re.split(r"\s*,\s*", text) if "," in text else text.split()
+    return [p.strip() for p in parts if p and p.strip()]
+
+
+def _email_from_texts(*texts: Any) -> str | None:
+    """First plausible contact email from description / mailto links."""
+    for text in texts:
+        if not text or not isinstance(text, str):
+            continue
+        for m in _EMAIL_RE.finditer(text):
+            addr = (m.group(1) or "").strip().lower()
+            if not addr or len(addr) > 120:
+                continue
+            if any(bad in addr for bad in _EMAIL_BLOCKLIST):
+                continue
+            return addr
+    return None
 
 
 _SOCIAL_LINK_RE = re.compile(

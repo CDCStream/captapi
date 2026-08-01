@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-01",
+    category: "feature",
+    title: "YouTube channel-details: email + SEO tags (non-breaking)",
+    description:
+      "YouTube channel-details keeps every existing numeric/stats field, and adds email (from About/description when publicly exposed) and tags[] from channel SEO keywords. CAPTCHA-gated business emails stay null.",
+    items: [
+      "Additive email when present in channel About/description or mailto links",
+      "Additive tags[] from channelMetadataRenderer keywords (list, not a comma string)",
+      "Existing subscriberCount/videoCount/viewCount numbers, handle, verified, links unchanged",
+    ],
+  },
+  {
+    publishedAt: "2026-08-01",
     category: "fix",
     title: "LinkedIn profile: stop treating SEO meta as About",
     description:

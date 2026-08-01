@@ -77,6 +77,7 @@ class YouTubeChannelDetails(BaseModel):
     url: str
     id: str | None = None
     name: str
+    handle: str | None = None
     description: str | None = None
     subscriberCount: int | None = None
     videoCount: int | None = None
@@ -84,6 +85,11 @@ class YouTubeChannelDetails(BaseModel):
     thumbnailUrl: str | None = None
     bannerUrl: str | None = None
     country: str | None = None
+    joinedDate: str | None = None
+    verified: bool | None = None
+    links: list[dict[str, str]] = []
+    email: str | None = None
+    tags: list[str] = []
 
 
 class YouTubeSearchResult(BaseModel):

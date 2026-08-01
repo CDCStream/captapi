@@ -12936,7 +12936,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   },
-  "youtube-channel-details": {
+  "youtube-channel-details":   {
     "url": "https://www.youtube.com/channel/UCX6OQ3DkcsbYNE6H8uQQuVA",
     "id": "UCX6OQ3DkcsbYNE6H8uQQuVA",
     "name": "MrBeast",
@@ -12967,6 +12967,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "Facebook",
         "url": "facebook.com/mrbeast"
       }
+    ],
+    "email": null,
+    "tags": [
+      "mrbeast",
+      "challenge",
+      "philanthropy"
     ]
   },
   "youtube-channel-playlists": {

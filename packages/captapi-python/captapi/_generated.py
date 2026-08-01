@@ -46,7 +46,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/comments", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def channel_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Details — Channel info & subscriber/stats for a YouTube channel. (1 credit)
+        """YouTube Channel Details — Channel info & numeric stats for a YouTube channel — plus handle, verified, links, email, and SEO tags when available. (1 credit)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -249,7 +249,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/comments", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def channel_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Details — Channel info & subscriber/stats for a YouTube channel. (1 credit)
+        """YouTube Channel Details — Channel info & numeric stats for a YouTube channel — plus handle, verified, links, email, and SEO tags when available. (1 credit)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

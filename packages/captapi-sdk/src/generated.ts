@@ -217,7 +217,7 @@ export class YoutubeApi {
   comments(params: YoutubeCommentsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/comments", params);
   }
-  /** YouTube Channel Details — Channel info & subscriber/stats for a YouTube channel. (1 credit) */
+  /** YouTube Channel Details — Channel info & numeric stats for a YouTube channel — plus handle, verified, links, email, and SEO tags when available. (1 credit) */
   channelDetails(params: YoutubeChannelDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/channel-details", params);
   }
