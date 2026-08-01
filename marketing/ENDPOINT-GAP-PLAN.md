@@ -101,3 +101,18 @@ SC 8 · Captapi 1 · Mixed 1. Shipped this batch: #8 SEO fix, #9 ISO+post, #10 S
 |---|---|---|
 | Additive email from About/description or mailto | P1 | Shipped (CAPTCHA reveal not scraped) |
 | Additive tags[] from channel SEO keywords | P1 | Shipped as list (not comma string) |
+
+---
+
+## #14 Facebook GET /v1/facebook/details
+**Keep:** videoUrl, author.username/displayName/url/profileImage/verified, engagement{}, isVideo, link.
+
+| Field | Priority | Status |
+|---|---|---|
+| author.id | P0 | Shipped additive |
+| feedbackId | P1 | Shipped additive |
+| captionsUrl (.srt) | P1 | Shipped when Facebook exposes it |
+| videoSdUrl / videoHdUrl + videoWidth/Height + nested video{} | P1 | Shipped additive |
+| music{} | P1 | Shipped when short_form audio present |
+| Docs: Reel view badge can lag post-page views | P1 | Shipped in catalog copy |
+| get_comments / get_transcript same-call params | P2 | Deferred (separate endpoints) |

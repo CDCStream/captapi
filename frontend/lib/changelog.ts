@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-01",
     category: "feature",
+    title: "Richer Facebook details: author id, SD/HD, captions, music (non-breaking)",
+    description:
+      "Facebook details keeps every existing field (videoUrl, author.username, engagement), and adds stable author.id, feedbackId, captionsUrl, videoSdUrl/videoHdUrl, video dimensions, nested video{}, and music when Facebook exposes them. Docs note that some Reel view counts on the post page can lag the public Reels grid badge.",
+    items: [
+      "Additive author.id + feedbackId",
+      "Additive captionsUrl, videoSdUrl/videoHdUrl, videoWidth/videoHeight, video{}, music{}",
+      "Docs warning for Reel view-count badge mismatch vs profile Reels grid",
+    ],
+  },
+  {
+    publishedAt: "2026-08-01",
+    category: "feature",
     title: "YouTube channel-details: email + SEO tags (non-breaking)",
     description:
       "YouTube channel-details keeps every existing numeric/stats field, and adds email (from About/description when publicly exposed) and tags[] from channel SEO keywords. CAPTCHA-gated business emails stay null.",

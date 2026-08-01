@@ -1104,7 +1104,7 @@ class FacebookApi:
         self._t = transport
 
     def details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Details — Details for a Facebook video or post. (1 credit)
+        """Facebook Details — Facebook post or Reel details — engagement, author id, SD/HD video, captions, and music when exposed. (2 credits)
 
         :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1188,7 +1188,7 @@ class AsyncFacebookApi:
         self._t = transport
 
     async def details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Details — Details for a Facebook video or post. (1 credit)
+        """Facebook Details — Facebook post or Reel details — engagement, author id, SD/HD video, captions, and music when exposed. (2 credits)
 
         :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

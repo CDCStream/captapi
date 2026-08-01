@@ -284,7 +284,7 @@ const INSTAGRAM: Spec[] = [
 ];
 
 const FACEBOOK: Spec[] = [
-  { slug: "facebook-details", name: "Facebook Details API", shortName: "Details", category: "details", method: "GET", path: "/v1/facebook/details", credits: 2 , tagline: "Get a Facebook post or video — caption, engagement, author, and media fields as structured JSON." },
+  { slug: "facebook-details", name: "Facebook Details API", shortName: "Details", category: "details", method: "GET", path: "/v1/facebook/details", credits: 2, tagline: "Facebook post or Reel — caption, engagement, author id, SD/HD video, captions, and music when Facebook exposes them.", longDescription: "Paste a Facebook post or Reel URL and get clean JSON: caption, publishedAt, engagement, author (including stable author.id when present), videoUrl plus additive videoSdUrl/videoHdUrl, videoWidth/videoHeight, captionsUrl (.srt), feedbackId, and music when available. Note: for some Reels, the view count on the individual post page can be null or lower than the public Reels grid badge — use Facebook Profile Reels and match by post id if you need that badge count. Flat 2 credits per call." },
   { slug: "facebook-summarizer", name: "Facebook Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/facebook/summarize", credits: 4 },
   { slug: "facebook-comments", name: "Facebook Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/facebook/comments", credits: 2 },
   { slug: "facebook-page-details", name: "Facebook Page Details API", shortName: "Page Details", category: "channel", method: "GET", path: "/v1/facebook/page-details", credits: 2 },
@@ -2466,6 +2466,13 @@ const FIELD_DESCS: Record<string, string> = {
   coverUrl: "Cover image URL.",
   logo: "Logo image URL.",
   videoUrl: "Direct video file URL (CDN link); may be null when the platform does not expose one.",
+  music: "Reel soundtrack metadata (id, type, trackTitle, albumArt) when Facebook exposes it.",
+  videoHeight: "Video height in pixels when available.",
+  videoWidth: "Video width in pixels when available.",
+  videoHdUrl: "High-definition playable video URL when Facebook exposes one.",
+  videoSdUrl: "Standard-definition playable video URL when Facebook exposes one.",
+  captionsUrl: "URL to Facebook-generated captions (.srt) when exposed on the post/Reel.",
+  feedbackId: "Facebook feedback id for the post (useful for comments threading).",
   downloadUrl: "CDN media URL when present (not a dedicated download API).",
   noWatermarkUrl: "Watermark-free variant of the video URL.",
   embedUrl: "Embed page URL — load it directly in an <iframe src>.",

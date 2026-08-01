@@ -875,7 +875,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   },
-  "facebook-details": {
+  "facebook-details":   {
     "platform": "facebook",
     "url": "https://www.facebook.com/reel/1376651124309650",
     "id": "1567272851434752",
@@ -890,7 +890,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "displayName": "NASA - National Aeronautics and Space Administration",
       "url": "https://www.facebook.com/NASA",
       "profileImage": "https://scontent-atl3-1.xx.fbcdn.net/v/t39.30808-1/243095782_416661036495945_3843362260429099279_n.png?stp=cp0_dst-png&cstp=mx800x800&ctp=s80x80&_nc_cat=1&ccb=1-7&_nc_sid=2d3e12&_nc_ohc=rc5kNRYek84Q7kNvwEOuwnr&_nc_oc=AdpqXBYPB1HBfYhXUuQXS0HKbYcQ4mDfRxLfg4yx6pslEIjKO3biNVlf9-En1zfMphg&_nc_zt=24&_nc_ht=scontent-atl3-1.xx&_nc_gid=Vj-hvWV9W_P8ZRNVd_Lj3A&_nc_ss=7b289&oh=00_AQC0BgaEp99KKXvgYYd9uVYMHC0XuzO-SVIyen4WTzBkyw&oe=6A6D8255",
-      "verified": true
+      "verified": true,
+      "id": "100000076236457"
     },
     "engagement": {
       "views": 598000,
@@ -899,7 +900,30 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "shares": 531
     },
     "isVideo": true,
-    "link": "https://go.nasa.gov/3QvQc4k"
+    "link": "https://go.nasa.gov/3QvQc4k",
+    "feedbackId": "feedback:1567272851434752",
+    "captionsUrl": "https://example.com/captions.srt",
+    "videoSdUrl": "https://example.com/video-sd.mp4",
+    "videoHdUrl": "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQOh7ZLRZfB5SIGETu_uz2jbsqvY3dW7G3sGdKsNsX627DpYoTuCxs26FyYE4T4rDzRdvIV2tOCYJi5hs8Gs1EaQEL7_LhQnAXKuILiY508JFg.mp4?_nc_cat=103&_nc_sid=5e9851&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=wPmj9ZUq47YQ7kNvwH_JIsW&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5GQUNFQk9PSy4uQzMuMTI4MC5kYXNoX2gyNjQtYmFzaWMtZ2VuMl83MjBwIiwieHB2X2Fzc2V0X2lkIjoxMzQ3ODY4NzYwMDA4MjE2LCJhc3NldF9hZ2VfZGF5cyI6MjUsInZpX3VzZWNhc2VfaWQiOjEwMTIyLCJkdXJhdGlvbl9zIjoyMDAsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=c53b4168a8d58285&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC80QjQyOEYzOTg3NDFDRkNGM0UzNzQ4QkZDMDY4QTU4QV9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50LzAxNEExNzM2QkY1RkU3NTNDMjU1QkUyMjg3RUMzOEE0X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACawmKfqpPjkBBUCKAJDMywXQGkBDlYEGJMYGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUCZZSeAQA&_nc_gid=Vj-hvWV9W_P8ZRNVd_Lj3A&_nc_ss=7b289&_nc_zt=28&oh=00_AQAFmAbpq3yKHMxyvUj4LDMndyCfVJXc4d0c8CQZ_UIBUw&oe=6A6D7DF5&bitrate=733579&tag=dash_h264-basic-gen2_720p",
+    "videoWidth": 720,
+    "videoHeight": 1280,
+    "music": {
+      "id": "123",
+      "type": "original_audio",
+      "trackTitle": "Original audio",
+      "albumArt": null
+    },
+    "video": {
+      "id": "1567272851434752",
+      "sdUrl": "https://example.com/video-sd.mp4",
+      "hdUrl": "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQOh7ZLRZfB5SIGETu_uz2jbsqvY3dW7G3sGdKsNsX627DpYoTuCxs26FyYE4T4rDzRdvIV2tOCYJi5hs8Gs1EaQEL7_LhQnAXKuILiY508JFg.mp4?_nc_cat=103&_nc_sid=5e9851&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=wPmj9ZUq47YQ7kNvwH_JIsW&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5GQUNFQk9PSy4uQzMuMTI4MC5kYXNoX2gyNjQtYmFzaWMtZ2VuMl83MjBwIiwieHB2X2Fzc2V0X2lkIjoxMzQ3ODY4NzYwMDA4MjE2LCJhc3NldF9hZ2VfZGF5cyI6MjUsInZpX3VzZWNhc2VfaWQiOjEwMTIyLCJkdXJhdGlvbl9zIjoyMDAsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=c53b4168a8d58285&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC80QjQyOEYzOTg3NDFDRkNGM0UzNzQ4QkZDMDY4QTU4QV9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50LzAxNEExNzM2QkY1RkU3NTNDMjU1QkUyMjg3RUMzOEE0X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACawmKfqpPjkBBUCKAJDMywXQGkBDlYEGJMYGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUCZZSeAQA&_nc_gid=Vj-hvWV9W_P8ZRNVd_Lj3A&_nc_ss=7b289&_nc_zt=28&oh=00_AQAFmAbpq3yKHMxyvUj4LDMndyCfVJXc4d0c8CQZ_UIBUw&oe=6A6D7DF5&bitrate=733579&tag=dash_h264-basic-gen2_720p",
+      "url": "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m366/AQOh7ZLRZfB5SIGETu_uz2jbsqvY3dW7G3sGdKsNsX627DpYoTuCxs26FyYE4T4rDzRdvIV2tOCYJi5hs8Gs1EaQEL7_LhQnAXKuILiY508JFg.mp4?_nc_cat=103&_nc_sid=5e9851&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=wPmj9ZUq47YQ7kNvwH_JIsW&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5GQUNFQk9PSy4uQzMuMTI4MC5kYXNoX2gyNjQtYmFzaWMtZ2VuMl83MjBwIiwieHB2X2Fzc2V0X2lkIjoxMzQ3ODY4NzYwMDA4MjE2LCJhc3NldF9hZ2VfZGF5cyI6MjUsInZpX3VzZWNhc2VfaWQiOjEwMTIyLCJkdXJhdGlvbl9zIjoyMDAsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=c53b4168a8d58285&_nc_vs=HBksFQIYRWZiX2VwaGVtZXJhbC80QjQyOEYzOTg3NDFDRkNGM0UzNzQ4QkZDMDY4QTU4QV9tdF8xX3ZpZGVvX2Rhc2hpbml0Lm1wNBUAAsgBEgAVAhhAZmJfcGVybWFuZW50LzAxNEExNzM2QkY1RkU3NTNDMjU1QkUyMjg3RUMzOEE0X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACawmKfqpPjkBBUCKAJDMywXQGkBDlYEGJMYGWRhc2hfaDI2NC1iYXNpYy1nZW4yXzcyMHARAHUCZZSeAQA&_nc_gid=Vj-hvWV9W_P8ZRNVd_Lj3A&_nc_ss=7b289&_nc_zt=28&oh=00_AQAFmAbpq3yKHMxyvUj4LDMndyCfVJXc4d0c8CQZ_UIBUw&oe=6A6D7DF5&bitrate=733579&tag=dash_h264-basic-gen2_720p",
+      "width": 720,
+      "height": 1280,
+      "durationSeconds": 200.016,
+      "thumbnailUrl": "https://scontent-atl3-3.xx.fbcdn.net/v/t15.5256-10/735149954_4435586749988646_521208314578416779_n.jpg?stp=dst-jpg_tt6&cstp=mx720x405&ctp=s720x405&_nc_cat=111&ccb=1-7&_nc_sid=be8305&_nc_ohc=lkSHcojZDSYQ7kNvwG18v3E&_nc_oc=Ado7Dqia8Fp3TMyoJP-nqzgoUUe3fuNq01u63ZrWrjBdYhVBfwfG-8TDKE-UDnBXYek&_nc_zt=23&_nc_ht=scontent-atl3-3.xx&_nc_gid=Vj-hvWV9W_P8ZRNVd_Lj3A&_nc_ss=7b289&oh=00_AQBLDKBELI40vp0Kckzx4q2eKic8tR46WwPCSFfbY5cwNw&oe=6A6D5E2C",
+      "captionsUrl": "https://example.com/captions.srt"
+    }
   },
   "facebook-event-details": {
     "platform": "facebook",

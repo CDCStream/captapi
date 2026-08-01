@@ -1662,8 +1662,8 @@
     "platform": "facebook",
     "name": "Facebook Details",
     "path": "/v1/facebook/details",
-    "credits": 1,
-    "summary": "Details for a Facebook video or post.",
+    "credits": 2,
+    "summary": "Facebook post or Reel details — engagement, author id, SD/HD video, captions, and music when exposed.",
     "params": [
       {
         "name": "url",

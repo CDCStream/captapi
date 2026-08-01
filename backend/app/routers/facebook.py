@@ -265,18 +265,52 @@ def _normalize_post(item: dict) -> dict:
         or short_thumb
         or _fb_thumb_from_node(media)
     )
+    video_hd_url = safe_str(
+        item.get("videoHdUrl")
+        or delivery.get("browser_native_hd_url")
+        or short_delivery.get("browser_native_hd_url")
+        or playback.get("browser_native_hd_url")
+        or playback.get("playable_url_quality_hd")
+    )
+    video_sd_url = safe_str(
+        item.get("videoSdUrl")
+        or delivery.get("browser_native_sd_url")
+        or short_delivery.get("browser_native_sd_url")
+        or playback.get("browser_native_sd_url")
+        or playback.get("playable_url")
+    )
     video_url = (
         item.get("videoUrl")
         or media.get("videoUrl")
-        or delivery.get("browser_native_hd_url")
-        or delivery.get("browser_native_sd_url")
-        or short_delivery.get("browser_native_hd_url")
-        or short_delivery.get("browser_native_sd_url")
-        or playback.get("browser_native_hd_url")
-        or playback.get("browser_native_sd_url")
-        or playback.get("playable_url_quality_hd")
-        or playback.get("playable_url")
+        or video_hd_url
+        or video_sd_url
     )
+    video_width = safe_int(
+        item.get("videoWidth")
+        or media.get("original_width")
+        or media.get("width")
+        or playback.get("original_width")
+        or playback.get("width")
+    )
+    video_height = safe_int(
+        item.get("videoHeight")
+        or media.get("original_height")
+        or media.get("height")
+        or playback.get("original_height")
+        or playback.get("height")
+    )
+    captions_url = safe_str(
+        item.get("captionsUrl")
+        or item.get("captions_url")
+        or media.get("captions_url")
+        or playback.get("captions_url")
+        or facebook_details_native._captions_url_from_video(playback)
+        or facebook_details_native._captions_url_from_video(media)
+    )
+    music = item.get("music") if isinstance(item.get("music"), dict) else None
+    if not music:
+        music = facebook_details_native._music_from_short_form(short)
+    feedback_id = safe_str(item.get("feedbackId") or item.get("feedback_id"))
     # Group scrapers put the *group* URL in facebookUrl/inputUrl. Prefer the
     # posting user's profile URL so author.username/url aren't the group page.
     author_url = safe_str(
@@ -294,7 +328,13 @@ def _normalize_post(item: dict) -> dict:
     if not author_url and not groupish:
         author_url = safe_str(item.get("facebookUrl") or item.get("inputUrl"))
     # Numeric FB user ids resolve as profile URLs; opaque pfbid tokens do not.
-    user_id = safe_str(user.get("id"))
+    user_id = safe_str(
+        user.get("id")
+        or video_owner.get("id")
+        or delegate.get("id")
+        or item.get("authorId")
+        or item.get("pageId")
+    )
     if not author_url and user_id and user_id.isdigit():
         author_url = f"https://www.facebook.com/{user_id}"
     author_username = safe_str(
@@ -339,22 +379,25 @@ def _normalize_post(item: dict) -> dict:
     is_video = item.get("isVideo")
     if is_video is None:
         is_video = bool(short or video_url or "/reel/" in (post_url or "").lower())
-    return {
+    duration_seconds = safe_float(
+        item.get("videoDuration")
+        or media.get("duration")
+        or playback.get("length_in_second")
+        or (duration_ms / 1000 if isinstance(duration_ms, (int, float)) and duration_ms else None)
+    )
+    video_id = safe_str(playback.get("id") or media.get("id") or item.get("videoId"))
+    out: dict[str, Any] = {
         "platform": "facebook",
         "url": post_url,
         "id": safe_str(item.get("postId") or item.get("post_id") or item.get("id") or playback.get("id")),
         "caption": caption,
         "description": caption,
         "publishedAt": published,
-        "durationSeconds": safe_float(
-            item.get("videoDuration")
-            or media.get("duration")
-            or playback.get("length_in_second")
-            or (duration_ms / 1000 if isinstance(duration_ms, (int, float)) and duration_ms else None)
-        ),
+        "durationSeconds": duration_seconds,
         "thumbnailUrl": safe_str(thumbnail),
         "videoUrl": safe_str(video_url),
         "author": {
+            "id": user_id,
             "username": author_username,
             "displayName": safe_str(
                 item.get("pageName") or user.get("name") or video_owner.get("name") or item.get("authorName")
@@ -392,6 +435,39 @@ def _normalize_post(item: dict) -> dict:
         "isVideo": bool(is_video),
         "link": safe_str(item.get("link")) or _fb_external_link(item),
     }
+    # Additive media / identity fields (never rename videoUrl / author.username).
+    if feedback_id:
+        out["feedbackId"] = feedback_id
+    if captions_url:
+        out["captionsUrl"] = captions_url
+    if video_sd_url:
+        out["videoSdUrl"] = video_sd_url
+    if video_hd_url:
+        out["videoHdUrl"] = video_hd_url
+    if video_width is not None:
+        out["videoWidth"] = video_width
+    if video_height is not None:
+        out["videoHeight"] = video_height
+    if music and (music.get("id") or music.get("trackTitle")):
+        out["music"] = {
+            "id": safe_str(music.get("id")),
+            "type": safe_str(music.get("type")),
+            "trackTitle": safe_str(music.get("trackTitle") or music.get("track_title")),
+            "albumArt": safe_str(music.get("albumArt") or music.get("music_album_art") or music.get("album_art")),
+        }
+    if bool(is_video) and (video_url or video_sd_url or video_hd_url or captions_url or video_id):
+        out["video"] = {
+            "id": video_id,
+            "sdUrl": video_sd_url,
+            "hdUrl": video_hd_url,
+            "url": safe_str(video_url),
+            "width": video_width,
+            "height": video_height,
+            "durationSeconds": duration_seconds,
+            "thumbnailUrl": safe_str(thumbnail),
+            "captionsUrl": captions_url,
+        }
+    return out
 
 
 def _is_reel(item: dict) -> bool:
@@ -865,7 +941,7 @@ async def facebook_details(
 
         data = await cached_or_run(
             endpoint="facebook.details",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

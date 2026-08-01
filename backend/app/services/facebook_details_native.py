@@ -271,8 +271,8 @@ def _pick_story(
     return best
 
 
-def _engagement_for_post(blobs: list[Any], post_id: str | None) -> dict[str, int]:
-    out = {"likes": 0, "comments": 0, "shares": 0}
+def _engagement_for_post(blobs: list[Any], post_id: str | None) -> dict[str, Any]:
+    out: dict[str, Any] = {"likes": 0, "comments": 0, "shares": 0, "feedbackId": None}
     if not post_id:
         return out
     nodes: list[dict[str, Any]] = []
@@ -293,7 +293,8 @@ def _engagement_for_post(blobs: list[Any], post_id: str | None) -> dict[str, int
     )
     best_likes = -1
     for node in nodes:
-        fid = _feedback_post_id(safe_str(node.get("id")))
+        raw_fid = safe_str(node.get("id"))
+        fid = _feedback_post_id(raw_fid)
         url = safe_str(node.get("url")) or ""
         # Skip per-comment feedback (…?comment_id=).
         if "comment_id=" in url:
@@ -321,11 +322,82 @@ def _engagement_for_post(blobs: list[Any], post_id: str | None) -> dict[str, int
         if likes is not None and likes > best_likes:
             best_likes = likes
             out["likes"] = likes
+            if raw_fid and (fid == post_id or not out.get("feedbackId")):
+                out["feedbackId"] = raw_fid
         if comments is not None:
             out["comments"] = max(out["comments"], comments)
         if shares is not None:
             out["shares"] = max(out["shares"], shares)
+        if out.get("feedbackId") is None and raw_fid and fid == post_id:
+            out["feedbackId"] = raw_fid
     return out
+
+
+def _music_from_short_form(sf: dict[str, Any]) -> dict[str, Any] | None:
+    """Best-effort Reel audio / soundtrack block."""
+    if not isinstance(sf, dict):
+        return None
+    candidates: list[dict[str, Any]] = []
+    for key in ("audio", "music", "music_info", "track", "original_audio"):
+        block = sf.get(key)
+        if isinstance(block, dict):
+            candidates.append(block)
+    audio_asset = sf.get("audio_asset") if isinstance(sf.get("audio_asset"), dict) else None
+    if audio_asset:
+        candidates.append(audio_asset)
+    for cand in candidates:
+        nested = cand.get("audio_asset") if isinstance(cand.get("audio_asset"), dict) else cand
+        if not isinstance(nested, dict):
+            continue
+        mid = safe_str(
+            nested.get("id")
+            or cand.get("id")
+            or nested.get("audio_id")
+            or cand.get("audio_id")
+        )
+        title = safe_str(
+            nested.get("title")
+            or nested.get("track_title")
+            or cand.get("track_title")
+            or cand.get("title")
+            or nested.get("music_title")
+        )
+        art = None
+        for art_key in ("music_album_art_uri", "album_art", "cover_art", "thumbnail_uri", "image"):
+            val = nested.get(art_key) or cand.get(art_key)
+            if isinstance(val, dict):
+                art = safe_str(val.get("uri") or val.get("url"))
+            else:
+                art = safe_str(val)
+            if art:
+                break
+        mtype = safe_str(nested.get("type") or cand.get("type") or nested.get("audio_type"))
+        if mid or title:
+            return {
+                "id": mid,
+                "type": mtype,
+                "trackTitle": title,
+                "albumArt": art,
+            }
+    return None
+
+
+def _captions_url_from_video(video: dict[str, Any] | None) -> str | None:
+    if not isinstance(video, dict):
+        return None
+    for key in ("captions_url", "captionsUrl", "caption_url"):
+        val = safe_str(video.get(key))
+        if val:
+            return val
+    locales = video.get("video_available_captions_locales") or video.get("captions")
+    if isinstance(locales, list):
+        for loc in locales:
+            if not isinstance(loc, dict):
+                continue
+            val = safe_str(loc.get("captions_url") or loc.get("url") or loc.get("uri"))
+            if val:
+                return val
+    return None
 
 
 def _external_link_from_message(message: dict[str, Any] | None) -> str | None:
@@ -347,6 +419,8 @@ def _from_creation_story(cs: dict[str, Any], blobs: list[Any], page_url: str) ->
     post_id = safe_str(cs.get("post_id"))
     eng = _engagement_for_post(blobs, post_id)
     message = cs.get("message") if isinstance(cs.get("message"), dict) else {}
+    playback = sf.get("playback_video") if isinstance(sf.get("playback_video"), dict) else {}
+    video_owner = sf.get("video_owner") if isinstance(sf.get("video_owner"), dict) else {}
     item: dict[str, Any] = {
         "short_form_video_context": sf,
         "postId": post_id,
@@ -355,7 +429,7 @@ def _from_creation_story(cs: dict[str, Any], blobs: list[Any], page_url: str) ->
         "message": message,
         "text": message.get("text") if isinstance(message, dict) else None,
         "url": safe_str(sf.get("shareable_url"))
-        or safe_str((sf.get("playback_video") or {}).get("permalink_url"))
+        or safe_str(playback.get("permalink_url"))
         or page_url,
         "facebookUrl": page_url,
         "likes": eng["likes"],
@@ -364,9 +438,20 @@ def _from_creation_story(cs: dict[str, Any], blobs: list[Any], page_url: str) ->
         "likesCount": eng["likes"],
         "commentsCount": eng["comments"],
         "sharesCount": eng["shares"],
+        "feedbackId": eng.get("feedbackId"),
+        "captionsUrl": _captions_url_from_video(playback),
+        "music": _music_from_short_form(sf),
         "link": _external_link_from_message(message if isinstance(message, dict) else None),
         "isVideo": True,
         "attachments": cs.get("attachments"),
+        "user": {
+            "id": safe_str(video_owner.get("id")),
+            "name": safe_str(video_owner.get("name")),
+            "profileUrl": safe_str(video_owner.get("url")),
+            "isVerified": video_owner.get("is_verified")
+            if video_owner.get("is_verified") is not None
+            else video_owner.get("isVerified"),
+        },
     }
     return item
 
@@ -421,6 +506,7 @@ def _from_story(story: dict[str, Any], blobs: list[Any], page_url: str) -> dict[
         "likesCount": eng["likes"],
         "commentsCount": eng["comments"],
         "sharesCount": eng["shares"],
+        "feedbackId": eng.get("feedbackId"),
         "isVideo": False,
         "link": _external_link_from_message(message),
     }

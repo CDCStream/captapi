@@ -861,7 +861,7 @@ export interface FacebookProfilePhotosParams {
 
 export class FacebookApi {
   constructor(private readonly core: HttpCore) {}
-  /** Facebook Details — Details for a Facebook video or post. (1 credit) */
+  /** Facebook Details — Facebook post or Reel details — engagement, author id, SD/HD video, captions, and music when exposed. (2 credits) */
   details(params: FacebookDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/details", params);
   }
