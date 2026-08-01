@@ -265,10 +265,10 @@ export function ToolRunnerClient({
                   Create account & pick a plan
                 </Link>
                 <Link
-                  href={`/dashboard/tools/${slug}`}
+                  href="/dashboard/playground"
                   className="inline-flex items-center justify-center gap-1.5 text-sm text-gray-300 hover:text-white"
                 >
-                  Open in dashboard <ArrowRight className="size-3.5" />
+                  Open API Playground <ArrowRight className="size-3.5" />
                 </Link>
               </div>
             </div>

@@ -15,6 +15,18 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Dashboard free-tools UI confused users about the API product;
+      // send bookmarked links to the API Playground.
+      {
+        source: "/dashboard/tools",
+        destination: "/dashboard/playground",
+        permanent: true,
+      },
+      {
+        source: "/dashboard/tools/:slug",
+        destination: "/dashboard/playground",
+        permanent: true,
+      },
       // instagram-music-posts was removed (duplicate of reels-by-audio-id,
       // same scraper and data); keep old docs links alive.
       {
