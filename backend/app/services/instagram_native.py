@@ -188,6 +188,26 @@ def _map_preview_comment(raw: dict[str, Any], *, post_url: str) -> dict[str, Any
         if created
         else None
     )
+    liked = raw.get("edge_liked_by") if isinstance(raw.get("edge_liked_by"), dict) else {}
+    children = (
+        raw.get("preview_child_comments")
+        or raw.get("child_comments")
+        or raw.get("replies")
+        or []
+    )
+    child_n = len(children) if isinstance(children, list) else 0
+    like_count = safe_int(
+        raw.get("comment_like_count")
+        or raw.get("like_count")
+        or raw.get("likesCount")
+        or liked.get("count")
+    )
+    reply_count = safe_int(
+        raw.get("child_comment_count")
+        or raw.get("reply_count")
+        or raw.get("repliesCount")
+        or (child_n if child_n else None)
+    )
     return {
         "id": cid,
         "url": f"{post_url.rstrip('/')}/c/{cid}/" if cid and post_url else None,
@@ -195,9 +215,9 @@ def _map_preview_comment(raw: dict[str, Any], *, post_url: str) -> dict[str, Any
         "author": author,
         "authorAvatarUrl": safe_str(user.get("profile_pic_url")),
         "authorIsVerified": bool(user.get("is_verified")) if user.get("is_verified") is not None else False,
-        "likeCount": safe_int(raw.get("comment_like_count") or raw.get("like_count")) or 0,
+        "likeCount": like_count or 0,
         "publishedAt": published,
-        "replyCount": safe_int(raw.get("child_comment_count") or raw.get("reply_count")) or 0,
+        "replyCount": reply_count or 0,
     }
 
 

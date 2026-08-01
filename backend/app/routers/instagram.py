@@ -655,12 +655,24 @@ async def instagram_comments(
                 apify = get_apify()
                 items = await apify.run_actor_sync(
                     settings.APIFY_ACTOR_INSTAGRAM_COMMENT,
-                    {"directUrls": [url], "resultsLimit": limit},
+                    {
+                        "directUrls": [url],
+                        "resultsLimit": limit,
+                        # Without this, Apify leaves repliesCount null (maps to 0).
+                        "includeReplies": True,
+                        "includeNestedComments": True,
+                    },
                     max_items=limit,
                 )
                 comments = []
                 for c in items[:limit]:
                     owner = c.get("owner") or {}
+                    nested = c.get("replies") if isinstance(c.get("replies"), list) else []
+                    reply_count = first_present(
+                        c.get("repliesCount"),
+                        c.get("replyCount"),
+                        len(nested) if nested else None,
+                    )
                     comments.append(
                         {
                             "id": safe_str(c.get("id")),
@@ -671,7 +683,7 @@ async def instagram_comments(
                             "authorIsVerified": bool(owner.get("is_verified")),
                             "likeCount": safe_int(c.get("likesCount") or c.get("likeCount")) or 0,
                             "publishedAt": safe_str(c.get("timestamp")),
-                            "replyCount": safe_int(c.get("replyCount") or c.get("repliesCount")) or 0,
+                            "replyCount": safe_int(reply_count) or 0,
                         }
                     )
                 return {
@@ -697,7 +709,7 @@ async def instagram_comments(
 
         data = await cached_or_run(
             endpoint="instagram.comments",
-            params={"url": url, "limit": limit, "v": 6},
+            params={"url": url, "limit": limit, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
