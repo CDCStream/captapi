@@ -141,6 +141,8 @@ def _iso(create_time: Any) -> str | None:
 
 
 async def video_details_native(url: str) -> dict[str, Any] | None:
+    from app.utils.media_urls import earliest_cdn_expires_at, utc_now_iso
+
     scope = await _fetch_scope(url)
     if not scope:
         return None
@@ -157,17 +159,64 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
     author_stats = item.get("authorStats") or {}
     video = item.get("video") or {}
     music = item.get("music") or {}
+    status = item.get("status") if isinstance(item.get("status"), dict) else {}
     username = safe_str(author.get("uniqueId"))
+    fetched_at = utc_now_iso()
 
-    hashtags = []
+    hashtags: list[str] = []
+    mentions: list[dict[str, Any]] = []
     for te in item.get("textExtra") or []:
-        name = safe_str((te or {}).get("hashtagName"))
+        if not isinstance(te, dict):
+            continue
+        name = safe_str(te.get("hashtagName"))
         if name:
             hashtags.append(name)
+        mention_user = safe_str(te.get("userUniqueId") or te.get("userId"))
+        mention_sec = safe_str(te.get("secUid"))
+        if te.get("userId") or te.get("userUniqueId") or mention_sec:
+            mentions.append(
+                {
+                    "userId": safe_str(te.get("userId")),
+                    "secUid": mention_sec,
+                    "username": safe_str(te.get("userUniqueId")),
+                    "start": safe_int(te.get("start")),
+                    "end": safe_int(te.get("end")),
+                }
+            )
     if not hashtags:
         hashtags = [
             safe_str(c.get("title")) for c in item.get("challenges") or [] if safe_str(c.get("title"))
         ]
+
+    aweme_type = safe_int(item.get("awemeType"))
+    image_post = item.get("imagePost")
+    shoot_tab = (safe_str(item.get("shootTabName")) or "").lower()
+    if image_post or shoot_tab == "photo" or aweme_type in (150, 51):
+        media_type = "photo"
+    else:
+        media_type = "video"
+
+    play_addr = video.get("playAddr")
+    if isinstance(play_addr, dict):
+        play_url = safe_str((play_addr.get("urlList") or [None])[0]) or safe_str(play_addr.get("uri"))
+    else:
+        play_url = safe_str(play_addr)
+    download_addr = video.get("downloadAddr")
+    if isinstance(download_addr, dict):
+        download_url = safe_str((download_addr.get("urlList") or [None])[0]) or safe_str(
+            download_addr.get("uri")
+        )
+    else:
+        download_url = safe_str(download_addr)
+    thumbnail_url = safe_str(video.get("cover") or video.get("originCover"))
+    profile_image = safe_str(author.get("avatarLarger") or author.get("avatarMedium"))
+
+    music_title = safe_str(music.get("title"))
+    is_original = bool(music.get("original")) or (
+        bool(music_title) and music_title.strip().lower() in {"original sound", "original sound -"}
+    )
+    # Exact counts live in statsV2; legacy stats often rounds large play counts.
+    engagement_approx = not bool(stats_v2.get("playCount") or stats_v2.get("diggCount"))
 
     return {
         "platform": "tiktok",
@@ -177,14 +226,27 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
         "description": safe_str(item.get("desc")),
         "publishedAt": _iso(item.get("createTime")),
         "durationSeconds": safe_float(video.get("duration")),
-        "thumbnailUrl": safe_str(video.get("cover") or video.get("originCover")),
+        "thumbnailUrl": thumbnail_url,
+        "mediaType": media_type,
+        "width": safe_int(video.get("width")),
+        "height": safe_int(video.get("height")),
+        "videoUrl": play_url,
+        "downloadUrl": download_url,
+        "hasWatermark": True if download_url else None,
+        "mediaUrlsExpireAt": earliest_cdn_expires_at(
+            play_url, download_url, thumbnail_url, profile_image
+        ),
         "author": {
+            "id": safe_str(author.get("id") or author.get("uid")),
+            "secUid": safe_str(author.get("secUid")),
             "username": username,
             "displayName": safe_str(author.get("nickname")),
             "url": f"https://www.tiktok.com/@{username}" if username else None,
             "followers": safe_int(author_stats.get("followerCount")),
+            "followersAsOf": fetched_at,
             "verified": False if author.get("verified") is None else bool(author.get("verified")),
-            "profileImage": safe_str(author.get("avatarLarger") or author.get("avatarMedium")),
+            "profileImage": profile_image,
+            "region": safe_str(author.get("region") or item.get("authorRegion")),
         },
         "engagement": {
             "views": _stat(stats_v2, stats, "playCount"),
@@ -192,9 +254,38 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
             "comments": _stat(stats_v2, stats, "commentCount"),
             "shares": _stat(stats_v2, stats, "shareCount"),
             "saves": _stat(stats_v2, stats, "collectCount"),
+            "isApproximate": engagement_approx,
         },
         "hashtags": hashtags,
-        "musicName": safe_str(music.get("title")),
+        "mentions": mentions,
+        "musicName": music_title,
+        "musicId": safe_str(music.get("id") or music.get("idStr") or music.get("mid")),
+        "musicAuthor": safe_str(music.get("authorName") or music.get("ownerNickname")),
+        "isOriginalSound": is_original,
+        "region": safe_str(item.get("locationCreated") or item.get("region")),
+        "isAd": bool(item.get("isAd")),
+        "isCommerce": bool(
+            item.get("isCommerce")
+            or item.get("hasCommerceRight")
+            or item.get("commercial_right_type")
+            or item.get("commercialRightType")
+        ),
+        "isBrandedContent": bool(
+            item.get("isBrandOrganic") or item.get("isBrandOrganicContent")
+        ),
+        "status": {
+            "allowComment": None if status.get("allowComment") is None else bool(status.get("allowComment")),
+            "allowShare": None if status.get("allowShare") is None else bool(status.get("allowShare")),
+            "isPrivate": bool(
+                status.get("privateStatus")
+                or status.get("isPrivate")
+                or item.get("forFriend")
+            ),
+            "isDeleted": bool(status.get("isDelete") or status.get("isDeleted")),
+            "inReview": bool(status.get("inReviewing") or status.get("inReview")),
+            "isProhibited": bool(status.get("isProhibited")),
+        },
+        "fetchedAt": fetched_at,
     }
 
 

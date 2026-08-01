@@ -1167,11 +1167,69 @@ async def transcript_native(norm_url: str, language: str | None) -> dict[str, An
 
 
 # ---------------------------------------------------------- video details --
-async def video_details_native(video_id: str, norm_url: str) -> dict[str, Any] | None:
-    """Metadata/stats via InnerTube ANDROID player (watch HTML is often 429)."""
-    player = await _player_android(video_id)
-    if not player:
-        return None
+def _youtube_thumbnails(thumbs: list[Any]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for t in thumbs:
+        if not isinstance(t, dict):
+            continue
+        url = safe_str(t.get("url"))
+        if not url:
+            continue
+        out.append(
+            {
+                "url": url,
+                "width": safe_int(t.get("width")),
+                "height": safe_int(t.get("height")),
+            }
+        )
+    return out
+
+
+def _youtube_available_captions(player: dict[str, Any]) -> list[dict[str, Any]]:
+    from app.utils.media_urls import cdn_expires_at
+
+    out: list[dict[str, Any]] = []
+    for t in _caption_tracks(player):
+        if not isinstance(t, dict):
+            continue
+        code = safe_str(t.get("languageCode"))
+        if not code:
+            continue
+        name = t.get("name")
+        language_name = None
+        if isinstance(name, dict):
+            language_name = safe_str(name.get("simpleText")) or text_of(name)
+        else:
+            language_name = safe_str(name)
+        base_url = safe_str(t.get("baseUrl"))
+        row: dict[str, Any] = {
+            "languageCode": code,
+            "languageName": language_name,
+            "kind": safe_str(t.get("kind")) or "standard",
+            "baseUrl": base_url,
+            "expiresAt": cdn_expires_at(base_url),
+        }
+        out.append(row)
+    return out
+
+
+def build_youtube_video_details(
+    *,
+    player: dict[str, Any],
+    video_id: str,
+    norm_url: str,
+    like_count: int | None = None,
+    comment_count: int | None = None,
+    fetched_at: str | None = None,
+) -> dict[str, Any] | None:
+    """Normalize an InnerTube player payload into the public video-details shape."""
+    from app.utils.media_urls import (
+        channel_handle_from_profile_url,
+        description_links,
+        live_status_from_youtube,
+        utc_now_iso,
+    )
+
     if ((player.get("playabilityStatus") or {}).get("status")) != "OK":
         return None
     details = player.get("videoDetails") or {}
@@ -1179,6 +1237,7 @@ async def video_details_native(video_id: str, norm_url: str) -> dict[str, Any] |
         return None
     micro = (player.get("microformat") or {}).get("playerMicroformatRenderer") or {}
     thumbs = (details.get("thumbnail") or {}).get("thumbnails") or []
+    thumbnails = _youtube_thumbnails(thumbs if isinstance(thumbs, list) else [])
     channel_id = safe_str(details.get("channelId"))
     length = details.get("lengthSeconds") or micro.get("lengthSeconds")
     try:
@@ -1191,23 +1250,86 @@ async def video_details_native(video_id: str, norm_url: str) -> dict[str, Any] |
             duration_seconds = int(int(approx) / 1000) if approx is not None else None
         except (TypeError, ValueError):
             duration_seconds = None
+
+    owner_profile = safe_str(micro.get("ownerProfileUrl"))
+    channel_handle = channel_handle_from_profile_url(owner_profile)
+    live_status = live_status_from_youtube(details)
+    is_short = bool(
+        "/shorts/" in (norm_url or "")
+        or details.get("isShortsEligible")
+        or (duration_seconds is not None and duration_seconds <= 60 and "shorts" in (norm_url or "").lower())
+    )
+    if live_status == "live":
+        content_type = "live"
+    elif is_short:
+        content_type = "short"
+    else:
+        content_type = "video"
+
+    playability = player.get("playabilityStatus") or {}
+    reason = (safe_str(playability.get("reason")) or "").lower()
+    is_members_only = "members" in reason or "member" in reason
+    live_broadcast = micro.get("liveBroadcastDetails")
+    if not isinstance(live_broadcast, dict):
+        live_broadcast = details.get("liveBroadcastDetails")
+    if not isinstance(live_broadcast, dict):
+        live_broadcast = {}
+
+    description = safe_str(details.get("shortDescription"))
     return {
         "url": norm_url,
         "id": video_id,
         "title": safe_str(details.get("title")) or "",
-        "description": safe_str(details.get("shortDescription")),
+        "description": description,
+        "descriptionLinks": description_links(description),
         "channelName": safe_str(details.get("author") or micro.get("ownerChannelName")),
         "channelId": channel_id,
-        "channelUrl": (f"https://www.youtube.com/channel/{channel_id}" if channel_id else None),
+        "channelHandle": channel_handle,
+        "channelUrl": (
+            owner_profile
+            if owner_profile
+            else (f"https://www.youtube.com/channel/{channel_id}" if channel_id else None)
+        ),
         "publishedAt": safe_str(micro.get("publishDate") or micro.get("uploadDate")),
         "durationSeconds": duration_seconds,
         "viewCount": safe_int(details.get("viewCount")),
-        "likeCount": None,
-        "commentCount": None,
-        "thumbnailUrl": safe_str(thumbs[-1].get("url")) if thumbs else None,
+        "likeCount": like_count,
+        "commentCount": comment_count,
+        "thumbnailUrl": thumbnails[-1]["url"] if thumbnails else None,
+        "thumbnails": thumbnails,
         "genre": safe_str(micro.get("category")),
+        "categoryId": safe_str(details.get("categoryId") or micro.get("categoryId")),
         "tags": safe_list(details.get("keywords")),
+        "contentType": content_type,
+        "isShort": is_short,
+        "liveStatus": live_status,
+        "scheduledStartTime": safe_str(live_broadcast.get("startTimestamp")),
+        "actualStartTime": safe_str(live_broadcast.get("actualStartTime")),
+        "concurrentViewers": safe_int(details.get("concurrentViewers")),
+        "defaultLanguage": safe_str(details.get("defaultLanguage")),
+        "defaultAudioLanguage": safe_str(details.get("defaultAudioLanguage")),
+        "isFamilySafe": None if micro.get("isFamilySafe") is None else bool(micro.get("isFamilySafe")),
+        "isPrivate": bool(details.get("isPrivate")),
+        "isUnlisted": bool(details.get("isUnlisted")),
+        "isAgeRestricted": bool(
+            details.get("isCrawlable") is False
+            or "age" in reason
+            or playability.get("desktopLegacyAgeGateReason") is not None
+        ),
+        "isMembersOnly": is_members_only,
+        "availableCaptions": _youtube_available_captions(player),
+        "chapters": [],  # filled later via InnerTube next when available
+        "fetchedAt": fetched_at or utc_now_iso(),
+        "viewCountIsApproximate": False,
     }
+
+
+async def video_details_native(video_id: str, norm_url: str) -> dict[str, Any] | None:
+    """Metadata/stats via InnerTube ANDROID player (watch HTML is often 429)."""
+    player = await _player_android(video_id)
+    if not player:
+        return None
+    return build_youtube_video_details(player=player, video_id=video_id, norm_url=norm_url)
 
 # --------------------------------------------------------------- comments --
 def _comment_author_avatar(author: dict[str, Any]) -> str | None:

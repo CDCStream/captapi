@@ -4,12 +4,16 @@ from pydantic import BaseModel
 
 
 class SocialAuthor(BaseModel):
+    id: str | None = None
+    secUid: str | None = None
     username: str | None = None
     displayName: str | None = None
     url: str | None = None
     followers: int | None = None
+    followersAsOf: str | None = None
     verified: bool | None = None
     profileImage: str | None = None
+    region: str | None = None
 
 
 class SocialEngagement(BaseModel):
@@ -18,6 +22,7 @@ class SocialEngagement(BaseModel):
     comments: int | None = None
     shares: int | None = None
     saves: int | None = None
+    isApproximate: bool | None = None
 
 
 class SocialVideoDetails(BaseModel):
@@ -30,10 +35,18 @@ class SocialVideoDetails(BaseModel):
     durationSeconds: float | None = None
     thumbnailUrl: str | None = None
     videoUrl: str | None = None
+    downloadUrl: str | None = None
+    mediaType: str | None = None
+    mediaUrlsExpireAt: str | None = None
     author: SocialAuthor | None = None
     engagement: SocialEngagement | None = None
     hashtags: list[str] = []
+    mentions: list[dict] = []
     musicName: str | None = None
+    musicId: str | None = None
+    musicAuthor: str | None = None
+    isOriginalSound: bool | None = None
+    fetchedAt: str | None = None
 
 
 class SocialComment(BaseModel):

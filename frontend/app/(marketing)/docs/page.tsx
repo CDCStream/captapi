@@ -146,6 +146,9 @@ const successResponse = `{
   "success": true,
   "cached": false,
   "creditsUsed": 2,
+  "requestId": "8f3c2a1e-4b9d-4e6a-9c1f-2d7e5b8a0c34",
+  "fetchedAt": "2026-08-01T20:15:03.120Z",
+  "cachedAt": null,
   "data": {
     "language": "en",
     "segments": [
@@ -337,7 +340,10 @@ export default function DocsPage() {
       <p className="text-muted-foreground max-w-3xl">
         Every response is JSON with a top-level <code className="rounded bg-muted px-1.5 py-0.5 text-xs">success</code>{" "}
         boolean. Successful responses include <code className="rounded bg-muted px-1.5 py-0.5 text-xs">cached</code>,{" "}
-        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">creditsUsed</code>, and a{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">creditsUsed</code>,{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">requestId</code>,{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">fetchedAt</code>,{" "}
+        <code className="rounded bg-muted px-1.5 py-0.5 text-xs">cachedAt</code>, and a{" "}
         <code className="rounded bg-muted px-1.5 py-0.5 text-xs">data</code> object.
       </p>
       <div className="mt-4 grid gap-4 lg:grid-cols-2">

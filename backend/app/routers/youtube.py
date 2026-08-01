@@ -23,6 +23,7 @@ from app.services.cached_runner import cached_or_run
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.openai_client import summarize_transcript
 from app.services.youtube_native import (
+    build_youtube_video_details,
     channel_details_native,
     channel_playlists_native,
     channel_tab_native,
@@ -917,6 +918,8 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
         or not android.get("genre")
         or android.get("likeCount") is None
         or android.get("publishedAt") is None
+        or not android.get("channelHandle")
+        or not android.get("availableCaptions")
     )
     player, html = await _watch_player_response(norm_url) if need_page else (None, "")
     genre, tags = _genre_tags_from_player(player)
@@ -938,6 +941,36 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
         if out.get("publishedAt") is None and player:
             micro = (player.get("microformat") or {}).get("playerMicroformatRenderer") or {}
             out["publishedAt"] = safe_str(micro.get("publishDate") or micro.get("uploadDate"))
+        if player and not out.get("availableCaptions"):
+            enriched = build_youtube_video_details(
+                player=player,
+                video_id=vid,
+                norm_url=norm_url,
+                like_count=out.get("likeCount"),
+                comment_count=out.get("commentCount"),
+                fetched_at=out.get("fetchedAt"),
+            )
+            if enriched:
+                for key in (
+                    "channelHandle",
+                    "channelUrl",
+                    "availableCaptions",
+                    "thumbnails",
+                    "descriptionLinks",
+                    "contentType",
+                    "isShort",
+                    "liveStatus",
+                    "defaultLanguage",
+                    "defaultAudioLanguage",
+                    "isFamilySafe",
+                    "isPrivate",
+                    "isUnlisted",
+                    "isAgeRestricted",
+                    "isMembersOnly",
+                    "categoryId",
+                ):
+                    if not out.get(key) and enriched.get(key) not in (None, [], ""):
+                        out[key] = enriched[key]
         if out.get("commentCount") is None and html:
             out["commentCount"] = _parse_comment_count(html)
         if out.get("commentCount") is None:
@@ -947,41 +980,29 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
     if player is None:
         if isinstance(android, dict) and android.get("commentCount") is None:
             android = {**android, "commentCount": await comment_count_native(vid)}
+            if android.get("durationSeconds") is not None and "durationFormatted" not in android:
+                android["durationFormatted"] = _format_duration(int(android["durationSeconds"]))
         return android
 
-    details = player.get("videoDetails") or {}
-    micro = (player.get("microformat") or {}).get("playerMicroformatRenderer") or {}
-    thumbs = (details.get("thumbnail") or {}).get("thumbnails") or []
-    duration_seconds = _duration_seconds(details.get("lengthSeconds") or micro.get("lengthSeconds"))
-    if duration_seconds is None:
-        approx = details.get("approxDurationMs") or micro.get("approxDurationMs")
-        try:
-            duration_seconds = int(int(approx) / 1000) if approx is not None else None
-        except (TypeError, ValueError):
-            duration_seconds = None
-    channel_id = safe_str(details.get("channelId"))
+    like_count = _parse_like_count(html) if html else None
     comment_count = _parse_comment_count(html) if html else None
     if comment_count is None:
         comment_count = await comment_count_native(vid)
-
-    return {
-        "url": norm_url,
-        "id": vid,
-        "title": safe_str(details.get("title")) or "",
-        "description": safe_str(details.get("shortDescription")),
-        "channelName": safe_str(details.get("author") or micro.get("ownerChannelName")),
-        "channelId": channel_id,
-        "channelUrl": (f"https://www.youtube.com/channel/{channel_id}" if channel_id else None),
-        "publishedAt": safe_str(micro.get("publishDate") or micro.get("uploadDate")),
-        "durationSeconds": duration_seconds,
-        "durationFormatted": _format_duration(duration_seconds),
-        "viewCount": safe_int(details.get("viewCount")),
-        "likeCount": _parse_like_count(html) if html else None,
-        "commentCount": comment_count,
-        "thumbnailUrl": safe_str(thumbs[-1].get("url")) if thumbs else None,
-        "genre": genre,
-        "tags": tags,
-    }
+    out = build_youtube_video_details(
+        player=player,
+        video_id=vid,
+        norm_url=norm_url,
+        like_count=like_count,
+        comment_count=comment_count,
+    )
+    if not out:
+        return android
+    if not out.get("genre") and genre:
+        out["genre"] = genre
+    if not out.get("tags") and tags:
+        out["tags"] = tags
+    out["durationFormatted"] = _format_duration(out.get("durationSeconds"))
+    return out
 
 
 @router.get("/video-details", summary="YouTube video metadata + stats")
@@ -1009,7 +1030,7 @@ async def youtube_video_details(
 
         data = await cached_or_run(
             endpoint="youtube.video-details",
-            params={"url": norm_url, "v": 4},
+            params={"url": norm_url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

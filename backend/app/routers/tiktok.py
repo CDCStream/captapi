@@ -682,7 +682,7 @@ async def tiktok_video_details(
 
         data = await cached_or_run(
             endpoint="tiktok.video-details",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

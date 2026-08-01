@@ -169,6 +169,10 @@ async def billed_call(
 
         source = None if cache_hit else ctx.get("source")
         request_id = str(uuid.uuid4())
+        fetched_at = None
+        data_obj = ctx.get("data")
+        if isinstance(data_obj, dict):
+            fetched_at = data_obj.get("fetchedAt")
 
         # Publish billing metadata for the response-header middleware. Runs in
         # the same context that serializes the response, so the middleware sees
@@ -179,6 +183,8 @@ async def billed_call(
                 "credits": credits_used,
                 "cache_hit": cache_hit,
                 "status": status_code,
+                "request_id": request_id,
+                "fetched_at": fetched_at,
             }
         )
 

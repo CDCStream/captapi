@@ -34,16 +34,28 @@ class YouTubeVideoDetails(BaseModel):
     id: str
     title: str
     description: str | None = None
+    descriptionLinks: list[dict] = []
     channelName: str | None = None
     channelId: str | None = None
+    channelHandle: str | None = None
     channelUrl: str | None = None
     publishedAt: str | None = None
     durationSeconds: int | None = None
+    durationFormatted: str | None = None
     viewCount: int | None = None
     likeCount: int | None = None
     commentCount: int | None = None
     thumbnailUrl: str | None = None
+    thumbnails: list[dict] = []
+    genre: str | None = None
+    categoryId: str | None = None
     tags: list[str] = []
+    contentType: str | None = None
+    isShort: bool | None = None
+    liveStatus: str | None = None
+    availableCaptions: list[dict] = []
+    chapters: list[dict] = []
+    fetchedAt: str | None = None
 
 
 class YouTubeComment(BaseModel):

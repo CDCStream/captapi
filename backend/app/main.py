@@ -56,14 +56,16 @@ from app.routers import (
 
 
 class BillingHeaderMiddleware:
-    """Stamp per-request billing metadata onto the response as headers.
+    """Stamp billing metadata onto response headers and the JSON envelope.
 
     Pure-ASGI (no task hop) so it shares the async context with the endpoint;
     billed_call publishes into `request_meta` in its finally, which runs before
-    the response is sent, so the values are available on http.response.start.
-    Lets clients (e.g. the playground) read how a call was served without a DB
-    lookup.
+    the response is sent. Injects ``cached``, ``creditsUsed``, ``requestId``,
+    ``fetchedAt``, and ``cachedAt`` into successful JSON bodies so clients do
+    not have to rely on headers alone.
     """
+
+    _MAX_INJECT_BYTES = 2_000_000
 
     def __init__(self, app):  # noqa: ANN001 - ASGI app
         self.app = app
@@ -72,24 +74,83 @@ class BillingHeaderMiddleware:
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
+        import json
+
         from app.core.credits import request_meta
 
         request_meta.set(None)
+        start_message: dict | None = None
+        body_chunks: list[bytes] = []
 
         async def send_wrapper(message):  # noqa: ANN001
+            nonlocal start_message
             if message["type"] == "http.response.start":
-                meta = request_meta.get()
-                if meta:
-                    cache_hit = bool(meta.get("cache_hit"))
-                    source = "cache" if cache_hit else (meta.get("source") or "unknown")
-                    extra = [
+                start_message = message
+                return
+            if message["type"] != "http.response.body" or start_message is None:
+                await send(message)
+                return
+
+            body_chunks.append(message.get("body") or b"")
+            if message.get("more_body"):
+                return
+
+            body = b"".join(body_chunks)
+            meta = request_meta.get() or {}
+            headers = list(start_message.get("headers") or [])
+            if meta:
+                cache_hit = bool(meta.get("cache_hit"))
+                source = "cache" if cache_hit else (meta.get("source") or "unknown")
+                request_id = str(meta.get("request_id") or "")
+                headers.extend(
+                    [
                         (b"x-captapi-source", str(source).encode()),
                         (b"x-captapi-credits", str(meta.get("credits", 0)).encode()),
                         (b"x-captapi-cache", b"1" if cache_hit else b"0"),
                     ]
-                    message.setdefault("headers", [])
-                    message["headers"].extend(extra)
-            await send(message)
+                )
+                if request_id:
+                    headers.append((b"x-captapi-request-id", request_id.encode()))
+
+                status = int(start_message.get("status", 200))
+                ctype = b""
+                for k, v in headers:
+                    if k.lower() == b"content-type":
+                        ctype = v.lower()
+                        break
+                if (
+                    status < 400
+                    and b"application/json" in ctype
+                    and 0 < len(body) <= self._MAX_INJECT_BYTES
+                ):
+                    try:
+                        payload = json.loads(body)
+                    except (ValueError, TypeError):
+                        payload = None
+                    if isinstance(payload, dict) and payload.get("success") is True:
+                        cache_hit = bool(meta.get("cache_hit"))
+                        fetched_at = meta.get("fetched_at")
+                        data = payload.get("data")
+                        if fetched_at is None and isinstance(data, dict):
+                            fetched_at = data.get("fetchedAt")
+                        payload["cached"] = cache_hit
+                        payload["creditsUsed"] = int(meta.get("credits") or 0)
+                        if request_id:
+                            payload["requestId"] = request_id
+                        if fetched_at:
+                            payload["fetchedAt"] = fetched_at
+                        payload["cachedAt"] = fetched_at if cache_hit else None
+                        body = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode()
+                        headers = [
+                            (k, v)
+                            for k, v in headers
+                            if k.lower() != b"content-length"
+                        ]
+                        headers.append((b"content-length", str(len(body)).encode()))
+
+            start_message["headers"] = headers
+            await send(start_message)
+            await send({"type": "http.response.body", "body": body})
 
         await self.app(scope, receive, send_wrapper)
 
