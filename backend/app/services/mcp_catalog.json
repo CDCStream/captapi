@@ -82,7 +82,7 @@
     "platform": "youtube",
     "name": "YouTube Comments",
     "path": "/v1/youtube/comments",
-    "credits": 20,
+    "credits": 2,
     "summary": "Comments on a YouTube video, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
@@ -138,7 +138,7 @@
     "platform": "youtube",
     "name": "YouTube Search",
     "path": "/v1/youtube/search",
-    "credits": 20,
+    "credits": 2,
     "summary": "Search YouTube videos by keyword.",
     "params": [
       {
@@ -166,7 +166,7 @@
     "platform": "youtube",
     "name": "YouTube Channel Videos",
     "path": "/v1/youtube/channel-videos",
-    "credits": 20,
+    "credits": 2,
     "summary": "List a channel's uploaded videos.",
     "params": [
       {
@@ -346,7 +346,7 @@
     "platform": "youtube",
     "name": "YouTube Shorts Comments",
     "path": "/v1/youtube/shorts/comments",
-    "credits": 20,
+    "credits": 2,
     "summary": "Comments on a YouTube Short.",
     "params": [
       {
@@ -402,7 +402,7 @@
     "platform": "youtube",
     "name": "YouTube Trending Shorts",
     "path": "/v1/youtube/trending-shorts",
-    "credits": 2,
+    "credits": 28,
     "summary": "Discover trending YouTube Shorts by seed keyword.",
     "params": [
       {
@@ -415,7 +415,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Flat 2 credits per call."
+        "description": "Max items to return. Default 20, max 100. Billed per result."
       },
       {
         "name": "cache",
@@ -486,7 +486,7 @@
     "platform": "youtube",
     "name": "YouTube Comment Replies",
     "path": "/v1/youtube/comment-replies",
-    "credits": 20,
+    "credits": 2,
     "summary": "Replies to a specific YouTube comment.",
     "params": [
       {
@@ -520,7 +520,7 @@
     "platform": "youtube",
     "name": "YouTube Channel Playlists",
     "path": "/v1/youtube/channel-playlists",
-    "credits": 20,
+    "credits": 2,
     "summary": "List a channel's playlists.",
     "params": [
       {
@@ -798,7 +798,7 @@
     "platform": "tiktok",
     "name": "TikTok Search Suggestions",
     "path": "/v1/tiktok/search-suggestions",
-    "credits": 2,
+    "credits": 28,
     "summary": "The autocomplete terms TikTok suggests in its search bar for a seed keyword — the real phrases people search, ranked. Localize by country + language.",
     "params": [
       {
@@ -823,7 +823,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Flat 2 credits per call."
+        "description": "Upper bound on suggestions to return (1-100, default 20). TikTok surfaces only a limited number of real autocomplete suggestions per keyword, so you'll often get fewer. Billed per result."
       },
       {
         "name": "cache",
@@ -968,7 +968,7 @@
     "platform": "tiktok",
     "name": "TikTok Music Posts",
     "path": "/v1/tiktok/music-posts",
-    "credits": 2,
+    "credits": 32,
     "summary": "Posts using a specific TikTok sound/music.",
     "params": [
       {
@@ -981,7 +981,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
+        "description": "Max items to return. Default 20, max 200. Billed per result."
       },
       {
         "name": "cache",
@@ -996,7 +996,7 @@
     "platform": "tiktok",
     "name": "TikTok Top Search",
     "path": "/v1/tiktok/top-search",
-    "credits": 14,
+    "credits": 2,
     "summary": "Top mixed TikTok results for a keyword.",
     "params": [
       {
@@ -1120,7 +1120,7 @@
     "platform": "tiktok",
     "name": "TikTok Trending Feed",
     "path": "/v1/tiktok/trending-feed",
-    "credits": 14,
+    "credits": 2,
     "summary": "TikTok trending (For You) videos by region.",
     "params": [
       {
@@ -1568,7 +1568,7 @@
     "platform": "instagram",
     "name": "Instagram Hashtag Search",
     "path": "/v1/instagram/hashtag-search",
-    "credits": 12,
+    "credits": 2,
     "summary": "Search Instagram posts by hashtag.",
     "params": [
       {
@@ -1662,7 +1662,7 @@
     "platform": "facebook",
     "name": "Facebook Details",
     "path": "/v1/facebook/details",
-    "credits": 2,
+    "credits": 1,
     "summary": "Details for a Facebook video or post.",
     "params": [
       {
@@ -1706,7 +1706,7 @@
     "platform": "facebook",
     "name": "Facebook Comments",
     "path": "/v1/facebook/comments",
-    "credits": 2,
+    "credits": 30,
     "summary": "Comments on a Facebook post.",
     "params": [
       {
@@ -1719,7 +1719,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 50, max 500. Flat 2 credits per call."
+        "description": "Max items to return. Default 50, max 500. Billed per result."
       },
       {
         "name": "cache",
@@ -1734,7 +1734,7 @@
     "platform": "facebook",
     "name": "Facebook Page Details",
     "path": "/v1/facebook/page-details",
-    "credits": 2,
+    "credits": 1,
     "summary": "Info & stats for a Facebook page.",
     "params": [
       {
@@ -1756,7 +1756,7 @@
     "platform": "facebook",
     "name": "Facebook Profile Posts",
     "path": "/v1/facebook/profile-posts",
-    "credits": 2,
+    "credits": 12,
     "summary": "Latest posts from a Facebook profile/page.",
     "params": [
       {
@@ -1769,7 +1769,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
+        "description": "Max items to return. Default 20, max 200. Billed per result."
       },
       {
         "name": "cache",
@@ -1784,7 +1784,7 @@
     "platform": "facebook",
     "name": "Facebook Profile Reels",
     "path": "/v1/facebook/profile-reels",
-    "credits": 2,
+    "credits": 36,
     "summary": "Latest Reels from a Facebook profile/page.",
     "params": [
       {
@@ -1797,7 +1797,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
+        "description": "Max items to return. Default 20, max 200. Billed per result."
       },
       {
         "name": "cache",
@@ -1812,7 +1812,7 @@
     "platform": "facebook",
     "name": "Facebook Group Posts",
     "path": "/v1/facebook/group-posts",
-    "credits": 2,
+    "credits": 12,
     "summary": "Posts from a public Facebook group.",
     "params": [
       {
@@ -1825,7 +1825,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
+        "description": "Max items to return. Default 20, max 200. Billed per result."
       },
       {
         "name": "cache",
@@ -1840,7 +1840,7 @@
     "platform": "facebook",
     "name": "Facebook Comment Replies",
     "path": "/v1/facebook/comment-replies",
-    "credits": 2,
+    "credits": 30,
     "summary": "Replies to a specific Facebook comment.",
     "params": [
       {
@@ -1859,131 +1859,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 50, max 500. Flat 2 credits per call."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "facebook_marketplace_search",
-    "platform": "facebook_marketplace",
-    "name": "Facebook Marketplace Search",
-    "path": "/v1/facebook/marketplace-search",
-    "credits": 2,
-    "summary": "Search Facebook Marketplace listings by keyword and location. details=true adds description/coords/photos (2 + 2 per listing).",
-    "params": [
-      {
-        "name": "q",
-        "type": "string",
-        "required": true,
-        "description": "Product or keyword to search for (min 2 chars)."
-      },
-      {
-        "name": "location",
-        "type": "string",
-        "required": true,
-        "description": "City or place name, e.g. 'Austin, TX'."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Flat 2 credits per call."
-      },
-      {
-        "name": "details",
-        "type": "string",
-        "required": false,
-        "description": "Set true to enrich each listing with description, photos and coordinates (2 + 2 credits per listing)."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "facebook_marketplace_location_search",
-    "platform": "facebook_marketplace",
-    "name": "Facebook Marketplace Location Search",
-    "path": "/v1/facebook/marketplace-location-search",
-    "credits": 2,
-    "summary": "Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34).",
-    "params": [
-      {
-        "name": "q",
-        "type": "string",
-        "required": true,
-        "description": "City/place search query, e.g. Austin."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 10, max 50. Flat 2 credits per call."
-      },
-      {
-        "name": "details",
-        "type": "string",
-        "required": false,
-        "description": "Set true to include latitude/longitude per location (slower; doubles cost to 2 credits)."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "facebook_event_search",
-    "platform": "facebook_events",
-    "name": "Facebook Event Search",
-    "path": "/v1/facebook/event-search",
-    "credits": 2,
-    "summary": "Search Facebook events by topic and/or location.",
-    "params": [
-      {
-        "name": "q",
-        "type": "string",
-        "required": true,
-        "description": "Topic and/or place, e.g. 'comedy Chicago' (min 2 chars)."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 20, max 200. Flat 2 credits on native success."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "facebook_event_details",
-    "platform": "facebook_events",
-    "name": "Facebook Event Details",
-    "path": "/v1/facebook/event-details",
-    "credits": 2,
-    "summary": "Details for a Facebook event (date, location, attendees, tickets).",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Facebook event URL, e.g. https://facebook.com/events/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+        "description": "Max items to return. Default 50, max 500. Billed per result."
       },
       {
         "name": "cache",
@@ -1998,7 +1874,7 @@
     "platform": "facebook",
     "name": "Facebook Profile Photos",
     "path": "/v1/facebook/profile-photos",
-    "credits": 2,
+    "credits": 12,
     "summary": "Photos from a Facebook profile or page.",
     "params": [
       {
@@ -2011,57 +1887,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "facebook_profile_events",
-    "platform": "facebook_events",
-    "name": "Facebook Profile Events",
-    "path": "/v1/facebook/profile-events",
-    "credits": 2,
-    "summary": "Events from a Facebook profile or page.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 20, max 200. Flat 2 credits on native success."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "facebook_marketplace_item",
-    "platform": "facebook_marketplace",
-    "name": "Facebook Marketplace Item",
-    "path": "/v1/facebook/marketplace-item",
-    "credits": 2,
-    "summary": "Details for a single Facebook Marketplace listing (title, price, description, condition, photos, location).",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+        "description": "Max items to return. Default 20, max 200. Billed per result."
       },
       {
         "name": "cache",
@@ -2142,8 +1968,8 @@
     "platform": "twitter",
     "name": "Twitter/X User Tweets",
     "path": "/v1/twitter/user-tweets",
-    "credits": 14,
-    "summary": "Recent public tweets from a Twitter/X profile — text, author, engagement, hashtags, and media.",
+    "credits": 2,
+    "summary": "Recent tweets from a Twitter/X profile.",
     "params": [
       {
         "name": "url",
@@ -2170,7 +1996,7 @@
     "platform": "twitter",
     "name": "Twitter/X Search",
     "path": "/v1/twitter/search",
-    "credits": 14,
+    "credits": 2,
     "summary": "Search public tweets on X by keyword — text, author, engagement, hashtags, and media.",
     "params": [
       {
@@ -2248,7 +2074,7 @@
     "platform": "reddit",
     "name": "Reddit Subreddit Posts",
     "path": "/v1/reddit/subreddit-posts",
-    "credits": 10,
+    "credits": 2,
     "summary": "Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
@@ -2304,7 +2130,7 @@
     "platform": "reddit",
     "name": "Reddit Post Comments",
     "path": "/v1/reddit/post-comments",
-    "credits": 20,
+    "credits": 2,
     "summary": "Comments on a Reddit post.",
     "params": [
       {
@@ -2332,7 +2158,7 @@
     "platform": "reddit",
     "name": "Reddit Post Transcript",
     "path": "/v1/reddit/post-transcript",
-    "credits": 20,
+    "credits": 2,
     "summary": "Extract Reddit post text and top comments as a discussion transcript.",
     "params": [
       {
@@ -2360,7 +2186,7 @@
     "platform": "reddit",
     "name": "Reddit Search",
     "path": "/v1/reddit/search",
-    "credits": 10,
+    "credits": 2,
     "summary": "Search Reddit posts site-wide by keyword — title, subreddit, author, upvotes, comments; cursor pagination.",
     "params": [
       {
@@ -2416,7 +2242,7 @@
     "platform": "reddit",
     "name": "Reddit Subreddit Search",
     "path": "/v1/reddit/subreddit-search",
-    "credits": 10,
+    "credits": 2,
     "summary": "Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
@@ -2457,7 +2283,7 @@
     "name": "Threads Profile",
     "path": "/v1/threads/profile",
     "credits": 1,
-    "summary": "Public Threads profile — bio, followers, verified status, and avatar.",
+    "summary": "Profile info & stats for a Threads account.",
     "params": [
       {
         "name": "url",
@@ -3030,7 +2856,7 @@
     "platform": "rumble",
     "name": "Rumble Comments",
     "path": "/v1/rumble/comments",
-    "credits": 2,
+    "credits": 30,
     "summary": "Comments on a Rumble video.",
     "params": [
       {
@@ -3043,7 +2869,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 50, max 500. Flat 2 credits per call."
+        "description": "Max items to return. Default 50, max 500. Billed per result."
       },
       {
         "name": "cache",
@@ -3178,6 +3004,616 @@
         "type": "string",
         "required": true,
         "description": "TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_marketplace_search",
+    "platform": "facebook_marketplace",
+    "name": "Facebook Marketplace Search",
+    "path": "/v1/facebook/marketplace-search",
+    "credits": 28,
+    "summary": "Search Facebook Marketplace listings by keyword and location.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Product or keyword to search for (min 2 chars)."
+      },
+      {
+        "name": "location",
+        "type": "string",
+        "required": true,
+        "description": "City or place name, e.g. 'Austin, TX'."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "details",
+        "type": "string",
+        "required": false,
+        "description": "Set true to fetch full description, photos and coordinates per listing (slower, costs more)."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_marketplace_location_search",
+    "platform": "facebook_marketplace",
+    "name": "Facebook Marketplace Location Search",
+    "path": "/v1/facebook/marketplace-location-search",
+    "credits": 17,
+    "summary": "Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34).",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "City/place search query, e.g. Austin."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 10, max 50. Flat 17 credits per call."
+      },
+      {
+        "name": "details",
+        "type": "string",
+        "required": false,
+        "description": "Set true to include latitude/longitude per location (slower; doubles cost to 34 credits)."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_marketplace_item",
+    "platform": "facebook_marketplace",
+    "name": "Facebook Marketplace Item",
+    "path": "/v1/facebook/marketplace-item",
+    "credits": 1,
+    "summary": "Details for a single Facebook Marketplace listing.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_event_search",
+    "platform": "facebook_events",
+    "name": "Facebook Event Search",
+    "path": "/v1/facebook/event-search",
+    "credits": 40,
+    "summary": "Search Facebook events by topic and/or location.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Topic and/or place, e.g. 'comedy Chicago' (min 2 chars)."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_event_details",
+    "platform": "facebook_events",
+    "name": "Facebook Event Details",
+    "path": "/v1/facebook/event-details",
+    "credits": 2,
+    "summary": "Details for a Facebook event (date, location, attendees, tickets).",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook event URL, e.g. https://facebook.com/events/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_profile_events",
+    "platform": "facebook_events",
+    "name": "Facebook Profile Events",
+    "path": "/v1/facebook/profile-events",
+    "credits": 40,
+    "summary": "Events from a Facebook profile or page.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_search",
+    "platform": "facebook_ad_library",
+    "name": "Facebook Ad Library Search",
+    "path": "/v1/ad-library/facebook/search",
+    "credits": 2,
+    "summary": "Search Meta/Facebook ads by keyword with status, media, date, and sort filters.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "required": false,
+        "description": "ACTIVE (default), INACTIVE, or ALL."
+      },
+      {
+        "name": "media_type",
+        "type": "string",
+        "required": false,
+        "description": "ALL (default), IMAGE, VIDEO, MEME, IMAGE_AND_MEME, or NONE."
+      },
+      {
+        "name": "ad_type",
+        "type": "string",
+        "required": false,
+        "description": "all (default) or political_and_issue_ads."
+      },
+      {
+        "name": "search_type",
+        "type": "string",
+        "required": false,
+        "description": "keyword_unordered (default) or keyword_exact_phrase."
+      },
+      {
+        "name": "sort_by",
+        "type": "string",
+        "required": false,
+        "description": "total_impressions or relevancy_monthly_grouped."
+      },
+      {
+        "name": "start_date",
+        "type": "string",
+        "required": false,
+        "description": "Delivery start on/after YYYY-MM-DD."
+      },
+      {
+        "name": "end_date",
+        "type": "string",
+        "required": false,
+        "description": "Delivery start on/before YYYY-MM-DD."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_company_ads",
+    "platform": "facebook_ad_library",
+    "name": "Facebook Company Ads",
+    "path": "/v1/ad-library/facebook/company-ads",
+    "credits": 2,
+    "summary": "Ads for a Facebook page or Meta Ad Library URL.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Facebook page URL or Meta Ad Library URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_search_companies",
+    "platform": "facebook_ad_library",
+    "name": "Facebook Ad Library Search Companies",
+    "path": "/v1/ad-library/facebook/search-companies",
+    "credits": 2,
+    "summary": "Find advertisers/pages in the Meta Ad Library by name.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_ad_details",
+    "platform": "facebook_ad_library",
+    "name": "Facebook Ad Details",
+    "path": "/v1/ad-library/facebook/ad-details",
+    "credits": 17,
+    "summary": "Meta/Facebook ad details.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "facebook_ad_library_ad_transcript",
+    "platform": "facebook_ad_library",
+    "name": "Facebook Ad Transcript",
+    "path": "/v1/ad-library/facebook/ad-transcript",
+    "credits": 17,
+    "summary": "Extract creative text from a Meta/Facebook ad as transcript text.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Meta Ad Library ad URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_ad_library_search",
+    "platform": "tiktok_ad_library",
+    "name": "TikTok Ad Library Search",
+    "path": "/v1/ad-library/tiktok/search",
+    "credits": 70,
+    "summary": "Search TikTok Ad Library and Creative Center.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default DE."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "tiktok_ad_library_ad_details",
+    "platform": "tiktok_ad_library",
+    "name": "TikTok Ad Details",
+    "path": "/v1/ad-library/tiktok/ad-details",
+    "credits": 17,
+    "summary": "TikTok ad details by ad URL or ID.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default DE."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "google_ad_library_company_ads",
+    "platform": "google_ad_library",
+    "name": "Google Company Ads",
+    "path": "/v1/ad-library/google/company-ads",
+    "credits": 2,
+    "summary": "Google Ads Transparency Center ads for an advertiser.",
+    "params": [
+      {
+        "name": "advertiser",
+        "type": "string",
+        "required": true,
+        "description": "Advertiser name, domain, or Google advertiser ID."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "google_ad_library_ad_details",
+    "platform": "google_ad_library",
+    "name": "Google Ad Details",
+    "path": "/v1/ad-library/google/ad-details",
+    "credits": 17,
+    "summary": "Google ad details by Transparency Center URL.",
+    "params": [
+      {
+        "name": "creative_id",
+        "type": "string",
+        "required": true,
+        "description": "Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "google_ad_library_advertiser_search",
+    "platform": "google_ad_library",
+    "name": "Google Advertiser Search",
+    "path": "/v1/ad-library/google/advertiser-search",
+    "credits": 1,
+    "summary": "Search Google Ads advertisers.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 10, max 50. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_ad_library_search_ads",
+    "platform": "linkedin_ad_library",
+    "name": "LinkedIn Ad Library Search",
+    "path": "/v1/ad-library/linkedin/search-ads",
+    "credits": 2,
+    "summary": "Search LinkedIn Ad Library ads.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": true,
+        "description": "Search query or keywords (min 2 chars)."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "linkedin_ad_library_ad_details",
+    "platform": "linkedin_ad_library",
+    "name": "LinkedIn Ad Details",
+    "path": "/v1/ad-library/linkedin/ad-details",
+    "credits": 17,
+    "summary": "LinkedIn ad details by URL or ID.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
+    "tool": "amazon_shop_page",
+    "platform": "amazon_shop",
+    "name": "Amazon Shop Page",
+    "path": "/v1/amazon-shop/page",
+    "credits": 2,
+    "summary": "Amazon seller storefront metadata and product listings.",
+    "params": [
+      {
+        "name": "url",
+        "type": "string",
+        "required": true,
+        "description": "Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+      },
+      {
+        "name": "marketplace",
+        "type": "string",
+        "required": false,
+        "description": "Amazon marketplace code. Default US."
       },
       {
         "name": "limit",
@@ -3518,7 +3954,7 @@
     "platform": "twitch",
     "name": "Twitch User Videos",
     "path": "/v1/twitch/user-videos",
-    "credits": 2,
+    "credits": 34,
     "summary": "Recent Twitch VODs for a channel.",
     "params": [
       {
@@ -3531,7 +3967,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 30. Flat 2 credits on native success."
+        "description": "Max items to return. Default 20, max 30. Billed per result."
       },
       {
         "name": "cache",
@@ -3590,7 +4026,7 @@
     "platform": "spotify",
     "name": "Spotify Artist",
     "path": "/v1/spotify/artist",
-    "credits": 2,
+    "credits": 6,
     "summary": "Spotify artist details, followers and listener metadata.",
     "params": [
       {
@@ -3612,7 +4048,7 @@
     "platform": "spotify",
     "name": "Spotify Track",
     "path": "/v1/spotify/track",
-    "credits": 2,
+    "credits": 6,
     "summary": "Spotify track metadata, artists, album and play count when available.",
     "params": [
       {
@@ -3634,7 +4070,7 @@
     "platform": "spotify",
     "name": "Spotify Album",
     "path": "/v1/spotify/album",
-    "credits": 2,
+    "credits": 6,
     "summary": "Spotify album metadata and track count.",
     "params": [
       {
@@ -3656,7 +4092,7 @@
     "platform": "spotify",
     "name": "Spotify Search",
     "path": "/v1/spotify/search",
-    "credits": 2,
+    "credits": 23,
     "summary": "Search Spotify tracks, albums, artists, podcasts or episodes.",
     "params": [
       {
@@ -3675,7 +4111,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 50. Flat 2 credits per call."
+        "description": "Max items to return. Default 20, max 50. Billed per result."
       },
       {
         "name": "cache",
@@ -3690,7 +4126,7 @@
     "platform": "spotify",
     "name": "Spotify Podcast",
     "path": "/v1/spotify/podcast",
-    "credits": 2,
+    "credits": 6,
     "summary": "Spotify podcast/show details and episode summary metadata.",
     "params": [
       {
@@ -3718,7 +4154,7 @@
     "platform": "spotify",
     "name": "Spotify Podcast Episodes",
     "path": "/v1/spotify/podcast-episodes",
-    "credits": 2,
+    "credits": 23,
     "summary": "List episodes for a Spotify podcast/show.",
     "params": [
       {
@@ -3731,7 +4167,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 50. Flat 2 credits per call."
+        "description": "Max items to return. Default 20, max 50. Billed per result."
       },
       {
         "name": "cache",
@@ -3768,7 +4204,7 @@
     "platform": "soundcloud",
     "name": "SoundCloud Artist Tracks",
     "path": "/v1/soundcloud/artist-tracks",
-    "credits": 2,
+    "credits": 28,
     "summary": "Tracks from a SoundCloud artist profile, with cursor pagination (nextCursor + hasMore).",
     "params": [
       {
@@ -3781,7 +4217,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Flat 2 credits per call."
+        "description": "Max items to return. Default 20, max 100. Billed per result."
       },
       {
         "name": "cursor",
@@ -3946,7 +4382,7 @@
     "platform": "kick",
     "name": "Kick Clip",
     "path": "/v1/kick/clip",
-    "credits": 2,
+    "credits": 34,
     "summary": "Kick clip metadata from a clip URL or recent channel clips.",
     "params": [
       {
@@ -3959,41 +4395,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 30, max 100. Flat 2 credits on native success."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "amazon_shop_page",
-    "platform": "amazon_shop",
-    "name": "Amazon Shop Page",
-    "path": "/v1/amazon-shop/page",
-    "credits": 2,
-    "summary": "Amazon seller storefront metadata and product listings.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
-      },
-      {
-        "name": "marketplace",
-        "type": "string",
-        "required": false,
-        "description": "Amazon marketplace code. Default US."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 30, max 100. Flat 34 credits per call."
       },
       {
         "name": "cache",
@@ -4287,366 +4689,6 @@
         "type": "string",
         "required": true,
         "description": "Linkme profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "facebook_ad_library_search",
-    "platform": "facebook_ad_library",
-    "name": "Facebook Ad Library Search",
-    "path": "/v1/ad-library/facebook/search",
-    "credits": 70,
-    "summary": "Search Meta/Facebook ads by keyword.",
-    "params": [
-      {
-        "name": "q",
-        "type": "string",
-        "required": true,
-        "description": "Search query or keywords (min 2 chars)."
-      },
-      {
-        "name": "country",
-        "type": "string",
-        "required": false,
-        "description": "ISO country code. Default US."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "facebook_ad_library_company_ads",
-    "platform": "facebook_ad_library",
-    "name": "Facebook Company Ads",
-    "path": "/v1/ad-library/facebook/company-ads",
-    "credits": 70,
-    "summary": "Ads for a Facebook page or Meta Ad Library URL.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Facebook page URL or Meta Ad Library URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
-      },
-      {
-        "name": "country",
-        "type": "string",
-        "required": false,
-        "description": "ISO country code. Default US."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "facebook_ad_library_search_companies",
-    "platform": "facebook_ad_library",
-    "name": "Facebook Ad Library Search Companies",
-    "path": "/v1/ad-library/facebook/search-companies",
-    "credits": 70,
-    "summary": "Find advertisers/pages in the Meta Ad Library by name.",
-    "params": [
-      {
-        "name": "q",
-        "type": "string",
-        "required": true,
-        "description": "Search query or keywords (min 2 chars)."
-      },
-      {
-        "name": "country",
-        "type": "string",
-        "required": false,
-        "description": "ISO country code. Default US."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "facebook_ad_library_ad_details",
-    "platform": "facebook_ad_library",
-    "name": "Facebook Ad Details",
-    "path": "/v1/ad-library/facebook/ad-details",
-    "credits": 2,
-    "summary": "Meta/Facebook Ad Library ad details (creative text, media, advertiser).",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "facebook_ad_library_ad_transcript",
-    "platform": "facebook_ad_library",
-    "name": "Facebook Ad Transcript",
-    "path": "/v1/ad-library/facebook/ad-transcript",
-    "credits": 2,
-    "summary": "Extract creative text from a Meta/Facebook ad as transcript text.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "Meta Ad Library ad URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "tiktok_ad_library_search",
-    "platform": "tiktok_ad_library",
-    "name": "TikTok Ad Library Search",
-    "path": "/v1/ad-library/tiktok/search",
-    "credits": 70,
-    "summary": "Search TikTok Ad Library and Creative Center.",
-    "params": [
-      {
-        "name": "q",
-        "type": "string",
-        "required": true,
-        "description": "Search query or keywords (min 2 chars)."
-      },
-      {
-        "name": "country",
-        "type": "string",
-        "required": false,
-        "description": "ISO country code. Default DE."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "tiktok_ad_library_ad_details",
-    "platform": "tiktok_ad_library",
-    "name": "TikTok Ad Details",
-    "path": "/v1/ad-library/tiktok/ad-details",
-    "credits": 17,
-    "summary": "TikTok ad details by ad URL or ID.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
-      },
-      {
-        "name": "country",
-        "type": "string",
-        "required": false,
-        "description": "ISO country code. Default DE."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "google_ad_library_company_ads",
-    "platform": "google_ad_library",
-    "name": "Google Company Ads",
-    "path": "/v1/ad-library/google/company-ads",
-    "credits": 67,
-    "summary": "Google Ads Transparency Center ads for an advertiser.",
-    "params": [
-      {
-        "name": "advertiser",
-        "type": "string",
-        "required": true,
-        "description": "Advertiser name, domain, or Google advertiser ID."
-      },
-      {
-        "name": "country",
-        "type": "string",
-        "required": false,
-        "description": "ISO country code. Default US."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "google_ad_library_ad_details",
-    "platform": "google_ad_library",
-    "name": "Google Ad Details",
-    "path": "/v1/ad-library/google/ad-details",
-    "credits": 17,
-    "summary": "Google ad details by Transparency Center URL.",
-    "params": [
-      {
-        "name": "creative_id",
-        "type": "string",
-        "required": true,
-        "description": "Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID."
-      },
-      {
-        "name": "country",
-        "type": "string",
-        "required": false,
-        "description": "ISO country code. Default US."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "google_ad_library_advertiser_search",
-    "platform": "google_ad_library",
-    "name": "Google Advertiser Search",
-    "path": "/v1/ad-library/google/advertiser-search",
-    "credits": 1,
-    "summary": "Search Google Ads advertisers.",
-    "params": [
-      {
-        "name": "q",
-        "type": "string",
-        "required": true,
-        "description": "Search query or keywords (min 2 chars)."
-      },
-      {
-        "name": "country",
-        "type": "string",
-        "required": false,
-        "description": "ISO country code. Default US."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 10, max 50. Billed per result."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "linkedin_ad_library_search_ads",
-    "platform": "linkedin_ad_library",
-    "name": "LinkedIn Ad Library Search",
-    "path": "/v1/ad-library/linkedin/search-ads",
-    "credits": 70,
-    "summary": "Search LinkedIn Ad Library ads.",
-    "params": [
-      {
-        "name": "q",
-        "type": "string",
-        "required": true,
-        "description": "Search query or keywords (min 2 chars)."
-      },
-      {
-        "name": "country",
-        "type": "string",
-        "required": false,
-        "description": "ISO country code. Default US."
-      },
-      {
-        "name": "limit",
-        "type": "number",
-        "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
-      },
-      {
-        "name": "cache",
-        "type": "boolean",
-        "required": false,
-        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
-      }
-    ]
-  },
-  {
-    "tool": "linkedin_ad_library_ad_details",
-    "platform": "linkedin_ad_library",
-    "name": "LinkedIn Ad Details",
-    "path": "/v1/ad-library/linkedin/ad-details",
-    "credits": 17,
-    "summary": "LinkedIn ad details by URL or ID.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "required": true,
-        "description": "LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "cache",

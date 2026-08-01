@@ -213,7 +213,7 @@ export class YoutubeApi {
   videoDetails(params: YoutubeVideoDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/video-details", params);
   }
-  /** YouTube Comments — Comments on a YouTube video, with cursor pagination (nextCursor + hasMore). (20 credits) */
+  /** YouTube Comments — Comments on a YouTube video, with cursor pagination (nextCursor + hasMore). (2 credits) */
   comments(params: YoutubeCommentsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/comments", params);
   }
@@ -221,11 +221,11 @@ export class YoutubeApi {
   channelDetails(params: YoutubeChannelDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/channel-details", params);
   }
-  /** YouTube Search — Search YouTube videos by keyword. (20 credits) */
+  /** YouTube Search — Search YouTube videos by keyword. (2 credits) */
   search(params: YoutubeSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/search", params);
   }
-  /** YouTube Channel Videos — List a channel's uploaded videos. (20 credits) */
+  /** YouTube Channel Videos — List a channel's uploaded videos. (2 credits) */
   channelVideos(params: YoutubeChannelVideosParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/channel-videos", params);
   }
@@ -249,7 +249,7 @@ export class YoutubeApi {
   shortsDetails(params: YoutubeShortsDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/shorts/video-details", params);
   }
-  /** YouTube Shorts Comments — Comments on a YouTube Short. (20 credits) */
+  /** YouTube Shorts Comments — Comments on a YouTube Short. (2 credits) */
   shortsComments(params: YoutubeShortsCommentsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/shorts/comments", params);
   }
@@ -269,11 +269,11 @@ export class YoutubeApi {
   hashtagSearch(params: YoutubeHashtagSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/hashtag-search", params);
   }
-  /** YouTube Comment Replies — Replies to a specific YouTube comment. (20 credits) */
+  /** YouTube Comment Replies — Replies to a specific YouTube comment. (2 credits) */
   commentReplies(params: YoutubeCommentRepliesParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/comment-replies", params);
   }
-  /** YouTube Channel Playlists — List a channel's playlists. (20 credits) */
+  /** YouTube Channel Playlists — List a channel's playlists. (2 credits) */
   channelPlaylists(params: YoutubeChannelPlaylistsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/channel-playlists", params);
   }
@@ -296,7 +296,7 @@ export interface TiktokTranscriptParams {
   url: string;
   /** Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect. */
   language?: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  /** Serve from the 24h shared cache when available (0 credits on hit). Default true — set false to always fetch fresh. */
   cache?: boolean;
 }
 
@@ -551,7 +551,7 @@ export class TiktokApi {
   musicPosts(params: TiktokMusicPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/music-posts", params);
   }
-  /** TikTok Top Search — Top mixed TikTok results for a keyword. (14 credits) */
+  /** TikTok Top Search — Top mixed TikTok results for a keyword. (2 credits) */
   topSearch(params: TiktokTopSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/top-search", params);
   }
@@ -567,7 +567,7 @@ export class TiktokApi {
   songDetails(params: TiktokSongDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/song-details", params);
   }
-  /** TikTok Trending Feed — TikTok trending (For You) videos by region. (14 credits) */
+  /** TikTok Trending Feed — TikTok trending (For You) videos by region. (2 credits) */
   trendingFeed(params: TiktokTrendingFeedParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/trending-feed", params);
   }
@@ -764,7 +764,7 @@ export class InstagramApi {
   reelsByAudioId(params: InstagramReelsByAudioIdParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/reels-by-audio-id", params);
   }
-  /** Instagram Hashtag Search — Search Instagram posts by hashtag. (12 credits) */
+  /** Instagram Hashtag Search — Search Instagram posts by hashtag. (2 credits) */
   hashtagSearch(params: InstagramHashtagSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/hashtag-search", params);
   }
@@ -788,7 +788,6 @@ export interface FacebookDetailsParams {
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
-
 
 export interface FacebookSummarizeParams {
   /** Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
@@ -851,67 +850,11 @@ export interface FacebookCommentRepliesParams {
   cache?: boolean;
 }
 
-export interface FacebookMarketplaceSearchParams {
-  /** Product or keyword to search for (min 2 chars). */
-  q: string;
-  /** City or place name, e.g. 'Austin, TX'. */
-  location: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
-  limit?: number;
-  /** Set true to fetch full description, photos and coordinates per listing (slower, costs more). */
-  details?: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface FacebookMarketplaceLocationSearchParams {
-  /** City/place search query, e.g. Austin. */
-  q: string;
-  /** Max items to return. Default 10, max 50. Flat 17 credits per call. */
-  limit?: number;
-  /** Set true to include latitude/longitude per location (slower; doubles cost to 34 credits). */
-  details?: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface FacebookEventSearchParams {
-  /** Topic and/or place, e.g. 'comedy Chicago' (min 2 chars). */
-  q: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
-  limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface FacebookEventDetailsParams {
-  /** Facebook event URL, e.g. https://facebook.com/events/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
 export interface FacebookProfilePhotosParams {
   /** Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface FacebookProfileEventsParams {
-  /** Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
-  limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface FacebookMarketplaceItemParams {
-  /** Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -950,33 +893,9 @@ export class FacebookApi {
   commentReplies(params: FacebookCommentRepliesParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/comment-replies", params);
   }
-  /** Facebook Marketplace Search — Search Facebook Marketplace listings by keyword and location. (28 credits) */
-  marketplaceSearch(params: FacebookMarketplaceSearchParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/facebook/marketplace-search", params);
-  }
-  /** Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34). (17 credits) */
-  marketplaceLocationSearch(params: FacebookMarketplaceLocationSearchParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/facebook/marketplace-location-search", params);
-  }
-  /** Facebook Event Search — Search Facebook events by topic and/or location. (40 credits) */
-  eventSearch(params: FacebookEventSearchParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/facebook/event-search", params);
-  }
-  /** Facebook Event Details — Details for a Facebook event (date, location, attendees, tickets). (2 credits) */
-  eventDetails(params: FacebookEventDetailsParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/facebook/event-details", params);
-  }
   /** Facebook Profile Photos — Photos from a Facebook profile or page. (12 credits) */
   profilePhotos(params: FacebookProfilePhotosParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/profile-photos", params);
-  }
-  /** Facebook Profile Events — Events from a Facebook profile or page. (40 credits) */
-  profileEvents(params: FacebookProfileEventsParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/facebook/profile-events", params);
-  }
-  /** Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (1 credit) */
-  marketplaceItem(params: FacebookMarketplaceItemParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/facebook/marketplace-item", params);
   }
 }
 
@@ -1045,15 +964,15 @@ export class TwitterApi {
   transcript(params: TwitterTranscriptParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitter/transcript", params);
   }
-  /** Twitter/X Profile — Profile info & stats for a Twitter/X account. (1 credit) */
+  /** Twitter/X Profile — Public Twitter/X profile — bio, followers, following, tweet count, avatar. (1 credit) */
   profile(params: TwitterProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitter/profile", params);
   }
-  /** Twitter/X User Tweets — Recent tweets from a Twitter/X profile. (14 credits) */
+  /** Twitter/X User Tweets — Recent tweets from a Twitter/X profile. (2 credits) */
   userTweets(params: TwitterUserTweetsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitter/user-tweets", params);
   }
-  /** Twitter/X Search — Search public tweets on X by keyword. (14 credits) */
+  /** Twitter/X Search — Search public tweets on X by keyword — text, author, engagement, hashtags, and media. (2 credits) */
   search(params: TwitterSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitter/search", params);
   }
@@ -1136,7 +1055,7 @@ export interface RedditSubredditSearchParams {
 
 export class RedditApi {
   constructor(private readonly core: HttpCore) {}
-  /** Reddit Subreddit Posts — Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore). (10 credits) */
+  /** Reddit Subreddit Posts — Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore). (2 credits) */
   subredditPosts(params: RedditSubredditPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/subreddit-posts", params);
   }
@@ -1144,15 +1063,15 @@ export class RedditApi {
   postDetails(params: RedditPostDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/post-details", params);
   }
-  /** Reddit Post Comments — Comments on a Reddit post. (20 credits) */
+  /** Reddit Post Comments — Comments on a Reddit post. (2 credits) */
   postComments(params: RedditPostCommentsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/post-comments", params);
   }
-  /** Reddit Post Transcript — Extract Reddit post text and top comments as a discussion transcript. (20 credits) */
+  /** Reddit Post Transcript — Extract Reddit post text and top comments as a discussion transcript. (2 credits) */
   postTranscript(params: RedditPostTranscriptParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/post-transcript", params);
   }
-  /** Reddit Search — Search Reddit posts site-wide by keyword, with cursor pagination (nextCursor + hasMore). (10 credits) */
+  /** Reddit Search — Search Reddit posts site-wide by keyword — title, subreddit, author, upvotes, comments; cursor pagination. (2 credits) */
   search(params: RedditSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/search", params);
   }
@@ -1160,7 +1079,7 @@ export class RedditApi {
   subredditDetails(params: RedditSubredditDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/subreddit-details", params);
   }
-  /** Reddit Subreddit Search — Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore). (10 credits) */
+  /** Reddit Subreddit Search — Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore). (2 credits) */
   subredditSearch(params: RedditSubredditSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/subreddit-search", params);
   }
@@ -1221,11 +1140,11 @@ export class ThreadsApi {
   postDetails(params: ThreadsPostDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/threads/post-details", params);
   }
-  /** Threads Post Search — Search public Threads posts by keyword. (18 credits) */
+  /** Threads Post Search — Search public Threads posts by keyword — text, author, engagement, and media. (18 credits) */
   search(params: ThreadsSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/threads/search", params);
   }
-  /** Threads Search Users — Find Threads users by keyword. (14 credits) */
+  /** Threads Search Users — Find Threads users by keyword — username, display name, profile URL, verified. (14 credits) */
   searchUsers(params: ThreadsSearchUsersParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/threads/search-users", params);
   }
@@ -1262,7 +1181,7 @@ export class BlueskyApi {
   profile(params: BlueskyProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/bluesky/profile", params);
   }
-  /** Bluesky User Posts — Recent posts from a Bluesky profile — text, author, engagement, embeds; cursor pagination. (3 credits) */
+  /** Bluesky User Posts — Recent posts from a Bluesky profile — text, author, likes, reposts, embeds; cursor pagination. (3 credits) */
   userPosts(params: BlueskyUserPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/bluesky/user-posts", params);
   }
@@ -1372,6 +1291,8 @@ export interface LinkedinCompanyPostsParams {
   url: string;
   /** Max items to return. Default 20, max 100. Billed per result. */
   limit?: number;
+  /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (numeric offset, e.g. 20). */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -1405,7 +1326,7 @@ export class LinkedinApi {
   postTranscript(params: LinkedinPostTranscriptParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/linkedin/post-transcript", params);
   }
-  /** LinkedIn Company Posts — Recent public posts from a LinkedIn company page. (16 credits) */
+  /** LinkedIn Company Posts — Recent public posts from a LinkedIn company page, with cursor pagination (nextCursor + hasMore) up to 100 posts. (16 credits) */
   companyPosts(params: LinkedinCompanyPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/linkedin/company-posts", params);
   }
@@ -1506,7 +1427,7 @@ export interface TiktokShopProductReviewsParams {
 }
 
 export interface TiktokShopUserShowcaseParams {
-  /** TikTok username with or without @. */
+  /** TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug. */
   username: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
@@ -1535,6 +1456,307 @@ export class TiktokShopApi {
   /** TikTok Shop User Showcase — Products a TikTok creator promotes in their Shop showcase — URL, title, price, image, seller shop id. (45 credits) */
   userShowcase(params: TiktokShopUserShowcaseParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok-shop/user-showcase", params);
+  }
+}
+
+export interface FacebookMarketplaceSearchParams {
+  /** Product or keyword to search for (min 2 chars). */
+  q: string;
+  /** City or place name, e.g. 'Austin, TX'. */
+  location: string;
+  /** Max items to return. Default 20, max 200. Billed per result. */
+  limit?: number;
+  /** Set true to fetch full description, photos and coordinates per listing (slower, costs more). */
+  details?: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface FacebookMarketplaceLocationSearchParams {
+  /** City/place search query, e.g. Austin. */
+  q: string;
+  /** Max items to return. Default 10, max 50. Flat 17 credits per call. */
+  limit?: number;
+  /** Set true to include latitude/longitude per location (slower; doubles cost to 34 credits). */
+  details?: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface FacebookMarketplaceItemParams {
+  /** Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  url: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export class FacebookMarketplaceApi {
+  constructor(private readonly core: HttpCore) {}
+  /** Facebook Marketplace Search — Search Facebook Marketplace listings by keyword and location. (28 credits) */
+  search(params: FacebookMarketplaceSearchParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/facebook/marketplace-search", params);
+  }
+  /** Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34). (17 credits) */
+  locationSearch(params: FacebookMarketplaceLocationSearchParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/facebook/marketplace-location-search", params);
+  }
+  /** Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (1 credit) */
+  item(params: FacebookMarketplaceItemParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/facebook/marketplace-item", params);
+  }
+}
+
+export interface FacebookEventSearchParams {
+  /** Topic and/or place, e.g. 'comedy Chicago' (min 2 chars). */
+  q: string;
+  /** Max items to return. Default 20, max 200. Billed per result. */
+  limit?: number;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface FacebookEventDetailsParams {
+  /** Facebook event URL, e.g. https://facebook.com/events/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  url: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface FacebookProfileEventsParams {
+  /** Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  url: string;
+  /** Max items to return. Default 20, max 200. Billed per result. */
+  limit?: number;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export class FacebookEventsApi {
+  constructor(private readonly core: HttpCore) {}
+  /** Facebook Event Search — Search Facebook events by topic and/or location. (40 credits) */
+  facebookEventSearch(params: FacebookEventSearchParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/facebook/event-search", params);
+  }
+  /** Facebook Event Details — Details for a Facebook event (date, location, attendees, tickets). (2 credits) */
+  facebookEventDetails(params: FacebookEventDetailsParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/facebook/event-details", params);
+  }
+  /** Facebook Profile Events — Events from a Facebook profile or page. (40 credits) */
+  facebookProfileEvents(params: FacebookProfileEventsParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/facebook/profile-events", params);
+  }
+}
+
+export interface FacebookAdLibrarySearchParams {
+  /** Search query or keywords (min 2 chars). */
+  q: string;
+  /** ISO country code. Default US. */
+  country?: string;
+  /** Max items to return. Default 20, max 200. Billed per result. */
+  limit?: number;
+  /** ACTIVE (default), INACTIVE, or ALL. */
+  status?: string;
+  /** ALL (default), IMAGE, VIDEO, MEME, IMAGE_AND_MEME, or NONE. */
+  media_type?: string;
+  /** all (default) or political_and_issue_ads. */
+  ad_type?: string;
+  /** keyword_unordered (default) or keyword_exact_phrase. */
+  search_type?: string;
+  /** total_impressions or relevancy_monthly_grouped. */
+  sort_by?: string;
+  /** Delivery start on/after YYYY-MM-DD. */
+  start_date?: string;
+  /** Delivery start on/before YYYY-MM-DD. */
+  end_date?: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface FacebookAdLibraryCompanyAdsParams {
+  /** Facebook page URL or Meta Ad Library URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  url: string;
+  /** ISO country code. Default US. */
+  country?: string;
+  /** Max items to return. Default 20, max 200. Billed per result. */
+  limit?: number;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface FacebookAdLibrarySearchCompaniesParams {
+  /** Search query or keywords (min 2 chars). */
+  q: string;
+  /** ISO country code. Default US. */
+  country?: string;
+  /** Max items to return. Default 20, max 200. Billed per result. */
+  limit?: number;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface FacebookAdLibraryAdDetailsParams {
+  /** Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  url: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface FacebookAdLibraryAdTranscriptParams {
+  /** Meta Ad Library ad URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  url: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export class FacebookAdLibraryApi {
+  constructor(private readonly core: HttpCore) {}
+  /** Facebook Ad Library Search — Search Meta/Facebook ads by keyword with status, media, date, and sort filters. (2 credits) */
+  search(params: FacebookAdLibrarySearchParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/ad-library/facebook/search", params);
+  }
+  /** Facebook Company Ads — Ads for a Facebook page or Meta Ad Library URL. (2 credits) */
+  companyAds(params: FacebookAdLibraryCompanyAdsParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/ad-library/facebook/company-ads", params);
+  }
+  /** Facebook Ad Library Search Companies — Find advertisers/pages in the Meta Ad Library by name. (2 credits) */
+  searchCompanies(params: FacebookAdLibrarySearchCompaniesParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/ad-library/facebook/search-companies", params);
+  }
+  /** Facebook Ad Details — Meta/Facebook ad details. (17 credits) */
+  adDetails(params: FacebookAdLibraryAdDetailsParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/ad-library/facebook/ad-details", params);
+  }
+  /** Facebook Ad Transcript — Extract creative text from a Meta/Facebook ad as transcript text. (17 credits) */
+  adTranscript(params: FacebookAdLibraryAdTranscriptParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/ad-library/facebook/ad-transcript", params);
+  }
+}
+
+export interface TiktokAdLibrarySearchParams {
+  /** Search query or keywords (min 2 chars). */
+  q: string;
+  /** ISO country code. Default DE. */
+  country?: string;
+  /** Max items to return. Default 20, max 200. Billed per result. */
+  limit?: number;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface TiktokAdLibraryAdDetailsParams {
+  /** TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  url: string;
+  /** ISO country code. Default DE. */
+  country?: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export class TiktokAdLibraryApi {
+  constructor(private readonly core: HttpCore) {}
+  /** TikTok Ad Library Search — Search TikTok Ad Library and Creative Center. (70 credits) */
+  search(params: TiktokAdLibrarySearchParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/ad-library/tiktok/search", params);
+  }
+  /** TikTok Ad Details — TikTok ad details by ad URL or ID. (17 credits) */
+  adDetails(params: TiktokAdLibraryAdDetailsParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/ad-library/tiktok/ad-details", params);
+  }
+}
+
+export interface GoogleAdLibraryCompanyAdsParams {
+  /** Advertiser name, domain, or Google advertiser ID. */
+  advertiser: string;
+  /** ISO country code. Default US. */
+  country?: string;
+  /** Max items to return. Default 20, max 200. Billed per result. */
+  limit?: number;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface GoogleAdLibraryAdDetailsParams {
+  /** Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID. */
+  creative_id: string;
+  /** ISO country code. Default US. */
+  country?: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface GoogleAdLibraryAdvertiserSearchParams {
+  /** Search query or keywords (min 2 chars). */
+  q: string;
+  /** ISO country code. Default US. */
+  country?: string;
+  /** Max items to return. Default 10, max 50. Billed per result. */
+  limit?: number;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export class GoogleAdLibraryApi {
+  constructor(private readonly core: HttpCore) {}
+  /** Google Company Ads — Google Ads Transparency Center ads for an advertiser. (2 credits) */
+  companyAds(params: GoogleAdLibraryCompanyAdsParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/ad-library/google/company-ads", params);
+  }
+  /** Google Ad Details — Google ad details by Transparency Center URL. (17 credits) */
+  adDetails(params: GoogleAdLibraryAdDetailsParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/ad-library/google/ad-details", params);
+  }
+  /** Google Advertiser Search — Search Google Ads advertisers. (1 credit) */
+  advertiserSearch(params: GoogleAdLibraryAdvertiserSearchParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/ad-library/google/advertiser-search", params);
+  }
+}
+
+export interface LinkedinAdLibrarySearchAdsParams {
+  /** Search query or keywords (min 2 chars). */
+  q: string;
+  /** ISO country code. Default US. */
+  country?: string;
+  /** Max items to return. Default 20, max 200. Billed per result. */
+  limit?: number;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export interface LinkedinAdLibraryAdDetailsParams {
+  /** LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  url: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export class LinkedinAdLibraryApi {
+  constructor(private readonly core: HttpCore) {}
+  /** LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (2 credits) */
+  searchAds(params: LinkedinAdLibrarySearchAdsParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/ad-library/linkedin/search-ads", params);
+  }
+  /** LinkedIn Ad Details — LinkedIn ad details by URL or ID. (17 credits) */
+  adDetails(params: LinkedinAdLibraryAdDetailsParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/ad-library/linkedin/ad-details", params);
+  }
+}
+
+export interface AmazonShopPageParams {
+  /** Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  url: string;
+  /** Amazon marketplace code. Default US. */
+  marketplace?: string;
+  /** Max items to return. Default 20, max 200. Billed per result. */
+  limit?: number;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
+export class AmazonShopApi {
+  constructor(private readonly core: HttpCore) {}
+  /** Amazon Shop Page — Amazon seller storefront metadata and product listings. (2 credits) */
+  page(params: AmazonShopPageParams): Promise<ApiEnvelope> {
+    return this.core.get("/v1/amazon-shop/page", params);
   }
 }
 
@@ -1935,25 +2157,6 @@ export class KickApi {
   }
 }
 
-export interface AmazonShopPageParams {
-  /** Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** Amazon marketplace code. Default US. */
-  marketplace?: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
-  limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export class AmazonShopApi {
-  constructor(private readonly core: HttpCore) {}
-  /** Amazon Shop Page — Amazon seller storefront metadata and product listings. (2 credits) */
-  page(params: AmazonShopPageParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/amazon-shop/page", params);
-  }
-}
-
 export interface AccountBalanceParams {
 }
 
@@ -2135,174 +2338,6 @@ export class LinkmeApi {
   }
 }
 
-export interface FacebookAdLibrarySearchParams {
-  /** Search query or keywords (min 2 chars). */
-  q: string;
-  /** ISO country code. Default US. */
-  country?: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
-  limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface FacebookAdLibraryCompanyAdsParams {
-  /** Facebook page URL or Meta Ad Library URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** ISO country code. Default US. */
-  country?: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
-  limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface FacebookAdLibrarySearchCompaniesParams {
-  /** Search query or keywords (min 2 chars). */
-  q: string;
-  /** ISO country code. Default US. */
-  country?: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
-  limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface FacebookAdLibraryAdDetailsParams {
-  /** Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface FacebookAdLibraryAdTranscriptParams {
-  /** Meta Ad Library ad URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface TiktokAdLibrarySearchParams {
-  /** Search query or keywords (min 2 chars). */
-  q: string;
-  /** ISO country code. Default DE. */
-  country?: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
-  limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface TiktokAdLibraryAdDetailsParams {
-  /** TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** ISO country code. Default DE. */
-  country?: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface GoogleAdLibraryCompanyAdsParams {
-  /** Advertiser name, domain, or Google advertiser ID. */
-  advertiser: string;
-  /** ISO country code. Default US. */
-  country?: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
-  limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface GoogleAdLibraryAdDetailsParams {
-  /** Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID. */
-  creative_id: string;
-  /** ISO country code. Default US. */
-  country?: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface GoogleAdLibraryAdvertiserSearchParams {
-  /** Search query or keywords (min 2 chars). */
-  q: string;
-  /** ISO country code. Default US. */
-  country?: string;
-  /** Max items to return. Default 10, max 50. Billed per result. */
-  limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface LinkedinAdLibrarySearchAdsParams {
-  /** Search query or keywords (min 2 chars). */
-  q: string;
-  /** ISO country code. Default US. */
-  country?: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
-  limit?: number;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export interface LinkedinAdLibraryAdDetailsParams {
-  /** LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
-  cache?: boolean;
-}
-
-export class AdLibraryApi {
-  constructor(private readonly core: HttpCore) {}
-  /** Facebook Ad Library Search — Search Meta/Facebook ads by keyword. (2 credits) */
-  facebookSearch(params: FacebookAdLibrarySearchParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/ad-library/facebook/search", params);
-  }
-  /** Facebook Company Ads — Ads for a Facebook page or Meta Ad Library URL. (2 credits) */
-  facebookCompanyAds(params: FacebookAdLibraryCompanyAdsParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/ad-library/facebook/company-ads", params);
-  }
-  /** Facebook Ad Library Search Companies — Find advertisers/pages in the Meta Ad Library by name. (2 credits) */
-  facebookSearchCompanies(params: FacebookAdLibrarySearchCompaniesParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/ad-library/facebook/search-companies", params);
-  }
-  /** Facebook Ad Details — Meta/Facebook ad details. (17 credits) */
-  facebookAdDetails(params: FacebookAdLibraryAdDetailsParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/ad-library/facebook/ad-details", params);
-  }
-  /** Facebook Ad Transcript — Extract creative text from a Meta/Facebook ad as transcript text. (17 credits) */
-  facebookAdTranscript(params: FacebookAdLibraryAdTranscriptParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/ad-library/facebook/ad-transcript", params);
-  }
-  /** TikTok Ad Library Search — Search TikTok Ad Library and Creative Center. (70 credits) */
-  tiktokSearch(params: TiktokAdLibrarySearchParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/ad-library/tiktok/search", params);
-  }
-  /** TikTok Ad Details — TikTok ad details by ad URL or ID. (17 credits) */
-  tiktokAdDetails(params: TiktokAdLibraryAdDetailsParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/ad-library/tiktok/ad-details", params);
-  }
-  /** Google Company Ads — Google Ads Transparency Center ads for an advertiser. (2 credits) */
-  googleCompanyAds(params: GoogleAdLibraryCompanyAdsParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/ad-library/google/company-ads", params);
-  }
-  /** Google Ad Details — Google ad details by Transparency Center URL. (17 credits) */
-  googleAdDetails(params: GoogleAdLibraryAdDetailsParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/ad-library/google/ad-details", params);
-  }
-  /** Google Advertiser Search — Search Google Ads advertisers. (1 credit) */
-  googleAdvertiserSearch(params: GoogleAdLibraryAdvertiserSearchParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/ad-library/google/advertiser-search", params);
-  }
-  /** LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (2 credits) */
-  linkedinSearchAds(params: LinkedinAdLibrarySearchAdsParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/ad-library/linkedin/search-ads", params);
-  }
-  /** LinkedIn Ad Details — LinkedIn ad details by URL or ID. (17 credits) */
-  linkedinAdDetails(params: LinkedinAdLibraryAdDetailsParams): Promise<ApiEnvelope> {
-    return this.core.get("/v1/ad-library/linkedin/ad-details", params);
-  }
-}
-
 /** Captapi API client. Get your key at https://captapi.com/dashboard/api-keys */
 export class Captapi {
   readonly youtube: YoutubeApi;
@@ -2317,6 +2352,13 @@ export class Captapi {
   readonly linkedin: LinkedinApi;
   readonly rumble: RumbleApi;
   readonly tiktokShop: TiktokShopApi;
+  readonly facebookMarketplace: FacebookMarketplaceApi;
+  readonly facebookEvents: FacebookEventsApi;
+  readonly facebookAdLibrary: FacebookAdLibraryApi;
+  readonly tiktokAdLibrary: TiktokAdLibraryApi;
+  readonly googleAdLibrary: GoogleAdLibraryApi;
+  readonly linkedinAdLibrary: LinkedinAdLibraryApi;
+  readonly amazonShop: AmazonShopApi;
   readonly github: GithubApi;
   readonly twitch: TwitchApi;
   readonly spotify: SpotifyApi;
@@ -2325,7 +2367,6 @@ export class Captapi {
   readonly snapchat: SnapchatApi;
   readonly truthSocial: TruthSocialApi;
   readonly kick: KickApi;
-  readonly amazonShop: AmazonShopApi;
   readonly account: AccountApi;
   readonly utilities: UtilitiesApi;
   readonly kwai: KwaiApi;
@@ -2333,7 +2374,6 @@ export class Captapi {
   readonly pillar: PillarApi;
   readonly linkbio: LinkbioApi;
   readonly linkme: LinkmeApi;
-  readonly adLibrary: AdLibraryApi;
   constructor(options: CaptapiOptions = {}) {
     const core = new HttpCore(options);
     this.youtube = new YoutubeApi(core);
@@ -2348,6 +2388,13 @@ export class Captapi {
     this.linkedin = new LinkedinApi(core);
     this.rumble = new RumbleApi(core);
     this.tiktokShop = new TiktokShopApi(core);
+    this.facebookMarketplace = new FacebookMarketplaceApi(core);
+    this.facebookEvents = new FacebookEventsApi(core);
+    this.facebookAdLibrary = new FacebookAdLibraryApi(core);
+    this.tiktokAdLibrary = new TiktokAdLibraryApi(core);
+    this.googleAdLibrary = new GoogleAdLibraryApi(core);
+    this.linkedinAdLibrary = new LinkedinAdLibraryApi(core);
+    this.amazonShop = new AmazonShopApi(core);
     this.github = new GithubApi(core);
     this.twitch = new TwitchApi(core);
     this.spotify = new SpotifyApi(core);
@@ -2356,7 +2403,6 @@ export class Captapi {
     this.snapchat = new SnapchatApi(core);
     this.truthSocial = new TruthSocialApi(core);
     this.kick = new KickApi(core);
-    this.amazonShop = new AmazonShopApi(core);
     this.account = new AccountApi(core);
     this.utilities = new UtilitiesApi(core);
     this.kwai = new KwaiApi(core);
@@ -2364,6 +2410,5 @@ export class Captapi {
     this.pillar = new PillarApi(core);
     this.linkbio = new LinkbioApi(core);
     this.linkme = new LinkmeApi(core);
-    this.adLibrary = new AdLibraryApi(core);
   }
 }

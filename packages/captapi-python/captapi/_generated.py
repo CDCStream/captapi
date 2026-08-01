@@ -36,7 +36,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/video-details", {"url": url, "cache": cache})
 
     def comments(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Comments — Comments on a YouTube video, with cursor pagination (nextCursor + hasMore). (20 credits)
+        """YouTube Comments — Comments on a YouTube video, with cursor pagination (nextCursor + hasMore). (2 credits)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
@@ -54,7 +54,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/channel-details", {"url": url, "cache": cache})
 
     def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Search — Search YouTube videos by keyword. (20 credits)
+        """YouTube Search — Search YouTube videos by keyword. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -63,7 +63,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/search", {"q": q, "limit": limit, "cache": cache})
 
     def channel_videos(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Videos — List a channel's uploaded videos. (20 credits)
+        """YouTube Channel Videos — List a channel's uploaded videos. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -119,7 +119,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/shorts/video-details", {"url": url, "cache": cache})
 
     def shorts_comments(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Shorts Comments — Comments on a YouTube Short. (20 credits)
+        """YouTube Shorts Comments — Comments on a YouTube Short. (2 credits)
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
@@ -164,7 +164,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/hashtag-search", {"q": q, "limit": limit, "cache": cache})
 
     def comment_replies(self, *, url: str, comment_id: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Comment Replies — Replies to a specific YouTube comment. (20 credits)
+        """YouTube Comment Replies — Replies to a specific YouTube comment. (2 credits)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param comment_id: ID of the parent comment to fetch replies for (from the comments endpoint).
@@ -174,7 +174,7 @@ class YoutubeApi:
         return self._t.get("/v1/youtube/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
 
     def channel_playlists(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Playlists — List a channel's playlists. (20 credits)
+        """YouTube Channel Playlists — List a channel's playlists. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -239,7 +239,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/video-details", {"url": url, "cache": cache})
 
     async def comments(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Comments — Comments on a YouTube video, with cursor pagination (nextCursor + hasMore). (20 credits)
+        """YouTube Comments — Comments on a YouTube video, with cursor pagination (nextCursor + hasMore). (2 credits)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
@@ -257,7 +257,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/channel-details", {"url": url, "cache": cache})
 
     async def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Search — Search YouTube videos by keyword. (20 credits)
+        """YouTube Search — Search YouTube videos by keyword. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -266,7 +266,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/search", {"q": q, "limit": limit, "cache": cache})
 
     async def channel_videos(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Videos — List a channel's uploaded videos. (20 credits)
+        """YouTube Channel Videos — List a channel's uploaded videos. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -322,7 +322,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/shorts/video-details", {"url": url, "cache": cache})
 
     async def shorts_comments(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Shorts Comments — Comments on a YouTube Short. (20 credits)
+        """YouTube Shorts Comments — Comments on a YouTube Short. (2 credits)
 
         :param url: Public YouTube Shorts URL, e.g. https://youtube.com/shorts/ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
@@ -367,7 +367,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/hashtag-search", {"q": q, "limit": limit, "cache": cache})
 
     async def comment_replies(self, *, url: str, comment_id: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Comment Replies — Replies to a specific YouTube comment. (20 credits)
+        """YouTube Comment Replies — Replies to a specific YouTube comment. (2 credits)
 
         :param url: Public YouTube video URL, e.g. https://youtube.com/watch?v=ID. Not a TikTok/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param comment_id: ID of the parent comment to fetch replies for (from the comments endpoint).
@@ -377,7 +377,7 @@ class AsyncYoutubeApi:
         return await self._t.get("/v1/youtube/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
 
     async def channel_playlists(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Channel Playlists — List a channel's playlists. (20 credits)
+        """YouTube Channel Playlists — List a channel's playlists. (2 credits)
 
         :param url: YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -420,7 +420,7 @@ class TiktokApi:
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        :param cache: Serve from the 24h shared cache when available (0 credits on hit). Default true — set false to always fetch fresh.
         """
         return self._t.get("/v1/tiktok/transcript", {"url": url, "language": language, "cache": cache})
 
@@ -535,7 +535,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/music-posts", {"url": url, "limit": limit, "cache": cache})
 
     def top_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Top Search — Top mixed TikTok results for a keyword. (14 credits)
+        """TikTok Top Search — Top mixed TikTok results for a keyword. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -573,7 +573,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/song-details", {"url": url, "cache": cache})
 
     def trending_feed(self, *, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Trending Feed — TikTok trending (For You) videos by region. (14 credits)
+        """TikTok Trending Feed — TikTok trending (For You) videos by region. (2 credits)
 
         :param country: Two-letter ISO country code, e.g. US, GB, TR. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -627,7 +627,7 @@ class AsyncTiktokApi:
 
         :param url: Public TikTok video URL, e.g. https://tiktok.com/@user/video/ID. Not a YouTube/Instagram/Facebook URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param language: Preferred caption language as an ISO code, e.g. "en". Defaults to auto-detect.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        :param cache: Serve from the 24h shared cache when available (0 credits on hit). Default true — set false to always fetch fresh.
         """
         return await self._t.get("/v1/tiktok/transcript", {"url": url, "language": language, "cache": cache})
 
@@ -742,7 +742,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/music-posts", {"url": url, "limit": limit, "cache": cache})
 
     async def top_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Top Search — Top mixed TikTok results for a keyword. (14 credits)
+        """TikTok Top Search — Top mixed TikTok results for a keyword. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -780,7 +780,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/song-details", {"url": url, "cache": cache})
 
     async def trending_feed(self, *, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Trending Feed — TikTok trending (For You) videos by region. (14 credits)
+        """TikTok Trending Feed — TikTok trending (For You) videos by region. (2 credits)
 
         :param country: Two-letter ISO country code, e.g. US, GB, TR. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -929,7 +929,7 @@ class InstagramApi:
         return self._t.get("/v1/instagram/reels-by-audio-id", {"audio_id": audio_id, "limit": limit, "cache": cache})
 
     def hashtag_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Hashtag Search — Search Instagram posts by hashtag. (12 credits)
+        """Instagram Hashtag Search — Search Instagram posts by hashtag. (2 credits)
 
         :param q: Hashtag without the # (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -1066,7 +1066,7 @@ class AsyncInstagramApi:
         return await self._t.get("/v1/instagram/reels-by-audio-id", {"audio_id": audio_id, "limit": limit, "cache": cache})
 
     async def hashtag_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Hashtag Search — Search Instagram posts by hashtag. (12 credits)
+        """Instagram Hashtag Search — Search Instagram posts by hashtag. (2 credits)
 
         :param q: Hashtag without the # (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -1110,7 +1110,6 @@ class FacebookApi:
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/details", {"url": url, "cache": cache})
-
 
     def summarize(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Summarizer — AI summary of a Facebook video or post. (4 credits)
@@ -1174,44 +1173,6 @@ class FacebookApi:
         """
         return self._t.get("/v1/facebook/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
 
-    def marketplace_search(self, *, q: str, location: str, limit: float | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Marketplace Search — Search Facebook Marketplace listings by keyword and location. (28 credits)
-
-        :param q: Product or keyword to search for (min 2 chars).
-        :param location: City or place name, e.g. 'Austin, TX'.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param details: Set true to fetch full description, photos and coordinates per listing (slower, costs more).
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/facebook/marketplace-search", {"q": q, "location": location, "limit": limit, "details": details, "cache": cache})
-
-    def marketplace_location_search(self, *, q: str, limit: float | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34). (17 credits)
-
-        :param q: City/place search query, e.g. Austin.
-        :param limit: Max items to return. Default 10, max 50. Flat 17 credits per call.
-        :param details: Set true to include latitude/longitude per location (slower; doubles cost to 34 credits).
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/facebook/marketplace-location-search", {"q": q, "limit": limit, "details": details, "cache": cache})
-
-    def event_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Event Search — Search Facebook events by topic and/or location. (40 credits)
-
-        :param q: Topic and/or place, e.g. 'comedy Chicago' (min 2 chars).
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/facebook/event-search", {"q": q, "limit": limit, "cache": cache})
-
-    def event_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Event Details — Details for a Facebook event (date, location, attendees, tickets). (2 credits)
-
-        :param url: Facebook event URL, e.g. https://facebook.com/events/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/facebook/event-details", {"url": url, "cache": cache})
-
     def profile_photos(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Profile Photos — Photos from a Facebook profile or page. (12 credits)
 
@@ -1220,23 +1181,6 @@ class FacebookApi:
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/profile-photos", {"url": url, "limit": limit, "cache": cache})
-
-    def profile_events(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Profile Events — Events from a Facebook profile or page. (40 credits)
-
-        :param url: Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/facebook/profile-events", {"url": url, "limit": limit, "cache": cache})
-
-    def marketplace_item(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (1 credit)
-
-        :param url: Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/facebook/marketplace-item", {"url": url, "cache": cache})
 
 
 class AsyncFacebookApi:
@@ -1250,7 +1194,6 @@ class AsyncFacebookApi:
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/details", {"url": url, "cache": cache})
-
 
     async def summarize(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Summarizer — AI summary of a Facebook video or post. (4 credits)
@@ -1314,44 +1257,6 @@ class AsyncFacebookApi:
         """
         return await self._t.get("/v1/facebook/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
 
-    async def marketplace_search(self, *, q: str, location: str, limit: float | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Marketplace Search — Search Facebook Marketplace listings by keyword and location. (28 credits)
-
-        :param q: Product or keyword to search for (min 2 chars).
-        :param location: City or place name, e.g. 'Austin, TX'.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param details: Set true to fetch full description, photos and coordinates per listing (slower, costs more).
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/facebook/marketplace-search", {"q": q, "location": location, "limit": limit, "details": details, "cache": cache})
-
-    async def marketplace_location_search(self, *, q: str, limit: float | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34). (17 credits)
-
-        :param q: City/place search query, e.g. Austin.
-        :param limit: Max items to return. Default 10, max 50. Flat 17 credits per call.
-        :param details: Set true to include latitude/longitude per location (slower; doubles cost to 34 credits).
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/facebook/marketplace-location-search", {"q": q, "limit": limit, "details": details, "cache": cache})
-
-    async def event_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Event Search — Search Facebook events by topic and/or location. (40 credits)
-
-        :param q: Topic and/or place, e.g. 'comedy Chicago' (min 2 chars).
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/facebook/event-search", {"q": q, "limit": limit, "cache": cache})
-
-    async def event_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Event Details — Details for a Facebook event (date, location, attendees, tickets). (2 credits)
-
-        :param url: Facebook event URL, e.g. https://facebook.com/events/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/facebook/event-details", {"url": url, "cache": cache})
-
     async def profile_photos(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Profile Photos — Photos from a Facebook profile or page. (12 credits)
 
@@ -1360,23 +1265,6 @@ class AsyncFacebookApi:
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/profile-photos", {"url": url, "limit": limit, "cache": cache})
-
-    async def profile_events(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Profile Events — Events from a Facebook profile or page. (40 credits)
-
-        :param url: Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/facebook/profile-events", {"url": url, "limit": limit, "cache": cache})
-
-    async def marketplace_item(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (1 credit)
-
-        :param url: Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/facebook/marketplace-item", {"url": url, "cache": cache})
 
 
 class TwitterApi:
@@ -1400,7 +1288,7 @@ class TwitterApi:
         return self._t.get("/v1/twitter/transcript", {"url": url, "cache": cache})
 
     def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Twitter/X Profile — Profile info & stats for a Twitter/X account. (1 credit)
+        """Twitter/X Profile — Public Twitter/X profile — bio, followers, following, tweet count, avatar. (1 credit)
 
         :param url: Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1408,7 +1296,7 @@ class TwitterApi:
         return self._t.get("/v1/twitter/profile", {"url": url, "cache": cache})
 
     def user_tweets(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Twitter/X User Tweets — Recent tweets from a Twitter/X profile. (14 credits)
+        """Twitter/X User Tweets — Recent tweets from a Twitter/X profile. (2 credits)
 
         :param url: Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -1417,7 +1305,7 @@ class TwitterApi:
         return self._t.get("/v1/twitter/user-tweets", {"url": url, "limit": limit, "cache": cache})
 
     def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Twitter/X Search — Search public tweets on X by keyword. (14 credits)
+        """Twitter/X Search — Search public tweets on X by keyword — text, author, engagement, hashtags, and media. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -1464,7 +1352,7 @@ class AsyncTwitterApi:
         return await self._t.get("/v1/twitter/transcript", {"url": url, "cache": cache})
 
     async def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Twitter/X Profile — Profile info & stats for a Twitter/X account. (1 credit)
+        """Twitter/X Profile — Public Twitter/X profile — bio, followers, following, tweet count, avatar. (1 credit)
 
         :param url: Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1472,7 +1360,7 @@ class AsyncTwitterApi:
         return await self._t.get("/v1/twitter/profile", {"url": url, "cache": cache})
 
     async def user_tweets(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Twitter/X User Tweets — Recent tweets from a Twitter/X profile. (14 credits)
+        """Twitter/X User Tweets — Recent tweets from a Twitter/X profile. (2 credits)
 
         :param url: Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -1481,7 +1369,7 @@ class AsyncTwitterApi:
         return await self._t.get("/v1/twitter/user-tweets", {"url": url, "limit": limit, "cache": cache})
 
     async def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Twitter/X Search — Search public tweets on X by keyword. (14 credits)
+        """Twitter/X Search — Search public tweets on X by keyword — text, author, engagement, hashtags, and media. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -1512,7 +1400,7 @@ class RedditApi:
         self._t = transport
 
     def subreddit_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Subreddit Posts — Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore). (10 credits)
+        """Reddit Subreddit Posts — Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore). (2 credits)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
@@ -1530,7 +1418,7 @@ class RedditApi:
         return self._t.get("/v1/reddit/post-details", {"url": url, "cache": cache})
 
     def post_comments(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Post Comments — Comments on a Reddit post. (20 credits)
+        """Reddit Post Comments — Comments on a Reddit post. (2 credits)
 
         :param url: Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
@@ -1539,7 +1427,7 @@ class RedditApi:
         return self._t.get("/v1/reddit/post-comments", {"url": url, "limit": limit, "cache": cache})
 
     def post_transcript(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Post Transcript — Extract Reddit post text and top comments as a discussion transcript. (20 credits)
+        """Reddit Post Transcript — Extract Reddit post text and top comments as a discussion transcript. (2 credits)
 
         :param url: Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 200. Billed per result.
@@ -1548,7 +1436,7 @@ class RedditApi:
         return self._t.get("/v1/reddit/post-transcript", {"url": url, "limit": limit, "cache": cache})
 
     def search(self, *, q: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Search — Search Reddit posts site-wide by keyword, with cursor pagination (nextCursor + hasMore). (10 credits)
+        """Reddit Search — Search Reddit posts site-wide by keyword — title, subreddit, author, upvotes, comments; cursor pagination. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
@@ -1566,7 +1454,7 @@ class RedditApi:
         return self._t.get("/v1/reddit/subreddit-details", {"url": url, "cache": cache})
 
     def subreddit_search(self, *, url: str, q: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Subreddit Search — Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore). (10 credits)
+        """Reddit Subreddit Search — Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore). (2 credits)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param q: Search query or keywords (min 2 chars).
@@ -1582,7 +1470,7 @@ class AsyncRedditApi:
         self._t = transport
 
     async def subreddit_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Subreddit Posts — Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore). (10 credits)
+        """Reddit Subreddit Posts — Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore). (2 credits)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 200. Billed per result.
@@ -1600,7 +1488,7 @@ class AsyncRedditApi:
         return await self._t.get("/v1/reddit/post-details", {"url": url, "cache": cache})
 
     async def post_comments(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Post Comments — Comments on a Reddit post. (20 credits)
+        """Reddit Post Comments — Comments on a Reddit post. (2 credits)
 
         :param url: Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 500. Billed per result.
@@ -1609,7 +1497,7 @@ class AsyncRedditApi:
         return await self._t.get("/v1/reddit/post-comments", {"url": url, "limit": limit, "cache": cache})
 
     async def post_transcript(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Post Transcript — Extract Reddit post text and top comments as a discussion transcript. (20 credits)
+        """Reddit Post Transcript — Extract Reddit post text and top comments as a discussion transcript. (2 credits)
 
         :param url: Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 50, max 200. Billed per result.
@@ -1618,7 +1506,7 @@ class AsyncRedditApi:
         return await self._t.get("/v1/reddit/post-transcript", {"url": url, "limit": limit, "cache": cache})
 
     async def search(self, *, q: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Search — Search Reddit posts site-wide by keyword, with cursor pagination (nextCursor + hasMore). (10 credits)
+        """Reddit Search — Search Reddit posts site-wide by keyword — title, subreddit, author, upvotes, comments; cursor pagination. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
@@ -1636,7 +1524,7 @@ class AsyncRedditApi:
         return await self._t.get("/v1/reddit/subreddit-details", {"url": url, "cache": cache})
 
     async def subreddit_search(self, *, url: str, q: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Subreddit Search — Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore). (10 credits)
+        """Reddit Subreddit Search — Search posts within a specific subreddit, with cursor pagination (nextCursor + hasMore). (2 credits)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param q: Search query or keywords (min 2 chars).
@@ -1677,7 +1565,7 @@ class ThreadsApi:
         return self._t.get("/v1/threads/post-details", {"url": url, "cache": cache})
 
     def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Threads Post Search — Search public Threads posts by keyword. (18 credits)
+        """Threads Post Search — Search public Threads posts by keyword — text, author, engagement, and media. (18 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
@@ -1686,7 +1574,7 @@ class ThreadsApi:
         return self._t.get("/v1/threads/search", {"q": q, "limit": limit, "cache": cache})
 
     def search_users(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Threads Search Users — Find Threads users by keyword. (14 credits)
+        """Threads Search Users — Find Threads users by keyword — username, display name, profile URL, verified. (14 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 100. Billed per result.
@@ -1725,7 +1613,7 @@ class AsyncThreadsApi:
         return await self._t.get("/v1/threads/post-details", {"url": url, "cache": cache})
 
     async def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Threads Post Search — Search public Threads posts by keyword. (18 credits)
+        """Threads Post Search — Search public Threads posts by keyword — text, author, engagement, and media. (18 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 25, max 200. Billed per result.
@@ -1734,7 +1622,7 @@ class AsyncThreadsApi:
         return await self._t.get("/v1/threads/search", {"q": q, "limit": limit, "cache": cache})
 
     async def search_users(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Threads Search Users — Find Threads users by keyword. (14 credits)
+        """Threads Search Users — Find Threads users by keyword — username, display name, profile URL, verified. (14 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 100. Billed per result.
@@ -1756,7 +1644,7 @@ class BlueskyApi:
         return self._t.get("/v1/bluesky/profile", {"url": url, "cache": cache})
 
     def user_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Bluesky User Posts — Recent posts from a Bluesky profile — text, author, engagement, embeds; cursor pagination. (3 credits)
+        """Bluesky User Posts — Recent posts from a Bluesky profile — text, author, likes, reposts, embeds; cursor pagination. (3 credits)
 
         :param url: Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 100. Billed per result.
@@ -1787,7 +1675,7 @@ class AsyncBlueskyApi:
         return await self._t.get("/v1/bluesky/profile", {"url": url, "cache": cache})
 
     async def user_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Bluesky User Posts — Recent posts from a Bluesky profile — text, author, engagement, embeds; cursor pagination. (3 credits)
+        """Bluesky User Posts — Recent posts from a Bluesky profile — text, author, likes, reposts, embeds; cursor pagination. (3 credits)
 
         :param url: Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 25, max 100. Billed per result.
@@ -1939,14 +1827,15 @@ class LinkedinApi:
         """
         return self._t.get("/v1/linkedin/post-transcript", {"url": url, "cache": cache})
 
-    def company_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """LinkedIn Company Posts — Recent public posts from a LinkedIn company page. (16 credits)
+    def company_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """LinkedIn Company Posts — Recent public posts from a LinkedIn company page, with cursor pagination (nextCursor + hasMore) up to 100 posts. (16 credits)
 
         :param url: LinkedIn company URL, e.g. https://linkedin.com/company/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (numeric offset, e.g. 20).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/linkedin/company-posts", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/linkedin/company-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     def search_posts(self, *, q: str, sort: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """LinkedIn Search Posts — Search public LinkedIn posts by keyword. (16 credits)
@@ -1995,14 +1884,15 @@ class AsyncLinkedinApi:
         """
         return await self._t.get("/v1/linkedin/post-transcript", {"url": url, "cache": cache})
 
-    async def company_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """LinkedIn Company Posts — Recent public posts from a LinkedIn company page. (16 credits)
+    async def company_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """LinkedIn Company Posts — Recent public posts from a LinkedIn company page, with cursor pagination (nextCursor + hasMore) up to 100 posts. (16 credits)
 
         :param url: LinkedIn company URL, e.g. https://linkedin.com/company/slug. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (numeric offset, e.g. 20).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/linkedin/company-posts", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/linkedin/company-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def search_posts(self, *, q: str, sort: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """LinkedIn Search Posts — Search public LinkedIn posts by keyword. (16 credits)
@@ -2138,7 +2028,7 @@ class TiktokShopApi:
     def user_showcase(self, *, username: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Shop User Showcase — Products a TikTok creator promotes in their Shop showcase — URL, title, price, image, seller shop id. (45 credits)
 
-        :param username: TikTok username with or without @.
+        :param username: TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -2188,11 +2078,449 @@ class AsyncTiktokShopApi:
     async def user_showcase(self, *, username: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Shop User Showcase — Products a TikTok creator promotes in their Shop showcase — URL, title, price, image, seller shop id. (45 credits)
 
-        :param username: TikTok username with or without @.
+        :param username: TikTok username, @handle, or profile URL, e.g. hydrojug or https://www.tiktok.com/@hydrojug.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/tiktok-shop/user-showcase", {"username": username, "limit": limit, "cache": cache})
+
+
+class FacebookMarketplaceApi:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def search(self, *, q: str, location: str, limit: float | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Marketplace Search — Search Facebook Marketplace listings by keyword and location. (28 credits)
+
+        :param q: Product or keyword to search for (min 2 chars).
+        :param location: City or place name, e.g. 'Austin, TX'.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param details: Set true to fetch full description, photos and coordinates per listing (slower, costs more).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/facebook/marketplace-search", {"q": q, "location": location, "limit": limit, "details": details, "cache": cache})
+
+    def location_search(self, *, q: str, limit: float | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34). (17 credits)
+
+        :param q: City/place search query, e.g. Austin.
+        :param limit: Max items to return. Default 10, max 50. Flat 17 credits per call.
+        :param details: Set true to include latitude/longitude per location (slower; doubles cost to 34 credits).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/facebook/marketplace-location-search", {"q": q, "limit": limit, "details": details, "cache": cache})
+
+    def item(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (1 credit)
+
+        :param url: Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/facebook/marketplace-item", {"url": url, "cache": cache})
+
+
+class AsyncFacebookMarketplaceApi:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def search(self, *, q: str, location: str, limit: float | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Marketplace Search — Search Facebook Marketplace listings by keyword and location. (28 credits)
+
+        :param q: Product or keyword to search for (min 2 chars).
+        :param location: City or place name, e.g. 'Austin, TX'.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param details: Set true to fetch full description, photos and coordinates per listing (slower, costs more).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/facebook/marketplace-search", {"q": q, "location": location, "limit": limit, "details": details, "cache": cache})
+
+    async def location_search(self, *, q: str, limit: float | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34). (17 credits)
+
+        :param q: City/place search query, e.g. Austin.
+        :param limit: Max items to return. Default 10, max 50. Flat 17 credits per call.
+        :param details: Set true to include latitude/longitude per location (slower; doubles cost to 34 credits).
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/facebook/marketplace-location-search", {"q": q, "limit": limit, "details": details, "cache": cache})
+
+    async def item(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Marketplace Item — Details for a single Facebook Marketplace listing. (1 credit)
+
+        :param url: Facebook Marketplace item URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/facebook/marketplace-item", {"url": url, "cache": cache})
+
+
+class FacebookEventsApi:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def facebook_event_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Event Search — Search Facebook events by topic and/or location. (40 credits)
+
+        :param q: Topic and/or place, e.g. 'comedy Chicago' (min 2 chars).
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/facebook/event-search", {"q": q, "limit": limit, "cache": cache})
+
+    def facebook_event_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Event Details — Details for a Facebook event (date, location, attendees, tickets). (2 credits)
+
+        :param url: Facebook event URL, e.g. https://facebook.com/events/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/facebook/event-details", {"url": url, "cache": cache})
+
+    def facebook_profile_events(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Profile Events — Events from a Facebook profile or page. (40 credits)
+
+        :param url: Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/facebook/profile-events", {"url": url, "limit": limit, "cache": cache})
+
+
+class AsyncFacebookEventsApi:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def facebook_event_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Event Search — Search Facebook events by topic and/or location. (40 credits)
+
+        :param q: Topic and/or place, e.g. 'comedy Chicago' (min 2 chars).
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/facebook/event-search", {"q": q, "limit": limit, "cache": cache})
+
+    async def facebook_event_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Event Details — Details for a Facebook event (date, location, attendees, tickets). (2 credits)
+
+        :param url: Facebook event URL, e.g. https://facebook.com/events/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/facebook/event-details", {"url": url, "cache": cache})
+
+    async def facebook_profile_events(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Profile Events — Events from a Facebook profile or page. (40 credits)
+
+        :param url: Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/facebook/profile-events", {"url": url, "limit": limit, "cache": cache})
+
+
+class FacebookAdLibraryApi:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def search(self, *, q: str, country: str | None = None, limit: float | None = None, status: str | None = None, media_type: str | None = None, ad_type: str | None = None, search_type: str | None = None, sort_by: str | None = None, start_date: str | None = None, end_date: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Ad Library Search — Search Meta/Facebook ads by keyword with status, media, date, and sort filters. (2 credits)
+
+        :param q: Search query or keywords (min 2 chars).
+        :param country: ISO country code. Default US.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param status: ACTIVE (default), INACTIVE, or ALL.
+        :param media_type: ALL (default), IMAGE, VIDEO, MEME, IMAGE_AND_MEME, or NONE.
+        :param ad_type: all (default) or political_and_issue_ads.
+        :param search_type: keyword_unordered (default) or keyword_exact_phrase.
+        :param sort_by: total_impressions or relevancy_monthly_grouped.
+        :param start_date: Delivery start on/after YYYY-MM-DD.
+        :param end_date: Delivery start on/before YYYY-MM-DD.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/ad-library/facebook/search", {"q": q, "country": country, "limit": limit, "status": status, "media_type": media_type, "ad_type": ad_type, "search_type": search_type, "sort_by": sort_by, "start_date": start_date, "end_date": end_date, "cache": cache})
+
+    def company_ads(self, *, url: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Company Ads — Ads for a Facebook page or Meta Ad Library URL. (2 credits)
+
+        :param url: Facebook page URL or Meta Ad Library URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param country: ISO country code. Default US.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/ad-library/facebook/company-ads", {"url": url, "country": country, "limit": limit, "cache": cache})
+
+    def search_companies(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Ad Library Search Companies — Find advertisers/pages in the Meta Ad Library by name. (2 credits)
+
+        :param q: Search query or keywords (min 2 chars).
+        :param country: ISO country code. Default US.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/ad-library/facebook/search-companies", {"q": q, "country": country, "limit": limit, "cache": cache})
+
+    def ad_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Ad Details — Meta/Facebook ad details. (17 credits)
+
+        :param url: Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/ad-library/facebook/ad-details", {"url": url, "cache": cache})
+
+    def ad_transcript(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Ad Transcript — Extract creative text from a Meta/Facebook ad as transcript text. (17 credits)
+
+        :param url: Meta Ad Library ad URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/ad-library/facebook/ad-transcript", {"url": url, "cache": cache})
+
+
+class AsyncFacebookAdLibraryApi:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def search(self, *, q: str, country: str | None = None, limit: float | None = None, status: str | None = None, media_type: str | None = None, ad_type: str | None = None, search_type: str | None = None, sort_by: str | None = None, start_date: str | None = None, end_date: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Ad Library Search — Search Meta/Facebook ads by keyword with status, media, date, and sort filters. (2 credits)
+
+        :param q: Search query or keywords (min 2 chars).
+        :param country: ISO country code. Default US.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param status: ACTIVE (default), INACTIVE, or ALL.
+        :param media_type: ALL (default), IMAGE, VIDEO, MEME, IMAGE_AND_MEME, or NONE.
+        :param ad_type: all (default) or political_and_issue_ads.
+        :param search_type: keyword_unordered (default) or keyword_exact_phrase.
+        :param sort_by: total_impressions or relevancy_monthly_grouped.
+        :param start_date: Delivery start on/after YYYY-MM-DD.
+        :param end_date: Delivery start on/before YYYY-MM-DD.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/ad-library/facebook/search", {"q": q, "country": country, "limit": limit, "status": status, "media_type": media_type, "ad_type": ad_type, "search_type": search_type, "sort_by": sort_by, "start_date": start_date, "end_date": end_date, "cache": cache})
+
+    async def company_ads(self, *, url: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Company Ads — Ads for a Facebook page or Meta Ad Library URL. (2 credits)
+
+        :param url: Facebook page URL or Meta Ad Library URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param country: ISO country code. Default US.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/ad-library/facebook/company-ads", {"url": url, "country": country, "limit": limit, "cache": cache})
+
+    async def search_companies(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Ad Library Search Companies — Find advertisers/pages in the Meta Ad Library by name. (2 credits)
+
+        :param q: Search query or keywords (min 2 chars).
+        :param country: ISO country code. Default US.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/ad-library/facebook/search-companies", {"q": q, "country": country, "limit": limit, "cache": cache})
+
+    async def ad_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Ad Details — Meta/Facebook ad details. (17 credits)
+
+        :param url: Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/ad-library/facebook/ad-details", {"url": url, "cache": cache})
+
+    async def ad_transcript(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Ad Transcript — Extract creative text from a Meta/Facebook ad as transcript text. (17 credits)
+
+        :param url: Meta Ad Library ad URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/ad-library/facebook/ad-transcript", {"url": url, "cache": cache})
+
+
+class TiktokAdLibraryApi:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Ad Library Search — Search TikTok Ad Library and Creative Center. (70 credits)
+
+        :param q: Search query or keywords (min 2 chars).
+        :param country: ISO country code. Default DE.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/ad-library/tiktok/search", {"q": q, "country": country, "limit": limit, "cache": cache})
+
+    def ad_details(self, *, url: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Ad Details — TikTok ad details by ad URL or ID. (17 credits)
+
+        :param url: TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param country: ISO country code. Default DE.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/ad-library/tiktok/ad-details", {"url": url, "country": country, "cache": cache})
+
+
+class AsyncTiktokAdLibraryApi:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Ad Library Search — Search TikTok Ad Library and Creative Center. (70 credits)
+
+        :param q: Search query or keywords (min 2 chars).
+        :param country: ISO country code. Default DE.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/ad-library/tiktok/search", {"q": q, "country": country, "limit": limit, "cache": cache})
+
+    async def ad_details(self, *, url: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Ad Details — TikTok ad details by ad URL or ID. (17 credits)
+
+        :param url: TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param country: ISO country code. Default DE.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/ad-library/tiktok/ad-details", {"url": url, "country": country, "cache": cache})
+
+
+class GoogleAdLibraryApi:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def company_ads(self, *, advertiser: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Google Company Ads — Google Ads Transparency Center ads for an advertiser. (2 credits)
+
+        :param advertiser: Advertiser name, domain, or Google advertiser ID.
+        :param country: ISO country code. Default US.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/ad-library/google/company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "cache": cache})
+
+    def ad_details(self, *, creative_id: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Google Ad Details — Google ad details by Transparency Center URL. (17 credits)
+
+        :param creative_id: Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID.
+        :param country: ISO country code. Default US.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/ad-library/google/ad-details", {"creative_id": creative_id, "country": country, "cache": cache})
+
+    def advertiser_search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Google Advertiser Search — Search Google Ads advertisers. (1 credit)
+
+        :param q: Search query or keywords (min 2 chars).
+        :param country: ISO country code. Default US.
+        :param limit: Max items to return. Default 10, max 50. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/ad-library/google/advertiser-search", {"q": q, "country": country, "limit": limit, "cache": cache})
+
+
+class AsyncGoogleAdLibraryApi:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def company_ads(self, *, advertiser: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Google Company Ads — Google Ads Transparency Center ads for an advertiser. (2 credits)
+
+        :param advertiser: Advertiser name, domain, or Google advertiser ID.
+        :param country: ISO country code. Default US.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/ad-library/google/company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "cache": cache})
+
+    async def ad_details(self, *, creative_id: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Google Ad Details — Google ad details by Transparency Center URL. (17 credits)
+
+        :param creative_id: Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID.
+        :param country: ISO country code. Default US.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/ad-library/google/ad-details", {"creative_id": creative_id, "country": country, "cache": cache})
+
+    async def advertiser_search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Google Advertiser Search — Search Google Ads advertisers. (1 credit)
+
+        :param q: Search query or keywords (min 2 chars).
+        :param country: ISO country code. Default US.
+        :param limit: Max items to return. Default 10, max 50. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/ad-library/google/advertiser-search", {"q": q, "country": country, "limit": limit, "cache": cache})
+
+
+class LinkedinAdLibraryApi:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def search_ads(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (2 credits)
+
+        :param q: Search query or keywords (min 2 chars).
+        :param country: ISO country code. Default US.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/ad-library/linkedin/search-ads", {"q": q, "country": country, "limit": limit, "cache": cache})
+
+    def ad_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
+        """LinkedIn Ad Details — LinkedIn ad details by URL or ID. (17 credits)
+
+        :param url: LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/ad-library/linkedin/ad-details", {"url": url, "cache": cache})
+
+
+class AsyncLinkedinAdLibraryApi:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def search_ads(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (2 credits)
+
+        :param q: Search query or keywords (min 2 chars).
+        :param country: ISO country code. Default US.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/ad-library/linkedin/search-ads", {"q": q, "country": country, "limit": limit, "cache": cache})
+
+    async def ad_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
+        """LinkedIn Ad Details — LinkedIn ad details by URL or ID. (17 credits)
+
+        :param url: LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/ad-library/linkedin/ad-details", {"url": url, "cache": cache})
+
+
+class AmazonShopApi:
+    def __init__(self, transport: SyncTransport) -> None:
+        self._t = transport
+
+    def page(self, *, url: str, marketplace: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Amazon Shop Page — Amazon seller storefront metadata and product listings. (2 credits)
+
+        :param url: Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param marketplace: Amazon marketplace code. Default US.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/amazon-shop/page", {"url": url, "marketplace": marketplace, "limit": limit, "cache": cache})
+
+
+class AsyncAmazonShopApi:
+    def __init__(self, transport: AsyncTransport) -> None:
+        self._t = transport
+
+    async def page(self, *, url: str, marketplace: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Amazon Shop Page — Amazon seller storefront metadata and product listings. (2 credits)
+
+        :param url: Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param marketplace: Amazon marketplace code. Default US.
+        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/amazon-shop/page", {"url": url, "marketplace": marketplace, "limit": limit, "cache": cache})
 
 
 class GithubApi:
@@ -2785,36 +3113,6 @@ class AsyncKickApi:
         return await self._t.get("/v1/kick/clip", {"url": url, "limit": limit, "cache": cache})
 
 
-class AmazonShopApi:
-    def __init__(self, transport: SyncTransport) -> None:
-        self._t = transport
-
-    def page(self, *, url: str, marketplace: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Amazon Shop Page — Amazon seller storefront metadata and product listings. (2 credits)
-
-        :param url: Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param marketplace: Amazon marketplace code. Default US.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/amazon-shop/page", {"url": url, "marketplace": marketplace, "limit": limit, "cache": cache})
-
-
-class AsyncAmazonShopApi:
-    def __init__(self, transport: AsyncTransport) -> None:
-        self._t = transport
-
-    async def page(self, *, url: str, marketplace: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Amazon Shop Page — Amazon seller storefront metadata and product listings. (2 credits)
-
-        :param url: Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param marketplace: Amazon marketplace code. Default US.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/amazon-shop/page", {"url": url, "marketplace": marketplace, "limit": limit, "cache": cache})
-
-
 class AccountApi:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
@@ -3111,240 +3409,6 @@ class AsyncLinkmeApi:
         return await self._t.get("/v1/linkme/profile", {"url": url, "cache": cache})
 
 
-class AdLibraryApi:
-    def __init__(self, transport: SyncTransport) -> None:
-        self._t = transport
-
-    def facebook_search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Ad Library Search — Search Meta/Facebook ads by keyword. (2 credits)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param country: ISO country code. Default US.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/ad-library/facebook/search", {"q": q, "country": country, "limit": limit, "cache": cache})
-
-    def facebook_company_ads(self, *, url: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Company Ads — Ads for a Facebook page or Meta Ad Library URL. (2 credits)
-
-        :param url: Facebook page URL or Meta Ad Library URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param country: ISO country code. Default US.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/ad-library/facebook/company-ads", {"url": url, "country": country, "limit": limit, "cache": cache})
-
-    def facebook_search_companies(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Ad Library Search Companies — Find advertisers/pages in the Meta Ad Library by name. (2 credits)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param country: ISO country code. Default US.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/ad-library/facebook/search-companies", {"q": q, "country": country, "limit": limit, "cache": cache})
-
-    def facebook_ad_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Ad Details — Meta/Facebook ad details. (17 credits)
-
-        :param url: Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/ad-library/facebook/ad-details", {"url": url, "cache": cache})
-
-    def facebook_ad_transcript(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Ad Transcript — Extract creative text from a Meta/Facebook ad as transcript text. (17 credits)
-
-        :param url: Meta Ad Library ad URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/ad-library/facebook/ad-transcript", {"url": url, "cache": cache})
-
-    def tiktok_search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Ad Library Search — Search TikTok Ad Library and Creative Center. (70 credits)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param country: ISO country code. Default DE.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/ad-library/tiktok/search", {"q": q, "country": country, "limit": limit, "cache": cache})
-
-    def tiktok_ad_details(self, *, url: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Ad Details — TikTok ad details by ad URL or ID. (17 credits)
-
-        :param url: TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param country: ISO country code. Default DE.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/ad-library/tiktok/ad-details", {"url": url, "country": country, "cache": cache})
-
-    def google_company_ads(self, *, advertiser: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Company Ads — Google Ads Transparency Center ads for an advertiser. (2 credits)
-
-        :param advertiser: Advertiser name, domain, or Google advertiser ID.
-        :param country: ISO country code. Default US.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/ad-library/google/company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "cache": cache})
-
-    def google_ad_details(self, *, creative_id: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Ad Details — Google ad details by Transparency Center URL. (17 credits)
-
-        :param creative_id: Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID.
-        :param country: ISO country code. Default US.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/ad-library/google/ad-details", {"creative_id": creative_id, "country": country, "cache": cache})
-
-    def google_advertiser_search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Advertiser Search — Search Google Ads advertisers. (1 credit)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param country: ISO country code. Default US.
-        :param limit: Max items to return. Default 10, max 50. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/ad-library/google/advertiser-search", {"q": q, "country": country, "limit": limit, "cache": cache})
-
-    def linkedin_search_ads(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (2 credits)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param country: ISO country code. Default US.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/ad-library/linkedin/search-ads", {"q": q, "country": country, "limit": limit, "cache": cache})
-
-    def linkedin_ad_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """LinkedIn Ad Details — LinkedIn ad details by URL or ID. (17 credits)
-
-        :param url: LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return self._t.get("/v1/ad-library/linkedin/ad-details", {"url": url, "cache": cache})
-
-
-class AsyncAdLibraryApi:
-    def __init__(self, transport: AsyncTransport) -> None:
-        self._t = transport
-
-    async def facebook_search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Ad Library Search — Search Meta/Facebook ads by keyword. (2 credits)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param country: ISO country code. Default US.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/ad-library/facebook/search", {"q": q, "country": country, "limit": limit, "cache": cache})
-
-    async def facebook_company_ads(self, *, url: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Company Ads — Ads for a Facebook page or Meta Ad Library URL. (2 credits)
-
-        :param url: Facebook page URL or Meta Ad Library URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param country: ISO country code. Default US.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/ad-library/facebook/company-ads", {"url": url, "country": country, "limit": limit, "cache": cache})
-
-    async def facebook_search_companies(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Ad Library Search Companies — Find advertisers/pages in the Meta Ad Library by name. (2 credits)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param country: ISO country code. Default US.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/ad-library/facebook/search-companies", {"q": q, "country": country, "limit": limit, "cache": cache})
-
-    async def facebook_ad_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Ad Details — Meta/Facebook ad details. (17 credits)
-
-        :param url: Meta Ad Library ad URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/ad-library/facebook/ad-details", {"url": url, "cache": cache})
-
-    async def facebook_ad_transcript(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Ad Transcript — Extract creative text from a Meta/Facebook ad as transcript text. (17 credits)
-
-        :param url: Meta Ad Library ad URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/ad-library/facebook/ad-transcript", {"url": url, "cache": cache})
-
-    async def tiktok_search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Ad Library Search — Search TikTok Ad Library and Creative Center. (70 credits)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param country: ISO country code. Default DE.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/ad-library/tiktok/search", {"q": q, "country": country, "limit": limit, "cache": cache})
-
-    async def tiktok_ad_details(self, *, url: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Ad Details — TikTok ad details by ad URL or ID. (17 credits)
-
-        :param url: TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param country: ISO country code. Default DE.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/ad-library/tiktok/ad-details", {"url": url, "country": country, "cache": cache})
-
-    async def google_company_ads(self, *, advertiser: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Company Ads — Google Ads Transparency Center ads for an advertiser. (2 credits)
-
-        :param advertiser: Advertiser name, domain, or Google advertiser ID.
-        :param country: ISO country code. Default US.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/ad-library/google/company-ads", {"advertiser": advertiser, "country": country, "limit": limit, "cache": cache})
-
-    async def google_ad_details(self, *, creative_id: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Ad Details — Google ad details by Transparency Center URL. (17 credits)
-
-        :param creative_id: Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID.
-        :param country: ISO country code. Default US.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/ad-library/google/ad-details", {"creative_id": creative_id, "country": country, "cache": cache})
-
-    async def google_advertiser_search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Google Advertiser Search — Search Google Ads advertisers. (1 credit)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param country: ISO country code. Default US.
-        :param limit: Max items to return. Default 10, max 50. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/ad-library/google/advertiser-search", {"q": q, "country": country, "limit": limit, "cache": cache})
-
-    async def linkedin_search_ads(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (2 credits)
-
-        :param q: Search query or keywords (min 2 chars).
-        :param country: ISO country code. Default US.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/ad-library/linkedin/search-ads", {"q": q, "country": country, "limit": limit, "cache": cache})
-
-    async def linkedin_ad_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """LinkedIn Ad Details — LinkedIn ad details by URL or ID. (17 credits)
-
-        :param url: LinkedIn Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
-        """
-        return await self._t.get("/v1/ad-library/linkedin/ad-details", {"url": url, "cache": cache})
-
-
 class Captapi:
     """Captapi API client. Get your key at https://captapi.com/dashboard/api-keys"""
 
@@ -3362,6 +3426,13 @@ class Captapi:
         self.linkedin = LinkedinApi(self._transport)
         self.rumble = RumbleApi(self._transport)
         self.tiktok_shop = TiktokShopApi(self._transport)
+        self.facebook_marketplace = FacebookMarketplaceApi(self._transport)
+        self.facebook_events = FacebookEventsApi(self._transport)
+        self.facebook_ad_library = FacebookAdLibraryApi(self._transport)
+        self.tiktok_ad_library = TiktokAdLibraryApi(self._transport)
+        self.google_ad_library = GoogleAdLibraryApi(self._transport)
+        self.linkedin_ad_library = LinkedinAdLibraryApi(self._transport)
+        self.amazon_shop = AmazonShopApi(self._transport)
         self.github = GithubApi(self._transport)
         self.twitch = TwitchApi(self._transport)
         self.spotify = SpotifyApi(self._transport)
@@ -3370,7 +3441,6 @@ class Captapi:
         self.snapchat = SnapchatApi(self._transport)
         self.truth_social = TruthSocialApi(self._transport)
         self.kick = KickApi(self._transport)
-        self.amazon_shop = AmazonShopApi(self._transport)
         self.account = AccountApi(self._transport)
         self.utilities = UtilitiesApi(self._transport)
         self.kwai = KwaiApi(self._transport)
@@ -3378,7 +3448,6 @@ class Captapi:
         self.pillar = PillarApi(self._transport)
         self.linkbio = LinkbioApi(self._transport)
         self.linkme = LinkmeApi(self._transport)
-        self.ad_library = AdLibraryApi(self._transport)
 
     def close(self) -> None:
         self._transport.close()
@@ -3407,6 +3476,13 @@ class AsyncCaptapi:
         self.linkedin = AsyncLinkedinApi(self._transport)
         self.rumble = AsyncRumbleApi(self._transport)
         self.tiktok_shop = AsyncTiktokShopApi(self._transport)
+        self.facebook_marketplace = AsyncFacebookMarketplaceApi(self._transport)
+        self.facebook_events = AsyncFacebookEventsApi(self._transport)
+        self.facebook_ad_library = AsyncFacebookAdLibraryApi(self._transport)
+        self.tiktok_ad_library = AsyncTiktokAdLibraryApi(self._transport)
+        self.google_ad_library = AsyncGoogleAdLibraryApi(self._transport)
+        self.linkedin_ad_library = AsyncLinkedinAdLibraryApi(self._transport)
+        self.amazon_shop = AsyncAmazonShopApi(self._transport)
         self.github = AsyncGithubApi(self._transport)
         self.twitch = AsyncTwitchApi(self._transport)
         self.spotify = AsyncSpotifyApi(self._transport)
@@ -3415,7 +3491,6 @@ class AsyncCaptapi:
         self.snapchat = AsyncSnapchatApi(self._transport)
         self.truth_social = AsyncTruthSocialApi(self._transport)
         self.kick = AsyncKickApi(self._transport)
-        self.amazon_shop = AsyncAmazonShopApi(self._transport)
         self.account = AsyncAccountApi(self._transport)
         self.utilities = AsyncUtilitiesApi(self._transport)
         self.kwai = AsyncKwaiApi(self._transport)
@@ -3423,7 +3498,6 @@ class AsyncCaptapi:
         self.pillar = AsyncPillarApi(self._transport)
         self.linkbio = AsyncLinkbioApi(self._transport)
         self.linkme = AsyncLinkmeApi(self._transport)
-        self.ad_library = AsyncAdLibraryApi(self._transport)
 
     async def aclose(self) -> None:
         await self._transport.aclose()

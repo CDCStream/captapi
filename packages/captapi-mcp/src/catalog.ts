@@ -469,7 +469,25 @@ const LINKME: Omit<Endpoint, "platform">[] = [
 ];
 
 const FACEBOOK_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
-  { tool: "facebook_ad_library_search", name: "Facebook Ad Library Search", path: "/v1/ad-library/facebook/search", credits: 2, summary: "Search Meta/Facebook ads by keyword.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
+  {
+    tool: "facebook_ad_library_search",
+    name: "Facebook Ad Library Search",
+    path: "/v1/ad-library/facebook/search",
+    credits: 2,
+    summary: "Search Meta/Facebook ads by keyword with status, media, date, and sort filters.",
+    params: [
+      q(),
+      { name: "country", type: "string", required: false, description: "ISO country code. Default US." },
+      limit(20, 200),
+      { name: "status", type: "string", required: false, description: "ACTIVE (default), INACTIVE, or ALL." },
+      { name: "media_type", type: "string", required: false, description: "ALL (default), IMAGE, VIDEO, MEME, IMAGE_AND_MEME, or NONE." },
+      { name: "ad_type", type: "string", required: false, description: "all (default) or political_and_issue_ads." },
+      { name: "search_type", type: "string", required: false, description: "keyword_unordered (default) or keyword_exact_phrase." },
+      { name: "sort_by", type: "string", required: false, description: "total_impressions or relevancy_monthly_grouped." },
+      { name: "start_date", type: "string", required: false, description: "Delivery start on/after YYYY-MM-DD." },
+      { name: "end_date", type: "string", required: false, description: "Delivery start on/before YYYY-MM-DD." },
+    ],
+  },
   { tool: "facebook_ad_library_company_ads", name: "Facebook Company Ads", path: "/v1/ad-library/facebook/company-ads", credits: 2, summary: "Ads for a Facebook page or Meta Ad Library URL.", params: [url("Facebook page URL or Meta Ad Library URL."), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
   { tool: "facebook_ad_library_search_companies", name: "Facebook Ad Library Search Companies", path: "/v1/ad-library/facebook/search-companies", credits: 2, summary: "Find advertisers/pages in the Meta Ad Library by name.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
   { tool: "facebook_ad_library_ad_details", name: "Facebook Ad Details", path: "/v1/ad-library/facebook/ad-details", credits: 17, summary: "Meta/Facebook ad details.", params: [url("Meta Ad Library ad URL.")] },

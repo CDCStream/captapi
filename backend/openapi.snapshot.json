@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Captapi API",
-    "description": "Extract transcripts, summaries, comments and stats from social media videos (YouTube, TikTok, Instagram, Facebook). Connect by AI agents and no-code tools via the MCP server (@captapi/mcp), the CLI (@captapi/cli), the n8n community node (n8n-nodes-captapi), the Make.com custom app, or the Apify Actor (BYO key). Full guide: https://captapi.com/docs/integrations",
+    "description": "Extract transcripts, summaries, comments and stats from social media videos and related public sources (YouTube, TikTok, Instagram, Facebook, and more). Connect via MCP (@captapi/mcp), CLI (@captapi/cli), n8n (n8n-nodes-captapi), Make.com, or the optional Apify Store client that calls this REST API with your Captapi key. Full guide: https://captapi.com/docs/integrations",
     "version": "0.1.0"
   },
   "paths": {
@@ -762,9 +762,11 @@
               "type": "integer",
               "maximum": 100,
               "minimum": 1,
+              "description": "How many Shorts to return (1–100). Flat 2 credits per call.",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "How many Shorts to return (1–100). Flat 2 credits per call."
           },
           {
             "name": "cache",
@@ -2807,9 +2809,11 @@
               "type": "integer",
               "maximum": 200,
               "minimum": 1,
+              "description": "How many videos using this sound to return (1–200). Flat 2 credits per call.",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "How many videos using this sound to return (1–200). Flat 2 credits per call."
           },
           {
             "name": "cache",
@@ -5071,9 +5075,11 @@
               "type": "integer",
               "maximum": 500,
               "minimum": 1,
+              "description": "How many top-level comments to return (1–500). Flat 2 credits per call.",
               "default": 50,
               "title": "Limit"
-            }
+            },
+            "description": "How many top-level comments to return (1–500). Flat 2 credits per call."
           },
           {
             "name": "cache",
@@ -5425,9 +5431,11 @@
               "type": "integer",
               "maximum": 500,
               "minimum": 1,
+              "description": "How many direct replies to return (1–500). Flat 2 credits per call.",
               "default": 50,
               "title": "Limit"
-            }
+            },
+            "description": "How many direct replies to return (1–500). Flat 2 credits per call."
           },
           {
             "name": "cache",
@@ -5710,9 +5718,11 @@
               "type": "integer",
               "maximum": 200,
               "minimum": 1,
+              "description": "How many listings to return (1–200). Flat 2 credits when details=false; with details=true billed as 2 + 2 per listing.",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "How many listings to return (1–200). Flat 2 credits when details=false; with details=true billed as 2 + 2 per listing."
           },
           {
             "name": "details",
@@ -5720,11 +5730,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "Fetch full description, photos & coordinates per listing (slower, costs more)",
+              "description": "When true, enrich each listing with description, condition, coordinates, and photos via native item pages (2 + 2 credits per listing). Default false → list cards only at flat 2 credits.",
               "default": false,
               "title": "Details"
             },
-            "description": "Fetch full description, photos & coordinates per listing (slower, costs more)"
+            "description": "When true, enrich each listing with description, condition, coordinates, and photos via native item pages (2 + 2 credits per listing). Default false → list cards only at flat 2 credits."
           },
           {
             "name": "cache",
@@ -5804,11 +5814,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "When true, fetches listing details so each location includes latitude/longitude (slower; doubles credit cost).",
+              "description": "Legacy flag. Coordinates are always included when Facebook exposes them. Flat 2 credits either way.",
               "default": false,
               "title": "Details"
             },
-            "description": "When true, fetches listing details so each location includes latitude/longitude (slower; doubles credit cost)."
+            "description": "Legacy flag. Coordinates are always included when Facebook exposes them. Flat 2 credits either way."
           },
           {
             "name": "cache",
@@ -5996,8 +6006,10 @@
             "schema": {
               "type": "string",
               "minLength": 2,
+              "description": "Keyword, brand, or advertiser to search.",
               "title": "Q"
-            }
+            },
+            "description": "Keyword, brand, or advertiser to search."
           },
           {
             "name": "country",
@@ -6019,9 +6031,140 @@
               "type": "integer",
               "maximum": 200,
               "minimum": 1,
+              "description": "Max ads to return per call (default 20, max 200). Native HTML page may return fewer.",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "Max ads to return per call (default 20, max 200). Native HTML page may return fewer."
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "ALL",
+                "ACTIVE",
+                "INACTIVE"
+              ],
+              "type": "string",
+              "description": "Ad delivery status filter. Default ACTIVE — use ALL for historical/inactive ads.",
+              "default": "ACTIVE",
+              "title": "Status"
+            },
+            "description": "Ad delivery status filter. Default ACTIVE — use ALL for historical/inactive ads."
+          },
+          {
+            "name": "media_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "ALL",
+                "IMAGE",
+                "VIDEO",
+                "MEME",
+                "IMAGE_AND_MEME",
+                "NONE"
+              ],
+              "type": "string",
+              "description": "Creative media filter (Meta Ad Library media_type).",
+              "default": "ALL",
+              "title": "Media Type"
+            },
+            "description": "Creative media filter (Meta Ad Library media_type)."
+          },
+          {
+            "name": "ad_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "all",
+                "political_and_issue_ads"
+              ],
+              "type": "string",
+              "description": "Ad type filter. political_and_issue_ads is required for spend/impressions on many markets.",
+              "default": "all",
+              "title": "Ad Type"
+            },
+            "description": "Ad type filter. political_and_issue_ads is required for spend/impressions on many markets."
+          },
+          {
+            "name": "search_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "keyword_unordered",
+                "keyword_exact_phrase"
+              ],
+              "type": "string",
+              "description": "Keyword matching: unordered tokens vs exact phrase.",
+              "default": "keyword_unordered",
+              "title": "Search Type"
+            },
+            "description": "Keyword matching: unordered tokens vs exact phrase."
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "total_impressions",
+                    "relevancy_monthly_grouped"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Meta sort mode (sort_data[mode]). Omit for Meta default.",
+              "title": "Sort By"
+            },
+            "description": "Meta sort mode (sort_data[mode]). Omit for Meta default."
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only ads with delivery start on/after this date (YYYY-MM-DD).",
+              "title": "Start Date"
+            },
+            "description": "Only ads with delivery start on/after this date (YYYY-MM-DD)."
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only ads with delivery start on/before this date (YYYY-MM-DD).",
+              "title": "End Date"
+            },
+            "description": "Only ads with delivery start on/before this date (YYYY-MM-DD)."
           },
           {
             "name": "cache",
@@ -8861,10 +9004,10 @@
             "schema": {
               "type": "string",
               "minLength": 2,
-              "description": "Keyword to search Threads users",
+              "description": "Keyword to find Threads users or creators",
               "title": "Q"
             },
-            "description": "Keyword to search Threads users"
+            "description": "Keyword to find Threads users or creators"
           },
           {
             "name": "limit",
@@ -9796,6 +9939,24 @@
             }
           },
           {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (numeric offset, e.g. 20). A null nextCursor means the end of the list (max 100 posts).",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (numeric offset, e.g. 20). A null nextCursor means the end of the list (max 100 posts)."
+          },
+          {
             "name": "cache",
             "in": "query",
             "required": false,
@@ -10075,9 +10236,11 @@
               "type": "integer",
               "maximum": 500,
               "minimum": 1,
+              "description": "How many top-level comments to return (1–500). Flat 2 credits per call.",
               "default": 50,
               "title": "Limit"
-            }
+            },
+            "description": "How many top-level comments to return (1–500). Flat 2 credits per call."
           },
           {
             "name": "cache",
@@ -10278,10 +10441,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)",
+              "description": "Kwai profile URL or @handle (e.g. https://www.kwai.com/@topfilmeseseriesnatv)",
               "title": "Url"
             },
-            "description": "Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)"
+            "description": "Kwai profile URL or @handle (e.g. https://www.kwai.com/@topfilmeseseriesnatv)"
           },
           {
             "name": "cache",
@@ -10337,10 +10500,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)",
+              "description": "Kwai profile URL or @handle (e.g. https://www.kwai.com/@topfilmeseseriesnatv)",
               "title": "Url"
             },
-            "description": "Kwai profile URL or @handle (e.g. https://www.kwai.com/@easycashindonesia)"
+            "description": "Kwai profile URL or @handle (e.g. https://www.kwai.com/@topfilmeseseriesnatv)"
           },
           {
             "name": "limit",
@@ -13104,6 +13267,61 @@
           },
           "data": {
             "title": "Data"
+          },
+          "cached": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cached"
+          },
+          "creditsUsed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Creditsused"
+          },
+          "requestId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requestid"
+          },
+          "fetchedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fetchedat"
+          },
+          "cachedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cachedat"
           }
         },
         "type": "object",
@@ -13283,8 +13501,8 @@
           },
           "interval_minutes": {
             "type": "integer",
-            "maximum": 1440,
-            "minimum": 15,
+            "maximum": 1440.0,
+            "minimum": 15.0,
             "title": "Interval Minutes",
             "default": 60
           },
@@ -13345,8 +13563,8 @@
             "anyOf": [
               {
                 "type": "integer",
-                "maximum": 1440,
-                "minimum": 15
+                "maximum": 1440.0,
+                "minimum": 15.0
               },
               {
                 "type": "null"

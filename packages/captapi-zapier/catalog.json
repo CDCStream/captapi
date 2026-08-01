@@ -4295,8 +4295,8 @@
     "platform": "ad_library",
     "name": "Facebook Ad Library Search",
     "path": "/v1/ad-library/facebook/search",
-    "credits": 70,
-    "summary": "Search Meta/Facebook ads by keyword.",
+    "credits": 2,
+    "summary": "Search Meta/Facebook ads by keyword with status, media, date, and sort filters.",
     "params": [
       {
         "name": "q",
@@ -4314,7 +4314,49 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200."
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "required": false,
+        "description": "ACTIVE (default), INACTIVE, or ALL."
+      },
+      {
+        "name": "media_type",
+        "type": "string",
+        "required": false,
+        "description": "ALL (default), IMAGE, VIDEO, MEME, IMAGE_AND_MEME, or NONE."
+      },
+      {
+        "name": "ad_type",
+        "type": "string",
+        "required": false,
+        "description": "all (default) or political_and_issue_ads."
+      },
+      {
+        "name": "search_type",
+        "type": "string",
+        "required": false,
+        "description": "keyword_unordered (default) or keyword_exact_phrase."
+      },
+      {
+        "name": "sort_by",
+        "type": "string",
+        "required": false,
+        "description": "total_impressions or relevancy_monthly_grouped."
+      },
+      {
+        "name": "start_date",
+        "type": "string",
+        "required": false,
+        "description": "Delivery start on/after YYYY-MM-DD."
+      },
+      {
+        "name": "end_date",
+        "type": "string",
+        "required": false,
+        "description": "Delivery start on/before YYYY-MM-DD."
       },
       {
         "name": "cache",
