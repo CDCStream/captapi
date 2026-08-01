@@ -593,7 +593,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "facebook-ad-library-search": {
     "query": "election",
     "country": "US",
+    "status": "ALL",
+    "limit": 5,
     "totalReturned": 5,
+    "searchResultsCount": 50001,
+    "hasMore": true,
+    "nextCursor": null,
     "ads": [
       {
         "platform": "facebook_ad_library",
@@ -613,12 +618,59 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "id": "108824017345866",
           "name": "Meta",
           "url": "https://www.facebook.com/Meta/",
-          "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qaRlosGC9wUQ7kNvwHuGOSN&_nc_oc=AdpUTiQHP0F2DQWlJJsFhLjPwiKgiTaMBS9Gf3J_Ogy1Z6nYv2kt_BhKXvw8jPupOMg&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQCbS0Qc_-2kHNJh8Yysq78dbBXaaJS4Osw3-xA3_SHVlw&oe=6A89438E"
+          "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qaRlosGC9wUQ7kNvwHuGOSN&_nc_oc=AdpUTiQHP0F2DQWlJJsFhLjPwiKgiTaMBS9Gf3J_Ogy1Z6nYv2kt_BhKXvw8jPupOMg&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQCbS0Qc_-2kHNJh8Yysq78dbBXaaJS4Osw3-xA3_SHVlw&oe=6A89438E",
+          "likeCount": 128000000,
+          "categories": [
+            "Product/service"
+          ],
+          "entityType": "PAGE"
         },
         "media": [
           "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4?_nc_cat=106&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=VIhm6QH6QpYQ7kNvwEGz32Z&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4MzE0MTAwMzMxNDk2MzYsImFzc2V0X2FnZV9kYXlzIjoyMzcsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQBmg1RWfbVvJ3MUBSfprUeNw4A1j1otLN5iP3DoZ8RxIw&oe=6A677448",
           "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=XJsOGtccv7UQ7kNvwFOmuvH&_nc_oc=AdqJh0Avn_pYIk_hzhEW3QS1dyOrrTJn4nBpQ38NLoUvb1OE8Kwj7qy75S7f1QbV1cs&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQBESYOW184a4FJWDENcSYwQSBzwkH5yonZh3U5v6ZZEgA&oe=6A67964A"
-        ]
+        ],
+        "isActive": false,
+        "publisherPlatforms": [
+          "FACEBOOK",
+          "INSTAGRAM"
+        ],
+        "caption": null,
+        "linkDescription": null,
+        "brandedContent": null,
+        "disclaimerLabel": null,
+        "byline": null,
+        "reachEstimate": null,
+        "reachEstimateRange": null,
+        "totalActiveTime": null,
+        "politicalCountries": [
+          "US"
+        ],
+        "pageLikeCount": 128000000,
+        "pageCategories": [
+          "Product/service"
+        ],
+        "pageEntityType": "PAGE",
+        "cards": [],
+        "images": [],
+        "videos": [
+          {
+            "url": "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4?_nc_cat=106&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=VIhm6QH6QpYQ7kNvwEGz32Z&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4MzE0MTAwMzMxNDk2MzYsImFzc2V0X2FnZV9kYXlzIjoyMzcsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQBmg1RWfbVvJ3MUBSfprUeNw4A1j1otLN5iP3DoZ8RxIw&oe=6A677448",
+            "sdUrl": null,
+            "previewUrl": "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=XJsOGtccv7UQ7kNvwFOmuvH&_nc_oc=AdqJh0Avn_pYIk_hzhEW3QS1dyOrrTJn4nBpQ38NLoUvb1OE8Kwj7qy75S7f1QbV1cs&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQBESYOW184a4FJWDENcSYwQSBzwkH5yonZh3U5v6ZZEgA&oe=6A67964A"
+          }
+        ],
+        "spendRange": {
+          "min": 1000000,
+          "max": null,
+          "currency": "USD",
+          "raw": ">$1M"
+        },
+        "impressionsRange": {
+          "min": 1000000,
+          "max": null,
+          "raw": ">1M"
+        },
+        "fetchedAt": "2026-08-01T12:00:00.000Z"
       },
       {
         "platform": "facebook_ad_library",

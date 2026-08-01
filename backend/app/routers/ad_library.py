@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import math
 import re
-from typing import Any
-from urllib.parse import urlencode
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -21,7 +20,8 @@ from app.services import (
     linkedin_ads_native,
     tiktok_ads_native,
 )
-from app.utils.formatters import safe_int, safe_str
+from app.utils.formatters import safe_float, safe_int, safe_str
+from app.utils.media_urls import utc_now_iso
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
@@ -118,6 +118,144 @@ def _flatten_media(values: list[Any]) -> list[str]:
     return out
 
 
+_AMOUNT_TOKEN = re.compile(
+    r"(?P<prefix>[<>≤≥]?)\s*\$?\s*(?P<num>\d+(?:\.\d+)?)\s*(?P<suffix>[KMB])?",
+    re.I,
+)
+
+
+def _amount_token_to_number(num: str, suffix: str | None) -> float | None:
+    try:
+        value = float(num)
+    except (TypeError, ValueError):
+        return None
+    mult = {"": 1, "K": 1_000, "M": 1_000_000, "B": 1_000_000_000}.get((suffix or "").upper(), 1)
+    return value * mult
+
+
+def _parse_meta_range(raw: Any, *, currency_default: str | None = None) -> dict[str, Any] | None:
+    """Parse Meta display strings / bound objects into ``{min,max,currency?,raw}``.
+
+    Examples: ``">1M"``, ``"$600K - $700K"``, ``"≤999"``,
+    ``{"lower_bound": "100", "upper_bound": "199", "currency": "USD"}``.
+    """
+    if raw in (None, "", [], {}):
+        return None
+    if isinstance(raw, dict):
+        lo = safe_float(raw.get("lower_bound") or raw.get("min") or raw.get("lower"))
+        hi = safe_float(raw.get("upper_bound") or raw.get("max") or raw.get("upper"))
+        if lo is None and hi is None:
+            return None
+        out: dict[str, Any] = {
+            "min": int(lo) if lo is not None else None,
+            "max": int(hi) if hi is not None else None,
+            "raw": safe_str(raw.get("text") or raw.get("raw")) or None,
+        }
+        cur = safe_str(raw.get("currency")) or currency_default
+        if cur:
+            out["currency"] = cur
+        return out
+
+    text = safe_str(raw) or str(raw).strip()
+    if not text:
+        return None
+    tokens = list(_AMOUNT_TOKEN.finditer(text))
+    if not tokens:
+        return {"min": None, "max": None, "raw": text, **({"currency": currency_default} if currency_default else {})}
+
+    def tok_val(m: re.Match[str]) -> tuple[float | None, str]:
+        return _amount_token_to_number(m.group("num"), m.group("suffix")), (m.group("prefix") or "")
+
+    if len(tokens) >= 2:
+        a, _ = tok_val(tokens[0])
+        b, _ = tok_val(tokens[1])
+        lo, hi = (a, b) if (a is not None and b is not None and a <= b) else (b, a)
+        out = {
+            "min": int(lo) if lo is not None else None,
+            "max": int(hi) if hi is not None else None,
+            "raw": text,
+        }
+        if currency_default or "$" in text:
+            out["currency"] = currency_default or "USD"
+        return out
+
+    val, prefix = tok_val(tokens[0])
+    if val is None:
+        return {"min": None, "max": None, "raw": text}
+    out = {"raw": text}
+    if currency_default or "$" in text:
+        out["currency"] = currency_default or "USD"
+    if prefix in {">", "≥"}:
+        out["min"] = int(val)
+        out["max"] = None
+    elif prefix in {"<", "≤"}:
+        out["min"] = None
+        out["max"] = int(val)
+    else:
+        out["min"] = int(val)
+        out["max"] = int(val)
+    return out
+
+
+def _fb_typed_images(snapshot: dict[str, Any], item: dict[str, Any]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for img in _listify(snapshot.get("images")) + _listify(item.get("images")):
+        if isinstance(img, str):
+            url = safe_str(img)
+            if url:
+                out.append({"url": url, "resizedUrl": None})
+            continue
+        if not isinstance(img, dict):
+            continue
+        url = safe_str(img.get("originalImageUrl") or img.get("url") or img.get("src"))
+        resized = safe_str(img.get("resizedImageUrl"))
+        if url or resized:
+            out.append({"url": url or resized, "resizedUrl": resized})
+    return out
+
+
+def _fb_typed_videos(snapshot: dict[str, Any], item: dict[str, Any]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for vid in _listify(snapshot.get("videos")) + _listify(item.get("videos")):
+        if isinstance(vid, str):
+            url = safe_str(vid)
+            if url:
+                out.append({"url": url, "sdUrl": None, "previewUrl": None})
+            continue
+        if not isinstance(vid, dict):
+            continue
+        hd = safe_str(vid.get("videoHdUrl") or vid.get("videoUrl") or vid.get("url"))
+        sd = safe_str(vid.get("videoSdUrl"))
+        preview = safe_str(vid.get("videoPreviewImageUrl"))
+        if hd or sd:
+            out.append({"url": hd or sd, "sdUrl": sd, "previewUrl": preview})
+    return out
+
+
+def _fb_cards(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for card in _listify(snapshot.get("cards")):
+        if not isinstance(card, dict):
+            continue
+        body = card.get("body")
+        if isinstance(body, dict):
+            body = body.get("text")
+        out.append(
+            {
+                "text": safe_str(body),
+                "headline": safe_str(card.get("title")),
+                "cta": safe_str(card.get("ctaText")),
+                "landingUrl": safe_str(card.get("linkUrl")),
+                "linkDescription": safe_str(card.get("linkDescription")),
+                "caption": safe_str(card.get("caption")),
+                "imageUrl": safe_str(card.get("originalImageUrl") or card.get("resizedImageUrl")),
+                "videoUrl": safe_str(card.get("videoHdUrl") or card.get("videoSdUrl")),
+                "videoPreviewUrl": safe_str(card.get("videoPreviewImageUrl")),
+            }
+        )
+    return out
+
+
 def _facebook_ad_url(value: str) -> str:
     _reject_ad_platform_mismatch(value, "facebook", "https://www.facebook.com/ads/library/?id=123456789")
     value = value.strip()
@@ -126,16 +264,29 @@ def _facebook_ad_url(value: str) -> str:
     return value
 
 
-def _facebook_search_url(q: str, country: str) -> str:
-    params = {
-        "active_status": "all",
-        "ad_type": "all",
-        "country": country.upper(),
-        "q": q,
-        "search_type": "keyword_unordered",
-        "media_type": "all",
-    }
-    return f"https://www.facebook.com/ads/library/?{urlencode(params)}"
+def _facebook_search_url(
+    q: str,
+    country: str,
+    *,
+    active_status: str = "active",
+    ad_type: str = "all",
+    search_type: str = "keyword_unordered",
+    media_type: str = "all",
+    sort_by: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> str:
+    return facebook_ads_native.search_url(
+        q,
+        country,
+        active_status=active_status,
+        ad_type=ad_type,
+        search_type=search_type,
+        media_type=media_type,
+        sort_by=sort_by,
+        start_date=start_date,
+        end_date=end_date,
+    )
 
 
 def _tiktok_ad_id(value: str) -> str:
@@ -443,19 +594,30 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
         ),
         "impressions": _google_impressions(item)
         if platform == "google_ad_library"
-        else _first(
-            item.get("impressions"),
-            item.get("impressionsRange"),
-            _dig(item, "impressionsWithIndex", "impressionsText"),
-            item.get("reachEstimate"),
-            item.get("reach"),
-            item.get("reachRange"),
-            item.get("impressionRange"),
-            item.get("totalImpressionsInterval"),
-            item.get("impressionsMin"),
-            item.get("uniqueUsersSeen"),
-            item.get("estimatedAudience"),
-            item.get("euTotalReach"),
+        else (
+            # Facebook: do not conflate reachEstimate with impressions (commercial
+            # ads often have neither; political ads have impressionsText).
+            _first(
+                item.get("impressions"),
+                item.get("impressionsRange"),
+                _dig(item, "impressionsWithIndex", "impressionsText"),
+                _dig(item, "impressionsWithIndex", "impressions_text"),
+            )
+            if platform == "facebook_ad_library"
+            else _first(
+                item.get("impressions"),
+                item.get("impressionsRange"),
+                _dig(item, "impressionsWithIndex", "impressionsText"),
+                item.get("reachEstimate"),
+                item.get("reach"),
+                item.get("reachRange"),
+                item.get("impressionRange"),
+                item.get("totalImpressionsInterval"),
+                item.get("impressionsMin"),
+                item.get("uniqueUsersSeen"),
+                item.get("estimatedAudience"),
+                item.get("euTotalReach"),
+            )
         ),
         "spend": _first(item.get("spend"), item.get("spendRange"), item.get("adSpent"), item.get("budgetRange")),
         "country": safe_str(country_value),
@@ -507,6 +669,68 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
         "media": media,
     }
     adv = normalized["advertiser"]
+    if platform == "facebook_ad_library":
+        # Additive fields for competitor intel — existing keys above stay stable.
+        spend_raw = normalized.get("spend")
+        impressions_raw = normalized.get("impressions")
+        # Meta sometimes returns spend as a bound object; keep string `spend` for
+        # legacy clients and expose structured spendRange/impressionsRange.
+        if isinstance(spend_raw, dict):
+            normalized["spend"] = safe_str(
+                spend_raw.get("text")
+                or spend_raw.get("raw")
+                or (
+                    f"${spend_raw.get('lower_bound')} - ${spend_raw.get('upper_bound')}"
+                    if spend_raw.get("lower_bound") is not None
+                    else None
+                )
+            )
+        reach_raw = item.get("reachEstimate")
+        if isinstance(reach_raw, dict):
+            reach_display = safe_str(reach_raw.get("text") or reach_raw.get("raw"))
+        else:
+            reach_display = safe_str(reach_raw) if reach_raw not in (None, "", [], {}) else None
+        platforms = item.get("publisherPlatforms") or item.get("publisher_platform") or []
+        if isinstance(platforms, str):
+            platforms = [platforms]
+        categories = snapshot.get("pageCategories") or []
+        if not isinstance(categories, list):
+            categories = [categories] if categories else []
+        political = item.get("politicalCountries") or []
+        if not isinstance(political, list):
+            political = [political] if political else []
+        normalized.update(
+            {
+                "isActive": item.get("isActive"),
+                "publisherPlatforms": [str(p).upper() for p in platforms if p],
+                "caption": safe_str(snapshot.get("caption")),
+                "linkDescription": safe_str(snapshot.get("linkDescription")),
+                "brandedContent": snapshot.get("brandedContent"),
+                "disclaimerLabel": safe_str(snapshot.get("disclaimerLabel")),
+                "byline": safe_str(snapshot.get("byline")),
+                "reachEstimate": reach_display,
+                "reachEstimateRange": _parse_meta_range(reach_raw),
+                "totalActiveTime": safe_int(item.get("totalActiveTime")),
+                "politicalCountries": [str(c) for c in political if c],
+                "pageLikeCount": safe_int(snapshot.get("pageLikeCount")),
+                "pageCategories": [str(c) for c in categories if c],
+                "pageEntityType": safe_str(snapshot.get("pageEntityType")),
+                "cards": _fb_cards(snapshot),
+                "images": _fb_typed_images(snapshot, item),
+                "videos": _fb_typed_videos(snapshot, item),
+                "spendRange": _parse_meta_range(spend_raw, currency_default="USD"),
+                "impressionsRange": _parse_meta_range(impressions_raw),
+                "fetchedAt": utc_now_iso(),
+            }
+        )
+        like_count = safe_int(snapshot.get("pageLikeCount"))
+        if like_count is not None:
+            adv["likeCount"] = like_count
+        if categories:
+            adv["categories"] = [str(c) for c in categories if c]
+        entity = safe_str(snapshot.get("pageEntityType"))
+        if entity:
+            adv["entityType"] = entity
     if platform == "google_ad_library" and not adv["url"] and adv["id"]:
         adv["url"] = f"https://adstransparency.google.com/advertiser/{adv['id']}"
     # LinkedIn / TikTok withhold most delivery metadata. Google ATC never
@@ -550,13 +774,50 @@ async def _run_actor(actor: str, payload: dict[str, Any], limit: int) -> list[di
 
 @router.get("/facebook/search", summary="Search Meta/Facebook Ad Library")
 async def facebook_search(
-    q: str = Query(..., min_length=2),
+    q: str = Query(..., min_length=2, description="Keyword, brand, or advertiser to search."),
     country: str = Query("US", min_length=2, max_length=2),
-    limit: int = Query(20, ge=1, le=200),
+    limit: int = Query(
+        20,
+        ge=1,
+        le=200,
+        description="Max ads to return per call (default 20, max 200). Native HTML page may return fewer.",
+    ),
+    status: Literal["ALL", "ACTIVE", "INACTIVE"] = Query(
+        "ACTIVE",
+        description="Ad delivery status filter. Default ACTIVE — use ALL for historical/inactive ads.",
+    ),
+    media_type: Literal["ALL", "IMAGE", "VIDEO", "MEME", "IMAGE_AND_MEME", "NONE"] = Query(
+        "ALL",
+        description="Creative media filter (Meta Ad Library media_type).",
+    ),
+    ad_type: Literal["all", "political_and_issue_ads"] = Query(
+        "all",
+        description="Ad type filter. political_and_issue_ads is required for spend/impressions on many markets.",
+    ),
+    search_type: Literal["keyword_unordered", "keyword_exact_phrase"] = Query(
+        "keyword_unordered",
+        description="Keyword matching: unordered tokens vs exact phrase.",
+    ),
+    sort_by: Literal["total_impressions", "relevancy_monthly_grouped"] | None = Query(
+        None,
+        description="Meta sort mode (sort_data[mode]). Omit for Meta default.",
+    ),
+    start_date: str | None = Query(
+        None,
+        description="Only ads with delivery start on/after this date (YYYY-MM-DD).",
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
+    ),
+    end_date: str | None = Query(
+        None,
+        description="Only ads with delivery start on/before this date (YYYY-MM-DD).",
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
+    active_status = status.lower()
+    media = media_type.lower()
     async with billed_call(
         caller=caller,
         endpoint="/v1/ad-library/facebook/search",
@@ -565,23 +826,83 @@ async def facebook_search(
         base_credits=_scaled(limit),
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await facebook_ads_native.search_ads(q, country=country, limit=limit)
+            native = await facebook_ads_native.search_ads(
+                q,
+                country=country,
+                limit=limit,
+                active_status=active_status,
+                ad_type=ad_type,
+                search_type=search_type,
+                media_type=media,
+                sort_by=sort_by,
+                start_date=start_date,
+                end_date=end_date,
+            )
             if native is not None:
                 ctx["source"] = "direct"
-                ads = [_normalize_ad(i, "facebook_ad_library") for i in native]
+                ads = [_normalize_ad(i, "facebook_ad_library") for i in (native.get("ads") or [])]
                 ctx["credits_override"] = CREDIT_AD_LIBRARY_NATIVE
-                return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
+                return {
+                    "query": q,
+                    "country": country.upper(),
+                    "status": status,
+                    "limit": limit,
+                    "totalReturned": len(ads),
+                    "searchResultsCount": native.get("searchResultsCount"),
+                    "hasMore": bool(native.get("hasMore")),
+                    "nextCursor": None,
+                    "ads": ads,
+                }
 
+            library_url = _facebook_search_url(
+                q,
+                country,
+                active_status=active_status,
+                ad_type=ad_type,
+                search_type=search_type,
+                media_type=media,
+                sort_by=sort_by,
+                start_date=start_date,
+                end_date=end_date,
+            )
             items = await _run_actor(
                 settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2,
-                {"startUrls": [{"url": _facebook_search_url(q, country)}], "resultsLimit": limit, "isDetailsPerAd": False},
+                {"startUrls": [{"url": library_url}], "resultsLimit": limit, "isDetailsPerAd": False},
                 limit,
             )
             ctx["source"] = "apify"
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
-            return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
+            return {
+                "query": q,
+                "country": country.upper(),
+                "status": status,
+                "limit": limit,
+                "totalReturned": len(ads),
+                "searchResultsCount": None,
+                "hasMore": len(ads) >= limit,
+                "nextCursor": None,
+                "ads": ads,
+            }
 
-        data = await cached_or_run("ad-library.facebook.search", {"q": q, "country": country, "limit": limit, "v": 6}, _run, ctx, use_cache=cache)
+        data = await cached_or_run(
+            "ad-library.facebook.search",
+            {
+                "q": q,
+                "country": country,
+                "limit": limit,
+                "status": status,
+                "media_type": media_type,
+                "ad_type": ad_type,
+                "search_type": search_type,
+                "sort_by": sort_by or "",
+                "start_date": start_date or "",
+                "end_date": end_date or "",
+                "v": 7,
+            },
+            _run,
+            ctx,
+            use_cache=cache,
+        )
         if ctx.get("source") != "direct":
             ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)

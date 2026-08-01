@@ -24,15 +24,34 @@ _LIBRARY = "https://www.facebook.com/ads/library/"
 _AD_ID_RE = re.compile(r"(?:[?&]id=|/ads/library/.*?id=)(\d{5,})", re.I)
 
 
-def search_url(q: str, country: str, *, active_status: str = "all") -> str:
-    params = {
-        "active_status": active_status,
-        "ad_type": "all",
+def search_url(
+    q: str,
+    country: str,
+    *,
+    active_status: str = "all",
+    ad_type: str = "all",
+    search_type: str = "keyword_unordered",
+    media_type: str = "all",
+    sort_by: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> str:
+    """Build a Meta Ad Library search URL (same query params the public UI uses)."""
+    params: dict[str, str] = {
+        "active_status": (active_status or "all").lower(),
+        "ad_type": (ad_type or "all").lower(),
         "country": (country or "US").upper(),
         "q": q,
-        "search_type": "keyword_unordered",
-        "media_type": "all",
+        "search_type": (search_type or "keyword_unordered").lower(),
+        "media_type": (media_type or "all").lower(),
     }
+    if sort_by:
+        params["sort_data[mode]"] = sort_by.lower()
+        params["sort_data[direction]"] = "desc"
+    if start_date:
+        params["start_date[min]"] = start_date[:10]
+    if end_date:
+        params["start_date[max]"] = end_date[:10]
     return f"{_LIBRARY}?{urlencode(params)}"
 
 
@@ -193,6 +212,25 @@ def _unix_iso(value: Any) -> str | None:
     return datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
 
+def _extract_search_results_count(html: str) -> int | None:
+    """Best-effort total hit count from embedded Ad Library JSON."""
+    for pattern in (
+        r'"searchResultsCount"\s*:\s*(\d+)',
+        r'"count"\s*:\s*(\d{2,})',
+        r'"totalCount"\s*:\s*(\d+)',
+    ):
+        m = re.search(pattern, html)
+        if not m:
+            continue
+        try:
+            n = int(m.group(1))
+        except ValueError:
+            continue
+        if n > 0:
+            return n
+    return None
+
+
 def to_normalize_shape(item: dict[str, Any]) -> dict[str, Any]:
     """Map Meta ``collated_results`` row → shape ``_normalize_ad`` understands."""
     snap_in = item.get("snapshot") if isinstance(item.get("snapshot"), dict) else {}
@@ -203,13 +241,19 @@ def to_normalize_shape(item: dict[str, Any]) -> dict[str, Any]:
     for card in snap_in.get("cards") or []:
         if not isinstance(card, dict):
             continue
+        card_body = card.get("body")
+        if isinstance(card_body, dict):
+            card_body = card_body.get("text")
         cards_out.append(
             {
-                "body": card.get("body"),
+                "body": card_body or card.get("body"),
                 "title": card.get("title"),
                 "ctaText": card.get("cta_text") or card.get("ctaText"),
                 "linkUrl": card.get("link_url") or card.get("linkUrl"),
+                "linkDescription": card.get("link_description") or card.get("linkDescription"),
+                "caption": card.get("caption"),
                 "originalImageUrl": card.get("original_image_url") or card.get("originalImageUrl"),
+                "resizedImageUrl": card.get("resized_image_url") or card.get("resizedImageUrl"),
                 "videoHdUrl": card.get("video_hd_url") or card.get("videoHdUrl"),
                 "videoSdUrl": card.get("video_sd_url") or card.get("videoSdUrl"),
                 "videoPreviewImageUrl": card.get("video_preview_image_url")
@@ -243,16 +287,26 @@ def to_normalize_shape(item: dict[str, Any]) -> dict[str, Any]:
 
     page_name = item.get("page_name") or snap_in.get("page_name")
     page_id = item.get("page_id") or snap_in.get("page_id")
+    platforms = item.get("publisher_platform") or item.get("publisherPlatform") or []
+    if isinstance(platforms, str):
+        platforms = [platforms]
 
     return {
         "adArchiveId": item.get("ad_archive_id") or item.get("adArchiveId"),
         "pageId": page_id,
         "pageName": page_name,
+        "isActive": item.get("is_active") if "is_active" in item else item.get("isActive"),
+        "isAaaEligible": item.get("is_aaa_eligible")
+        if "is_aaa_eligible" in item
+        else item.get("isAaaEligible"),
+        "publisherPlatforms": [str(p).upper() for p in platforms if p],
         "startDate": _unix_iso(item.get("start_date") or item.get("startDate")),
         "endDate": _unix_iso(item.get("end_date") or item.get("endDate")),
+        "totalActiveTime": item.get("total_active_time") or item.get("totalActiveTime"),
         "impressionsWithIndex": item.get("impressions_with_index") or item.get("impressionsWithIndex"),
         "spend": item.get("spend"),
         "reachEstimate": item.get("reach_estimate") or item.get("reachEstimate"),
+        "politicalCountries": item.get("political_countries") or item.get("politicalCountries"),
         "targetedOrReachedCountries": item.get("targeted_or_reached_countries")
         or item.get("targetedOrReachedCountries"),
         "snapshot": {
@@ -260,10 +314,22 @@ def to_normalize_shape(item: dict[str, Any]) -> dict[str, Any]:
             "pageProfileUri": snap_in.get("page_profile_uri") or snap_in.get("pageProfileUri"),
             "pageProfilePictureUrl": snap_in.get("page_profile_picture_url")
             or snap_in.get("pageProfilePictureUrl"),
+            "pageLikeCount": snap_in.get("page_like_count") or snap_in.get("pageLikeCount"),
+            "pageCategories": snap_in.get("page_categories") or snap_in.get("pageCategories") or [],
+            "pageEntityType": snap_in.get("page_entity_type") or snap_in.get("pageEntityType"),
+            "pageIsDeleted": snap_in.get("page_is_deleted")
+            if "page_is_deleted" in snap_in
+            else snap_in.get("pageIsDeleted"),
             "ctaText": snap_in.get("cta_text") or snap_in.get("ctaText"),
+            "ctaType": snap_in.get("cta_type") or snap_in.get("ctaType"),
             "linkUrl": snap_in.get("link_url") or snap_in.get("linkUrl"),
+            "linkDescription": snap_in.get("link_description") or snap_in.get("linkDescription"),
+            "caption": snap_in.get("caption"),
             "title": snap_in.get("title"),
             "displayFormat": snap_in.get("display_format") or snap_in.get("displayFormat"),
+            "brandedContent": snap_in.get("branded_content") or snap_in.get("brandedContent"),
+            "disclaimerLabel": snap_in.get("disclaimer_label") or snap_in.get("disclaimerLabel"),
+            "byline": snap_in.get("byline"),
             "body": {"text": body_text} if body_text else snap_in.get("body"),
             "cards": cards_out,
             "images": images,
@@ -272,7 +338,8 @@ def to_normalize_shape(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-async def _fetch_ads(library_url: str, *, limit: int) -> list[dict[str, Any]] | None:
+async def _fetch_ads_page(library_url: str, *, limit: int) -> dict[str, Any] | None:
+    """Fetch Ad Library HTML and return ``{ads, searchResultsCount, hasMore}``."""
     if not decodo_fetch.enabled():
         return None
     got = await decodo_fetch.fetch_url(library_url, timeout=120.0, headless="html")
@@ -283,26 +350,69 @@ async def _fetch_ads(library_url: str, *, limit: int) -> list[dict[str, Any]] | 
         log.warning("facebook_ads_native_weak", status=status, length=len(html))
         return None
     raw = extract_collated_ads(html)
+    count = _extract_search_results_count(html)
     if not raw:
         # Valid empty result page (no matches) vs parse failure.
         if "ad_library" in html.lower() or "ads/library" in html.lower():
-            return []
+            return {"ads": [], "searchResultsCount": count or 0, "hasMore": False}
         log.warning("facebook_ads_native_no_ads", length=len(html))
         return None
     want = max(0, int(limit))
     mapped = [to_normalize_shape(a) for a in raw]
-    return mapped[:want] if want else mapped
+    ads = mapped[:want] if want else mapped
+    has_more = bool(count and count > len(ads)) or (want > 0 and len(mapped) > want)
+    return {
+        "ads": ads,
+        "searchResultsCount": count,
+        "hasMore": has_more,
+    }
 
 
-async def search_ads(q: str, *, country: str = "US", limit: int = 20) -> list[dict[str, Any]] | None:
+async def _fetch_ads(library_url: str, *, limit: int) -> list[dict[str, Any]] | None:
+    page = await _fetch_ads_page(library_url, limit=limit)
+    if page is None:
+        return None
+    return list(page.get("ads") or [])
+
+
+async def search_ads(
+    q: str,
+    *,
+    country: str = "US",
+    limit: int = 20,
+    active_status: str = "active",
+    ad_type: str = "all",
+    search_type: str = "keyword_unordered",
+    media_type: str = "all",
+    sort_by: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> dict[str, Any] | None:
+    """Keyword search. Returns ``{ads, searchResultsCount, hasMore}`` or ``None``."""
     query = (q or "").strip()
     if len(query) < 2:
-        return []
-    url = search_url(query, country, active_status="active")
-    rows = await _fetch_ads(url, limit=limit)
-    if rows is not None:
-        log.info("facebook_ads_native_search_ok", count=len(rows), q=query[:40], country=country)
-    return rows
+        return {"ads": [], "searchResultsCount": 0, "hasMore": False}
+    url = search_url(
+        query,
+        country,
+        active_status=active_status,
+        ad_type=ad_type,
+        search_type=search_type,
+        media_type=media_type,
+        sort_by=sort_by,
+        start_date=start_date,
+        end_date=end_date,
+    )
+    page = await _fetch_ads_page(url, limit=limit)
+    if page is not None:
+        log.info(
+            "facebook_ads_native_search_ok",
+            count=len(page.get("ads") or []),
+            q=query[:40],
+            country=country,
+            status=active_status,
+        )
+    return page
 
 
 async def company_ads(
@@ -320,10 +430,10 @@ async def search_companies(
 ) -> list[dict[str, Any]] | None:
     """Search ads then unique advertisers (same shape as Apify path input)."""
     # Pull a wider ad window so company dedupe has enough pages.
-    ads = await search_ads(q, country=country, limit=max(limit * 3, limit))
-    if ads is None:
+    page = await search_ads(q, country=country, limit=max(limit * 3, limit))
+    if page is None:
         return None
-    return ads
+    return list(page.get("ads") or [])
 
 
 async def ad_details(url_or_id: str, *, country: str = "US") -> dict[str, Any] | None:

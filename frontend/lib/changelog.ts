@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-01",
     category: "feature",
+    title: "Facebook Ad Library search: filters + richer ads (non-breaking)",
+    description:
+      "Facebook Ad Library search keeps every existing ad field your integrations already parse (including media[] and string spend/impressions), and adds the filters and structured fields needed for competitor intel. Default status is ACTIVE so results match what advertisers are running now.",
+    items: [
+      "New filters: status, media_type, ad_type, search_type, sort_by, start_date, end_date (max limit 200 documented)",
+      "Additive ad fields: isActive, publisherPlatforms, cards[], images[], videos[], spendRange/impressionsRange, pageLikeCount, disclaimer/byline, fetchedAt",
+      "searchResultsCount / hasMore / nextCursor on the response (cursor paging deferred); docs note spend/impressions are usually political/issue-only",
+    ],
+  },
+  {
+    publishedAt: "2026-08-01",
+    category: "feature",
     title: "Richer TikTok channel-details (non-breaking)",
     description:
       "TikTok channel-details keeps every existing field your integrations already parse, and adds stable IDs, account age, commerce/seller flags, and bio-link risk for vetting and joins. category, private, and exact follower counts are unchanged.",
