@@ -102,6 +102,21 @@ const nextConfig = {
         destination: "/apis/ad-library-api",
         permanent: true,
       },
+      {
+        source: "/apis/linkedin",
+        destination: "/apis/linkedin-api",
+        permanent: true,
+      },
+      {
+        source: "/apis/facebook",
+        destination: "/apis/facebook-api",
+        permanent: true,
+      },
+      {
+        source: "/apis/twitter",
+        destination: "/apis/twitter-api",
+        permanent: true,
+      },
       // Renamed / shortened blog slugs still linked from older posts.
       {
         source: "/blog/top-10-data-collection-companies",
