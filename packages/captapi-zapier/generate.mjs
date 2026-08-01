@@ -42,7 +42,12 @@ const PLATFORM_LABELS = {
   linkme: "Linkme",
   tiktok_shop: "TikTok Shop",
   github: "GitHub",
-  ad_library: "Ad Library",
+  facebook_marketplace: "Facebook Marketplace",
+  facebook_events: "Facebook Events",
+  facebook_ad_library: "Facebook Ad Library",
+  tiktok_ad_library: "TikTok Ad Library",
+  google_ad_library: "Google Ad Library",
+  linkedin_ad_library: "LinkedIn Ad Library",
 };
 
 const catalog = ENDPOINTS.map((e) => ({

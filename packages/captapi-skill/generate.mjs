@@ -42,7 +42,12 @@ const PLATFORM_LABEL = {
   pillar: "Pillar",
   linkbio: "Linkbio",
   linkme: "Linkme",
-  ad_library: "Public Ad Libraries",
+  facebook_marketplace: "Facebook Marketplace",
+  facebook_events: "Facebook Events",
+  facebook_ad_library: "Facebook Ad Library",
+  tiktok_ad_library: "TikTok Ad Library",
+  google_ad_library: "Google Ad Library",
+  linkedin_ad_library: "LinkedIn Ad Library",
 };
 
 const PLATFORM_ORDER = [
@@ -58,6 +63,13 @@ const PLATFORM_ORDER = [
   "linkedin",
   "rumble",
   "tiktok_shop",
+  "facebook_marketplace",
+  "facebook_events",
+  "facebook_ad_library",
+  "tiktok_ad_library",
+  "google_ad_library",
+  "linkedin_ad_library",
+  "amazon_shop",
   "github",
   "twitch",
   "spotify",
@@ -66,14 +78,12 @@ const PLATFORM_ORDER = [
   "snapchat",
   "truth_social",
   "kick",
-  "amazon_shop",
   "kwai",
   "komi",
   "pillar",
   "linkbio",
   "linkme",
   "account",
-  "ad_library",
 ];
 
 function paramStr(p) {

@@ -15,8 +15,13 @@ export type Platform =
   | "linkedin"
   | "rumble"
   | "tiktok_shop"
+  | "facebook_marketplace"
+  | "facebook_events"
+  | "facebook_ad_library"
+  | "tiktok_ad_library"
+  | "google_ad_library"
+  | "linkedin_ad_library"
   | "github"
-  | "ad_library"
   | "twitch"
   | "spotify"
   | "soundcloud"
@@ -218,13 +223,19 @@ const FACEBOOK: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_profile_reels", name: "Facebook Profile Reels", path: "/v1/facebook/profile-reels", credits: 36, summary: "Latest Reels from a Facebook profile/page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
   { tool: "facebook_group_posts", name: "Facebook Group Posts", path: "/v1/facebook/group-posts", credits: 12, summary: "Posts from a public Facebook group.", params: [url("Public Facebook group URL, e.g. https://facebook.com/groups/ID."), limit(20, 200)] },
   { tool: "facebook_comment_replies", name: "Facebook Comment Replies", path: "/v1/facebook/comment-replies", credits: 30, summary: "Replies to a specific Facebook comment.", params: [url("Facebook post URL the comment belongs to."), commentId(), limit(50, 500)] },
+  { tool: "facebook_profile_photos", name: "Facebook Profile Photos", path: "/v1/facebook/profile-photos", credits: 12, summary: "Photos from a Facebook profile or page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
+];
+
+const FACEBOOK_MARKETPLACE: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_marketplace_search", name: "Facebook Marketplace Search", path: "/v1/facebook/marketplace-search", credits: 28, summary: "Search Facebook Marketplace listings by keyword and location.", params: [q("Product or keyword to search for (min 2 chars)."), { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." }, limit(20, 200), { name: "details", type: "string", required: false, description: "Set true to fetch full description, photos and coordinates per listing (slower, costs more)." }] },
   { tool: "facebook_marketplace_location_search", name: "Facebook Marketplace Location Search", path: "/v1/facebook/marketplace-location-search", credits: 17, summary: "Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34).", params: [q("City/place search query, e.g. Austin."), limitFlat(10, 50, 17), { name: "details", type: "string", required: false, description: "Set true to include latitude/longitude per location (slower; doubles cost to 34 credits)." }] },
+  { tool: "facebook_marketplace_item", name: "Facebook Marketplace Item", path: "/v1/facebook/marketplace-item", credits: 1, summary: "Details for a single Facebook Marketplace listing.", params: [url("Facebook Marketplace item URL.")] },
+];
+
+const FACEBOOK_EVENTS: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_event_search", name: "Facebook Event Search", path: "/v1/facebook/event-search", credits: 40, summary: "Search Facebook events by topic and/or location.", params: [q("Topic and/or place, e.g. 'comedy Chicago' (min 2 chars)."), limit(20, 200)] },
   { tool: "facebook_event_details", name: "Facebook Event Details", path: "/v1/facebook/event-details", credits: 2, summary: "Details for a Facebook event (date, location, attendees, tickets).", params: [url("Facebook event URL, e.g. https://facebook.com/events/ID.")] },
-  { tool: "facebook_profile_photos", name: "Facebook Profile Photos", path: "/v1/facebook/profile-photos", credits: 12, summary: "Photos from a Facebook profile or page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
   { tool: "facebook_profile_events", name: "Facebook Profile Events", path: "/v1/facebook/profile-events", credits: 40, summary: "Events from a Facebook profile or page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
-  { tool: "facebook_marketplace_item", name: "Facebook Marketplace Item", path: "/v1/facebook/marketplace-item", credits: 1, summary: "Details for a single Facebook Marketplace listing.", params: [url("Facebook Marketplace item URL.")] },
 ];
 
 const TW_TWEET = "Public tweet URL, e.g. https://x.com/user/status/ID.";
@@ -457,17 +468,26 @@ const LINKME: Omit<Endpoint, "platform">[] = [
   { tool: "linkme_profile", name: "Linkme Profile", path: "/v1/linkme/profile", credits: 4, summary: "Public Linkme profile links and metadata.", params: [url(LINKME_PROFILE)] },
 ];
 
-const AD_LIBRARY: Omit<Endpoint, "platform">[] = [
+const FACEBOOK_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_ad_library_search", name: "Facebook Ad Library Search", path: "/v1/ad-library/facebook/search", credits: 2, summary: "Search Meta/Facebook ads by keyword.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
   { tool: "facebook_ad_library_company_ads", name: "Facebook Company Ads", path: "/v1/ad-library/facebook/company-ads", credits: 2, summary: "Ads for a Facebook page or Meta Ad Library URL.", params: [url("Facebook page URL or Meta Ad Library URL."), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
   { tool: "facebook_ad_library_search_companies", name: "Facebook Ad Library Search Companies", path: "/v1/ad-library/facebook/search-companies", credits: 2, summary: "Find advertisers/pages in the Meta Ad Library by name.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
   { tool: "facebook_ad_library_ad_details", name: "Facebook Ad Details", path: "/v1/ad-library/facebook/ad-details", credits: 17, summary: "Meta/Facebook ad details.", params: [url("Meta Ad Library ad URL.")] },
   { tool: "facebook_ad_library_ad_transcript", name: "Facebook Ad Transcript", path: "/v1/ad-library/facebook/ad-transcript", credits: 17, summary: "Extract creative text from a Meta/Facebook ad as transcript text.", params: [url("Meta Ad Library ad URL or ad ID.")] },
+];
+
+const TIKTOK_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
   { tool: "tiktok_ad_library_search", name: "TikTok Ad Library Search", path: "/v1/ad-library/tiktok/search", credits: 70, summary: "Search TikTok Ad Library and Creative Center.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default DE." }, limit(20, 200)] },
   { tool: "tiktok_ad_library_ad_details", name: "TikTok Ad Details", path: "/v1/ad-library/tiktok/ad-details", credits: 17, summary: "TikTok ad details by ad URL or ID.", params: [url("TikTok Ad Library URL or ad ID."), { name: "country", type: "string", required: false, description: "ISO country code. Default DE." }] },
+];
+
+const GOOGLE_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
   { tool: "google_ad_library_company_ads", name: "Google Company Ads", path: "/v1/ad-library/google/company-ads", credits: 2, summary: "Google Ads Transparency Center ads for an advertiser.", params: [{ name: "advertiser", type: "string", required: true, description: "Advertiser name, domain, or Google advertiser ID." }, { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
   { tool: "google_ad_library_ad_details", name: "Google Ad Details", path: "/v1/ad-library/google/ad-details", credits: 17, summary: "Google ad details by Transparency Center URL.", params: [{ name: "creative_id", type: "string", required: true, description: "Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID." }, { name: "country", type: "string", required: false, description: "ISO country code. Default US." }] },
   { tool: "google_ad_library_advertiser_search", name: "Google Advertiser Search", path: "/v1/ad-library/google/advertiser-search", credits: 1, summary: "Search Google Ads advertisers.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(10, 50)] },
+];
+
+const LINKEDIN_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
   { tool: "linkedin_ad_library_search_ads", name: "LinkedIn Ad Library Search", path: "/v1/ad-library/linkedin/search-ads", credits: 2, summary: "Search LinkedIn Ad Library ads.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
   { tool: "linkedin_ad_library_ad_details", name: "LinkedIn Ad Details", path: "/v1/ad-library/linkedin/ad-details", credits: 17, summary: "LinkedIn ad details by URL or ID.", params: [url("LinkedIn Ad Library URL or ad ID.")] },
 ];
@@ -502,6 +522,13 @@ export const ENDPOINTS: Endpoint[] = [
   ...withPlatform(LINKEDIN, "linkedin"),
   ...withPlatform(RUMBLE, "rumble"),
   ...withPlatform(TIKTOK_SHOP, "tiktok_shop"),
+  ...withPlatform(FACEBOOK_MARKETPLACE, "facebook_marketplace"),
+  ...withPlatform(FACEBOOK_EVENTS, "facebook_events"),
+  ...withPlatform(FACEBOOK_AD_LIBRARY, "facebook_ad_library"),
+  ...withPlatform(TIKTOK_AD_LIBRARY, "tiktok_ad_library"),
+  ...withPlatform(GOOGLE_AD_LIBRARY, "google_ad_library"),
+  ...withPlatform(LINKEDIN_AD_LIBRARY, "linkedin_ad_library"),
+  ...withPlatform(AMAZON_SHOP_ENDPOINTS, "amazon_shop"),
   ...withPlatform(GITHUB, "github"),
   ...withPlatform(TWITCH, "twitch"),
   ...withPlatform(SPOTIFY, "spotify"),
@@ -510,7 +537,6 @@ export const ENDPOINTS: Endpoint[] = [
   ...withPlatform(SNAPCHAT, "snapchat"),
   ...withPlatform(TRUTH_SOCIAL, "truth_social"),
   ...withPlatform(KICK, "kick"),
-  ...withPlatform(AMAZON_SHOP_ENDPOINTS, "amazon_shop"),
   ...withPlatform(ACCOUNT, "account"),
   ...withPlatform(UTILITIES, "utilities"),
   ...withPlatform(KWAI, "kwai"),
@@ -518,7 +544,6 @@ export const ENDPOINTS: Endpoint[] = [
   ...withPlatform(PILLAR, "pillar"),
   ...withPlatform(LINKBIO, "linkbio"),
   ...withPlatform(LINKME, "linkme"),
-  ...withPlatform(AD_LIBRARY, "ad_library"),
 ];
 
 /** A concise, agent-facing description (summary + cost) for an endpoint. */

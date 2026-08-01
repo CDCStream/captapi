@@ -42,7 +42,12 @@ const PLATFORM_LABELS = {
   pillar: "Pillar",
   linkbio: "Linkbio",
   linkme: "Linkme",
-  ad_library: "Ad Library",
+  facebook_marketplace: "Facebook Marketplace",
+  facebook_events: "Facebook Events",
+  facebook_ad_library: "Facebook Ad Library",
+  tiktok_ad_library: "TikTok Ad Library",
+  google_ad_library: "Google Ad Library",
+  linkedin_ad_library: "LinkedIn Ad Library",
 };
 
 function writeJson(relPath, value) {

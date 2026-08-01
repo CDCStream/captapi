@@ -25,9 +25,14 @@ export type PlatformId =
   | "linkedin"
   | "rumble"
   | "tiktok_shop"
+  | "facebook_marketplace"
+  | "facebook_events"
+  | "facebook_ad_library"
+  | "tiktok_ad_library"
+  | "google_ad_library"
+  | "linkedin_ad_library"
   | "github"
   | "twitch"
-  | "ad_library"
   | "spotify"
   | "soundcloud"
   | "linktree"
@@ -127,6 +132,7 @@ export interface PlatformGroup {
     | "shoppingBag"
     | "github"
     | "megaphone"
+    | "calendar"
     | "video"
     | "cloud"
     | "search"
@@ -176,9 +182,14 @@ const PLATFORM_LABEL: Record<PlatformId, string> = {
   linkedin: "LinkedIn",
   rumble: "Rumble",
   tiktok_shop: "TikTok Shop",
+  facebook_marketplace: "Facebook Marketplace",
+  facebook_events: "Facebook Events",
+  facebook_ad_library: "Facebook Ad Library",
+  tiktok_ad_library: "TikTok Ad Library",
+  google_ad_library: "Google Ad Library",
+  linkedin_ad_library: "LinkedIn Ad Library",
   github: "GitHub",
   twitch: "Twitch",
-  ad_library: "Ad Library",
   spotify: "Spotify",
   soundcloud: "SoundCloud",
   linktree: "Linktree",
@@ -278,13 +289,19 @@ const FACEBOOK: Spec[] = [
   { slug: "facebook-profile-reels", name: "Facebook Profile Reels API", shortName: "Profile Reels", category: "list", method: "GET", path: "/v1/facebook/profile-reels", credits: 2 },
   { slug: "facebook-group-posts", name: "Facebook Group Posts API", shortName: "Group Posts", category: "list", method: "GET", path: "/v1/facebook/group-posts", credits: 2 },
   { slug: "facebook-comment-replies", name: "Facebook Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/facebook/comment-replies", credits: 2 },
+  { slug: "facebook-profile-photos", name: "Facebook Profile Photos API", shortName: "Profile Photos", category: "list", method: "GET", path: "/v1/facebook/profile-photos", credits: 2 },
+];
+
+const FACEBOOK_MARKETPLACE: Spec[] = [
   { slug: "facebook-marketplace-search", name: "Facebook Marketplace Search API", shortName: "Marketplace Search", category: "search", method: "GET", path: "/v1/facebook/marketplace-search", credits: 2, tagline: "Search Facebook Marketplace by keyword and location — listing title, price, and link for each result.", longDescription: "Search Facebook Marketplace with a product keyword and city/place. Each result includes title, price, and listing URL. Default list path is flat 2 credits. Pass details=true for description, condition, coordinates, and photos — billed as 2 + 2 credits per listing." },
   { slug: "facebook-marketplace-location-search", name: "Facebook Marketplace Location Search API", shortName: "Marketplace Locations", category: "search", method: "GET", path: "/v1/facebook/marketplace-location-search", credits: 2 },
+  { slug: "facebook-marketplace-item", name: "Facebook Marketplace Item API", shortName: "Marketplace Item", category: "details", method: "GET", path: "/v1/facebook/marketplace-item", credits: 2 , tagline: "Get a Facebook Marketplace listing — title, price, condition, and location as structured JSON.", longDescription: "Paste a Facebook Marketplace item URL and get the listing as clean JSON: title, price, description, condition, delivery types, photos, and location when available. Flat 2 credits per call." },
+];
+
+const FACEBOOK_EVENTS: Spec[] = [
   { slug: "facebook-event-search", name: "Facebook Event Search API", shortName: "Event Search", category: "search", method: "GET", path: "/v1/facebook/event-search", credits: 2 },
   { slug: "facebook-event-details", name: "Facebook Event Details API", shortName: "Event Details", category: "details", method: "GET", path: "/v1/facebook/event-details", credits: 2 , tagline: "Get a Facebook event — title, time, place, host, and attendance signals as structured JSON.", longDescription: "Paste a Facebook event URL and get the event details as clean JSON: title, description, start/end time, location, host page, and interest or going counts when available. Flat 2 credits per call." },
-  { slug: "facebook-profile-photos", name: "Facebook Profile Photos API", shortName: "Profile Photos", category: "list", method: "GET", path: "/v1/facebook/profile-photos", credits: 2 },
   { slug: "facebook-profile-events", name: "Facebook Profile Events API", shortName: "Profile Events", category: "list", method: "GET", path: "/v1/facebook/profile-events", credits: 2 },
-  { slug: "facebook-marketplace-item", name: "Facebook Marketplace Item API", shortName: "Marketplace Item", category: "details", method: "GET", path: "/v1/facebook/marketplace-item", credits: 2 , tagline: "Get a Facebook Marketplace listing — title, price, condition, and location as structured JSON.", longDescription: "Paste a Facebook Marketplace item URL and get the listing as clean JSON: title, price, description, condition, delivery types, photos, and location when available. Flat 2 credits per call." },
 ];
 
 const TWITTER: Spec[] = [
@@ -488,19 +505,28 @@ const LINKME: Spec[] = [
   { slug: "linkme-profile", name: "Linkme Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/linkme/profile", credits: 4 , tagline: "Extract the public links and profile fields from a Linkme profile.", longDescription: "Paste a Linkme profile URL and get the public profile as structured JSON — profile fields plus the links listed on the page." },
 ];
 
-const AD_LIBRARY: Spec[] = [
-  { slug: "facebook-ad-library-search", name: "Facebook Ad Library Search API", shortName: "Facebook Search", category: "search", method: "GET", path: "/v1/ad-library/facebook/search", credits: 2 },
-  { slug: "facebook-ad-library-company-ads", name: "Facebook Company Ads API", shortName: "Facebook Company Ads", category: "list", method: "GET", path: "/v1/ad-library/facebook/company-ads", credits: 2 },
-  { slug: "facebook-ad-library-search-companies", name: "Facebook Ad Library Search Companies API", shortName: "Facebook Search Companies", category: "search", method: "GET", path: "/v1/ad-library/facebook/search-companies", credits: 2 },
-  { slug: "facebook-ad-library-ad-details", name: "Facebook Ad Details API", shortName: "Facebook Ad Details", category: "details", method: "GET", path: "/v1/ad-library/facebook/ad-details", credits: 2 , tagline: "Get a Meta Ad Library ad — creative text, media, advertiser, and delivery fields as structured JSON.", longDescription: "Paste a Meta Ad Library ad URL or ad ID and get the creative as clean JSON: body text, headline, CTA, landing URL, media, advertiser, and delivery signals when available. Flat 2 credits per call." },
-  { slug: "facebook-ad-library-ad-transcript", name: "Facebook Ad Transcript API", shortName: "Facebook Ad Transcript", category: "transcript", method: "GET", path: "/v1/ad-library/facebook/ad-transcript", credits: 2 , tagline: "Get a Meta Ad Library ad's creative text — headline, body, CTA, and landing URL as a transcript-style payload.", longDescription: "Paste a Meta Ad Library ad URL or ad ID and get the creative copy as structured transcript text (headline, body, CTA, landing URL). Flat 2 credits per call." },
-  { slug: "tiktok-ad-library-search", name: "TikTok Ad Library Search API", shortName: "TikTok Search", category: "search", method: "GET", path: "/v1/ad-library/tiktok/search", credits: 70, creditsPerResult: 3.5 },
-  { slug: "tiktok-ad-library-ad-details", name: "TikTok Ad Details API", shortName: "TikTok Ad Details", category: "details", method: "GET", path: "/v1/ad-library/tiktok/ad-details", credits: 17 , tagline: "Get a TikTok Ad Library ad — creative, advertiser, and delivery fields as structured JSON." },
-  { slug: "google-ad-library-company-ads", name: "Google Company Ads API", shortName: "Google Company Ads", category: "list", method: "GET", path: "/v1/ad-library/google/company-ads", credits: 2 },
-  { slug: "google-ad-library-ad-details", name: "Google Ad Details API", shortName: "Google Ad Details", category: "details", method: "GET", path: "/v1/ad-library/google/ad-details", credits: 17 , tagline: "Get a Google Ads Transparency ad — creative, advertiser, and delivery fields as structured JSON." },
-  { slug: "google-ad-library-advertiser-search", name: "Google Advertiser Search API", shortName: "Google Advertiser Search", category: "search", method: "GET", path: "/v1/ad-library/google/advertiser-search", credits: 1 },
-  { slug: "linkedin-ad-library-search-ads", name: "LinkedIn Ad Library Search API", shortName: "LinkedIn Search Ads", category: "search", method: "GET", path: "/v1/ad-library/linkedin/search-ads", credits: 2 },
-  { slug: "linkedin-ad-library-ad-details", name: "LinkedIn Ad Details API", shortName: "LinkedIn Ad Details", category: "details", method: "GET", path: "/v1/ad-library/linkedin/ad-details", credits: 17 , tagline: "Get a LinkedIn Ad Library ad — creative, advertiser, and delivery fields as structured JSON." },
+const FACEBOOK_AD_LIBRARY: Spec[] = [
+  { slug: "facebook-ad-library-search", name: "Facebook Ad Library Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/ad-library/facebook/search", credits: 2 },
+  { slug: "facebook-ad-library-company-ads", name: "Facebook Company Ads API", shortName: "Company Ads", category: "list", method: "GET", path: "/v1/ad-library/facebook/company-ads", credits: 2 },
+  { slug: "facebook-ad-library-search-companies", name: "Facebook Ad Library Search Companies API", shortName: "Search Companies", category: "search", method: "GET", path: "/v1/ad-library/facebook/search-companies", credits: 2 },
+  { slug: "facebook-ad-library-ad-details", name: "Facebook Ad Details API", shortName: "Ad Details", category: "details", method: "GET", path: "/v1/ad-library/facebook/ad-details", credits: 2 , tagline: "Get a Meta Ad Library ad — creative text, media, advertiser, and delivery fields as structured JSON.", longDescription: "Paste a Meta Ad Library ad URL or ad ID and get the creative as clean JSON: body text, headline, CTA, landing URL, media, advertiser, and delivery signals when available. Flat 2 credits per call." },
+  { slug: "facebook-ad-library-ad-transcript", name: "Facebook Ad Transcript API", shortName: "Ad Transcript", category: "transcript", method: "GET", path: "/v1/ad-library/facebook/ad-transcript", credits: 2 , tagline: "Get a Meta Ad Library ad's creative text — headline, body, CTA, and landing URL as a transcript-style payload.", longDescription: "Paste a Meta Ad Library ad URL or ad ID and get the creative copy as structured transcript text (headline, body, CTA, landing URL). Flat 2 credits per call." },
+];
+
+const TIKTOK_AD_LIBRARY: Spec[] = [
+  { slug: "tiktok-ad-library-search", name: "TikTok Ad Library Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/ad-library/tiktok/search", credits: 70, creditsPerResult: 3.5 },
+  { slug: "tiktok-ad-library-ad-details", name: "TikTok Ad Details API", shortName: "Ad Details", category: "details", method: "GET", path: "/v1/ad-library/tiktok/ad-details", credits: 17 , tagline: "Get a TikTok Ad Library ad — creative, advertiser, and delivery fields as structured JSON." },
+];
+
+const GOOGLE_AD_LIBRARY: Spec[] = [
+  { slug: "google-ad-library-company-ads", name: "Google Company Ads API", shortName: "Company Ads", category: "list", method: "GET", path: "/v1/ad-library/google/company-ads", credits: 2 },
+  { slug: "google-ad-library-ad-details", name: "Google Ad Details API", shortName: "Ad Details", category: "details", method: "GET", path: "/v1/ad-library/google/ad-details", credits: 17 , tagline: "Get a Google Ads Transparency ad — creative, advertiser, and delivery fields as structured JSON." },
+  { slug: "google-ad-library-advertiser-search", name: "Google Advertiser Search API", shortName: "Advertiser Search", category: "search", method: "GET", path: "/v1/ad-library/google/advertiser-search", credits: 1 },
+];
+
+const LINKEDIN_AD_LIBRARY: Spec[] = [
+  { slug: "linkedin-ad-library-search-ads", name: "LinkedIn Ad Library Search API", shortName: "Search Ads", category: "search", method: "GET", path: "/v1/ad-library/linkedin/search-ads", credits: 2 },
+  { slug: "linkedin-ad-library-ad-details", name: "LinkedIn Ad Details API", shortName: "Ad Details", category: "details", method: "GET", path: "/v1/ad-library/linkedin/ad-details", credits: 17 , tagline: "Get a LinkedIn Ad Library ad — creative, advertiser, and delivery fields as structured JSON." },
 ];
 
 export const PLATFORM_GROUPS: PlatformGroup[] = [
@@ -613,6 +639,69 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     endpoints: TIKTOK_SHOP.map((s) => ({ ...s, platform: "tiktok_shop" as const })),
   },
   {
+    id: "facebook_marketplace",
+    name: "Facebook Marketplace",
+    blurb: "Search Facebook Marketplace listings by keyword and location, resolve places, and fetch item details.",
+    icon: "shoppingBag",
+    color: "text-blue-600",
+    exampleUrl: "https://www.facebook.com/marketplace/",
+    endpoints: FACEBOOK_MARKETPLACE.map((s) => ({ ...s, platform: "facebook_marketplace" as const })),
+  },
+  {
+    id: "facebook_events",
+    name: "Facebook Events",
+    blurb: "Search Facebook events, pull event details, and list events from a public profile or page.",
+    icon: "calendar",
+    color: "text-blue-600",
+    exampleUrl: "https://www.facebook.com/events/",
+    endpoints: FACEBOOK_EVENTS.map((s) => ({ ...s, platform: "facebook_events" as const })),
+  },
+  {
+    id: "facebook_ad_library",
+    name: "Facebook Ad Library",
+    blurb: "Search Meta Ad Library creatives, advertisers, and company ads for competitor research.",
+    icon: "megaphone",
+    color: "text-blue-600",
+    exampleUrl: "https://www.facebook.com/ads/library/",
+    endpoints: FACEBOOK_AD_LIBRARY.map((s) => ({ ...s, platform: "facebook_ad_library" as const })),
+  },
+  {
+    id: "tiktok_ad_library",
+    name: "TikTok Ad Library",
+    blurb: "Search TikTok Ad Library and Creative Center ads, then fetch individual ad details.",
+    icon: "megaphone",
+    color: "text-pink-500",
+    exampleUrl: "https://library.tiktok.com/",
+    endpoints: TIKTOK_AD_LIBRARY.map((s) => ({ ...s, platform: "tiktok_ad_library" as const })),
+  },
+  {
+    id: "google_ad_library",
+    name: "Google Ad Library",
+    blurb: "Search Google Ads Transparency Center advertisers and pull company ads or creative details.",
+    icon: "megaphone",
+    color: "text-amber-600",
+    exampleUrl: "https://adstransparency.google.com/",
+    endpoints: GOOGLE_AD_LIBRARY.map((s) => ({ ...s, platform: "google_ad_library" as const })),
+  },
+  {
+    id: "linkedin_ad_library",
+    name: "LinkedIn Ad Library",
+    blurb: "Search LinkedIn Ad Library ads and fetch creative details for B2B competitor intelligence.",
+    icon: "megaphone",
+    color: "text-blue-700",
+    exampleUrl: "https://www.linkedin.com/ad-library/",
+    endpoints: LINKEDIN_AD_LIBRARY.map((s) => ({ ...s, platform: "linkedin_ad_library" as const })),
+  },
+  {
+    id: "amazon_shop",
+    name: "Amazon Shop",
+    blurb: "Fetch Amazon seller storefront metadata and product listings for commerce research.",
+    icon: "shoppingBag",
+    color: "text-amber-500",
+    exampleUrl: "https://www.amazon.com/s?me=ATVPDKIKX0DER",
+    endpoints: AMAZON_SHOP.map((s) => ({ ...s, platform: "amazon_shop" as const })),
+  },
+  {
     id: "github",
     name: "GitHub",
     blurb: "Pull public GitHub users, repositories, pull requests, activity, followers, and trending repos.",
@@ -629,15 +718,6 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     color: "text-purple-500",
     exampleUrl: "https://www.twitch.tv/shroud",
     endpoints: TWITCH.map((s) => ({ ...s, platform: "twitch" as const })),
-  },
-  {
-    id: "ad_library",
-    name: "Ad Library",
-    blurb: "Search public Meta, TikTok, Google, and LinkedIn ad libraries for competitor creative intelligence.",
-    icon: "megaphone",
-    color: "text-amber-600",
-    exampleUrl: "https://adstransparency.google.com/",
-    endpoints: AD_LIBRARY.map((s) => ({ ...s, platform: "ad_library" as const })),
   },
   {
     id: "spotify",
@@ -692,15 +772,6 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     color: "text-green-500",
     exampleUrl: "https://kick.com/xqc",
     endpoints: KICK.map((s) => ({ ...s, platform: "kick" as const })),
-  },
-  {
-    id: "amazon_shop",
-    name: "Amazon Shop",
-    blurb: "Fetch Amazon seller storefront metadata and product listings for commerce research.",
-    icon: "shoppingBag",
-    color: "text-amber-500",
-    exampleUrl: "https://www.amazon.com/s?me=ATVPDKIKX0DER",
-    endpoints: AMAZON_SHOP.map((s) => ({ ...s, platform: "amazon_shop" as const })),
   },
   {
     id: "account",
@@ -1630,7 +1701,12 @@ function notFoundDetail(ep: ApiEndpoint): string | null {
     bluesky: "Post not found",
     twitter: "Tweet not found",
     pinterest: "Pin not found",
-    ad_library: "Ad not found",
+    facebook_ad_library: "Ad not found",
+    tiktok_ad_library: "Ad not found",
+    google_ad_library: "Ad not found",
+    linkedin_ad_library: "Ad not found",
+    facebook_marketplace: "Marketplace listing not found",
+    facebook_events: "Event not found",
     spotify: "Spotify item not found",
     kick: "Kick clip not found",
     kwai: "Kwai post not found",
@@ -1740,9 +1816,14 @@ const PROFILE_URL: Record<PlatformId, string> = {
   linkedin: "https://www.linkedin.com/in/williamhgates",
   rumble: "https://rumble.com/c/Bongino",
   tiktok_shop: "https://shop.tiktok.com/us/pdp/example-product/1234567890",
+  facebook_marketplace: "https://www.facebook.com/marketplace/",
+  facebook_events: "https://www.facebook.com/events/",
+  facebook_ad_library: "https://www.facebook.com/ads/library/",
+  tiktok_ad_library: "https://library.tiktok.com/",
+  google_ad_library: "https://adstransparency.google.com/",
+  linkedin_ad_library: "https://www.linkedin.com/ad-library/",
   github: "https://github.com/vercel/next.js",
   twitch: "https://www.twitch.tv/shroud",
-  ad_library: "https://adstransparency.google.com/",
   spotify: "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02",
   soundcloud: "https://soundcloud.com/nasa",
   linktree: "https://linktr.ee/tonyhawk",

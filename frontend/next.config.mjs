@@ -99,7 +99,12 @@ const nextConfig = {
       },
       {
         source: "/apis/ad-library",
-        destination: "/apis/ad-library-api",
+        destination: "/apis/facebook-ad-library-api",
+        permanent: true,
+      },
+      {
+        source: "/apis/ad-library-api",
+        destination: "/apis/facebook-ad-library-api",
         permanent: true,
       },
       {

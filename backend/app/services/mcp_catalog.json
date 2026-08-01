@@ -1871,7 +1871,7 @@
   },
   {
     "tool": "facebook_marketplace_search",
-    "platform": "facebook",
+    "platform": "facebook_marketplace",
     "name": "Facebook Marketplace Search",
     "path": "/v1/facebook/marketplace-search",
     "credits": 2,
@@ -1911,7 +1911,7 @@
   },
   {
     "tool": "facebook_marketplace_location_search",
-    "platform": "facebook",
+    "platform": "facebook_marketplace",
     "name": "Facebook Marketplace Location Search",
     "path": "/v1/facebook/marketplace-location-search",
     "credits": 2,
@@ -1945,7 +1945,7 @@
   },
   {
     "tool": "facebook_event_search",
-    "platform": "facebook",
+    "platform": "facebook_events",
     "name": "Facebook Event Search",
     "path": "/v1/facebook/event-search",
     "credits": 2,
@@ -1973,7 +1973,7 @@
   },
   {
     "tool": "facebook_event_details",
-    "platform": "facebook",
+    "platform": "facebook_events",
     "name": "Facebook Event Details",
     "path": "/v1/facebook/event-details",
     "credits": 2,
@@ -2023,7 +2023,7 @@
   },
   {
     "tool": "facebook_profile_events",
-    "platform": "facebook",
+    "platform": "facebook_events",
     "name": "Facebook Profile Events",
     "path": "/v1/facebook/profile-events",
     "credits": 2,
@@ -2051,7 +2051,7 @@
   },
   {
     "tool": "facebook_marketplace_item",
-    "platform": "facebook",
+    "platform": "facebook_marketplace",
     "name": "Facebook Marketplace Item",
     "path": "/v1/facebook/marketplace-item",
     "credits": 2,
@@ -4298,7 +4298,7 @@
   },
   {
     "tool": "facebook_ad_library_search",
-    "platform": "ad_library",
+    "platform": "facebook_ad_library",
     "name": "Facebook Ad Library Search",
     "path": "/v1/ad-library/facebook/search",
     "credits": 70,
@@ -4332,7 +4332,7 @@
   },
   {
     "tool": "facebook_ad_library_company_ads",
-    "platform": "ad_library",
+    "platform": "facebook_ad_library",
     "name": "Facebook Company Ads",
     "path": "/v1/ad-library/facebook/company-ads",
     "credits": 70,
@@ -4366,7 +4366,7 @@
   },
   {
     "tool": "facebook_ad_library_search_companies",
-    "platform": "ad_library",
+    "platform": "facebook_ad_library",
     "name": "Facebook Ad Library Search Companies",
     "path": "/v1/ad-library/facebook/search-companies",
     "credits": 70,
@@ -4400,7 +4400,7 @@
   },
   {
     "tool": "facebook_ad_library_ad_details",
-    "platform": "ad_library",
+    "platform": "facebook_ad_library",
     "name": "Facebook Ad Details",
     "path": "/v1/ad-library/facebook/ad-details",
     "credits": 2,
@@ -4422,7 +4422,7 @@
   },
   {
     "tool": "facebook_ad_library_ad_transcript",
-    "platform": "ad_library",
+    "platform": "facebook_ad_library",
     "name": "Facebook Ad Transcript",
     "path": "/v1/ad-library/facebook/ad-transcript",
     "credits": 2,
@@ -4444,7 +4444,7 @@
   },
   {
     "tool": "tiktok_ad_library_search",
-    "platform": "ad_library",
+    "platform": "tiktok_ad_library",
     "name": "TikTok Ad Library Search",
     "path": "/v1/ad-library/tiktok/search",
     "credits": 70,
@@ -4478,7 +4478,7 @@
   },
   {
     "tool": "tiktok_ad_library_ad_details",
-    "platform": "ad_library",
+    "platform": "tiktok_ad_library",
     "name": "TikTok Ad Details",
     "path": "/v1/ad-library/tiktok/ad-details",
     "credits": 17,
@@ -4506,7 +4506,7 @@
   },
   {
     "tool": "google_ad_library_company_ads",
-    "platform": "ad_library",
+    "platform": "google_ad_library",
     "name": "Google Company Ads",
     "path": "/v1/ad-library/google/company-ads",
     "credits": 67,
@@ -4540,7 +4540,7 @@
   },
   {
     "tool": "google_ad_library_ad_details",
-    "platform": "ad_library",
+    "platform": "google_ad_library",
     "name": "Google Ad Details",
     "path": "/v1/ad-library/google/ad-details",
     "credits": 17,
@@ -4568,7 +4568,7 @@
   },
   {
     "tool": "google_ad_library_advertiser_search",
-    "platform": "ad_library",
+    "platform": "google_ad_library",
     "name": "Google Advertiser Search",
     "path": "/v1/ad-library/google/advertiser-search",
     "credits": 1,
@@ -4602,7 +4602,7 @@
   },
   {
     "tool": "linkedin_ad_library_search_ads",
-    "platform": "ad_library",
+    "platform": "linkedin_ad_library",
     "name": "LinkedIn Ad Library Search",
     "path": "/v1/ad-library/linkedin/search-ads",
     "credits": 70,
@@ -4636,7 +4636,7 @@
   },
   {
     "tool": "linkedin_ad_library_ad_details",
-    "platform": "ad_library",
+    "platform": "linkedin_ad_library",
     "name": "LinkedIn Ad Details",
     "path": "/v1/ad-library/linkedin/ad-details",
     "credits": 17,
