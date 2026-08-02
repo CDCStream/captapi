@@ -51,6 +51,17 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "Account APIs: camelCase field names",
+    description:
+      "GET /v1/account/balance (and sibling usage/history/daily-usage/most-used-routes/limits) now use camelCase keys — monthlyQuota, subscriptionCredits, topupCredits, totalCredits, subscriptionRenewsAt, creditsUsed, createdAt, etc. — matching the rest of the Captapi surface. Same data; naming only.",
+    items: [
+      "balance: monthlyQuota, subscriptionCredits, topupCredits, totalCredits, subscriptionRenewsAt",
+      "usage/history/routes: creditsUsed, cacheHit, statusCode, createdAt, …",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "Truth Social profile: bot/isPrivate flags, static media, 1 credit",
     description:
       "GET /v1/truth-social/profile drops from 5 → 1 credit and adds bot, isPrivate (locked), group, discoverable, location, avatarStatic/headerStatic, emojis[], plus acceptingMessages/chatsOnboarded/tvAccount when present. Bio stays HTML-stripped. Docs warn that as of late 2025 Truth Social typically only exposes public profiles for prominent accounts without login — auth-gated accounts return a clear 404. Native lookup retries via Decodo when datacenter IPs hit Cloudflare.",

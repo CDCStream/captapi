@@ -6,11 +6,11 @@
 export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "account-balance": {
     "plan": "free",
-    "monthly_quota": 100,
-    "subscription_credits": 0,
-    "topup_credits": 9599,
-    "total_credits": 9599,
-    "subscription_renews_at": null
+    "monthlyQuota": 100,
+    "subscriptionCredits": 0,
+    "topupCredits": 9599,
+    "totalCredits": 9599,
+    "subscriptionRenewsAt": null
   },
   "account-daily-usage": {
     "days": 7,
@@ -20,9 +20,9 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "date": "2026-07-18",
         "requests": 251,
-        "credits_used": 498,
-        "successful_requests": 242,
-        "failed_requests": 9
+        "creditsUsed": 498,
+        "successfulRequests": 242,
+        "failedRequests": 9
       }
     ]
   },
@@ -34,41 +34,41 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "endpoint": "/v1/instagram/details",
         "platform": "instagram",
         "requests": 161,
-        "credits_used": 46,
-        "successful_requests": 161,
-        "failed_requests": 0
+        "creditsUsed": 46,
+        "successfulRequests": 161,
+        "failedRequests": 0
       },
       {
         "endpoint": "/v1/instagram/basic-profile",
         "platform": "instagram",
         "requests": 3,
-        "credits_used": 2,
-        "successful_requests": 3,
-        "failed_requests": 0
+        "creditsUsed": 2,
+        "successfulRequests": 3,
+        "failedRequests": 0
       },
       {
         "endpoint": "/v1/tiktok/live-info",
         "platform": "tiktok",
         "requests": 2,
-        "credits_used": 14,
-        "successful_requests": 2,
-        "failed_requests": 0
+        "creditsUsed": 14,
+        "successfulRequests": 2,
+        "failedRequests": 0
       },
       {
         "endpoint": "/v1/tiktok/search-suggestions",
         "platform": "tiktok",
         "requests": 2,
-        "credits_used": 14,
-        "successful_requests": 0,
-        "failed_requests": 2
+        "creditsUsed": 14,
+        "successfulRequests": 0,
+        "failedRequests": 2
       },
       {
         "endpoint": "/v1/tiktok-shop/user-showcase",
         "platform": "tiktok_shop",
         "requests": 2,
-        "credits_used": 12,
-        "successful_requests": 1,
-        "failed_requests": 1
+        "creditsUsed": 12,
+        "successfulRequests": 1,
+        "failedRequests": 1
       }
     ]
   },
@@ -78,57 +78,57 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "endpoint": "/v1/instagram/basic-profile",
         "platform": "instagram",
-        "resource_url": "instagram_user:adencylnozturk",
-        "credits_used": 0,
-        "cache_hit": true,
-        "status_code": 200,
-        "response_time_ms": 154,
-        "error_message": null,
-        "created_at": "2026-07-18T11:31:44.31599+00:00"
+        "resourceUrl": "instagram_user:adencylnozturk",
+        "creditsUsed": 0,
+        "cacheHit": true,
+        "statusCode": 200,
+        "responseTimeMs": 154,
+        "errorMessage": null,
+        "createdAt": "2026-07-18T11:31:44.31599+00:00"
       },
       {
         "endpoint": "/v1/instagram/basic-profile",
         "platform": "instagram",
-        "resource_url": "instagram_user:adencylnozturk",
-        "credits_used": 1,
-        "cache_hit": false,
-        "status_code": 200,
-        "response_time_ms": 4980,
-        "error_message": null,
-        "created_at": "2026-07-18T11:31:21.584147+00:00"
+        "resourceUrl": "instagram_user:adencylnozturk",
+        "creditsUsed": 1,
+        "cacheHit": false,
+        "statusCode": 200,
+        "responseTimeMs": 4980,
+        "errorMessage": null,
+        "createdAt": "2026-07-18T11:31:21.584147+00:00"
       },
       {
         "endpoint": "/v1/instagram/basic-profile",
         "platform": "instagram",
-        "resource_url": "instagram_user:adencylnozturk",
-        "credits_used": 1,
-        "cache_hit": false,
-        "status_code": 200,
-        "response_time_ms": 4168,
-        "error_message": null,
-        "created_at": "2026-07-18T11:31:20.30634+00:00"
+        "resourceUrl": "instagram_user:adencylnozturk",
+        "creditsUsed": 1,
+        "cacheHit": false,
+        "statusCode": 200,
+        "responseTimeMs": 4168,
+        "errorMessage": null,
+        "createdAt": "2026-07-18T11:31:20.30634+00:00"
       },
       {
         "endpoint": "/v1/pinterest/board",
         "platform": "pinterest",
-        "resource_url": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/",
-        "credits_used": 3,
-        "cache_hit": false,
-        "status_code": 200,
-        "response_time_ms": 17558,
-        "error_message": null,
-        "created_at": "2026-07-18T11:29:07.873651+00:00"
+        "resourceUrl": "https://www.pinterest.com/potterybarn/indigo-blues-lookbook/",
+        "creditsUsed": 3,
+        "cacheHit": false,
+        "statusCode": 200,
+        "responseTimeMs": 17558,
+        "errorMessage": null,
+        "createdAt": "2026-07-18T11:29:07.873651+00:00"
       },
       {
         "endpoint": "/v1/facebook/marketplace-item",
         "platform": "facebook",
-        "resource_url": "https://www.facebook.com/marketplace/item/2228870800986975/",
-        "credits_used": 1,
-        "cache_hit": false,
-        "status_code": 200,
-        "response_time_ms": 10482,
-        "error_message": null,
-        "created_at": "2026-07-18T11:28:59.677517+00:00"
+        "resourceUrl": "https://www.facebook.com/marketplace/item/2228870800986975/",
+        "creditsUsed": 1,
+        "cacheHit": false,
+        "statusCode": 200,
+        "responseTimeMs": 10482,
+        "errorMessage": null,
+        "createdAt": "2026-07-18T11:28:59.677517+00:00"
       }
     ]
   },

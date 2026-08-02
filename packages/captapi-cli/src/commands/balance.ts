@@ -4,17 +4,18 @@ interface UsageResponse {
   data?: {
     balance?: {
       plan?: string;
-      subscription_credits?: number;
-      topup_credits?: number;
-      total_credits?: number;
-      subscription_renews_at?: string | null;
+      monthlyQuota?: number;
+      subscriptionCredits?: number;
+      topupCredits?: number;
+      totalCredits?: number;
+      subscriptionRenewsAt?: string | null;
     };
-    recent_requests?: Array<{
+    recentRequests?: Array<{
       endpoint?: string;
-      credits_used?: number;
-      cache_hit?: boolean;
-      status_code?: number;
-      created_at?: string;
+      creditsUsed?: number;
+      cacheHit?: boolean;
+      statusCode?: number;
+      createdAt?: string;
     }>;
   };
 }
@@ -26,24 +27,24 @@ export async function balance(opts: { json?: boolean }): Promise<void> {
     return;
   }
   const bal = body.data?.balance ?? {};
-  const total = bal.total_credits ?? 0;
+  const total = bal.totalCredits ?? 0;
   const color = total <= 0 ? c.red : total < 50 ? c.yellow : c.green;
   console.log(c.bold("Captapi balance"));
   console.log(`  Plan:            ${bal.plan ?? "free"}`);
   console.log(`  Total credits:   ${color(String(total))}`);
-  console.log(`    subscription:  ${bal.subscription_credits ?? 0}`);
-  console.log(`    top-up:        ${bal.topup_credits ?? 0}`);
-  if (bal.subscription_renews_at)
-    console.log(`  Renews:          ${bal.subscription_renews_at}`);
+  console.log(`    subscription:  ${bal.subscriptionCredits ?? 0}`);
+  console.log(`    top-up:        ${bal.topupCredits ?? 0}`);
+  if (bal.subscriptionRenewsAt)
+    console.log(`  Renews:          ${bal.subscriptionRenewsAt}`);
 
-  const recent = body.data?.recent_requests ?? [];
+  const recent = body.data?.recentRequests ?? [];
   if (recent.length) {
     console.log("\n" + c.bold("Recent requests"));
     for (const r of recent) {
-      const tag = r.cache_hit ? c.dim("[cache]") : "";
+      const tag = r.cacheHit ? c.dim("[cache]") : "";
       console.log(
-        `  ${c.dim(r.created_at ?? "")}  ${r.endpoint ?? "?"}  ` +
-          `${r.credits_used ?? 0}cr ${r.status_code ?? ""} ${tag}`.trimEnd(),
+        `  ${c.dim(r.createdAt ?? "")}  ${r.endpoint ?? "?"}  ` +
+          `${r.creditsUsed ?? 0}cr ${r.statusCode ?? ""} ${tag}`.trimEnd(),
       );
     }
   }

@@ -26,14 +26,15 @@ class ErrorResponse(BaseModel):
 
 
 class UsageInfo(BaseModel):
-    credits_used: int
-    credits_remaining: int
-    cache_hit: bool = False
+    creditsUsed: int
+    creditsRemaining: int
+    cacheHit: bool = False
 
 
 class CreditBalance(BaseModel):
     plan: str
-    subscription_credits: int
-    topup_credits: int
-    total_credits: int
-    subscription_renews_at: str | None = None
+    monthlyQuota: int | None = None
+    subscriptionCredits: int
+    topupCredits: int
+    totalCredits: int
+    subscriptionRenewsAt: str | None = None

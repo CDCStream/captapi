@@ -24,16 +24,32 @@ PLAN_QUOTAS = {
 
 
 def _balance_payload(row: dict | None, caller: ApiCaller) -> dict:
+    """Public balance shape — camelCase to match the rest of the Captapi surface."""
     b = row or {}
     subscription = b.get("subscription_credits", caller.subscription_credits) or 0
     topup = b.get("topup_credits", caller.topup_credits) or 0
+    plan = b.get("plan", caller.plan)
     return {
-        "plan": b.get("plan", caller.plan),
-        "monthly_quota": PLAN_QUOTAS.get(b.get("plan", caller.plan), 100),
-        "subscription_credits": subscription,
-        "topup_credits": topup,
-        "total_credits": subscription + topup,
-        "subscription_renews_at": b.get("subscription_renews_at"),
+        "plan": plan,
+        "monthlyQuota": PLAN_QUOTAS.get(plan, 100),
+        "subscriptionCredits": subscription,
+        "topupCredits": topup,
+        "totalCredits": subscription + topup,
+        "subscriptionRenewsAt": b.get("subscription_renews_at"),
+    }
+
+
+def _request_row(row: dict) -> dict:
+    return {
+        "endpoint": row.get("endpoint"),
+        "platform": row.get("platform"),
+        "resourceUrl": row.get("resource_url"),
+        "creditsUsed": row.get("credits_used") or 0,
+        "cacheHit": bool(row.get("cache_hit")),
+        "statusCode": row.get("status_code"),
+        "responseTimeMs": row.get("response_time_ms"),
+        "errorMessage": row.get("error_message"),
+        "createdAt": row.get("created_at"),
     }
 
 
@@ -73,7 +89,7 @@ async def get_usage(
     return ApiResponse(
         data={
             "balance": _balance_payload(b, caller),
-            "recent_requests": reqs.data or [],
+            "recentRequests": [_request_row(r) for r in (reqs.data or [])],
         }
     )
 
@@ -105,7 +121,8 @@ async def get_request_history(
         .limit(limit)
         .execute()
     )
-    return ApiResponse(data={"totalReturned": len(reqs.data or []), "requests": reqs.data or []})
+    rows = [_request_row(r) for r in (reqs.data or [])]
+    return ApiResponse(data={"totalReturned": len(rows), "requests": rows})
 
 
 @router.get("/daily-usage", summary="Get daily credit usage")
@@ -128,19 +145,28 @@ async def get_daily_usage(
     for row in reqs.data or []:
         dt = _parse_dt(row.get("created_at"))
         day = (dt.date().isoformat() if dt else str(row.get("created_at", ""))[:10])
-        bucket = buckets.setdefault(day, {"date": day, "requests": 0, "credits_used": 0, "successful_requests": 0, "failed_requests": 0})
+        bucket = buckets.setdefault(
+            day,
+            {
+                "date": day,
+                "requests": 0,
+                "creditsUsed": 0,
+                "successfulRequests": 0,
+                "failedRequests": 0,
+            },
+        )
         bucket["requests"] += 1
-        bucket["credits_used"] += row.get("credits_used") or 0
+        bucket["creditsUsed"] += row.get("credits_used") or 0
         if (row.get("status_code") or 0) < 400:
-            bucket["successful_requests"] += 1
+            bucket["successfulRequests"] += 1
         else:
-            bucket["failed_requests"] += 1
+            bucket["failedRequests"] += 1
     usage = [buckets[k] for k in sorted(buckets)]
     return ApiResponse(
         data={
             "days": days,
             "totalRequests": sum(d["requests"] for d in usage),
-            "totalCreditsUsed": sum(d["credits_used"] for d in usage),
+            "totalCreditsUsed": sum(d["creditsUsed"] for d in usage),
             "usage": usage,
         }
     )
@@ -167,15 +193,22 @@ async def get_most_used_routes(
         endpoint = row.get("endpoint") or "unknown"
         route = routes.setdefault(
             endpoint,
-            {"endpoint": endpoint, "platform": row.get("platform"), "requests": 0, "credits_used": 0, "successful_requests": 0, "failed_requests": 0},
+            {
+                "endpoint": endpoint,
+                "platform": row.get("platform"),
+                "requests": 0,
+                "creditsUsed": 0,
+                "successfulRequests": 0,
+                "failedRequests": 0,
+            },
         )
         route["requests"] += 1
-        route["credits_used"] += row.get("credits_used") or 0
+        route["creditsUsed"] += row.get("credits_used") or 0
         if (row.get("status_code") or 0) < 400:
-            route["successful_requests"] += 1
+            route["successfulRequests"] += 1
         else:
-            route["failed_requests"] += 1
-    ranked = sorted(routes.values(), key=lambda r: (r["requests"], r["credits_used"]), reverse=True)[:limit]
+            route["failedRequests"] += 1
+    ranked = sorted(routes.values(), key=lambda r: (r["requests"], r["creditsUsed"]), reverse=True)[:limit]
     return ApiResponse(data={"days": days, "totalReturned": len(ranked), "routes": ranked})
 
 
@@ -221,9 +254,9 @@ async def get_limits(caller: ApiCaller = Depends(require_api_key)):
     return ApiResponse(
         data={
             "plan": caller.plan,
-            "monthly_quota": plan_quota,
-            "subscription_credits_remaining": caller.subscription_credits,
-            "topup_credits_remaining": caller.topup_credits,
-            "total_credits_remaining": caller.total_credits,
+            "monthlyQuota": plan_quota,
+            "subscriptionCreditsRemaining": caller.subscription_credits,
+            "topupCreditsRemaining": caller.topup_credits,
+            "totalCreditsRemaining": caller.total_credits,
         }
     )

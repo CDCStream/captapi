@@ -615,7 +615,18 @@ const AMAZON_SHOP: Spec[] = [
 ];
 
 const ACCOUNT: Spec[] = [
-  { slug: "account-balance", name: "Credit Balance API", shortName: "Credit Balance", category: "details", method: "GET", path: "/v1/account/balance", credits: 0 , tagline: "Check how many Captapi credits remain on your API key.", longDescription: "Call the Credit Balance API with your Captapi key and get the remaining credit balance as JSON. Free — does not consume credits." },
+  {
+    slug: "account-balance",
+    name: "Credit Balance API",
+    shortName: "Credit Balance",
+    category: "details",
+    method: "GET",
+    path: "/v1/account/balance",
+    credits: 0,
+    tagline: "Plan, subscription vs top-up credits, monthly quota, and renewsAt — 0 credits.",
+    longDescription:
+      "Call with your Captapi key and get plan, monthlyQuota, subscriptionCredits (reset each billing period), topupCredits (never expire), totalCredits, and subscriptionRenewsAt as camelCase JSON. Free — does not consume credits. Use this to tell whether remaining balance is time-boxed subscription quota or permanent top-ups.",
+  },
   { slug: "account-request-history", name: "Request History API", shortName: "Request History", category: "list", method: "GET", path: "/v1/account/request-history", credits: 0 , tagline: "See recent API requests made with your Captapi key — path, status, and credits used.", longDescription: "List recent requests for your Captapi account as structured JSON: endpoint path, status, credits charged, and timestamps. Free — does not consume credits." },
   { slug: "account-daily-usage", name: "Daily Usage API", shortName: "Daily Usage", category: "list", method: "GET", path: "/v1/account/daily-usage", credits: 0 , tagline: "See day-by-day credit usage for your Captapi account.", longDescription: "Get daily credit usage for your Captapi key as structured JSON — useful for spend monitoring and budgeting. Free — does not consume credits." },
   { slug: "account-most-used-routes", name: "Most Used Routes API", shortName: "Most Used Routes", category: "list", method: "GET", path: "/v1/account/most-used-routes", credits: 0 , tagline: "See which Captapi endpoints your key calls most often.", longDescription: "Get a ranked list of the routes your Captapi key uses most, with call counts over a chosen window. Free — does not consume credits." },
