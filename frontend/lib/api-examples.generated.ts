@@ -14401,49 +14401,68 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "url": "https://www.youtube.com/watch?v=ekr2nIex040",
         "title": "ROSÉ & Bruno Mars - APT. (Official Music Video)",
-        "publishedAt": "1 year ago",
+        "publishedAt": "2025-08-02T12:00:00.000Z",
         "viewCount": 2500000000,
         "durationSeconds": 174,
         "thumbnailUrl": "https://i.ytimg.com/vi/ekr2nIex040/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDzyvnY8qeogjw9kGhO1TPZkM12-A",
-        "channelName": "ROSÉ and Bruno Mars"
+        "channelName": "ROSÉ and Bruno Mars",
+        "id": "ekr2nIex040",
+        "publishedTimeText": "1 year ago",
+        "viewCountApproximate": true
       },
       {
         "url": "https://www.youtube.com/watch?v=kPa7bsKwL-c",
         "title": "Lady Gaga, Bruno Mars - Die With A Smile (Official Music Video)",
-        "publishedAt": "1 year ago",
+        "publishedAt": "2025-08-02T12:00:00.000Z",
         "viewCount": 1700000000,
         "durationSeconds": 253,
         "thumbnailUrl": "https://i.ytimg.com/vi/kPa7bsKwL-c/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDF3iMqsC6OQclYtXdkxhPQUpKHUA",
-        "channelName": "Lady Gaga"
+        "channelName": "Lady Gaga",
+        "id": "kPa7bsKwL-c",
+        "publishedTimeText": "1 year ago",
+        "viewCountApproximate": true
       },
       {
         "url": "https://www.youtube.com/watch?v=euCqAq6BRa4",
         "title": "DJ Snake - Let Me Love You (Official Music Video) ft. Justin Bieber",
-        "publishedAt": "9 years ago",
+        "publishedAt": "2017-08-04T12:00:00.000Z",
         "viewCount": 2000000000,
         "durationSeconds": 206,
         "thumbnailUrl": "https://i.ytimg.com/vi/euCqAq6BRa4/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDohgpb2pBRT0I2x0NJiDghKYbSkA",
-        "channelName": "DJ Snake"
+        "channelName": "DJ Snake",
+        "id": "euCqAq6BRa4",
+        "publishedTimeText": "9 years ago",
+        "viewCountApproximate": true
       },
       {
         "url": "https://www.youtube.com/watch?v=V9PVRfjEBTI",
         "title": "Billie Eilish - BIRDS OF A FEATHER (Official Music Video)",
-        "publishedAt": "1 year ago",
+        "publishedAt": "2025-08-02T12:00:00.000Z",
         "viewCount": 894000000,
         "durationSeconds": 231,
         "thumbnailUrl": "https://i.ytimg.com/vi/V9PVRfjEBTI/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLBvvxAwBQjBvuWLg_hCUQMH6nfFXA",
-        "channelName": "Billie Eilish"
+        "channelName": "Billie Eilish",
+        "id": "V9PVRfjEBTI",
+        "publishedTimeText": "1 year ago",
+        "viewCountApproximate": true
       },
       {
         "url": "https://www.youtube.com/watch?v=q4lU1N3oqYQ",
         "title": "Madison Beer - lovergirl (Official Music Video)",
-        "publishedAt": "2 months ago",
+        "publishedAt": "2026-06-03T12:00:00.000Z",
         "viewCount": 2400000,
         "durationSeconds": 202,
         "thumbnailUrl": "https://i.ytimg.com/vi/q4lU1N3oqYQ/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDHwDbvQb7vLyC4A9CadeUa1Zit0w",
-        "channelName": "Madison Beer"
+        "channelName": "Madison Beer",
+        "id": "q4lU1N3oqYQ",
+        "publishedTimeText": "2 months ago"
       }
-    ]
+    ],
+    "id": "PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj",
+    "owner": {
+      "name": "ROSÉ and Bruno Mars"
+    },
+    "totalVideos": 98
   },
   "youtube-playlist-videos": {
     "url": "https://www.youtube.com/playlist?list=PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj",
@@ -14452,49 +14471,64 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "url": "https://www.youtube.com/watch?v=ekr2nIex040",
         "title": "ROSÉ & Bruno Mars - APT. (Official Music Video)",
-        "publishedAt": "1 year ago",
+        "publishedAt": "2025-08-02T12:00:00.000Z",
         "viewCount": 2500000000,
         "durationSeconds": 174,
         "thumbnailUrl": "https://i.ytimg.com/vi/ekr2nIex040/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDzyvnY8qeogjw9kGhO1TPZkM12-A",
-        "channelName": "ROSÉ and Bruno Mars"
+        "channelName": "ROSÉ and Bruno Mars",
+        "id": "ekr2nIex040",
+        "publishedTimeText": "1 year ago",
+        "viewCountApproximate": true
       },
       {
         "url": "https://www.youtube.com/watch?v=kPa7bsKwL-c",
         "title": "Lady Gaga, Bruno Mars - Die With A Smile (Official Music Video)",
-        "publishedAt": "1 year ago",
+        "publishedAt": "2025-08-02T12:00:00.000Z",
         "viewCount": 1700000000,
         "durationSeconds": 253,
         "thumbnailUrl": "https://i.ytimg.com/vi/kPa7bsKwL-c/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDF3iMqsC6OQclYtXdkxhPQUpKHUA",
-        "channelName": "Lady Gaga"
+        "channelName": "Lady Gaga",
+        "id": "kPa7bsKwL-c",
+        "publishedTimeText": "1 year ago",
+        "viewCountApproximate": true
       },
       {
         "url": "https://www.youtube.com/watch?v=euCqAq6BRa4",
         "title": "DJ Snake - Let Me Love You (Official Music Video) ft. Justin Bieber",
-        "publishedAt": "9 years ago",
+        "publishedAt": "2017-08-04T12:00:00.000Z",
         "viewCount": 2000000000,
         "durationSeconds": 206,
         "thumbnailUrl": "https://i.ytimg.com/vi/euCqAq6BRa4/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDohgpb2pBRT0I2x0NJiDghKYbSkA",
-        "channelName": "DJ Snake"
+        "channelName": "DJ Snake",
+        "id": "euCqAq6BRa4",
+        "publishedTimeText": "9 years ago",
+        "viewCountApproximate": true
       },
       {
         "url": "https://www.youtube.com/watch?v=V9PVRfjEBTI",
         "title": "Billie Eilish - BIRDS OF A FEATHER (Official Music Video)",
-        "publishedAt": "1 year ago",
+        "publishedAt": "2025-08-02T12:00:00.000Z",
         "viewCount": 894000000,
         "durationSeconds": 231,
         "thumbnailUrl": "https://i.ytimg.com/vi/V9PVRfjEBTI/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLBvvxAwBQjBvuWLg_hCUQMH6nfFXA",
-        "channelName": "Billie Eilish"
+        "channelName": "Billie Eilish",
+        "id": "V9PVRfjEBTI",
+        "publishedTimeText": "1 year ago",
+        "viewCountApproximate": true
       },
       {
         "url": "https://www.youtube.com/watch?v=q4lU1N3oqYQ",
         "title": "Madison Beer - lovergirl (Official Music Video)",
-        "publishedAt": "2 months ago",
+        "publishedAt": "2026-06-03T12:00:00.000Z",
         "viewCount": 2400000,
         "durationSeconds": 202,
         "thumbnailUrl": "https://i.ytimg.com/vi/q4lU1N3oqYQ/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLDHwDbvQb7vLyC4A9CadeUa1Zit0w",
-        "channelName": "Madison Beer"
+        "channelName": "Madison Beer",
+        "id": "q4lU1N3oqYQ",
+        "publishedTimeText": "2 months ago"
       }
-    ]
+    ],
+    "id": "PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj"
   },
   "youtube-search": {
     "query": "space",

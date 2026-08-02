@@ -50,6 +50,19 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
+    category: "fix",
+    title: "YouTube playlist: ISO publishedAt, video id, owner, totalVideos",
+    description:
+      "GET /v1/youtube/playlist and /playlist-videos no longer return relative labels like \"1 year ago\" in publishedAt. publishedAt is ISO-8601 (approximate when derived from YouTube's relative card text); the original label is kept as publishedTimeText. Each video now includes id. Playlist responses add owner{id,name,url,handle}, totalVideos (full playlist size vs totalReturned page length), and viewCountApproximate when viewCount comes from compact 2.5B-style UI text. Still flat 2 credits on the native path; fast=true RSS kept for exact dates / speed.",
+    items: [
+      "publishedAt ISO (approx from relative); publishedTimeText kept",
+      "videos[].id on playlist + playlist-videos",
+      "owner{id,name,url,handle} + totalVideos",
+      "viewCountApproximate for compact K/M/B counts",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
     category: "improvement",
     title: "Instagram Reels Search: flat 2 credits, schema parity with hashtag",
     description:

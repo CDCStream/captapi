@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import re
 import xml.etree.ElementTree as ET
+from datetime import datetime, timedelta, timezone
 from typing import Any, Iterator
 from urllib.parse import parse_qs, urlparse
 
@@ -192,24 +193,94 @@ def text_of(node: Any) -> str | None:
 
 _COUNT_RE = re.compile(r"([\d.,]+)\s*([KMB])?", re.IGNORECASE)
 _MULT = {"K": 1_000, "M": 1_000_000, "B": 1_000_000_000}
+_RELATIVE_PUBLISHED_RE = re.compile(
+    r"(?:streamed\s+|premiered\s+)?"
+    r"(?:(\d+)\s*(second|minute|hour|day|week|month|year)s?"
+    r"|(\d+)\s*([smhdwy]))"
+    r"\s+ago",
+    re.IGNORECASE,
+)
+_UNIT_SECONDS = {
+    "second": 1,
+    "s": 1,
+    "minute": 60,
+    "m": 60,
+    "hour": 3600,
+    "h": 3600,
+    "day": 86400,
+    "d": 86400,
+    "week": 604800,
+    "w": 604800,
+    "month": 2_592_000,  # 30d — YouTube's label is already approximate
+    "year": 31_536_000,  # 365d
+    "y": 31_536_000,
+}
 
 
 def parse_count_text(value: Any) -> int | None:
     """Parse '1,234,567 views', '1.2M views', '123K', 'No views' -> int."""
+    n, _approx = parse_count_text_meta(value)
+    return n
+
+
+def parse_count_text_meta(value: Any) -> tuple[int | None, bool]:
+    """Return ``(count, approximate)`` — approximate when K/M/B compact form."""
     s = text_of(value) if not isinstance(value, str) else value
     if not s:
-        return None
+        return None, False
     if "no views" in s.lower():
-        return 0
+        return 0, False
     m = _COUNT_RE.search(s.replace("\u00a0", " "))
     if not m:
-        return None
+        return None, False
     num, suffix = m.group(1), (m.group(2) or "").upper()
     try:
         base = float(num.replace(",", ""))
     except ValueError:
+        return None, False
+    return int(base * _MULT.get(suffix, 1)), bool(suffix)
+
+
+def approximate_iso_from_relative(value: Any, *, now: datetime | None = None) -> str | None:
+    """Turn YouTube labels like ``1 year ago`` / ``5d ago`` into approximate ISO-8601.
+
+    Exact timestamps are rarely on playlist/search cards; this keeps ``publishedAt``
+    sortable/ISO-typed while ``publishedTimeText`` retains the original label.
+    """
+    text = (text_of(value) if not isinstance(value, str) else value) or ""
+    text = text.strip()
+    if not text:
         return None
-    return int(base * _MULT.get(suffix, 1))
+    # Already ISO-ish.
+    if "T" in text and (text.endswith("Z") or "+" in text[10:]):
+        return text
+    m = _RELATIVE_PUBLISHED_RE.search(text)
+    if not m:
+        return None
+    amount = int(m.group(1) or m.group(3) or 0)
+    unit = (m.group(2) or m.group(4) or "").lower()
+    secs = _UNIT_SECONDS.get(unit)
+    if not secs or amount <= 0:
+        return None
+    base = now or datetime.now(timezone.utc)
+    approx = base - timedelta(seconds=amount * secs)
+    return approx.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
+
+def published_fields(relative_or_iso: Any) -> tuple[str | None, str | None]:
+    """Return ``(publishedAt ISO|None, publishedTimeText|None)``."""
+    text = text_of(relative_or_iso) if not isinstance(relative_or_iso, str) else relative_or_iso
+    text = (text or "").strip() or None
+    if not text:
+        return None, None
+    if "T" in text and (text.endswith("Z") or "+" in text[10:]):
+        return text, None
+    if re.search(r"\bago\b", text, re.I) or re.search(r"\b(premiere|streamed|scheduled)\b", text, re.I):
+        return approximate_iso_from_relative(text), text
+    # Bare date YYYY-MM-DD from some actors.
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", text):
+        return f"{text}T00:00:00.000Z", None
+    return None, text
 
 
 def walk_find(node: Any, key: str) -> Iterator[dict[str, Any]]:
@@ -314,9 +385,9 @@ def normalize_video_renderer(vr: dict[str, Any]) -> dict[str, Any] | None:
     video_id = safe_str(vr.get("videoId"))
     if not video_id:
         return None
-    view_count = parse_count_text(vr.get("viewCountText"))
+    view_count, view_approx = parse_count_text_meta(vr.get("viewCountText"))
     if view_count is None:
-        view_count = parse_count_text(vr.get("shortViewCountText"))
+        view_count, view_approx = parse_count_text_meta(vr.get("shortViewCountText"))
     duration = _duration_text_seconds(vr.get("lengthText"))
     badges = _badge_labels(vr)
     channel = _channel_from_text_runs(
@@ -328,12 +399,14 @@ def normalize_video_renderer(vr: dict[str, Any]) -> dict[str, Any] | None:
         if rtype == "short"
         else f"https://www.youtube.com/watch?v={video_id}"
     )
-    return {
+    published_at, published_text = published_fields(vr.get("publishedTimeText"))
+    card: dict[str, Any] = {
         "type": rtype,
         "id": video_id,
         "url": url,
         "title": text_of(vr.get("title")) or "",
-        "publishedAt": text_of(vr.get("publishedTimeText")),
+        "publishedAt": published_at,
+        "publishedTimeText": published_text,
         "viewCount": view_count,
         "durationSeconds": duration,
         "thumbnailUrl": _best_thumb(vr.get("thumbnail")),
@@ -342,6 +415,9 @@ def normalize_video_renderer(vr: dict[str, Any]) -> dict[str, Any] | None:
         "channel": channel,
         "badges": badges,
     }
+    if view_approx:
+        card["viewCountApproximate"] = True
+    return card
 
 
 def _normalize_shorts_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
@@ -419,18 +495,19 @@ def _normalize_video_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
     # or the compact form ["Channel", "1.7M", "5d ago"] without the word "views".
     channel_name = None
     view_count = None
-    published_at = None
+    view_approx = False
+    published_raw = None
     for txt in parts:
         low = txt.lower()
         stripped = txt.strip()
         if view_count is None and (
             "view" in low or re.fullmatch(r"[\d.,]+\s*[KMB]?", stripped, re.IGNORECASE)
         ):
-            view_count = parse_count_text(txt)
-        elif published_at is None and any(
+            view_count, view_approx = parse_count_text_meta(txt)
+        elif published_raw is None and any(
             word in low for word in ("ago", "premiere", "streamed", "scheduled")
         ):
-            published_at = txt
+            published_raw = txt
         elif channel_name is None:
             channel_name = txt
 
@@ -440,12 +517,14 @@ def _normalize_video_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
         if duration is not None:
             break
 
-    return {
+    published_at, published_text = published_fields(published_raw)
+    card: dict[str, Any] = {
         "type": "video",
         "id": video_id,
         "url": f"https://www.youtube.com/watch?v={video_id}",
         "title": title,
         "publishedAt": published_at,
+        "publishedTimeText": published_text,
         "viewCount": view_count,
         "durationSeconds": duration,
         "thumbnailUrl": _best_thumb(lk.get("contentImage")),
@@ -454,6 +533,9 @@ def _normalize_video_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
         "channel": {"id": None, "title": channel_name, "handle": None, "url": None, "thumbnail": None},
         "badges": [],
     }
+    if view_approx:
+        card["viewCountApproximate"] = True
+    return card
 
 
 def _normalize_playlist_video(pv: dict[str, Any]) -> dict[str, Any] | None:
@@ -462,23 +544,26 @@ def _normalize_playlist_video(pv: dict[str, Any]) -> dict[str, Any] | None:
     if not video_id:
         return None
     view_count = None
-    published_at = None
+    view_approx = False
+    published_raw = None
     for run in (pv.get("videoInfo") or {}).get("runs") or []:
         txt = safe_str(run.get("text")) or ""
         low = txt.lower()
         if "view" in low:
-            view_count = parse_count_text(txt)
-        elif "ago" in low or "streamed" in low:
-            published_at = txt
+            view_count, view_approx = parse_count_text_meta(txt)
+        elif "ago" in low or "streamed" in low or "premiere" in low:
+            published_raw = txt
     secs = safe_str(pv.get("lengthSeconds"))
     duration = int(secs) if secs and secs.isdigit() else _duration_text_seconds(pv.get("lengthText"))
     channel = _channel_from_text_runs(pv.get("shortBylineText"))
-    return {
+    published_at, published_text = published_fields(published_raw)
+    card: dict[str, Any] = {
         "type": "video",
         "id": video_id,
         "url": f"https://www.youtube.com/watch?v={video_id}",
         "title": text_of(pv.get("title")) or "",
         "publishedAt": published_at,
+        "publishedTimeText": published_text,
         "viewCount": view_count,
         "durationSeconds": duration,
         "thumbnailUrl": _best_thumb(pv.get("thumbnail")),
@@ -487,6 +572,9 @@ def _normalize_playlist_video(pv: dict[str, Any]) -> dict[str, Any] | None:
         "channel": channel,
         "badges": [],
     }
+    if view_approx:
+        card["viewCountApproximate"] = True
+    return card
 
 
 def _normalize_channel_renderer(cr: dict[str, Any]) -> dict[str, Any] | None:
@@ -918,8 +1006,73 @@ async def search_shorts_native(q: str, limit: int) -> list[dict[str, Any]] | Non
 
 
 # ---------------------------------------------------------------- playlist -
+def _playlist_total_videos(data: Any, header: dict[str, Any] | None) -> int | None:
+    """Playlist size from header / sidebar stats (not the page slice length)."""
+    candidates: list[Any] = []
+    if isinstance(header, dict):
+        candidates.extend(
+            [
+                header.get("numVideosText"),
+                header.get("numVideos"),
+            ]
+        )
+        for byline in header.get("byline") or []:
+            if isinstance(byline, dict):
+                pbr = byline.get("playlistBylineRenderer") or {}
+                candidates.append(pbr.get("text"))
+        for key in ("stats", "briefStats"):
+            stats = header.get(key)
+            if isinstance(stats, list) and stats:
+                candidates.append(stats[0])
+    for side in walk_find(data, "playlistSidebarPrimaryInfoRenderer"):
+        for key in ("stats", "briefStats"):
+            stats = side.get(key)
+            if isinstance(stats, list) and stats:
+                candidates.append(stats[0])
+        candidates.append(side.get("statsText"))
+    for cand in candidates:
+        n = parse_count_text(cand)
+        if n is not None and n >= 0:
+            return n
+    # Fallback: scan "98 videos" style strings near the header.
+    blob = json.dumps(header or {}, ensure_ascii=False)
+    m = re.search(r"([\d,.]+)\s+videos?", blob, re.I)
+    if m:
+        return safe_int(m.group(1).replace(",", ""))
+    return None
+
+
+def _playlist_owner(data: Any, header: dict[str, Any] | None) -> dict[str, Any]:
+    owner_node = None
+    if isinstance(header, dict):
+        owner_node = header.get("ownerText")
+    if owner_node is None:
+        for side in walk_find(data, "playlistSidebarSecondaryInfoRenderer"):
+            vor = ((side.get("videoOwner") or {}).get("videoOwnerRenderer")) or {}
+            owner_node = vor.get("title")
+            if owner_node:
+                break
+    channel = _channel_from_text_runs(owner_node) if owner_node else {
+        "id": None,
+        "title": None,
+        "handle": None,
+        "url": None,
+        "thumbnail": None,
+    }
+    # Normalize to SC-like owner{id,name,url,handle}; keep title alias.
+    name = channel.get("title")
+    return {
+        "id": channel.get("id"),
+        "name": name,
+        "title": name,
+        "url": channel.get("url")
+        or (f"https://www.youtube.com/channel/{channel['id']}" if channel.get("id") else None),
+        "handle": channel.get("handle"),
+    }
+
+
 async def playlist_native(url: str, limit: int) -> dict[str, Any] | None:
-    """Videos (plus title/channel) straight from a /playlist page."""
+    """Videos (plus title/owner/totalVideos) straight from a /playlist page."""
     data, _ = await fetch_page_data(url)
     if data is None:
         return None
@@ -928,17 +1081,48 @@ async def playlist_native(url: str, limit: int) -> dict[str, Any] | None:
         return None
 
     title = None
-    channel = None
+    header: dict[str, Any] | None = None
     for meta in walk_find(data, "playlistMetadataRenderer"):
         title = safe_str(meta.get("title"))
         break
-    for header in walk_find(data, "playlistHeaderRenderer"):
-        title = title or text_of(header.get("title"))
-        channel = text_of(header.get("ownerText"))
+    for hdr in walk_find(data, "playlistHeaderRenderer"):
+        header = hdr
+        title = title or text_of(hdr.get("title"))
         break
-    if channel is None:
-        channel = videos[0].get("channelName")
-    return {"title": title, "channelName": channel, "videos": videos}
+
+    owner = _playlist_owner(data, header)
+    channel_name = owner.get("name")
+    if not channel_name:
+        channel_name = videos[0].get("channelName")
+        owner["name"] = channel_name
+        owner["title"] = channel_name
+
+    playlist_id = None
+    m = re.search(r"[?&]list=([\w-]+)", url or "")
+    if m:
+        playlist_id = m.group(1)
+    if not playlist_id and isinstance(header, dict):
+        playlist_id = safe_str(header.get("playlistId"))
+
+    total_videos = _playlist_total_videos(data, header)
+    # Drop empty nested channel thumbs on video cards for a leaner payload.
+    for vid in videos:
+        ch = vid.get("channel")
+        if isinstance(ch, dict):
+            vid["channel"] = {k: v for k, v in ch.items() if v is not None}
+            if not vid["channel"]:
+                vid.pop("channel", None)
+        if vid.get("publishedTimeText") is None:
+            vid.pop("publishedTimeText", None)
+
+    return {
+        "id": playlist_id,
+        "title": title,
+        "channelName": channel_name,
+        "owner": {k: v for k, v in owner.items() if v is not None},
+        "totalVideos": total_videos,
+        "videos": videos,
+    }
 
 
 # ---------------------------------------------------- channel tab lists ---

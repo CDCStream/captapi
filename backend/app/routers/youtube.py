@@ -23,6 +23,7 @@ from app.services.cached_runner import cached_or_run
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.openai_client import summarize_transcript
 from app.services.youtube_native import (
+    published_fields,
     build_youtube_video_details,
     channel_details_native,
     channel_playlists_native,
@@ -289,6 +290,7 @@ async def _youtube_feed_videos(feed_url: str, limit: int) -> list[dict[str, Any]
             duration = safe_int(dur_el.get("seconds"))
         videos.append(
             {
+                "id": video_id,
                 "url": f"https://www.youtube.com/watch?v={video_id}" if video_id else "",
                 "title": title,
                 "publishedAt": published,
@@ -381,12 +383,17 @@ def _video_card(v: dict) -> dict:
     stats = v.get("statistics") if isinstance(v.get("statistics"), dict) else {}
     if isinstance(snippet, dict) and (snippet.get("resourceId") or snippet.get("videoUrl")):
         video_id = safe_str((snippet.get("resourceId") or {}).get("videoId") or content.get("videoId"))
+        published_at, published_text = published_fields(
+            snippet.get("publishedAt") or content.get("videoPublishedAt")
+        )
         return strip_empty(
             {
+                "id": video_id if video_id and len(video_id) == 11 else None,
                 "url": safe_str(snippet.get("videoUrl"))
                 or (f"https://www.youtube.com/watch?v={video_id}" if video_id else ""),
                 "title": safe_str(snippet.get("title")) or "",
-                "publishedAt": safe_str(snippet.get("publishedAt") or content.get("videoPublishedAt")),
+                "publishedAt": published_at,
+                "publishedTimeText": published_text,
                 "viewCount": safe_int(snippet.get("viewCount") or stats.get("viewCount") or v.get("viewCount")),
                 "durationSeconds": _duration_seconds(
                     snippet.get("duration")
@@ -404,22 +411,30 @@ def _video_card(v: dict) -> dict:
         # Some actors put a playlistItem id here; prefer nested videoId.
         nested_id = safe_str((v.get("id") or {}).get("videoId")) if isinstance(v.get("id"), dict) else None
         video_id = nested_id or video_id
+    if video_id and len(video_id) != 11:
+        # Not a watch id — try URL.
+        video_id = extract_youtube_id(safe_str(v.get("url") or v.get("videoUrl") or "") or "") or video_id
+        if video_id and len(video_id) != 11:
+            video_id = None
     url = safe_str(v.get("url") or v.get("videoUrl") or v.get("video_url") or v.get("link"))
-    if not url and video_id and len(video_id) == 11:
+    if not url and video_id:
         url = f"https://www.youtube.com/watch?v={video_id}"
+    published_at, published_text = published_fields(
+        v.get("date")
+        or v.get("publishedAt")
+        or v.get("published_at")
+        or v.get("published")
+        or v.get("publishDate")
+        or v.get("publishedTimeText")
+        or v.get("uploadDate")
+    )
     return strip_empty(
         {
+            "id": video_id,
             "url": url,
             "title": safe_str(v.get("title") or v.get("videoTitle") or v.get("video_title") or v.get("name")) or "",
-            "publishedAt": safe_str(
-                v.get("date")
-                or v.get("publishedAt")
-                or v.get("published_at")
-                or v.get("published")
-                or v.get("publishDate")
-                or v.get("publishedTimeText")
-                or v.get("uploadDate")
-            ),
+            "publishedAt": published_at,
+            "publishedTimeText": published_text,
             "viewCount": safe_int(
                 v.get("viewCount")
                 or v.get("views")
@@ -1235,15 +1250,31 @@ async def youtube_playlist_videos(
                 feed_videos = await _youtube_playlist_feed(url, limit)
                 if feed_videos:
                     ctx["source"] = "direct"
-                    return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
+                    return {
+                        "url": url,
+                        "id": _playlist_id(url),
+                        "totalReturned": len(feed_videos),
+                        "videos": feed_videos,
+                    }
             native = await playlist_native(url, limit)
             if native and native.get("videos"):
                 ctx["source"] = "direct"
-                return {"url": url, "totalReturned": len(native["videos"]), "videos": native["videos"]}
+                return {
+                    "url": url,
+                    "id": safe_str(native.get("id")) or _playlist_id(url),
+                    "totalVideos": native.get("totalVideos"),
+                    "totalReturned": len(native["videos"]),
+                    "videos": native["videos"],
+                }
             feed_videos = await _youtube_playlist_feed(url, limit)
             if feed_videos:
                 ctx["source"] = "direct"
-                return {"url": url, "totalReturned": len(feed_videos), "videos": feed_videos}
+                return {
+                    "url": url,
+                    "id": _playlist_id(url),
+                    "totalReturned": len(feed_videos),
+                    "videos": feed_videos,
+                }
             apify = get_apify()
             items, _actor = await apify.run_with_fallback(
                 _playlist_actor_candidates(settings, url, limit)[:1],
@@ -1257,11 +1288,16 @@ async def youtube_playlist_videos(
             for v in items[:limit]:
                 videos.append(_video_card(v))
             ctx["source"] = "apify"
-            return {"url": url, "totalReturned": len(videos), "videos": videos}
+            return {
+                "url": url,
+                "id": _playlist_id(url),
+                "totalReturned": len(videos),
+                "videos": videos,
+            }
 
         data = await cached_or_run(
             endpoint="youtube.playlist-videos",
-            params={"url": url, "limit": limit, "fast": fast, "v": 10},
+            params={"url": url, "limit": limit, "fast": fast, "v": 11},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1296,37 +1332,48 @@ async def youtube_playlist(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            pid = _playlist_id(url)
             if fast:
                 feed_videos = await _youtube_playlist_feed(url, limit)
                 if feed_videos:
                     ctx["source"] = "direct"
+                    channel_name = feed_videos[0].get("channelName") if feed_videos else ""
                     return {
                         "platform": "youtube",
                         "url": url,
+                        "id": pid,
                         "title": "",
-                        "channelName": feed_videos[0].get("channelName") if feed_videos else "",
+                        "channelName": channel_name,
+                        "owner": {"name": channel_name} if channel_name else None,
                         "totalReturned": len(feed_videos),
                         "videos": feed_videos,
                     }
             native = await playlist_native(url, limit)
             if native and native.get("videos"):
                 ctx["source"] = "direct"
+                owner = native.get("owner") if isinstance(native.get("owner"), dict) else None
                 return {
                     "platform": "youtube",
                     "url": url,
+                    "id": safe_str(native.get("id")) or pid,
                     "title": safe_str(native.get("title")) or "",
                     "channelName": safe_str(native.get("channelName")) or "",
+                    "owner": owner,
+                    "totalVideos": native.get("totalVideos"),
                     "totalReturned": len(native["videos"]),
                     "videos": native["videos"],
                 }
             feed_videos = await _youtube_playlist_feed(url, limit)
             if feed_videos:
                 ctx["source"] = "direct"
+                channel_name = feed_videos[0].get("channelName") if feed_videos else ""
                 return {
                     "platform": "youtube",
                     "url": url,
+                    "id": pid,
                     "title": "",
-                    "channelName": feed_videos[0].get("channelName") if feed_videos else "",
+                    "channelName": channel_name,
+                    "owner": {"name": channel_name} if channel_name else None,
                     "totalReturned": len(feed_videos),
                     "videos": feed_videos,
                 }
@@ -1343,18 +1390,21 @@ async def youtube_playlist(
             videos = [_video_card(v) for v in items[:limit]]
             first = items[0] if items else {}
             ctx["source"] = "apify"
+            channel_name = safe_str(first.get("channelName") or first.get("channel"))
             return {
                 "platform": "youtube",
                 "url": url,
+                "id": pid,
                 "title": safe_str(first.get("playlistTitle") or first.get("playlistName")),
-                "channelName": safe_str(first.get("channelName") or first.get("channel")),
+                "channelName": channel_name,
+                "owner": {"name": channel_name} if channel_name else None,
                 "totalReturned": len(videos),
                 "videos": videos,
             }
 
         data = await cached_or_run(
             endpoint="youtube.playlist",
-            params={"url": url, "limit": limit, "fast": fast, "v": 9},
+            params={"url": url, "limit": limit, "fast": fast, "v": 10},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
