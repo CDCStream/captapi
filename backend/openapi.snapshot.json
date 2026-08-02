@@ -6506,6 +6506,7 @@
           "Ad Library"
         ],
         "summary": "Search TikTok Ad Library",
+        "description": "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) as clean JSON. Flat 2 credits on the native path. firstShown/lastShown are ISO-8601. Default country is GB (this library is EU-led; region=US is often empty). This is not TikTok Creative Center — CTR / play-rate ranking metrics live on Creative Center, a different public surface.",
         "operationId": "tiktok_search_v1_ad_library_tiktok_search_get",
         "security": [
           {
@@ -6520,8 +6521,10 @@
             "schema": {
               "type": "string",
               "minLength": 2,
+              "description": "Keyword or advertiser name (min 2 characters).",
               "title": "Q"
-            }
+            },
+            "description": "Keyword or advertiser name (min 2 characters)."
           },
           {
             "name": "country",
@@ -6531,9 +6534,11 @@
               "type": "string",
               "minLength": 2,
               "maxLength": 2,
-              "default": "DE",
+              "description": "Two-letter ISO country code. Default GB (EU Commercial Content Library; US often empty).",
+              "default": "GB",
               "title": "Country"
-            }
+            },
+            "description": "Two-letter ISO country code. Default GB (EU Commercial Content Library; US often empty)."
           },
           {
             "name": "limit",
@@ -6614,9 +6619,11 @@
               "type": "string",
               "minLength": 2,
               "maxLength": 2,
-              "default": "DE",
+              "description": "Two-letter ISO country code. Default GB.",
+              "default": "GB",
               "title": "Country"
-            }
+            },
+            "description": "Two-letter ISO country code. Default GB."
           },
           {
             "name": "cache",

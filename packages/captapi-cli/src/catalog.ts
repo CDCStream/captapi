@@ -506,8 +506,8 @@ const FACEBOOK_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
 ];
 
 const TIKTOK_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
-  { tool: "tiktok_ad_library_search", name: "TikTok Ad Library Search", path: "/v1/ad-library/tiktok/search", credits: 70, summary: "Search TikTok Ad Library and Creative Center.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default DE." }, limit(20, 200)] },
-  { tool: "tiktok_ad_library_ad_details", name: "TikTok Ad Details", path: "/v1/ad-library/tiktok/ad-details", credits: 17, summary: "TikTok ad details by ad URL or ID.", params: [url("TikTok Ad Library URL or ad ID."), { name: "country", type: "string", required: false, description: "ISO country code. Default DE." }] },
+  { tool: "tiktok_ad_library_search", name: "TikTok Ad Library Search", path: "/v1/ad-library/tiktok/search", credits: 2, summary: "Search TikTok Commercial Content Library (EU DSA) — ISO dates, advertiser, reach bands.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default GB (US often empty)." }, limit(20, 200)] },
+  { tool: "tiktok_ad_library_ad_details", name: "TikTok Ad Details", path: "/v1/ad-library/tiktok/ad-details", credits: 17, summary: "TikTok ad details by ad URL or ID.", params: [url("TikTok Ad Library URL or ad ID."), { name: "country", type: "string", required: false, description: "ISO country code. Default GB." }] },
 ];
 
 const GOOGLE_AD_LIBRARY: Omit<Endpoint, "platform">[] = [

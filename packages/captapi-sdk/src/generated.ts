@@ -1637,7 +1637,7 @@ export class FacebookAdLibraryApi {
 export interface TiktokAdLibrarySearchParams {
   /** Search query or keywords (min 2 chars). */
   q: string;
-  /** ISO country code. Default DE. */
+  /** ISO country code. Default GB (US often empty). */
   country?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
@@ -1648,7 +1648,7 @@ export interface TiktokAdLibrarySearchParams {
 export interface TiktokAdLibraryAdDetailsParams {
   /** TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** ISO country code. Default DE. */
+  /** ISO country code. Default GB. */
   country?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -1656,7 +1656,7 @@ export interface TiktokAdLibraryAdDetailsParams {
 
 export class TiktokAdLibraryApi {
   constructor(private readonly core: HttpCore) {}
-  /** TikTok Ad Library Search — Search TikTok Ad Library and Creative Center. (70 credits) */
+  /** TikTok Ad Library Search — Search TikTok Commercial Content Library (EU DSA) — ISO dates, advertiser, reach bands. (2 credits) */
   search(params: TiktokAdLibrarySearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/tiktok/search", params);
   }

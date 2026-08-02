@@ -10549,56 +10549,78 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     ]
   },
   "tiktok-ad-library-search": {
-    "query": "fashion",
-    "country": "DE",
+    "query": "nike",
+    "country": "GB",
     "totalReturned": 3,
     "ads": [
       {
         "platform": "tiktok_ad_library",
-        "id": "1872034324356433",
-        "url": "https://library.tiktok.com/ads/detail/?ad_id=1872034324356433",
-        "text": "#gandurilemele #foryoupage❤️❤️ Buna dimineața tuturor!Zi binecuvântata tuturor!🙏🙏🙏",
+        "id": "1872402620173314",
+        "url": "https://library.tiktok.com/ads/detail/?ad_id=1872402620173314",
+        "text": "Professional Massage Therapy for Relaxation, Recovery, and Wellness.",
         "adFormat": "video",
-        "firstShown": "07/29/2026",
-        "lastShown": "07/29/2026",
+        "firstShown": "2026-08-02T00:00:00.000Z",
+        "lastShown": "2026-08-02T00:00:00.000Z",
         "impressions": "0-1K",
         "advertiser": {
-          "name": "alyalina535"
+          "name": "HongKong AdTiger Media Co., Limited",
+          "location": "Hong Kong"
         },
         "media": [
-          "https://p16-common-sign.tiktokcdn.com/tos-useast2a-p-0037-euttp/og7D4rDZFh1nZXOfLR2MABlEJzgIQmBfQqyx8E~tplv-noop.image?dr=18692&refresh_token=07160d6b&x-expires=1785378043&x-signature=chp8LV05WtZMgn%2Foj9DEUlAt0HE%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&am"
-        ]
+          "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/3dff80d5a4f73a22d6682afa5f45d78d~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=cd5ba53f&x-expires=1785686400&x-signature=m6GakMpuep1d%2BRNlCGpC0K9CiWE%3D&t=4d5b0474&ps=13740610&a",
+          "https://library.tiktok.com/api/v1/cdn/1785667308/video/aHR0cHM6Ly92NzcudGlrdG9rY2RuLmNvbS9mMTgyNTU3Yzg1OGVjOGEwM2RkMGQ1MjRjZTRlOWM4Ny82YTZmNzM3ZS92aWRlby90b3MvYWxpc2cvdG9zLWFsaXNnLXZlLTAwNTFjMDAxLXNnL29zOU5VSkFzZ0lMUGVtT0RoRlVHZUdSQzNSb1JnbW5lQUFKTEdiLw==/fee44425-7600-4c48-8df9-ce242eb52069?a=475769&bt=593&btag=e00088000&bti=PDU2NmYwMy86&ft=.NpOcInz7Thz~INGXq8Zmo&l=2026080218414895FDAC2A6CF961573BDF&mime_type=video_mp4&rc=N2hoOzVpZzM1OTs0aDM5aUBpajVpOGw5cjRqPDMzODYzNEBjMmFeYy9fXzMxMS0zLTJjYSNxZy82MmRraWthLS1kMC1zcw%3D%3D&signature=v7cmUB0AYCwTjyukuWGzRGtiRJKMRb6UOyUo2szN2pY%3D&vvpl=1"
+        ],
+        "impressionsRange": {
+          "min": 0,
+          "max": 1000,
+          "raw": "0-1K"
+        }
       },
       {
         "platform": "tiktok_ad_library",
-        "id": "1872081596639249",
-        "url": "https://library.tiktok.com/ads/detail/?ad_id=1872081596639249",
+        "id": "1872069030885697",
+        "url": "https://library.tiktok.com/ads/detail/?ad_id=1872069030885697",
+        "text": "Visit the website and learn more.",
         "adFormat": "video",
-        "firstShown": "07/29/2026",
-        "lastShown": "07/29/2026",
+        "firstShown": "2026-08-02T00:00:00.000Z",
+        "lastShown": "2026-08-02T00:00:00.000Z",
         "impressions": "0-1K",
         "advertiser": {
-          "name": "ariana_s.loan"
+          "name": "VV7 HOLDING LLC",
+          "location": "United States"
         },
         "media": [
-          "https://p16-common-sign.tiktokcdn.com/tos-useast2a-p-0037-euttp/ocIpICBQICsNApB1EipZfAoCuW0CXiSozUI7At~tplv-noop.image?dr=18692&refresh_token=b141ba74&x-expires=1785378012&x-signature=%2BPg2gSRW9p1DJIiOmvO9Wnb5riU%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&"
-        ]
+          "https://p16-common-sign.tiktokcdn.com/ad-site-i18n-sg/20260729c7c7767b1bd4c6634305aba2~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=a7fcf310&x-expires=1785686400&x-signature=H8hajcaAaLOzUe4Qcbse8V10R%2Bs%3D&t=4d5b0474&ps=13740610&shp=0c75dd76&s",
+          "https://library.tiktok.com/api/v1/cdn/1785667310/video/aHR0cHM6Ly92NzcudGlrdG9rY2RuLmNvbS9kOTEzMzQzYmVlZTBlODkyNDRhOTZjYmE0ZTdjYzk1OS82YTZmNzM2MC92aWRlby90b3MvYWxpc2cvdG9zLWFsaXNnLXZlLTAwNTFjMDAxLXNnL28wM3VvbDdZak5BRUFpSHcybXk5enB2aVVNY0JCWGFRQ3FOSUEv/a83a6b69-bc09-432a-a704-4cb96c22fbb2?a=475769&bt=997&btag=e000b8000&bti=PDU2NmYwMy86&ft=.NpOcInz7Thn~INGXq8Zmo&l=202608021841508CA9C9F51CA00456AC9F&mime_type=video_mp4&rc=Z2dpNWY5ZTdmM2k8ZzU2OEBpM3FvcnU5cmw2PDMzODYzNEBhMDUyLjFhXjQxMF5jXy1eYSNiY3MwMmRrLmlhLS1kMC1zcw%3D%3D&signature=c1LXfiH6SOrrYOTEWg4TRCzE%2BNR%2BSu0k%2Fuj%2FDEUJ3vk%3D&vvpl=1"
+        ],
+        "impressionsRange": {
+          "min": 0,
+          "max": 1000,
+          "raw": "0-1K"
+        }
       },
       {
         "platform": "tiktok_ad_library",
-        "id": "1872034324355105",
-        "url": "https://library.tiktok.com/ads/detail/?ad_id=1872034324355105",
-        "text": "#foryoupage❤️❤️ Zi minunată tuturor!🙏🙏🙏",
+        "id": "1872402620170418",
+        "url": "https://library.tiktok.com/ads/detail/?ad_id=1872402620170418",
+        "text": "Relax and Recharge with Professional Massage Services Near You. Book Today.",
         "adFormat": "video",
-        "firstShown": "07/29/2026",
-        "lastShown": "07/29/2026",
+        "firstShown": "2026-08-02T00:00:00.000Z",
+        "lastShown": "2026-08-02T00:00:00.000Z",
         "impressions": "0-1K",
         "advertiser": {
-          "name": "alyalina535"
+          "name": "HongKong AdTiger Media Co., Limited",
+          "location": "Hong Kong"
         },
         "media": [
-          "https://p16-common-sign.tiktokcdn.com/tos-useast2a-p-0037-euttp/ocICop3RUGnfxAGf3FQABXQNYnMQ4oCBf8afhY~tplv-noop.image?dr=18692&refresh_token=5f676cca&x-expires=1785378035&x-signature=Jc1zp2g8pv1QCck5g5SjsSf%2Fp1g%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&am"
-        ]
+          "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/3de4a6d6aeade6ab958a291a3a5bd49c~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=d3c7a0dd&x-expires=1785686400&x-signature=GyiPUhUAFUFyEOGfF1XhsMSx4rQ%3D&t=4d5b0474&ps=13740610&",
+          "https://library.tiktok.com/api/v1/cdn/1785667307/video/aHR0cHM6Ly92MTZtLnRpa3Rva2Nkbi5jb20vNjQxZWM4ZWZiYTgwY2M1YzU0OWI4N2NhZjk5MjEyMDEvNmE2ZjczNTgvdmlkZW8vdG9zL2FsaXNnL3Rvcy1hbGlzZy12ZS0wMDUxYzAwMS1zZy9vd2dJMzRBYlZnRzBHRmZEUVVoQWZVTWdXWjhBQUNTRUdSOWVtWS8=/bb0280a2-4a63-46e8-a759-8d4b732e6d88?a=475769&bt=720&btag=e000b0000&bti=PDU2NmYwMy86&ft=.NpOcInz7Th2~INGXq8Zmo&l=202608021841474F1F2ED09C9DE84DF0AE&mime_type=video_mp4&rc=NDQ8NjQ0ZTxlM2Y2Njs5ZEBpMzhuZ245cjZqPDMzODYzNEAtLmNjXl5jNV8xMi0yLzJgYSNjMXMtMmQ0aWthLS1kMC1zcw%3D%3D&signature=2pQWORzvAEmUKgGQGmydZDn%2B0mYazq1nnnXy7NGPupQ%3D&vvpl=1"
+        ],
+        "impressionsRange": {
+          "min": 0,
+          "max": 1000,
+          "raw": "0-1K"
+        }
       }
     ]
   },

@@ -2338,10 +2338,10 @@ class TiktokAdLibraryApi:
         self._t = transport
 
     def search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Ad Library Search — Search TikTok Ad Library and Creative Center. (70 credits)
+        """TikTok Ad Library Search — Search TikTok Commercial Content Library (EU DSA) — ISO dates, advertiser, reach bands. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
-        :param country: ISO country code. Default DE.
+        :param country: ISO country code. Default GB (US often empty).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -2351,7 +2351,7 @@ class TiktokAdLibraryApi:
         """TikTok Ad Details — TikTok ad details by ad URL or ID. (17 credits)
 
         :param url: TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param country: ISO country code. Default DE.
+        :param country: ISO country code. Default GB.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/ad-library/tiktok/ad-details", {"url": url, "country": country, "cache": cache})
@@ -2362,10 +2362,10 @@ class AsyncTiktokAdLibraryApi:
         self._t = transport
 
     async def search(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Ad Library Search — Search TikTok Ad Library and Creative Center. (70 credits)
+        """TikTok Ad Library Search — Search TikTok Commercial Content Library (EU DSA) — ISO dates, advertiser, reach bands. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
-        :param country: ISO country code. Default DE.
+        :param country: ISO country code. Default GB (US often empty).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -2375,7 +2375,7 @@ class AsyncTiktokAdLibraryApi:
         """TikTok Ad Details — TikTok ad details by ad URL or ID. (17 credits)
 
         :param url: TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param country: ISO country code. Default DE.
+        :param country: ISO country code. Default GB.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/ad-library/tiktok/ad-details", {"url": url, "country": country, "cache": cache})

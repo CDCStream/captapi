@@ -38,6 +38,10 @@ CREDIT_GOOGLE_COMPANY_ADS = 2
 # 120% markup → ~1 credit; bill 2 flat when native succeeds. Apify fallback keeps
 # the legacy per-result RATE_AD_LIST scale.
 CREDIT_AD_LIBRARY_NATIVE = 2
+# TikTok Commercial Content Library: Decodo-native is the primary path (flat 2).
+# Apify fallback is capped — never the old ~70-credit trap.
+CREDIT_TIKTOK_AD_SEARCH = 2
+CREDIT_TIKTOK_AD_SEARCH_APIFY = 5
 
 
 def _scaled(limit: int, rate: float = RATE_AD_LIST, minimum: int = 2) -> int:
@@ -302,8 +306,58 @@ def _tiktok_ad_id(value: str) -> str:
 
 
 def _tiktok_region(value: str) -> str:
-    region = (value or "DE").strip().upper()
-    return region or "DE"
+    region = (value or "GB").strip().upper()
+    return region or "GB"
+
+
+def _tiktok_library_date_iso(value: Any) -> str | None:
+    """Normalize TikTok library dates (often ``MM/DD/YYYY``) to ISO-8601 UTC."""
+    raw = safe_str(value)
+    if not raw:
+        return None
+    if re.match(r"^\d{4}-\d{2}-\d{2}T", raw):
+        return raw
+    if re.match(r"^\d{4}-\d{2}-\d{2}$", raw):
+        return f"{raw}T00:00:00.000Z"
+    m = re.search(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b", raw)
+    if not m:
+        return raw
+    month, day, year = int(m.group(1)), int(m.group(2)), int(m.group(3))
+    if not (1 <= month <= 12 and 1 <= day <= 31):
+        return raw
+    return f"{year:04d}-{month:02d}-{day:02d}T00:00:00.000Z"
+
+
+def _tiktok_reach_range(value: Any) -> dict[str, Any] | None:
+    """Parse library reach bands like ``0-1K`` / ``1K-10K`` into min/max."""
+    raw = safe_str(value)
+    if not raw:
+        return None
+
+    def _num(token: str) -> int | None:
+        t = token.strip().upper().replace(",", "")
+        m = re.fullmatch(r"(\d+(?:\.\d+)?)([KMB])?", t)
+        if not m:
+            return None
+        n = float(m.group(1))
+        suf = m.group(2)
+        if suf == "K":
+            n *= 1_000
+        elif suf == "M":
+            n *= 1_000_000
+        elif suf == "B":
+            n *= 1_000_000_000
+        return int(n)
+
+    parts = re.split(r"\s*[-–—]\s*", raw)
+    if len(parts) == 2:
+        lo, hi = _num(parts[0]), _num(parts[1])
+        if lo is not None or hi is not None:
+            return {"min": lo, "max": hi, "raw": raw}
+    single = _num(raw)
+    if single is not None:
+        return {"min": single, "max": single, "raw": raw}
+    return {"min": None, "max": None, "raw": raw}
 
 
 def _linkedin_ad_url(value: str) -> str:
@@ -665,9 +719,24 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
                     snapshot.get("advertiserLogo"),
                 )
             ),
+            "location": safe_str(
+                _first(
+                    advertiser.get("location") if isinstance(advertiser, dict) else None,
+                    item.get("advertiserLocation"),
+                    item.get("advertiser_location"),
+                    item.get("registeredLocation"),
+                )
+            ),
         },
         "media": media,
     }
+    if platform == "tiktok_ad_library":
+        # Align date shape with Facebook/Google Ad Library (ISO-8601).
+        normalized["firstShown"] = _tiktok_library_date_iso(normalized.get("firstShown"))
+        normalized["lastShown"] = _tiktok_library_date_iso(normalized.get("lastShown"))
+        reach_range = _tiktok_reach_range(normalized.get("impressions"))
+        if reach_range:
+            normalized["impressionsRange"] = reach_range
     adv = normalized["advertiser"]
     if platform == "facebook_ad_library":
         # Additive fields for competitor intel — existing keys above stay stable.
@@ -758,7 +827,7 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
                 normalized.pop(key, None)
     # Advertiser logo is never supplied by Google Ads Transparency; omit empty
     # advertiser keys across libraries when upstream gave nothing.
-    for key in ("id", "name", "url", "logo"):
+    for key in ("id", "name", "url", "logo", "location"):
         if adv.get(key) in (None, "", []):
             adv.pop(key, None)
     return normalized
@@ -1101,44 +1170,77 @@ async def facebook_ad_transcript(
         )
 
 
-@router.get("/tiktok/search", summary="Search TikTok Ad Library")
+@router.get(
+    "/tiktok/search",
+    summary="Search TikTok Ad Library",
+    description=(
+        "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) "
+        "as clean JSON. Flat 2 credits on the native path. firstShown/lastShown are "
+        "ISO-8601. Default country is GB (this library is EU-led; region=US is often "
+        "empty). This is not TikTok Creative Center — CTR / play-rate ranking metrics "
+        "live on Creative Center, a different public surface."
+    ),
+)
 async def tiktok_search(
-    q: str = Query(..., min_length=2),
-    country: str = Query("DE", min_length=2, max_length=2),
+    q: str = Query(..., min_length=2, description="Keyword or advertiser name (min 2 characters)."),
+    country: str = Query(
+        "GB",
+        min_length=2,
+        max_length=2,
+        description="Two-letter ISO country code. Default GB (EU Commercial Content Library; US often empty).",
+    ),
     limit: int = Query(20, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    async with billed_call(caller=caller, endpoint="/v1/ad-library/tiktok/search", platform="tiktok_ad_library", resource_url=None, base_credits=_scaled(limit)) as ctx:
+    region = _tiktok_region(country)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/ad-library/tiktok/search",
+        platform="tiktok_ad_library",
+        resource_url=None,
+        base_credits=CREDIT_TIKTOK_AD_SEARCH,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Public DSA JSON API — often 421 from our exits; Apify remains fallback.
-            native = await tiktok_ads_native.search_ads(q, country=country, limit=limit)
+            # Decodo-native Commercial Content Library first (flat 2 credits).
+            native = await tiktok_ads_native.search_ads(q, country=region, limit=limit)
             if native is not None:
                 ctx["source"] = "direct"
                 ads = [_normalize_ad(i, "tiktok_ad_library") for i in native]
-                ctx["credits_override"] = CREDIT_AD_LIBRARY_NATIVE
-                return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
+                ctx["credits_override"] = CREDIT_TIKTOK_AD_SEARCH
+                return {"query": q, "country": region, "totalReturned": len(ads), "ads": ads}
 
             items = await _run_actor(
                 settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY,
-                {"source": "both", "searchTerms": [q], "countries": [country.upper()], "maxResults": limit},
+                {"source": "both", "searchTerms": [q], "countries": [region], "maxResults": limit},
                 limit,
             )
             ctx["source"] = "apify"
             ads = [_normalize_ad(i, "tiktok_ad_library") for i in items]
-            return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
+            return {"query": q, "country": region, "totalReturned": len(ads), "ads": ads}
 
-        data = await cached_or_run("ad-library.tiktok.search", {"q": q, "country": country, "limit": limit, "v": 5}, _run, ctx, use_cache=cache)
+        data = await cached_or_run(
+            "ad-library.tiktok.search",
+            {"q": q, "country": region, "limit": limit, "v": 6},
+            _run,
+            ctx,
+            use_cache=cache,
+        )
         if ctx.get("source") != "direct":
-            ctx["credits_override"] = _scaled(len(data["ads"]))
+            ctx["credits_override"] = CREDIT_TIKTOK_AD_SEARCH_APIFY
         return ApiResponse(data=data)
 
 
 @router.get("/tiktok/ad-details", summary="TikTok ad details")
 async def tiktok_ad_details(
     url: str = Query(..., description="TikTok Ad Library URL or ad ID"),
-    country: str = Query("DE", min_length=2, max_length=2),
+    country: str = Query(
+        "GB",
+        min_length=2,
+        max_length=2,
+        description="Two-letter ISO country code. Default GB.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):

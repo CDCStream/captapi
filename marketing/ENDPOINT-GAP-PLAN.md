@@ -222,3 +222,18 @@ SC 8 · Captapi 1 · Mixed 1. Shipped this batch: #8 SEO fix, #9 ISO+post, #10 S
 | gameBoxArtUrl (stream / lastBroadcast / videos) | P1 | Shipped |
 | animatedPreviewUrl (recentVideos storyboard) | P1 | Shipped |
 | Keep `game` as name string (non-breaking) | P0 | Shipped |
+
+---
+
+## #23 GET /v1/ad-library/tiktok/search
+**Keep:** Commercial Content Library ads as clean JSON. Not Creative Center Top Ads.
+
+| Field / param | Priority | Status |
+|---|---|---|
+| Native-first Decodo path (avoid 421 JSON) | P0 | Shipped |
+| Credits ~70 → 2 native (Apify ≤5) | P0 | Shipped |
+| ISO firstShown/lastShown | P0 | Shipped |
+| Default country DE → GB (US often empty) | P0 | Shipped |
+| impressionsRange + advertiser.location | P1 | Shipped |
+| Creative Center CTR / order_by / industry | — | Out of scope (different product) |
+| Stable advertiser.id | — | Not on library HTML (null when absent) |

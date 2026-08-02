@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "feature",
+    title: "TikTok Ad Library search: 2 credits native, ISO dates, GB default",
+    description:
+      "TikTok Ad Library search drops the ~70-credit Apify-first pricing to flat 2 credits on the Decodo-native Commercial Content Library path (Apify fallback capped at 5). firstShown/lastShown become ISO-8601, impressionsRange parses reach bands like 0-1K, and advertiser.location is added when present. Default country is GB (EU DSA library; US is often empty). Docs clarify this is not Creative Center — CTR/order_by metrics live on a different TikTok surface.",
+    items: [
+      "Price: ~70 → 2 credits native (Apify fallback ≤5)",
+      "ISO dates + impressionsRange + advertiser.location",
+      "Default country DE → GB; honesty note vs Creative Center",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "feature",
     title: "Twitch profile: game box art + animated video previews",
     description:
       "Twitch profile keeps game as the category name string and adds gameBoxArtUrl on stream, lastBroadcast, and recentVideos, plus animatedPreviewUrl (storyboard strip) on each VOD. Still 1 credit; no GraphQL leftover fields.",

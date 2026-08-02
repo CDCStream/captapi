@@ -157,7 +157,9 @@ async def _hydrate_captions(
     sem = asyncio.Semaphore(max(1, min(concurrency, 5)))
 
     async def _one(row: dict[str, Any]) -> dict[str, Any]:
-        if row.get("text") or row.get("body") or row.get("caption"):
+        has_text = bool(row.get("text") or row.get("body") or row.get("caption"))
+        has_loc = bool(row.get("advertiserLocation"))
+        if has_text and has_loc:
             return row
         aid = str(row.get("id") or row.get("adId") or "").strip()
         if not aid.isdigit():
@@ -166,55 +168,75 @@ async def _hydrate_captions(
             detail = await ad_details(aid, country=country)
         if not detail:
             return row
-        caption = detail.get("text") or detail.get("body")
-        if not caption:
-            return row
         out = dict(row)
-        out["text"] = caption
-        out["body"] = caption
+        caption = detail.get("text") or detail.get("body")
+        if caption:
+            out["text"] = caption
+            out["body"] = caption
+        # Detail page often has richer advertiser / delivery fields than SERP.
+        for key in (
+            "advertiserName",
+            "payer",
+            "advertiserLocation",
+            "first_shown_date",
+            "last_shown_date",
+            "estimatedAudience",
+            "videoUrl",
+            "imageUrls",
+            "media",
+            "adFormat",
+        ):
+            if detail.get(key) not in (None, "", [], {}) and out.get(key) in (None, "", [], {}):
+                out[key] = detail[key]
         return out
 
     return list(await asyncio.gather(*[_one(r) for r in rows]))
 
 
 async def search_ads(
-    q: str, *, country: str = "DE", limit: int = 20
+    q: str, *, country: str = "GB", limit: int = 20
 ) -> list[dict[str, Any]] | None:
+    """Search TikTok Commercial Content Library (EU DSA).
+
+    Prefers Decodo HTML SERP — the JSON ``/api/v1/search`` endpoint is chronically
+    HTTP 421 ``system busy`` from our exits. Returns ``None`` only when every
+    native path fails (caller may fall back to Apify).
+    """
     query = (q or "").strip()
     if len(query) < 2:
         return []
 
-    region = (country or "DE").upper()
+    region = (country or "GB").upper()
     want = max(1, int(limit))
-    tiers: list[tuple[str, str | None]] = [
-        ("datacenter", proxy_for("datacenter")),
-        ("residential", proxy_for("residential")),
-        ("direct", None),
-    ]
-
     rows: list[dict[str, Any]] | None = None
-    # Server caps page size at 12; first healthy tier wins (incl. empty list).
-    for tier, proxy in tiers:
-        if tier != "direct" and not proxy:
-            continue
-        page = await _post_search(query, region=region, limit=min(12, want), proxy=proxy)
-        if page is None:
-            continue
-        log.info(
-            "tiktok_ads_native_search_ok",
-            tier=tier,
-            count=len(page),
-            q=query[:40],
-            region=region,
-        )
-        rows = page[:want]
-        break
 
-    # JSON API often 421 "system busy" — Decodo-rendered library SERP.
+    # 1) Decodo SERP first (reliable; ~1 headless render).
+    decodo_rows = await search_ads_via_decodo(query, country=region, limit=want)
+    if decodo_rows is not None:
+        rows = decodo_rows[:want]
+
+    # 2) JSON API secondary (cheap when TikTok stops returning 421).
     if rows is None:
-        decodo_rows = await search_ads_via_decodo(query, country=region, limit=want)
-        if decodo_rows is not None:
-            rows = decodo_rows[:want]
+        tiers: list[tuple[str, str | None]] = [
+            ("datacenter", proxy_for("datacenter")),
+            ("residential", proxy_for("residential")),
+            ("direct", None),
+        ]
+        for tier, proxy in tiers:
+            if tier != "direct" and not proxy:
+                continue
+            page = await _post_search(query, region=region, limit=min(12, want), proxy=proxy)
+            if page is None:
+                continue
+            log.info(
+                "tiktok_ads_native_search_ok",
+                tier=tier,
+                count=len(page),
+                q=query[:40],
+                region=region,
+            )
+            rows = page[:want]
+            break
 
     if rows is None:
         return None
@@ -232,10 +254,9 @@ async def search_ads(
     return hydrated
 
 
-
-def detail_url(ad_id: str, *, region: str = "DE") -> str:
+def detail_url(ad_id: str, *, region: str = "GB") -> str:
     aid = (ad_id or "").strip()
-    reg = (region or "DE").upper()
+    reg = (region or "GB").upper()
     return f"https://library.tiktok.com/ads/detail/?ad_id={aid}&region={reg}"
 
 
@@ -335,7 +356,7 @@ def extract_ad_details(html: str, *, ad_id: str) -> dict[str, Any] | None:
 
 
 async def ad_details(
-    ad_id: str, *, country: str = "DE"
+    ad_id: str, *, country: str = "GB"
 ) -> dict[str, Any] | None:
     """Fetch one Commercial Content Library ad via Decodo HTML."""
     from app.services import decodo_fetch
@@ -365,22 +386,32 @@ async def ad_details(
 
 
 async def search_ads_via_decodo(
-    q: str, *, country: str = "DE", limit: int = 20
+    q: str, *, country: str = "GB", limit: int = 20
 ) -> list[dict[str, Any]] | None:
-    """HTML SERP fallthrough when the JSON search API returns 421."""
+    """HTML SERP for ``library.tiktok.com`` (EU Commercial Content Library).
+
+    Note: region=US often returns an empty library — this surface is DSA/EU-led.
+    """
     from app.services import decodo_fetch
     import html as html_lib
 
     query = (q or "").strip()
     if len(query) < 2 or not decodo_fetch.enabled():
         return None
-    region = (country or "DE").upper()
+    region = (country or "GB").upper()
     url = f"https://library.tiktok.com/ads?region={region}&query={quote(query, safe='')}"
     got = await decodo_fetch.fetch_url(url, timeout=120.0, headless="html")
     if not got:
         return None
     status, body = got
     if status != 200 or len(body) < 5000:
+        log.warning(
+            "tiktok_ads_native_decodo_search_weak",
+            status=status,
+            length=len(body or ""),
+            region=region,
+            q=query[:40],
+        )
         return None
 
     ads: list[dict[str, Any]] = []

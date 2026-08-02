@@ -601,7 +601,19 @@ const FACEBOOK_AD_LIBRARY: Spec[] = [
 ];
 
 const TIKTOK_AD_LIBRARY: Spec[] = [
-  { slug: "tiktok-ad-library-search", name: "TikTok Ad Library Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/ad-library/tiktok/search", credits: 70, creditsPerResult: 3.5 },
+  {
+    slug: "tiktok-ad-library-search",
+    name: "TikTok Ad Library Search API",
+    shortName: "Search",
+    category: "search",
+    method: "GET",
+    path: "/v1/ad-library/tiktok/search",
+    credits: 2,
+    tagline:
+      "Search TikTok Commercial Content Library ads — ISO dates, advertiser location, reach bands (2 credits native).",
+    longDescription:
+      "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) by keyword. Returns ads with id, url, text, adFormat, ISO firstShown/lastShown, impressions + impressionsRange, advertiser{name, location}, and media[]. Flat 2 credits on the native path (Apify fallback capped at 5). Default country is GB — this library is EU-led; region=US is often empty. Honesty note: this is not TikTok Creative Center. CTR, play_2s_rate, industry/objective filters, and order_by live on Creative Center (a different public surface ScrapeCreators wraps) and are not available here.",
+  },
   { slug: "tiktok-ad-library-ad-details", name: "TikTok Ad Details API", shortName: "Ad Details", category: "details", method: "GET", path: "/v1/ad-library/tiktok/ad-details", credits: 17 , tagline: "Get a TikTok Ad Library ad — creative, advertiser, and delivery fields as structured JSON." },
 ];
 
@@ -755,7 +767,8 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
   {
     id: "tiktok_ad_library",
     name: "TikTok Ad Library",
-    blurb: "Search TikTok Ad Library and Creative Center ads, then fetch individual ad details.",
+    blurb:
+      "Search TikTok's Commercial Content Library (EU DSA) and fetch individual ad details as clean JSON.",
     icon: "tiktok",
     color: "text-foreground",
     exampleUrl: "https://library.tiktok.com/",
@@ -1687,8 +1700,26 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "facebook-ad-library-search-companies": [qp("Company or brand name to search for (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
   "facebook-ad-library-ad-details": [up("Meta Ad Library ad URL or ad ID.")],
   "facebook-ad-library-ad-transcript": [up("Meta Ad Library ad URL or ad ID.")],
-  "tiktok-ad-library-search": [qp("Keyword or advertiser to search TikTok Ad Library (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default DE." }, lp(20, 200)],
-  "tiktok-ad-library-ad-details": [up("TikTok Ad Library URL or ad ID."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default DE." }],
+  "tiktok-ad-library-search": [
+    qp("Keyword or advertiser to search TikTok Commercial Content Library (min 2 characters)."),
+    {
+      name: "country",
+      type: "string",
+      required: false,
+      description: "Two-letter ISO country code. Default GB (EU DSA library; US often empty).",
+    },
+    lp(20, 200),
+    cacheP(),
+  ],
+  "tiktok-ad-library-ad-details": [
+    up("TikTok Ad Library URL or ad ID."),
+    {
+      name: "country",
+      type: "string",
+      required: false,
+      description: "Two-letter ISO country code. Default GB.",
+    },
+  ],
   "linkedin-ad-library-search-ads": [qp("Keyword, company, or advertiser to search LinkedIn Ad Library (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
   "linkedin-ad-library-ad-details": [up("LinkedIn Ad Library URL or ad ID.")],
   "google-ad-library-company-ads": [
@@ -2352,6 +2383,12 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     list.push({
       q: `What does isThreadsOnlyUser mean?`,
       a: `When Meta exposes it, true means the account exists only on Threads (not an Instagram-linked auto-profile). On the public web hydrate this flag is often omitted — Captapi still returns the key as null so clients can rely on a stable schema.`,
+    });
+  }
+  if (ep.slug === "tiktok-ad-library-search") {
+    list.push({
+      q: `Is this TikTok Creative Center (CTR / Top Ads)?`,
+      a: `No. This endpoint searches TikTok's Commercial Content Library (library.tiktok.com — EU DSA transparency). Creative Center Top Ads (CTR, play rates, industry/objective filters, order_by) is a different public surface and is not returned here. Default country is GB because the library is EU-led; US often returns empty.`,
     });
   }
   list.push({

@@ -4501,8 +4501,8 @@
     "platform": "ad_library",
     "name": "TikTok Ad Library Search",
     "path": "/v1/ad-library/tiktok/search",
-    "credits": 70,
-    "summary": "Search TikTok Ad Library and Creative Center.",
+    "credits": 2,
+    "summary": "Search TikTok Commercial Content Library (EU DSA) — ISO dates, advertiser, reach bands.",
     "params": [
       {
         "name": "q",
@@ -4514,7 +4514,7 @@
         "name": "country",
         "type": "string",
         "required": false,
-        "description": "ISO country code. Default DE."
+        "description": "ISO country code. Default GB (US often empty)."
       },
       {
         "name": "limit",
@@ -4548,7 +4548,7 @@
         "name": "country",
         "type": "string",
         "required": false,
-        "description": "ISO country code. Default DE."
+        "description": "ISO country code. Default GB."
       },
       {
         "name": "cache",
