@@ -360,7 +360,25 @@ const THREADS: Spec[] = [
 ];
 
 const BLUESKY: Spec[] = [
-  { slug: "bluesky-profile", name: "Bluesky Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/bluesky/profile", credits: 1 },
+  {
+    slug: "bluesky-profile",
+    name: "Bluesky Profile API",
+    shortName: "Profile",
+    category: "channel",
+    method: "GET",
+    path: "/v1/bluesky/profile",
+    credits: 1,
+    tagline:
+      "Bluesky profile — handle, did, bio, counts, banner, verification{}, labels[], and associated{} (1 credit).",
+    longDescription:
+      "Give a Bluesky profile URL, @handle, or handle and get the public AT Protocol profile as clean JSON: platform, handle, url, did, name, bio, followers/following/posts, avatar, banner, createdAt/indexedAt, plus verified + verification{verifications[], verifiedStatus, trustedVerifierStatus}, moderation labels[], and associated{lists, feedgens, starterPacks, labeler} so you can tell feed/labeler service accounts from people. Flat 1 credit per call.",
+    delivers: [
+      "Handle, DID, display name, bio, avatar, and banner",
+      "Follower, following, and post counts",
+      "verified + verification{} (issuer, validity, trusted verifier status)",
+      "Moderation labels[] and associated{lists, feedgens, starterPacks, labeler}",
+    ],
+  },
   { slug: "bluesky-user-posts", name: "Bluesky User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/bluesky/user-posts", credits: 3, creditsPerResult: 0.1, tagline: "Get recent posts from any Bluesky profile — text, author, likes, reposts, replies, and embeds, with cursor pagination.", longDescription: "Send a Bluesky profile URL, @handle, or handle and the Bluesky User Posts API returns that account's recent posts as clean JSON. Each post includes the Bluesky URL and AT URI, text, publish time, the author (handle, display name, DID, avatar), engagement (likes, reposts, replies, quotes), and embed details when the post has a link, image, or quote. Need more than the first page? Pass the nextCursor value from the previous response to keep paging, and use hasMore to know when you've reached the end. Ideal for creator monitoring, content calendars, and feeding analytics tools. Billed per result — about 0.1 credits each. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Recent public posts from any Bluesky profile", "Post URL, AT URI, text, and publish time", "Author handle, display name, DID, and avatar", "Likes, reposts, replies, quotes, and embeds when present", "Cursor pagination (nextCursor + hasMore) through older posts"] },
   { slug: "bluesky-post-details", name: "Bluesky Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/bluesky/post-details", credits: 1 , tagline: "Get a Bluesky post — text, author, likes, reposts, and replies as structured JSON." },
 ];
@@ -2630,6 +2648,17 @@ const FIELD_DESCS: Record<string, string> = {
   isReply: "Whether the tweet is a reply.",
   isRetweet: "Whether the tweet is a retweet.",
   isBlueVerified: "Whether the account has blue-check verification.",
+  verified: "Whether the Bluesky profile has a valid verification (verifiedStatus == valid).",
+  verification:
+    "Bluesky verification block: verifications[{issuer, uri, isValid, createdAt, …}], verifiedStatus, trustedVerifierStatus.",
+  labels: "Moderation labels on the profile (val, src, uri, createdAt, …).",
+  associated:
+    "Bluesky association counts: lists, feedgens, starterPacks, labeler (plus chat/activitySubscription when present).",
+  verifiedStatus: "Bluesky verification status string (e.g. valid, none).",
+  trustedVerifierStatus: "Whether this account is a trusted verifier (e.g. valid, none).",
+  feedgens: "Number of custom feeds (feed generators) this account publishes.",
+  starterPacks: "Number of starter packs this account publishes.",
+  labeler: "Whether this account is a Bluesky labeler (moderation service).",
 
   // Media
   thumbnailUrl: "Thumbnail image URL.",

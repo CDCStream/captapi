@@ -9403,6 +9403,7 @@
           "Bluesky"
         ],
         "summary": "Bluesky profile details & stats",
+        "description": "Public Bluesky profile via AT Protocol app.bsky.actor.getProfile — handle, did, display name, bio, follower/following/post counts, avatar, banner, plus verified/verification{}, moderation labels[], and associated{lists, feedgens, starterPacks, labeler}. Flat 1 credit.",
         "operationId": "bluesky_profile_v1_bluesky_profile_get",
         "security": [
           {

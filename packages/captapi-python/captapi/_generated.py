@@ -1636,7 +1636,7 @@ class BlueskyApi:
         self._t = transport
 
     def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Bluesky Profile — Profile info & stats for a Bluesky account. (1 credit)
+        """Bluesky Profile — Bluesky profile — counts, banner, verification{}, labels[], associated{}. (1 credit)
 
         :param url: Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1667,7 +1667,7 @@ class AsyncBlueskyApi:
         self._t = transport
 
     async def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Bluesky Profile — Profile info & stats for a Bluesky account. (1 credit)
+        """Bluesky Profile — Bluesky profile — counts, banner, verification{}, labels[], associated{}. (1 credit)
 
         :param url: Bluesky profile URL, @handle, or handle, e.g. bsky.app/profile/handle. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

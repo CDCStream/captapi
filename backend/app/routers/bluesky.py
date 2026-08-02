@@ -159,8 +159,84 @@ def _normalize_post(post: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _verification(p: dict[str, Any]) -> dict[str, Any]:
+    """Map ``app.bsky.actor.getProfile`` verification to a stable shape."""
+    raw = p.get("verification") if isinstance(p.get("verification"), dict) else {}
+    items: list[dict[str, Any]] = []
+    for v in raw.get("verifications") or []:
+        if not isinstance(v, dict):
+            continue
+        items.append(
+            {
+                "issuer": safe_str(v.get("issuer")),
+                "issuerHandle": safe_str(v.get("issuerHandle")),
+                "issuerDisplayName": safe_str(v.get("issuerDisplayName")),
+                "uri": safe_str(v.get("uri")),
+                "isValid": bool(v.get("isValid")) if v.get("isValid") is not None else None,
+                "createdAt": safe_str(v.get("createdAt")),
+            }
+        )
+    return {
+        "verifications": items,
+        "verifiedStatus": safe_str(raw.get("verifiedStatus")),
+        "trustedVerifierStatus": safe_str(raw.get("trustedVerifierStatus")),
+    }
+
+
+def _labels(p: dict[str, Any]) -> list[dict[str, Any]]:
+    raw = p.get("labels")
+    if not isinstance(raw, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for lab in raw:
+        if not isinstance(lab, dict):
+            continue
+        out.append(
+            {
+                "src": safe_str(lab.get("src")),
+                "uri": safe_str(lab.get("uri")),
+                "cid": safe_str(lab.get("cid")),
+                "val": safe_str(lab.get("val")),
+                "neg": bool(lab.get("neg")) if lab.get("neg") is not None else None,
+                "createdAt": safe_str(lab.get("cts") or lab.get("createdAt")),
+                "expiresAt": safe_str(lab.get("exp") or lab.get("expiresAt")),
+            }
+        )
+    return out
+
+
+def _associated(p: dict[str, Any]) -> dict[str, Any]:
+    """Profile association counts — feedgens/lists/labeler distinguish bots/services."""
+    raw = p.get("associated") if isinstance(p.get("associated"), dict) else {}
+    chat = raw.get("chat") if isinstance(raw.get("chat"), dict) else {}
+    activity = (
+        raw.get("activitySubscription")
+        if isinstance(raw.get("activitySubscription"), dict)
+        else {}
+    )
+    return {
+        "lists": safe_int(raw.get("lists")),
+        "feedgens": safe_int(raw.get("feedgens")),
+        "starterPacks": safe_int(raw.get("starterPacks")),
+        "labeler": bool(raw.get("labeler")) if raw.get("labeler") is not None else None,
+        "chat": {
+            "allowIncoming": safe_str(chat.get("allowIncoming")),
+            "allowGroupInvites": safe_str(chat.get("allowGroupInvites")),
+        }
+        if chat
+        else None,
+        "activitySubscription": {
+            "allowSubscriptions": safe_str(activity.get("allowSubscriptions")),
+        }
+        if activity
+        else None,
+    }
+
+
 def _normalize_profile(p: dict[str, Any]) -> dict[str, Any]:
     handle = p.get("handle")
+    verification = _verification(p)
+    verified_status = (verification.get("verifiedStatus") or "").lower()
     return {
         "platform": "bluesky",
         "handle": safe_str(handle),
@@ -173,12 +249,25 @@ def _normalize_profile(p: dict[str, Any]) -> dict[str, Any]:
         "posts": safe_int(p.get("postsCount")),
         "avatar": safe_str(p.get("avatar")),
         "banner": safe_str(p.get("banner")),
+        "verified": verified_status == "valid",
+        "verification": verification,
+        "labels": _labels(p),
+        "associated": _associated(p),
         "createdAt": safe_str(p.get("createdAt")),
         "indexedAt": safe_str(p.get("indexedAt")),
     }
 
 
-@router.get("/profile", summary="Bluesky profile details & stats")
+@router.get(
+    "/profile",
+    summary="Bluesky profile details & stats",
+    description=(
+        "Public Bluesky profile via AT Protocol app.bsky.actor.getProfile — handle, "
+        "did, display name, bio, follower/following/post counts, avatar, banner, plus "
+        "verified/verification{}, moderation labels[], and associated{lists, feedgens, "
+        "starterPacks, labeler}. Flat 1 credit."
+    ),
+)
 async def bluesky_profile(
     url: str = Query(..., description="Bluesky profile URL, @handle, or handle"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -199,7 +288,7 @@ async def bluesky_profile(
 
         result = await cached_or_run(
             endpoint="bluesky.profile",
-            params={"actor": actor, "v": 3},
+            params={"actor": actor, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

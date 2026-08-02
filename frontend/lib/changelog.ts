@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "feature",
+    title: "Bluesky profile: verification, labels, associated",
+    description:
+      "GET /v1/bluesky/profile now surfaces AT Protocol fields already on app.bsky.actor.getProfile: verified + verification{verifications[], verifiedStatus, trustedVerifierStatus}, moderation labels[], and associated{lists, feedgens, starterPacks, labeler} (plus chat/activitySubscription when present). Still 1 credit; existing keys unchanged.",
+    items: [
+      "Additive verified + verification{}",
+      "Additive labels[] and associated{}",
+      "Docs match What you get (verification status)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "feature",
     title: "TikTok Creative Center Top Ads: 2 credits native",
     description:
       "GET /v1/ad-library/tiktok/top-ads now prefers a Decodo-native Creative Center path (XHR capture of creative_radar top_ads/v2/list) at a flat 2 credits. Apify remains the fallback at ~1 credit per returned ad (min 2). Response shape unchanged.",

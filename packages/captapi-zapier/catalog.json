@@ -2585,7 +2585,7 @@
     "name": "Bluesky Profile",
     "path": "/v1/bluesky/profile",
     "credits": 1,
-    "summary": "Profile info & stats for a Bluesky account.",
+    "summary": "Bluesky profile — counts, banner, verification{}, labels[], associated{}.",
     "params": [
       {
         "name": "url",

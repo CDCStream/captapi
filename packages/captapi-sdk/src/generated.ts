@@ -1177,7 +1177,7 @@ export interface BlueskyPostDetailsParams {
 
 export class BlueskyApi {
   constructor(private readonly core: HttpCore) {}
-  /** Bluesky Profile — Profile info & stats for a Bluesky account. (1 credit) */
+  /** Bluesky Profile — Bluesky profile — counts, banner, verification{}, labels[], associated{}. (1 credit) */
   profile(params: BlueskyProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/bluesky/profile", params);
   }
