@@ -2841,7 +2841,7 @@ class TwitchApi:
         return self._t.get("/v1/twitch/user-schedule", {"url": url, "cache": cache})
 
     def clip(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Twitch Clip — Twitch clip metadata from a clip URL or channel fallback. (1 credit)
+        """Twitch Clip — Twitch clip — curator vs channel, qualities, token expiry. (1 credit)
 
         :param url: Twitch clip URL, channel URL, or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2879,7 +2879,7 @@ class AsyncTwitchApi:
         return await self._t.get("/v1/twitch/user-schedule", {"url": url, "cache": cache})
 
     async def clip(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Twitch Clip — Twitch clip metadata from a clip URL or channel fallback. (1 credit)
+        """Twitch Clip — Twitch clip — curator vs channel, qualities, token expiry. (1 credit)
 
         :param url: Twitch clip URL, channel URL, or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2900,7 +2900,7 @@ class SpotifyApi:
         return self._t.get("/v1/spotify/artist", {"url": url, "cache": cache})
 
     def track(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Spotify Track — Spotify track metadata, artists, album and play count when available. (6 credits)
+        """Spotify Track — Spotify track — playCount, artist/album IDs, explicit rating. (1 credit)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2957,7 +2957,7 @@ class AsyncSpotifyApi:
         return await self._t.get("/v1/spotify/artist", {"url": url, "cache": cache})
 
     async def track(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Spotify Track — Spotify track metadata, artists, album and play count when available. (6 credits)
+        """Spotify Track — Spotify track — playCount, artist/album IDs, explicit rating. (1 credit)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

@@ -10515,47 +10515,30 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     ],
     "album": "Midnights",
     "durationMs": 200690,
+    "releaseYear": 2022,
     "image": "https://i.scdn.co/image/ab67616d00001e02bb54dde68cd23e2a268ae0f5",
-    "raw": {
-      "__typename": "Track",
-      "uri": "spotify:track:0V3wPSX9ygBnCm8psDIegu",
-      "name": "Anti-Hero",
-      "duration": {
-        "totalMilliseconds": 200690
-      },
-      "albumOfTrack": {
-        "coverArt": {
-          "sources": [
-            {
-              "height": 300,
-              "url": "https://i.scdn.co/image/ab67616d00001e02bb54dde68cd23e2a268ae0f5",
-              "width": 300
-            },
-            {
-              "height": 64,
-              "url": "https://i.scdn.co/image/ab67616d00004851bb54dde68cd23e2a268ae0f5",
-              "width": 64
-            },
-            {
-              "height": 640,
-              "url": "https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5",
-              "width": 640
-            }
-          ]
-        },
-        "name": "Midnights",
-        "uri": "spotify:album:151w1FgRZfnKZA9FEcg9Z3"
-      },
-      "artists": {
-        "items": [
-          {
-            "profile": {
-              "name": "Taylor Swift"
-            },
-            "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02"
-          }
-        ]
+    "id": "0V3wPSX9ygBnCm8psDIegu",
+    "playCount": 2036192400,
+    "trackNumber": 3,
+    "contentRating": "NONE",
+    "explicit": false,
+    "mediaType": "AUDIO",
+    "playable": true,
+    "releaseDate": "2022-10-21T00:00:00Z",
+    "artistItems": [
+      {
+        "id": "06HL4z0CvFAxyc27GXpf02",
+        "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02",
+        "name": "Taylor Swift",
+        "url": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02"
       }
+    ],
+    "albumInfo": {
+      "id": "151w1FgRZfnKZA9FEcg9Z3",
+      "uri": "spotify:album:151w1FgRZfnKZA9FEcg9Z3",
+      "name": "Midnights",
+      "url": "https://open.spotify.com/album/151w1FgRZfnKZA9FEcg9Z3",
+      "releaseDate": "2022-10-21T00:00:00Z"
     }
   },
   "threads-post-details": {

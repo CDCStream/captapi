@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "Spotify track: playCount, artist/album IDs; 1 credit",
+    description:
+      "GET /v1/spotify/track drops to 1 credit and switches to Spotify's getTrack Pathfinder query. Returns playCount (stream count), trackNumber, contentRating/explicit, artistItems[{id,uri,name,url}], albumInfo[{id,uri,name,url,releaseDate}], and previewUrl when present on the payload. Flat artists[] / album name strings kept for back-compat. Drops the bulky raw discography dump that buried those IDs.",
+    items: [
+      "1 credit (was 2)",
+      "playCount, trackNumber, contentRating/explicit",
+      "artistItems + albumInfo with chainable IDs",
+      "Drop bulky raw track payload",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "Twitch clip: curator vs channel, qualities, token expiry",
     description:
       "GET /v1/twitch/clip stays 1 credit and now returns a fully normalized clip — not Twitch's GraphQL array envelope. Adds curator (clipper) separate from channel (broadcaster id/followers/isPartner/lastBroadcast), language, isFeatured/isPublished, videoOffsetSeconds, gameId/slug/box art, videoQualities[{quality,frameRate,url}], and playbackAccessToken.expires/expiresAt. Flat broadcaster string kept for back-compat.",

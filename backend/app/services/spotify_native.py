@@ -47,6 +47,8 @@ _FALLBACK_HASHES: dict[str, str] = {
     "queryShowMetadataV2": "40202837452991ffa80ced96987bc1a937e21d5a89df5bf1fb743110e4d6e93a",
     "getAlbum": "b9bfabef66ed756e5e13f68a942deb60bd4125ec1f1be8cc42769dc0259b4b10",
     "queryArtistOverview": "ae0e2958a4ab645b35ca19ac04d0495ae12d9c5d7b7286217674801a9aab281a",
+    # Track page (playcount / trackNumber / firstArtist) — refreshed from web-player JS.
+    "getTrack": "1a2f0cce77c90a4a5b1730beecc4da7e34290d684324c16663bf09a268ebce48",
 }
 
 _UA = {
@@ -280,9 +282,50 @@ async def _oembed(client: httpx.AsyncClient, uri: str) -> dict[str, Any] | None:
     )
 
 
+def _preview_from_track_row(track: dict[str, Any]) -> str | None:
+    previews = track.get("previews") if isinstance(track.get("previews"), dict) else {}
+    audio = previews.get("audioPreviews") if isinstance(previews.get("audioPreviews"), dict) else {}
+    items = audio.get("items") if isinstance(audio.get("items"), list) else []
+    for row in items:
+        if isinstance(row, dict) and row.get("url"):
+            return str(row["url"])
+    return None
+
+
+def _attach_preview_from_top_tracks(track: dict[str, Any]) -> dict[str, Any]:
+    """getTrack omits previews on the root track; topTracks rows often carry them."""
+    if _preview_from_track_row(track):
+        return track
+    uri = track.get("uri")
+    if not uri:
+        return track
+    for block_name in ("firstArtist", "otherArtists"):
+        block = track.get(block_name)
+        if not isinstance(block, dict):
+            continue
+        for artist in block.get("items") or []:
+            if not isinstance(artist, dict):
+                continue
+            disco = artist.get("discography") if isinstance(artist.get("discography"), dict) else {}
+            top = disco.get("topTracks") if isinstance(disco.get("topTracks"), dict) else {}
+            for row in top.get("items") or []:
+                if not isinstance(row, dict):
+                    continue
+                candidate = row.get("track") if isinstance(row.get("track"), dict) else row
+                if not isinstance(candidate, dict) or candidate.get("uri") != uri:
+                    continue
+                preview = _preview_from_track_row(candidate)
+                if preview:
+                    out = dict(track)
+                    out["previews"] = {"audioPreviews": {"items": [{"url": preview}]}}
+                    return out
+    return track
+
+
 async def _hydrate_tracks(
     client: httpx.AsyncClient, token: str, uris: list[str]
 ) -> list[dict[str, Any]]:
+    """Batch hydrate for search — lighter decorateContextTracks payload."""
     if not uris:
         return []
     data = await _pathfinder(client, token, "decorateContextTracks", {"uris": uris})
@@ -292,6 +335,21 @@ async def _hydrate_tracks(
         if isinstance(track, dict) and track.get("uri"):
             out.append(_with_url(track))
     return out
+
+
+async def _hydrate_track_details(
+    client: httpx.AsyncClient, token: str, uri: str
+) -> dict[str, Any] | None:
+    """Single-track page via getTrack (playcount, trackNumber, firstArtist, …)."""
+    data = await _pathfinder(client, token, "getTrack", {"uri": uri})
+    union = (data or {}).get("trackUnion")
+    if not isinstance(union, dict) or union.get("__typename") not in (None, "Track"):
+        # Fall back to decorate when getTrack hash/shape drifts.
+        rows = await _hydrate_tracks(client, token, [uri])
+        return rows[0] if rows else None
+    if union.get("__typename") == "NotFound" or not union.get("uri"):
+        return None
+    return _with_url(_attach_preview_from_top_tracks(dict(union)))
 
 
 async def _hydrate_episodes(
@@ -550,8 +608,7 @@ async def details_native(
             return None
 
         if kind == "track":
-            rows = await _hydrate_tracks(client, token, [uri])
-            return rows[0] if rows else None
+            return await _hydrate_track_details(client, token, uri)
         if kind == "album":
             rows = await _hydrate_albums(client, token, [uri])
             return rows[0] if rows else None

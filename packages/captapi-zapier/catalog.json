@@ -3732,8 +3732,8 @@
     "platform": "spotify",
     "name": "Spotify Track",
     "path": "/v1/spotify/track",
-    "credits": 6,
-    "summary": "Spotify track metadata, artists, album and play count when available.",
+    "credits": 1,
+    "summary": "Spotify track — playCount, artist/album IDs, explicit rating.",
     "params": [
       {
         "name": "url",

@@ -24,8 +24,9 @@ router = APIRouter()
 RATE = 1.15
 # Native Pathfinder (web-player) — flat fee; our cost ~$0.
 CREDIT_NATIVE = 2
-# Artist details: same GraphQL source as SC; priced at 1 credit (parity).
+# Artist / track details: Pathfinder GraphQL, priced at 1 credit (SC parity).
 CREDIT_ARTIST = 1
+CREDIT_TRACK = 1
 
 
 def _scaled(n: int, rate: float = RATE, minimum: int = 2) -> int:
@@ -346,6 +347,114 @@ def _artist_fields(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _artist_ref(raw: Any) -> dict[str, Any] | None:
+    if not isinstance(raw, dict):
+        return None
+    uri = safe_str(raw.get("uri"))
+    aid = safe_str(raw.get("id")) or _spotify_id(uri, "artist")
+    profile = raw.get("profile") if isinstance(raw.get("profile"), dict) else {}
+    name = safe_str(profile.get("name") or raw.get("name"))
+    if not aid and not name:
+        return None
+    return {
+        "id": aid,
+        "uri": uri or (f"spotify:artist:{aid}" if aid else None),
+        "name": name,
+        "url": f"https://open.spotify.com/artist/{aid}" if aid else None,
+    }
+
+
+def _track_artist_items(item: dict[str, Any]) -> list[dict[str, Any]]:
+    """Structured artists with ids — from getTrack firstArtist/otherArtists or artists.items."""
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+
+    def _add(ref: dict[str, Any] | None) -> None:
+        if not ref:
+            return
+        key = ref.get("id") or ref.get("uri") or ref.get("name") or ""
+        if not key or key in seen:
+            return
+        seen.add(str(key))
+        out.append({k: v for k, v in ref.items() if v not in (None, "", [])})
+
+    for block_name in ("firstArtist", "otherArtists"):
+        block = item.get(block_name)
+        if isinstance(block, dict):
+            for row in block.get("items") or []:
+                _add(_artist_ref(row))
+        elif isinstance(block, list):
+            for row in block:
+                _add(_artist_ref(row))
+
+    artists = item.get("artists")
+    if isinstance(artists, dict):
+        for row in artists.get("items") or []:
+            _add(_artist_ref(row))
+    elif isinstance(artists, list):
+        for row in artists:
+            _add(_artist_ref(row) if isinstance(row, dict) else None)
+
+    return out
+
+
+def _track_preview_url(item: dict[str, Any]) -> str | None:
+    previews = item.get("previews") if isinstance(item.get("previews"), dict) else {}
+    audio = previews.get("audioPreviews") if isinstance(previews.get("audioPreviews"), dict) else {}
+    for row in audio.get("items") or []:
+        if isinstance(row, dict):
+            url = safe_str(row.get("url"))
+            if url:
+                return url
+    return safe_str(item.get("previewUrl") or item.get("preview_url"))
+
+
+def _track_fields(item: dict[str, Any], album: dict[str, Any]) -> dict[str, Any]:
+    """Lift getTrack fields: playCount, ids, rating, albumInfo. Omits bulky raw."""
+    uri = safe_str(item.get("uri"))
+    tid = safe_str(item.get("id")) or _spotify_id(uri, "track")
+    rating = item.get("contentRating") if isinstance(item.get("contentRating"), dict) else {}
+    label = safe_str(rating.get("label") or item.get("contentRating"))
+    playability = item.get("playability") if isinstance(item.get("playability"), dict) else {}
+    album_uri = safe_str(album.get("uri")) if isinstance(album, dict) else None
+    album_id = (
+        safe_str(album.get("id")) if isinstance(album, dict) else None
+    ) or _spotify_id(album_uri, "album")
+    release_date = None
+    if isinstance(album, dict):
+        date = album.get("date") if isinstance(album.get("date"), dict) else {}
+        release_date = safe_str(date.get("isoString") or album.get("releaseDate") or album.get("release_date"))
+    artist_items = _track_artist_items(item)
+    album_info = None
+    if album_id or (isinstance(album, dict) and album.get("name")):
+        album_info = {
+            k: v
+            for k, v in {
+                "id": album_id,
+                "uri": album_uri or (f"spotify:album:{album_id}" if album_id else None),
+                "name": safe_str(album.get("name")) if isinstance(album, dict) else None,
+                "url": f"https://open.spotify.com/album/{album_id}" if album_id else None,
+                "releaseDate": release_date,
+            }.items()
+            if v not in (None, "", [])
+        }
+    return {
+        "id": tid,
+        "playCount": safe_int(item.get("playcount") or item.get("playCount")),
+        "popularity": safe_int(item.get("popularity")),
+        "trackNumber": safe_int(item.get("trackNumber") or item.get("track_number")),
+        "discNumber": safe_int(item.get("discNumber") or item.get("disc_number")),
+        "contentRating": label,
+        "explicit": True if label == "EXPLICIT" else (False if label else None),
+        "mediaType": safe_str(item.get("mediaType")),
+        "playable": playability.get("playable") if isinstance(playability.get("playable"), bool) else None,
+        "previewUrl": _track_preview_url(item),
+        "releaseDate": release_date,
+        "artistItems": artist_items,
+        "albumInfo": album_info,
+    }
+
+
 def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
     stats = item.get("stats") or {}
     duration = item.get("duration") or {}
@@ -410,11 +519,50 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
     }
     if kind == "artist":
         out.update(_artist_fields(item))
+    if kind == "track":
+        # getTrack payload embeds full artist discographies — do not leak as raw.
+        out.pop("raw", None)
+        track_extra = _track_fields(item, album if isinstance(album, dict) else {})
+        out.update(track_extra)
+        # Prefer structured artist names when string list was empty.
+        if not out.get("artists") and track_extra.get("artistItems"):
+            out["artists"] = [
+                a["name"] for a in track_extra["artistItems"] if isinstance(a, dict) and a.get("name")
+            ]
+        if not out.get("album") and isinstance(track_extra.get("albumInfo"), dict):
+            out["album"] = track_extra["albumInfo"].get("name")
+        if track_extra.get("id"):
+            # Prefer canonical URL over shareUrl (?si=…).
+            out["url"] = f"https://open.spotify.com/track/{track_extra['id']}"
+            if not out.get("uri"):
+                out["uri"] = f"spotify:track:{track_extra['id']}"
+        if not out.get("releaseYear") and track_extra.get("releaseDate"):
+            out["releaseYear"] = _year_of(track_extra["releaseDate"])
     for key in _OMIT_BY_KIND.get(kind, frozenset()):
         out.pop(key, None)
     for key in _OMIT_IF_EMPTY:
         if key in out and out[key] in (None, "", []):
             out.pop(key, None)
+    # Track-only empties (keep falsey bools).
+    if kind == "track":
+        for key in (
+            "playCount",
+            "popularity",
+            "trackNumber",
+            "discNumber",
+            "contentRating",
+            "mediaType",
+            "previewUrl",
+            "releaseDate",
+            "artistItems",
+            "albumInfo",
+            "id",
+        ):
+            if out.get(key) in (None, "", []):
+                out.pop(key, None)
+        for key in ("explicit", "playable"):
+            if out.get(key) is None:
+                out.pop(key, None)
     return out
 
 
@@ -517,20 +665,30 @@ async def artist(
         return ApiResponse(data=data)
 
 
-@router.get("/track", summary="Spotify track details")
+@router.get(
+    "/track",
+    summary="Spotify track details",
+    description=(
+        "Track from Spotify's web-player GraphQL as clean JSON: id, playCount, "
+        "trackNumber, contentRating/explicit, artistItems[{id,uri,name,url}], "
+        "albumInfo[{id,uri,name,url,releaseDate}], duration, and previewUrl when "
+        "Spotify exposes one. Flat artist name strings and album name kept for "
+        "back-compat. Flat 1 credit. No bulky raw discography dump."
+    ),
+)
 async def track(
     url: str = Query(..., description="Spotify track URL, URI, or ID"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "track")
-    async with billed_call(caller=caller, endpoint="/v1/spotify/track", platform="spotify", resource_url=uri, base_credits=CREDIT_NATIVE) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/spotify/track", platform="spotify", resource_url=uri, base_credits=CREDIT_TRACK) as ctx:
         async def _run() -> dict[str, Any]:
             return await _details("track", uri, ctx=ctx)
 
         data = await cached_or_run(
             "spotify.track",
-            {"uri": uri, "v": 8},
+            {"uri": uri, "v": 9},
             _run,
             ctx,
             ttl=get_settings().CACHE_TTL_STATIC,

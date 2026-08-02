@@ -11908,6 +11908,7 @@
           "Spotify"
         ],
         "summary": "Spotify track details",
+        "description": "Track from Spotify's web-player GraphQL as clean JSON: id, playCount, trackNumber, contentRating/explicit, artistItems[{id,uri,name,url}], albumInfo[{id,uri,name,url,releaseDate}], duration, and previewUrl when Spotify exposes one. Flat artist name strings and album name kept for back-compat. Flat 1 credit. No bulky raw discography dump.",
         "operationId": "track_v1_spotify_track_get",
         "security": [
           {

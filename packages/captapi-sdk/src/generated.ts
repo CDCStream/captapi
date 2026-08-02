@@ -2031,7 +2031,7 @@ export class TwitchApi {
   userSchedule(params: TwitchUserScheduleParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitch/user-schedule", params);
   }
-  /** Twitch Clip — Twitch clip metadata from a clip URL or channel fallback. (1 credit) */
+  /** Twitch Clip — Twitch clip — curator vs channel, qualities, token expiry. (1 credit) */
   clip(params: TwitchClipParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitch/clip", params);
   }
@@ -2093,7 +2093,7 @@ export class SpotifyApi {
   artist(params: SpotifyArtistParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/spotify/artist", params);
   }
-  /** Spotify Track — Spotify track metadata, artists, album and play count when available. (6 credits) */
+  /** Spotify Track — Spotify track — playCount, artist/album IDs, explicit rating. (1 credit) */
   track(params: SpotifyTrackParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/spotify/track", params);
   }
