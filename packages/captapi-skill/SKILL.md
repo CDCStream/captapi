@@ -133,7 +133,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `tiktok_top_search` | `/v1/tiktok/top-search` | `q` (string), `limit`? (number), `cache`? (boolean) | 14 |
 | `tiktok_search_by_hashtag` | `/v1/tiktok/search/hashtag` | `q` (string), `limit`? (number), `cursor`? (number), `region`? (string), `cache`? (boolean) | 14 |
 | `tiktok_search_users` | `/v1/tiktok/search/users` | `q` (string), `limit`? (number), `cursor`? (number), `cache`? (boolean) | 1 |
-| `tiktok_song_details` | `/v1/tiktok/song-details` | `url` (string), `cache`? (boolean) | 2 |
+| `tiktok_song_details` | `/v1/tiktok/song-details` | `url` (string), `cache`? (boolean) | 1 |
 | `tiktok_trending_feed` | `/v1/tiktok/trending-feed` | `country`? (string), `limit`? (number), `cache`? (boolean) | 14 |
 | `tiktok_popular_hashtags` | `/v1/tiktok/popular-hashtags` | `query`? (string), `limit`? (number), `cache`? (boolean) | 14 |
 | `tiktok_live` | `/v1/tiktok/live` | `url` (string), `cache`? (boolean) | 1 |

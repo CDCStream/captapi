@@ -10899,15 +10899,80 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "tiktok-song-details": {
     "platform": "tiktok",
-    "url": "https://www.tiktok.com/music/original-sound-7646812079113898783",
-    "id": "7646812079113898783",
-    "title": "original sound - khaby.lame",
-    "author": "Khabane lame",
-    "original": true,
-    "album": null,
-    "duration": 29.0,
-    "coverUrl": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter-q:1080:1080:q70.webp?dr=10796&idc=my&ps=87d6e48a&refresh_token=765a9f29&s=MUSIC_AWEME&sc=avatar&shcp=f6441914&shp=d05b14bd&t=223449c4&x-expires=1785315600&x-signature=8LI4%2BlUJaaW%2FwmqFRm1LaQGCx%2FY%3D",
-    "playUrl": "https://sf16-ies-music-va.tiktokcdn.com/obj/ies-music-ttp-dup-us/tx27650420977368582943.mp3"
+    "url": "https://www.tiktok.com/music/Pumpin-Blood-7659457659034175489",
+    "id": "7659457659034175489",
+    "mid": "7659457659034175489",
+    "title": "Pumpin Blood",
+    "author": "TWINSICK & NONONO",
+    "artists": [
+      {
+        "id": "6749206263416161285",
+        "uid": "6749206263416161285",
+        "secUid": "MS4wLjABAAAA38xoRsEaXL5TLeUkSCGHTo-RvU9P485jMPZSIiBjhQ4-uQiq3rS4FIDrP5O_Y0yW",
+        "handle": "twinsick",
+        "displayName": "TWINSICK",
+        "verified": true,
+        "avatarUrl": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/119173022434f9a952213ee3344b3539~tplv-tiktokx-cropcenter-q:168:168:q70.webp?dr=10792&idc=my2&ps=87d6e48a&refresh_token=7dd6ae52&s=MUSIC_AWEME&sc=avatar&shcp=f6441914&shp=d05b14bd&t=223449c4&x-expires=1785783600&x-signature=NqCTSbDLT8umzbrTEziv7%2FkGOI0%3D"
+      },
+      {
+        "id": "7308738121520235553",
+        "uid": "7308738121520235553",
+        "secUid": "MS4wLjABAAAA4_Viygw3rG9RFqavMKpGvCNaiyjZlizM_LYw1Qe4M5eEo-MLAztgyRwUbK6vYVNT",
+        "handle": "nononoofficial",
+        "displayName": "NONONO",
+        "verified": false,
+        "avatarUrl": "https://p16-common-sign.tiktokcdn.com/tos-useast2a-avt-0068-euttp/0ce5a0d0b5f22cf5d263875e8c0a2702~tplv-tiktokx-cropcenter-q:168:168:q70.webp?dr=10792&idc=my2&ps=87d6e48a&refresh_token=f4958d29&s=MUSIC_AWEME&sc=avatar&shcp=f6441914&shp=d05b14bd&t=223449c4&x-expires=1785783600&x-signature=lhH%2BscwS89J4V4PRehJ%2F3rjbKR8%3D"
+      }
+    ],
+    "original": false,
+    "isOriginal": false,
+    "isOriginalSound": false,
+    "isPgc": true,
+    "isAuthorArtist": true,
+    "album": "Pumpin Blood",
+    "duration": 46.0,
+    "coverUrl": "https://p77-sg.tiktokcdn.com/aweme/720x720/tos-alisg-v-2774/ogkAESQZAtNDXBDkBAgFZTWoEfNeqjEB8AV7MC.jpeg",
+    "cover": {
+      "large": "https://p77-sg.tiktokcdn.com/aweme/720x720/tos-alisg-v-2774/ogkAESQZAtNDXBDkBAgFZTWoEfNeqjEB8AV7MC.jpeg",
+      "medium": "https://p77-sg.tiktokcdn.com/aweme/200x200/tos-alisg-v-2774/ogkAESQZAtNDXBDkBAgFZTWoEfNeqjEB8AV7MC.jpeg",
+      "thumb": "https://p77-sg.tiktokcdn.com/aweme/100x100/tos-alisg-v-2774/ogkAESQZAtNDXBDkBAgFZTWoEfNeqjEB8AV7MC.jpeg"
+    },
+    "playUrl": "https://sf16-ies-music-sg.tiktokcdn.com/obj/tos-alisg-ve-2774/oUBA3erMBM5LhL55CXiLQNZYpBfcqjBIingAtS",
+    "usageCount": null,
+    "createdAt": "2026-07-06T16:51:01.000Z",
+    "createTime": 1783356661,
+    "isCommerceMusic": true,
+    "hasCommerceRight": false,
+    "commercialRightType": 3,
+    "matchedSong": {
+      "id": "7659443114000369680",
+      "title": "Pumpin Blood",
+      "author": "TWINSICK & NONONO",
+      "fullDuration": 46673.0,
+      "chorusInfo": {
+        "startMs": 0,
+        "durationMs": 30528
+      }
+    },
+    "musicReleaseInfo": {
+      "groupReleaseDate": "2026-07-06T00:00:00.000Z",
+      "groupReleaseTimestamp": 1783296000,
+      "isNewReleaseSong": true
+    },
+    "extra": {
+      "bpm": null,
+      "loudnessLufs": -8.160819,
+      "amplitudePeak": 1.3610525,
+      "beats": {
+        "audio_effect_onset": "https://sf16-ies-music-sg.tiktokcdn.com/obj/tos-alisg-v-2774/osAA6oEIIAgqFiTfrVFDceC9UIpRjtCtDBiZAl",
+        "beats_tracker": "https://sf77-ies-music-sg.tiktokcdn.com/obj/tos-alisg-v-2774/oQEBvfGFLAzjne62AzRQFCuaNJJQQGAeAUXFyI",
+        "energy_trace": "https://sf16-ies-music-sg.tiktokcdn.com/obj/tos-alisg-v-2774/okGP6eevAu6XULAaetqCFjaIInQB9QOAz2EAJz",
+        "merged_beats": "https://sf77-ies-music-sg.tiktokcdn.com/obj/tos-alisg-v-2774/og6OlA6azQsFfaFeJEQAu6GUAhELIBjXCADven"
+      }
+    },
+    "strongBeatUrl": "https://sf77-ies-music-sg.tiktokcdn.com/obj/tos-alisg-v-2774/oYQUDfpKtEpQEARfgAqgFBAQErZECAB0BBpAlP",
+    "similarMusic": null,
+    "recList": null
   },
   "tiktok-summarizer": {
     "platform": "tiktok",

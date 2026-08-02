@@ -579,7 +579,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/search/users", {"q": q, "limit": limit, "cursor": cursor, "cache": cache})
 
     def song_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Song Details — Details of a TikTok sound/song. (2 credits)
+        """TikTok Song Details — Sound metadata — usageCount, artists[], commerce rights, chorus timing; 1 credit native. (1 credit)
 
         :param url: TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -786,7 +786,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/search/users", {"q": q, "limit": limit, "cursor": cursor, "cache": cache})
 
     async def song_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Song Details — Details of a TikTok sound/song. (2 credits)
+        """TikTok Song Details — Sound metadata — usageCount, artists[], commerce rights, chorus timing; 1 credit native. (1 credit)
 
         :param url: TikTok music/sound URL, e.g. https://tiktok.com/music/name-ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

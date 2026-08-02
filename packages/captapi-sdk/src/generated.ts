@@ -577,7 +577,7 @@ export class TiktokApi {
   searchUsers(params: TiktokSearchUsersParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/search/users", params);
   }
-  /** TikTok Song Details — Details of a TikTok sound/song. (2 credits) */
+  /** TikTok Song Details — Sound metadata — usageCount, artists[], commerce rights, chorus timing; 1 credit native. (1 credit) */
   songDetails(params: TiktokSongDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/song-details", params);
   }

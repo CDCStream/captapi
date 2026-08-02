@@ -42,6 +42,7 @@ from app.services.tiktok_native import (
     trending_feed_native,
     search_suggestions_native,
     search_users_native,
+    normalize_song_details,
     song_details_native,
     top_search_native,
     user_connections_native,
@@ -74,6 +75,10 @@ CREDIT_COMMENTS = 2  # native (TikTok's own API); flat fee, our cost ~$0
 CREDIT_COMMENT_REPLIES = 2  # native comment/list/reply; flat fee, our cost ~$0
 CREDIT_CHANNEL_POSTS = 2  # native aweme/post; flat fee, our cost ~$0
 CREDIT_MUSIC_POSTS = 2  # native music/aweme; flat fee, our cost ~$0
+# Native music/aweme song metadata (~$0); ScrapeCreators parity = 1 credit.
+# Apify song actors stay at 2 (multiple fallbacks, real actor cost).
+CREDIT_SONG_DETAILS_NATIVE = 1
+CREDIT_SONG_DETAILS_APIFY = 2
 CREDIT_SEARCH_SUGGESTIONS = 2  # native search preview; flat fee, our cost ~$0
 CREDIT_PROFILE_REGION = 2  # native profile page + fast LLM region estimate
 CREDIT_AUDIENCE = 3  # video list (actor) + native commenter-region sampling
@@ -2164,6 +2169,108 @@ async def tiktok_search_users(
         return ApiResponse(data=data)
 
 
+def _song_from_apify_music(music: dict[str, Any], *, url: str, url_id: str | None) -> dict[str, Any] | None:
+    """Best-effort map of Apify sound/music actor rows into song-details shape."""
+    if not isinstance(music, dict):
+        return None
+    # Prefer the shared normalizer when the actor already returns TikTok-shaped keys.
+    normalized = normalize_song_details(music, url=url, music_id=url_id)
+    if normalized and normalized.get("title"):
+        # Overlay usageCount from common actor aliases when native-shaped count is missing.
+        if normalized.get("usageCount") is None:
+            for key in (
+                "user_count",
+                "userCount",
+                "videoCount",
+                "video_count",
+                "musicVideoCount",
+                "videosCount",
+            ):
+                n = safe_int(music.get(key))
+                if n is not None and n > 0:
+                    normalized["usageCount"] = n
+                    break
+        return normalized
+
+    title = safe_str(
+        music.get("title")
+        or music.get("musicName")
+        or music.get("soundTitle")
+        or music.get("name")
+    )
+    if not title:
+        return None
+    usage = None
+    for key in (
+        "user_count",
+        "userCount",
+        "videoCount",
+        "video_count",
+        "musicVideoCount",
+        "videosCount",
+    ):
+        n = safe_int(music.get(key))
+        if n is not None and n > 0:
+            usage = n
+            break
+    original = music.get("musicOriginal")
+    if original is None:
+        original = music.get("is_original_sound")
+    if original is None:
+        original = bool(title.lower().startswith("original sound"))
+    cover = safe_str(
+        music.get("coverLarge")
+        or music.get("cover_large")
+        or music.get("coverMedium")
+        or music.get("coverUrl")
+        or music.get("cover")
+        or music.get("soundCoverUrl")
+    )
+    return {
+        "platform": "tiktok",
+        "url": url,
+        "id": url_id
+        or safe_str(music.get("musicId") or music.get("soundId") or music.get("id") or music.get("id_str")),
+        "mid": safe_str(music.get("mid"))
+        or url_id
+        or safe_str(music.get("musicId") or music.get("id")),
+        "title": title,
+        "author": safe_str(
+            music.get("musicAuthor")
+            or music.get("authorName")
+            or music.get("soundAuthor")
+            or music.get("artist")
+            or music.get("author")
+        ),
+        "artists": [],
+        "original": bool(original) if original is not None else None,
+        "isOriginalSound": bool(original) if original is not None else None,
+        "album": safe_str(music.get("album") or music.get("soundAlbum")) or None,
+        "duration": safe_float(
+            music.get("duration") or music.get("durationSeconds") or music.get("soundDuration")
+        ),
+        "coverUrl": cover,
+        "cover": {
+            "large": safe_str(music.get("coverLarge") or music.get("cover_large")),
+            "medium": safe_str(music.get("coverMedium") or music.get("cover_medium")),
+            "thumb": safe_str(music.get("coverThumb") or music.get("cover_thumb")),
+        },
+        "playUrl": safe_str(music.get("playUrl") or music.get("audioUrl") or music.get("play_url")),
+        "usageCount": usage,
+        "createdAt": None,
+        "createTime": safe_int(music.get("create_time") or music.get("createTime")),
+        "isCommerceMusic": None,
+        "hasCommerceRight": None,
+        "commercialRightType": None,
+        "matchedSong": None,
+        "musicReleaseInfo": None,
+        "extra": None,
+        "strongBeatUrl": None,
+        "similarMusic": None,
+        "recList": None,
+    }
+
+
 @router.get("/song-details", summary="Details of a TikTok sound/song")
 async def tiktok_song_details(
     url: str = Query(..., description="TikTok music/sound URL"),
@@ -2177,7 +2284,7 @@ async def tiktok_song_details(
         endpoint="/v1/tiktok/song-details",
         platform="tiktok",
         resource_url=url,
-        base_credits=CREDIT_VIDEO_DETAILS + 1,
+        base_credits=CREDIT_SONG_DETAILS_APIFY,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Primary: music/aweme mobile API (~1-3s). Same metadata the sound
@@ -2230,26 +2337,11 @@ async def tiktok_song_details(
             except Exception:  # noqa: BLE001
                 items = []
             if items:
-                song = items[0].get("song") or {}
-                if song:
-                    title = safe_str(song.get("title"))
-                    return await _enrich_play_url(
-                        {
-                            "platform": "tiktok",
-                            "url": url,
-                            "id": url_id or safe_str(song.get("id")),
-                            "title": title,
-                            "author": safe_str(song.get("artist")),
-                            "original": bool(title) and title.lower().startswith("original sound"),
-                            # Original sounds genuinely have no album; licensed tracks may.
-                            "album": safe_str(song.get("album")),
-                            "duration": safe_float(song.get("duration")),
-                            "coverUrl": safe_str(song.get("cover")),
-                            "playUrl": safe_str(
-                                song.get("playUrl") or song.get("audioUrl") or song.get("play_url")
-                            ),
-                        }
-                    )
+                song = items[0].get("song") or items[0].get("music") or items[0]
+                mapped = _song_from_apify_music(song, url=url, url_id=url_id)
+                if mapped and mapped.get("title"):
+                    ctx["source"] = "apify"
+                    return await _enrich_play_url(mapped)
 
             # apidojo failed: the remaining fallbacks are independent actors, so
             # race them concurrently instead of cascading (worst case used to be
@@ -2276,43 +2368,7 @@ async def tiktok_song_details(
                     return None
                 item = summary_items[0]
                 music = item.get("sound") or item.get("music") or item.get("summary") or item
-                title = safe_str(
-                    music.get("title")
-                    or music.get("musicName")
-                    or music.get("soundTitle")
-                    or music.get("name")
-                )
-                if not title:
-                    return None
-                return {
-                    "platform": "tiktok",
-                    "url": url,
-                    "id": url_id
-                    or safe_str(
-                        music.get("id") or music.get("musicId") or music.get("soundId")
-                    ),
-                    "title": title,
-                    "author": safe_str(
-                        music.get("artist")
-                        or music.get("authorName")
-                        or music.get("soundAuthor")
-                        or music.get("author")
-                    ),
-                    "original": bool(title) and title.lower().startswith("original sound"),
-                    "album": safe_str(music.get("album") or music.get("soundAlbum")),
-                    "duration": safe_float(
-                        music.get("duration")
-                        or music.get("durationSeconds")
-                        or music.get("soundDuration")
-                    ),
-                    "coverUrl": safe_str(
-                        music.get("cover")
-                        or music.get("coverUrl")
-                        or music.get("soundCoverUrl")
-                        or music.get("coverLarge")
-                    ),
-                    "playUrl": safe_str(music.get("playUrl") or music.get("audioUrl")),
-                }
+                return _song_from_apify_music(music, url=url, url_id=url_id)
 
             async def _clockworks_fallback() -> dict[str, Any] | None:
                 # Prefer clockworks (has playUrl) over coregent summary.
@@ -2350,50 +2406,7 @@ async def tiktok_song_details(
                     or items[0].get("summary")
                     or items[0]
                 )
-                title = safe_str(
-                    music.get("musicName")
-                    or music.get("title")
-                    or music.get("soundTitle")
-                    or music.get("name")
-                )
-                return {
-                    "platform": "tiktok",
-                    "url": url,
-                    "id": url_id
-                    or safe_str(
-                        music.get("musicId") or music.get("soundId") or music.get("id")
-                    ),
-                    "title": title,
-                    "author": safe_str(
-                        music.get("musicAuthor")
-                        or music.get("authorName")
-                        or music.get("soundAuthor")
-                        or music.get("artist")
-                        or music.get("author")
-                    ),
-                    "original": music.get("musicOriginal")
-                    if music.get("musicOriginal") is not None
-                    else (
-                        bool(title) and title.lower().startswith("original sound")
-                        if title
-                        else None
-                    ),
-                    "album": safe_str(music.get("album") or music.get("soundAlbum")),
-                    "duration": safe_float(
-                        music.get("duration")
-                        or music.get("durationSeconds")
-                        or music.get("soundDuration")
-                    ),
-                    "coverUrl": safe_str(
-                        music.get("coverLarge")
-                        or music.get("coverMedium")
-                        or music.get("coverMediumUrl")
-                        or music.get("coverUrl")
-                        or music.get("soundCoverUrl")
-                        or music.get("cover")
-                    ),
-                    "playUrl": safe_str(music.get("playUrl") or music.get("audioUrl")),
-                }
+                return _song_from_apify_music(music, url=url, url_id=url_id)
 
             summary_result, clockworks_result = await asyncio.gather(
                 _summary_fallback(), _clockworks_fallback()
@@ -2404,15 +2417,20 @@ async def tiktok_song_details(
                 result = summary_result or clockworks_result
             if not result:
                 raise HTTPException(status_code=404, detail="Song not found")
+            ctx["source"] = "apify"
             return await _enrich_play_url(result)
 
         data = await cached_or_run(
             endpoint="tiktok.song-details",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_SONG_DETAILS_NATIVE
+        else:
+            ctx["credits_override"] = CREDIT_SONG_DETAILS_APIFY
         return ApiResponse(data=data)
 
 

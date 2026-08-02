@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "fix",
+    title: "TikTok song details: usageCount, artists, commerce, chorus; 1 credit",
+    description:
+      "GET /v1/tiktok/song-details now returns the fields the docs already promised: usageCount (videos using the sound; null when TikTok omits a real total on music/aweme), artists[{id,uid,secUid,handle,displayName,verified,avatarUrl}] (owner lifted for original sounds), commerce rights (isCommerceMusic / hasCommerceRight / commercialRightType), createdAt, matchedSong.chorusInfo{startMs,durationMs}, musicReleaseInfo, and extra{loudnessLufs,amplitudePeak,beats,bpm} when present. Flat 1 credit on the native path (was 2); Apify fallback stays 2.",
+    items: [
+      "usageCount field (docs parity; null when TikTok sends 0/absent)",
+      "artists[] with id/secUid/handle; commerce + chorus timing",
+      "musicReleaseInfo + audio analysis extra{}",
+      "1 credit native (was 2)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "fix",
     title: "YouTube community posts: numeric likes, ISO dates, channel/video, cursor",
     description:
       "GET /v1/youtube/community-posts no longer returns likeCount as a display string (\"3M\") or publishedTime as a relative label only. likeCount is a number with likeCountText kept for display (likeCountApproximate when YouTube only shows K/M/B); publishedTime is ISO-8601 (approximate from relative labels) with publishedTimeText preserved. Each post adds channel{id,title,url,handle}, url/image, and when linked — video{id,title,thumbnail,url,viewCountText,viewCountInt,lengthText,lengthSeconds} plus enriched linkedVideos[]. Cursor pagination via nextCursor + hasMore. Flat 1 credit on the native /posts path; Apify fallback stays ~0.5/result.",

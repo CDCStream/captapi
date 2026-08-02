@@ -667,7 +667,7 @@
       },
       "tiktokSongDetails": {
         "label": "TikTok Song Details",
-        "description": "Details of a TikTok sound/song. Costs ~2 credits (cached results free, failures never charged).",
+        "description": "Sound metadata — usageCount, artists[], commerce rights, chorus timing. Costs ~1 credit native (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

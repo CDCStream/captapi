@@ -1140,8 +1140,8 @@
     "platform": "tiktok",
     "name": "TikTok Song Details",
     "path": "/v1/tiktok/song-details",
-    "credits": 2,
-    "summary": "Details of a TikTok sound/song.",
+    "credits": 1,
+    "summary": "Sound metadata — usageCount, artists[], commerce rights, chorus timing; 1 credit native.",
     "params": [
       {
         "name": "url",

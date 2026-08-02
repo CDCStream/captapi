@@ -2008,6 +2008,220 @@ async def hashtag_posts_native(
     return posts, has_more, next_cursor
 
 
+def _parse_music_extra(raw: Any) -> dict[str, Any] | None:
+    """TikTok packs analysis metadata into a JSON string under ``extra``."""
+    if isinstance(raw, dict):
+        return raw
+    if isinstance(raw, str) and raw.strip():
+        try:
+            parsed = json.loads(raw)
+        except ValueError:
+            return None
+        return parsed if isinstance(parsed, dict) else None
+    return None
+
+
+def _map_music_artist(row: dict[str, Any]) -> dict[str, Any] | None:
+    uid = safe_str(row.get("uid") or row.get("id") or row.get("user_id"))
+    handle = safe_str(row.get("handle") or row.get("unique_id") or row.get("uniqueId"))
+    if not uid and not handle:
+        return None
+    avatar = _url_list_first(row.get("avatar")) or _url_list_first(row.get("avatar_thumb"))
+    return {
+        "id": uid,
+        "uid": uid,
+        "secUid": safe_str(row.get("sec_uid") or row.get("secUid")),
+        "handle": handle.lstrip("@") if handle else None,
+        "displayName": safe_str(row.get("nick_name") or row.get("nickname") or row.get("nickName")),
+        "verified": bool(row.get("is_verified") or row.get("verified"))
+        if row.get("is_verified") is not None or row.get("verified") is not None
+        else None,
+        "avatarUrl": avatar,
+    }
+
+
+def _usage_count_from_music(music: dict[str, Any]) -> int | None:
+    """Videos using this sound. TikTok often sends ``0`` on music/aweme embeds —
+    treat non-positive as unknown (null) rather than a fake zero."""
+    for key in ("user_count", "music_group_use_count", "music_ugid_use_count"):
+        n = safe_int(music.get(key))
+        if n is not None and n > 0:
+            return n
+    return None
+
+
+def normalize_song_details(
+    music: dict[str, Any],
+    *,
+    url: str,
+    music_id: str | None = None,
+) -> dict[str, Any] | None:
+    """Map a TikTok ``music`` object → ``/v1/tiktok/song-details`` shape."""
+    if not isinstance(music, dict):
+        return None
+    mid = (
+        safe_str(music.get("id_str") or music.get("id") or music.get("mid"))
+        or music_id
+    )
+    title = safe_str(music.get("title"))
+    if not mid and not title:
+        return None
+
+    is_original_sound = music.get("is_original_sound")
+    is_original = music.get("is_original")
+    original = is_original_sound if is_original_sound is not None else is_original
+    if original is None and title:
+        original = title.lower().startswith("original sound")
+
+    cover_large = _url_list_first(music.get("cover_large"))
+    cover_medium = _url_list_first(music.get("cover_medium"))
+    cover_thumb = _url_list_first(music.get("cover_thumb"))
+    cover = cover_large or cover_medium or cover_thumb
+    play = _url_list_first(music.get("play_url"))
+
+    artists: list[dict[str, Any]] = []
+    seen_artist: set[str] = set()
+    for raw in music.get("artists") or []:
+        if not isinstance(raw, dict):
+            continue
+        mapped = _map_music_artist(raw)
+        if not mapped:
+            continue
+        key = mapped.get("id") or mapped.get("handle") or ""
+        if key and key in seen_artist:
+            continue
+        if key:
+            seen_artist.add(key)
+        artists.append(mapped)
+    # Original sounds often omit artists[] — lift owner identity when present.
+    if not artists:
+        owner = _map_music_artist(
+            {
+                "uid": music.get("owner_id"),
+                "sec_uid": music.get("sec_uid"),
+                "handle": music.get("owner_handle"),
+                "nick_name": music.get("owner_nickname") or music.get("author"),
+                "avatar": music.get("avatar_medium") or music.get("avatar_thumb"),
+                "is_verified": None,
+            }
+        )
+        if owner and (owner.get("id") or owner.get("handle")):
+            artists.append(owner)
+
+    matched_raw = music.get("matched_song") if isinstance(music.get("matched_song"), dict) else None
+    matched_song = None
+    if matched_raw:
+        chorus_raw = matched_raw.get("chorus_info") if isinstance(matched_raw.get("chorus_info"), dict) else None
+        chorus_info = None
+        if chorus_raw:
+            start_ms = chorus_raw.get("start_ms")
+            if start_ms is None:
+                start_ms = chorus_raw.get("startMs")
+            duration_ms = chorus_raw.get("duration_ms")
+            if duration_ms is None:
+                duration_ms = chorus_raw.get("durationMs")
+            chorus_info = {
+                "startMs": safe_int(start_ms),
+                "durationMs": safe_int(duration_ms),
+            }
+        matched_song = {
+            "id": safe_str(matched_raw.get("id") or matched_raw.get("id_str")),
+            "title": safe_str(matched_raw.get("title")),
+            "author": safe_str(matched_raw.get("author")),
+            "fullDuration": safe_float(matched_raw.get("full_duration") or matched_raw.get("fullDuration")),
+            "chorusInfo": chorus_info,
+        }
+
+    release_raw = (
+        music.get("music_release_info")
+        if isinstance(music.get("music_release_info"), dict)
+        else None
+    )
+    music_release = None
+    if release_raw:
+        group_ts = safe_int(release_raw.get("group_release_date"))
+        music_release = {
+            "groupReleaseDate": _iso(group_ts) if group_ts else None,
+            "groupReleaseTimestamp": group_ts,
+            "isNewReleaseSong": bool(release_raw.get("is_new_release_song"))
+            if release_raw.get("is_new_release_song") is not None
+            else None,
+        }
+
+    extra_raw = _parse_music_extra(music.get("extra"))
+    extra = None
+    if extra_raw:
+        beats = extra_raw.get("beats") if isinstance(extra_raw.get("beats"), dict) else None
+        bpm = safe_float(extra_raw.get("bpm"))
+        loudness = safe_float(extra_raw.get("loudness_lufs") or extra_raw.get("loudnessLufs"))
+        peak = safe_float(extra_raw.get("amplitude_peak") or extra_raw.get("amplitudePeak"))
+        # Only surface the analysis block when TikTok actually populated it.
+        if bpm is not None or (loudness is not None and loudness != 0) or (
+            peak is not None and peak != 0
+        ) or (beats and any(beats.values())):
+            extra = {
+                "bpm": bpm,
+                "loudnessLufs": loudness,
+                "amplitudePeak": peak,
+                "beats": beats or None,
+            }
+
+    create_ts = safe_int(music.get("create_time") or music.get("createTime"))
+    album = safe_str(music.get("album"))
+    out: dict[str, Any] = {
+        "platform": "tiktok",
+        "url": url,
+        "id": mid,
+        "mid": safe_str(music.get("mid")) or mid,
+        "title": title,
+        "author": safe_str(music.get("author") or music.get("owner_nickname")),
+        "artists": artists,
+        "original": bool(original) if original is not None else None,
+        "isOriginal": bool(is_original) if is_original is not None else None,
+        "isOriginalSound": bool(is_original_sound)
+        if is_original_sound is not None
+        else (bool(original) if original is not None else None),
+        "isPgc": bool(music.get("is_pgc")) if music.get("is_pgc") is not None else None,
+        "isAuthorArtist": bool(music.get("is_author_artist"))
+        if music.get("is_author_artist") is not None
+        else None,
+        "album": album or None,
+        "duration": safe_float(music.get("duration")),
+        "coverUrl": cover,
+        "cover": {
+            "large": cover_large,
+            "medium": cover_medium,
+            "thumb": cover_thumb,
+        },
+        "playUrl": play,
+        # Docs promise usage count — map user_count when TikTok exposes a real value.
+        "usageCount": _usage_count_from_music(music),
+        "createdAt": _iso(create_ts) if create_ts else None,
+        "createTime": create_ts,
+        "isCommerceMusic": bool(music.get("is_commerce_music"))
+        if music.get("is_commerce_music") is not None
+        else None,
+        "hasCommerceRight": bool(music.get("has_commerce_right"))
+        if music.get("has_commerce_right") is not None
+        else None,
+        "commercialRightType": safe_int(music.get("commercial_right_type")),
+        "matchedSong": matched_song,
+        "musicReleaseInfo": music_release,
+        "extra": extra,
+        "strongBeatUrl": _url_list_first(music.get("strong_beat_url"))
+        or safe_str(
+            (music.get("strong_beat_url") or {}).get("uri")
+            if isinstance(music.get("strong_beat_url"), dict)
+            else music.get("strong_beat_url")
+        ),
+        # Similar / rec lists need a separate music-detail web call (signer);
+        # leave null rather than invent empty arrays.
+        "similarMusic": None,
+        "recList": None,
+    }
+    return out
+
+
 async def song_details_native(music_id_or_url: str) -> dict[str, Any] | None:
     """Song/sound metadata from the first music/aweme row (same mobile API as
     ``music_posts_native``). Returns the /v1/tiktok/song-details shape, or
@@ -2026,37 +2240,12 @@ async def song_details_native(music_id_or_url: str) -> dict[str, Any] | None:
     if not isinstance(music, dict):
         return None
 
-    title = safe_str(music.get("title"))
-    original = music.get("is_original_sound")
-    if original is None:
-        original = music.get("is_original")
-    if original is None and title:
-        original = title.lower().startswith("original sound")
-
-    album = safe_str(music.get("album"))
-    cover = (
-        _url_list_first(music.get("cover_large"))
-        or _url_list_first(music.get("cover_medium"))
-        or _url_list_first(music.get("cover_thumb"))
-    )
-    play = _url_list_first(music.get("play_url"))
     url = (
         music_id_or_url
         if music_id_or_url.startswith("http")
         else f"https://www.tiktok.com/music/sound-{music_id}"
     )
-    return {
-        "platform": "tiktok",
-        "url": url,
-        "id": safe_str(music.get("id_str") or music.get("id")) or music_id,
-        "title": title,
-        "author": safe_str(music.get("author") or music.get("owner_nickname")),
-        "original": bool(original) if original is not None else None,
-        "album": album or None,
-        "duration": safe_float(music.get("duration")),
-        "coverUrl": cover,
-        "playUrl": play,
-    }
+    return normalize_song_details(music, url=url, music_id=music_id)
 
 
 def _extract_stream_urls(live_room: dict[str, Any]) -> list[str]:

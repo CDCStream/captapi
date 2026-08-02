@@ -311,7 +311,25 @@ const TIKTOK: Spec[] = [
       "Cursor pagination (nextCursor + hasMore)",
     ],
   },
-  { slug: "tiktok-song-details", name: "TikTok Song Details API", shortName: "Song Details", category: "details", method: "GET", path: "/v1/tiktok/song-details", credits: 2 , tagline: "Get details for a TikTok sound — title, artist, duration, cover art, and how many videos use it.", longDescription: "Paste a TikTok music/sound URL and get the sound's metadata as clean JSON: title, artist or original creator, duration, cover image, and usage count when available. Pair with Music Posts to list videos that use the same sound. Flat 2 credits per call." },
+  {
+    slug: "tiktok-song-details",
+    name: "TikTok Song Details API",
+    shortName: "Song Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/tiktok/song-details",
+    credits: 1,
+    tagline:
+      "TikTok sound metadata — usageCount, artists[{id,secUid,handle}], commerce rights, chorus timing, audio analysis (1 credit native).",
+    longDescription:
+      "Paste a TikTok music/sound URL and get the sound as clean JSON: title, author, artists[{id,uid,secUid,handle,displayName,verified,avatarUrl}], duration, cover/coverUrl/playUrl, usageCount (videos using the sound — null when TikTok omits it on this path), createdAt, commerce flags (isCommerceMusic / hasCommerceRight / commercialRightType), isOriginalSound / isPgc, matchedSong.chorusInfo{startMs,durationMs}, musicReleaseInfo{isNewReleaseSong}, and extra{bpm,loudnessLufs,beats} when TikTok exposes them. Pair with Music Posts to list videos on the sound. Flat 1 credit on the native path; Apify fallback bills 2.",
+    delivers: [
+      "usageCount when TikTok exposes video-use totals",
+      "artists[] with stable id / secUid / handle",
+      "Commerce rights + matchedSong chorus timing",
+      "Audio analysis (loudness / beats) when present; 1 credit native",
+    ],
+  },
   { slug: "tiktok-trending-feed", name: "TikTok Trending Feed API", shortName: "Trending Feed", category: "list", method: "GET", path: "/v1/tiktok/trending-feed", credits: 2 , tagline: "Get videos from TikTok's trending feed — caption, author, and engagement for each item. Flat 2 credits per call." },
   { slug: "tiktok-popular-hashtags", name: "TikTok Popular Hashtags API", shortName: "Popular Hashtags", category: "list", method: "GET", path: "/v1/tiktok/popular-hashtags", credits: 14, creditsPerResult: 0.7 , tagline: "Get currently popular TikTok hashtags — name and popularity signals for each tag." },
   { slug: "tiktok-live", name: "TikTok Live API", shortName: "Live", category: "details", method: "GET", path: "/v1/tiktok/live", credits: 1 , tagline: "Check whether a TikTok user is live right now — live status and basic room info when they are.", longDescription: "Send a TikTok profile URL or @handle and learn if that creator is currently live. When they are live you get basic room fields; when they are not, you get a clear offline status. For richer room details (title, viewer counts, and more), use Live Info. Flat 1 credit per call." },
