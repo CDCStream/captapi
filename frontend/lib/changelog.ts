@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "feature",
+    title: "LinkedIn Ad Library search: targeting, dates, pagination",
+    description:
+      "GET /v1/ad-library/linkedin/search-ads now returns LinkedIn transparency fields — targeting{}, ISO startDate/endDate + adDuration, totalImpressions + impressionsByCountry[], cta/destinationUrl, headline/description, advertiser id/URL, and carouselImages[] — plus cursor pagination (paginationToken/nextCursor, totalAds, isLastPage) and filters (countries, startDate/endDate, companyId, keyword). Still flat 2 credits on the native path.",
+    items: [
+      "Additive targeting{}, dates, impressions, CTA/destination",
+      "Cursor pagination + totalAds",
+      "Filters: countries, date range, companyId, keyword",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "feature",
     title: "Bluesky profile: verification, labels, associated",
     description:
       "GET /v1/bluesky/profile now surfaces AT Protocol fields already on app.bsky.actor.getProfile: verified + verification{verifications[], verifiedStatus, trustedVerifierStatus}, moderation labels[], and associated{lists, feedgens, starterPacks, labeler} (plus chat/activitySubscription when present). Still 1 credit; existing keys unchanged.",

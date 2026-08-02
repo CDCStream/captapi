@@ -743,6 +743,62 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
         reach_range = _tiktok_reach_range(normalized.get("impressions"))
         if reach_range:
             normalized["impressionsRange"] = reach_range
+    if platform == "linkedin_ad_library":
+        # LinkedIn Ad Library transparency extras (additive; SC-parity).
+        description = safe_str(
+            _first(item.get("description"), item.get("body"), item.get("bodyText"))
+        )
+        destination = safe_str(
+            _first(item.get("destinationUrl"), normalized.get("landingUrl"))
+        )
+        targeting = item.get("targeting") if isinstance(item.get("targeting"), dict) else None
+        if targeting:
+            targeting = {str(k): safe_str(v) for k, v in targeting.items() if safe_str(v)}
+        imp_by = item.get("impressionsByCountry")
+        impressions_by_country: list[dict[str, Any]] = []
+        if isinstance(imp_by, list):
+            for row in imp_by:
+                if not isinstance(row, dict):
+                    continue
+                impressions_by_country.append(
+                    {
+                        "country": safe_str(row.get("country") or row.get("name")),
+                        "impressions": safe_str(
+                            row.get("impressions") or row.get("share") or row.get("value")
+                        ),
+                    }
+                )
+        carousel = [
+            str(u)
+            for u in _listify(item.get("carouselImages") or item.get("carousel_images"))
+            if isinstance(u, str) and u.startswith("http")
+        ]
+        countries = item.get("countries")
+        if isinstance(countries, str):
+            countries = [c.strip().upper() for c in countries.split(",") if c.strip()]
+        elif isinstance(countries, list):
+            countries = [str(c).upper() for c in countries if c]
+        else:
+            countries = []
+        normalized.update(
+            {
+                "description": description,
+                "destinationUrl": destination,
+                "adDuration": safe_str(item.get("adDuration") or item.get("dateRange")),
+                "startDate": safe_str(item.get("startDate") or normalized.get("firstShown")),
+                "endDate": safe_str(item.get("endDate") or normalized.get("lastShown")),
+                "totalImpressions": safe_str(
+                    item.get("totalImpressions") or normalized.get("impressions")
+                ),
+                "impressionsByCountry": impressions_by_country,
+                "targeting": targeting,
+                "carouselImages": carousel,
+                "paidForBy": safe_str(item.get("paidForBy") or item.get("payer")),
+                "countries": countries,
+            }
+        )
+        if not normalized.get("landingUrl") and destination:
+            normalized["landingUrl"] = destination
     adv = normalized["advertiser"]
     if platform == "facebook_ad_library":
         # Additive fields for competitor intel — existing keys above stay stable.
@@ -808,10 +864,10 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             adv["entityType"] = entity
     if platform == "google_ad_library" and not adv["url"] and adv["id"]:
         adv["url"] = f"https://adstransparency.google.com/advertiser/{adv['id']}"
-    # LinkedIn / TikTok withhold most delivery metadata. Google ATC never
-    # returns CTA/spend and only sometimes impressions — omit empties.
+    # TikTok withhold most delivery metadata — omit empties.
+    # LinkedIn now surfaces targeting/dates/impressions; keep stable nulls there.
     # Facebook sometimes returns spend/impressions, so keep explicit nulls there.
-    if platform in {"tiktok_ad_library", "linkedin_ad_library"}:
+    if platform == "tiktok_ad_library":
         for key in (
             "cta",
             "landingUrl",
@@ -823,6 +879,11 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             "headline",
             "text",
         ):
+            if normalized.get(key) in (None, "", [], {}):
+                normalized.pop(key, None)
+    elif platform == "linkedin_ad_library":
+        # Drop only legacy empties that stay unused; keep new transparency keys.
+        for key in ("spend",):
             if normalized.get(key) in (None, "", [], {}):
                 normalized.pop(key, None)
     elif platform == "google_ad_library":
@@ -1735,15 +1796,80 @@ async def google_advertiser_search(
         )
 
 
-@router.get("/linkedin/search-ads", summary="Search LinkedIn Ad Library")
+@router.get(
+    "/linkedin/search-ads",
+    summary="Search LinkedIn Ad Library",
+    description=(
+        "Search LinkedIn Ad Library as clean JSON — headline/description, targeting{}, "
+        "ISO startDate/endDate + adDuration, totalImpressions + impressionsByCountry[], "
+        "cta/destinationUrl, advertiser{id,name,url,logo}, and carouselImages[]. "
+        "Supports countries (comma-separated), startDate/endDate, companyId, keyword, and "
+        "cursor pagination (paginationToken / nextCursor). Flat 2 credits on the native path."
+    ),
+)
 async def linkedin_search_ads(
-    q: str = Query(..., min_length=2),
-    country: str = Query("US", min_length=2, max_length=2),
+    q: str | None = Query(
+        None,
+        description="Advertiser / account owner name (LinkedIn accountOwner). Min 2 chars when used.",
+    ),
+    keyword: str | None = Query(
+        None,
+        description="Optional keyword filter on ad creative copy.",
+    ),
+    company_id: str | None = Query(
+        None,
+        alias="companyId",
+        description="LinkedIn numeric company id for exact advertiser match.",
+    ),
+    country: str = Query(
+        "US",
+        min_length=2,
+        max_length=2,
+        description="Single ISO country code. Ignored when countries is set. Default US.",
+    ),
+    countries: str | None = Query(
+        None,
+        description="Comma-separated ISO country codes (e.g. US,CA,MX). Overrides country.",
+    ),
+    start_date: str | None = Query(
+        None,
+        alias="startDate",
+        description="Custom range start (YYYY-MM-DD). Use with endDate.",
+    ),
+    end_date: str | None = Query(
+        None,
+        alias="endDate",
+        description="Custom range end (YYYY-MM-DD). Use with startDate.",
+    ),
+    cursor: str | None = Query(
+        None,
+        description="Pagination token from a previous response (paginationToken / nextCursor).",
+    ),
     limit: int = Query(20, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
+    owner = (q or "").strip()
+    kw = (keyword or "").strip()
+    cid = (company_id or "").strip()
+    if len(owner) < 2 and len(kw) < 2 and not cid:
+        raise HTTPException(
+            status_code=400,
+            detail="Provide q (advertiser), keyword, or companyId.",
+        )
+    if (start_date and not end_date) or (end_date and not start_date):
+        raise HTTPException(
+            status_code=400,
+            detail="startDate and endDate must be provided together (YYYY-MM-DD).",
+        )
+    for label, value in (("startDate", start_date), ("endDate", end_date)):
+        if value and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+            raise HTTPException(status_code=400, detail=f"{label} must be YYYY-MM-DD.")
+
+    country_param = (countries or country or "US").strip()
+    primary_country = country_param.split(",")[0].strip().upper() or "US"
+
     async with billed_call(
         caller=caller,
         endpoint="/v1/ad-library/linkedin/search-ads",
@@ -1752,23 +1878,90 @@ async def linkedin_search_ads(
         base_credits=_scaled(limit),
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await linkedin_ads_native.search_ads(q, country=country, limit=limit)
+            native = await linkedin_ads_native.search_ads(
+                owner or None,
+                country=primary_country,
+                countries=country_param,
+                limit=limit,
+                keyword=kw or None,
+                company_id=cid or None,
+                start_date=start_date,
+                end_date=end_date,
+                pagination_token=cursor,
+                enrich=True,
+            )
             if native is not None:
                 ctx["source"] = "direct"
-                ads = [_normalize_ad(i, "linkedin_ad_library") for i in native]
+                ads = [
+                    _normalize_ad(i, "linkedin_ad_library")
+                    for i in (native.get("ads") or [])
+                    if isinstance(i, dict)
+                ]
                 ctx["credits_override"] = CREDIT_AD_LIBRARY_NATIVE
-                return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
+                token = native.get("paginationToken")
+                is_last = native.get("isLastPage")
+                return {
+                    "query": owner or kw or cid,
+                    "keyword": kw or None,
+                    "companyId": cid or None,
+                    "country": primary_country,
+                    "countries": [c.strip().upper() for c in country_param.split(",") if c.strip()],
+                    "startDate": start_date,
+                    "endDate": end_date,
+                    "totalAds": native.get("totalAds"),
+                    "totalReturned": len(ads),
+                    "paginationToken": token,
+                    "nextCursor": token,
+                    "isLastPage": is_last,
+                    "hasMore": (False if is_last is True else bool(token)),
+                    "ads": ads,
+                }
 
             items = await _run_actor(
                 settings.APIFY_ACTOR_LINKEDIN_AD_LIBRARY,
-                {"search": q, "country": country.upper(), "sort": "NEWEST"},
+                {
+                    "search": owner or kw or cid,
+                    "country": primary_country,
+                    "sort": "NEWEST",
+                },
                 limit,
             )
             ctx["source"] = "apify"
             ads = [_normalize_ad(i, "linkedin_ad_library") for i in items]
-            return {"query": q, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
+            return {
+                "query": owner or kw or cid,
+                "keyword": kw or None,
+                "companyId": cid or None,
+                "country": primary_country,
+                "countries": [c.strip().upper() for c in country_param.split(",") if c.strip()],
+                "startDate": start_date,
+                "endDate": end_date,
+                "totalAds": None,
+                "totalReturned": len(ads),
+                "paginationToken": None,
+                "nextCursor": None,
+                "isLastPage": None,
+                "hasMore": False,
+                "ads": ads,
+            }
 
-        data = await cached_or_run("ad-library.linkedin.search-ads", {"q": q, "country": country, "limit": limit, "v": 6}, _run, ctx, use_cache=cache)
+        data = await cached_or_run(
+            "ad-library.linkedin.search-ads",
+            {
+                "q": owner,
+                "keyword": kw,
+                "companyId": cid,
+                "country": country_param,
+                "startDate": start_date or "",
+                "endDate": end_date or "",
+                "cursor": cursor or "",
+                "limit": limit,
+                "v": 7,
+            },
+            _run,
+            ctx,
+            use_cache=cache,
+        )
         if ctx.get("source") != "direct":
             ctx["credits_override"] = _scaled(len(data["ads"]))
         return ApiResponse(data=data)

@@ -7162,6 +7162,7 @@
           "Ad Library"
         ],
         "summary": "Search LinkedIn Ad Library",
+        "description": "Search LinkedIn Ad Library as clean JSON — headline/description, targeting{}, ISO startDate/endDate + adDuration, totalImpressions + impressionsByCountry[], cta/destinationUrl, advertiser{id,name,url,logo}, and carouselImages[]. Supports countries (comma-separated), startDate/endDate, companyId, keyword, and cursor pagination (paginationToken / nextCursor). Flat 2 credits on the native path.",
         "operationId": "linkedin_search_ads_v1_ad_library_linkedin_search_ads_get",
         "security": [
           {
@@ -7172,12 +7173,56 @@
           {
             "name": "q",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string",
-              "minLength": 2,
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Advertiser / account owner name (LinkedIn accountOwner). Min 2 chars when used.",
               "title": "Q"
-            }
+            },
+            "description": "Advertiser / account owner name (LinkedIn accountOwner). Min 2 chars when used."
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional keyword filter on ad creative copy.",
+              "title": "Keyword"
+            },
+            "description": "Optional keyword filter on ad creative copy."
+          },
+          {
+            "name": "companyId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "LinkedIn numeric company id for exact advertiser match.",
+              "title": "Companyid"
+            },
+            "description": "LinkedIn numeric company id for exact advertiser match."
           },
           {
             "name": "country",
@@ -7187,9 +7232,83 @@
               "type": "string",
               "minLength": 2,
               "maxLength": 2,
+              "description": "Single ISO country code. Ignored when countries is set. Default US.",
               "default": "US",
               "title": "Country"
-            }
+            },
+            "description": "Single ISO country code. Ignored when countries is set. Default US."
+          },
+          {
+            "name": "countries",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Comma-separated ISO country codes (e.g. US,CA,MX). Overrides country.",
+              "title": "Countries"
+            },
+            "description": "Comma-separated ISO country codes (e.g. US,CA,MX). Overrides country."
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Custom range start (YYYY-MM-DD). Use with endDate.",
+              "title": "Startdate"
+            },
+            "description": "Custom range start (YYYY-MM-DD). Use with endDate."
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Custom range end (YYYY-MM-DD). Use with startDate.",
+              "title": "Enddate"
+            },
+            "description": "Custom range end (YYYY-MM-DD). Use with startDate."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination token from a previous response (paginationToken / nextCursor).",
+              "title": "Cursor"
+            },
+            "description": "Pagination token from a previous response (paginationToken / nextCursor)."
           },
           {
             "name": "limit",

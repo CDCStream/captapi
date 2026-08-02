@@ -534,7 +534,24 @@ const GOOGLE_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
 ];
 
 const LINKEDIN_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
-  { tool: "linkedin_ad_library_search_ads", name: "LinkedIn Ad Library Search", path: "/v1/ad-library/linkedin/search-ads", credits: 2, summary: "Search LinkedIn Ad Library ads.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
+  {
+    tool: "linkedin_ad_library_search_ads",
+    name: "LinkedIn Ad Library Search",
+    path: "/v1/ad-library/linkedin/search-ads",
+    credits: 2,
+    summary: "LinkedIn Ad Library — targeting{}, ISO dates, impressions, CTA, cursor pagination.",
+    params: [
+      { name: "q", type: "string", required: false, description: "Advertiser / account owner (min 2 when used). Or use keyword/companyId." },
+      { name: "keyword", type: "string", required: false, description: "Optional keyword filter on ad copy." },
+      { name: "companyId", type: "string", required: false, description: "LinkedIn numeric company id." },
+      { name: "country", type: "string", required: false, description: "ISO country code. Default US." },
+      { name: "countries", type: "string", required: false, description: "Comma-separated ISO codes (e.g. US,CA,MX)." },
+      { name: "startDate", type: "string", required: false, description: "YYYY-MM-DD custom range start (with endDate)." },
+      { name: "endDate", type: "string", required: false, description: "YYYY-MM-DD custom range end (with startDate)." },
+      { name: "cursor", type: "string", required: false, description: "Pagination token from nextCursor/paginationToken." },
+      limit(20, 200),
+    ],
+  },
   { tool: "linkedin_ad_library_ad_details", name: "LinkedIn Ad Details", path: "/v1/ad-library/linkedin/ad-details", credits: 17, summary: "LinkedIn ad details by URL or ID.", params: [url("LinkedIn Ad Library URL or ad ID.")] },
 ];
 

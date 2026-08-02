@@ -655,7 +655,25 @@ const GOOGLE_AD_LIBRARY: Spec[] = [
 ];
 
 const LINKEDIN_AD_LIBRARY: Spec[] = [
-  { slug: "linkedin-ad-library-search-ads", name: "LinkedIn Ad Library Search API", shortName: "Search Ads", category: "search", method: "GET", path: "/v1/ad-library/linkedin/search-ads", credits: 2 },
+  {
+    slug: "linkedin-ad-library-search-ads",
+    name: "LinkedIn Ad Library Search API",
+    shortName: "Search Ads",
+    category: "search",
+    method: "GET",
+    path: "/v1/ad-library/linkedin/search-ads",
+    credits: 2,
+    tagline:
+      "LinkedIn Ad Library search — targeting{}, ISO dates, impressions, CTA/destination, cursor pagination (2 credits).",
+    longDescription:
+      "Search LinkedIn's Ad Library and get transparency fields as clean JSON: headline + description, targeting{language, location, company, …}, ISO startDate/endDate + adDuration, totalImpressions + impressionsByCountry[], cta + destinationUrl, advertiser{id, name, url, logo}, media[] / carouselImages[]. Filter with q (advertiser), keyword, companyId, country or countries (US,CA,MX), and startDate/endDate. Page with cursor / paginationToken (nextCursor + hasMore + totalAds). Flat 2 credits on the native path.",
+    delivers: [
+      "targeting{} — language, location, company, and other LinkedIn targeting segments",
+      "ISO startDate/endDate, adDuration, totalImpressions, impressionsByCountry[]",
+      "cta, destinationUrl, headline/description split, advertiser id + LinkedIn page URL",
+      "Cursor pagination via paginationToken / nextCursor + totalAds",
+    ],
+  },
   { slug: "linkedin-ad-library-ad-details", name: "LinkedIn Ad Details API", shortName: "Ad Details", category: "details", method: "GET", path: "/v1/ad-library/linkedin/ad-details", credits: 17 , tagline: "Get a LinkedIn Ad Library ad — creative, advertiser, and delivery fields as structured JSON." },
 ];
 
@@ -1797,7 +1815,17 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       description: "Two-letter ISO country code. Default GB.",
     },
   ],
-  "linkedin-ad-library-search-ads": [qp("Keyword, company, or advertiser to search LinkedIn Ad Library (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
+  "linkedin-ad-library-search-ads": [
+    { name: "q", type: "string", required: false, description: "Advertiser / account owner name (min 2 when used). Provide q, keyword, or companyId." },
+    { name: "keyword", type: "string", required: false, description: "Optional keyword filter on ad creative copy." },
+    { name: "companyId", type: "string", required: false, description: "LinkedIn numeric company id for exact advertiser match." },
+    { name: "country", type: "string", required: false, description: "Single ISO country code. Default US. Ignored when countries is set." },
+    { name: "countries", type: "string", required: false, description: "Comma-separated ISO country codes (e.g. US,CA,MX)." },
+    { name: "startDate", type: "string", required: false, description: "Custom range start YYYY-MM-DD (use with endDate)." },
+    { name: "endDate", type: "string", required: false, description: "Custom range end YYYY-MM-DD (use with startDate)." },
+    { name: "cursor", type: "string", required: false, description: "Pagination token from paginationToken / nextCursor." },
+    lp(20, 200),
+  ],
   "linkedin-ad-library-ad-details": [up("LinkedIn Ad Library URL or ad ID.")],
   "google-ad-library-company-ads": [
     { name: "advertiser", type: "string", required: true, description: "Advertiser name, domain (e.g. nike.com), or Google advertiser ID (AR…)." },
@@ -2659,6 +2687,19 @@ const FIELD_DESCS: Record<string, string> = {
   feedgens: "Number of custom feeds (feed generators) this account publishes.",
   starterPacks: "Number of starter packs this account publishes.",
   labeler: "Whether this account is a Bluesky labeler (moderation service).",
+  targeting:
+    "LinkedIn Ad Library targeting segments (language, location, company, and related keys).",
+  adDuration: "LinkedIn 'Ran from … to …' availability string.",
+  startDate: "Ad start date (YYYY-MM-DD) when LinkedIn exposes a ran-from range.",
+  endDate: "Ad end date (YYYY-MM-DD) when LinkedIn exposes a ran-from range.",
+  totalImpressions: "Estimated total impressions band from LinkedIn Ad Library (e.g. 1k-5k).",
+  impressionsByCountry: "Per-country impression share rows ({country, impressions}).",
+  destinationUrl: "Click-through / landing URL from the ad creative.",
+  carouselImages: "Ordered carousel creative image URLs when the ad is a carousel.",
+  paidForBy: "Payer entity string from LinkedIn's 'Paid for by' line.",
+  totalAds: "Total ads matching the LinkedIn Ad Library search criteria.",
+  paginationToken: "Opaque LinkedIn Ad Library pagination token for the next page.",
+  isLastPage: "Whether LinkedIn reports this search page as the last page.",
 
   // Media
   thumbnailUrl: "Thumbnail image URL.",

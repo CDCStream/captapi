@@ -4626,67 +4626,179 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "linkedin-ad-library-ad-details": {
     "platform": "linkedin_ad_library",
-    "id": "1475728386",
-    "url": "https://www.linkedin.com/ad-library/detail/1475728386",
-    "text": "The apps you know go further with Copilot. Explore limited time offers today.",
-    "headline": "Microsoft Outlook with Copilot",
-    "adFormat": "Single Image Ad",
+    "id": "1456323573",
+    "url": "https://www.linkedin.com/ad-library/detail/1456323573",
+    "text": "Drowning in one off scripts and manual steps? In a free 15 minute consult, our experts help streamline IT Infrastructure Operations with PowerShell.",
+    "headline": null,
+    "cta": "Learn more",
+    "landingUrl": "https://calendly.com/d/cvqn-kt5-t72/free-consultation?utm_campaign=32735245-PowerHouse&utm_source=linkedin&utm_medium=paidsocial&utm_term=free%20consultation&utm_content=calendly%20link&trk=ad_library_ad_preview_content_image",
+    "adFormat": null,
+    "firstShown": "2026-07-28",
+    "lastShown": "2026-08-02",
+    "impressions": "1k-5k",
+    "country": null,
     "advertiser": {
-      "name": "Microsoft 365",
-      "url": "https://www.linkedin.com/company/3509299"
+      "id": "16217038",
+      "name": "ScriptRunner Software GmbH",
+      "url": "https://www.linkedin.com/company/16217038",
+      "logo": "https://media.licdn.com/dms/image/v2/C4D0BAQFYeG3JIAlUQg/company-logo_100_100/company-logo_100_100/0/1630544718632/scriptrunner_logo?e=1787184000&v=beta&t=CeO2dmEiPsb-6gTcpJtkBMm0c4JSLZ6b6zfm44wc_7s"
     },
-    "media": [
-      "https://media.licdn.com/dms/image/v2/D4D10AQFWrEKj4VaX3g/image-shrink_1280/B4DZ7vxdWJHgAc-/0/1782139180792/Copilot_LinkedIn-Theme4_USA_1200x1200_PHA_SubTheme4L-SU_SMB-EN_NA_Standard_SBAN_LEA_NA_1jpg?e=2147483647&v=beta&t=nrMFf9aBVU7jPCZrhg2A-V0VMOscElqrqWshkXp_r7Y"
-    ]
+    "media": [],
+    "description": "Drowning in one off scripts and manual steps? In a free 15 minute consult, our experts help streamline IT Infrastructure Operations with PowerShell.",
+    "destinationUrl": "https://calendly.com/d/cvqn-kt5-t72/free-consultation?utm_campaign=32735245-PowerHouse&utm_source=linkedin&utm_medium=paidsocial&utm_term=free%20consultation&utm_content=calendly%20link&trk=ad_library_ad_preview_content_image",
+    "adDuration": "Ran from Jul 28, 2026 to Aug 2, 2026",
+    "startDate": "2026-07-28",
+    "endDate": "2026-08-02",
+    "totalImpressions": "1k-5k",
+    "impressionsByCountry": [
+      {
+        "country": "United States",
+        "impressions": "97%"
+      },
+      {
+        "country": "Canada",
+        "impressions": "3%"
+      },
+      {
+        "country": "United Kingdom",
+        "impressions": "less than 1%"
+      }
+    ],
+    "targeting": {
+      "language": "Targeting includes English",
+      "location": "Targeting includes Germany, Switzerland and Netherlands, Benelux, DACH, United States, Canada, Austria, Belgium, United Kingdom"
+    },
+    "carouselImages": [],
+    "paidForBy": "ScriptRunner Software GmbH",
+    "countries": []
   },
   "linkedin-ad-library-search-ads": {
     "query": "microsoft",
+    "keyword": null,
+    "companyId": null,
     "country": "US",
+    "countries": [
+      "US"
+    ],
+    "startDate": null,
+    "endDate": null,
+    "totalAds": 7523,
     "totalReturned": 3,
+    "paginationToken": "1456462353-1785251292711",
+    "nextCursor": "1456462353-1785251292711",
+    "isLastPage": false,
+    "hasMore": true,
     "ads": [
       {
         "platform": "linkedin_ad_library",
-        "id": "1475728386",
-        "url": "https://www.linkedin.com/ad-library/detail/1475728386",
-        "text": "The apps you know go further with Copilot. Explore limited time offers today.",
-        "adFormat": "Single Image Ad",
+        "id": "1456323573",
+        "url": "https://www.linkedin.com/ad-library/detail/1456323573",
+        "text": "Drowning in one off scripts and manual steps? In a free 15 minute consult, our experts help streamline IT Infrastructure Operations with PowerShell.",
+        "headline": null,
+        "cta": "Learn more",
+        "landingUrl": "https://calendly.com/d/cvqn-kt5-t72/free-consultation?utm_campaign=32735245-PowerHouse&utm_source=linkedin&utm_medium=paidsocial&utm_term=free%20consultation&utm_content=calendly%20link&trk=ad_library_ad_preview_content_image",
+        "adFormat": null,
+        "firstShown": "2026-07-28",
+        "lastShown": "2026-08-02",
+        "impressions": "1k-5k",
         "country": "US",
         "advertiser": {
-          "name": "Microsoft 365",
-          "logo": "https://media.licdn.com/dms/image/v2/C560BAQGG-2Kb6o7o4A/company-logo_100_100/company-logo_100_100/0/1630592958709/microsoft_office_logo?e=1784764800&v=beta&t=McAvdsqf8HXtZyPU7nS-RGDY-98NHgoC_pwqOw5Gw7k"
+          "id": "16217038",
+          "name": "ScriptRunner Software GmbH",
+          "url": "https://www.linkedin.com/company/16217038",
+          "logo": "https://media.licdn.com/dms/image/v2/C4D0BAQFYeG3JIAlUQg/company-logo_100_100/company-logo_100_100/0/1630544718632/scriptrunner_logo?e=1787184000&v=beta&t=CeO2dmEiPsb-6gTcpJtkBMm0c4JSLZ6b6zfm44wc_7s"
         },
-        "media": [
-          "https://media.licdn.com/dms/image/v2/D4D10AQFWrEKj4VaX3g/image-shrink_1280/B4DZ7vxdWJHgAc-/0/1782139180792/Copilot_LinkedIn-Theme4_USA_1200x1200_PHA_SubTheme4L-SU_SMB-EN_NA_Standard_SBAN_LEA_NA_1jpg?e=2147483647&v=beta&t=nrMFf9aBVU7jPCZrhg2A-V0VMOscElqrqWshkXp_r7Y"
+        "media": [],
+        "description": "Drowning in one off scripts and manual steps? In a free 15 minute consult, our experts help streamline IT Infrastructure Operations with PowerShell.",
+        "destinationUrl": "https://calendly.com/d/cvqn-kt5-t72/free-consultation?utm_campaign=32735245-PowerHouse&utm_source=linkedin&utm_medium=paidsocial&utm_term=free%20consultation&utm_content=calendly%20link&trk=ad_library_ad_preview_content_image",
+        "adDuration": "Ran from Jul 28, 2026 to Aug 2, 2026",
+        "startDate": "2026-07-28",
+        "endDate": "2026-08-02",
+        "totalImpressions": "1k-5k",
+        "impressionsByCountry": [
+          {
+            "country": "United States",
+            "impressions": "97%"
+          },
+          {
+            "country": "Canada",
+            "impressions": "3%"
+          },
+          {
+            "country": "United Kingdom",
+            "impressions": "less than 1%"
+          }
+        ],
+        "targeting": {
+          "language": "Targeting includes English",
+          "location": "Targeting includes Germany, Switzerland and Netherlands, Benelux, DACH, United States, Canada, Austria, Belgium, United Kingdom"
+        },
+        "carouselImages": [],
+        "paidForBy": "ScriptRunner Software GmbH",
+        "countries": [
+          "US"
         ]
       },
       {
         "platform": "linkedin_ad_library",
-        "id": "1480089046",
-        "url": "https://www.linkedin.com/ad-library/detail/1480089046",
-        "text": "Celebrate your work. Spotlight your impact. Submit your Microsoft Advertising Partner Award nomination by July 15. https…",
-        "adFormat": "Single Image Ad",
+        "id": "1526380116",
+        "url": "https://www.linkedin.com/ad-library/detail/1526380116",
+        "text": "Built to grow together: The FY27 Microsoft Marketplace opportunity",
+        "headline": "Built to grow together: The FY27 Microsoft Marketplace opportunity",
+        "cta": null,
+        "landingUrl": null,
+        "adFormat": null,
+        "firstShown": null,
+        "lastShown": null,
+        "impressions": null,
         "country": "US",
         "advertiser": {
-          "name": "Microsoft Advertising",
-          "logo": "https://media.licdn.com/dms/image/v2/C560BAQGCzRbSOXB2wQ/company-logo_100_100/company-logo_100_100/0/1630567794734/bing_ads_logo?e=1784764800&v=beta&t=BzqkDTytrzFb_8OLsQQIBHuGqimMbzavRs88iErL0ck"
+          "name": "Built to grow together: The FY27 Microsoft Marketplace opportunity"
         },
-        "media": [
-          "https://media.licdn.com/dms/image/v2/D5610AQFp6MVJQ_ELIQ/image-shrink_1280/B56Z8FkbnCGcAg-/0/1782504864563/PartnerAwards-Nominationcreative-squarepng?e=2147483647&v=beta&t=UQnA8QEX1N3wDgmKAiG32tPqtzJsUPha7xcw3hMBN_I"
+        "media": [],
+        "description": null,
+        "destinationUrl": null,
+        "adDuration": null,
+        "startDate": null,
+        "endDate": null,
+        "totalImpressions": null,
+        "impressionsByCountry": [],
+        "targeting": null,
+        "carouselImages": [],
+        "paidForBy": null,
+        "countries": [
+          "US"
         ]
       },
       {
         "platform": "linkedin_ad_library",
-        "id": "1480019596",
-        "url": "https://www.linkedin.com/ad-library/detail/1480019596",
-        "text": "Celebrate your work. Spotlight your impact. Submit your Microsoft Advertising Partner Award nomination by July 15. https…",
-        "adFormat": "Single Image Ad",
+        "id": "1527291136",
+        "url": "https://www.linkedin.com/ad-library/detail/1527291136",
+        "text": "See how Rhenus scaled secure IT automation",
+        "headline": "See how Rhenus scaled secure IT automation",
+        "cta": null,
+        "landingUrl": null,
+        "adFormat": null,
+        "firstShown": null,
+        "lastShown": null,
+        "impressions": null,
         "country": "US",
         "advertiser": {
-          "name": "Microsoft Advertising",
-          "logo": "https://media.licdn.com/dms/image/v2/C560BAQGCzRbSOXB2wQ/company-logo_100_100/company-logo_100_100/0/1630567794734/bing_ads_logo?e=1784764800&v=beta&t=BzqkDTytrzFb_8OLsQQIBHuGqimMbzavRs88iErL0ck"
+          "name": "See how Rhenus scaled secure IT automation"
         },
-        "media": [
-          "https://media.licdn.com/dms/image/v2/D5610AQFMsObBoXKilg/image_627_1200/B4DZ8AkxjpHQAQ-/0/1782421068868/PartnerAwardnominationpng?e=2147483647&v=beta&t=gCPJRZXnj1LOvGwC87qEbjzYvvDhHtfHA1xd9ZBTYe8"
+        "media": [],
+        "description": null,
+        "destinationUrl": null,
+        "adDuration": null,
+        "startDate": null,
+        "endDate": null,
+        "totalImpressions": null,
+        "impressionsByCountry": [],
+        "targeting": null,
+        "carouselImages": [],
+        "paidForBy": null,
+        "countries": [
+          "US"
         ]
       }
     ]

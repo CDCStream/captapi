@@ -2491,15 +2491,21 @@ class LinkedinAdLibraryApi:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
 
-    def search_ads(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (2 credits)
+    def search_ads(self, *, q: str | None = None, keyword: str | None = None, companyId: str | None = None, country: str | None = None, countries: str | None = None, startDate: str | None = None, endDate: str | None = None, cursor: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """LinkedIn Ad Library Search — LinkedIn Ad Library — targeting{}, ISO dates, impressions, CTA, cursor pagination. (2 credits)
 
-        :param q: Search query or keywords (min 2 chars).
+        :param q: Advertiser / account owner (min 2 when used). Or use keyword/companyId.
+        :param keyword: Optional keyword filter on ad copy.
+        :param companyId: LinkedIn numeric company id.
         :param country: ISO country code. Default US.
+        :param countries: Comma-separated ISO codes (e.g. US,CA,MX).
+        :param startDate: YYYY-MM-DD custom range start (with endDate).
+        :param endDate: YYYY-MM-DD custom range end (with startDate).
+        :param cursor: Pagination token from nextCursor/paginationToken.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/ad-library/linkedin/search-ads", {"q": q, "country": country, "limit": limit, "cache": cache})
+        return self._t.get("/v1/ad-library/linkedin/search-ads", {"q": q, "keyword": keyword, "companyId": companyId, "country": country, "countries": countries, "startDate": startDate, "endDate": endDate, "cursor": cursor, "limit": limit, "cache": cache})
 
     def ad_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """LinkedIn Ad Details — LinkedIn ad details by URL or ID. (17 credits)
@@ -2514,15 +2520,21 @@ class AsyncLinkedinAdLibraryApi:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
 
-    async def search_ads(self, *, q: str, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (2 credits)
+    async def search_ads(self, *, q: str | None = None, keyword: str | None = None, companyId: str | None = None, country: str | None = None, countries: str | None = None, startDate: str | None = None, endDate: str | None = None, cursor: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """LinkedIn Ad Library Search — LinkedIn Ad Library — targeting{}, ISO dates, impressions, CTA, cursor pagination. (2 credits)
 
-        :param q: Search query or keywords (min 2 chars).
+        :param q: Advertiser / account owner (min 2 when used). Or use keyword/companyId.
+        :param keyword: Optional keyword filter on ad copy.
+        :param companyId: LinkedIn numeric company id.
         :param country: ISO country code. Default US.
+        :param countries: Comma-separated ISO codes (e.g. US,CA,MX).
+        :param startDate: YYYY-MM-DD custom range start (with endDate).
+        :param endDate: YYYY-MM-DD custom range end (with startDate).
+        :param cursor: Pagination token from nextCursor/paginationToken.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/ad-library/linkedin/search-ads", {"q": q, "country": country, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/ad-library/linkedin/search-ads", {"q": q, "keyword": keyword, "companyId": companyId, "country": country, "countries": countries, "startDate": startDate, "endDate": endDate, "cursor": cursor, "limit": limit, "cache": cache})
 
     async def ad_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """LinkedIn Ad Details — LinkedIn ad details by URL or ID. (17 credits)

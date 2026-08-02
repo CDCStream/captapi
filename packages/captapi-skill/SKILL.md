@@ -393,7 +393,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `google_ad_library_company_ads` | `/v1/ad-library/google/company-ads` | `advertiser` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `google_ad_library_ad_details` | `/v1/ad-library/google/ad-details` | `creative_id` (string), `country`? (string), `cache`? (boolean) | 17 |
 | `google_ad_library_advertiser_search` | `/v1/ad-library/google/advertiser-search` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 1 |
-| `linkedin_ad_library_search_ads` | `/v1/ad-library/linkedin/search-ads` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `linkedin_ad_library_search_ads` | `/v1/ad-library/linkedin/search-ads` | `q`? (string), `keyword`? (string), `companyId`? (string), `country`? (string), `countries`? (string), `startDate`? (string), `endDate`? (string), `cursor`? (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `linkedin_ad_library_ad_details` | `/v1/ad-library/linkedin/ad-details` | `url` (string), `cache`? (boolean) | 17 |
 
 ---

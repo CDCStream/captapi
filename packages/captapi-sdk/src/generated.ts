@@ -1747,10 +1747,22 @@ export class GoogleAdLibraryApi {
 }
 
 export interface LinkedinAdLibrarySearchAdsParams {
-  /** Search query or keywords (min 2 chars). */
-  q: string;
+  /** Advertiser / account owner (min 2 when used). Or use keyword/companyId. */
+  q?: string;
+  /** Optional keyword filter on ad copy. */
+  keyword?: string;
+  /** LinkedIn numeric company id. */
+  companyId?: string;
   /** ISO country code. Default US. */
   country?: string;
+  /** Comma-separated ISO codes (e.g. US,CA,MX). */
+  countries?: string;
+  /** YYYY-MM-DD custom range start (with endDate). */
+  startDate?: string;
+  /** YYYY-MM-DD custom range end (with startDate). */
+  endDate?: string;
+  /** Pagination token from nextCursor/paginationToken. */
+  cursor?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
@@ -1766,8 +1778,8 @@ export interface LinkedinAdLibraryAdDetailsParams {
 
 export class LinkedinAdLibraryApi {
   constructor(private readonly core: HttpCore) {}
-  /** LinkedIn Ad Library Search — Search LinkedIn Ad Library ads. (2 credits) */
-  searchAds(params: LinkedinAdLibrarySearchAdsParams): Promise<ApiEnvelope> {
+  /** LinkedIn Ad Library Search — LinkedIn Ad Library — targeting{}, ISO dates, impressions, CTA, cursor pagination. (2 credits) */
+  searchAds(params: LinkedinAdLibrarySearchAdsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/linkedin/search-ads", params);
   }
   /** LinkedIn Ad Details — LinkedIn ad details by URL or ID. (17 credits) */
