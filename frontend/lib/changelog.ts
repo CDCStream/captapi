@@ -90,6 +90,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "Spotify podcast: publisher, rating, topics; 1 credit",
+    description:
+      "GET /v1/spotify/podcast drops to 1 credit and lifts Pathfinder show fields into a stable top-level shape: publisher{name} (not artists[] — publisher ≠ hosts), rating{average, totalRatings}, topics[{title, uri}], contentRating/explicit, mediaType, htmlDescription, playable, consumptionOrder, plus totalEpisodes. Drops the bulky raw payload (including Spotify's visualIdentity color dump).",
+    items: [
+      "1 credit (was 2)",
+      "rating.average + rating.totalRatings",
+      "publisher{} instead of mislabeled artists[]",
+      "topics + contentRating/explicit; no visualIdentity",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "Spotify track: playCount, artist/album IDs; 1 credit",
     description:
       "GET /v1/spotify/track drops to 1 credit and switches to Spotify's getTrack Pathfinder query. Returns playCount (stream count), trackNumber, contentRating/explicit, artistItems[{id,uri,name,url}], albumInfo[{id,uri,name,url,releaseDate}], and previewUrl when present on the payload. Flat artists[] / album name strings kept for back-compat. Drops the bulky raw discography dump that buried those IDs.",

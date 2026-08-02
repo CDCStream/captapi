@@ -2930,10 +2930,10 @@ class SpotifyApi:
         return self._t.get("/v1/spotify/search", {"q": q, "type": type_, "limit": limit, "cache": cache})
 
     def podcast(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Spotify Podcast — Spotify podcast/show details and episode summary metadata. (6 credits)
+        """Spotify Podcast — Spotify podcast — publisher, rating, topics, explicit, totalEpisodes. (1 credit)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 50. Flat 6 credits per call.
+        :param limit: Max items to return. Default 20, max 50. Flat 1 credit per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/spotify/podcast", {"url": url, "limit": limit, "cache": cache})
@@ -2987,10 +2987,10 @@ class AsyncSpotifyApi:
         return await self._t.get("/v1/spotify/search", {"q": q, "type": type_, "limit": limit, "cache": cache})
 
     async def podcast(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Spotify Podcast — Spotify podcast/show details and episode summary metadata. (6 credits)
+        """Spotify Podcast — Spotify podcast — publisher, rating, topics, explicit, totalEpisodes. (1 credit)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 50. Flat 6 credits per call.
+        :param limit: Max items to return. Default 20, max 50. Flat 1 credit per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/spotify/podcast", {"url": url, "limit": limit, "cache": cache})

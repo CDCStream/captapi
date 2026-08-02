@@ -2076,7 +2076,7 @@ export interface SpotifySearchParams {
 export interface SpotifyPodcastParams {
   /** Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 20, max 50. Flat 6 credits per call. */
+  /** Max items to return. Default 20, max 50. Flat 1 credit per call. */
   limit?: number;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -2109,7 +2109,7 @@ export class SpotifyApi {
   search(params: SpotifySearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/spotify/search", params);
   }
-  /** Spotify Podcast — Spotify podcast/show details and episode summary metadata. (6 credits) */
+  /** Spotify Podcast — Spotify podcast — publisher, rating, topics, explicit, totalEpisodes. (1 credit) */
   podcast(params: SpotifyPodcastParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/spotify/podcast", params);
   }

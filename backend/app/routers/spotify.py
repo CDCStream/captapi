@@ -24,9 +24,10 @@ router = APIRouter()
 RATE = 1.15
 # Native Pathfinder (web-player) — flat fee; our cost ~$0.
 CREDIT_NATIVE = 2
-# Artist / track details: Pathfinder GraphQL, priced at 1 credit (SC parity).
+# Artist / track / podcast details: Pathfinder GraphQL, priced at 1 credit (SC parity).
 CREDIT_ARTIST = 1
 CREDIT_TRACK = 1
+CREDIT_PODCAST = 1
 
 
 def _scaled(n: int, rate: float = RATE, minimum: int = 2) -> int:
@@ -78,9 +79,17 @@ def _image(item: dict[str, Any]) -> str | None:
         or header_sources
     )
     if isinstance(images, list) and images:
-        first = images[0]
-        if isinstance(first, dict):
-            return safe_str(first.get("url"))
+        best: dict[str, Any] | None = None
+        best_h = -1
+        for row in images:
+            if not isinstance(row, dict) or not row.get("url"):
+                continue
+            h = safe_int(row.get("height")) or 0
+            if best is None or h >= best_h:
+                best = row
+                best_h = h
+        if best is not None:
+            return safe_str(best.get("url"))
     return safe_str(item.get("image") or item.get("thumbnail") or item.get("thumbnailUrl"))
 
 
@@ -116,8 +125,17 @@ _OMIT_BY_KIND: dict[str, frozenset[str]] = {
     "album": frozenset(
         {"album", "durationMs", "followers", "monthlyListeners", "totalEpisodes"}
     ),
+    # Podcast publisher ≠ music artists — never ship artists[] for shows.
     "podcast": frozenset(
-        {"album", "durationMs", "followers", "monthlyListeners", "releaseYear", "totalTracks"}
+        {
+            "album",
+            "artists",
+            "durationMs",
+            "followers",
+            "monthlyListeners",
+            "releaseYear",
+            "totalTracks",
+        }
     ),
     # Episode creators/play counts are almost never present in this actor payload.
     "episode": frozenset(
@@ -409,6 +427,84 @@ def _track_preview_url(item: dict[str, Any]) -> str | None:
     return safe_str(item.get("previewUrl") or item.get("preview_url"))
 
 
+def _podcast_fields(item: dict[str, Any]) -> dict[str, Any]:
+    """Lift show metadata: publisher, rating, topics, contentRating. Omits bulky raw."""
+    uri = safe_str(item.get("uri"))
+    pid = safe_str(item.get("id")) or _spotify_id(uri, "show")
+    publisher_raw = item.get("publisher") if isinstance(item.get("publisher"), dict) else {}
+    publisher_name = safe_str(publisher_raw.get("name"))
+    publisher = {"name": publisher_name} if publisher_name else None
+
+    rating_block = item.get("rating") if isinstance(item.get("rating"), dict) else {}
+    avg_block = (
+        rating_block.get("averageRating")
+        if isinstance(rating_block.get("averageRating"), dict)
+        else {}
+    )
+    average = avg_block.get("average")
+    if not isinstance(average, (int, float)):
+        average = None
+    total_ratings = safe_int(avg_block.get("totalRatings"))
+    rating = None
+    if average is not None or total_ratings is not None:
+        rating = {
+            k: v
+            for k, v in {"average": average, "totalRatings": total_ratings}.items()
+            if v is not None
+        }
+
+    topics: list[dict[str, Any]] = []
+    topics_block = item.get("topics")
+    topic_rows = (
+        topics_block.get("items")
+        if isinstance(topics_block, dict)
+        else topics_block
+        if isinstance(topics_block, list)
+        else []
+    )
+    for row in topic_rows or []:
+        if not isinstance(row, dict):
+            continue
+        title = safe_str(row.get("title") or row.get("name"))
+        topic_uri = safe_str(row.get("uri"))
+        if not title and not topic_uri:
+            continue
+        topics.append(
+            {k: v for k, v in {"title": title, "uri": topic_uri}.items() if v not in (None, "")}
+        )
+
+    labels: list[str] = []
+    cr_v2 = item.get("contentRatingV2") if isinstance(item.get("contentRatingV2"), dict) else {}
+    for label in cr_v2.get("labels") or []:
+        if isinstance(label, str) and label.strip():
+            labels.append(label.strip())
+    if not labels:
+        cr = item.get("contentRating")
+        if isinstance(cr, dict):
+            lab = safe_str(cr.get("label"))
+            if lab:
+                labels.append(lab)
+        elif isinstance(cr, str) and cr.strip():
+            labels.append(cr.strip())
+    primary = labels[0] if labels else None
+    explicit = True if "EXPLICIT" in labels else (False if labels else None)
+
+    playability = item.get("playability") if isinstance(item.get("playability"), dict) else {}
+    return {
+        "id": pid,
+        "publisher": publisher,
+        "rating": rating,
+        "topics": topics,
+        "contentRating": primary,
+        "contentRatingLabels": labels,
+        "explicit": explicit,
+        "mediaType": safe_str(item.get("mediaType")),
+        "htmlDescription": safe_str(item.get("htmlDescription")),
+        "playable": playability.get("playable") if isinstance(playability.get("playable"), bool) else None,
+        "consumptionOrder": safe_str(item.get("consumptionOrderV2") or item.get("consumptionOrder")),
+    }
+
+
 def _track_fields(item: dict[str, Any], album: dict[str, Any]) -> dict[str, Any]:
     """Lift getTrack fields: playCount, ids, rating, albumInfo. Omits bulky raw."""
     uri = safe_str(item.get("uri"))
@@ -488,10 +584,7 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
     artists = _names(item.get("artists"))
     if not artists:
         artists = _names(item.get("firstArtist")) + _names(item.get("otherArtists"))
-    if not artists:
-        publisher = item.get("publisher")
-        if isinstance(publisher, dict) and publisher.get("name"):
-            artists = [str(publisher["name"])]
+    # Do not map publisher → artists (podcast publisher ≠ hosts/artists).
 
     sharing = item.get("sharingInfo") if isinstance(item.get("sharingInfo"), dict) else {}
     profile = item.get("profile") if isinstance(item.get("profile"), dict) else {}
@@ -538,6 +631,15 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
                 out["uri"] = f"spotify:track:{track_extra['id']}"
         if not out.get("releaseYear") and track_extra.get("releaseDate"):
             out["releaseYear"] = _year_of(track_extra["releaseDate"])
+    if kind == "podcast":
+        # Pathfinder show payload includes visualIdentity color dumps + episode stubs — drop raw.
+        out.pop("raw", None)
+        podcast_extra = _podcast_fields(item)
+        out.update(podcast_extra)
+        if podcast_extra.get("id"):
+            out["url"] = f"https://open.spotify.com/show/{podcast_extra['id']}"
+            if not out.get("uri") or not str(out["uri"]).startswith("spotify:show:"):
+                out["uri"] = f"spotify:show:{podcast_extra['id']}"
     for key in _OMIT_BY_KIND.get(kind, frozenset()):
         out.pop(key, None)
     for key in _OMIT_IF_EMPTY:
@@ -557,6 +659,23 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
             "artistItems",
             "albumInfo",
             "id",
+        ):
+            if out.get(key) in (None, "", []):
+                out.pop(key, None)
+        for key in ("explicit", "playable"):
+            if out.get(key) is None:
+                out.pop(key, None)
+    if kind == "podcast":
+        for key in (
+            "id",
+            "publisher",
+            "rating",
+            "topics",
+            "contentRating",
+            "contentRatingLabels",
+            "mediaType",
+            "htmlDescription",
+            "consumptionOrder",
         ):
             if out.get(key) in (None, "", []):
                 out.pop(key, None)
@@ -727,13 +846,13 @@ async def podcast(
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "show")
-    async with billed_call(caller=caller, endpoint="/v1/spotify/podcast", platform="spotify", resource_url=uri, base_credits=CREDIT_NATIVE) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/spotify/podcast", platform="spotify", resource_url=uri, base_credits=CREDIT_PODCAST) as ctx:
         async def _run() -> dict[str, Any]:
             return await _details("podcast", uri, limit, ctx=ctx)
 
         data = await cached_or_run(
             "spotify.podcast",
-            {"uri": uri, "limit": limit, "v": 7},
+            {"uri": uri, "limit": limit, "v": 8},
             _run,
             ctx,
             ttl=get_settings().CACHE_TTL_STATIC,
@@ -772,9 +891,28 @@ async def podcast_episodes(
                     "episodes": episodes,
                 }
 
-            data = await _details("podcast", uri, limit)
-            raw = data.get("raw") or {}
-            episodes_block = _episodes_v2(raw) or raw.get("items") or raw.get("content") or {}
+            # Apify details actor (normalize drops raw — extract episodes from actor item).
+            settings = get_settings()
+            try:
+                actor_items = await get_apify().run_actor_sync(
+                    settings.APIFY_ACTOR_SPOTIFY_DETAILS,
+                    {
+                        "getDetailsType": "podcast",
+                        "spotifyUris": [uri],
+                        "proxyCountry": "US",
+                        "podcasts_get_offset": 0,
+                        "podcasts_get_limit": limit,
+                        "podcasts_includeRecommended": False,
+                        "episodes_includeRecommended": False,
+                    },
+                    max_items=1,
+                )
+            except (ApifyError, httpx.HTTPError):
+                actor_items = []
+            item = actor_items[0] if actor_items and not actor_items[0].get("error") else None
+            if not isinstance(item, dict):
+                raise HTTPException(status_code=404, detail="Spotify podcast not found")
+            episodes_block = _episodes_v2(item) or item.get("items") or item.get("content") or {}
             items = episodes_block.get("items") if isinstance(episodes_block, dict) else episodes_block
             rows: list[dict[str, Any]] = []
             for entry in items if isinstance(items, list) else []:
@@ -787,14 +925,14 @@ async def podcast_episodes(
             ctx["source"] = "apify"
             return {
                 "platform": "spotify",
-                "podcast": data,
+                "podcast": _normalize(item, "podcast"),
                 "totalReturned": len(normalized[:limit]),
                 "episodes": normalized[:limit],
             }
 
         data = await cached_or_run(
             "spotify.podcast-episodes",
-            {"uri": uri, "limit": limit, "v": 7},
+            {"uri": uri, "limit": limit, "v": 8},
             _run,
             ctx,
             use_cache=cache,

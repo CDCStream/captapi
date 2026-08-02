@@ -3822,8 +3822,8 @@
     "platform": "spotify",
     "name": "Spotify Podcast",
     "path": "/v1/spotify/podcast",
-    "credits": 6,
-    "summary": "Spotify podcast/show details and episode summary metadata.",
+    "credits": 1,
+    "summary": "Spotify podcast — publisher, rating, topics, explicit, totalEpisodes.",
     "params": [
       {
         "name": "url",
@@ -3835,7 +3835,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 50. Flat 6 credits per call."
+        "description": "Max items to return. Default 20, max 50. Flat 1 credit per call."
       },
       {
         "name": "cache",

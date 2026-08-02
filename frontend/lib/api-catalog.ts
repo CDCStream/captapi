@@ -584,7 +584,19 @@ const SPOTIFY: Spec[] = [
   },
   { slug: "spotify-album", name: "Spotify Album API", shortName: "Album", category: "details", method: "GET", path: "/v1/spotify/album", credits: 2 , tagline: "Get a Spotify album — title, artists, tracks, release date, and cover art as structured JSON." },
   { slug: "spotify-search", name: "Spotify Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/spotify/search", credits: 2 },
-  { slug: "spotify-podcast", name: "Spotify Podcast API", shortName: "Podcast", category: "details", method: "GET", path: "/v1/spotify/podcast", credits: 2 , tagline: "Get a Spotify podcast show — title, publisher, description, and episode counts as structured JSON." },
+  {
+    slug: "spotify-podcast",
+    name: "Spotify Podcast API",
+    shortName: "Podcast",
+    category: "details",
+    method: "GET",
+    path: "/v1/spotify/podcast",
+    credits: 1,
+    tagline:
+      "Spotify podcast show — publisher, rating, topics, explicit flag, and totalEpisodes as clean JSON.",
+    longDescription:
+      "Pass a Spotify show/podcast URL, URI, or ID and get clean JSON: id, name, description, publisher{name}, rating{average, totalRatings}, topics[{title, uri}], contentRating/explicit, mediaType, totalEpisodes, and cover image. Publisher is the show's publisher (not host names stuffed into artists[]). Flat 1 credit. Does not ship Spotify's UI color palette (visualIdentity) or a bulky raw dump.",
+  },
   { slug: "spotify-podcast-episodes", name: "Spotify Podcast Episodes API", shortName: "Podcast Episodes", category: "list", method: "GET", path: "/v1/spotify/podcast-episodes", credits: 2 },
 ];
 
@@ -1833,7 +1845,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "spotify-track": [up(SPOTIFY_URL), cacheP()],
   "spotify-album": [up(SPOTIFY_URL), cacheP()],
   "spotify-search": [qp(), { name: "type", type: "string", required: false, description: "tracks, albums, artists, podcasts, or episodes. Default tracks." }, lp(20, 50)],
-  "spotify-podcast": [up(SPOTIFY_URL), lpFlat(20, 50, 2), cacheP()],
+  "spotify-podcast": [up(SPOTIFY_URL), lpFlat(20, 50, 1), cacheP()],
   "spotify-podcast-episodes": [up(SPOTIFY_URL), lp(20, 50)],
   // SoundCloud
   "soundcloud-artist": [up(SC_PROFILE)],
@@ -2711,6 +2723,16 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     list.push({
       q: `Is this the same as Spotify's free Web API?`,
       a: `No. Spotify's official Web API returns followers, popularity, genres, and top tracks, but not monthlyListeners, topCities, or worldRank. Those three come from the web-player GraphQL path this endpoint uses — along with topTracks playCount, concerts, and relatedArtists as clean JSON.`,
+    });
+  }
+  if (ep.slug === "spotify-podcast") {
+    list.push({
+      q: `Is publisher the same as the podcast hosts?`,
+      a: `No. publisher.name is the show's publisher (e.g. Hubspot). Hosts are a different concept — Captapi does not stuff publisher into artists[] the way a music schema would.`,
+    });
+    list.push({
+      q: `What does rating mean on a podcast?`,
+      a: `rating.average is Spotify's show rating (about 0–5) and rating.totalRatings is how many people voted. It's the main numeric quality signal for podcast research on this endpoint.`,
     });
   }
   if (ep.slug === "threads-profile") {

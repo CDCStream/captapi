@@ -364,7 +364,7 @@ async def _hydrate_episodes(
     out: list[dict[str, Any]] = []
     for ep in episodes if isinstance(episodes, list) else []:
         if isinstance(ep, dict) and ep.get("uri"):
-            # Publisher lives under podcastV2 — surface for _normalize artists.
+            # Publisher lives under podcastV2 — surface for episode/show normalize.
             podcast = (ep.get("podcastV2") or {}).get("data") if isinstance(ep.get("podcastV2"), dict) else None
             if isinstance(podcast, dict) and isinstance(podcast.get("publisher"), dict):
                 ep = dict(ep)
