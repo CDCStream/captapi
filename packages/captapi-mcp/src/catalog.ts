@@ -403,7 +403,7 @@ const UTILITIES: Omit<Endpoint, "platform">[] = [
     name: "Post Analytics",
     path: "/v1/analytics/post",
     credits: 1,
-    summary: "Unified metrics for one post/video/reel (platform auto-detected). Flat 1 credit.",
+    summary: "Unified metrics for one post/video/reel (platform auto-detected). Same shape everywhere; platform-missing fields stay null. Flat 1 credit.",
     params: [
       url("A public post, video, or reel URL from a supported platform."),
       cacheParam(),

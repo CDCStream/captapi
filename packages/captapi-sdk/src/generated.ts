@@ -2231,7 +2231,7 @@ export interface VideoSummarizeParams {
 
 export class UtilitiesApi {
   constructor(private readonly core: HttpCore) {}
-  /** Post Analytics — Unified metrics for one post/video/reel (platform auto-detected). Flat 1 credit. (1 credit) */
+  /** Post Analytics — Unified metrics for one post/video/reel (platform auto-detected). Same shape everywhere; platform-missing fields stay null. Flat 1 credit. (1 credit) */
   analyticsPost(params: AnalyticsPostParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/analytics/post", params);
   }

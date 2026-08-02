@@ -956,7 +956,15 @@ async def _video_details_native(vid: str, norm_url: str) -> dict[str, Any] | Non
         if out.get("publishedAt") is None and player:
             micro = (player.get("microformat") or {}).get("playerMicroformatRenderer") or {}
             out["publishedAt"] = safe_str(micro.get("publishDate") or micro.get("uploadDate"))
-        if player and not out.get("availableCaptions"):
+        # ANDROID often has captions but still omits channelHandle / microformat
+        # fields — merge missing keys from the watch-page player whenever we
+        # fetched it (not only when availableCaptions is empty).
+        if player and (
+            not out.get("availableCaptions")
+            or not out.get("channelHandle")
+            or not out.get("channelUrl")
+            or not out.get("genre")
+        ):
             enriched = build_youtube_video_details(
                 player=player,
                 video_id=vid,

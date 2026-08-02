@@ -200,23 +200,23 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "id": "dQw4w9WgXcQ",
     "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
-    "publishedAt": null,
+    "publishedAt": "2009-10-24T23:57:33-07:00",
     "durationSeconds": 213,
     "thumbnailUrl": "https://i.ytimg.com/vi_webp/dQw4w9WgXcQ/sddefault.webp",
     "author": {
-      "username": "Rick Astley",
+      "username": "RickAstleyYT",
       "displayName": "Rick Astley",
       "url": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
       "verified": null
     },
     "metrics": {
       "views": 1797826473,
-      "likes": null,
-      "comments": null,
+      "likes": 19283915,
+      "comments": 2400000,
       "shares": null,
       "saves": null,
-      "interactions": null,
-      "engagementRate": null
+      "interactions": 21683915,
+      "engagementRate": 0.0121
     }
   },
   "bluesky-post-details": {
@@ -2503,7 +2503,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   },
-  "google-ad-library-company-ads":   {
+  "google-ad-library-company-ads": {
     "advertiser": "nike.com",
     "country": "US",
     "totalReturned": 5,
@@ -2588,10 +2588,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "https://tpc.googlesyndication.com/archive/simgad/12062534195836224920"
         ]
       }
-    ],
-    "adsCountEstimate": 20000,
-    "hasMore": true,
-    "nextCursor": "eyJ2IjoxLCJhZHZlcnRpc2VySWQiOiJBUjE2NzM1MDc2MzIzNTEyMjg3MjMzIn0"
+    ]
   },
   "instagram-basic-profile": {
     "id": "314216",

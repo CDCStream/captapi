@@ -3192,7 +3192,7 @@ class UtilitiesApi:
         self._t = transport
 
     def analytics_post(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Post Analytics — Unified metrics for one post/video/reel (platform auto-detected). Flat 1 credit. (1 credit)
+        """Post Analytics — Unified metrics for one post/video/reel (platform auto-detected). Same shape everywhere; platform-missing fields stay null. Flat 1 credit. (1 credit)
 
         :param url: A public post, video, or reel URL from a supported platform. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -3226,7 +3226,7 @@ class AsyncUtilitiesApi:
         self._t = transport
 
     async def analytics_post(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Post Analytics — Unified metrics for one post/video/reel (platform auto-detected). Flat 1 credit. (1 credit)
+        """Post Analytics — Unified metrics for one post/video/reel (platform auto-detected). Same shape everywhere; platform-missing fields stay null. Flat 1 credit. (1 credit)
 
         :param url: A public post, video, or reel URL from a supported platform. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

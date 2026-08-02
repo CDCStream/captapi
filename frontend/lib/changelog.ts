@@ -49,6 +49,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 /** Static mirror of the migration seed — used only when the table is unavailable. */
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
+    publishedAt: "2026-08-02",
+    category: "fix",
+    title: "Post analytics: YouTube likes, comments, publishedAt, engagementRate",
+    description:
+      "Cross-platform post analytics now uses the same enriched YouTube path as video-details, so likes, comments, publishedAt, and engagementRate populate instead of staying null when views alone were present. author.username prefers the channel handle; shares/saves remain null on YouTube (not publicly exposed).",
+    items: [
+      "YouTube analytics reuses enriched video-details (likes/comments/publishedAt)",
+      "author.username ← channelHandle when available; displayName stays channel name",
+      "Docs/FAQ: same metrics shape; platform-missing fields stay null",
+    ],
+  },
+  {
     publishedAt: "2026-08-01",
     category: "feature",
     title: "Google company-ads: cursor paging, date filters, adsCountEstimate",

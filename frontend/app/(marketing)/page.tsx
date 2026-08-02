@@ -102,7 +102,7 @@ const faqs = [
   },
   {
     q: "Can I get analytics for any post in one consistent format?",
-    a: "Yes. The cross-platform analytics endpoint detects the platform from the URL and returns the same normalized metrics object — views, likes, comments, shares, saves, and an engagement rate — so you do not have to special-case each network.",
+    a: "Yes. The cross-platform analytics endpoint detects the platform from the URL and returns the same normalized metrics object — views, likes, comments, shares, saves, interactions, and engagementRate — so you do not have to special-case each network. Fields a platform does not expose stay null (for example YouTube has no public share or save counts); engagementRate is interactions / views when both are available.",
   },
 ];
 
@@ -173,7 +173,7 @@ export default function LandingPage() {
               <CardContent className="text-sm text-muted-foreground">
                 One endpoint, one shape. Pass any YouTube, TikTok, Instagram, or
                 Facebook URL and get the same normalized metrics back — views,
-                likes, comments, shares, and engagement rate.
+                likes, comments, and engagement rate when the platform exposes them.
               </CardContent>
             </Card>
             <Card>

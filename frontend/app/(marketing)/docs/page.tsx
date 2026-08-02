@@ -449,8 +449,10 @@ export default function DocsPage() {
         The read-side companion to publishing and scheduling tools: pass any
         supported post, video, or reel URL (YouTube, TikTok, Instagram, Facebook,
         X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble) and get one
-        normalized metrics object — views, likes, comments, shares, saves, and an
-        engagement rate — with the platform auto-detected.
+        normalized metrics object — views, likes, comments, shares, saves,
+        interactions, and engagementRate — with the platform auto-detected.
+        Fields a network does not expose stay null (YouTube has no public
+        share/save counts).
       </p>
       <CodeTabs samples={analyticsSample} />
 

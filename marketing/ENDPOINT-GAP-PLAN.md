@@ -130,3 +130,16 @@ SC 8 · Captapi 1 · Mixed 1. Shipped this batch: #8 SEO fix, #9 ISO+post, #10 S
 | region alias for country | P1 | Shipped |
 | Docs: domain accepted; public-only honesty note | P1 | Shipped |
 | topic=political | P2 | Explicitly unsupported (400) |
+
+---
+
+## #16 GET /v1/analytics/post (Captapi-only)
+**Keep:** Unified metrics shape, 1 credit, platform auto-detect, compare endpoint.
+
+| Field / param | Priority | Status |
+|---|---|---|
+| YouTube likes / comments / publishedAt via enriched video-details | P0 | Shipped |
+| engagementRate from interactions / views when numerators exist | P0 | Shipped (cascade fixed) |
+| author.username = channel handle; displayName = channel name | P1 | Shipped |
+| Docs honesty: shares/saves null on YouTube; same shape, sparse fields OK | P1 | Shipped |
+| author.verified on YouTube | P2 | Still null without channel badge lookup |

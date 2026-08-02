@@ -38,6 +38,7 @@ from app.routers.rumble import _normalize_video as _rb_normalize
 from app.routers.threads import _normalize_post as _th_normalize
 from app.routers.tiktok import _normalize as _tiktok_normalize
 from app.routers.twitter import _normalize_tweet as _tw_normalize
+from app.routers.youtube import _video_details_native as _yt_video_details_native
 from app.schemas.common import ApiResponse
 from app.services import facebook_details_native
 from app.services import instagram_native
@@ -47,7 +48,6 @@ from app.services import rumble_video_native
 from app.services import threads_native
 from app.services import tiktok_native
 from app.services import twitter_native
-from app.services import youtube_native
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
 from app.utils.formatters import safe_int, safe_str
@@ -94,12 +94,27 @@ def _detect_platform(url: str) -> str | None:
     return None
 
 
+def _youtube_handle(v: dict[str, Any]) -> str | None:
+    """Prefer @handle for username; fall back to channel display name."""
+    handle = safe_str(v.get("channelHandle") or v.get("channelUsername"))
+    if handle:
+        return handle.lstrip("@")
+    return safe_str(v.get("channelName") or v.get("channel"))
+
+
 def _youtube_analytics_row(v: dict[str, Any], *, norm: str, video_id: str | None) -> dict[str, Any]:
     thumbs = v.get("thumbnails")
     thumb = safe_str(
         v.get("thumbnailUrl")
         or (thumbs[-1].get("url") if isinstance(thumbs, list) and thumbs else None)
     )
+    display = safe_str(v.get("channelName") or v.get("channel"))
+    username = _youtube_handle(v)
+    verified = v.get("channelVerified")
+    if verified is None:
+        verified = v.get("isChannelVerified")
+    if not isinstance(verified, bool):
+        verified = None
     return {
         "platform": "youtube",
         "url": norm,
@@ -109,15 +124,16 @@ def _youtube_analytics_row(v: dict[str, Any], *, norm: str, video_id: str | None
         "thumbnailUrl": thumb,
         "durationSeconds": safe_int(v.get("durationSeconds")),
         "author": {
-            "username": safe_str(v.get("channelName") or v.get("channel")),
-            "displayName": safe_str(v.get("channelName") or v.get("channel")),
+            "username": username,
+            "displayName": display or username,
             "url": safe_str(v.get("channelUrl")),
-            "verified": None,
+            "verified": verified,
         },
         "engagement": {
             "views": safe_int(v.get("viewCount") or v.get("views")),
             "likes": safe_int(v.get("likes") or v.get("likeCount")),
             "comments": safe_int(v.get("commentsCount") or v.get("commentCount")),
+            # YouTube does not expose public share/save counts in this pipeline.
         },
     }
 
@@ -184,11 +200,14 @@ def _threads_analytics_row(n: dict[str, Any]) -> dict[str, Any]:
 
 
 async def _fetch_youtube(url: str) -> dict[str, Any]:
+    # Use the same enriched path as /v1/youtube/video-details so likes,
+    # comments, publishedAt, and channelHandle populate — thin ANDROID player
+    # alone often returns views + title only.
     norm = normalize_youtube_url(url)
     video_id = extract_youtube_id(url)
     if video_id:
-        native = await youtube_native.video_details_native(video_id, norm)
-        if native and native.get("title"):
+        native = await _yt_video_details_native(video_id, norm)
+        if native and (native.get("title") or native.get("viewCount") is not None):
             _mark_source("direct")
             return _youtube_analytics_row(native, norm=norm, video_id=video_id)
 
@@ -490,8 +509,9 @@ def _unify(n: dict[str, Any]) -> dict[str, Any]:
     saves = eng.get("saves")
     engagement_vals = [x for x in (likes, comments, shares, saves) if isinstance(x, int)]
     interactions = sum(engagement_vals) if engagement_vals else None
-    # Never invent 0.0 engagement when every numerator is missing (YT native
-    # often has views but null likes/comments — a fake rate misleads clients).
+    # Never invent 0.0 engagement when every numerator is missing — a fake
+    # rate misleads clients. Shares/saves stay null when the platform does not
+    # expose them (YouTube); rate still computes from likes+comments alone.
     engagement_rate = (
         round(interactions / views, 4)
         if isinstance(views, int)
@@ -562,7 +582,7 @@ async def post_analytics(
 
         data = await cached_or_run(
             endpoint=f"analytics.post.{platform}",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             ttl=get_settings().CACHE_TTL_DYNAMIC,
