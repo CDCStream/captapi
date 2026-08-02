@@ -309,7 +309,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `linktree_page` | `/v1/linktree/page` | `url` (string), `cache`? (boolean) | 4 |
+| `linktree_page` | `/v1/linktree/page` | `url` (string), `cache`? (boolean) | 1 |
 
 ### Snapchat
 

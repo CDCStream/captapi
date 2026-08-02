@@ -2163,7 +2163,7 @@ export interface LinktreePageParams {
 
 export class LinktreeApi {
   constructor(private readonly core: HttpCore) {}
-  /** Linktree Page — Public Linktree profile links, socials and profile metadata. (4 credits) */
+  /** Linktree Page — Public Linktree profile links (incl. GROUP children), socials, email, verticals. (1 credit) */
   page(params: LinktreePageParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/linktree/page", params);
   }

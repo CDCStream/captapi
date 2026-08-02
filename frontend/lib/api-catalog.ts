@@ -571,7 +571,7 @@ const SOUNDCLOUD: Spec[] = [
 ];
 
 const LINKTREE: Spec[] = [
-  { slug: "linktree-page", name: "Linktree Page API", shortName: "Page", category: "details", method: "GET", path: "/v1/linktree/page", credits: 4 , tagline: "Extract the links from a public Linktree page — title, URL, and order for each link.", longDescription: "Paste a Linktree URL and get the page's public links as structured JSON: each link's title, destination URL, and position. Ideal for lead enrichment and competitor link-in-bio research." },
+  { slug: "linktree-page", name: "Linktree Page API", shortName: "Page", category: "details", method: "GET", path: "/v1/linktree/page", credits: 1, tagline: "Public Linktree page — links (incl. GROUP children), socials, email, verticals. Flat 1 credit.", longDescription: "Paste a Linktree URL or username and get the public page as clean JSON: profile fields, verticals/linkPlatforms, email when the creator publishes a mailto social, typed links (CLASSIC, SPOTIFY_*, GROUP, …), and nested GROUP.links for folder children (parentId on nested rows). socials is the icon list from Linktree; socialAccounts is a camelCase URL map (instagram/tiktok/soundcloud/…). Thumbnails and linkCount included. Flat 1 credit. Ideal for lead enrichment and competitor link-in-bio research." },
 ];
 
 const SNAPCHAT: Spec[] = [
@@ -961,7 +961,7 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
   {
     id: "linktree",
     name: "Linktree",
-    blurb: "Extract public Linktree profile links, socials, and profile metadata.",
+    blurb: "Public Linktree links (incl. GROUP children), socials, email, and verticals.",
     icon: "link",
     color: "text-lime-500",
     exampleUrl: "https://linktr.ee/tonyhawk",
@@ -2219,7 +2219,7 @@ const PROFILE_URL: Record<PlatformId, string> = {
   twitch: "https://www.twitch.tv/shroud",
   spotify: "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02",
   soundcloud: "https://soundcloud.com/nasa",
-  linktree: "https://linktr.ee/tonyhawk",
+  linktree: "https://linktr.ee/miguelangeles",
   snapchat: "https://www.snapchat.com/@nba",
   truth_social: "https://truthsocial.com/@realDonaldTrump",
   kick: "https://kick.com/xqc",

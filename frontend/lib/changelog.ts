@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "Linktree page: email, GROUP children, verticals, 1 credit",
+    description:
+      "GET /v1/linktree/page drops from 4 → 1 credit. Returns email when the creator publishes a mailto social, plus verticals and linkPlatforms. GROUP folders now nest child links under links[] (parentId on nested rows); typed links (SPOTIFY_*, SOUNDCLOUD_*, …) kept. socialAccounts includes soundcloud; socials remains the icon list. Browser-like fetch headers avoid Linktree 403s on datacenter UAs.",
+    items: [
+      "1 credit (was 4)",
+      "email + verticals + linkPlatforms",
+      "GROUP.links nesting + parentId; soundcloud in socialAccounts",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "Snapchat profile: full snap lists, Spotlight, 1 credit",
     description:
       "GET /v1/snapchat/user-profile drops from 11 → 1 credit (native __NEXT_DATA__). Highlights now include snapList[] (mediaUrl + timestamp per snap), plus spotlightHighlights with engagement/views/shares/comments and video metadata. Adds createdAt/creationTimestampMs, businessProfileId, squareHeroImageUrl, badge, human-readable category (keeps categoryId), story snaps, and richer relatedAccounts. subscriberCount stays numeric.",

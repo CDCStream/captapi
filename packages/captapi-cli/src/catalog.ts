@@ -406,7 +406,7 @@ const SOUNDCLOUD: Omit<Endpoint, "platform">[] = [
 ];
 
 const LINKTREE: Omit<Endpoint, "platform">[] = [
-  { tool: "linktree_page", name: "Linktree Page", path: "/v1/linktree/page", credits: 4, summary: "Public Linktree profile links, socials and profile metadata.", params: [url(LINKTREE_PROFILE)] },
+  { tool: "linktree_page", name: "Linktree Page", path: "/v1/linktree/page", credits: 1, summary: "Public Linktree profile links (incl. GROUP children), socials, email, verticals.", params: [url(LINKTREE_PROFILE)] },
 ];
 
 const SNAPCHAT: Omit<Endpoint, "platform">[] = [

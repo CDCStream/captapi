@@ -14561,75 +14561,118 @@
     "credits": null,
     "data": {
       "platform": "linktree",
-      "url": "https://linktr.ee/selenagomez",
-      "id": 4274511,
-      "username": "selenagomez",
-      "description": "“In The Dark” & “I Said I Love You First...And You Said It Back” Out Now",
-      "avatar": "https://ugc.production.linktr.ee/2be337b1-59dd-41e2-9c2d-9ecd765d1a76_506310332-18609160939019724-3952420009186030627-n.jpeg",
+      "url": "https://linktr.ee/miguelangeles",
+      "id": 15278008,
+      "username": "miguelangeles",
+      "name": "MIGUEL ANGELES",
+      "description": "☆☆☆☆ IRL ANGEL ☆☆☆☆\nψ EMBRACE CHAOS ψ",
+      "avatar": "https://ugc.production.linktr.ee/d3141538-f586-4f3f-bc9a-a82fbebab798_DEATHRATTLE-slowed-COVER.jpeg",
       "verified": false,
-      "timezone": "America/Los_Angeles",
-      "linkCount": 67,
+      "verticals": [
+        "music",
+        "creative",
+        "arts-entertainment"
+      ],
+      "linkPlatforms": [
+        "TikTok",
+        "Instagram"
+      ],
+      "timezone": "America/New_York",
+      "email": "miguel@irlangel.com",
+      "linkCount": 8,
       "links": [
         {
-          "id": "562048543",
-          "title": "Rare Beauty Social Impact Report",
-          "url": "https://cdn.shopify.com/s/files/1/0314/1143/7703/files/RB-SOCIAL-IMPACT-REPORT-2025_DIGITAL_V1_OPTIMIZED_SPREADS.pdf?v=1777921017",
+          "title": "new project \"BEFORE THE SUN RISES & WINTERR ENDS\"",
+          "type": "SPOTIFY_ALBUM",
+          "id": "463416775",
+          "url": "https://open.spotify.com/album/0pgrg7phBbnwGJ2HBEl9EG?si=Zub7J4I3RySAaM9WVX3Okg",
+          "thumbnail": "https://ugc.production.linktr.ee/8ed131c7-6d74-47fc-bceb-8be7f6bae4c8_ab67616d0000b2739bd93cc6e406b820dfff691f.jpeg"
+        },
+        {
+          "title": "stream \"NOVEMBERR\"",
+          "type": "SPOTIFY_SONG",
+          "id": "460281204",
+          "url": "https://open.spotify.com/track/62HnBMEdZjeFCd2T8g37T8?si=7bd35dd0e9f24d65",
+          "thumbnail": "https://ugc.production.linktr.ee/3bd59146-cd44-4187-9601-4341b21070d2_ab67616d0000b2739ad10104c60fb9deff5b7f34.jpeg"
+        },
+        {
+          "title": "watch \"INNOCENCE\" video",
+          "type": "YOUTUBE_VIDEO",
+          "id": "460285424",
+          "url": "https://www.youtube.com/watch?v=JINmh9O-sjU",
+          "thumbnail": "https://ugc.production.linktr.ee/49049fb3-97fb-4947-b847-46c9c2f84384_maxresdefault.jpeg"
+        },
+        {
+          "title": "stream \"OBSESSED\"",
+          "type": "SPOTIFY_SONG",
+          "id": "460281376",
+          "url": "https://open.spotify.com/track/0ipHYEQf07qoReAWhVC3zO?si=8fbaee843716443f",
+          "thumbnail": "https://ugc.production.linktr.ee/8459222c-2e13-47c2-8827-55f6a4af585d_ab67616d0000b273fbf50ee1e8be73b31fa177e2.jpeg"
+        },
+        {
+          "title": "MERCH",
+          "type": "PRODUCT",
+          "id": "233892723",
+          "thumbnail": "https://ugc.production.linktr.ee/b59a3236-2d8a-4704-9c8b-16eb7acd44cb_embrace-chaos-hatv1.jpeg"
+        },
+        {
+          "title": "ALL STREAMING LINKS",
           "type": "CLASSIC",
-          "thumbnail": "https://ugc.production.linktr.ee/f68b8e4f-20cf-4273-971d-1c9ec47bd725_Screenshot-2026-05-05-at-9.01.27AM.png"
+          "id": "233894119",
+          "url": "https://songwhip.com/miguelangeles"
         },
         {
-          "id": "515274143",
-          "title": "Selena Gomez - Revival LP - Selena Gomez Official Shop",
-          "url": "https://store.selenagomez.com/collections/revival/products/revival-vinyl",
+          "title": "SPOTIFY PLAYLIST",
           "type": "CLASSIC",
-          "thumbnail": "https://ugc.production.linktr.ee/c0e0b32d-a4d4-4cf1-9924-8772737244de_Revival.jpeg"
+          "id": "80367589",
+          "url": "https://open.spotify.com/playlist/1m0U7ud6CCPzMO8oLTMi3B?si=d7cb7f6e6bc94d3b",
+          "thumbnail": "https://ugc.production.linktr.ee/aPvlFMFwRO6UxX7z7Ajb_95C7BCA3-481E-426C-8EEC-E4C868C6C79D.jpg"
         },
         {
-          "id": "515270816",
-          "title": "In The Dark",
-          "type": "GROUP"
-        },
-        {
-          "id": "515273167",
-          "title": "Revival 10 Year Anniversary",
-          "type": "GROUP"
-        },
-        {
-          "id": "508070161",
-          "title": "Selena Gomez Throwback Collection",
-          "type": "GROUP"
+          "title": "SOUNDCLOUD PLAYLIST",
+          "type": "SOUNDCLOUD_PLAYLIST",
+          "id": "102824974",
+          "url": "https://soundcloud.com/miguelangeles/sets/irl-angel-vibes",
+          "thumbnail": "https://ugc.production.linktr.ee/dspU8yloQW2ViLu1ZNGA_7B24137C-D995-425C-8670-45D8EEFBBBF5.JPG"
         }
       ],
       "socials": [
         {
-          "type": "FACEBOOK",
-          "url": "https://facebook.com/Selena"
-        },
-        {
           "type": "INSTAGRAM",
-          "url": "https://instagram.com/selenagomez"
+          "url": "https://instagram.com/miguelangeles"
         },
         {
           "type": "TIKTOK",
-          "url": "https://tiktok.com/@selenagomez"
+          "url": "https://tiktok.com/@irlangel"
         },
         {
           "type": "SPOTIFY",
-          "url": "https://open.spotify.com/artist/0C8ZW7ezQVs4URX5aX7Kqx?si=vLUeKsFuTSKqHn7JJIr2Eg"
+          "url": "https://open.spotify.com/artist/14xRX3JR8H4RWh8R7V3fvZ?si=EgRxWIPiRcaEHtSnqk5PAQ"
         },
         {
           "type": "YOUTUBE",
-          "url": "https://youtube.com/selenagomez"
+          "url": "https://www.youtube.com/watch?v=xiFUzOJaiC4"
+        },
+        {
+          "type": "SOUNDCLOUD",
+          "url": "https://soundcloud.com/miguelangeles"
+        },
+        {
+          "type": "APPLE_MUSIC",
+          "url": "https://music.apple.com/ca/artist/miguel-angeles/1209423162"
+        },
+        {
+          "type": "EMAIL_ADDRESS",
+          "url": "mailto:miguel@irlangel.com"
         }
       ],
       "socialAccounts": {
-        "facebook": "https://facebook.com/Selena",
-        "instagram": "https://instagram.com/selenagomez",
-        "tiktok": "https://tiktok.com/@selenagomez",
-        "spotify": "https://open.spotify.com/artist/0C8ZW7ezQVs4URX5aX7Kqx?si=vLUeKsFuTSKqHn7JJIr2Eg",
-        "youtube": "https://youtube.com/selenagomez",
-        "appleMusic": "https://music.apple.com/us/artist/selena-gomez/280215834",
-        "twitter": "https://x.com/selenagomez"
+        "instagram": "https://instagram.com/miguelangeles",
+        "tiktok": "https://tiktok.com/@irlangel",
+        "spotify": "https://open.spotify.com/artist/14xRX3JR8H4RWh8R7V3fvZ?si=EgRxWIPiRcaEHtSnqk5PAQ",
+        "youtube": "https://www.youtube.com/watch?v=xiFUzOJaiC4",
+        "soundcloud": "https://soundcloud.com/miguelangeles",
+        "appleMusic": "https://music.apple.com/ca/artist/miguel-angeles/1209423162"
       }
     }
   },
