@@ -12569,7 +12569,7 @@
         "tags": [
           "Amazon Shop"
         ],
-        "summary": "Amazon Shop / storefront page",
+        "summary": "Amazon seller storefront page",
         "operationId": "amazon_shop_page_v1_amazon_shop_page_get",
         "security": [
           {
@@ -12583,10 +12583,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Amazon seller storefront URL, seller profile URL, or seller ID",
+              "description": "Amazon seller storefront URL (/sp?seller=… or /s?me=…) or raw seller ID (e.g. A294P4X9EWVXLJ). Not influencer Amazon Shops (/shop/<handle>) — those are a different surface.",
               "title": "Url"
             },
-            "description": "Amazon seller storefront URL, seller profile URL, or seller ID"
+            "description": "Amazon seller storefront URL (/sp?seller=… or /s?me=…) or raw seller ID (e.g. A294P4X9EWVXLJ). Not influencer Amazon Shops (/shop/<handle>) — those are a different surface."
           },
           {
             "name": "marketplace",
@@ -12608,11 +12608,29 @@
               "type": "integer",
               "maximum": 200,
               "minimum": 0,
-              "description": "Max products to include. Use 0 for shop metadata only when supported.",
+              "description": "Max products to include on this page fetch. Use 0 for seller metadata only.",
               "default": 20,
               "title": "Limit"
             },
-            "description": "Max products to include. Use 0 for shop metadata only when supported."
+            "description": "Max products to include on this page fetch. Use 0 for seller metadata only."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor from a previous nextCursor (storefront page number).",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor from a previous nextCursor (storefront page number)."
           },
           {
             "name": "cache",

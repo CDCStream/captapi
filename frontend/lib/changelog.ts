@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "Amazon seller storefront: badges, scrapedAt, pagination; drop raw leak",
+    description:
+      "GET /v1/amazon-shop/page now returns seller name, scrapedAt, stable product shapes (price/currency/priceFormatted always present), isPrime/isBestSeller/isSponsored, canonical /dp/{ASIN} URLs, display priceFormatted ($1,234.56), and cursor pagination (nextCursor/hasMore). Removes rawFirstItem leakage. Docs clarify scope: seller storefronts (/sp?seller=), not influencer /shop/<handle> vitrines. Influencer shop URLs return 400 with a clear message. List price aligned to 1 credit per ~16-product page.",
+    items: [
+      "scrapedAt + isPrime/isBestSeller/isSponsored on products",
+      "seller.name, canonical /dp URLs, stable price fields, cursor pagination",
+      "Removed rawFirstItem; scope note vs influencer /shop/",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "Linktree page: email, GROUP children, verticals, 1 credit",
     description:
       "GET /v1/linktree/page drops from 4 → 1 credit. Returns email when the creator publishes a mailto social, plus verticals and linkPlatforms. GROUP folders now nest child links under links[] (parentId on nested rows); typed links (SPOTIFY_*, SOUNDCLOUD_*, …) kept. socialAccounts includes soundcloud; socials remains the icon list. Browser-like fetch headers avoid Linktree 403s on datacenter UAs.",

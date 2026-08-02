@@ -2,6 +2,9 @@
 
 Fetches Amazon's server-rendered ``/s?me=<sellerId>`` listing via
 datacenter -> residential -> Decodo, then parses ``s-search-result`` cards.
+
+Scope: third-party **seller storefronts** (``/sp?seller=``, ``/s?me=``, raw
+seller IDs) — not influencer Amazon Shops (``/shop/<handle>``).
 """
 
 from __future__ import annotations
@@ -9,6 +12,7 @@ from __future__ import annotations
 import html as htmlmod
 import math
 import re
+from datetime import datetime, timezone
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
@@ -21,7 +25,8 @@ from app.services.http_fetch import DEFAULT_HEADERS, proxy_for
 log = structlog.get_logger(__name__)
 
 # Approximate organic results per storefront page.
-_PAGE_SIZE = 16
+PAGE_SIZE = 16
+_PAGE_SIZE = PAGE_SIZE
 
 _MARKETPLACES: dict[str, tuple[str, str]] = {
     "US": ("www.amazon.com", "ATVPDKIKX0DER"),
@@ -58,13 +63,26 @@ _IMG_RE = re.compile(
     re.I,
 )
 _RATING_RE = re.compile(r"([\d.]+)\s+out of\s+5", re.I)
-_REVIEWS_RE = re.compile(
-    r"(?:aria-label=\"([0-9,.]+)\s+ratings?\"|>)([0-9,.]+)\s*</span>\s*</a>\s*</span>\s*<span[^>]*>\s*</span>\s*<span class=\"a-letter-space\">",
+_REVIEWS_SIMPLE_RE = re.compile(r's-underline-text[^>]*>\s*([0-9,.]+)\s*<', re.I)
+_BEST_SELLER_RE = re.compile(r'aria-label="Best\s*Seller', re.I)
+_SPONSORED_RE = re.compile(r"(?:^|>)\s*Sponsored\s*<", re.I)
+_PRIME_RE = re.compile(
+    r'a-icon-prime|aria-label="[^"]*Amazon\s*Prime[^"]*"|puis-prime-badge|data-a-badge-type="prime"',
     re.I,
 )
-_REVIEWS_SIMPLE_RE = re.compile(
-    r's-underline-text[^>]*>\s*([0-9,.]+)\s*<', re.I
+_SELLER_TITLE_RE = re.compile(
+    r"Seller\s+Profile\s*:\s*([^|<]+)",
+    re.I,
 )
+_INFLUENCER_SHOP_RE = re.compile(r"amazon\.[^/]+/shop/[^/?#]+", re.I)
+
+
+def is_influencer_shop_url(url_or_id: str) -> bool:
+    """True for amazon.com/shop/<handle> influencer vitrines (not seller IDs)."""
+    raw = (url_or_id or "").strip()
+    if not raw or extract_seller_id(raw):
+        return False
+    return bool(_INFLUENCER_SHOP_RE.search(raw))
 
 
 def extract_seller_id(url_or_id: str) -> str | None:
@@ -82,8 +100,20 @@ def extract_seller_id(url_or_id: str) -> str | None:
                 return vals[0]
     except Exception:  # noqa: BLE001
         pass
+    # Avoid matching random ASINs buried in /dp/ paths.
+    if "/dp/" in raw.lower() or "/gp/product/" in raw.lower():
+        return None
     m = _SELLER_RE.search(raw)
     return m.group(1) if m else None
+
+
+def marketplace_host(marketplace: str) -> str:
+    return _MARKETPLACES.get((marketplace or "US").upper(), _MARKETPLACES["US"])[0]
+
+
+def seller_profile_url(seller_id: str, marketplace: str) -> str:
+    host = marketplace_host(marketplace)
+    return f"https://{host}/sp?seller={seller_id}"
 
 
 def storefront_url(seller_id: str, marketplace: str, page: int = 1) -> str:
@@ -92,6 +122,10 @@ def storefront_url(seller_id: str, marketplace: str, page: int = 1) -> str:
     if page > 1:
         url += f"&page={page}"
     return url
+
+
+def canonical_product_url(asin: str, marketplace: str) -> str:
+    return f"https://{marketplace_host(marketplace)}/dp/{asin}"
 
 
 def _parse_price(text: str | None) -> tuple[float | None, str | None, str | None]:
@@ -109,6 +143,7 @@ def _parse_price(text: str | None) -> tuple[float | None, str | None, str | None
         currency = "JPY"
     elif cleaned.startswith("₹"):
         currency = "INR"
+    # Keep display form (with symbol + grouping); parse a numeric value separately.
     num = re.sub(r"[^\d.]", "", cleaned.replace(",", ""))
     try:
         value = float(num) if num else None
@@ -117,7 +152,7 @@ def _parse_price(text: str | None) -> tuple[float | None, str | None, str | None
     return value, currency, cleaned
 
 
-def _parse_card(part: str, *, host: str, seller_id: str) -> dict[str, Any] | None:
+def _parse_card(part: str, *, host: str, seller_id: str, marketplace: str) -> dict[str, Any] | None:
     asin_m = _ASIN_RE.search(part)
     if not asin_m:
         return None
@@ -138,14 +173,7 @@ def _parse_card(part: str, *, host: str, seller_id: str) -> dict[str, Any] | Non
     price, currency, price_fmt = _parse_price(price_m.group(1) if price_m else None)
 
     img_m = _IMG_RE.search(part)
-    href_m = re.search(
-        rf'href="(/[^"]*?/dp/{re.escape(asin)}[^"]*)"', part, flags=re.I
-    )
-    product_url = (
-        f"https://{host}{href_m.group(1)}"
-        if href_m
-        else f"https://{host}/dp/{asin}"
-    )
+    product_url = f"https://{host}/dp/{asin}"
 
     rating = None
     rm = _RATING_RE.search(part)
@@ -156,16 +184,15 @@ def _parse_card(part: str, *, host: str, seller_id: str) -> dict[str, Any] | Non
             rating = None
 
     reviews = None
-    for pat in (_REVIEWS_SIMPLE_RE,):
-        rvm = pat.search(part)
-        if rvm:
-            try:
-                reviews = int(rvm.group(1).replace(",", ""))
-                break
-            except ValueError:
-                pass
+    rvm = _REVIEWS_SIMPLE_RE.search(part)
+    if rvm:
+        try:
+            reviews = int(rvm.group(1).replace(",", ""))
+        except ValueError:
+            reviews = None
 
-    item: dict[str, Any] = {
+    head = part[:1800]
+    return {
         "asin": asin,
         "title": title,
         "productUrl": product_url,
@@ -174,16 +201,21 @@ def _parse_card(part: str, *, host: str, seller_id: str) -> dict[str, Any] | Non
         "image": img_m.group(1) if img_m else None,
         "price": price,
         "currency": currency,
-        "priceFormatted": f"{currency} {price}".strip() if currency and price is not None else price_fmt,
+        "priceFormatted": price_fmt,
         "rating": rating,
         "reviews": reviews,
         "reviewsCount": reviews,
         "sellerId": seller_id,
+        "marketplace": marketplace,
+        "isPrime": bool(_PRIME_RE.search(part)),
+        "isBestSeller": bool(_BEST_SELLER_RE.search(part)),
+        "isSponsored": bool(_SPONSORED_RE.search(head)),
     }
-    return item
 
 
-def parse_storefront_html(page_html: str, *, host: str, seller_id: str) -> list[dict[str, Any]]:
+def parse_storefront_html(
+    page_html: str, *, host: str, seller_id: str, marketplace: str = "US"
+) -> list[dict[str, Any]]:
     if not page_html or len(page_html) < 2000:
         return []
     lowered = page_html.lower()
@@ -194,7 +226,7 @@ def parse_storefront_html(page_html: str, *, host: str, seller_id: str) -> list[
     products: list[dict[str, Any]] = []
     seen: set[str] = set()
     for part in parts[1:]:
-        item = _parse_card(part, host=host, seller_id=seller_id)
+        item = _parse_card(part, host=host, seller_id=seller_id, marketplace=marketplace)
         if not item:
             continue
         asin = item["asin"]
@@ -203,6 +235,27 @@ def parse_storefront_html(page_html: str, *, host: str, seller_id: str) -> list[
         seen.add(asin)
         products.append(item)
     return products
+
+
+def parse_seller_name(page_html: str) -> str | None:
+    if not page_html:
+        return None
+    title_m = re.search(r"<title[^>]*>([^<]+)</title>", page_html, flags=re.I)
+    if title_m:
+        sm = _SELLER_TITLE_RE.search(htmlmod.unescape(title_m.group(1)))
+        if sm:
+            name = sm.group(1).strip()
+            if name and name.lower() not in {"amazon.com", "amazon"}:
+                return name
+    h1 = re.search(r"<h1[^>]*>\s*([^<]{2,80})\s*</h1>", page_html, flags=re.I)
+    if h1:
+        name = htmlmod.unescape(h1.group(1)).strip()
+        if name and "amazon" not in name.lower():
+            return name
+    m = re.search(r'"sellerName"\s*:\s*"([^"]+)"', page_html)
+    if m:
+        return htmlmod.unescape(m.group(1)).strip() or None
+    return None
 
 
 async def _fetch_html(url: str) -> tuple[str | None, str]:
@@ -228,8 +281,7 @@ async def _fetch_html(url: str) -> tuple[str | None, str]:
             ) as client:
                 resp = await client.get(url)
             if resp.status_code == 200 and len(resp.text) > 5000:
-                products_probe = "data-asin=" in resp.text
-                if products_probe:
+                if "data-asin=" in resp.text or "Seller Profile" in resp.text or 'id="sellerName"' in resp.text:
                     return resp.text, tier
             log.warning(
                 "amazon_shop_fetch_weak",
@@ -248,16 +300,25 @@ async def _fetch_html(url: str) -> tuple[str | None, str]:
     return None, "none"
 
 
+async def fetch_seller_profile(seller_id: str, marketplace: str = "US") -> dict[str, Any]:
+    """Best-effort seller name + profile URL from ``/sp?seller=``."""
+    profile = seller_profile_url(seller_id, marketplace)
+    html, tier = await _fetch_html(profile)
+    name = parse_seller_name(html or "")
+    return {"id": seller_id, "name": name, "url": profile, "tier": tier}
+
+
 async def fetch_shop_products(
     url_or_id: str,
     *,
     marketplace: str = "US",
     limit: int = 20,
+    page: int = 1,
 ) -> dict[str, Any] | None:
     """Fetch seller storefront products natively.
 
-    Returns a dict shaped for ``_normalize_shop`` (list of product-like items
-    plus sellerId), or ``None`` when every transport tier fails.
+    ``page`` is the Amazon storefront page (1-based). When ``limit`` spans
+    multiple pages, pages are fetched sequentially starting at ``page``.
     """
     seller_id = extract_seller_id(url_or_id)
     if not seller_id:
@@ -266,8 +327,8 @@ async def fetch_shop_products(
     market = (marketplace or "US").upper()
     host, _mid = _MARKETPLACES.get(market, _MARKETPLACES["US"])
     want = max(0, int(limit))
+    start_page = max(1, int(page or 1))
     if want == 0:
-        # Metadata-only: one page is enough to confirm the shop exists.
         want_fetch = 1
     else:
         want_fetch = want
@@ -275,14 +336,19 @@ async def fetch_shop_products(
     pages_needed = max(1, math.ceil(want_fetch / _PAGE_SIZE))
     items: list[dict[str, Any]] = []
     tier_used = "none"
+    last_batch_len = 0
+    pages_fetched = 0
 
-    for page in range(1, pages_needed + 1):
-        page_url = storefront_url(seller_id, market, page=page)
+    for offset in range(pages_needed):
+        page_num = start_page + offset
+        page_url = storefront_url(seller_id, market, page=page_num)
         html, tier = await _fetch_html(page_url)
         tier_used = tier
         if not html:
             break
-        batch = parse_storefront_html(html, host=host, seller_id=seller_id)
+        batch = parse_storefront_html(html, host=host, seller_id=seller_id, marketplace=market)
+        pages_fetched += 1
+        last_batch_len = len(batch)
         if not batch:
             break
         for item in batch:
@@ -292,12 +358,22 @@ async def fetch_shop_products(
         if want > 0 and len(items) >= want:
             break
         if len(batch) < 5:
-            # Likely last page / soft empty.
             break
 
-    if not items:
-        if want > 0 or tier_used == "none":
-            return None
+    if not items and (want > 0 or tier_used == "none"):
+        return None
+
+    scraped_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+    for item in items:
+        item.setdefault("sellerId", seller_id)
+        item.setdefault("marketplace", market)
+        item["scrapedAt"] = scraped_at
+
+    # hasMore: last fetched page looked full (Amazon typically returns ~16).
+    ended_early = want > 0 and len(items) >= want and last_batch_len >= _PAGE_SIZE
+    natural_more = last_batch_len >= _PAGE_SIZE and not (want > 0 and len(items) < want)
+    has_more = bool(items) and (ended_early or natural_more)
+    next_page = start_page + pages_fetched if has_more else None
 
     log.info(
         "amazon_shop_native_ok",
@@ -305,15 +381,19 @@ async def fetch_shop_products(
         count=len(items),
         tier=tier_used,
         market=market,
+        page=start_page,
+        has_more=has_more,
     )
-    for item in items:
-        item.setdefault("sellerId", seller_id)
-        item.setdefault("marketplace", market)
     return {
         "seller_id": seller_id,
         "marketplace": market,
         "host": host,
         "tier": tier_used,
         "items": items[:want] if want > 0 else [],
-        "pages": pages_needed,
+        "pages": pages_fetched,
+        "page": start_page,
+        "has_more": has_more,
+        "next_page": next_page,
+        "scraped_at": scraped_at,
+        "page_size": _PAGE_SIZE,
     }

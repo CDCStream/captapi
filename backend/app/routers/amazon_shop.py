@@ -1,10 +1,15 @@
-"""Amazon Shop / storefront endpoint."""
+"""Amazon seller storefront endpoint.
+
+Scrapes third-party seller storefronts (``/sp?seller=``, ``/s?me=``, raw seller
+IDs) — not influencer Amazon Shops (``amazon.com/shop/<handle>``). Those are a
+different Amazon surface (creator vitrines) and are out of scope here.
+"""
 
 from __future__ import annotations
 
-import html
 import math
 import re
+from datetime import datetime, timezone
 from typing import Any
 
 import httpx
@@ -25,32 +30,7 @@ router = APIRouter()
 # Native storefront HTML ≈ $0.002/page via DC proxy. 120% markup @ $0.0045/credit
 # → ~1 credit/page (~16 products). Was 4.45/result on Apify.
 CREDIT_PER_PAGE = 1
-NATIVE_PAGE_SIZE = 16
-
-
-_PRODUCT_OMIT_IF_EMPTY = frozenset(
-    {"price", "priceFormatted", "rating", "reviews", "image", "url", "title"}
-)
-# Storefront actor never returns seller profile fields or product availability.
-_SELLER_OMIT_IF_EMPTY = frozenset({"name", "url", "rating", "reviewCount"})
-_RAW_OMIT_IF_EMPTY = frozenset(
-    {
-        "rating",
-        "ratingText",
-        "reviewCount",
-        "bestSellerCategory",
-        "availability",
-        "sellerName",
-        "storeName",
-    }
-)
-
-
-def _drop_empty(obj: dict[str, Any], keys: frozenset[str]) -> dict[str, Any]:
-    for key in keys:
-        if key in obj and obj[key] in (None, "", []):
-            obj.pop(key, None)
-    return obj
+NATIVE_PAGE_SIZE = amazon_shop_native.PAGE_SIZE
 
 
 def _credits_for_limit(limit: int) -> int:
@@ -59,118 +39,209 @@ def _credits_for_limit(limit: int) -> int:
     return max(CREDIT_PER_PAGE, math.ceil(limit / NATIVE_PAGE_SIZE) * CREDIT_PER_PAGE)
 
 
-def _normalize_product(item: dict[str, Any]) -> dict[str, Any]:
-    price = item.get("price") or item.get("priceValue")
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+
+
+def _canonical_product_url(item: dict[str, Any], marketplace: str) -> str | None:
+    asin = safe_str(item.get("asin") or item.get("ASIN"))
+    if asin:
+        return amazon_shop_native.canonical_product_url(asin, marketplace)
+    raw = safe_str(item.get("url") or item.get("productUrl"))
+    if not raw:
+        return None
+    # Strip tracking query /ref=… path noise when an ASIN is embedded.
+    m = re.search(r"/dp/([A-Z0-9]{10})", raw, flags=re.I)
+    if m:
+        return amazon_shop_native.canonical_product_url(m.group(1).upper(), marketplace)
+    return raw.split("?")[0] or raw
+
+
+def _format_price(price: Any, currency: str | None, price_formatted: str | None) -> str | None:
+    """Prefer Amazon's display string; otherwise build a readable fallback."""
+    if price_formatted:
+        # Reject our old non-display form "USD 5498".
+        if not re.match(r"^[A-Z]{3}\s+\d", price_formatted):
+            return price_formatted
+    if price is None:
+        return None
+    try:
+        num = float(price)
+    except (TypeError, ValueError):
+        return str(price)
+    cur = (currency or "").upper()
+    symbols = {"USD": "$", "GBP": "£", "EUR": "€", "JPY": "¥", "INR": "₹"}
+    sym = symbols.get(cur)
+    if sym:
+        if num == int(num) and cur in {"USD", "EUR", "GBP"}:
+            # Keep cents when present; whole dollars get grouping.
+            whole = int(num)
+            return f"{sym}{whole:,}"
+        if cur == "JPY":
+            return f"{sym}{int(num):,}"
+        return f"{sym}{num:,.2f}"
+    if cur:
+        return f"{cur} {num:,.2f}".rstrip("0").rstrip(".")
+    return f"{num:,.2f}".rstrip("0").rstrip(".")
+
+
+def _as_bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "y"}
+    return False
+
+
+def _normalize_product(item: dict[str, Any], marketplace: str) -> dict[str, Any]:
+    price = item.get("price")
+    if price is None:
+        price = item.get("priceValue")
+    try:
+        price_num = float(price) if price is not None else None
+    except (TypeError, ValueError):
+        price_num = safe_float(price)
+
     currency = safe_str(item.get("currency") or item.get("currencyCode"))
-    price_formatted = safe_str(item.get("priceFormatted") or item.get("priceText"))
-    if not price_formatted and price is not None:
-        price_formatted = f"{currency} {price}".strip() if currency else str(price)
-    # availability is never present on this actor — omit rather than null.
-    return _drop_empty(
-        {
-            "asin": safe_str(item.get("asin") or item.get("ASIN")),
-            "title": safe_str(item.get("title") or item.get("name")),
-            "url": safe_str(item.get("url") or item.get("productUrl")),
-            "image": safe_str(item.get("image") or item.get("imageUrl")),
-            "price": price,
-            "priceFormatted": price_formatted,
-            "rating": safe_float(item.get("rating") or item.get("stars")),
-            "reviews": safe_int(item.get("reviews") or item.get("reviewsCount") or item.get("reviewCount")),
-        },
-        _PRODUCT_OMIT_IF_EMPTY,
+    price_formatted = _format_price(
+        price_num,
+        currency,
+        safe_str(item.get("priceFormatted") or item.get("priceText")),
     )
+    asin = safe_str(item.get("asin") or item.get("ASIN"))
+    # Stable shape: always include price/flags keys (null when unknown).
+    return {
+        "asin": asin,
+        "title": safe_str(item.get("title") or item.get("name")),
+        "url": _canonical_product_url(item, marketplace),
+        "image": safe_str(item.get("image") or item.get("imageUrl")),
+        "price": price_num,
+        "currency": currency,
+        "priceFormatted": price_formatted,
+        "rating": safe_float(item.get("rating") or item.get("stars")),
+        "reviews": safe_int(item.get("reviews") or item.get("reviewsCount") or item.get("reviewCount")),
+        "isPrime": _as_bool(item.get("isPrime")),
+        "isBestSeller": _as_bool(item.get("isBestSeller") or item.get("bestSeller")),
+        "isSponsored": _as_bool(item.get("isSponsored") or item.get("sponsored")),
+    }
 
 
-def _normalize_shop(items: list[dict[str, Any]], url: str, marketplace: str) -> dict[str, Any]:
+def _normalize_shop(
+    items: list[dict[str, Any]],
+    *,
+    url: str,
+    marketplace: str,
+    seller: dict[str, Any] | None = None,
+    scraped_at: str | None = None,
+    has_more: bool = False,
+    next_cursor: str | None = None,
+) -> dict[str, Any]:
     first = items[0] if items else {}
+    products = [_normalize_product(i, marketplace) for i in items if i.get("asin") or i.get("title")]
+
     seller_src = first.get("seller") if isinstance(first.get("seller"), dict) else first
-    products = [_normalize_product(i) for i in items if i.get("asin") or i.get("title")]
-    # Product rows expose sellerId only — do not reuse product rating/url as seller fields.
-    seller = _drop_empty(
-        {
-            "id": safe_str(seller_src.get("sellerId") or seller_src.get("seller_id") or seller_src.get("id")),
-            "name": safe_str(seller_src.get("sellerName") or seller_src.get("seller_name") or seller_src.get("brand")),
-            "url": safe_str(seller_src.get("sellerUrl") or seller_src.get("storefrontUrl")),
-            "rating": safe_float(seller_src.get("sellerRating") or seller_src.get("seller_rating")),
-            "reviewCount": safe_int(seller_src.get("sellerReviews") or seller_src.get("seller_reviews")),
-        },
-        _SELLER_OMIT_IF_EMPTY,
+    seller_out: dict[str, Any] = {
+        "id": safe_str(
+            (seller or {}).get("id")
+            or seller_src.get("sellerId")
+            or seller_src.get("seller_id")
+            or seller_src.get("id")
+        ),
+        "name": safe_str(
+            (seller or {}).get("name")
+            or seller_src.get("sellerName")
+            or seller_src.get("seller_name")
+            or seller_src.get("storeName")
+            or seller_src.get("brand")
+        ),
+        "url": safe_str(
+            (seller or {}).get("url")
+            or seller_src.get("sellerUrl")
+            or seller_src.get("storefrontUrl")
+        ),
+    }
+    if not seller_out.get("url") and seller_out.get("id"):
+        seller_out["url"] = amazon_shop_native.seller_profile_url(seller_out["id"], marketplace)
+    # Drop empty optional seller fields; keep id when present.
+    if not seller_out.get("name"):
+        seller_out.pop("name", None)
+    if not seller_out.get("url"):
+        seller_out.pop("url", None)
+    if not seller_out.get("id"):
+        seller_out.pop("id", None)
+
+    scraped = (
+        scraped_at
+        or safe_str(first.get("scrapedAt") or first.get("scraped_at"))
+        or _now_iso()
     )
-    raw = None
-    if isinstance(first, dict) and first and (first.get("asin") or first.get("title")):
-        raw = _drop_empty(dict(first), _RAW_OMIT_IF_EMPTY)
-        # Drop remaining null/empty noise keys from the debug payload.
-        raw = {k: v for k, v in raw.items() if v not in (None, "", [])}
     return {
         "platform": "amazon_shop",
         "url": safe_str(url),
         "marketplace": marketplace.upper(),
-        "seller": seller,
+        "seller": seller_out,
+        "scrapedAt": scraped,
         "totalReturned": len(products),
+        "hasMore": bool(has_more),
+        "nextCursor": next_cursor,
         "products": products,
-        "rawFirstItem": raw,
     }
 
 
-def _meta(page: str, key: str) -> str:
-    if key == "title":
-        match = re.search(r"<title[^>]*>(.*?)</title>", page, flags=re.IGNORECASE | re.DOTALL)
-        if match:
-            return html.unescape(re.sub(r"\s+", " ", match.group(1)).strip())
-    patterns = [
-        rf'<meta[^>]+property=["\']{re.escape(key)}["\'][^>]+content=["\']([^"\']+)["\']',
-        rf'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']{re.escape(key)}["\']',
-        rf'<meta[^>]+name=["\']{re.escape(key)}["\'][^>]+content=["\']([^"\']+)["\']',
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, page, flags=re.IGNORECASE)
-        if match:
-            return html.unescape(match.group(1).strip())
-    return ""
-
-
-async def _public_shop_metadata(url: str, marketplace: str) -> dict[str, Any] | None:
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
-        )
-    }
+def _parse_cursor(cursor: str | None) -> tuple[int, int]:
+    """Return (storefront_page, offset_within_page)."""
+    if not cursor:
+        return 1, 0
+    raw = cursor.strip()
+    if raw.lower().startswith("p:"):
+        raw = raw[2:]
+    page_raw, _, offset_raw = raw.partition(":")
     try:
-        async with httpx.AsyncClient(timeout=6.0, follow_redirects=True, headers=headers) as client:
-            resp = await client.get(url)
-    except httpx.HTTPError:
-        return None
-    if resp.status_code >= 400:
-        return None
-    title = _meta(resp.text, "og:title") or _meta(resp.text, "title")
-    image = _meta(resp.text, "og:image")
-    if not (title or image):
-        return None
-    seller_id = amazon_shop_native.extract_seller_id(url) or ""
-    return {
-        "platform": "amazon_shop",
-        "url": safe_str(str(resp.url) or url),
-        "marketplace": marketplace.upper(),
-        "seller": _drop_empty(
-            {
-                "id": seller_id,
-                "name": safe_str(title),
-                "url": safe_str(str(resp.url) or url),
-            },
-            _SELLER_OMIT_IF_EMPTY,
-        ),
-        "totalReturned": 0,
-        "products": [],
-        "rawFirstItem": {"title": title, "image": image} if image else {"title": title},
-    }
+        page = int(page_raw)
+        offset = int(offset_raw) if offset_raw else 0
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid cursor. Pass the nextCursor value from a previous response.",
+        ) from exc
+    if page < 1 or offset < 0:
+        raise HTTPException(status_code=400, detail="Invalid cursor.")
+    return page, offset
 
 
-@router.get("/page", summary="Amazon Shop / storefront page")
+def _next_cursor(*, page: int, offset: int, returned: int, page_len: int, page_full: bool) -> str | None:
+    """Advance within the current Amazon page, then to the next page when full."""
+    consumed = offset + returned
+    if consumed < page_len:
+        return f"{page}:{consumed}"
+    if page_full:
+        return str(page + 1)
+    return None
+
+
+@router.get("/page", summary="Amazon seller storefront page")
 async def amazon_shop_page(
-    url: str = Query(..., description="Amazon seller storefront URL, seller profile URL, or seller ID"),
+    url: str = Query(
+        ...,
+        description=(
+            "Amazon seller storefront URL (/sp?seller=… or /s?me=…) or raw seller ID "
+            "(e.g. A294P4X9EWVXLJ). Not influencer Amazon Shops (/shop/<handle>) — "
+            "those are a different surface."
+        ),
+    ),
     marketplace: str = Query("US", min_length=2, max_length=5),
-    limit: int = Query(20, ge=0, le=200, description="Max products to include. Use 0 for shop metadata only when supported."),
+    limit: int = Query(
+        20,
+        ge=0,
+        le=200,
+        description="Max products to include on this page fetch. Use 0 for seller metadata only.",
+    ),
+    cursor: str | None = Query(
+        None,
+        description="Pagination cursor from a previous nextCursor (storefront page number).",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -178,10 +249,28 @@ async def amazon_shop_page(
     if detected and detected != "amazon_shop":
         raise HTTPException(
             status_code=400,
-            detail=platform_mismatch_detail(url, "amazon_shop", "https://www.amazon.com/shop/storefront"),
+            detail=platform_mismatch_detail(
+                url, "amazon_shop", "https://www.amazon.com/sp?seller=A294P4X9EWVXLJ"
+            ),
         )
+    if amazon_shop_native.is_influencer_shop_url(url):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "This endpoint scrapes Amazon seller storefronts (/sp?seller= or /s?me=), "
+                "not influencer Amazon Shops (/shop/<handle>). Pass a seller ID or seller "
+                "profile URL."
+            ),
+        )
+    if not amazon_shop_native.extract_seller_id(url):
+        raise HTTPException(
+            status_code=400,
+            detail="Could not find an Amazon seller ID. Pass /sp?seller=…, /s?me=…, or a raw seller ID.",
+        )
+
+    page, offset = _parse_cursor(cursor)
     settings = get_settings()
-    cost = _credits_for_limit(limit)
+    cost = _credits_for_limit(limit if limit > 0 else NATIVE_PAGE_SIZE)
     async with billed_call(
         caller=caller,
         endpoint="/v1/amazon-shop/page",
@@ -189,37 +278,107 @@ async def amazon_shop_page(
         resource_url=url,
         base_credits=cost,
     ) as ctx:
+
         async def _run() -> dict[str, Any]:
             max_products = limit if limit > 0 else 0
+            market = marketplace.upper()
 
-            # 1) Native /s?me= storefront HTML (proxy / Decodo).
-            native = await amazon_shop_native.fetch_shop_products(
-                url, marketplace=marketplace, limit=max_products if max_products > 0 else 0
+            # Walk storefront pages from ``page``/``offset`` until ``limit`` is filled.
+            first = await amazon_shop_native.fetch_shop_products(
+                url,
+                marketplace=market,
+                limit=NATIVE_PAGE_SIZE if max_products > 0 else 0,
+                page=page,
             )
-            if native is not None:
+            if first is not None:
                 ctx["source"] = "direct"
-                items = native.get("items") or []
+                seller_id = first.get("seller_id") or amazon_shop_native.extract_seller_id(url) or ""
+                profile = await amazon_shop_native.fetch_seller_profile(seller_id, market)
+                seller = {
+                    "id": seller_id,
+                    "name": profile.get("name"),
+                    "url": profile.get("url") or amazon_shop_native.seller_profile_url(seller_id, market),
+                }
+                scraped_at = first.get("scraped_at") or _now_iso()
                 if max_products == 0:
-                    sid = native.get("seller_id") or amazon_shop_native.extract_seller_id(url) or ""
-                    return {
-                        "platform": "amazon_shop",
-                        "url": safe_str(url),
-                        "marketplace": marketplace.upper(),
-                        "seller": _drop_empty({"id": sid}, _SELLER_OMIT_IF_EMPTY),
-                        "totalReturned": 0,
-                        "products": [],
-                        "rawFirstItem": None,
-                    }
-                if items:
-                    return _normalize_shop(items[:max_products], url, marketplace)
+                    return _normalize_shop(
+                        [],
+                        url=url,
+                        marketplace=market,
+                        seller=seller,
+                        scraped_at=scraped_at,
+                        has_more=False,
+                        next_cursor=None,
+                    )
 
-            # 2) Apify last resort.
+                page_items = list(first.get("items") or [])
+                if page_items:
+                    collected: list[dict[str, Any]] = []
+                    cur_page = page
+                    cur_offset = offset
+                    page_full = len(page_items) >= NATIVE_PAGE_SIZE
+                    while True:
+                        chunk = page_items[cur_offset:]
+                        need = max_products - len(collected)
+                        take = chunk[:need]
+                        collected.extend(take)
+                        if len(collected) >= max_products:
+                            nxt = _next_cursor(
+                                page=cur_page,
+                                offset=cur_offset,
+                                returned=len(take),
+                                page_len=len(page_items),
+                                page_full=page_full,
+                            )
+                            return _normalize_shop(
+                                collected,
+                                url=url,
+                                marketplace=market,
+                                seller=seller,
+                                scraped_at=scraped_at,
+                                has_more=bool(nxt),
+                                next_cursor=nxt,
+                            )
+                        if not page_full:
+                            return _normalize_shop(
+                                collected,
+                                url=url,
+                                marketplace=market,
+                                seller=seller,
+                                scraped_at=scraped_at,
+                                has_more=False,
+                                next_cursor=None,
+                            )
+                        cur_page += 1
+                        cur_offset = 0
+                        nxt_native = await amazon_shop_native.fetch_shop_products(
+                            url,
+                            marketplace=market,
+                            limit=NATIVE_PAGE_SIZE,
+                            page=cur_page,
+                        )
+                        if not nxt_native or not nxt_native.get("items"):
+                            return _normalize_shop(
+                                collected,
+                                url=url,
+                                marketplace=market,
+                                seller=seller,
+                                scraped_at=scraped_at,
+                                has_more=False,
+                                next_cursor=None,
+                            )
+                        page_items = list(nxt_native.get("items") or [])
+                        page_full = len(page_items) >= NATIVE_PAGE_SIZE
+                        if nxt_native.get("scraped_at"):
+                            scraped_at = nxt_native["scraped_at"]
+
+            # Apify last resort (single page of maxProducts; no storefront cursor).
             try:
                 items = await get_apify().run_actor_sync(
                     settings.APIFY_ACTOR_AMAZON_SHOP,
                     {
                         "sellerUrls": [url],
-                        "marketplace": marketplace.upper(),
+                        "marketplace": market,
                         "maxProducts": max(max_products, 1),
                     },
                     max_items=max(max_products, 1),
@@ -228,22 +387,39 @@ async def amazon_shop_page(
                 items = []
             if items:
                 ctx["source"] = "apify"
-                return _normalize_shop(items[: max(max_products, 1)], url, marketplace)
+                seller_id = amazon_shop_native.extract_seller_id(url) or ""
+                first = items[0] if isinstance(items[0], dict) else {}
+                seller = {
+                    "id": safe_str(first.get("sellerId") or seller_id),
+                    "name": safe_str(first.get("sellerName") or first.get("storeName")),
+                    "url": amazon_shop_native.seller_profile_url(seller_id, market) if seller_id else None,
+                }
+                scraped = safe_str(first.get("scrapedAt")) or _now_iso()
+                return _normalize_shop(
+                    items[: max(max_products, 1)],
+                    url=url,
+                    marketplace=market,
+                    seller=seller,
+                    scraped_at=scraped,
+                    has_more=False,
+                    next_cursor=None,
+                )
 
-            metadata = await _public_shop_metadata(url, marketplace)
-            if metadata:
-                ctx["source"] = "direct"
-                return metadata
-            raise HTTPException(status_code=404, detail="Amazon Shop page not found")
+            raise HTTPException(status_code=404, detail="Amazon seller storefront not found")
 
         data = await cached_or_run(
             "amazon-shop.page",
-            {"url": url, "marketplace": marketplace.upper(), "limit": limit, "v": 4},
+            {
+                "url": url,
+                "marketplace": marketplace.upper(),
+                "limit": limit,
+                "cursor": cursor or "",
+                "v": 5,
+            },
             _run,
             ctx,
             use_cache=cache,
         )
-        # Bill by pages actually needed for returned products.
         n = int(data.get("totalReturned") or 0)
-        ctx["credits_override"] = _credits_for_limit(n if limit > 0 else 0)
+        ctx["credits_override"] = _credits_for_limit(n if limit > 0 else NATIVE_PAGE_SIZE)
         return ApiResponse(data=data)

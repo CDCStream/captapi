@@ -137,63 +137,86 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "url": "https://www.amazon.com/sp?seller=A294P4X9EWVXLJ",
     "marketplace": "US",
     "seller": {
-      "id": "A294P4X9EWVXLJ"
+      "id": "A294P4X9EWVXLJ",
+      "name": "AnkerDirect",
+      "url": "https://www.amazon.com/sp?seller=A294P4X9EWVXLJ"
     },
+    "scrapedAt": "2026-08-02T16:59:58.250Z",
     "totalReturned": 5,
+    "hasMore": true,
+    "nextCursor": "1:5",
     "products": [
       {
-        "asin": "B0H8XR7QJY",
-        "title": "soundcore Nebula X1 Pro with Speaker Floor Stand | Spatial Sound, Dolby Atmos, Optical Zoom, 56000:1 Contrast, Intelligent Setup, Home Outdoor Cinema",
-        "url": "https://www.amazon.com/soundcore-Nebula-Speaker-Floor-Stand/dp/B0H8XR7QJY/ref=sr_1_1?dib=eyJ2IjoiMSJ9.pSOgATegJgbel08XOr1UCtK2uIYZBvx7uxxdG3HHhgSnHcRhL0MJp1DPfiEjU0_zDGpSB964INID8lL3CMYnVwanLZv5sEW84tdvOg-iyQt7mj_9LBDZJ7O_Ozh37LeGxvAHoh2Qr2SMUxZF03FSn-X1tN9fa6Kt18YdKuaNL14leMHt-ZG4IfrSuvB6qSlteIxlYY6iuKefuKy0VrvdWRiVly5jFsUHX9vKZGAch4A.IPr2KHPQjHajV3ZX5sYcXfQY1dUX7dNgSQCYqBgx2fc&dib_tag=se&m=A294P4X9EWVXLJ&marketplaceID=ATVPDKIKX0DER&nsdOptOutParam=true&qid=1784400520&s=merchant-items&sr=1-1",
-        "image": "https://m.media-amazon.com/images/I/61ag00U6VHL._AC_UY218_.jpg",
-        "price": 5498,
-        "priceFormatted": "USD 5498"
+        "asin": "B08NDYQSXZ",
+        "title": "Anker Charging Dock for Oculus Quest 2, Oculus Certified Charging Station Stand Set, Headset Display Holder and Controller Mount Station with 2 Rechargeable Batteries, USB-C Charger and Cable",
+        "url": "https://www.amazon.com/dp/B08NDYQSXZ",
+        "image": "https://m.media-amazon.com/images/I/61EK9jpDapL._AC_UY218_.jpg",
+        "price": 49.99,
+        "currency": "USD",
+        "priceFormatted": "$49.99",
+        "rating": 4.4,
+        "reviews": null,
+        "isPrime": false,
+        "isBestSeller": false,
+        "isSponsored": false
       },
       {
-        "asin": "B0GWR23WPV",
-        "title": "Soundcore AeroFit 2 Pro by Anker, Open-Ear and Active Noise Cancellation Modes, Hi-Res Open Ear Headphones for Commute,Office,Fitness, LDAC, 4-Mic AI Clear Calls,Wireless Bluetooth Earbuds(Renewed)",
-        "url": "https://www.amazon.com/Soundcore-Open-Ear-Cancellation-Headphones-Bluetooth/dp/B0GWR23WPV/ref=sr_1_2?dib=eyJ2IjoiMSJ9.pSOgATegJgbel08XOr1UCtK2uIYZBvx7uxxdG3HHhgSnHcRhL0MJp1DPfiEjU0_zDGpSB964INID8lL3CMYnVwanLZv5sEW84tdvOg-iyQt7mj_9LBDZJ7O_Ozh37LeGxvAHoh2Qr2SMUxZF03FSn-X1tN9fa6Kt18YdKuaNL14leMHt-ZG4IfrSuvB6qSlteIxlYY6iuKefuKy0VrvdWRiVly5jFsUHX9vKZGAch4A.IPr2KHPQjHajV3ZX5sYcXfQY1dUX7dNgSQCYqBgx2fc&dib_tag=se&m=A294P4X9EWVXLJ&marketplaceID=ATVPDKIKX0DER&nsdOptOutParam=true&qid=1784400520&s=merchant-items&sr=1-2",
-        "image": "https://m.media-amazon.com/images/I/516ufTBwbpL._AC_UY218_.jpg"
+        "asin": "B08HKPDZSD",
+        "title": "Anker Ergonomic Optical USB Wired Vertical Mouse 1000/1600 DPI, 5 Buttons CE100 (Renewed)",
+        "url": "https://www.amazon.com/dp/B08HKPDZSD",
+        "image": "https://m.media-amazon.com/images/I/61Zu2ANcJbL._AC_UY218_.jpg",
+        "price": 16.89,
+        "currency": "USD",
+        "priceFormatted": "$16.89",
+        "rating": 4.5,
+        "reviews": null,
+        "isPrime": false,
+        "isBestSeller": false,
+        "isSponsored": false
       },
       {
-        "asin": "B0H8XR2BB7",
-        "title": "soundcore Nebula Speaker Floor Stand (Set of 4), Stable Surround Sound Speaker Stand for Home Theater, Compatible with Nebula X1 Pro Speakers",
-        "url": "https://www.amazon.com/soundcore-Speaker-Surround-Compatible-Speakers/dp/B0H8XR2BB7/ref=sr_1_3?dib=eyJ2IjoiMSJ9.pSOgATegJgbel08XOr1UCtK2uIYZBvx7uxxdG3HHhgSnHcRhL0MJp1DPfiEjU0_zDGpSB964INID8lL3CMYnVwanLZv5sEW84tdvOg-iyQt7mj_9LBDZJ7O_Ozh37LeGxvAHoh2Qr2SMUxZF03FSn-X1tN9fa6Kt18YdKuaNL14leMHt-ZG4IfrSuvB6qSlteIxlYY6iuKefuKy0VrvdWRiVly5jFsUHX9vKZGAch4A.IPr2KHPQjHajV3ZX5sYcXfQY1dUX7dNgSQCYqBgx2fc&dib_tag=se&m=A294P4X9EWVXLJ&marketplaceID=ATVPDKIKX0DER&nsdOptOutParam=true&qid=1784400520&s=merchant-items&sr=1-3",
-        "image": "https://m.media-amazon.com/images/I/51Go8jaFodL._AC_UY218_.jpg",
-        "price": 499,
-        "priceFormatted": "USD 499"
+        "asin": "B088NRLMPV",
+        "title": "Anker USB C to USB C Cable, 60W Fast Charging Cable (2-Pack, 6 ft, Black) | For iPhone 17 Series, iPad mini 6, and More",
+        "url": "https://www.amazon.com/dp/B088NRLMPV",
+        "image": "https://m.media-amazon.com/images/I/71IE9dLBduL._AC_UY218_.jpg",
+        "price": 9.99,
+        "currency": "USD",
+        "priceFormatted": "$9.99",
+        "rating": 4.7,
+        "reviews": null,
+        "isPrime": false,
+        "isBestSeller": true,
+        "isSponsored": false
       },
       {
-        "asin": "B0H8YF8T2V",
-        "title": "NEBULA X1 projector with 100\" screen",
-        "url": "https://www.amazon.com/NEBULA-X1-projector-100-screen/dp/B0H8YF8T2V/ref=sr_1_4?dib=eyJ2IjoiMSJ9.pSOgATegJgbel08XOr1UCtK2uIYZBvx7uxxdG3HHhgSnHcRhL0MJp1DPfiEjU0_zDGpSB964INID8lL3CMYnVwanLZv5sEW84tdvOg-iyQt7mj_9LBDZJ7O_Ozh37LeGxvAHoh2Qr2SMUxZF03FSn-X1tN9fa6Kt18YdKuaNL14leMHt-ZG4IfrSuvB6qSlteIxlYY6iuKefuKy0VrvdWRiVly5jFsUHX9vKZGAch4A.IPr2KHPQjHajV3ZX5sYcXfQY1dUX7dNgSQCYqBgx2fc&dib_tag=se&m=A294P4X9EWVXLJ&marketplaceID=ATVPDKIKX0DER&nsdOptOutParam=true&qid=1784400520&s=merchant-items&sr=1-4",
-        "image": "https://m.media-amazon.com/images/I/71tGl43E+XL._AC_UY218_.jpg",
-        "price": 2312.64,
-        "priceFormatted": "USD 2312.64"
+        "asin": "B09SG2Q23M",
+        "title": "Anker Power Strip with 2100J Surge Protector, Outlet Extender, 20W, 12 AC | 5ft Extension Cord with Multiple Outlets, 1 USB C, 2 USB A, Home Office, Dorm Room Essentials, TUV Listed",
+        "url": "https://www.amazon.com/dp/B09SG2Q23M",
+        "image": "https://m.media-amazon.com/images/I/71FtSiqsK3L._AC_UY218_.jpg",
+        "price": 23.99,
+        "currency": "USD",
+        "priceFormatted": "$23.99",
+        "rating": 4.8,
+        "reviews": null,
+        "isPrime": false,
+        "isBestSeller": false,
+        "isSponsored": false
       },
       {
-        "asin": "B0H8YQRKZS",
-        "title": "soundcore nebula P1 projector with 100\" screen",
-        "url": "https://www.amazon.com/soundcore-nebula-projector-100-screen/dp/B0H8YQRKZS/ref=sr_1_5?dib=eyJ2IjoiMSJ9.pSOgATegJgbel08XOr1UCtK2uIYZBvx7uxxdG3HHhgSnHcRhL0MJp1DPfiEjU0_zDGpSB964INID8lL3CMYnVwanLZv5sEW84tdvOg-iyQt7mj_9LBDZJ7O_Ozh37LeGxvAHoh2Qr2SMUxZF03FSn-X1tN9fa6Kt18YdKuaNL14leMHt-ZG4IfrSuvB6qSlteIxlYY6iuKefuKy0VrvdWRiVly5jFsUHX9vKZGAch4A.IPr2KHPQjHajV3ZX5sYcXfQY1dUX7dNgSQCYqBgx2fc&dib_tag=se&m=A294P4X9EWVXLJ&marketplaceID=ATVPDKIKX0DER&nsdOptOutParam=true&qid=1784400520&s=merchant-items&sr=1-5",
-        "image": "https://m.media-amazon.com/images/I/7130mBASgZL._AC_UY218_.jpg",
-        "price": 706.64,
-        "priceFormatted": "USD 706.64"
+        "asin": "B0BQLLB61B",
+        "title": "Anker USB C Hub, 5-in-1 USBC to HDMI Splitter with 4K Display | 85W Max PD, 1 Powered USB-C 5Gbps & 2 Powered USB-A 3.0 5Gbps Data Ports, for MacBook Pro, MacBook Air, Dell and More (Black)",
+        "url": "https://www.amazon.com/dp/B0BQLLB61B",
+        "image": "https://m.media-amazon.com/images/I/615HRY2dnML._AC_UY218_.jpg",
+        "price": 17.99,
+        "currency": "USD",
+        "priceFormatted": "$17.99",
+        "rating": 4.4,
+        "reviews": null,
+        "isPrime": false,
+        "isBestSeller": true,
+        "isSponsored": false
       }
-    ],
-    "rawFirstItem": {
-      "asin": "B0H8XR7QJY",
-      "title": "soundcore Nebula X1 Pro with Speaker Floor Stand | Spatial Sound, Dolby Atmos, Optical Zoom, 56000:1 Contrast, Intelligent Setup, Home Outdoor Cinema",
-      "productUrl": "https://www.amazon.com/soundcore-Nebula-Speaker-Floor-Stand/dp/B0H8XR7QJY/ref=sr_1_1?dib=eyJ2IjoiMSJ9.pSOgATegJgbel08XOr1UCtK2uIYZBvx7uxxdG3HHhgSnHcRhL0MJp1DPfiEjU0_zDGpSB964INID8lL3CMYnVwanLZv5sEW84tdvOg-iyQt7mj_9LBDZJ7O_Ozh37LeGxvAHoh2Qr2SMUxZF03FSn-X1tN9fa6Kt18YdKuaNL14leMHt-ZG4IfrSuvB6qSlteIxlYY6iuKefuKy0VrvdWRiVly5jFsUHX9vKZGAch4A.IPr2KHPQjHajV3ZX5sYcXfQY1dUX7dNgSQCYqBgx2fc&dib_tag=se&m=A294P4X9EWVXLJ&marketplaceID=ATVPDKIKX0DER&nsdOptOutParam=true&qid=1784400520&s=merchant-items&sr=1-1",
-      "imageUrl": "https://m.media-amazon.com/images/I/61ag00U6VHL._AC_UY218_.jpg",
-      "price": 5498,
-      "currency": "USD",
-      "sellerId": "A294P4X9EWVXLJ",
-      "marketplace": "US",
-      "isPrime": false,
-      "isBestSeller": false,
-      "isSponsored": false,
-      "scrapedAt": "2026-07-18T18:48:41.125Z"
-    }
+    ]
   },
   "analytics-compare": {
     "count": 2,

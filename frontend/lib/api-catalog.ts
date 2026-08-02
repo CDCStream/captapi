@@ -589,7 +589,18 @@ const KICK: Spec[] = [
 ];
 
 const AMAZON_SHOP: Spec[] = [
-  { slug: "amazon-shop-page", name: "Amazon Shop Page API", shortName: "Shop Page", category: "list", method: "GET", path: "/v1/amazon-shop/page", credits: 2, tagline: "List products from an Amazon Shop / influencer storefront page — title, price, and product URL for each item." },
+  {
+    slug: "amazon-shop-page",
+    name: "Amazon Shop Page API",
+    shortName: "Shop Page",
+    category: "list",
+    method: "GET",
+    path: "/v1/amazon-shop/page",
+    credits: 1,
+    tagline: "Amazon seller storefront products — ASIN, price, badges, canonical /dp URLs. 1 credit/page.",
+    longDescription:
+      "Pass an Amazon seller storefront URL (/sp?seller=… or /s?me=…) or raw seller ID and get that seller's product listings as clean JSON: ASIN, title, canonical /dp URL, image, price/currency/priceFormatted, rating/reviews, and isPrime/isBestSeller/isSponsored flags. Includes seller id/name/profile URL, scrapedAt, and cursor pagination (nextCursor/hasMore). Scope: third-party seller storefronts — not influencer Amazon Shops (/shop/<handle>), which are a different Amazon surface. Billing is 1 credit per ~16-product storefront page.",
+  },
 ];
 
 const ACCOUNT: Spec[] = [
@@ -915,7 +926,7 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
   {
     id: "amazon_shop",
     name: "Amazon Shop",
-    blurb: "Fetch Amazon seller storefront metadata and product listings for commerce research.",
+    blurb: "Seller storefront product listings (not influencer /shop/ vitrines) — price, badges, pagination.",
     icon: "amazon",
     color: "text-amber-500",
     exampleUrl: "https://www.amazon.com/s?me=ATVPDKIKX0DER",
@@ -1528,7 +1539,8 @@ const SNAPCHAT_PROFILE = "Snapchat username or profile URL.";
 const TRUTH_PROFILE = "Truth Social profile URL or @username.";
 const TRUTH_POST = "Truth Social post URL or post ID.";
 const KICK_CLIP = "Kick clip URL, channel URL, or channel username.";
-const AMAZON_SHOP_URL = "Amazon seller storefront URL, seller profile URL, or seller ID.";
+const AMAZON_SHOP_URL =
+  "Amazon seller storefront URL (/sp?seller=… or /s?me=…) or raw seller ID. Not influencer /shop/<handle> pages.";
 const KWAI_PROFILE = "Kwai profile URL or @handle, e.g. https://www.kwai.com/@topfilmeseseriesnatv.";
 const KWAI_POST = "Kwai video URL, e.g. https://www.kwai.com/@topfilmeseseriesnatv/video/5240932700689736196.";
 const CURSOR = { name: "cursor", type: "string" as const, required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." };
@@ -1733,7 +1745,17 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "truth-social-user-posts": [up(TRUTH_PROFILE), lp(20, 80), CURSOR],
   "truth-social-post": [up(TRUTH_POST)],
   "kick-clip": [up(KICK_CLIP), lpFlat(30, 100, 2)],
-  "amazon-shop-page": [up(AMAZON_SHOP_URL), { name: "marketplace", type: "string", required: false, description: "Amazon marketplace code. Default US." }, lp(20, 200)],
+  "amazon-shop-page": [
+    up(AMAZON_SHOP_URL),
+    { name: "marketplace", type: "string", required: false, description: "Amazon marketplace code. Default US." },
+    lp(20, 200),
+    {
+      name: "cursor",
+      type: "string",
+      required: false,
+      description: "Pagination cursor from nextCursor (page or page:offset). Leave empty for the first page.",
+    },
+  ],
   // Account
   "account-balance": [],
   "account-request-history": [lp(50, 500)],
@@ -2106,7 +2128,7 @@ function notFoundDetail(ep: ApiEndpoint): string | null {
     truth_social: "Truth Social post not found",
     github: "Not found on GitHub",
     linkedin: "Not found on LinkedIn",
-    amazon_shop: "Amazon Shop page not found",
+    amazon_shop: "Amazon seller storefront not found",
   };
   return RESOURCE_404[p] ?? "Resource not found";
 }
@@ -2223,7 +2245,7 @@ const PROFILE_URL: Record<PlatformId, string> = {
   snapchat: "https://www.snapchat.com/@nba",
   truth_social: "https://truthsocial.com/@realDonaldTrump",
   kick: "https://kick.com/xqc",
-  amazon_shop: "https://www.amazon.com/s?me=ATVPDKIKX0DER",
+  amazon_shop: "https://www.amazon.com/sp?seller=A294P4X9EWVXLJ",
   account: "https://captapi.com/dashboard",
   utilities: "https://www.tiktok.com/@tiktok/video/7234567890123456789",
   kwai: "https://www.kwai.com/@topfilmeseseriesnatv",

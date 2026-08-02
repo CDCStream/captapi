@@ -2587,30 +2587,32 @@ class AmazonShopApi:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
 
-    def page(self, *, url: str, marketplace: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Amazon Shop Page — Amazon seller storefront metadata and product listings. (2 credits)
+    def page(self, *, url: str, marketplace: str | None = None, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Amazon Shop Page — Amazon seller storefront products with price, badges, scrapedAt, and cursor pagination. (1 credit)
 
-        :param url: Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Amazon seller storefront URL (/sp?seller=… or /s?me=…) or raw seller ID. Not influencer /shop/<handle> pages. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param marketplace: Amazon marketplace code. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cursor: Pagination cursor from nextCursor (page or page:offset). Leave empty for the first page.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/amazon-shop/page", {"url": url, "marketplace": marketplace, "limit": limit, "cache": cache})
+        return self._t.get("/v1/amazon-shop/page", {"url": url, "marketplace": marketplace, "limit": limit, "cursor": cursor, "cache": cache})
 
 
 class AsyncAmazonShopApi:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
 
-    async def page(self, *, url: str, marketplace: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Amazon Shop Page — Amazon seller storefront metadata and product listings. (2 credits)
+    async def page(self, *, url: str, marketplace: str | None = None, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Amazon Shop Page — Amazon seller storefront products with price, badges, scrapedAt, and cursor pagination. (1 credit)
 
-        :param url: Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
+        :param url: Amazon seller storefront URL (/sp?seller=… or /s?me=…) or raw seller ID. Not influencer /shop/<handle> pages. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param marketplace: Amazon marketplace code. Default US.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cursor: Pagination cursor from nextCursor (page or page:offset). Leave empty for the first page.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/amazon-shop/page", {"url": url, "marketplace": marketplace, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/amazon-shop/page", {"url": url, "marketplace": marketplace, "limit": limit, "cursor": cursor, "cache": cache})
 
 
 class GithubApi:

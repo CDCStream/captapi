@@ -138,7 +138,8 @@ const SNAPCHAT_PROFILE = "Snapchat username or profile URL.";
 const TRUTH_PROFILE = "Truth Social profile URL or @username.";
 const TRUTH_POST = "Truth Social post URL or post ID.";
 const KICK_CLIP = "Kick clip URL, channel URL, or channel username.";
-const AMAZON_SHOP = "Amazon seller storefront URL, seller profile URL, or seller ID.";
+const AMAZON_SHOP =
+  "Amazon seller storefront URL (/sp?seller=… or /s?me=…) or raw seller ID. Not influencer /shop/<handle> pages.";
 const KWAI_PROFILE = "Kwai profile URL or @handle, e.g. https://www.kwai.com/@easycashindonesia.";
 const KWAI_POST = "Kwai video URL, e.g. https://www.kwai.com/@handle/video/5238962376325675745.";
 const KOMI_PAGE = "Komi page URL or username.";
@@ -424,7 +425,24 @@ const KICK: Omit<Endpoint, "platform">[] = [
 ];
 
 const AMAZON_SHOP_ENDPOINTS: Omit<Endpoint, "platform">[] = [
-  { tool: "amazon_shop_page", name: "Amazon Shop Page", path: "/v1/amazon-shop/page", credits: 2, summary: "Amazon seller storefront metadata and product listings.", params: [url(AMAZON_SHOP), { name: "marketplace", type: "string", required: false, description: "Amazon marketplace code. Default US." }, limit(20, 200)] },
+  {
+    tool: "amazon_shop_page",
+    name: "Amazon Shop Page",
+    path: "/v1/amazon-shop/page",
+    credits: 1,
+    summary: "Amazon seller storefront products with price, badges, scrapedAt, and cursor pagination.",
+    params: [
+      url(AMAZON_SHOP),
+      { name: "marketplace", type: "string", required: false, description: "Amazon marketplace code. Default US." },
+      limit(20, 200),
+      {
+        name: "cursor",
+        type: "string",
+        required: false,
+        description: "Pagination cursor from nextCursor (page or page:offset). Leave empty for the first page.",
+      },
+    ],
+  },
 ];
 
 const ACCOUNT: Omit<Endpoint, "platform">[] = [

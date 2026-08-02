@@ -3844,14 +3844,14 @@
     "platform": "amazon_shop",
     "name": "Amazon Shop Page",
     "path": "/v1/amazon-shop/page",
-    "credits": 2,
-    "summary": "Amazon seller storefront metadata and product listings.",
+    "credits": 1,
+    "summary": "Amazon seller storefront products with price, badges, scrapedAt, and cursor pagination.",
     "params": [
       {
         "name": "url",
         "type": "string",
         "required": true,
-        "description": "Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+        "description": "Amazon seller storefront URL (/sp?seller=… or /s?me=…) or raw seller ID. Not influencer /shop/<handle> pages. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
       },
       {
         "name": "marketplace",
@@ -3864,6 +3864,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor from nextCursor (page or page:offset). Leave empty for the first page."
       },
       {
         "name": "cache",

@@ -1827,19 +1827,21 @@ export class LinkedinAdLibraryApi {
 }
 
 export interface AmazonShopPageParams {
-  /** Amazon seller storefront URL, seller profile URL, or seller ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
+  /** Amazon seller storefront URL (/sp?seller=… or /s?me=…) or raw seller ID. Not influencer /shop/<handle> pages. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
   /** Amazon marketplace code. Default US. */
   marketplace?: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Pagination cursor from nextCursor (page or page:offset). Leave empty for the first page. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
 
 export class AmazonShopApi {
   constructor(private readonly core: HttpCore) {}
-  /** Amazon Shop Page — Amazon seller storefront metadata and product listings. (2 credits) */
+  /** Amazon Shop Page — Amazon seller storefront products with price, badges, scrapedAt, and cursor pagination. (1 credit) */
   page(params: AmazonShopPageParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/amazon-shop/page", params);
   }
