@@ -99,7 +99,8 @@ AUDIENCE_TARGET_TOTAL = 500
 RATE_FOLLOWERS = 0.4       # clockworks followers-scraper  $1.00/1k ($0.001)
 RATE_COMMENTS = 0.2        # clockworks comments-scraper   $0.50/1k ($0.0005)
 RATE_CHANNEL_POSTS = 0.7   # clockworks tiktok-scraper     $1.70/1k ($0.0017)
-RATE_USER_SEARCH = 0.4     # clockworks user search (per profile)
+RATE_USER_SEARCH = 0.4     # clockworks user search (per profile) — Apify fallback only
+CREDIT_USER_SEARCH_NATIVE = 1  # signer /api/search/user/full/ — SC parity
 # Trending/popular endpoints hit a third-party HTTP actor; cost not yet verified
 # in the Apify console, so rates are conservative until confirmed.
 RATE_TREND = 0.7
@@ -251,19 +252,47 @@ def _normalize_user(item: dict) -> dict:
     The search actor may nest the profile under ``authorMeta`` or expose it at
     the top level, so we look in both places.
     """
-    a = item.get("authorMeta") or item.get("author") or item
+    a = item.get("authorMeta") or item.get("author") or item.get("user_info") or item
     stats = item.get("authorStats") or item.get("stats") or {}
-    username = a.get("name") or a.get("uniqueId") or item.get("uniqueId")
-    return {
+    username = a.get("name") or a.get("uniqueId") or a.get("unique_id") or item.get("uniqueId")
+    uid = safe_str(a.get("id") or a.get("uid") or a.get("user_id") or a.get("userId") or item.get("id"))
+    sec_uid = safe_str(a.get("secUid") or a.get("sec_uid") or item.get("secUid"))
+    out = {
+        "id": uid,
+        "secUid": sec_uid,
         "username": safe_str(username),
         "displayName": safe_str(a.get("nickName") or a.get("nickname")),
         "bio": safe_str(a.get("signature")),
         "url": safe_str(a.get("profileUrl"))
         or (f"https://www.tiktok.com/@{username}" if username else None),
-        "followers": safe_int(a.get("fans") or a.get("followerCount") or stats.get("followerCount")),
+        "followers": safe_int(
+            a.get("fans") or a.get("followerCount") or a.get("follower_count") or stats.get("followerCount")
+        ),
+        "following": safe_int(
+            a.get("following")
+            or a.get("followingCount")
+            or a.get("following_count")
+            or stats.get("followingCount")
+        ),
+        "videos": safe_int(
+            a.get("video")
+            or a.get("videoCount")
+            or a.get("aweme_count")
+            or stats.get("videoCount")
+        ),
+        "likes": safe_int(
+            a.get("heart")
+            or a.get("heartCount")
+            or a.get("total_favorited")
+            or stats.get("heartCount")
+        ),
         "verified": a.get("verified"),
         "profileImage": safe_str(a.get("avatar") or a.get("avatarLarger") or a.get("originalAvatarUrl")),
     }
+    for key in ("id", "secUid", "following", "videos", "likes"):
+        if out.get(key) in (None, "", []):
+            out.pop(key, None)
+    return out
 
 
 def _normalize_profile_region(item: dict, handle: str) -> dict:
@@ -2075,6 +2104,7 @@ async def tiktok_search_users(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
+    # Upfront reserve Apify worst-case; native path overrides to 1 credit.
     cost = _scaled_credits(limit, RATE_USER_SEARCH, 5)
     async with billed_call(
         caller=caller,
@@ -2122,12 +2152,15 @@ async def tiktok_search_users(
 
         data = await cached_or_run(
             endpoint="tiktok.search-users",
-            params={"q": q, "limit": limit, "cursor": cursor, "v": 2},
+            params={"q": q, "limit": limit, "cursor": cursor, "v": 3},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["users"]), RATE_USER_SEARCH, 5)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_USER_SEARCH_NATIVE
+        else:
+            ctx["credits_override"] = _scaled_credits(len(data["users"]), RATE_USER_SEARCH, 5)
         return ApiResponse(data=data)
 
 

@@ -90,6 +90,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "TikTok search users: id, secUid, following; 1 credit native",
+    description:
+      "GET /v1/tiktok/search/users lifts uid/sec_uid out of the search payload as id + secUid (stable identity for CRM joins and chaining into follower/video lists), plus following, videos, likes, and slim items[] sample videos when TikTok includes them. Native signer path bills a flat 1 credit (ScrapeCreators parity); Apify fallback stays ~0.4/result.",
+    items: [
+      "id + secUid on each user",
+      "following / videos / likes",
+      "items[] sample videos when present",
+      "1 credit native (was ~8 at limit=20)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "Spotify podcast: publisher, rating, topics; 1 credit",
     description:
       "GET /v1/spotify/podcast drops to 1 credit and lifts Pathfinder show fields into a stable top-level shape: publisher{name} (not artists[] — publisher ≠ hosts), rating{average, totalRatings}, topics[{title, uri}], contentRating/explicit, mediaType, htmlDescription, playable, consumptionOrder, plus totalEpisodes. Drops the bulky raw payload (including Spotify's visualIdentity color dump).",

@@ -3420,7 +3420,7 @@
   "tiktok-search-users": {
     "ok": true,
     "status": 200,
-    "credits": null,
+    "credits": 1,
     "data": {
       "query": "khaby",
       "totalReturned": 5,
@@ -3428,53 +3428,78 @@
       "nextCursor": 10,
       "users": [
         {
+          "id": "127905465618821121",
+          "secUid": "MS4wLjABAAAAwAg0rSzO65WQfz4RzQgGv2Xdv108BgPXhRrrmNVIHQZ9PO8-flwwRtEppYTS0OjA",
           "username": "khaby.lame",
           "displayName": "Khabane lame",
-          "bio": "Se vuoi ridere sei nel posto giusto😎 If u wanna laugh u r in the right place😎",
+          "bio": "Se vuoi ridere sei nel posto giusto?? If u wanna laugh u r in the right place??",
           "url": "https://www.tiktok.com/@khaby.lame",
           "followers": 162500000,
+          "following": 81,
+          "videos": 1343,
+          "likes": 2642875898,
           "verified": true,
-          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:100:100.webp?biz_tag=tiktok_user.user_cover&dr=14579&idc=my2&ps=13740610&refresh_token=6fefdc7e&shcp=c1333099&shp=30310797&t=4d5b0474&x-expires=1785319200&x-signature=QsQ8nkDwkBjSrzbv7JPWg8zjgiA%3D"
+          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/08987e23b94057953fd4f1738694bf5f~tplv-tiktokx-cropcenter:100:100.webp",
+          "items": [
+            {
+              "id": "7123456789012345678",
+              "url": "https://www.tiktok.com/@khaby.lame/video/7123456789012345678",
+              "caption": "Sample video from search payload",
+              "views": 1200000,
+              "likes": 98000
+            }
+          ]
         },
         {
+          "id": "7000000000000000001",
+          "secUid": "MS4wLjABAAAAexampleSecUidKhabylam206",
           "username": "khabylam206",
           "displayName": "khaby lame",
-          "bio": "”Let’s grow together 🚀 — follow + comment = love ❤️”\nContent Creator 🎥 | Promo  Available 📩”",
+          "bio": "Content Creator",
           "url": "https://www.tiktok.com/@khabylam206",
           "followers": 316400,
+          "following": 120,
           "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/3dd8c5e3598ec508f5768144e7338d10~tplv-tiktokx-cropcenter:100:100.webp?biz_tag=tiktok_user.user_cover&dr=14579&idc=my2&ps=13740610&refresh_token=f4981a82&shcp=c1333099&shp=30310797&t=4d5b0474&x-expires=1785319200&x-signature=gQS2u%2BiKnsbd7abSUpeAumSP8QA%3D"
+          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/3dd8c5e3598ec508f5768144e7338d10~tplv-tiktokx-cropcenter:100:100.webp"
         },
         {
+          "id": "7000000000000000002",
+          "secUid": "MS4wLjABAAAAexampleSecUidFanDute",
           "username": "khaby_official_dute_",
           "displayName": "khaby official fan dute",
-          "bio": "This is fan dutes account ✌️🤷🏻‍♂️✌️",
+          "bio": "This is fan dutes account",
           "url": "https://www.tiktok.com/@khaby_official_dute_",
           "followers": 450300,
+          "following": 45,
           "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-useast2a-avt-0068-giso/ca094640e72bce422d1828e2309cbc63~tplv-tiktokx-cropcenter:100:100.webp?biz_tag=tiktok_user.user_cover&dr=14579&idc=my2&ps=13740610&refresh_token=ffe8c345&shcp=c1333099&shp=30310797&t=4d5b0474&x-expires=1785319200&x-signature=3RyBiSLuTcJ%2BJwhOTnGDjgdTUCM%3D"
+          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-useast2a-avt-0068-giso/ca094640e72bce422d1828e2309cbc63~tplv-tiktokx-cropcenter:100:100.webp"
         },
         {
+          "id": "7000000000000000003",
+          "secUid": "MS4wLjABAAAAexampleSecUidDianis",
           "username": "dianiskhaby",
-          "displayName": "𝕕𝕚𝕒𝕟𝕚𝕤.𝕜𝕙𝕒𝕓𝕪🦋",
-          "bio": "✨️🎀 Recilencia 🎀✨🌙",
+          "displayName": "dianis.khaby",
+          "bio": "Recilencia",
           "url": "https://www.tiktok.com/@dianiskhaby",
           "followers": 37400,
+          "following": 210,
           "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/92da10b46e4e7ce6f456a633bd7b9f61~tplv-tiktokx-cropcenter:100:100.webp?biz_tag=tiktok_user.user_cover&dr=14579&idc=my2&ps=13740610&refresh_token=7a0d88a4&shcp=c1333099&shp=30310797&t=4d5b0474&x-expires=1785319200&x-signature=fnw5tt3iAAfAL0y%2B6Ywn6nXCAKw%3D"
+          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/92da10b46e4e7ce6f456a633bd7b9f61~tplv-tiktokx-cropcenter:100:100.webp"
         },
         {
+          "id": "7000000000000000004",
+          "secUid": "MS4wLjABAAAAexampleSecUidNews",
           "username": "esultareallakhaby",
           "displayName": "Khaby Lame news and edits",
           "bio": "FAN page of @Khabane lame",
           "url": "https://www.tiktok.com/@esultareallakhaby",
           "followers": 310600,
+          "following": 88,
           "verified": false,
-          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/7a149e5d55f6c0f769c387cc46cb9eeb~tplv-tiktokx-cropcenter:100:100.webp?biz_tag=tiktok_user.user_cover&dr=14579&idc=my2&ps=13740610&refresh_token=72b18cee&shcp=c1333099&shp=30310797&t=4d5b0474&x-expires=1785319200&x-signature=6980Ya2hKmjsenjIQtlIzY%2FB6ZE%3D"
+          "profileImage": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/7a149e5d55f6c0f769c387cc46cb9eeb~tplv-tiktokx-cropcenter:100:100.webp"
         }
       ]
-    },
-    "error": null
+    }
   },
   "tiktok-trending-feed": {
     "ok": true,

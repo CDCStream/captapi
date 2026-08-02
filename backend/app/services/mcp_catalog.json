@@ -1100,8 +1100,8 @@
     "platform": "tiktok",
     "name": "TikTok Search Users",
     "path": "/v1/tiktok/search/users",
-    "credits": 8,
-    "summary": "Search TikTok users by keyword — username, display name, bio, follower count, verified flag, and avatar per result, with cursor pagination (nextCursor + hasMore).",
+    "credits": 1,
+    "summary": "Search TikTok users — id, secUid, followers/following, verified, sample videos; cursor pagination.",
     "params": [
       {
         "name": "q",
@@ -1113,7 +1113,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 100. Billed per result."
+        "description": "Max items to return. Default 20, max 100. Flat 1 credit on the native path."
       },
       {
         "name": "cursor",

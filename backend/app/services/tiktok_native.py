@@ -1717,6 +1717,39 @@ async def user_connections_native(
     return collected[:limit] if collected else None
 
 
+def _map_search_sample_item(
+    item: dict[str, Any], username: str | None
+) -> dict[str, Any] | None:
+    """Slim sample video from a search-user row's ``items[]`` (not full video-details)."""
+    aweme_id = safe_str(item.get("aweme_id") or item.get("id"))
+    if not aweme_id:
+        return None
+    stats = item.get("statistics") or item.get("stats") or {}
+    if not isinstance(stats, dict):
+        stats = {}
+    video = item.get("video") or {}
+    if not isinstance(video, dict):
+        video = {}
+    cover = (
+        _url_list_first(video.get("cover"))
+        or _url_list_first(video.get("origin_cover") or video.get("originCover"))
+        or _url_list_first(video.get("dynamic_cover") or video.get("dynamicCover"))
+        or safe_str(item.get("cover") or item.get("thumbnail"))
+    )
+    out: dict[str, Any] = {
+        "id": aweme_id,
+        "url": (
+            f"https://www.tiktok.com/@{username}/video/{aweme_id}" if username else None
+        ),
+        "caption": safe_str(item.get("desc") or item.get("description")),
+        "views": safe_int(stats.get("play_count") or stats.get("playCount")),
+        "likes": safe_int(stats.get("digg_count") or stats.get("diggCount")),
+        "thumbnailUrl": cover,
+        "publishedAt": _iso(item.get("create_time") or item.get("createTime")),
+    }
+    return {k: v for k, v in out.items() if v not in (None, "", [])} or None
+
+
 def _map_search_user(row: dict[str, Any]) -> dict[str, Any] | None:
     """Map ``/api/search/user/full/`` user_list row → search-users shape."""
     info = row.get("user_info") or row.get("user") or row
@@ -1726,12 +1759,29 @@ def _map_search_user(row: dict[str, Any]) -> dict[str, Any] | None:
     if not username:
         return None
     avatar = (
-        _url_list_first(info.get("avatar_thumb") or info.get("avatarThumb"))
-        or _url_list_first(info.get("avatar_medium") or info.get("avatarMedium"))
-        or safe_str(info.get("avatar_thumb") or info.get("avatarThumb"))
+        _url_list_first(info.get("avatar_medium") or info.get("avatarMedium"))
+        or _url_list_first(info.get("avatar_larger") or info.get("avatarLarger"))
+        or _url_list_first(info.get("avatar_thumb") or info.get("avatarThumb"))
+        or safe_str(info.get("avatar_medium") or info.get("avatar_thumb"))
     )
     verified = info.get("custom_verify") or info.get("verification_type") or info.get("verified")
-    return {
+    uid = safe_str(
+        info.get("uid") or info.get("user_id") or info.get("userId") or info.get("id")
+    )
+    sec_uid = safe_str(info.get("sec_uid") or info.get("secUid"))
+    sample_items: list[dict[str, Any]] = []
+    raw_items = row.get("items") or row.get("item_list") or row.get("itemList") or []
+    if isinstance(raw_items, list):
+        for entry in raw_items:
+            if not isinstance(entry, dict):
+                continue
+            mapped = _map_search_sample_item(entry, username)
+            if mapped:
+                sample_items.append(mapped)
+
+    out: dict[str, Any] = {
+        "id": uid,
+        "secUid": sec_uid,
         "username": username,
         "displayName": safe_str(info.get("nickname") or info.get("nickName")),
         "bio": safe_str(info.get("signature")),
@@ -1739,9 +1789,27 @@ def _map_search_user(row: dict[str, Any]) -> dict[str, Any] | None:
         "followers": safe_int(
             info.get("follower_count") or info.get("followerCount")
         ),
+        "following": safe_int(
+            info.get("following_count") or info.get("followingCount")
+        ),
+        "videos": safe_int(
+            info.get("aweme_count")
+            or info.get("video_count")
+            or info.get("videoCount")
+        ),
+        "likes": safe_int(
+            info.get("total_favorited")
+            or info.get("heart_count")
+            or info.get("heartCount")
+        ),
         "verified": bool(verified) if verified not in (None, "", 0, "0") else False,
         "profileImage": avatar,
+        "items": sample_items,
     }
+    for key in ("id", "secUid", "following", "videos", "likes", "items"):
+        if out.get(key) in (None, "", []):
+            out.pop(key, None)
+    return out
 
 
 def _collect_search_users(rows: list[Any], *, limit: int) -> list[dict[str, Any]]:

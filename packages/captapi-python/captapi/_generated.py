@@ -567,10 +567,10 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/search/hashtag", {"q": q, "limit": limit, "cursor": cursor, "region": region, "cache": cache})
 
     def search_users(self, *, q: str, limit: float | None = None, cursor: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Search Users — Search TikTok users by keyword — username, display name, bio, follower count, verified flag, and avatar per result, with cursor pagination (nextCursor + hasMore). (8 credits)
+        """TikTok Search Users — Search TikTok users — id, secUid, followers/following, verified, sample videos; cursor pagination. (1 credit)
 
         :param q: Search query matched against usernames, display names and bios.
-        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param limit: Max items to return. Default 20, max 100. Flat 1 credit on the native path.
         :param cursor: Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
@@ -774,10 +774,10 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/search/hashtag", {"q": q, "limit": limit, "cursor": cursor, "region": region, "cache": cache})
 
     async def search_users(self, *, q: str, limit: float | None = None, cursor: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Search Users — Search TikTok users by keyword — username, display name, bio, follower count, verified flag, and avatar per result, with cursor pagination (nextCursor + hasMore). (8 credits)
+        """TikTok Search Users — Search TikTok users — id, secUid, followers/following, verified, sample videos; cursor pagination. (1 credit)
 
         :param q: Search query matched against usernames, display names and bios.
-        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param limit: Max items to return. Default 20, max 100. Flat 1 credit on the native path.
         :param cursor: Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """

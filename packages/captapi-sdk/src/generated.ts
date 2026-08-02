@@ -449,7 +449,7 @@ export interface TiktokSearchByHashtagParams {
 export interface TiktokSearchUsersParams {
   /** Search query matched against usernames, display names and bios. */
   q: string;
-  /** Max items to return. Default 20, max 100. Billed per result. */
+  /** Max items to return. Default 20, max 100. Flat 1 credit on the native path. */
   limit?: number;
   /** Pagination offset. Leave at 0 for the first page; then pass the nextCursor value from the previous response. A null nextCursor means the end. */
   cursor?: number;
@@ -571,7 +571,7 @@ export class TiktokApi {
   searchByHashtag(params: TiktokSearchByHashtagParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/search/hashtag", params);
   }
-  /** TikTok Search Users — Search TikTok users by keyword — username, display name, bio, follower count, verified flag, and avatar per result, with cursor pagination (nextCursor + hasMore). (8 credits) */
+  /** TikTok Search Users — Search TikTok users — id, secUid, followers/following, verified, sample videos; cursor pagination. (1 credit) */
   searchUsers(params: TiktokSearchUsersParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/search/users", params);
   }

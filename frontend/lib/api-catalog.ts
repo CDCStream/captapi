@@ -274,7 +274,25 @@ const TIKTOK: Spec[] = [
   { slug: "tiktok-music-posts", name: "TikTok Music Posts API", shortName: "Music Posts", category: "list", method: "GET", path: "/v1/tiktok/music-posts", credits: 2, tagline: "List TikTok videos that use a specific sound — caption, author, and engagement for each post.", longDescription: "Paste a TikTok music/sound URL and get the public videos that use that sound as structured JSON. Each result includes caption, author, thumbnail, and engagement counts. Use Song Details first if you only need the sound's metadata. Flat 2 credits per call." },
   { slug: "tiktok-top-search", name: "TikTok Top Search API", shortName: "Top Search", category: "search", method: "GET", path: "/v1/tiktok/top-search", credits: 2 , tagline: "Search TikTok's top mixed results for a keyword — videos and related hits ranked the way TikTok's search ranks them.", longDescription: "Pass a keyword and get TikTok's top mixed search results as structured JSON — the same style of ranked hits you see in TikTok search, not a single content type only. Each result includes the fields TikTok exposes for that hit (URL, caption or title, author, engagement when available). Flat 2 credits per call." },
   { slug: "tiktok-search-by-hashtag", name: "TikTok Search by Hashtag API", shortName: "Search by Hashtag", category: "search", method: "GET", path: "/v1/tiktok/search/hashtag", credits: 14, creditsPerResult: 0.7, tagline: "Search TikTok videos by hashtag — video URL, caption, author, and view / like / comment counts for each result, with cursor pagination to page through them all.", delivers: ["Public videos posted under your hashtag", "Video URL, caption, thumbnail, duration, and publish date", "Author profile plus view / like / comment / share / save counts", "Cursor pagination (nextCursor + hasMore) through every result"] , longDescription: "Pass a hashtag (with or without the #) and the TikTok Search by Hashtag API returns the videos posted under that tag as clean, structured JSON. Each result includes the video URL, caption, publish date, duration, thumbnail, the author's profile, and full engagement counts — views, likes, comments, shares, and saves — plus the hashtags and sound used. Need more than the first page? Pass the nextCursor value from the previous response to keep paging, and use hasMore to know when you've reached the end. An optional region parameter only chooses which country our request is sent from — it does not filter results by country. Use it to track a campaign or branded hashtag, discover trending content in a niche, or build a themed content feed. No TikTok login required. Billed per result — about 0.7 credits each." },
-  { slug: "tiktok-search-users", name: "TikTok Search Users API", shortName: "Search Users", category: "search", method: "GET", path: "/v1/tiktok/search/users", credits: 8, creditsPerResult: 0.4, tagline: "Search TikTok users by keyword — username, display name, bio, follower count, verified flag, and avatar for each matching creator, with cursor pagination.", longDescription: "Pass a search query and the TikTok Search Users API returns the creators whose username, display name, or bio match it as clean, structured JSON. Each result includes the username, display name, profile URL, bio, follower count, verified flag, and avatar. Need more than the first page? Pass the nextCursor value from the previous response to keep paging, and use hasMore to know when you've reached the end. Use it to turn a brand or creator name into confirmed @handles, discover creators in a niche, enrich a CRM or lead list, or feed an influencer-discovery tool. No TikTok login and no proxies or infrastructure to maintain on your side. Billed per result — about 0.4 credits each.", delivers: ["Public creators matching your search query", "Username, display name, profile URL, and bio", "Follower count, verified flag, and avatar", "Cursor pagination (nextCursor + hasMore) through every result"] },
+  {
+    slug: "tiktok-search-users",
+    name: "TikTok Search Users API",
+    shortName: "Search Users",
+    category: "search",
+    method: "GET",
+    path: "/v1/tiktok/search/users",
+    credits: 1,
+    tagline:
+      "Search TikTok users — id, secUid, followers/following, verified, and sample videos, with cursor pagination.",
+    longDescription:
+      "Pass a search query and get matching creators as clean JSON: id + secUid (stable TikTok identity — secUid is what follower/video list calls need), username, displayName, bio, url, followers, following, videos, likes, verified, profileImage, and items[] sample videos when TikTok includes them. Cursor pagination via nextCursor + hasMore. Prefer id/secUid over @handle for CRM joins — handles change. Flat 1 credit on the native path; Apify fallback bills about 0.4 credits per returned user (min 5).",
+    delivers: [
+      "id + secUid for stable identity / chaining",
+      "followers, following, videos, likes, verified",
+      "Sample items[] videos when present",
+      "Cursor pagination (nextCursor + hasMore)",
+    ],
+  },
   { slug: "tiktok-song-details", name: "TikTok Song Details API", shortName: "Song Details", category: "details", method: "GET", path: "/v1/tiktok/song-details", credits: 2 , tagline: "Get details for a TikTok sound — title, artist, duration, cover art, and how many videos use it.", longDescription: "Paste a TikTok music/sound URL and get the sound's metadata as clean JSON: title, artist or original creator, duration, cover image, and usage count when available. Pair with Music Posts to list videos that use the same sound. Flat 2 credits per call." },
   { slug: "tiktok-trending-feed", name: "TikTok Trending Feed API", shortName: "Trending Feed", category: "list", method: "GET", path: "/v1/tiktok/trending-feed", credits: 2 , tagline: "Get videos from TikTok's trending feed — caption, author, and engagement for each item. Flat 2 credits per call." },
   { slug: "tiktok-popular-hashtags", name: "TikTok Popular Hashtags API", shortName: "Popular Hashtags", category: "list", method: "GET", path: "/v1/tiktok/popular-hashtags", credits: 14, creditsPerResult: 0.7 , tagline: "Get currently popular TikTok hashtags — name and popularity signals for each tag." },
@@ -2733,6 +2751,12 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     list.push({
       q: `What does rating mean on a podcast?`,
       a: `rating.average is Spotify's show rating (about 0–5) and rating.totalRatings is how many people voted. It's the main numeric quality signal for podcast research on this endpoint.`,
+    });
+  }
+  if (ep.slug === "tiktok-search-users") {
+    list.push({
+      q: `Why do I need secUid if I already have the @handle?`,
+      a: `Handles change; id and secUid do not. TikTok's follower lists, video lists, and many internal calls require secUid. Prefer id/secUid for CRM joins and chaining — use username for display.`,
     });
   }
   if (ep.slug === "threads-profile") {
