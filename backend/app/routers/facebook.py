@@ -1506,20 +1506,69 @@ async def facebook_marketplace_search(
         le=200,
         description=(
             "How many listings to return (1–200). Flat 2 credits when details=false; "
-            "with details=true billed as 2 + 2 per listing."
+            "with details=true billed as 2 + 2 per listing. "
+            "First SSR/scroll page typically yields ~15–60 cards."
         ),
+    ),
+    minPrice: float | None = Query(None, ge=0, description="Minimum price in local currency units."),
+    maxPrice: float | None = Query(None, ge=0, description="Maximum price in local currency units."),
+    sortBy: str | None = Query(
+        None,
+        description=(
+            "Sort: suggested (default), distance, creation_time, "
+            "price_ascend, price_descend."
+        ),
+    ),
+    daysSinceListed: str | None = Query(
+        None,
+        description="Recency filter: 1 (24h), 7, or 30 days.",
+    ),
+    condition: str | None = Query(
+        None,
+        description="Item condition: new, like_new, good, fair (comma-separated ok).",
+    ),
+    deliveryMethod: str | None = Query(
+        None,
+        description="Delivery filter: local_pickup, shipping, or all.",
+    ),
+    availability: str | None = Query(
+        None,
+        description="Availability: available (default), sold, or all.",
+    ),
+    radiusMiles: int | None = Query(
+        None,
+        description="Search radius in miles (1,2,5,10,20,40,60,80,100,250,500). Default ~40.",
+    ),
+    category: str | None = Query(
+        None,
+        description="Top-level Marketplace category slug, e.g. electronics, vehicles, home.",
+    ),
+    cursor: str | None = Query(
+        None,
+        description="Pagination cursor from a previous nextCursor (same query + filters).",
     ),
     details: bool = Query(
         False,
         description=(
             "When true, enrich each listing with description, condition, coordinates, "
-            "and photos via native item pages (2 + 2 credits per listing). "
-            "Default false → list cards only at flat 2 credits."
+            "and the full photo gallery via item pages (2 + 2 credits per listing). "
+            "Default false → search cards at flat 2 credits (still includes cover photo)."
         ),
     ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    filters = facebook_marketplace_native.normalize_filters(
+        min_price=minPrice,
+        max_price=maxPrice,
+        sort_by=sortBy,
+        days_since_listed=daysSinceListed,
+        condition=condition,
+        delivery_method=deliveryMethod,
+        availability=availability,
+        radius_miles=radiusMiles,
+        category=category,
+    )
     # Reserve max; override to actual returned count after the run.
     base = (
         facebook_marketplace_native.credits_for_details(limit)
@@ -1535,29 +1584,43 @@ async def facebook_marketplace_search(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             if details:
-                native = await facebook_marketplace_native.marketplace_search_details_native(
-                    q, location, limit
+                page = await facebook_marketplace_native.marketplace_search_details_native(
+                    q, location, limit, filters=filters or None, cursor=cursor
                 )
             else:
-                native = await facebook_marketplace_native.marketplace_search_native(
-                    q, location, limit
+                page = await facebook_marketplace_native.marketplace_search_native(
+                    q, location, limit, filters=filters or None, cursor=cursor
                 )
-            if native is None:
+            if page is None:
                 raise HTTPException(
                     status_code=502,
                     detail="Facebook Marketplace search temporarily unavailable",
                 )
             ctx["source"] = "direct"
-            return {
-                "query": q,
-                "location": location,
-                "totalReturned": len(native),
-                "listings": native,
-            }
+            listings = page.get("listings") or []
+            return strip_empty(
+                {
+                    "query": q,
+                    "location": location,
+                    "filters": filters or None,
+                    "totalReturned": len(listings),
+                    "hasMore": bool(page.get("hasMore")),
+                    "nextCursor": page.get("nextCursor"),
+                    "listings": listings,
+                }
+            )
 
         data = await cached_or_run(
             endpoint="facebook.marketplace-search",
-            params={"q": q, "location": location, "limit": limit, "details": details, "v": 5},
+            params={
+                "q": q,
+                "location": location,
+                "limit": limit,
+                "details": details,
+                "filters": filters,
+                "cursor": cursor or "",
+                "v": 6,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,

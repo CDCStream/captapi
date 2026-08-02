@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "Facebook Marketplace search: filters, priceAmount, status flags",
+    description:
+      "GET /v1/facebook/marketplace-search keeps city-name location (no lat/lng) and createdAt, and now accepts Marketplace filters (minPrice/maxPrice, sortBy, daysSinceListed, condition, deliveryMethod, availability, radiusMiles, category). Listings add priceAmount (minor units), strikethroughPrice*, categoryId, isPending/isHidden/isViewerSeller, plus hasMore/nextCursor within the fetched page. Docs clarified: details=false already includes the cover photo; details=true adds description/condition/coordinates/full gallery (2 + 2 credits per listing).",
+    items: [
+      "Price/sort/condition/delivery/availability/radius/category filters",
+      "priceAmount + strikethrough + categoryId + pending/hidden flags",
+      "hasMore/nextCursor; details=true docs fixed vs cover photos",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "Instagram hashtag search: views, paid flags, creator size, audio",
     description:
       "GET /v1/instagram/hashtag-search stays on Instagram's native hashtag grid (not Google index) and now returns campaign-ready fields: engagement.views (backfilled from the creator feed when Polaris hides play counts), author.followers / author.postCount, isPaidPartnership / isAd / isAffiliate, music{id,title,artist} + musicId, location, accessibilityCaption, and previewComments. Optional mediaType=all|reels. Still flat 2 credits. Live check: engagement.likes matches Apify likesCount (not mislabeled views).",

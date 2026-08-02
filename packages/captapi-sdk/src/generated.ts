@@ -1480,9 +1480,29 @@ export interface FacebookMarketplaceSearchParams {
   q: string;
   /** City or place name, e.g. 'Austin, TX'. */
   location: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
+  /** Max items to return. Default 20, max 200. Flat 2 credits per call. */
   limit?: number;
-  /** Set true to fetch full description, photos and coordinates per listing (slower, costs more). */
+  /** Minimum price in local currency units. */
+  minPrice?: number;
+  /** Maximum price in local currency units. */
+  maxPrice?: number;
+  /** suggested | distance | creation_time | price_ascend | price_descend. */
+  sortBy?: string;
+  /** 1 (24h), 7, or 30. */
+  daysSinceListed?: string;
+  /** new, like_new, good, fair. */
+  condition?: string;
+  /** local_pickup | shipping | all. */
+  deliveryMethod?: string;
+  /** available | sold | all. */
+  availability?: string;
+  /** Radius in miles (1–500 discrete values). */
+  radiusMiles?: number;
+  /** Top-level category slug, e.g. electronics. */
+  category?: string;
+  /** Pagination cursor from a previous nextCursor. */
+  cursor?: string;
+  /** Set true for description/condition/coordinates/full gallery (2 + 2 credits per listing). Cover photo is included even when false. */
   details?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -1508,7 +1528,7 @@ export interface FacebookMarketplaceItemParams {
 
 export class FacebookMarketplaceApi {
   constructor(private readonly core: HttpCore) {}
-  /** Facebook Marketplace Search — Search Facebook Marketplace listings by keyword and location. (28 credits) */
+  /** Facebook Marketplace Search — Search Facebook Marketplace listings by keyword and city name. (2 credits) */
   search(params: FacebookMarketplaceSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/marketplace-search", params);
   }

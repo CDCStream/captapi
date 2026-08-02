@@ -5860,11 +5860,193 @@
               "type": "integer",
               "maximum": 200,
               "minimum": 1,
-              "description": "How many listings to return (1–200). Flat 2 credits when details=false; with details=true billed as 2 + 2 per listing.",
+              "description": "How many listings to return (1–200). Flat 2 credits when details=false; with details=true billed as 2 + 2 per listing. First SSR/scroll page typically yields ~15–60 cards.",
               "default": 20,
               "title": "Limit"
             },
-            "description": "How many listings to return (1–200). Flat 2 credits when details=false; with details=true billed as 2 + 2 per listing."
+            "description": "How many listings to return (1–200). Flat 2 credits when details=false; with details=true billed as 2 + 2 per listing. First SSR/scroll page typically yields ~15–60 cards."
+          },
+          {
+            "name": "minPrice",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Minimum price in local currency units.",
+              "title": "Minprice"
+            },
+            "description": "Minimum price in local currency units."
+          },
+          {
+            "name": "maxPrice",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Maximum price in local currency units.",
+              "title": "Maxprice"
+            },
+            "description": "Maximum price in local currency units."
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Sort: suggested (default), distance, creation_time, price_ascend, price_descend.",
+              "title": "Sortby"
+            },
+            "description": "Sort: suggested (default), distance, creation_time, price_ascend, price_descend."
+          },
+          {
+            "name": "daysSinceListed",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Recency filter: 1 (24h), 7, or 30 days.",
+              "title": "Dayssincelisted"
+            },
+            "description": "Recency filter: 1 (24h), 7, or 30 days."
+          },
+          {
+            "name": "condition",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Item condition: new, like_new, good, fair (comma-separated ok).",
+              "title": "Condition"
+            },
+            "description": "Item condition: new, like_new, good, fair (comma-separated ok)."
+          },
+          {
+            "name": "deliveryMethod",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Delivery filter: local_pickup, shipping, or all.",
+              "title": "Deliverymethod"
+            },
+            "description": "Delivery filter: local_pickup, shipping, or all."
+          },
+          {
+            "name": "availability",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Availability: available (default), sold, or all.",
+              "title": "Availability"
+            },
+            "description": "Availability: available (default), sold, or all."
+          },
+          {
+            "name": "radiusMiles",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search radius in miles (1,2,5,10,20,40,60,80,100,250,500). Default ~40.",
+              "title": "Radiusmiles"
+            },
+            "description": "Search radius in miles (1,2,5,10,20,40,60,80,100,250,500). Default ~40."
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Top-level Marketplace category slug, e.g. electronics, vehicles, home.",
+              "title": "Category"
+            },
+            "description": "Top-level Marketplace category slug, e.g. electronics, vehicles, home."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor from a previous nextCursor (same query + filters).",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor from a previous nextCursor (same query + filters)."
           },
           {
             "name": "details",
@@ -5872,11 +6054,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
-              "description": "When true, enrich each listing with description, condition, coordinates, and photos via native item pages (2 + 2 credits per listing). Default false → list cards only at flat 2 credits.",
+              "description": "When true, enrich each listing with description, condition, coordinates, and the full photo gallery via item pages (2 + 2 credits per listing). Default false → search cards at flat 2 credits (still includes cover photo).",
               "default": false,
               "title": "Details"
             },
-            "description": "When true, enrich each listing with description, condition, coordinates, and photos via native item pages (2 + 2 credits per listing). Default false → list cards only at flat 2 credits."
+            "description": "When true, enrich each listing with description, condition, coordinates, and the full photo gallery via item pages (2 + 2 credits per listing). Default false → search cards at flat 2 credits (still includes cover photo)."
           },
           {
             "name": "cache",

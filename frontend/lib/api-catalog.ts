@@ -314,7 +314,7 @@ const FACEBOOK: Spec[] = [
 ];
 
 const FACEBOOK_MARKETPLACE: Spec[] = [
-  { slug: "facebook-marketplace-search", name: "Facebook Marketplace Search API", shortName: "Marketplace Search", category: "search", method: "GET", path: "/v1/facebook/marketplace-search", credits: 2, tagline: "Search Facebook Marketplace by keyword and location — listing title, price, and link for each result.", longDescription: "Search Facebook Marketplace with a product keyword and city/place. Each result includes title, price, and listing URL. Default list path is flat 2 credits. Pass details=true for description, condition, coordinates, and photos — billed as 2 + 2 credits per listing." },
+  { slug: "facebook-marketplace-search", name: "Facebook Marketplace Search API", shortName: "Marketplace Search", category: "search", method: "GET", path: "/v1/facebook/marketplace-search", credits: 2, tagline: "Search Facebook Marketplace by keyword and city name — price filters, sort, condition, radius, and createdAt. Flat 2 credits.", longDescription: "Search Facebook Marketplace with a product keyword and a city/place name (no lat/lng required). Each result includes title, price (+ priceAmount in minor units), strikethrough price when discounted, categoryId, location, deliveryTypes, isSold/isLive/isPending/isHidden, cover photo, and createdAt. Optional filters: minPrice, maxPrice, sortBy, daysSinceListed, condition, deliveryMethod, availability, radiusMiles, category. Cursor pagination via nextCursor/hasMore within the fetched SSR page. Default list path is flat 2 credits and already includes the cover photo. Pass details=true for description, condition, coordinates, and the full photo gallery — billed as 2 + 2 credits per listing." },
   { slug: "facebook-marketplace-location-search", name: "Facebook Marketplace Location Search API", shortName: "Marketplace Locations", category: "search", method: "GET", path: "/v1/facebook/marketplace-location-search", credits: 2 },
   { slug: "facebook-marketplace-item", name: "Facebook Marketplace Item API", shortName: "Marketplace Item", category: "details", method: "GET", path: "/v1/facebook/marketplace-item", credits: 2 , tagline: "Get a Facebook Marketplace listing — title, price, condition, and location as structured JSON.", longDescription: "Paste a Facebook Marketplace item URL and get the listing as clean JSON: title, price, description, condition, delivery types, photos, and location when available. Flat 2 credits per call." },
 ];
@@ -1627,7 +1627,22 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "facebook-profile-reels": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
   "facebook-group-posts": [up("Public Facebook group URL, e.g. https://facebook.com/groups/ID."), lp(20, 200)],
   "facebook-comment-replies": [up("Facebook post URL the comment belongs to."), cid(), lpFlat(50, 500, 2)],
-  "facebook-marketplace-search": [qp("Product or keyword to search Facebook Marketplace for."), { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." }, lpFlat(20, 200, 2), { name: "details", type: "boolean", required: false, description: "When true, enriches each listing with description/condition/coordinates/photos (2 + 2 credits per listing). Default false → flat 2 credits." }],
+  "facebook-marketplace-search": [
+    qp("Product or keyword to search Facebook Marketplace for."),
+    { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." },
+    lpFlat(20, 200, 2),
+    { name: "minPrice", type: "number", required: false, description: "Minimum price in local currency units." },
+    { name: "maxPrice", type: "number", required: false, description: "Maximum price in local currency units." },
+    { name: "sortBy", type: "string", required: false, description: "suggested | distance | creation_time | price_ascend | price_descend." },
+    { name: "daysSinceListed", type: "string", required: false, description: "1 (24h), 7, or 30." },
+    { name: "condition", type: "string", required: false, description: "new, like_new, good, fair (comma-separated ok)." },
+    { name: "deliveryMethod", type: "string", required: false, description: "local_pickup | shipping | all." },
+    { name: "availability", type: "string", required: false, description: "available | sold | all." },
+    { name: "radiusMiles", type: "number", required: false, description: "Radius in miles: 1,2,5,10,20,40,60,80,100,250,500." },
+    { name: "category", type: "string", required: false, description: "Top-level category slug, e.g. electronics." },
+    { name: "cursor", type: "string", required: false, description: "Pagination cursor from a previous nextCursor." },
+    { name: "details", type: "boolean", required: false, description: "When true, adds description/condition/coordinates/full photo gallery (2 + 2 credits per listing). Default false → flat 2 credits; cover photo is still included." },
+  ],
   "facebook-marketplace-location-search": [qp("City/place search query, e.g. Austin."), lpFlat(10, 50, 2), { name: "details", type: "boolean", required: false, description: "Legacy flag. Coordinates are included when available. Flat 2 credits either way." }],
   "facebook-event-search": [qp("Topic and/or place, e.g. 'comedy Chicago'."), lp(20, 200)],
   "facebook-event-details": [up("Facebook event URL, e.g. https://facebook.com/events/ID.")],

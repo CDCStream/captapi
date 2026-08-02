@@ -2105,16 +2105,26 @@ class FacebookMarketplaceApi:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
 
-    def search(self, *, q: str, location: str, limit: float | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Marketplace Search — Search Facebook Marketplace listings by keyword and location. (28 credits)
+    def search(self, *, q: str, location: str, limit: float | None = None, minPrice: float | None = None, maxPrice: float | None = None, sortBy: str | None = None, daysSinceListed: str | None = None, condition: str | None = None, deliveryMethod: str | None = None, availability: str | None = None, radiusMiles: float | None = None, category: str | None = None, cursor: str | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Marketplace Search — Search Facebook Marketplace listings by keyword and city name. (2 credits)
 
         :param q: Product or keyword to search for (min 2 chars).
         :param location: City or place name, e.g. 'Austin, TX'.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param details: Set true to fetch full description, photos and coordinates per listing (slower, costs more).
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
+        :param minPrice: Minimum price in local currency units.
+        :param maxPrice: Maximum price in local currency units.
+        :param sortBy: suggested | distance | creation_time | price_ascend | price_descend.
+        :param daysSinceListed: 1 (24h), 7, or 30.
+        :param condition: new, like_new, good, fair.
+        :param deliveryMethod: local_pickup | shipping | all.
+        :param availability: available | sold | all.
+        :param radiusMiles: Radius in miles (1–500 discrete values).
+        :param category: Top-level category slug, e.g. electronics.
+        :param cursor: Pagination cursor from a previous nextCursor.
+        :param details: Set true for description/condition/coordinates/full gallery (2 + 2 credits per listing). Cover photo is included even when false.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/facebook/marketplace-search", {"q": q, "location": location, "limit": limit, "details": details, "cache": cache})
+        return self._t.get("/v1/facebook/marketplace-search", {"q": q, "location": location, "limit": limit, "minPrice": minPrice, "maxPrice": maxPrice, "sortBy": sortBy, "daysSinceListed": daysSinceListed, "condition": condition, "deliveryMethod": deliveryMethod, "availability": availability, "radiusMiles": radiusMiles, "category": category, "cursor": cursor, "details": details, "cache": cache})
 
     def location_search(self, *, q: str, limit: float | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34). (17 credits)
@@ -2139,16 +2149,26 @@ class AsyncFacebookMarketplaceApi:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
 
-    async def search(self, *, q: str, location: str, limit: float | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Marketplace Search — Search Facebook Marketplace listings by keyword and location. (28 credits)
+    async def search(self, *, q: str, location: str, limit: float | None = None, minPrice: float | None = None, maxPrice: float | None = None, sortBy: str | None = None, daysSinceListed: str | None = None, condition: str | None = None, deliveryMethod: str | None = None, availability: str | None = None, radiusMiles: float | None = None, category: str | None = None, cursor: str | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Marketplace Search — Search Facebook Marketplace listings by keyword and city name. (2 credits)
 
         :param q: Product or keyword to search for (min 2 chars).
         :param location: City or place name, e.g. 'Austin, TX'.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
-        :param details: Set true to fetch full description, photos and coordinates per listing (slower, costs more).
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
+        :param minPrice: Minimum price in local currency units.
+        :param maxPrice: Maximum price in local currency units.
+        :param sortBy: suggested | distance | creation_time | price_ascend | price_descend.
+        :param daysSinceListed: 1 (24h), 7, or 30.
+        :param condition: new, like_new, good, fair.
+        :param deliveryMethod: local_pickup | shipping | all.
+        :param availability: available | sold | all.
+        :param radiusMiles: Radius in miles (1–500 discrete values).
+        :param category: Top-level category slug, e.g. electronics.
+        :param cursor: Pagination cursor from a previous nextCursor.
+        :param details: Set true for description/condition/coordinates/full gallery (2 + 2 credits per listing). Cover photo is included even when false.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/facebook/marketplace-search", {"q": q, "location": location, "limit": limit, "details": details, "cache": cache})
+        return await self._t.get("/v1/facebook/marketplace-search", {"q": q, "location": location, "limit": limit, "minPrice": minPrice, "maxPrice": maxPrice, "sortBy": sortBy, "daysSinceListed": daysSinceListed, "condition": condition, "deliveryMethod": deliveryMethod, "availability": availability, "radiusMiles": radiusMiles, "category": category, "cursor": cursor, "details": details, "cache": cache})
 
     async def location_search(self, *, q: str, limit: float | None = None, details: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Marketplace Location Search — Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34). (17 credits)

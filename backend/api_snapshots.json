@@ -7461,119 +7461,162 @@
     "data": {
       "query": "desk chair",
       "location": "Austin, TX",
+      "filters": {
+        "minPrice": "50",
+        "maxPrice": "200",
+        "sortBy": "price_ascend",
+        "daysSinceListed": "30"
+      },
       "totalReturned": 5,
+      "hasMore": true,
+      "nextCursor": "eyJ2IjoxLCJxIjoiZGVzayBjaGFpciIsImxvYyI6IkF1c3RpbiwgVFgiLCJmIjp7Im1pblByaWNlIjoiNTAiLCJtYXhQcmljZSI6IjIwMCIsInNvcnRCeSI6InByaWNlX2FzY2VuZCIsImRheXNTaW5jZUxpc3RlZCI6IjMwIn0sInNraXAiOjUsImVjIjoie1wicGdcIjowLFwiYjJjXCI6e1wiYnJcIjpcIlwiLFwiaXRcIjowLFwiaG1zclwiOmZhbHNlLFwidGJpXCI6MH0sXCJjMmNcIjp7XCJiclwiOlwiQWJwaXVWdElpSVhFajlWV0ZVZEl4czFJUi13SldycGx1NWlNTGNYOURiMTBTQzhFQk93YzFXZi1RcmpOcDM3elBFWlg5ZGJNdlNDa0ZUay1sclBucTlCTnJGWURUdHg5bFZlMFhGd2FGdEQ0RG03T3RkemJBMU5MVWdkLUFrclRhc3hPZHVmWldmVkJTZlJTTG1SYmZydWVBVW85QTRNZXBqc1I0cm0zV09FejNSYlhIVnRrcm9SV21JZ1liUUZYN0Y0WnpfNnlhQTRkdThSY1BRbzJJeUwtcC1Ca3hlTVhHblFLSHZ1ZXJyZ2J2alN0M2hXNEFNdDZlclE1UkpGOUhSdFk3b1RLbGI2bTVfTUZEd2FqcXdMbUJhSzBKWlVKN3ZsUnczVFlQMm9SSjVoMDFxSndUU2Z6enduMkFodEFlcVFaUEs0eWV5OEc0WGZ0bm81cERJYzZDUWNzTWtRdEJjZDE2R3FNanQwQXhybkNJM1A0OFZINmZqcG9vM3hGTnJqU3ZvRDhOOGNxbVFMaVJzVy1SRlF2am9CNTdGWkkzVkpMLXhLN204cUVNaUczcnZKUlRJd2ZLS2VHdTlBckJXbi1SODJuNkVPUU9MU2loUkppTlY4Q0Rxamw0WnIyUVJmcXFMN3hmNzZPSnBzaEVxWi05Z1JWRWlzaFdJcUx1eWY0YzF6NE1zMUZ5YTNDeUZxamgtdDBtei1nR3dTZGhEOEhxelloQXhYWGZsU0NkdGUxVWIwaVBiRVctSUhqQmVjXCIsXCJpdFwiOjI0LFwicnBiclwiOlwiXCIsXCJycGhyXCI6ZmFsc2UsXCJybWhyXCI6ZmFsc2UsXCJzc2lcIjpmYWxzZSxcInNzY29cIjowLFwic3NwaVwiOltdfSxcImlyclwiOmZhbHNlLFwic2VycF9jdGFcIjpmYWxzZSxcInJ1aVwiOltdLFwibXBpZFwiOltdLFwidWJwXCI6bnVsbCxcIm5jcm5kXCI6MCxcImlyc3JcIjpmYWxzZSxcImJtcHJcIjpbXSxcImJtcGVpZFwiOltdLFwibm1ibXBcIjpmYWxzZSxcInNrcnJcIjpmYWxzZSxcImlvb3VyXCI6ZmFsc2UsXCJpc2VcIjp0cnVlLFwic21zX2N1cnNvclwiOntcInBhZ2VfaW5kZXhcIjowLFwiYmxlbmRlZF9hZF9pbmRleFwiOjAsXCJvcmdhbmljc19zaW5jZV9sYXN0X2FkXCI6MCxcInBhZ2Vfb3JnYW5pY19jb3VudFwiOjAsXCJibGVuZGVkX29yZ2FuaWNfaW5kZXhcIjowLFwicmV0dXJuZWRfYWRfaW5kZXhcIjowLFwidG90YWxfaW5kZXhcIjowfX0ifQ",
       "listings": [
         {
           "platform": "facebook",
-          "id": "1023091973955138",
-          "title": "MCM Atomic Chrome Swivel Office Chair",
-          "url": "https://www.facebook.com/marketplace/item/1023091973955138/",
-          "price": 150.0,
-          "priceFormatted": "$150",
-          "currency": "USD",
-          "location": "Austin, TX",
-          "city": "Austin",
-          "state": "TX",
-          "isSold": false,
-          "isLive": true,
-          "deliveryTypes": [
-            "IN_PERSON"
-          ],
-          "image": "https://scontent-cdg4-1.xx.fbcdn.net/v/t45.5328-4/755951223_1861937971878382_7371499039634355416_n.jpg?stp=c0.82.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=247b10&_nc_ohc=iS2R-9GEaf0Q7kNvwEL6juq&_nc_oc=AdoqGHjak_iTFrRMTFiTIfP9gJ0C02Lrs8E10_5hr-cGHRGwxE34jj0_d7sc4YVnggo&_nc_zt=23&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQBY7zuItKb-MwsWVAB1gXEbITj-pNmvrR3-tFbTKO8FYA&oe=6A6C2954",
-          "photos": [
-            "https://scontent-cdg4-1.xx.fbcdn.net/v/t45.5328-4/755951223_1861937971878382_7371499039634355416_n.jpg?stp=c0.82.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=247b10&_nc_ohc=iS2R-9GEaf0Q7kNvwEL6juq&_nc_oc=AdoqGHjak_iTFrRMTFiTIfP9gJ0C02Lrs8E10_5hr-cGHRGwxE34jj0_d7sc4YVnggo&_nc_zt=23&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQBY7zuItKb-MwsWVAB1gXEbITj-pNmvrR3-tFbTKO8FYA&oe=6A6C2954"
-          ],
-          "createdAt": "2026-07-23T21:20:09+00:00"
-        },
-        {
-          "platform": "facebook",
-          "id": "1533101124374941",
-          "title": "Serta Office Chair",
-          "url": "https://www.facebook.com/marketplace/item/1533101124374941/",
+          "id": "4482233215369733",
+          "title": "Vintage 1980s Postmodern \"American Lighting\" Gooseneck Desk Lamp",
+          "url": "https://www.facebook.com/marketplace/item/4482233215369733/",
           "price": 50.0,
           "priceFormatted": "$50",
+          "priceAmount": 5000,
           "currency": "USD",
-          "location": "Austin, TX",
-          "city": "Austin",
-          "state": "TX",
+          "categoryId": "1569171756675761",
+          "location": "Benson, AZ",
+          "city": "Benson",
+          "state": "AZ",
+          "cityPageId": "109791499039942",
           "isSold": false,
           "isLive": true,
-          "deliveryTypes": [
-            "IN_PERSON"
-          ],
-          "image": "https://scontent-cdg4-1.xx.fbcdn.net/v/t39.84726-6/757399214_1031644829731524_4603068134504050190_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=102&ccb=1-7&_nc_sid=92e707&_nc_ohc=zCCGEoZ3sFQQ7kNvwGzIsYW&_nc_oc=AdpnI5LGrygL5GaY33ihdUIkM_Ik5iRVhjFftWTnp9J51H_THzqey8iKLmTK2nlH7lM&_nc_zt=14&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQBcc_63EF_bnVfFnrVeGFYzSp29ye1Wp4xyNJhV11Y_BA&oe=6A6C2FC6",
-          "photos": [
-            "https://scontent-cdg4-1.xx.fbcdn.net/v/t39.84726-6/757399214_1031644829731524_4603068134504050190_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=102&ccb=1-7&_nc_sid=92e707&_nc_ohc=zCCGEoZ3sFQQ7kNvwGzIsYW&_nc_oc=AdpnI5LGrygL5GaY33ihdUIkM_Ik5iRVhjFftWTnp9J51H_THzqey8iKLmTK2nlH7lM&_nc_zt=14&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQBcc_63EF_bnVfFnrVeGFYzSp29ye1Wp4xyNJhV11Y_BA&oe=6A6C2FC6"
-          ],
-          "createdAt": "2026-07-26T17:31:22+00:00"
-        },
-        {
-          "platform": "facebook",
-          "id": "1566650898588175",
-          "title": "Desk Chair",
-          "url": "https://www.facebook.com/marketplace/item/1566650898588175/",
-          "price": 30.0,
-          "priceFormatted": "$30",
-          "currency": "USD",
-          "location": "Austin, TX",
-          "city": "Austin",
-          "state": "TX",
-          "isSold": false,
-          "isLive": true,
+          "isPending": false,
+          "isHidden": false,
+          "isViewerSeller": false,
           "deliveryTypes": [
             "IN_PERSON",
-            "DOOR_PICKUP"
+            "SHIPPING_ONSITE"
           ],
-          "image": "https://scontent-cdg4-3.xx.fbcdn.net/v/t39.84726-6/754015548_1682037223082191_5648936842361625036_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=110&ccb=1-7&_nc_sid=92e707&_nc_ohc=Xt7CL7MSfV0Q7kNvwHViL7E&_nc_oc=AdqQ_s3xEOlUDJs59MBQEsPjhXxRBUNT4XSfFG6M0jVFl9gBt6VQJNRCK0OSex4Bmr0&_nc_zt=14&_nc_ht=scontent-cdg4-3.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQDevzQYEUxQjd0MoLR-37bq4-BjrEgoh_RPke8J6O0DLA&oe=6A6C293E",
+          "image": "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/748718464_1472100928021023_7004614235492134530_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=109&ccb=1-7&_nc_sid=92e707&_nc_ohc=Osco_iBPSHsQ7kNvwE88Z2B&_nc_oc=AdrnNrq4GxtoKGWCDi_qxKj2BfO-OcysnTpk7mDO5d-84zPauj6YWLhxJPZuiRErURoSW7OUci-LjqdvjivdYc4u&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQFTCh3FFtSTB-AA28V6Jr1NtrTs9PSVie1b1KW_xUkkNw&oe=6A753B85",
           "photos": [
-            "https://scontent-cdg4-3.xx.fbcdn.net/v/t39.84726-6/754015548_1682037223082191_5648936842361625036_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=110&ccb=1-7&_nc_sid=92e707&_nc_ohc=Xt7CL7MSfV0Q7kNvwHViL7E&_nc_oc=AdqQ_s3xEOlUDJs59MBQEsPjhXxRBUNT4XSfFG6M0jVFl9gBt6VQJNRCK0OSex4Bmr0&_nc_zt=14&_nc_ht=scontent-cdg4-3.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQDevzQYEUxQjd0MoLR-37bq4-BjrEgoh_RPke8J6O0DLA&oe=6A6C293E"
+            "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/748718464_1472100928021023_7004614235492134530_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=109&ccb=1-7&_nc_sid=92e707&_nc_ohc=Osco_iBPSHsQ7kNvwE88Z2B&_nc_oc=AdrnNrq4GxtoKGWCDi_qxKj2BfO-OcysnTpk7mDO5d-84zPauj6YWLhxJPZuiRErURoSW7OUci-LjqdvjivdYc4u&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQFTCh3FFtSTB-AA28V6Jr1NtrTs9PSVie1b1KW_xUkkNw&oe=6A753B85"
           ],
-          "createdAt": "2026-07-24T15:57:10+00:00"
+          "createdAt": "2026-07-16T06:02:16+00:00"
         },
         {
           "platform": "facebook",
-          "id": "2004670837585145",
-          "title": "Pink desk chair",
-          "url": "https://www.facebook.com/marketplace/item/2004670837585145/",
+          "id": "2467979733629080",
+          "title": "Gaiam Classic Balance Ball Chair - Ergonomic Office/Desk Chair",
+          "url": "https://www.facebook.com/marketplace/item/2467979733629080/",
           "price": 50.0,
           "priceFormatted": "$50",
+          "priceAmount": 5000,
           "currency": "USD",
-          "location": "Austin, TX",
-          "city": "Austin",
-          "state": "TX",
+          "categoryId": "1383948661922113",
+          "location": "Fresno, CA",
+          "city": "Fresno",
+          "state": "CA",
+          "cityPageId": "107983435897193",
           "isSold": false,
           "isLive": true,
+          "isPending": false,
+          "isHidden": false,
+          "isViewerSeller": false,
           "deliveryTypes": [
             "IN_PERSON",
-            "DOOR_PICKUP"
+            "SHIPPING_ONSITE"
           ],
-          "image": "https://scontent-cdg4-1.xx.fbcdn.net/v/t39.84726-6/753583645_1039687612146944_6256711315481793218_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=TgNT-PsmgoQQ7kNvwGCI4-m&_nc_oc=AdoXoAjYeQCQq0VPOYJOWPAcbIaMe-o0SZfZUU67qARG1O9UwQpjme1XSm6bF7oelS0&_nc_zt=14&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQBe7BMXFnD-HN-JknCFdw9K3RYJ9DPCvi8_zQtAQgVOhw&oe=6A6C2C09",
+          "image": "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/749286700_1116782047845292_1788708914246608626_n.jpg?stp=c0.81.526.526a_dst-jpg_p526x395_tt6&_nc_cat=110&ccb=1-7&_nc_sid=92e707&_nc_ohc=gbzkYGqnXmYQ7kNvwGzH1qf&_nc_oc=AdqLUHLAdzpxyU4TF9F6Xf5v9Tib9M6UCrmYThgY8kMR7j8y-uMyvFm3zwMzYYMwX1rcrfF1-yMiBdhJbknk-W2-&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQHJWOlgp25sCHb9Xzuo5yQVzSCjOZpSF6EaQpKDCudKZA&oe=6A751DFD",
           "photos": [
-            "https://scontent-cdg4-1.xx.fbcdn.net/v/t39.84726-6/753583645_1039687612146944_6256711315481793218_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=TgNT-PsmgoQQ7kNvwGCI4-m&_nc_oc=AdoXoAjYeQCQq0VPOYJOWPAcbIaMe-o0SZfZUU67qARG1O9UwQpjme1XSm6bF7oelS0&_nc_zt=14&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQBe7BMXFnD-HN-JknCFdw9K3RYJ9DPCvi8_zQtAQgVOhw&oe=6A6C2C09"
+            "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/749286700_1116782047845292_1788708914246608626_n.jpg?stp=c0.81.526.526a_dst-jpg_p526x395_tt6&_nc_cat=110&ccb=1-7&_nc_sid=92e707&_nc_ohc=gbzkYGqnXmYQ7kNvwGzH1qf&_nc_oc=AdqLUHLAdzpxyU4TF9F6Xf5v9Tib9M6UCrmYThgY8kMR7j8y-uMyvFm3zwMzYYMwX1rcrfF1-yMiBdhJbknk-W2-&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQHJWOlgp25sCHb9Xzuo5yQVzSCjOZpSF6EaQpKDCudKZA&oe=6A751DFD"
           ],
-          "createdAt": "2026-07-24T19:31:45+00:00"
+          "createdAt": "2026-07-18T17:45:28+00:00"
         },
         {
           "platform": "facebook",
-          "id": "1584011809800878",
-          "title": "MCM desk chair",
-          "url": "https://www.facebook.com/marketplace/item/1584011809800878/",
-          "price": 100.0,
-          "priceFormatted": "$100",
+          "id": "2923413478020563",
+          "title": "Vintage1970s Nichols & Stone Co.Rocking Chair",
+          "url": "https://www.facebook.com/marketplace/item/2923413478020563/",
+          "price": 50.0,
+          "priceFormatted": "$50",
+          "priceAmount": 5000,
           "currency": "USD",
-          "location": "Austin, TX",
-          "city": "Austin",
-          "state": "TX",
+          "strikethroughPrice": 100.0,
+          "strikethroughPriceFormatted": "$100",
+          "categoryId": "393860164117441",
+          "location": "Rome, GA",
+          "city": "Rome",
+          "state": "GA",
+          "cityPageId": "107963899224102",
           "isSold": false,
           "isLive": true,
+          "isPending": false,
+          "isHidden": false,
+          "isViewerSeller": false,
           "deliveryTypes": [
-            "IN_PERSON"
+            "IN_PERSON",
+            "SHIPPING_ONSITE"
           ],
-          "image": "https://scontent-cdg4-1.xx.fbcdn.net/v/t39.84726-6/752488797_879146811526501_8218767426310547436_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=sJaQtNKyPKYQ7kNvwEu89ms&_nc_oc=AdobGnX8VaIQdb80CmnYrb5Cfy6JhSlKc2eun-j26T5rJ5bpqq13ITx-fKkzgb1ALfQ&_nc_zt=14&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQAzBl4MNhR9_EkMwe8DKJdNW2shrzeoDoi4FN-P7HgqZA&oe=6A6C3912",
+          "image": "https://scontent-atl3-2.xx.fbcdn.net/v/t39.84726-6/749315387_1673120763899840_2089201881053873382_n.jpg?stp=c90.0.540.540a_dst-jpg_p180x540_tt6&_nc_cat=101&ccb=1-7&_nc_sid=92e707&_nc_ohc=yzjaBCMGrMMQ7kNvwGfHl6m&_nc_oc=AdqiHHMNN2qvUfzBzmJ6q9wS97vlPFf4F-wRzvmtx-qFyOdbSsq4Aji2cCitIRxWt3iZWwzWr0PYKUcTLL98O7J7&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQH_n97Ur_wuC5aujGv1-I6KEFId_1VfGGX1xC0UpCQc6Q&oe=6A753AD8",
           "photos": [
-            "https://scontent-cdg4-1.xx.fbcdn.net/v/t39.84726-6/752488797_879146811526501_8218767426310547436_n.jpg?stp=c0.87.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=sJaQtNKyPKYQ7kNvwEu89ms&_nc_oc=AdobGnX8VaIQdb80CmnYrb5Cfy6JhSlKc2eun-j26T5rJ5bpqq13ITx-fKkzgb1ALfQ&_nc_zt=14&_nc_ht=scontent-cdg4-1.xx&_nc_gid=buCdo_tqgJzarMXnPPtI0Q&_nc_ss=7b289&oh=00_AQAzBl4MNhR9_EkMwe8DKJdNW2shrzeoDoi4FN-P7HgqZA&oe=6A6C3912"
+            "https://scontent-atl3-2.xx.fbcdn.net/v/t39.84726-6/749315387_1673120763899840_2089201881053873382_n.jpg?stp=c90.0.540.540a_dst-jpg_p180x540_tt6&_nc_cat=101&ccb=1-7&_nc_sid=92e707&_nc_ohc=yzjaBCMGrMMQ7kNvwGfHl6m&_nc_oc=AdqiHHMNN2qvUfzBzmJ6q9wS97vlPFf4F-wRzvmtx-qFyOdbSsq4Aji2cCitIRxWt3iZWwzWr0PYKUcTLL98O7J7&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQH_n97Ur_wuC5aujGv1-I6KEFId_1VfGGX1xC0UpCQc6Q&oe=6A753AD8"
           ],
-          "createdAt": "2026-07-21T22:20:20+00:00"
+          "createdAt": "2026-07-18T02:52:50+00:00"
+        },
+        {
+          "platform": "facebook",
+          "id": "1017066137601706",
+          "title": "Vintage vanity chair, wardrobe assistant, great for putting on shoes, accent chair in living room.",
+          "url": "https://www.facebook.com/marketplace/item/1017066137601706/",
+          "price": 50.0,
+          "priceFormatted": "$50",
+          "priceAmount": 5000,
+          "currency": "USD",
+          "categoryId": "393860164117441",
+          "location": "Maryville, TN",
+          "city": "Maryville",
+          "state": "TN",
+          "cityPageId": "112258735456868",
+          "isSold": false,
+          "isLive": true,
+          "isPending": false,
+          "isHidden": false,
+          "isViewerSeller": false,
+          "deliveryTypes": [
+            "IN_PERSON",
+            "SHIPPING_ONSITE"
+          ],
+          "image": "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/741215085_852313984369406_1199345941718414788_n.jpg?stp=c0.0.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=1rWcQdyGDVkQ7kNvwFqYy36&_nc_oc=AdpU7HoeqvlHL9o_N9JOFFwP4AjJebYky0kIUeH_AF9v0dqoDq4pWdxRGzMlSVSIpF6QKH4sbjMcRi7o-RS7LSbq&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQEqWptcpVP9NCT1UFRFTfDjcdjzHfl2aISSZ3d1tj-7Kg&oe=6A7533E5",
+          "photos": [
+            "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/741215085_852313984369406_1199345941718414788_n.jpg?stp=c0.0.526.526a_dst-jpg_p526x395_tt6&_nc_cat=108&ccb=1-7&_nc_sid=92e707&_nc_ohc=1rWcQdyGDVkQ7kNvwFqYy36&_nc_oc=AdpU7HoeqvlHL9o_N9JOFFwP4AjJebYky0kIUeH_AF9v0dqoDq4pWdxRGzMlSVSIpF6QKH4sbjMcRi7o-RS7LSbq&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQEqWptcpVP9NCT1UFRFTfDjcdjzHfl2aISSZ3d1tj-7Kg&oe=6A7533E5"
+          ],
+          "createdAt": "2026-07-09T08:31:52+00:00"
+        },
+        {
+          "platform": "facebook",
+          "id": "881051264629414",
+          "title": "Vintage Amber Shell Bowls. (1 Lg, 4 small included.)",
+          "url": "https://www.facebook.com/marketplace/item/881051264629414/",
+          "price": 50.0,
+          "priceFormatted": "$50",
+          "priceAmount": 5000,
+          "currency": "USD",
+          "categoryId": "393860164117441",
+          "location": "Fredericksburg, VA",
+          "city": "Fredericksburg",
+          "state": "VA",
+          "cityPageId": "113115852035715",
+          "isSold": false,
+          "isLive": true,
+          "isPending": false,
+          "isHidden": false,
+          "isViewerSeller": false,
+          "deliveryTypes": [
+            "IN_PERSON",
+            "SHIPPING_ONSITE"
+          ],
+          "image": "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/752497517_1511663550122072_1173419982088349245_n.jpg?stp=c89.0.540.540a_dst-jpg_p180x540_tt6&_nc_cat=109&ccb=1-7&_nc_sid=92e707&_nc_ohc=sera2ZomqWAQ7kNvwGSF1lp&_nc_oc=AdqITSx-NaNloczS3k1wp8xihTAjYYb0y10n7UOeZWDKTydDSaVoG4-37EHGiZJRsi3Ah6IwReJt0KGUq5phIu99&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQEA8yZzcg5BBISfEWS39nFNBpk3W3GmWNKXweosR4MRAg&oe=6A752917",
+          "photos": [
+            "https://scontent-atl3-3.xx.fbcdn.net/v/t39.84726-6/752497517_1511663550122072_1173419982088349245_n.jpg?stp=c89.0.540.540a_dst-jpg_p180x540_tt6&_nc_cat=109&ccb=1-7&_nc_sid=92e707&_nc_ohc=sera2ZomqWAQ7kNvwGSF1lp&_nc_oc=AdqITSx-NaNloczS3k1wp8xihTAjYYb0y10n7UOeZWDKTydDSaVoG4-37EHGiZJRsi3Ah6IwReJt0KGUq5phIu99&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=48UkL5OoevcKmJAZmxtYnw&_nc_ss=7b289&oh=00_AQEA8yZzcg5BBISfEWS39nFNBpk3W3GmWNKXweosR4MRAg&oe=6A752917"
+          ],
+          "createdAt": "2026-07-20T06:20:50+00:00"
         }
       ]
     }

@@ -243,7 +243,22 @@ const FACEBOOK: Omit<Endpoint, "platform">[] = [
 ];
 
 const FACEBOOK_MARKETPLACE: Omit<Endpoint, "platform">[] = [
-  { tool: "facebook_marketplace_search", name: "Facebook Marketplace Search", path: "/v1/facebook/marketplace-search", credits: 28, summary: "Search Facebook Marketplace listings by keyword and location.", params: [q("Product or keyword to search for (min 2 chars)."), { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." }, limit(20, 200), { name: "details", type: "string", required: false, description: "Set true to fetch full description, photos and coordinates per listing (slower, costs more)." }] },
+  { tool: "facebook_marketplace_search", name: "Facebook Marketplace Search", path: "/v1/facebook/marketplace-search", credits: 2, summary: "Search Facebook Marketplace listings by keyword and city name.", params: [
+    q("Product or keyword to search for (min 2 chars)."),
+    { name: "location", type: "string", required: true, description: "City or place name, e.g. 'Austin, TX'." },
+    limitFlat(20, 200, 2),
+    { name: "minPrice", type: "number", required: false, description: "Minimum price in local currency units." },
+    { name: "maxPrice", type: "number", required: false, description: "Maximum price in local currency units." },
+    { name: "sortBy", type: "string", required: false, description: "suggested | distance | creation_time | price_ascend | price_descend." },
+    { name: "daysSinceListed", type: "string", required: false, description: "1 (24h), 7, or 30." },
+    { name: "condition", type: "string", required: false, description: "new, like_new, good, fair." },
+    { name: "deliveryMethod", type: "string", required: false, description: "local_pickup | shipping | all." },
+    { name: "availability", type: "string", required: false, description: "available | sold | all." },
+    { name: "radiusMiles", type: "number", required: false, description: "Radius in miles (1–500 discrete values)." },
+    { name: "category", type: "string", required: false, description: "Top-level category slug, e.g. electronics." },
+    { name: "cursor", type: "string", required: false, description: "Pagination cursor from a previous nextCursor." },
+    { name: "details", type: "string", required: false, description: "Set true for description/condition/coordinates/full gallery (2 + 2 credits per listing). Cover photo is included even when false." },
+  ] },
   { tool: "facebook_marketplace_location_search", name: "Facebook Marketplace Location Search", path: "/v1/facebook/marketplace-location-search", credits: 17, summary: "Find Facebook Marketplace location candidates for a city or place query. Pass details=true for latitude/longitude (doubles cost to 34).", params: [q("City/place search query, e.g. Austin."), limitFlat(10, 50, 17), { name: "details", type: "string", required: false, description: "Set true to include latitude/longitude per location (slower; doubles cost to 34 credits)." }] },
   { tool: "facebook_marketplace_item", name: "Facebook Marketplace Item", path: "/v1/facebook/marketplace-item", credits: 1, summary: "Details for a single Facebook Marketplace listing.", params: [url("Facebook Marketplace item URL.")] },
 ];
