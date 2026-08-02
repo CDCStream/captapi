@@ -321,7 +321,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `truth_social_profile` | `/v1/truth-social/profile` | `url` (string), `cache`? (boolean) | 5 |
+| `truth_social_profile` | `/v1/truth-social/profile` | `url` (string), `cache`? (boolean) | 1 |
 | `truth_social_user_posts` | `/v1/truth-social/user-posts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 17 |
 | `truth_social_post` | `/v1/truth-social/post` | `url` (string), `cache`? (boolean) | 5 |
 

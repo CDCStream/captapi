@@ -579,7 +579,18 @@ const SNAPCHAT: Spec[] = [
 ];
 
 const TRUTH_SOCIAL: Spec[] = [
-  { slug: "truth-social-profile", name: "Truth Social Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/truth-social/profile", credits: 5 },
+  {
+    slug: "truth-social-profile",
+    name: "Truth Social Profile API",
+    shortName: "Profile",
+    category: "channel",
+    method: "GET",
+    path: "/v1/truth-social/profile",
+    credits: 1,
+    tagline: "Public Truth Social profile — stats, bot/private flags, static media. Flat 1 credit.",
+    longDescription:
+      "Pass a Truth Social @username or profile URL and get the public account as clean JSON: display name, HTML-stripped bio, avatar/banner plus avatarStatic/headerStatic, verified/bot/isPrivate/group, discoverable, followers/following/postCount, location/website, createdAt/lastStatusAt, emojis[], and profile fields[]. Important limitation: as of late 2025 Truth Social typically only exposes public profiles/posts for prominent accounts without login — most other accounts require auth and return 404 here. Flat 1 credit.",
+  },
   { slug: "truth-social-user-posts", name: "Truth Social User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/truth-social/user-posts", credits: 17, creditsPerResult: 0.85 },
   { slug: "truth-social-post", name: "Truth Social Post API", shortName: "Post", category: "details", method: "GET", path: "/v1/truth-social/post", credits: 5 , tagline: "Get a Truth Social post — text, author, and engagement fields as structured JSON." },
 ];
@@ -990,7 +1001,7 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
   {
     id: "truth_social",
     name: "Truth Social",
-    blurb: "Pull public Truth Social profiles, user posts, and post metadata for monitoring and research.",
+    blurb: "Public Truth Social profiles/posts for prominent accounts (most others require auth).",
     icon: "threads",
     color: "text-red-700",
     exampleUrl: "https://truthsocial.com/@realDonaldTrump",

@@ -415,7 +415,15 @@ const SNAPCHAT: Omit<Endpoint, "platform">[] = [
 ];
 
 const TRUTH_SOCIAL: Omit<Endpoint, "platform">[] = [
-  { tool: "truth_social_profile", name: "Truth Social Profile", path: "/v1/truth-social/profile", credits: 5, summary: "Public Truth Social profile metadata and stats.", params: [url(TRUTH_PROFILE)] },
+  {
+    tool: "truth_social_profile",
+    name: "Truth Social Profile",
+    path: "/v1/truth-social/profile",
+    credits: 1,
+    summary:
+      "Public Truth Social profile (bot/isPrivate/group, static media, emojis). Prominent accounts only — most others require auth.",
+    params: [url(TRUTH_PROFILE)],
+  },
   { tool: "truth_social_user_posts", name: "Truth Social User Posts", path: "/v1/truth-social/user-posts", credits: 17, summary: "Recent public posts from a Truth Social profile, with cursor pagination (nextCursor + hasMore).", params: [url(TRUTH_PROFILE), limit(20, 80), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
   { tool: "truth_social_post", name: "Truth Social Post", path: "/v1/truth-social/post", credits: 5, summary: "Truth Social post metadata, text, media and engagement.", params: [url(TRUTH_POST)] },
 ];

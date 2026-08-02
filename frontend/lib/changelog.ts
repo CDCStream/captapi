@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "Truth Social profile: bot/isPrivate flags, static media, 1 credit",
+    description:
+      "GET /v1/truth-social/profile drops from 5 → 1 credit and adds bot, isPrivate (locked), group, discoverable, location, avatarStatic/headerStatic, emojis[], plus acceptingMessages/chatsOnboarded/tvAccount when present. Bio stays HTML-stripped. Docs warn that as of late 2025 Truth Social typically only exposes public profiles for prominent accounts without login — auth-gated accounts return a clear 404. Native lookup retries via Decodo when datacenter IPs hit Cloudflare.",
+    items: [
+      "1 credit (was 5)",
+      "bot, isPrivate, group, location, avatarStatic/headerStatic, emojis",
+      "Docs + 404 copy for auth-gated / non-prominent accounts",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "Amazon seller storefront: badges, scrapedAt, pagination; drop raw leak",
     description:
       "GET /v1/amazon-shop/page now returns seller name, scrapedAt, stable product shapes (price/currency/priceFormatted always present), isPrime/isBestSeller/isSponsored, canonical /dp/{ASIN} URLs, display priceFormatted ($1,234.56), and cursor pagination (nextCursor/hasMore). Removes rawFirstItem leakage. Docs clarify scope: seller storefronts (/sp?seller=), not influencer /shop/<handle> vitrines. Influencer shop URLs return 400 with a clear message. List price aligned to 1 credit per ~16-product page.",

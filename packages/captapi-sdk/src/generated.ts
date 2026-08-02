@@ -2213,7 +2213,7 @@ export interface TruthSocialPostParams {
 
 export class TruthSocialApi {
   constructor(private readonly core: HttpCore) {}
-  /** Truth Social Profile — Public Truth Social profile metadata and stats. (5 credits) */
+  /** Truth Social Profile — Public Truth Social profile (bot/isPrivate/group, static media, emojis). Prominent accounts only — most others require auth. (1 credit) */
   profile(params: TruthSocialProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/truth-social/profile", params);
   }

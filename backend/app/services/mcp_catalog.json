@@ -4554,8 +4554,8 @@
     "platform": "truth_social",
     "name": "Truth Social Profile",
     "path": "/v1/truth-social/profile",
-    "credits": 5,
-    "summary": "Public Truth Social profile metadata and stats.",
+    "credits": 1,
+    "summary": "Public Truth Social profile (bot/isPrivate/group, static media, emojis). Prominent accounts only — most others require auth.",
     "params": [
       {
         "name": "url",

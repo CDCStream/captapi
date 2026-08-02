@@ -1,11 +1,19 @@
-"""Truth Social public profile and post endpoints."""
+"""Truth Social public profile and post endpoints.
+
+Note: as of late 2025 Truth Social often only exposes public profile/posts for
+prominent accounts without login; most other accounts return auth errors. We
+document this on the profile endpoint and surface a clear 404 when the public
+API refuses the account.
+"""
 
 from __future__ import annotations
 
 import html
+import json
 import math
 import re
 from typing import Any
+from urllib.parse import urlencode
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -14,18 +22,28 @@ from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
 from app.schemas.common import ApiResponse
+from app.services import decodo_fetch
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
+from app.services.http_fetch import DEFAULT_HEADERS
 from app.utils.formatters import safe_int, safe_str
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
 
 BASE = "https://truthsocial.com"
+CREDIT_PROFILE = 1
+CREDIT_POST = 5
 HEADERS = {
+    **DEFAULT_HEADERS,
     "Accept": "application/json",
-    "User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)",
 }
+
+_AUTH_GATED_DETAIL = (
+    "Truth Social profile not publicly available. As of late 2025 Truth Social "
+    "typically only exposes public profiles/posts for prominent accounts without "
+    "login; most other accounts require auth and cannot be fetched."
+)
 
 
 def _username(value: str) -> str:
@@ -69,25 +87,85 @@ def _strip_html(value: Any) -> str:
     return re.sub(r"\s+", " ", html.unescape(text)).strip()
 
 
+def _bool_or_none(value: Any) -> bool | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        low = value.strip().lower()
+        if low in {"true", "1", "yes"}:
+            return True
+        if low in {"false", "0", "no"}:
+            return False
+    return None
+
+
+def _normalize_emojis(raw: Any) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    if not isinstance(raw, list):
+        return out
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        row = {
+            "shortcode": safe_str(item.get("shortcode")),
+            "url": safe_str(item.get("url")),
+            "staticUrl": safe_str(item.get("static_url") or item.get("staticUrl")),
+        }
+        if any(row.values()):
+            out.append({k: v for k, v in row.items() if v is not None})
+    return out
+
+
 def _normalize_account(item: dict[str, Any]) -> dict[str, Any]:
     username = item.get("username") or item.get("acct") or item.get("authorUsername")
     fields = item.get("fields") if isinstance(item.get("fields"), list) else []
-    return {
+    # Full Mastodon/Truth account payloads expose these; Apify author stubs often don't.
+    rich = any(
+        k in item
+        for k in (
+            "followers_count",
+            "followersCount",
+            "locked",
+            "bot",
+            "group",
+            "avatar_static",
+            "header_static",
+            "note",
+            "statuses_count",
+            "statusesCount",
+        )
+    )
+    locked = item.get("locked") if "locked" in item else item.get("isPrivate")
+    out: dict[str, Any] = {
         "platform": "truth_social",
         "id": safe_str(item.get("id") or item.get("authorId")),
         "username": safe_str(username),
-        "url": safe_str(item.get("url") or item.get("authorUrl")) or (f"https://truthsocial.com/@{username}" if username else None),
-        "displayName": safe_str(item.get("display_name") or item.get("displayName") or item.get("authorName")),
+        "acct": safe_str(item.get("acct") or username),
+        "url": safe_str(item.get("url") or item.get("authorUrl"))
+        or (f"https://truthsocial.com/@{username}" if username else None),
+        "displayName": safe_str(
+            item.get("display_name") or item.get("displayName") or item.get("authorName")
+        ),
         "bio": _strip_html(item.get("note") or item.get("bio")),
         "avatar": safe_str(item.get("avatar") or item.get("authorAvatar")),
+        "avatarStatic": safe_str(item.get("avatar_static") or item.get("avatarStatic")),
         "banner": safe_str(item.get("header") or item.get("banner")),
+        "headerStatic": safe_str(item.get("header_static") or item.get("headerStatic")),
         "verified": bool(item.get("verified") or item.get("authorVerified")),
         "followers": safe_int(item.get("followers_count") or item.get("followersCount")),
         "following": safe_int(item.get("following_count") or item.get("followingCount")),
         "postCount": safe_int(item.get("statuses_count") or item.get("statusesCount")),
+        "location": safe_str(item.get("location")),
         "website": safe_str(item.get("website")),
-        "createdAt": safe_str(item.get("created_at") or item.get("createdAt") or item.get("authorCreatedAt")),
+        "createdAt": safe_str(
+            item.get("created_at") or item.get("createdAt") or item.get("authorCreatedAt")
+        ),
         "lastStatusAt": safe_str(item.get("last_status_at") or item.get("lastStatusAt")),
+        "emojis": _normalize_emojis(item.get("emojis")),
         "fields": [
             {
                 "name": safe_str(f.get("name")),
@@ -97,6 +175,25 @@ def _normalize_account(item: dict[str, Any]) -> dict[str, Any]:
             if isinstance(f, dict)
         ],
     }
+    if rich:
+        out["bot"] = bool(item.get("bot"))
+        out["isPrivate"] = bool(locked) if locked is not None else False
+        out["group"] = bool(item.get("group"))
+        out["discoverable"] = _bool_or_none(item.get("discoverable"))
+        if "accepting_messages" in item or "acceptingMessages" in item:
+            out["acceptingMessages"] = _bool_or_none(
+                item.get("accepting_messages", item.get("acceptingMessages"))
+            )
+        if "chats_onboarded" in item or "chatsOnboarded" in item:
+            out["chatsOnboarded"] = _bool_or_none(
+                item.get("chats_onboarded", item.get("chatsOnboarded"))
+            )
+        if "tv_account" in item or "tvAccount" in item:
+            out["tvAccount"] = _bool_or_none(item.get("tv_account", item.get("tvAccount")))
+    for key in ("location", "website", "avatarStatic", "headerStatic", "acct"):
+        if out.get(key) in (None, ""):
+            out.pop(key, None)
+    return out
 
 
 def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
@@ -129,16 +226,54 @@ def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-async def _get_json(path: str, params: dict[str, Any] | None = None) -> Any:
-    async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=HEADERS) as client:
-        resp = await client.get(f"{BASE}{path}", params=params)
-    if resp.status_code == 404:
+def _looks_like_json(body: str) -> bool:
+    text = (body or "").lstrip()
+    return text.startswith("{") or text.startswith("[")
+
+
+async def _get_json(
+    path: str,
+    params: dict[str, Any] | None = None,
+    *,
+    auth_gated_as_404: bool = False,
+) -> Any:
+    url = f"{BASE}{path}"
+    if params:
+        url = f"{url}?{urlencode(params)}"
+
+    status: int | None = None
+    try:
+        async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=HEADERS) as client:
+            resp = await client.get(url)
+        status = resp.status_code
+        if status == 200 and _looks_like_json(resp.text):
+            return json.loads(resp.text)
+    except (httpx.HTTPError, json.JSONDecodeError):
+        pass
+
+    # Datacenter IPs often get Cloudflare HTML; retry via Decodo.
+    if decodo_fetch.enabled():
+        got = await decodo_fetch.fetch_json(url, timeout=45.0)
+        if got is not None:
+            status, payload = got
+            if status == 200 and payload is not None:
+                return payload
+
+    if status == 404:
         raise HTTPException(status_code=404, detail="Truth Social resource not found")
-    if resp.status_code in (401, 403, 429):
-        raise HTTPException(status_code=502, detail="Truth Social public API is temporarily unavailable")
-    if resp.status_code >= 400:
-        raise HTTPException(status_code=502, detail="Truth Social lookup failed")
-    return resp.json()
+    if status in (401, 403):
+        if auth_gated_as_404:
+            raise HTTPException(status_code=404, detail=_AUTH_GATED_DETAIL)
+        raise HTTPException(
+            status_code=502,
+            detail="Truth Social public API is temporarily unavailable",
+        )
+    if status == 429:
+        raise HTTPException(
+            status_code=502,
+            detail="Truth Social public API is temporarily unavailable",
+        )
+    raise HTTPException(status_code=502, detail="Truth Social lookup failed")
 
 
 async def _actor_posts(username: str, limit: int) -> list[dict[str, Any]]:
@@ -202,7 +337,16 @@ async def _actor_post(post_id: str, url: str) -> dict[str, Any]:
     raise HTTPException(status_code=404, detail="Truth Social post not found")
 
 
-@router.get("/profile", summary="Truth Social profile")
+@router.get(
+    "/profile",
+    summary="Truth Social profile",
+    description=(
+        "Public Truth Social profile (Mastodon-compatible account fields). "
+        "Important: as of late 2025 Truth Social typically only exposes public "
+        "profiles/posts for prominent accounts without login — most other "
+        "accounts require auth and will 404 here. Flat 1 credit."
+    ),
+)
 async def profile(
     url: str = Query(..., description="Truth Social profile URL or @username"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -211,17 +355,36 @@ async def profile(
     username = _username(url)
     if not username:
         raise HTTPException(status_code=400, detail="Invalid Truth Social profile")
-    async with billed_call(caller=caller, endpoint="/v1/truth-social/profile", platform="truth_social", resource_url=f"{BASE}/@{username}", base_credits=5) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/truth-social/profile",
+        platform="truth_social",
+        resource_url=f"{BASE}/@{username}",
+        base_credits=CREDIT_PROFILE,
+    ) as ctx:
+
         async def _run() -> dict[str, Any]:
             try:
-                data = await _get_json("/api/v1/accounts/lookup", {"acct": username})
+                data = await _get_json(
+                    "/api/v1/accounts/lookup",
+                    {"acct": username},
+                    auth_gated_as_404=True,
+                )
+                ctx["source"] = "direct"
                 return _normalize_account(data)
             except HTTPException as exc:
                 if exc.status_code not in {502, 503, 504}:
                     raise
+            ctx["source"] = "apify"
             return await _actor_account(username)
 
-        data = await cached_or_run("truth-social.profile", {"username": username, "v": 2}, _run, ctx, use_cache=cache)
+        data = await cached_or_run(
+            "truth-social.profile",
+            {"username": username, "v": 3},
+            _run,
+            ctx,
+            use_cache=cache,
+        )
         return ApiResponse(data=data)
 
 
@@ -304,7 +467,7 @@ async def post(
     post_id = _post_id(url)
     if not post_id:
         raise HTTPException(status_code=400, detail="Invalid Truth Social post URL or ID")
-    async with billed_call(caller=caller, endpoint="/v1/truth-social/post", platform="truth_social", resource_url=f"{BASE}/api/v1/statuses/{post_id}", base_credits=5) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/truth-social/post", platform="truth_social", resource_url=f"{BASE}/api/v1/statuses/{post_id}", base_credits=CREDIT_POST) as ctx:
         async def _run() -> dict[str, Any]:
             try:
                 data = await _get_json(f"/api/v1/statuses/{post_id}")

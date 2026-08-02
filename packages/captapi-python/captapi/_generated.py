@@ -3120,7 +3120,7 @@ class TruthSocialApi:
         self._t = transport
 
     def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Truth Social Profile — Public Truth Social profile metadata and stats. (5 credits)
+        """Truth Social Profile — Public Truth Social profile (bot/isPrivate/group, static media, emojis). Prominent accounts only — most others require auth. (1 credit)
 
         :param url: Truth Social profile URL or @username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -3151,7 +3151,7 @@ class AsyncTruthSocialApi:
         self._t = transport
 
     async def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Truth Social Profile — Public Truth Social profile metadata and stats. (5 credits)
+        """Truth Social Profile — Public Truth Social profile (bot/isPrivate/group, static media, emojis). Prominent accounts only — most others require auth. (1 credit)
 
         :param url: Truth Social profile URL or @username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

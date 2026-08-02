@@ -3805,6 +3805,7 @@
           "Truth Social"
         ],
         "summary": "Truth Social profile",
+        "description": "Public Truth Social profile (Mastodon-compatible account fields). Important: as of late 2025 Truth Social typically only exposes public profiles/posts for prominent accounts without login — most other accounts require auth and will 404 here. Flat 1 credit.",
         "operationId": "profile_v1_truth_social_profile_get",
         "security": [
           {
