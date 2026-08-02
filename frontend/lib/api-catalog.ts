@@ -328,7 +328,24 @@ const FACEBOOK_EVENTS: Spec[] = [
 const TWITTER: Spec[] = [
   { slug: "twitter-tweet-details", name: "Twitter/X Tweet Details API", shortName: "Tweet Details", category: "details", method: "GET", path: "/v1/twitter/tweet-details", credits: 1 , tagline: "Get a tweet — text, author, likes, replies, and media as structured JSON.", longDescription: "Paste a tweet URL and get the tweet as clean JSON: text, author, like / reply counts, media when present, and publish time. Flat 1 credit per call." },
   { slug: "twitter-transcript", name: "Twitter/X Transcript API", shortName: "Transcript", category: "transcript", method: "GET", path: "/v1/twitter/transcript", credits: 1 },
-  { slug: "twitter-profile", name: "Twitter/X Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/twitter/profile", credits: 1 , tagline: "Get a Twitter/X profile — bio, followers, following, tweet count, and avatar as structured JSON.", longDescription: "Paste a profile URL or @handle and get the public profile as clean JSON: username, display name, bio, location, website, followers, following, tweet count, avatar, and account created time when available. Flat 1 credit per call." },
+  {
+    slug: "twitter-profile",
+    name: "Twitter/X Profile API",
+    shortName: "Profile",
+    category: "channel",
+    method: "GET",
+    path: "/v1/twitter/profile",
+    credits: 1,
+    tagline:
+      "X profile with verification triad — blue check, identity verified, affiliate label — plus listed/media/likes counts.",
+    longDescription:
+      "Paste a profile URL or @handle and get the public X profile as clean JSON: username, name, bio, location, website, followers/following/tweetCount, likesCount/mediaCount/listedCount, pinnedTweetIds, bannerImage, profileImageShape, and ISO createdAt. Verification is explicit: verified + isBlueVerified + isIdentityVerified + verification{verifiedType, reason, verifiedSince} and affiliate{description,url,badgeUrl} when X exposes an org affiliation. Also returns bioUrls[], highlightedTweets, creatorSubscriptionsCount, businessAffiliatesCount, and possiblySensitive when present. Flat 1 credit. Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "Blue check vs identity vs affiliate verification",
+      "listedCount, mediaCount, likesCount, pinnedTweetIds",
+      "bannerImage + bioUrls + ISO createdAt",
+    ],
+  },
   { slug: "twitter-user-tweets", name: "Twitter/X User Tweets API", shortName: "User Tweets", category: "list", method: "GET", path: "/v1/twitter/user-tweets", credits: 2, tagline: "List recent tweets from a Twitter/X profile — text, author, likes, reposts, hashtags, and media. Flat 2 credits per call.", longDescription: "Pass a profile URL or @handle and get recent public tweets as clean JSON. Each result includes the tweet URL and id, full text, language, publish time, the author (username, display name, followers, verified, avatar), engagement (likes, replies, retweets, quotes when available), reply/retweet flags, hashtags, and media URLs when present. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
   { slug: "twitter-search", name: "Twitter/X Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/twitter/search", credits: 2, tagline: "Search public tweets on X by keyword — text, author, likes, reposts, hashtags, and media for each matching post. Flat 2 credits per call.", longDescription: "Pass a keyword or phrase and the Twitter/X Search API returns matching public tweets as clean JSON. Each result includes the tweet URL and id, full text, language, publish time, the author (username, display name, followers, verified, avatar), engagement (views, likes, replies, retweets, quotes, bookmarks), reply/retweet flags, hashtags, and media URLs when present. Use it for topic monitoring, brand listening, or content discovery on X. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Public tweets matching your keyword", "Tweet URL, text, language, and publish time", "Author profile — handle, name, followers, verified, avatar", "Views, likes, replies, retweets, quotes, bookmarks, hashtags, and media"] },
   { slug: "twitter-community", name: "Twitter/X Community API", shortName: "Community", category: "details", method: "GET", path: "/v1/twitter/community", credits: 1 , tagline: "Get a Twitter/X Community — name, description, member count, and rules as structured JSON.", longDescription: "Paste a Twitter/X Community URL and get the community metadata as clean JSON: name, description, member count, and related fields when available. Pair with Community Tweets to list posts inside it." },

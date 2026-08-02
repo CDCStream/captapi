@@ -8428,7 +8428,7 @@
         "tags": [
           "Twitter"
         ],
-        "summary": "Twitter/X profile details & stats",
+        "summary": "Twitter/X profile — verification triad, listed/media/likes, banner",
         "operationId": "twitter_profile_v1_twitter_profile_get",
         "security": [
           {

@@ -1300,7 +1300,7 @@ class TwitterApi:
         return self._t.get("/v1/twitter/transcript", {"url": url, "cache": cache})
 
     def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Twitter/X Profile — Public Twitter/X profile — bio, followers, following, tweet count, avatar. (1 credit)
+        """Twitter/X Profile — X profile with blue/identity/affiliate verification, listed/media/likes counts, banner, pinned tweets. (1 credit)
 
         :param url: Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1364,7 +1364,7 @@ class AsyncTwitterApi:
         return await self._t.get("/v1/twitter/transcript", {"url": url, "cache": cache})
 
     async def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Twitter/X Profile — Public Twitter/X profile — bio, followers, following, tweet count, avatar. (1 credit)
+        """Twitter/X Profile — X profile with blue/identity/affiliate verification, listed/media/likes counts, banner, pinned tweets. (1 credit)
 
         :param url: Twitter/X profile URL or @handle, e.g. https://x.com/username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

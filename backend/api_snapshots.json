@@ -4181,11 +4181,32 @@
       "name": "NASA",
       "bio": "Making the seemingly impossible, possible. ✨",
       "location": "Pale Blue Dot",
-      "followers": 92219438,
+      "verified": true,
+      "isBlueVerified": true,
+      "isIdentityVerified": false,
+      "verification": {
+        "isIdentityVerified": false,
+        "verifiedType": "Government",
+        "reason": "This account is verified because it is a government or multilateral organization account.  Learn more",
+        "verifiedSince": "2009-08-07T19:53:50.000Z"
+      },
+      "followers": 92233651,
       "following": 119,
-      "tweetCount": 74261,
+      "tweetCount": 74283,
+      "likesCount": 16902,
+      "mediaCount": 28057,
+      "listedCount": 97023,
+      "pinnedTweetIds": [
+        "2082511887757881648"
+      ],
       "website": "http://www.nasa.gov/",
       "profileImage": "https://pbs.twimg.com/profile_images/1321163587679784960/0ZxKlEKB_400x400.jpg",
+      "bannerImage": "https://pbs.twimg.com/profile_banners/11348282/1775567134",
+      "profileImageShape": "Square",
+      "possiblySensitive": false,
+      "highlightedTweets": 265,
+      "creatorSubscriptionsCount": 0,
+      "businessAffiliatesCount": 89,
       "createdAt": "2007-12-19T20:20:32.000Z"
     }
   },

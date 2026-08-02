@@ -976,7 +976,7 @@ export class TwitterApi {
   transcript(params: TwitterTranscriptParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitter/transcript", params);
   }
-  /** Twitter/X Profile — Public Twitter/X profile — bio, followers, following, tweet count, avatar. (1 credit) */
+  /** Twitter/X Profile — X profile with blue/identity/affiliate verification, listed/media/likes counts, banner, pinned tweets. (1 credit) */
   profile(params: TwitterProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitter/profile", params);
   }

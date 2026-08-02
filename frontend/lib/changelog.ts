@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
+    category: "feature",
+    title: "Twitter/X profile: verification triad, listed/media/likes",
+    description:
+      "GET /v1/twitter/profile now uses guest GraphQL UserByScreenName for rich public fields: verified + isBlueVerified + isIdentityVerified, verification{verifiedType, reason, verifiedSince}, affiliate{} when present, listedCount/mediaCount/likesCount, pinnedTweetIds, bannerImage, profileImageShape, bioUrls[], highlightedTweets, and related signals. createdAt stays ISO-8601. Still 1 credit; HTML microdata remains the fallback.",
+    items: [
+      "Blue check / identity / affiliate verification fields",
+      "listedCount, mediaCount, likesCount, pinnedTweetIds",
+      "bannerImage, bioUrls, highlightedTweets",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
     category: "fix",
     title: "Rumble video details: real likes/comments, media, captions",
     description:

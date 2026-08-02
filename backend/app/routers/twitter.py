@@ -312,11 +312,65 @@ def _verified_flag(item: dict[str, Any]) -> bool | None:
 
 def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
     username = item.get("userName") or item.get("screen_name") or item.get("username")
+    # Guest GraphQL exposes the modern triad: blue check / identity / affiliate.
+    blue = first_present(
+        item.get("isBlueVerified"),
+        item.get("is_blue_verified"),
+        item.get("isVerified"),
+        item.get("verified"),
+    )
+    identity = first_present(item.get("isIdentityVerified"), item.get("is_identity_verified"))
+    affiliate = item.get("affiliate") if isinstance(item.get("affiliate"), dict) else None
     verified = _verified_flag(item)
-    # apidojo/twitter-user-scraper often only emits `verified` / `isVerified`.
-    # On today's X that flag is the blue checkmark, so mirror it for isBlueVerified.
-    # Public HTML microdata does not expose verified / likes / media / listed / banner.
-    blue = first_present(item.get("isBlueVerified"), item.get("isVerified"), item.get("verified"))
+    if verified is None and (blue is not None or identity is not None or affiliate is not None):
+        verified = bool(blue) or bool(identity) or bool(affiliate)
+
+    verification = strip_empty(
+        {
+            "isIdentityVerified": bool(identity) if identity is not None else None,
+            "verifiedType": safe_str(item.get("verifiedType") or item.get("verified_type")),
+            "reason": safe_str(item.get("verificationReason")),
+            "verifiedSince": safe_str(item.get("verifiedSince")),
+        }
+    )
+
+    pinned = item.get("pinnedTweetIds") or item.get("pinned_tweet_ids_str")
+    if isinstance(pinned, list):
+        pinned_ids = [str(x) for x in pinned if x is not None and str(x)]
+    else:
+        pinned_ids = None
+
+    bio_urls = item.get("bioUrls")
+    if not isinstance(bio_urls, list):
+        # Fall back to legacy entities.description.urls when present.
+        entities = item.get("entities") if isinstance(item.get("entities"), dict) else {}
+        desc = entities.get("description") if isinstance(entities.get("description"), dict) else {}
+        raw_urls = desc.get("urls") if isinstance(desc.get("urls"), list) else []
+        bio_urls = []
+        for u in raw_urls:
+            if not isinstance(u, dict):
+                continue
+            expanded = safe_str(u.get("expanded_url") or u.get("expandedUrl") or u.get("url"))
+            if not expanded:
+                continue
+            bio_urls.append(
+                {
+                    "url": safe_str(u.get("url")),
+                    "expandedUrl": expanded,
+                    "displayUrl": safe_str(u.get("display_url") or u.get("displayUrl")),
+                }
+            )
+        if not bio_urls:
+            bio_urls = None
+
+    withheld = item.get("withheldInCountries") or item.get("withheld_in_countries")
+    if not isinstance(withheld, list):
+        withheld = None
+
+    created = safe_str(item.get("createdAt") or item.get("created_at"))
+    if created and "T" not in created:
+        created = native._twitter_created_at_iso(created) or created
+
     return strip_empty(
         {
             "platform": "twitter",
@@ -328,6 +382,10 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
             "bio": safe_str(item.get("description") or item.get("bio")),
             "location": safe_str(item.get("location")),
             "verified": verified,
+            "isBlueVerified": bool(blue) if blue is not None else None,
+            "isIdentityVerified": bool(identity) if identity is not None else None,
+            "verification": verification or None,
+            "affiliate": affiliate,
             "followers": safe_int(first_present(item.get("followers"), item.get("followersCount"))),
             "following": safe_int(
                 first_present(item.get("following"), item.get("followingCount"), item.get("friendsCount"))
@@ -340,11 +398,38 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
             ),
             "mediaCount": safe_int(first_present(item.get("mediaCount"), item.get("media_count"))),
             "listedCount": safe_int(first_present(item.get("listedCount"), item.get("listed_count"))),
-            "isBlueVerified": bool(blue) if blue is not None else None,
+            "pinnedTweetIds": pinned_ids,
             "website": safe_str(item.get("website")) or _entities_website(item),
+            "bioUrls": bio_urls,
             "profileImage": safe_str(item.get("profilePicture") or item.get("profile_image_url_https")),
             "bannerImage": safe_str(item.get("coverPicture") or item.get("profile_banner_url")),
-            "createdAt": safe_str(item.get("createdAt") or item.get("created_at")),
+            "profileImageShape": safe_str(item.get("profileImageShape") or item.get("profile_image_shape")),
+            "possiblySensitive": (
+                bool(item.get("possiblySensitive"))
+                if item.get("possiblySensitive") is not None
+                else (
+                    bool(item.get("possibly_sensitive"))
+                    if item.get("possibly_sensitive") is not None
+                    else None
+                )
+            ),
+            "withheldInCountries": withheld,
+            "highlightedTweets": safe_int(
+                first_present(item.get("highlightedTweets"), item.get("highlighted_tweets"))
+            ),
+            "creatorSubscriptionsCount": safe_int(
+                first_present(
+                    item.get("creatorSubscriptionsCount"),
+                    item.get("creator_subscriptions_count"),
+                )
+            ),
+            "businessAffiliatesCount": safe_int(
+                first_present(
+                    item.get("businessAffiliatesCount"),
+                    item.get("business_affiliates_count"),
+                )
+            ),
+            "createdAt": created,
         }
     )
 
@@ -440,7 +525,10 @@ async def twitter_transcript(
         return ApiResponse(data=data)
 
 
-@router.get("/profile", summary="Twitter/X profile details & stats")
+@router.get(
+    "/profile",
+    summary="Twitter/X profile — verification triad, listed/media/likes, banner",
+)
 async def twitter_profile(
     url: str = Query(..., description="Profile URL or @handle, e.g. https://x.com/username"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -455,7 +543,8 @@ async def twitter_profile(
         base_credits=CREDIT_PROFILE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # Public profile HTML microdata (native-only).
+            # Guest GraphQL UserByScreenName (rich verification + counts),
+            # with HTML microdata fallback.
             native_profile = await native.profile_by_handle(handle)
             if native_profile:
                 ctx["source"] = "direct"
@@ -464,7 +553,7 @@ async def twitter_profile(
 
         data = await cached_or_run(
             endpoint="twitter.profile",
-            params={"handle": handle, "v": 5},
+            params={"handle": handle, "v": 6},
             runner=_run,
             ctx=ctx,
             # Profiles are polled repeatedly; follower counts drift slowly, so

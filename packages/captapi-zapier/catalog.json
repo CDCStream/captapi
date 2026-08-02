@@ -2157,7 +2157,7 @@
     "name": "Twitter/X Profile",
     "path": "/v1/twitter/profile",
     "credits": 1,
-    "summary": "Public Twitter/X profile — bio, followers, following, tweet count, avatar.",
+    "summary": "X profile with blue/identity/affiliate verification, listed/media/likes counts, banner, pinned tweets.",
     "params": [
       {
         "name": "url",
