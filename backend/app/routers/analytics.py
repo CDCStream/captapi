@@ -50,7 +50,7 @@ from app.services import tiktok_native
 from app.services import twitter_native
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
-from app.utils.formatters import safe_int, safe_str
+from app.utils.formatters import safe_int, safe_str, strip_empty
 from app.utils.url import (
     extract_bluesky_post,
     extract_instagram_shortcode,
@@ -110,11 +110,8 @@ def _youtube_analytics_row(v: dict[str, Any], *, norm: str, video_id: str | None
     )
     display = safe_str(v.get("channelName") or v.get("channel"))
     username = _youtube_handle(v)
-    verified = v.get("channelVerified")
-    if verified is None:
-        verified = v.get("isChannelVerified")
-    if not isinstance(verified, bool):
-        verified = None
+    # Omit verified / shares / saves — YouTube's public video path does not
+    # expose them reliably; returning perpetual nulls is noise.
     return {
         "platform": "youtube",
         "url": norm,
@@ -127,13 +124,11 @@ def _youtube_analytics_row(v: dict[str, Any], *, norm: str, video_id: str | None
             "username": username,
             "displayName": display or username,
             "url": safe_str(v.get("channelUrl")),
-            "verified": verified,
         },
         "engagement": {
             "views": safe_int(v.get("viewCount") or v.get("views")),
             "likes": safe_int(v.get("likes") or v.get("likeCount")),
             "comments": safe_int(v.get("commentsCount") or v.get("commentCount")),
-            # YouTube does not expose public share/save counts in this pipeline.
         },
     }
 
@@ -500,7 +495,12 @@ _FETCHERS: dict[str, Callable[[str], Awaitable[dict[str, Any]]]] = {
 
 
 def _unify(n: dict[str, Any]) -> dict[str, Any]:
-    """Collapse a per-platform normalized post into one consistent metrics shape."""
+    """Collapse a per-platform normalized post into one consistent metrics shape.
+
+    Metrics the source platform does not expose are omitted (not null) — e.g.
+    YouTube has no public share/save counts and no verified badge on this path.
+    TikTok/X still return shares/saves when present.
+    """
     eng = n.get("engagement") or {}
     views = eng.get("views")
     likes = eng.get("likes")
@@ -510,8 +510,7 @@ def _unify(n: dict[str, Any]) -> dict[str, Any]:
     engagement_vals = [x for x in (likes, comments, shares, saves) if isinstance(x, int)]
     interactions = sum(engagement_vals) if engagement_vals else None
     # Never invent 0.0 engagement when every numerator is missing — a fake
-    # rate misleads clients. Shares/saves stay null when the platform does not
-    # expose them (YouTube); rate still computes from likes+comments alone.
+    # rate misleads clients. Rate still computes from likes+comments alone.
     engagement_rate = (
         round(interactions / views, 4)
         if isinstance(views, int)
@@ -520,25 +519,31 @@ def _unify(n: dict[str, Any]) -> dict[str, Any]:
         and engagement_vals
         else None
     )
-    return {
-        "platform": n.get("platform"),
-        "url": n.get("url"),
-        "id": n.get("id"),
-        "title": n.get("title") or n.get("caption"),
-        "publishedAt": n.get("publishedAt"),
-        "durationSeconds": n.get("durationSeconds"),
-        "thumbnailUrl": n.get("thumbnailUrl"),
-        "author": n.get("author") or {},
-        "metrics": {
-            "views": views,
-            "likes": likes,
-            "comments": comments,
-            "shares": shares,
-            "saves": saves,
-            "interactions": interactions,
-            "engagementRate": engagement_rate,
-        },
-    }
+    author = dict(n.get("author") or {})
+    # Drop unknown verification rather than shipping perpetual null.
+    if author.get("verified") is None:
+        author.pop("verified", None)
+    return strip_empty(
+        {
+            "platform": n.get("platform"),
+            "url": n.get("url"),
+            "id": n.get("id"),
+            "title": n.get("title") or n.get("caption"),
+            "publishedAt": n.get("publishedAt"),
+            "durationSeconds": n.get("durationSeconds"),
+            "thumbnailUrl": n.get("thumbnailUrl"),
+            "author": author,
+            "metrics": {
+                "views": views,
+                "likes": likes,
+                "comments": comments,
+                "shares": shares,
+                "saves": saves,
+                "interactions": interactions,
+                "engagementRate": engagement_rate,
+            },
+        }
+    )
 
 
 @router.get(
@@ -582,7 +587,7 @@ async def post_analytics(
 
         data = await cached_or_run(
             endpoint=f"analytics.post.{platform}",
-            params={"url": url, "v": 5},
+            params={"url": url, "v": 6},
             runner=_run,
             ctx=ctx,
             ttl=get_settings().CACHE_TTL_DYNAMIC,
@@ -646,7 +651,7 @@ async def compare_analytics(
                 # /post on the same URL is a free hit.
                 row = await cached_or_run(
                     endpoint=f"analytics.post.{p}",
-                    params={"url": u, "v": 5},
+                    params={"url": u, "v": 6},
                     runner=_run,
                     ctx=sub_ctx,
                     ttl=settings.CACHE_TTL_DYNAMIC,

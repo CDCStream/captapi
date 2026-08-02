@@ -136,8 +136,6 @@ curl "${API_URL}/v1/analytics/compare?urls=https%3A%2F%2Fwww.youtube.com%2Fwatch
           "views": 1797826473,
           "likes": 19283915,
           "comments": 2400000,
-          "shares": null,
-          "saves": null,
           "interactions": 21683915,
           "engagementRate": 0.0121
         }

@@ -102,7 +102,7 @@ const faqs = [
   },
   {
     q: "Can I get analytics for any post in one consistent format?",
-    a: "Yes. The cross-platform analytics endpoint detects the platform from the URL and returns the same normalized metrics object — views, likes, comments, shares, saves, interactions, and engagementRate — so you do not have to special-case each network. Fields a platform does not expose stay null (for example YouTube has no public share or save counts); engagementRate is interactions / views when both are available.",
+    a: "Yes. The cross-platform analytics endpoint detects the platform from the URL and returns the same normalized metrics object — views, likes, comments, interactions, and engagementRate, plus shares/saves when the network exposes them — so you do not have to special-case each platform. Fields a network does not expose are omitted (YouTube has no public share/save counts); engagementRate is interactions / views when both are available.",
   },
 ];
 

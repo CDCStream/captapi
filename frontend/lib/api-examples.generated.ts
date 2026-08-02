@@ -210,15 +210,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "RickAstleyYT",
           "displayName": "Rick Astley",
-          "url": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
-          "verified": null
+          "url": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
         },
         "metrics": {
           "views": 1799581314,
           "likes": 19303245,
           "comments": 2400000,
-          "shares": null,
-          "saves": null,
           "interactions": 21703245,
           "engagementRate": 0.0121
         }
@@ -234,15 +231,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": {
           "username": "jawed",
           "displayName": "jawed",
-          "url": "https://www.youtube.com/channel/UC4QobU6STFB0P71PMvOGN5A",
-          "verified": null
+          "url": "https://www.youtube.com/channel/UC4QobU6STFB0P71PMvOGN5A"
         },
         "metrics": {
           "views": 402644853,
           "likes": 19283429,
           "comments": 10000000,
-          "shares": null,
-          "saves": null,
           "interactions": 29283429,
           "engagementRate": 0.0727
         }
@@ -260,15 +254,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "author": {
       "username": "RickAstleyYT",
       "displayName": "Rick Astley",
-      "url": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
-      "verified": null
+      "url": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
     },
     "metrics": {
       "views": 1797826473,
       "likes": 19283915,
       "comments": 2400000,
-      "shares": null,
-      "saves": null,
       "interactions": 21683915,
       "engagementRate": 0.0121
     }
