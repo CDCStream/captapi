@@ -222,6 +222,10 @@ def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
     author = post.get("author")
     if isinstance(author, dict):
         post["author"] = {k: v for k, v in author.items() if v is not None}
+    for key in ("location", "music", "accessibilityCaption", "musicId", "previewComments"):
+        val = post.get(key)
+        if val in (None, [], {}):
+            post.pop(key, None)
     return post
 
 
@@ -268,12 +272,56 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         },
         "engagement": {
             "views": safe_int(node.get("video_view_count") or node.get("video_play_count") or node.get("views")),
+            "plays": safe_int(node.get("video_play_count"))
+            if node.get("video_view_count") is not None and node.get("video_play_count") is not None
+            and safe_int(node.get("video_view_count")) != safe_int(node.get("video_play_count"))
+            else None,
             "likes": hidden_count(_count(node.get("edge_media_preview_like")) or node.get("likes")),
             "comments": hidden_count(_count(node.get("edge_media_to_comment")) or node.get("num_comments")),
         },
         "hashtags": _HASHTAG_RE.findall(caption),
         "mentions": _MENTION_RE.findall(caption),
+        "isPaidPartnership": bool(node.get("is_paid_partnership"))
+        if node.get("is_paid_partnership") is not None
+        else False,
+        "isAd": bool(node.get("is_ad") or node.get("ad_id")),
+        "isAffiliate": bool(node.get("affiliate_info") or node.get("is_affiliate")),
+        "accessibilityCaption": safe_str(node.get("accessibility_caption")),
     }
+    loc = node.get("location") if isinstance(node.get("location"), dict) else None
+    if loc and (loc.get("name") or loc.get("id") or loc.get("pk")):
+        result["location"] = {
+            "id": safe_str(loc.get("pk") or loc.get("id")),
+            "name": safe_str(loc.get("name")),
+            "latitude": safe_float(loc.get("lat") or loc.get("latitude")),
+            "longitude": safe_float(loc.get("lng") or loc.get("longitude")),
+        }
+        result["location"] = {k: v for k, v in result["location"].items() if v is not None}
+    music = node.get("clips_music_attribution_info")
+    if isinstance(music, dict) and (
+        music.get("audio_id") or music.get("song_name") or music.get("artist_name")
+    ):
+        result["music"] = {
+            "id": safe_str(music.get("audio_id")),
+            "title": safe_str(music.get("song_name")),
+            "artist": safe_str(music.get("artist_name")),
+        }
+        result["musicId"] = result["music"].get("id")
+    # Owner stats when the GraphQL node carries them (often only on richer edges).
+    if isinstance(owner, dict):
+        followers = _count(owner.get("edge_followed_by")) or safe_int(owner.get("follower_count"))
+        posts = _count(owner.get("edge_owner_to_timeline_media")) or safe_int(
+            owner.get("media_count") or owner.get("post_count")
+        )
+        if followers is not None:
+            result["author"]["followers"] = followers
+        if posts is not None:
+            result["author"]["postCount"] = posts
+        if owner.get("is_private") is not None:
+            result["author"]["private"] = owner.get("is_private")
+        oid = safe_str(owner.get("id") or owner.get("pk"))
+        if oid:
+            result["author"]["id"] = oid
     return strip_null_post_fields(result)
 
 

@@ -705,6 +705,8 @@ export interface InstagramHashtagSearchParams {
   q: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** all (default) or reels — return only Reels/clips when set to reels. */
+  mediaType?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -776,7 +778,7 @@ export class InstagramApi {
   reelsByAudioId(params: InstagramReelsByAudioIdParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/reels-by-audio-id", params);
   }
-  /** Instagram Hashtag Search — Search Instagram posts by hashtag. (2 credits) */
+  /** Instagram Hashtag Search — Search Instagram posts by hashtag (native grid). (2 credits) */
   hashtagSearch(params: InstagramHashtagSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/hashtag-search", params);
   }

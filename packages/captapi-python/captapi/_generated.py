@@ -940,14 +940,15 @@ class InstagramApi:
         """
         return self._t.get("/v1/instagram/reels-by-audio-id", {"audio_id": audio_id, "limit": limit, "cache": cache})
 
-    def hashtag_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Hashtag Search — Search Instagram posts by hashtag. (2 credits)
+    def hashtag_search(self, *, q: str, limit: float | None = None, mediaType: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Instagram Hashtag Search — Search Instagram posts by hashtag (native grid). (2 credits)
 
         :param q: Hashtag without the # (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param mediaType: all (default) or reels — return only Reels/clips when set to reels.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/instagram/hashtag-search", {"q": q, "limit": limit, "cache": cache})
+        return self._t.get("/v1/instagram/hashtag-search", {"q": q, "limit": limit, "mediaType": mediaType, "cache": cache})
 
     def profile_search(self, *, q: str, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Profile Search — Resolve an Instagram account name or @handle to its public profile. (1 credit)
@@ -1077,14 +1078,15 @@ class AsyncInstagramApi:
         """
         return await self._t.get("/v1/instagram/reels-by-audio-id", {"audio_id": audio_id, "limit": limit, "cache": cache})
 
-    async def hashtag_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Hashtag Search — Search Instagram posts by hashtag. (2 credits)
+    async def hashtag_search(self, *, q: str, limit: float | None = None, mediaType: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Instagram Hashtag Search — Search Instagram posts by hashtag (native grid). (2 credits)
 
         :param q: Hashtag without the # (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param mediaType: all (default) or reels — return only Reels/clips when set to reels.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/instagram/hashtag-search", {"q": q, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/instagram/hashtag-search", {"q": q, "limit": limit, "mediaType": mediaType, "cache": cache})
 
     async def profile_search(self, *, q: str, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Profile Search — Resolve an Instagram account name or @handle to its public profile. (1 credit)

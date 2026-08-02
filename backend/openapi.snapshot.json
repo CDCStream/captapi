@@ -4909,6 +4909,19 @@
             }
           },
           {
+            "name": "mediaType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(all|reels)$",
+              "description": "all (default) or reels — filter to Reels/clips only.",
+              "default": "all",
+              "title": "Mediatype"
+            },
+            "description": "all (default) or reels — filter to Reels/clips only."
+          },
+          {
             "name": "cache",
             "in": "query",
             "required": false,

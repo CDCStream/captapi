@@ -1504,10 +1504,16 @@ async def instagram_tagged_posts(
 async def instagram_hashtag_search(
     q: str = Query(..., min_length=2, description="Hashtag (without #)"),
     limit: int = Query(20, ge=1, le=200),
+    mediaType: str = Query(
+        "all",
+        pattern="^(all|reels)$",
+        description="all (default) or reels — filter to Reels/clips only.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     # Native/Decodo only — flat fee (no Apify fallthrough).
+    reels_only = mediaType == "reels"
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/hashtag-search",
@@ -1517,14 +1523,16 @@ async def instagram_hashtag_search(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             async def _decodo_run() -> dict[str, Any] | None:
-                results = await decodo.hashtag_medias(q, limit, reels_only=False)
+                results = await decodo.hashtag_medias(q, limit, reels_only=reels_only)
                 if results is None:
                     return None
+                # GraphQL nodes rarely carry play counts / owner stats — enrich.
+                results = await instagram_native.enrich_posts_from_author_feeds(results)
                 return {"query": q, "totalReturned": len(results), "results": results}
 
             async def _headless_hydrate() -> dict[str, Any] | None:
                 results = await instagram_native.hashtag_posts_native(
-                    q, limit=limit, reels_only=False
+                    q, limit=limit, reels_only=reels_only
                 )
                 if not results:
                     return None
@@ -1546,7 +1554,7 @@ async def instagram_hashtag_search(
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",
-            params={"q": q, "limit": limit, "v": 12},
+            params={"q": q, "limit": limit, "mediaType": mediaType, "v": 13},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

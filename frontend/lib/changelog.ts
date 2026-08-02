@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
+    category: "improvement",
+    title: "Instagram hashtag search: views, paid flags, creator size, audio",
+    description:
+      "GET /v1/instagram/hashtag-search stays on Instagram's native hashtag grid (not Google index) and now returns campaign-ready fields: engagement.views (backfilled from the creator feed when Polaris hides play counts), author.followers / author.postCount, isPaidPartnership / isAd / isAffiliate, music{id,title,artist} + musicId, location, accessibilityCaption, and previewComments. Optional mediaType=all|reels. Still flat 2 credits. Live check: engagement.likes matches Apify likesCount (not mislabeled views).",
+    items: [
+      "engagement.views + author.followers / postCount on hashtag hits",
+      "isPaidPartnership / isAd / isAffiliate, music, location, previewComments",
+      "mediaType=reels filter",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
     category: "fix",
     title: "TikTok Shop search: rating/reviews + HTML entity decode",
     description:

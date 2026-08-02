@@ -1605,7 +1605,7 @@
     "name": "Instagram Hashtag Search",
     "path": "/v1/instagram/hashtag-search",
     "credits": 2,
-    "summary": "Search Instagram posts by hashtag.",
+    "summary": "Search Instagram posts by hashtag (native grid).",
     "params": [
       {
         "name": "q",
@@ -1618,6 +1618,12 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "mediaType",
+        "type": "string",
+        "required": false,
+        "description": "all (default) or reels — return only Reels/clips when set to reels."
       },
       {
         "name": "cache",

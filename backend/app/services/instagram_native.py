@@ -113,6 +113,167 @@ def _video_duration(media: dict[str, Any], cover: dict[str, Any]) -> float | Non
     return _duration_from_video_url(safe_str(videos[0].get("url")) if videos else "")
 
 
+def _location_from_media(media: dict[str, Any]) -> dict[str, Any] | None:
+    loc = media.get("location")
+    if not isinstance(loc, dict):
+        return None
+    name = safe_str(loc.get("name"))
+    lid = safe_str(loc.get("pk") or loc.get("id"))
+    if not name and not lid:
+        return None
+    out: dict[str, Any] = {"id": lid, "name": name}
+    lat = safe_float(loc.get("lat") or loc.get("latitude"))
+    lng = safe_float(loc.get("lng") or loc.get("longitude"))
+    if lat is not None:
+        out["latitude"] = lat
+    if lng is not None:
+        out["longitude"] = lng
+    return out
+
+
+def _music_from_media(media: dict[str, Any]) -> dict[str, Any] | None:
+    """Audio attribution from clips_metadata (licensed track or original sound)."""
+    clips = media.get("clips_metadata") if isinstance(media.get("clips_metadata"), dict) else {}
+    music_info = clips.get("music_info") if isinstance(clips.get("music_info"), dict) else {}
+    original = (
+        clips.get("original_sound_info")
+        if isinstance(clips.get("original_sound_info"), dict)
+        else {}
+    )
+    asset = (
+        music_info.get("music_asset_info")
+        if isinstance(music_info.get("music_asset_info"), dict)
+        else {}
+    )
+    audio_id = safe_str(
+        asset.get("audio_cluster_id")
+        or asset.get("audio_asset_id")
+        or music_info.get("audio_asset_id")
+        or original.get("audio_asset_id")
+        or original.get("audio_id")
+    )
+    title = safe_str(
+        asset.get("title")
+        or music_info.get("song_name")
+        or original.get("original_audio_title")
+    )
+    artist = None
+    for block in (music_info, original, asset):
+        ig_artist = block.get("ig_artist") if isinstance(block, dict) else None
+        if isinstance(ig_artist, dict):
+            artist = safe_str(ig_artist.get("username") or ig_artist.get("full_name"))
+            if artist:
+                break
+    if not artist:
+        artist = safe_str(asset.get("display_artist"))
+    if not audio_id and not title:
+        return None
+    return {"id": audio_id, "title": title, "artist": artist}
+
+
+def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) -> dict[str, Any]:
+    """Map a Polaris / api/v1 media dict to the public post shape.
+
+    Additive fields (isPaidPartnership, music, location, previewComments, …)
+    are included when Instagram exposes them. Play counts are often absent on
+    the logged-out media endpoint — callers may backfill ``engagement.views``
+    from the owner's feed (see ``enrich_posts_from_author_feeds``).
+    """
+    from app.services.instagram_decodo import strip_null_post_fields
+
+    code = safe_str(media.get("code")) or shortcode or ""
+    caption_obj = media.get("caption")
+    caption = safe_str(caption_obj.get("text")) if isinstance(caption_obj, dict) else None
+    user = media.get("user") if isinstance(media.get("user"), dict) else {}
+    username = safe_str(user.get("username"))
+    owner_id = safe_str(user.get("pk") or user.get("pk_id") or user.get("id"))
+
+    cover = (media.get("carousel_media") or [media])[0]
+    videos = cover.get("video_versions") or []
+    images = (cover.get("image_versions2") or {}).get("candidates") or []
+
+    taken_at = safe_int(media.get("taken_at"))
+    published = (
+        datetime.fromtimestamp(taken_at, tz=timezone.utc).isoformat().replace("+00:00", "Z")
+        if taken_at
+        else None
+    )
+
+    media_type = safe_int(media.get("media_type")) or 0
+    is_video = media_type == 2
+    product = safe_str(media.get("product_type"))
+    plays = safe_int(media.get("play_count"))
+    ig_plays = safe_int(media.get("ig_play_count") or media.get("view_count"))
+    views = plays or ig_plays
+
+    music = _music_from_media(media)
+    location = _location_from_media(media)
+    post_url = (
+        f"https://www.instagram.com/{'reel' if is_video or product in {'clips', 'reel', 'reels'} else 'p'}/{code}/"
+        if code
+        else None
+    )
+    preview_raw = media.get("preview_comments") or []
+    preview_comments = []
+    if isinstance(preview_raw, list) and post_url:
+        for raw in preview_raw[:5]:
+            if isinstance(raw, dict):
+                mapped = _map_preview_comment(raw, post_url=post_url)
+                if mapped:
+                    preview_comments.append(mapped)
+
+    affiliate = media.get("affiliate_info")
+    is_affiliate = bool(affiliate) if affiliate not in (None, [], {}, False) else False
+    is_ad = bool(media.get("is_ad") or media.get("ad_id") or media.get("injected"))
+    is_paid = media.get("is_paid_partnership")
+    if is_paid is None and media.get("sponsor_tags"):
+        is_paid = True
+
+    author: dict[str, Any] = {
+        "id": owner_id,
+        "username": username,
+        "displayName": safe_str(user.get("full_name")),
+        "url": f"https://instagram.com/{username}" if username else None,
+        "verified": user.get("is_verified"),
+        "profileImage": safe_str(user.get("profile_pic_url")),
+        "followers": safe_int(user.get("follower_count")),
+        "postCount": safe_int(user.get("media_count")),
+        "private": user.get("is_private"),
+    }
+
+    post: dict[str, Any] = {
+        "platform": "instagram",
+        "url": post_url or (f"https://www.instagram.com/p/{code}/" if code else None),
+        "id": code or shortcode,
+        "postType": _MEDIA_TYPE_NAMES.get(media_type),
+        "productType": product,
+        "caption": caption,
+        "description": caption,
+        "publishedAt": published,
+        "durationSeconds": _video_duration(media, cover),
+        "thumbnailUrl": safe_str(images[0].get("url")) if images else None,
+        "videoUrl": safe_str(videos[0].get("url")) if videos else None,
+        "author": author,
+        "engagement": {
+            "views": views,
+            "plays": plays if plays is not None and ig_plays is not None and plays != ig_plays else None,
+            "likes": hidden_count(media.get("like_count")),
+            "comments": hidden_count(media.get("comment_count")),
+        },
+        "hashtags": _HASHTAG_RE.findall(caption or ""),
+        "mentions": _MENTION_RE.findall(caption or ""),
+        "isPaidPartnership": bool(is_paid) if is_paid is not None else False,
+        "isAd": is_ad,
+        "isAffiliate": is_affiliate,
+        "accessibilityCaption": safe_str(media.get("accessibility_caption")),
+        "location": location,
+        "music": music,
+        "musicId": (music or {}).get("id") if music else None,
+        "previewComments": preview_comments or None,
+    }
+    return strip_null_post_fields(post)
+
+
 async def fetch_post_details(shortcode: str) -> dict[str, Any] | None:
     """Full post/reel/carousel details in the /v1/instagram/details shape.
 
@@ -126,52 +287,7 @@ async def fetch_post_details(shortcode: str) -> dict[str, Any] | None:
         media = await _fetch_item_with_session(shortcode)
     if media is None:
         return None
-
-    caption_obj = media.get("caption")
-    caption = safe_str(caption_obj.get("text")) if isinstance(caption_obj, dict) else None
-    user = media.get("user") or {}
-    username = safe_str(user.get("username"))
-
-    # For carousels the media lives on the children; lead with the cover item.
-    cover = (media.get("carousel_media") or [media])[0]
-    videos = cover.get("video_versions") or []
-    images = (cover.get("image_versions2") or {}).get("candidates") or []
-
-    taken_at = safe_int(media.get("taken_at"))
-    published = (
-        datetime.fromtimestamp(taken_at, tz=timezone.utc).isoformat().replace("+00:00", "Z")
-        if taken_at
-        else None
-    )
-
-    return {
-        "platform": "instagram",
-        "url": f"https://www.instagram.com/p/{shortcode}/",
-        "id": safe_str(media.get("code")) or shortcode,
-        "postType": _MEDIA_TYPE_NAMES.get(safe_int(media.get("media_type")) or 0),
-        "productType": safe_str(media.get("product_type")),
-        "caption": caption,
-        "description": caption,
-        "publishedAt": published,
-        "durationSeconds": _video_duration(media, cover),
-        "thumbnailUrl": safe_str(images[0].get("url")) if images else None,
-        "videoUrl": safe_str(videos[0].get("url")) if videos else None,
-        "author": {
-            "username": username,
-            "displayName": safe_str(user.get("full_name")),
-            "url": f"https://instagram.com/{username}" if username else None,
-            "verified": user.get("is_verified"),
-            "profileImage": safe_str(user.get("profile_pic_url")),
-        },
-        # No "views": Instagram hides play counts from the logged-out API for
-        # clips, so the field can't be served consistently across post types.
-        "engagement": {
-            "likes": hidden_count(media.get("like_count")),
-            "comments": hidden_count(media.get("comment_count")),
-        },
-        "hashtags": _HASHTAG_RE.findall(caption or ""),
-        "mentions": _MENTION_RE.findall(caption or ""),
-    }
+    return map_post_from_media(media, shortcode=shortcode)
 
 
 def _map_preview_comment(raw: dict[str, Any], *, post_url: str) -> dict[str, Any] | None:
@@ -1915,6 +2031,126 @@ async def trending_reels_native(
     return out
 
 
+async def enrich_posts_from_author_feeds(
+    posts: list[dict[str, Any]], *, max_authors: int = 12
+) -> list[dict[str, Any]]:
+    """Backfill ``engagement.views`` + author followers/postCount.
+
+    Polaris media info (used by hydrate) returns real ``like_count`` but hides
+    play counts logged-out. The owner's ``api/v1`` feed still exposes
+    ``play_count`` / ``ig_play_count`` for recent posts — merge those in when
+    the hashtag hit is still on the creator's timeline. Profile lookup fills
+    ``author.followers`` / ``author.postCount`` for campaign sizing.
+    """
+    from app.services.instagram_decodo import strip_null_post_fields
+
+    if not posts:
+        return posts
+
+    # username -> author id (prefer id from hydrated media)
+    authors: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for post in posts:
+        author = post.get("author") if isinstance(post.get("author"), dict) else {}
+        username = safe_str(author.get("username"))
+        uid = safe_str(author.get("id"))
+        if not username or username in seen:
+            continue
+        seen.add(username)
+        authors.append((username, uid or ""))
+        if len(authors) >= max_authors:
+            break
+
+    if not authors:
+        return posts
+
+    sem = asyncio.Semaphore(3)
+    play_by_code: dict[str, tuple[int | None, int | None]] = {}
+    stats_by_user: dict[str, dict[str, Any]] = {}
+
+    def _stats_from_profile(profile: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "followers": _edge_count(
+                profile.get("edge_followed_by") or profile.get("follower_count")
+            ),
+            "postCount": _edge_count(
+                profile.get("edge_owner_to_timeline_media") or profile.get("media_count")
+            ),
+            "private": profile.get("is_private"),
+            "id": safe_str(profile.get("id") or profile.get("pk")),
+        }
+
+    async def _one(username: str, user_id: str) -> None:
+        async with sem:
+            # Decodo HTML profile is the reliable path under WPI 429s; run it
+            # alongside the feed so hashtag search stays within a few seconds.
+            profile_task = asyncio.create_task(fetch_web_profile_info_via_decodo(username))
+            uid = user_id
+            if uid:
+                page = await fetch_user_feed_page(uid, count=33)
+                if page:
+                    for item in page[0]:
+                        code = safe_str(item.get("code"))
+                        if not code:
+                            continue
+                        play_by_code[code] = (
+                            safe_int(item.get("play_count")),
+                            safe_int(item.get("ig_play_count") or item.get("view_count")),
+                        )
+            profile, _missing = await profile_task
+            if isinstance(profile, dict):
+                stats = _stats_from_profile(profile)
+                stats_by_user[username] = stats
+                if not uid and stats.get("id"):
+                    uid = stats["id"]
+                    page = await fetch_user_feed_page(uid, count=33)
+                    if page:
+                        for item in page[0]:
+                            code = safe_str(item.get("code"))
+                            if not code:
+                                continue
+                            play_by_code[code] = (
+                                safe_int(item.get("play_count")),
+                                safe_int(item.get("ig_play_count") or item.get("view_count")),
+                            )
+            elif username not in stats_by_user:
+                # Last resort — full WPI ladder (slow / rate-limited).
+                profile = await fetch_web_profile_info(username)
+                if isinstance(profile, dict):
+                    stats_by_user[username] = _stats_from_profile(profile)
+
+    await asyncio.gather(*[_one(u, i) for u, i in authors])
+
+    for post in posts:
+        code = safe_str(post.get("id"))
+        engagement = post.get("engagement") if isinstance(post.get("engagement"), dict) else {}
+        if code and code in play_by_code and engagement.get("views") is None:
+            plays, ig_plays = play_by_code[code]
+            views = plays or ig_plays
+            if views is not None:
+                engagement["views"] = views
+            if (
+                plays is not None
+                and ig_plays is not None
+                and plays != ig_plays
+            ):
+                engagement["plays"] = plays
+            post["engagement"] = engagement
+        author = post.get("author") if isinstance(post.get("author"), dict) else {}
+        username = safe_str(author.get("username"))
+        stats = stats_by_user.get(username or "")
+        if stats:
+            if author.get("followers") is None and stats.get("followers") is not None:
+                author["followers"] = stats["followers"]
+            if author.get("postCount") is None and stats.get("postCount") is not None:
+                author["postCount"] = stats["postCount"]
+            if author.get("private") is None and stats.get("private") is not None:
+                author["private"] = stats["private"]
+            post["author"] = author
+        strip_null_post_fields(post)
+    return posts
+
+
 async def hashtag_posts_native(
     tag: str, *, limit: int = 20, reels_only: bool = False
 ) -> list[dict[str, Any]] | None:
@@ -1939,4 +2175,7 @@ async def hashtag_posts_native(
             or (safe_str(p.get("productType")) in {"clips", "reel", "reels"})
             or bool(p.get("videoUrl"))
         ]
-    return posts[:limit] or None
+    posts = posts[:limit]
+    if not posts:
+        return None
+    return await enrich_posts_from_author_feeds(posts)
