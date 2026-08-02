@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "fix",
+    title: "YouTube community posts: numeric likes, ISO dates, channel/video, cursor",
+    description:
+      "GET /v1/youtube/community-posts no longer returns likeCount as a display string (\"3M\") or publishedTime as a relative label only. likeCount is a number with likeCountText kept for display (likeCountApproximate when YouTube only shows K/M/B); publishedTime is ISO-8601 (approximate from relative labels) with publishedTimeText preserved. Each post adds channel{id,title,url,handle}, url/image, and when linked — video{id,title,thumbnail,url,viewCountText,viewCountInt,lengthText,lengthSeconds} plus enriched linkedVideos[]. Cursor pagination via nextCursor + hasMore. Flat 1 credit on the native /posts path; Apify fallback stays ~0.5/result.",
+    items: [
+      "likeCount number + likeCountText; ISO publishedTime + publishedTimeText",
+      "channel{id,title,url,handle}; video{} / linkedVideos when attached",
+      "nextCursor + hasMore pagination",
+      "1 credit native (was ~10 at limit=20)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "fix",
     title: "YouTube playlist: ISO publishedAt, video id, owner, totalVideos",
     description:
       "GET /v1/youtube/playlist and /playlist-videos no longer return relative labels like \"1 year ago\" in publishedAt. publishedAt is ISO-8601 (approximate when derived from YouTube's relative card text); the original label is kept as publishedTimeText. Each video now includes id. Playlist responses add owner{id,name,url,handle}, totalVideos (full playlist size vs totalReturned page length), and viewCountApproximate when viewCount comes from compact 2.5B-style UI text. Still flat 2 credits on the native path; fast=true RSS kept for exact dates / speed.",

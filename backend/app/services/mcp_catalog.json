@@ -584,8 +584,8 @@
     "platform": "youtube",
     "name": "YouTube Community Posts",
     "path": "/v1/youtube/community-posts",
-    "credits": 10,
-    "summary": "List a channel's community (posts) tab.",
+    "credits": 1,
+    "summary": "Community posts — numeric likes, ISO dates, channel{}, video{}; cursor pagination.",
     "params": [
       {
         "name": "url",
@@ -597,7 +597,13 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 1 credit on the native path."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Leave empty for the first page; then pass the nextCursor value from the previous response."
       },
       {
         "name": "cache",

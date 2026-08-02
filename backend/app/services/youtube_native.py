@@ -2293,6 +2293,62 @@ async def comment_replies_native(norm_url: str, comment_id: str, limit: int) -> 
 
 
 # --------------------------------------------------------- community posts --
+def _channel_from_community_post(post: dict[str, Any]) -> dict[str, Any]:
+    """``channel{id,title,url,handle}`` from authorEndpoint / authorText."""
+    channel = _channel_from_text_runs(post.get("authorText"))
+    browse = ((post.get("authorEndpoint") or {}).get("browseEndpoint")) or {}
+    if isinstance(browse, dict):
+        cid = safe_str(browse.get("browseId"))
+        if cid:
+            channel["id"] = cid
+        base = safe_str(browse.get("canonicalBaseUrl"))
+        if base:
+            channel["url"] = (
+                f"https://www.youtube.com{base}" if base.startswith("/") else base
+            )
+            if base.startswith("/@"):
+                channel["handle"] = base[1:]
+    if not channel.get("title"):
+        channel["title"] = text_of(post.get("authorText"))
+    return {
+        "id": channel.get("id"),
+        "title": channel.get("title"),
+        "url": channel.get("url"),
+        "handle": channel.get("handle"),
+    }
+
+
+def _video_from_community_renderer(vr: dict[str, Any]) -> dict[str, Any] | None:
+    """Linked video card — id, display + numeric views, length."""
+    if not isinstance(vr, dict):
+        return None
+    vid = safe_str(vr.get("videoId"))
+    if not vid:
+        watch = ((vr.get("navigationEndpoint") or {}).get("watchEndpoint")) or {}
+        vid = safe_str(watch.get("videoId")) if isinstance(watch, dict) else None
+    if not vid:
+        return None
+    view_text = text_of(vr.get("viewCountText") or vr.get("shortViewCountText"))
+    view_int, _approx = parse_count_text_meta(view_text)
+    length_text = text_of(vr.get("lengthText"))
+    length_secs = _duration_text_seconds(vr.get("lengthText"))
+    if length_secs is None:
+        raw_secs = safe_str(vr.get("lengthSeconds"))
+        if raw_secs and raw_secs.isdigit():
+            length_secs = int(raw_secs)
+    thumb = _best_thumb(vr.get("thumbnail"))
+    return {
+        "id": vid,
+        "title": text_of(vr.get("title")),
+        "thumbnail": thumb,
+        "url": f"https://www.youtube.com/watch?v={vid}",
+        "viewCountText": view_text,
+        "viewCountInt": view_int,
+        "lengthText": length_text,
+        "lengthSeconds": length_secs,
+    }
+
+
 def _normalize_community_post(post: dict[str, Any]) -> dict[str, Any] | None:
     """Shape matching ``/v1/youtube/community-posts`` list items."""
     if not isinstance(post, dict):
@@ -2316,39 +2372,91 @@ def _normalize_community_post(post: dict[str, Any]) -> dict[str, Any] | None:
                 url = "https:" + url
             images.append(url)
             post_type = "image"
-    for key in ("videoRenderer", "compactVideoRenderer", "gridVideoRenderer"):
+    if list(walk_find(attachment, "pollRenderer")):
+        post_type = "poll"
+    for key in (
+        "videoRenderer",
+        "compactVideoRenderer",
+        "gridVideoRenderer",
+        "videoAttachmentPostRenderer",
+        "backstageVideoRenderer",
+    ):
         for vr in walk_find(attachment, key):
-            vid = safe_str(vr.get("videoId"))
-            if not vid:
+            video = _video_from_community_renderer(vr)
+            if not video:
                 continue
+            # Keep videoId for older clients; mirror SC-style fields too.
             linked.append(
                 {
-                    "videoId": vid,
-                    "url": f"https://www.youtube.com/watch?v={vid}",
-                    "title": text_of(vr.get("title")),
+                    "videoId": video["id"],
+                    "id": video["id"],
+                    "url": video["url"],
+                    "title": video.get("title"),
+                    "thumbnail": video.get("thumbnail"),
+                    "viewCountText": video.get("viewCountText"),
+                    "viewCountInt": video.get("viewCountInt"),
+                    "lengthText": video.get("lengthText"),
+                    "lengthSeconds": video.get("lengthSeconds"),
                 }
             )
             post_type = "video"
-    # Deduplicate images while preserving order.
+    # Deduplicate images / videos while preserving order.
     seen_img: set[str] = set()
     uniq_images: list[str] = []
     for img in images:
         if img not in seen_img:
             seen_img.add(img)
             uniq_images.append(img)
+    seen_vid: set[str] = set()
+    uniq_linked: list[dict[str, Any]] = []
+    for row in linked:
+        vid = row.get("id") or row.get("videoId")
+        if not vid or vid in seen_vid:
+            continue
+        seen_vid.add(vid)
+        uniq_linked.append(row)
     hashtags = re.findall(r"#(\w+)", text)
-    return {
+    like_text = text_of(post.get("voteCount"))
+    like_count, like_approx = parse_count_text_meta(like_text)
+    published_iso, published_text = published_fields(post.get("publishedTimeText"))
+    channel = _channel_from_community_post(post)
+    source_url = f"https://www.youtube.com/post/{post_id}"
+    primary_video = None
+    if uniq_linked:
+        first = uniq_linked[0]
+        primary_video = {
+            "id": first.get("id"),
+            "title": first.get("title"),
+            "thumbnail": first.get("thumbnail"),
+            "url": first.get("url"),
+            "viewCountText": first.get("viewCountText"),
+            "viewCountInt": first.get("viewCountInt"),
+            "lengthText": first.get("lengthText"),
+            "lengthSeconds": first.get("lengthSeconds"),
+        }
+    out: dict[str, Any] = {
         "id": post_id,
-        "author": text_of(post.get("authorText")),
+        "url": source_url,
+        "author": channel.get("title") or text_of(post.get("authorText")),
+        "channel": channel,
         "text": text.strip(),
-        "likeCount": text_of(post.get("voteCount")),
+        "likeCount": like_count,
+        "likeCountText": like_text,
         "hashtags": hashtags,
-        "linkedVideos": linked,
-        "publishedTime": text_of(post.get("publishedTimeText")),
+        "linkedVideos": uniq_linked,
+        "video": primary_video,
+        # publishedTime is ISO-8601 (approx from relative labels); keep the
+        # YouTube UI string separately — same dual-field pattern as playlist.
+        "publishedTime": published_iso,
+        "publishedTimeText": published_text,
         "postType": post_type,
         "images": uniq_images,
-        "sourceUrl": f"https://www.youtube.com/post/{post_id}",
+        "image": uniq_images[0] if uniq_images else None,
+        "sourceUrl": source_url,
     }
+    if like_approx:
+        out["likeCountApproximate"] = True
+    return out
 
 
 def _collect_community_posts(data: Any) -> list[dict[str, Any]]:
@@ -2376,28 +2484,62 @@ def _posts_tab_url(channel_url: str) -> str:
     return f"{base}/posts"
 
 
-async def community_posts_native(channel_url: str, limit: int = 20) -> list[dict[str, Any]] | None:
-    """Channel community posts from the public ``/posts`` tab + continuations."""
+async def community_posts_native(
+    channel_url: str,
+    limit: int = 20,
+    *,
+    cursor: str | None = None,
+) -> dict[str, Any] | None:
+    """Channel community posts from the public ``/posts`` tab + continuations.
+
+    Returns ``{posts, nextCursor}``. Pass ``cursor`` (previous ``nextCursor``)
+    to page; without a cursor we bootstrap from the public ``/posts`` HTML.
+    """
     capped = max(1, min(int(limit or 20), 200))
-    tab = _posts_tab_url(channel_url)
-    data, _ = await fetch_page_data(tab)
-    if data is None:
-        return None
-    posts = _collect_community_posts(data)
-    token = find_continuation_token(data)
+    posts: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    token: str | None = (cursor or "").strip() or None
+
+    if not token:
+        tab = _posts_tab_url(channel_url)
+        data, _ = await fetch_page_data(tab)
+        if data is None:
+            return None
+        for item in _collect_community_posts(data):
+            if item["id"] in seen:
+                continue
+            seen.add(item["id"])
+            posts.append(item)
+            if len(posts) >= capped:
+                break
+        token = find_continuation_token(data)
+
     hops = 0
-    while token and len(posts) < capped and hops < 8:
+    max_hops = max(8, (capped // 10) + 3)
+    while token and len(posts) < capped and hops < max_hops:
         payload = await innertube("browse", {"continuation": token})
         if payload is None:
+            token = None
             break
-        existing = {p["id"] for p in posts}
-        added = [p for p in _collect_community_posts(payload) if p["id"] not in existing]
-        if not added:
-            break
-        posts.extend(added)
+        added = [p for p in _collect_community_posts(payload) if p["id"] not in seen]
         token = find_continuation_token(payload)
         hops += 1
+        if not added:
+            # Empty page but another continuation may still yield posts.
+            if not token:
+                break
+            continue
+        for item in added:
+            seen.add(item["id"])
+            posts.append(item)
+            if len(posts) >= capped:
+                break
+
     if not posts:
         return None
-    return posts[:capped]
+    next_cursor = token if token else None
+    return {
+        "posts": posts[:capped],
+        "nextCursor": next_cursor,
+    }
 

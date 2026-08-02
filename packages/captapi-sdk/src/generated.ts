@@ -191,8 +191,10 @@ export interface YoutubeChannelPlaylistsParams {
 export interface YoutubeCommunityPostsParams {
   /** YouTube channel URL, e.g. https://youtube.com/@handle or /channel/UC... The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
+  /** Max items to return. Default 20, max 200. Flat 1 credit on the native path. */
   limit?: number;
+  /** Leave empty for the first page; then pass the nextCursor value from the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -289,7 +291,7 @@ export class YoutubeApi {
   channelPlaylists(params: YoutubeChannelPlaylistsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/channel-playlists", params);
   }
-  /** YouTube Community Posts — List a channel's community (posts) tab. (10 credits) */
+  /** YouTube Community Posts — Community posts — numeric likes, ISO dates, channel{}, video{}; cursor pagination. (1 credit) */
   communityPosts(params: YoutubeCommunityPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/community-posts", params);
   }

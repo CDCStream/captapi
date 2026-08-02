@@ -65,15 +65,18 @@ CREDIT_YT_NATIVE_LIST = 2
 # At $0.0045/credit with 120% markup → ~1 credit; bill 2 flat when native/RSS
 # succeeds. Apify fallback keeps RATE_YT_VIDEO per-result scale.
 CREDIT_YT_PLAYLIST_NATIVE = 2
+# Community /posts tab ytInitialData + InnerTube continuations (~$0–0.001).
+# Flat 1 credit on the native path (ScrapeCreators parity); Apify fallback
+# keeps RATE_YT_COMMUNITY per-result scale.
+CREDIT_YT_COMMUNITY_NATIVE = 1
 
 # Per-result rates kept only for endpoints that still fall through to Apify
-# (channel-shorts/streams/hashtag, community-posts, playlist Apify path).
+# (channel-shorts/streams/hashtag, community-posts Apify path, playlist Apify).
 #   streamers/youtube-scraper $2.40/1k → RATE_YT_VIDEO = 1.0 (~80% markup)
 RATE_YT_VIDEO = 1.0
 RATE_YT_MARGIN = 1.4
 RATE_YT_COMMENTS = 0.4  # legacy; comments/replies bill CREDIT_YT_NATIVE_LIST
-# Community posts use a third-party HTTP actor; cost not yet verified, so the
-# rate is conservative until confirmed in the Apify console.
+# Community posts Apify actor; cost not fully verified — conservative rate.
 RATE_YT_COMMUNITY = 0.5
 
 
@@ -1878,11 +1881,19 @@ async def youtube_channel_playlists(
 async def youtube_community_posts(
     url: str = Query(..., description="Channel URL, @handle, bare handle, or UC... channel ID"),
     limit: int = Query(20, ge=1, le=200),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     url = normalize_youtube_channel_url(url)
     settings = get_settings()
+    # Upfront reserve Apify worst-case; native path overrides to 1 credit.
     cost = _scaled_credits(limit, RATE_YT_COMMUNITY, 2)
     async with billed_call(
         caller=caller,
@@ -1893,10 +1904,24 @@ async def youtube_community_posts(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Public /posts tab ytInitialData + InnerTube continuations.
-            native_posts = await community_posts_native(url, limit=limit)
-            if native_posts:
+            native = await community_posts_native(url, limit=limit, cursor=cursor)
+            if native and native.get("posts"):
                 ctx["source"] = "direct"
-                return {"url": url, "totalReturned": len(native_posts), "posts": native_posts}
+                posts = native["posts"]
+                next_cursor = safe_str(native.get("nextCursor")) or None
+                return {
+                    "url": url,
+                    "totalReturned": len(posts),
+                    "hasMore": next_cursor is not None,
+                    "nextCursor": next_cursor,
+                    "posts": posts,
+                }
+
+            if cursor:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid or expired cursor. Start a new request without cursor.",
+                )
 
             apify = get_apify()
             items = await apify.run_actor_sync(
@@ -1910,35 +1935,106 @@ async def youtube_community_posts(
                     continue
                 media = p.get("media_urls") or []
                 images = [safe_str(i) for i in media if isinstance(i, str) and i]
-                # The actor reports likes as a display string (e.g. "330K") when
-                # present, so we surface it verbatim rather than forcing an int.
-                posts.append(
-                    {
-                        "id": safe_str(p.get("post_id")),
-                        "author": safe_str(p.get("author_name")),
-                        "text": (p.get("content_text") or "").strip(),
-                        "likeCount": safe_str(p.get("likes")),
-                        "hashtags": p.get("hashtags") or [],
-                        "linkedVideos": p.get("linked_videos") or p.get("video_links") or [],
-                        "publishedTime": safe_str(p.get("published_time_text")),
-                        "postType": safe_str(p.get("post_type")),
-                        "images": images,
-                        "sourceUrl": safe_str(p.get("post_url")) or url,
-                    }
+                like_text = safe_str(p.get("likes"))
+                like_count, like_approx = None, False
+                if like_text:
+                    like_count = parse_count_text(like_text)
+                    # Compact K/M/B labels are approximate — mirror native flag.
+                    like_approx = bool(
+                        like_count is not None
+                        and re.search(r"[KMB]\b", like_text, re.I)
+                    )
+                published_iso, published_text = published_fields(
+                    p.get("published_time_text") or p.get("published_time")
                 )
+                author = safe_str(p.get("author_name"))
+                source_url = safe_str(p.get("post_url")) or url
+                linked_raw = p.get("linked_videos") or p.get("video_links") or []
+                linked: list[dict[str, Any]] = []
+                if isinstance(linked_raw, list):
+                    for lv in linked_raw:
+                        if not isinstance(lv, dict):
+                            continue
+                        vid = safe_str(lv.get("videoId") or lv.get("id") or lv.get("video_id"))
+                        if not vid:
+                            continue
+                        linked.append(
+                            {
+                                "videoId": vid,
+                                "id": vid,
+                                "url": safe_str(lv.get("url"))
+                                or f"https://www.youtube.com/watch?v={vid}",
+                                "title": safe_str(lv.get("title")),
+                                "thumbnail": safe_str(lv.get("thumbnail") or lv.get("thumbnailUrl")),
+                                "viewCountText": safe_str(lv.get("viewCountText")),
+                                "viewCountInt": safe_int(lv.get("viewCountInt") or lv.get("viewCount")),
+                                "lengthText": safe_str(lv.get("lengthText")),
+                                "lengthSeconds": safe_int(lv.get("lengthSeconds") or lv.get("duration")),
+                            }
+                        )
+                primary_video = None
+                if linked:
+                    first = linked[0]
+                    primary_video = {
+                        "id": first.get("id"),
+                        "title": first.get("title"),
+                        "thumbnail": first.get("thumbnail"),
+                        "url": first.get("url"),
+                        "viewCountText": first.get("viewCountText"),
+                        "viewCountInt": first.get("viewCountInt"),
+                        "lengthText": first.get("lengthText"),
+                        "lengthSeconds": first.get("lengthSeconds"),
+                    }
+                row: dict[str, Any] = {
+                    "id": safe_str(p.get("post_id")),
+                    "url": source_url,
+                    "author": author,
+                    "channel": {
+                        "id": safe_str(p.get("channel_id") or p.get("author_id")) or None,
+                        "title": author or None,
+                        "url": safe_str(p.get("author_url") or p.get("channel_url")) or None,
+                        "handle": safe_str(p.get("author_handle") or p.get("handle")) or None,
+                    },
+                    "text": (p.get("content_text") or "").strip(),
+                    "likeCount": like_count,
+                    "likeCountText": like_text or None,
+                    "hashtags": p.get("hashtags") or [],
+                    "linkedVideos": linked,
+                    "video": primary_video,
+                    "publishedTime": published_iso,
+                    "publishedTimeText": published_text
+                    or safe_str(p.get("published_time_text"))
+                    or None,
+                    "postType": safe_str(p.get("post_type")),
+                    "images": images,
+                    "image": images[0] if images else None,
+                    "sourceUrl": source_url,
+                }
+                if like_approx:
+                    row["likeCountApproximate"] = True
+                posts.append(row)
             if not posts:
                 raise HTTPException(status_code=404, detail="No community posts found")
             ctx["source"] = "apify"
-            return {"url": url, "totalReturned": len(posts), "posts": posts}
+            return {
+                "url": url,
+                "totalReturned": len(posts),
+                "hasMore": None,
+                "nextCursor": None,
+                "posts": posts,
+            }
 
         data = await cached_or_run(
             endpoint="youtube.community-posts",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_YT_COMMUNITY, 2)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_YT_COMMUNITY_NATIVE
+        else:
+            ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_YT_COMMUNITY, 2)
         return ApiResponse(data=data)
 
 

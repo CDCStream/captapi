@@ -344,7 +344,7 @@
       },
       "youtubeCommunityPosts": {
         "label": "YouTube Community Posts",
-        "description": "List a channel's community (posts) tab. Costs ~10 credits (cached results free, failures never charged).",
+        "description": "Community posts — numeric likes, ISO dates, channel{}, video{}; cursor pagination. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

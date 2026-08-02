@@ -253,7 +253,25 @@ const YOUTUBE: Spec[] = [
   { slug: "youtube-hashtag-search", name: "YouTube Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/youtube/hashtag-search", credits: 20, creditsPerResult: 1 },
   { slug: "youtube-comment-replies", name: "YouTube Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/youtube/comment-replies", credits: 2 },
   { slug: "youtube-channel-playlists", name: "YouTube Channel Playlists API", shortName: "Channel Playlists", category: "list", method: "GET", path: "/v1/youtube/channel-playlists", credits: 2 },
-  { slug: "youtube-community-posts", name: "YouTube Community Posts API", shortName: "Community Posts", category: "list", method: "GET", path: "/v1/youtube/community-posts", credits: 10, creditsPerResult: 0.5 },
+  {
+    slug: "youtube-community-posts",
+    name: "YouTube Community Posts API",
+    shortName: "Community Posts",
+    category: "list",
+    method: "GET",
+    path: "/v1/youtube/community-posts",
+    credits: 1,
+    tagline:
+      "List a YouTube channel's community posts — numeric likes, ISO dates, channel{}, linked video{}, cursor pagination (1 credit native).",
+    longDescription:
+      "Pass a channel URL, @handle, or UC… ID and get that channel's community /posts tab as clean JSON. Each post includes id/url, author + channel{id,title,url,handle}, text, likeCount (number) + likeCountText (e.g. \"3.2M\"; likeCountApproximate=true for compact K/M/B labels), publishedTime (ISO-8601; approximate when derived from YouTube's relative label) + publishedTimeText, postType, images[] / image, hashtags[], and when the post links a video — video{id,title,thumbnail,url,viewCountText,viewCountInt,lengthText,lengthSeconds} plus linkedVideos[]. Cursor pagination via nextCursor + hasMore. Flat 1 credit on the native path; Apify fallback bills about 0.5 credits per returned post (min 2).",
+    delivers: [
+      "Community posts with text, images, and post type",
+      "likeCount number + likeCountText; ISO publishedTime + publishedTimeText",
+      "channel{id,title,url,handle} and linked video{} when present",
+      "Cursor pagination (nextCursor + hasMore); 1 credit native",
+    ],
+  },
   { slug: "youtube-community-post-details", name: "YouTube Community Post Details API", shortName: "Community Post Details", category: "details", method: "GET", path: "/v1/youtube/community-post-details", credits: 1 , tagline: "Get a YouTube community post — text, images, poll options, likes, and comments as structured JSON.", longDescription: "Paste a YouTube community post URL and get the post as clean JSON: the text, attached images, poll options when present, like and comment counts, publish date, and the channel that posted it. Use it to archive community updates, track polls, or feed a content calendar. No YouTube OAuth required. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
   { slug: "youtube-video-sponsors", name: "YouTube Video Sponsors API", shortName: "Video Sponsors", category: "details", method: "GET", path: "/v1/youtube/video-sponsors", credits: 1 , tagline: "Find sponsor, self-promo, and interaction segments inside a YouTube video — start/end times and category for each segment.", longDescription: "Paste a YouTube video URL and get the sponsor and promo segments viewers have marked for that video: each segment includes a category (sponsor, self-promo, interaction, and similar), plus start and end timestamps. Useful for skipping ads in players, estimating brand-deal density, or cleaning footage for reuse. No YouTube OAuth required." },
 ];
@@ -1709,7 +1727,17 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-hashtag-search": [qp("Hashtag with or without the # (min 2 characters)."), lp(20, 200)],
   "youtube-comment-replies": [up(YT_VIDEO), cid(), lp(50, 500)],
   "youtube-channel-playlists": [up(YT_CHANNEL), lp(20, 200)],
-  "youtube-community-posts": [up(YT_CHANNEL), lp(20, 200)],
+  "youtube-community-posts": [
+    up(YT_CHANNEL),
+    lpFlat(20, 200, 1),
+    {
+      name: "cursor",
+      type: "string",
+      required: false,
+      description:
+        "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+    },
+  ],
   "youtube-community-post-details": [up("YouTube community post URL.")],
   "youtube-video-sponsors": [up(YT_VIDEO)],
   // TikTok
