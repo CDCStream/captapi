@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "feature",
+    title: "Threads profile: private, bioLinks, transparency, HD avatars",
+    description:
+      "Threads profile keeps id/username/name/bio/followers/verified/profileImage and adds isThreadsOnlyUser, isPrivate, bioLinks[], transparencyLabel, profileImageVersions[], and hasOnboarded. Still 1 credit. isThreadsOnlyUser is null when Meta's web hydrate omits it (common); following/post counts remain unavailable on this public surface.",
+    items: [
+      "Additive isThreadsOnlyUser, isPrivate, bioLinks, transparencyLabel",
+      "Additive profileImageVersions[] and hasOnboarded",
+      "Docs note: following/posts not on public Threads profile surface",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "feature",
     title: "Spotify artist: topCities, worldRank, topTracks, 1 credit",
     description:
       "Spotify artist lifts the valuable GraphQL fields out of raw into a stable top-level shape: worldRank, topCities[], externalLinks[], verified, topTracks[] (with playCount), concerts[], relatedArtists[], and albums/singles (+ counts). Price drops 2 → 1 credit (ScrapeCreators parity). Docs note that monthlyListeners / topCities / worldRank are not on Spotify's public Web API — this endpoint's GraphQL path is the real value. raw remains for advanced use.",

@@ -277,7 +277,7 @@ const REDDIT: Omit<Endpoint, "platform">[] = [
 ];
 
 const THREADS: Omit<Endpoint, "platform">[] = [
-  { tool: "threads_profile", name: "Threads Profile", path: "/v1/threads/profile", credits: 1, summary: "Profile info & stats for a Threads account.", params: [url(TH_PROFILE)] },
+  { tool: "threads_profile", name: "Threads Profile", path: "/v1/threads/profile", credits: 1, summary: "Threads profile — bio, followers, verified, isPrivate, bioLinks, transparencyLabel, HD avatar versions.", params: [url(TH_PROFILE)] },
   { tool: "threads_user_posts", name: "Threads User Posts", path: "/v1/threads/user-posts", credits: 14, summary: "Recent posts from a Threads profile.", params: [url(TH_PROFILE), limit(20, 100)] },
   { tool: "threads_post_details", name: "Threads Post Details", path: "/v1/threads/post-details", credits: 1, summary: "Metadata + engagement for a Threads post.", params: [url(TH_POST)] },
   { tool: "threads_search", name: "Threads Post Search", path: "/v1/threads/search", credits: 18, summary: "Search public Threads posts by keyword — text, author, engagement, and media.", params: [q(), limit(25, 200)] },

@@ -1540,7 +1540,7 @@ class ThreadsApi:
         self._t = transport
 
     def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Threads Profile — Profile info & stats for a Threads account. (1 credit)
+        """Threads Profile — Threads profile — bio, followers, verified, isPrivate, bioLinks, transparencyLabel, HD avatar versions. (1 credit)
 
         :param url: Threads profile URL or @handle, e.g. https://threads.net/@username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1588,7 +1588,7 @@ class AsyncThreadsApi:
         self._t = transport
 
     async def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Threads Profile — Profile info & stats for a Threads account. (1 credit)
+        """Threads Profile — Threads profile — bio, followers, verified, isPrivate, bioLinks, transparencyLabel, HD avatar versions. (1 credit)
 
         :param url: Threads profile URL or @handle, e.g. https://threads.net/@username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

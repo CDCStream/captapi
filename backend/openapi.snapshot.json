@@ -8891,6 +8891,7 @@
           "Threads"
         ],
         "summary": "Threads profile details & stats",
+        "description": "Public Threads profile as clean JSON: username, name, bio, followers, verified, profileImage, plus isThreadsOnlyUser, isPrivate, bioLinks[], transparencyLabel, profileImageVersions[], and hasOnboarded. Flat 1 credit. isThreadsOnlyUser is present when Meta exposes it (often null on web hydrate).",
         "operationId": "threads_profile_v1_threads_profile_get",
         "security": [
           {

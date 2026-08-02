@@ -196,3 +196,18 @@ SC 8 · Captapi 1 · Mixed 1. Shipped this batch: #8 SEO fix, #9 ISO+post, #10 S
 | albums[] / singles[] + counts | P1 | Shipped |
 | Credits 2 → 1 (match SC) | P0 | Shipped |
 | Docs: GraphQL-only vs Spotify Web API honesty | P0 | Shipped |
+
+---
+
+## #21 GET /v1/threads/profile
+**Keep:** camelCase profile, stable `id`, 1 credit, cache param.
+
+| Field / param | Priority | Status |
+|---|---|---|
+| isThreadsOnlyUser | P0 | Shipped (null when Meta omits on web) |
+| isPrivate | P0 | Shipped |
+| bioLinks[] | P0 | Shipped |
+| transparencyLabel | P0 | Shipped |
+| profileImageVersions[] | P1 | Shipped |
+| hasOnboarded | P2 | Shipped |
+| following / postCount | — | Not on public surface (SC same gap) |

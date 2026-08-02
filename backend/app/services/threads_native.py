@@ -198,6 +198,15 @@ def parse_profile_html(html: str, handle: str) -> dict[str, Any] | None:
             and not user.get("full_name")
         ):
             continue
+        threads_only = user.get("is_threads_only_user")
+        if threads_only is None:
+            threads_only = user.get("isThreadsOnlyUser")
+        is_private = user.get("text_post_app_is_private")
+        if is_private is None:
+            is_private = user.get("isPrivate")
+        onboarded = user.get("has_onboarded_to_text_post_app")
+        if onboarded is None:
+            onboarded = user.get("hasOnboardedToTextPostApp")
         return {
             "username": username,
             "pk": safe_str(user.get("pk") or user.get("id") or user.get("userId")),
@@ -207,6 +216,32 @@ def parse_profile_html(html: str, handle: str) -> dict[str, Any] | None:
             "follower_count": safe_int(user.get("follower_count") or user.get("followerCount")),
             "profile_pic_url": _profile_pic(user),
             "url": f"https://www.threads.net/@{username}",
+            # Additive profile intel (web Relay / Apify). Keys may be absent on
+            # older blobs — router maps them to stable camelCase with null/[].
+            "is_threads_only_user": (
+                bool(threads_only) if isinstance(threads_only, bool) else threads_only
+            ),
+            "text_post_app_is_private": (
+                bool(is_private) if isinstance(is_private, bool) else is_private
+            ),
+            "transparency_label": user.get("transparency_label")
+            if user.get("transparency_label") is not None
+            else user.get("transparencyLabel"),
+            "bio_links": user.get("bio_links")
+            if isinstance(user.get("bio_links"), list)
+            else (user.get("bioLinks") if isinstance(user.get("bioLinks"), list) else []),
+            "hd_profile_pic_versions": (
+                user.get("hd_profile_pic_versions")
+                if isinstance(user.get("hd_profile_pic_versions"), list)
+                else (
+                    user.get("hdProfilePicVersions")
+                    if isinstance(user.get("hdProfilePicVersions"), list)
+                    else []
+                )
+            ),
+            "has_onboarded_to_text_post_app": (
+                bool(onboarded) if isinstance(onboarded, bool) else onboarded
+            ),
         }
 
     return parse_profile_og(html, handle)

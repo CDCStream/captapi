@@ -340,7 +340,19 @@ const REDDIT: Spec[] = [
 ];
 
 const THREADS: Spec[] = [
-  { slug: "threads-profile", name: "Threads Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/threads/profile", credits: 1, tagline: "Get a Threads profile — bio, followers, verified status, and avatar as structured JSON.", longDescription: "Pass a Threads profile URL or @handle and get the public profile as clean JSON: username, display name, bio, follower count, verified flag, and avatar. Flat 1 credit per call." },
+  {
+    slug: "threads-profile",
+    name: "Threads Profile API",
+    shortName: "Profile",
+    category: "channel",
+    method: "GET",
+    path: "/v1/threads/profile",
+    credits: 1,
+    tagline:
+      "Threads profile — bio, followers, verified, isPrivate, bioLinks, transparencyLabel, and HD avatar versions (1 credit).",
+    longDescription:
+      "Pass a Threads profile URL or @handle and get the public profile as clean JSON: id, username, name, bio, followers, verified, profileImage, plus isThreadsOnlyUser (Threads-only vs Instagram-linked when Meta exposes it), isPrivate, bioLinks[], transparencyLabel, profileImageVersions[] ({url,width,height}), and hasOnboarded. Flat 1 credit. following and post counts are not publicly exposed on this surface (same gap as ScrapeCreators).",
+  },
   { slug: "threads-user-posts", name: "Threads User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/threads/user-posts", credits: 14, creditsPerResult: 0.7 },
   { slug: "threads-post-details", name: "Threads Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/threads/post-details", credits: 1 , tagline: "Get a Threads post — text, author, likes, replies, and media as structured JSON." },
   { slug: "threads-search", name: "Threads Post Search API", shortName: "Post Search", category: "search", method: "GET", path: "/v1/threads/search", credits: 18, creditsPerResult: 0.7, tagline: "Search public Threads posts by keyword — text, author, likes, replies, and media for each matching post.", longDescription: "Pass a keyword or phrase and the Threads Post Search API returns matching public posts as clean JSON. Each result includes the post URL and id, the text, when it was published, the author (username, display name, verified), engagement (likes, replies, reposts, quotes), and media URLs when the post has images or video. Use it for topic monitoring, brand listening, or content discovery on Threads. Path stays /v1/threads/search. Billed per result — about 0.7 credits each. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Public Threads posts matching your keyword", "Post URL, text, and publish time", "Author username, display name, and verified flag", "Likes, replies, reposts, quotes, and media URLs"] },
@@ -2324,6 +2336,12 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       a: `No. Spotify's official Web API returns followers, popularity, genres, and top tracks, but not monthlyListeners, topCities, or worldRank. Those three come from the web-player GraphQL path this endpoint uses — along with topTracks playCount, concerts, and relatedArtists as clean JSON.`,
     });
   }
+  if (ep.slug === "threads-profile") {
+    list.push({
+      q: `What does isThreadsOnlyUser mean?`,
+      a: `When Meta exposes it, true means the account exists only on Threads (not an Instagram-linked auto-profile). On the public web hydrate this flag is often omitted — Captapi still returns the key as null so clients can rely on a stable schema.`,
+    });
+  }
   list.push({
     q: `Is the ${ep.name} suitable for production use?`,
     a: `Yes. It is a stable REST endpoint with predictable JSON and automatic retries. ${CACHE_NOTE} Use it for analytics, monitoring, and content automation.`,
@@ -2501,6 +2519,14 @@ const FIELD_DESCS: Record<string, string> = {
   image: "Image URL.",
   avatar: "Avatar image URL.",
   profileImage: "Profile image URL.",
+  isThreadsOnlyUser:
+    "Whether the account exists only on Threads (not auto-created from Instagram). Often null on web hydrate when Meta omits the flag.",
+  isPrivate: "Whether the Threads account is private.",
+  bioLinks: "Links from the profile bio ({url, verified, linkId}).",
+  transparencyLabel: "Meta transparency label when present (e.g. state-affiliated media).",
+  profileImageVersions: "Profile image URLs at multiple resolutions ({url, width, height}).",
+  hasOnboarded: "Whether the account has onboarded to Threads (text post app).",
+  linkId: "Stable id for a bio link when Meta exposes one.",
   banner: "Banner image URL.",
   bannerImage: "Banner image URL.",
   bannerUrl: "Banner image URL.",

@@ -10238,8 +10238,25 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "name": "Mark Zuckerberg",
     "bio": "Mostly superintelligence and MMA takes",
     "verified": true,
-    "followers": 5678924,
-    "profileImage": "https://scontent-jnb2-1.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s640x640_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-jnb2-1.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gHgB_JnWjUcMF3ClGD3Nu7EeqbHtOfvRDMiZVytNZClmulwOSiZrKkL1AD3tKWycU0&_nc_ohc=vLH8jAZMCqoQ7kNvwFbrSGC&_nc_gid=gvP8XGFZH3cYku-7CAFvRg&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQA87udQfmdL7wcfVw31zEURt8uRpJ2kttrIdyNDf266rA&oe=6A6E2ABE&_nc_sid=10d13b"
+    "followers": 5691292,
+    "profileImage": "https://scontent-lax3-2.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s640x640_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-lax3-2.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gEeXugh5SzVlR3-SM7yE5Ymx4mleUIUQVrFLOJAyo4Pai-q3Q4Babsn5npHNxps9Zg&_nc_ohc=2ejw17SwZhoQ7kNvwFX521e&_nc_gid=dmOcoQ5owB8qGvpTG7PZZA&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQGktZYLExtnyRLt29v5FtvhGpx_oXGGlsI4Dt45cx4yWA&oe=6A74FA7E&_nc_sid=10d13b",
+    "isThreadsOnlyUser": null,
+    "isPrivate": false,
+    "bioLinks": [],
+    "transparencyLabel": null,
+    "profileImageVersions": [
+      {
+        "url": "https://scontent-lax3-2.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-lax3-2.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gEeXugh5SzVlR3-SM7yE5Ymx4mleUIUQVrFLOJAyo4Pai-q3Q4Babsn5npHNxps9Zg&_nc_ohc=2ejw17SwZhoQ7kNvwFX521e&_nc_gid=dmOcoQ5owB8qGvpTG7PZZA&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQFU2s6roeLRVTBK1hBGzljKdg1GndlM6ZamolBrQr2S0Q&oe=6A74FA7E&_nc_sid=10d13b",
+        "width": 320,
+        "height": 320
+      },
+      {
+        "url": "https://scontent-lax3-2.cdninstagram.com/v/t51.82787-19/550174606_17925811725103224_8363667901743352243_n.jpg?stp=dst-jpg_s640x640_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-lax3-2.cdninstagram.com&_nc_cat=100&_nc_oc=Q6cZ2gEeXugh5SzVlR3-SM7yE5Ymx4mleUIUQVrFLOJAyo4Pai-q3Q4Babsn5npHNxps9Zg&_nc_ohc=2ejw17SwZhoQ7kNvwFX521e&_nc_gid=dmOcoQ5owB8qGvpTG7PZZA&edm=APs17CUBAAAA&ccb=7-5&oh=00_AQGktZYLExtnyRLt29v5FtvhGpx_oXGGlsI4Dt45cx4yWA&oe=6A74FA7E&_nc_sid=10d13b",
+        "width": 640,
+        "height": 640
+      }
+    ],
+    "hasOnboarded": true
   },
   "threads-search": {
     "query": "artificial intelligence",

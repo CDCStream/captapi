@@ -1128,7 +1128,7 @@ export interface ThreadsSearchUsersParams {
 
 export class ThreadsApi {
   constructor(private readonly core: HttpCore) {}
-  /** Threads Profile — Profile info & stats for a Threads account. (1 credit) */
+  /** Threads Profile — Threads profile — bio, followers, verified, isPrivate, bioLinks, transparencyLabel, HD avatar versions. (1 credit) */
   profile(params: ThreadsProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/threads/profile", params);
   }

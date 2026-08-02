@@ -148,23 +148,121 @@ def _normalize_post(item: dict[str, Any], *, include_author_image: bool = True) 
     }
 
 
+def _bool_or_none(value: Any) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    return None
+
+
+def _bio_links(item: dict[str, Any]) -> list[dict[str, Any]]:
+    raw = item.get("bio_links") if isinstance(item.get("bio_links"), list) else item.get("bioLinks")
+    if not isinstance(raw, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for link in raw:
+        if not isinstance(link, dict):
+            continue
+        url = safe_str(link.get("url"))
+        if not url:
+            continue
+        verified = link.get("is_verified")
+        if verified is None:
+            verified = link.get("verified")
+        out.append(
+            {
+                "url": url,
+                "verified": _bool_or_none(verified),
+                "linkId": safe_str(link.get("link_id") or link.get("linkId")),
+            }
+        )
+    return out
+
+
+def _profile_image_versions(item: dict[str, Any]) -> list[dict[str, Any]]:
+    raw = (
+        item.get("hd_profile_pic_versions")
+        if isinstance(item.get("hd_profile_pic_versions"), list)
+        else item.get("hdProfilePicVersions")
+    )
+    if not isinstance(raw, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for row in raw:
+        if not isinstance(row, dict):
+            continue
+        url = safe_str(row.get("url"))
+        if not url:
+            continue
+        out.append(
+            {
+                "url": url,
+                "width": safe_int(row.get("width")),
+                "height": safe_int(row.get("height")),
+            }
+        )
+    return out
+
+
 def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
     username = item.get("username") or item.get("userName")
     verified = item.get("is_verified")
     if verified is None:
         verified = item.get("isVerified")
-    return strip_empty({
-        "platform": "threads",
-        "username": safe_str(username),
-        "url": safe_str(item.get("url"))
-        or (f"https://www.threads.net/@{username}" if username else None),
-        "id": safe_str(item.get("pk") or item.get("id") or item.get("userId") or item.get("user_id")),
-        "name": safe_str(item.get("full_name") or item.get("fullName") or item.get("name")),
-        "bio": safe_str(item.get("biography") or item.get("bio")),
-        "verified": bool(verified) if verified is not None else None,
-        "followers": safe_int(item.get("follower_count") or item.get("followerCount") or item.get("followers")),
-        "profileImage": safe_str(item.get("profile_pic_url") or item.get("profilePicUrl")),
-    })
+    threads_only = item.get("is_threads_only_user")
+    if threads_only is None:
+        threads_only = item.get("isThreadsOnlyUser")
+    is_private = item.get("text_post_app_is_private")
+    if is_private is None:
+        is_private = item.get("isPrivate")
+    onboarded = item.get("has_onboarded_to_text_post_app")
+    if onboarded is None:
+        onboarded = item.get("hasOnboardedToTextPostApp")
+    transparency = item.get("transparency_label")
+    if transparency is None:
+        transparency = item.get("transparencyLabel")
+    if isinstance(transparency, dict):
+        transparency = safe_str(
+            transparency.get("label") or transparency.get("title") or transparency.get("name")
+        )
+    else:
+        transparency = safe_str(transparency)
+
+    versions = _profile_image_versions(item)
+    profile_image = safe_str(item.get("profile_pic_url") or item.get("profilePicUrl"))
+    if not profile_image and versions:
+        # Prefer the largest width when the actor only shipped versions[].
+        best = max(versions, key=lambda row: row.get("width") or 0)
+        profile_image = best.get("url")
+
+    # Legacy core fields still go through strip_empty; additive keys are always
+    # present (null / []) so clients never special-case missing keys.
+    out = strip_empty(
+        {
+            "platform": "threads",
+            "username": safe_str(username),
+            "url": safe_str(item.get("url"))
+            or (f"https://www.threads.net/@{username}" if username else None),
+            "id": safe_str(item.get("pk") or item.get("id") or item.get("userId") or item.get("user_id")),
+            "name": safe_str(item.get("full_name") or item.get("fullName") or item.get("name")),
+            "bio": safe_str(item.get("biography") or item.get("bio")),
+            "verified": bool(verified) if verified is not None else None,
+            "followers": safe_int(
+                item.get("follower_count") or item.get("followerCount") or item.get("followers")
+            ),
+            "profileImage": profile_image,
+        }
+    )
+    out.update(
+        {
+            "isThreadsOnlyUser": _bool_or_none(threads_only),
+            "isPrivate": _bool_or_none(is_private),
+            "bioLinks": _bio_links(item),
+            "transparencyLabel": transparency,
+            "profileImageVersions": versions,
+            "hasOnboarded": _bool_or_none(onboarded),
+        }
+    )
+    return out
 
 
 def _normalize_post_download(item: dict[str, Any]) -> dict[str, Any]:
@@ -189,7 +287,16 @@ def _normalize_post_download(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-@router.get("/profile", summary="Threads profile details & stats")
+@router.get(
+    "/profile",
+    summary="Threads profile details & stats",
+    description=(
+        "Public Threads profile as clean JSON: username, name, bio, followers, "
+        "verified, profileImage, plus isThreadsOnlyUser, isPrivate, bioLinks[], "
+        "transparencyLabel, profileImageVersions[], and hasOnboarded. Flat 1 credit. "
+        "isThreadsOnlyUser is present when Meta exposes it (often null on web hydrate)."
+    ),
+)
 async def threads_profile(
     url: str = Query(..., description="Threads profile URL or @handle"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -226,7 +333,7 @@ async def threads_profile(
 
         data = await cached_or_run(
             endpoint="threads.profile",
-            params={"handle": handle, "v": 3},
+            params={"handle": handle, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
