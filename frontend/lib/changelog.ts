@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "feature",
+    title: "Spotify artist: topCities, worldRank, topTracks, 1 credit",
+    description:
+      "Spotify artist lifts the valuable GraphQL fields out of raw into a stable top-level shape: worldRank, topCities[], externalLinks[], verified, topTracks[] (with playCount), concerts[], relatedArtists[], and albums/singles (+ counts). Price drops 2 → 1 credit (ScrapeCreators parity). Docs note that monthlyListeners / topCities / worldRank are not on Spotify's public Web API — this endpoint's GraphQL path is the real value. raw remains for advanced use.",
+    items: [
+      "Price: 2 → 1 credit",
+      "Additive worldRank, topCities, externalLinks, verified, topTracks, concerts, relatedArtists, albums/singles",
+      "Honesty note: GraphQL-only metrics vs Spotify Web API",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "feature",
     title: "GitHub user: email + parity fields, 1 credit, free-API note",
     description:
       "GitHub user drops from 3 credits to 1 (matching ScrapeCreators) and adds email (when public), nodeId, apiUrl, hireable, and siteAdmin. type is now user or organization. Docs note that this wraps GitHub's free public REST API — use Captapi for one-key workflows; call api.github.com directly for GitHub-only jobs.",

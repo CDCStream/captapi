@@ -2012,7 +2012,7 @@ export interface SpotifyPodcastEpisodesParams {
 
 export class SpotifyApi {
   constructor(private readonly core: HttpCore) {}
-  /** Spotify Artist — Spotify artist details, followers and listener metadata. (6 credits) */
+  /** Spotify Artist — Spotify artist — followers, monthlyListeners, worldRank, topCities, topTracks with playCount, concerts, related artists. (1 credit) */
   artist(params: SpotifyArtistParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/spotify/artist", params);
   }

@@ -24,6 +24,8 @@ router = APIRouter()
 RATE = 1.15
 # Native Pathfinder (web-player) — flat fee; our cost ~$0.
 CREDIT_NATIVE = 2
+# Artist details: same GraphQL source as SC; priced at 1 credit (parity).
+CREDIT_ARTIST = 1
 
 
 def _scaled(n: int, rate: float = RATE, minimum: int = 2) -> int:
@@ -161,6 +163,189 @@ def _strip_empty_keys(value: Any) -> Any:
     return value
 
 
+def _spotify_id(uri: str | None, kind: str) -> str | None:
+    u = safe_str(uri)
+    if not u:
+        return None
+    prefix = f"spotify:{kind}:"
+    if u.startswith(prefix):
+        return u[len(prefix) :]
+    if "open.spotify.com/" in u:
+        part = u.split(f"/{kind}/", 1)[-1]
+        return part.split("?", 1)[0].strip("/") or None
+    return u if ":" not in u else None
+
+
+def _items(block: Any) -> list[Any]:
+    if isinstance(block, list):
+        return block
+    if isinstance(block, dict):
+        return list(block.get("items") or [])
+    return []
+
+
+def _artist_top_cities(stats: dict[str, Any]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for row in _items(stats.get("topCities")):
+        if not isinstance(row, dict):
+            continue
+        out.append(
+            {
+                "city": safe_str(row.get("city")),
+                "country": safe_str(row.get("country")),
+                "region": safe_str(row.get("region")),
+                "listeners": safe_int(row.get("numberOfListeners")),
+            }
+        )
+    return out
+
+
+def _artist_external_links(profile: dict[str, Any]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for row in _items(profile.get("externalLinks")):
+        if not isinstance(row, dict):
+            continue
+        name = safe_str(row.get("name"))
+        url = safe_str(row.get("url"))
+        if name or url:
+            out.append({"name": name, "url": url})
+    return out
+
+
+def _artist_top_tracks(discography: dict[str, Any]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for row in _items(discography.get("topTracks")):
+        track = row.get("track") if isinstance(row, dict) else None
+        if not isinstance(track, dict):
+            continue
+        album = track.get("albumOfTrack") if isinstance(track.get("albumOfTrack"), dict) else {}
+        duration = track.get("duration") if isinstance(track.get("duration"), dict) else {}
+        uri = safe_str(track.get("uri"))
+        tid = _spotify_id(uri, "track")
+        rating = track.get("contentRating") if isinstance(track.get("contentRating"), dict) else {}
+        label = safe_str(rating.get("label"))
+        out.append(
+            {
+                "name": safe_str(track.get("name")),
+                "uri": uri,
+                "url": f"https://open.spotify.com/track/{tid}" if tid else None,
+                "playCount": safe_int(track.get("playcount")),
+                "durationMs": safe_int(duration.get("totalMilliseconds")),
+                "albumUri": safe_str(album.get("uri")),
+                "image": _image(album),
+                "explicit": False if label in (None, "NONE") else True if label else None,
+            }
+        )
+    return out
+
+
+def _artist_concerts(goods: dict[str, Any]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for row in _items(goods.get("concerts")):
+        data = row.get("data") if isinstance(row, dict) else row
+        if not isinstance(data, dict):
+            continue
+        loc = data.get("location") if isinstance(data.get("location"), dict) else {}
+        uri = safe_str(data.get("uri"))
+        cid = _spotify_id(uri, "concert")
+        festival = data.get("festival")
+        out.append(
+            {
+                "title": safe_str(data.get("title")),
+                "city": safe_str(loc.get("city")),
+                "venue": safe_str(loc.get("name")),
+                "startsAt": safe_str(data.get("startDateIsoString")),
+                "uri": uri,
+                "url": f"https://open.spotify.com/concert/{cid}" if cid else None,
+                "isFestival": bool(festival) if isinstance(festival, bool) else None,
+            }
+        )
+    return out
+
+
+def _artist_related(related: dict[str, Any]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for row in _items(related.get("relatedArtists")):
+        if not isinstance(row, dict):
+            continue
+        profile = row.get("profile") if isinstance(row.get("profile"), dict) else {}
+        uri = safe_str(row.get("uri"))
+        aid = _spotify_id(uri, "artist")
+        out.append(
+            {
+                "name": safe_str(profile.get("name") or row.get("name")),
+                "uri": uri,
+                "url": f"https://open.spotify.com/artist/{aid}" if aid else None,
+                "image": _image(row),
+            }
+        )
+    return out
+
+
+def _artist_releases(block: Any, *, limit: int = 20) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for row in _items(block)[:limit]:
+        if not isinstance(row, dict):
+            continue
+        releases = _items((row.get("releases") or {}) if isinstance(row.get("releases"), dict) else [])
+        rel = releases[0] if releases and isinstance(releases[0], dict) else row
+        if not isinstance(rel, dict):
+            continue
+        uri = safe_str(rel.get("uri"))
+        aid = _spotify_id(uri, "album")
+        tracks = rel.get("tracks") if isinstance(rel.get("tracks"), dict) else {}
+        out.append(
+            {
+                "name": safe_str(rel.get("name")),
+                "uri": uri,
+                "url": f"https://open.spotify.com/album/{aid}" if aid else None,
+                "image": _image(rel),
+                "releaseYear": _year_of(rel.get("date")),
+                "totalTracks": safe_int(tracks.get("totalCount") or rel.get("trackCount")),
+            }
+        )
+    return out
+
+
+def _artist_verified(item: dict[str, Any]) -> bool | None:
+    trait = item.get("onPlatformReputationTrait")
+    if not isinstance(trait, dict):
+        return None
+    verification = trait.get("verification")
+    if not isinstance(verification, dict):
+        return None
+    verified = verification.get("isVerified")
+    return bool(verified) if isinstance(verified, bool) else None
+
+
+def _artist_fields(item: dict[str, Any]) -> dict[str, Any]:
+    """Lift GraphQL-only artist intel into a stable top-level shape.
+
+    Keys are always present (lists may be empty; scalars may be null) so clients
+    never special-case missing keys. ``raw`` remains for advanced use.
+    """
+    stats = item.get("stats") if isinstance(item.get("stats"), dict) else {}
+    profile = item.get("profile") if isinstance(item.get("profile"), dict) else {}
+    discography = item.get("discography") if isinstance(item.get("discography"), dict) else {}
+    goods = item.get("goods") if isinstance(item.get("goods"), dict) else {}
+    related = item.get("relatedContent") if isinstance(item.get("relatedContent"), dict) else {}
+    albums_block = discography.get("albums") if isinstance(discography.get("albums"), dict) else {}
+    singles_block = discography.get("singles") if isinstance(discography.get("singles"), dict) else {}
+    return {
+        "worldRank": safe_int(stats.get("worldRank")),
+        "topCities": _artist_top_cities(stats),
+        "externalLinks": _artist_external_links(profile),
+        "verified": _artist_verified(item),
+        "topTracks": _artist_top_tracks(discography),
+        "concerts": _artist_concerts(goods),
+        "relatedArtists": _artist_related(related),
+        "albums": _artist_releases(albums_block, limit=20),
+        "singles": _artist_releases(singles_block, limit=20),
+        "albumsCount": safe_int(albums_block.get("totalCount")),
+        "singlesCount": safe_int(singles_block.get("totalCount")),
+    }
+
+
 def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
     stats = item.get("stats") or {}
     duration = item.get("duration") or {}
@@ -184,6 +369,12 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
     biography = item.get("biography")
     if not description and isinstance(biography, dict):
         description = safe_str(biography.get("text"))
+    if not description and isinstance(item.get("profile"), dict):
+        bio = item["profile"].get("biography")
+        if isinstance(bio, dict):
+            description = safe_str(bio.get("text"))
+        elif isinstance(bio, str):
+            description = safe_str(bio)
 
     artists = _names(item.get("artists"))
     if not artists:
@@ -194,13 +385,15 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
             artists = [str(publisher["name"])]
 
     sharing = item.get("sharingInfo") if isinstance(item.get("sharingInfo"), dict) else {}
+    profile = item.get("profile") if isinstance(item.get("profile"), dict) else {}
+    name = safe_str(item.get("name") or item.get("title") or profile.get("name"))
 
     out: dict[str, Any] = {
         "platform": "spotify",
         "type": kind,
         "uri": safe_str(item.get("uri") or item.get("id")),
         "url": safe_str(item.get("url") or item.get("externalUrl") or item.get("shareUrl") or sharing.get("shareUrl")),
-        "name": safe_str(item.get("name") or item.get("title")),
+        "name": name,
         "description": description,
         "artists": artists,
         "album": safe_str(album.get("name") if isinstance(album, dict) else None) or safe_str(item.get("albumName")),
@@ -215,6 +408,8 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
         "totalEpisodes": safe_int(episodes.get("totalCount") if isinstance(episodes, dict) else item.get("totalEpisodes")),
         "raw": _strip_empty_keys(item),
     }
+    if kind == "artist":
+        out.update(_artist_fields(item))
     for key in _OMIT_BY_KIND.get(kind, frozenset()):
         out.pop(key, None)
     for key in _OMIT_IF_EMPTY:
@@ -283,20 +478,37 @@ async def _details(kind: str, uri: str, limit: int | None = None, *, ctx: dict[s
     return _normalize(items[0], kind)
 
 
-@router.get("/artist", summary="Spotify artist details")
+@router.get(
+    "/artist",
+    summary="Spotify artist details",
+    description=(
+        "Artist profile from Spotify's web-player GraphQL as clean JSON: followers, "
+        "monthlyListeners, worldRank, topCities, externalLinks, verified, topTracks "
+        "(with playCount), concerts, relatedArtists, and albums/singles. Flat 1 credit. "
+        "monthlyListeners / topCities / worldRank are not on Spotify's public Web API — "
+        "they require this GraphQL path. raw keeps the upstream payload for advanced use "
+        "(shape may change); prefer the normalized fields."
+    ),
+)
 async def artist(
     url: str = Query(..., description="Spotify artist URL, URI, or ID"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     uri = _url(url, "artist")
-    async with billed_call(caller=caller, endpoint="/v1/spotify/artist", platform="spotify", resource_url=uri, base_credits=CREDIT_NATIVE) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/spotify/artist",
+        platform="spotify",
+        resource_url=uri,
+        base_credits=CREDIT_ARTIST,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
             return await _details("artist", uri, ctx=ctx)
 
         data = await cached_or_run(
             "spotify.artist",
-            {"uri": uri, "v": 7},
+            {"uri": uri, "v": 8},
             _run,
             ctx,
             ttl=get_settings().CACHE_TTL_STATIC,

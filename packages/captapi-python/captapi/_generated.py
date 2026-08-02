@@ -2810,7 +2810,7 @@ class SpotifyApi:
         self._t = transport
 
     def artist(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Spotify Artist — Spotify artist details, followers and listener metadata. (6 credits)
+        """Spotify Artist — Spotify artist — followers, monthlyListeners, worldRank, topCities, topTracks with playCount, concerts, related artists. (1 credit)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2867,7 +2867,7 @@ class AsyncSpotifyApi:
         self._t = transport
 
     async def artist(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Spotify Artist — Spotify artist details, followers and listener metadata. (6 credits)
+        """Spotify Artist — Spotify artist — followers, monthlyListeners, worldRank, topCities, topTracks with playCount, concerts, related artists. (1 credit)
 
         :param url: Spotify URL, URI, or ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

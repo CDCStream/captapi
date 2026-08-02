@@ -290,7 +290,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `spotify_artist` | `/v1/spotify/artist` | `url` (string), `cache`? (boolean) | 6 |
+| `spotify_artist` | `/v1/spotify/artist` | `url` (string), `cache`? (boolean) | 1 |
 | `spotify_track` | `/v1/spotify/track` | `url` (string), `cache`? (boolean) | 6 |
 | `spotify_album` | `/v1/spotify/album` | `url` (string), `cache`? (boolean) | 6 |
 | `spotify_search` | `/v1/spotify/search` | `q` (string), `type`? (string), `limit`? (number), `cache`? (boolean) | 23 |

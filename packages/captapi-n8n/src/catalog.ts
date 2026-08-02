@@ -354,7 +354,7 @@ const TWITCH: Omit<Endpoint, "platform">[] = [
 ];
 
 const SPOTIFY: Omit<Endpoint, "platform">[] = [
-  { tool: "spotify_artist", name: "Spotify Artist", path: "/v1/spotify/artist", credits: 6, summary: "Spotify artist details, followers and listener metadata.", params: [url(SPOTIFY_URL), cacheParam()] },
+  { tool: "spotify_artist", name: "Spotify Artist", path: "/v1/spotify/artist", credits: 1, summary: "Spotify artist — followers, monthlyListeners, worldRank, topCities, topTracks with playCount, concerts, related artists.", params: [url(SPOTIFY_URL), cacheParam()] },
   { tool: "spotify_track", name: "Spotify Track", path: "/v1/spotify/track", credits: 6, summary: "Spotify track metadata, artists, album and play count when available.", params: [url(SPOTIFY_URL), cacheParam()] },
   { tool: "spotify_album", name: "Spotify Album", path: "/v1/spotify/album", credits: 6, summary: "Spotify album metadata and track count.", params: [url(SPOTIFY_URL), cacheParam()] },
   { tool: "spotify_search", name: "Spotify Search", path: "/v1/spotify/search", credits: 23, summary: "Search Spotify tracks, albums, artists, podcasts or episodes.", params: [q(), { name: "type", type: "string", required: false, description: "tracks, albums, artists, podcasts, or episodes. Default tracks." }, limit(20, 50)] },

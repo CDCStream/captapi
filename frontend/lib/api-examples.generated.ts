@@ -6565,59 +6565,595 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "platform": "spotify",
     "type": "artist",
     "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02",
-    "url": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02?si=Mq7OMKD4TLGuRgNctzV7oA",
+    "url": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02?si=XzEUcLZ4RlmEQtnhJVQ2MQ",
     "name": "Taylor Swift",
     "description": "And, baby, that’s show business for you. New album The Life of a Showgirl. Available now ❤️‍&#x1f525;",
-    "followers": 161422754,
-    "monthlyListeners": 100897315,
+    "followers": 161714021,
+    "monthlyListeners": 100752084,
     "image": "https://i.scdn.co/image/ab6761610000e5ebe2e8e7ff002a4afda1c7147e",
     "raw": {
       "__typename": "Artist",
-      "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02",
-      "name": "Taylor Swift",
-      "id": "06HL4z0CvFAxyc27GXpf02",
-      "stats": {
-        "followers": 161422754,
-        "monthlyListeners": 100897315,
-        "topCities": {
+      "discography": {
+        "albums": {
           "items": [
             {
-              "city": "London",
-              "country": "GB",
-              "numberOfListeners": 1614334,
-              "region": "ENG"
+              "releases": {
+                "items": [
+                  {
+                    "copyright": {
+                      "items": [
+                        {
+                          "text": "© 2025 Taylor Swift",
+                          "type": "C"
+                        },
+                        {
+                          "text": "℗ 2025 Taylor Swift",
+                          "type": "P"
+                        }
+                      ]
+                    },
+                    "coverArt": {
+                      "sources": [
+                        {
+                          "height": 300,
+                          "url": "https://i.scdn.co/image/ab67616d00001e02f756bdc2c11a985dc0c06d94",
+                          "width": 300
+                        },
+                        {
+                          "height": 64,
+                          "url": "https://i.scdn.co/image/ab67616d00004851f756bdc2c11a985dc0c06d94",
+                          "width": 64
+                        }
+                      ]
+                    },
+                    "date": {
+                      "day": 7,
+                      "month": 11,
+                      "precision": "DAY",
+                      "year": 2025
+                    },
+                    "id": "6QNMhoV8V0u7cFuhhUBOn7",
+                    "label": "Taylor Swift",
+                    "name": "The Life of a Showgirl + Acoustic Collection",
+                    "playability": {
+                      "playable": true,
+                      "reason": "PLAYABLE"
+                    },
+                    "sharingInfo": {
+                      "shareId": "KLxm6rCMQAm4YcjHJTOvWQ",
+                      "shareUrl": "https://open.spotify.com/album/6QNMhoV8V0u7cFuhhUBOn7?si=KLxm6rCMQAm4YcjHJTOvWQ"
+                    },
+                    "tracks": {
+                      "totalCount": 19
+                    },
+                    "type": "ALBUM",
+                    "uri": "spotify:album:6QNMhoV8V0u7cFuhhUBOn7"
+                  }
+                ]
+              }
             },
             {
-              "city": "Quezon City",
-              "country": "PH",
-              "numberOfListeners": 1224227,
-              "region": "00"
+              "releases": {
+                "items": [
+                  {
+                    "copyright": {
+                      "items": [
+                        {
+                          "text": "© 2025 Taylor Swift",
+                          "type": "C"
+                        },
+                        {
+                          "text": "℗ 2025 Taylor Swift",
+                          "type": "P"
+                        }
+                      ]
+                    },
+                    "coverArt": {
+                      "sources": [
+                        {
+                          "height": 300,
+                          "url": "https://i.scdn.co/image/ab67616d00001e02d7812467811a7da6e6a44902",
+                          "width": 300
+                        },
+                        {
+                          "height": 64,
+                          "url": "https://i.scdn.co/image/ab67616d00004851d7812467811a7da6e6a44902",
+                          "width": 64
+                        }
+                      ]
+                    },
+                    "date": {
+                      "day": 3,
+                      "month": 10,
+                      "precision": "DAY",
+                      "year": 2025
+                    },
+                    "id": "4a6NzYL1YHRUgx9e3YZI6I",
+                    "label": "Taylor Swift",
+                    "name": "The Life of a Showgirl",
+                    "playability": {
+                      "playable": true,
+                      "reason": "PLAYABLE"
+                    },
+                    "sharingInfo": {
+                      "shareId": "iS6riwW_Qy-tXMrIyY9_XA",
+                      "shareUrl": "https://open.spotify.com/album/4a6NzYL1YHRUgx9e3YZI6I?si=iS6riwW_Qy-tXMrIyY9_XA"
+                    },
+                    "tracks": {
+                      "totalCount": 12
+                    },
+                    "type": "ALBUM",
+                    "uri": "spotify:album:4a6NzYL1YHRUgx9e3YZI6I"
+                  }
+                ]
+              }
+            }
+          ],
+          "totalCount": 33
+        },
+        "compilations": {
+          "items": [
+            {
+              "releases": {
+                "items": [
+                  {
+                    "copyright": {
+                      "items": [
+                        {
+                          "text": "© 2024 Taylor Swift",
+                          "type": "C"
+                        },
+                        {
+                          "text": "℗ 2024 Taylor Swift",
+                          "type": "P"
+                        }
+                      ]
+                    },
+                    "coverArt": {
+                      "sources": [
+                        {
+                          "height": 300,
+                          "url": "https://i.scdn.co/image/ab67616d00001e02c246cd7fb142b383672627c8",
+                          "width": 300
+                        },
+                        {
+                          "height": 64,
+                          "url": "https://i.scdn.co/image/ab67616d00004851c246cd7fb142b383672627c8",
+                          "width": 64
+                        }
+                      ]
+                    },
+                    "date": {
+                      "day": 3,
+                      "month": 10,
+                      "precision": "DAY",
+                      "year": 2024
+                    },
+                    "id": "30gDvYhEgyTbGEdCIY8FWV",
+                    "label": "Taylor Swift",
+                    "name": "THE TORTURED POETS DEPARTMENT | TS The Eras Tour Setlist",
+                    "playability": {
+                      "playable": true,
+                      "reason": "PLAYABLE"
+                    },
+                    "sharingInfo": {
+                      "shareId": "kFkacM1QRMK5FJ9Hb-HIrw",
+                      "shareUrl": "https://open.spotify.com/album/30gDvYhEgyTbGEdCIY8FWV?si=kFkacM1QRMK5FJ9Hb-HIrw"
+                    },
+                    "tracks": {
+                      "totalCount": 7
+                    },
+                    "type": "COMPILATION",
+                    "uri": "spotify:album:30gDvYhEgyTbGEdCIY8FWV"
+                  }
+                ]
+              }
+            }
+          ],
+          "totalCount": 1
+        },
+        "latest": {
+          "copyright": {
+            "items": [
+              {
+                "text": "© 2026 Wonderland Music Company, Inc. (BMI) / Pixar Music (BMI) and Walt Disney Music Company (ASCAP) / Pixar Talking Pictures (ASCAP)",
+                "type": "C"
+              },
+              {
+                "text": "℗ 2026 Walt Disney Records / Pixar",
+                "type": "P"
+              }
+            ]
+          },
+          "coverArt": {
+            "sources": [
+              {
+                "height": 300,
+                "url": "https://i.scdn.co/image/ab67616d00001e02e8852f06eca817333d20e60b",
+                "width": 300
+              },
+              {
+                "height": 64,
+                "url": "https://i.scdn.co/image/ab67616d00004851e8852f06eca817333d20e60b",
+                "width": 64
+              }
+            ]
+          },
+          "date": {
+            "day": 12,
+            "month": 6,
+            "precision": "DAY",
+            "year": 2026
+          },
+          "id": "4Ii9whWXI1O1H01ziECRaG",
+          "label": "Walt Disney Records / Pixar",
+          "name": "I Knew It, I Knew You (From \"Toy Story 5\")",
+          "playability": {
+            "playable": true,
+            "reason": "PLAYABLE"
+          },
+          "sharingInfo": {
+            "shareId": "nZ66vs3RRJii1Y_Dx_t1Zg",
+            "shareUrl": "https://open.spotify.com/album/4Ii9whWXI1O1H01ziECRaG?si=nZ66vs3RRJii1Y_Dx_t1Zg"
+          },
+          "tracks": {
+            "totalCount": 3
+          },
+          "type": "SINGLE",
+          "uri": "spotify:album:4Ii9whWXI1O1H01ziECRaG"
+        },
+        "popularReleasesAlbums": {
+          "items": [
+            {
+              "copyright": {
+                "items": [
+                  {
+                    "text": "© 2025 Taylor Swift",
+                    "type": "C"
+                  },
+                  {
+                    "text": "℗ 2025 Taylor Swift",
+                    "type": "P"
+                  }
+                ]
+              },
+              "coverArt": {
+                "sources": [
+                  {
+                    "height": 300,
+                    "url": "https://i.scdn.co/image/ab67616d00001e02d7812467811a7da6e6a44902",
+                    "width": 300
+                  },
+                  {
+                    "height": 64,
+                    "url": "https://i.scdn.co/image/ab67616d00004851d7812467811a7da6e6a44902",
+                    "width": 64
+                  }
+                ]
+              },
+              "date": {
+                "day": 3,
+                "month": 10,
+                "precision": "DAY",
+                "year": 2025
+              },
+              "id": "4a6NzYL1YHRUgx9e3YZI6I",
+              "label": "Taylor Swift",
+              "name": "The Life of a Showgirl",
+              "playability": {
+                "playable": true,
+                "reason": "PLAYABLE"
+              },
+              "sharingInfo": {
+                "shareId": "vSJa5UaiQ2SUNY0VFGVwyw",
+                "shareUrl": "https://open.spotify.com/album/4a6NzYL1YHRUgx9e3YZI6I?si=vSJa5UaiQ2SUNY0VFGVwyw"
+              },
+              "tracks": {
+                "totalCount": 12
+              },
+              "type": "ALBUM",
+              "uri": "spotify:album:4a6NzYL1YHRUgx9e3YZI6I"
             },
             {
-              "city": "São Paulo",
-              "country": "BR",
-              "numberOfListeners": 1113446,
-              "region": "SP"
+              "copyright": {
+                "items": [
+                  {
+                    "text": "© 2019 Taylor Swift",
+                    "type": "C"
+                  },
+                  {
+                    "text": "℗ 2019 Taylor Swift",
+                    "type": "P"
+                  }
+                ]
+              },
+              "coverArt": {
+                "sources": [
+                  {
+                    "height": 300,
+                    "url": "https://i.scdn.co/image/ab67616d00001e02e787cffec20aa2a396a61647",
+                    "width": 300
+                  },
+                  {
+                    "height": 64,
+                    "url": "https://i.scdn.co/image/ab67616d00004851e787cffec20aa2a396a61647",
+                    "width": 64
+                  }
+                ]
+              },
+              "date": {
+                "day": 23,
+                "month": 8,
+                "precision": "DAY",
+                "year": 2019
+              },
+              "id": "1NAmidJlEaVgA3MpcPFYGq",
+              "label": "Taylor Swift",
+              "name": "Lover",
+              "playability": {
+                "playable": true,
+                "reason": "PLAYABLE"
+              },
+              "sharingInfo": {
+                "shareId": "wcjPySC6Qt-rziksFMcprg",
+                "shareUrl": "https://open.spotify.com/album/1NAmidJlEaVgA3MpcPFYGq?si=wcjPySC6Qt-rziksFMcprg"
+              },
+              "tracks": {
+                "totalCount": 18
+              },
+              "type": "ALBUM",
+              "uri": "spotify:album:1NAmidJlEaVgA3MpcPFYGq"
+            }
+          ],
+          "totalCount": 20
+        },
+        "singles": {
+          "items": [
+            {
+              "releases": {
+                "items": [
+                  {
+                    "copyright": {
+                      "items": [
+                        {
+                          "text": "© 2026 Wonderland Music Company, Inc. (BMI) / Pixar Music (BMI) and Walt Disney Music Company (ASCAP) / Pixar Talking Pictures (ASCAP)",
+                          "type": "C"
+                        },
+                        {
+                          "text": "℗ 2026 Walt Disney Records / Pixar",
+                          "type": "P"
+                        }
+                      ]
+                    },
+                    "coverArt": {
+                      "sources": [
+                        {
+                          "height": 300,
+                          "url": "https://i.scdn.co/image/ab67616d00001e02e8852f06eca817333d20e60b",
+                          "width": 300
+                        },
+                        {
+                          "height": 64,
+                          "url": "https://i.scdn.co/image/ab67616d00004851e8852f06eca817333d20e60b",
+                          "width": 64
+                        }
+                      ]
+                    },
+                    "date": {
+                      "day": 12,
+                      "month": 6,
+                      "precision": "DAY",
+                      "year": 2026
+                    },
+                    "id": "4Ii9whWXI1O1H01ziECRaG",
+                    "label": "Walt Disney Records / Pixar",
+                    "name": "I Knew It, I Knew You (From \"Toy Story 5\")",
+                    "playability": {
+                      "playable": true,
+                      "reason": "PLAYABLE"
+                    },
+                    "sharingInfo": {
+                      "shareId": "koh4Jx1QRJW7w80babxnKg",
+                      "shareUrl": "https://open.spotify.com/album/4Ii9whWXI1O1H01ziECRaG?si=koh4Jx1QRJW7w80babxnKg"
+                    },
+                    "tracks": {
+                      "totalCount": 3
+                    },
+                    "type": "SINGLE",
+                    "uri": "spotify:album:4Ii9whWXI1O1H01ziECRaG"
+                  }
+                ]
+              }
             },
             {
-              "city": "Sydney",
-              "country": "AU",
-              "numberOfListeners": 1062106,
-              "region": "NSW"
+              "releases": {
+                "items": [
+                  {
+                    "copyright": {
+                      "items": [
+                        {
+                          "text": "© 2026 Taylor Swift",
+                          "type": "C"
+                        },
+                        {
+                          "text": "℗ 2026 Taylor Swift",
+                          "type": "P"
+                        }
+                      ]
+                    },
+                    "coverArt": {
+                      "sources": [
+                        {
+                          "height": 300,
+                          "url": "https://i.scdn.co/image/ab67616d00001e02dc6e4c7774e0c77c210d3a31",
+                          "width": 300
+                        },
+                        {
+                          "height": 64,
+                          "url": "https://i.scdn.co/image/ab67616d00004851dc6e4c7774e0c77c210d3a31",
+                          "width": 64
+                        }
+                      ]
+                    },
+                    "date": {
+                      "day": 31,
+                      "month": 3,
+                      "precision": "DAY",
+                      "year": 2026
+                    },
+                    "id": "71GTik4z9bbKKY2EmUvkDI",
+                    "label": "Taylor Swift",
+                    "name": "Elizabeth Taylor",
+                    "playability": {
+                      "playable": true,
+                      "reason": "PLAYABLE"
+                    },
+                    "sharingInfo": {
+                      "shareId": "eyXqkQQWSeu4h9pEWv6G6A",
+                      "shareUrl": "https://open.spotify.com/album/71GTik4z9bbKKY2EmUvkDI?si=eyXqkQQWSeu4h9pEWv6G6A"
+                    },
+                    "tracks": {
+                      "totalCount": 3
+                    },
+                    "type": "SINGLE",
+                    "uri": "spotify:album:71GTik4z9bbKKY2EmUvkDI"
+                  }
+                ]
+              }
+            }
+          ],
+          "totalCount": 79
+        },
+        "topTracks": {
+          "items": [
+            {
+              "track": {
+                "albumOfTrack": {
+                  "coverArt": {
+                    "sources": [
+                      {
+                        "url": "https://i.scdn.co/image/ab67616d00001e02d7812467811a7da6e6a44902"
+                      },
+                      {
+                        "url": "https://i.scdn.co/image/ab67616d00004851d7812467811a7da6e6a44902"
+                      }
+                    ]
+                  },
+                  "uri": "spotify:album:4a6NzYL1YHRUgx9e3YZI6I"
+                },
+                "artists": {
+                  "items": [
+                    {
+                      "profile": {
+                        "name": "Taylor Swift"
+                      },
+                      "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02"
+                    }
+                  ]
+                },
+                "associationsV3": {
+                  "videoAssociations": {
+                    "totalCount": 1
+                  }
+                },
+                "contentRating": {
+                  "label": "NONE"
+                },
+                "discNumber": 1,
+                "duration": {
+                  "totalMilliseconds": 226073
+                },
+                "id": "53iuhJlwXhSER5J2IYYv1W",
+                "name": "The Fate of Ophelia",
+                "playability": {
+                  "playable": true,
+                  "reason": "PLAYABLE"
+                },
+                "playcount": "1564999602",
+                "uri": "spotify:track:53iuhJlwXhSER5J2IYYv1W"
+              },
+              "uid": "231bf597ddd1da456200"
             },
             {
-              "city": "Jakarta",
-              "country": "ID",
-              "numberOfListeners": 1027997,
-              "region": "JK"
+              "track": {
+                "albumOfTrack": {
+                  "coverArt": {
+                    "sources": [
+                      {
+                        "url": "https://i.scdn.co/image/ab67616d00001e02a35a1d4983e2b4fd0094f910"
+                      },
+                      {
+                        "url": "https://i.scdn.co/image/ab67616d00004851a35a1d4983e2b4fd0094f910"
+                      }
+                    ]
+                  },
+                  "uri": "spotify:album:3ZLIShtR6Fjs4nTWFpBUB6"
+                },
+                "artists": {
+                  "items": [
+                    {
+                      "profile": {
+                        "name": "Taylor Swift"
+                      },
+                      "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02"
+                    }
+                  ]
+                },
+                "associationsV3": {
+                  "videoAssociations": {
+                    "totalCount": 1
+                  }
+                },
+                "contentRating": {
+                  "label": "NONE"
+                },
+                "discNumber": 1,
+                "duration": {
+                  "totalMilliseconds": 178186
+                },
+                "id": "5uPaqMMt59KGrdKIitDRqa",
+                "name": "I Knew It, I Knew You - From \"Toy Story 5\"",
+                "playability": {
+                  "playable": true,
+                  "reason": "PLAYABLE"
+                },
+                "playcount": "133109572",
+                "uri": "spotify:track:5uPaqMMt59KGrdKIitDRqa"
+              },
+              "uid": "063fb4f3170db71ba947"
             }
           ]
-        },
-        "worldRank": 7
+        }
       },
-      "sharingInfo": {
-        "shareId": "Mq7OMKD4TLGuRgNctzV7oA",
-        "shareUrl": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02?si=Mq7OMKD4TLGuRgNctzV7oA"
+      "goods": {
+        "concerts": {
+          "items": [],
+          "totalCount": 0
+        }
+      },
+      "headerImage": {
+        "data": {
+          "__typename": "ImageV2",
+          "sources": [
+            {
+              "maxHeight": 640,
+              "maxWidth": 1494,
+              "url": "https://image-cdn-fa.spotifycdn.com/image/ab67618600000194c45b07608a062f02a9c89bab"
+            },
+            {
+              "maxHeight": 1080,
+              "maxWidth": 1920,
+              "url": "https://i2o.scdn.co/image/ab67618600001667c45b07608a062f02a9c89bab"
+            }
+          ]
+        }
+      },
+      "id": "06HL4z0CvFAxyc27GXpf02",
+      "onPlatformReputationTrait": {
+        "verification": {
+          "isRegistered": true,
+          "isVerified": true
+        }
       },
       "profile": {
         "biography": {
@@ -6633,169 +7169,90 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
             {
               "name": "INSTAGRAM",
               "url": "https://instagram.com/taylorswift"
-            },
-            {
-              "name": "TWITTER",
-              "url": "https://twitter.com/taylorswift13"
             }
           ]
         },
-        "name": "Taylor Swift",
-        "pinnedItem": {
-          "comment": "From Toy Story 5 ",
-          "itemV2": {
-            "__typename": "AlbumResponseWrapper",
-            "data": {
-              "__typename": "Album",
-              "coverArt": {
-                "sources": [
-                  {
-                    "height": 300,
-                    "url": "https://i.scdn.co/image/ab67616d00001e02a35a1d4983e2b4fd0094f910",
-                    "width": 300
-                  },
-                  {
-                    "height": 64,
-                    "url": "https://i.scdn.co/image/ab67616d00004851a35a1d4983e2b4fd0094f910",
-                    "width": 64
-                  },
-                  {
-                    "height": 640,
-                    "url": "https://i.scdn.co/image/ab67616d0000b273a35a1d4983e2b4fd0094f910",
-                    "width": 640
-                  }
-                ]
-              },
-              "name": "I Knew It, I Knew You (From \"Toy Story 5\")",
-              "type": "SINGLE",
-              "uri": "spotify:album:3ZLIShtR6Fjs4nTWFpBUB6"
-            }
-          },
-          "subtitle": "Single • New Release",
-          "thumbnailImage": {
-            "data": {
-              "sources": [
-                {
-                  "url": "https://image-cdn-ak.spotifycdn.com/image/ab67616d000075a0a35a1d4983e2b4fd0094f910"
-                },
-                {
-                  "url": "https://image-cdn-ak.spotifycdn.com/image/ab67616d000090d5a35a1d4983e2b4fd0094f910"
-                },
-                {
-                  "url": "https://image-cdn-ak.spotifycdn.com/image/ab67616d0000ab87a35a1d4983e2b4fd0094f910"
-                }
-              ]
-            }
-          },
-          "title": "I Knew It, I Knew You (From \"Toy Story 5\")",
-          "type": "ALBUM",
-          "uri": "spotify:album:3ZLIShtR6Fjs4nTWFpBUB6"
-        },
-        "playlistsV2": {
+        "name": "Taylor Swift"
+      },
+      "relatedContent": {
+        "relatedArtists": {
           "items": [
             {
-              "data": {
-                "__typename": "Playlist",
-                "images": {
-                  "items": [
+              "id": "74KM79TiuVKeVCqs8QtB0B",
+              "profile": {
+                "name": "Sabrina Carpenter"
+              },
+              "uri": "spotify:artist:74KM79TiuVKeVCqs8QtB0B",
+              "visuals": {
+                "avatarImage": {
+                  "sources": [
                     {
-                      "sources": [
-                        {
-                          "url": "https://image-cdn-fa.spotifycdn.com/image/ab67706c0000da84dcef9bbc0ba7be550664fe13"
-                        }
-                      ]
+                      "height": 640,
+                      "url": "https://i.scdn.co/image/ab6761610000e5eb78e45cfa4697ce3c437cb455",
+                      "width": 640
+                    },
+                    {
+                      "height": 160,
+                      "url": "https://i.scdn.co/image/ab6761610000f17878e45cfa4697ce3c437cb455",
+                      "width": 160
                     }
                   ]
-                },
-                "name": "And, baby, that’s show business for you ❤️‍🔥",
-                "ownerV2": {
-                  "data": {
-                    "__typename": "User",
-                    "name": "Taylor Swift"
-                  }
-                },
-                "uri": "spotify:playlist:65uAjFTt4N8sEJeonhNOBL"
+                }
               }
             },
             {
-              "data": {
-                "__typename": "Playlist",
-                "description": "Everything <a href=\"https://www.taylorswift.com/\">Taylor Swift</a> Right Here",
-                "images": {
-                  "items": [
+              "id": "66CXWjxzNUsdJxJ2JdwvnR",
+              "profile": {
+                "name": "Ariana Grande"
+              },
+              "uri": "spotify:artist:66CXWjxzNUsdJxJ2JdwvnR",
+              "visuals": {
+                "avatarImage": {
+                  "sources": [
                     {
-                      "sources": [
-                        {
-                          "url": "https://image-cdn-fa.spotifycdn.com/image/ab67706c0000da8450c3581c282b1b2871248e85"
-                        }
-                      ]
+                      "height": 640,
+                      "url": "https://i.scdn.co/image/ab6761610000e5eb766397ec42a573a53eb5fb87",
+                      "width": 640
+                    },
+                    {
+                      "height": 160,
+                      "url": "https://i.scdn.co/image/ab6761610000f178766397ec42a573a53eb5fb87",
+                      "width": 160
                     }
                   ]
-                },
-                "name": "Taylor Swift Complete Collection",
-                "ownerV2": {
-                  "data": {
-                    "__typename": "User",
-                    "name": "Taylor Swift"
-                  }
-                },
-                "uri": "spotify:playlist:4GtQVhGjAwcHFz82UKy3Ca"
-              }
-            },
-            {
-              "data": {
-                "__typename": "Playlist",
-                "description": "Songs From Lover Performed Live In Paris ",
-                "images": {
-                  "items": [
-                    {
-                      "sources": [
-                        {
-                          "url": "https://image-cdn-fa.spotifycdn.com/image/ab67706c0000d72c8810d6b470de5a439b491000"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                "name": "Live From Paris",
-                "ownerV2": {
-                  "data": {
-                    "__typename": "User",
-                    "name": "Taylor Swift"
-                  }
-                },
-                "uri": "spotify:playlist:1Ew1IbrHjmNedkANLw1jdr"
-              }
-            },
-            {
-              "data": {
-                "__typename": "Playlist",
-                "description": "The complete setlist from the Taylor Swift reputation Stadium Tour including special guests",
-                "images": {
-                  "items": [
-                    {
-                      "sources": [
-                        {
-                          "url": "https://image-cdn-fa.spotifycdn.com/image/ab67706c0000d72cd17e192d4a08b8d87b6baa18"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                "name": "rep Tour and Friends",
-                "ownerV2": {
-                  "data": {
-                    "__typename": "User",
-                    "name": "Taylor Swift"
-                  }
-                },
-                "uri": "spotify:playlist:074AoVXFnnlKmSpz28uqe0"
+                }
               }
             }
           ],
-          "totalCount": 4
+          "totalCount": 40
         }
       },
+      "sharingInfo": {
+        "shareId": "XzEUcLZ4RlmEQtnhJVQ2MQ",
+        "shareUrl": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02?si=XzEUcLZ4RlmEQtnhJVQ2MQ"
+      },
+      "stats": {
+        "followers": 161714021,
+        "monthlyListeners": 100752084,
+        "topCities": {
+          "items": [
+            {
+              "city": "London",
+              "country": "GB",
+              "numberOfListeners": 1630216,
+              "region": "ENG"
+            },
+            {
+              "city": "Quezon City",
+              "country": "PH",
+              "numberOfListeners": 1235715,
+              "region": "00"
+            }
+          ]
+        },
+        "worldRank": 6
+      },
+      "uri": "spotify:artist:06HL4z0CvFAxyc27GXpf02",
       "visuals": {
         "avatarImage": {
           "extractedColors": {
@@ -6813,182 +7270,121 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
               "height": 160,
               "url": "https://i.scdn.co/image/ab6761610000f178e2e8e7ff002a4afda1c7147e",
               "width": 160
-            },
-            {
-              "height": 320,
-              "url": "https://i.scdn.co/image/ab67616100005174e2e8e7ff002a4afda1c7147e",
-              "width": 320
-            }
-          ]
-        },
-        "gallery": {
-          "items": [
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/ab6761670000ecd42bf054eaed60a69249718908",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/ab6761670000ecd464d14cdfef28e4d6f1662b92",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/ab6761670000ecd4cfb500c2d2059c6cf61f507c",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/ab6761670000ecd409089d68fc0ca6159308501f",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/ab6761670000ecd4e2ce92c3e52e64888165b515",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/c58123a1be80feff0618700a1513b935bb533534",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/53352eaa695ba3f9bdcb85f854db74647dbf13d5",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/ff4274a6ba4a992bf6559b8a1c2ed89a88520277",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/0d210fdaebb1898d91d7fe4ee3d94e96474695aa",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/41b04a780de285bb7ddcb5762034a27f18f7ec14",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/bf8710e22941026e0236ae06342dd0fa124ce5a9",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/9c833978203ca62ea13202e9d729b1a574e16f4b",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/c2d1c283624213760bc32ec8adce1fe144ae5b1a",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/e2789900977e1eadc0d39430c0be8ccc3423eecb",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/5dc490f10f4bad0c71fa9d873b9aca79ade3607a",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/074730a7c319fcb3f4fd6bda7bbc5c7c5cb4e04a",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/b5c6fec7aaea0e70715e86b6aefe1d21330425e7",
-                  "width": 640
-                }
-              ]
-            },
-            {
-              "sources": [
-                {
-                  "height": 640,
-                  "url": "https://i.scdn.co/image/1188cc78e9174abaa112c1bc436a94b3000b9f0d",
-                  "width": 640
-                }
-              ]
             }
           ]
         }
+      },
+      "name": "Taylor Swift",
+      "biography": {
+        "text": "And, baby, that’s show business for you. New album The Life of a Showgirl. Available now ❤️‍&#x1f525;",
+        "type": "AUTOBIOGRAPHY"
       }
-    }
+    },
+    "worldRank": 6,
+    "topCities": [
+      {
+        "city": "London",
+        "country": "GB",
+        "region": "ENG",
+        "listeners": 1630216
+      },
+      {
+        "city": "Quezon City",
+        "country": "PH",
+        "region": "00",
+        "listeners": 1235715
+      }
+    ],
+    "externalLinks": [
+      {
+        "name": "FACEBOOK",
+        "url": "https://facebook.com/TaylorSwift"
+      },
+      {
+        "name": "INSTAGRAM",
+        "url": "https://instagram.com/taylorswift"
+      },
+      {
+        "name": "TWITTER",
+        "url": "https://twitter.com/taylorswift13"
+      }
+    ],
+    "verified": true,
+    "topTracks": [
+      {
+        "name": "The Fate of Ophelia",
+        "uri": "spotify:track:53iuhJlwXhSER5J2IYYv1W",
+        "url": "https://open.spotify.com/track/53iuhJlwXhSER5J2IYYv1W",
+        "playCount": 1564999602,
+        "durationMs": 226073,
+        "albumUri": "spotify:album:4a6NzYL1YHRUgx9e3YZI6I",
+        "image": "https://i.scdn.co/image/ab67616d00001e02d7812467811a7da6e6a44902",
+        "explicit": false
+      },
+      {
+        "name": "I Knew It, I Knew You - From \"Toy Story 5\"",
+        "uri": "spotify:track:5uPaqMMt59KGrdKIitDRqa",
+        "url": "https://open.spotify.com/track/5uPaqMMt59KGrdKIitDRqa",
+        "playCount": 133109572,
+        "durationMs": 178186,
+        "albumUri": "spotify:album:3ZLIShtR6Fjs4nTWFpBUB6",
+        "image": "https://i.scdn.co/image/ab67616d00001e02a35a1d4983e2b4fd0094f910",
+        "explicit": false
+      }
+    ],
+    "concerts": [],
+    "relatedArtists": [
+      {
+        "name": "Sabrina Carpenter",
+        "uri": "spotify:artist:74KM79TiuVKeVCqs8QtB0B",
+        "url": "https://open.spotify.com/artist/74KM79TiuVKeVCqs8QtB0B",
+        "image": "https://i.scdn.co/image/ab6761610000e5eb78e45cfa4697ce3c437cb455"
+      },
+      {
+        "name": "Ariana Grande",
+        "uri": "spotify:artist:66CXWjxzNUsdJxJ2JdwvnR",
+        "url": "https://open.spotify.com/artist/66CXWjxzNUsdJxJ2JdwvnR",
+        "image": "https://i.scdn.co/image/ab6761610000e5eb766397ec42a573a53eb5fb87"
+      }
+    ],
+    "albums": [
+      {
+        "name": "The Life of a Showgirl + Acoustic Collection",
+        "uri": "spotify:album:6QNMhoV8V0u7cFuhhUBOn7",
+        "url": "https://open.spotify.com/album/6QNMhoV8V0u7cFuhhUBOn7",
+        "image": "https://i.scdn.co/image/ab67616d00001e02f756bdc2c11a985dc0c06d94",
+        "releaseYear": 2025,
+        "totalTracks": 19
+      },
+      {
+        "name": "The Life of a Showgirl",
+        "uri": "spotify:album:4a6NzYL1YHRUgx9e3YZI6I",
+        "url": "https://open.spotify.com/album/4a6NzYL1YHRUgx9e3YZI6I",
+        "image": "https://i.scdn.co/image/ab67616d00001e02d7812467811a7da6e6a44902",
+        "releaseYear": 2025,
+        "totalTracks": 12
+      }
+    ],
+    "singles": [
+      {
+        "name": "I Knew It, I Knew You (From \"Toy Story 5\")",
+        "uri": "spotify:album:4Ii9whWXI1O1H01ziECRaG",
+        "url": "https://open.spotify.com/album/4Ii9whWXI1O1H01ziECRaG",
+        "image": "https://i.scdn.co/image/ab67616d00001e02e8852f06eca817333d20e60b",
+        "releaseYear": 2026,
+        "totalTracks": 3
+      },
+      {
+        "name": "Elizabeth Taylor",
+        "uri": "spotify:album:71GTik4z9bbKKY2EmUvkDI",
+        "url": "https://open.spotify.com/album/71GTik4z9bbKKY2EmUvkDI",
+        "image": "https://i.scdn.co/image/ab67616d00001e02dc6e4c7774e0c77c210d3a31",
+        "releaseYear": 2026,
+        "totalTracks": 3
+      }
+    ],
+    "albumsCount": 33,
+    "singlesCount": 79
   },
   "spotify-podcast": {
     "platform": "spotify",

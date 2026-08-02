@@ -431,7 +431,19 @@ const TWITCH: Spec[] = [
 ];
 
 const SPOTIFY: Spec[] = [
-  { slug: "spotify-artist", name: "Spotify Artist API", shortName: "Artist", category: "channel", method: "GET", path: "/v1/spotify/artist", credits: 2 },
+  {
+    slug: "spotify-artist",
+    name: "Spotify Artist API",
+    shortName: "Artist",
+    category: "channel",
+    method: "GET",
+    path: "/v1/spotify/artist",
+    credits: 1,
+    tagline:
+      "Spotify artist — followers, monthlyListeners, worldRank, topCities, topTracks with playCount, concerts, and related artists (1 credit).",
+    longDescription:
+      "Pass a Spotify artist URL, URI, or ID and get a clean profile: name, description, image, followers, monthlyListeners, worldRank, topCities[], externalLinks[], verified, topTracks[] (with playCount), concerts[], relatedArtists[], and albums/singles (with counts). Flat 1 credit. monthlyListeners, topCities, and worldRank are not on Spotify's public Web API — they come from the web-player GraphQL path this endpoint uses. raw keeps the upstream payload for advanced use (shape may change); prefer the normalized fields.",
+  },
   { slug: "spotify-track", name: "Spotify Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/spotify/track", credits: 2 , tagline: "Get a Spotify track — title, artists, album, and duration as structured JSON." },
   { slug: "spotify-album", name: "Spotify Album API", shortName: "Album", category: "details", method: "GET", path: "/v1/spotify/album", credits: 2 , tagline: "Get a Spotify album — title, artists, tracks, release date, and cover art as structured JSON." },
   { slug: "spotify-search", name: "Spotify Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/spotify/search", credits: 2 },
@@ -773,7 +785,8 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
   {
     id: "spotify",
     name: "Spotify",
-    blurb: "Extract Spotify artist, track, album, podcast, episode, and search metadata.",
+    blurb:
+      "Extract Spotify artist intel (monthly listeners, top cities, top tracks with play counts), plus track, album, podcast, episode, and search metadata.",
     icon: "music",
     color: "text-green-500",
     exampleUrl: "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02",
@@ -2305,6 +2318,12 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       a: `Summaries are generated with GPT-4o-mini for a strong balance of quality, speed, and cost, built on top of the transcript.`,
     });
   }
+  if (ep.slug === "spotify-artist") {
+    list.push({
+      q: `Is this the same as Spotify's free Web API?`,
+      a: `No. Spotify's official Web API returns followers, popularity, genres, and top tracks, but not monthlyListeners, topCities, or worldRank. Those three come from the web-player GraphQL path this endpoint uses — along with topTracks playCount, concerts, and relatedArtists as clean JSON.`,
+    });
+  }
   list.push({
     q: `Is the ${ep.name} suitable for production use?`,
     a: `Yes. It is a stable REST endpoint with predictable JSON and automatic retries. ${CACHE_NOTE} Use it for analytics, monitoring, and content automation.`,
@@ -2381,7 +2400,7 @@ const FIELD_DESCS: Record<string, string> = {
   totalReturned: "Number of items returned in this response.",
   nextCursor: "Cursor to pass for the next page of results.",
   hasMore: "Whether more results are available beyond this page. When true, pass nextCursor to fetch the next page.",
-  raw: "Raw upstream payload for advanced use (fields may change).",
+  raw: "Raw upstream payload for advanced use (fields may change). Prefer the normalized top-level fields when available.",
 
   // People / profiles
   username: "Account username / handle.",
@@ -2667,6 +2686,23 @@ const FIELD_DESCS: Record<string, string> = {
   totalTracks: "Number of tracks.",
   totalEpisodes: "Number of episodes.",
   monthlyListeners: "Monthly listener count.",
+  worldRank: "Artist global rank by monthly listeners (web-player GraphQL; not on Spotify's public Web API).",
+  topCities: "Top listener cities with country, region, and listener counts.",
+  externalLinks: "Official external profile links (Facebook, Instagram, Twitter, etc.).",
+  verified: "Whether the artist is verified on Spotify.",
+  topTracks: "Artist's popular tracks with play counts and album art.",
+  concerts: "Upcoming concerts with city, venue, and start time when Spotify exposes them.",
+  relatedArtists: "Related artists with profile image and Spotify URL.",
+  albums: "Recent albums (name, cover, release year, track count).",
+  singles: "Recent singles and EPs (name, cover, release year, track count).",
+  albumsCount: "Total album count for the artist.",
+  singlesCount: "Total singles/EP count for the artist.",
+  listeners: "Listener count for a city in topCities.",
+  venue: "Concert venue name.",
+  startsAt: "Concert start time as an ISO-8601 string.",
+  isFestival: "Whether the concert is part of a festival.",
+  albumUri: "Spotify album URI for a track.",
+  explicit: "Whether the track is marked explicit.",
   isrc: "International Standard Recording Code.",
   musicName: "Name of the soundtrack used.",
   musicUrl: "URL of the soundtrack used.",

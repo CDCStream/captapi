@@ -11205,6 +11205,7 @@
           "Spotify"
         ],
         "summary": "Spotify artist details",
+        "description": "Artist profile from Spotify's web-player GraphQL as clean JSON: followers, monthlyListeners, worldRank, topCities, externalLinks, verified, topTracks (with playCount), concerts, relatedArtists, and albums/singles. Flat 1 credit. monthlyListeners / topCities / worldRank are not on Spotify's public Web API — they require this GraphQL path. raw keeps the upstream payload for advanced use (shape may change); prefer the normalized fields.",
         "operationId": "artist_v1_spotify_artist_get",
         "security": [
           {

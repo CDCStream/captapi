@@ -183,3 +183,16 @@ SC 8 · Captapi 1 · Mixed 1. Shipped this batch: #8 SEO fix, #9 ISO+post, #10 S
 | type = user \| organization (was hardcoded user) | P1 | Shipped |
 | Credits 3 → 1 (match SC / free-API wrapper) | P0 | Shipped |
 | Docs honesty: free GitHub REST alternative | P0 | Shipped |
+
+---
+
+## #20 GET /v1/spotify/artist
+**Keep:** Clean camelCase profile, cache param, `raw` for advanced use.
+
+| Field / param | Priority | Status |
+|---|---|---|
+| worldRank / topCities[] / externalLinks[] | P0 | Shipped |
+| verified / topTracks[] (playCount) / concerts[] / relatedArtists[] | P0 | Shipped |
+| albums[] / singles[] + counts | P1 | Shipped |
+| Credits 2 → 1 (match SC) | P0 | Shipped |
+| Docs: GraphQL-only vs Spotify Web API honesty | P0 | Shipped |

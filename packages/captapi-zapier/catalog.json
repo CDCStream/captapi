@@ -3596,8 +3596,8 @@
     "platform": "spotify",
     "name": "Spotify Artist",
     "path": "/v1/spotify/artist",
-    "credits": 6,
-    "summary": "Spotify artist details, followers and listener metadata.",
+    "credits": 1,
+    "summary": "Spotify artist — followers, monthlyListeners, worldRank, topCities, topTracks with playCount, concerts, related artists.",
     "params": [
       {
         "name": "url",
