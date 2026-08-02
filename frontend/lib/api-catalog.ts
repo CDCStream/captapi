@@ -612,7 +612,21 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     tagline:
       "Search TikTok Commercial Content Library ads — ISO dates, advertiser location, reach bands (2 credits native).",
     longDescription:
-      "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) by keyword. Returns ads with id, url, text, adFormat, ISO firstShown/lastShown, impressions + impressionsRange, advertiser{name, location}, and media[]. Flat 2 credits on the native path (Apify fallback capped at 5). Default country is GB — this library is EU-led; region=US is often empty. Honesty note: this is not TikTok Creative Center. CTR, play_2s_rate, industry/objective filters, and order_by live on Creative Center (a different public surface ScrapeCreators wraps) and are not available here.",
+      "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) by keyword. Returns ads with id, url, text, adFormat, ISO firstShown/lastShown, impressions + impressionsRange, advertiser{name, location}, and media[]. Flat 2 credits on the native path (Apify fallback capped at 5). Default country is GB — this library is EU-led; region=US is often empty. For Creative Center Top Ads (CTR, likes, industry/objective, orderBy), use /v1/ad-library/tiktok/top-ads instead.",
+  },
+  {
+    slug: "tiktok-ad-library-top-ads",
+    name: "TikTok Creative Center Top Ads API",
+    shortName: "Top Ads",
+    category: "search",
+    method: "GET",
+    path: "/v1/ad-library/tiktok/top-ads",
+    credits: 20,
+    creditsPerResult: 1,
+    tagline:
+      "TikTok Creative Center Top Ads — CTR, likes, industry/objective, Spark flag, and video URLs (1 credit/ad).",
+    longDescription:
+      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, title, brandName, likes, ctr/ctrTier, costTier, favorite, isSparkAd, industry/industryKey, objective, countries, and video{url,urlHd,cover,durationSeconds,width,height}. Filter with country (default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|cost), and optional q/industry/objective/adFormat. Billed 1 credit per returned ad (minimum 2). This is Creative Center — not the EU Commercial Content Library (use /tiktok/search for DSA transparency).",
   },
   { slug: "tiktok-ad-library-ad-details", name: "TikTok Ad Details API", shortName: "Ad Details", category: "details", method: "GET", path: "/v1/ad-library/tiktok/ad-details", credits: 17 , tagline: "Get a TikTok Ad Library ad — creative, advertiser, and delivery fields as structured JSON." },
 ];
@@ -768,7 +782,7 @@ export const PLATFORM_GROUPS: PlatformGroup[] = [
     id: "tiktok_ad_library",
     name: "TikTok Ad Library",
     blurb:
-      "Search TikTok's Commercial Content Library (EU DSA) and fetch individual ad details as clean JSON.",
+      "Search TikTok's Commercial Content Library (EU DSA), pull Creative Center Top Ads with performance metrics, and fetch ad details.",
     icon: "tiktok",
     color: "text-foreground",
     exampleUrl: "https://library.tiktok.com/",
@@ -1711,6 +1725,52 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     lp(20, 200),
     cacheP(),
   ],
+  "tiktok-ad-library-top-ads": [
+    {
+      name: "q",
+      type: "string",
+      required: false,
+      description: "Optional keyword filter (brand, product, or creative theme).",
+    },
+    {
+      name: "country",
+      type: "string",
+      required: false,
+      description: "Two-letter ISO country code. Default US.",
+    },
+    {
+      name: "period",
+      type: "number",
+      required: false,
+      description: "Lookback window in days: 7, 30, or 180. Default 30.",
+    },
+    {
+      name: "orderBy",
+      type: "string",
+      required: false,
+      description: "Sort: for_you, likes, ctr, impressions, or cost. Default for_you.",
+    },
+    {
+      name: "industry",
+      type: "string",
+      required: false,
+      description: "Optional industry key or label from Creative Center.",
+    },
+    {
+      name: "objective",
+      type: "string",
+      required: false,
+      description: "Optional campaign objective (e.g. Traffic, Conversion, Reach).",
+    },
+    {
+      name: "adFormat",
+      type: "string",
+      required: false,
+      description: "Optional format filter: spark or non_spark.",
+    },
+    lp(20, 100),
+    cacheP(),
+  ],
   "tiktok-ad-library-ad-details": [
     up("TikTok Ad Library URL or ad ID."),
     {
@@ -2388,7 +2448,13 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
   if (ep.slug === "tiktok-ad-library-search") {
     list.push({
       q: `Is this TikTok Creative Center (CTR / Top Ads)?`,
-      a: `No. This endpoint searches TikTok's Commercial Content Library (library.tiktok.com — EU DSA transparency). Creative Center Top Ads (CTR, play rates, industry/objective filters, order_by) is a different public surface and is not returned here. Default country is GB because the library is EU-led; US often returns empty.`,
+      a: `No. This endpoint searches TikTok's Commercial Content Library (library.tiktok.com — EU DSA transparency). For Creative Center Top Ads with CTR, likes, industry/objective, and orderBy, use GET /v1/ad-library/tiktok/top-ads.`,
+    });
+  }
+  if (ep.slug === "tiktok-ad-library-top-ads") {
+    list.push({
+      q: `How is this different from TikTok Ad Library Search?`,
+      a: `Top Ads is Creative Center performance inspiration (CTR tiers, likes, industry/objective, Spark Ads, video renditions). Ad Library Search is the EU Commercial Content Library (first/last shown, reach bands). Different TikTok products — pick Top Ads for creative intel, Search for DSA transparency.`,
     });
   }
   list.push({
@@ -2595,6 +2661,14 @@ const FIELD_DESCS: Record<string, string> = {
   embedUrl: "Embed page URL — load it directly in an <iframe src>.",
   gameBoxArtUrl: "Twitch category/game box art image URL (usually 144×192).",
   animatedPreviewUrl: "Storyboard strip / animated preview image for a VOD.",
+  brandName: "Advertiser / brand name when Creative Center exposes one.",
+  ctrTier: "CTR performance band (e.g. top_10%, top_25%, below_50%).",
+  costTier: "Relative spend signal from Creative Center (0–5 style tier).",
+  isSparkAd: "Whether the creative is a Spark Ad (boosted organic-style post).",
+  industryKey: "Creative Center industry key / label id.",
+  objectiveKey: "Creative Center campaign objective key.",
+  periodDays: "Lookback window in days used for the Top Ads ranking.",
+  ctr: "Click-through rate signal from Creative Center (typically 0–1).",
   videoId: "Platform video ID.",
   streamUrls: "Live stream playback URLs.",
   playUrl: "Playback URL.",

@@ -235,5 +235,19 @@ SC 8 · Captapi 1 · Mixed 1. Shipped this batch: #8 SEO fix, #9 ISO+post, #10 S
 | ISO firstShown/lastShown | P0 | Shipped |
 | Default country DE → GB (US often empty) | P0 | Shipped |
 | impressionsRange + advertiser.location | P1 | Shipped |
-| Creative Center CTR / order_by / industry | — | Out of scope (different product) |
+| Creative Center CTR / order_by / industry | — | Separate endpoint #23b |
 | Stable advertiser.id | — | Not on library HTML (null when absent) |
+
+---
+
+## #23b GET /v1/ad-library/tiktok/top-ads
+**Keep:** Creative Center Top Ads performance intel as clean camelCase (separate from DSA library search).
+
+| Field / param | Priority | Status |
+|---|---|---|
+| New endpoint (not mixed into /search) | P0 | Shipped |
+| ctr / ctrTier / likes / costTier / isSparkAd | P0 | Shipped |
+| video{url,urlHd,cover,duration,width,height} | P0 | Shipped |
+| country / period / orderBy / q / industry / objective / adFormat | P0 | Shipped |
+| Credits ~1 per returned ad (min 2) | P0 | Shipped |
+| Native signed creative_radar bootstrap | P2 | Later (Apify for now) |

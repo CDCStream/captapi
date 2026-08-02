@@ -1645,6 +1645,27 @@ export interface TiktokAdLibrarySearchParams {
   cache?: boolean;
 }
 
+export interface TiktokAdLibraryTopAdsParams {
+  /** Optional keyword filter. */
+  q?: string;
+  /** ISO country code. Default US. */
+  country?: string;
+  /** Lookback days: 7, 30, or 180. Default 30. */
+  period?: number;
+  /** for_you | likes | ctr | impressions | cost. */
+  orderBy?: string;
+  /** Optional industry key or label. */
+  industry?: string;
+  /** Optional campaign objective. */
+  objective?: string;
+  /** spark | non_spark. */
+  adFormat?: string;
+  /** Max items to return. Default 20, max 100. Billed per result. */
+  limit?: number;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
+}
+
 export interface TiktokAdLibraryAdDetailsParams {
   /** TikTok Ad Library URL or ad ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
@@ -1659,6 +1680,10 @@ export class TiktokAdLibraryApi {
   /** TikTok Ad Library Search — Search TikTok Commercial Content Library (EU DSA) — ISO dates, advertiser, reach bands. (2 credits) */
   search(params: TiktokAdLibrarySearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/ad-library/tiktok/search", params);
+  }
+  /** TikTok Creative Center Top Ads — Creative Center Top Ads — CTR, likes, industry/objective, Spark flag, video URLs. (20 credits) */
+  topAds(params: TiktokAdLibraryTopAdsParams = {}): Promise<ApiEnvelope> {
+    return this.core.get("/v1/ad-library/tiktok/top-ads", params);
   }
   /** TikTok Ad Details — TikTok ad details by ad URL or ID. (17 credits) */
   adDetails(params: TiktokAdLibraryAdDetailsParams): Promise<ApiEnvelope> {

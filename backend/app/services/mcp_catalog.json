@@ -3422,6 +3422,70 @@
     ]
   },
   {
+    "tool": "tiktok_ad_library_top_ads",
+    "platform": "tiktok_ad_library",
+    "name": "TikTok Creative Center Top Ads",
+    "path": "/v1/ad-library/tiktok/top-ads",
+    "credits": 20,
+    "summary": "Creative Center Top Ads — CTR, likes, industry/objective, Spark flag, video URLs.",
+    "params": [
+      {
+        "name": "q",
+        "type": "string",
+        "required": false,
+        "description": "Optional keyword filter."
+      },
+      {
+        "name": "country",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code. Default US."
+      },
+      {
+        "name": "period",
+        "type": "number",
+        "required": false,
+        "description": "Lookback days: 7, 30, or 180. Default 30."
+      },
+      {
+        "name": "orderBy",
+        "type": "string",
+        "required": false,
+        "description": "for_you | likes | ctr | impressions | cost."
+      },
+      {
+        "name": "industry",
+        "type": "string",
+        "required": false,
+        "description": "Optional industry key or label."
+      },
+      {
+        "name": "objective",
+        "type": "string",
+        "required": false,
+        "description": "Optional campaign objective."
+      },
+      {
+        "name": "adFormat",
+        "type": "string",
+        "required": false,
+        "description": "spark | non_spark."
+      },
+      {
+        "name": "limit",
+        "type": "number",
+        "required": false,
+        "description": "Max items to return. Default 20, max 100. Billed per result."
+      },
+      {
+        "name": "cache",
+        "type": "boolean",
+        "required": false,
+        "description": "Set true to serve from the 24h response cache. Default false — always fetch fresh data."
+      }
+    ]
+  },
+  {
     "tool": "tiktok_ad_library_ad_details",
     "platform": "tiktok_ad_library",
     "name": "TikTok Ad Details",

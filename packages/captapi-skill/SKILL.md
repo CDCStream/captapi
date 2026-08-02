@@ -388,6 +388,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `facebook_ad_library_ad_details` | `/v1/ad-library/facebook/ad-details` | `url` (string), `cache`? (boolean) | 17 |
 | `facebook_ad_library_ad_transcript` | `/v1/ad-library/facebook/ad-transcript` | `url` (string), `cache`? (boolean) | 17 |
 | `tiktok_ad_library_search` | `/v1/ad-library/tiktok/search` | `q` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `tiktok_ad_library_top_ads` | `/v1/ad-library/tiktok/top-ads` | `q`? (string), `country`? (string), `period`? (number), `orderBy`? (string), `industry`? (string), `objective`? (string), `adFormat`? (string), `limit`? (number), `cache`? (boolean) | 20 |
 | `tiktok_ad_library_ad_details` | `/v1/ad-library/tiktok/ad-details` | `url` (string), `country`? (string), `cache`? (boolean) | 17 |
 | `google_ad_library_company_ads` | `/v1/ad-library/google/company-ads` | `advertiser` (string), `country`? (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `google_ad_library_ad_details` | `/v1/ad-library/google/ad-details` | `creative_id` (string), `country`? (string), `cache`? (boolean) | 17 |

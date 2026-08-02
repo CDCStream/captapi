@@ -225,6 +225,8 @@ class Settings(BaseSettings):
     APIFY_ACTOR_TIKTOK_AD_LIBRARY: str = "brilliant_gum/tiktok-ads-library-scraper"
     APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL: str = "jy-labs/tiktok-ad-library-fast-search"
     APIFY_ACTOR_TIKTOK_AD_LIBRARY_DETAIL_FALLBACK: str = "prodiger/tiktok-ads-library-scraper"
+    # Creative Center Top Ads (signed creative_radar_api via Apify bootstrap).
+    APIFY_ACTOR_TIKTOK_CREATIVE_CENTER: str = "khadinakbar/tiktok-ads-scraper"
     APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2: str = "unseenuser/google-ads"
     APIFY_ACTOR_LINKEDIN_AD_LIBRARY: str = "s-r/linkedin-ads-library"
     APIFY_ACTOR_LINKEDIN_AD_LIBRARY_DETAIL: str = "elliotpadfield/linkedin-ad-library-scraper"

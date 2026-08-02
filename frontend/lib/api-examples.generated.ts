@@ -10624,6 +10624,89 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       }
     ]
   },
+  "tiktok-ad-library-top-ads": {
+    "query": null,
+    "country": "US",
+    "period": 30,
+    "orderBy": "ctr",
+    "totalReturned": 2,
+    "ads": [
+      {
+        "platform": "tiktok_creative_center",
+        "id": "7662489073849090066",
+        "url": "https://ads.tiktok.com/business/creativecenter/inspiration/topads/pc/en?period=30&region=US&order_by=ctr",
+        "title": "Nuuly loves a woman in a suit ! #ad #nuulypartner #nuuly #frthoidolovenuuly",
+        "brandName": "nuuly",
+        "likes": 620,
+        "ctr": 0.17,
+        "ctrTier": "below_50%",
+        "costTier": 1,
+        "favorite": false,
+        "isSparkAd": false,
+        "industry": "All Industries",
+        "industryKey": "label_23105000000",
+        "objective": "Reach",
+        "objectiveKey": null,
+        "adFormat": "All Formats",
+        "countries": [
+          "US"
+        ],
+        "periodDays": 30,
+        "video": {
+          "id": "v10033g50000example",
+          "url": "https://v16m-default.tiktokcdn.com/example.mp4",
+          "urlHd": "https://v16m-default.tiktokcdn.com/example-hd.mp4",
+          "cover": "https://p16-common-sign.tiktokcdn.com/example~tplv-noop.image",
+          "durationSeconds": 15.0,
+          "width": 720,
+          "height": 1280
+        },
+        "media": [
+          "https://p16-common-sign.tiktokcdn.com/example~tplv-noop.image",
+          "https://v16m-default.tiktokcdn.com/example-hd.mp4",
+          "https://v16m-default.tiktokcdn.com/example.mp4"
+        ],
+        "tags": []
+      },
+      {
+        "platform": "tiktok_creative_center",
+        "id": "7662938725836324871",
+        "url": "https://ads.tiktok.com/business/creativecenter/inspiration/topads/pc/en?period=30&region=US&order_by=ctr",
+        "title": "How I fix my hair EASILY on the go #hair #hairhack",
+        "brandName": null,
+        "likes": 5,
+        "ctr": 0.62,
+        "ctrTier": "top_25%",
+        "costTier": 0,
+        "favorite": false,
+        "isSparkAd": false,
+        "industry": "All Industries",
+        "industryKey": "label_23105000000",
+        "objective": "Product Sales",
+        "objectiveKey": null,
+        "adFormat": "All Formats",
+        "countries": [
+          "US"
+        ],
+        "periodDays": 30,
+        "video": {
+          "id": "v10033g50000example",
+          "url": "https://v16m-default.tiktokcdn.com/example.mp4",
+          "urlHd": "https://v16m-default.tiktokcdn.com/example-hd.mp4",
+          "cover": "https://p16-common-sign.tiktokcdn.com/example~tplv-noop.image",
+          "durationSeconds": 15.0,
+          "width": 720,
+          "height": 1280
+        },
+        "media": [
+          "https://p16-common-sign.tiktokcdn.com/example~tplv-noop.image",
+          "https://v16m-default.tiktokcdn.com/example-hd.mp4",
+          "https://v16m-default.tiktokcdn.com/example.mp4"
+        ],
+        "tags": []
+      }
+    ]
+  },
   "tiktok-audience-demographics": {
     "platform": "tiktok",
     "username": "khaby.lame",

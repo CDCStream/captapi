@@ -6587,6 +6587,177 @@
         }
       }
     },
+    "/v1/ad-library/tiktok/top-ads": {
+      "get": {
+        "tags": [
+          "Ad Library"
+        ],
+        "summary": "TikTok Creative Center Top Ads",
+        "description": "High-performing TikTok ads from Creative Center Top Ads (ads.tiktok.com/business/creativecenter) as clean JSON — title, brandName, likes, ctr/ctrTier, costTier, industry/objective, isSparkAd, and video{} renditions. Filter with country (default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|cost), optional q/industry/objective/adFormat. Billed ~1 credit per returned ad (minimum 2). This is not the EU Commercial Content Library — use /v1/ad-library/tiktok/search for DSA transparency ads.",
+        "operationId": "tiktok_top_ads_v1_ad_library_tiktok_top_ads_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional keyword filter (brand, product, or creative theme).",
+              "title": "Q"
+            },
+            "description": "Optional keyword filter (brand, product, or creative theme)."
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 2,
+              "description": "Two-letter ISO country code. Default US.",
+              "default": "US",
+              "title": "Country"
+            },
+            "description": "Two-letter ISO country code. Default US."
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "description": "Lookback window in days: 7, 30, or 180. Default 30.",
+              "default": 30,
+              "title": "Period"
+            },
+            "description": "Lookback window in days: 7, 30, or 180. Default 30."
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Sort: for_you, likes, ctr, impressions, or cost.",
+              "default": "for_you",
+              "title": "Orderby"
+            },
+            "description": "Sort: for_you, likes, ctr, impressions, or cost."
+          },
+          {
+            "name": "industry",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional industry filter (Creative Center industry key or label).",
+              "title": "Industry"
+            },
+            "description": "Optional industry filter (Creative Center industry key or label)."
+          },
+          {
+            "name": "objective",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional campaign objective filter (e.g. Traffic, Conversion).",
+              "title": "Objective"
+            },
+            "description": "Optional campaign objective filter (e.g. Traffic, Conversion)."
+          },
+          {
+            "name": "adFormat",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional format filter: spark, non_spark, or actor label.",
+              "title": "Adformat"
+            },
+            "description": "Optional format filter: spark, non_spark, or actor label."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set true to use the 24h cache. Default false — always fetch fresh data.",
+              "default": false,
+              "title": "Cache"
+            },
+            "description": "Set true to use the 24h cache. Default false — always fetch fresh data."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/ad-library/tiktok/ad-details": {
       "get": {
         "tags": [

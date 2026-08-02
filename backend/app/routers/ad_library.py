@@ -19,6 +19,7 @@ from app.services import (
     google_ads_native,
     linkedin_ads_native,
     tiktok_ads_native,
+    tiktok_creative_center,
 )
 from app.utils.formatters import safe_float, safe_int, safe_str
 from app.utils.media_urls import utc_now_iso
@@ -42,6 +43,9 @@ CREDIT_AD_LIBRARY_NATIVE = 2
 # Apify fallback is capped — never the old ~70-credit trap.
 CREDIT_TIKTOK_AD_SEARCH = 2
 CREDIT_TIKTOK_AD_SEARCH_APIFY = 5
+# Creative Center Top Ads via Apify (~$0.003/ad) → ~1 credit/result after markup.
+RATE_TIKTOK_TOP_ADS = 1.0
+CREDIT_TIKTOK_TOP_ADS_MIN = 2
 
 
 def _scaled(limit: int, rate: float = RATE_AD_LIST, minimum: int = 2) -> int:
@@ -1229,6 +1233,129 @@ async def tiktok_search(
         )
         if ctx.get("source") != "direct":
             ctx["credits_override"] = CREDIT_TIKTOK_AD_SEARCH_APIFY
+        return ApiResponse(data=data)
+
+
+@router.get(
+    "/tiktok/top-ads",
+    summary="TikTok Creative Center Top Ads",
+    description=(
+        "High-performing TikTok ads from Creative Center Top Ads "
+        "(ads.tiktok.com/business/creativecenter) as clean JSON — title, brandName, "
+        "likes, ctr/ctrTier, costTier, industry/objective, isSparkAd, and video{} "
+        "renditions. Filter with country (default US), period (7/30/180), orderBy "
+        "(for_you|likes|ctr|impressions|cost), optional q/industry/objective/adFormat. "
+        "Billed ~1 credit per returned ad (minimum 2). This is not the EU Commercial "
+        "Content Library — use /v1/ad-library/tiktok/search for DSA transparency ads."
+    ),
+)
+async def tiktok_top_ads(
+    q: str | None = Query(
+        None,
+        description="Optional keyword filter (brand, product, or creative theme).",
+    ),
+    country: str = Query(
+        "US",
+        min_length=2,
+        max_length=2,
+        description="Two-letter ISO country code. Default US.",
+    ),
+    period: int = Query(
+        30,
+        description="Lookback window in days: 7, 30, or 180. Default 30.",
+    ),
+    order_by: str = Query(
+        "for_you",
+        alias="orderBy",
+        description="Sort: for_you, likes, ctr, impressions, or cost.",
+    ),
+    industry: str | None = Query(
+        None,
+        description="Optional industry filter (Creative Center industry key or label).",
+    ),
+    objective: str | None = Query(
+        None,
+        description="Optional campaign objective filter (e.g. Traffic, Conversion).",
+    ),
+    ad_format: str | None = Query(
+        None,
+        alias="adFormat",
+        description="Optional format filter: spark, non_spark, or actor label.",
+    ),
+    limit: int = Query(20, ge=1, le=100),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    settings = get_settings()
+    region = (country or "US").strip().upper() or "US"
+    try:
+        period_days = tiktok_creative_center.normalize_period(period)
+        order_label = tiktok_creative_center.normalize_order_by(order_by)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    cost = _scaled(limit, RATE_TIKTOK_TOP_ADS, CREDIT_TIKTOK_TOP_ADS_MIN)
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/ad-library/tiktok/top-ads",
+        platform="tiktok_ad_library",
+        resource_url=None,
+        base_credits=cost,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            payload = tiktok_creative_center.apify_input(
+                country=region,
+                period=period_days,
+                order_by=order_label,
+                limit=limit,
+                q=q,
+                industry=industry,
+                objective=objective,
+                ad_format=ad_format,
+            )
+            items = await _run_actor(
+                settings.APIFY_ACTOR_TIKTOK_CREATIVE_CENTER,
+                payload,
+                limit,
+            )
+            ctx["source"] = "apify"
+            ads = [
+                tiktok_creative_center.normalize_top_ad(i)
+                for i in items
+                if isinstance(i, dict) and (i.get("ad_id") or i.get("id"))
+            ]
+            return {
+                "query": (q or "").strip() or None,
+                "country": region,
+                "period": period_days,
+                "orderBy": order_by.strip().lower().replace(" ", "_").replace("-", "_"),
+                "totalReturned": len(ads),
+                "ads": ads,
+            }
+
+        data = await cached_or_run(
+            "ad-library.tiktok.top-ads",
+            {
+                "q": q or "",
+                "country": region,
+                "period": period_days,
+                "orderBy": order_label,
+                "industry": industry or "",
+                "objective": objective or "",
+                "adFormat": ad_format or "",
+                "limit": limit,
+                "v": 1,
+            },
+            _run,
+            ctx,
+            use_cache=cache,
+        )
+        n = len(data.get("ads") or [])
+        ctx["credits_override"] = (
+            CREDIT_TIKTOK_TOP_ADS_MIN
+            if n == 0
+            else _scaled(n, RATE_TIKTOK_TOP_ADS, CREDIT_TIKTOK_TOP_ADS_MIN)
+        )
         return ApiResponse(data=data)
 
 

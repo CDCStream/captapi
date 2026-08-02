@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "feature",
+    title: "TikTok Creative Center Top Ads endpoint",
+    description:
+      "New GET /v1/ad-library/tiktok/top-ads returns Creative Center Top Ads as clean JSON — likes, ctr/ctrTier, costTier, industry/objective, isSparkAd, and video{url,urlHd,cover}. Filters: country (default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|cost), optional q/industry/objective/adFormat. Billed 1 credit per returned ad (min 2). Separate from EU Commercial Content Library search.",
+    items: [
+      "New /v1/ad-library/tiktok/top-ads",
+      "Performance metrics: ctr, ctrTier, likes, costTier, Spark flag",
+      "orderBy / period / industry / objective filters",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "feature",
     title: "TikTok Ad Library search: 2 credits native, ISO dates, GB default",
     description:
       "TikTok Ad Library search drops the ~70-credit Apify-first pricing to flat 2 credits on the Decodo-native Commercial Content Library path (Apify fallback capped at 5). firstShown/lastShown become ISO-8601, impressionsRange parses reach bands like 0-1K, and advertiser.location is added when present. Default country is GB (EU DSA library; US is often empty). Docs clarify this is not Creative Center — CTR/order_by metrics live on a different TikTok surface.",

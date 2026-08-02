@@ -2347,6 +2347,21 @@ class TiktokAdLibraryApi:
         """
         return self._t.get("/v1/ad-library/tiktok/search", {"q": q, "country": country, "limit": limit, "cache": cache})
 
+    def top_ads(self, *, q: str | None = None, country: str | None = None, period: float | None = None, orderBy: str | None = None, industry: str | None = None, objective: str | None = None, adFormat: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Creative Center Top Ads — Creative Center Top Ads — CTR, likes, industry/objective, Spark flag, video URLs. (20 credits)
+
+        :param q: Optional keyword filter.
+        :param country: ISO country code. Default US.
+        :param period: Lookback days: 7, 30, or 180. Default 30.
+        :param orderBy: for_you | likes | ctr | impressions | cost.
+        :param industry: Optional industry key or label.
+        :param objective: Optional campaign objective.
+        :param adFormat: spark | non_spark.
+        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return self._t.get("/v1/ad-library/tiktok/top-ads", {"q": q, "country": country, "period": period, "orderBy": orderBy, "industry": industry, "objective": objective, "adFormat": adFormat, "limit": limit, "cache": cache})
+
     def ad_details(self, *, url: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Ad Details — TikTok ad details by ad URL or ID. (17 credits)
 
@@ -2370,6 +2385,21 @@ class AsyncTiktokAdLibraryApi:
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/ad-library/tiktok/search", {"q": q, "country": country, "limit": limit, "cache": cache})
+
+    async def top_ads(self, *, q: str | None = None, country: str | None = None, period: float | None = None, orderBy: str | None = None, industry: str | None = None, objective: str | None = None, adFormat: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """TikTok Creative Center Top Ads — Creative Center Top Ads — CTR, likes, industry/objective, Spark flag, video URLs. (20 credits)
+
+        :param q: Optional keyword filter.
+        :param country: ISO country code. Default US.
+        :param period: Lookback days: 7, 30, or 180. Default 30.
+        :param orderBy: for_you | likes | ctr | impressions | cost.
+        :param industry: Optional industry key or label.
+        :param objective: Optional campaign objective.
+        :param adFormat: spark | non_spark.
+        :param limit: Max items to return. Default 20, max 100. Billed per result.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
+        """
+        return await self._t.get("/v1/ad-library/tiktok/top-ads", {"q": q, "country": country, "period": period, "orderBy": orderBy, "industry": industry, "objective": objective, "adFormat": adFormat, "limit": limit, "cache": cache})
 
     async def ad_details(self, *, url: str, country: str | None = None, cache: bool | None = None) -> dict[str, Any]:
         """TikTok Ad Details — TikTok ad details by ad URL or ID. (17 credits)
