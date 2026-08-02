@@ -59,6 +59,8 @@ RATE_IG_MARGIN = 1.4
 # Instagram's own feed API), which is far cheaper than an Apify run, so they
 # get their own reduced per-result rate.
 RATE_IG_CHANNEL = 0.3
+# Native usertags feed (session cookies) — flat fee; Apify tagged scraper stays RATE_IG_RICH.
+CREDIT_TAGGED_NATIVE = 1
 
 
 def _scaled_credits(n: int, rate: float, minimum: int) -> int:
@@ -915,6 +917,49 @@ _IG_CURSOR_RE = re.compile(r"^\d+_(\d+)$")
 _IG_FEED_MAX_PAGES = 8
 
 
+def _sort_posts_newest_first(posts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Stable newest-first — Instagram usertags pages can arrive slightly shuffled."""
+
+    def _key(post: dict[str, Any]) -> float:
+        dt = _parse_published_at(post.get("publishedAt"))
+        return dt.timestamp() if dt is not None else 0.0
+
+    return sorted(posts, key=_key, reverse=True)
+
+
+async def _ig_usertags_collect(
+    user_id: str,
+    cursor: str | None,
+    limit: int,
+) -> tuple[list[dict[str, Any]], str | None] | None:
+    """Collect up to ``limit`` tagged posts from ``/api/v1/usertags/{id}/feed/``."""
+    collected: list[dict[str, Any]] = []
+    next_cursor = cursor
+    for _ in range(_IG_FEED_MAX_PAGES):
+        page = await instagram_native.fetch_usertags_page(user_id, next_cursor, count=min(33, max(limit, 12)))
+        if page is None and not collected:
+            await asyncio.sleep(0.4)
+            page = await instagram_native.fetch_usertags_page(user_id, next_cursor, count=min(33, max(limit, 12)))
+        if page is None:
+            return None if not collected else (_sort_posts_newest_first(collected)[:limit], next_cursor)
+        items, next_max_id, more = page
+        for raw in items:
+            collected.append(
+                decodo.strip_null_post_fields(
+                    instagram_native.map_feed_post(raw, profile_user_id=user_id)
+                )
+            )
+            if len(collected) >= limit:
+                break
+        next_cursor = next_max_id if more and next_max_id else None
+        if next_cursor:
+            # Public cursor embeds the tagged profile's user id (same pattern as channel-posts).
+            next_cursor = f"{next_cursor.split('_')[0]}_{user_id}"
+        if len(collected) >= limit or next_cursor is None:
+            break
+    return _sort_posts_newest_first(collected)[:limit], next_cursor
+
+
 async def _ig_feed_collect(
     user_id: str,
     cursor: str | None,
@@ -1544,11 +1589,21 @@ async def instagram_reels_by_audio_id(
 async def instagram_tagged_posts(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
     limit: int = Query(20, ge=1, le=200),
+    cursor: str | None = Query(
+        None,
+        description="Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_instagram_profile(url)
     settings = get_settings()
+    if cursor and not _IG_CURSOR_RE.match(cursor):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid cursor. Pass the nextCursor value from a previous response.",
+        )
+    # Upfront reserve Apify worst-case; native path overrides to 1 credit.
     cost = _scaled_credits(limit, RATE_IG_RICH, 2)
     async with billed_call(
         caller=caller,
@@ -1558,6 +1613,28 @@ async def instagram_tagged_posts(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            if cursor:
+                user_id = _IG_CURSOR_RE.match(cursor).group(1)
+                result = await retry_none(
+                    lambda: _ig_usertags_collect(user_id, cursor, limit),
+                    attempts=2,
+                    delay=0.45,
+                )
+                if result is None:
+                    raise HTTPException(
+                        status_code=502,
+                        detail="Failed to fetch the next tagged page. Retry shortly.",
+                    )
+                posts, next_cursor = result
+                ctx["source"] = "direct"
+                return {
+                    "url": url,
+                    "totalReturned": len(posts),
+                    "hasMore": next_cursor is not None,
+                    "nextCursor": next_cursor,
+                    "posts": posts,
+                }
+
             # Resolve user id: native web_profile_info first, Decodo GraphQL profile
             # as fallthrough (same pattern as channel-posts when IG rate-limits).
             user = await instagram_native.fetch_web_profile_info(handle)
@@ -1565,32 +1642,20 @@ async def instagram_tagged_posts(
                 user = await decodo._profile(handle)
             user_id = safe_str((user or {}).get("id") or (user or {}).get("pk"))
             if user_id:
-                collected: list[dict[str, Any]] = []
-                next_max: str | None = None
-                for _ in range(_IG_FEED_MAX_PAGES):
-                    page = await instagram_native.fetch_usertags_page(
-                        user_id, next_max, count=min(33, limit)
-                    )
-                    if page is None:
-                        break
-                    items, next_max_id, more = page
-                    for raw in items:
-                        collected.append(
-                            decodo.strip_null_post_fields(
-                                instagram_native.map_feed_post(raw, profile_user_id=user_id)
-                            )
-                        )
-                        if len(collected) >= limit:
-                            break
-                    next_max = next_max_id if more and next_max_id else None
-                    if len(collected) >= limit or next_max is None:
-                        break
-                if collected:
+                result = await retry_none(
+                    lambda: _ig_usertags_collect(user_id, None, limit),
+                    attempts=2,
+                    delay=0.45,
+                )
+                if result is not None and result[0]:
+                    posts, next_cursor = result
                     ctx["source"] = "direct"
                     return {
                         "url": url,
-                        "totalReturned": len(collected[:limit]),
-                        "posts": collected[:limit],
+                        "totalReturned": len(posts),
+                        "hasMore": next_cursor is not None,
+                        "nextCursor": next_cursor,
+                        "posts": posts,
                     }
 
             apify = get_apify()
@@ -1599,22 +1664,33 @@ async def instagram_tagged_posts(
                 {"username": [handle], "resultsLimit": limit},
                 max_items=limit,
             )
-            posts = [
-                decodo.strip_null_post_fields(_normalize_post(i))
-                for i in items[:limit]
-                if not i.get("error")
-            ]
+            posts = _sort_posts_newest_first(
+                [
+                    decodo.strip_null_post_fields(_normalize_post(i))
+                    for i in items[:limit]
+                    if not i.get("error")
+                ]
+            )
             ctx["source"] = "apify"
-            return {"url": url, "totalReturned": len(posts), "posts": posts}
+            return {
+                "url": url,
+                "totalReturned": len(posts),
+                "hasMore": None,
+                "nextCursor": None,
+                "posts": posts,
+            }
 
         data = await cached_or_run(
             endpoint="instagram.tagged-posts",
-            params={"url": url, "limit": limit, "v": 11},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 12},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_RICH, 2)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_TAGGED_NATIVE
+        else:
+            ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_RICH, 2)
         return ApiResponse(data=data)
 
 

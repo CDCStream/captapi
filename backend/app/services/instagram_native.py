@@ -835,24 +835,30 @@ def map_feed_post(
         else None
     )
 
+    owner_id = safe_str(user.get("pk") or user.get("pk_id") or user.get("id"))
     author: dict[str, Any] = {
+        "id": owner_id,
         "username": username,
         "displayName": safe_str(user.get("full_name")),
         "url": f"https://instagram.com/{username}" if username else None,
         "verified": user.get("is_verified"),
         "profileImage": safe_str(user.get("profile_pic_url")) or None,
     }
-    owner_id = safe_str(user.get("pk") or user.get("pk_id") or user.get("id"))
     if followers is not None and (
         profile_user_id is None or owner_id is None or owner_id == profile_user_id
     ):
         author["followers"] = followers
+
+    plays = safe_int(media.get("play_count"))
+    ig_plays = safe_int(media.get("ig_play_count") or media.get("view_count"))
+    views = plays or ig_plays
 
     return strip_null_post_fields(
         {
             "platform": "instagram",
             "url": f"https://www.instagram.com/{'reel' if is_video else 'p'}/{shortcode}/" if shortcode else None,
             "id": safe_str(media.get("pk") or media.get("id")),
+            "shortcode": shortcode,
             "postType": _MEDIA_TYPE_NAMES.get(media_type or 0),
             "productType": safe_str(media.get("product_type")),
             "caption": caption,
@@ -863,7 +869,10 @@ def map_feed_post(
             "videoUrl": safe_str(videos[0].get("url")) if videos else None,
             "author": author,
             "engagement": {
-                "views": safe_int(media.get("play_count") or media.get("view_count")),
+                "views": views,
+                "plays": plays
+                if plays is not None and ig_plays is not None and plays != ig_plays
+                else None,
                 "likes": hidden_count(media.get("like_count")),
                 "comments": hidden_count(media.get("comment_count")),
             },

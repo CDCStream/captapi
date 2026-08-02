@@ -1554,8 +1554,8 @@
     "platform": "instagram",
     "name": "Instagram Tagged Posts",
     "path": "/v1/instagram/tagged-posts",
-    "credits": 18,
-    "summary": "Posts an Instagram user is tagged in.",
+    "credits": 1,
+    "summary": "Tagged posts — author id, views, hashtags/mentions; cursor pagination.",
     "params": [
       {
         "name": "url",
@@ -1567,7 +1567,13 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 1 credit on the native path."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Leave empty for the first page; then pass the nextCursor value from the previous response."
       },
       {
         "name": "cache",

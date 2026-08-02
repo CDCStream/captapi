@@ -311,7 +311,25 @@ const INSTAGRAM: Spec[] = [
   { slug: "instagram-channel-reels", name: "Instagram Channel Reels API", shortName: "Channel Reels", category: "list", method: "GET", path: "/v1/instagram/channel-reels", credits: 6, creditsPerResult: 0.3, tagline: "Get the latest Reels from any public Instagram profile — video URL, caption, views, likes, comments, and duration for each Reel, with cursor pagination for older ones.", longDescription: "Send a profile URL or @handle and the Instagram Channel Reels API returns that account's most recent Reels as clean, structured JSON. Photo and carousel posts are filtered out — you only get videos, each with its direct video URL, caption, view / like / comment counts, duration, and publish date. Need more than the first page? Pass the nextCursor value from the previous response to keep paging through older Reels. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
   { slug: "instagram-reels-search", name: "Instagram Reels Search API", shortName: "Reels Search", category: "search", method: "GET", path: "/v1/instagram/reels-search", credits: 2, tagline: "Native Instagram Reels hashtag search — views + plays, author verified/followers, audio, location. Flat 2 credits.", longDescription: "Send a hashtag (without the #) or keyword and get matching Reels from Instagram's native hashtag grid as clean JSON — videos only. Same enriched shape as Hashtag Search: author (verified, profileImage, followers, postCount), engagement.views plus engagement.plays when Instagram exposes both, music{}, location{}, paid/ad/affiliate flags, preview comments when present, duration, and publish date. Optional datePosted=last_24_hours|last_week|last_month|last_year. Flat 2 credits per call (same as hashtag-search). Pass cache=true for the 24h shared cache." },
   { slug: "instagram-trending-reels", name: "Instagram Trending Reels API", shortName: "Trending Reels", category: "list", method: "GET", path: "/v1/instagram/trending-reels", credits: 28, creditsPerResult: 1.4, tagline: "Get the Reels currently trending on Instagram's Explore feed for a chosen country — video URL, caption, author, views, likes, and comments for each one.", longDescription: "The Instagram Trending Reels API returns what's blowing up on Instagram right now. Pass a country name (default United States) and you get the Reels currently featured on that country's Explore feed as clean, structured JSON — each with its direct video URL, caption, author profile, and view / like / comment counts. No hashtag or keyword needed: this is Instagram's own trending selection, useful for spotting viral content, tracking trends by region, or seeding content-research tools. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
-  { slug: "instagram-tagged-posts", name: "Instagram Tagged Posts API", shortName: "Tagged Posts", category: "list", method: "GET", path: "/v1/instagram/tagged-posts", credits: 18, creditsPerResult: 0.9, tagline: "Get the posts where an Instagram account is tagged by other users — caption, media URLs, author, likes, comments, and publish date for each post.", longDescription: "Send a profile URL or @handle and the Instagram Tagged Posts API returns the posts other people tagged that account in — the same content you see in the profile's \"Tagged\" tab — as clean, structured JSON. Each post includes who published it, the caption, image or video URLs, like and comment counts, post type, and publish date. It's the easiest way to see UGC and brand mentions: track who is tagging a brand, collect fan or customer content, or monitor collaborations. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
+  {
+    slug: "instagram-tagged-posts",
+    name: "Instagram Tagged Posts API",
+    shortName: "Tagged Posts",
+    category: "list",
+    method: "GET",
+    path: "/v1/instagram/tagged-posts",
+    credits: 1,
+    tagline:
+      "Posts that tag an Instagram account — author id, views, hashtags/mentions, cursor pagination (1 credit native).",
+    longDescription:
+      "Pass a profile URL or @handle (no numeric user_id required) and get the profile's Tagged tab as clean JSON: each post includes id/shortcode, postType, caption, publishedAt, author{id,username,displayName,url}, engagement{views,likes,comments}, hashtags[], and mentions[]. Cursor pagination via nextCursor + hasMore (same shape as channel-posts). Flat 1 credit on the native usertags path; Apify fallback bills about 0.9 credits per returned post (min 2). Note: Instagram's usertags feed only returns tags the account still exposes — some large brands (e.g. natgeo) surface a truncated historical window while accounts like nasa return recent UGC.",
+    delivers: [
+      "author.id + username for the tagging creator",
+      "engagement.views on video/Reel tags when Instagram exposes them",
+      "hashtags[] / mentions[] / postType",
+      "Cursor pagination (nextCursor + hasMore)",
+    ],
+  },
   { slug: "instagram-reels-by-audio-id", name: "Instagram Reels By Audio ID API", shortName: "Reels By Audio ID", category: "list", method: "GET", path: "/v1/instagram/reels-by-audio-id", credits: 28, creditsPerResult: 1.4, tagline: "Give it an Instagram sound and get back every Reel that uses it — each with its video, caption, creator, and view / like / comment counts.", longDescription: "On Instagram every Reel is built on an audio track, and each track has its own page listing the Reels that use it. This API takes that sound — either the numeric audio ID (the musicId you see on a Reel) or a full audio-page URL like https://www.instagram.com/reels/audio/AUDIO_ID/ — and returns those Reels as clean JSON. For each Reel you get a direct video URL, caption, the creator's profile, play / like / comment counts, duration, and publish date. Use it to see how far a trending sound has spread, find every creator who used your music, or measure a branded-audio campaign. No Instagram login, no OAuth, and no infrastructure to maintain. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Every public Reel made with that audio track", "Direct MP4 video URL and thumbnail for each Reel", "Caption, duration, publish date, and the sound's audio ID", "Creator handle plus play / like / comment counts"] },
   { slug: "instagram-hashtag-search", name: "Instagram Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/instagram/hashtag-search", credits: 2, tagline: "Native Instagram hashtag grid — posts with media, caption, author followers, views, paid-partnership flags, audio, and location. Flat 2 credits per call.", longDescription: "Pass a hashtag without the # (e.g. travel or foodie) and the Instagram Hashtag Search API returns the public posts and Reels from that tag's Explore grid as clean JSON — the same grid you'd see on the hashtag's page in the app (not a Google-indexed subset). Each result includes the post URL, media type, caption, author (with followers / postCount when available), like / comment / view counts, paid-partnership / ad / affiliate flags, audio (musicId), location, sample preview comments, a thumbnail, and hashtags / @mentions. Optional mediaType=reels filters to Reels only. Use it to track a campaign or branded hashtag, separate organic from sponsored hits, discover creators by size, or watch a trend grow. No Instagram login, no OAuth, and no infrastructure to maintain. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Native hashtag grid posts and Reels (not Google index)", "Author followers / postCount plus like / comment / view counts", "isPaidPartnership / isAd / isAffiliate flags", "musicId, location, previewComments, mediaType=reels filter"] },
   { slug: "instagram-profile-search", name: "Instagram Profile Search API", shortName: "Profile Search", category: "search", method: "GET", path: "/v1/instagram/profile-search", credits: 1, tagline: "Look up an Instagram account by name or @handle and get its profile back — display name, follower count, verified badge, private flag, and avatar.", delivers: ["The public Instagram profile that matches your query", "Username, display name, and profile URL", "Follower count plus verified and private flags", "Profile picture URL"] , longDescription: "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, or instagram.com/natgeo) and the Instagram Profile Search API resolves it to the matching public profile as clean JSON. It returns the account itself, not its posts: username, display name, profile URL, follower count, whether the account is verified or private, and the profile picture. Use it to turn a brand or creator name into a confirmed @handle, enrich a CRM or lead list, or feed an influencer-discovery tool. Fast and costs just 1 credit — no Instagram login or OAuth. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
@@ -1742,7 +1760,17 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     },
   ],
   "instagram-trending-reels": [{ name: "country", type: "string", required: false, description: "Country for Explore localization — full name or ISO code (e.g. 'United States', 'US', 'Turkey', 'TR'). Default United States. 35 countries supported." }, lp(20, 200)],
-  "instagram-tagged-posts": [up(IG_PROFILE), lp(20, 200)],
+  "instagram-tagged-posts": [
+    up(IG_PROFILE),
+    lpFlat(20, 200, 1),
+    {
+      name: "cursor",
+      type: "string",
+      required: false,
+      description:
+        "Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+    },
+  ],
   "instagram-reels-by-audio-id": [{ name: "audio_id", type: "string", required: true, description: "Instagram audio/music ID or full audio URL." }, lp(20, 200)],
   "instagram-hashtag-search": [
     qp("Hashtag without the # (min 2 characters)."),
@@ -2757,6 +2785,12 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     list.push({
       q: `Why do I need secUid if I already have the @handle?`,
       a: `Handles change; id and secUid do not. TikTok's follower lists, video lists, and many internal calls require secUid. Prefer id/secUid for CRM joins and chaining — use username for display.`,
+    });
+  }
+  if (ep.slug === "instagram-tagged-posts") {
+    list.push({
+      q: `Why do some brands return only old tagged posts?`,
+      a: `Instagram's usertags feed only returns tags the account still exposes. Mega brands that stopped approving tags (e.g. natgeo) can surface a truncated historical window — verified live — while accounts like nasa or cristiano return recent UGC. Captapi does not invent newer tags than Instagram provides.`,
     });
   }
   if (ep.slug === "threads-profile") {

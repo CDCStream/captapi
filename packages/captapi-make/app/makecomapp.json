@@ -922,7 +922,7 @@
       },
       "instagramTaggedPosts": {
         "label": "Instagram Tagged Posts",
-        "description": "Posts an Instagram user is tagged in. Costs ~18 credits (cached results free, failures never charged).",
+        "description": "Tagged posts — author id, views, hashtags/mentions; cursor pagination. Costs ~1 credit on the native path (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

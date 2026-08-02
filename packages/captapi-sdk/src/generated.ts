@@ -687,8 +687,10 @@ export interface InstagramTrendingReelsParams {
 export interface InstagramTaggedPostsParams {
   /** Instagram profile URL, e.g. https://instagram.com/username/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
+  /** Max items to return. Default 20, max 200. Flat 1 credit on the native path. */
   limit?: number;
+  /** Leave empty for the first page; then pass the nextCursor value from the previous response. */
+  cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -772,7 +774,7 @@ export class InstagramApi {
   trendingReels(params: InstagramTrendingReelsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/trending-reels", params);
   }
-  /** Instagram Tagged Posts — Posts an Instagram user is tagged in. (18 credits) */
+  /** Instagram Tagged Posts — Tagged posts — author id, views, hashtags/mentions; cursor pagination. (1 credit) */
   taggedPosts(params: InstagramTaggedPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/tagged-posts", params);
   }

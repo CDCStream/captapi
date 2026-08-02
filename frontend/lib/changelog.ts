@@ -90,6 +90,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "Instagram tagged posts: cursor, author id, views; 1 credit native",
+    description:
+      "GET /v1/instagram/tagged-posts adds nextCursor + hasMore (channel-posts shape), author.id on each tagging creator, engagement.views/plays when Instagram exposes them on video tags, and newest-first sorting within a page. Native usertags path bills a flat 1 credit; Apify fallback stays ~0.9/result. Docs note that Instagram itself truncates the tagged feed for some mega brands (natgeo stuck in 2018) while accounts like nasa/cristiano return recent UGC — verified live.",
+    items: [
+      "nextCursor + hasMore pagination",
+      "author.id + engagement.views when present",
+      "Newest-first sort within each page",
+      "1 credit native (was ~18 at limit=20)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "TikTok search users: id, secUid, following; 1 credit native",
     description:
       "GET /v1/tiktok/search/users lifts uid/sec_uid out of the search payload as id + secUid (stable identity for CRM joins and chaining into follower/video lists), plus following, videos, likes, and slim items[] sample videos when TikTok includes them. Native signer path bills a flat 1 credit (ScrapeCreators parity); Apify fallback stays ~0.4/result.",
