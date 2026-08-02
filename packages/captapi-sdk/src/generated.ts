@@ -732,7 +732,7 @@ export interface InstagramEmbedParams {
 }
 
 export interface InstagramBasicProfileParams {
-  /** Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically. */
+  /** Instagram numeric user ID (e.g. 13460080). A profile URL, @handle, or username is also accepted and resolved automatically. */
   userId: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -796,7 +796,7 @@ export class InstagramApi {
   embed(params: InstagramEmbedParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/embed", params);
   }
-  /** Instagram Basic Profile — Full public Instagram profile by numeric user ID (a URL/@handle is also accepted). (1 credit) */
+  /** Instagram Basic Profile — Instagram profile by user ID/@handle — camelCase (followers, externalUrl, businessAddress). (1 credit) */
   basicProfile(params: InstagramBasicProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/basic-profile", params);
   }

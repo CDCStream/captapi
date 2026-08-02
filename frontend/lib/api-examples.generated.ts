@@ -2747,36 +2747,54 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     ]
   },
   "instagram-basic-profile": {
-    "id": "314216",
-    "pk": "314216",
-    "username": "zuck",
-    "full_name": "Mark Zuckerberg",
-    "biography": "I build stuff",
-    "biography_with_entities": {
-      "raw_text": "I build stuff",
+    "platform": "instagram",
+    "url": "https://instagram.com/nike",
+    "id": "13460080",
+    "pk": "13460080",
+    "username": "nike",
+    "displayName": "Nike",
+    "bio": "Just Do It.",
+    "biographyWithEntities": {
+      "rawText": "Just Do It.",
       "entities": []
     },
-    "follower_count": 16944276,
-    "following_count": 620,
-    "media_count": 436,
-    "highlight_reel_count": 0,
-    "is_private": false,
-    "is_verified": true,
-    "is_business": false,
-    "is_professional_account": true,
-    "should_show_category": false,
-    "profile_pic_url": "https://instagram.fscl1-1.fna.fbcdn.net/v/t51.82787-19/550234512_18532404670058217_8758519395071163708_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=instagram.fscl1-1.fna.fbcdn.net&_nc_cat=1&_nc_oc=Q6cZ2gEGmyGBjnyLEtHbhEtAZrW4crvPeMpPLfp8Yy0Lrfn0_vQhEHyYh23QJ00H6DVK_VM&_nc_ohc=Y_4zRJVeNMAQ7kNvwFRwYxd&_nc_gid=Ge4vi-V9UTLD2FUMCnmsKw&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQD9_gXgZJvog7nIb0Ul7nHSl7_wAAGx9yOrW67giUoqyA&oe=6A61336D&_nc_sid=8b3546",
-    "hd_profile_pic_url_info": {
-      "url": "https://instagram.fscl1-1.fna.fbcdn.net/v/t51.82787-19/550234512_18532404670058217_8758519395071163708_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=instagram.fscl1-1.fna.fbcdn.net&_nc_cat=1&_nc_oc=Q6cZ2gEGmyGBjnyLEtHbhEtAZrW4crvPeMpPLfp8Yy0Lrfn0_vQhEHyYh23QJ00H6DVK_VM&_nc_ohc=Y_4zRJVeNMAQ7kNvwFRwYxd&_nc_gid=Ge4vi-V9UTLD2FUMCnmsKw&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQAXB3DwpL7ZK8fs3tlWiQ-bPK8ZOOXOWiaMKyvsZNzjbw&oe=6A61336D&_nc_sid=8b3546"
-    },
-    "fbid_v2": "17841401746480004",
+    "followers": 291638893,
+    "following": 264,
+    "postCount": 1668,
+    "highlightReelCount": 5,
+    "hasClips": true,
+    "isPrivate": false,
+    "verified": true,
+    "isBusinessAccount": true,
+    "isProfessionalAccount": true,
+    "categoryName": "SPORTSWEAR_STORE",
+    "shouldShowCategory": true,
+    "profileImage": "https://instagram.fadb3-1.fna.fbcdn.net/v/t51.82787-19/551608484_18567162979020081_1135468084872726555_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4zOTkuYzIifQ&_nc_ht=instagram.fadb3-1.fna.fbcdn.net&_nc_cat=1&_nc_oc=Q6cZ2gFbXFmp_TeRpCCj6RR0tM15Q0oZBPR6ROg0ngZ8OMxwGUMoGki14pWoXpBkyDth51bqpCSkJFx6YosO0GZyPqK-&_nc_ohc=jOWQehR8N0kQ7kNvwHCN0UL&_nc_gid=k79WPpLD7fgQ0KoqHooi9A&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQGLKYnAo8kqPvpjPiPXB6947FKZdPXkp90fLn4BX7sh5w&oe=6A756ABA&_nc_sid=8b3546",
+    "profileImageHd": "https://instagram.fadb3-1.fna.fbcdn.net/v/t51.82787-19/551608484_18567162979020081_1135468084872726555_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4zOTkuYzIifQ&_nc_ht=instagram.fadb3-1.fna.fbcdn.net&_nc_cat=1&_nc_oc=Q6cZ2gFbXFmp_TeRpCCj6RR0tM15Q0oZBPR6ROg0ngZ8OMxwGUMoGki14pWoXpBkyDth51bqpCSkJFx6YosO0GZyPqK-&_nc_ohc=jOWQehR8N0kQ7kNvwHCN0UL&_nc_gid=k79WPpLD7fgQ0KoqHooi9A&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQGLKYnAo8kqPvpjPiPXB6947FKZdPXkp90fLn4BX7sh5w&oe=6A756ABA&_nc_sid=8b3546",
+    "profileImageUrl": "https://instagram.fadb3-1.fna.fbcdn.net/v/t51.82787-19/551608484_18567162979020081_1135468084872726555_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4zOTkuYzIifQ&_nc_ht=instagram.fadb3-1.fna.fbcdn.net&_nc_cat=1&_nc_oc=Q6cZ2gFbXFmp_TeRpCCj6RR0tM15Q0oZBPR6ROg0ngZ8OMxwGUMoGki14pWoXpBkyDth51bqpCSkJFx6YosO0GZyPqK-&_nc_ohc=jOWQehR8N0kQ7kNvwHCN0UL&_nc_gid=k79WPpLD7fgQ0KoqHooi9A&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQFUavH_AkjH7xOjK_XCMgEdFI82tO3J-qTmLtfVLMz1GA&oe=6A756ABA&_nc_sid=8b3546",
+    "externalUrl": "http://empli.fi/nike",
+    "fbid": "17841400602400210",
     "pronouns": [],
-    "bio_links": [],
-    "is_embeds_disabled": false,
-    "is_regulated_c18": false,
-    "show_account_transparency_details": true,
-    "show_text_post_app_badge": true,
-    "remove_message_entrypoint": false
+    "bioLinks": [
+      {
+        "title": null,
+        "url": "http://empli.fi/nike",
+        "linkType": "external"
+      }
+    ],
+    "showAccountTransparencyDetails": true,
+    "isEmbedsDisabled": false,
+    "isRegulatedC18": false,
+    "businessAddress": {
+      "cityName": "Beaverton, Oregon",
+      "cityId": "108410602520455",
+      "streetAddress": "One Bowerman Dr",
+      "latitude": 45.5076448,
+      "longitude": -122.8269159,
+      "zipCode": "97005"
+    },
+    "businessContactMethod": "CALL",
+    "fetchedAt": "2026-08-02T20:06:56.628Z"
   },
   "instagram-channel-details": {
     "platform": "instagram",

@@ -1597,42 +1597,166 @@ def _edge_count(value: Any) -> int | None:
     return safe_int(value)
 
 
+def _biography_with_entities(user: dict[str, Any]) -> dict[str, Any] | None:
+    raw = user.get("biography_with_entities")
+    if not isinstance(raw, dict):
+        return None
+    entities = raw.get("entities") if isinstance(raw.get("entities"), list) else []
+    return {
+        "rawText": safe_str(raw.get("raw_text") or raw.get("rawText") or user.get("biography")),
+        "entities": entities,
+    }
+
+
+def _account_badges(user: dict[str, Any]) -> list[Any] | None:
+    raw = user.get("account_badges") or user.get("accountBadges")
+    if isinstance(raw, list):
+        return raw
+    return None
+
+
+def _linked_fb_info(user: dict[str, Any]) -> dict[str, Any] | None:
+    raw = user.get("linked_fb_info") or user.get("linkedFbInfo") or user.get("fb_profile_biolink")
+    if isinstance(raw, dict) and raw:
+        return {
+            "url": safe_str(raw.get("url") or raw.get("link")),
+            "id": safe_str(raw.get("id") or raw.get("fb_id") or raw.get("fbid")),
+            "name": safe_str(raw.get("name") or raw.get("title")),
+        }
+    if isinstance(raw, str) and raw.strip():
+        return {"url": raw.strip(), "id": None, "name": None}
+    return None
+
+
 def map_basic_profile(user: dict[str, Any]) -> dict[str, Any]:
-    """Map a web_profile_info user node to a clean, competitor-compatible
-    profile shape. Null/absent fields are dropped so the JSON stays tidy."""
-    hd = safe_str(user.get("profile_pic_url_hd"))
-    bio_entities = user.get("biography_with_entities")
+    """Map a web_profile_info user node to Captapi camelCase profile shape.
+
+    Same naming as ``/channel-details`` (displayName, followers, verified,
+    externalUrl, …) plus richer basic-profile fields. Null/absent values are
+    dropped so the JSON stays tidy.
+    """
+    from app.utils.media_urls import utc_now_iso
+
+    username = safe_str(user.get("username"))
+    pic = safe_str(user.get("profile_pic_url"))
+    pic_hd = safe_str(user.get("profile_pic_url_hd"))
+    # Some payloads nest HD as hd_profile_pic_url_info.url
+    hd_info = user.get("hd_profile_pic_url_info")
+    if not pic_hd and isinstance(hd_info, dict):
+        pic_hd = safe_str(hd_info.get("url"))
+    verified = user.get("is_verified")
+    private = user.get("is_private")
+    uid = safe_str(user.get("id") or user.get("pk"))
+    followers = _edge_count(user.get("edge_followed_by") or user.get("follower_count"))
+    following = _edge_count(user.get("edge_follow") or user.get("following_count"))
+    post_count = _edge_count(
+        user.get("edge_owner_to_timeline_media")
+        or user.get("media_count")
+        or user.get("all_media_count")
+    )
+    total_clips = safe_int(user.get("total_clips_count") or user.get("totalClipsCount"))
+    category = safe_str(
+        user.get("category_name")
+        or user.get("categoryName")
+        or user.get("business_category_name")
+        or user.get("overall_category_name")
+        or user.get("category")
+        or user.get("category_enum")
+    )
+    bio_links = _bio_links(user)
+    external = _external_url_from_user(user)
+    pronouns = user.get("pronouns") if isinstance(user.get("pronouns"), list) else None
+    badges = _account_badges(user)
+    latest_reel = user.get("latest_reel_media")
+    if latest_reel is not None and not isinstance(latest_reel, (int, float, str)):
+        latest_reel = safe_str(latest_reel) or None
+
     out: dict[str, Any] = {
-        "id": safe_str(user.get("id") or user.get("pk")),
-        "pk": safe_str(user.get("pk") or user.get("id")),
-        "username": safe_str(user.get("username")),
-        "full_name": safe_str(user.get("full_name")),
-        "biography": safe_str(user.get("biography")),
-        "biography_with_entities": bio_entities if isinstance(bio_entities, dict) else None,
-        "external_url": safe_str(user.get("external_url")),
-        "follower_count": _edge_count(user.get("edge_followed_by") or user.get("follower_count")),
-        "following_count": _edge_count(user.get("edge_follow") or user.get("following_count")),
-        "media_count": _edge_count(user.get("edge_owner_to_timeline_media") or user.get("media_count")),
-        "highlight_reel_count": safe_int(user.get("highlight_reel_count")),
-        "is_private": user.get("is_private"),
-        "is_verified": user.get("is_verified"),
-        "is_business": user.get("is_business_account"),
-        "is_professional_account": user.get("is_professional_account"),
-        "category": safe_str(user.get("category_name") or user.get("category")),
-        "should_show_category": user.get("should_show_category"),
-        "profile_pic_url": safe_str(user.get("profile_pic_url")),
-        "hd_profile_pic_url_info": {"url": hd} if hd else None,
-        "fbid_v2": safe_str(user.get("fbid") or user.get("fbid_v2")),
-        "pronouns": user.get("pronouns"),
-        "bio_links": user.get("bio_links"),
-        "is_embeds_disabled": user.get("is_embeds_disabled"),
-        "is_regulated_c18": user.get("is_regulated_c18"),
-        "show_account_transparency_details": user.get("show_account_transparency_details"),
-        "transparency_label": user.get("transparency_label"),
-        "transparency_product": user.get("transparency_product"),
-        "show_text_post_app_badge": user.get("show_text_post_app_badge"),
-        "remove_message_entrypoint": user.get("remove_message_entrypoint"),
-        "ai_agent_type": user.get("ai_agent_type"),
+        "platform": "instagram",
+        "url": f"https://instagram.com/{username}" if username else None,
+        "id": uid,
+        "pk": safe_str(user.get("pk") or uid),
+        "username": username,
+        "displayName": safe_str(user.get("full_name")),
+        "bio": safe_str(user.get("biography")),
+        "biographyWithEntities": _biography_with_entities(user),
+        "followers": followers,
+        "following": following,
+        "postCount": post_count,
+        "highlightReelCount": safe_int(user.get("highlight_reel_count")),
+        "totalClipsCount": total_clips,
+        "hasClips": bool(user.get("has_clips")) if user.get("has_clips") is not None else None,
+        "isPrivate": False if private is None else bool(private),
+        "verified": False if verified is None else bool(verified),
+        "isBusinessAccount": (
+            None
+            if user.get("is_business_account") is None and user.get("is_business") is None
+            else bool(
+                user.get("is_business_account")
+                if user.get("is_business_account") is not None
+                else user.get("is_business")
+            )
+        ),
+        "isProfessionalAccount": (
+            None
+            if user.get("is_professional_account") is None
+            else bool(user.get("is_professional_account"))
+        ),
+        "isMemorialized": (
+            None
+            if user.get("is_memorialized") is None
+            else bool(user.get("is_memorialized"))
+        ),
+        "accountType": safe_int(user.get("account_type") or user.get("accountType")),
+        "categoryName": category,
+        "shouldShowCategory": (
+            None
+            if user.get("should_show_category") is None
+            else bool(user.get("should_show_category"))
+        ),
+        "profileImage": pic_hd or pic,
+        "profileImageHd": pic_hd,
+        "profileImageUrl": pic,
+        "externalUrl": external,
+        "fbid": safe_str(user.get("fbid") or user.get("fbid_v2")),
+        "pronouns": pronouns,
+        "bioLinks": bio_links,
+        "accountBadges": badges,
+        "transparencyLabel": user.get("transparency_label"),
+        "transparencyProduct": user.get("transparency_product"),
+        "showAccountTransparencyDetails": (
+            None
+            if user.get("show_account_transparency_details") is None
+            else bool(user.get("show_account_transparency_details"))
+        ),
+        "isEmbedsDisabled": (
+            None
+            if user.get("is_embeds_disabled") is None
+            else bool(user.get("is_embeds_disabled"))
+        ),
+        "isRegulatedC18": (
+            None
+            if user.get("is_regulated_c18") is None
+            else bool(user.get("is_regulated_c18"))
+        ),
+        "showTextPostAppBadge": (
+            None
+            if user.get("show_text_post_app_badge") is None
+            else bool(user.get("show_text_post_app_badge"))
+        ),
+        "removeMessageEntrypoint": (
+            None
+            if user.get("remove_message_entrypoint") is None
+            else bool(user.get("remove_message_entrypoint"))
+        ),
+        "businessAddress": _business_address(user),
+        "businessEmail": safe_str(user.get("business_email")),
+        "businessPhoneNumber": safe_str(user.get("business_phone_number")),
+        "businessContactMethod": safe_str(user.get("business_contact_method")),
+        "linkedFbInfo": _linked_fb_info(user),
+        "latestReelMedia": safe_int(latest_reel) if latest_reel is not None else None,
+        "aiAgentType": user.get("ai_agent_type"),
+        "fetchedAt": utc_now_iso(),
     }
     return {k: v for k, v in out.items() if v is not None}
 
@@ -1695,14 +1819,21 @@ def _business_address(user: dict[str, Any]) -> dict[str, Any] | None:
     if not isinstance(raw, dict):
         return None
     city = safe_str(raw.get("city_name") or raw.get("cityName"))
+    street = safe_str(
+        raw.get("street_address")
+        or raw.get("address_street")
+        or raw.get("streetAddress")
+        or raw.get("addressStreet")
+    )
     zip_code = safe_str(raw.get("zip_code") or raw.get("zipCode"))
     lat = raw.get("latitude")
     lng = raw.get("longitude")
-    if not any([city, zip_code, lat is not None, lng is not None]):
+    if not any([city, street, zip_code, lat is not None, lng is not None]):
         return None
     return {
         "cityName": city,
         "cityId": safe_str(raw.get("city_id") or raw.get("cityId")),
+        "streetAddress": street,
         "latitude": lat if isinstance(lat, (int, float)) else safe_float(lat),
         "longitude": lng if isinstance(lng, (int, float)) else safe_float(lng),
         "zipCode": zip_code,

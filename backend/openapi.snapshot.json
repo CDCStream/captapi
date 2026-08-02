@@ -4367,10 +4367,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "description": "Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically.",
+              "description": "Instagram numeric user ID (e.g. 13460080). A profile URL, @handle, or username is also accepted and resolved automatically.",
               "title": "Userid"
             },
-            "description": "Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically."
+            "description": "Instagram numeric user ID (e.g. 13460080). A profile URL, @handle, or username is also accepted and resolved automatically."
           },
           {
             "name": "cache",

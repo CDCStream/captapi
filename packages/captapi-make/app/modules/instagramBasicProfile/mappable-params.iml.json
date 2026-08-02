@@ -4,7 +4,7 @@
     "type": "text",
     "label": "UserId",
     "required": true,
-    "help": "Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically."
+    "help": "Instagram numeric user ID (e.g. 13460080). A profile URL, @handle, or username is also accepted and resolved automatically."
   },
   {
     "name": "cache",

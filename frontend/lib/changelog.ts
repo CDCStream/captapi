@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "fix",
+    title: "Instagram basic profile: camelCase schema aligned with Channel Details",
+    description:
+      "GET /v1/instagram/basic-profile no longer returns raw Instagram snake_case (full_name, follower_count, is_private, hd_profile_pic_url_info). Response is Captapi camelCase matching Channel Details: displayName, bio, followers / following / postCount, verified, isPrivate, profileImage / profileImageHd, externalUrl, bioLinks[], categoryName, isBusinessAccount / isProfessionalAccount, businessAddress{cityName,streetAddress,zipCode,…}, fbid, highlightReelCount, hasClips, and transparency flags when present. Still 1 credit.",
+    items: [
+      "camelCase fields (displayName, followers, verified, …)",
+      "externalUrl + bioLinks[] parity with Channel Details",
+      "businessAddress includes streetAddress",
+      "categoryName from category_name / category_enum",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "fix",
     title: "TikTok song details: usageCount, artists, commerce, chorus; 1 credit",
     description:
       "GET /v1/tiktok/song-details now returns the fields the docs already promised: usageCount (videos using the sound; null when TikTok omits a real total on music/aweme), artists[{id,uid,secUid,handle,displayName,verified,avatarUrl}] (owner lifted for original sounds), commerce rights (isCommerceMusic / hasCommerceRight / commercialRightType), createdAt, matchedSong.chorusInfo{startMs,durationMs}, musicReleaseInfo, and extra{loudnessLufs,amplitudePeak,beats,bpm} when present. Flat 1 credit on the native path (was 2); Apify fallback stays 2.",

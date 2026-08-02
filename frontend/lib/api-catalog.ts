@@ -370,7 +370,25 @@ const INSTAGRAM: Spec[] = [
   { slug: "instagram-hashtag-search", name: "Instagram Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/instagram/hashtag-search", credits: 2, tagline: "Native Instagram hashtag grid — posts with media, caption, author followers, views, paid-partnership flags, audio, and location. Flat 2 credits per call.", longDescription: "Pass a hashtag without the # (e.g. travel or foodie) and the Instagram Hashtag Search API returns the public posts and Reels from that tag's Explore grid as clean JSON — the same grid you'd see on the hashtag's page in the app (not a Google-indexed subset). Each result includes the post URL, media type, caption, author (with followers / postCount when available), like / comment / view counts, paid-partnership / ad / affiliate flags, audio (musicId), location, sample preview comments, a thumbnail, and hashtags / @mentions. Optional mediaType=reels filters to Reels only. Use it to track a campaign or branded hashtag, separate organic from sponsored hits, discover creators by size, or watch a trend grow. No Instagram login, no OAuth, and no infrastructure to maintain. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Native hashtag grid posts and Reels (not Google index)", "Author followers / postCount plus like / comment / view counts", "isPaidPartnership / isAd / isAffiliate flags", "musicId, location, previewComments, mediaType=reels filter"] },
   { slug: "instagram-profile-search", name: "Instagram Profile Search API", shortName: "Profile Search", category: "search", method: "GET", path: "/v1/instagram/profile-search", credits: 1, tagline: "Look up an Instagram account by name or @handle and get its profile back — display name, follower count, verified badge, private flag, and avatar.", delivers: ["The public Instagram profile that matches your query", "Username, display name, and profile URL", "Follower count plus verified and private flags", "Profile picture URL"] , longDescription: "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, or instagram.com/natgeo) and the Instagram Profile Search API resolves it to the matching public profile as clean JSON. It returns the account itself, not its posts: username, display name, profile URL, follower count, whether the account is verified or private, and the profile picture. Use it to turn a brand or creator name into a confirmed @handle, enrich a CRM or lead list, or feed an influencer-discovery tool. Fast and costs just 1 credit — no Instagram login or OAuth. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
   { slug: "instagram-embed", name: "Instagram Embed HTML API", shortName: "Embed HTML", category: "details", method: "GET", path: "/v1/instagram/embed", credits: 1, tagline: "Get Instagram's own self-contained embed HTML for any post, reel, or profile — ready to drop into an iframe on your site.", longDescription: "Pass an Instagram post, reel, or profile URL (or an @handle) and get back Instagram's own self-contained embed page as ready-to-use HTML — the full <html> document Instagram serves at /embed/, which you can drop straight into an <iframe srcdoc> or render server-side. The response also returns embedUrl, so you can point an <iframe src> at it directly instead. Posts and reels come back as a rich media card (with caption); profiles come back as a profile card that links to the account. No login or OAuth needed — it's fast, costs just 1 credit. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh. If Instagram's embed page is ever unavailable, the response falls back to the classic blockquote + embed.js snippet.", delivers: ["Instagram's full self-contained embed HTML document", "embedUrl you can load directly in an <iframe src>", "Canonical Instagram permalink for the post/reel/profile", "Type flag (post/reel/profile) plus shortcode or username"] },
-  { slug: "instagram-basic-profile", name: "Instagram Basic Profile API", shortName: "Basic Profile", category: "channel", method: "GET", path: "/v1/instagram/basic-profile", credits: 1 , tagline: "Look up a full public Instagram profile by user ID (or @handle) — bio, follower counts, verification, and profile pictures.", longDescription: "Pass an Instagram numeric user ID (e.g. 314216) and get that account's public profile as clean JSON: username, full name, biography, follower / following / media counts, verification and privacy flags, business status, and profile pictures. A profile URL, @handle, or username is also accepted and resolved automatically. Fast, costs just 1 credit, and needs no Instagram login or OAuth. Empty fields are omitted. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Username, full name, and biography", "Follower, following, and media counts", "Verification, privacy, and business flags", "Standard and HD profile picture URLs, plus stable user IDs"] },
+  {
+    slug: "instagram-basic-profile",
+    name: "Instagram Basic Profile API",
+    shortName: "Basic Profile",
+    category: "channel",
+    method: "GET",
+    path: "/v1/instagram/basic-profile",
+    credits: 1,
+    tagline:
+      "Instagram profile by user ID or @handle — camelCase schema aligned with Channel Details (followers, externalUrl, businessAddress).",
+    longDescription:
+      "Pass an Instagram numeric user ID (e.g. 13460080) or a profile URL / @handle and get that account's public profile as clean Captapi JSON — same naming as Channel Details: displayName, bio, followers / following / postCount, verified, isPrivate, profileImage / profileImageHd, externalUrl, bioLinks[], categoryName, isBusinessAccount / isProfessionalAccount, businessAddress{cityName,streetAddress,zipCode,…}, fbid, highlightReelCount, hasClips, and transparency flags when Instagram exposes them. Empty/null fields are omitted. Flat 1 credit. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.",
+    delivers: [
+      "camelCase profile fields (displayName, followers, verified, …)",
+      "externalUrl + bioLinks[] when present",
+      "Business address / category for business accounts",
+      "Lookup by numeric user ID or @handle (1 credit)",
+    ],
+  },
 ];
 
 const FACEBOOK: Spec[] = [
@@ -1825,7 +1843,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   ],
   "instagram-profile-search": [qp("Account name, @handle, or profile URL to look up (min 2 characters).")],
   "instagram-embed": [up("Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/.")],
-  "instagram-basic-profile": [{ name: "userId", type: "string", required: true, description: "Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically." }],
+  "instagram-basic-profile": [{ name: "userId", type: "string", required: true, description: "Instagram numeric user ID (e.g. 13460080). A profile URL, @handle, or username is also accepted and resolved automatically." }],
   // Facebook
   "facebook-details": [up(FB_VIDEO)],
   "facebook-summarizer": [up(FB_VIDEO), cacheP()],
@@ -2516,7 +2534,7 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       const ex = API_EXAMPLES[ep.slug];
       const captured = (ex?.id ?? ex?.pk) as unknown;
       if (typeof captured === "string" && captured.trim()) return captured;
-      return "314216";
+      return "13460080";
     }
     case "urls": {
       const ex = API_EXAMPLES[ep.slug] as { results?: Array<{ url?: string }> } | undefined;
@@ -2943,30 +2961,35 @@ const FIELD_DESCS: Record<string, string> = {
   username: "Account username / handle.",
   handle: "Account handle.",
   login: "Account login name.",
-  // Instagram basic profile (snake_case, competitor-compatible shape)
+  // Instagram basic profile (camelCase, aligned with Channel Details)
   pk: "Instagram user primary key (same as id).",
-  full_name: "Account display (full) name.",
-  biography: "Profile bio text.",
-  biography_with_entities: "Bio text plus parsed @mentions / #hashtags.",
-  follower_count: "Follower count.",
-  following_count: "Number of accounts this profile follows.",
-  media_count: "Total number of posts on the profile.",
-  highlight_reel_count: "Number of Story Highlight albums on the profile.",
-  is_private: "Whether the account is private.",
-  is_verified: "Whether the account is verified.",
-  is_business: "Whether the account is a business account.",
-  is_professional_account: "Whether the account is a professional (creator/business) account.",
-  should_show_category: "Whether Instagram shows the account's category publicly.",
-  profile_pic_url: "Standard-resolution profile picture URL.",
-  hd_profile_pic_url_info: "Object with the HD profile picture URL.",
-  fbid_v2: "Linked Facebook/Meta ID for the account.",
+  biographyWithEntities: "Bio text plus parsed @mentions / #hashtags ({rawText, entities}).",
+  highlightReelCount: "Number of Story Highlight albums on the profile.",
+  totalClipsCount: "Total Reels/clips count when Instagram exposes it.",
+  hasClips: "Whether the account has Reels/clips.",
+  isPrivate: "Whether the account is private.",
+  isBusinessAccount: "Whether the account is a business account.",
+  isProfessionalAccount: "Whether the account is a professional (creator/business) account.",
+  isMemorialized: "Whether the account is memorialized.",
+  accountType: "Instagram account type code when present.",
+  categoryName: "Public category label (e.g. SPORTSWEAR_STORE).",
+  shouldShowCategory: "Whether Instagram shows the account's category publicly.",
+  profileImageHd: "HD profile picture URL.",
+  profileImageUrl: "Standard-resolution profile picture URL.",
+  externalUrl: "Website / link-in-bio URL when present.",
+  fbid: "Linked Facebook/Meta ID for the account.",
   pronouns: "Pronouns listed on the profile.",
-  bio_links: "External links shown on the profile.",
-  is_embeds_disabled: "Whether embedding this account's content is disabled.",
-  is_regulated_c18: "Whether the account is age-restricted (18+).",
-  show_account_transparency_details: "Whether Instagram shows account transparency details.",
-  show_text_post_app_badge: "Whether the Threads badge is shown on the profile.",
-  remove_message_entrypoint: "Whether the message button is hidden on the profile.",
+  bioLinks: "External links shown on the profile ({title, url, linkType}).",
+  accountBadges: "Instagram account badges when present.",
+  transparencyLabel: "Account transparency label when Instagram exposes it.",
+  showAccountTransparencyDetails: "Whether Instagram shows account transparency details.",
+  isEmbedsDisabled: "Whether embedding this account's content is disabled.",
+  isRegulatedC18: "Whether the account is age-restricted (18+).",
+  showTextPostAppBadge: "Whether the Threads badge is shown on the profile.",
+  removeMessageEntrypoint: "Whether the message button is hidden on the profile.",
+  businessAddress: "Business address ({cityName, streetAddress, zipCode, latitude, longitude}).",
+  linkedFbInfo: "Linked Facebook page info when present.",
+  latestReelMedia: "Latest reel media timestamp/id when Instagram exposes it.",
   displayName: "Display name of the account.",
   name: "Name of the item or account.",
   fullName: "Full display name.",

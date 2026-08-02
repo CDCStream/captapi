@@ -326,7 +326,7 @@ def batch4_phase1() -> list[tuple[str, str, dict]]:
         ("account-request-history", "/v1/account/request-history", {"limit": 5}),
         ("account-daily-usage", "/v1/account/daily-usage", {"days": 7}),
         ("account-most-used-routes", "/v1/account/most-used-routes", {"days": 30, "limit": 5}),
-        ("instagram-basic-profile", "/v1/instagram/basic-profile", {"userId": "314216"}),
+        ("instagram-basic-profile", "/v1/instagram/basic-profile", {"userId": "13460080"}),
         ("instagram-trending-reels", "/v1/instagram/trending-reels", {"country": "United States", "limit": 10}),
         ("instagram-reels-by-audio-id", "/v1/instagram/reels-by-audio-id", {"audio_id": "27919946310946207", "limit": 5}),
         ("bluesky-profile", "/v1/bluesky/profile", {"url": "https://bsky.app/profile/jay.bsky.team"}),
@@ -428,7 +428,7 @@ def batch_fix_phase1() -> list[tuple[str, str, dict]]:
     """Recapture endpoints that failed due to bad params / flaky upstream."""
     return [
         ("tiktok-search-suggestions", "/v1/tiktok/search-suggestions", {"q": "makeup", "country": "US", "language": "en-US", "limit": 5}),
-        ("instagram-basic-profile", "/v1/instagram/basic-profile", {"userId": "314216"}),
+        ("instagram-basic-profile", "/v1/instagram/basic-profile", {"userId": "13460080"}),
         ("kwai-profile", "/v1/kwai/profile", {"url": "https://www.kwai.com/@KwaiBrasilOficial"}),
         ("kwai-user-posts", "/v1/kwai/user-posts", {"url": "https://www.kwai.com/@topfilmeseseriesnatv", "limit": 5}),
     ]

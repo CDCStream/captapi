@@ -971,9 +971,9 @@ class InstagramApi:
         return self._t.get("/v1/instagram/embed", {"url": url, "cache": cache})
 
     def basic_profile(self, *, userId: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Basic Profile — Full public Instagram profile by numeric user ID (a URL/@handle is also accepted). (1 credit)
+        """Instagram Basic Profile — Instagram profile by user ID/@handle — camelCase (followers, externalUrl, businessAddress). (1 credit)
 
-        :param userId: Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically.
+        :param userId: Instagram numeric user ID (e.g. 13460080). A profile URL, @handle, or username is also accepted and resolved automatically.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/instagram/basic-profile", {"userId": userId, "cache": cache})
@@ -1111,9 +1111,9 @@ class AsyncInstagramApi:
         return await self._t.get("/v1/instagram/embed", {"url": url, "cache": cache})
 
     async def basic_profile(self, *, userId: str, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Basic Profile — Full public Instagram profile by numeric user ID (a URL/@handle is also accepted). (1 credit)
+        """Instagram Basic Profile — Instagram profile by user ID/@handle — camelCase (followers, externalUrl, businessAddress). (1 credit)
 
-        :param userId: Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically.
+        :param userId: Instagram numeric user ID (e.g. 13460080). A profile URL, @handle, or username is also accepted and resolved automatically.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/instagram/basic-profile", {"userId": userId, "cache": cache})

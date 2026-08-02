@@ -111,7 +111,7 @@ def _require_ig_profile_target(value: str) -> tuple[str, str]:
         raise HTTPException(
             status_code=400,
             detail=(
-                "Invalid Instagram user. Pass a numeric user ID (e.g. 314216) or "
+                "Invalid Instagram user. Pass a numeric user ID (e.g. 13460080) or "
                 "a profile URL / @handle."
             ),
         )
@@ -863,7 +863,7 @@ async def instagram_basic_profile(
     userId: str = Query(
         ...,
         description=(
-            "Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or "
+            "Instagram numeric user ID (e.g. 13460080). A profile URL, @handle, or "
             "username is also accepted and resolved automatically."
         ),
     ),
@@ -905,7 +905,7 @@ async def instagram_basic_profile(
 
         data = await cached_or_run(
             endpoint="instagram.basic-profile",
-            params={"target": f"{mode}:{ident}", "v": 5},
+            params={"target": f"{mode}:{ident}", "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

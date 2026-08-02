@@ -1701,13 +1701,13 @@
     "name": "Instagram Basic Profile",
     "path": "/v1/instagram/basic-profile",
     "credits": 1,
-    "summary": "Full public Instagram profile by numeric user ID (a URL/@handle is also accepted).",
+    "summary": "Instagram profile by user ID/@handle — camelCase (followers, externalUrl, businessAddress).",
     "params": [
       {
         "name": "userId",
         "type": "string",
         "required": true,
-        "description": "Instagram numeric user ID (e.g. 314216). A profile URL, @handle, or username is also accepted and resolved automatically."
+        "description": "Instagram numeric user ID (e.g. 13460080). A profile URL, @handle, or username is also accepted and resolved automatically."
       },
       {
         "name": "cache",
