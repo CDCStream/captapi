@@ -1574,7 +1574,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "linkbio-page": [up(LINKBIO_PAGE)],
   "linkme-profile": [up(LINKME_PROFILE)],
   // GitHub
-  "github-user": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL, e.g. vercel or https://github.com/vercel." }],
+  "github-user": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL, e.g. getify or https://github.com/getify." }],
   "github-repositories": [{ name: "username", type: "string", required: true, description: "GitHub username or profile URL." }, lp(30, 100), CURSOR],
   "github-repository": [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name, e.g. vercel/next.js." }],
   "github-pull-requests": [{ name: "repo", type: "string", required: true, description: "Repository URL or owner/name, e.g. vercel/next.js." }, { name: "state", type: "string", required: false, description: "open, closed, or all. Default open." }, lp(30, 100), CURSOR],
@@ -1971,8 +1971,14 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       return "US";
     case "region":
       return "US";
-    case "username":
-      return ep.platform === "github" ? "vercel" : "hydrojug";
+    case "username": {
+      if (ep.platform === "github") {
+        const captured = API_EXAMPLES[ep.slug]?.login;
+        if (typeof captured === "string" && captured.trim()) return captured;
+        return "getify";
+      }
+      return "hydrojug";
+    }
     case "repo":
       return "vercel/next.js";
     case "state":

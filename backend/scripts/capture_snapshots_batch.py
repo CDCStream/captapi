@@ -235,7 +235,7 @@ def batch2_phase2(p1: dict[str, dict]) -> list[tuple[str, str, dict]]:
 
 def batch3_phase1() -> list[tuple[str, str, dict]]:
     return [
-        ("github-user", "/v1/github/user", {"username": "sindresorhus"}),
+        ("github-user", "/v1/github/user", {"username": "getify"}),
         ("github-repositories", "/v1/github/repositories", {"username": "torvalds", "limit": 5}),
         ("github-repository", "/v1/github/repository", {"repo": "torvalds/linux"}),
         ("github-pull-requests", "/v1/github/pull-requests", {"repo": "vercel/next.js", "state": "closed", "limit": 5}),
@@ -462,7 +462,7 @@ def batch5_phase1() -> list[tuple[str, str, dict]]:
         ("bluesky-user-posts", "/v1/bluesky/user-posts", {"url": "https://bsky.app/profile/jay.bsky.team", "limit": 5}),
         ("truth-social-profile", "/v1/truth-social/profile", {"url": "@realDonaldTrump"}),
         ("truth-social-user-posts", "/v1/truth-social/user-posts", {"url": "@realDonaldTrump", "limit": 5}),
-        ("github-user", "/v1/github/user", {"username": "sindresorhus"}),
+        ("github-user", "/v1/github/user", {"username": "getify"}),
         ("github-repositories", "/v1/github/repositories", {"username": "torvalds", "limit": 5}),
         ("github-repository", "/v1/github/repository", {"repo": "torvalds/linux"}),
         ("github-trending-repositories", "/v1/github/trending-repositories", {"limit": 5}),
