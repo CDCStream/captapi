@@ -17,7 +17,7 @@ import httpx
 import structlog
 
 from app.core.config import get_settings
-from app.utils.formatters import safe_float, safe_int, safe_str
+from app.utils.formatters import first_present, safe_float, safe_int, safe_str
 
 log = structlog.get_logger(__name__)
 
@@ -222,7 +222,16 @@ def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
     author = post.get("author")
     if isinstance(author, dict):
         post["author"] = {k: v for k, v in author.items() if v is not None}
-    for key in ("location", "music", "accessibilityCaption", "musicId", "previewComments"):
+    for key in (
+        "location",
+        "music",
+        "accessibilityCaption",
+        "musicId",
+        "previewComments",
+        "shortcode",
+        "mediaId",
+        "hasAudio",
+    ):
         val = post.get(key)
         if val in (None, [], {}):
             post.pop(key, None)
@@ -245,15 +254,21 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         author = owner
     username = safe_str(author.get("username") or node.get("user_posted"))
     shortcode = safe_str(node.get("shortcode") or node.get("code"))
+    media_id = safe_str(node.get("id") or node.get("pk"))
     typename = safe_str(node.get("__typename"))
     is_video = bool(node.get("is_video")) or typename == "GraphVideo"
     is_sidecar = typename == "GraphSidecar"
     caption = _caption(node) or ""
+    view_count = safe_int(node.get("video_view_count") or node.get("views"))
+    play_count = safe_int(node.get("video_play_count"))
+    # Prefer shortcode as id (matches Polaris hydrate + enrich_posts_from_author_feeds).
     result = {
         "platform": "instagram",
         "url": safe_str(node.get("url"))
         or (f"https://www.instagram.com/{'reel' if is_video else 'p'}/{shortcode}/" if shortcode else None),
-        "id": safe_str(node.get("id")),
+        "id": shortcode or media_id,
+        "shortcode": shortcode,
+        "mediaId": media_id if media_id and media_id != shortcode else None,
         "postType": "Sidecar" if is_sidecar else ("Video" if is_video else "Image"),
         "productType": safe_str(node.get("product_type")) or ("clips" if is_video else ""),
         "caption": caption,
@@ -262,6 +277,7 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         "durationSeconds": safe_float(node.get("video_duration") or node.get("length")),
         "thumbnailUrl": _image_url(node),
         "videoUrl": safe_str(node.get("video_url")) or None,
+        "hasAudio": node.get("has_audio") if node.get("has_audio") is not None else None,
         "author": {
             "username": username,
             "displayName": safe_str(author.get("full_name")),
@@ -271,13 +287,26 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
             "profileImage": _image_url(author),
         },
         "engagement": {
-            "views": safe_int(node.get("video_view_count") or node.get("video_play_count") or node.get("views")),
-            "plays": safe_int(node.get("video_play_count"))
-            if node.get("video_view_count") is not None and node.get("video_play_count") is not None
-            and safe_int(node.get("video_view_count")) != safe_int(node.get("video_play_count"))
+            # Instagram distinguishes view_count (IG-only) vs play_count (incl. cross-post).
+            "views": view_count or play_count,
+            "plays": play_count
+            if view_count is not None and play_count is not None and view_count != play_count
             else None,
-            "likes": hidden_count(_count(node.get("edge_media_preview_like")) or node.get("likes")),
-            "comments": hidden_count(_count(node.get("edge_media_to_comment")) or node.get("num_comments")),
+            "likes": hidden_count(
+                first_present(
+                    _count(node.get("edge_media_preview_like")),
+                    _count(node.get("edge_liked_by")),
+                    node.get("like_count"),
+                    node.get("likes"),
+                )
+            ),
+            "comments": hidden_count(
+                first_present(
+                    _count(node.get("edge_media_to_comment")),
+                    node.get("comment_count"),
+                    node.get("num_comments"),
+                )
+            ),
         },
         "hashtags": _HASHTAG_RE.findall(caption),
         "mentions": _MENTION_RE.findall(caption),

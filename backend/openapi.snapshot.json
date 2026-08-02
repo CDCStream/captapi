@@ -4591,6 +4591,7 @@
           "Instagram"
         ],
         "summary": "Search Instagram Reels by hashtag",
+        "description": "Same native hashtag grid as ``/hashtag-search?mediaType=reels`` — flat 2 credits.\n\nReturns the enriched post shape (author.verified/profileImage/followers,\nengagement.views + plays when distinct, music, location, paid flags).",
         "operationId": "instagram_reels_search_v1_instagram_reels_search_get",
         "security": [
           {
@@ -4621,6 +4622,24 @@
               "default": 20,
               "title": "Limit"
             }
+          },
+          {
+            "name": "datePosted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional recency filter: last_24_hours | last_week | last_month | last_year (aliases: today, this_week, this_month, this_year).",
+              "title": "Dateposted"
+            },
+            "description": "Optional recency filter: last_24_hours | last_week | last_month | last_year (aliases: today, this_week, this_month, this_year)."
           },
           {
             "name": "cache",

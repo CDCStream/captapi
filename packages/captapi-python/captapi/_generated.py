@@ -904,14 +904,15 @@ class InstagramApi:
         """
         return self._t.get("/v1/instagram/channel-reels", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
-    def reels_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Reels Search — Search Instagram Reels by hashtag/keyword. (12 credits)
+    def reels_search(self, *, q: str, limit: float | None = None, datePosted: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Instagram Reels Search — Native Reels hashtag search with views/plays. (2 credits)
 
         :param q: Hashtag (without #) or keyword (min 2 chars).
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
+        :param datePosted: last_24_hours | last_week | last_month | last_year.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/instagram/reels-search", {"q": q, "limit": limit, "cache": cache})
+        return self._t.get("/v1/instagram/reels-search", {"q": q, "limit": limit, "datePosted": datePosted, "cache": cache})
 
     def trending_reels(self, *, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Trending Reels — Trending Instagram Reels / Explore posts by country. (28 credits)
@@ -1042,14 +1043,15 @@ class AsyncInstagramApi:
         """
         return await self._t.get("/v1/instagram/channel-reels", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
 
-    async def reels_search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Instagram Reels Search — Search Instagram Reels by hashtag/keyword. (12 credits)
+    async def reels_search(self, *, q: str, limit: float | None = None, datePosted: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Instagram Reels Search — Native Reels hashtag search with views/plays. (2 credits)
 
         :param q: Hashtag (without #) or keyword (min 2 chars).
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
+        :param datePosted: last_24_hours | last_week | last_month | last_year.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/instagram/reels-search", {"q": q, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/instagram/reels-search", {"q": q, "limit": limit, "datePosted": datePosted, "cache": cache})
 
     async def trending_reels(self, *, country: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Instagram Trending Reels — Trending Instagram Reels / Explore posts by country. (28 credits)

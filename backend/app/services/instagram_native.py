@@ -2121,8 +2121,19 @@ async def enrich_posts_from_author_feeds(
 
     await asyncio.gather(*[_one(u, i) for u, i in authors])
 
+    def _post_shortcode(post: dict[str, Any]) -> str | None:
+        # Hydrated posts use shortcode as id; GraphQL nodes often use numeric id.
+        code = safe_str(post.get("id") or post.get("shortcode") or post.get("shortCode"))
+        if code and not code.isdigit() and code in play_by_code:
+            return code
+        url = safe_str(post.get("url")) or ""
+        m = re.search(r"/(?:reel|p|tv)/([^/?#]+)/?", url, re.I)
+        if m:
+            return m.group(1)
+        return code if code and code in play_by_code else None
+
     for post in posts:
-        code = safe_str(post.get("id"))
+        code = _post_shortcode(post)
         engagement = post.get("engagement") if isinstance(post.get("engagement"), dict) else {}
         if code and code in play_by_code and engagement.get("views") is None:
             plays, ig_plays = play_by_code[code]

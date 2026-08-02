@@ -1492,8 +1492,8 @@
     "platform": "instagram",
     "name": "Instagram Reels Search",
     "path": "/v1/instagram/reels-search",
-    "credits": 12,
-    "summary": "Search Instagram Reels by hashtag/keyword.",
+    "credits": 2,
+    "summary": "Native Instagram Reels hashtag search — views/plays, author verified/followers, datePosted. Flat 2 credits.",
     "params": [
       {
         "name": "q",
@@ -1505,7 +1505,13 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
+      },
+      {
+        "name": "datePosted",
+        "type": "string",
+        "required": false,
+        "description": "last_24_hours | last_week | last_month | last_year."
       },
       {
         "name": "cache",

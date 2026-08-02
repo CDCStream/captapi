@@ -50,6 +50,19 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
+    category: "improvement",
+    title: "Instagram Reels Search: flat 2 credits, schema parity with hashtag",
+    description:
+      "GET /v1/instagram/reels-search drops from ~12 credits (0.6/result) to flat 2 — same native hashtag-grid path as /hashtag-search?mediaType=reels, including author-feed view backfill. Results now match hashtag-search shape: author.verified / profileImage / followers / postCount, engagement.views plus engagement.plays when Instagram exposes both (view_count ≠ play_count), music{}, location{}, isPaidPartnership / isAd / isAffiliate, and optional datePosted (last_24_hours|last_week|last_month|last_year). Note on the hashtag likes hypothesis: when both metrics exist, likes sit well below views (~12% on the sample viral reel) — likes are not mislabeled views; missing views was an enrich shortcode mismatch, now fixed.",
+    items: [
+      "Flat 2 credits (was ~0.6 × results)",
+      "author.verified / profileImage / followers parity with hashtag-search",
+      "engagement.views + plays when Instagram distinguishes them",
+      "datePosted filter; enrich shortcode match fix for views backfill",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
     category: "fix",
     title: "Facebook group posts: real author IDs, sortBy, null shares",
     description:

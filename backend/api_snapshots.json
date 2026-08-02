@@ -3716,7 +3716,7 @@
   "instagram-reels-search": {
     "ok": true,
     "status": 200,
-    "credits": null,
+    "credits": 2,
     "data": {
       "query": "travel",
       "totalReturned": 3,
@@ -3750,7 +3750,10 @@
             "travel",
             "travelreels"
           ],
-          "mentions": []
+          "mentions": [],
+          "isPaidPartnership": false,
+          "isAd": false,
+          "isAffiliate": false
         },
         {
           "platform": "instagram",
@@ -3780,7 +3783,10 @@
             "midjuly",
             "travel"
           ],
-          "mentions": []
+          "mentions": [],
+          "isPaidPartnership": false,
+          "isAd": false,
+          "isAffiliate": false
         },
         {
           "platform": "instagram",
@@ -3811,7 +3817,10 @@
             "afroargentina.tours",
             "mariana.radisic",
             "amediahora"
-          ]
+          ],
+          "isPaidPartnership": false,
+          "isAd": false,
+          "isAffiliate": false
         }
       ]
     }

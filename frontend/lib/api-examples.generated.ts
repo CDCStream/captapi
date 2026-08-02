@@ -3390,7 +3390,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "travel",
           "travelreels"
         ],
-        "mentions": []
+        "mentions": [],
+        "isPaidPartnership": false,
+        "isAd": false,
+        "isAffiliate": false
       },
       {
         "platform": "instagram",
@@ -3420,7 +3423,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "midjuly",
           "travel"
         ],
-        "mentions": []
+        "mentions": [],
+        "isPaidPartnership": false,
+        "isAd": false,
+        "isAffiliate": false
       },
       {
         "platform": "instagram",
@@ -3451,7 +3457,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "afroargentina.tours",
           "mariana.radisic",
           "amediahora"
-        ]
+        ],
+        "isPaidPartnership": false,
+        "isAd": false,
+        "isAffiliate": false
       }
     ]
   },

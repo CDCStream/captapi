@@ -139,14 +139,46 @@ def _normalize_post(item: dict) -> dict:
     post_type = safe_str(item.get("type"))
     duration = safe_float(item.get("videoDuration") or item.get("duration") or item.get("durationSeconds"))
     caption = safe_str(item.get("caption") or item.get("text") or item.get("description")) or ""
-    return {
+    shortcode = safe_str(item.get("shortCode") or item.get("shortcode"))
+    media_id = safe_str(item.get("id"))
+    # Prefer shortcode as the public id (matches hashtag-search / details).
+    public_id = shortcode or media_id
+    view_count = safe_int(item.get("videoViewCount") or item.get("video_view_count"))
+    play_count = safe_int(item.get("videoPlayCount") or item.get("video_play_count"))
+    verified = owner.get("isVerified") if owner.get("isVerified") is not None else owner.get("is_verified")
+    if verified is None:
+        verified = item.get("ownerIsVerified") or item.get("isVerified")
+    music_raw = item.get("musicInfo") or item.get("clips_music_attribution_info") or item.get("music")
+    music = None
+    if isinstance(music_raw, dict) and (
+        music_raw.get("audio_id") or music_raw.get("id") or music_raw.get("song_name") or music_raw.get("title")
+    ):
+        music = {
+            "id": safe_str(music_raw.get("audio_id") or music_raw.get("id") or music_raw.get("musicId")),
+            "title": safe_str(music_raw.get("song_name") or music_raw.get("title") or music_raw.get("trackName")),
+            "artist": safe_str(music_raw.get("artist_name") or music_raw.get("artist") or music_raw.get("artistName")),
+        }
+    loc_raw = item.get("location") if isinstance(item.get("location"), dict) else None
+    location = None
+    if loc_raw and (loc_raw.get("name") or loc_raw.get("id") or loc_raw.get("pk")):
+        location = {
+            "id": safe_str(loc_raw.get("pk") or loc_raw.get("id")),
+            "name": safe_str(loc_raw.get("name")),
+            "slug": safe_str(loc_raw.get("slug")),
+            "latitude": safe_float(loc_raw.get("lat") or loc_raw.get("latitude")),
+            "longitude": safe_float(loc_raw.get("lng") or loc_raw.get("longitude")),
+        }
+        location = {k: v for k, v in location.items() if v is not None}
+    out: dict[str, Any] = {
         "platform": "instagram",
         "url": safe_str(item.get("url") or item.get("permalink") or item.get("shortcodeUrl")),
-        "id": safe_str(item.get("id") or item.get("shortCode") or item.get("shortcode")),
+        "id": public_id,
+        "shortcode": shortcode,
+        "mediaId": media_id if media_id and media_id != public_id else None,
         # "Image" | "Video" | "Sidecar" (carousel) - video-only fields are
         # stripped for non-video posts.
         "postType": post_type,
-        "productType": safe_str(item.get("productType")),
+        "productType": safe_str(item.get("productType") or item.get("product_type")),
         "caption": caption,
         "description": caption,
         "publishedAt": safe_str(item.get("timestamp") or item.get("takenAt") or item.get("taken_at")),
@@ -155,22 +187,87 @@ def _normalize_post(item: dict) -> dict:
         "durationSeconds": round(duration, 3) if duration is not None else None,
         "thumbnailUrl": safe_str(item.get("displayUrl") or item.get("thumbnailUrl") or item.get("thumbnail")),
         "videoUrl": safe_str(item.get("videoUrl") or item.get("video_url") or item.get("downloadUrl")),
+        "hasAudio": item.get("hasAudio") if item.get("hasAudio") is not None else item.get("has_audio"),
         "author": {
+            "id": safe_str(owner.get("id") or item.get("ownerId")),
             "username": safe_str(author),
             "displayName": safe_str(item.get("ownerFullName") or owner.get("fullName") or owner.get("full_name")),
             "url": f"https://instagram.com/{author}" if author else None,
-            "followers": safe_int(owner.get("followerCount") or owner.get("followersCount")),
-            "verified": owner.get("isVerified") if owner.get("isVerified") is not None else owner.get("is_verified"),
-            "profileImage": safe_str(owner.get("profilePicUrl") or owner.get("profile_pic_url")),
+            "followers": safe_int(
+                owner.get("followerCount") or owner.get("followersCount") or item.get("ownerFollowerCount")
+            ),
+            "postCount": safe_int(owner.get("mediaCount") or owner.get("postsCount") or item.get("ownerPostsCount")),
+            "verified": verified,
+            "private": owner.get("isPrivate") if owner.get("isPrivate") is not None else owner.get("is_private"),
+            "profileImage": safe_str(
+                owner.get("profilePicUrl") or owner.get("profile_pic_url") or item.get("ownerProfilePicUrl")
+            ),
         },
         "engagement": {
-            "views": safe_int(item.get("videoViewCount") or item.get("videoPlayCount")),
+            # Keep view_count and play_count distinct when Instagram exposes both.
+            "views": view_count or play_count,
+            "plays": play_count
+            if view_count is not None and play_count is not None and view_count != play_count
+            else None,
             "likes": decodo.hidden_count(item.get("likesCount") or item.get("likeCount")),
             "comments": decodo.hidden_count(item.get("commentsCount") or item.get("commentCount")),
         },
         "hashtags": _clean_hashtags(item.get("hashtags")),
         "mentions": safe_list(item.get("mentions")),
+        "isPaidPartnership": bool(item.get("isPaidPartnership") or item.get("is_paid_partnership"))
+        if (item.get("isPaidPartnership") is not None or item.get("is_paid_partnership") is not None)
+        else False,
+        "isAd": bool(item.get("isAd") or item.get("is_ad") or item.get("ad_id")),
+        "isAffiliate": bool(item.get("isAffiliate") or item.get("is_affiliate") or item.get("affiliate_info")),
+        "accessibilityCaption": safe_str(item.get("accessibilityCaption") or item.get("accessibility_caption")),
+        "location": location,
+        "music": music,
+        "musicId": (music or {}).get("id") if music else safe_str(item.get("musicId")),
     }
+    return out
+
+
+def _parse_published_at(value: Any) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        try:
+            return datetime.fromtimestamp(int(value), tz=timezone.utc)
+        except (OSError, OverflowError, ValueError):
+            return None
+    text = safe_str(value)
+    if not text:
+        return None
+    try:
+        return datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def _filter_date_posted(posts: list[dict[str, Any]], date_posted: str | None) -> list[dict[str, Any]]:
+    """Client-side date window — SC-compatible aliases."""
+    raw = (date_posted or "").strip().lower().replace("-", "_")
+    if not raw or raw in {"any", "anytime", "all"}:
+        return posts
+    days = {
+        "last_24_hours": 1,
+        "today": 1,
+        "last_week": 7,
+        "this_week": 7,
+        "last_month": 30,
+        "this_month": 30,
+        "last_year": 365,
+        "this_year": 365,
+    }.get(raw)
+    if days is None:
+        return posts
+    cutoff = datetime.now(timezone.utc).timestamp() - days * 86400
+    out: list[dict[str, Any]] = []
+    for post in posts:
+        dt = _parse_published_at(post.get("publishedAt"))
+        if dt is None or dt.timestamp() >= cutoff:
+            out.append(post)
+    return out
 
 
 def _dedupe_candidates(candidates: list[tuple[str, dict[str, Any]]]) -> list[tuple[str, dict[str, Any]]]:
@@ -1128,67 +1225,88 @@ async def instagram_channel_reels(
 async def instagram_reels_search(
     q: str = Query(..., min_length=2, description="Hashtag (without #) or keyword"),
     limit: int = Query(20, ge=1, le=200),
+    datePosted: str | None = Query(
+        None,
+        description=(
+            "Optional recency filter: last_24_hours | last_week | last_month | last_year "
+            "(aliases: today, this_week, this_month, this_year)."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    """Same native hashtag grid as ``/hashtag-search?mediaType=reels`` — flat 2 credits.
+
+    Returns the enriched post shape (author.verified/profileImage/followers,
+    engagement.views + plays when distinct, music, location, paid flags).
+    """
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_IG_POSTS, CREDIT_SEARCH)
+    # Pull extra before date filter so a tight window can still fill ``limit``.
+    fetch_limit = min(200, limit * 3 if datePosted else limit)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/reels-search",
         platform="instagram",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_SEARCH,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            async def _apify() -> dict[str, Any]:
+            async def _apify() -> list[dict[str, Any]] | None:
                 apify = get_apify()
                 items, _actor = await apify.run_with_fallback(
-                    _instagram_hashtag_candidates(settings, q.lstrip("#"), limit, "reels"),
-                    max_items=limit,
+                    _instagram_hashtag_candidates(settings, q.lstrip("#"), fetch_limit, "reels"),
+                    max_items=fetch_limit,
                 )
                 results = [
                     decodo.strip_null_post_fields(_normalize_post(i))
-                    for i in items[:limit]
+                    for i in items[:fetch_limit]
                     if not i.get("error") and i.get("type") == "Video"
                 ]
-                return {"query": q, "totalReturned": len(results), "results": results}
+                return results or None
 
-            async def _decodo_run() -> dict[str, Any] | None:
-                results = await decodo.hashtag_medias(q, limit, reels_only=True)
+            async def _decodo_run() -> list[dict[str, Any]] | None:
+                results = await decodo.hashtag_medias(q, fetch_limit, reels_only=True)
                 if results is None:
                     return None
-                return {"query": q, "totalReturned": len(results), "results": results}
+                # Match hashtag-search: GraphQL nodes rarely carry play counts.
+                return await instagram_native.enrich_posts_from_author_feeds(results)
 
-            async def _explore_hydrate() -> dict[str, Any] | None:
-                results = await instagram_native.hashtag_posts_native(
-                    q, limit=limit, reels_only=True
+            async def _explore_hydrate() -> list[dict[str, Any]] | None:
+                return await instagram_native.hashtag_posts_native(
+                    q, limit=fetch_limit, reels_only=True
                 )
-                if not results:
-                    return None
-                return {"query": q, "totalReturned": len(results), "results": results}
 
-            # GraphQL target first (cheap); Explore headless+Polaris before Apify.
+            results: list[dict[str, Any]] | None = None
+            # GraphQL + enrich first (cheap); Explore headless+Polaris before Apify.
             if decodo.enabled():
-                gql = await _decodo_run()
-                if gql is not None:
+                results = await _decodo_run()
+                if results is not None:
                     ctx["source"] = "direct"
-                    return gql
-            explore = await _explore_hydrate()
-            if explore is not None:
-                ctx["source"] = "direct"
-                return explore
-            ctx["source"] = "apify"
-            return await _apify()
+            if results is None:
+                results = await _explore_hydrate()
+                if results is not None:
+                    ctx["source"] = "direct"
+            if results is None:
+                ctx["source"] = "apify"
+                results = await _apify() or []
+
+            results = _filter_date_posted(results, datePosted)[:limit]
+            payload: dict[str, Any] = {
+                "query": q,
+                "totalReturned": len(results),
+                "results": results,
+            }
+            if datePosted:
+                payload["datePosted"] = datePosted
+            return payload
 
         data = await cached_or_run(
             endpoint="instagram.reels-search",
-            params={"q": q, "limit": limit, "v": 13},
+            params={"q": q, "limit": limit, "datePosted": datePosted or "", "v": 14},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["results"]), RATE_IG_POSTS, CREDIT_SEARCH)
         return ApiResponse(data=data)
 
 
@@ -1554,7 +1672,7 @@ async def instagram_hashtag_search(
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",
-            params={"q": q, "limit": limit, "mediaType": mediaType, "v": 13},
+            params={"q": q, "limit": limit, "mediaType": mediaType, "v": 14},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

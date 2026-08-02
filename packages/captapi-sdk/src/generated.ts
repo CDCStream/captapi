@@ -667,8 +667,10 @@ export interface InstagramChannelReelsParams {
 export interface InstagramReelsSearchParams {
   /** Hashtag (without #) or keyword (min 2 chars). */
   q: string;
-  /** Max items to return. Default 20, max 200. Billed per result. */
+  /** Max items to return. Default 20, max 200. Flat 2 credits per call. */
   limit?: number;
+  /** last_24_hours | last_week | last_month | last_year. */
+  datePosted?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -762,7 +764,7 @@ export class InstagramApi {
   channelReels(params: InstagramChannelReelsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/channel-reels", params);
   }
-  /** Instagram Reels Search — Search Instagram Reels by hashtag/keyword. (12 credits) */
+  /** Instagram Reels Search — Native Reels hashtag search with views/plays. (2 credits) */
   reelsSearch(params: InstagramReelsSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/instagram/reels-search", params);
   }
