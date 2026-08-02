@@ -10669,7 +10669,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "secUid": "MS4wLjABAAAAwAg0rSzO65WQfz4RzQgGv2Xdv108BgPXhRrrmNVIHQZ9PO8-flwwRtEppYTS0OjA",
         "username": "khaby.lame",
         "displayName": "Khabane lame",
-        "bio": "Se vuoi ridere sei nel posto giusto?? If u wanna laugh u r in the right place??",
+        "bio": "Se vuoi ridere sei nel posto giusto😎 If u wanna laugh u r in the right place😎",
         "url": "https://www.tiktok.com/@khaby.lame",
         "followers": 162500000,
         "following": 81,
