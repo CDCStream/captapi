@@ -13081,12 +13081,67 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "title": "the word",
     "createdAt": "2026-07-12T23:00:58Z",
     "durationSeconds": 44,
-    "views": 29833,
+    "views": 31603,
     "thumbnail": "https://static-cdn.jtvnw.net/twitch-video-assets/twitch-vap-video-assets-prod-us-west-2/a952a6bb-ad94-4889-8ac1-6afadf21d338/landscape/thumb/thumb-0000000000-1920x1080.jpg",
     "videoUrl": "https://d1ndex63qxojbr.cloudfront.net/nauth/a952a6bb-ad94-4889-8ac1-6afadf21d338/landscape/h264/1080/index.mp4",
+    "videoQualities": [
+      {
+        "quality": "1080",
+        "frameRate": 60,
+        "url": "https://d1ndex63qxojbr.cloudfront.net/nauth/a952a6bb-ad94-4889-8ac1-6afadf21d338/landscape/h264/1080/index.mp4"
+      },
+      {
+        "quality": "720",
+        "frameRate": 60.02308654785156,
+        "url": "https://d1ndex63qxojbr.cloudfront.net/nauth/a952a6bb-ad94-4889-8ac1-6afadf21d338/landscape/h264/720/index.mp4"
+      },
+      {
+        "quality": "480",
+        "frameRate": 30.012901306152344,
+        "url": "https://d1ndex63qxojbr.cloudfront.net/nauth/a952a6bb-ad94-4889-8ac1-6afadf21d338/landscape/h264/480/index.mp4"
+      },
+      {
+        "quality": "360",
+        "frameRate": 30.012901306152344,
+        "url": "https://d1ndex63qxojbr.cloudfront.net/nauth/a952a6bb-ad94-4889-8ac1-6afadf21d338/landscape/h264/360/index.mp4"
+      }
+    ],
+    "language": "EN",
+    "isFeatured": false,
+    "isPublished": true,
+    "videoOffsetSeconds": 1677,
     "game": "Just Chatting",
+    "gameId": "509658",
+    "gameSlug": "just-chatting",
+    "gameBoxArtUrl": "https://static-cdn.jtvnw.net/ttv-boxart/509658-285x380.jpg",
     "broadcaster": "xqc",
-    "broadcasterProfileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-150x150.jpeg"
+    "broadcasterProfileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-150x150.jpeg",
+    "channel": {
+      "id": "71092938",
+      "username": "xqc",
+      "name": "xQc",
+      "url": "https://www.twitch.tv/xqc",
+      "profileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/xqc-profile_image-9298dca608632101-150x150.jpeg",
+      "followers": 12531017,
+      "isPartner": true,
+      "lastBroadcast": {
+        "startedAt": "2026-08-02T06:29:57.736501Z",
+        "title": "🧑‍🌾LIVE🧑‍🌾HERE🧑‍🌾LOCK IN🧑‍🌾DRAMA🧑‍🌾NEWS🧑‍🌾VIDEOSV🧑‍🌾REACTS🧑‍🌾TRHNIGS🧑‍🌾GAMES🧑‍🌾VIDEOGAMES🧑‍🌾MAYBE EVEN THINGS AND SUCH"
+      }
+    },
+    "curator": {
+      "id": "768198835",
+      "username": "puertoricanporo",
+      "name": "puertoricanporo",
+      "url": "https://www.twitch.tv/puertoricanporo",
+      "profileImage": "https://static-cdn.jtvnw.net/jtv_user_pictures/15b6d728-aa8b-47be-a3a3-6474f3bea71e-profile_image-150x150.png"
+    },
+    "playbackAccessToken": {
+      "signature": "717a7cc45782d584804989cd3b629ae9bdd25364",
+      "value": "{\"authorization\":{\"forbidden\":false,\"reason\":\"\"},\"clip_uri\":\"https://d1ndex63qxojbr.cloudfront.net/nauth/a952a6bb-ad94-4889-8ac1-6afadf21d338/landscape/h264/720/index.mp4\",\"clip_slug\":\"EnergeticEmpathicElephantJKanStyle-0sOlvgAod9mDhCw4\",\"device_id\":\"2f4b8c922ff447c6a2667b75c9a2ff30\",\"expires\":1785766190,\"user_id\":\"\",\"version\":3}",
+      "expires": 1785766190,
+      "expiresAt": "2026-08-03T14:09:50Z"
+    }
   },
   "twitch-profile": {
     "platform": "twitch",

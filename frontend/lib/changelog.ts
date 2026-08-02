@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "Twitch clip: curator vs channel, qualities, token expiry",
+    description:
+      "GET /v1/twitch/clip stays 1 credit and now returns a fully normalized clip — not Twitch's GraphQL array envelope. Adds curator (clipper) separate from channel (broadcaster id/followers/isPartner/lastBroadcast), language, isFeatured/isPublished, videoOffsetSeconds, gameId/slug/box art, videoQualities[{quality,frameRate,url}], and playbackAccessToken.expires/expiresAt. Flat broadcaster string kept for back-compat.",
+    items: [
+      "curator vs channel (clipper ≠ broadcaster)",
+      "channel.followers / isPartner / lastBroadcast",
+      "videoQualities + playbackAccessToken.expires",
+      "language, isFeatured, isPublished, videoOffsetSeconds",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "SoundCloud artist: badges, creator subscription, lastModified",
     description:
       "GET /v1/soundcloud/artist now surfaces SoundCloud's paid-tier signals: badges {pro, creatorMidTier, proUnlimited, verified}, creatorSubscription.product.id (e.g. creator-pro-unlimited), and lastModified — so Pro Unlimited accounts are distinguishable from hobby profiles. Still 1 credit.",

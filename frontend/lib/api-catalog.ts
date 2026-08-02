@@ -540,7 +540,19 @@ const TWITCH: Spec[] = [
   },
   { slug: "twitch-user-videos", name: "Twitch User Videos API", shortName: "User Videos", category: "list", method: "GET", path: "/v1/twitch/user-videos", credits: 2 },
   { slug: "twitch-user-schedule", name: "Twitch User Schedule API", shortName: "User Schedule", category: "list", method: "GET", path: "/v1/twitch/user-schedule", credits: 1 },
-  { slug: "twitch-clip", name: "Twitch Clip API", shortName: "Clip", category: "details", method: "GET", path: "/v1/twitch/clip", credits: 1 , tagline: "Get a Twitch clip — title, broadcaster, views, duration, and thumbnail as structured JSON." },
+  {
+    slug: "twitch-clip",
+    name: "Twitch Clip API",
+    shortName: "Clip",
+    category: "details",
+    method: "GET",
+    path: "/v1/twitch/clip",
+    credits: 1,
+    tagline:
+      "Twitch clip — curator vs channel, followers, multi-quality video, and token expiry as clean JSON.",
+    longDescription:
+      "Pass a Twitch clip URL (or channel URL/username for a recent clip) and get a clean structured object — not Twitch's raw GraphQL envelope. Includes curator (who cut the clip) separate from channel/broadcaster (id, followers, isPartner, lastBroadcast), language, isFeatured/isPublished, videoOffsetSeconds, gameId/gameSlug/gameBoxArtUrl, videoQualities[{quality,frameRate,url}], and playbackAccessToken with expires/expiresAt. Flat broadcaster string kept for back-compat. Flat 1 credit.",
+  },
 ];
 
 const SPOTIFY: Spec[] = [
@@ -2837,6 +2849,18 @@ const FIELD_DESCS: Record<string, string> = {
   creatorMidTier: "Whether the account has SoundCloud creator mid-tier.",
   proUnlimited: "Whether the account has SoundCloud Pro Unlimited.",
   pro: "Whether the account has SoundCloud Pro.",
+  curator: "Who created/cut the Twitch clip (distinct from the broadcaster channel).",
+  channel: "Twitch broadcaster channel object (id, username, followers, isPartner, lastBroadcast).",
+  videoQualities: "Available clip MP4 qualities ({quality, frameRate, url}).",
+  playbackAccessToken: "Twitch playback token ({signature, value, expires, expiresAt}).",
+  videoOffsetSeconds: "Seconds into the source VOD where the clip starts.",
+  isFeatured: "Whether Twitch marks the clip as featured on the channel.",
+  isPublished: "Whether the clip is published.",
+  gameId: "Twitch game/category id.",
+  gameSlug: "Twitch game/category slug.",
+  gameBoxArtUrl: "Game box art image URL.",
+  isPartner: "Whether the Twitch channel is a Partner.",
+  lastBroadcast: "Most recent broadcast metadata ({startedAt, title}).",
   videoCount: "Total number of videos.",
   tweetCount: "Total number of tweets.",
   mediaCount: "Total number of media posts.",

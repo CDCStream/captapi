@@ -388,7 +388,7 @@ const TWITCH: Omit<Endpoint, "platform">[] = [
   { tool: "twitch_profile", name: "Twitch Profile", path: "/v1/twitch/profile", credits: 1, summary: "Twitch channel — live stream, last broadcast, recent videos with embedUrl, game box art, storyboard previews.", params: [url(TWITCH_PROFILE)] },
   { tool: "twitch_user_videos", name: "Twitch User Videos", path: "/v1/twitch/user-videos", credits: 34, summary: "Recent Twitch VODs for a channel.", params: [url(TWITCH_PROFILE), limit(20, 30)] },
   { tool: "twitch_user_schedule", name: "Twitch User Schedule", path: "/v1/twitch/user-schedule", credits: 1, summary: "Upcoming Twitch schedule data when exposed on the public channel.", params: [url(TWITCH_PROFILE)] },
-  { tool: "twitch_clip", name: "Twitch Clip", path: "/v1/twitch/clip", credits: 1, summary: "Twitch clip metadata from a clip URL or channel fallback.", params: [url("Twitch clip URL, channel URL, or username.")] },
+  { tool: "twitch_clip", name: "Twitch Clip", path: "/v1/twitch/clip", credits: 1, summary: "Twitch clip — curator vs channel, qualities, token expiry.", params: [url("Twitch clip URL, channel URL, or username.")] },
 ];
 
 const SPOTIFY: Omit<Endpoint, "platform">[] = [

@@ -11788,6 +11788,7 @@
           "Twitch"
         ],
         "summary": "Twitch clip metadata",
+        "description": "Fetch a Twitch clip as clean JSON — curator vs channel (broadcaster), followers/isPartner, language, multi-quality videoQualities, and playbackAccessToken.expires. Not the raw GraphQL envelope.",
         "operationId": "clip_v1_twitch_clip_get",
         "security": [
           {

@@ -396,7 +396,15 @@ async def user_schedule(
         return ApiResponse(data=data)
 
 
-@router.get("/clip", summary="Twitch clip metadata")
+@router.get(
+    "/clip",
+    summary="Twitch clip metadata",
+    description=(
+        "Fetch a Twitch clip as clean JSON — curator vs channel (broadcaster), "
+        "followers/isPartner, language, multi-quality videoQualities, and "
+        "playbackAccessToken.expires. Not the raw GraphQL envelope."
+    ),
+)
 async def clip(
     url: str = Query(..., description="Twitch clip URL, channel URL, or username"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -448,5 +456,5 @@ async def clip(
             ctx["source"] = "apify"
             return _video(items[0])
 
-        data = await cached_or_run("twitch.clip", {"url": url, "v": 4}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("twitch.clip", {"url": url, "v": 5}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)

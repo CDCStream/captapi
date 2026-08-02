@@ -12,13 +12,16 @@ back to the actor.
 
 from __future__ import annotations
 
+import json
 import uuid
+from datetime import datetime, timezone
 from typing import Any
+from urllib.parse import unquote
 
 import httpx
 
 from app.services.http_fetch import post_json
-from app.utils.formatters import safe_int, safe_str
+from app.utils.formatters import safe_int, safe_str, strip_empty
 
 # Public web Client-ID (anonymous). Same value the Twitch web app sends; not a
 # secret and not tied to our account.
@@ -252,14 +255,164 @@ async def channel_native(login: str, video_limit: int = 30) -> dict[str, Any] | 
 _CLIP_QUERY = """
 query($slug: ID!) {
   clip(slug: $slug) {
-    id slug title createdAt viewCount durationSeconds
+    id slug title createdAt viewCount durationSeconds language
     url embedURL thumbnailURL
-    game { name }
-    broadcaster { login displayName profileImageURL(width: 150) }
-    videoQualities { quality sourceURL }
+    isFeatured isPublished videoOffsetSeconds
+    game { id name slug boxArtURL }
+    curator { id login displayName profileImageURL(width: 150) }
+    broadcaster {
+      id login displayName profileImageURL(width: 150)
+      roles { isPartner }
+      followers { totalCount }
+      lastBroadcast { startedAt title }
+    }
+    videoQualities { quality frameRate sourceURL }
+    playbackAccessToken(params: {platform: "web", playerBackend: "mediaplayer", playerType: "site"}) {
+      signature value
+    }
   }
 }
 """
+
+
+def _box_art(url: str | None, *, width: int = 285, height: int = 380) -> str | None:
+    if not url:
+        return None
+    return url.replace("{width}", str(width)).replace("{height}", str(height))
+
+
+def _person(raw: Any) -> dict[str, Any] | None:
+    if not isinstance(raw, dict):
+        return None
+    login = safe_str(raw.get("login") or raw.get("username"))
+    name = safe_str(raw.get("displayName") or raw.get("name") or login)
+    if not login and not name and raw.get("id") is None:
+        return None
+    return strip_empty(
+        {
+            "id": safe_str(raw.get("id")),
+            "username": login,
+            "name": name,
+            "url": f"https://www.twitch.tv/{login}" if login else None,
+            "profileImage": safe_str(raw.get("profileImageURL") or raw.get("profileImageUrl")),
+        }
+    )
+
+
+def _token_expires(value: Any) -> tuple[int | None, str | None]:
+    """Parse playbackAccessToken.value JSON → (unix expires, ISO expiresAt)."""
+    text = safe_str(value)
+    if not text:
+        return None, None
+    payload: Any = None
+    for candidate in (text, unquote(text)):
+        try:
+            payload = json.loads(candidate)
+            break
+        except (TypeError, ValueError, json.JSONDecodeError):
+            continue
+    if not isinstance(payload, dict):
+        return None, None
+    expires = safe_int(payload.get("expires"))
+    if expires is None:
+        return None, None
+    try:
+        iso = datetime.fromtimestamp(expires, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    except (OverflowError, OSError, ValueError):
+        iso = None
+    return expires, iso
+
+
+def _map_clip(c: dict[str, Any]) -> dict[str, Any]:
+    game = c.get("game") if isinstance(c.get("game"), dict) else {}
+    b = c.get("broadcaster") if isinstance(c.get("broadcaster"), dict) else {}
+    curator = _person(c.get("curator"))
+    channel = _person(b) or {}
+    followers = None
+    if isinstance(b.get("followers"), dict):
+        followers = safe_int(b["followers"].get("totalCount"))
+    roles = b.get("roles") if isinstance(b.get("roles"), dict) else {}
+    is_partner = roles.get("isPartner") if isinstance(roles.get("isPartner"), bool) else None
+    last_raw = b.get("lastBroadcast") if isinstance(b.get("lastBroadcast"), dict) else None
+    last_broadcast = None
+    if last_raw:
+        last_broadcast = strip_empty(
+            {
+                "startedAt": safe_str(last_raw.get("startedAt")),
+                "title": safe_str(last_raw.get("title")),
+            }
+        ) or None
+    if channel:
+        channel = strip_empty(
+            {
+                **channel,
+                "followers": followers,
+                "isPartner": is_partner,
+                "lastBroadcast": last_broadcast,
+            }
+        )
+
+    qualities_out: list[dict[str, Any]] = []
+    for q in c.get("videoQualities") or []:
+        if not isinstance(q, dict):
+            continue
+        row = strip_empty(
+            {
+                "quality": safe_str(q.get("quality")),
+                "frameRate": q.get("frameRate") if isinstance(q.get("frameRate"), (int, float)) else None,
+                "url": safe_str(q.get("sourceURL") or q.get("sourceUrl") or q.get("url")),
+            }
+        )
+        if row.get("url"):
+            qualities_out.append(row)
+    # Prefer highest listed quality for the flat videoUrl (Twitch returns 1080 first).
+    mp4 = qualities_out[0]["url"] if qualities_out else None
+
+    token_raw = c.get("playbackAccessToken") if isinstance(c.get("playbackAccessToken"), dict) else {}
+    expires, expires_at = _token_expires(token_raw.get("value"))
+    token = strip_empty(
+        {
+            "signature": safe_str(token_raw.get("signature")),
+            "value": safe_str(token_raw.get("value")),
+            "expires": expires,
+            "expiresAt": expires_at,
+        }
+    ) or None
+
+    login = safe_str(b.get("login") or b.get("displayName")) or safe_str(channel.get("username"))
+    slug = safe_str(c.get("slug"))
+    return strip_empty(
+        {
+            "platform": "twitch",
+            "id": safe_str(c.get("id")),
+            "slug": slug,
+            "url": safe_str(c.get("url")) or (f"https://clips.twitch.tv/{slug}" if slug else None),
+            "embedUrl": safe_str(c.get("embedURL"))
+            or (f"https://clips.twitch.tv/embed?clip={slug}" if slug else None),
+            "title": safe_str(c.get("title")),
+            "createdAt": safe_str(c.get("createdAt")),
+            "durationSeconds": safe_int(c.get("durationSeconds")),
+            "views": safe_int(c.get("viewCount")),
+            "thumbnail": safe_str(c.get("thumbnailURL")),
+            "videoUrl": mp4,
+            "videoQualities": qualities_out or None,
+            "language": safe_str(c.get("language")),
+            "isFeatured": c.get("isFeatured") if isinstance(c.get("isFeatured"), bool) else None,
+            "isPublished": c.get("isPublished") if isinstance(c.get("isPublished"), bool) else None,
+            "videoOffsetSeconds": safe_int(c.get("videoOffsetSeconds")),
+            # String game kept for back-compat; structured fields additive.
+            "game": safe_str(game.get("name") if game else c.get("game")),
+            "gameId": safe_str(game.get("id")),
+            "gameSlug": safe_str(game.get("slug")),
+            "gameBoxArtUrl": _box_art(safe_str(game.get("boxArtURL") or game.get("boxArtUrl"))),
+            # Flat broadcaster string kept for back-compat (Kick-style channel/curator added).
+            "broadcaster": login,
+            "broadcasterProfileImage": safe_str(b.get("profileImageURL")) or safe_str(channel.get("profileImage")),
+            "channel": channel or None,
+            "curator": curator,
+            "playbackAccessToken": token,
+        }
+    )
 
 
 async def clip_native(slug: str) -> dict[str, Any] | None:
@@ -267,29 +420,9 @@ async def clip_native(slug: str) -> dict[str, Any] | None:
     if not data:
         return None
     c = data.get("clip")
-    if not c or not c.get("id"):
+    if not isinstance(c, dict) or not c.get("id"):
         return None
-    game = c.get("game") or {}
-    b = c.get("broadcaster") or {}
-    qualities = c.get("videoQualities") or []
-    mp4 = safe_str(qualities[0].get("sourceURL")) if qualities else None
-    return {
-        "platform": "twitch",
-        "id": safe_str(c.get("id")),
-        "slug": safe_str(c.get("slug")),
-        "url": safe_str(c.get("url")) or (f"https://clips.twitch.tv/{c.get('slug')}" if c.get("slug") else None),
-        "embedUrl": safe_str(c.get("embedURL")) or (f"https://clips.twitch.tv/embed?clip={c.get('slug')}" if c.get("slug") else None),
-        "title": safe_str(c.get("title")),
-        "createdAt": safe_str(c.get("createdAt")),
-        "durationSeconds": safe_int(c.get("durationSeconds")),
-        "views": safe_int(c.get("viewCount")),
-        "thumbnail": safe_str(c.get("thumbnailURL")),
-        "videoUrl": mp4,
-        "game": safe_str(game.get("name") if isinstance(game, dict) else game),
-        "language": None,
-        "broadcaster": safe_str(b.get("login") or b.get("displayName")),
-        "broadcasterProfileImage": safe_str(b.get("profileImageURL")),
-    }
+    return _map_clip(c)
 
 
 _SCHEDULE_QUERY = """

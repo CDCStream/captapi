@@ -3689,7 +3689,7 @@
     "name": "Twitch Clip",
     "path": "/v1/twitch/clip",
     "credits": 1,
-    "summary": "Twitch clip metadata from a clip URL or channel fallback.",
+    "summary": "Twitch clip — curator vs channel, qualities, token expiry.",
     "params": [
       {
         "name": "url",
