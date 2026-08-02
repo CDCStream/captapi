@@ -3664,8 +3664,8 @@
     "platform": "github",
     "name": "GitHub User",
     "path": "/v1/github/user",
-    "credits": 3,
-    "summary": "Public GitHub user profile details.",
+    "credits": 1,
+    "summary": "Public GitHub profile (email when public). 1 credit — wraps free GitHub REST API.",
     "params": [
       {
         "name": "username",

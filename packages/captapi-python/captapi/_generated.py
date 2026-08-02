@@ -2538,7 +2538,7 @@ class GithubApi:
         self._t = transport
 
     def user(self, *, username: str, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub User — Public GitHub user profile details. (3 credits)
+        """GitHub User — Public GitHub profile (email when public). 1 credit — wraps free GitHub REST API. (1 credit)
 
         :param username: GitHub username or profile URL.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2636,7 +2636,7 @@ class AsyncGithubApi:
         self._t = transport
 
     async def user(self, *, username: str, cache: bool | None = None) -> dict[str, Any]:
-        """GitHub User — Public GitHub user profile details. (3 credits)
+        """GitHub User — Public GitHub profile (email when public). 1 credit — wraps free GitHub REST API. (1 credit)
 
         :param username: GitHub username or profile URL.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

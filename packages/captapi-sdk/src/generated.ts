@@ -1868,7 +1868,7 @@ export interface GithubTrendingDevelopersParams {
 
 export class GithubApi {
   constructor(private readonly core: HttpCore) {}
-  /** GitHub User — Public GitHub user profile details. (3 credits) */
+  /** GitHub User — Public GitHub profile (email when public). 1 credit — wraps free GitHub REST API. (1 credit) */
   user(params: GithubUserParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/github/user", params);
   }

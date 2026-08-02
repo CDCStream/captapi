@@ -410,7 +410,7 @@ const TIKTOK_SHOP: Spec[] = [
 ];
 
 const GITHUB: Spec[] = [
-  { slug: "github-user", name: "GitHub User API", shortName: "User", category: "channel", method: "GET", path: "/v1/github/user", credits: 3 },
+  { slug: "github-user", name: "GitHub User API", shortName: "User", category: "channel", method: "GET", path: "/v1/github/user", credits: 1, tagline: "GitHub public profile — login, bio, email when public, followers, and repos as clean JSON (1 credit).", longDescription: "Pass a GitHub username or profile URL and get the public /users/{username} profile as camelCase JSON: login, name, company, blog, location, email (only when the user made it public), bio, avatar, publicRepos/publicGists, followers/following, twitterUsername, hireable, nodeId, siteAdmin, and createdAt/updatedAt. type is user or organization. Flat 1 credit. Honesty note: this wraps GitHub's free public REST API (5,000 req/hour with a personal access token). Prefer Captapi for one-key multi-platform workflows; call api.github.com directly for GitHub-only jobs so you do not spend credits on free data." },
   { slug: "github-repositories", name: "GitHub Repositories API", shortName: "Repositories", category: "list", method: "GET", path: "/v1/github/repositories", credits: 12, creditsPerResult: 0.4 },
   { slug: "github-pull-requests", name: "GitHub Pull Requests API", shortName: "Pull Requests", category: "list", method: "GET", path: "/v1/github/pull-requests", credits: 12, creditsPerResult: 0.4 },
   { slug: "github-activity", name: "GitHub Activity API", shortName: "Activity", category: "list", method: "GET", path: "/v1/github/activity", credits: 12, creditsPerResult: 0.4 , tagline: "List a GitHub user's recent public activity — pushes, issues, pull requests, and similar events." },
@@ -2428,7 +2428,7 @@ const FIELD_DESCS: Record<string, string> = {
   mediaCount: "Total number of media posts.",
   location: "Location shown on the profile or item.",
   website: "Website listed on the profile.",
-  email: "Public / business email when the creator exposes it in About/description. Null when only CAPTCHA-gated.",
+  email: "Public email when the account exposes one (GitHub: only if set public on the profile; YouTube: from About/description). Null when private or CAPTCHA-gated.",
   joinedDate: "When the account was created.",
 
   // Content

@@ -101,16 +101,32 @@ def _page_cursor(cursor: str | None) -> int:
 
 
 def _user(u: dict[str, Any]) -> dict[str, Any]:
+    """Normalize GitHub /users/{login} into Captapi camelCase.
+
+    Additive fields mirror the public REST payload (email, nodeId, siteAdmin,
+    hireable). ``email`` is only non-null when the account has a public email —
+    GitHub does not expose private emails here.
+    """
+    gh_type = (safe_str(u.get("type")) or "User").lower()
+    hireable = u.get("hireable")
+    if not isinstance(hireable, bool):
+        hireable = None
+    site_admin = u.get("site_admin")
+    if not isinstance(site_admin, bool):
+        site_admin = None
     return {
         "platform": "github",
-        "type": "user",
+        "type": gh_type,  # "user" | "organization" (was hardcoded "user")
         "login": safe_str(u.get("login")),
         "id": safe_int(u.get("id")),
+        "nodeId": safe_str(u.get("node_id")),
         "url": safe_str(u.get("html_url")),
+        "apiUrl": safe_str(u.get("url")),
         "name": safe_str(u.get("name")),
         "company": safe_str(u.get("company")),
         "blog": safe_str(u.get("blog")),
         "location": safe_str(u.get("location")),
+        "email": safe_str(u.get("email")),
         "bio": safe_str(u.get("bio")),
         "avatar": safe_str(u.get("avatar_url")),
         "publicRepos": safe_int(u.get("public_repos")),
@@ -118,6 +134,8 @@ def _user(u: dict[str, Any]) -> dict[str, Any]:
         "followers": safe_int(u.get("followers")),
         "following": safe_int(u.get("following")),
         "twitterUsername": safe_str(u.get("twitter_username")),
+        "hireable": hireable,
+        "siteAdmin": site_admin,
         "createdAt": safe_str(u.get("created_at")),
         "updatedAt": safe_str(u.get("updated_at")),
     }
@@ -179,7 +197,20 @@ def _pull(p: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-@router.get("/user", summary="GitHub user profile")
+CREDIT_USER = 1
+
+
+@router.get(
+    "/user",
+    summary="GitHub user profile",
+    description=(
+        "Public profile from GitHub's REST /users/{username} API as clean camelCase JSON "
+        "(login, name, email when public, bio, followers, repos, twitterUsername, …). "
+        "Flat 1 credit. The same payload is available free from api.github.com with a "
+        "personal access token (5,000 req/hour) — use Captapi when you want one key and "
+        "the same shape as other platforms; call GitHub directly for GitHub-only workloads."
+    ),
+)
 async def github_user(
     username: str = Query(..., description="GitHub username or profile URL"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -188,12 +219,26 @@ async def github_user(
     login = _username(username)
     if not login:
         raise HTTPException(status_code=400, detail="Invalid GitHub username")
-    async with billed_call(caller=caller, endpoint="/v1/github/user", platform="github", resource_url=f"https://github.com/{login}", base_credits=3) as ctx:
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/github/user",
+        platform="github",
+        resource_url=f"https://github.com/{login}",
+        base_credits=CREDIT_USER,
+    ) as ctx:
         async def _run() -> dict[str, Any]:
             ctx["source"] = "direct"
             return _user(await _get(f"/users/{login}"))
 
-        return ApiResponse(data=await cached_or_run("github.user", {"login": login, "v": 3}, _run, ctx, use_cache=cache))
+        return ApiResponse(
+            data=await cached_or_run(
+                "github.user",
+                {"login": login, "v": 4},
+                _run,
+                ctx,
+                use_cache=cache,
+            )
+        )
 
 
 @router.get("/repositories", summary="List a GitHub user's repositories (cursor-paginated)")

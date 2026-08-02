@@ -7125,6 +7125,7 @@
           "GitHub"
         ],
         "summary": "GitHub user profile",
+        "description": "Public profile from GitHub's REST /users/{username} API as clean camelCase JSON (login, name, email when public, bio, followers, repos, twitterUsername, …). Flat 1 credit. The same payload is available free from api.github.com with a personal access token (5,000 req/hour) — use Captapi when you want one key and the same shape as other platforms; call GitHub directly for GitHub-only workloads.",
         "operationId": "github_user_v1_github_user_get",
         "security": [
           {

@@ -170,3 +170,16 @@ SC 8 · Captapi 1 · Mixed 1. Shipped this batch: #8 SEO fix, #9 ISO+post, #10 S
 | Full metrics{} (likes/comments/engagementRate) per result | P0 | Shipped (via #16 YouTube enrich) |
 | cache param (shared with /analytics/post; hits free) | P1 | Shipped |
 | Honest billing: no bulk discount vs N× /post | P1 | Shipped in catalog/FAQ |
+
+---
+
+## #19 GET /v1/github/user
+**Keep:** camelCase normalized shape, one-key UX, cache param.
+
+| Field / param | Priority | Status |
+|---|---|---|
+| email (public only) | P0 | Shipped |
+| nodeId / apiUrl / hireable / siteAdmin | P1 | Shipped |
+| type = user \| organization (was hardcoded user) | P1 | Shipped |
+| Credits 3 → 1 (match SC / free-API wrapper) | P0 | Shipped |
+| Docs honesty: free GitHub REST alternative | P0 | Shipped |

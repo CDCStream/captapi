@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
+    category: "feature",
+    title: "GitHub user: email + parity fields, 1 credit, free-API note",
+    description:
+      "GitHub user drops from 3 credits to 1 (matching ScrapeCreators) and adds email (when public), nodeId, apiUrl, hireable, and siteAdmin. type is now user or organization. Docs note that this wraps GitHub's free public REST API — use Captapi for one-key workflows; call api.github.com directly for GitHub-only jobs.",
+    items: [
+      "Price: 3 → 1 credit",
+      "Additive email, nodeId, apiUrl, hireable, siteAdmin",
+      "Honesty note: free GitHub API alternative for GitHub-only workloads",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
     category: "fix",
     title: "Compare analytics: real unified metrics example + cache param",
     description:

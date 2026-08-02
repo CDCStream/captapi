@@ -266,7 +266,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `github_user` | `/v1/github/user` | `username` (string), `cache`? (boolean) | 3 |
+| `github_user` | `/v1/github/user` | `username` (string), `cache`? (boolean) | 1 |
 | `github_repositories` | `/v1/github/repositories` | `username` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 12 |
 | `github_repository` | `/v1/github/repository` | `repo` (string), `cache`? (boolean) | 3 |
 | `github_pull_requests` | `/v1/github/pull-requests` | `repo` (string), `state`? (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 12 |
