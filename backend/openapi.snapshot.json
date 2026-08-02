@@ -663,7 +663,8 @@
         "tags": [
           "YouTube"
         ],
-        "summary": "Search YouTube videos by keyword",
+        "summary": "Search YouTube by keyword (cursor-paginated)",
+        "description": "Search YouTube as clean JSON with cursor pagination. Each hit includes type (video|short|channel|playlist|live), id, canonical url, title, channel{id,title,handle}, viewCount, durationSeconds, badges[]. Filter with type, sortBy, uploadDate, duration, and region. Flat 2 credits per page — pass nextCursor to continue.",
         "operationId": "youtube_search_v1_youtube_search_get",
         "security": [
           {
@@ -678,8 +679,10 @@
             "schema": {
               "type": "string",
               "minLength": 2,
+              "description": "Search query (min 2 characters).",
               "title": "Q"
-            }
+            },
+            "description": "Search query (min 2 characters)."
           },
           {
             "name": "limit",
@@ -689,9 +692,121 @@
               "type": "integer",
               "maximum": 200,
               "minimum": 1,
+              "description": "Max results for this page (default 20).",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "Max results for this page (default 20)."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.",
+              "title": "Cursor"
+            },
+            "description": "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response."
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Result type filter: all | videos | shorts | channels | playlists.",
+              "title": "Type"
+            },
+            "description": "Result type filter: all | videos | shorts | channels | playlists."
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Sort: relevance | date | views | rating (alias: popular→views).",
+              "title": "Sortby"
+            },
+            "description": "Sort: relevance | date | views | rating (alias: popular→views)."
+          },
+          {
+            "name": "uploadDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Upload window: any | today | this_week | this_month | this_year.",
+              "title": "Uploaddate"
+            },
+            "description": "Upload window: any | today | this_week | this_month | this_year."
+          },
+          {
+            "name": "duration",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Length filter: any | under_4 | 4_20 | over_20.",
+              "title": "Duration"
+            },
+            "description": "Length filter: any | under_4 | 4_20 | over_20."
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 2
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "ISO country code for localized results (InnerTube gl). Default US.",
+              "title": "Region"
+            },
+            "description": "ISO country code for localized results (InnerTube gl). Default US."
           },
           {
             "name": "cache",

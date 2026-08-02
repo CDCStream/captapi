@@ -49,6 +49,18 @@ export interface YoutubeSearchParams {
   q: string;
   /** Max items to return. Default 20, max 200. Billed per result. */
   limit?: number;
+  /** Pagination cursor from nextCursor. */
+  cursor?: string;
+  /** all | videos | shorts | channels | playlists. */
+  type?: string;
+  /** relevance | date | views | rating. */
+  sortBy?: string;
+  /** any | today | this_week | this_month | this_year. */
+  uploadDate?: string;
+  /** any | under_4 | 4_20 | over_20. */
+  duration?: string;
+  /** ISO country code (default US). */
+  region?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
 }
@@ -221,7 +233,7 @@ export class YoutubeApi {
   channelDetails(params: YoutubeChannelDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/channel-details", params);
   }
-  /** YouTube Search — Search YouTube videos by keyword. (2 credits) */
+  /** YouTube Search — YouTube search — typed hits, ids, canonical URLs, cursor pagination, filters. (2 credits) */
   search(params: YoutubeSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/youtube/search", params);
   }

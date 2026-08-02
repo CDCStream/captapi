@@ -1367,13 +1367,57 @@ async def youtube_playlist(
 
 
 # ---------- SEARCH --------------------------------------------------------
-@router.get("/search", summary="Search YouTube videos by keyword")
+@router.get(
+    "/search",
+    summary="Search YouTube by keyword (cursor-paginated)",
+    description=(
+        "Search YouTube as clean JSON with cursor pagination. Each hit includes "
+        "type (video|short|channel|playlist|live), id, canonical url, title, "
+        "channel{id,title,handle}, viewCount, durationSeconds, badges[]. "
+        "Filter with type, sortBy, uploadDate, duration, and region. Flat 2 credits "
+        "per page — pass nextCursor to continue."
+    ),
+)
 async def youtube_search(
-    q: str = Query(..., min_length=2),
-    limit: int = Query(20, ge=1, le=200),
+    q: str = Query(..., min_length=2, description="Search query (min 2 characters)."),
+    limit: int = Query(20, ge=1, le=200, description="Max results for this page (default 20)."),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor. Leave empty for the first page; then pass the "
+            "nextCursor value returned in the previous response."
+        ),
+    ),
+    result_type: str | None = Query(
+        None,
+        alias="type",
+        description="Result type filter: all | videos | shorts | channels | playlists.",
+    ),
+    sort_by: str | None = Query(
+        None,
+        alias="sortBy",
+        description="Sort: relevance | date | views | rating (alias: popular→views).",
+    ),
+    upload_date: str | None = Query(
+        None,
+        alias="uploadDate",
+        description="Upload window: any | today | this_week | this_month | this_year.",
+    ),
+    duration: str | None = Query(
+        None,
+        description="Length filter: any | under_4 | 4_20 | over_20.",
+    ),
+    region: str | None = Query(
+        None,
+        min_length=2,
+        max_length=2,
+        description="ISO country code for localized results (InnerTube gl). Default US.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    from app.services.youtube_native import search_native_page
+
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/search",
@@ -1382,18 +1426,57 @@ async def youtube_search(
         base_credits=CREDIT_YT_NATIVE_LIST,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native_results = await search_native(q, limit)
-            if native_results:
-                ctx["source"] = "direct"
-                return {"query": q, "totalReturned": len(native_results), "results": native_results}
-            raise HTTPException(
-                status_code=502,
-                detail="YouTube search temporarily unavailable",
+            page = await search_native_page(
+                q,
+                limit,
+                cursor=cursor,
+                sort_by=sort_by,
+                upload_date=upload_date,
+                result_type=result_type,
+                duration=duration,
+                region=region,
             )
+            if page is None:
+                raise HTTPException(
+                    status_code=400 if cursor else 502,
+                    detail=(
+                        "Invalid or expired cursor. Start a new request without cursor."
+                        if cursor
+                        else "YouTube search temporarily unavailable"
+                    ),
+                )
+            ctx["source"] = "direct"
+            results = page.get("results") or []
+            next_cursor = safe_str(page.get("nextCursor")) or None
+            videos = [r for r in results if r.get("type") in {"video", "live", "upcoming"}]
+            shorts = [r for r in results if r.get("type") == "short"]
+            channels = [r for r in results if r.get("type") == "channel"]
+            playlists = [r for r in results if r.get("type") == "playlist"]
+            return {
+                "query": q,
+                "totalReturned": len(results),
+                "nextCursor": next_cursor,
+                "hasMore": next_cursor is not None,
+                "results": results,
+                "videos": videos,
+                "shorts": shorts,
+                "channels": channels,
+                "playlists": playlists,
+            }
 
         data = await cached_or_run(
             endpoint="youtube.search",
-            params={"q": q, "limit": limit, "v": 3},
+            params={
+                "q": q,
+                "limit": limit,
+                "cursor": cursor or "",
+                "type": result_type or "",
+                "sortBy": sort_by or "",
+                "uploadDate": upload_date or "",
+                "duration": duration or "",
+                "region": (region or "").upper(),
+                "v": 4,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -59,7 +59,93 @@ _CHANNEL_TAB_PARAMS: dict[str, str] = {
 # Shorts filter for InnerTube ``search`` (same as ``sp=EgIYAQ==`` on /results).
 _SEARCH_SHORTS_PARAMS = "EgIYAQ=="
 
+# YouTube search ``sp`` / InnerTube ``params`` enums (Invidious-compatible).
+_SEARCH_SORT = {"relevance": 0, "rating": 1, "date": 2, "views": 3, "popular": 3}
+_SEARCH_UPLOAD = {
+    "any": 0,
+    "hour": 1,
+    "today": 2,
+    "this_week": 3,
+    "week": 3,
+    "this_month": 4,
+    "month": 4,
+    "this_year": 5,
+    "year": 5,
+}
+_SEARCH_TYPE = {
+    "all": 0,
+    "video": 1,
+    "videos": 1,
+    "channel": 2,
+    "channels": 2,
+    "playlist": 3,
+    "playlists": 3,
+    "movie": 4,
+    "movies": 4,
+}
+_SEARCH_DURATION = {
+    "any": 0,
+    "under_4": 1,
+    "short": 1,
+    "4_20": 2,
+    "medium": 2,
+    "over_20": 3,
+    "long": 3,
+}
+
 _JSON_DECODER = json.JSONDecoder()
+
+
+def _pb_varint(value: int) -> bytes:
+    n = int(value)
+    out = bytearray()
+    while True:
+        bits = n & 0x7F
+        n >>= 7
+        out.append(bits | (0x80 if n else 0))
+        if not n:
+            return bytes(out)
+
+
+def _pb_key(field: int, wire: int) -> bytes:
+    return _pb_varint((field << 3) | wire)
+
+
+def encode_search_params(
+    *,
+    sort_by: str | None = None,
+    upload_date: str | None = None,
+    result_type: str | None = None,
+    duration: str | None = None,
+) -> str | None:
+    """Build InnerTube search ``params`` (base64url protobuf), or None if default."""
+    import base64
+
+    sort_n = _SEARCH_SORT.get((sort_by or "relevance").strip().lower(), 0)
+    date_n = _SEARCH_UPLOAD.get((upload_date or "any").strip().lower().replace("-", "_"), 0)
+    type_n = _SEARCH_TYPE.get((result_type or "all").strip().lower().replace("-", "_"), 0)
+    dur_n = _SEARCH_DURATION.get((duration or "any").strip().lower().replace("-", "_"), 0)
+
+    # Dedicated Shorts filter (not the same protobuf type enum).
+    if (result_type or "").strip().lower() in {"short", "shorts"}:
+        return _SEARCH_SHORTS_PARAMS
+
+    embedded = bytearray()
+    if date_n:
+        embedded += _pb_key(1, 0) + _pb_varint(date_n)
+    if type_n:
+        embedded += _pb_key(2, 0) + _pb_varint(type_n)
+    if dur_n:
+        embedded += _pb_key(3, 0) + _pb_varint(dur_n)
+
+    obj = bytearray()
+    if sort_n:
+        obj += _pb_key(1, 0) + _pb_varint(sort_n)
+    if embedded:
+        obj += _pb_key(2, 2) + _pb_varint(len(embedded)) + embedded
+    if not obj:
+        return None
+    return base64.urlsafe_b64encode(bytes(obj)).decode("ascii").rstrip("=")
 
 
 def extract_initial_json(html: str, var_name: str) -> dict[str, Any] | None:
@@ -164,6 +250,65 @@ def _best_thumb(node: Any) -> str | None:
     return None
 
 
+def _channel_from_text_runs(node: Any) -> dict[str, Any]:
+    """Extract channel id/handle/name from owner/byline text runs."""
+    name = text_of(node)
+    channel_id = None
+    handle = None
+    url = None
+    if isinstance(node, dict):
+        for run in node.get("runs") or []:
+            if not isinstance(run, dict):
+                continue
+            browse = ((run.get("navigationEndpoint") or {}).get("browseEndpoint")) or {}
+            channel_id = safe_str(browse.get("browseId")) or channel_id
+            base = safe_str(browse.get("canonicalBaseUrl"))
+            if base:
+                url = f"https://www.youtube.com{base}" if base.startswith("/") else base
+                if base.startswith("/@"):
+                    handle = base[1:]
+            if not name:
+                name = safe_str(run.get("text"))
+    return {
+        "id": channel_id,
+        "title": name,
+        "handle": handle,
+        "url": url,
+        "thumbnail": None,
+    }
+
+
+def _badge_labels(node: Any) -> list[str]:
+    out: list[str] = []
+    for badge in walk_find(node, "metadataBadgeRenderer"):
+        label = safe_str(badge.get("label")) or text_of(badge.get("accessibilityData"))
+        if not label:
+            label = safe_str((badge.get("accessibilityData") or {}).get("label"))
+        if label and label not in out:
+            out.append(label)
+    return out
+
+
+def _result_type_for_video(vr: dict[str, Any], *, duration: int | None, badges: list[str]) -> str:
+    nav = vr.get("navigationEndpoint") or {}
+    if (nav.get("reelWatchEndpoint") or {}).get("videoId"):
+        return "short"
+    low = " ".join(badges).lower()
+    if "live" in low or vr.get("badges") and any(
+        "LIVE" in str(b) for b in (vr.get("badges") or [])
+    ):
+        if "upcoming" in low or vr.get("upcomingEventData"):
+            return "upcoming"
+        return "live"
+    if duration is not None and duration > 0 and duration <= 60:
+        # Heuristic: sub-minute search hits are often Shorts.
+        if "short" in low or duration <= 60:
+            # Prefer short only when overlay/shorts signals exist; else video.
+            if "short" in low:
+                return "short"
+    return "video"
+
+
 def normalize_video_renderer(vr: dict[str, Any]) -> dict[str, Any] | None:
     """``videoRenderer`` (search / channel tabs / hashtag) -> our video card."""
     video_id = safe_str(vr.get("videoId"))
@@ -172,14 +317,30 @@ def normalize_video_renderer(vr: dict[str, Any]) -> dict[str, Any] | None:
     view_count = parse_count_text(vr.get("viewCountText"))
     if view_count is None:
         view_count = parse_count_text(vr.get("shortViewCountText"))
+    duration = _duration_text_seconds(vr.get("lengthText"))
+    badges = _badge_labels(vr)
+    channel = _channel_from_text_runs(
+        vr.get("ownerText") or vr.get("longBylineText") or vr.get("shortBylineText")
+    )
+    rtype = _result_type_for_video(vr, duration=duration, badges=badges)
+    url = (
+        f"https://www.youtube.com/shorts/{video_id}"
+        if rtype == "short"
+        else f"https://www.youtube.com/watch?v={video_id}"
+    )
     return {
-        "url": f"https://www.youtube.com/watch?v={video_id}",
+        "type": rtype,
+        "id": video_id,
+        "url": url,
         "title": text_of(vr.get("title")) or "",
         "publishedAt": text_of(vr.get("publishedTimeText")),
         "viewCount": view_count,
-        "durationSeconds": _duration_text_seconds(vr.get("lengthText")),
+        "durationSeconds": duration,
         "thumbnailUrl": _best_thumb(vr.get("thumbnail")),
-        "channelName": text_of(vr.get("ownerText") or vr.get("longBylineText") or vr.get("shortBylineText")),
+        "channelName": channel.get("title"),
+        "channelId": channel.get("id"),
+        "channel": channel,
+        "badges": badges,
     }
 
 
@@ -197,6 +358,8 @@ def _normalize_shorts_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
         return None
     overlay = lk.get("overlayMetadata") or {}
     return {
+        "type": "short",
+        "id": video_id,
         "url": f"https://www.youtube.com/shorts/{video_id}",
         "title": text_of((overlay.get("primaryText") or {})) or "",
         "publishedAt": None,
@@ -204,6 +367,9 @@ def _normalize_shorts_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
         "durationSeconds": None,
         "thumbnailUrl": _best_thumb(lk.get("thumbnail")),
         "channelName": None,
+        "channelId": None,
+        "channel": None,
+        "badges": [],
     }
 
 
@@ -213,6 +379,8 @@ def _normalize_reel_item(r: dict[str, Any]) -> dict[str, Any] | None:
     if not video_id:
         return None
     return {
+        "type": "short",
+        "id": video_id,
         "url": f"https://www.youtube.com/shorts/{video_id}",
         "title": text_of(r.get("headline")) or "",
         "publishedAt": None,
@@ -220,6 +388,9 @@ def _normalize_reel_item(r: dict[str, Any]) -> dict[str, Any] | None:
         "durationSeconds": None,
         "thumbnailUrl": _best_thumb(r.get("thumbnail")),
         "channelName": None,
+        "channelId": None,
+        "channel": None,
+        "badges": [],
     }
 
 
@@ -270,6 +441,8 @@ def _normalize_video_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
             break
 
     return {
+        "type": "video",
+        "id": video_id,
         "url": f"https://www.youtube.com/watch?v={video_id}",
         "title": title,
         "publishedAt": published_at,
@@ -277,6 +450,9 @@ def _normalize_video_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
         "durationSeconds": duration,
         "thumbnailUrl": _best_thumb(lk.get("contentImage")),
         "channelName": channel_name,
+        "channelId": None,
+        "channel": {"id": None, "title": channel_name, "handle": None, "url": None, "thumbnail": None},
+        "badges": [],
     }
 
 
@@ -296,14 +472,77 @@ def _normalize_playlist_video(pv: dict[str, Any]) -> dict[str, Any] | None:
             published_at = txt
     secs = safe_str(pv.get("lengthSeconds"))
     duration = int(secs) if secs and secs.isdigit() else _duration_text_seconds(pv.get("lengthText"))
+    channel = _channel_from_text_runs(pv.get("shortBylineText"))
     return {
+        "type": "video",
+        "id": video_id,
         "url": f"https://www.youtube.com/watch?v={video_id}",
         "title": text_of(pv.get("title")) or "",
         "publishedAt": published_at,
         "viewCount": view_count,
         "durationSeconds": duration,
         "thumbnailUrl": _best_thumb(pv.get("thumbnail")),
-        "channelName": text_of(pv.get("shortBylineText")),
+        "channelName": channel.get("title") or text_of(pv.get("shortBylineText")),
+        "channelId": channel.get("id"),
+        "channel": channel,
+        "badges": [],
+    }
+
+
+def _normalize_channel_renderer(cr: dict[str, Any]) -> dict[str, Any] | None:
+    channel_id = safe_str(cr.get("channelId"))
+    if not channel_id:
+        return None
+    handle = None
+    base = safe_str(((cr.get("navigationEndpoint") or {}).get("browseEndpoint") or {}).get("canonicalBaseUrl"))
+    if base and base.startswith("/@"):
+        handle = base[1:]
+    url = f"https://www.youtube.com/channel/{channel_id}"
+    if handle:
+        url = f"https://www.youtube.com/{handle}"
+    return {
+        "type": "channel",
+        "id": channel_id,
+        "url": url,
+        "title": text_of(cr.get("title")) or "",
+        "publishedAt": None,
+        "viewCount": None,
+        "durationSeconds": None,
+        "thumbnailUrl": _best_thumb(cr.get("thumbnail")),
+        "channelName": text_of(cr.get("title")),
+        "channelId": channel_id,
+        "channel": {
+            "id": channel_id,
+            "title": text_of(cr.get("title")),
+            "handle": handle,
+            "url": url,
+            "thumbnail": _best_thumb(cr.get("thumbnail")),
+        },
+        "badges": _badge_labels(cr),
+        "subscriberCount": parse_count_text(cr.get("subscriberCountText") or cr.get("videoCountText")),
+    }
+
+
+def _normalize_playlist_renderer(pr: dict[str, Any]) -> dict[str, Any] | None:
+    playlist_id = safe_str(pr.get("playlistId"))
+    if not playlist_id:
+        return None
+    channel = _channel_from_text_runs(pr.get("longBylineText") or pr.get("shortBylineText"))
+    video_count = parse_count_text(pr.get("videoCount") or pr.get("videoCountText"))
+    return {
+        "type": "playlist",
+        "id": playlist_id,
+        "url": f"https://www.youtube.com/playlist?list={playlist_id}",
+        "title": text_of(pr.get("title")) or "",
+        "publishedAt": None,
+        "viewCount": None,
+        "durationSeconds": None,
+        "thumbnailUrl": _best_thumb(pr.get("thumbnails") or pr.get("thumbnail")),
+        "channelName": channel.get("title"),
+        "channelId": channel.get("id"),
+        "channel": channel,
+        "badges": [],
+        "videoCount": video_count,
     }
 
 
@@ -313,9 +552,13 @@ def collect_video_cards(data: Any, *, shorts: bool = False) -> list[dict[str, An
     seen: set[str] = set()
 
     def add(card: dict[str, Any] | None) -> None:
-        if card and card["url"] not in seen:
-            seen.add(card["url"])
-            cards.append(card)
+        if not card:
+            return
+        key = safe_str(card.get("id")) or card.get("url")
+        if not key or key in seen:
+            return
+        seen.add(key)
+        cards.append(card)
 
     if shorts:
         for lk in walk_find(data, "shortsLockupViewModel"):
@@ -326,13 +569,15 @@ def collect_video_cards(data: Any, *, shorts: bool = False) -> list[dict[str, An
         for vr in walk_find(data, "videoRenderer"):
             card = normalize_video_renderer(vr)
             if card:
-                vid = card["url"].rsplit("v=", 1)[-1]
+                vid = card.get("id") or card["url"].rsplit("/", 1)[-1].replace("watch?v=", "")
+                card["type"] = "short"
                 card["url"] = f"https://www.youtube.com/shorts/{vid}"
                 add(card)
         for lk in walk_find(data, "lockupViewModel"):
             card = _normalize_video_lockup(lk)
             if card:
-                vid = card["url"].rsplit("v=", 1)[-1]
+                vid = card.get("id")
+                card["type"] = "short"
                 card["url"] = f"https://www.youtube.com/shorts/{vid}"
                 add(card)
     else:
@@ -343,6 +588,49 @@ def collect_video_cards(data: Any, *, shorts: bool = False) -> list[dict[str, An
         for lk in walk_find(data, "lockupViewModel"):
             add(_normalize_video_lockup(lk))
     return cards
+
+
+def collect_search_results(data: Any) -> list[dict[str, Any]]:
+    """Mixed search hits: videos/shorts/channels/playlists (document order)."""
+    results: list[dict[str, Any]] = []
+    seen: set[str] = set()
+
+    def add(card: dict[str, Any] | None) -> None:
+        if not card:
+            return
+        key = f"{card.get('type')}:{card.get('id') or card.get('url')}"
+        if key in seen:
+            return
+        seen.add(key)
+        results.append(card)
+
+    # Walk top-level section contents in order when possible.
+    sections = list(walk_find(data, "itemSectionRenderer"))
+    if sections:
+        for section in sections:
+            for item in section.get("contents") or []:
+                if not isinstance(item, dict):
+                    continue
+                if "videoRenderer" in item:
+                    add(normalize_video_renderer(item["videoRenderer"]))
+                elif "channelRenderer" in item:
+                    add(_normalize_channel_renderer(item["channelRenderer"]))
+                elif "playlistRenderer" in item:
+                    add(_normalize_playlist_renderer(item["playlistRenderer"]))
+                elif "shortsLockupViewModel" in item:
+                    add(_normalize_shorts_lockup(item["shortsLockupViewModel"]))
+                elif "reelItemRenderer" in item:
+                    add(_normalize_reel_item(item["reelItemRenderer"]))
+                elif "lockupViewModel" in item:
+                    add(_normalize_video_lockup(item["lockupViewModel"]))
+    else:
+        for card in collect_video_cards(data):
+            add(card)
+        for cr in walk_find(data, "channelRenderer"):
+            add(_normalize_channel_renderer(cr))
+        for pr in walk_find(data, "playlistRenderer"):
+            add(_normalize_playlist_renderer(pr))
+    return results
 
 
 def find_continuation_tokens(data: Any) -> list[str]:
@@ -403,13 +691,27 @@ async def fetch_page_data(url: str, *, timeout: float = 12.0) -> tuple[dict[str,
     return None, last_html
 
 
-async def innertube(endpoint: str, body: dict[str, Any], *, timeout: float = 12.0) -> dict[str, Any] | None:
+async def innertube(
+    endpoint: str,
+    body: dict[str, Any],
+    *,
+    timeout: float = 12.0,
+    region: str | None = None,
+) -> dict[str, Any] | None:
     """POST to InnerTube (web client). ``endpoint``: search | browse | next."""
+    context = {
+        "client": {
+            **_INNERTUBE_CONTEXT["client"],
+        }
+    }
+    gl = (region or "").strip().upper()
+    if gl and len(gl) == 2:
+        context["client"]["gl"] = gl
     for tier in _proxy_tiers():
         try:
             resp = await post_json(
                 f"https://www.youtube.com/youtubei/v1/{endpoint}",
-                {"context": _INNERTUBE_CONTEXT, **body},
+                {"context": context, **body},
                 tier=tier,  # type: ignore[arg-type]
                 headers={
                     **YT_HEADERS,
@@ -500,24 +802,96 @@ async def resolve_channel_id(url: str) -> str | None:
 
 
 # ---------------------------------------------------------------- search ---
-async def search_native(q: str, limit: int) -> list[dict[str, Any]]:
+async def search_native_page(
+    q: str,
+    limit: int = 20,
+    *,
+    cursor: str | None = None,
+    sort_by: str | None = None,
+    upload_date: str | None = None,
+    result_type: str | None = None,
+    duration: str | None = None,
+    region: str | None = None,
+) -> dict[str, Any] | None:
+    """One page of YouTube search results + ``nextCursor``.
+
+    Pass ``cursor`` from a previous response to continue. Filters map to
+    InnerTube ``params`` (protobuf). ``region`` sets client ``gl``.
+    """
     from urllib.parse import quote
 
     query = (q or "").strip()
-    if not query:
-        return []
-    # InnerTube search avoids HTML 429s on /results.
-    data = await innertube("search", {"query": query}, timeout=15)
-    if data is not None:
-        cards = await _paginate(data, limit=limit, continuation_endpoint="search")
-        if cards:
-            return cards
-    data, _ = await fetch_page_data(
-        f"https://www.youtube.com/results?search_query={quote(query)}"
+    token = (cursor or "").strip() or None
+    if not query and not token:
+        return {"results": [], "nextCursor": None}
+
+    params = encode_search_params(
+        sort_by=sort_by,
+        upload_date=upload_date,
+        result_type=result_type,
+        duration=duration,
     )
+    gl = (region or "").strip().upper() or None
+
+    if token:
+        data = await innertube(
+            "search", {"continuation": token}, timeout=15, region=gl
+        )
+    else:
+        body: dict[str, Any] = {"query": query}
+        if params:
+            body["params"] = params
+        data = await innertube("search", body, timeout=15, region=gl)
+        if data is None:
+            # HTML fallback for first page only.
+            url = f"https://www.youtube.com/results?search_query={quote(query)}"
+            if params:
+                url += f"&sp={quote(params)}"
+            data, _ = await fetch_page_data(url)
     if data is None:
+        return None
+
+    # Shorts-filtered search uses the shorts collectors.
+    shorts_mode = (result_type or "").strip().lower() in {"short", "shorts"}
+    if shorts_mode:
+        results = collect_video_cards(data, shorts=True)
+    else:
+        results = collect_search_results(data)
+    results = results[: max(0, int(limit))]
+    next_cursor = find_continuation_token(data)
+    # Avoid returning the same cursor we just used.
+    if next_cursor and token and next_cursor == token:
+        next_cursor = None
+    return {"results": results, "nextCursor": next_cursor}
+
+
+async def search_native(q: str, limit: int) -> list[dict[str, Any]]:
+    """Backward-compatible helper: first pages until ``limit`` (no cursor)."""
+    page = await search_native_page(q, limit=limit)
+    if not page:
         return []
-    return await _paginate(data, limit=limit, continuation_endpoint="search")
+    results = list(page.get("results") or [])
+    token = page.get("nextCursor")
+    hops = 0
+    while token and len(results) < limit and hops < 8:
+        nxt = await search_native_page(q, limit=limit - len(results), cursor=token)
+        hops += 1
+        if not nxt:
+            break
+        batch = nxt.get("results") or []
+        if not batch:
+            break
+        seen = {r.get("id") or r.get("url") for r in results}
+        for row in batch:
+            key = row.get("id") or row.get("url")
+            if key in seen:
+                continue
+            results.append(row)
+            seen.add(key)
+            if len(results) >= limit:
+                break
+        token = nxt.get("nextCursor")
+    return results[:limit]
 
 
 async def search_shorts_native(q: str, limit: int) -> list[dict[str, Any]] | None:

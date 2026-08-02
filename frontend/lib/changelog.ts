@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "feature",
+    title: "YouTube search: cursor pagination, ids, filters",
+    description:
+      "GET /v1/youtube/search is now cursor-paginated (nextCursor + hasMore), returns typed hits with stable id + canonical URL (no radio/mix query junk), channelId/channel{handle}, badges[], and additive videos/shorts/channels/playlists partitions. New filters: type, sortBy, uploadDate, duration, region. Flat 2 credits per page; cache=true supported.",
+    items: [
+      "nextCursor / hasMore pagination",
+      "type + id + canonical url + channelId",
+      "Filters: type, sortBy, uploadDate, duration, region",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "feature",
     title: "LinkedIn Ad Library search: targeting, dates, pagination",
     description:
       "GET /v1/ad-library/linkedin/search-ads now returns LinkedIn transparency fields — targeting{}, ISO startDate/endDate + adDuration, totalImpressions + impressionsByCountry[], cta/destinationUrl, headline/description, advertiser id/URL, and carouselImages[] — plus cursor pagination (paginationToken/nextCursor, totalAds, isLastPage) and filters (countries, startDate/endDate, companyId, keyword). Still flat 2 credits on the native path.",

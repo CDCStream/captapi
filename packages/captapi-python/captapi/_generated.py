@@ -53,14 +53,20 @@ class YoutubeApi:
         """
         return self._t.get("/v1/youtube/channel-details", {"url": url, "cache": cache})
 
-    def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Search — Search YouTube videos by keyword. (2 credits)
+    def search(self, *, q: str, limit: float | None = None, cursor: str | None = None, type_: str | None = None, sortBy: str | None = None, uploadDate: str | None = None, duration: str | None = None, region: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Search — YouTube search — typed hits, ids, canonical URLs, cursor pagination, filters. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cursor: Pagination cursor from nextCursor.
+        :param type_: all | videos | shorts | channels | playlists.
+        :param sortBy: relevance | date | views | rating.
+        :param uploadDate: any | today | this_week | this_month | this_year.
+        :param duration: any | under_4 | 4_20 | over_20.
+        :param region: ISO country code (default US).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/youtube/search", {"q": q, "limit": limit, "cache": cache})
+        return self._t.get("/v1/youtube/search", {"q": q, "limit": limit, "cursor": cursor, "type": type_, "sortBy": sortBy, "uploadDate": uploadDate, "duration": duration, "region": region, "cache": cache})
 
     def channel_videos(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Channel Videos — List a channel's uploaded videos. (2 credits)
@@ -256,14 +262,20 @@ class AsyncYoutubeApi:
         """
         return await self._t.get("/v1/youtube/channel-details", {"url": url, "cache": cache})
 
-    async def search(self, *, q: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """YouTube Search — Search YouTube videos by keyword. (2 credits)
+    async def search(self, *, q: str, limit: float | None = None, cursor: str | None = None, type_: str | None = None, sortBy: str | None = None, uploadDate: str | None = None, duration: str | None = None, region: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """YouTube Search — YouTube search — typed hits, ids, canonical URLs, cursor pagination, filters. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param cursor: Pagination cursor from nextCursor.
+        :param type_: all | videos | shorts | channels | playlists.
+        :param sortBy: relevance | date | views | rating.
+        :param uploadDate: any | today | this_week | this_month | this_year.
+        :param duration: any | under_4 | 4_20 | over_20.
+        :param region: ISO country code (default US).
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/youtube/search", {"q": q, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/youtube/search", {"q": q, "limit": limit, "cursor": cursor, "type": type_, "sortBy": sortBy, "uploadDate": uploadDate, "duration": duration, "region": region, "cache": cache})
 
     async def channel_videos(self, *, url: str, limit: float | None = None, fast: bool | None = None, cache: bool | None = None) -> dict[str, Any]:
         """YouTube Channel Videos — List a channel's uploaded videos. (2 credits)

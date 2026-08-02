@@ -95,7 +95,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `youtube_video_details` | `/v1/youtube/video-details` | `url` (string), `cache`? (boolean) | 1 |
 | `youtube_comments` | `/v1/youtube/comments` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 20 |
 | `youtube_channel_details` | `/v1/youtube/channel-details` | `url` (string), `cache`? (boolean) | 1 |
-| `youtube_search` | `/v1/youtube/search` | `q` (string), `limit`? (number), `cache`? (boolean) | 20 |
+| `youtube_search` | `/v1/youtube/search` | `q` (string), `limit`? (number), `cursor`? (string), `type`? (string), `sortBy`? (string), `uploadDate`? (string), `duration`? (string), `region`? (string), `cache`? (boolean) | 2 |
 | `youtube_channel_videos` | `/v1/youtube/channel-videos` | `url` (string), `limit`? (number), `fast`? (boolean), `cache`? (boolean) | 20 |
 | `youtube_playlist_videos` | `/v1/youtube/playlist-videos` | `url` (string), `limit`? (number), `fast`? (boolean), `cache`? (boolean) | 2 |
 | `youtube_playlist` | `/v1/youtube/playlist` | `url` (string), `limit`? (number), `fast`? (boolean), `cache`? (boolean) | 2 |

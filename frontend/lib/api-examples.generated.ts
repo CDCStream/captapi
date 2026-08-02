@@ -14201,53 +14201,223 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "youtube-search": {
     "query": "space",
     "totalReturned": 5,
+    "nextCursor": "EtACEgVzcGFjZRrGAlNCU0NBUXRxUm14WGQyaFFVbUpRZDRJQkMwdzVUazFTUzFsVE5uYzBnZ0VMUVhVeWJEWk9iMlo0TUVXQ0FRc3pXamh1TkRONWNDMXRaNElCQzJseU9HcE5lVXhDVXpacmdnRUxaeTFuYTJOM1dXdGtSRUdDQVF0R1RsSTNZVGhxYjBOSGM0SUJDMkpvTVd4amJqSlRVRTVuZ2dFTFZVdHJMV2hWUVd0UGQydUNBUXRvWjAxcVlqVjJhbWhtYTRJQkN6SlVhbnBKTXpWSk5sTmpnZ0VMV2xWMVVVMUtOVTh6V0UyQ0FRdFliWGxrTjBWRFZHeEpXWUlCQzFWek1sb3RWME01Y21GdmdnRUxaVmRmYlc5V05uWnZkRUdDQVF0WloyTlVkMlY1Vmt0a2I3SUJCZ29FQ0JZUUF1b0JCQWdDRUJrJTNEGIHg6BgiC3NlYXJjaC1mZWVk",
+    "hasMore": true,
     "results": [
       {
-        "url": "https://www.youtube.com/watch?v=KvrxcrlG6Mo",
-        "title": "SpaceX set to attempt starship rocket launch in South Texas",
-        "publishedAt": "5 days ago",
-        "viewCount": 41084,
-        "durationSeconds": 35,
-        "thumbnailUrl": "https://i.ytimg.com/vi/KvrxcrlG6Mo/hqdefault.jpg?sqp=-oaymwEcCOADEI4CSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBvGaxl9zxxMlI9UvgXerbpjUI0pg",
-        "channelName": "WFAA"
+        "type": "video",
+        "id": "jFlWwhPRbPw",
+        "url": "https://www.youtube.com/watch?v=jFlWwhPRbPw",
+        "title": "James Webb Found a Structure So Big It Breaks Known Physics",
+        "publishedAt": "10 days ago",
+        "viewCount": 38769,
+        "durationSeconds": 7924,
+        "thumbnailUrl": "https://i.ytimg.com/vi/jFlWwhPRbPw/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA7UvQbAJ_-ucLxF_Y5rLx6Et8OqQ",
+        "channelName": "Late Science",
+        "channelId": "UCIqH5kGFOM_lP9x_AmPodjQ",
+        "channel": {
+          "id": "UCIqH5kGFOM_lP9x_AmPodjQ",
+          "title": "Late Science",
+          "handle": "@Late_Science",
+          "url": "https://www.youtube.com/@Late_Science",
+          "thumbnail": null
+        },
+        "badges": [
+          "4K"
+        ]
       },
       {
-        "url": "https://www.youtube.com/watch?v=kBHfGJ76GlY",
-        "title": "SpaceX is learning as much as it can about rocket updates in test launch: Former SpaceX engineer",
-        "publishedAt": "5 days ago",
-        "viewCount": 17838,
-        "durationSeconds": 210,
-        "thumbnailUrl": "https://i.ytimg.com/vi/kBHfGJ76GlY/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLC1mzXfCTVM5XmdCSHQnrpdqEbbFA",
-        "channelName": "CNBC Television"
+        "type": "video",
+        "id": "L9NMRKYS6w4",
+        "url": "https://www.youtube.com/watch?v=L9NMRKYS6w4",
+        "title": "James Webb Detected a Sign of a Different Universe That Shattered Every Model Built Since Einstein",
+        "publishedAt": "2 months ago",
+        "viewCount": 151088,
+        "durationSeconds": 6441,
+        "thumbnailUrl": "https://i.ytimg.com/vi/L9NMRKYS6w4/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDucFGeHFH4XAYqCTdLsGr5dul9IA",
+        "channelName": "SPACE BEFOREAFTER",
+        "channelId": "UCxbnsftoQou1IfWZlEb_1iA",
+        "channel": {
+          "id": "UCxbnsftoQou1IfWZlEb_1iA",
+          "title": "SPACE BEFOREAFTER",
+          "handle": "@space-before-after",
+          "url": "https://www.youtube.com/@space-before-after",
+          "thumbnail": null
+        },
+        "badges": []
       },
       {
-        "url": "https://www.youtube.com/watch?v=gYCmoZCSqkI",
-        "title": "The Most Disturbing Events in Space",
-        "publishedAt": "5 months ago",
-        "viewCount": 1891769,
-        "durationSeconds": 1254,
-        "thumbnailUrl": "https://i.ytimg.com/vi/gYCmoZCSqkI/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAeIltRB8k6SADrQC5wKX6UQSOiPg",
-        "channelName": "The Paint Explainer"
+        "type": "video",
+        "id": "Au2l6Nofx0E",
+        "url": "https://www.youtube.com/watch?v=Au2l6Nofx0E",
+        "title": "Why Space Gets More Terrifying the Further You Travel",
+        "publishedAt": "3 weeks ago",
+        "viewCount": 45420,
+        "durationSeconds": 7439,
+        "thumbnailUrl": "https://i.ytimg.com/vi/Au2l6Nofx0E/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDqNYbuQDzmLSgFoZ9jjTAwu3hDZg",
+        "channelName": "Calm Space",
+        "channelId": "UCXyJmt3PKv0fbsU9DtcreEw",
+        "channel": {
+          "id": "UCXyJmt3PKv0fbsU9DtcreEw",
+          "title": "Calm Space",
+          "handle": "@CalmSpaceToSleep",
+          "url": "https://www.youtube.com/@CalmSpaceToSleep",
+          "thumbnail": null
+        },
+        "badges": []
       },
       {
-        "url": "https://www.youtube.com/watch?v=SvwfkTmyHFU",
-        "title": "Why Space Is Genuinely Terrifying",
-        "publishedAt": "6 months ago",
-        "viewCount": 3019696,
-        "durationSeconds": 2298,
-        "thumbnailUrl": "https://i.ytimg.com/vi/SvwfkTmyHFU/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDlvwzdnNDl-ZwXafY3GMI18oDXWA",
-        "channelName": "Joe Bart Philosophy"
+        "type": "video",
+        "id": "3Z8n43yp-mg",
+        "url": "https://www.youtube.com/watch?v=3Z8n43yp-mg",
+        "title": "3 Hours Of Facts About Space And Our Solar System",
+        "publishedAt": "1 year ago",
+        "viewCount": 506443,
+        "durationSeconds": 10922,
+        "thumbnailUrl": "https://i.ytimg.com/vi/3Z8n43yp-mg/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA5ZCCpBoxl_OMCWz4cWPE8nCa40w",
+        "channelName": "Spark",
+        "channelId": "UCMV3aTOwUtG5vwfH9_rzb2w",
+        "channel": {
+          "id": "UCMV3aTOwUtG5vwfH9_rzb2w",
+          "title": "Spark",
+          "handle": "@SparkDocs",
+          "url": "https://www.youtube.com/@SparkDocs",
+          "thumbnail": null
+        },
+        "badges": [
+          "Verified"
+        ]
       },
       {
-        "url": "https://www.youtube.com/watch?v=UiZRQBOs4Sk",
-        "title": "Undeniable proof that humans walked on the moon (six times) #space #astronomy #science #nasa",
-        "publishedAt": "8 days ago",
-        "viewCount": 283980,
-        "durationSeconds": 94,
-        "thumbnailUrl": "https://i.ytimg.com/vi/UiZRQBOs4Sk/hq720.jpg?sqp=-oaymwE2CNAFEJQDSFXyq4qpAygIARUAAIhCGABwAcABBvABAfgBtgiAAoAPigIMCAAQARhjIGMoYzAP&rs=AOn4CLBl05WqCDjAc9UuFJnRaEs94ADrRw",
-        "channelName": "ASTRO ALEXANDRA"
+        "type": "video",
+        "id": "ir8jMyLBS6k",
+        "url": "https://www.youtube.com/watch?v=ir8jMyLBS6k",
+        "title": "1 Hour of Mind-Blowing Space Facts Scientists Can’t Ignore",
+        "publishedAt": "4 weeks ago",
+        "viewCount": 72726,
+        "durationSeconds": 3632,
+        "thumbnailUrl": "https://i.ytimg.com/vi/ir8jMyLBS6k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD_eVVLviIcny85Etou6tqf2noKlw",
+        "channelName": "Astral Curiosity",
+        "channelId": "UCd6DpEsZHe5vadiZQ7JssNw",
+        "channel": {
+          "id": "UCd6DpEsZHe5vadiZQ7JssNw",
+          "title": "Astral Curiosity",
+          "handle": "@astralcuriosity",
+          "url": "https://www.youtube.com/@astralcuriosity",
+          "thumbnail": null
+        },
+        "badges": []
       }
-    ]
+    ],
+    "videos": [
+      {
+        "type": "video",
+        "id": "jFlWwhPRbPw",
+        "url": "https://www.youtube.com/watch?v=jFlWwhPRbPw",
+        "title": "James Webb Found a Structure So Big It Breaks Known Physics",
+        "publishedAt": "10 days ago",
+        "viewCount": 38769,
+        "durationSeconds": 7924,
+        "thumbnailUrl": "https://i.ytimg.com/vi/jFlWwhPRbPw/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA7UvQbAJ_-ucLxF_Y5rLx6Et8OqQ",
+        "channelName": "Late Science",
+        "channelId": "UCIqH5kGFOM_lP9x_AmPodjQ",
+        "channel": {
+          "id": "UCIqH5kGFOM_lP9x_AmPodjQ",
+          "title": "Late Science",
+          "handle": "@Late_Science",
+          "url": "https://www.youtube.com/@Late_Science",
+          "thumbnail": null
+        },
+        "badges": [
+          "4K"
+        ]
+      },
+      {
+        "type": "video",
+        "id": "L9NMRKYS6w4",
+        "url": "https://www.youtube.com/watch?v=L9NMRKYS6w4",
+        "title": "James Webb Detected a Sign of a Different Universe That Shattered Every Model Built Since Einstein",
+        "publishedAt": "2 months ago",
+        "viewCount": 151088,
+        "durationSeconds": 6441,
+        "thumbnailUrl": "https://i.ytimg.com/vi/L9NMRKYS6w4/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDucFGeHFH4XAYqCTdLsGr5dul9IA",
+        "channelName": "SPACE BEFOREAFTER",
+        "channelId": "UCxbnsftoQou1IfWZlEb_1iA",
+        "channel": {
+          "id": "UCxbnsftoQou1IfWZlEb_1iA",
+          "title": "SPACE BEFOREAFTER",
+          "handle": "@space-before-after",
+          "url": "https://www.youtube.com/@space-before-after",
+          "thumbnail": null
+        },
+        "badges": []
+      },
+      {
+        "type": "video",
+        "id": "Au2l6Nofx0E",
+        "url": "https://www.youtube.com/watch?v=Au2l6Nofx0E",
+        "title": "Why Space Gets More Terrifying the Further You Travel",
+        "publishedAt": "3 weeks ago",
+        "viewCount": 45420,
+        "durationSeconds": 7439,
+        "thumbnailUrl": "https://i.ytimg.com/vi/Au2l6Nofx0E/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDqNYbuQDzmLSgFoZ9jjTAwu3hDZg",
+        "channelName": "Calm Space",
+        "channelId": "UCXyJmt3PKv0fbsU9DtcreEw",
+        "channel": {
+          "id": "UCXyJmt3PKv0fbsU9DtcreEw",
+          "title": "Calm Space",
+          "handle": "@CalmSpaceToSleep",
+          "url": "https://www.youtube.com/@CalmSpaceToSleep",
+          "thumbnail": null
+        },
+        "badges": []
+      },
+      {
+        "type": "video",
+        "id": "3Z8n43yp-mg",
+        "url": "https://www.youtube.com/watch?v=3Z8n43yp-mg",
+        "title": "3 Hours Of Facts About Space And Our Solar System",
+        "publishedAt": "1 year ago",
+        "viewCount": 506443,
+        "durationSeconds": 10922,
+        "thumbnailUrl": "https://i.ytimg.com/vi/3Z8n43yp-mg/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA5ZCCpBoxl_OMCWz4cWPE8nCa40w",
+        "channelName": "Spark",
+        "channelId": "UCMV3aTOwUtG5vwfH9_rzb2w",
+        "channel": {
+          "id": "UCMV3aTOwUtG5vwfH9_rzb2w",
+          "title": "Spark",
+          "handle": "@SparkDocs",
+          "url": "https://www.youtube.com/@SparkDocs",
+          "thumbnail": null
+        },
+        "badges": [
+          "Verified"
+        ]
+      },
+      {
+        "type": "video",
+        "id": "ir8jMyLBS6k",
+        "url": "https://www.youtube.com/watch?v=ir8jMyLBS6k",
+        "title": "1 Hour of Mind-Blowing Space Facts Scientists Can’t Ignore",
+        "publishedAt": "4 weeks ago",
+        "viewCount": 72726,
+        "durationSeconds": 3632,
+        "thumbnailUrl": "https://i.ytimg.com/vi/ir8jMyLBS6k/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD_eVVLviIcny85Etou6tqf2noKlw",
+        "channelName": "Astral Curiosity",
+        "channelId": "UCd6DpEsZHe5vadiZQ7JssNw",
+        "channel": {
+          "id": "UCd6DpEsZHe5vadiZQ7JssNw",
+          "title": "Astral Curiosity",
+          "handle": "@astralcuriosity",
+          "url": "https://www.youtube.com/@astralcuriosity",
+          "thumbnail": null
+        },
+        "badges": []
+      }
+    ],
+    "shorts": [],
+    "channels": [],
+    "playlists": []
   },
   "youtube-shorts-comments": {
     "url": "https://www.youtube.com/watch?v=DXVHmGoCTco",

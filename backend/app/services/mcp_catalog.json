@@ -139,7 +139,7 @@
     "name": "YouTube Search",
     "path": "/v1/youtube/search",
     "credits": 2,
-    "summary": "Search YouTube videos by keyword.",
+    "summary": "YouTube search — typed hits, ids, canonical URLs, cursor pagination, filters.",
     "params": [
       {
         "name": "q",
@@ -152,6 +152,42 @@
         "type": "number",
         "required": false,
         "description": "Max items to return. Default 20, max 200. Billed per result."
+      },
+      {
+        "name": "cursor",
+        "type": "string",
+        "required": false,
+        "description": "Pagination cursor from nextCursor."
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "required": false,
+        "description": "all | videos | shorts | channels | playlists."
+      },
+      {
+        "name": "sortBy",
+        "type": "string",
+        "required": false,
+        "description": "relevance | date | views | rating."
+      },
+      {
+        "name": "uploadDate",
+        "type": "string",
+        "required": false,
+        "description": "any | today | this_week | this_month | this_year."
+      },
+      {
+        "name": "duration",
+        "type": "string",
+        "required": false,
+        "description": "any | under_4 | 4_20 | over_20."
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "required": false,
+        "description": "ISO country code (default US)."
       },
       {
         "name": "cache",
