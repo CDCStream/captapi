@@ -9430,6 +9430,7 @@
           "Pinterest"
         ],
         "summary": "Pinterest pin metadata + stats",
+        "description": "Returns title, description, seoAltText, link, ISO createdAt, board, author (pinner), originAuthor (native creator), saves/repin/share/reaction counts, and image plus sized images including originals. Flat 1 credit.",
         "operationId": "pin_details_v1_pinterest_pin_details_get",
         "security": [
           {

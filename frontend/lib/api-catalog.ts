@@ -354,7 +354,7 @@ const BLUESKY: Spec[] = [
 ];
 
 const PINTEREST: Spec[] = [
-  { slug: "pinterest-pin-details", name: "Pinterest Pin Details API", shortName: "Pin Details", category: "details", method: "GET", path: "/v1/pinterest/pin-details", credits: 1 , tagline: "Get a Pinterest pin — title, description, image, board, and save/engagement fields as structured JSON." },
+  { slug: "pinterest-pin-details", name: "Pinterest Pin Details API", shortName: "Pin Details", category: "details", method: "GET", path: "/v1/pinterest/pin-details", credits: 1, tagline: "Get a Pinterest pin — title, description, link, board, origin creator, and engagement as structured JSON.", longDescription: "Pass a Pinterest pin URL and get clean JSON: title, description, seoAltText, link/destinationUrl, createdAt (ISO-8601), board{name,url,pinCount,followers}, author (board pinner), originAuthor (native creator / original uploader), saves plus repinCount/shareCount/reactionCount, image plus images{236x,564x,originals}. Flat 1 credit. Fields Pinterest does not expose on a given pin stay omitted/null." },
   { slug: "pinterest-user-pins", name: "Pinterest User Pins API", shortName: "User Pins", category: "list", method: "GET", path: "/v1/pinterest/user-pins", credits: 13, creditsPerResult: 0.5 },
   { slug: "pinterest-search", name: "Pinterest Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/pinterest/search", credits: 13, creditsPerResult: 0.5 },
   { slug: "pinterest-board", name: "Pinterest Board API", shortName: "Board", category: "list", method: "GET", path: "/v1/pinterest/board", credits: 13, creditsPerResult: 0.5 },

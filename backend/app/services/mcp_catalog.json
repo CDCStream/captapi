@@ -2489,7 +2489,7 @@
     "name": "Pinterest Pin Details",
     "path": "/v1/pinterest/pin-details",
     "credits": 1,
-    "summary": "Metadata + saves for a Pinterest pin.",
+    "summary": "Pin title, description, link, board, originAuthor, images, and engagement (1 credit).",
     "params": [
       {
         "name": "url",

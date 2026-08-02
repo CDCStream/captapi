@@ -7,8 +7,11 @@ from __future__ import annotations
 
 import asyncio
 import html
+import json
 import math
 import re
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from typing import Any
 
 import httpx
@@ -71,10 +74,148 @@ def _require_pinterest_username(value: str) -> str:
     return username
 
 
+def _html_text(v: Any) -> str | None:
+    """safe_str + HTML entity decode (Pinterest often returns &amp; in names/links)."""
+    s = safe_str(v)
+    if not s:
+        return None
+    return html.unescape(s).strip() or None
+
+
+def _created_at_iso(value: Any) -> str | None:
+    """Normalize Pinterest dates to ISO-8601 UTC (accepts ISO or RFC 2822)."""
+    s = safe_str(value)
+    if not s:
+        return None
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?", s):
+        return s if s.endswith("Z") else f"{s}Z" if "T" in s else s
+    try:
+        dt = parsedate_to_datetime(s)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    except (TypeError, ValueError, IndexError, OverflowError):
+        pass
+    try:
+        dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    except ValueError:
+        return s
+
+
+def _synthesize_originals_url(image_url: str | None) -> str | None:
+    """Rewrite a sized pinimg URL to /originals/ when possible."""
+    u = safe_str(image_url)
+    if not u or "pinimg.com" not in u:
+        return None
+    if "/originals/" in u:
+        return u
+    rewritten = re.sub(r"/(\d+x)/", "/originals/", u, count=1)
+    return rewritten if rewritten != u else None
+
+
+def _images_variants(images: Any) -> dict[str, Any]:
+    """Map pidgets/Apify image dict → {size: {url,width,height}}."""
+    if not isinstance(images, dict):
+        return {}
+    out: dict[str, Any] = {}
+    for key, entry in images.items():
+        if not isinstance(key, str):
+            continue
+        if isinstance(entry, dict) and entry.get("url"):
+            out[key] = strip_empty(
+                {
+                    "url": safe_str(entry.get("url")),
+                    "width": safe_int(entry.get("width")),
+                    "height": safe_int(entry.get("height")),
+                }
+            )
+        elif isinstance(entry, str) and entry.strip():
+            out[key] = {"url": entry.strip()}
+    if "originals" not in out and "orig" not in out:
+        for key in ("736x", "564x", "474x", "237x", "236x"):
+            entry = out.get(key)
+            if isinstance(entry, dict):
+                orig = _synthesize_originals_url(entry.get("url"))
+                if orig:
+                    out["originals"] = {"url": orig}
+                    break
+    return out
+
+
+def _best_image_url(
+    images: dict[str, Any] | None,
+    fallback: str | None = None,
+    *,
+    prefer_originals: bool = False,
+) -> str | None:
+    """Pick a display image. Default prefers sized CDN URLs (stable for clients);
+    originals stay available under ``images.originals``."""
+    if isinstance(images, dict):
+        keys = (
+            ("originals", "orig", "736x", "564x", "474x", "237x", "236x")
+            if prefer_originals
+            else ("736x", "564x", "474x", "237x", "236x", "originals", "orig")
+        )
+        for key in keys:
+            entry = images.get(key)
+            if isinstance(entry, dict) and entry.get("url"):
+                return safe_str(entry["url"])
+            if isinstance(entry, str):
+                return safe_str(entry)
+    return safe_str(fallback)
+
+
+def _person_from_pidget(user: Any) -> dict[str, Any]:
+    """Normalize pinner / native_creator into a clean person object."""
+    if not isinstance(user, dict):
+        return {}
+    profile_url = _html_text(user.get("profile_url") or user.get("url"))
+    username = _html_text(user.get("username"))
+    if not username and profile_url:
+        username = profile_url.rstrip("/").rsplit("/", 1)[-1] or None
+    verified = user.get("is_verified_merchant")
+    if not isinstance(verified, bool):
+        verified = user.get("isVerifiedMerchant")
+    if not isinstance(verified, bool):
+        verified = None
+    return strip_empty(
+        {
+            "id": safe_str(user.get("id") or user.get("entityId")),
+            "username": username,
+            "displayName": _html_text(
+                user.get("full_name") or user.get("fullName") or user.get("displayName")
+            ),
+            "url": profile_url,
+            "followers": safe_int(user.get("follower_count") or user.get("followerCount")),
+            "pinCount": safe_int(user.get("pin_count") or user.get("pinCount")),
+            "avatar": safe_str(
+                user.get("image_small_url")
+                or user.get("imageSmallUrl")
+                or user.get("avatar")
+            ),
+            "avatarMedium": safe_str(
+                user.get("image_medium_url") or user.get("imageMediumUrl")
+            ),
+            "avatarLarge": safe_str(
+                user.get("image_large_url") or user.get("imageLargeUrl")
+            ),
+            "isVerifiedMerchant": verified,
+            "about": _html_text(user.get("about")),
+        }
+    )
+
+
 def _image(item: dict[str, Any]) -> str | None:
     imgs = item.get("images") or item.get("image")
     if isinstance(imgs, dict):
-        for key in ("orig", "736x", "564x", "474x"):
+        mapped = _images_variants(imgs) if any(isinstance(v, (dict, str)) for v in imgs.values()) else {}
+        best = _best_image_url(mapped)
+        if best:
+            return best
+        for key in ("orig", "originals", "736x", "564x", "474x"):
             v = imgs.get(key)
             if isinstance(v, dict) and v.get("url"):
                 return safe_str(v["url"])
@@ -89,93 +230,116 @@ def _normalize_pin(item: dict[str, Any]) -> dict[str, Any]:
     pinner = item.get("pinner") or item.get("user") or {}
     if not isinstance(pinner, dict):
         pinner = {}
+    native_creator = item.get("native_creator") or item.get("nativeCreator") or item.get("originPinner")
     board = item.get("board") if isinstance(item.get("board"), dict) else {}
     pin_id = item.get("id") or item.get("pinId") or item.get("pin_id")
     pin_url = item.get("url") or item.get("pinUrl") or item.get("pin_url")
     board_url = safe_str(item.get("boardUrl") or board.get("url"))
     if board_url and board_url.startswith("/"):
         board_url = f"https://www.pinterest.com{board_url}"
+    link = _html_text(
+        item.get("link")
+        or item.get("destinationUrl")
+        or item.get("sourceLink")
+        or item.get("linkUrl")
+        or item.get("clickThroughUrl")
+    )
+    images = _images_variants(item.get("images")) if isinstance(item.get("images"), dict) else {}
+    image = _image(item) or _best_image_url(images)
+    created = _created_at_iso(
+        item.get("created_at")
+        or item.get("createdAt")
+        or item.get("createdDate")
+        or item.get("date")
+        or item.get("publishedAt")
+    )
+    author = _person_from_pidget(pinner)
+    if not author.get("username"):
+        author = strip_empty(
+            {
+                **author,
+                "username": safe_str(
+                    item.get("pinner_username")
+                    or item.get("creator")
+                    or item.get("creatorUsername")
+                ),
+                "displayName": author.get("displayName")
+                or _html_text(
+                    item.get("pinner_name")
+                    or item.get("creatorFullName")
+                    or item.get("creatorName")
+                ),
+                "followers": author.get("followers")
+                or safe_int(item.get("creatorFollowerCount")),
+            }
+        )
+    origin = _person_from_pidget(native_creator)
+    agg = item.get("aggregated_pin_data") if isinstance(item.get("aggregated_pin_data"), dict) else {}
+    stats = agg.get("aggregated_stats") if isinstance(agg.get("aggregated_stats"), dict) else {}
+    saves = safe_int(
+        stats.get("saves")
+        or item.get("saveCount")
+        or item.get("saves")
+        or item.get("aggregateSaveCount")
+        or item.get("repin_count")
+        or item.get("repinCount")
+    )
     return strip_empty(
         {
             "platform": "pinterest",
             "id": safe_str(pin_id),
             "url": safe_str(pin_url)
             or (f"https://www.pinterest.com/pin/{pin_id}/" if pin_id else None),
-            "title": safe_str(
+            "title": _html_text(
                 item.get("title")
                 or item.get("grid_title")
                 or item.get("closeup_unified_title")
                 or item.get("gridTitle")
-                # pidgets often only expose description for search-hydrated pins
-                or item.get("description")
+                or item.get("headline")
             ),
-            "description": safe_str(
+            "description": _html_text(
                 item.get("description")
                 or item.get("altText")
                 or item.get("autoAltText")
+                or item.get("auto_alt_text")
                 or item.get("alt_text")
             ),
-            "destinationUrl": safe_str(
-                item.get("link")
-                or item.get("destinationUrl")
-                or item.get("sourceLink")
-                or item.get("linkUrl")
-                or item.get("clickThroughUrl")
+            "seoAltText": _html_text(
+                item.get("seoAltText") or item.get("seo_alt_text") or item.get("auto_alt_text")
             ),
-            "image": _image(item),
-            "saves": safe_int(
-                item.get("repin_count")
-                or item.get("saveCount")
-                or item.get("repinCount")
-                or item.get("save_count")
-                or item.get("saves")
+            "link": link,
+            "destinationUrl": link,
+            "domain": _html_text(item.get("domain")),
+            "image": image,
+            "images": images or None,
+            "isVideo": bool(item.get("is_video") or item.get("isVideo"))
+            if item.get("is_video") is not None or item.get("isVideo") is not None
+            else None,
+            "dominantColor": safe_str(item.get("dominant_color") or item.get("dominantColor")),
+            "saves": saves,
+            "repinCount": safe_int(item.get("repin_count") or item.get("repinCount")),
+            "shareCount": safe_int(item.get("share_count") or item.get("shareCount")),
+            "reactionCount": safe_int(
+                item.get("total_reaction_count")
+                or item.get("totalReactionCount")
                 or item.get("reactionCount")
-                or item.get("aggregateSaveCount")
             ),
             "comments": safe_int(
                 item.get("comment_count")
                 or item.get("commentCount")
                 or item.get("commentsCount")
-                or (
-                    (item.get("aggregated_pin_data") or {}).get("comment_count")
-                    if isinstance(item.get("aggregated_pin_data"), dict)
-                    else None
-                )
+                or agg.get("comment_count")
             ),
-            "publishedAt": safe_str(
-                item.get("created_at")
-                or item.get("createdAt")
-                or item.get("createdDate")
-                or item.get("date")
-            ),
+            "createdAt": created,
+            "publishedAt": created,
             "board": {
-                "name": safe_str(item.get("boardName") or board.get("name")),
+                "name": _html_text(item.get("boardName") or board.get("name")),
                 "url": board_url,
+                "pinCount": safe_int(board.get("pin_count") or board.get("pinCount")),
+                "followers": safe_int(board.get("follower_count") or board.get("followerCount")),
             },
-            "author": {
-                "username": safe_str(
-                    pinner.get("username")
-                    or item.get("pinner_username")
-                    or item.get("creator")
-                    or item.get("creatorUsername")
-                    or (
-                        (safe_str(pinner.get("profile_url")) or "").rstrip("/").rsplit("/", 1)[-1]
-                        or None
-                    )
-                ),
-                "displayName": safe_str(
-                    pinner.get("full_name")
-                    or pinner.get("fullName")
-                    or item.get("pinner_name")
-                    or item.get("creatorFullName")
-                    or item.get("creatorName")
-                ),
-                "followers": safe_int(
-                    pinner.get("follower_count")
-                    or pinner.get("followerCount")
-                    or item.get("creatorFollowerCount")
-                ),
-            },
+            "author": author,
+            "originAuthor": origin or None,
         }
     )
 
@@ -233,7 +397,26 @@ async def _enrich_sparse_pins(pins: list[dict[str, Any]], *, max_enrich: int = 1
             out.append(pin)
             continue
         merged = {**pin}
-        for key in ("title", "description", "destinationUrl", "saves", "comments", "publishedAt", "image"):
+        for key in (
+            "title",
+            "description",
+            "seoAltText",
+            "link",
+            "destinationUrl",
+            "domain",
+            "saves",
+            "repinCount",
+            "shareCount",
+            "reactionCount",
+            "comments",
+            "createdAt",
+            "publishedAt",
+            "image",
+            "images",
+            "isVideo",
+            "dominantColor",
+            "originAuthor",
+        ):
             if not merged.get(key) and detail.get(key):
                 merged[key] = detail[key]
         if isinstance(merged.get("author"), dict) and isinstance(detail.get("author"), dict):
@@ -272,6 +455,136 @@ def _json_string(page: str, key: str) -> str | None:
         return html.unescape(match.group(1)).strip()
 
 
+def _json_ld_pin(page: str) -> dict[str, Any]:
+    """Extract SocialMediaPosting JSON-LD from a pin page (title/desc/date/image)."""
+    for match in re.finditer(
+        r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
+        page,
+        flags=re.IGNORECASE | re.DOTALL,
+    ):
+        raw = match.group(1).strip()
+        if "SocialMediaPosting" not in raw and "ImageObject" not in raw:
+            continue
+        try:
+            data = json.loads(raw)
+        except (ValueError, TypeError):
+            continue
+        if isinstance(data, list):
+            data = next((d for d in data if isinstance(d, dict)), None)
+        if not isinstance(data, dict):
+            continue
+        author = data.get("author") if isinstance(data.get("author"), dict) else {}
+        image = data.get("image")
+        image_url = None
+        if isinstance(image, str):
+            image_url = image
+        elif isinstance(image, list) and image:
+            image_url = image[0] if isinstance(image[0], str) else None
+        elif isinstance(image, dict):
+            image_url = image.get("url")
+        saves = None
+        for stat in data.get("interactionStatistic") or []:
+            if not isinstance(stat, dict):
+                continue
+            if safe_str(stat.get("description")) == "Saves" or "LikeAction" in str(
+                stat.get("interactionType")
+            ):
+                saves = safe_int(stat.get("userInteractionCount"))
+                break
+        return strip_empty(
+            {
+                "title": _html_text(data.get("headline") or data.get("name")),
+                "description": _html_text(data.get("articleBody") or data.get("description")),
+                "createdAt": _created_at_iso(data.get("datePublished")),
+                "image": safe_str(image_url),
+                "saves": saves,
+                "authorName": _html_text(author.get("name")),
+                "authorUsername": _html_text(author.get("alternateName")),
+                "authorUrl": _html_text(author.get("url")),
+            }
+        )
+    return {}
+
+
+def _page_pin_extras(page: str) -> dict[str, Any]:
+    """Pull seoAltText / engagement counts / RFC createdAt from pin HTML JSON."""
+    def _num(key: str) -> int | None:
+        m = re.search(rf'"{re.escape(key)}"\s*:\s*(\d+)', page)
+        return safe_int(m.group(1)) if m else None
+
+    seo = _json_string(page, "seoAltText")
+    created_rfc = _json_string(page, "createdAt")
+    return strip_empty(
+        {
+            "seoAltText": _html_text(seo),
+            "createdAt": _created_at_iso(created_rfc),
+            "repinCount": _num("repinCount"),
+            "shareCount": _num("shareCount"),
+            "reactionCount": _num("totalReactionCount"),
+        }
+    )
+
+
+async def _enrich_pin_from_page(pin_id: str, base: dict[str, Any]) -> dict[str, Any]:
+    """Fill title/description/createdAt/seoAltText/reactions from the public pin page.
+
+    Pidgets omit created_at and often blank description; the pin HTML carries
+    JSON-LD + seoAltText / shareCount / totalReactionCount.
+    """
+    url = safe_str(base.get("url")) or f"https://www.pinterest.com/pin/{pin_id}/"
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; CaptapiBot/1.0)"}
+    try:
+        async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers) as client:
+            resp = await client.get(url)
+    except httpx.HTTPError:
+        return base
+    if resp.status_code >= 400 or not resp.text:
+        return base
+
+    page = resp.text
+    ld = _json_ld_pin(page)
+    extras = _page_pin_extras(page)
+    out = dict(base)
+
+    for key in ("title", "description", "seoAltText"):
+        if not out.get(key) and (ld.get(key) or extras.get(key)):
+            out[key] = ld.get(key) or extras.get(key)
+
+    created = ld.get("createdAt") or extras.get("createdAt")
+    if created:
+        out["createdAt"] = created
+        out["publishedAt"] = created
+
+    for key in ("repinCount", "shareCount", "reactionCount"):
+        if out.get(key) is None and extras.get(key) is not None:
+            out[key] = extras[key]
+
+    if not out.get("saves") and ld.get("saves") is not None:
+        out["saves"] = ld["saves"]
+
+    # Prefer JSON-LD originals image when present.
+    if ld.get("image"):
+        images = dict(out.get("images") or {}) if isinstance(out.get("images"), dict) else {}
+        if "/originals/" in ld["image"] or "originals" not in images:
+            images["originals"] = {"url": ld["image"]}
+            out["images"] = images
+            # Keep existing sized `image` if we already have one; else use originals.
+            if not out.get("image"):
+                out["image"] = ld["image"]
+
+    author = dict(out.get("author") or {}) if isinstance(out.get("author"), dict) else {}
+    if not author.get("displayName") and ld.get("authorName"):
+        author["displayName"] = ld["authorName"]
+    if not author.get("username") and ld.get("authorUsername"):
+        author["username"] = ld["authorUsername"]
+    if not author.get("url") and ld.get("authorUrl"):
+        author["url"] = ld["authorUrl"]
+    if author:
+        out["author"] = author
+
+    return strip_empty(out)
+
+
 async def _fetch_pin_pidgets(pin_id: str) -> dict[str, Any] | None:
     """Pinterest's public widget API returns full pin metadata (stats, pinner,
     board, images) without auth; use it before falling back to OG scraping."""
@@ -293,84 +606,77 @@ async def _fetch_pin_pidgets(pin_id: str) -> dict[str, Any] | None:
     if not rows or not isinstance(rows[0], dict):
         return None
     pin = rows[0]
-    pinner = pin.get("pinner") or {}
-    board = pin.get("board") or {}
-    stats = ((pin.get("aggregated_pin_data") or {}).get("aggregated_stats")) or {}
-    images = pin.get("images") or {}
-    image = None
-    for key in ("originals", "orig", "736x", "564x", "474x", "237x"):
-        entry = images.get(key)
-        if isinstance(entry, dict) and entry.get("url"):
-            image = entry["url"]
-            break
-    if not image:
+    board = pin.get("board") if isinstance(pin.get("board"), dict) else {}
+    agg = pin.get("aggregated_pin_data") if isinstance(pin.get("aggregated_pin_data"), dict) else {}
+    stats = agg.get("aggregated_stats") if isinstance(agg.get("aggregated_stats"), dict) else {}
+    images = _images_variants(pin.get("images"))
+    if not images:
         # story pins keep images inside story_pin_data pages
         for page in ((pin.get("story_pin_data") or {}).get("pages")) or []:
             for block in (page.get("blocks") or []) if isinstance(page, dict) else []:
-                block_images = ((block.get("image") or {}).get("images")) if isinstance(block, dict) else None
+                block_images = (
+                    ((block.get("image") or {}).get("images")) if isinstance(block, dict) else None
+                )
                 if isinstance(block_images, dict):
-                    for key in ("originals", "736x", "474x"):
-                        entry = block_images.get(key)
-                        if isinstance(entry, dict) and entry.get("url"):
-                            image = entry["url"]
-                            break
-                if image:
-                    break
-            if image:
+                    images = _images_variants(block_images)
+                    if images:
+                        break
+            if images:
                 break
-    username = None
-    profile_url = safe_str(pinner.get("profile_url"))
-    if profile_url:
-        username = profile_url.rstrip("/").rsplit("/", 1)[-1]
+    image = _best_image_url(images)
     board_url = safe_str(board.get("url"))
+    if board_url and board_url.startswith("/"):
+        board_url = f"https://www.pinterest.com{board_url}"
     rich = pin.get("rich_metadata") if isinstance(pin.get("rich_metadata"), dict) else {}
     rich_summary = pin.get("rich_summary") if isinstance(pin.get("rich_summary"), dict) else {}
-    title = safe_str(
+    link = _html_text(pin.get("link") or rich.get("url"))
+    # Prefer a real title; do not fall back to a whitespace-only description.
+    title = _html_text(
         rich.get("title")
         or pin.get("grid_title")
         or pin.get("closeup_unified_title")
         or rich_summary.get("display_name")
         or pin.get("title")
-        or pin.get("description")
     )
+    description = _html_text(pin.get("description"))
+    seo_alt = _html_text(pin.get("auto_alt_text") or pin.get("alt_text") or pin.get("seoAltText"))
+    created = _created_at_iso(pin.get("created_at") or pin.get("createdAt"))
+    author = _person_from_pidget(pin.get("pinner"))
+    origin = _person_from_pidget(pin.get("native_creator") or pin.get("origin_pinner"))
     return strip_empty(
         {
             "platform": "pinterest",
             "id": safe_str(pin.get("id") or pin_id),
             "url": f"https://www.pinterest.com/pin/{pin_id}/",
             "title": title,
-            "description": safe_str(
-                pin.get("description") or pin.get("auto_alt_text") or pin.get("alt_text")
-            ),
-            "destinationUrl": safe_str(pin.get("link") or rich.get("url")),
+            "description": description,
+            "seoAltText": seo_alt,
+            "link": link,
+            "destinationUrl": link,
+            "domain": _html_text(pin.get("domain")),
             "image": safe_str(image),
+            "images": images or None,
             "isVideo": bool(pin.get("is_video")),
             "dominantColor": safe_str(pin.get("dominant_color")),
-            "saves": safe_int(stats.get("saves") or pin.get("repin_count") or pin.get("share_count")),
-            "comments": safe_int(
-                pin.get("comment_count")
-                or stats.get("comments")
-                or (
-                    (pin.get("aggregated_pin_data") or {}).get("comment_count")
-                    if isinstance(pin.get("aggregated_pin_data"), dict)
-                    else None
-                )
+            "saves": safe_int(stats.get("saves") or pin.get("repin_count")),
+            "repinCount": safe_int(pin.get("repin_count")),
+            "shareCount": safe_int(pin.get("share_count")),
+            "reactionCount": safe_int(
+                pin.get("total_reaction_count") or pin.get("totalReactionCount")
             ),
-            "publishedAt": safe_str(pin.get("created_at")),
+            "comments": safe_int(
+                pin.get("comment_count") or stats.get("comments") or agg.get("comment_count")
+            ),
+            "createdAt": created,
+            "publishedAt": created,
             "board": {
-                "name": safe_str(board.get("name")),
-                "url": f"https://www.pinterest.com{board_url}" if board_url and board_url.startswith("/") else board_url,
+                "name": _html_text(board.get("name")),
+                "url": board_url,
                 "pinCount": safe_int(board.get("pin_count")),
                 "followers": safe_int(board.get("follower_count")),
             },
-            "author": {
-                "username": safe_str(username),
-                "displayName": safe_str(pinner.get("full_name")),
-                "url": profile_url,
-                "followers": safe_int(pinner.get("follower_count")),
-                "pinCount": safe_int(pinner.get("pin_count")),
-                "avatar": safe_str(pinner.get("image_small_url")),
-            },
+            "author": author,
+            "originAuthor": origin or None,
         }
     )
 
@@ -384,32 +690,66 @@ async def _fetch_pin_page(url: str) -> dict[str, Any]:
 
     page = resp.text
     pin_id = extract_pinterest_pin_id(str(resp.url)) or extract_pinterest_pin_id(url)
-    title = _meta(page, "og:title") or _json_string(page, "title") or _html_title(page)
+    ld = _json_ld_pin(page)
+    extras = _page_pin_extras(page)
+    title = (
+        ld.get("title")
+        or _meta(page, "og:title")
+        or _json_string(page, "title")
+        or _html_title(page)
+    )
     description = (
-        _meta(page, "og:description")
+        ld.get("description")
+        or _meta(page, "og:description")
         or _meta(page, "description")
         or _json_string(page, "description")
     )
-    image = _meta(page, "og:image")
+    image = ld.get("image") or _meta(page, "og:image")
     canonical = _meta(page, "og:url") or str(resp.url)
+    created = ld.get("createdAt") or extras.get("createdAt")
     if not (title or description or image):
         raise HTTPException(status_code=404, detail="Pin not found")
 
+    images = {}
+    if image and "/originals/" in image:
+        images["originals"] = {"url": image}
     return strip_empty(
         {
             "platform": "pinterest",
             "id": safe_str(pin_id),
             "url": safe_str(canonical),
-            "title": safe_str(title),
-            "description": safe_str(description),
+            "title": _html_text(title),
+            "description": _html_text(description),
+            "seoAltText": extras.get("seoAltText"),
             "image": safe_str(image),
-            "saves": 0,
+            "images": images or None,
+            "saves": ld.get("saves") if ld.get("saves") is not None else 0,
+            "repinCount": extras.get("repinCount"),
+            "shareCount": extras.get("shareCount"),
+            "reactionCount": extras.get("reactionCount"),
             "comments": 0,
+            "createdAt": created,
+            "publishedAt": created,
+            "author": strip_empty(
+                {
+                    "username": ld.get("authorUsername"),
+                    "displayName": ld.get("authorName"),
+                    "url": ld.get("authorUrl"),
+                }
+            ),
         }
     )
 
 
-@router.get("/pin-details", summary="Pinterest pin metadata + stats")
+@router.get(
+    "/pin-details",
+    summary="Pinterest pin metadata + stats",
+    description=(
+        "Returns title, description, seoAltText, link, ISO createdAt, board, "
+        "author (pinner), originAuthor (native creator), saves/repin/share/reaction "
+        "counts, and image plus sized images including originals. Flat 1 credit."
+    ),
+)
 async def pin_details(
     url: str = Query(..., description="Pinterest pin URL"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -429,7 +769,10 @@ async def pin_details(
             if pin_id:
                 pidgets = await _fetch_pin_pidgets(pin_id)
                 if pidgets:
-                    return pidgets
+                    ctx["source"] = "direct"
+                    # Page hydrate fills createdAt / title / seoAltText / reactions
+                    # that pidgets omit — still one credit, same endpoint.
+                    return await _enrich_pin_from_page(pin_id, pidgets)
             apify = get_apify()
             try:
                 items = await apify.run_actor_sync(
@@ -440,12 +783,21 @@ async def pin_details(
             except Exception:
                 items = []
             if items:
-                return _normalize_pin(items[0])
+                ctx["source"] = "apify"
+                normalized = _normalize_pin(items[0])
+                if pin_id and (
+                    not normalized.get("createdAt")
+                    or not normalized.get("title")
+                    or not normalized.get("seoAltText")
+                ):
+                    return await _enrich_pin_from_page(pin_id, normalized)
+                return normalized
+            ctx["source"] = "direct"
             return await _fetch_pin_page(url)
 
         data = await cached_or_run(
             endpoint="pinterest.pin-details",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -1698,7 +1698,7 @@ class PinterestApi:
         self._t = transport
 
     def pin_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Pinterest Pin Details — Metadata + saves for a Pinterest pin. (1 credit)
+        """Pinterest Pin Details — Pin title, description, link, board, originAuthor, images, and engagement (1 credit). (1 credit)
 
         :param url: Pinterest pin URL, e.g. https://pinterest.com/pin/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1747,7 +1747,7 @@ class AsyncPinterestApi:
         self._t = transport
 
     async def pin_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Pinterest Pin Details — Metadata + saves for a Pinterest pin. (1 credit)
+        """Pinterest Pin Details — Pin title, description, link, board, originAuthor, images, and engagement (1 credit). (1 credit)
 
         :param url: Pinterest pin URL, e.g. https://pinterest.com/pin/ID/. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

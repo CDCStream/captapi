@@ -143,3 +143,18 @@ SC 8 · Captapi 1 · Mixed 1. Shipped this batch: #8 SEO fix, #9 ISO+post, #10 S
 | author.username = channel handle; displayName = channel name | P1 | Shipped |
 | Docs honesty: shares/saves null on YouTube; same shape, sparse fields OK | P1 | Shipped |
 | author.verified on YouTube | P2 | Still null without channel badge lookup |
+
+---
+
+## #17 GET /v1/pinterest/pin-details
+**Keep:** board{}, isVideo, dominantColor, clean author{}, 1 credit, top-level image string.
+
+| Field / param | Priority | Status |
+|---|---|---|
+| title / description / seoAltText | P0 | Shipped (pidgets + pin-page JSON-LD) |
+| link + destinationUrl | P0 | Shipped |
+| createdAt / publishedAt ISO-8601 | P0 | Shipped (page datePublished; RFC2822 normalized) |
+| originAuthor (native creator) vs author (pinner) | P0 | Shipped |
+| repinCount / shareCount / reactionCount (+ saves) | P1 | Shipped |
+| images{236x,237x,564x,originals} | P1 | Shipped (keep image string) |
+| domain | P2 | Shipped when present |

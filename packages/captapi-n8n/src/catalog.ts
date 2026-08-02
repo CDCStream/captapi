@@ -291,7 +291,7 @@ const BLUESKY: Omit<Endpoint, "platform">[] = [
 ];
 
 const PINTEREST: Omit<Endpoint, "platform">[] = [
-  { tool: "pinterest_pin_details", name: "Pinterest Pin Details", path: "/v1/pinterest/pin-details", credits: 1, summary: "Metadata + saves for a Pinterest pin.", params: [url(PIN_PIN)] },
+  { tool: "pinterest_pin_details", name: "Pinterest Pin Details", path: "/v1/pinterest/pin-details", credits: 1, summary: "Pin title, description, link, board, originAuthor, images, and engagement (1 credit).", params: [url(PIN_PIN)] },
   { tool: "pinterest_user_pins", name: "Pinterest User Pins", path: "/v1/pinterest/user-pins", credits: 13, summary: "Pins from a Pinterest profile.", params: [url(PIN_PROFILE), limit(25, 200)] },
   { tool: "pinterest_search", name: "Pinterest Search", path: "/v1/pinterest/search", credits: 13, summary: "Search Pinterest pins by keyword.", params: [q(), limit(25, 200)] },
   { tool: "pinterest_board", name: "Pinterest Board", path: "/v1/pinterest/board", credits: 13, summary: "List pins inside a Pinterest board.", params: [url(PIN_BOARD), limit(25, 200)] },

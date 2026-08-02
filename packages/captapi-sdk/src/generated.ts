@@ -1236,7 +1236,7 @@ export interface PinterestUserBoardsParams {
 
 export class PinterestApi {
   constructor(private readonly core: HttpCore) {}
-  /** Pinterest Pin Details — Metadata + saves for a Pinterest pin. (1 credit) */
+  /** Pinterest Pin Details — Pin title, description, link, board, originAuthor, images, and engagement (1 credit). (1 credit) */
   pinDetails(params: PinterestPinDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/pinterest/pin-details", params);
   }

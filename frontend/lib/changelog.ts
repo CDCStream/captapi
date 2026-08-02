@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
+    category: "feature",
+    title: "Pinterest pin-details: title, link, createdAt, originAuthor, images",
+    description:
+      "Pinterest pin-details keeps board{}, author{}, image, and saves, and adds the fields needed for commerce and creator intel: title/description/seoAltText, link/destinationUrl, ISO createdAt, originAuthor vs author (pinner), repinCount/shareCount/reactionCount, and images{} including originals.",
+    items: [
+      "Additive title, description, seoAltText, link/destinationUrl, domain",
+      "Additive createdAt/publishedAt (ISO-8601 from pin page)",
+      "Additive originAuthor + images{236x,564x,originals} + repin/share/reaction counts",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
     category: "fix",
     title: "Post analytics: YouTube likes, comments, publishedAt, engagementRate",
     description:

@@ -11275,10 +11275,32 @@
       "platform": "pinterest",
       "id": "422281212828530",
       "url": "https://www.pinterest.com/pin/422281212828530/",
+      "domain": "Uploaded by user",
       "image": "https://i.pinimg.com/564x/51/a2/0e/51a20efe23e50376920012d832a191a2.jpg",
+      "images": {
+        "236x": {
+          "url": "https://i.pinimg.com/236x/51/a2/0e/51a20efe23e50376920012d832a191a2.jpg",
+          "width": 236,
+          "height": 419
+        },
+        "237x": {
+          "url": "https://i.pinimg.com/236x/51/a2/0e/51a20efe23e50376920012d832a191a2.jpg",
+          "width": 236,
+          "height": 419
+        },
+        "564x": {
+          "url": "https://i.pinimg.com/564x/51/a2/0e/51a20efe23e50376920012d832a191a2.jpg",
+          "width": 564,
+          "height": 1002
+        },
+        "originals": {
+          "url": "https://i.pinimg.com/originals/51/a2/0e/51a20efe23e50376920012d832a191a2.webp"
+        }
+      },
       "isVideo": false,
       "dominantColor": "#a87147",
-      "saves": 9038,
+      "saves": 9606,
+      "repinCount": 2140,
       "board": {
         "name": "Sala",
         "url": "https://www.pinterest.com/camilarmoutinho/sala/",
@@ -11286,13 +11308,31 @@
         "followers": 6
       },
       "author": {
+        "id": "422418623531974",
         "username": "camilarmoutinho",
         "displayName": "Camila Moutinho",
         "url": "https://www.pinterest.com/camilarmoutinho/",
         "followers": 7,
         "pinCount": 265,
         "avatar": "https://i.pinimg.com/60x60_RS/80/48/e0/8048e086101e0b18790160b4251d00bc.jpg"
-      }
+      },
+      "originAuthor": {
+        "id": "1049198181847459163",
+        "username": "HomedecorInteriorDesigntips",
+        "displayName": "B O E | Home, Bedroom, Living Room, Kitchen, Fashion & Bathroom",
+        "url": "https://www.pinterest.com/HomedecorInteriorDesigntips/",
+        "followers": 2956,
+        "pinCount": 66723,
+        "avatar": "https://i.pinimg.com/60x60_RS/8f/b3/53/8fb3538984206cebf310b7a979006bae.jpg",
+        "about": "At BOE, we inspire stylish and functional home living. Discover the latest home improvement ideas, timeless bedroom and living room décor, practical kitchen and bathroom tips, and cozy laundry room inspiration. Explore curated collections of furniture, lighting, fashion accents, and accessories that blend beauty with utility. Get expert guides, DIY projects, and sustainable design practices to transform every space."
+      },
+      "title": "Bauhaus Interior",
+      "description": "May 6, 2026 — A living room with a brown sofa and a yellow armchair. The space features a colorful rug with geometric patterns and a round glass coffee table. Funky mid century modern, Living spaces, Home interior design",
+      "seoAltText": "a living room filled with lots of furniture next to a wall mounted book shelf and lamp",
+      "createdAt": "2026-06-10T11:31:28.000Z",
+      "publishedAt": "2026-06-10T11:31:28.000Z",
+      "shareCount": 94,
+      "reactionCount": 588
     }
   },
   "pinterest-board": {
