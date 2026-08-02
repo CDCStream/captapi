@@ -495,8 +495,8 @@ const UTILITIES: Spec[] = [
     method: "GET",
     path: "/v1/analytics/compare",
     credits: 1,
-    tagline: "Compare unified metrics across up to 10 URLs in one call — 1 credit per successfully resolved URL.",
-    longDescription: "Pass up to 10 comma-separated post/video/reel URLs (any mix of supported platforms) and get the same normalized metrics object for each. Fields the source platform does not expose stay null. Bills 1 credit per successfully resolved URL (minimum 1).",
+    tagline: "Compare unified metrics across up to 10 URLs in one call — 1 credit per resolved URL (cache hits free).",
+    longDescription: "Pass up to 10 comma-separated post/video/reel URLs (any mix of supported platforms) and get count/resolved plus results[] — each item is the same shape as /v1/analytics/post (platform, title, publishedAt, author, metrics{views,likes,comments,shares,saves,interactions,engagementRate}). Platform-missing fields stay null. Bills 1 credit per successfully resolved URL that is not served from the 24h cache (shared with post analytics); there is no bulk discount vs N separate /post calls — the win is one HTTP round-trip. Pass cache=true for free cache hits.",
   },
   {
     slug: "video-transcript",
@@ -1547,6 +1547,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       required: true,
       description: "Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms.",
     },
+    cacheP(),
   ],
   "video-transcript": [
     {
@@ -2005,8 +2006,15 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
       if (typeof captured === "string" && captured.trim()) return captured;
       return "314216";
     }
-    case "urls":
-      return "https://www.tiktok.com/@tiktok/video/7234567890123456789,https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+    case "urls": {
+      const ex = API_EXAMPLES[ep.slug] as { results?: Array<{ url?: string }> } | undefined;
+      const captured = (ex?.results || [])
+        .map((r) => (typeof r?.url === "string" ? r.url : ""))
+        .filter(Boolean)
+        .slice(0, 10);
+      if (captured.length >= 2) return captured.join(",");
+      return "https://www.youtube.com/watch?v=dQw4w9WgXcQ,https://www.youtube.com/watch?v=jNQXAC9IVRw";
+    }
     case "file":
       return "@video.mp4";
     case "url": {
@@ -2255,7 +2263,7 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
         ep.platform === "account" || ep.credits === 0
           ? `Account endpoints are free — they do not consume credits.`
           : ep.slug === "analytics-compare"
-            ? `Billing is 1 credit per successfully resolved URL (minimum 1). Failed or empty results are never charged.`
+            ? `Billing is 1 credit per successfully resolved URL that is not served from cache. Cache hits (cache=true) are free, same as Post Analytics. There is no bulk discount vs calling /v1/analytics/post once per URL — compare saves HTTP round-trips. A fully failed batch still records a minimal 1-credit charge.`
             : ep.slug === "video-transcript"
               ? `Billing is 1 credit per minute of audio (rounded up, minimum 1). Failed or empty results are never charged.`
               : ep.slug === "video-summarize"

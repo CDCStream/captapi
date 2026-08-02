@@ -414,7 +414,7 @@ const UTILITIES: Omit<Endpoint, "platform">[] = [
     name: "Compare Analytics",
     path: "/v1/analytics/compare",
     credits: 1,
-    summary: "Compare unified metrics across up to 10 URLs in one call. 1 credit per successfully resolved URL.",
+    summary: "Same unified metrics as post analytics for up to 10 URLs. 1 credit per resolved URL; cache hits free.",
     params: [
       {
         name: "urls",
@@ -422,6 +422,7 @@ const UTILITIES: Omit<Endpoint, "platform">[] = [
         required: true,
         description: "Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms.",
       },
+      cacheParam(),
     ],
   },
   {

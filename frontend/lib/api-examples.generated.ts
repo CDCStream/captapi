@@ -195,6 +195,60 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "scrapedAt": "2026-07-18T18:48:41.125Z"
     }
   },
+  "analytics-compare": {
+    "count": 2,
+    "resolved": 2,
+    "results": [
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "id": "dQw4w9WgXcQ",
+        "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
+        "publishedAt": "2009-10-24T23:57:33-07:00",
+        "durationSeconds": 213,
+        "thumbnailUrl": "https://i.ytimg.com/vi_webp/dQw4w9WgXcQ/sddefault.webp",
+        "author": {
+          "username": "RickAstleyYT",
+          "displayName": "Rick Astley",
+          "url": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+          "verified": null
+        },
+        "metrics": {
+          "views": 1799581314,
+          "likes": 19303245,
+          "comments": 2400000,
+          "shares": null,
+          "saves": null,
+          "interactions": 21703245,
+          "engagementRate": 0.0121
+        }
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+        "id": "jNQXAC9IVRw",
+        "title": "Me at the zoo",
+        "publishedAt": "2005-04-23T20:31:52-07:00",
+        "durationSeconds": 19,
+        "thumbnailUrl": "https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg?sqp=-oaymwEmCOADEOgC8quKqQMa8AEB-AG-AoAC8AGKAgwIABABGFUgWShlMA8=&rs=AOn4CLA9eLBatYv9WbkD4BbZ2Im-biSPTw",
+        "author": {
+          "username": "jawed",
+          "displayName": "jawed",
+          "url": "https://www.youtube.com/channel/UC4QobU6STFB0P71PMvOGN5A",
+          "verified": null
+        },
+        "metrics": {
+          "views": 402644853,
+          "likes": 19283429,
+          "comments": 10000000,
+          "shares": null,
+          "saves": null,
+          "interactions": 29283429,
+          "engagementRate": 0.0727
+        }
+      }
+    ]
+  },
   "analytics-post": {
     "platform": "youtube",
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",

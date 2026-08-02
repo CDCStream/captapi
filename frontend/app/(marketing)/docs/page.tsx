@@ -110,11 +110,11 @@ const analyticsSample = [
   {
     label: "cURL",
     code: `# Platform is auto-detected from the URL
-curl "${API_URL}/v1/analytics/post?url=https%3A%2F%2Fwww.tiktok.com%2F%40user%2Fvideo%2F7311234567890123456" \\
+curl "${API_URL}/v1/analytics/post?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ" \\
   -H "Authorization: Bearer capt_live_..."
 
-# Compare several posts across platforms in one call
-curl "${API_URL}/v1/analytics/compare?urls=URL1,URL2,URL3" \\
+# Compare several posts in one call (same metrics shape per URL)
+curl "${API_URL}/v1/analytics/compare?urls=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ,https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DjNQXAC9IVRw" \\
   -H "Authorization: Bearer capt_live_..."`,
   },
   {
@@ -122,21 +122,27 @@ curl "${API_URL}/v1/analytics/compare?urls=URL1,URL2,URL3" \\
     code: `{
   "success": true,
   "data": {
-    "platform": "tiktok",
-    "url": "https://www.tiktok.com/@user/video/7311234567890123456",
-    "id": "7311234567890123456",
-    "title": "...",
-    "publishedAt": "2024-12-01T12:00:00.000Z",
-    "author": { "username": "user", "followers": 120000, "verified": true },
-    "metrics": {
-      "views": 1840000,
-      "likes": 245000,
-      "comments": 3100,
-      "shares": 8800,
-      "saves": 12400,
-      "interactions": 269300,
-      "engagementRate": 0.1464
-    }
+    "count": 2,
+    "resolved": 2,
+    "results": [
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "id": "dQw4w9WgXcQ",
+        "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
+        "publishedAt": "2009-10-24T23:57:33-07:00",
+        "author": { "username": "RickAstleyYT", "displayName": "Rick Astley" },
+        "metrics": {
+          "views": 1797826473,
+          "likes": 19283915,
+          "comments": 2400000,
+          "shares": null,
+          "saves": null,
+          "interactions": 21683915,
+          "engagementRate": 0.0121
+        }
+      }
+    ]
   }
 }`,
   },

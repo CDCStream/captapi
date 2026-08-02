@@ -2217,6 +2217,8 @@ export interface AnalyticsPostParams {
 export interface AnalyticsCompareParams {
   /** Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms. */
   urls: string;
+  /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
+  cache?: boolean;
 }
 
 export interface VideoTranscriptParams {
@@ -2235,7 +2237,7 @@ export class UtilitiesApi {
   analyticsPost(params: AnalyticsPostParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/analytics/post", params);
   }
-  /** Compare Analytics — Compare unified metrics across up to 10 URLs in one call. 1 credit per successfully resolved URL. (1 credit) */
+  /** Compare Analytics — Same unified metrics as post analytics for up to 10 URLs. 1 credit per resolved URL; cache hits free. (1 credit) */
   analyticsCompare(params: AnalyticsCompareParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/analytics/compare", params);
   }

@@ -536,6 +536,14 @@ def batch_quality_phase1() -> list[tuple[str, str, dict]]:
         ("tiktok-shop-product-details", "/v1/tiktok-shop/product-details", {**fresh, "url": "https://www.tiktok.com/shop/pdp/1731743608991158724"}),
         ("twitch-profile", "/v1/twitch/profile", {**fresh, "url": "https://www.twitch.tv/shroud"}),
         ("analytics-post", "/v1/analytics/post", {**fresh, "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"}),
+        (
+            "analytics-compare",
+            "/v1/analytics/compare",
+            {
+                **fresh,
+                "urls": "https://www.youtube.com/watch?v=dQw4w9WgXcQ,https://www.youtube.com/watch?v=jNQXAC9IVRw",
+            },
+        ),
         ("tiktok-top-search", "/v1/tiktok/top-search", {**fresh, "q": "nasa", "limit": 5}),
         ("tiktok-trending-feed", "/v1/tiktok/trending-feed", {**fresh, "country": "US", "limit": 5}),
         ("twitter-user-tweets", "/v1/twitter/user-tweets", {**fresh, "url": "https://x.com/nasa", "limit": 5}),

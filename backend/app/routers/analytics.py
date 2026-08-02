@@ -595,14 +595,23 @@ async def post_analytics(
     "/compare",
     summary="Compare metrics across multiple posts and platforms",
     description=(
-        "Fetches unified metrics for up to 10 comma-separated URLs in one call "
-        "(any mix of platforms). Bills 1 credit per successfully resolved URL."
+        "Fetches the same unified metrics object as /v1/analytics/post for up to "
+        "10 comma-separated URLs in one call (any mix of platforms). Each result "
+        "includes metrics.views/likes/comments/shares/saves/interactions/"
+        "engagementRate — fields a platform does not expose stay null. "
+        "Bills 1 credit per successfully resolved URL that is not served from "
+        "cache (same per-URL cache as post analytics). No bulk discount vs "
+        "calling /post N times — the win is one HTTP round-trip."
     ),
 )
 async def compare_analytics(
     urls: str = Query(
         ...,
         description="Comma-separated post URLs (up to 10), any mix of platforms",
+    ),
+    cache: bool = Query(
+        False,
+        description="Set true to use the 24h per-URL cache (shared with /v1/analytics/post). Default false — always fetch fresh.",
     ),
     caller: ApiCaller = Depends(require_api_key),
 ):
@@ -611,6 +620,7 @@ async def compare_analytics(
         raise HTTPException(status_code=400, detail="Provide at least one URL")
 
     base = len(url_list) * CREDIT_POST_ANALYTICS
+    settings = get_settings()
 
     async with billed_call(
         caller=caller,
@@ -619,23 +629,47 @@ async def compare_analytics(
         resource_url=None,
         base_credits=base,
     ) as ctx:
-        async def _one(u: str) -> dict[str, Any]:
+        async def _one(u: str) -> tuple[dict[str, Any], bool]:
+            """Return (row, cache_hit). cache_hit only when a resolved row came from cache."""
             p = _detect_platform(u)
             if not p:
-                return {"url": u, "error": "unsupported_url"}
-            try:
+                return {"url": u, "error": "unsupported_url"}, False
+
+            async def _run() -> dict[str, Any]:
+                _analytics_source.set(None)
                 n = await _FETCHERS[p](u)
                 return _unify(n)
-            except HTTPException as e:
-                return {"url": u, "platform": p, "error": str(e.detail)}
-            except Exception:
-                return {"url": u, "platform": p, "error": "fetch_failed"}
 
-        results = list(await asyncio.gather(*[_one(u) for u in url_list]))
-        resolved = [r for r in results if not r.get("error")]
-        # Bill only for URLs we actually resolved (floor of 1 so a fully failed
-        # batch still records a minimal charge for the work attempted).
-        ctx["credits_override"] = max(1, len(resolved) * CREDIT_POST_ANALYTICS)
+            sub_ctx: dict[str, Any] = {}
+            try:
+                # Share the post-analytics cache key so compare(cache=true) after
+                # /post on the same URL is a free hit.
+                row = await cached_or_run(
+                    endpoint=f"analytics.post.{p}",
+                    params={"url": u, "v": 5},
+                    runner=_run,
+                    ctx=sub_ctx,
+                    ttl=settings.CACHE_TTL_DYNAMIC,
+                    use_cache=cache,
+                )
+                return row, bool(sub_ctx.get("cache_hit"))
+            except HTTPException as e:
+                return {"url": u, "platform": p, "error": str(e.detail)}, False
+            except Exception:
+                return {"url": u, "platform": p, "error": "fetch_failed"}, False
+
+        pairs = list(await asyncio.gather(*[_one(u) for u in url_list]))
+        results = [row for row, _hit in pairs]
+        resolved = [row for row, _hit in pairs if not row.get("error")]
+        fresh = sum(1 for row, hit in pairs if not row.get("error") and not hit)
+        # Cache hits are free (same as /analytics/post). All-failed batches still
+        # record a minimal 1-credit charge for the work attempted.
+        if not resolved:
+            ctx["credits_override"] = 1
+        else:
+            ctx["credits_override"] = fresh * CREDIT_POST_ANALYTICS
+        if fresh == 0 and resolved:
+            ctx["cache_hit"] = True
         return ApiResponse(
             data={
                 "count": len(results),

@@ -3199,12 +3199,13 @@ class UtilitiesApi:
         """
         return self._t.get("/v1/analytics/post", {"url": url, "cache": cache})
 
-    def analytics_compare(self, *, urls: str) -> dict[str, Any]:
-        """Compare Analytics — Compare unified metrics across up to 10 URLs in one call. 1 credit per successfully resolved URL. (1 credit)
+    def analytics_compare(self, *, urls: str, cache: bool | None = None) -> dict[str, Any]:
+        """Compare Analytics — Same unified metrics as post analytics for up to 10 URLs. 1 credit per resolved URL; cache hits free. (1 credit)
 
         :param urls: Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/analytics/compare", {"urls": urls})
+        return self._t.get("/v1/analytics/compare", {"urls": urls, "cache": cache})
 
     def video_transcript(self, *, file: str) -> dict[str, Any]:
         """Video File Transcript — Whisper transcription of an uploaded video/audio file. 1 credit per minute of audio. (1 credit)
@@ -3233,12 +3234,13 @@ class AsyncUtilitiesApi:
         """
         return await self._t.get("/v1/analytics/post", {"url": url, "cache": cache})
 
-    async def analytics_compare(self, *, urls: str) -> dict[str, Any]:
-        """Compare Analytics — Compare unified metrics across up to 10 URLs in one call. 1 credit per successfully resolved URL. (1 credit)
+    async def analytics_compare(self, *, urls: str, cache: bool | None = None) -> dict[str, Any]:
+        """Compare Analytics — Same unified metrics as post analytics for up to 10 URLs. 1 credit per resolved URL; cache hits free. (1 credit)
 
         :param urls: Comma-separated post/video/reel URLs (up to 10), any mix of supported platforms.
+        :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/analytics/compare", {"urls": urls})
+        return await self._t.get("/v1/analytics/compare", {"urls": urls, "cache": cache})
 
     async def video_transcript(self, *, file: str) -> dict[str, Any]:
         """Video File Transcript — Whisper transcription of an uploaded video/audio file. 1 credit per minute of audio. (1 credit)

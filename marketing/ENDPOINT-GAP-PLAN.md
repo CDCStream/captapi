@@ -158,3 +158,15 @@ SC 8 · Captapi 1 · Mixed 1. Shipped this batch: #8 SEO fix, #9 ISO+post, #10 S
 | repinCount / shareCount / reactionCount (+ saves) | P1 | Shipped |
 | images{236x,237x,564x,originals} | P1 | Shipped (keep image string) |
 | domain | P2 | Shipped when present |
+
+---
+
+## #18 GET /v1/analytics/compare (Captapi-only)
+**Keep:** Up to 10 URLs, same `_unify` metrics as post analytics, 1 credit/resolved URL.
+
+| Field / param | Priority | Status |
+|---|---|---|
+| Replace placeholder docs example with live count/resolved/results[] | P0 | Shipped |
+| Full metrics{} (likes/comments/engagementRate) per result | P0 | Shipped (via #16 YouTube enrich) |
+| cache param (shared with /analytics/post; hits free) | P1 | Shipped |
+| Honest billing: no bulk discount vs N× /post | P1 | Shipped in catalog/FAQ |

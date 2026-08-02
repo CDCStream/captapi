@@ -12074,7 +12074,7 @@
           "Analytics"
         ],
         "summary": "Compare metrics across multiple posts and platforms",
-        "description": "Fetches unified metrics for up to 10 comma-separated URLs in one call (any mix of platforms). Bills 1 credit per successfully resolved URL.",
+        "description": "Fetches the same unified metrics object as /v1/analytics/post for up to 10 comma-separated URLs in one call (any mix of platforms). Each result includes metrics.views/likes/comments/shares/saves/interactions/engagementRate — fields a platform does not expose stay null. Bills 1 credit per successfully resolved URL that is not served from cache (same per-URL cache as post analytics). No bulk discount vs calling /post N times — the win is one HTTP round-trip.",
         "operationId": "compare_analytics_v1_analytics_compare_get",
         "security": [
           {
@@ -12092,6 +12092,18 @@
               "title": "Urls"
             },
             "description": "Comma-separated post URLs (up to 10), any mix of platforms"
+          },
+          {
+            "name": "cache",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Set true to use the 24h per-URL cache (shared with /v1/analytics/post). Default false — always fetch fresh.",
+              "default": false,
+              "title": "Cache"
+            },
+            "description": "Set true to use the 24h per-URL cache (shared with /v1/analytics/post). Default false — always fetch fresh."
           }
         ],
         "responses": {

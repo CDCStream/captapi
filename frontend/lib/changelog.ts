@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
+    category: "fix",
+    title: "Compare analytics: real unified metrics example + cache param",
+    description:
+      "Compare analytics docs no longer show placeholder example.com rows. The live example returns count/resolved/results[] with the same metrics object as post analytics (views, likes, comments, engagementRate, …). Adds cache=true (per-URL cache shared with /post; hits free) and honest billing copy — 1 credit per resolved URL, no bulk discount.",
+    items: [
+      "Live snapshot example with two real YouTube URLs and full metrics{}",
+      "Additive cache param (shared with /v1/analytics/post)",
+      "Docs/FAQ: same shape as post analytics; no bulk credit discount",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
     category: "feature",
     title: "Pinterest pin-details: title, link, createdAt, originAuthor, images",
     description:
