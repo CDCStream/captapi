@@ -401,7 +401,7 @@ const SPOTIFY: Omit<Endpoint, "platform">[] = [
 ];
 
 const SOUNDCLOUD: Omit<Endpoint, "platform">[] = [
-  { tool: "soundcloud_artist", name: "SoundCloud Artist", path: "/v1/soundcloud/artist", credits: 1, summary: "SoundCloud artist profile metadata.", params: [url(SC_PROFILE)] },
+  { tool: "soundcloud_artist", name: "SoundCloud Artist", path: "/v1/soundcloud/artist", credits: 1, summary: "SoundCloud artist — bio, counts, badges, creator subscription tier.", params: [url(SC_PROFILE)] },
   { tool: "soundcloud_artist_tracks", name: "SoundCloud Artist Tracks", path: "/v1/soundcloud/artist-tracks", credits: 28, summary: "Tracks from a SoundCloud artist profile, with cursor pagination (nextCursor + hasMore).", params: [url(SC_PROFILE), limit(20, 100), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
   { tool: "soundcloud_track", name: "SoundCloud Track", path: "/v1/soundcloud/track", credits: 1, summary: "SoundCloud track metadata and engagement stats.", params: [url(SC_TRACK)] },
 ];

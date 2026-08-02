@@ -3867,7 +3867,7 @@
     "name": "SoundCloud Artist",
     "path": "/v1/soundcloud/artist",
     "credits": 1,
-    "summary": "SoundCloud artist profile metadata.",
+    "summary": "SoundCloud artist — bio, counts, badges, creator subscription tier.",
     "params": [
       {
         "name": "url",

@@ -100,8 +100,38 @@ def _track(item: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _badges(raw: Any) -> dict[str, bool] | None:
+    if not isinstance(raw, dict) or not raw:
+        return None
+    out = {
+        "pro": bool(raw.get("pro")),
+        "creatorMidTier": bool(raw.get("creator_mid_tier") or raw.get("creatorMidTier")),
+        "proUnlimited": bool(raw.get("pro_unlimited") or raw.get("proUnlimited")),
+        "verified": bool(raw.get("verified")),
+    }
+    return out
+
+
+def _creator_subscription(user: dict[str, Any]) -> dict[str, Any] | None:
+    sub = user.get("creator_subscription") or user.get("creatorSubscription")
+    if not isinstance(sub, dict):
+        subs = user.get("creator_subscriptions") or user.get("creatorSubscriptions")
+        if isinstance(subs, list) and subs and isinstance(subs[0], dict):
+            sub = subs[0]
+    if not isinstance(sub, dict):
+        return None
+    product = sub.get("product") if isinstance(sub.get("product"), dict) else {}
+    product_id = safe_str(product.get("id"))
+    if not product_id:
+        return None
+    return {"product": {"id": product_id}}
+
+
 def _artist(item: dict[str, Any], url: str) -> dict[str, Any]:
     user = item.get("user") or item.get("artist") or item
+    badges = _badges(user.get("badges"))
+    # Prefer badges.verified when SoundCloud exposes the badge block.
+    verified = bool(badges["verified"]) if badges is not None else bool(user.get("verified"))
     out: dict[str, Any] = {
         "platform": "soundcloud",
         "id": safe_str(user.get("id") or user.get("userId")),
@@ -112,21 +142,31 @@ def _artist(item: dict[str, Any], url: str) -> dict[str, Any]:
         "avatar": safe_str(user.get("avatarUrl") or user.get("avatar_url")),
         "city": safe_str(user.get("city")),
         "countryCode": safe_str(user.get("countryCode") or user.get("country_code")),
-        "verified": bool(user.get("verified")),
+        "verified": verified,
+        "badges": badges,
+        "creatorSubscription": _creator_subscription(user if isinstance(user, dict) else {}),
         "followers": safe_int(user.get("followersCount") or user.get("followers_count")),
         "followings": safe_int(user.get("followingsCount") or user.get("followings_count")),
         "trackCount": safe_int(user.get("trackCount") or user.get("track_count")),
         "playlistCount": safe_int(user.get("playlistCount") or user.get("playlist_count")),
         "likesCount": safe_int(user.get("likesCount") or user.get("likes_count")),
         "createdAt": safe_str(user.get("createdAt") or user.get("created_at")),
+        "lastModified": safe_str(user.get("lastModified") or user.get("last_modified")),
     }
-    for key in ("description", "city", "countryCode", "createdAt"):
+    for key in ("description", "city", "countryCode", "createdAt", "lastModified", "badges", "creatorSubscription"):
         if out.get(key) in (None, "", []):
             out.pop(key, None)
     return out
 
 
-@router.get("/artist", summary="SoundCloud artist profile")
+@router.get(
+    "/artist",
+    summary="SoundCloud artist profile",
+    description=(
+        "Fetch a SoundCloud artist — bio, counts, verified, badges "
+        "(pro / proUnlimited), creator subscription tier, and lastModified."
+    ),
+)
 async def artist(
     url: str = Query(..., description="SoundCloud artist URL or username"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -155,7 +195,7 @@ async def artist(
             ctx["source"] = "apify"
             return _artist(item, profile)
 
-        data = await cached_or_run("soundcloud.artist", {"url": profile, "v": 4}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("soundcloud.artist", {"url": profile, "v": 5}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 

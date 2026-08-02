@@ -12248,6 +12248,7 @@
           "SoundCloud"
         ],
         "summary": "SoundCloud artist profile",
+        "description": "Fetch a SoundCloud artist — bio, counts, verified, badges (pro / proUnlimited), creator subscription tier, and lastModified.",
         "operationId": "artist_v1_soundcloud_artist_get",
         "security": [
           {

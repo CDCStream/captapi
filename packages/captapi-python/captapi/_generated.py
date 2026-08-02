@@ -3006,7 +3006,7 @@ class SoundcloudApi:
         self._t = transport
 
     def artist(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """SoundCloud Artist — SoundCloud artist profile metadata. (1 credit)
+        """SoundCloud Artist — SoundCloud artist — bio, counts, badges, creator subscription tier. (1 credit)
 
         :param url: SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -3037,7 +3037,7 @@ class AsyncSoundcloudApi:
         self._t = transport
 
     async def artist(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """SoundCloud Artist — SoundCloud artist profile metadata. (1 credit)
+        """SoundCloud Artist — SoundCloud artist — bio, counts, badges, creator subscription tier. (1 credit)
 
         :param url: SoundCloud artist profile URL or username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "SoundCloud artist: badges, creator subscription, lastModified",
+    description:
+      "GET /v1/soundcloud/artist now surfaces SoundCloud's paid-tier signals: badges {pro, creatorMidTier, proUnlimited, verified}, creatorSubscription.product.id (e.g. creator-pro-unlimited), and lastModified — so Pro Unlimited accounts are distinguishable from hobby profiles. Still 1 credit.",
+    items: [
+      "badges.pro / creatorMidTier / proUnlimited / verified",
+      "creatorSubscription.product.id",
+      "lastModified",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "Kick clip: creator vs channel, VOD/maturity fields; 1 credit",
     description:
       "GET /v1/kick/clip drops to 1 credit on the native path and stops duplicating the same object as clip and clips[0]. Clip URLs hit Kick's single-clip API and return { channelUrl, clip } with creator (clipper) separate from channel (broadcaster), plus privacy, isMature, startedAt, vod.id, livestreamId, vodStartsAt, categorySlug/parentCategory/categoryBanner, and channel/creator ids + profile pictures. Channel URLs return { channelUrl, totalReturned, clips } only.",

@@ -13750,8 +13750,6 @@
   },
   "soundcloud-artist": {
     "ok": true,
-    "status": 200,
-    "credits": null,
     "data": {
       "platform": "soundcloud",
       "id": "2976616",
@@ -13763,11 +13761,23 @@
       "city": "Sydney",
       "countryCode": "AU",
       "verified": true,
-      "followers": 2227656,
+      "badges": {
+        "pro": false,
+        "creatorMidTier": false,
+        "proUnlimited": true,
+        "verified": true
+      },
+      "creatorSubscription": {
+        "product": {
+          "id": "creator-pro-unlimited"
+        }
+      },
+      "followers": 2227687,
       "followings": 203,
-      "trackCount": 307,
+      "trackCount": 412,
       "playlistCount": 46,
-      "likesCount": 149
+      "likesCount": 149,
+      "lastModified": "2026-02-13T20:55:02Z"
     }
   },
   "soundcloud-artist-tracks": {

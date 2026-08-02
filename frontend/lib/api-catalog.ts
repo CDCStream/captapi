@@ -565,7 +565,19 @@ const SPOTIFY: Spec[] = [
 ];
 
 const SOUNDCLOUD: Spec[] = [
-  { slug: "soundcloud-artist", name: "SoundCloud Artist API", shortName: "Artist", category: "channel", method: "GET", path: "/v1/soundcloud/artist", credits: 1 },
+  {
+    slug: "soundcloud-artist",
+    name: "SoundCloud Artist API",
+    shortName: "Artist",
+    category: "channel",
+    method: "GET",
+    path: "/v1/soundcloud/artist",
+    credits: 1,
+    tagline:
+      "SoundCloud artist profile — bio, counts, verified, badges, and creator subscription tier.",
+    longDescription:
+      "Pass a SoundCloud artist URL or username and get the public profile as clean JSON: id, username, name, description, avatar, city/countryCode, verified, followers/followings/trackCount/playlistCount/likesCount, plus badges (pro / creatorMidTier / proUnlimited / verified), creatorSubscription.product.id (e.g. creator-pro-unlimited), and lastModified. Flat 1 credit.",
+  },
   { slug: "soundcloud-artist-tracks", name: "SoundCloud Artist Tracks API", shortName: "Artist Tracks", category: "list", method: "GET", path: "/v1/soundcloud/artist-tracks", credits: 2 },
   { slug: "soundcloud-track", name: "SoundCloud Track API", shortName: "Track", category: "details", method: "GET", path: "/v1/soundcloud/track", credits: 1 , tagline: "Get a SoundCloud track — title, artist, plays, likes, duration, and artwork as structured JSON." },
 ];
@@ -2819,6 +2831,12 @@ const FIELD_DESCS: Record<string, string> = {
   parentCategory: "Kick parent category (e.g. irl).",
   categoryBanner: "Category banner image URL when Kick exposes one.",
   categoryId: "Kick category id.",
+  badges: "SoundCloud account badges (pro, creatorMidTier, proUnlimited, verified).",
+  creatorSubscription: "SoundCloud creator subscription ({product:{id}}, e.g. creator-pro-unlimited).",
+  lastModified: "When the SoundCloud profile was last modified (ISO 8601).",
+  creatorMidTier: "Whether the account has SoundCloud creator mid-tier.",
+  proUnlimited: "Whether the account has SoundCloud Pro Unlimited.",
+  pro: "Whether the account has SoundCloud Pro.",
   videoCount: "Total number of videos.",
   tweetCount: "Total number of tweets.",
   mediaCount: "Total number of media posts.",

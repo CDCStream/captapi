@@ -2142,7 +2142,7 @@ export interface SoundcloudTrackParams {
 
 export class SoundcloudApi {
   constructor(private readonly core: HttpCore) {}
-  /** SoundCloud Artist — SoundCloud artist profile metadata. (1 credit) */
+  /** SoundCloud Artist — SoundCloud artist — bio, counts, badges, creator subscription tier. (1 credit) */
   artist(params: SoundcloudArtistParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/soundcloud/artist", params);
   }
