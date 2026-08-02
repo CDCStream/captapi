@@ -331,7 +331,7 @@ const RUMBLE: Omit<Endpoint, "platform">[] = [
 ];
 
 const TIKTOK_SHOP: Omit<Endpoint, "platform">[] = [
-  { tool: "tiktok_shop_search", name: "TikTok Shop Search", path: "/v1/tiktok-shop/shop-search", credits: 56, summary: "Search TikTok Shop products by keyword.", params: [q("Product search query."), { name: "region", type: "string", required: false, description: "Two-letter TikTok Shop region. Default US." }, limit(20, 200)] },
+  { tool: "tiktok_shop_search", name: "TikTok Shop Search", path: "/v1/tiktok-shop/shop-search", credits: 56, summary: "TikTok Shop keyword search with price, sold, rating/reviews, seller id (HTML entities decoded).", params: [q("Product search query."), { name: "region", type: "string", required: false, description: "Two-letter TikTok Shop region. Default US." }, limit(20, 200)] },
   { tool: "tiktok_shop_products", name: "TikTok Shop Products", path: "/v1/tiktok-shop/shop-products", credits: 2, summary: "List products from a TikTok Shop store.", params: [url("TikTok Shop store URL."), limit(20, 200)] },
   {
     tool: "tiktok_shop_product_details",

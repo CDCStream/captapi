@@ -473,7 +473,25 @@ const RUMBLE: Spec[] = [
 ];
 
 const TIKTOK_SHOP: Spec[] = [
-  { slug: "tiktok-shop-search", name: "TikTok Shop Search API", shortName: "Shop Search", category: "search", method: "GET", path: "/v1/tiktok-shop/shop-search", credits: 56, creditsPerResult: 2.8 },
+  {
+    slug: "tiktok-shop-search",
+    name: "TikTok Shop Search API",
+    shortName: "Shop Search",
+    category: "search",
+    method: "GET",
+    path: "/v1/tiktok-shop/shop-search",
+    credits: 56,
+    creditsPerResult: 2.8,
+    tagline:
+      "TikTok Shop keyword search — price, originalPrice/discount, sold, rating/reviews, and seller id.",
+    longDescription:
+      "Search TikTok Shop by keyword and get products as clean JSON: id, url, title, price + originalPrice/discount, currency, sold, rating + reviews when TikTok exposes them, image, and seller{id,name,url}. Pass region (default US). Native path bills a flat 2 credits when it succeeds; Apify fallback is about 2.8 credits per result (e.g. ~56 for limit=20). String fields are HTML-entity decoded (&amp; → &). Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "rating + reviews on search hits when available",
+      "originalPrice + discount alongside sale price",
+      "seller.id / name / url",
+    ],
+  },
   { slug: "tiktok-shop-products", name: "TikTok Shop Products API", shortName: "Shop Products", category: "list", method: "GET", path: "/v1/tiktok-shop/shop-products", credits: 2 },
   {
     slug: "tiktok-shop-product-details",

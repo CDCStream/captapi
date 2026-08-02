@@ -50,6 +50,17 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
+    category: "fix",
+    title: "TikTok Shop search: rating/reviews + HTML entity decode",
+    description:
+      "GET /v1/tiktok-shop/shop-search now returns rating and reviews when TikTok exposes them (native PDP hydrate / rate_info). Also fixes systematic HTML-entity leakage in API strings — titles and URLs no longer contain literal &amp; (safe_str now runs html.unescape). Keeps originalPrice/discount and seller.id.",
+    items: [
+      "rating + reviews on shop search hits",
+      "Decode &amp; / &#x…; in titles, URLs, and other safe_str fields",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
     category: "feature",
     title: "Twitter/X profile: verification triad, listed/media/likes",
     description:

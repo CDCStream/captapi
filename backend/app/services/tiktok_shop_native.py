@@ -501,18 +501,34 @@ async def fetch_product_details(url: str) -> dict[str, Any] | None:
 
     # Product star score; treat 0 + zero reviews as unknown.
     rating: float | None = None
-    score_m = re.search(r'"product_overall_score"\s*:\s*([0-9.]+)', html)
-    if score_m:
+    for pat in (
+        r'"product_overall_score"\s*:\s*([0-9.]+)',
+        r'"product_rating"\s*:\s*"?([0-9.]+)"?',
+        r'"average_rating"\s*:\s*"?([0-9.]+)"?',
+        r'"score"\s*:\s*"?([0-9.]+)"?\s*,\s*"review_count"',
+    ):
+        score_m = re.search(pat, html)
+        if not score_m:
+            continue
         try:
             rating = float(score_m.group(1))
+            break
         except ValueError:
             rating = None
     review_count = None
-    rc_m = re.search(r'"product_review_count"\s*:\s*"?(\d+)"?', html)
-    if rc_m:
-        review_count = int(rc_m.group(1))
+    for pat in (
+        r'"product_review_count"\s*:\s*"?(\d+)"?',
+        r'"review_count"\s*:\s*"?(\d+)"?',
+        r'"reviewCount"\s*:\s*"?(\d+)"?',
+    ):
+        rc_m = re.search(pat, html)
+        if rc_m:
+            review_count = int(rc_m.group(1))
+            break
     if rating == 0 and not review_count:
         rating = None
+    if review_count == 0 and rating is None:
+        review_count = None
 
     shop_rating = None
     sr_m = re.search(r'"shop_rating"\s*:\s*"([0-9.]+)"', html)

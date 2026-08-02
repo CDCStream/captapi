@@ -128,13 +128,16 @@ def _normalize_product(
     # details_mode used to strip description / list pricing / seller id — that
     # hid native PDP fields competitors expose. Include them whenever present.
     include_description = not search_mode and not catalog_mode and not showcase_mode
-    # Details now hydrates product rating from PDP review_model; still omit on search/showcase.
-    include_rating_reviews = not search_mode and not showcase_mode
+    # Search hydrates via PDP / rate_info — surface rating + review count there too.
+    include_rating_reviews = not showcase_mode
     include_stock = not search_mode and not catalog_mode and not showcase_mode
     include_seller_rating = not search_mode and not catalog_mode and not showcase_mode
     include_list_pricing = not showcase_mode  # originalPrice / discount
     include_sold = not showcase_mode
     include_full_seller = not showcase_mode
+
+    rate_info = item.get("rate_info") if isinstance(item.get("rate_info"), dict) else {}
+    sold_info = item.get("sold_info") if isinstance(item.get("sold_info"), dict) else {}
 
     out: dict[str, Any] = {
         "platform": "tiktok_shop",
@@ -164,10 +167,39 @@ def _normalize_product(
     if include_list_pricing:
         out["discount"] = safe_str(item.get("discountPercent") or item.get("discount") or item.get("discount_rate"))
     if include_rating_reviews:
-        out["rating"] = item.get("rating") or item.get("reviewRating") or item.get("product_rating")
-        out["reviews"] = safe_int(item.get("reviews") or item.get("reviewCount") or item.get("review_count"))
+        rating = safe_float(
+            first_present(
+                item.get("rating"),
+                item.get("reviewRating"),
+                item.get("product_rating"),
+                rate_info.get("score"),
+                rate_info.get("average_rating"),
+            )
+        )
+        reviews = safe_int(
+            first_present(
+                item.get("reviews"),
+                item.get("reviewCount"),
+                item.get("review_count"),
+                rate_info.get("review_count"),
+                rate_info.get("reviewCount"),
+            )
+        )
+        if rating is not None:
+            out["rating"] = rating
+        # Omit reviews:0 when score is unknown — same null-vs-fake-zero class.
+        if reviews is not None and not (reviews == 0 and rating is None):
+            out["reviews"] = reviews
     if include_sold:
-        out["sold"] = safe_int(item.get("sold") or item.get("soldCount") or item.get("unitsSold") or item.get("sales_count"))
+        out["sold"] = safe_int(
+            first_present(
+                item.get("sold"),
+                item.get("soldCount"),
+                item.get("unitsSold"),
+                item.get("sales_count"),
+                sold_info.get("sold_count"),
+            )
+        )
     if include_stock:
         out["stock"] = safe_int(item.get("stock") or item.get("stock_num") or item.get("inventory") or item.get("sku_stock"))
     out["image"] = safe_str(
@@ -355,7 +387,7 @@ async def shop_search(
 
         data = await cached_or_run(
             "tiktok-shop.shop-search",
-            {"q": q, "region": region, "limit": limit, "v": 4},
+            {"q": q, "region": region, "limit": limit, "v": 5},
             _run,
             ctx,
             use_cache=cache,

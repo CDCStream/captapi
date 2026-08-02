@@ -11917,7 +11917,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "tiktok-shop-product-details": {
     "platform": "tiktok_shop",
     "id": "1731098552908944370",
-    "url": "https://shop.tiktok.com/us/pdp/trendy-pink-ed-hardy-tough-phone-cases-impact-resistant-wireless-charging-shock-absorption/1731098552908944370?source=product_detail&amp;enter_method=url_semantic_301",
+    "url": "https://shop.tiktok.com/us/pdp/trendy-pink-ed-hardy-tough-phone-cases-impact-resistant-wireless-charging-shock-absorption/1731098552908944370?source=product_detail&enter_method=url_semantic_301",
     "title": "Trendy Pink Ed Hardy Inspired Tough Phone Cases, Phone Durable, Gift, Accessories Top Trendy Phone Cases Phone Cover Hard Case Tough 2-piece Phone Case",
     "price": 10.3,
     "currency": "USD",
@@ -11925,7 +11925,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "reviews": 48,
     "sold": 1488,
     "stock": 2693,
-    "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/cc79ccfd6a324d548de31cb761b6c3c4~tplv-fhlh96nyum-crop-webp:794:794.webp?dr=12190&amp;t=555f072d&amp;ps=933b5bde&amp;shp=8dbd94bf&amp;shcp=e1be8f53&amp;idc=useast5&amp;from=2378011839",
+    "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/cc79ccfd6a324d548de31cb761b6c3c4~tplv-fhlh96nyum-crop-webp:794:794.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
     "seller": {
       "name": "Timeless Teapot Creations",
       "rating": 4.6
@@ -12102,31 +12102,33 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "tiktok_shop",
         "id": "1732313842426745420",
-        "url": "https://shop.tiktok.com/us/pdp/plum-polka-dot-cute-phone-case-for-iphone-x-17-tough-stylish/1732313842426745420?source=product_detail&amp;enter_method=url_semantic_301",
-        "title": "Plum Polka Dot Cute Phone Case for iPhone - Durable &amp; Stylish",
+        "url": "https://shop.tiktok.com/us/pdp/plum-polka-dot-cute-phone-case-for-iphone-x-17-tough-stylish/1732313842426745420?source=product_detail&enter_method=url_semantic_301",
+        "title": "Plum Polka Dot Cute Phone Case for iPhone - Durable & Stylish",
         "price": 12.68,
         "originalPrice": 21.2,
         "currency": "USD",
         "discount": "40%",
         "sold": 532,
-        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/db875350dd404f64bb4b6bc79ae26a09~tplv-fhlh96nyum-crop-webp:1290:1290.webp?dr=12190&amp;t=555f072d&amp;ps=933b5bde&amp;shp=8dbd94bf&amp;shcp=607f11de&amp;idc=useast5&amp;from=2378011839",
+        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/db875350dd404f64bb4b6bc79ae26a09~tplv-fhlh96nyum-crop-webp:1290:1290.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
         "seller": {
           "id": "7495626050433419852",
           "name": "Anthony Z Sierra Store",
           "url": "https://www.tiktok.com/shop/store/Anthony%20Z%20Sierra%20Store/7495626050433419852"
-        }
+        },
+        "rating": 4.8,
+        "reviews": 2493
       },
       {
         "platform": "tiktok_shop",
         "id": "1731098552908944370",
-        "url": "https://shop.tiktok.com/us/pdp/trendy-pink-ed-hardy-tough-phone-cases-impact-resistant-wireless-charging-shock-absorption/1731098552908944370?source=product_detail&amp;enter_method=url_semantic_301",
+        "url": "https://shop.tiktok.com/us/pdp/trendy-pink-ed-hardy-tough-phone-cases-impact-resistant-wireless-charging-shock-absorption/1731098552908944370?source=product_detail&enter_method=url_semantic_301",
         "title": "Trendy Pink Ed Hardy Inspired Tough Phone Cases",
         "price": 11.21,
         "originalPrice": 24.91,
         "currency": "USD",
         "discount": "55%",
         "sold": 1488,
-        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/cc79ccfd6a324d548de31cb761b6c3c4~tplv-fhlh96nyum-crop-webp:794:794.webp?dr=12190&amp;t=555f072d&amp;ps=933b5bde&amp;shp=8dbd94bf&amp;shcp=607f11de&amp;idc=useast5&amp;from=2378011839",
+        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/cc79ccfd6a324d548de31cb761b6c3c4~tplv-fhlh96nyum-crop-webp:794:794.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
         "seller": {
           "id": "7496126292994264050",
           "name": "Timeless Teapot Creations",
@@ -12136,14 +12138,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "tiktok_shop",
         "id": "1732210224209891836",
-        "url": "https://shop.tiktok.com/us/pdp/high-end-iphone-16-case-with-four-leaf-clover-lanyard-butterfly-pattern/1732210224209891836?source=product_detail&amp;enter_method=url_semantic_301",
+        "url": "https://shop.tiktok.com/us/pdp/high-end-iphone-16-case-with-four-leaf-clover-lanyard-butterfly-pattern/1732210224209891836?source=product_detail&enter_method=url_semantic_301",
         "title": "Suitable for [iPhone 16] high-end phone case，a beautiful four-leaf clover lanyard is included,exquisite and dreamy butterfly pattern,a variety of colors are available for you to choose from YM99",
         "price": 14.0,
         "originalPrice": 17.88,
         "currency": "USD",
         "discount": "22%",
         "sold": 314495,
-        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/a92993fc7a2242d9aca2322aac7cdaf6~tplv-fhlh96nyum-crop-webp:800:800.webp?dr=12190&amp;t=555f072d&amp;ps=933b5bde&amp;shp=8dbd94bf&amp;shcp=e1be8f53&amp;idc=useast5&amp;from=2378011839",
+        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/a92993fc7a2242d9aca2322aac7cdaf6~tplv-fhlh96nyum-crop-webp:800:800.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=e1be8f53&idc=useast5&from=2378011839",
         "seller": {
           "id": "7495991409431644668",
           "name": "LIBAI-USA1",
@@ -12160,7 +12162,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "currency": "USD",
         "discount": null,
         "sold": 3480,
-        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/a26a3efec0ef48b6bb663fdee15deac9~tplv-fhlh96nyum-crop-webp:800:800.webp?dr=12190&amp;t=555f072d&amp;ps=933b5bde&amp;shp=8dbd94bf&amp;shcp=607f11de&amp;idc=useast5&amp;from=2378011839",
+        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/a26a3efec0ef48b6bb663fdee15deac9~tplv-fhlh96nyum-crop-webp:800:800.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
         "seller": {
           "id": "7496146286741784922",
           "name": "Cover Farm",
@@ -12170,14 +12172,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       {
         "platform": "tiktok_shop",
         "id": "1732319524515713953",
-        "url": "https://shop.tiktok.com/us/pdp/oppo-reno14-f-5g-phone-case-durable-stylish-matte-finish/1732319524515713953?source=product_detail&amp;enter_method=url_semantic_301",
+        "url": "https://shop.tiktok.com/us/pdp/oppo-reno14-f-5g-phone-case-durable-stylish-matte-finish/1732319524515713953?source=product_detail&enter_method=url_semantic_301",
         "title": "For OPPO Reno14 F 5G phone case, durable protective case, stylish phone accessories, matte colored phone case, simple matte appearance. Protective and anti drop phone case, available in multiple colors",
         "price": 3.36,
         "originalPrice": null,
         "currency": "USD",
         "discount": null,
         "sold": 67,
-        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/60a6605d5c9348a8841b4ec949ad8534~tplv-fhlh96nyum-crop-webp:800:800.webp?dr=12190&amp;t=555f072d&amp;ps=933b5bde&amp;shp=8dbd94bf&amp;shcp=607f11de&amp;idc=useast5&amp;from=2378011839",
+        "image": "https://p16-oec-general-useast5.ttcdn-us.com/tos-useast5-i-omjb5zjo8w-tx/60a6605d5c9348a8841b4ec949ad8534~tplv-fhlh96nyum-crop-webp:800:800.webp?dr=12190&t=555f072d&ps=933b5bde&shp=8dbd94bf&shcp=607f11de&idc=useast5&from=2378011839",
         "seller": {
           "id": "8652615240597738401",
           "name": "JiaRongHui Store",

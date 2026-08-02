@@ -1451,7 +1451,7 @@ export interface TiktokShopUserShowcaseParams {
 
 export class TiktokShopApi {
   constructor(private readonly core: HttpCore) {}
-  /** TikTok Shop Search — Search TikTok Shop products by keyword. (56 credits) */
+  /** TikTok Shop Search — TikTok Shop keyword search with price, sold, rating/reviews, seller id (HTML entities decoded). (56 credits) */
   search(params: TiktokShopSearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok-shop/shop-search", params);
   }

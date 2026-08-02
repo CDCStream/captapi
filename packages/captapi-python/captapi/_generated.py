@@ -2002,7 +2002,7 @@ class TiktokShopApi:
         self._t = transport
 
     def search(self, *, q: str, region: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop Search — Search TikTok Shop products by keyword. (56 credits)
+        """TikTok Shop Search — TikTok Shop keyword search with price, sold, rating/reviews, seller id (HTML entities decoded). (56 credits)
 
         :param q: Product search query.
         :param region: Two-letter TikTok Shop region. Default US.
@@ -2053,7 +2053,7 @@ class AsyncTiktokShopApi:
         self._t = transport
 
     async def search(self, *, q: str, region: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Shop Search — Search TikTok Shop products by keyword. (56 credits)
+        """TikTok Shop Search — TikTok Shop keyword search with price, sold, rating/reviews, seller id (HTML entities decoded). (56 credits)
 
         :param q: Product search query.
         :param region: Two-letter TikTok Shop region. Default US.

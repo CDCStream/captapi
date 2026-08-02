@@ -3095,7 +3095,7 @@
     "name": "TikTok Shop Search",
     "path": "/v1/tiktok-shop/shop-search",
     "credits": 56,
-    "summary": "Search TikTok Shop products by keyword.",
+    "summary": "TikTok Shop keyword search with price, sold, rating/reviews, seller id (HTML entities decoded).",
     "params": [
       {
         "name": "q",

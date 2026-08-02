@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from html import unescape as html_unescape
 from typing import Any
 
 
@@ -64,9 +65,15 @@ def safe_float(v) -> float | None:
 
 
 def safe_str(v) -> str | None:
+    """Strip and decode HTML entities (``&amp;`` → ``&``, ``&#x…;`` → char).
+
+    Upstream SSR/OG/JSON often leaves entities escaped inside string values.
+    Leaving them breaks URLs (query params become literal ``&amp;``) and stores
+    titles with visible ``&amp;`` instead of ``&``.
+    """
     if v is None:
         return None
-    s = str(v).strip()
+    s = html_unescape(str(v)).strip()
     return s or None
 
 
