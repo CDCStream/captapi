@@ -50,7 +50,7 @@ from app.services import tiktok_native
 from app.services import twitter_native
 from app.services.apify_client import get_apify
 from app.services.cached_runner import cached_or_run
-from app.utils.formatters import safe_int, safe_str, strip_empty
+from app.utils.formatters import safe_int, safe_str
 from app.utils.url import (
     extract_bluesky_post,
     extract_instagram_shortcode,
@@ -110,8 +110,6 @@ def _youtube_analytics_row(v: dict[str, Any], *, norm: str, video_id: str | None
     )
     display = safe_str(v.get("channelName") or v.get("channel"))
     username = _youtube_handle(v)
-    # Omit verified / shares / saves — YouTube's public video path does not
-    # expose them reliably; returning perpetual nulls is noise.
     return {
         "platform": "youtube",
         "url": norm,
@@ -124,11 +122,16 @@ def _youtube_analytics_row(v: dict[str, Any], *, norm: str, video_id: str | None
             "username": username,
             "displayName": display or username,
             "url": safe_str(v.get("channelUrl")),
+            # Stable key; YouTube video path does not resolve channel badge.
+            "verified": None,
         },
         "engagement": {
             "views": safe_int(v.get("viewCount") or v.get("views")),
             "likes": safe_int(v.get("likes") or v.get("likeCount")),
             "comments": safe_int(v.get("commentsCount") or v.get("commentCount")),
+            # Stable keys; YouTube has no public share/save counts.
+            "shares": None,
+            "saves": None,
         },
     }
 
@@ -497,9 +500,9 @@ _FETCHERS: dict[str, Callable[[str], Awaitable[dict[str, Any]]]] = {
 def _unify(n: dict[str, Any]) -> dict[str, Any]:
     """Collapse a per-platform normalized post into one consistent metrics shape.
 
-    Metrics the source platform does not expose are omitted (not null) — e.g.
-    YouTube has no public share/save counts and no verified badge on this path.
-    TikTok/X still return shares/saves when present.
+    Schema is stable: metrics always includes views/likes/comments/shares/saves/
+    interactions/engagementRate; author always includes verified. Unavailable
+    values are null — keys are never omitted.
     """
     eng = n.get("engagement") or {}
     views = eng.get("views")
@@ -520,30 +523,27 @@ def _unify(n: dict[str, Any]) -> dict[str, Any]:
         else None
     )
     author = dict(n.get("author") or {})
-    # Drop unknown verification rather than shipping perpetual null.
-    if author.get("verified") is None:
-        author.pop("verified", None)
-    return strip_empty(
-        {
-            "platform": n.get("platform"),
-            "url": n.get("url"),
-            "id": n.get("id"),
-            "title": n.get("title") or n.get("caption"),
-            "publishedAt": n.get("publishedAt"),
-            "durationSeconds": n.get("durationSeconds"),
-            "thumbnailUrl": n.get("thumbnailUrl"),
-            "author": author,
-            "metrics": {
-                "views": views,
-                "likes": likes,
-                "comments": comments,
-                "shares": shares,
-                "saves": saves,
-                "interactions": interactions,
-                "engagementRate": engagement_rate,
-            },
-        }
-    )
+    if "verified" not in author or not isinstance(author.get("verified"), bool):
+        author["verified"] = None
+    return {
+        "platform": n.get("platform"),
+        "url": n.get("url"),
+        "id": n.get("id"),
+        "title": n.get("title") or n.get("caption"),
+        "publishedAt": n.get("publishedAt"),
+        "durationSeconds": n.get("durationSeconds"),
+        "thumbnailUrl": n.get("thumbnailUrl"),
+        "author": author,
+        "metrics": {
+            "views": views,
+            "likes": likes,
+            "comments": comments,
+            "shares": shares,
+            "saves": saves,
+            "interactions": interactions,
+            "engagementRate": engagement_rate,
+        },
+    }
 
 
 @router.get(
@@ -587,7 +587,7 @@ async def post_analytics(
 
         data = await cached_or_run(
             endpoint=f"analytics.post.{platform}",
-            params={"url": url, "v": 6},
+            params={"url": url, "v": 7},
             runner=_run,
             ctx=ctx,
             ttl=get_settings().CACHE_TTL_DYNAMIC,
@@ -651,7 +651,7 @@ async def compare_analytics(
                 # /post on the same URL is a free hit.
                 row = await cached_or_run(
                     endpoint=f"analytics.post.{p}",
-                    params={"url": u, "v": 6},
+                    params={"url": u, "v": 7},
                     runner=_run,
                     ctx=sub_ctx,
                     ttl=settings.CACHE_TTL_DYNAMIC,

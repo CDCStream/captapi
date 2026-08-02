@@ -14653,13 +14653,16 @@
       "author": {
         "username": "RickAstleyYT",
         "displayName": "Rick Astley",
-        "url": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+        "url": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+        "verified": null
       },
       "metrics": {
-        "views": 1797826473,
-        "likes": 19283915,
+        "views": 1799593805,
+        "likes": 19303349,
         "comments": 2400000,
-        "interactions": 21683915,
+        "shares": null,
+        "saves": null,
+        "interactions": 21703349,
         "engagementRate": 0.0121
       }
     }
@@ -14683,13 +14686,16 @@
           "author": {
             "username": "RickAstleyYT",
             "displayName": "Rick Astley",
-            "url": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw"
+            "url": "https://www.youtube.com/channel/UCuAXFkgsw1L7xaCfnd5JJOw",
+            "verified": null
           },
           "metrics": {
-            "views": 1799581314,
-            "likes": 19303245,
+            "views": 1799593805,
+            "likes": 19303349,
             "comments": 2400000,
-            "interactions": 21703245,
+            "shares": null,
+            "saves": null,
+            "interactions": 21703349,
             "engagementRate": 0.0121
           }
         },
@@ -14704,13 +14710,16 @@
           "author": {
             "username": "jawed",
             "displayName": "jawed",
-            "url": "https://www.youtube.com/channel/UC4QobU6STFB0P71PMvOGN5A"
+            "url": "https://www.youtube.com/channel/UC4QobU6STFB0P71PMvOGN5A",
+            "verified": null
           },
           "metrics": {
-            "views": 402644853,
-            "likes": 19283429,
+            "views": 402652118,
+            "likes": 19283609,
             "comments": 10000000,
-            "interactions": 29283429,
+            "shares": null,
+            "saves": null,
+            "interactions": 29283609,
             "engagementRate": 0.0727
           }
         }

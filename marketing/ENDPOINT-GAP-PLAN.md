@@ -141,7 +141,7 @@ SC 8 · Captapi 1 · Mixed 1. Shipped this batch: #8 SEO fix, #9 ISO+post, #10 S
 | YouTube likes / comments / publishedAt via enriched video-details | P0 | Shipped |
 | engagementRate from interactions / views when numerators exist | P0 | Shipped (cascade fixed) |
 | author.username = channel handle; displayName = channel name | P1 | Shipped |
-| Omit shares/saves/verified when unavailable (YouTube) — not perpetual null | P1 | Shipped |
+| Stable schema: shares/saves/verified always present; null when unavailable | P1 | Shipped |
 | author.verified on YouTube | P2 | Still null without channel badge lookup |
 
 ---

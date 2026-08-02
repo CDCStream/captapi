@@ -131,11 +131,13 @@ curl "${API_URL}/v1/analytics/compare?urls=https%3A%2F%2Fwww.youtube.com%2Fwatch
         "id": "dQw4w9WgXcQ",
         "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
         "publishedAt": "2009-10-24T23:57:33-07:00",
-        "author": { "username": "RickAstleyYT", "displayName": "Rick Astley" },
+        "author": { "username": "RickAstleyYT", "displayName": "Rick Astley", "verified": null },
         "metrics": {
           "views": 1797826473,
           "likes": 19283915,
           "comments": 2400000,
+          "shares": null,
+          "saves": null,
           "interactions": 21683915,
           "engagementRate": 0.0121
         }
