@@ -2178,7 +2178,7 @@ export interface SnapchatUserProfileParams {
 
 export class SnapchatApi {
   constructor(private readonly core: HttpCore) {}
-  /** Snapchat User Profile — Public Snapchat profile metadata, subscriber count, avatar and highlights. (11 credits) */
+  /** Snapchat User Profile — Public Snapchat profile — highlights with snap lists, Spotlight engagement, related accounts. (1 credit) */
   userProfile(params: SnapchatUserProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/snapchat/user-profile", params);
   }

@@ -4526,8 +4526,8 @@
     "platform": "snapchat",
     "name": "Snapchat User Profile",
     "path": "/v1/snapchat/user-profile",
-    "credits": 11,
-    "summary": "Public Snapchat profile metadata, subscriber count, avatar and highlights.",
+    "credits": 1,
+    "summary": "Public Snapchat profile — highlights with snap lists, Spotlight engagement, related accounts.",
     "params": [
       {
         "name": "url",

@@ -575,7 +575,7 @@ const LINKTREE: Spec[] = [
 ];
 
 const SNAPCHAT: Spec[] = [
-  { slug: "snapchat-user-profile", name: "Snapchat User Profile API", shortName: "User Profile", category: "channel", method: "GET", path: "/v1/snapchat/user-profile", credits: 11 },
+  { slug: "snapchat-user-profile", name: "Snapchat User Profile API", shortName: "User Profile", category: "channel", method: "GET", path: "/v1/snapchat/user-profile", credits: 1, tagline: "Public Snapchat profile — subscribers, highlights with full snap lists, Spotlight engagement, and related accounts. Flat 1 credit.", longDescription: "Pass a Snapchat username or profile URL and get the public profile as clean JSON: display name, bio, human-readable category, numeric subscriberCount, badge/verified, avatar + hero image, snapcode, website, businessProfileId, and account createdAt. Curated highlights include every snap's mediaUrl and timestamp (not just the first). Spotlight highlights carry video metadata plus engagement (views/shares/comments). Also returns the active story snap list and related accounts. Flat 1 credit." },
 ];
 
 const TRUTH_SOCIAL: Spec[] = [

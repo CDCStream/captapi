@@ -410,7 +410,7 @@ const LINKTREE: Omit<Endpoint, "platform">[] = [
 ];
 
 const SNAPCHAT: Omit<Endpoint, "platform">[] = [
-  { tool: "snapchat_user_profile", name: "Snapchat User Profile", path: "/v1/snapchat/user-profile", credits: 11, summary: "Public Snapchat profile metadata, subscriber count, avatar and highlights.", params: [url(SNAPCHAT_PROFILE)] },
+  { tool: "snapchat_user_profile", name: "Snapchat User Profile", path: "/v1/snapchat/user-profile", credits: 1, summary: "Public Snapchat profile — highlights with snap lists, Spotlight engagement, related accounts.", params: [url(SNAPCHAT_PROFILE)] },
 ];
 
 const TRUTH_SOCIAL: Omit<Endpoint, "platform">[] = [

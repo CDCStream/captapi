@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "Snapchat profile: full snap lists, Spotlight, 1 credit",
+    description:
+      "GET /v1/snapchat/user-profile drops from 11 → 1 credit (native __NEXT_DATA__). Highlights now include snapList[] (mediaUrl + timestamp per snap), plus spotlightHighlights with engagement/views/shares/comments and video metadata. Adds createdAt/creationTimestampMs, businessProfileId, squareHeroImageUrl, badge, human-readable category (keeps categoryId), story snaps, and richer relatedAccounts. subscriberCount stays numeric.",
+    items: [
+      "1 credit (was 11); native HTML profile",
+      "highlight snapList[] + Spotlight engagement/metadata",
+      "createdAt, businessProfileId, hero image, readable category",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "Reddit subreddit posts: sort, timeframe, score & author id",
     description:
       "GET /v1/reddit/subreddit-posts adds sort (best/hot/new/top/rising) and timeframe for top feeds, plus score/downs/upvoteRatio, authorFullname, subscriberCount, isVideo, totalAwardsReceived, and Reddit name (t3_…). Keeps flair/nsfw/thumbnail/text, ISO publishedAt, and nextCursor/hasMore. Flat 2 credits. Also normalizes subreddit-details createdAt to ISO.",

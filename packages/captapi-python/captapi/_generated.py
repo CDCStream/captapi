@@ -3092,7 +3092,7 @@ class SnapchatApi:
         self._t = transport
 
     def user_profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Snapchat User Profile — Public Snapchat profile metadata, subscriber count, avatar and highlights. (11 credits)
+        """Snapchat User Profile — Public Snapchat profile — highlights with snap lists, Spotlight engagement, related accounts. (1 credit)
 
         :param url: Snapchat username or profile URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -3105,7 +3105,7 @@ class AsyncSnapchatApi:
         self._t = transport
 
     async def user_profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Snapchat User Profile — Public Snapchat profile metadata, subscriber count, avatar and highlights. (11 credits)
+        """Snapchat User Profile — Public Snapchat profile — highlights with snap lists, Spotlight engagement, related accounts. (1 credit)
 
         :param url: Snapchat username or profile URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
