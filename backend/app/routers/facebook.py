@@ -1208,7 +1208,7 @@ async def facebook_profile_reels(
 
         data = await cached_or_run(
             endpoint="facebook.profile-reels",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

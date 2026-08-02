@@ -903,7 +903,7 @@ export class FacebookApi {
   profilePosts(params: FacebookProfilePostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/profile-posts", params);
   }
-  /** Facebook Profile Reels — Latest Reels from a Facebook profile/page. (36 credits) */
+  /** Facebook Profile Reels — Latest page Reels with full engagement; newest-first, archive cliff. (2 credits) */
   profileReels(params: FacebookProfileReelsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/profile-reels", params);
   }

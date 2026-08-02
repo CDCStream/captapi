@@ -1166,7 +1166,7 @@ class FacebookApi:
         return self._t.get("/v1/facebook/profile-posts", {"url": url, "limit": limit, "cache": cache})
 
     def profile_reels(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Profile Reels — Latest Reels from a Facebook profile/page. (36 credits)
+        """Facebook Profile Reels — Latest page Reels with full engagement; newest-first, archive cliff. (2 credits)
 
         :param url: Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.
@@ -1251,7 +1251,7 @@ class AsyncFacebookApi:
         return await self._t.get("/v1/facebook/profile-posts", {"url": url, "limit": limit, "cache": cache})
 
     async def profile_reels(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Profile Reels — Latest Reels from a Facebook profile/page. (36 credits)
+        """Facebook Profile Reels — Latest page Reels with full engagement; newest-first, archive cliff. (2 credits)
 
         :param url: Facebook profile or page URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param limit: Max items to return. Default 20, max 200. Billed per result.

@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "fix",
+    title: "Facebook profile reels: drop archive padding after recency cliff",
+    description:
+      "GET /v1/facebook/profile-reels no longer pads \"latest\" with years-old videos pulled from a deep /videos scroll or the profile home feed. Listing prefers /reels (falls back to /videos) with a shallower scroll; after newest-first sort, the first gap larger than 1 year truncates the page. Engagement (views/likes/comments/shares) unchanged. Still 2 credits.",
+    items: [
+      "Prefer /reels tab before /videos",
+      "Shallower listing scroll (less archive pollution)",
+      "Recency cliff: stop at >1 year gap between items",
+      "Home feed mined only when both tabs are empty",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "fix",
     title: "TikTok live: authoritative isLive/status + parsed stream qualities",
     description:
       "GET /v1/tiktok/live (and /live-info) no longer treat a leftover roomId or non-empty streamUrls as live. isLive is true only when liveRoom.status === 2; that numeric status is also returned at the top level and on room. Offline responses can still include the last room (title, counts, pull URLs) — trust isLive/status. Additive fields: creator.id / secUid / following, room.liveSubOnly / gameTagId / hashTagId / streamId, streamQualities[{quality,codec,resolution,bitrate,flv,hls,dash}], and streams{hd,sd,ld,origin,ao,…} (h264 preferred). streamUrls[] kept for compatibility. Still 1 credit on /live.",
