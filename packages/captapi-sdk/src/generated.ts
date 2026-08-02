@@ -2353,7 +2353,7 @@ export interface KwaiPostParams {
 
 export class KwaiApi {
   constructor(private readonly core: HttpCore) {}
-  /** Kwai Profile — Kwai public profile details and stats. (17 credits) */
+  /** Kwai Profile — Kwai profile — bio, counts, verification, and post privacy flags. (1 credit) */
   profile(params: KwaiProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/kwai/profile", params);
   }

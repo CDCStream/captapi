@@ -11172,6 +11172,7 @@
           "Kwai"
         ],
         "summary": "Kwai profile",
+        "description": "Fetch a Kwai profile — display name, bio, counts, and verification as structured JSON. Parsed from Kwai's public web page (JSON-LD + Nuxt SSR state).",
         "operationId": "profile_v1_kwai_profile_get",
         "security": [
           {

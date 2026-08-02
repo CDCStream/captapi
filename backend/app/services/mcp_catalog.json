@@ -4799,8 +4799,8 @@
     "platform": "kwai",
     "name": "Kwai Profile",
     "path": "/v1/kwai/profile",
-    "credits": 17,
-    "summary": "Kwai public profile details and stats.",
+    "credits": 1,
+    "summary": "Kwai profile — bio, counts, verification, and post privacy flags.",
     "params": [
       {
         "name": "url",

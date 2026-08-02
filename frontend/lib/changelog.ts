@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "Kwai profile: bio, verification, post counts; 1 credit",
+    description:
+      "GET /v1/kwai/profile drops from 17 → 1 credit and finally matches its own docs promise: bio, verified/verifiedDescription/verifiedNumber, gender, following, publicPostCount/privatePostCount, isPrivate, and eid — parsed from Kwai JSON-LD + Nuxt SSR state. Removes the duplicate raw block. When Kwai stubs follower/following to 1, followers prefer schema.org counts and following is omitted instead of a fake 1.",
+    items: [
+      "1 credit (was 17)",
+      "bio, verified, verifiedDescription, verifiedNumber, gender, eid",
+      "following, publicPostCount, privatePostCount, isPrivate",
+      "Drop duplicate raw profile block",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "Account APIs: camelCase field names",
     description:
       "GET /v1/account/balance (and sibling usage/history/daily-usage/most-used-routes/limits) now use camelCase keys — monthlyQuota, subscriptionCredits, topupCredits, totalCredits, subscriptionRenewsAt, creditsUsed, createdAt, etc. — matching the rest of the Captapi surface. Same data; naming only.",

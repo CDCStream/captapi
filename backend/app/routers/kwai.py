@@ -82,31 +82,59 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
     author = _author(item)
     handle = author.get("username") or author.get("name")
     page_url = author.get("url") or (f"https://www.kwai.com/@{handle}" if handle else None)
-    # Actor often omits videosCount now — drop empties instead of shipping null.
-    raw = {k: v for k, v in author.items() if v not in (None, "", [])} if isinstance(author, dict) else {}
+    eid = safe_str(author.get("eid") or author.get("id"))
+    public_posts = safe_int(author.get("publicPostCount") or author.get("videosCount"))
+    private_posts = safe_int(author.get("privatePostCount"))
+    verified = author.get("verified")
+    if not isinstance(verified, bool):
+        verified = None
+    is_private = author.get("isPrivate")
+    if not isinstance(is_private, bool):
+        is_private = None
     out: dict[str, Any] = {
         "platform": "kwai",
-        "id": safe_str(author.get("id")),
+        "id": eid,
+        "eid": eid,
         "url": safe_str(page_url),
         "username": safe_str(handle),
         "displayName": safe_str(author.get("name")),
+        "bio": safe_str(author.get("bio") or author.get("description")),
         "avatar": safe_str(author.get("avatar")),
+        "verified": verified,
+        "verifiedDescription": safe_str(author.get("verifiedDescription")),
+        "verifiedNumber": safe_int(author.get("verifiedNumber")),
+        "gender": safe_str(author.get("gender")),
         "followers": safe_int(author.get("followersCount")),
+        "following": safe_int(author.get("followingCount")),
         "likedCount": safe_int(author.get("likesCount")),
-        "postCount": safe_int(author.get("videosCount")),
-        "raw": raw,
+        "publicPostCount": public_posts,
+        "privatePostCount": private_posts,
+        "postCount": public_posts,
+        "isPrivate": is_private,
     }
-    if out.get("postCount") is None:
-        out.pop("postCount", None)
+    # Drop empties — prefer omitting over null spam (except keep falsey bools).
+    for key in (
+        "bio",
+        "verifiedDescription",
+        "verifiedNumber",
+        "gender",
+        "following",
+        "publicPostCount",
+        "privatePostCount",
+        "postCount",
+        "eid",
+    ):
+        if out.get(key) in (None, "", []):
+            out.pop(key, None)
+    for key in ("verified", "isPrivate"):
+        if out.get(key) is None:
+            out.pop(key, None)
     return out
 
 
 def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
     author = _author(item)
     duration = item.get("duration")
-    raw = {k: v for k, v in item.items() if v not in (None, "", [])} if isinstance(item, dict) else item
-    if isinstance(raw, dict) and isinstance(raw.get("authorMeta"), dict):
-        raw["authorMeta"] = {k: v for k, v in raw["authorMeta"].items() if v not in (None, "", [])}
     out: dict[str, Any] = {
         "platform": "kwai",
         "id": safe_str(item.get("id")),
@@ -130,7 +158,6 @@ def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
             "comments": safe_int(item.get("commentCount")),
             "shares": safe_int(item.get("shareCount")),
         },
-        "raw": raw,
     }
     for key in ("text", "transcript", "durationSeconds", "thumbnailUrl", "videoUrl"):
         if out.get(key) in (None, "", []):
@@ -138,7 +165,14 @@ def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
-@router.get("/profile", summary="Kwai profile")
+@router.get(
+    "/profile",
+    summary="Kwai profile",
+    description=(
+        "Fetch a Kwai profile — display name, bio, counts, and verification as structured JSON. "
+        "Parsed from Kwai's public web page (JSON-LD + Nuxt SSR state)."
+    ),
+)
 async def profile(
     url: str = Query(..., description="Kwai profile URL or @handle (e.g. https://www.kwai.com/@topfilmeseseriesnatv)"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -147,7 +181,7 @@ async def profile(
     profile_url = _profile_url(url)
     if not profile_url:
         raise HTTPException(status_code=400, detail="Invalid Kwai profile URL or handle")
-    async with billed_call(caller=caller, endpoint="/v1/kwai/profile", platform="kwai", resource_url=url, base_credits=17) as ctx:
+    async with billed_call(caller=caller, endpoint="/v1/kwai/profile", platform="kwai", resource_url=url, base_credits=1) as ctx:
         async def _run() -> dict[str, Any]:
             native_row = await native.fetch_profile(profile_url)
             if native_row:
@@ -159,7 +193,7 @@ async def profile(
             ctx["source"] = "apify"
             return _normalize_profile(items[0])
 
-        data = await cached_or_run("kwai.profile", {"url": profile_url, "v": 5}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("kwai.profile", {"url": profile_url, "v": 6}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 
@@ -187,7 +221,7 @@ async def user_posts(
             posts = [_normalize_post(i) for i in items[:limit]]
             return {"profileUrl": profile_url, "totalReturned": len(posts), "posts": posts}
 
-        data = await cached_or_run("kwai.user-posts", {"url": profile_url, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("kwai.user-posts", {"url": profile_url, "limit": limit, "v": 5}, _run, ctx, use_cache=cache)
         ctx["credits_override"] = max(2, math.ceil(len(data["posts"]) * 2.25))
         return ApiResponse(data=data)
 
@@ -213,5 +247,5 @@ async def post(
             ctx["source"] = "apify"
             return _normalize_post(items[0])
 
-        data = await cached_or_run("kwai.post", {"url": video_url, "v": 5}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("kwai.post", {"url": video_url, "v": 6}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)

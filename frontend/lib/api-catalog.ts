@@ -681,7 +681,19 @@ const UTILITIES: Spec[] = [
 ];
 
 const KWAI: Spec[] = [
-  { slug: "kwai-profile", name: "Kwai Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/kwai/profile", credits: 17 },
+  {
+    slug: "kwai-profile",
+    name: "Kwai Profile API",
+    shortName: "Profile",
+    category: "channel",
+    method: "GET",
+    path: "/v1/kwai/profile",
+    credits: 1,
+    tagline:
+      "Fetch Kwai profile — display name, bio, counts, and verification as structured JSON.",
+    longDescription:
+      "Pass a Kwai profile URL or @handle and get the public account as clean JSON: id/eid, username, displayName, bio, avatar, verified + verifiedDescription/verifiedNumber when Kwai exposes them, gender, followers/following/likedCount, publicPostCount/privatePostCount, and isPrivate. Parsed from Kwai's public web page (JSON-LD + Nuxt SSR state) — not HTML scraping of visible counters. Note: Kwai's web surface sometimes stubs follower/following to 1; when that happens we prefer schema.org counts for followers and omit following rather than ship a fake 1. Flat 1 credit.",
+  },
   { slug: "kwai-user-posts", name: "Kwai User Posts API", shortName: "User Posts", category: "list", method: "GET", path: "/v1/kwai/user-posts", credits: 45, creditsPerResult: 2.25 },
   { slug: "kwai-post", name: "Kwai Post API", shortName: "Post", category: "details", method: "GET", path: "/v1/kwai/post", credits: 17 , tagline: "Get a Kwai post — caption, author, and engagement fields as structured JSON." },
 ];
@@ -2779,6 +2791,12 @@ const FIELD_DESCS: Record<string, string> = {
   connections: "Number of connections.",
   members: "Member count.",
   postCount: "Total number of posts.",
+  publicPostCount: "Public posts on the Kwai profile.",
+  privatePostCount: "Private posts on the Kwai profile.",
+  likedCount: "Total likes received across the profile.",
+  verifiedDescription: "Kwai verification label (e.g. Conta Oficial).",
+  verifiedNumber: "Kwai verification tier number when present.",
+  eid: "Kwai opaque profile eid.",
   videoCount: "Total number of videos.",
   tweetCount: "Total number of tweets.",
   mediaCount: "Total number of media posts.",

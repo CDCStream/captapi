@@ -4162,57 +4162,26 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "likes": 9232,
       "comments": 91,
       "shares": 169
-    },
-    "raw": {
-      "id": "5240932700689736196",
-      "caption": "...",
-      "transcript": "BANDIDO ESTAVA ESPERANDO ELE NA SAIDA DO BANCOBANDIDO ESTAVA ESPERANDO ELE NA SAIDA DO BANCO. ",
-      "createTime": "2026-01-24T00:50:13Z",
-      "thumb": "https://aws-br-pic.kwai.net/upic/2026/01/24/08/BMjAyNjAxMjQwODQ4MTNfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMDI4NTA4NDg3NF8yXzM=_oscn2_Befd2f922b58f2b5f72e4cb3c375d043d.webp",
-      "url": "https://www.kwai.com/@topfilmeseseriesnatv/video/5240932700689736196",
-      "authorMeta": {
-        "id": "3x9mhse7ekkvfa9",
-        "name": "Topseriesfilmetv",
-        "username": "topfilmeseseriesnatv",
-        "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_t.jpg",
-        "url": "https://www.kwai.com/@topfilmeseseriesnatv",
-        "type": "Person",
-        "followersCount": 356909,
-        "likesCount": 7616767
-      },
-      "duration": 156,
-      "width": 720,
-      "height": 1280,
-      "playUrl": "https://aws-br-cdn.kwai.net/upic/2026/01/24/08/BMjAyNjAxMjQwODQ4MTNfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMDI4NTA4NDg3NF8yXzM=_b_Bf1ce0ec42b4fe4482cd50678b3abd2d4.mp4?tag=1-1784753172-s-0-afgxvdpz8w-4a78f339bd4accdf",
-      "likeCount": 9232,
-      "commentCount": 91,
-      "shareCount": 169,
-      "viewCount": 138841,
-      "genres": [
-        "TV series",
-        "Film&TV"
-      ]
     }
   },
   "kwai-profile": {
     "platform": "kwai",
-    "id": "3x9mhse7ekkvfa9",
-    "url": "https://www.kwai.com/@topfilmeseseriesnatv",
-    "username": "topfilmeseseriesnatv",
-    "displayName": "Topseriesfilmetv",
-    "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_t.jpg",
-    "followers": 356909,
-    "likedCount": 7616767,
-    "raw": {
-      "id": "3x9mhse7ekkvfa9",
-      "name": "Topseriesfilmetv",
-      "username": "topfilmeseseriesnatv",
-      "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_t.jpg",
-      "url": "https://www.kwai.com/@topfilmeseseriesnatv",
-      "type": "Person",
-      "followersCount": 356909,
-      "likesCount": 7616767
-    }
+    "id": "3xyutri4afq3qks",
+    "eid": "3xyutri4afq3qks",
+    "url": "https://www.kwai.com/@KwaiBrasilOficial",
+    "username": "KwaiBrasilOficial",
+    "displayName": "Kwai Brasil Oficial",
+    "bio": "Aqui, Geral Brilha ✨",
+    "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20260729230605_BNTU4ODQzMDkz_s.jpg",
+    "verified": true,
+    "verifiedDescription": "Conta Oficial",
+    "verifiedNumber": 3,
+    "followers": 414136454,
+    "likedCount": 17600139,
+    "publicPostCount": 3707,
+    "privatePostCount": 0,
+    "postCount": 3707,
+    "isPrivate": false
   },
   "kwai-user-posts": {
     "profileUrl": "https://www.kwai.com/@topfilmeseseriesnatv",
@@ -4240,36 +4209,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "likes": 9232,
           "comments": 91,
           "shares": 169
-        },
-        "raw": {
-          "id": "5240932700689736196",
-          "caption": "...",
-          "transcript": "BANDIDO ESTAVA ESPERANDO ELE NA SAIDA DO BANCOBANDIDO ESTAVA ESPERANDO ELE NA SAIDA DO BANCO. ",
-          "createTime": "2026-01-24T00:50:13Z",
-          "thumb": "https://aws-br-pic.kwai.net/upic/2026/01/24/08/BMjAyNjAxMjQwODQ4MTNfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMDI4NTA4NDg3NF8yXzM=_oscn2_Befd2f922b58f2b5f72e4cb3c375d043d.webp",
-          "url": "https://www.kwai.com/@topfilmeseseriesnatv/video/5240932700689736196",
-          "authorMeta": {
-            "id": "3x9mhse7ekkvfa9",
-            "name": "Topseriesfilmetv",
-            "username": "topfilmeseseriesnatv",
-            "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_t.jpg",
-            "url": "https://www.kwai.com/@topfilmeseseriesnatv",
-            "type": "Person",
-            "followersCount": 356909,
-            "likesCount": 7616767
-          },
-          "duration": 156,
-          "width": 720,
-          "height": 1280,
-          "playUrl": "https://aws-br-cdn.kwai.net/upic/2026/01/24/08/BMjAyNjAxMjQwODQ4MTNfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMDI4NTA4NDg3NF8yXzM=_b_Bf1ce0ec42b4fe4482cd50678b3abd2d4.mp4?tag=1-1784753172-s-0-afgxvdpz8w-4a78f339bd4accdf",
-          "likeCount": 9232,
-          "commentCount": 91,
-          "shareCount": 169,
-          "viewCount": 138841,
-          "genres": [
-            "TV series",
-            "Film&TV"
-          ]
         }
       },
       {
@@ -4293,34 +4232,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "likes": 441,
           "comments": 7,
           "shares": 16
-        },
-        "raw": {
-          "id": "5197304080333126332",
-          "caption": "...",
-          "createTime": "2026-07-21T01:41:02Z",
-          "thumb": "https://p16-kimg.kwai.net/kimg/EKzM1y8qmQEKAnMzEg1waG90by1vdmVyc2VhGoMBdXBpYy8yMDI2LzA3LzIxLzAxL0JNakF5TmpBM01qRXdNVFF3TVRCZk1UVXdNREF4TkRVMU1ERTVPVFExWHpFMU1ERXhNVEUwTlRFMU9UUTBNRjh5WHpNPV9vdXVfQjVkMzdmMDZiZTFmMmU5NjQ0MGNkNjhhMjc3ZTg1MjRlLndlYnA.webp",
-          "url": "https://www.kwai.com/@topfilmeseseriesnatv/video/5197304080333126332",
-          "authorMeta": {
-            "id": "3x9mhse7ekkvfa9",
-            "name": "Topseriesfilmetv",
-            "username": "topfilmeseseriesnatv",
-            "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_tw.webp",
-            "url": "https://www.kwai.com/@topfilmeseseriesnatv",
-            "followersCount": 356909,
-            "likesCount": 7616767
-          },
-          "duration": 125,
-          "width": 720,
-          "height": 1280,
-          "playUrl": "https://aws-br-cdn.kwai.net/upic/2026/07/21/01/BMjAyNjA3MjEwMTQwMTBfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMTE0NTE1OTQ0MF8yXzM=_b_B9e078740aaad1692190abe5e2e2e61c6.mp4?tag=1-1784753179-s-0-46g59inljw-0d434501e8fb5c1c",
-          "likeCount": 441,
-          "commentCount": 7,
-          "shareCount": 16,
-          "viewCount": 8998,
-          "genres": [
-            "搞笑影视剧;Funny Movies&TV series",
-            "影视综艺;Film&TV"
-          ]
         }
       },
       {
@@ -4344,34 +4255,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "likes": 236,
           "comments": 3,
           "shares": 2
-        },
-        "raw": {
-          "id": "5227421903765456876",
-          "caption": "#ZorraTotal",
-          "createTime": "2026-07-19T08:28:52Z",
-          "thumb": "https://aws-br-pic.kwai.net/upic/2026/07/19/08/BMjAyNjA3MTkwODI4MzVfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMTEzNzQ3NjIyNV8yXzM=_oscn2_Bd317dff3b8f0f93053698bca28b4ed31.webp",
-          "url": "https://www.kwai.com/@topfilmeseseriesnatv/video/5227421903765456876",
-          "authorMeta": {
-            "id": "3x9mhse7ekkvfa9",
-            "name": "Topseriesfilmetv",
-            "username": "topfilmeseseriesnatv",
-            "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_tw.webp",
-            "url": "https://www.kwai.com/@topfilmeseseriesnatv",
-            "followersCount": 356909,
-            "likesCount": 7616767
-          },
-          "duration": 44,
-          "width": 720,
-          "height": 1280,
-          "playUrl": "https://aws-br-cdn.kwai.net/upic/2026/07/19/08/BMjAyNjA3MTkwODI4MzVfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMTEzNzQ3NjIyNV8yXzM=_b_Bb5b74479ac0bb2b14712dd1bca99f12f.mp4?tag=1-1784753179-s-0-difmieeh24-c9d6d04a70b198e6",
-          "likeCount": 236,
-          "commentCount": 3,
-          "shareCount": 2,
-          "viewCount": 4064,
-          "genres": [
-            "搞笑影视剧;Funny Movies&TV series",
-            "影视综艺;Film&TV"
-          ]
         }
       },
       {
@@ -4395,34 +4278,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "likes": 86,
           "comments": 2,
           "shares": 6
-        },
-        "raw": {
-          "id": "5217570279939826842",
-          "caption": "...",
-          "createTime": "2026-07-21T05:13:21Z",
-          "thumb": "https://aws-br-pic.kwai.net/upic/2026/07/21/05/BMjAyNjA3MjEwNTEzMDhfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMTE0NTg5NzI1NV8yXzM=_oscn2_B738481f7686349213ede76436f8269a7.webp",
-          "url": "https://www.kwai.com/@topfilmeseseriesnatv/video/5217570279939826842",
-          "authorMeta": {
-            "id": "3x9mhse7ekkvfa9",
-            "name": "Topseriesfilmetv",
-            "username": "topfilmeseseriesnatv",
-            "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_tw.webp",
-            "url": "https://www.kwai.com/@topfilmeseseriesnatv",
-            "followersCount": 356909,
-            "likesCount": 7616767
-          },
-          "duration": 40,
-          "width": 720,
-          "height": 1280,
-          "playUrl": "https://aws-br-cdn.kwai.net/upic/2026/07/21/05/BMjAyNjA3MjEwNTEzMDhfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMTE0NTg5NzI1NV8yXzM=_b_B997df5f2c06f222fd72be8ae19406143.mp4?tag=1-1784753179-s-0-nl283rewpv-f048203b60d766d3",
-          "likeCount": 86,
-          "commentCount": 2,
-          "shareCount": 6,
-          "viewCount": 1944,
-          "genres": [
-            "电影;Film",
-            "影视综艺;Film&TV"
-          ]
         }
       },
       {
@@ -4446,34 +4301,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "likes": 38,
           "comments": 0,
           "shares": 1
-        },
-        "raw": {
-          "id": "5210533406153142423",
-          "caption": "...",
-          "createTime": "2026-07-21T04:48:58Z",
-          "thumb": "https://p1-kimg.kwai.net/kimg/EKzM1y8qmQEKAnMzEg1waG90by1vdmVyc2VhGoMBdXBpYy8yMDI2LzA3LzIxLzA0L0JNakF5TmpBM01qRXdORFE0TURSZk1UVXdNREF4TkRVMU1ERTVPVFExWHpFMU1ERXhNVEUwTlRnd09UVTNORjh5WHpNPV9vdXVfQjAxNmY3NTlkNjVkOGJiNWZjNmNjNmExZTNmODBiOThkLndlYnA.webp",
-          "url": "https://www.kwai.com/@topfilmeseseriesnatv/video/5210533406153142423",
-          "authorMeta": {
-            "id": "3x9mhse7ekkvfa9",
-            "name": "Topseriesfilmetv",
-            "username": "topfilmeseseriesnatv",
-            "avatar": "https://aws-br-pic.kwai.net/bs2/overseaHead/20250507231107_BMTUwMDAxNDU1MDE5OTQ1_tw.webp",
-            "url": "https://www.kwai.com/@topfilmeseseriesnatv",
-            "followersCount": 356909,
-            "likesCount": 7616767
-          },
-          "duration": 124,
-          "width": 720,
-          "height": 1280,
-          "playUrl": "https://aws-br-cdn.kwai.net/upic/2026/07/21/04/BMjAyNjA3MjEwNDQ4MDRfMTUwMDAxNDU1MDE5OTQ1XzE1MDExMTE0NTgwOTU3NF8yXzM=_b_B4d8d80659d6efea357399c8f82843875.mp4?tag=1-1784753179-s-0-ilwmazqyjf-c8d63120fe70f928",
-          "likeCount": 38,
-          "commentCount": 0,
-          "shareCount": 1,
-          "viewCount": 601,
-          "genres": [
-            "电视;TV series",
-            "影视综艺;Film&TV"
-          ]
         }
       }
     ]

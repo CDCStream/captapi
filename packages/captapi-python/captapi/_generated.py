@@ -3344,7 +3344,7 @@ class KwaiApi:
         self._t = transport
 
     def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Kwai Profile — Kwai public profile details and stats. (17 credits)
+        """Kwai Profile — Kwai profile — bio, counts, verification, and post privacy flags. (1 credit)
 
         :param url: Kwai profile URL or @handle, e.g. https://www.kwai.com/@easycashindonesia. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -3374,7 +3374,7 @@ class AsyncKwaiApi:
         self._t = transport
 
     async def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Kwai Profile — Kwai public profile details and stats. (17 credits)
+        """Kwai Profile — Kwai profile — bio, counts, verification, and post privacy flags. (1 credit)
 
         :param url: Kwai profile URL or @handle, e.g. https://www.kwai.com/@easycashindonesia. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

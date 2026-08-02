@@ -341,7 +341,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 
 | Tool / endpoint | REST path | Parameters | Credits |
 | --- | --- | --- | --- |
-| `kwai_profile` | `/v1/kwai/profile` | `url` (string), `cache`? (boolean) | 17 |
+| `kwai_profile` | `/v1/kwai/profile` | `url` (string), `cache`? (boolean) | 1 |
 | `kwai_user_posts` | `/v1/kwai/user-posts` | `url` (string), `limit`? (number), `cache`? (boolean) | 45 |
 | `kwai_post` | `/v1/kwai/post` | `url` (string), `cache`? (boolean) | 17 |
 

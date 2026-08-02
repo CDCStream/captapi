@@ -521,7 +521,7 @@ const UTILITIES: Omit<Endpoint, "platform">[] = [
 ];
 
 const KWAI: Omit<Endpoint, "platform">[] = [
-  { tool: "kwai_profile", name: "Kwai Profile", path: "/v1/kwai/profile", credits: 17, summary: "Kwai public profile details and stats.", params: [url(KWAI_PROFILE)] },
+  { tool: "kwai_profile", name: "Kwai Profile", path: "/v1/kwai/profile", credits: 1, summary: "Kwai profile — bio, counts, verification, and post privacy flags.", params: [url(KWAI_PROFILE)] },
   { tool: "kwai_user_posts", name: "Kwai User Posts", path: "/v1/kwai/user-posts", credits: 45, summary: "Recent Kwai videos from a profile.", params: [url(KWAI_PROFILE), limit(20, 200)] },
   { tool: "kwai_post", name: "Kwai Post", path: "/v1/kwai/post", credits: 17, summary: "Kwai post metadata and engagement.", params: [url(KWAI_POST)] },
 ];
