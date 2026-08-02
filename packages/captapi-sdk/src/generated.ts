@@ -589,11 +589,11 @@ export class TiktokApi {
   popularHashtags(params: TiktokPopularHashtagsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/popular-hashtags", params);
   }
-  /** TikTok Live — Live status & room info for a TikTok creator. (1 credit) */
+  /** TikTok Live — Authoritative isLive/status, last room, creator id/secUid, parsed stream qualities. (1 credit) */
   live(params: TiktokLiveParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/live", params);
   }
-  /** TikTok Live Info — Live room details for a TikTok creator. (7 credits) */
+  /** TikTok Live Info — Same as TikTok Live (status, room, stream qualities). (7 credits) */
   liveInfo(params: TiktokLiveInfoParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/tiktok/live-info", params);
   }

@@ -2248,43 +2248,112 @@ async def song_details_native(music_id_or_url: str) -> dict[str, Any] | None:
     return normalize_song_details(music, url=url, music_id=music_id)
 
 
-def _extract_stream_urls(live_room: dict[str, Any]) -> list[str]:
-    """Pull flv/hls URLs out of ``api-live/user/room`` streamData blobs."""
-    urls: list[str] = []
-    seen: set[str] = set()
+# TikTok ``liveRoom.status`` / ``user.status`` — 2 means currently live.
+# Other codes (commonly 4) mean the last room payload is stale / ended; stream
+# pull URLs may still be present but must not be treated as an active broadcast.
+_TT_LIVE_STATUS_LIVE = 2
 
-    def _add(raw: Any) -> None:
-        u = safe_str(raw)
-        if u and u.startswith("http") and u not in seen:
-            seen.add(u)
-            urls.append(u)
 
-    for key in ("streamData", "hevcStreamData"):
-        blob = live_room.get(key)
-        if not isinstance(blob, dict):
+def _parse_stream_data_blob(blob: Any) -> dict[str, Any]:
+    """Decode ``pull_data.stream_data`` (JSON string or dict) → quality map."""
+    if not isinstance(blob, dict):
+        return {}
+    pull = blob.get("pull_data") if isinstance(blob.get("pull_data"), dict) else {}
+    raw = pull.get("stream_data")
+    parsed: Any = None
+    if isinstance(raw, str) and raw.strip():
+        try:
+            parsed = json.loads(raw)
+        except ValueError:
+            parsed = None
+    elif isinstance(raw, dict):
+        parsed = raw
+    if not isinstance(parsed, dict):
+        return {}
+    data = parsed.get("data")
+    return data if isinstance(data, dict) else {}
+
+
+def _parse_sdk_params(raw: Any) -> dict[str, Any]:
+    if isinstance(raw, dict):
+        return raw
+    if isinstance(raw, str) and raw.strip():
+        try:
+            got = json.loads(raw)
+            return got if isinstance(got, dict) else {}
+        except ValueError:
+            return {}
+    return {}
+
+
+def _extract_stream_qualities(live_room: dict[str, Any]) -> list[dict[str, Any]]:
+    """Parse h264 + hevc streamData into quality rows (hd/sd/ld/origin/ao/…)."""
+    rows: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    for blob_key, default_codec in (("streamData", "h264"), ("hevcStreamData", "h265")):
+        data = _parse_stream_data_blob(live_room.get(blob_key))
+        if not data:
             continue
-        pull = blob.get("pull_data") if isinstance(blob.get("pull_data"), dict) else {}
-        raw = pull.get("stream_data")
-        parsed: Any = None
-        if isinstance(raw, str) and raw.strip():
-            try:
-                parsed = json.loads(raw)
-            except ValueError:
-                parsed = None
-        elif isinstance(raw, dict):
-            parsed = raw
-        if not isinstance(parsed, dict):
-            continue
-        data = parsed.get("data") if isinstance(parsed.get("data"), dict) else {}
-        for quality in data.values():
+        for quality_name, quality in data.items():
             if not isinstance(quality, dict):
+                continue
+            q = safe_str(quality_name)
+            if not q:
                 continue
             main = quality.get("main") if isinstance(quality.get("main"), dict) else quality
             if not isinstance(main, dict):
                 continue
-            for k in ("flv", "hls", "cmaf", "dash"):
-                _add(main.get(k))
+            sdk = _parse_sdk_params(main.get("sdk_params"))
+            codec = safe_str(sdk.get("VCodec") or sdk.get("vcodec") or default_codec) or default_codec
+            key = (q, codec)
+            if key in seen:
+                continue
+            seen.add(key)
+            resolution = safe_str(sdk.get("resolution"))
+            bitrate = safe_int(sdk.get("vbitrate") if sdk.get("vbitrate") is not None else sdk.get("bitrate"))
+            row: dict[str, Any] = {
+                "quality": q,
+                "codec": codec,
+                "resolution": resolution or None,
+                "bitrate": bitrate,
+                "flv": safe_str(main.get("flv")),
+                "hls": safe_str(main.get("hls")),
+                "dash": safe_str(main.get("dash")),
+                "cmaf": safe_str(main.get("cmaf")),
+            }
+            rows.append({k: v for k, v in row.items() if v is not None and v != ""})
+    return rows
+
+
+def _extract_stream_urls(live_room: dict[str, Any]) -> list[str]:
+    """Flat flv/hls/dash/cmaf URL list (compat); prefer ``streamQualities``."""
+    urls: list[str] = []
+    seen: set[str] = set()
+    for row in _extract_stream_qualities(live_room):
+        for k in ("flv", "hls", "dash", "cmaf"):
+            u = safe_str(row.get(k))
+            if u and u.startswith("http") and u not in seen:
+                seen.add(u)
+                urls.append(u)
     return urls
+
+
+def _streams_by_quality(qualities: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """SC-style map keyed by quality (prefer h264 when both codecs exist)."""
+    if not qualities:
+        return None
+    out: dict[str, Any] = {}
+    for row in qualities:
+        q = safe_str(row.get("quality"))
+        if not q:
+            continue
+        codec = safe_str(row.get("codec")) or "h264"
+        # First win, but let h264 replace a prior hevc entry for the same key.
+        if q in out and codec not in ("h264", "avc"):
+            continue
+        entry = {k: v for k, v in row.items() if k != "quality" and v is not None and v != ""}
+        out[q] = entry
+    return out or None
 
 
 async def _fetch_live_room_api(handle: str) -> dict[str, Any] | None:
@@ -2307,9 +2376,11 @@ async def _fetch_live_room_api(handle: str) -> dict[str, Any] | None:
 async def live_status_native(handle: str) -> dict[str, Any] | None:
     """Live status via ``api-live/user/room`` (streams) + profile fallback.
 
-    Prefer the signed live-room API (title/viewers/stream URLs). ``status == 2``
-    means currently live; other statuses keep room metadata but ``isLive=false``.
-    Profile ``roomId`` is a secondary signal when the live API is unavailable.
+    ``isLive`` is authoritative and true only when ``liveRoom.status == 2``
+    (or ``user.status == 2`` when the room node is missing). Other statuses
+    still return the last room (title / counts / pull URLs) so clients can
+    inspect history — but must key off ``isLive`` / ``status``, not a non-empty
+    ``room``. Profile ``roomId`` is used only when the live API is unavailable.
     """
     username = (handle or "").lstrip("@").strip()
     if not username:
@@ -2343,52 +2414,101 @@ async def live_status_native(handle: str) -> dict[str, Any] | None:
     if not username and live_api is None and ui is None:
         return None
 
-    room_id = safe_str(user.get("roomId"))
-    status = safe_int(live_room.get("status"))
-    # TikTok liveRoom.status: 2 = currently live.
-    is_live = status == 2 or bool(room_id)
+    profile_room_id = safe_str(user.get("roomId") or api_user.get("roomId"))
+    room_status = safe_int(live_room.get("status"))
+    user_status = safe_int(api_user.get("status") if api_user.get("status") is not None else user.get("status"))
+    # Authoritative: numeric liveRoom.status (2 = live). Never treat a leftover
+    # roomId / non-empty streamUrls as "currently live".
+    if room_status is not None:
+        is_live = room_status == _TT_LIVE_STATUS_LIVE
+        status = room_status
+    elif user_status is not None:
+        is_live = user_status == _TT_LIVE_STATUS_LIVE
+        status = user_status
+    else:
+        # Live API missing entirely — weak profile signal only.
+        is_live = bool(profile_room_id) and live_api is None
+        status = _TT_LIVE_STATUS_LIVE if is_live else None
 
     room_stats = live_room.get("liveRoomStats") if isinstance(live_room.get("liveRoomStats"), dict) else {}
+    stream_qualities = _extract_stream_qualities(live_room) if live_room else []
     stream_urls = _extract_stream_urls(live_room) if live_room else []
+    streams_map = _streams_by_quality(stream_qualities)
+    game_tag = safe_int(live_room.get("gameTagId") or live_room.get("game_tag_id"))
+    hash_tag = safe_int(live_room.get("hashTagId") or live_room.get("hash_tag_id"))
+    live_sub = live_room.get("liveSubOnly")
+    if live_sub is None:
+        live_sub = live_room.get("live_sub_only")
+    live_sub_only = None if live_sub is None else bool(safe_int(live_sub) if not isinstance(live_sub, bool) else live_sub)
+
     room: dict[str, Any] = {}
     if live_room:
         room = {
-            "id": safe_str(live_room.get("roomId") or live_room.get("streamId") or room_id),
+            "id": safe_str(
+                live_room.get("roomId")
+                or api_user.get("roomId")
+                or profile_room_id
+                or live_room.get("streamId")
+            ),
+            "streamId": safe_str(live_room.get("streamId")),
+            "status": room_status if room_status is not None else status,
             "title": safe_str(live_room.get("title")),
             "startedAt": _iso(live_room.get("startTime")),
             "viewerCount": safe_int(room_stats.get("userCount") or live_room.get("userCount")),
             "totalEnterCount": safe_int(room_stats.get("enterCount") or live_room.get("enterCount")),
             "coverUrl": safe_str(live_room.get("coverUrl") or live_room.get("squareCoverImg")),
+            "liveSubOnly": live_sub_only,
+            "gameTagId": game_tag if game_tag else None,
+            "hashTagId": hash_tag if hash_tag else None,
+            "liveRoomMode": safe_int(live_room.get("liveRoomMode")),
             "streamUrls": stream_urls or None,
+            "streamQualities": stream_qualities or None,
+            "streams": streams_map,
         }
         room = {k: v for k, v in room.items() if v is not None and v != "" and v != []}
-    elif room_id:
-        room = {"id": room_id}
+    elif profile_room_id and is_live:
+        room = {"id": profile_room_id, "status": status}
 
-    return {
+    creator_id = safe_str(api_user.get("id") or user.get("id") or user.get("uid"))
+    sec_uid = safe_str(api_user.get("secUid") or user.get("secUid") or user.get("sec_uid"))
+    following = (
+        safe_int(api_stats.get("followingCount"))
+        or _stat(stats_v2, stats, "followingCount")
+    )
+    creator = {
+        "id": creator_id,
+        "secUid": sec_uid,
+        "displayName": safe_str(api_user.get("nickname") or user.get("nickname")),
+        "followers": safe_int(api_stats.get("followerCount"))
+        or _stat(stats_v2, stats, "followerCount"),
+        "following": following,
+        "followingCount": following,
+        "verified": (
+            bool(api_user.get("verified"))
+            if api_user.get("verified") is not None
+            else (bool(user.get("verified")) if user.get("verified") is not None else None)
+        ),
+        "avatar": safe_str(
+            api_user.get("avatarLarger")
+            or api_user.get("avatarMedium")
+            or user.get("avatarLarger")
+            or user.get("avatarMedium")
+            or user.get("avatarThumb")
+        ),
+        "bio": safe_str(api_user.get("signature") or user.get("signature")),
+        "status": user_status,
+    }
+    creator = {k: v for k, v in creator.items() if v is not None and v != ""}
+
+    out: dict[str, Any] = {
         "platform": "tiktok",
         "username": username,
         "isLive": is_live,
-        "creator": {
-            "displayName": safe_str(api_user.get("nickname") or user.get("nickname")),
-            "followers": safe_int(api_stats.get("followerCount"))
-            or _stat(stats_v2, stats, "followerCount"),
-            "verified": (
-                bool(api_user.get("verified"))
-                if api_user.get("verified") is not None
-                else (bool(user.get("verified")) if user.get("verified") is not None else None)
-            ),
-            "avatar": safe_str(
-                api_user.get("avatarLarger")
-                or api_user.get("avatarMedium")
-                or user.get("avatarLarger")
-                or user.get("avatarMedium")
-                or user.get("avatarThumb")
-            ),
-            "bio": safe_str(api_user.get("signature") or user.get("signature")),
-        },
+        "status": status,
+        "creator": creator,
         "room": room,
     }
+    return {k: v for k, v in out.items() if v is not None and v != {}}
 
 
 def _map_trend_video(item: dict[str, Any], *, rank: int) -> dict[str, Any] | None:

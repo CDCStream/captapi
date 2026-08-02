@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "fix",
+    title: "TikTok live: authoritative isLive/status + parsed stream qualities",
+    description:
+      "GET /v1/tiktok/live (and /live-info) no longer treat a leftover roomId or non-empty streamUrls as live. isLive is true only when liveRoom.status === 2; that numeric status is also returned at the top level and on room. Offline responses can still include the last room (title, counts, pull URLs) — trust isLive/status. Additive fields: creator.id / secUid / following, room.liveSubOnly / gameTagId / hashTagId / streamId, streamQualities[{quality,codec,resolution,bitrate,flv,hls,dash}], and streams{hd,sd,ld,origin,ao,…} (h264 preferred). streamUrls[] kept for compatibility. Still 1 credit on /live.",
+    items: [
+      "isLive only when status === 2 (room may still be last broadcast)",
+      "creator.id + secUid + following",
+      "streamQualities[] + streams{} with resolution/bitrate/codec",
+      "liveSubOnly / gameTagId / hashTagId when present",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "fix",
     title: "Instagram basic profile: camelCase schema aligned with Channel Details",
     description:
       "GET /v1/instagram/basic-profile no longer returns raw Instagram snake_case (full_name, follower_count, is_private, hd_profile_pic_url_info). Response is Captapi camelCase matching Channel Details: displayName, bio, followers / following / postCount, verified, isPrivate, profileImage / profileImageHd, externalUrl, bioLinks[], categoryName, isBusinessAccount / isProfessionalAccount, businessAddress{cityName,streetAddress,zipCode,…}, fbid, highlightReelCount, hasClips, and transparency flags when present. Still 1 credit.",

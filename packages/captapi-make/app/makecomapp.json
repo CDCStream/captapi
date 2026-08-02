@@ -718,7 +718,7 @@
       },
       "tiktokLive": {
         "label": "TikTok Live",
-        "description": "Live status & room info for a TikTok creator. Costs ~1 credit (cached results free, failures never charged).",
+        "description": "Authoritative isLive/status, last room, creator id/secUid, parsed stream qualities. Costs ~1 credit (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,
@@ -735,7 +735,7 @@
       },
       "tiktokLiveInfo": {
         "label": "TikTok Live Info",
-        "description": "Live room details for a TikTok creator. Costs ~7 credits (cached results free, failures never charged).",
+        "description": "Same as TikTok Live (status, room, stream qualities) at 7 credits. Costs ~7 credits (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

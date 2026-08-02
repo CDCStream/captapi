@@ -1219,7 +1219,7 @@
     "name": "TikTok Live",
     "path": "/v1/tiktok/live",
     "credits": 1,
-    "summary": "Live status & room info for a TikTok creator.",
+    "summary": "Authoritative isLive/status, last room, creator id/secUid, parsed stream qualities.",
     "params": [
       {
         "name": "url",
@@ -1241,7 +1241,7 @@
     "name": "TikTok Live Info",
     "path": "/v1/tiktok/live-info",
     "credits": 7,
-    "summary": "Live room details for a TikTok creator.",
+    "summary": "Same as TikTok Live (status, room, stream qualities) at 7 credits.",
     "params": [
       {
         "name": "url",

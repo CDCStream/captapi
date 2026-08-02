@@ -1197,8 +1197,30 @@ async def tiktok_profile_region(
 
 def _normalize_live(item: dict[str, Any], handle: str) -> dict[str, Any]:
     """Map live actor output — supports nested liveRoom* and flat snake_case rows."""
+    from app.services.tiktok_native import (
+        _TT_LIVE_STATUS_LIVE,
+        _extract_stream_qualities,
+        _extract_stream_urls,
+        _streams_by_quality,
+    )
+
     user = item.get("liveRoomUserInfo") if isinstance(item.get("liveRoomUserInfo"), dict) else {}
     room = item.get("liveRoom") if isinstance(item.get("liveRoom"), dict) else {}
+    room_status = safe_int(room.get("status") if room.get("status") is not None else item.get("status"))
+    user_status = safe_int(user.get("status") if user.get("status") is not None else item.get("user_status"))
+    if room_status is not None:
+        is_live = room_status == _TT_LIVE_STATUS_LIVE
+        status = room_status
+    elif item.get("is_live") is not None or item.get("isLive") is not None:
+        is_live = bool(item.get("is_live") if item.get("is_live") is not None else item.get("isLive"))
+        status = _TT_LIVE_STATUS_LIVE if is_live else (user_status if user_status is not None else None)
+    elif user_status is not None:
+        is_live = user_status == _TT_LIVE_STATUS_LIVE
+        status = user_status
+    else:
+        is_live = False
+        status = None
+
     stream_urls = (
         item.get("stream_urls")
         or item.get("streamUrls")
@@ -1208,16 +1230,37 @@ def _normalize_live(item: dict[str, Any], handle: str) -> dict[str, Any]:
     )
     if not isinstance(stream_urls, list):
         stream_urls = []
+    qualities = _extract_stream_qualities(room) if room else []
+    if not stream_urls and qualities:
+        stream_urls = _extract_stream_urls(room)
+    streams_map = _streams_by_quality(qualities)
+    game_tag = safe_int(room.get("gameTagId") or room.get("game_tag_id") or item.get("gameTagId"))
+    hash_tag = safe_int(room.get("hashTagId") or room.get("hash_tag_id") or item.get("hashTagId"))
+    live_sub = room.get("liveSubOnly") if room.get("liveSubOnly") is not None else item.get("liveSubOnly")
+    live_sub_only = None if live_sub is None else bool(safe_int(live_sub) if not isinstance(live_sub, bool) else live_sub)
+    following = safe_int(
+        user.get("followingCount")
+        or item.get("following_count")
+        or item.get("followingCount")
+    )
+    creator_id = safe_str(user.get("id") or user.get("uid") or item.get("uid") or item.get("user_id"))
+    sec_uid = safe_str(user.get("secUid") or user.get("sec_uid") or item.get("secUid") or item.get("sec_uid"))
+
     return strip_empty(
         {
             "platform": "tiktok",
             "username": safe_str(
                 user.get("uniqueId") or item.get("unique_id") or item.get("handle") or handle
             ),
-            "isLive": bool(item.get("is_live") if item.get("is_live") is not None else item.get("isLive")),
+            "isLive": is_live,
+            "status": status,
             "creator": {
+                "id": creator_id,
+                "secUid": sec_uid,
                 "displayName": safe_str(user.get("nickname") or item.get("nickname")),
                 "followers": safe_int(user.get("followerCount") or item.get("follower_count")),
+                "following": following,
+                "followingCount": following,
                 "verified": user.get("verified") if user.get("verified") is not None else item.get("verified"),
                 "avatar": safe_str(
                     user.get("avatarUrl")
@@ -1226,14 +1269,20 @@ def _normalize_live(item: dict[str, Any], handle: str) -> dict[str, Any]:
                     or item.get("avatarUrl")
                 ),
                 "bio": safe_str(user.get("signature") or item.get("bio") or item.get("signature")),
+                "status": user_status,
             },
             "room": {
                 "id": safe_str(
-                    item.get("roomId")
-                    or item.get("room_id")
+                    room.get("roomId")
                     or room.get("room_id")
+                    or item.get("roomId")
+                    or item.get("room_id")
+                    or user.get("roomId")
                     or room.get("id")
+                    or room.get("streamId")
                 ),
+                "streamId": safe_str(room.get("streamId") or item.get("streamId")),
+                "status": room_status if room_status is not None else status,
                 "title": safe_str(room.get("title") or item.get("room_title") or item.get("title")),
                 "startedAt": safe_str(room.get("started_at") or item.get("started_at") or item.get("startedAt")),
                 "viewerCount": safe_int(
@@ -1246,7 +1295,12 @@ def _normalize_live(item: dict[str, Any], handle: str) -> dict[str, Any]:
                 ),
                 "likeCount": safe_int(room.get("like_count") or item.get("like_count") or item.get("likeCount")),
                 "coverUrl": safe_str(room.get("cover_url") or item.get("cover_url") or item.get("coverUrl")),
+                "liveSubOnly": live_sub_only,
+                "gameTagId": game_tag if game_tag else None,
+                "hashTagId": hash_tag if hash_tag else None,
                 "streamUrls": stream_urls or None,
+                "streamQualities": qualities or None,
+                "streams": streams_map,
             },
         }
     )
@@ -1292,7 +1346,7 @@ async def tiktok_live(
 
         data = await cached_or_run(
             endpoint="tiktok.live",
-            params={"handle": handle, "v": 5},
+            params={"handle": handle, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1369,7 +1423,7 @@ async def tiktok_live_info(
 
         data = await cached_or_run(
             endpoint="tiktok.live-info",
-            params={"handle": handle, "v": 5},
+            params={"handle": handle, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

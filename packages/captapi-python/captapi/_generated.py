@@ -605,7 +605,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/popular-hashtags", {"query": query, "limit": limit, "cache": cache})
 
     def live(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Live — Live status & room info for a TikTok creator. (1 credit)
+        """TikTok Live — Authoritative isLive/status, last room, creator id/secUid, parsed stream qualities. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -613,7 +613,7 @@ class TiktokApi:
         return self._t.get("/v1/tiktok/live", {"url": url, "cache": cache})
 
     def live_info(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Live Info — Live room details for a TikTok creator. (7 credits)
+        """TikTok Live Info — Same as TikTok Live (status, room, stream qualities). (7 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -812,7 +812,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/popular-hashtags", {"query": query, "limit": limit, "cache": cache})
 
     async def live(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Live — Live status & room info for a TikTok creator. (1 credit)
+        """TikTok Live — Authoritative isLive/status, last room, creator id/secUid, parsed stream qualities. (1 credit)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -820,7 +820,7 @@ class AsyncTiktokApi:
         return await self._t.get("/v1/tiktok/live", {"url": url, "cache": cache})
 
     async def live_info(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """TikTok Live Info — Live room details for a TikTok creator. (7 credits)
+        """TikTok Live Info — Same as TikTok Live (status, room, stream qualities). (7 credits)
 
         :param url: TikTok profile URL, e.g. https://tiktok.com/@username. Not a YouTube channel URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

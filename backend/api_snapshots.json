@@ -5752,27 +5752,112 @@
       "platform": "tiktok",
       "username": "espn",
       "isLive": false,
+      "status": 4,
       "creator": {
+        "id": "6663294979903422470",
+        "secUid": "MS4wLjABAAAAbq-1Yqpp1a6u5KbV_sMg93_FK7AN3d6MJeZ3H0Yj3vZXOtqFXXjc2TIkMW7flCxX",
         "displayName": "ESPN",
-        "followers": 60012277,
+        "followers": 60015790,
+        "following": 647,
+        "followingCount": 647,
         "verified": true,
-        "avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=80fa76fc&x-expires=1785409200&x-signature=FKUjYJgevw6H%2F02LrG5LD%2B4tMoI%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
-        "bio": "Serving Sports Fans. Anytime. Anywhere."
+        "avatar": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:1080:1080.webp?dr=14579&refresh_token=cb85dd6e&x-expires=1785409200&x-signature=4yYWI3y%2FajCE1Z7muZ%2B%2FXsCaQo0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=my2",
+        "bio": "Serving Sports Fans. Anytime. Anywhere.",
+        "status": 4
       },
       "room": {
-        "id": "3578501789985538992",
+        "id": "7663185230940932877",
+        "streamId": "3578501789985538992",
+        "status": 4,
         "title": "WORLD CUP FINAL PREVIEW 🏆⚽️",
         "startedAt": "2026-07-16T17:54:15.000Z",
         "viewerCount": 1,
         "totalEnterCount": 99160,
-        "coverUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=929e6963&x-expires=1785409200&x-signature=LH4jDtgdTto5OnEr2KmFkVYjrZI%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+        "coverUrl": "https://p19-common-sign.tiktokcdn.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:720:720.webp?dr=14579&refresh_token=3b40bad5&x-expires=1785409200&x-signature=ZgFLHeHvgrR5618D8T7m9B5Fe%2Bo%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=my2",
+        "liveSubOnly": false,
+        "liveRoomMode": 0,
         "streamUrls": [
-          "https://pull-f5-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992_hd.flv?expire=1786447036&sign=1d93e103fc74cb8d60ab52fbe3f75984",
-          "https://pull-hls-f16-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992_hd/index.m3u8?expire=1786447036&sign=c31a2a33815891e3385c09b3367fa2bc",
-          "https://pull-f5-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992_hd/index.mpd?expire=1786447036&sign=203f24dba2b34b401151fb14a5f7dd26",
-          "https://pull-f5-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992.flv?expire=1786447036&sign=fa936c642c249ebc46995cad6f11ce81&only_audio=1",
-          "https://pull-f5-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992_ao/index.mpd?expire=1786447036&sign=2beb75f264b3e8a952a089b32cc47d58"
-        ]
+          "https://pull-flv-f11-tt01.tiktokcdn.com/stage/stream-3578501789985538992_hd.flv?expire=1786446578&sign=7ef898a3a70f6405de307c883d51c34f",
+          "https://pull-flv-f11-tt01.tiktokcdn.com/stage/stream-3578501789985538992.flv?expire=1786446578&sign=f35556d73e82fc0186bb04b843b5b6ed&only_audio=1",
+          "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_ld5.flv?expire=1786446578&sign=ef89d29dc87ef8313250ede68dcdaa68",
+          "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_hd5.flv?expire=1786446578&sign=3c11158ca3e5b446fcd1d738f90242de",
+          "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_zsd5.flv?expire=1786446578&sign=d89751ef08147688627305bc6c2705e8",
+          "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992.flv?expire=1786446578&sign=ba0e33c5c80ca7790fa55354913eaed6"
+        ],
+        "streamQualities": [
+          {
+            "quality": "hd",
+            "codec": "h264",
+            "resolution": "720x1440",
+            "bitrate": 1000000,
+            "flv": "https://pull-flv-f11-tt01.tiktokcdn.com/stage/stream-3578501789985538992_hd.flv?expire=1786446578&sign=7ef898a3a70f6405de307c883d51c34f"
+          },
+          {
+            "quality": "ao",
+            "codec": "h264",
+            "bitrate": 0,
+            "flv": "https://pull-flv-f11-tt01.tiktokcdn.com/stage/stream-3578501789985538992.flv?expire=1786446578&sign=f35556d73e82fc0186bb04b843b5b6ed&only_audio=1"
+          },
+          {
+            "quality": "ld",
+            "codec": "h265",
+            "resolution": "480x960",
+            "bitrate": 400000,
+            "flv": "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_ld5.flv?expire=1786446578&sign=ef89d29dc87ef8313250ede68dcdaa68"
+          },
+          {
+            "quality": "hd",
+            "codec": "h265",
+            "resolution": "720x1440",
+            "bitrate": 1350000,
+            "flv": "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_hd5.flv?expire=1786446578&sign=3c11158ca3e5b446fcd1d738f90242de"
+          },
+          {
+            "quality": "sd",
+            "codec": "h265",
+            "resolution": "576x1152",
+            "bitrate": 800000,
+            "flv": "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_zsd5.flv?expire=1786446578&sign=d89751ef08147688627305bc6c2705e8"
+          },
+          {
+            "quality": "origin",
+            "codec": "h265",
+            "resolution": "960x1920",
+            "bitrate": 2904000,
+            "flv": "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992.flv?expire=1786446578&sign=ba0e33c5c80ca7790fa55354913eaed6"
+          }
+        ],
+        "streams": {
+          "hd": {
+            "codec": "h264",
+            "resolution": "720x1440",
+            "bitrate": 1000000,
+            "flv": "https://pull-flv-f11-tt01.tiktokcdn.com/stage/stream-3578501789985538992_hd.flv?expire=1786446578&sign=7ef898a3a70f6405de307c883d51c34f"
+          },
+          "ao": {
+            "codec": "h264",
+            "bitrate": 0,
+            "flv": "https://pull-flv-f11-tt01.tiktokcdn.com/stage/stream-3578501789985538992.flv?expire=1786446578&sign=f35556d73e82fc0186bb04b843b5b6ed&only_audio=1"
+          },
+          "ld": {
+            "codec": "h265",
+            "resolution": "480x960",
+            "bitrate": 400000,
+            "flv": "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_ld5.flv?expire=1786446578&sign=ef89d29dc87ef8313250ede68dcdaa68"
+          },
+          "sd": {
+            "codec": "h265",
+            "resolution": "576x1152",
+            "bitrate": 800000,
+            "flv": "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_zsd5.flv?expire=1786446578&sign=d89751ef08147688627305bc6c2705e8"
+          },
+          "origin": {
+            "codec": "h265",
+            "resolution": "960x1920",
+            "bitrate": 2904000,
+            "flv": "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992.flv?expire=1786446578&sign=ba0e33c5c80ca7790fa55354913eaed6"
+          }
+        }
       }
     }
   },
@@ -5784,34 +5869,120 @@
       "platform": "tiktok",
       "username": "espn",
       "isLive": false,
+      "status": 4,
       "creator": {
+        "id": "6663294979903422470",
+        "secUid": "MS4wLjABAAAAbq-1Yqpp1a6u5KbV_sMg93_FK7AN3d6MJeZ3H0Yj3vZXOtqFXXjc2TIkMW7flCxX",
         "displayName": "ESPN",
-        "followers": 60012277,
+        "followers": 60015790,
+        "following": 647,
+        "followingCount": 647,
         "verified": true,
-        "avatar": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:1080:1080.webp?dr=9640&refresh_token=80fa76fc&x-expires=1785409200&x-signature=FKUjYJgevw6H%2F02LrG5LD%2B4tMoI%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
-        "bio": "Serving Sports Fans. Anytime. Anywhere."
+        "avatar": "https://p16-common-sign.tiktokcdn.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:1080:1080.webp?dr=14579&refresh_token=cb85dd6e&x-expires=1785409200&x-signature=4yYWI3y%2FajCE1Z7muZ%2B%2FXsCaQo0%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=my2",
+        "bio": "Serving Sports Fans. Anytime. Anywhere.",
+        "status": 4
       },
       "room": {
-        "id": "3578501789985538992",
+        "id": "7663185230940932877",
+        "streamId": "3578501789985538992",
+        "status": 4,
         "title": "WORLD CUP FINAL PREVIEW 🏆⚽️",
         "startedAt": "2026-07-16T17:54:15.000Z",
         "viewerCount": 1,
         "totalEnterCount": 99160,
-        "coverUrl": "https://p16-common-sign.tiktokcdn-us.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:720:720.webp?dr=9640&refresh_token=929e6963&x-expires=1785409200&x-signature=LH4jDtgdTto5OnEr2KmFkVYjrZI%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=useast5",
+        "coverUrl": "https://p19-common-sign.tiktokcdn.com/tos-maliva-avt-0068/7310257743653240837~tplv-tiktokx-cropcenter:720:720.webp?dr=14579&refresh_token=3b40bad5&x-expires=1785409200&x-signature=ZgFLHeHvgrR5618D8T7m9B5Fe%2Bo%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=fdd36af4&idc=my2",
+        "liveSubOnly": false,
+        "liveRoomMode": 0,
         "streamUrls": [
-          "https://pull-f5-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992_hd.flv?expire=1786447036&sign=1d93e103fc74cb8d60ab52fbe3f75984",
-          "https://pull-hls-f16-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992_hd/index.m3u8?expire=1786447036&sign=c31a2a33815891e3385c09b3367fa2bc",
-          "https://pull-f5-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992_hd/index.mpd?expire=1786447036&sign=203f24dba2b34b401151fb14a5f7dd26",
-          "https://pull-f5-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992.flv?expire=1786447036&sign=fa936c642c249ebc46995cad6f11ce81&only_audio=1",
-          "https://pull-f5-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992_ao/index.mpd?expire=1786447036&sign=2beb75f264b3e8a952a089b32cc47d58"
-        ]
+          "https://pull-flv-f11-tt01.tiktokcdn.com/stage/stream-3578501789985538992_hd.flv?expire=1786446578&sign=7ef898a3a70f6405de307c883d51c34f",
+          "https://pull-flv-f11-tt01.tiktokcdn.com/stage/stream-3578501789985538992.flv?expire=1786446578&sign=f35556d73e82fc0186bb04b843b5b6ed&only_audio=1",
+          "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_ld5.flv?expire=1786446578&sign=ef89d29dc87ef8313250ede68dcdaa68",
+          "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_hd5.flv?expire=1786446578&sign=3c11158ca3e5b446fcd1d738f90242de",
+          "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_zsd5.flv?expire=1786446578&sign=d89751ef08147688627305bc6c2705e8",
+          "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992.flv?expire=1786446578&sign=ba0e33c5c80ca7790fa55354913eaed6"
+        ],
+        "streamQualities": [
+          {
+            "quality": "hd",
+            "codec": "h264",
+            "resolution": "720x1440",
+            "bitrate": 1000000,
+            "flv": "https://pull-flv-f11-tt01.tiktokcdn.com/stage/stream-3578501789985538992_hd.flv?expire=1786446578&sign=7ef898a3a70f6405de307c883d51c34f"
+          },
+          {
+            "quality": "ao",
+            "codec": "h264",
+            "bitrate": 0,
+            "flv": "https://pull-flv-f11-tt01.tiktokcdn.com/stage/stream-3578501789985538992.flv?expire=1786446578&sign=f35556d73e82fc0186bb04b843b5b6ed&only_audio=1"
+          },
+          {
+            "quality": "ld",
+            "codec": "h265",
+            "resolution": "480x960",
+            "bitrate": 400000,
+            "flv": "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_ld5.flv?expire=1786446578&sign=ef89d29dc87ef8313250ede68dcdaa68"
+          },
+          {
+            "quality": "hd",
+            "codec": "h265",
+            "resolution": "720x1440",
+            "bitrate": 1350000,
+            "flv": "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_hd5.flv?expire=1786446578&sign=3c11158ca3e5b446fcd1d738f90242de"
+          },
+          {
+            "quality": "sd",
+            "codec": "h265",
+            "resolution": "576x1152",
+            "bitrate": 800000,
+            "flv": "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_zsd5.flv?expire=1786446578&sign=d89751ef08147688627305bc6c2705e8"
+          },
+          {
+            "quality": "origin",
+            "codec": "h265",
+            "resolution": "960x1920",
+            "bitrate": 2904000,
+            "flv": "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992.flv?expire=1786446578&sign=ba0e33c5c80ca7790fa55354913eaed6"
+          }
+        ],
+        "streams": {
+          "hd": {
+            "codec": "h264",
+            "resolution": "720x1440",
+            "bitrate": 1000000,
+            "flv": "https://pull-flv-f11-tt01.tiktokcdn.com/stage/stream-3578501789985538992_hd.flv?expire=1786446578&sign=7ef898a3a70f6405de307c883d51c34f"
+          },
+          "ao": {
+            "codec": "h264",
+            "bitrate": 0,
+            "flv": "https://pull-flv-f11-tt01.tiktokcdn.com/stage/stream-3578501789985538992.flv?expire=1786446578&sign=f35556d73e82fc0186bb04b843b5b6ed&only_audio=1"
+          },
+          "ld": {
+            "codec": "h265",
+            "resolution": "480x960",
+            "bitrate": 400000,
+            "flv": "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_ld5.flv?expire=1786446578&sign=ef89d29dc87ef8313250ede68dcdaa68"
+          },
+          "sd": {
+            "codec": "h265",
+            "resolution": "576x1152",
+            "bitrate": 800000,
+            "flv": "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_zsd5.flv?expire=1786446578&sign=d89751ef08147688627305bc6c2705e8"
+          },
+          "origin": {
+            "codec": "h265",
+            "resolution": "960x1920",
+            "bitrate": 2904000,
+            "flv": "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992.flv?expire=1786446578&sign=ba0e33c5c80ca7790fa55354913eaed6"
+          }
+        }
       },
       "streamUrls": [
-        "https://pull-f5-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992_hd.flv?expire=1786447036&sign=1d93e103fc74cb8d60ab52fbe3f75984",
-        "https://pull-hls-f16-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992_hd/index.m3u8?expire=1786447036&sign=c31a2a33815891e3385c09b3367fa2bc",
-        "https://pull-f5-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992_hd/index.mpd?expire=1786447036&sign=203f24dba2b34b401151fb14a5f7dd26",
-        "https://pull-f5-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992.flv?expire=1786447036&sign=fa936c642c249ebc46995cad6f11ce81&only_audio=1",
-        "https://pull-f5-tt01.tiktokcdn-us.com/stage/stream-3578501789985538992_ao/index.mpd?expire=1786447036&sign=2beb75f264b3e8a952a089b32cc47d58"
+        "https://pull-flv-f11-tt01.tiktokcdn.com/stage/stream-3578501789985538992_hd.flv?expire=1786446578&sign=7ef898a3a70f6405de307c883d51c34f",
+        "https://pull-flv-f11-tt01.tiktokcdn.com/stage/stream-3578501789985538992.flv?expire=1786446578&sign=f35556d73e82fc0186bb04b843b5b6ed&only_audio=1",
+        "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_ld5.flv?expire=1786446578&sign=ef89d29dc87ef8313250ede68dcdaa68",
+        "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_hd5.flv?expire=1786446578&sign=3c11158ca3e5b446fcd1d738f90242de",
+        "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992_zsd5.flv?expire=1786446578&sign=d89751ef08147688627305bc6c2705e8",
+        "https://pull-flv-f11-tt02.tiktokcdn.com/stage/stream-3578501789985538992.flv?expire=1786446578&sign=ba0e33c5c80ca7790fa55354913eaed6"
       ]
     }
   },
