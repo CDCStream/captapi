@@ -1413,15 +1413,17 @@ class RedditApi:
     def __init__(self, transport: SyncTransport) -> None:
         self._t = transport
 
-    def subreddit_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Subreddit Posts — Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore). (2 credits)
+    def subreddit_posts(self, *, url: str, limit: float | None = None, sort: str | None = None, timeframe: str | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Reddit Subreddit Posts — Posts in a subreddit with sort/timeframe and cursor pagination (nextCursor + hasMore). (2 credits)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 25, max 200. Billed per result.
+        :param limit: Max items to return. Default 25, max 200. Flat 2 credits per call.
+        :param sort: Feed sort: best, hot, new (default), top, or rising.
+        :param timeframe: For sort=top: hour, day (default), week, month, year, or all.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/reddit/subreddit-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
+        return self._t.get("/v1/reddit/subreddit-posts", {"url": url, "limit": limit, "sort": sort, "timeframe": timeframe, "cursor": cursor, "cache": cache})
 
     def post_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Reddit Post Details — Metadata + stats for a Reddit post. (1 credit)
@@ -1483,15 +1485,17 @@ class AsyncRedditApi:
     def __init__(self, transport: AsyncTransport) -> None:
         self._t = transport
 
-    async def subreddit_posts(self, *, url: str, limit: float | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Reddit Subreddit Posts — Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore). (2 credits)
+    async def subreddit_posts(self, *, url: str, limit: float | None = None, sort: str | None = None, timeframe: str | None = None, cursor: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Reddit Subreddit Posts — Posts in a subreddit with sort/timeframe and cursor pagination (nextCursor + hasMore). (2 credits)
 
         :param url: Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 25, max 200. Billed per result.
+        :param limit: Max items to return. Default 25, max 200. Flat 2 credits per call.
+        :param sort: Feed sort: best, hot, new (default), top, or rising.
+        :param timeframe: For sort=top: hour, day (default), week, month, year, or all.
         :param cursor: Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/reddit/subreddit-posts", {"url": url, "limit": limit, "cursor": cursor, "cache": cache})
+        return await self._t.get("/v1/reddit/subreddit-posts", {"url": url, "limit": limit, "sort": sort, "timeframe": timeframe, "cursor": cursor, "cache": cache})
 
     async def post_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Reddit Post Details — Metadata + stats for a Reddit post. (1 credit)

@@ -2117,7 +2117,7 @@
     "name": "Reddit Subreddit Posts",
     "path": "/v1/reddit/subreddit-posts",
     "credits": 2,
-    "summary": "Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore).",
+    "summary": "Posts in a subreddit with sort/timeframe and cursor pagination (nextCursor + hasMore).",
     "params": [
       {
         "name": "url",
@@ -2129,7 +2129,19 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 25, max 200. Billed per result."
+        "description": "Max items to return. Default 25, max 200. Flat 2 credits per call."
+      },
+      {
+        "name": "sort",
+        "type": "string",
+        "required": false,
+        "description": "Feed sort: best, hot, new (default), top, or rising."
+      },
+      {
+        "name": "timeframe",
+        "type": "string",
+        "required": false,
+        "description": "For sort=top: hour, day (default), week, month, year, or all."
       },
       {
         "name": "cursor",

@@ -298,7 +298,13 @@ const TWITTER: Omit<Endpoint, "platform">[] = [
 ];
 
 const REDDIT: Omit<Endpoint, "platform">[] = [
-  { tool: "reddit_subreddit_posts", name: "Reddit Subreddit Posts", path: "/v1/reddit/subreddit-posts", credits: 2, summary: "Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore).", params: [url(RD_SUB), limit(25, 200), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." }] },
+  { tool: "reddit_subreddit_posts", name: "Reddit Subreddit Posts", path: "/v1/reddit/subreddit-posts", credits: 2, summary: "Posts in a subreddit with sort/timeframe and cursor pagination (nextCursor + hasMore).", params: [
+    url(RD_SUB),
+    limitFlat(25, 200, 2),
+    { name: "sort", type: "string", required: false, description: "Feed sort: best, hot, new (default), top, or rising." },
+    { name: "timeframe", type: "string", required: false, description: "For sort=top: hour, day (default), week, month, year, or all." },
+    { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response." },
+  ] },
   { tool: "reddit_post_details", name: "Reddit Post Details", path: "/v1/reddit/post-details", credits: 1, summary: "Metadata + stats for a Reddit post.", params: [url(RD_POST)] },
   { tool: "reddit_post_comments", name: "Reddit Post Comments", path: "/v1/reddit/post-comments", credits: 2, summary: "Comments on a Reddit post.", params: [url(RD_POST), limit(50, 500)] },
   { tool: "reddit_post_transcript", name: "Reddit Post Transcript", path: "/v1/reddit/post-transcript", credits: 2, summary: "Extract Reddit post text and top comments as a discussion transcript.", params: [url(RD_POST), limit(50, 200)] },

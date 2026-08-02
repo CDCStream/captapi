@@ -353,7 +353,7 @@ const TWITTER: Spec[] = [
 ];
 
 const REDDIT: Spec[] = [
-  { slug: "reddit-subreddit-posts", name: "Reddit Subreddit Posts API", shortName: "Subreddit Posts", category: "list", method: "GET", path: "/v1/reddit/subreddit-posts", credits: 2 },
+  { slug: "reddit-subreddit-posts", name: "Reddit Subreddit Posts API", shortName: "Subreddit Posts", category: "list", method: "GET", path: "/v1/reddit/subreddit-posts", credits: 2, tagline: "List posts from a subreddit with sort, timeframe, and cursor pagination — title, score, upvote ratio, flair, and more.", longDescription: "Pass a subreddit URL or r/name and get its posts as clean JSON. Choose sort (best/hot/new/top/rising) and, for top, a timeframe (hour/day/week/month/year/all). Each post includes title, selftext, author + authorFullname, upvotes/score/downs/upvoteRatio, comment count, subscriberCount, isVideo, flair, nsfw, thumbnail, and ISO publishedAt. Cursor pagination via nextCursor + hasMore. Flat 2 credits." },
   { slug: "reddit-post-details", name: "Reddit Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/reddit/post-details", credits: 1 , tagline: "Get a Reddit post — title, body, score, comments count, subreddit, and author as structured JSON.", longDescription: "Paste a Reddit post URL and get the post as clean JSON: title, body text, score, comment count, subreddit, author, and flair when available. Flat 1 credit per call." },
   {
     slug: "reddit-post-comments",
@@ -1658,7 +1658,13 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "twitter-community": [up("X community URL (x.com/i/communities/ID) or community ID.")],
   "twitter-community-tweets": [up("X community URL (x.com/i/communities/ID) or community ID."), lp(25, 200)],
   // Reddit
-  "reddit-subreddit-posts": [up("Subreddit URL, r/name, or bare name, e.g. r/technology."), lp(25, 200), CURSOR],
+  "reddit-subreddit-posts": [
+    up("Subreddit URL, r/name, or bare name, e.g. r/technology."),
+    lp(25, 200),
+    { name: "sort", type: "string", required: false, description: "Feed sort: best, hot, new (default), top, or rising." },
+    { name: "timeframe", type: "string", required: false, description: "For sort=top: hour, day (default), week, month, year, or all." },
+    CURSOR,
+  ],
   "reddit-post-details": [up("Reddit post URL, e.g. https://reddit.com/r/sub/comments/ID/...")],
   "reddit-post-comments": [up("Reddit post URL."), lpFlat(50, 500, 2)],
   "reddit-post-transcript": [up("Reddit post URL."), lp(50, 200)],

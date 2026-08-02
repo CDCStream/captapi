@@ -111,20 +111,39 @@ def _normalize_post(item: dict[str, Any]) -> dict[str, Any]:
     published = _epoch_to_iso(item.get("createdAt") or item.get("created") or item.get("created_utc"))
     if not isinstance(published, str):
         published = safe_str(published)
+    ups = safe_int(first_present(item.get("ups"), item.get("upVotes"), item.get("score")))
+    score = safe_int(first_present(item.get("score"), ups))
+    is_video = first_present(item.get("isVideo"), item.get("is_video"))
+    post_id = safe_str(item.get("id") or item.get("parsedId"))
+    fullname = safe_str(item.get("name"))
+    if not fullname and post_id:
+        fullname = post_id if post_id.startswith("t3_") else f"t3_{post_id}"
     return {
         "platform": "reddit",
-        "id": safe_str(item.get("id") or item.get("parsedId")),
+        "id": post_id,
+        "name": fullname,
         "url": safe_str(item.get("canonical_url") or item.get("url")),
         "title": safe_str(item.get("title")),
-        "text": safe_str(item.get("body") or item.get("text")),
+        "text": safe_str(item.get("body") or item.get("text") or item.get("selftext")),
         "subreddit": safe_str(item.get("communityName") or item.get("subreddit") or item.get("parsedCommunityName")),
         "author": safe_str(item.get("username") or item.get("author")),
-        "upvotes": safe_int(first_present(item.get("upVotes"), item.get("score"), item.get("ups"))),
+        "authorFullname": safe_str(item.get("authorFullname") or item.get("author_fullname")),
+        "upvotes": ups,
+        "score": score,
+        "downs": safe_int(item.get("downs")),
+        "upvoteRatio": safe_float(item.get("upvoteRatio") or item.get("upvote_ratio")),
         "comments": safe_int(
             first_present(item.get("numberOfComments"), item.get("numComments"), item.get("num_comments"))
         ),
+        "subscriberCount": safe_int(
+            item.get("subscriberCount") or item.get("subreddit_subscribers")
+        ),
+        "totalAwardsReceived": safe_int(
+            item.get("totalAwardsReceived") or item.get("total_awards_received")
+        ),
+        "isVideo": bool(is_video) if is_video is not None else None,
         "publishedAt": published,
-        "flair": safe_str(item.get("flair")),
+        "flair": safe_str(item.get("flair") or item.get("link_flair_text")),
         "nsfw": first_present(item.get("over18"), item.get("nsfw"), item.get("over_18")),
         "thumbnail": thumbnail,
     }
@@ -316,15 +335,7 @@ def _parse_reddit_post_payload(
     trimmed = comments[:limit]
     if len(comments) > limit:
         has_more = True
-    # Attach pagination hint on the post dict for the comments handler.
-    normalized_post = _normalize_post(post)
-    # Additive post fields used by post-comments (and harmless on post-details).
-    normalized_post["upvoteRatio"] = safe_float(post.get("upvote_ratio"))
-    normalized_post["authorFullname"] = safe_str(post.get("author_fullname"))
-    normalized_post["subscriberCount"] = safe_int(post.get("subreddit_subscribers"))
-    normalized_post["downs"] = safe_int(post.get("downs"))
-    normalized_post["isVideo"] = post.get("is_video")
-    return normalized_post, [_normalize_comment(c) for c in trimmed], has_more
+    return _normalize_post(post), [_normalize_comment(c) for c in trimmed], has_more
 
 
 async def _fetch_reddit_json_post(
@@ -491,9 +502,6 @@ async def _reddit_listing_json(
             raw = child.get("data") if isinstance(child, dict) else None
             if not isinstance(raw, dict) or child.get("kind") != "t3":
                 continue
-            created = raw.get("created_utc")
-            if isinstance(created, (int, float)):
-                created = datetime.fromtimestamp(int(created), tz=timezone.utc).isoformat()
             thumb = raw.get("thumbnail")
             if thumb in {"self", "default", "nsfw", "spoiler", "image"}:
                 thumb = None
@@ -501,14 +509,26 @@ async def _reddit_listing_json(
                 _normalize_post(
                     {
                         "id": raw.get("id"),
-                        "url": f"https://www.reddit.com{raw.get('permalink')}" if raw.get("permalink") else raw.get("url"),
+                        "name": raw.get("name"),
+                        "url": (
+                            f"https://www.reddit.com{raw.get('permalink')}"
+                            if raw.get("permalink")
+                            else raw.get("url")
+                        ),
                         "title": raw.get("title"),
                         "body": raw.get("selftext"),
                         "subreddit": raw.get("subreddit"),
                         "author": raw.get("author"),
-                        "score": raw.get("score") or raw.get("ups"),
+                        "author_fullname": raw.get("author_fullname"),
+                        "score": raw.get("score"),
+                        "ups": raw.get("ups"),
+                        "downs": raw.get("downs"),
+                        "upvote_ratio": raw.get("upvote_ratio"),
                         "numComments": raw.get("num_comments"),
-                        "created": created,
+                        "subreddit_subscribers": raw.get("subreddit_subscribers"),
+                        "total_awards_received": raw.get("total_awards_received"),
+                        "is_video": raw.get("is_video"),
+                        "created": raw.get("created_utc"),
                         "flair": raw.get("link_flair_text"),
                         "nsfw": raw.get("over_18"),
                         "thumbnail": thumb,
@@ -521,10 +541,32 @@ async def _reddit_listing_json(
     return [], None
 
 
-@router.get("/subreddit-posts", summary="List recent posts in a subreddit (cursor-paginated)")
+_SUBREDDIT_SORTS = {
+    "best": "hot",  # subreddit "best" is Reddit hot
+    "hot": "hot",
+    "new": "new",
+    "top": "top",
+    "rising": "rising",
+    "controversial": "controversial",
+}
+_SUBREDDIT_TIMEFRAMES = {"hour", "day", "week", "month", "year", "all"}
+
+
+@router.get("/subreddit-posts", summary="List posts in a subreddit (cursor-paginated)")
 async def subreddit_posts(
     url: str = Query(..., description="Subreddit URL, r/name, or bare name"),
     limit: int = Query(25, ge=1, le=200),
+    sort: str = Query(
+        "new",
+        description="Feed sort: best|hot|new|top|rising (default new).",
+    ),
+    timeframe: str | None = Query(
+        None,
+        description=(
+            "For sort=top (or controversial): hour|day|week|month|year|all. "
+            "Default day when sort=top and timeframe is omitted."
+        ),
+    ),
     cursor: str | None = Query(
         None,
         description=(
@@ -536,6 +578,25 @@ async def subreddit_posts(
     caller: ApiCaller = Depends(require_api_key),
 ):
     sub = _require_subreddit(url)
+    sort_key = (sort or "new").strip().lower()
+    path_sort = _SUBREDDIT_SORTS.get(sort_key)
+    if not path_sort:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid sort. Use best, hot, new, top, or rising.",
+        )
+    listing_params: dict[str, Any] = {}
+    resolved_timeframe: str | None = None
+    if path_sort in {"top", "controversial"}:
+        t_raw = (timeframe or "day").strip().lower()
+        if t_raw not in _SUBREDDIT_TIMEFRAMES:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid timeframe. Use hour, day, week, month, year, or all.",
+            )
+        listing_params["t"] = t_raw
+        resolved_timeframe = t_raw
+
     async with billed_call(
         caller=caller,
         endpoint="/v1/reddit/subreddit-posts",
@@ -545,12 +606,17 @@ async def subreddit_posts(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             posts, next_cursor = await _reddit_listing_json(
-                f"/r/{sub}/new.json", {}, limit, after=cursor
+                f"/r/{sub}/{path_sort}.json",
+                listing_params,
+                limit,
+                after=cursor,
             )
             if posts:
                 ctx["source"] = "direct"
                 return {
                     "subreddit": sub,
+                    "sort": sort_key,
+                    "timeframe": resolved_timeframe,
                     "totalReturned": len(posts),
                     "nextCursor": next_cursor,
                     "hasMore": bool(next_cursor),
@@ -568,7 +634,14 @@ async def subreddit_posts(
 
         data = await cached_or_run(
             endpoint="reddit.subreddit-posts",
-            params={"sub": sub, "limit": limit, "cursor": cursor or "", "v": 3},
+            params={
+                "sub": sub,
+                "limit": limit,
+                "sort": sort_key,
+                "timeframe": resolved_timeframe or "",
+                "cursor": cursor or "",
+                "v": 4,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -631,7 +704,7 @@ async def _subreddit_details_native(sub: str) -> dict[str, Any] | None:
         "category": safe_str(data.get("advertiser_category")),
         "language": safe_str(data.get("lang")),
         "type": safe_str(data.get("subreddit_type")),
-        "createdAt": safe_str(data.get("created_utc")),
+        "createdAt": _epoch_to_iso(data.get("created_utc")),
         "nsfw": bool(data.get("over18")),
         "icon": _clean_reddit_image(data.get("community_icon") or data.get("icon_img")),
         "banner": _clean_reddit_image(data.get("banner_background_image") or data.get("banner_img")),

@@ -8955,7 +8955,7 @@
         "tags": [
           "Reddit"
         ],
-        "summary": "List recent posts in a subreddit (cursor-paginated)",
+        "summary": "List posts in a subreddit (cursor-paginated)",
         "operationId": "subreddit_posts_v1_reddit_subreddit_posts_get",
         "security": [
           {
@@ -8985,6 +8985,36 @@
               "default": 25,
               "title": "Limit"
             }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Feed sort: best|hot|new|top|rising (default new).",
+              "default": "new",
+              "title": "Sort"
+            },
+            "description": "Feed sort: best|hot|new|top|rising (default new)."
+          },
+          {
+            "name": "timeframe",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "For sort=top (or controversial): hour|day|week|month|year|all. Default day when sort=top and timeframe is omitted.",
+              "title": "Timeframe"
+            },
+            "description": "For sort=top (or controversial): hour|day|week|month|year|all. Default day when sort=top and timeframe is omitted."
           },
           {
             "name": "cursor",

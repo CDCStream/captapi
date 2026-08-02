@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "Reddit subreddit posts: sort, timeframe, score & author id",
+    description:
+      "GET /v1/reddit/subreddit-posts adds sort (best/hot/new/top/rising) and timeframe for top feeds, plus score/downs/upvoteRatio, authorFullname, subscriberCount, isVideo, totalAwardsReceived, and Reddit name (t3_…). Keeps flair/nsfw/thumbnail/text, ISO publishedAt, and nextCursor/hasMore. Flat 2 credits. Also normalizes subreddit-details createdAt to ISO.",
+    items: [
+      "sort + timeframe (top/controversial) query params",
+      "score, downs, upvoteRatio, authorFullname, subscriberCount, isVideo",
+      "ISO createdAt on subreddit-details",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "Facebook Marketplace search: filters, priceAmount, status flags",
     description:
       "GET /v1/facebook/marketplace-search keeps city-name location (no lat/lng) and createdAt, and now accepts Marketplace filters (minPrice/maxPrice, sortBy, daysSinceListed, condition, deliveryMethod, availability, radiusMiles, category). Listings add priceAmount (minor units), strikethroughPrice*, categoryId, isPending/isHidden/isViewerSeller, plus hasMore/nextCursor within the fetched page. Docs clarified: details=false already includes the cover photo; details=true adds description/condition/coordinates/full gallery (2 + 2 credits per listing).",

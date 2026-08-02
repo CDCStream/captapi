@@ -1003,8 +1003,12 @@ export class TwitterApi {
 export interface RedditSubredditPostsParams {
   /** Subreddit URL, r/name, or bare name, e.g. r/technology. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 25, max 200. Billed per result. */
+  /** Max items to return. Default 25, max 200. Flat 2 credits per call. */
   limit?: number;
+  /** Feed sort: best, hot, new (default), top, or rising. */
+  sort?: string;
+  /** For sort=top: hour, day (default), week, month, year, or all. */
+  timeframe?: string;
   /** Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response. */
   cursor?: string;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
@@ -1069,7 +1073,7 @@ export interface RedditSubredditSearchParams {
 
 export class RedditApi {
   constructor(private readonly core: HttpCore) {}
-  /** Reddit Subreddit Posts — Recent posts in a subreddit, with cursor pagination (nextCursor + hasMore). (2 credits) */
+  /** Reddit Subreddit Posts — Posts in a subreddit with sort/timeframe and cursor pagination (nextCursor + hasMore). (2 credits) */
   subredditPosts(params: RedditSubredditPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/reddit/subreddit-posts", params);
   }
