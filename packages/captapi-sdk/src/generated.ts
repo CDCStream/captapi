@@ -1942,7 +1942,7 @@ export interface TwitchClipParams {
 
 export class TwitchApi {
   constructor(private readonly core: HttpCore) {}
-  /** Twitch Profile — Twitch channel profile, followers, live status and recent metadata. (1 credit) */
+  /** Twitch Profile — Twitch channel — live stream, last broadcast, recent videos with embedUrl, game box art, storyboard previews. (1 credit) */
   profile(params: TwitchProfileParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/twitch/profile", params);
   }

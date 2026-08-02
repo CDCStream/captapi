@@ -436,7 +436,19 @@ const GITHUB: Spec[] = [
 
 
 const TWITCH: Spec[] = [
-  { slug: "twitch-profile", name: "Twitch Profile API", shortName: "Profile", category: "channel", method: "GET", path: "/v1/twitch/profile", credits: 1 },
+  {
+    slug: "twitch-profile",
+    name: "Twitch Profile API",
+    shortName: "Profile",
+    category: "channel",
+    method: "GET",
+    path: "/v1/twitch/profile",
+    credits: 1,
+    tagline:
+      "Twitch channel — live stream, last broadcast, recent videos with embedUrl, game box art, and storyboard previews (1 credit).",
+    longDescription:
+      "Pass a Twitch channel URL or username and get a clean profile: id, login, displayName, description, followers, profileImage/bannerImage, isPartner/isAffiliate, createdAt, isLive, stream{title, game, gameBoxArtUrl, viewers, startedAt, thumbnail}, lastBroadcast{}, recentVideos[] (with embedUrl, language, animatedPreviewUrl, gameBoxArtUrl), topClips[], and schedule[]. Flat 1 credit. game stays the category name string; gameBoxArtUrl and animatedPreviewUrl are additive media fields (no GraphQL junk).",
+  },
   { slug: "twitch-user-videos", name: "Twitch User Videos API", shortName: "User Videos", category: "list", method: "GET", path: "/v1/twitch/user-videos", credits: 2 },
   { slug: "twitch-user-schedule", name: "Twitch User Schedule API", shortName: "User Schedule", category: "list", method: "GET", path: "/v1/twitch/user-schedule", credits: 1 },
   { slug: "twitch-clip", name: "Twitch Clip API", shortName: "Clip", category: "details", method: "GET", path: "/v1/twitch/clip", credits: 1 , tagline: "Get a Twitch clip — title, broadcaster, views, duration, and thumbnail as structured JSON." },
@@ -2544,6 +2556,8 @@ const FIELD_DESCS: Record<string, string> = {
   downloadUrl: "CDN media URL when present (not a dedicated download API).",
   noWatermarkUrl: "Watermark-free variant of the video URL.",
   embedUrl: "Embed page URL — load it directly in an <iframe src>.",
+  gameBoxArtUrl: "Twitch category/game box art image URL (usually 144×192).",
+  animatedPreviewUrl: "Storyboard strip / animated preview image for a VOD.",
   videoId: "Platform video ID.",
   streamUrls: "Live stream playback URLs.",
   playUrl: "Playback URL.",

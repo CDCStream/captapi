@@ -2734,7 +2734,7 @@ class TwitchApi:
         self._t = transport
 
     def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Twitch Profile — Twitch channel profile, followers, live status and recent metadata. (1 credit)
+        """Twitch Profile — Twitch channel — live stream, last broadcast, recent videos with embedUrl, game box art, storyboard previews. (1 credit)
 
         :param url: Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -2772,7 +2772,7 @@ class AsyncTwitchApi:
         self._t = transport
 
     async def profile(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Twitch Profile — Twitch channel profile, followers, live status and recent metadata. (1 credit)
+        """Twitch Profile — Twitch channel — live stream, last broadcast, recent videos with embedUrl, game box art, storyboard previews. (1 credit)
 
         :param url: Twitch channel URL or username, e.g. https://www.twitch.tv/shroud. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

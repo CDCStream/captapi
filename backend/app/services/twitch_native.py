@@ -92,13 +92,20 @@ async def _gql(query: str, variables: dict[str, Any]) -> dict[str, Any] | None:
     return await _gql_direct(query, variables)
 
 
+def _game_fields(game: Any) -> tuple[str | None, str | None]:
+    """Return (name, boxArtUrl). ``game`` stays a plain name string in the API."""
+    if isinstance(game, dict):
+        return safe_str(game.get("name")), safe_str(game.get("boxArtURL") or game.get("boxArtUrl"))
+    return safe_str(game), None
+
+
 def _video_node(
     node: dict[str, Any],
     *,
     broadcaster: str | None = None,
     profile_image: str | None = None,
 ) -> dict[str, Any]:
-    game = node.get("game") or {}
+    game_name, game_box = _game_fields(node.get("game"))
     video_id = safe_str(node.get("id"))
     # VODs have no clip slug and no public MP4 URL (tokenized). Omit those
     # keys rather than returning always-null placeholders; clips keep them.
@@ -114,51 +121,61 @@ def _video_node(
         "durationSeconds": safe_int(node.get("lengthSeconds")),
         "views": safe_int(node.get("viewCount")),
         "thumbnail": safe_str(node.get("previewThumbnailURL")),
-        "game": safe_str(game.get("name") if isinstance(game, dict) else game),
+        "animatedPreviewUrl": safe_str(node.get("animatedPreviewURL") or node.get("animatedPreviewUrl")),
+        "game": game_name,
+        "gameBoxArtUrl": game_box,
         "language": safe_str(node.get("language")),
         "broadcaster": broadcaster,
         "broadcasterProfileImage": profile_image,
     }
 
 
-_PROFILE_QUERY = """
-query($login: String!, $videoLimit: Int!) {
-  user(login: $login) {
+_GAME_FIELDS = "game { name boxArtURL(width: 144, height: 192) }"
+
+_PROFILE_QUERY = f"""
+query($login: String!, $videoLimit: Int!) {{
+  user(login: $login) {{
     id login displayName description createdAt
     profileImageURL(width: 300)
     bannerImageURL
-    roles { isPartner isAffiliate }
-    followers { totalCount }
-    stream {
+    roles {{ isPartner isAffiliate }}
+    followers {{ totalCount }}
+    stream {{
       id title viewersCount type createdAt
       previewImageURL(width: 640, height: 360)
-      game { name }
-    }
-    lastBroadcast { title startedAt game { name } }
-    videos(first: $videoLimit, sort: TIME) {
-      edges { node { id title lengthSeconds viewCount createdAt previewThumbnailURL language game { name } } }
-    }
-  }
-}
+      {_GAME_FIELDS}
+    }}
+    lastBroadcast {{ title startedAt {_GAME_FIELDS} }}
+    videos(first: $videoLimit, sort: TIME) {{
+      edges {{
+        node {{
+          id title lengthSeconds viewCount createdAt
+          previewThumbnailURL animatedPreviewURL language
+          {_GAME_FIELDS}
+        }}
+      }}
+    }}
+  }}
+}}
 """
 
 # Lighter query used when the full profile query is rejected / rate-limited.
-_PROFILE_LITE_QUERY = """
-query($login: String!) {
-  user(login: $login) {
+_PROFILE_LITE_QUERY = f"""
+query($login: String!) {{
+  user(login: $login) {{
     id login displayName description createdAt
     profileImageURL(width: 300)
     bannerImageURL
-    roles { isPartner isAffiliate }
-    followers { totalCount }
-    stream {
+    roles {{ isPartner isAffiliate }}
+    followers {{ totalCount }}
+    stream {{
       id title viewersCount type createdAt
       previewImageURL(width: 640, height: 360)
-      game { name }
-    }
-    lastBroadcast { title startedAt game { name } }
-  }
-}
+      {_GAME_FIELDS}
+    }}
+    lastBroadcast {{ title startedAt {_GAME_FIELDS} }}
+  }}
+}}
 """
 
 
@@ -168,9 +185,12 @@ def _map_channel(u: dict[str, Any], login: str, recent: list[dict[str, Any]] | N
     last = u.get("lastBroadcast") or {}
     login_val = safe_str(u.get("login")) or login
     profile_image = safe_str(u.get("profileImageURL"))
+    stream_game, stream_box = _game_fields((stream or {}).get("game") if stream else None)
+    last_game, last_box = _game_fields(last.get("game"))
     stream_block = {
         "title": safe_str((stream or {}).get("title")),
-        "game": safe_str(((stream or {}).get("game") or {}).get("name")) if stream else None,
+        "game": stream_game if stream else None,
+        "gameBoxArtUrl": stream_box if stream else None,
         "viewers": safe_int((stream or {}).get("viewersCount")) if stream else None,
         "startedAt": safe_str((stream or {}).get("createdAt")) if stream else None,
         "thumbnail": safe_str((stream or {}).get("previewImageURL")) if stream else None,
@@ -191,7 +211,8 @@ def _map_channel(u: dict[str, Any], login: str, recent: list[dict[str, Any]] | N
         "stream": stream_block,
         "lastBroadcast": {
             "title": safe_str(last.get("title")),
-            "game": safe_str((last.get("game") or {}).get("name")),
+            "game": last_game,
+            "gameBoxArtUrl": last_box,
             "startedAt": safe_str(last.get("startedAt")),
         },
         "recentVideos": recent if recent is not None else [],

@@ -105,6 +105,19 @@ def _video(item: dict[str, Any]) -> dict[str, Any]:
     quality_url = None
     if qualities and isinstance(qualities[0], dict):
         quality_url = qualities[0].get("sourceURL") or qualities[0].get("sourceUrl")
+    game_obj = item.get("game") if isinstance(item.get("game"), dict) else {}
+    game_name = safe_str(
+        item.get("gameName")
+        or item.get("currentGame")
+        or game_obj.get("name")
+        or (item.get("game") if isinstance(item.get("game"), str) else None)
+    )
+    game_box = safe_str(
+        item.get("gameBoxArtUrl")
+        or item.get("gameBoxArtURL")
+        or game_obj.get("boxArtURL")
+        or game_obj.get("boxArtUrl")
+    )
     return strip_empty(
         {
             "platform": "twitch",
@@ -119,6 +132,11 @@ def _video(item: dict[str, Any]) -> dict[str, Any]:
             ),
             "views": safe_int(item.get("viewCount") or item.get("views") or item.get("clipViewCount")),
             "thumbnail": safe_str(item.get("thumbnailUrl") or item.get("thumbnailURL") or item.get("thumbnail")),
+            "animatedPreviewUrl": safe_str(
+                item.get("animatedPreviewUrl")
+                or item.get("animatedPreviewURL")
+                or item.get("animated_preview_url")
+            ),
             "videoUrl": safe_str(
                 item.get("videoMp4Url")
                 or item.get("mp4Url")
@@ -127,11 +145,8 @@ def _video(item: dict[str, Any]) -> dict[str, Any]:
                 or item.get("videoQualitiesUrl")
                 or quality_url
             ),
-            "game": safe_str(
-                item.get("gameName")
-                or item.get("currentGame")
-                or ((item.get("game") or {}).get("name") if isinstance(item.get("game"), dict) else item.get("game"))
-            ),
+            "game": game_name,
+            "gameBoxArtUrl": game_box,
             "language": safe_str(item.get("language") or item.get("broadcastLanguage")),
             "broadcaster": broadcaster,
             "broadcasterProfileImage": safe_str(
@@ -152,6 +167,7 @@ def _empty_stream() -> dict[str, Any]:
     return {
         "title": None,
         "game": None,
+        "gameBoxArtUrl": None,
         "viewers": None,
         "startedAt": None,
         "thumbnail": None,
@@ -159,7 +175,7 @@ def _empty_stream() -> dict[str, Any]:
 
 
 def _empty_last_broadcast() -> dict[str, Any]:
-    return {"title": None, "game": None, "startedAt": None}
+    return {"title": None, "game": None, "gameBoxArtUrl": None, "startedAt": None}
 
 
 def _profile(item: dict[str, Any]) -> dict[str, Any]:
@@ -188,6 +204,7 @@ def _profile(item: dict[str, Any]) -> dict[str, Any]:
     stream = {
         "title": safe_str(item.get("streamTitle") or item.get("broadcastTitle")),
         "game": safe_str(item.get("currentGame") or item.get("broadcastGameName")),
+        "gameBoxArtUrl": safe_str(item.get("gameBoxArtUrl") or item.get("currentGameBoxArtUrl")),
         "viewers": safe_int(item.get("currentViewers") or item.get("viewersCount")),
         "startedAt": safe_str(item.get("startedAt") or item.get("streamStartedAt")),
         "thumbnail": safe_str(item.get("thumbnailUrl")),
@@ -195,6 +212,7 @@ def _profile(item: dict[str, Any]) -> dict[str, Any]:
     last = {
         "title": safe_str(item.get("lastBroadcastTitle")),
         "game": safe_str(item.get("lastBroadcastGame")),
+        "gameBoxArtUrl": safe_str(item.get("lastBroadcastGameBoxArtUrl")),
         "startedAt": safe_str(item.get("lastBroadcastDate") or item.get("lastBroadcastStartedAt")),
     }
     out["stream"] = stream if any(v is not None for v in stream.values()) else _empty_stream()
@@ -288,7 +306,7 @@ async def profile(
             ctx["source"] = "apify"
             return await _channel(username)
 
-        data = await cached_or_run("twitch.profile", {"username": username, "v": 5}, _run, ctx, use_cache=cache)
+        data = await cached_or_run("twitch.profile", {"username": username, "v": 6}, _run, ctx, use_cache=cache)
         return ApiResponse(data=data)
 
 

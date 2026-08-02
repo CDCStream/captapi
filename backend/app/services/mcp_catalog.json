@@ -3963,7 +3963,7 @@
     "name": "Twitch Profile",
     "path": "/v1/twitch/profile",
     "credits": 1,
-    "summary": "Twitch channel profile, followers, live status and recent metadata.",
+    "summary": "Twitch channel — live stream, last broadcast, recent videos with embedUrl, game box art, storyboard previews.",
     "params": [
       {
         "name": "url",

@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "feature",
+    title: "Twitch profile: game box art + animated video previews",
+    description:
+      "Twitch profile keeps game as the category name string and adds gameBoxArtUrl on stream, lastBroadcast, and recentVideos, plus animatedPreviewUrl (storyboard strip) on each VOD. Still 1 credit; no GraphQL leftover fields.",
+    items: [
+      "Additive gameBoxArtUrl on stream / lastBroadcast / recentVideos",
+      "Additive animatedPreviewUrl on recentVideos",
+      "game name string unchanged (non-breaking)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "feature",
     title: "Threads profile: private, bioLinks, transparency, HD avatars",
     description:
       "Threads profile keeps id/username/name/bio/followers/verified/profileImage and adds isThreadsOnlyUser, isPrivate, bioLinks[], transparencyLabel, profileImageVersions[], and hasOnboarded. Still 1 credit. isThreadsOnlyUser is null when Meta's web hydrate omits it (common); following/post counts remain unavailable on this public surface.",

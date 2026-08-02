@@ -211,3 +211,14 @@ SC 8 · Captapi 1 · Mixed 1. Shipped this batch: #8 SEO fix, #9 ISO+post, #10 S
 | profileImageVersions[] | P1 | Shipped |
 | hasOnboarded | P2 | Shipped |
 | following / postCount | — | Not on public surface (SC same gap) |
+
+---
+
+## #22 GET /v1/twitch/profile
+**Keep:** Live `stream{}`, `lastBroadcast`, `recentVideos` with `embedUrl`/`language`, 1 credit. Captapi already ahead of SC here.
+
+| Field / param | Priority | Status |
+|---|---|---|
+| gameBoxArtUrl (stream / lastBroadcast / videos) | P1 | Shipped |
+| animatedPreviewUrl (recentVideos storyboard) | P1 | Shipped |
+| Keep `game` as name string (non-breaking) | P0 | Shipped |
