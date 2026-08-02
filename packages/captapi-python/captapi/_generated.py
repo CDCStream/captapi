@@ -1168,14 +1168,15 @@ class FacebookApi:
         """
         return self._t.get("/v1/facebook/profile-reels", {"url": url, "limit": limit, "cache": cache})
 
-    def group_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Group Posts — Posts from a public Facebook group. (12 credits)
+    def group_posts(self, *, url: str, limit: float | None = None, sortBy: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Group Posts — Public group posts with author IDs and sortBy. (2 credits)
 
         :param url: Public Facebook group URL, e.g. https://facebook.com/groups/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
+        :param sortBy: TOP_POSTS | RECENT_ACTIVITY | CHRONOLOGICAL (default) | CHRONOLOGICAL_LISTINGS.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/facebook/group-posts", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/facebook/group-posts", {"url": url, "limit": limit, "sortBy": sortBy, "cache": cache})
 
     def comment_replies(self, *, url: str, comment_id: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Comment Replies — Replies to a specific Facebook comment. (30 credits)
@@ -1252,14 +1253,15 @@ class AsyncFacebookApi:
         """
         return await self._t.get("/v1/facebook/profile-reels", {"url": url, "limit": limit, "cache": cache})
 
-    async def group_posts(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Group Posts — Posts from a public Facebook group. (12 credits)
+    async def group_posts(self, *, url: str, limit: float | None = None, sortBy: str | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Group Posts — Public group posts with author IDs and sortBy. (2 credits)
 
         :param url: Public Facebook group URL, e.g. https://facebook.com/groups/ID. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 20, max 200. Billed per result.
+        :param limit: Max items to return. Default 20, max 200. Flat 2 credits per call.
+        :param sortBy: TOP_POSTS | RECENT_ACTIVITY | CHRONOLOGICAL (default) | CHRONOLOGICAL_LISTINGS.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/facebook/group-posts", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/facebook/group-posts", {"url": url, "limit": limit, "sortBy": sortBy, "cache": cache})
 
     async def comment_replies(self, *, url: str, comment_id: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Comment Replies — Replies to a specific Facebook comment. (30 credits)

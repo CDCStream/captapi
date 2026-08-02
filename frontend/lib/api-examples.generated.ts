@@ -1088,10 +1088,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "engagement": {
           "likes": 87,
-          "comments": 0,
-          "shares": 0
+          "comments": 0
         },
-        "isVideo": false
+        "isVideo": false,
+        "permalink": "https://www.facebook.com/groups/dogspotting/posts/10165927007174467/"
       },
       {
         "platform": "facebook",
@@ -1102,15 +1102,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2026-07-24T22:16:11.000Z",
         "thumbnailUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.30808-6/754824625_10163571025602896_890543610805686018_n.jpg?stp=dst-jpg_tt6&cstp=mx2048x1536&ctp=p600x600&_nc_cat=107&ccb=1-7&_nc_sid=63...",
         "author": {
-          "username": "dogspotting",
           "displayName": "Chet Rhodes"
         },
         "engagement": {
           "likes": 36,
-          "comments": 2,
-          "shares": 0
+          "comments": 2
         },
-        "isVideo": false
+        "isVideo": false,
+        "permalink": "https://www.facebook.com/groups/dogspotting/posts/10165913663824467/"
       },
       {
         "platform": "facebook",
@@ -1121,15 +1120,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2026-07-24T15:45:47.000Z",
         "thumbnailUrl": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-6/753343843_27704228762540395_7618880549288864734_n.jpg?stp=cp6_dst-jpg_tt6&cstp=mx1536x2048&ctp=p526x296&_nc_cat=108&ccb=1-7&_nc_s...",
         "author": {
-          "username": "dogspotting",
           "displayName": "Dóra Almási"
         },
         "engagement": {
           "likes": 182,
-          "comments": 2,
-          "shares": 0
+          "comments": 2
         },
-        "isVideo": false
+        "isVideo": false,
+        "permalink": "https://www.facebook.com/groups/dogspotting/posts/10165912136809467/"
       },
       {
         "platform": "facebook",
@@ -1140,16 +1138,17 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2026-07-24T11:52:33.000Z",
         "thumbnailUrl": "https://scontent-lga3-2.xx.fbcdn.net/v/t39.30808-6/753702691_963642156683059_393037493943314975_n.jpg?stp=dst-jpg_tt6&cstp=mx750x1334&ctp=p526x296&_nc_cat=100&ccb=1-7&_nc_sid=aa7b4...",
         "author": {
-          "username": "dogspotting",
           "displayName": "Adam Steele",
-          "url": "https://www.facebook.com/100091118505588"
+          "url": "https://www.facebook.com/100091118505588",
+          "id": "100091118505588",
+          "username": "100091118505588"
         },
         "engagement": {
           "likes": 115,
-          "comments": 2,
-          "shares": 0
+          "comments": 2
         },
-        "isVideo": false
+        "isVideo": false,
+        "permalink": "https://www.facebook.com/groups/dogspotting/posts/10165911376684467/"
       },
       {
         "platform": "facebook",
@@ -1160,15 +1159,14 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2023-06-04T23:32:57.000Z",
         "thumbnailUrl": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.30808-6/499529333_10229703762722775_2097200119742123101_n.jpg?stp=dst-jpg_tt6&cstp=mx626x636&ctp=p526x296&_nc_cat=109&ccb=1-7&_nc_sid=aa7...",
         "author": {
-          "username": "dogspotting",
           "displayName": "Tiberius Bertea"
         },
         "engagement": {
           "likes": 516,
-          "comments": 26,
-          "shares": 0
+          "comments": 26
         },
-        "isVideo": false
+        "isVideo": false,
+        "permalink": "https://www.facebook.com/groups/dogspotting/posts/10161487929709467/"
       },
       {
         "platform": "facebook",
@@ -1179,16 +1177,17 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2023-04-21T17:50:53.000Z",
         "thumbnailUrl": "https://scontent-iad3-2.xx.fbcdn.net/v/t1.6435-9/103961332_2591579321116865_8247201645454706872_n.jpg?stp=dst-jpg_tt6&cstp=mx960x502&ctp=s960x502&_nc_cat=103&ccb=1-7&_nc_sid=0b1479...",
         "author": {
-          "username": "dogspotting",
           "displayName": "Dogspotting",
-          "url": "https://www.facebook.com/100069522984491"
+          "url": "https://www.facebook.com/100069522984491",
+          "id": "100069522984491",
+          "username": "100069522984491"
         },
         "engagement": {
           "likes": 70,
-          "comments": 19,
-          "shares": 0
+          "comments": 19
         },
-        "isVideo": false
+        "isVideo": false,
+        "permalink": "https://www.facebook.com/groups/dogspotting/posts/10161384058399467/"
       },
       {
         "platform": "facebook",
@@ -1199,16 +1198,17 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2021-01-01T05:00:02.000Z",
         "thumbnailUrl": "https://scontent-hou1-1.xx.fbcdn.net/v/t1.6435-9/133293956_2757029211238541_8556362737627446916_n.jpg?stp=dst-jpg_tt6&cstp=mx1178x664&ctp=p600x600&_nc_cat=103&ccb=1-7&_nc_sid=9fe6e...",
         "author": {
-          "username": "dogspotting",
           "displayName": "Dogspotting",
-          "url": "https://www.facebook.com/100069522984491"
+          "url": "https://www.facebook.com/100069522984491",
+          "id": "100069522984491",
+          "username": "100069522984491"
         },
         "engagement": {
           "likes": 214,
-          "comments": 53,
-          "shares": 0
+          "comments": 53
         },
-        "isVideo": false
+        "isVideo": false,
+        "permalink": "https://www.facebook.com/groups/dogspotting/posts/10159514349104467/"
       },
       {
         "platform": "facebook",
@@ -1219,18 +1219,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2020-07-12T07:32:41.000Z",
         "thumbnailUrl": "https://scontent.fagc1-1.fna.fbcdn.net/v/t1.6435-9/109276728_2614404018834395_7966348785768951769_n.jpg?stp=dst-jpg_tt6&cstp=mx820x820&ctp=s600x600&_nc_cat=101&ccb=1-7&_nc_sid=9fe6...",
         "author": {
-          "username": "dogspotting",
           "displayName": "Dogspotting",
-          "url": "https://www.facebook.com/100069522984491"
+          "url": "https://www.facebook.com/100069522984491",
+          "id": "100069522984491",
+          "username": "100069522984491"
         },
         "engagement": {
           "likes": 131,
-          "comments": 10,
-          "shares": 0
+          "comments": 10
         },
-        "isVideo": false
+        "isVideo": false,
+        "permalink": "https://www.facebook.com/groups/dogspotting/posts/10159050659364467/"
       }
-    ]
+    ],
+    "sortBy": "CHRONOLOGICAL"
   },
   "facebook-marketplace-item": {
     "platform": "facebook",

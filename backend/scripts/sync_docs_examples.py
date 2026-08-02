@@ -122,13 +122,29 @@ def _patch_facebook_photos(data: dict[str, Any]) -> bool:
 
 def _patch_facebook_group_posts(data: dict[str, Any]) -> bool:
     changed = False
+    if "sortBy" not in data:
+        data["sortBy"] = "CHRONOLOGICAL"
+        changed = True
     for post in data.get("posts") or []:
         if not isinstance(post, dict):
             continue
-        author = post.get("author")
-        if isinstance(author, dict) and "/groups/" in str(author.get("url") or "").lower():
-            author["url"] = None
+        if not post.get("permalink") and post.get("url"):
+            post["permalink"] = post.get("url")
             changed = True
+        eng = post.get("engagement")
+        if isinstance(eng, dict) and eng.get("shares") == 0:
+            # Unknown share counts must not ship as invent-0.
+            eng.pop("shares", None)
+            changed = True
+        author = post.get("author")
+        if isinstance(author, dict):
+            if "/groups/" in str(author.get("url") or "").lower():
+                author["url"] = None
+                changed = True
+            # Group slug mistakenly used as author username.
+            if str(author.get("username") or "").lower() in {"dogspotting"}:
+                author.pop("username", None)
+                changed = True
     return changed
 
 

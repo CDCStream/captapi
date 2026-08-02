@@ -5497,6 +5497,24 @@
             }
           },
           {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Feed sort: TOP_POSTS | RECENT_ACTIVITY | CHRONOLOGICAL (default) | CHRONOLOGICAL_LISTINGS. Passed to Facebook as sorting_setting.",
+              "title": "Sortby"
+            },
+            "description": "Feed sort: TOP_POSTS | RECENT_ACTIVITY | CHRONOLOGICAL (default) | CHRONOLOGICAL_LISTINGS. Passed to Facebook as sorting_setting."
+          },
+          {
             "name": "cache",
             "in": "query",
             "required": false,

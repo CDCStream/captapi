@@ -321,10 +321,18 @@ def _normalize_post(item: dict) -> dict:
         or item.get("userUrl")
     )
     groupish = False
-    for candidate in (item.get("facebookUrl"), item.get("inputUrl")):
-        if candidate and "/groups/" in str(candidate).lower():
+    group_slug: str | None = None
+    for candidate in (item.get("facebookUrl"), item.get("inputUrl"), item.get("url"), item.get("permalink")):
+        text = str(candidate or "")
+        if "/groups/" in text.lower():
             groupish = True
+            m = re.search(r"/groups/([^/?#]+)", text, re.I)
+            if m:
+                group_slug = m.group(1).lower()
             break
+    if author_url and "/groups/" in author_url.lower():
+        # Never keep a group URL as the author profile.
+        author_url = None
     if not author_url and not groupish:
         author_url = safe_str(item.get("facebookUrl") or item.get("inputUrl"))
     # Numeric FB user ids resolve as profile URLs; opaque pfbid tokens do not.
@@ -335,17 +343,37 @@ def _normalize_post(item: dict) -> dict:
         or item.get("authorId")
         or item.get("pageId")
     )
+    if not user_id and author_url:
+        m = re.search(r"facebook\.com/(?:profile\.php\?id=)?(\d{5,})", author_url)
+        if m:
+            user_id = m.group(1)
     if not author_url and user_id and user_id.isdigit():
         author_url = f"https://www.facebook.com/{user_id}"
-    author_username = safe_str(
-        item.get("pageUsername")
-        or user.get("username")
-        or delegate.get("uri_token")
-        or _fb_username_from_url(safe_str(video_owner.get("url")))
+
+    def _author_handle(value: str | None) -> str | None:
+        handle = safe_str(value)
+        if not handle:
+            return None
+        # Group slug mistakenly stamped as pageUsername on hydrated group posts.
+        if group_slug and handle.lower() == group_slug:
+            return None
+        if handle.lower() in {"groups", "people", "pages", "watch", "reel"}:
+            return None
+        return handle
+
+    author_username = (
+        _author_handle(item.get("pageUsername"))
+        or _author_handle(user.get("username"))
+        or _author_handle(delegate.get("uri_token"))
+        or _author_handle(_fb_username_from_url(safe_str(video_owner.get("url"))))
+        or _author_handle(_fb_username_from_url(author_url))
         or (user_id if user_id and user_id.isdigit() else None)
-        or _fb_username_from_url(author_url)
-        or (None if groupish else _fb_username_from_url(item.get("facebookUrl") or item.get("inputUrl")))
-        or item.get("author")
+        or (
+            None
+            if groupish
+            else _author_handle(_fb_username_from_url(item.get("facebookUrl") or item.get("inputUrl")))
+        )
+        or _author_handle(item.get("author") if isinstance(item.get("author"), str) else None)
     )
     # Classic posts: isPageVerified / user.verified (often absent).
     # Reels (short_form): video_owner.is_verified is the live GraphQL signal.
@@ -386,9 +414,23 @@ def _normalize_post(item: dict) -> dict:
         or (duration_ms / 1000 if isinstance(duration_ms, (int, float)) and duration_ms else None)
     )
     video_id = safe_str(playback.get("id") or media.get("id") or item.get("videoId"))
+    video_view_count = safe_int(
+        item.get("viewsCount") or item.get("videoViewCount") or item.get("videoPostViewCount")
+    )
+    # shares: missing stays None (never invent 0). likes/comments keep 0 floor for
+    # classic post cards where FB routinely exposes those counters.
+    shares_count = safe_int(
+        item.get("shares")
+        if item.get("shares") is not None
+        else item.get("sharesCount")
+        if item.get("sharesCount") is not None
+        else item.get("share_count_reduced")
+    )
+    permalink = safe_str(item.get("permalink") or item.get("permalink_url") or post_url)
     out: dict[str, Any] = {
         "platform": "facebook",
         "url": post_url,
+        "permalink": permalink,
         "id": safe_str(item.get("postId") or item.get("post_id") or item.get("id") or playback.get("id")),
         "caption": caption,
         "description": caption,
@@ -402,6 +444,7 @@ def _normalize_post(item: dict) -> dict:
             "displayName": safe_str(
                 item.get("pageName") or user.get("name") or video_owner.get("name") or item.get("authorName")
             ),
+            "shortName": safe_str(user.get("shortName") or user.get("short_name")),
             "url": author_url,
             "profileImage": safe_str(
                 user.get("profilePic")
@@ -411,7 +454,7 @@ def _normalize_post(item: dict) -> dict:
             "verified": bool(verified) if verified is not None else None,
         },
         "engagement": {
-            "views": safe_int(item.get("viewsCount") or item.get("videoViewCount") or item.get("videoPostViewCount")),
+            "views": video_view_count,
             "likes": safe_int(
                 item.get("likes")
                 or item.get("likesCount")
@@ -425,12 +468,7 @@ def _normalize_post(item: dict) -> dict:
                 or item.get("total_comment_count")
             )
             or 0,
-            "shares": safe_int(
-                item.get("shares")
-                or item.get("sharesCount")
-                or item.get("share_count_reduced")
-            )
-            or 0,
+            "shares": shares_count,
         },
         "isVideo": bool(is_video),
         "link": safe_str(item.get("link")) or _fb_external_link(item),
@@ -448,6 +486,8 @@ def _normalize_post(item: dict) -> dict:
         out["videoWidth"] = video_width
     if video_height is not None:
         out["videoHeight"] = video_height
+    if video_view_count is not None:
+        out["videoViewCount"] = video_view_count
     if music and (music.get("id") or music.get("trackTitle")):
         out["music"] = {
             "id": safe_str(music.get("id")),
@@ -456,7 +496,7 @@ def _normalize_post(item: dict) -> dict:
             "albumArt": safe_str(music.get("albumArt") or music.get("music_album_art") or music.get("album_art")),
         }
     if bool(is_video) and (video_url or video_sd_url or video_hd_url or captions_url or video_id):
-        out["video"] = {
+        video_block = {
             "id": video_id,
             "sdUrl": video_sd_url,
             "hdUrl": video_hd_url,
@@ -467,6 +507,15 @@ def _normalize_post(item: dict) -> dict:
             "thumbnailUrl": safe_str(thumbnail),
             "captionsUrl": captions_url,
         }
+        out["video"] = video_block
+        out["videoDetails"] = {
+            "sdUrl": video_sd_url,
+            "hdUrl": video_hd_url,
+            "thumbnailUrl": safe_str(thumbnail),
+        }
+    top_comments = item.get("topComments")
+    if isinstance(top_comments, list) and top_comments:
+        out["topComments"] = top_comments
     return out
 
 
@@ -1171,10 +1220,18 @@ async def facebook_profile_reels(
 async def facebook_group_posts(
     url: str = Query(..., description="Public Facebook group URL"),
     limit: int = Query(20, ge=1, le=200),
+    sortBy: str | None = Query(
+        None,
+        description=(
+            "Feed sort: TOP_POSTS | RECENT_ACTIVITY | CHRONOLOGICAL (default) | "
+            "CHRONOLOGICAL_LISTINGS. Passed to Facebook as sorting_setting."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     _reject_facebook_platform_mismatch(url, "https://www.facebook.com/groups/group-name")
+    sort_mode = facebook_group_posts_native._normalize_sort(sortBy)
     async with billed_call(
         caller=caller,
         endpoint="/v1/facebook/group-posts",
@@ -1183,16 +1240,21 @@ async def facebook_group_posts(
         base_credits=CREDIT_FB_GROUP_POSTS_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            raws = await facebook_group_posts_native.group_posts_native(url, limit)
+            raws = await facebook_group_posts_native.group_posts_native(url, limit, sort_by=sort_mode)
             if raws is None:
                 raise HTTPException(status_code=404, detail="Group posts not found")
             posts = [strip_empty(_normalize_post(i)) for i in raws]
             ctx["source"] = "direct"
-            return {"url": url, "totalReturned": len(posts), "posts": posts}
+            return {
+                "url": url,
+                "sortBy": sort_mode,
+                "totalReturned": len(posts),
+                "posts": posts,
+            }
 
         data = await cached_or_run(
             endpoint="facebook.group-posts",
-            params={"url": url, "limit": limit, "v": 6},
+            params={"url": url, "limit": limit, "sortBy": sort_mode, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -1854,8 +1854,8 @@
     "platform": "facebook",
     "name": "Facebook Group Posts",
     "path": "/v1/facebook/group-posts",
-    "credits": 12,
-    "summary": "Posts from a public Facebook group.",
+    "credits": 2,
+    "summary": "Public Facebook group posts — author IDs, permalink, sortBy, engagement (shares null when unknown).",
     "params": [
       {
         "name": "url",
@@ -1867,7 +1867,13 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits per call."
+      },
+      {
+        "name": "sortBy",
+        "type": "string",
+        "required": false,
+        "description": "TOP_POSTS | RECENT_ACTIVITY | CHRONOLOGICAL (default) | CHRONOLOGICAL_LISTINGS. Maps to Facebook sorting_setting."
       },
       {
         "name": "cache",

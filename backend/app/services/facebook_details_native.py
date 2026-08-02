@@ -272,7 +272,8 @@ def _pick_story(
 
 
 def _engagement_for_post(blobs: list[Any], post_id: str | None) -> dict[str, Any]:
-    out: dict[str, Any] = {"likes": 0, "comments": 0, "shares": 0, "feedbackId": None}
+    # Missing counts stay None — never invent 0 (especially shares).
+    out: dict[str, Any] = {"likes": None, "comments": None, "shares": None, "feedbackId": None}
     if not post_id:
         return out
     nodes: list[dict[str, Any]] = []
@@ -325,12 +326,99 @@ def _engagement_for_post(blobs: list[Any], post_id: str | None) -> dict[str, Any
             if raw_fid and (fid == post_id or not out.get("feedbackId")):
                 out["feedbackId"] = raw_fid
         if comments is not None:
-            out["comments"] = max(out["comments"], comments)
+            out["comments"] = max(out["comments"] or 0, comments)
         if shares is not None:
-            out["shares"] = max(out["shares"], shares)
+            out["shares"] = max(out["shares"] or 0, shares)
         if out.get("feedbackId") is None and raw_fid and fid == post_id:
             out["feedbackId"] = raw_fid
     return out
+
+
+def _iso_from_unix(raw: Any) -> str | None:
+    if raw is None:
+        return None
+    try:
+        ts = int(raw)
+    except (TypeError, ValueError):
+        return safe_str(raw)
+    if ts <= 0:
+        return None
+    from datetime import datetime, timezone
+
+    try:
+        return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat().replace("+00:00", ".000Z")
+    except (OSError, OverflowError, ValueError):
+        return None
+
+
+def _top_comments_from_obj(obj: Any, *, limit: int = 3) -> list[dict[str, Any]]:
+    """Best-effort sample comments embedded next to a Story (when FB includes them)."""
+    nodes: list[dict[str, Any]] = []
+    _walk(
+        obj,
+        lambda o: o.get("__typename") == "Comment"
+        and isinstance(o.get("body"), dict)
+        and isinstance(o["body"].get("text"), str),
+        nodes,
+        limit=40,
+    )
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for node in nodes:
+        cid = safe_str(node.get("legacy_fbid") or node.get("id"))
+        body = node.get("body") if isinstance(node.get("body"), dict) else {}
+        text = body.get("text") if isinstance(body, dict) else None
+        if not cid or cid in seen or not isinstance(text, str) or not text.strip():
+            continue
+        # Skip nested replies when depth is exposed.
+        depth = safe_int(node.get("depth"))
+        if depth is not None and depth > 0:
+            continue
+        seen.add(cid)
+        author = node.get("author") if isinstance(node.get("author"), dict) else {}
+        gender = safe_str(author.get("gender"))
+        row: dict[str, Any] = {
+            "id": cid,
+            "text": text,
+            "publishTime": _iso_from_unix(node.get("created_time")),
+            "author": {
+                "id": safe_str(author.get("id")),
+                "name": safe_str(author.get("name")),
+                "url": safe_str(author.get("url")),
+            },
+        }
+        if gender:
+            row["author"]["gender"] = gender
+        out.append(row)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _actor_from_story(story: dict[str, Any]) -> dict[str, Any]:
+    """Posting user/page — never the group node itself."""
+    actors = story.get("actors") if isinstance(story.get("actors"), list) else []
+    for cand in actors[:5]:
+        if not isinstance(cand, dict):
+            continue
+        url = safe_str(cand.get("url")) or ""
+        typename = safe_str(cand.get("__typename")) or ""
+        if typename == "Group" or "/groups/" in url.lower():
+            continue
+        if cand.get("name") and (cand.get("id") or url):
+            return cand
+    found: list[dict[str, Any]] = []
+    _walk(
+        story,
+        lambda o: o.get("__typename") in ("User", "Page")
+        and o.get("name")
+        and o.get("url")
+        and "facebook.com" in str(o.get("url"))
+        and "/groups/" not in str(o.get("url")).lower(),
+        found,
+        limit=10,
+    )
+    return found[0] if found else {}
 
 
 def _music_from_short_form(sf: dict[str, Any]) -> dict[str, Any] | None:
@@ -459,40 +547,44 @@ def _from_creation_story(cs: dict[str, Any], blobs: list[Any], page_url: str) ->
 def _from_story(story: dict[str, Any], blobs: list[Any], page_url: str) -> dict[str, Any]:
     post_id = safe_str(story.get("post_id"))
     eng = _engagement_for_post(blobs, post_id)
-    actors = story.get("actors") if isinstance(story.get("actors"), list) else []
-    actor = actors[0] if actors and isinstance(actors[0], dict) else {}
-    # Prefer nested actor with name+url under comet_sections when actors sparse.
-    if not actor.get("name"):
-        found: list[dict[str, Any]] = []
-        _walk(
-            story,
-            lambda o: o.get("__typename") in ("User", "Page")
-            and o.get("name")
-            and o.get("url")
-            and "facebook.com" in str(o.get("url")),
-            found,
-            limit=10,
-        )
-        if found:
-            actor = found[0]
+    actor = _actor_from_story(story)
     message_text = _story_message(story)
     message = {"text": message_text} if message_text else None
+    permalink = safe_str(story.get("permalink_url")) or page_url
+    actor_url = safe_str(actor.get("url"))
+    actor_id = safe_str(actor.get("id"))
+    if not actor_id and actor_url:
+        m = re.search(r"facebook\.com/(?:profile\.php\?id=)?(\d{5,})", actor_url)
+        if m:
+            actor_id = m.group(1)
+    # Vanity handle only — never a /groups/{slug} segment.
+    actor_username = None
+    if actor_url and "/groups/" not in actor_url.lower():
+        m = re.search(r"facebook\.com/([A-Za-z0-9.\-_]+)/?", actor_url)
+        if m:
+            handle = m.group(1)
+            if handle.lower() not in {
+                "profile.php", "people", "pages", "watch", "reel", "groups", "photo",
+            } and not handle.isdigit():
+                actor_username = handle
     item: dict[str, Any] = {
         "postId": post_id,
         "post_id": post_id,
         "creation_time": story.get("creation_time"),
         "message": message,
         "text": message_text,
-        "url": safe_str(story.get("permalink_url")) or page_url,
+        "url": permalink,
+        "permalink": permalink,
         "facebookUrl": page_url,
-        "pageUrl": safe_str(actor.get("url")),
+        "pageUrl": actor_url,
         "pageName": safe_str(actor.get("name")),
-        "pageUsername": None,
+        "pageUsername": actor_username,
         "user": {
-            "id": safe_str(actor.get("id")),
+            "id": actor_id,
             "name": safe_str(actor.get("name")),
-            "profileUrl": safe_str(actor.get("url")),
-            "username": None,
+            "profileUrl": actor_url,
+            "username": actor_username,
+            "shortName": safe_str(actor.get("short_name")),
             "isVerified": actor.get("is_verified")
             if actor.get("is_verified") is not None
             else actor.get("isVerified"),
@@ -509,6 +601,7 @@ def _from_story(story: dict[str, Any], blobs: list[Any], page_url: str) -> dict[
         "feedbackId": eng.get("feedbackId"),
         "isVideo": False,
         "link": _external_link_from_message(message),
+        "topComments": _top_comments_from_obj(story, limit=3),
     }
     # Thumbnail / video: prefer styles.attachment.media (has photo_image),
     # not the stub attachments[].media which is often just {id, __typename}.
@@ -589,7 +682,10 @@ async def details_native(url: str) -> dict[str, Any] | None:
         item = _from_story(story, blobs, url)
         if not item.get("text") and not item.get("media") and not item.get("short_form_video_context"):
             return None
-        if page:
+        # Page vanity is useful for /PageName/posts/… — never for /groups/{slug}/…
+        # (that slug is the group, not the author; stamping it caused author.username=group).
+        is_group_url = "/groups/" in (url or "").lower()
+        if page and not is_group_url:
             item["pageUsername"] = page
             user = item.get("user") if isinstance(item.get("user"), dict) else {}
             if not user.get("username"):

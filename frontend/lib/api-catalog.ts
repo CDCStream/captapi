@@ -1719,7 +1719,17 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "facebook-page-details": [up("Facebook page URL, @handle, or page name, e.g. https://facebook.com/PageName.")],
   "facebook-profile-posts": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
   "facebook-profile-reels": [up("Facebook profile/page URL, @handle, or page name."), lp(20, 200)],
-  "facebook-group-posts": [up("Public Facebook group URL, e.g. https://facebook.com/groups/ID."), lp(20, 200)],
+  "facebook-group-posts": [
+    up("Public Facebook group URL, e.g. https://facebook.com/groups/ID."),
+    lp(20, 200),
+    {
+      name: "sortBy",
+      type: "string",
+      required: false,
+      description:
+        "TOP_POSTS | RECENT_ACTIVITY | CHRONOLOGICAL (default) | CHRONOLOGICAL_LISTINGS. Maps to Facebook sorting_setting.",
+    },
+  ],
   "facebook-comment-replies": [up("Facebook post URL the comment belongs to."), cid(), lpFlat(50, 500, 2)],
   "facebook-marketplace-search": [
     qp("Product or keyword to search Facebook Marketplace for."),

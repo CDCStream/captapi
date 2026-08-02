@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 import re
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import structlog
 
@@ -20,6 +20,15 @@ from app.utils.formatters import safe_str
 log = structlog.get_logger(__name__)
 
 CREDIT_FB_GROUP_POSTS_NATIVE = 2
+
+SORT_MODES = frozenset(
+    {
+        "TOP_POSTS",
+        "RECENT_ACTIVITY",
+        "CHRONOLOGICAL",
+        "CHRONOLOGICAL_LISTINGS",
+    }
+)
 
 _SCROLL_ACTIONS: list[dict[str, Any]] = [
     {"type": "wait", "wait_time_s": 2},
@@ -49,6 +58,29 @@ def _norm_url(url: str) -> str:
     # Prefer /posts/ over /permalink/ for the same id.
     u = re.sub(r"/permalink/(\d+)$", r"/posts/\1", u, flags=re.I)
     return u
+
+
+def _with_sorting(url: str, sort_by: str) -> str:
+    """Append Facebook's ``sorting_setting`` query param."""
+    parsed = urlparse(url)
+    qs = parse_qs(parsed.query, keep_blank_values=True)
+    qs["sorting_setting"] = [sort_by]
+    # Flatten back to query string (first value per key).
+    query = urlencode({k: v[0] if isinstance(v, list) and v else v for k, v in qs.items()})
+    return urlunparse(parsed._replace(query=query))
+
+
+def _normalize_sort(sort_by: str | None) -> str:
+    raw = (sort_by or "CHRONOLOGICAL").strip().upper().replace("-", "_")
+    aliases = {
+        "NEWEST": "CHRONOLOGICAL",
+        "RECENT": "RECENT_ACTIVITY",
+        "TOP": "TOP_POSTS",
+        "RELEVANT": "TOP_POSTS",
+        "MOST_RELEVANT": "TOP_POSTS",
+    }
+    raw = aliases.get(raw, raw)
+    return raw if raw in SORT_MODES else "CHRONOLOGICAL"
 
 
 def _extract_post_urls(html: str, group_url: str) -> list[str]:
@@ -116,8 +148,12 @@ async def _hydrate(url: str, sem: asyncio.Semaphore) -> dict[str, Any] | None:
         return await facebook_details_native.details_native(url)
 
 
-async def group_posts_native(url: str, limit: int) -> list[dict[str, Any]] | None:
-    """Return raw post dicts for ``_normalize_post`` (newest-first), or None."""
+async def group_posts_native(
+    url: str,
+    limit: int,
+    sort_by: str | None = None,
+) -> list[dict[str, Any]] | None:
+    """Return raw post dicts for ``_normalize_post``, or None."""
     if limit <= 0:
         return []
     if not url or not decodo_fetch.enabled():
@@ -125,8 +161,11 @@ async def group_posts_native(url: str, limit: int) -> list[dict[str, Any]] | Non
     if "/groups/" not in (url or "").lower():
         return None
 
+    sort = _normalize_sort(sort_by)
+    feed_url = _with_sorting(url, sort)
+
     got = await decodo_fetch.fetch_url(
-        url,
+        feed_url,
         timeout=180.0,
         headless="html",
         browser_actions=_SCROLL_ACTIONS,
@@ -174,14 +213,18 @@ async def group_posts_native(url: str, limit: int) -> list[dict[str, Any]] | Non
 
     raws = inline + hydrated
     if not raws:
-        log.info("facebook_group_posts_native_empty", url=url[:120])
+        log.info("facebook_group_posts_native_empty", url=url[:120], sort=sort)
         return None
 
-    raws.sort(key=_ts, reverse=True)
+    # Chronological modes: newest-first by creation time.
+    # Relevance / recent-activity: preserve feed discovery order (do not re-sort).
+    if sort in ("CHRONOLOGICAL", "CHRONOLOGICAL_LISTINGS"):
+        raws.sort(key=_ts, reverse=True)
     out = raws[:limit]
     log.info(
         "facebook_group_posts_native_ok",
         url=url[:120],
+        sort=sort,
         inline=len(inline),
         hydrated=len(hydrated),
         returned=len(out),

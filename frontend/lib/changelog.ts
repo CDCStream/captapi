@@ -50,6 +50,19 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
+    category: "fix",
+    title: "Facebook group posts: real author IDs, sortBy, null shares",
+    description:
+      "GET /v1/facebook/group-posts no longer stamps the group slug into author.username (every post was \"dogspotting\"). Returns author.id when Facebook exposes it, permalink, optional topComments/videoDetails/videoViewCount, and sortBy (TOP_POSTS | RECENT_ACTIVITY | CHRONOLOGICAL | CHRONOLOGICAL_LISTINGS; default CHRONOLOGICAL via Facebook sorting_setting). engagement.shares stays null when unknown instead of inventing 0. Still flat 2 credits; limit up to 200.",
+    items: [
+      "Fix author.username = group slug bug",
+      "author.id + permalink; shares null when unknown",
+      "sortBy feed modes (default CHRONOLOGICAL)",
+      "topComments / videoDetails when present in feed HTML",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
     category: "improvement",
     title: "Spotify track: playCount, artist/album IDs; 1 credit",
     description:
