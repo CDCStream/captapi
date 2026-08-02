@@ -341,7 +341,7 @@ def batch4_phase1() -> list[tuple[str, str, dict]]:
         ("reddit-post-transcript", "/v1/reddit/post-transcript", {"url": "https://www.reddit.com/r/space/comments/1umfd43/radiation_exposure_may_become_the_biggest/", "limit": 5}),
         ("tiktok-shop-products", "/v1/tiktok-shop/shop-products", {"url": "https://www.tiktok.com/shop/store/goli-nutrition/7495794203056835079", "limit": 5}),
         ("linktree-page", "/v1/linktree/page", {"url": "https://linktr.ee/miguelangeles"}),
-        ("kick-clip", "/v1/kick/clip", {"url": "https://kick.com/xqc", "limit": 10}),
+        ("kick-clip", "/v1/kick/clip", {"url": "https://kick.com/xqc/clips/clip_01KZ0X5PGT228PY3QEB3RMR3YC"}),
         ("amazon-shop-page", "/v1/amazon-shop/page", {"url": "https://www.amazon.com/sp?seller=A294P4X9EWVXLJ", "limit": 5}),
         ("komi-page", "/v1/komi/page", {"url": "https://komi.io/ksi"}),
         ("pillar-page", "/v1/pillar/page", {"url": "https://pillar.io/jayshetty"}),
@@ -628,7 +628,7 @@ BATCHES = {
     ),
     "batch4d": (
         lambda: [
-            ("kick-clip", "/v1/kick/clip", {"url": "https://kick.com/xqc", "limit": 10}),
+            ("kick-clip", "/v1/kick/clip", {"url": "https://kick.com/xqc/clips/clip_01KZ0X5PGT228PY3QEB3RMR3YC"}),
             ("youtube-community-post-details", "/v1/youtube/community-post-details", {"url": "https://www.youtube.com/post/UgkxfMvMnSnV3Ww9HwAY2wFGmVevmhRaYAYO"}),
         ],
         lambda p1: [],

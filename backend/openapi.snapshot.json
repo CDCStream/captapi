@@ -11099,6 +11099,7 @@
           "Kick"
         ],
         "summary": "Kick clip metadata",
+        "description": "Fetch a Kick clip by URL, or list recent clips for a channel. Clip URLs return a single enriched clip (creator vs channel, maturity, VOD). Channel URLs/usernames return clips[] without duplicating the first item as clip.",
         "operationId": "kick_clip_v1_kick_clip_get",
         "security": [
           {
@@ -11125,11 +11126,11 @@
               "type": "integer",
               "maximum": 100,
               "minimum": 1,
-              "description": "How many recent clips to inspect when a channel is passed",
+              "description": "How many recent clips to return when a channel is passed",
               "default": 30,
               "title": "Limit"
             },
-            "description": "How many recent clips to inspect when a channel is passed"
+            "description": "How many recent clips to return when a channel is passed"
           },
           {
             "name": "cache",

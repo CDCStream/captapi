@@ -4632,8 +4632,8 @@
     "platform": "kick",
     "name": "Kick Clip",
     "path": "/v1/kick/clip",
-    "credits": 34,
-    "summary": "Kick clip metadata from a clip URL or recent channel clips.",
+    "credits": 1,
+    "summary": "Kick clip — creator vs channel, category, maturity, VOD; or recent channel clips.",
     "params": [
       {
         "name": "url",
@@ -4645,7 +4645,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 30, max 100. Flat 34 credits per call."
+        "description": "Max items to return. Default 30, max 100. Flat 1 credit per call."
       },
       {
         "name": "cache",

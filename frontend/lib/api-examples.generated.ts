@@ -3975,115 +3975,43 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "channelUrl": "https://kick.com/xqc",
     "clip": {
       "platform": "kick",
-      "id": "clip_01KYEQQZ850JYNJHP3ZEQCP2JH",
-      "url": "https://kick.com/xqc/clips/clip_01KYEQQZ850JYNJHP3ZEQCP2JH",
-      "title": ":-)",
-      "createdAt": "2026-07-26T08:13:34.458304Z",
-      "durationSeconds": 180,
-      "views": 6,
+      "id": "clip_01KZ0X5PGT228PY3QEB3RMR3YC",
+      "url": "https://kick.com/xqc/clips/clip_01KZ0X5PGT228PY3QEB3RMR3YC",
+      "title": "Vegas farming sadges",
+      "createdAt": "2026-08-02T09:36:01.061092Z",
+      "startedAt": "2026-08-02T05:45:57Z",
+      "durationSeconds": 38,
+      "views": 18,
       "likes": 0,
-      "thumbnailUrl": "https://clips.kick.com/clips/67/clip_01KYEQQZ850JYNJHP3ZEQCP2JH/thumbnail.webp",
-      "videoUrl": "https://clips.kick.com/clips/67/clip_01KYEQQZ850JYNJHP3ZEQCP2JH/playlist.m3u8",
+      "thumbnailUrl": "https://clips.kick.com/clips/fb/clip_01KZ0X5PGT228PY3QEB3RMR3YC/thumbnail.webp",
+      "videoUrl": "https://clips.kick.com/clips/fb/clip_01KZ0X5PGT228PY3QEB3RMR3YC/playlist.m3u8",
+      "privacy": "public",
+      "isMature": false,
+      "livestreamId": "120226226",
+      "vodStartsAt": 29450,
+      "vod": {
+        "id": "8faf0a05-dcdf-4ab1-8538-e87c6eef573e"
+      },
       "category": "Just Chatting",
+      "categoryId": "15",
+      "categorySlug": "just-chatting",
+      "parentCategory": "irl",
+      "categoryBanner": "https://files.kick.com/images/subcategories/15/banner/b697a8a3-62db-4779-aa76-e4e47662af97",
       "channel": {
+        "id": "668",
         "username": "xqc",
         "name": "xQc",
-        "url": "https://kick.com/xqc"
+        "url": "https://kick.com/xqc",
+        "profilePicture": "https://files.kick.com/images/user/676/profile_image/conversion/931b4e8f-5445-427c-bd82-b473530390cc-thumb.webp"
+      },
+      "creator": {
+        "id": "7458058",
+        "username": "ghosteld",
+        "name": "Ghosteld",
+        "url": "https://kick.com/ghosteld",
+        "profilePicture": "https://files.kick.com/images/user/7458058/profile_image/conversion/d0bd5606-ab8a-42f7-b535-6f7c4a672c34-thumb.webp"
       }
-    },
-    "totalReturned": 5,
-    "clips": [
-      {
-        "platform": "kick",
-        "id": "clip_01KYEQQZ850JYNJHP3ZEQCP2JH",
-        "url": "https://kick.com/xqc/clips/clip_01KYEQQZ850JYNJHP3ZEQCP2JH",
-        "title": ":-)",
-        "createdAt": "2026-07-26T08:13:34.458304Z",
-        "durationSeconds": 180,
-        "views": 6,
-        "likes": 0,
-        "thumbnailUrl": "https://clips.kick.com/clips/67/clip_01KYEQQZ850JYNJHP3ZEQCP2JH/thumbnail.webp",
-        "videoUrl": "https://clips.kick.com/clips/67/clip_01KYEQQZ850JYNJHP3ZEQCP2JH/playlist.m3u8",
-        "category": "Just Chatting",
-        "channel": {
-          "username": "xqc",
-          "name": "xQc",
-          "url": "https://kick.com/xqc"
-        }
-      },
-      {
-        "platform": "kick",
-        "id": "clip_01KYEQN56SHAPHCZJPGZZ4EPCE",
-        "url": "https://kick.com/xqc/clips/clip_01KYEQN56SHAPHCZJPGZZ4EPCE",
-        "title": ":-)",
-        "createdAt": "2026-07-26T08:12:12.509191Z",
-        "durationSeconds": 180,
-        "views": 1,
-        "likes": 0,
-        "thumbnailUrl": "https://clips.kick.com/clips/79/clip_01KYEQN56SHAPHCZJPGZZ4EPCE/thumbnail.webp",
-        "videoUrl": "https://clips.kick.com/clips/79/clip_01KYEQN56SHAPHCZJPGZZ4EPCE/playlist.m3u8",
-        "category": "Just Chatting",
-        "channel": {
-          "username": "xqc",
-          "name": "xQc",
-          "url": "https://kick.com/xqc"
-        }
-      },
-      {
-        "platform": "kick",
-        "id": "clip_01KYEP9TDDTCX4SEN8Q1HSJRPB",
-        "url": "https://kick.com/xqc/clips/clip_01KYEP9TDDTCX4SEN8Q1HSJRPB",
-        "title": "xqc",
-        "createdAt": "2026-07-26T07:48:33.803946Z",
-        "durationSeconds": 140,
-        "views": 9,
-        "likes": 0,
-        "thumbnailUrl": "https://clips.kick.com/clips/5f/clip_01KYEP9TDDTCX4SEN8Q1HSJRPB/thumbnail.webp",
-        "videoUrl": "https://clips.kick.com/clips/5f/clip_01KYEP9TDDTCX4SEN8Q1HSJRPB/playlist.m3u8",
-        "category": "Just Chatting",
-        "channel": {
-          "username": "xqc",
-          "name": "xQc",
-          "url": "https://kick.com/xqc"
-        }
-      },
-      {
-        "platform": "kick",
-        "id": "clip_01KYEP0H4ZW5YYGRTJHZT0FQZY",
-        "url": "https://kick.com/xqc/clips/clip_01KYEP0H4ZW5YYGRTJHZT0FQZY",
-        "title": "xqc",
-        "createdAt": "2026-07-26T07:43:15.086082Z",
-        "durationSeconds": 146,
-        "views": 4,
-        "likes": 0,
-        "thumbnailUrl": "https://clips.kick.com/clips/af/clip_01KYEP0H4ZW5YYGRTJHZT0FQZY/thumbnail.webp",
-        "videoUrl": "https://clips.kick.com/clips/af/clip_01KYEP0H4ZW5YYGRTJHZT0FQZY/playlist.m3u8",
-        "category": "Just Chatting",
-        "channel": {
-          "username": "xqc",
-          "name": "xQc",
-          "url": "https://kick.com/xqc"
-        }
-      },
-      {
-        "platform": "kick",
-        "id": "clip_01KYEN390NKRFHY0VG5YHV1ATT",
-        "url": "https://kick.com/xqc/clips/clip_01KYEN390NKRFHY0VG5YHV1ATT",
-        "title": "xqc",
-        "createdAt": "2026-07-26T07:27:22.035986Z",
-        "durationSeconds": 99,
-        "views": 4,
-        "likes": 0,
-        "thumbnailUrl": "https://clips.kick.com/clips/6e/clip_01KYEN390NKRFHY0VG5YHV1ATT/thumbnail.webp",
-        "videoUrl": "https://clips.kick.com/clips/6e/clip_01KYEN390NKRFHY0VG5YHV1ATT/playlist.m3u8",
-        "category": "Just Chatting",
-        "channel": {
-          "username": "xqc",
-          "name": "xQc",
-          "url": "https://kick.com/xqc"
-        }
-      }
-    ]
+    }
   },
   "komi-page": {
     "platform": "komi",

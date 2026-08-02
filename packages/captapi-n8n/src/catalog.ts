@@ -429,7 +429,7 @@ const TRUTH_SOCIAL: Omit<Endpoint, "platform">[] = [
 ];
 
 const KICK: Omit<Endpoint, "platform">[] = [
-  { tool: "kick_clip", name: "Kick Clip", path: "/v1/kick/clip", credits: 34, summary: "Kick clip metadata from a clip URL or recent channel clips.", params: [url(KICK_CLIP), limitFlat(30, 100, 34)] },
+  { tool: "kick_clip", name: "Kick Clip", path: "/v1/kick/clip", credits: 1, summary: "Kick clip — creator vs channel, category, maturity, VOD; or recent channel clips.", params: [url(KICK_CLIP), limitFlat(30, 100, 1)] },
 ];
 
 const AMAZON_SHOP_ENDPOINTS: Omit<Endpoint, "platform">[] = [

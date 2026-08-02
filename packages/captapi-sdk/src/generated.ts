@@ -2230,7 +2230,7 @@ export class TruthSocialApi {
 export interface KickClipParams {
   /** Kick clip URL, channel URL, or channel username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
   url: string;
-  /** Max items to return. Default 30, max 100. Flat 34 credits per call. */
+  /** Max items to return. Default 30, max 100. Flat 1 credit per call. */
   limit?: number;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -2238,7 +2238,7 @@ export interface KickClipParams {
 
 export class KickApi {
   constructor(private readonly core: HttpCore) {}
-  /** Kick Clip — Kick clip metadata from a clip URL or recent channel clips. (34 credits) */
+  /** Kick Clip — Kick clip — creator vs channel, category, maturity, VOD; or recent channel clips. (1 credit) */
   clip(params: KickClipParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/kick/clip", params);
   }

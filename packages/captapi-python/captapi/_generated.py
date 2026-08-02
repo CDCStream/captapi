@@ -3182,10 +3182,10 @@ class KickApi:
         self._t = transport
 
     def clip(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Kick Clip — Kick clip metadata from a clip URL or recent channel clips. (34 credits)
+        """Kick Clip — Kick clip — creator vs channel, category, maturity, VOD; or recent channel clips. (1 credit)
 
         :param url: Kick clip URL, channel URL, or channel username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 30, max 100. Flat 34 credits per call.
+        :param limit: Max items to return. Default 30, max 100. Flat 1 credit per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/kick/clip", {"url": url, "limit": limit, "cache": cache})
@@ -3196,10 +3196,10 @@ class AsyncKickApi:
         self._t = transport
 
     async def clip(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Kick Clip — Kick clip metadata from a clip URL or recent channel clips. (34 credits)
+        """Kick Clip — Kick clip — creator vs channel, category, maturity, VOD; or recent channel clips. (1 credit)
 
         :param url: Kick clip URL, channel URL, or channel username. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 30, max 100. Flat 34 credits per call.
+        :param limit: Max items to return. Default 30, max 100. Flat 1 credit per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/kick/clip", {"url": url, "limit": limit, "cache": cache})

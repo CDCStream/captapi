@@ -596,7 +596,19 @@ const TRUTH_SOCIAL: Spec[] = [
 ];
 
 const KICK: Spec[] = [
-  { slug: "kick-clip", name: "Kick Clip API", shortName: "Clip", category: "details", method: "GET", path: "/v1/kick/clip", credits: 2 , tagline: "Get a Kick clip — title, channel, views, duration, and thumbnail as structured JSON." },
+  {
+    slug: "kick-clip",
+    name: "Kick Clip API",
+    shortName: "Clip",
+    category: "details",
+    method: "GET",
+    path: "/v1/kick/clip",
+    credits: 1,
+    tagline:
+      "Get a Kick clip — creator vs channel, category, maturity, VOD link, views, and duration as structured JSON.",
+    longDescription:
+      "Pass a Kick clip URL for one enriched clip, or a channel URL/@username for recent clips[]. Clip responses separate creator (who cut the clip) from channel (the broadcaster), and include privacy, isMature, startedAt, vod.id, livestreamId, vodStartsAt, plus categorySlug/parentCategory. Channel mode returns clips[] only — no duplicate top-level clip. Flat 1 credit on the native path.",
+  },
 ];
 
 const AMAZON_SHOP: Spec[] = [
@@ -1778,7 +1790,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "truth-social-profile": [up(TRUTH_PROFILE)],
   "truth-social-user-posts": [up(TRUTH_PROFILE), lp(20, 80), CURSOR],
   "truth-social-post": [up(TRUTH_POST)],
-  "kick-clip": [up(KICK_CLIP), lpFlat(30, 100, 2)],
+  "kick-clip": [up(KICK_CLIP), lpFlat(30, 100, 1)],
   "amazon-shop-page": [
     up(AMAZON_SHOP_URL),
     { name: "marketplace", type: "string", required: false, description: "Amazon marketplace code. Default US." },
@@ -2797,6 +2809,16 @@ const FIELD_DESCS: Record<string, string> = {
   verifiedDescription: "Kwai verification label (e.g. Conta Oficial).",
   verifiedNumber: "Kwai verification tier number when present.",
   eid: "Kwai opaque profile eid.",
+  creator: "Who created/cut the Kick clip (distinct from the broadcaster channel).",
+  isMature: "Whether Kick marks the clip as mature content.",
+  privacy: "Clip privacy (e.g. public).",
+  startedAt: "When the clip segment began on the source stream (ISO 8601).",
+  livestreamId: "Kick livestream id the clip was taken from.",
+  vodStartsAt: "Offset into the VOD (seconds) where the clip starts.",
+  categorySlug: "Kick category slug (e.g. just-chatting).",
+  parentCategory: "Kick parent category (e.g. irl).",
+  categoryBanner: "Category banner image URL when Kick exposes one.",
+  categoryId: "Kick category id.",
   videoCount: "Total number of videos.",
   tweetCount: "Total number of tweets.",
   mediaCount: "Total number of media posts.",

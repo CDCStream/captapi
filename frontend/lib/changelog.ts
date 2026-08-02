@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "improvement",
+    title: "Kick clip: creator vs channel, VOD/maturity fields; 1 credit",
+    description:
+      "GET /v1/kick/clip drops to 1 credit on the native path and stops duplicating the same object as clip and clips[0]. Clip URLs hit Kick's single-clip API and return { channelUrl, clip } with creator (clipper) separate from channel (broadcaster), plus privacy, isMature, startedAt, vod.id, livestreamId, vodStartsAt, categorySlug/parentCategory/categoryBanner, and channel/creator ids + profile pictures. Channel URLs return { channelUrl, totalReturned, clips } only.",
+    items: [
+      "1 credit native (was 2)",
+      "creator vs channel (clipper ≠ broadcaster)",
+      "privacy, isMature, startedAt, vod, livestreamId",
+      "No more clip + clips[0] duplicate payload",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "improvement",
     title: "Kwai profile: bio, verification, post counts; 1 credit",
     description:
       "GET /v1/kwai/profile drops from 17 → 1 credit and finally matches its own docs promise: bio, verified/verifiedDescription/verifiedNumber, gender, following, publicPostCount/privatePostCount, isPrivate, and eid — parsed from Kwai JSON-LD + Nuxt SSR state. Removes the duplicate raw block. When Kwai stubs follower/following to 1, followers prefer schema.org counts and following is omitted instead of a fake 1.",
