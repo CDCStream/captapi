@@ -511,8 +511,8 @@ const TIKTOK_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
     tool: "tiktok_ad_library_top_ads",
     name: "TikTok Creative Center Top Ads",
     path: "/v1/ad-library/tiktok/top-ads",
-    credits: 20,
-    summary: "Creative Center Top Ads — CTR, likes, industry/objective, Spark flag, video URLs.",
+    credits: 2,
+    summary: "Creative Center Top Ads — CTR, likes, industry/objective, video URLs (2 credits native).",
     params: [
       { name: "q", type: "string", required: false, description: "Optional keyword filter." },
       { name: "country", type: "string", required: false, description: "ISO country code. Default US." },

@@ -43,7 +43,9 @@ CREDIT_AD_LIBRARY_NATIVE = 2
 # Apify fallback is capped — never the old ~70-credit trap.
 CREDIT_TIKTOK_AD_SEARCH = 2
 CREDIT_TIKTOK_AD_SEARCH_APIFY = 5
-# Creative Center Top Ads via Apify (~$0.003/ad) → ~1 credit/result after markup.
+# Creative Center Top Ads: Decodo-native is primary (flat 2). Apify fallback
+# keeps ~1 credit/result after markup (~$0.003/ad).
+CREDIT_TIKTOK_TOP_ADS = 2
 RATE_TIKTOK_TOP_ADS = 1.0
 CREDIT_TIKTOK_TOP_ADS_MIN = 2
 
@@ -1245,8 +1247,9 @@ async def tiktok_search(
         "likes, ctr/ctrTier, costTier, industry/objective, isSparkAd, and video{} "
         "renditions. Filter with country (default US), period (7/30/180), orderBy "
         "(for_you|likes|ctr|impressions|cost), optional q/industry/objective/adFormat. "
-        "Billed ~1 credit per returned ad (minimum 2). This is not the EU Commercial "
-        "Content Library — use /v1/ad-library/tiktok/search for DSA transparency ads."
+        "Flat 2 credits on the Decodo-native path; Apify fallback is ~1 credit per "
+        "returned ad (minimum 2). This is not the EU Commercial Content Library — "
+        "use /v1/ad-library/tiktok/search for DSA transparency ads."
     ),
 )
 async def tiktok_top_ads(
@@ -1294,15 +1297,49 @@ async def tiktok_top_ads(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    cost = _scaled(limit, RATE_TIKTOK_TOP_ADS, CREDIT_TIKTOK_TOP_ADS_MIN)
     async with billed_call(
         caller=caller,
         endpoint="/v1/ad-library/tiktok/top-ads",
         platform="tiktok_ad_library",
         resource_url=None,
-        base_credits=cost,
+        base_credits=CREDIT_TIKTOK_TOP_ADS,
     ) as ctx:
+        order_key = order_by.strip().lower().replace(" ", "_").replace("-", "_")
+
         async def _run() -> dict[str, Any]:
+            # Decodo XHR capture of creative_radar top_ads/v2/list first.
+            native = await tiktok_creative_center.search_top_ads(
+                country=region,
+                period=period_days,
+                order_by=order_label,
+                limit=limit,
+                q=q,
+                industry=industry,
+                objective=objective,
+                ad_format=ad_format,
+            )
+            # Empty native with active filters → try Apify (client-side filter may
+            # have dropped everything or Creative Center returned no match).
+            filtered = bool(
+                (q or "").strip() or industry or objective or ad_format
+            )
+            if native is not None and (native or not filtered):
+                ctx["source"] = "direct"
+                ads = [
+                    tiktok_creative_center.normalize_top_ad(i)
+                    for i in native
+                    if isinstance(i, dict) and (i.get("ad_id") or i.get("id"))
+                ]
+                ctx["credits_override"] = CREDIT_TIKTOK_TOP_ADS
+                return {
+                    "query": (q or "").strip() or None,
+                    "country": region,
+                    "period": period_days,
+                    "orderBy": order_key,
+                    "totalReturned": len(ads),
+                    "ads": ads,
+                }
+
             payload = tiktok_creative_center.apify_input(
                 country=region,
                 period=period_days,
@@ -1328,7 +1365,7 @@ async def tiktok_top_ads(
                 "query": (q or "").strip() or None,
                 "country": region,
                 "period": period_days,
-                "orderBy": order_by.strip().lower().replace(" ", "_").replace("-", "_"),
+                "orderBy": order_key,
                 "totalReturned": len(ads),
                 "ads": ads,
             }
@@ -1344,18 +1381,19 @@ async def tiktok_top_ads(
                 "objective": objective or "",
                 "adFormat": ad_format or "",
                 "limit": limit,
-                "v": 1,
+                "v": 2,
             },
             _run,
             ctx,
             use_cache=cache,
         )
-        n = len(data.get("ads") or [])
-        ctx["credits_override"] = (
-            CREDIT_TIKTOK_TOP_ADS_MIN
-            if n == 0
-            else _scaled(n, RATE_TIKTOK_TOP_ADS, CREDIT_TIKTOK_TOP_ADS_MIN)
-        )
+        if ctx.get("source") != "direct":
+            n = len(data.get("ads") or [])
+            ctx["credits_override"] = (
+                CREDIT_TIKTOK_TOP_ADS_MIN
+                if n == 0
+                else _scaled(n, RATE_TIKTOK_TOP_ADS, CREDIT_TIKTOK_TOP_ADS_MIN)
+            )
         return ApiResponse(data=data)
 
 

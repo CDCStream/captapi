@@ -51,9 +51,20 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
     category: "feature",
+    title: "TikTok Creative Center Top Ads: 2 credits native",
+    description:
+      "GET /v1/ad-library/tiktok/top-ads now prefers a Decodo-native Creative Center path (XHR capture of creative_radar top_ads/v2/list) at a flat 2 credits. Apify remains the fallback at ~1 credit per returned ad (min 2). Response shape unchanged.",
+    items: [
+      "Native-first Decodo XHR path for Top Ads",
+      "Price: flat 2 credits native (Apify ~1/ad min 2)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
+    category: "feature",
     title: "TikTok Creative Center Top Ads endpoint",
     description:
-      "New GET /v1/ad-library/tiktok/top-ads returns Creative Center Top Ads as clean JSON — likes, ctr/ctrTier, costTier, industry/objective, isSparkAd, and video{url,urlHd,cover}. Filters: country (default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|cost), optional q/industry/objective/adFormat. Billed 1 credit per returned ad (min 2). Separate from EU Commercial Content Library search.",
+      "New GET /v1/ad-library/tiktok/top-ads returns Creative Center Top Ads as clean JSON — likes, ctr/ctrTier, costTier, industry/objective, isSparkAd, and video{url,urlHd,cover}. Filters: country (default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|cost), optional q/industry/objective/adFormat. Separate from EU Commercial Content Library search.",
     items: [
       "New /v1/ad-library/tiktok/top-ads",
       "Performance metrics: ctr, ctrTier, likes, costTier, Spark flag",

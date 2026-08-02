@@ -3426,8 +3426,8 @@
     "platform": "tiktok_ad_library",
     "name": "TikTok Creative Center Top Ads",
     "path": "/v1/ad-library/tiktok/top-ads",
-    "credits": 20,
-    "summary": "Creative Center Top Ads — CTR, likes, industry/objective, Spark flag, video URLs.",
+    "credits": 2,
+    "summary": "Creative Center Top Ads — CTR, likes, industry/objective, video URLs (2 credits native).",
     "params": [
       {
         "name": "q",

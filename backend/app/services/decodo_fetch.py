@@ -57,9 +57,73 @@ async def fetch_url(
     LinkedIn Ad Library pages that hydrate search results client-side).
     Optional ``browser_actions`` runs Decodo interactions (scroll/wait) first.
     ``target="universal"`` is required for most ``browser_actions`` payloads.
-    ``xhr=True`` returns captured XHR JSON (as a string) instead of HTML.
+    ``xhr=True`` returns captured XHR JSON serialized as a string (legacy).
+    Prefer :func:`fetch_xhr` when you need the XHR list as Python objects.
     ``geo`` is an optional ISO country code for localized egress (e.g. ``US``).
     """
+    result = await _scrape(
+        url,
+        timeout=timeout,
+        headless=headless,
+        browser_actions=browser_actions,
+        target=target,
+        xhr=xhr,
+        geo=geo,
+    )
+    if result is None:
+        return None
+    status, content = result
+    if isinstance(content, str):
+        return status, content
+    if xhr and isinstance(content, list):
+        # Legacy callers expect a string body; serialize the XHR list.
+        return status, json.dumps(content)
+    return None
+
+
+async def fetch_xhr(
+    url: str,
+    timeout: float = 90.0,
+    *,
+    headless: str | None = "html",
+    browser_actions: list[dict[str, Any]] | None = None,
+    target: str | None = None,
+    geo: str | None = None,
+) -> tuple[int, list[dict[str, Any]]] | None:
+    """Fetch ``url`` via Decodo with ``xhr=True`` and return captured XHRs.
+
+    Returns ``(page_status, xhr_items)`` where each item is a dict with keys
+    like ``url``, ``status_code``, ``response_body``, ``request_headers``.
+    Returns ``None`` when Decodo is unconfigured / errored.
+    """
+    result = await _scrape(
+        url,
+        timeout=timeout,
+        headless=headless,
+        browser_actions=browser_actions,
+        target=target,
+        xhr=True,
+        geo=geo,
+    )
+    if result is None:
+        return None
+    status, content = result
+    if not isinstance(content, list):
+        return None
+    items = [i for i in content if isinstance(i, dict)]
+    return status, items
+
+
+async def _scrape(
+    url: str,
+    timeout: float = 30.0,
+    *,
+    headless: str | None = None,
+    browser_actions: list[dict[str, Any]] | None = None,
+    target: str | None = None,
+    xhr: bool = False,
+    geo: str | None = None,
+) -> tuple[int, str | list[Any]] | None:
     auth_header = _auth_header()
     if not auth_header:
         return None
@@ -109,9 +173,13 @@ async def fetch_url(
     result = results[0]
     status = result.get("status_code")
     content = result.get("content")
-    if not isinstance(status, int) or not isinstance(content, str):
+    if not isinstance(status, int):
         return None
-    return status, content
+    if isinstance(content, str):
+        return status, content
+    if xhr and isinstance(content, list):
+        return status, content
+    return None
 
 
 async def fetch_json(url: str, timeout: float = 30.0) -> tuple[int, Any] | None:

@@ -621,12 +621,11 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     category: "search",
     method: "GET",
     path: "/v1/ad-library/tiktok/top-ads",
-    credits: 20,
-    creditsPerResult: 1,
+    credits: 2,
     tagline:
-      "TikTok Creative Center Top Ads — CTR, likes, industry/objective, Spark flag, and video URLs (1 credit/ad).",
+      "TikTok Creative Center Top Ads — CTR, likes, industry/objective, and video URLs (2 credits native).",
     longDescription:
-      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, title, brandName, likes, ctr/ctrTier, costTier, favorite, isSparkAd, industry/industryKey, objective, countries, and video{url,urlHd,cover,durationSeconds,width,height}. Filter with country (default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|cost), and optional q/industry/objective/adFormat. Billed 1 credit per returned ad (minimum 2). This is Creative Center — not the EU Commercial Content Library (use /tiktok/search for DSA transparency).",
+      "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, title, brandName, likes, ctr/ctrTier, costTier, favorite, isSparkAd, industry/industryKey, objective, countries, and video{url,urlHd,cover,durationSeconds,width,height}. Filter with country (default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|cost), and optional q/industry/objective/adFormat. Flat 2 credits on the Decodo-native path; Apify fallback is ~1 credit per returned ad (minimum 2). This is Creative Center — not the EU Commercial Content Library (use /tiktok/search for DSA transparency).",
   },
   { slug: "tiktok-ad-library-ad-details", name: "TikTok Ad Details API", shortName: "Ad Details", category: "details", method: "GET", path: "/v1/ad-library/tiktok/ad-details", credits: 17 , tagline: "Get a TikTok Ad Library ad — creative, advertiser, and delivery fields as structured JSON." },
 ];
@@ -2455,6 +2454,10 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     list.push({
       q: `How is this different from TikTok Ad Library Search?`,
       a: `Top Ads is Creative Center performance inspiration (CTR tiers, likes, industry/objective, Spark Ads, video renditions). Ad Library Search is the EU Commercial Content Library (first/last shown, reach bands). Different TikTok products — pick Top Ads for creative intel, Search for DSA transparency.`,
+    });
+    list.push({
+      q: `How many credits does Top Ads cost?`,
+      a: `Flat 2 credits on the Decodo-native Creative Center path. If that path is unavailable, the Apify fallback bills about 1 credit per returned ad (minimum 2).`,
     });
   }
   list.push({

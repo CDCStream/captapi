@@ -6593,7 +6593,7 @@
           "Ad Library"
         ],
         "summary": "TikTok Creative Center Top Ads",
-        "description": "High-performing TikTok ads from Creative Center Top Ads (ads.tiktok.com/business/creativecenter) as clean JSON — title, brandName, likes, ctr/ctrTier, costTier, industry/objective, isSparkAd, and video{} renditions. Filter with country (default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|cost), optional q/industry/objective/adFormat. Billed ~1 credit per returned ad (minimum 2). This is not the EU Commercial Content Library — use /v1/ad-library/tiktok/search for DSA transparency ads.",
+        "description": "High-performing TikTok ads from Creative Center Top Ads (ads.tiktok.com/business/creativecenter) as clean JSON — title, brandName, likes, ctr/ctrTier, costTier, industry/objective, isSparkAd, and video{} renditions. Filter with country (default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|cost), optional q/industry/objective/adFormat. Flat 2 credits on the Decodo-native path; Apify fallback is ~1 credit per returned ad (minimum 2). This is not the EU Commercial Content Library — use /v1/ad-library/tiktok/search for DSA transparency ads.",
         "operationId": "tiktok_top_ads_v1_ad_library_tiktok_top_ads_get",
         "security": [
           {
