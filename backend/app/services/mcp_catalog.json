@@ -2815,7 +2815,7 @@
     "name": "Rumble Video Details",
     "path": "/v1/rumble/video-details",
     "credits": 1,
-    "summary": "Metadata + stats for a Rumble video.",
+    "summary": "Rumble video metadata + stats: real likes/comments (null when unknown), durationSeconds, captions, media qualities, channelFollowers/verified.",
     "params": [
       {
         "name": "url",

@@ -1384,7 +1384,7 @@ export interface RumbleCommentsParams {
 
 export class RumbleApi {
   constructor(private readonly core: HttpCore) {}
-  /** Rumble Video Details — Metadata + stats for a Rumble video. (1 credit) */
+  /** Rumble Video Details — Rumble video metadata + stats: real likes/comments (null when unknown), durationSeconds, captions, media qualities, channelFollowers/verified. (1 credit) */
   videoDetails(params: RumbleVideoDetailsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/rumble/video-details", params);
   }

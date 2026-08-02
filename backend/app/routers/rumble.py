@@ -109,25 +109,39 @@ def _normalize_az_video(item: dict[str, Any], *, include_description: bool = Tru
     votes = item.get("rumble_votes") if isinstance(item.get("rumble_votes"), dict) else {}
     comments = item.get("comments") if isinstance(item.get("comments"), dict) else {}
     video_id = safe_str(item.get("permalink_id") or item.get("id"))
+    embed_id = safe_str(item.get("embed_id") or item.get("embedId") or video_id)
+    channel_url = _clean_url(by.get("url"))
+    channel_handle = None
+    if channel_url:
+        channel_handle = channel_url.rstrip("/").split("/")[-1] or None
+    duration = safe_str(item.get("duration"))
+    duration_seconds = rumble_video_native._clock_to_seconds(duration)
     streams = [v for v in item.get("videos") or [] if isinstance(v, dict) and v.get("url")]
+    live_raw = first_present(item.get("is_live"), item.get("livestream_status"))
     out: dict[str, Any] = {
         "platform": "rumble",
         "id": video_id,
+        "numericId": safe_int(item.get("video_id") or item.get("numericId") or item.get("id")),
+        "embedId": embed_id,
         "url": _clean_url(item.get("url")),
-        "embedUrl": f"https://rumble.com/embed/{video_id}/" if video_id else None,
+        "embedUrl": f"https://rumble.com/embed/{embed_id}/" if embed_id else None,
+        "shareUrl": f"https://rumble.com/share/{video_id}" if video_id else None,
         "title": safe_str(item.get("title")),
         "channel": safe_str(by.get("name") or by.get("title")),
-        "channelUrl": _clean_url(by.get("url")),
+        "channelUrl": channel_url,
+        "channelHandle": channel_handle or safe_str(by.get("slug") or by.get("username")),
         "channelFollowers": safe_int(by.get("followers")),
-        "channelVerified": bool(by.get("verified_badge")),
+        "channelVerified": bool(by.get("verified_badge")) if by else None,
+        # Missing engagement stays null — never invent 0.
         "views": safe_int(item.get("views")),
         "likes": safe_int(votes.get("num_votes_up")),
         "dislikes": safe_int(votes.get("num_votes_down")),
-        "duration": safe_str(item.get("duration")),
+        "duration": duration,
+        "durationSeconds": duration_seconds,
         "publishedAt": safe_str(item.get("upload_date")),
         "thumbnail": safe_str(item.get("thumb")),
         "comments": safe_int(comments.get("count")),
-        "isLive": bool(item.get("is_live") or item.get("livestream_status")),
+        "isLive": bool(live_raw) if live_raw is not None else None,
         "streams": [
             {
                 "url": safe_str(v.get("url")),
@@ -211,6 +225,10 @@ async def _fetch_video_page(url: str) -> dict[str, Any]:
             raise HTTPException(status_code=404, detail="Video not found")
 
     page = resp.text
+    parsed = rumble_video_native.parse_video_html(page, url=str(resp.url) or url)
+    if parsed and parsed.get("title"):
+        return parsed
+
     video_id = extract_rumble_video_id(str(resp.url)) or extract_rumble_video_id(url)
     title = _meta(page, "og:title")
     description = _meta(page, "og:description") or _meta(page, "description")
@@ -219,6 +237,7 @@ async def _fetch_video_page(url: str) -> dict[str, Any]:
     if not (title or description or thumbnail):
         raise HTTPException(status_code=404, detail="Video not found")
 
+    # Last-resort OG-only card — engagement unknown, so null (not 0).
     return {
         "platform": "rumble",
         "id": safe_str(video_id),
@@ -227,17 +246,23 @@ async def _fetch_video_page(url: str) -> dict[str, Any]:
         "description": safe_str(description),
         "channel": None,
         "channelUrl": None,
-        "views": 0,
-        "likes": 0,
-        "dislikes": 0,
+        "views": None,
+        "likes": None,
+        "dislikes": None,
         "duration": None,
+        "durationSeconds": None,
         "publishedAt": None,
         "thumbnail": safe_str(thumbnail),
-        "comments": 0,
+        "comments": None,
+        "isLive": None,
+        "streams": [],
     }
 
 
-@router.get("/video-details", summary="Rumble video metadata + stats")
+@router.get(
+    "/video-details",
+    summary="Rumble video metadata + stats (null engagement when unknown; captions + media)",
+)
 async def video_details(
     url: str = Query(..., description="Rumble video URL"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -277,7 +302,7 @@ async def video_details(
 
         data = await cached_or_run(
             endpoint="rumble.video-details",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

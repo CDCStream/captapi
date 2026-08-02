@@ -1922,7 +1922,7 @@ class RumbleApi:
         self._t = transport
 
     def video_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Rumble Video Details — Metadata + stats for a Rumble video. (1 credit)
+        """Rumble Video Details — Rumble video metadata + stats: real likes/comments (null when unknown), durationSeconds, captions, media qualities, channelFollowers/verified. (1 credit)
 
         :param url: Rumble video URL, e.g. https://rumble.com/vXXXX-title.html. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
@@ -1962,7 +1962,7 @@ class AsyncRumbleApi:
         self._t = transport
 
     async def video_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
-        """Rumble Video Details — Metadata + stats for a Rumble video. (1 credit)
+        """Rumble Video Details — Rumble video metadata + stats: real likes/comments (null when unknown), durationSeconds, captions, media qualities, channelFollowers/verified. (1 credit)
 
         :param url: Rumble video URL, e.g. https://rumble.com/vXXXX-title.html. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.

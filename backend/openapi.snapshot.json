@@ -10597,7 +10597,7 @@
         "tags": [
           "Rumble"
         ],
-        "summary": "Rumble video metadata + stats",
+        "summary": "Rumble video metadata + stats (null engagement when unknown; captions + media)",
         "operationId": "video_details_v1_rumble_video_details_get",
         "security": [
           {

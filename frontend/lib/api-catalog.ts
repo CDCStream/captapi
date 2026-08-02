@@ -431,7 +431,25 @@ const LINKEDIN: Spec[] = [
 ];
 
 const RUMBLE: Spec[] = [
-  { slug: "rumble-video-details", name: "Rumble Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/rumble/video-details", credits: 1 },
+  {
+    slug: "rumble-video-details",
+    name: "Rumble Video Details API",
+    shortName: "Video Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/rumble/video-details",
+    credits: 1,
+    tagline:
+      "Rumble video metadata — real likes/comments (null when unknown), durationSeconds, captions, and media qualities.",
+    longDescription:
+      "Paste a Rumble video URL and get clean JSON: title, description, views, likes/dislikes/comments (null when Rumble does not expose them — never fake zeros), duration + durationSeconds, publishedAt, thumbnail, width/height, channel name/url/handle plus channelFollowers and channelVerified, numericId/embedId/shareUrl/embedUrl, captions (language → .vtt path), media (mp4 and/or tar qualities, timeline, audio, hls — each with bitrate/size/resolution when present), and a flat streams[] list. Flat 1 credit. Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "Engagement counts stay null when unknown (no fake zeros)",
+      "durationSeconds plus human duration string",
+      "captions{} with .vtt paths and media{mp4|tar,timeline,audio,hls}",
+      "channelFollowers + channelVerified without a second channel call",
+    ],
+  },
   { slug: "rumble-channel-videos", name: "Rumble Channel Videos API", shortName: "Channel Videos", category: "list", method: "GET", path: "/v1/rumble/channel-videos", credits: 12, creditsPerResult: 0.6 },
   { slug: "rumble-search", name: "Rumble Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/rumble/search", credits: 12, creditsPerResult: 0.6 },
   { slug: "rumble-comments", name: "Rumble Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/rumble/comments", credits: 2 },

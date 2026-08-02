@@ -50,6 +50,18 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-02",
+    category: "fix",
+    title: "Rumble video details: real likes/comments, media, captions",
+    description:
+      "GET /v1/rumble/video-details no longer invents likes/dislikes/comments/views as 0 when Rumble does not expose them (null = unknown). Adds durationSeconds, numericId/embedId/shareUrl, channelHandle, width/height, captions{} (.vtt paths), and media{mp4|tar,timeline,audio,hls}. Keeps channelFollowers + channelVerified. Still 1 credit.",
+    items: [
+      "Null instead of fake zero engagement",
+      "durationSeconds + captions{} + media qualities",
+      "numericId, embedId, shareUrl, channelHandle",
+    ],
+  },
+  {
+    publishedAt: "2026-08-02",
     category: "feature",
     title: "YouTube search: cursor pagination, ids, filters",
     description:

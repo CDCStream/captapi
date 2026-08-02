@@ -15018,29 +15018,122 @@
   "rumble-video-details": {
     "ok": true,
     "status": 200,
-    "credits": null,
+    "credits": 1,
     "data": {
       "platform": "rumble",
       "id": "v7cv2cc",
+      "numericId": 441201242,
+      "embedId": "v7aoh22",
       "url": "https://rumble.com/v7cv2cc-now-i-can-finally-talk-about-it-ep.-2555-07172026.html",
       "embedUrl": "https://rumble.com/embed/v7aoh22/",
+      "shareUrl": "https://rumble.com/share/v7cv2cc?src=J1c68WSr8AsehcaSzlyz2fgeg8DoMr_YAh20afx-dezbwbz0_kJtdA",
       "title": "Now I Can Finally Talk About It (Ep. 2555) - 07/17/2026",
       "description": "In this episode, I'll discuss the groundbreaking information President Trump revealed in his speech last night and what it means for our elections movingforward. 1776 Live Club: No purchase necessary.",
       "channel": "The Dan Bongino Show",
       "channelUrl": "https://rumble.com/c/bongino",
+      "channelHandle": "bongino",
       "channelFollowers": 3660000,
       "channelVerified": true,
-      "views": 935270,
-      "likes": 0,
-      "dislikes": 0,
+      "views": 940965,
+      "likes": 15500,
+      "dislikes": 194,
+      "comments": 1050,
       "duration": "1:26:25",
+      "durationSeconds": 5185,
       "publishedAt": "2026-07-17T12:18:39+00:00",
       "thumbnail": "https://1a-1791.com/video/fwe2/7c/s8/1/C/w/c/H/CwcHA.qR4e-small-Now-I-Can-Finally-Talk-Abou..jpg",
-      "comments": 0,
+      "width": 1920,
+      "height": 1080,
+      "captions": {
+        "en-auto": {
+          "language": "English (auto)",
+          "path": "https://1a-1791.com/video/fwe2/7c/s8/11/C/w/c/H/CwcHA.fn8Si.vtt"
+        }
+      },
+      "media": {
+        "mp4": {
+          "360": {
+            "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.baa.rec.mp4",
+            "meta": {
+              "bitrate": 636,
+              "size": 412534201,
+              "w": 640,
+              "h": 360
+            }
+          },
+          "480": {
+            "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.caa.rec.mp4",
+            "meta": {
+              "bitrate": 1005,
+              "size": 651781271,
+              "w": 854,
+              "h": 480
+            }
+          },
+          "720": {
+            "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.gaa.rec.mp4",
+            "meta": {
+              "bitrate": 2067,
+              "size": 1340090002,
+              "w": 1280,
+              "h": 720
+            }
+          },
+          "1080": {
+            "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.haa.rec.mp4",
+            "meta": {
+              "bitrate": 3985,
+              "size": 2583714297,
+              "w": 1920,
+              "h": 1080
+            }
+          },
+          "240": {
+            "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.oaa.rec.mp4",
+            "meta": {
+              "bitrate": 203,
+              "size": 131950161,
+              "w": 640,
+              "h": 360
+            }
+          },
+          "1081": {
+            "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.aaa.rec.mp4",
+            "meta": {
+              "bitrate": 8051,
+              "size": 5219124253,
+              "w": 1920,
+              "h": 1080
+            }
+          }
+        },
+        "timeline": {
+          "180": {
+            "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.Faa.rec.mp4",
+            "meta": {
+              "bitrate": 11,
+              "size": 7777789,
+              "w": 320,
+              "h": 180
+            }
+          }
+        },
+        "audio": {
+          "192": {
+            "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.Gaa.rec.aac",
+            "meta": {
+              "bitrate": 192,
+              "size": 124450817,
+              "w": 0,
+              "h": 0
+            }
+          }
+        }
+      },
       "isLive": false,
       "streams": [
         {
-          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.caa.rec.mp4?u=3&b=0",
+          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.caa.rec.mp4",
           "type": "mp4",
           "quality": "480p"
         },
@@ -15048,6 +15141,36 @@
           "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.Faa.rec.mp4",
           "type": "mp4",
           "quality": "180p"
+        },
+        {
+          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.aaa.rec.mp4",
+          "type": "mp4",
+          "quality": "1081p"
+        },
+        {
+          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.haa.rec.mp4",
+          "type": "mp4",
+          "quality": "1080p"
+        },
+        {
+          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.gaa.rec.mp4",
+          "type": "mp4",
+          "quality": "720p"
+        },
+        {
+          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.baa.rec.mp4",
+          "type": "mp4",
+          "quality": "360p"
+        },
+        {
+          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.oaa.rec.mp4",
+          "type": "mp4",
+          "quality": "240p"
+        },
+        {
+          "url": "https://1a-1791.com/video/fwe2/7c/s8/2/C/w/c/H/CwcHA.Gaa.rec.aac",
+          "type": "audio",
+          "quality": "192k"
         }
       ]
     }
