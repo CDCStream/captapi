@@ -180,17 +180,9 @@ def _normalize_post(item: dict) -> dict:
             "title": safe_str(music_raw.get("song_name") or music_raw.get("title") or music_raw.get("trackName")),
             "artist": safe_str(music_raw.get("artist_name") or music_raw.get("artist") or music_raw.get("artistName")),
         }
-    loc_raw = item.get("location") if isinstance(item.get("location"), dict) else None
-    location = None
-    if loc_raw and (loc_raw.get("name") or loc_raw.get("id") or loc_raw.get("pk")):
-        location = {
-            "id": safe_str(loc_raw.get("pk") or loc_raw.get("id")),
-            "name": safe_str(loc_raw.get("name")),
-            "slug": safe_str(loc_raw.get("slug")),
-            "latitude": safe_float(loc_raw.get("lat") or loc_raw.get("latitude")),
-            "longitude": safe_float(loc_raw.get("lng") or loc_raw.get("longitude")),
-        }
-        location = {k: v for k, v in location.items() if v is not None}
+    location = decodo.map_ig_location(
+        item.get("location") if isinstance(item.get("location"), dict) else None
+    )
     out: dict[str, Any] = {
         "platform": "instagram",
         "url": safe_str(item.get("url") or item.get("permalink") or item.get("shortcodeUrl")),
@@ -844,10 +836,20 @@ async def instagram_comments(
 @router.get("/channel-details", summary="Instagram profile info")
 async def instagram_channel_details(
     url: str = Query(..., description="Instagram profile URL, @handle, or username"),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the default cache TTL. Default false — always fetch fresh."),
+    cacheMaxAge: str | None = Query(
+        None,
+        description=(
+            "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. "
+            "When set, enables caching with that TTL. Envelope includes cached + cachedAt."
+        ),
+    ),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    from app.core.cache_params import resolve_cache_options
+
     handle = _require_instagram_profile(url)
+    use_cache, ttl = resolve_cache_options(cache, cacheMaxAge)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/channel-details",
@@ -873,10 +875,11 @@ async def instagram_channel_details(
 
         data = await cached_or_run(
             endpoint="instagram.channel-details",
-            params={"url": url, "v": 8},
+            params={"url": url, "v": 9, "cacheMaxAge": cacheMaxAge},
             runner=_run,
             ctx=ctx,
-            use_cache=cache,
+            use_cache=use_cache,
+            ttl=ttl,
         )
         return ApiResponse(data=data)
 
@@ -890,10 +893,20 @@ async def instagram_basic_profile(
             "username is also accepted and resolved automatically."
         ),
     ),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the default cache TTL. Default false — always fetch fresh."),
+    cacheMaxAge: str | None = Query(
+        None,
+        description=(
+            "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. "
+            "When set, enables caching with that TTL. Envelope includes cached + cachedAt."
+        ),
+    ),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    from app.core.cache_params import resolve_cache_options
+
     mode, ident = _require_ig_profile_target(userId)
+    use_cache, ttl = resolve_cache_options(cache, cacheMaxAge)
     async with billed_call(
         caller=caller,
         endpoint="/v1/instagram/basic-profile",
@@ -928,10 +941,11 @@ async def instagram_basic_profile(
 
         data = await cached_or_run(
             endpoint="instagram.basic-profile",
-            params={"target": f"{mode}:{ident}", "v": 6},
+            params={"target": f"{mode}:{ident}", "v": 7, "cacheMaxAge": cacheMaxAge},
             runner=_run,
             ctx=ctx,
-            use_cache=cache,
+            use_cache=use_cache,
+            ttl=ttl,
         )
         return ApiResponse(data=data)
 
@@ -1137,14 +1151,34 @@ async def _overlay_feed_engagement(
             media_type = safe_int(raw.get("media_type"))
             is_video = media_type == 2 if media_type is not None else post_is_video
             play_count, ig_play_count, fb_play_count = decodo.feed_play_metrics(raw)
+            prior_views = safe_int(eng.get("views"))
+            prior_plays = safe_int(eng.get("plays"))
+            preserved_view_count = None
+            if prior_views is not None and (
+                (prior_plays is not None and prior_views != prior_plays)
+                or (prior_plays is None and play_count is not None and prior_views != play_count)
+            ):
+                preserved_view_count = prior_views
+            video_view_count = safe_int(raw.get("video_view_count")) or preserved_view_count
             post["engagement"] = decodo.engagement_with_play_split(
                 eng,
                 play_count=play_count,
                 ig_play_count=ig_play_count,
                 fb_play_count=fb_play_count,
+                video_view_count=video_view_count,
                 likes=likes if likes is not None else eng.get("likes"),
                 is_video=is_video,
             )
+            # Commercial flags + location when feed has them and GraphQL omitted.
+            if raw.get("is_ad") is not None or raw.get("ad_id") or raw.get("injected"):
+                post["isAd"] = bool(raw.get("is_ad") or raw.get("ad_id") or raw.get("injected"))
+            affiliate = raw.get("affiliate_info")
+            if affiliate not in (None, [], {}, False) or raw.get("is_affiliate"):
+                post["isAffiliate"] = True
+            if not post.get("location"):
+                loc = instagram_native._location_from_media(raw)
+                if loc:
+                    post["location"] = loc
             # Backfill video/meta fields GraphQL timeline often omits.
             product = safe_str(raw.get("product_type")) or ("clips" if is_video else None)
             if product and not safe_str(post.get("productType")):
@@ -1618,7 +1652,117 @@ async def instagram_reels_search(
 
         data = await cached_or_run(
             endpoint="instagram.reels-search",
-            params={"q": q, "limit": limit, "datePosted": datePosted or "", "v": 15},
+            params={"q": q, "limit": limit, "datePosted": datePosted or "", "v": 16},
+            runner=_run,
+            ctx=ctx,
+            use_cache=cache,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/highlights", summary="List Instagram Story Highlights for a profile")
+async def instagram_highlights(
+    url: str | None = Query(
+        None, description="Profile URL or @handle (e.g. https://instagram.com/nasa or @nasa)"
+    ),
+    userId: str | None = Query(
+        None, description="Numeric Instagram user id (skips handle→ID resolve when known)"
+    ),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    """Persistent Story Highlight albums (not live 24h Stories). Flat 1 credit."""
+    handle = extract_instagram_username(url) if url else None
+    uid = safe_str(userId)
+    if not handle and not uid:
+        raise HTTPException(
+            status_code=400,
+            detail="Provide url (@handle / profile URL) or userId.",
+        )
+    if url:
+        _reject_instagram_platform_mismatch(url, "https://www.instagram.com/username/")
+
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/instagram/highlights",
+        platform="instagram",
+        resource_url=url,
+        base_credits=CREDIT_CHANNEL,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            resolved_id = uid
+            resolved_handle = handle
+            if not resolved_id and resolved_handle:
+                user = await instagram_native.fetch_web_profile_info(resolved_handle)
+                if isinstance(user, dict):
+                    resolved_id = safe_str(user.get("id") or user.get("pk"))
+                    resolved_handle = safe_str(user.get("username")) or resolved_handle
+            if not resolved_id and resolved_handle and decodo.enabled():
+                profile = await decodo.channel_details(resolved_handle)
+                if isinstance(profile, dict):
+                    resolved_id = safe_str(profile.get("id"))
+            if not resolved_id:
+                raise HTTPException(status_code=404, detail="Instagram profile not found.")
+            tray = await instagram_native.fetch_highlights_tray(resolved_id)
+            if tray is None:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Instagram Highlights tray unavailable right now. Retry shortly.",
+                )
+            ctx["source"] = "direct"
+            highlights = [
+                instagram_native.map_highlight_tray_item(n) for n in tray if isinstance(n, dict)
+            ]
+            return {
+                "userId": resolved_id,
+                "username": resolved_handle,
+                "totalReturned": len(highlights),
+                "highlights": highlights,
+            }
+
+        data = await cached_or_run(
+            endpoint="instagram.highlights",
+            params={"url": url or "", "userId": uid or "", "v": 1},
+            runner=_run,
+            ctx=ctx,
+            use_cache=cache,
+        )
+        return ApiResponse(data=data)
+
+
+@router.get("/highlights-details", summary="Instagram Story Highlight album details")
+async def instagram_highlights_details(
+    id: str = Query(..., description="Highlight id from /v1/instagram/highlights (no highlight: prefix)"),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    """Items inside one persistent Highlight album. Flat 1 credit."""
+    hid = safe_str(id)
+    if hid.startswith("highlight:"):
+        hid = hid.split(":", 1)[1]
+    if not hid:
+        raise HTTPException(status_code=400, detail="Provide a valid highlight id.")
+
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/instagram/highlights-details",
+        platform="instagram",
+        resource_url=None,
+        base_credits=CREDIT_CHANNEL,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            node = await instagram_native.fetch_highlight_reel(hid)
+            if node is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Highlight not found or unavailable.",
+                )
+            ctx["source"] = "direct"
+            return instagram_native.map_highlight_reel(node)
+
+        data = await cached_or_run(
+            endpoint="instagram.highlights-details",
+            params={"id": hid, "v": 1},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2134,7 +2278,7 @@ async def instagram_hashtag_search(
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",
-            params={"q": tag, "limit": limit, "mediaType": mediaType, "v": 17},
+            params={"q": tag, "limit": limit, "mediaType": mediaType, "v": 18},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

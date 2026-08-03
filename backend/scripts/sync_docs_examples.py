@@ -110,9 +110,21 @@ def _patch_linkedin_company_posts(data: dict[str, Any]) -> bool:
 
 def _patch_facebook_photos(data: dict[str, Any]) -> bool:
     changed = False
-    for photo in data.get("photos") or []:
+    # Snapshots are either bare payload or {ok,status,credits,data:{photos}}.
+    root = data.get("data") if isinstance(data.get("data"), dict) else data
+    for photo in (root or {}).get("photos") or []:
         if not isinstance(photo, dict):
             continue
+        # Rename legacy mislabeled caption → accessibilityCaption (alt-text).
+        if photo.get("caption") and not photo.get("accessibilityCaption"):
+            photo["accessibilityCaption"] = photo.pop("caption")
+            changed = True
+        elif "caption" in photo:
+            photo.pop("caption", None)
+            changed = True
+        if "text" in photo:
+            photo.pop("text", None)
+            changed = True
         for key in ("publishedAt", "likes", "comments", "width", "height"):
             if key in photo and photo.get(key) is None:
                 photo.pop(key, None)

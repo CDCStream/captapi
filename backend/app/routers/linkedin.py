@@ -89,31 +89,69 @@ def _require_company(data: dict[str, Any]) -> dict[str, Any]:
     raise HTTPException(status_code=404, detail="Company not found")
 
 
+def _is_masked_li_text(value: str | None) -> bool:
+    """True when LinkedIn guest-masked a string as asterisks (``*******``)."""
+    s = (value or "").strip()
+    if not s:
+        return False
+    letters = sum(1 for c in s if c.isalpha())
+    stars = s.count("*")
+    if stars >= 6 and letters == 0:
+        return True
+    if stars >= 8 and letters <= 2:
+        return True
+    return False
+
+
+def _text_or_restricted(value: Any) -> tuple[str | None, bool]:
+    """Return ``(text, restricted)``. Masked guest copy → ``(None, True)``."""
+    text = safe_str(value)
+    if text and _is_masked_li_text(text):
+        return None, True
+    return text, False
+
+
+def _first_list(*candidates: Any) -> list[Any]:
+    for raw in candidates:
+        if isinstance(raw, list) and raw:
+            return raw
+    return []
+
+
 def _map_li_experience(raw: Any) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for item in raw if isinstance(raw, list) else []:
         if not isinstance(item, dict):
             continue
         company = item.get("company") if isinstance(item.get("company"), dict) else {}
-        out.append(
-            {
-                "title": safe_str(item.get("title") or item.get("position") or item.get("name")),
-                "company": safe_str(
-                    item.get("company_name")
-                    or item.get("companyName")
-                    or company.get("name")
-                    or item.get("company")
-                ),
-                "url": safe_str(item.get("company_url") or item.get("url") or company.get("url")),
-                "location": safe_str(item.get("location") or item.get("company_location")),
-                "description": safe_str(item.get("description") or item.get("summary")),
-                "startDate": safe_str(item.get("start_date") or item.get("startDate")),
-                "endDate": safe_str(item.get("end_date") or item.get("endDate")),
-                "isCurrent": item.get("is_current")
-                if item.get("is_current") is not None
-                else item.get("isCurrent"),
-            }
+        member = item.get("member") if isinstance(item.get("member"), dict) else {}
+        desc, restricted = _text_or_restricted(
+            item.get("description")
+            or item.get("summary")
+            or member.get("description")
+            or member.get("summary")
         )
+        row: dict[str, Any] = {
+            "title": safe_str(item.get("title") or item.get("position") or item.get("name")),
+            "company": safe_str(
+                item.get("company_name")
+                or item.get("companyName")
+                or company.get("name")
+                or item.get("company")
+            ),
+            "url": safe_str(item.get("company_url") or item.get("url") or company.get("url")),
+            "location": safe_str(item.get("location") or item.get("company_location")),
+            "description": desc,
+            "startDate": safe_str(item.get("start_date") or item.get("startDate")),
+            "endDate": safe_str(item.get("end_date") or item.get("endDate")),
+            "isCurrent": item.get("is_current")
+            if item.get("is_current") is not None
+            else item.get("isCurrent"),
+        }
+        if restricted:
+            row["restricted"] = True
+            row["description"] = None  # keep key — null ≠ ******* spam
+        out.append({k: v for k, v in row.items() if v is not None or k == "description"})
     return [x for x in out if x.get("title") or x.get("company")]
 
 
@@ -123,22 +161,175 @@ def _map_li_education(raw: Any) -> list[dict[str, Any]]:
         if not isinstance(item, dict):
             continue
         school = item.get("school") if isinstance(item.get("school"), dict) else {}
-        out.append(
-            {
-                "name": safe_str(
-                    item.get("school_name")
-                    or item.get("schoolName")
-                    or school.get("name")
-                    or item.get("name")
-                ),
-                "url": safe_str(item.get("school_url") or item.get("url") or school.get("url")),
-                "degree": safe_str(item.get("degree") or item.get("degree_name")),
-                "field": safe_str(item.get("field_of_study") or item.get("fieldOfStudy") or item.get("field")),
-                "startDate": safe_str(item.get("start_date") or item.get("startDate")),
-                "endDate": safe_str(item.get("end_date") or item.get("endDate")),
-            }
+        desc, restricted = _text_or_restricted(
+            item.get("description") or item.get("activities") or item.get("notes")
         )
+        row: dict[str, Any] = {
+            "name": safe_str(
+                item.get("school_name")
+                or item.get("schoolName")
+                or school.get("name")
+                or item.get("name")
+            ),
+            "url": safe_str(item.get("school_url") or item.get("url") or school.get("url")),
+            "degree": safe_str(item.get("degree") or item.get("degree_name")),
+            "field": safe_str(
+                item.get("field_of_study") or item.get("fieldOfStudy") or item.get("field")
+            ),
+            "description": desc,
+            "startDate": safe_str(item.get("start_date") or item.get("startDate")),
+            "endDate": safe_str(item.get("end_date") or item.get("endDate")),
+        }
+        if restricted:
+            row["restricted"] = True
+        out.append({k: v for k, v in row.items() if v is not None})
     return [x for x in out if x.get("name")]
+
+
+def _map_li_similar(raw: Any) -> list[dict[str, Any]]:
+    """People-also-viewed / similar profiles — LinkedIn discovery graph."""
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for item in raw if isinstance(raw, list) else []:
+        if not isinstance(item, dict):
+            continue
+        url = safe_str(
+            item.get("url")
+            or item.get("profile_url")
+            or item.get("profileUrl")
+            or item.get("linkedinUrl")
+        )
+        username = safe_str(
+            item.get("public_identifier")
+            or item.get("publicIdentifier")
+            or item.get("username")
+            or item.get("vanityName")
+        )
+        if not username and url and "/in/" in url:
+            username = url.rstrip("/").split("/in/")[-1].split("?")[0] or None
+        name = safe_str(item.get("full_name") or item.get("fullName") or item.get("name"))
+        key = username or url or name
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        row = {
+            "name": name,
+            "username": username,
+            "url": url or (f"https://www.linkedin.com/in/{username}" if username else None),
+            "headline": safe_str(item.get("headline") or item.get("occupation") or item.get("title")),
+            "location": safe_str(
+                item.get("location")
+                if not isinstance(item.get("location"), dict)
+                else (
+                    item["location"].get("full")
+                    or item["location"].get("city")
+                    or item["location"].get("country")
+                )
+            ),
+            "profileImage": safe_str(
+                item.get("profile_picture_url")
+                or item.get("profilePicture")
+                or item.get("avatar")
+                or item.get("photoUrl")
+            ),
+        }
+        out.append({k: v for k, v in row.items() if v is not None})
+    return out
+
+
+def _map_li_named_section(
+    raw: Any,
+    *,
+    name_keys: tuple[str, ...],
+    extra_keys: tuple[tuple[str, tuple[str, ...]], ...] = (),
+) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for item in raw if isinstance(raw, list) else []:
+        if not isinstance(item, dict):
+            continue
+        name = None
+        for key in name_keys:
+            name = safe_str(item.get(key))
+            if name:
+                break
+        desc, restricted = _text_or_restricted(
+            item.get("description") or item.get("summary") or item.get("text")
+        )
+        row: dict[str, Any] = {"name": name, "description": desc}
+        for out_key, src_keys in extra_keys:
+            for sk in src_keys:
+                val = item.get(sk)
+                if isinstance(val, (str, int, float, bool)):
+                    row[out_key] = val if not isinstance(val, str) else safe_str(val)
+                    break
+                if isinstance(val, dict) and val.get("name"):
+                    row[out_key] = safe_str(val.get("name"))
+                    break
+        if restricted:
+            row["restricted"] = True
+        row = {k: v for k, v in row.items() if v is not None}
+        if row.get("name") or row.get("description"):
+            out.append(row)
+    return out
+
+
+def _map_li_recommendations(raw: Any) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for item in raw if isinstance(raw, list) else []:
+        if not isinstance(item, dict):
+            continue
+        text, restricted = _text_or_restricted(
+            item.get("text")
+            or item.get("description")
+            or item.get("recommendation")
+            or item.get("recommendation_text")
+        )
+        recommender = (
+            item.get("recommender")
+            if isinstance(item.get("recommender"), dict)
+            else (
+                item.get("author") if isinstance(item.get("author"), dict) else {}
+            )
+        )
+        row: dict[str, Any] = {
+            "text": text,
+            "name": safe_str(
+                item.get("name")
+                or item.get("recommender_name")
+                or recommender.get("full_name")
+                or recommender.get("name")
+            ),
+            "headline": safe_str(
+                item.get("headline")
+                or recommender.get("headline")
+                or item.get("recommender_headline")
+            ),
+            "url": safe_str(
+                item.get("url")
+                or recommender.get("url")
+                or recommender.get("profile_url")
+            ),
+            "relationship": safe_str(
+                item.get("relationship")
+                or item.get("relationship_type")
+                or item.get("context")
+            ),
+        }
+        if restricted:
+            row["restricted"] = True
+        row = {k: v for k, v in row.items() if v is not None}
+        if row.get("text") or row.get("name"):
+            out.append(row)
+    return out
+
+
+def _section_payload(p: dict[str, Any], info: dict[str, Any], *keys: str) -> list[Any]:
+    cands: list[Any] = []
+    for key in keys:
+        cands.extend([p.get(key), info.get(key)])
+        nested = p.get("sections") if isinstance(p.get("sections"), dict) else {}
+        cands.append(nested.get(key))
+    return _first_list(*cands)
 
 
 def _normalize_profile(p: dict[str, Any]) -> dict[str, Any]:
@@ -147,52 +338,189 @@ def _normalize_profile(p: dict[str, Any]) -> dict[str, Any]:
     location = info.get("location")
     if isinstance(location, dict):
         location = location.get("full") or location.get("city") or location.get("country")
-    about_raw = safe_str(info.get("about") or p.get("summary"))
+    about_raw = safe_str(info.get("about") or p.get("summary") or p.get("about"))
     # Guard Apify/legacy paths that still echo SEO meta into about.
     # Never return the meta description (or its leading mash) as About.
     seo_about = bool(about_raw and linkedin_native._is_seo_description(about_raw))
-    about = None if seo_about else about_raw
-    connections = safe_int(info.get("connection_count") or p.get("connections") or p.get("connectionsCount"))
+    about_restricted = False
+    if seo_about:
+        about = None
+    else:
+        about, about_restricted = _text_or_restricted(about_raw)
+    connections = safe_int(
+        info.get("connection_count") or p.get("connections") or p.get("connectionsCount")
+    )
     # Drop connections that match SEO "N connections on LinkedIn" privacy filler.
+    # Empty / omitted connections is a LinkedIn logged-out platform limit — not a
+    # Captapi bug (SC hits the same wall).
     seo_conn = linkedin_native._seo_connections_count(about_raw) if seo_about else None
     if seo_conn is not None and connections == seo_conn:
         connections = None
-    current_company = safe_str(info.get("current_company") or p.get("companyName") or p.get("company"))
+    current_company = safe_str(
+        info.get("current_company") or p.get("companyName") or p.get("company")
+    )
     if seo_about and about_raw and current_company:
         # Drop company only when it was clearly scraped from SEO "Experience: X".
         exp_m = re.search(r"Experience:\s*([^·\n|]{2,80})", about_raw, re.I)
         if exp_m and safe_str(exp_m.group(1).strip()) == current_company:
             current_company = None
     # Public HTML never exposes a reliable verified flag — omit the field.
-    out = {
+    out: dict[str, Any] = {
         "platform": "linkedin",
         "type": "person",
-        "url": safe_str(info.get("profile_url") or p.get("url") or p.get("profileUrl") or p.get("linkedinUrl")),
-        "username": safe_str(info.get("public_identifier")),
-        "name": safe_str(info.get("fullname") or p.get("fullName") or p.get("name")
-                         or f"{info.get('first_name', '')} {info.get('last_name', '')}".strip()),
+        "url": safe_str(
+            info.get("profile_url") or p.get("url") or p.get("profileUrl") or p.get("linkedinUrl")
+        ),
+        "username": safe_str(
+            info.get("public_identifier") or p.get("publicIdentifier") or p.get("username")
+        ),
+        "name": safe_str(
+            info.get("fullname")
+            or p.get("fullName")
+            or p.get("name")
+            or f"{info.get('first_name', '')} {info.get('last_name', '')}".strip()
+        ),
         "headline": safe_str(info.get("headline") or p.get("occupation")),
         "location": safe_str(location or p.get("locationName")),
         "about": about,
-        "followers": safe_int(info.get("follower_count") or p.get("followers") or p.get("followerCount")),
+        "followers": safe_int(
+            info.get("follower_count") or p.get("followers") or p.get("followerCount")
+        ),
         "connections": connections,
         "profileImage": safe_str(
-            info.get("profile_picture_url") or p.get("profilePicture") or p.get("photoUrl") or p.get("avatar")
+            info.get("profile_picture_url")
+            or p.get("profilePicture")
+            or p.get("photoUrl")
+            or p.get("avatar")
         ),
         "currentCompany": current_company,
     }
-    # Additive: pass through richer Apify sections when present (native may omit).
+    if about_restricted:
+        out["aboutRestricted"] = True
+
     experience = _map_li_experience(
-        p.get("experience") or p.get("experiences") or info.get("experience") or info.get("experiences")
+        _section_payload(p, info, "experience", "experiences", "work_experience")
     )
     education = _map_li_education(
-        p.get("education") or p.get("educations") or info.get("education") or info.get("educations")
+        _section_payload(p, info, "education", "educations")
     )
-    if experience:
-        out["experience"] = experience
-    if education:
-        out["education"] = education
+    similar = _map_li_similar(
+        _section_payload(
+            p,
+            info,
+            "similarProfiles",
+            "similar_profiles",
+            "peopleAlsoViewed",
+            "people_also_viewed",
+            "related_profiles",
+            "relatedProfiles",
+        )
+    )
+    projects = _map_li_named_section(
+        _section_payload(p, info, "projects", "project"),
+        name_keys=("title", "name", "project_name"),
+        extra_keys=(
+            ("url", ("url", "link")),
+            ("startDate", ("start_date", "startDate")),
+            ("endDate", ("end_date", "endDate")),
+        ),
+    )
+    publications = _map_li_named_section(
+        _section_payload(p, info, "publications", "publication"),
+        name_keys=("title", "name"),
+        extra_keys=(
+            ("url", ("url", "link")),
+            ("publisher", ("publisher", "publisher_name")),
+            ("date", ("date", "published_on", "publishedAt")),
+        ),
+    )
+    articles = _map_li_named_section(
+        _section_payload(p, info, "articles", "article", "posts", "recentPosts"),
+        name_keys=("title", "name", "headline"),
+        extra_keys=(
+            ("url", ("url", "link", "article_url")),
+            ("publishedAt", ("published_at", "publishedAt", "date")),
+        ),
+    )
+    activity = _map_li_named_section(
+        _section_payload(p, info, "activity", "activities", "recent_activity"),
+        name_keys=("title", "name", "text"),
+        extra_keys=(
+            ("url", ("url", "link")),
+            ("publishedAt", ("published_at", "publishedAt", "date")),
+        ),
+    )
+    recommendations = _map_li_recommendations(
+        _section_payload(p, info, "recommendations", "recommendation")
+    )
+    certifications = _map_li_named_section(
+        _section_payload(p, info, "certifications", "certs", "licenses"),
+        name_keys=("name", "title", "authority"),
+        extra_keys=(
+            ("authority", ("authority", "issuer", "company")),
+            ("url", ("url", "link")),
+            ("issuedAt", ("issued_at", "issue_date", "startDate")),
+        ),
+    )
+    languages = _map_li_named_section(
+        _section_payload(p, info, "languages", "language"),
+        name_keys=("name", "language", "title"),
+        extra_keys=(("proficiency", ("proficiency", "level", "fluency")),),
+    )
+
+    for key, value in (
+        ("experience", experience),
+        ("education", education),
+        ("similarProfiles", similar),
+        ("projects", projects),
+        ("publications", publications),
+        ("articles", articles),
+        ("activity", activity),
+        ("recommendations", recommendations),
+        ("certifications", certifications),
+        ("languages", languages),
+    ):
+        if value:
+            out[key] = value
     return out
+
+
+_PROFILE_SECTION_KEYS = (
+    "experience",
+    "education",
+    "similarProfiles",
+    "projects",
+    "publications",
+    "articles",
+    "activity",
+    "recommendations",
+    "certifications",
+    "languages",
+)
+
+
+def _merge_profile_sections(
+    base: dict[str, Any], rich: dict[str, Any]
+) -> dict[str, Any]:
+    """Keep native identity fields; fill missing B2B sections from Apify."""
+    out = dict(base)
+    for key in _PROFILE_SECTION_KEYS:
+        if not out.get(key) and rich.get(key):
+            out[key] = rich[key]
+    if not out.get("about") and rich.get("about"):
+        out["about"] = rich["about"]
+        if rich.get("aboutRestricted"):
+            out["aboutRestricted"] = True
+    for key in ("followers", "connections", "headline", "location", "currentCompany", "profileImage"):
+        if out.get(key) is None and rich.get(key) is not None:
+            out[key] = rich[key]
+    return out
+
+
+def _profile_needs_enrichment(profile: dict[str, Any] | None) -> bool:
+    if not profile:
+        return True
+    return not profile.get("experience") and not profile.get("education")
 
 
 def _normalize_company(c: dict[str, Any]) -> dict[str, Any]:
@@ -350,40 +678,79 @@ def _normalize_company_post(p: dict[str, Any]) -> dict[str, Any]:
     return base
 
 
-@router.get("/profile", summary="LinkedIn person profile details")
+@router.get(
+    "/profile",
+    summary="LinkedIn person profile — experience, education, similarProfiles",
+)
 async def linkedin_profile(
     url: str = Query(..., description="LinkedIn profile URL, e.g. https://linkedin.com/in/slug"),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    cache: bool = Query(
+        False,
+        description="Set true to use the default cache TTL. Default false — always fetch fresh.",
+    ),
     caller: ApiCaller = Depends(require_api_key),
 ):
     slug = _require_linkedin_profile_url(url)
     settings = get_settings()
+    profile_url = f"https://www.linkedin.com/in/{slug}"
+
+    async def _apify_profile(actor: str) -> dict[str, Any] | None:
+        try:
+            items = await get_apify().run_actor_sync(
+                actor,
+                {
+                    "username": slug,
+                    "url": profile_url,
+                    "includeEmail": False,
+                    "usernames": [slug],
+                },
+                max_items=1,
+            )
+        except Exception:  # noqa: BLE001
+            return None
+        if not items:
+            return None
+        return _normalize_profile(items[0] if isinstance(items[0], dict) else {})
+
     async with billed_call(
         caller=caller,
         endpoint="/v1/linkedin/profile",
         platform="linkedin",
-        resource_url=f"https://www.linkedin.com/in/{slug}",
+        resource_url=profile_url,
         base_credits=CREDIT_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await linkedin_native.fetch_profile(slug)
-            if native:
-                ctx["source"] = "direct"
-                return _require_person_profile(_normalize_profile(native))
+            native_raw = await linkedin_native.fetch_profile(slug)
+            base = _normalize_profile(native_raw) if native_raw else None
+            used_apify = False
 
-            apify = get_apify()
-            items = await apify.run_actor_sync(
-                settings.APIFY_ACTOR_LINKEDIN_PROFILE,
-                {"username": slug, "url": f"https://www.linkedin.com/in/{slug}"},
-                max_items=1,
-            )
-            ctx["source"] = "apify"
-            ctx["credits_override"] = CREDIT_PROFILE
-            return _require_person_profile(_normalize_profile(_first(items)))
+            # Native HTML rarely exposes experience/education — enrich from Apify
+            # instead of short-circuiting on a thin shell (B2B core fields).
+            if _profile_needs_enrichment(base):
+                rich = await _apify_profile(settings.APIFY_ACTOR_LINKEDIN_PROFILE)
+                if rich and (rich.get("name") or rich.get("username")):
+                    used_apify = True
+                    base = _merge_profile_sections(base, rich) if base else rich
+
+            if _profile_needs_enrichment(base):
+                full = await _apify_profile(settings.APIFY_ACTOR_LINKEDIN_PROFILE_FULL)
+                if full and (full.get("name") or full.get("username")):
+                    used_apify = True
+                    base = _merge_profile_sections(base, full) if base else full
+
+            if not base:
+                raise HTTPException(status_code=404, detail="Profile not found")
+
+            if used_apify:
+                ctx["source"] = "apify" if not native_raw else "hybrid"
+                ctx["credits_override"] = CREDIT_PROFILE
+            else:
+                ctx["source"] = "direct"
+            return _require_person_profile(base)
 
         data = await cached_or_run(
             endpoint="linkedin.profile",
-            params={"slug": slug, "v": 6},
+            params={"slug": slug, "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

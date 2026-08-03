@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 from contextvars import ContextVar
+from datetime import datetime, timezone
 from typing import Any, Awaitable, Callable
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -17,13 +18,6 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app.core.auth import ApiCaller, require_api_key
 from app.core.config import get_settings
 from app.core.credits import billed_call
-
-# Stamped by per-platform fetchers so billed_call can set X-Captapi-Source.
-_analytics_source: ContextVar[str | None] = ContextVar("analytics_source", default=None)
-
-
-def _mark_source(source: str) -> None:
-    _analytics_source.set(source)
 from app.routers.bluesky import _normalize_post as _bs_normalize
 from app.routers.bluesky import _xrpc as _bs_xrpc
 from app.routers.facebook import _normalize_post as _fb_normalize
@@ -60,10 +54,42 @@ from app.utils.url import (
     normalize_youtube_url,
 )
 
+# Stamped by per-platform fetchers so billed_call can set X-Captapi-Source.
+_analytics_source: ContextVar[str | None] = ContextVar("analytics_source", default=None)
+
 router = APIRouter()
 
 CREDIT_POST_ANALYTICS = 1
 MAX_COMPARE = 10
+# Post-level engagementRate is always interactions / views (ratio). Creator
+# charts (e.g. TikTok popular-creators) use a different basis — never compare
+# those numbers to this field without reading engagementRateBasis.
+ENGAGEMENT_RATE_BASIS = "interactions/views"
+# Bump when unified metrics shape or YouTube enrich policy changes.
+ANALYTICS_CACHE_VERSION = 8
+
+
+def _mark_source(source: str) -> None:
+    _analytics_source.set(source)
+
+
+def _published_at_utc_z(value: Any) -> str | None:
+    """Normalize timestamps to UTC ``YYYY-MM-DDTHH:MM:SS.mmmZ`` when parseable."""
+    s = safe_str(value)
+    if not s:
+        return None
+    raw = s.strip()
+    if raw.endswith("Z"):
+        raw = raw[:-1] + "+00:00"
+    try:
+        dt = datetime.fromisoformat(raw)
+    except ValueError:
+        return s
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    dt = dt.astimezone(timezone.utc)
+    ms = dt.microsecond // 1000
+    return dt.strftime("%Y-%m-%dT%H:%M:%S") + f".{ms:03d}Z"
 
 
 def _detect_platform(url: str) -> str | None:
@@ -95,11 +121,11 @@ def _detect_platform(url: str) -> str | None:
 
 
 def _youtube_handle(v: dict[str, Any]) -> str | None:
-    """Prefer @handle for username; fall back to channel display name."""
-    handle = safe_str(v.get("channelHandle") or v.get("channelUsername"))
-    if handle:
-        return handle.lstrip("@")
-    return safe_str(v.get("channelName") or v.get("channel"))
+    """YouTube @handle only — never echo the channel display name into username."""
+    handle = safe_str(v.get("channelHandle") or v.get("channelUsername") or v.get("handle"))
+    if not handle:
+        return None
+    return handle.lstrip("@")
 
 
 def _youtube_analytics_row(v: dict[str, Any], *, norm: str, video_id: str | None) -> dict[str, Any]:
@@ -108,32 +134,52 @@ def _youtube_analytics_row(v: dict[str, Any], *, norm: str, video_id: str | None
         v.get("thumbnailUrl")
         or (thumbs[-1].get("url") if isinstance(thumbs, list) and thumbs else None)
     )
-    display = safe_str(v.get("channelName") or v.get("channel"))
+    display = safe_str(v.get("channelName") or v.get("channel") or v.get("author"))
     username = _youtube_handle(v)
+    verified = v.get("channelVerified")
+    if not isinstance(verified, bool):
+        verified = v.get("verified") if isinstance(v.get("verified"), bool) else None
     return {
         "platform": "youtube",
         "url": norm,
-        "id": video_id or safe_str(v.get("id")),
+        "id": video_id or safe_str(v.get("id") or v.get("videoId")),
         "caption": safe_str(v.get("title")),
-        "publishedAt": safe_str(v.get("date") or v.get("publishedAt")),
+        "publishedAt": safe_str(v.get("date") or v.get("publishedAt") or v.get("uploadDate")),
         "thumbnailUrl": thumb,
-        "durationSeconds": safe_int(v.get("durationSeconds")),
+        "durationSeconds": safe_int(v.get("durationSeconds") or v.get("duration")),
         "author": {
             "username": username,
-            "displayName": display or username,
+            "displayName": display,
             "url": safe_str(v.get("channelUrl")),
-            # Stable key; YouTube video path does not resolve channel badge.
-            "verified": None,
+            "verified": verified,
         },
         "engagement": {
-            "views": safe_int(v.get("viewCount") or v.get("views")),
-            "likes": safe_int(v.get("likes") or v.get("likeCount")),
-            "comments": safe_int(v.get("commentsCount") or v.get("commentCount")),
+            "views": safe_int(v.get("viewCount") or v.get("views") or v.get("view_count")),
+            "likes": safe_int(v.get("likes") or v.get("likeCount") or v.get("like_count")),
+            "comments": safe_int(
+                v.get("commentsCount") or v.get("commentCount") or v.get("comment_count")
+            ),
             # Stable keys; YouTube has no public share/save counts.
             "shares": None,
             "saves": None,
         },
     }
+
+
+def _youtube_row_complete(row: dict[str, Any]) -> bool:
+    """True when the showcase metrics (likes, comments, date, handle) are present.
+
+    Thin ANDROID player responses often ship views + title only; those must not
+    short-circuit Apify or the docs example looks like a half-built product.
+    """
+    eng = row.get("engagement") or {}
+    author = row.get("author") or {}
+    return (
+        eng.get("likes") is not None
+        and eng.get("comments") is not None
+        and bool(row.get("publishedAt"))
+        and bool(author.get("username"))
+    )
 
 
 def _twitter_analytics_row(n: dict[str, Any]) -> dict[str, Any]:
@@ -198,27 +244,37 @@ def _threads_analytics_row(n: dict[str, Any]) -> dict[str, Any]:
 
 
 async def _fetch_youtube(url: str) -> dict[str, Any]:
-    # Use the same enriched path as /v1/youtube/video-details so likes,
-    # comments, publishedAt, and channelHandle populate — thin ANDROID player
-    # alone often returns views + title only.
+    # Prefer the enriched video-details native path; if watch-page enrich fails
+    # (429 / thin ANDROID), fall through to Apify so likes/comments/handle land.
     norm = normalize_youtube_url(url)
     video_id = extract_youtube_id(url)
+    native_row: dict[str, Any] | None = None
     if video_id:
         native = await _yt_video_details_native(video_id, norm)
         if native and (native.get("title") or native.get("viewCount") is not None):
-            _mark_source("direct")
-            return _youtube_analytics_row(native, norm=norm, video_id=video_id)
+            native_row = _youtube_analytics_row(native, norm=norm, video_id=video_id)
+            if _youtube_row_complete(native_row):
+                _mark_source("direct")
+                return native_row
 
     settings = get_settings()
-    items = await get_apify().run_actor_sync(
-        settings.APIFY_ACTOR_YOUTUBE_VIDEO,
-        {"startUrls": [{"url": norm}], "maxResults": 1},
-        max_items=1,
-    )
-    if not items:
-        raise HTTPException(status_code=404, detail="Video not found")
-    _mark_source("apify")
-    return _youtube_analytics_row(items[0], norm=norm, video_id=video_id)
+    try:
+        items = await get_apify().run_actor_sync(
+            settings.APIFY_ACTOR_YOUTUBE_VIDEO,
+            {"startUrls": [{"url": norm}], "maxResults": 1},
+            max_items=1,
+        )
+    except Exception:  # noqa: BLE001 — keep thin native rather than 502
+        items = None
+    if items:
+        apify_row = _youtube_analytics_row(items[0], norm=norm, video_id=video_id)
+        if _youtube_row_complete(apify_row) or native_row is None:
+            _mark_source("apify")
+            return apify_row
+    if native_row is not None:
+        _mark_source("direct")
+        return native_row
+    raise HTTPException(status_code=404, detail="Video not found")
 
 
 async def _fetch_tiktok(url: str) -> dict[str, Any]:
@@ -501,8 +557,8 @@ def _unify(n: dict[str, Any]) -> dict[str, Any]:
     """Collapse a per-platform normalized post into one consistent metrics shape.
 
     Schema is stable: metrics always includes views/likes/comments/shares/saves/
-    interactions/engagementRate; author always includes verified. Unavailable
-    values are null — keys are never omitted.
+    interactions/engagementRate/engagementRateBasis; author always includes
+    verified. Unavailable values are null — keys are never omitted.
     """
     eng = n.get("engagement") or {}
     views = eng.get("views")
@@ -525,12 +581,19 @@ def _unify(n: dict[str, Any]) -> dict[str, Any]:
     author = dict(n.get("author") or {})
     if "verified" not in author or not isinstance(author.get("verified"), bool):
         author["verified"] = None
+    # username must stay a handle — never duplicate displayName into it.
+    display = safe_str(author.get("displayName") or author.get("name"))
+    username = safe_str(author.get("username") or author.get("handle"))
+    if username and display and username.lower() == display.lower():
+        # Likely a display-name leak (YouTube thin path). Drop username.
+        if not username.startswith("@") and " " in username:
+            author["username"] = None
     return {
         "platform": n.get("platform"),
         "url": n.get("url"),
         "id": n.get("id"),
         "title": n.get("title") or n.get("caption"),
-        "publishedAt": n.get("publishedAt"),
+        "publishedAt": _published_at_utc_z(n.get("publishedAt")),
         "durationSeconds": n.get("durationSeconds"),
         "thumbnailUrl": n.get("thumbnailUrl"),
         "author": author,
@@ -542,6 +605,7 @@ def _unify(n: dict[str, Any]) -> dict[str, Any]:
             "saves": saves,
             "interactions": interactions,
             "engagementRate": engagement_rate,
+            "engagementRateBasis": ENGAGEMENT_RATE_BASIS,
         },
     }
 
@@ -552,8 +616,9 @@ def _unify(n: dict[str, Any]) -> dict[str, Any]:
     description=(
         "Detects the platform from the URL (YouTube, TikTok, Instagram, "
         "Facebook, Twitter/X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, "
-        f"Rumble) and returns one normalized metrics object. Costs "
-        f"{CREDIT_POST_ANALYTICS} credit."
+        f"Rumble) and returns one normalized metrics object including "
+        f"engagementRate with engagementRateBasis={ENGAGEMENT_RATE_BASIS}. "
+        f"Costs {CREDIT_POST_ANALYTICS} credit."
     ),
 )
 async def post_analytics(
@@ -587,7 +652,7 @@ async def post_analytics(
 
         data = await cached_or_run(
             endpoint=f"analytics.post.{platform}",
-            params={"url": url, "v": 7},
+            params={"url": url, "v": ANALYTICS_CACHE_VERSION},
             runner=_run,
             ctx=ctx,
             ttl=get_settings().CACHE_TTL_DYNAMIC,
@@ -602,10 +667,11 @@ async def post_analytics(
     description=(
         "Fetches the same unified metrics object as /v1/analytics/post for up to "
         "10 comma-separated URLs in one call (any mix of platforms). Each result "
-        "includes metrics.views/likes/comments/shares/saves/interactions/"
-        "engagementRate — fields a platform does not expose stay null. "
-        "Bills 1 credit per successfully resolved URL that is not served from "
-        "cache (same per-URL cache as post analytics). No bulk discount vs "
+        "includes platform, status (ok|error), and metrics.views/likes/comments/"
+        "shares/saves/interactions/engagementRate (engagementRateBasis="
+        f"{ENGAGEMENT_RATE_BASIS}). Failed URLs also appear in failed[] with a "
+        "reason. Bills 1 credit per successfully resolved URL that is not served "
+        "from cache (same per-URL cache as post analytics). No bulk discount vs "
         "calling /post N times — the win is one HTTP round-trip."
     ),
 )
@@ -638,7 +704,12 @@ async def compare_analytics(
             """Return (row, cache_hit). cache_hit only when a resolved row came from cache."""
             p = _detect_platform(u)
             if not p:
-                return {"url": u, "error": "unsupported_url"}, False
+                return {
+                    "url": u,
+                    "platform": None,
+                    "status": "error",
+                    "error": "unsupported_url",
+                }, False
 
             async def _run() -> dict[str, Any]:
                 _analytics_source.set(None)
@@ -651,34 +722,62 @@ async def compare_analytics(
                 # /post on the same URL is a free hit.
                 row = await cached_or_run(
                     endpoint=f"analytics.post.{p}",
-                    params={"url": u, "v": 7},
+                    params={"url": u, "v": ANALYTICS_CACHE_VERSION},
                     runner=_run,
                     ctx=sub_ctx,
                     ttl=settings.CACHE_TTL_DYNAMIC,
                     use_cache=cache,
                 )
-                return row, bool(sub_ctx.get("cache_hit"))
+                return {**row, "status": "ok"}, bool(sub_ctx.get("cache_hit"))
             except HTTPException as e:
-                return {"url": u, "platform": p, "error": str(e.detail)}, False
+                reason = str(e.detail) if e.detail else "fetch_failed"
+                return {
+                    "url": u,
+                    "platform": p,
+                    "status": "error",
+                    "error": reason,
+                }, False
             except Exception:
-                return {"url": u, "platform": p, "error": "fetch_failed"}, False
+                return {
+                    "url": u,
+                    "platform": p,
+                    "status": "error",
+                    "error": "fetch_failed",
+                }, False
 
         pairs = list(await asyncio.gather(*[_one(u) for u in url_list]))
-        results = [row for row, _hit in pairs]
-        resolved = [row for row, _hit in pairs if not row.get("error")]
-        fresh = sum(1 for row, hit in pairs if not row.get("error") and not hit)
+        results: list[dict[str, Any]] = []
+        failed: list[dict[str, Any]] = []
+        resolved_count = 0
+        fresh = 0
+        for row, hit in pairs:
+            results.append(row)
+            if row.get("status") == "ok" and not row.get("error"):
+                resolved_count += 1
+                if not hit:
+                    fresh += 1
+            else:
+                failed.append(
+                    {
+                        "url": row.get("url"),
+                        "platform": row.get("platform"),
+                        "reason": row.get("error") or "fetch_failed",
+                    }
+                )
         # Cache hits are free (same as /analytics/post). All-failed batches still
         # record a minimal 1-credit charge for the work attempted.
-        if not resolved:
+        if resolved_count == 0:
             ctx["credits_override"] = 1
         else:
             ctx["credits_override"] = fresh * CREDIT_POST_ANALYTICS
-        if fresh == 0 and resolved:
+        if fresh == 0 and resolved_count:
             ctx["cache_hit"] = True
         return ApiResponse(
             data={
                 "count": len(results),
-                "resolved": len(resolved),
+                "resolved": resolved_count,
+                "failedCount": len(failed),
                 "results": results,
+                "failed": failed,
             }
         )

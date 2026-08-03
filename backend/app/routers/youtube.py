@@ -1591,16 +1591,21 @@ async def youtube_search(
             shorts = [r for r in results if r.get("type") == "short"]
             channels = [r for r in results if r.get("type") == "channel"]
             playlists = [r for r in results if r.get("type") == "playlist"]
+            lives = [r for r in results if r.get("type") in {"live", "upcoming"}]
+            shelves = [r for r in results if r.get("type") == "shelf"]
             return {
                 "query": q,
                 "totalReturned": len(results),
                 "nextCursor": next_cursor,
+                "continuationToken": next_cursor,
                 "hasMore": next_cursor is not None,
                 "results": results,
                 "videos": videos,
                 "shorts": shorts,
                 "channels": channels,
                 "playlists": playlists,
+                "lives": lives,
+                "shelves": shelves,
             }
 
         data = await cached_or_run(
@@ -1614,7 +1619,7 @@ async def youtube_search(
                 "uploadDate": upload_date or "",
                 "duration": duration or "",
                 "region": (region or "").upper(),
-                "v": 5,
+                "v": 6,
             },
             runner=_run,
             ctx=ctx,

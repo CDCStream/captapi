@@ -50,10 +50,175 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
+    category: "improvement",
+    title: "Ad Library SC-parity audit: ctaType, trim, LinkedIn aliases — most fields already shipped",
+    description:
+      "Code audit vs ScrapeCreators: Facebook search already had status/media_type/sort_by/search_type/ad_type/start_date/end_date/cursor plus isActive, publisherPlatforms, cards, typed images/videos, pageLikeCount, politicalCountries, searchResultsCount — the docs example just hid them. Now ctaType is returned, trim is accepted (SC DX; payloads already lean), and the FB search example surfaces those fields. LinkedIn search already returned targeting{}, totalImpressions, impressionsByCountry[], totalAds, paginationToken — adds company + paginationToken input aliases, advertiserLinkedinPage, ISO dates, and stops treating creative headlines as company names on thin SERP rows. Remaining real gap vs SC: Facebook cursor is in-batch (HTML page), not Meta's multi-thousand POST cursor.",
+    items: [
+      "FB: ctaType + trim + SC-parity docs example (isActive/platforms/cards/…)",
+      "LI: company/paginationToken aliases + advertiserLinkedinPage + ISO dates",
+      "LI: never echo headline as advertiser.name",
+      "Honest gap: FB nextCursor pages the HTML batch, not SC's deep cursor",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "Facebook search-companies: brand match + pageId vs profileId",
+    description:
+      "search-companies no longer lists whoever appeared first in a keyword ad scrape (Sukeban / widget apps above Nike). Page names must contain the query tokens; exact and vanity matches rank first; empty beats off-brand spam. Each company now exposes pageId / advertiserId (pass to company-ads — Meta view_all_page_id) separately from profileId when facebook.com/{digits}/ uses a different numeric identity, plus libraryUrl. Docs spell the chain: search-companies → pageId → company-ads.",
+    items: [
+      "Name filter + rank (Nike first; Sukeban/IControl dropped for q=nike)",
+      "pageId / advertiserId vs profileId disambiguation",
+      "libraryUrl for view_all_page_id; company-ads docs say which id to pass",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "Google/LinkedIn ad-details: AR+CR identity, countries[], DKI flag, 2 credits",
+    description:
+      "google/ad-details is not an alias of company-ads — it adds text/headline/landingUrl/impressions — but the docs example had mixed Nike legal entities (Inc. request → Retail BV response). Response id + advertiser.id now must match the request AR/CR; 404 explains Inc/BV/SRL are different entities. countries[] is ISO-3166 (no 27-name comma string); country is a single ISO when unambiguous. textIsTemplate marks {KeyWord:…} DKI macros. LinkedIn ad-details extracts advertiser.id from /company/{id}, keeps null keys for country/logo (no silent field loss), and both detail endpoints list at 2 credits native with Apify capped at 5 (was silent 17).",
+    items: [
+      "Google: strict AR+CR identity + chain-synced Nike, Inc. example",
+      "Google: countries[] ISO + textIsTemplate for DKI",
+      "LinkedIn: advertiser.id from company URL + stable null schema",
+      "Google/LinkedIn ad-details: 2 credits native / Apify max 5",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "Ad details: delivery fields + TikTok price/schema parity (no paid aliases)",
+    description:
+      "facebook/ad-details now surfaces Meta delivery extras when the library publishes them — platforms, demographicDistribution[], regionDistribution[], EU AAA / euTransparency, variantCount, isAaaEligible — and keeps those keys as null on commercial ads so the schema is honest. Creative fields still match a search hit for the same id (ID lookup is the primary DX). TikTok ad-details is no longer a 17-credit thinner twin of search: impressions (Unique users seen) parse is hardened, advertiser null keys match search, catalog bills 2 credits native with Apify capped at 5. Docs state alias honesty: detail endpoints that mirror search must either add fields or say so — never charge twice for the same payload silently.",
+    items: [
+      "FB ad-details: platforms + demography/region/EU AAA/variantCount (null when withheld)",
+      "TT ad-details: impressions parity + 2 credits (Apify max 5, not 17)",
+      "Docs: ID-lookup honesty — same creative as search unless Meta/TikTok add more",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "Google advertiser-search → company-ads chain (Nike Inc., not SRL)",
+    description:
+      "advertiser-search no longer returns a single Italian NIKE SRL for q=nike&country=US. Brand queries are expanded (Nike, Inc. + siblings), ranked with country preference (US prefers Inc. over SRL/BV), and return multiple AR… entities so you can pick. company-ads adds resolvedAdvertiser{id,name,url}, sort=last_shown|first_shown, and stable null keys for text/headline/cta/landingUrl/spend. Chain: search → advertisers[0].id → company-ads?advertiser=AR…",
+    items: [
+      "advertiser-search: expand + rank multi-result (Nike, Inc. first for US)",
+      "company-ads: resolvedAdvertiser + sort + stable null schema",
+      "Docs/examples use AR167… Nike, Inc. for the creatives chain",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "improvement",
+    title: "Ad libraries: advertiser unify, FB cursor/platforms, TikTok relevance + 2 credits",
+    description:
+      "Facebook Ad Library search collapses the same page id to one advertiser name (no Facebook vs Facebook App split), adds platforms filter + nextCursor paging through the HTML batch, and documents status/date/media filters for live campaigns. TikTok Ad Library search relevance-filters so query tokens must appear in advertiser/copy (empty beats spam), keeps FB-parity null keys for headline/cta/landingUrl/spend/advertiser.id, ISO firstShown dates, and bills flat 2 credits native (Apify capped at 5 — never the old ~70 trap). DSA still withholds Meta-style spend; use Creative Center Top Ads for CTR/brand ranking.",
+    items: [
+      "FB: same advertiser id → one canonical name/url/logo per response",
+      "FB: platforms + cursor/nextCursor; status/date/media already wired",
+      "TT: relevance filter + stable null schema + ISO dates",
+      "TT pricing: 2 native / 5 Apify cap (documented vs old ~70)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "Analytics showcase: full YouTube metrics, failed[], engagementRateBasis",
+    description:
+      "Post analytics no longer ships views-only YouTube rows when watch-page enrich is thin — incomplete native responses fall through to Apify so likes, comments, publishedAt, and @handle populate on the vitrin example. author.username never echoes the display name. metrics.engagementRateBasis is always interactions/views on post/compare (do not compare to popular-creators). Compare adds status, failedCount, and failed[] so partial batches are auditable; publishedAt normalizes to UTC Z; docs never fall back to example.com lorem.",
+    items: [
+      "YouTube thin native → Apify when likes/comments/handle/date missing",
+      "username = @handle only; displayName stays separate",
+      "engagementRateBasis=interactions/views on every post metrics object",
+      "compare: status + failed[] + failedCount; real docs example fallback",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "improvement",
+    title: "LinkedIn profile: experience/education/similarProfiles + restricted masking",
+    description:
+      "LinkedIn /profile no longer short-circuits on a thin native shell — when HTML omits experience/education it enriches from Apify (detail, then full-sections) so B2B core fields actually arrive. Additive sections: experience[], education[], similarProfiles[], projects, publications, articles, activity, recommendations, certifications, languages. Guest-masked asterisk copy (******* …) is returned as description:null with restricted:true instead of star spam. connections remaining null is documented as a LinkedIn logged-out platform limit.",
+    items: [
+      "Native→Apify enrich when experience/education missing",
+      "similarProfiles[] + richer section pass-through",
+      "Masked ******* → null + restricted:true",
+      "connections null = LinkedIn guest limit (not a bug)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "feature",
+    title: "Creator trust layer: createTime, verification triad, tipjar contact{}, cacheMaxAge",
+    description:
+      "Account trust signals that make Creator Verification / Partnership Qualification real. TikTok channel-details and popular-creators now expose createTime / createTimeUnix (account age), bioLink{link,risk}, ttSeller, commerce/organization flags, and contact{}. Twitter/X profile keeps blue / legacy / identity verification as separate bits (isBlueVerified ≠ isLegacyVerified ≠ isIdentityVerified), plus fastFollowers/normalFollowers, tipjarSettings → contact{emails,paymentHandles,links}, and expanded bioUrls. New cacheMaxAge=1d|3d|7d|14d|30d on key profile endpoints; JSON envelope already includes cached + cachedAt on hits.",
+    items: [
+      "TikTok: createTime + bioLink.risk + ttSeller on channel-details / popular-creators",
+      "Twitter: isLegacyVerified + tipjar contact{} + fastFollowers",
+      "cacheMaxAge 1d–30d on TikTok/Twitter/Instagram profile endpoints",
+      "Envelope cached + cachedAt (not header-only)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "improvement",
+    title: "trending-feed: Creative Center orderBy/period/countryCode + Instagram profile pass-throughs",
+    description:
+      "trending-feed stays the rich For You feed by default, and now accepts SC-style filters — orderBy (hot|like|comment|repost), period (7|30|120), countryCode, and page — to read TikTok Creative Center popular videos (same chart as videos/popular) with pagination.totalCount (~500) while still hydrating engagement/author when possible. Instagram basic-profile / channel-details / profile-search now surface categoryName, fbid, relatedProfiles[] (edge_related_profiles), businessAddress, and likeAndViewCountsDisabled from the existing web_profile_info payload — no new scrape, niche discovery + IG↔FB join without a creator-search endpoint.",
+    items: [
+      "trending-feed: orderBy / period / countryCode / page + pagination.totalCount",
+      "Instagram profiles: relatedProfiles[] + likeAndViewCountsDisabled",
+      "categoryName + fbid + businessAddress parity across profile endpoints",
+      "Post mappers: likeAndViewCountsDisabled (0 ≠ hidden likes)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "feature",
+    title: "TikTok Creative Center: popular-hashtags, popular-creators, popular-songs",
+    description:
+      "popular-hashtags and popular-creators now read TikTok Creative Center charts (ads.tiktok.com/business/creativecenter) instead of sample co-occurrence / invented formulas — so videoCount is a real population total (not \"17 from a 20-video sample\") and engagementRate is TikTok's official interact rate when exposed. New GET /v1/tiktok/popular-songs adds popular|surging sounds with rankDiff, trend[] time series, and commercialMusic / ifCml for brand-safe audio. Flat 2 credits on the Creative Center path. Optional query= on popular-hashtags still runs the legacy related-tag co-occurrence enrich.",
+    items: [
+      "popular-hashtags: Creative Center chart + rankDiff + trend[] (flat 2 credits)",
+      "popular-creators: Creative Center first, then FYP / Apify fallthrough",
+      "New popular-songs: rankType, commercialMusic, trend[], rankDiff",
+      "country / period (7|30|120) / page / newOnBoard filters",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "improvement",
+    title: "Instagram Reels: views != plays, location{}, Highlights, commercial flags",
+    description:
+      "engagement.views is video_view_count (reach-style) when Instagram exposes it; engagement.plays is total play count including replays — the gap can be ~2x. viewsInstagram remains Instagram-only plays (excludes Facebook cross-post); viewsFacebook is the FB share. location{} now includes slug, hasPublicPage, addressJson / address{}. New GET /v1/instagram/highlights and /highlights-details for persistent Story Highlight albums (not live Stories). isAd / isAffiliate / isPaidPartnership and previewComments.authorId are filled on feed and search paths when Instagram exposes them.",
+    items: [
+      "views vs plays vs viewsInstagram / viewsFacebook documented and emitted",
+      "location{id,name,slug,address} on post/reel mappers",
+      "GET /highlights + /highlights-details (flat 1 credit each)",
+      "isAd / isAffiliate / isPaidPartnership on enriched search/feed rows",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "improvement",
+    title: "YouTube search: viewCountText/Int + lives/shelves arrays",
+    description:
+      "YouTube search already returned typed results and filters (type, sortBy, uploadDate, duration, region). Each hit now also exposes viewCountText (e.g. 750K) plus viewCountInt (750000) so compact UI labels stay honest. Response adds lives[] / shelves[], and continuationToken as an alias of nextCursor. Docs note: duration filters apply to long-form videos, not Shorts.",
+    items: [
+      "viewCountText + viewCountInt on search hits",
+      "lives[] / shelves[] partitioned arrays",
+      "continuationToken alias for nextCursor",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
     category: "fix",
     title: "TikTok popular-creators: real engagementRate (not likes÷followers)",
     description:
-      "engagementRate was lifetime likes ÷ followers, which ranks high-volume posters above high-engagement ones and contradicted our own docs. It is now (likes/videos)/followers × 100 (percent), with engagementRateBasis: \"avgLikesPerVideo/followers\". sort=engagement uses the corrected rate. Per-creator country no longer echoes the query market (misleading for non-US creators); use top-level country for the feed market and creator.region when TikTok exposes a profile locale. Additive: avgViews, id/secUid when present, and contact{emails,links} parsed from bio.",
+      "engagementRate was lifetime likes ÷ followers, which ranks high-volume posters above high-engagement ones and contradicted our own docs. It is now (likes/videos)/followers × 100 (percent), with engagementRateBasis: \"avgLikesPerVideo/followers\". sort=engagement uses the corrected rate. Per-creator country no longer echoes the query market (misleading for non-US creators); use top-level country for the feed market and creator.region when TikTok exposes a profile locale. Additive: avgViews, id/secUid when present, and contact{emails,links} parsed from bio. Superseded later the same day by Creative Center as the primary source — this entry records the formula fix on the FYP fallthrough path.",
     items: [
       "engagementRate = avg likes per video / followers × 100",
       "engagementRateBasis documents the formula",

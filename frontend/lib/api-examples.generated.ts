@@ -221,13 +221,15 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "analytics-compare": {
     "count": 2,
     "resolved": 2,
+    "failedCount": 0,
     "results": [
       {
         "platform": "youtube",
+        "status": "ok",
         "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
         "id": "dQw4w9WgXcQ",
         "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
-        "publishedAt": "2009-10-24T23:57:33-07:00",
+        "publishedAt": "2009-10-25T06:57:33.000Z",
         "durationSeconds": 213,
         "thumbnailUrl": "https://i.ytimg.com/vi_webp/dQw4w9WgXcQ/sddefault.webp",
         "author": {
@@ -243,15 +245,17 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "shares": null,
           "saves": null,
           "interactions": 21703349,
-          "engagementRate": 0.0121
+          "engagementRate": 0.0121,
+          "engagementRateBasis": "interactions/views"
         }
       },
       {
         "platform": "youtube",
+        "status": "ok",
         "url": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
         "id": "jNQXAC9IVRw",
         "title": "Me at the zoo",
-        "publishedAt": "2005-04-23T20:31:52-07:00",
+        "publishedAt": "2005-04-24T03:31:52.000Z",
         "durationSeconds": 19,
         "thumbnailUrl": "https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg?sqp=-oaymwEmCOADEOgC8quKqQMa8AEB-AG-AoAC8AGKAgwIABABGFUgWShlMA8=&rs=AOn4CLA9eLBatYv9WbkD4BbZ2Im-biSPTw",
         "author": {
@@ -267,17 +271,19 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "shares": null,
           "saves": null,
           "interactions": 29283609,
-          "engagementRate": 0.0727
+          "engagementRate": 0.0727,
+          "engagementRateBasis": "interactions/views"
         }
       }
-    ]
+    ],
+    "failed": []
   },
   "analytics-post": {
     "platform": "youtube",
     "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     "id": "dQw4w9WgXcQ",
     "title": "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
-    "publishedAt": "2009-10-24T23:57:33-07:00",
+    "publishedAt": "2009-10-25T06:57:33.000Z",
     "durationSeconds": 213,
     "thumbnailUrl": "https://i.ytimg.com/vi_webp/dQw4w9WgXcQ/sddefault.webp",
     "author": {
@@ -293,7 +299,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
       "shares": null,
       "saves": null,
       "interactions": 21703349,
-      "engagementRate": 0.0121
+      "engagementRate": 0.0121,
+      "engagementRateBasis": "interactions/views"
     }
   },
   "bluesky-post-details": {
@@ -519,7 +526,22 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "media": [
       "https://video-dfw5-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4?_nc_cat=106&_nc_sid=ef5aa3&_nc_ht=video-dfw5-1.xx.fbcdn.net&_nc_ohc=DeBVZh2ChkAQ7kNvwELM_GV&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4MzE0MTAwMzMxNDk2MzYsImFzc2V0X2FnZV9kYXlzIjoyNDEsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=oKi5rqU7-78Y6XFLpAVqvA&_nc_ss=79289&_nc_zt=28&oh=00_AQB-CUR53tb21BEWdlRLg5BhAauE3-hDDO9zmz06SvSAdg&oe=6A6D9B48",
       "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=JCEJHIw0engQ7kNvwEcgh1o&_nc_oc=Ado6Dn6wrEd2aZKTiM6OLVJyx_BYbHRC0Bmv70xAZp21Pm2Enab2l80KoUSxQZAs1Ow&_nc_zt=14&_nc_ht=scontent-dfw5-1.xx&_nc_gid=oKi5rqU7-78Y6XFLpAVqvA&_nc_ss=79289&oh=00_AQAw5ZEVUbeJYpBcx6Qa4wV6V-hZRjNvtI487nUdgq8UZA&oe=6A6D850A"
-    ]
+    ],
+    "platforms": ["FACEBOOK", "INSTAGRAM"],
+    "publisherPlatforms": ["FACEBOOK", "INSTAGRAM"],
+    "demographicDistribution": [
+      { "age": "25-34", "gender": "Female", "percentage": 0.28 },
+      { "age": "25-34", "gender": "Male", "percentage": 0.22 }
+    ],
+    "regionDistribution": [
+      { "region": "California", "percentage": 0.12 },
+      { "region": "Texas", "percentage": 0.09 }
+    ],
+    "ageCountryGenderReachBreakdown": null,
+    "variantCount": 3,
+    "collationId": null,
+    "isAaaEligible": false,
+    "euTransparency": null
   },
   "facebook-ad-library-ad-transcript": {
     "platform": "facebook_ad_library",
@@ -699,7 +721,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "facebook-ad-library-search": {
     "query": "election",
     "country": "US",
+    "status": "ALL",
+    "limit": 5,
     "totalReturned": 5,
+    "searchResultsCount": 50001,
+    "hasMore": true,
+    "nextCursor": "eyJvZmZzZXQiOjV9",
     "ads": [
       {
         "platform": "facebook_ad_library",
@@ -708,6 +735,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "text": "The Voting Information Center—one-tap voting registration information from election experts and authorities in one place.",
         "headline": "Voting Information Center",
         "cta": "Learn more",
+        "ctaType": "LEARN_MORE",
         "landingUrl": "http://facebook.com/votinginformationcenter",
         "adFormat": "VIDEO",
         "firstShown": "2020-09-22T07:00:00.000Z",
@@ -715,16 +743,45 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "impressions": ">1M",
         "spend": ">$1M",
         "country": "US",
+        "isActive": false,
+        "publisherPlatforms": ["FACEBOOK", "INSTAGRAM"],
+        "platforms": ["FACEBOOK", "INSTAGRAM"],
+        "caption": "facebook.com",
+        "linkDescription": "Voting Information Center",
+        "pageLikeCount": 12000000,
+        "pageCategories": ["Product/service"],
+        "pageEntityType": "PERSON_PROFILE",
+        "politicalCountries": ["US"],
+        "reachEstimate": null,
         "advertiser": {
           "id": "108824017345866",
+          "pageId": "108824017345866",
+          "advertiserId": "108824017345866",
+          "profileId": null,
           "name": "Meta",
           "url": "https://www.facebook.com/Meta/",
-          "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qaRlosGC9wUQ7kNvwHuGOSN&_nc_oc=AdpUTiQHP0F2DQWlJJsFhLjPwiKgiTaMBS9Gf3J_Ogy1Z6nYv2kt_BhKXvw8jPupOMg&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQCbS0Qc_-2kHNJh8Yysq78dbBXaaJS4Osw3-xA3_SHVlw&oe=6A89438E"
+          "logo": "https://scontent-atl3-1.xx.fbcdn.net/v/t1.6435-9/119568341_200337161527884_7846459746434232698_n.png?stp=dst-png_s60x60&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=qaRlosGC9wUQ7kNvwHuGOSN&_nc_oc=AdpUTiQHP0F2DQWlJJsFhLjPwiKgiTaMBS9Gf3J_Ogy1Z6nYv2kt_BhKXvw8jPupOMg&_nc_zt=23&_nc_ht=scontent-atl3-1.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQCbS0Qc_-2kHNJh8Yysq78dbBXaaJS4Osw3-xA3_SHVlw&oe=6A89438E",
+          "likeCount": 12000000,
+          "categories": ["Product/service"]
         },
         "media": [
           "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4?_nc_cat=106&_nc_sid=ef5aa3&_nc_ht=video-atl3-1.xx.fbcdn.net&_nc_ohc=VIhm6QH6QpYQ7kNvwEGz32Z&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5WSV9VU0VDQVNFX1BST0RVQ1RfVFlQRS4uQzMuMzQwLmFzaWNfaHExX3NkX3Byb2dyZXNzaXZlIiwieHB2X2Fzc2V0X2lkIjo4MzE0MTAwMzMxNDk2MzYsImFzc2V0X2FnZV9kYXlzIjoyMzcsInZpX3VzZWNhc2VfaWQiOjEwNjgwLCJkdXJhdGlvbl9zIjoxNSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&_nc_zt=28&oh=00_AQBmg1RWfbVvJ3MUBSfprUeNw4A1j1otLN5iP3DoZ8RxIw&oe=6A677448",
           "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=XJsOGtccv7UQ7kNvwFOmuvH&_nc_oc=AdqJh0Avn_pYIk_hzhEW3QS1dyOrrTJn4nBpQ38NLoUvb1OE8Kwj7qy75S7f1QbV1cs&_nc_zt=14&_nc_ht=scontent-atl3-2.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQBESYOW184a4FJWDENcSYwQSBzwkH5yonZh3U5v6ZZEgA&oe=6A67964A"
-        ]
+        ],
+        "images": [
+          {
+            "url": "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg",
+            "resizedUrl": "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg"
+          }
+        ],
+        "videos": [
+          {
+            "url": "https://video-atl3-1.xx.fbcdn.net/o1/v/t2/f2/m412/AQNN757NtitUcJnpv0ODeMH6fXo-yFM-X90P2W82Zsrc70oOzST9lrKgscKf21SHBUtZ9pdKMclY8s32B0eRJ7o.mp4",
+            "sdUrl": null,
+            "previewUrl": "https://scontent-atl3-2.xx.fbcdn.net/v/t39.35426-6/120065387_2711663819108220_8472417301728012411_n.jpg"
+          }
+        ],
+        "cards": []
       },
       {
         "platform": "facebook_ad_library",
@@ -767,7 +824,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "country": "US",
         "advertiser": {
           "id": "20531316728",
-          "name": "Facebook",
+          "name": "Facebook App",
           "url": "https://www.facebook.com/facebook/",
           "logo": "https://scontent-atl3-3.xx.fbcdn.net/v/t39.35426-6/123254501_376431443560946_8642123156381274111_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=108&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=uPcoVSVedoQQ7kNvwHgmWWe&_nc_oc=AdqwXTjc5hWqxKmTPliHRnVkbtl62MNcyuFRVtYt5e11rm_kKl_7cbhn2U6FxOqfz_4&_nc_zt=14&_nc_ht=scontent-atl3-3.xx&_nc_gid=kjSzmNhJvOQPmxnVKKr0xg&_nc_ss=72289&oh=00_AQAwgOXSH-Za4uSlnK2E_DN8SP8iELP-mBG2Fa6sq_k6fA&oe=6A678FB0"
         },
@@ -831,25 +888,27 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   "facebook-ad-library-search-companies": {
     "query": "nike",
     "country": "US",
-    "totalReturned": 3,
+    "totalReturned": 2,
     "companies": [
       {
-        "id": "146705838515566",
-        "name": "Sukeban World",
-        "url": "https://www.facebook.com/61551864263186/",
-        "logo": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.35426-6/517640014_2104272360362331_1464623957160374455_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=zj4Fm9x6lhEQ7kNvwGyzer2&_nc_oc=Adpw1Rqb_eBzffqqgyQt5_CPB2Dct1h7kaRFJQZmeucV_ui5BXf-Q6skKKVFDUKvDH4&_nc_zt=14&_nc_ht=scontent-iad6-1.xx&_nc_gid=WFVhUXC3vFhp5HqXMO2_vg&_nc_ss=72289&oh=00_AQCbgqCqvp545MCPZrHlySJ8QWqgsWnjuxmEGnyIw8Gw3A&oe=6A611F63"
-      },
-      {
         "id": "15087023444",
+        "pageId": "15087023444",
+        "advertiserId": "15087023444",
+        "profileId": null,
         "name": "Nike",
         "url": "https://www.facebook.com/nike/",
-        "logo": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.35426-6/366635364_819887626183060_5665913834577832309_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=106&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=cpw1LHoxRRMQ7kNvwF0VELk&_nc_oc=Adp4gYKupQoA3SFulWbqwUFHqP4Hb9COtOidu_sWgA0fqGKhHNgkorx0YOcUbNCeAek&_nc_zt=14&_nc_ht=scontent-iad6-1.xx&_nc_gid=WFVhUXC3vFhp5HqXMO2_vg&_nc_ss=72289&oh=00_AQCzxYXtTr8L2PBX03C3WTbVmtXlrB0ZHR45OVmp6Pv9mA&oe=6A612326"
+        "logo": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.35426-6/366635364_819887626183060_5665913834577832309_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=106&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=cpw1LHoxRRMQ7kNvwF0VELk&_nc_oc=Adp4gYKupQoA3SFulWbqwUFHqP4Hb9COtOidu_sWgA0fqGKhHNgkorx0YOcUbNCeAek&_nc_zt=14&_nc_ht=scontent-iad6-1.xx&_nc_gid=WFVhUXC3vFhp5HqXMO2_vg&_nc_ss=72289&oh=00_AQCzxYXtTr8L2PBX03C3WTbVmtXlrB0ZHR45OVmp6Pv9mA&oe=6A612326",
+        "libraryUrl": "https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=US&view_all_page_id=15087023444&media_type=all"
       },
       {
-        "id": "721404351056614",
-        "name": "IControl: Easy Widgets Themes",
-        "url": "https://www.facebook.com/61578892468353/",
-        "logo": "https://scontent-iad6-1.xx.fbcdn.net/v/t39.35426-6/695177587_1511487320476777_920753808075681498_n.jpg?stp=dst-jpg_s60x60_tt6&_nc_cat=100&ccb=1-7&_nc_sid=c53f8f&_nc_ohc=ymXmwsmzZqIQ7kNvwE2kif9&_nc_oc=AdrjQG4Qk6k7RYor663OBc3KYDml9EWij735hvCXNqbLvnje1pwp4JEzlGGYcxOAigU&_nc_zt=14&_nc_ht=scontent-iad6-1.xx&_nc_gid=WFVhUXC3vFhp5HqXMO2_vg&_nc_ss=72289&oh=00_AQBS8dexsIwImNwFM5phyZrj9jrF4PSW61cknXtjYUI1IA&oe=6A612EE7"
+        "id": "108824017345866",
+        "pageId": "108824017345866",
+        "advertiserId": "108824017345866",
+        "profileId": null,
+        "name": "Nike Training Club",
+        "url": "https://www.facebook.com/niketraining/",
+        "logo": null,
+        "libraryUrl": "https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=US&view_all_page_id=108824017345866&media_type=all"
       }
     ]
   },
@@ -1626,72 +1685,72 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "1587644152730955",
         "url": "https://www.facebook.com/photo.php?fbid=1587644152730955",
         "image": "https://scontent-dfw6-2.xx.fbcdn.net/v/t39.99422-6/758964186_1384158170473704_9008748322111971488_n.png?stp=dst-jpg_tt6&cstp=mx2047x1012&ctp=s2047x1012&_nc_cat=1&ccb=1-7&_nc_sid=12...",
-        "caption": "A galaxy cluster in deep space. It is filled with elliptical galaxies: small, bright white glowing ovals. The two largest elliptical galaxies, left and right of center, are bright cores that radiate light. Unrelated, distant galaxies are scattered around as red smudges and dots. Many of these are stretched out into red arcs and lines by the galaxy cluster’s strong gravity, creating multiple images in places. Numerous spiral galaxies and bright stars appear in the foreground. Credit: ESA/Webb, NASA & CSA, S. Fujimoto",
         "width": 2047,
-        "height": 1012
+        "height": 1012,
+        "accessibilityCaption": "A galaxy cluster in deep space. It is filled with elliptical galaxies: small, bright white glowing ovals. The two largest elliptical galaxies, left and right of center, are bright cores that radiate light. Unrelated, distant galaxies are scattered around as red smudges and dots. Many of these are stretched out into red arcs and lines by the galaxy cluster’s strong gravity, creating multiple images in places. Numerous spiral galaxies and bright stars appear in the foreground. Credit: ESA/Webb, NASA & CSA, S. Fujimoto"
       },
       {
         "platform": "facebook",
         "id": "1586655189496518",
         "url": "https://www.facebook.com/photo.php?fbid=1586655189496518",
         "image": "https://scontent-dfw6-2.xx.fbcdn.net/v/t39.30808-6/756229023_1586655192829851_1923291187225748989_n.jpg?stp=dst-jpg_tt6&cstp=mx1884x1054&ctp=s1884x1054&_nc_cat=110&ccb=1-7&_nc_sid=...",
-        "caption": "An aerial view of a spacecraft about to land on Earth; the capsule is barely visible, but a large white-and-red parachute billows above it. The plain around it is flat and featureless. Credit: NASA+",
         "width": 1884,
-        "height": 1054
+        "height": 1054,
+        "accessibilityCaption": "An aerial view of a spacecraft about to land on Earth; the capsule is barely visible, but a large white-and-red parachute billows above it. The plain around it is flat and featureless. Credit: NASA+"
       },
       {
         "platform": "facebook",
         "id": "1585138822981488",
         "url": "https://www.facebook.com/photo.php?fbid=1585138822981488",
         "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/754498097_1529437744896067_7884542055079848706_n.png?stp=dst-jpg_tt6&cstp=mx2048x2048&ctp=s2048x2048&_nc_cat=111&ccb=1-7&_nc_sid=...",
-        "caption": "The scene is cloaked in a cool, blue haze, decorated with the warm light of galaxies and stars. Around the center is a jagged ring where the haze appears absent and dark space peeks through. Credit: NASA, ESA, M.J. Jee and H. Ford (Johns Hopkins University)",
         "width": 2048,
-        "height": 2048
+        "height": 2048,
+        "accessibilityCaption": "The scene is cloaked in a cool, blue haze, decorated with the warm light of galaxies and stars. Around the center is a jagged ring where the haze appears absent and dark space peeks through. Credit: NASA, ESA, M.J. Jee and H. Ford (Johns Hopkins University)"
       },
       {
         "platform": "facebook",
         "id": "1583701686458535",
         "url": "https://www.facebook.com/photo.php?fbid=1583701686458535",
         "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/752620057_1361351692793736_6372731408048785122_n.png?stp=dst-jpg_tt6&cstp=mx2048x1713&ctp=s2048x1713&_nc_cat=105&ccb=1-7&_nc_sid=...",
-        "caption": "The Lighthouse Nebula (upper left) and a pulsar (lower right) are illuminated against a spotty starfield. The part of the nebula shown in this image looks like a diffuse, purple cloud with a bright star in the center. The pulsar looks like a bright white streak of light with a purple jet extending from one end, forming the shape of a checkmark. Credits: X-ray: Chandra: NASA/CXC/Stanford Univ./J.T. Dinsmore et al.; IXPE: NASA/MSFC/J.T. Dinsmore et al., Radio: CSIRO/ATNF/ATCA; Optical: 2MASS/UMass/IPAC-Caltech/NASA/NSF; Image processing: NASA/CXC/SAO/L. Frattare",
         "width": 2048,
-        "height": 1713
+        "height": 1713,
+        "accessibilityCaption": "The Lighthouse Nebula (upper left) and a pulsar (lower right) are illuminated against a spotty starfield. The part of the nebula shown in this image looks like a diffuse, purple cloud with a bright star in the center. The pulsar looks like a bright white streak of light with a purple jet extending from one end, forming the shape of a checkmark. Credits: X-ray: Chandra: NASA/CXC/Stanford Univ./J.T. Dinsmore et al.; IXPE: NASA/MSFC/J.T. Dinsmore et al., Radio: CSIRO/ATNF/ATCA; Optical: 2MASS/UMass/IPAC-Caltech/NASA/NSF; Image processing: NASA/CXC/SAO/L. Frattare"
       },
       {
         "platform": "facebook",
         "id": "1582125049949532",
         "url": "https://www.facebook.com/photo.php?fbid=1582125049949532",
         "image": "https://scontent-dfw6-2.xx.fbcdn.net/v/t39.30808-6/752699303_1582125053282865_6907261101135459632_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x1080&ctp=s1080x1080&_nc_cat=110&ccb=1-7&_nc_sid=...",
-        "caption": "Astronaut Buzz Aldrin, wearing his spacesuit, descends the ladder of the Apollo 11 Lunar Module, a large structure with golden foil covering its lower half. The Moon's surface is bright and flat; above the horizon, which slopes downward from right-to-left, the sky is completely black. Credit: NASA",
         "width": 1080,
-        "height": 1080
+        "height": 1080,
+        "accessibilityCaption": "Astronaut Buzz Aldrin, wearing his spacesuit, descends the ladder of the Apollo 11 Lunar Module, a large structure with golden foil covering its lower half. The Moon's surface is bright and flat; above the horizon, which slopes downward from right-to-left, the sky is completely black. Credit: NASA"
       },
       {
         "platform": "facebook",
         "id": "1578224950339542",
         "url": "https://www.facebook.com/photo.php?fbid=1578224950339542",
         "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/747931162_1667321021008266_4517886636206841967_n.png?stp=dst-jpg_tt6&cstp=mx2048x1365&ctp=s2048x1365&_nc_cat=111&ccb=1-7&_nc_sid=...",
-        "caption": "Anil and Anna Menon pose for a photograph at the Cosmonaut Hotel in Baikonur. Anil, in pre-launch quarantine at the time of this photo, is behind glass, but Anil and Anna are leaning close to each other. Both Anil and Anna are looking at the camera with big grins. Credit: NASA/John Kraus",
         "width": 2048,
-        "height": 1365
+        "height": 1365,
+        "accessibilityCaption": "Anil and Anna Menon pose for a photograph at the Cosmonaut Hotel in Baikonur. Anil, in pre-launch quarantine at the time of this photo, is behind glass, but Anil and Anna are leaning close to each other. Both Anil and Anna are looking at the camera with big grins. Credit: NASA/John Kraus"
       },
       {
         "platform": "facebook",
         "id": "1578224920339545",
         "url": "https://www.facebook.com/photo.php?fbid=1578224920339545",
         "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/748527781_2080772216199706_6612040318485045639_n.png?stp=dst-jpg_tt6&cstp=mx2048x1365&ctp=s2048x1365&_nc_cat=106&ccb=1-7&_nc_sid=...",
-        "caption": "Astronaut candidate Anna Menon and her two children watch a Soyuz rocket lift off in the distance. The three are standing in the middle of a scrubby field, wearing dark t-shirts with \"Team Menon\" on the back; Anna is carrying one of her children on her shoulders. Credit: NASA/John Kraus",
         "width": 2048,
-        "height": 1365
+        "height": 1365,
+        "accessibilityCaption": "Astronaut candidate Anna Menon and her two children watch a Soyuz rocket lift off in the distance. The three are standing in the middle of a scrubby field, wearing dark t-shirts with \"Team Menon\" on the back; Anna is carrying one of her children on her shoulders. Credit: NASA/John Kraus"
       },
       {
         "platform": "facebook",
         "id": "1578224907006213",
         "url": "https://www.facebook.com/photo.php?fbid=1578224907006213",
         "image": "https://scontent-dfw5-1.xx.fbcdn.net/v/t39.99422-6/746343278_880948677971054_703395191772258474_n.png?stp=dst-jpg_tt6&cstp=mx2048x1365&ctp=s2048x1365&_nc_cat=106&ccb=1-7&_nc_sid=12...",
-        "caption": "A closer shot of the Soyuz lifting off at Baikonur. Its flaming rockets flare out from a central column, with the spacecraft on top. Two large, antenna-like stands frame the rocket, with metal tracks running from the launch site into the foreground. Credit: NASA/Bill Ingalls",
         "width": 2048,
-        "height": 1365
+        "height": 1365,
+        "accessibilityCaption": "A closer shot of the Soyuz lifting off at Baikonur. Its flaming rockets flare out from a central column, with the spacecraft on top. Two large, antenna-like stands frame the rocket, with metal tracks running from the launch site into the foreground. Credit: NASA/Bill Ingalls"
       }
     ]
   },
@@ -2577,51 +2636,115 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "google-ad-library-ad-details": {
     "platform": "google_ad_library",
-    "id": "CR08395356613392728065",
-    "url": "https://adstransparency.google.com/advertiser/AR18378488041124659201/creative/CR08395356613392728065",
+    "id": "CR13596485266373083137",
+    "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR13596485266373083137",
     "text": "Discover {KeyWord:Nike Shoes} Online At Nike.com. Shop The Official Nike Site.",
     "headline": "{KeyWord:Nike Vomero}",
+    "cta": null,
     "landingUrl": "nike.com",
     "adFormat": "text",
-    "firstShown": "2025-09-19T13:04:37.000Z",
-    "lastShown": "2026-07-23T06:18:08.000Z",
+    "firstShown": "2022-11-30T14:47:01.000Z",
+    "lastShown": "2026-07-26T13:01:42.000Z",
     "impressions": "7000-8000",
-    "country": "Malta, United Arab Emirates, Cyprus, Belgium, United Kingdom, Czechia, Hungary, United States, Iceland, Ireland, Italy, Sweden, India, Spain, Greece, Croatia, Bulgaria, Portugal, Denmark, Lithuania, Poland, Netherlands, Germany, Australia, Norway, France, Romania",
+    "spend": null,
+    "country": null,
+    "countries": [
+      "MT",
+      "AE",
+      "CY",
+      "BE",
+      "GB",
+      "CZ",
+      "HU",
+      "US",
+      "IS",
+      "IE",
+      "IT",
+      "SE",
+      "IN",
+      "ES",
+      "GR",
+      "HR",
+      "BG",
+      "PT",
+      "DK",
+      "LT",
+      "PL",
+      "NL",
+      "DE",
+      "AU",
+      "NO",
+      "FR",
+      "RO"
+    ],
+    "textIsTemplate": true,
     "advertiser": {
-      "id": "AR18378488041124659201",
-      "name": "Nike Retail BV",
-      "url": "https://adstransparency.google.com/advertiser/AR18378488041124659201"
+      "id": "AR16735076323512287233",
+      "name": "Nike, Inc.",
+      "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233",
+      "logo": null,
+      "location": null
     },
-    "media": []
+    "media": [
+      "https://tpc.googlesyndication.com/archive/simgad/1889619096914274581"
+    ]
   },
   "google-ad-library-advertiser-search": {
     "query": "nike",
     "country": "US",
-    "totalReturned": 1,
+    "totalReturned": 3,
     "advertisers": [
+      {
+        "id": "AR16735076323512287233",
+        "name": "Nike, Inc.",
+        "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233",
+        "adsCount": 5000
+      },
       {
         "id": "AR17365672681860497409",
         "name": "NIKE SRL",
-        "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409"
+        "url": "https://adstransparency.google.com/advertiser/AR17365672681860497409",
+        "adsCount": 120
+      },
+      {
+        "id": "AR18378488041124659201",
+        "name": "Nike Retail BV",
+        "url": "https://adstransparency.google.com/advertiser/AR18378488041124659201",
+        "adsCount": 200
       }
     ]
   },
   "google-ad-library-company-ads": {
-    "advertiser": "nike.com",
+    "advertiser": "AR16735076323512287233",
+    "resolvedAdvertiser": {
+      "id": "AR16735076323512287233",
+      "name": "Nike, Inc.",
+      "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
+    },
     "country": "US",
     "totalReturned": 5,
+    "adsCountEstimate": 5000,
+    "hasMore": true,
+    "nextCursor": "eyJ2IjoxLCJhZHZlcnRpc2VySWQiOiJBUjE2NzM1MDc2MzIzNTEyMjg3MjMzIn0",
     "ads": [
       {
         "platform": "google_ad_library",
         "id": "CR13596485266373083137",
         "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR13596485266373083137",
+        "text": null,
+        "headline": null,
+        "cta": null,
+        "landingUrl": null,
         "adFormat": "image",
         "firstShown": "2022-11-30T14:47:01.000Z",
         "lastShown": "2026-07-26T13:01:42.000Z",
+        "impressions": null,
+        "spend": null,
         "advertiser": {
           "id": "AR16735076323512287233",
           "name": "Nike, Inc.",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233",
+          "logo": null
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/simgad/1889619096914274581"
@@ -2631,13 +2754,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "google_ad_library",
         "id": "CR00101170943954518017",
         "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR00101170943954518017",
+        "text": null,
+        "headline": null,
+        "cta": null,
+        "landingUrl": null,
         "adFormat": "image",
         "firstShown": "2022-11-30T18:54:18.000Z",
         "lastShown": "2026-07-26T12:53:39.000Z",
+        "impressions": null,
+        "spend": null,
         "advertiser": {
           "id": "AR16735076323512287233",
           "name": "Nike, Inc.",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233",
+          "logo": null
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/simgad/3850814477191431652"
@@ -2647,13 +2777,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "google_ad_library",
         "id": "CR11855191862560161793",
         "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR11855191862560161793",
+        "text": null,
+        "headline": null,
+        "cta": null,
+        "landingUrl": null,
         "adFormat": "image",
         "firstShown": "2022-11-30T14:47:41.000Z",
         "lastShown": "2026-07-26T12:29:26.000Z",
+        "impressions": null,
+        "spend": null,
         "advertiser": {
           "id": "AR16735076323512287233",
           "name": "Nike, Inc.",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233",
+          "logo": null
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/simgad/10582874225811561496"
@@ -2663,13 +2800,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "google_ad_library",
         "id": "CR10403323179404623873",
         "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR10403323179404623873",
+        "text": null,
+        "headline": null,
+        "cta": null,
+        "landingUrl": null,
         "adFormat": "image",
         "firstShown": "2022-11-30T14:47:37.000Z",
         "lastShown": "2026-07-26T12:28:37.000Z",
+        "impressions": null,
+        "spend": null,
         "advertiser": {
           "id": "AR16735076323512287233",
           "name": "Nike, Inc.",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233",
+          "logo": null
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/simgad/11551318734521008902"
@@ -2679,13 +2823,20 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "platform": "google_ad_library",
         "id": "CR15203746965809528833",
         "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR15203746965809528833",
+        "text": null,
+        "headline": null,
+        "cta": null,
+        "landingUrl": null,
         "adFormat": "image",
         "firstShown": "2022-11-30T15:11:07.000Z",
         "lastShown": "2026-07-26T12:27:34.000Z",
+        "impressions": null,
+        "spend": null,
         "advertiser": {
           "id": "AR16735076323512287233",
           "name": "Nike, Inc.",
-          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233"
+          "url": "https://adstransparency.google.com/advertiser/AR16735076323512287233",
+          "logo": null
         },
         "media": [
           "https://tpc.googlesyndication.com/archive/simgad/12062534195836224920"
@@ -4180,7 +4331,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     },
     "carouselImages": [],
     "paidForBy": "ScriptRunner Software GmbH",
-    "countries": []
+    "countries": ["US", "CA", "GB"],
+    "spend": null
   },
   "linkedin-ad-library-search-ads": {
     "query": "microsoft",
@@ -4208,8 +4360,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "cta": "Learn more",
         "landingUrl": "https://calendly.com/d/cvqn-kt5-t72/free-consultation?utm_campaign=32735245-PowerHouse&utm_source=linkedin&utm_medium=paidsocial&utm_term=free%20consultation&utm_content=calendly%20link&trk=ad_library_ad_preview_content_image",
         "adFormat": null,
-        "firstShown": "2026-07-28",
-        "lastShown": "2026-08-02",
+        "firstShown": "2026-07-28T00:00:00.000Z",
+        "lastShown": "2026-08-02T00:00:00.000Z",
         "impressions": "1k-5k",
         "country": "US",
         "advertiser": {
@@ -4222,8 +4374,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "description": "Drowning in one off scripts and manual steps? In a free 15 minute consult, our experts help streamline IT Infrastructure Operations with PowerShell.",
         "destinationUrl": "https://calendly.com/d/cvqn-kt5-t72/free-consultation?utm_campaign=32735245-PowerHouse&utm_source=linkedin&utm_medium=paidsocial&utm_term=free%20consultation&utm_content=calendly%20link&trk=ad_library_ad_preview_content_image",
         "adDuration": "Ran from Jul 28, 2026 to Aug 2, 2026",
-        "startDate": "2026-07-28",
-        "endDate": "2026-08-02",
+        "startDate": "2026-07-28T00:00:00.000Z",
+        "endDate": "2026-08-02T00:00:00.000Z",
         "totalImpressions": "1k-5k",
         "impressionsByCountry": [
           {
@@ -4241,10 +4393,12 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         ],
         "targeting": {
           "language": "Targeting includes English",
-          "location": "Targeting includes Germany, Switzerland and Netherlands, Benelux, DACH, United States, Canada, Austria, Belgium, United Kingdom"
+          "location": "Targeting includes Germany, Switzerland and Netherlands, Benelux, DACH, United States, Canada, Austria, Belgium, United Kingdom",
+          "company": "Exclusion targeting applied"
         },
         "carouselImages": [],
         "paidForBy": "ScriptRunner Software GmbH",
+        "advertiserLinkedinPage": "https://www.linkedin.com/company/16217038",
         "countries": [
           "US"
         ]
@@ -4263,7 +4417,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "impressions": null,
         "country": "US",
         "advertiser": {
-          "name": "Built to grow together: The FY27 Microsoft Marketplace opportunity"
+          "id": "1035",
+          "name": "Microsoft",
+          "url": "https://www.linkedin.com/company/1035",
+          "logo": null
         },
         "media": [],
         "description": null,
@@ -4276,6 +4433,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "targeting": null,
         "carouselImages": [],
         "paidForBy": null,
+        "advertiserLinkedinPage": "https://www.linkedin.com/company/1035",
         "countries": [
           "US"
         ]
@@ -4294,7 +4452,10 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "impressions": null,
         "country": "US",
         "advertiser": {
-          "name": "See how Rhenus scaled secure IT automation"
+          "id": null,
+          "name": null,
+          "url": null,
+          "logo": null
         },
         "media": [],
         "description": null,
@@ -9470,91 +9631,65 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
   },
   "tiktok-ad-library-ad-details": {
     "platform": "tiktok_ad_library",
-    "id": "1872034324356433",
-    "url": "https://library.tiktok.com/ads/detail/?ad_id=1872034324356433",
-    "text": "#gandurilemele #foryoupage❤️❤️ Buna dimineața tuturor!Zi binecuvântata tuturor!🙏🙏🙏",
+    "id": "1872402620173314",
+    "url": "https://library.tiktok.com/ads/detail/?ad_id=1872402620173314",
+    "text": "Just Do It — new Nike running drop. Shop the collection.",
+    "headline": null,
+    "cta": "Shop now",
+    "landingUrl": "https://www.nike.com/",
     "adFormat": "video",
-    "firstShown": "07/29/2026",
-    "lastShown": "07/29/2026",
+    "firstShown": "2026-07-29T00:00:00.000Z",
+    "lastShown": "2026-07-29T00:00:00.000Z",
+    "impressions": "1K-10K",
+    "spend": null,
     "advertiser": {
-      "name": "alyalina535"
+      "id": null,
+      "name": "Nike European Operations Netherlands B.V.",
+      "url": null,
+      "logo": null,
+      "location": "Netherlands"
     },
     "media": [
-      "https://library.tiktok.com/api/v1/cdn/1785356384/video/aHR0cHM6Ly92NzcudGlrdG9rY2RuLmNvbS8zYTU3ZmRiZjYzZGIzYjY5Nzc1NzA5ZjQ0ZTMwOGZkNC82YTZhYjUwZS92aWRlby90b3MvdXNlYXN0MmEvdG9zLXVzZWFzdDJhLXZlLTAwNjgtZXV0dHAvbzRJMXRCVHdBNUVFNlEzMW01emlpY1NNSUE0ZjlLQW53b0JMQ2sv/7467d396-0387-4b9f-90c7-2d2cd26db171?a=475769&bt=1049&btag=e00090000&bti=PDU2NmYwMy86&ft=.NpOcInz7ThRcbuGXq8Zmo&l=20260730041944142876664F10EA1EB193&mime_type=video_mp4&rc=NWZoZWU8ZDM6NDU3OGk6ZEBpM3Q0aHM5cjxsPDMzZjczNUA2YWM2MF9eXmExMWBeYDFgYSNnMjNmMmRzcGdhLS1kMTNzcw%3D%3D&signature=Qzo7c7UEa5N40yYL1KKsuy%2BR%2BCnqSwFptCMo9QOZPtQ%3D&vvpl=1"
-    ]
+      "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/3dff80d5a4f73a22d6682afa5f45d78d~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=cd5ba53f&x-expires=1785686400&x-signature=m6GakMpuep1d%2BRNlCGpC0K9CiWE%3D&t=4d5b0474&ps=13740610&a"
+    ],
+    "impressionsRange": {
+      "min": 1000,
+      "max": 10000,
+      "raw": "1K-10K"
+    }
   },
   "tiktok-ad-library-search": {
     "query": "nike",
     "country": "GB",
-    "totalReturned": 3,
+    "totalReturned": 1,
     "ads": [
       {
         "platform": "tiktok_ad_library",
         "id": "1872402620173314",
         "url": "https://library.tiktok.com/ads/detail/?ad_id=1872402620173314",
-        "text": "Professional Massage Therapy for Relaxation, Recovery, and Wellness.",
+        "text": "Just Do It — new Nike running drop. Shop the collection.",
+        "headline": null,
+        "cta": "Shop now",
+        "landingUrl": "https://www.nike.com/",
         "adFormat": "video",
-        "firstShown": "2026-08-02T00:00:00.000Z",
-        "lastShown": "2026-08-02T00:00:00.000Z",
-        "impressions": "0-1K",
+        "firstShown": "2026-07-29T00:00:00.000Z",
+        "lastShown": "2026-07-29T00:00:00.000Z",
+        "impressions": "1K-10K",
+        "spend": null,
         "advertiser": {
-          "name": "HongKong AdTiger Media Co., Limited",
-          "location": "Hong Kong"
+          "id": null,
+          "name": "Nike European Operations Netherlands B.V.",
+          "url": null,
+          "logo": null,
+          "location": "Netherlands"
         },
         "media": [
-          "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/3dff80d5a4f73a22d6682afa5f45d78d~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=cd5ba53f&x-expires=1785686400&x-signature=m6GakMpuep1d%2BRNlCGpC0K9CiWE%3D&t=4d5b0474&ps=13740610&a",
-          "https://library.tiktok.com/api/v1/cdn/1785667308/video/aHR0cHM6Ly92NzcudGlrdG9rY2RuLmNvbS9mMTgyNTU3Yzg1OGVjOGEwM2RkMGQ1MjRjZTRlOWM4Ny82YTZmNzM3ZS92aWRlby90b3MvYWxpc2cvdG9zLWFsaXNnLXZlLTAwNTFjMDAxLXNnL29zOU5VSkFzZ0lMUGVtT0RoRlVHZUdSQzNSb1JnbW5lQUFKTEdiLw==/fee44425-7600-4c48-8df9-ce242eb52069?a=475769&bt=593&btag=e00088000&bti=PDU2NmYwMy86&ft=.NpOcInz7Thz~INGXq8Zmo&l=2026080218414895FDAC2A6CF961573BDF&mime_type=video_mp4&rc=N2hoOzVpZzM1OTs0aDM5aUBpajVpOGw5cjRqPDMzODYzNEBjMmFeYy9fXzMxMS0zLTJjYSNxZy82MmRraWthLS1kMC1zcw%3D%3D&signature=v7cmUB0AYCwTjyukuWGzRGtiRJKMRb6UOyUo2szN2pY%3D&vvpl=1"
+          "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/3dff80d5a4f73a22d6682afa5f45d78d~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=cd5ba53f&x-expires=1785686400&x-signature=m6GakMpuep1d%2BRNlCGpC0K9CiWE%3D&t=4d5b0474&ps=13740610&a"
         ],
         "impressionsRange": {
-          "min": 0,
-          "max": 1000,
-          "raw": "0-1K"
-        }
-      },
-      {
-        "platform": "tiktok_ad_library",
-        "id": "1872069030885697",
-        "url": "https://library.tiktok.com/ads/detail/?ad_id=1872069030885697",
-        "text": "Visit the website and learn more.",
-        "adFormat": "video",
-        "firstShown": "2026-08-02T00:00:00.000Z",
-        "lastShown": "2026-08-02T00:00:00.000Z",
-        "impressions": "0-1K",
-        "advertiser": {
-          "name": "VV7 HOLDING LLC",
-          "location": "United States"
-        },
-        "media": [
-          "https://p16-common-sign.tiktokcdn.com/ad-site-i18n-sg/20260729c7c7767b1bd4c6634305aba2~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=a7fcf310&x-expires=1785686400&x-signature=H8hajcaAaLOzUe4Qcbse8V10R%2Bs%3D&t=4d5b0474&ps=13740610&shp=0c75dd76&s",
-          "https://library.tiktok.com/api/v1/cdn/1785667310/video/aHR0cHM6Ly92NzcudGlrdG9rY2RuLmNvbS9kOTEzMzQzYmVlZTBlODkyNDRhOTZjYmE0ZTdjYzk1OS82YTZmNzM2MC92aWRlby90b3MvYWxpc2cvdG9zLWFsaXNnLXZlLTAwNTFjMDAxLXNnL28wM3VvbDdZak5BRUFpSHcybXk5enB2aVVNY0JCWGFRQ3FOSUEv/a83a6b69-bc09-432a-a704-4cb96c22fbb2?a=475769&bt=997&btag=e000b8000&bti=PDU2NmYwMy86&ft=.NpOcInz7Thn~INGXq8Zmo&l=202608021841508CA9C9F51CA00456AC9F&mime_type=video_mp4&rc=Z2dpNWY5ZTdmM2k8ZzU2OEBpM3FvcnU5cmw2PDMzODYzNEBhMDUyLjFhXjQxMF5jXy1eYSNiY3MwMmRrLmlhLS1kMC1zcw%3D%3D&signature=c1LXfiH6SOrrYOTEWg4TRCzE%2BNR%2BSu0k%2Fuj%2FDEUJ3vk%3D&vvpl=1"
-        ],
-        "impressionsRange": {
-          "min": 0,
-          "max": 1000,
-          "raw": "0-1K"
-        }
-      },
-      {
-        "platform": "tiktok_ad_library",
-        "id": "1872402620170418",
-        "url": "https://library.tiktok.com/ads/detail/?ad_id=1872402620170418",
-        "text": "Relax and Recharge with Professional Massage Services Near You. Book Today.",
-        "adFormat": "video",
-        "firstShown": "2026-08-02T00:00:00.000Z",
-        "lastShown": "2026-08-02T00:00:00.000Z",
-        "impressions": "0-1K",
-        "advertiser": {
-          "name": "HongKong AdTiger Media Co., Limited",
-          "location": "Hong Kong"
-        },
-        "media": [
-          "https://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/3de4a6d6aeade6ab958a291a3a5bd49c~tplv-tiktokx-origin.jpeg?dr=14582&refresh_token=d3c7a0dd&x-expires=1785686400&x-signature=GyiPUhUAFUFyEOGfF1XhsMSx4rQ%3D&t=4d5b0474&ps=13740610&",
-          "https://library.tiktok.com/api/v1/cdn/1785667307/video/aHR0cHM6Ly92MTZtLnRpa3Rva2Nkbi5jb20vNjQxZWM4ZWZiYTgwY2M1YzU0OWI4N2NhZjk5MjEyMDEvNmE2ZjczNTgvdmlkZW8vdG9zL2FsaXNnL3Rvcy1hbGlzZy12ZS0wMDUxYzAwMS1zZy9vd2dJMzRBYlZnRzBHRmZEUVVoQWZVTWdXWjhBQUNTRUdSOWVtWS8=/bb0280a2-4a63-46e8-a759-8d4b732e6d88?a=475769&bt=720&btag=e000b0000&bti=PDU2NmYwMy86&ft=.NpOcInz7Th2~INGXq8Zmo&l=202608021841474F1F2ED09C9DE84DF0AE&mime_type=video_mp4&rc=NDQ8NjQ0ZTxlM2Y2Njs5ZEBpMzhuZ245cjZqPDMzODYzNEAtLmNjXl5jNV8xMi0yLzJgYSNjMXMtMmQ0aWthLS1kMC1zcw%3D%3D&signature=2pQWORzvAEmUKgGQGmydZDn%2B0mYazq1nnnXy7NGPupQ%3D&vvpl=1"
-        ],
-        "impressionsRange": {
-          "min": 0,
-          "max": 1000,
-          "raw": "0-1K"
+          "min": 1000,
+          "max": 10000,
+          "raw": "1K-10K"
         }
       }
     ]

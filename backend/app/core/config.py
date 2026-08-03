@@ -82,6 +82,8 @@ class Settings(BaseSettings):
     # last-resort fallbacks.
     APIFY_ACTOR_TIKTOK_POPULAR_CREATORS: str = "automation-lab/tiktok-trends-scraper"
     APIFY_ACTOR_TIKTOK_POPULAR_CREATORS_FALLBACK: str = "burbn/tiktok-trending-creators"
+    # Creative Center hashtags + songs (mode=hashtags|songs). Same family as Top Ads.
+    APIFY_ACTOR_TIKTOK_CREATIVE_CENTER_TRENDS: str = "datapeak/tiktok-creative-center"
 
     # spry_headset/instagram-page-post-scraper was disabled by its author
     # (every run now fails), so the official Apify scraper is primary and the
@@ -170,6 +172,10 @@ class Settings(BaseSettings):
     # LinkedIn. Profile + company + post/search actors (rental, public data
     # only). Slugs are config-driven; verify access in the Apify console.
     APIFY_ACTOR_LINKEDIN_PROFILE: str = "apimaestro/linkedin-profile-detail"
+    # Richer sections (projects / recommendations / skills) when detail is thin.
+    APIFY_ACTOR_LINKEDIN_PROFILE_FULL: str = (
+        "apimaestro/linkedin-profile-full-sections-scraper"
+    )
     APIFY_ACTOR_LINKEDIN_COMPANY: str = "apimaestro/linkedin-company-detail"
     APIFY_ACTOR_LINKEDIN_POST: str = "apimaestro/linkedin-post-detail"
     # Legacy pin (often still set in Railway to automation-lab). Prefer the

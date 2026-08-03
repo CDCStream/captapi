@@ -231,11 +231,101 @@ def _extract_search_results_count(html: str) -> int | None:
     return None
 
 
+_DELIVERY_KEY_ALIASES: dict[str, str] = {
+    "demographic_distribution": "demographicDistribution",
+    "demographicDistribution": "demographicDistribution",
+    "region_distribution": "regionDistribution",
+    "regionDistribution": "regionDistribution",
+    "delivery_by_region": "regionDistribution",
+    "deliveryByRegion": "regionDistribution",
+    "age_country_gender_reach_breakdown": "ageCountryGenderReachBreakdown",
+    "ageCountryGenderReachBreakdown": "ageCountryGenderReachBreakdown",
+    "collation_count": "collationCount",
+    "collationCount": "collationCount",
+    "collation_id": "collationId",
+    "collationId": "collationId",
+    "is_aaa_eligible": "isAaaEligible",
+    "isAaaEligible": "isAaaEligible",
+    "eu_total_reach": "euTotalReach",
+    "euTotalReach": "euTotalReach",
+    "target_ages": "targetAges",
+    "targetAges": "targetAges",
+    "target_gender": "targetGender",
+    "targetGender": "targetGender",
+    "target_locations": "targetLocations",
+    "targetLocations": "targetLocations",
+    "publisher_platform": "publisherPlatforms",
+    "publisher_platforms": "publisherPlatforms",
+    "publisherPlatform": "publisherPlatforms",
+    "publisherPlatforms": "publisherPlatforms",
+}
+
+
+def _json_at(html: str, start: int) -> Any | None:
+    """Parse a JSON value starting at ``start`` (``[``, ``{``, or scalar)."""
+    if start < 0 or start >= len(html):
+        return None
+    try:
+        obj, _end = json.JSONDecoder().raw_decode(html[start:])
+    except ValueError:
+        return None
+    return obj
+
+
+def _extract_keyed_json(html: str, key: str) -> Any | None:
+    """First non-empty JSON value for ``"key": …`` in ``html``."""
+    for m in re.finditer(rf'"{re.escape(key)}"\s*:\s*', html or ""):
+        j = m.end()
+        while j < len(html) and html[j] in " \t\n\r":
+            j += 1
+        val = _json_at(html, j)
+        if val not in (None, "", [], {}):
+            return val
+    return None
+
+
+def _collect_delivery_fields(node: Any, *, depth: int = 0) -> dict[str, Any]:
+    """Walk a Meta blob and pull known delivery / AAA keys."""
+    found: dict[str, Any] = {}
+    if depth > 14 or node is None:
+        return found
+    if isinstance(node, dict):
+        for key, val in node.items():
+            dest = _DELIVERY_KEY_ALIASES.get(str(key))
+            if dest and val not in (None, "", [], {}) and dest not in found:
+                found[dest] = val
+            if isinstance(val, (dict, list)):
+                for k, v in _collect_delivery_fields(val, depth=depth + 1).items():
+                    if k not in found and v not in (None, "", [], {}):
+                        found[k] = v
+    elif isinstance(node, list):
+        for item in node[:120]:
+            for k, v in _collect_delivery_fields(item, depth=depth + 1).items():
+                if k not in found and v not in (None, "", [], {}):
+                    found[k] = v
+    return found
+
+
+def _enrich_delivery_from_html(html: str, aid: str, mapped: dict[str, Any]) -> None:
+    """Fill delivery fields from HTML when the deeplink object omitted them."""
+    pos = (html or "").find(f'"ad_archive_id":"{aid}"')
+    if pos < 0:
+        pos = (html or "").find(f'"ad_archive_id": "{aid}"')
+    window = (html or "")[max(0, pos - 80_000) : pos + 250_000] if pos >= 0 else (html or "")
+    for src, dest in _DELIVERY_KEY_ALIASES.items():
+        if mapped.get(dest) not in (None, "", [], {}):
+            continue
+        val = _extract_keyed_json(window, src)
+        if val not in (None, "", [], {}):
+            mapped[dest] = val
+
+
 def to_normalize_shape(item: dict[str, Any]) -> dict[str, Any]:
     """Map Meta ``collated_results`` row → shape ``_normalize_ad`` understands."""
     snap_in = item.get("snapshot") if isinstance(item.get("snapshot"), dict) else {}
     body = snap_in.get("body")
     body_text = body.get("text") if isinstance(body, dict) else body
+    delivery = _collect_delivery_fields(item)
 
     cards_out: list[dict[str, Any]] = []
     for card in snap_in.get("cards") or []:
@@ -287,18 +377,27 @@ def to_normalize_shape(item: dict[str, Any]) -> dict[str, Any]:
 
     page_name = item.get("page_name") or snap_in.get("page_name")
     page_id = item.get("page_id") or snap_in.get("page_id")
-    platforms = item.get("publisher_platform") or item.get("publisherPlatform") or []
+    platforms = (
+        delivery.get("publisherPlatforms")
+        or item.get("publisher_platform")
+        or item.get("publisher_platforms")
+        or item.get("publisherPlatform")
+        or item.get("publisherPlatforms")
+        or []
+    )
     if isinstance(platforms, str):
         platforms = [platforms]
+
+    aaa = item.get("is_aaa_eligible") if "is_aaa_eligible" in item else item.get("isAaaEligible")
+    if aaa is None:
+        aaa = delivery.get("isAaaEligible")
 
     return {
         "adArchiveId": item.get("ad_archive_id") or item.get("adArchiveId"),
         "pageId": page_id,
         "pageName": page_name,
         "isActive": item.get("is_active") if "is_active" in item else item.get("isActive"),
-        "isAaaEligible": item.get("is_aaa_eligible")
-        if "is_aaa_eligible" in item
-        else item.get("isAaaEligible"),
+        "isAaaEligible": aaa,
         "publisherPlatforms": [str(p).upper() for p in platforms if p],
         "startDate": _unix_iso(item.get("start_date") or item.get("startDate")),
         "endDate": _unix_iso(item.get("end_date") or item.get("endDate")),
@@ -309,6 +408,19 @@ def to_normalize_shape(item: dict[str, Any]) -> dict[str, Any]:
         "politicalCountries": item.get("political_countries") or item.get("politicalCountries"),
         "targetedOrReachedCountries": item.get("targeted_or_reached_countries")
         or item.get("targetedOrReachedCountries"),
+        "demographicDistribution": delivery.get("demographicDistribution"),
+        "regionDistribution": delivery.get("regionDistribution"),
+        "ageCountryGenderReachBreakdown": delivery.get("ageCountryGenderReachBreakdown"),
+        "collationCount": delivery.get("collationCount")
+        or item.get("collation_count")
+        or item.get("collationCount"),
+        "collationId": delivery.get("collationId")
+        or item.get("collation_id")
+        or item.get("collationId"),
+        "euTotalReach": delivery.get("euTotalReach"),
+        "targetAges": delivery.get("targetAges"),
+        "targetGender": delivery.get("targetGender"),
+        "targetLocations": delivery.get("targetLocations"),
         "snapshot": {
             "pageName": page_name,
             "pageProfileUri": snap_in.get("page_profile_uri") or snap_in.get("pageProfileUri"),
@@ -454,8 +566,18 @@ async def ad_details(url_or_id: str, *, country: str = "US") -> dict[str, Any] |
         log.warning("facebook_ads_native_detail_miss", ad_id=aid, length=len(html))
         return None
     mapped = to_normalize_shape(raw)
+    _enrich_delivery_from_html(html, aid, mapped)
     # Country is sometimes omitted on deeplink blobs; keep the request country.
     if not mapped.get("targetedOrReachedCountries"):
         mapped["targetedOrReachedCountries"] = [(country or "US").upper()]
-    log.info("facebook_ads_native_detail_ok", ad_id=aid)
+    # Signal to ``_normalize_ad``: always expose delivery schema keys (null when Meta withholds).
+    mapped["_detailFetch"] = True
+    log.info(
+        "facebook_ads_native_detail_ok",
+        ad_id=aid,
+        platforms=len(mapped.get("publisherPlatforms") or []),
+        has_demo=bool(mapped.get("demographicDistribution")),
+        has_region=bool(mapped.get("regionDistribution")),
+        variants=mapped.get("collationCount"),
+    )
     return mapped

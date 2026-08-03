@@ -248,6 +248,13 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
         "isOriginalSound": is_original,
         "region": safe_str(item.get("locationCreated") or item.get("region")),
         "authorRegion": author_region,
+        "descLanguage": safe_str(
+            item.get("desc_language")
+            or item.get("descLanguage")
+            or item.get("textLanguage")
+            or item.get("text_language")
+        ),
+        "shopProductUrl": extract_shop_product_url(item),
         "isAd": bool(item.get("isAd")),
         "isCommerce": bool(
             item.get("isCommerce")
@@ -258,6 +265,21 @@ async def video_details_native(url: str) -> dict[str, Any] | None:
         "isBrandedContent": bool(
             item.get("isBrandOrganic") or item.get("isBrandOrganicContent")
         ),
+        "isPaidPartnership": bool(
+            item.get("is_paid_partnership")
+            or item.get("isPaidPartnership")
+            or item.get("is_paid_content")
+            or item.get("isPaidContent")
+        ),
+        "isEligibleForCommission": bool(
+            item.get("is_eligible_for_commission")
+            or item.get("isEligibleForCommission")
+        )
+        if (
+            item.get("is_eligible_for_commission") is not None
+            or item.get("isEligibleForCommission") is not None
+        )
+        else None,
         "status": {
             "allowComment": None if status.get("allowComment") is None else bool(status.get("allowComment")),
             "allowShare": None if status.get("allowShare") is None else bool(status.get("allowShare")),
@@ -580,20 +602,32 @@ async def channel_details_native(handle: str, url: str) -> dict[str, Any] | None
     bio_link_raw = user.get("bioLink")
     external_url: str | None = None
     bio_link_risk: Any = None
+    bio_link: dict[str, Any] | None = None
     if isinstance(bio_link_raw, dict):
         external_url = safe_str(bio_link_raw.get("link"))
         bio_link_risk = bio_link_raw.get("risk")
+        bio_link = {
+            "link": external_url,
+            "risk": bio_link_risk,
+        }
+        bio_link = {k: v for k, v in bio_link.items() if v is not None} or None
     elif bio_link_raw:
         external_url = safe_str(bio_link_raw)
+        bio_link = {"link": external_url} if external_url else None
     commerce = user.get("commerceUserInfo") or {}
+    profile_tab = user.get("profileTab") if isinstance(user.get("profileTab"), dict) else None
     profile_image = safe_str(user.get("avatarLarger") or user.get("avatarMedium"))
+    bio = safe_str(user.get("signature"))
+    create_unix = safe_int(user.get("createTime"))
+    tt_seller = user.get("ttSeller")
+    contact = build_contact(bio=bio, links=[external_url] if external_url else None)
     # Additive-only: keep the original 12 keys stable for existing parsers.
     return {
         "platform": "tiktok",
         "url": f"https://www.tiktok.com/@{username}",
         "username": username,
         "displayName": safe_str(user.get("nickname")),
-        "bio": safe_str(user.get("signature")),
+        "bio": bio,
         "followers": _stat(stats_v2, stats, "followerCount"),
         "following": _stat(stats_v2, stats, "followingCount"),
         "likes": _stat(stats_v2, stats, "heartCount"),
@@ -606,26 +640,40 @@ async def channel_details_native(handle: str, url: str) -> dict[str, Any] | None
         # --- additive identity / vetting / commerce ---
         "id": safe_str(user.get("id")),
         "secUid": safe_str(user.get("secUid")),
-        "createTime": _iso(user.get("createTime")),
+        "createTime": _iso(create_unix),
+        "createTimeUnix": create_unix,
         "friendCount": _stat(stats_v2, stats, "friendCount"),
         "diggCount": _stat(stats_v2, stats, "diggCount"),
         "profileImageMedium": safe_str(user.get("avatarMedium")),
         "profileImageThumb": safe_str(user.get("avatarThumb")),
+        "bioLink": bio_link,
         "bioLinkRisk": bio_link_risk,
         "isCommerceUser": bool(commerce.get("commerceUser"))
         if commerce.get("commerceUser") is not None
         else None,
-        "isSeller": user.get("ttSeller"),
+        "isSeller": bool(tt_seller) if tt_seller is not None else None,
+        "ttSeller": bool(tt_seller) if tt_seller is not None else None,
         "isOrganization": user.get("isOrganization"),
         "isAdVirtual": user.get("isADVirtual"),
+        "isEmbedBanned": (
+            bool(user.get("isEmbedBanned"))
+            if user.get("isEmbedBanned") is not None
+            else (
+                bool(user.get("IsEmbedBanned"))
+                if user.get("IsEmbedBanned") is not None
+                else None
+            )
+        ),
         "language": safe_str(user.get("language")),
         "commentSetting": user.get("commentSetting"),
         "duetSetting": user.get("duetSetting"),
         "stitchSetting": user.get("stitchSetting"),
         "downloadSetting": user.get("downloadSetting"),
         "followingVisibility": user.get("followingVisibility"),
+        "profileTab": profile_tab,
         "uniqueIdModifyTime": _iso(user.get("uniqueIdModifyTime")),
         "nickNameModifyTime": _iso(user.get("nickNameModifyTime")),
+        "contact": contact,
         "fetchedAt": utc_now_iso(),
     }
 
@@ -1094,6 +1142,91 @@ def normalize_hashtag_query(raw: str | None) -> str | None:
     return tag.casefold() if tag else None
 
 
+def extract_shop_product_url(item: dict[str, Any] | None) -> str | None:
+    """TikTok Shop PDP URL when the video anchors a product.
+
+    Surfaces ``shopProductUrl`` so clients can join list endpoints to
+    ``/v1/tiktok-shop/*`` without guessing which videos sell.
+    """
+    if not isinstance(item, dict):
+        return None
+    direct = safe_str(
+        item.get("shop_product_url")
+        or item.get("shopProductUrl")
+        or item.get("shopProductURL")
+    )
+    if direct and "tiktok.com" in direct:
+        return direct
+
+    def _from_pid(pid: str | None) -> str | None:
+        if pid and pid.isdigit() and len(pid) >= 6:
+            return f"https://www.tiktok.com/shop/pdp/{pid}"
+        return None
+
+    for key in ("anchors", "anchor_list", "anchorList"):
+        anchors = item.get(key)
+        if not isinstance(anchors, list):
+            continue
+        for anchor in anchors:
+            if not isinstance(anchor, dict):
+                continue
+            url = safe_str(
+                anchor.get("url")
+                or anchor.get("schema")
+                or anchor.get("open_url")
+                or anchor.get("openUrl")
+            )
+            if url and "shop" in url.lower() and ("pdp" in url.lower() or "product" in url.lower()):
+                return url
+            extra = anchor.get("extra") if isinstance(anchor.get("extra"), dict) else {}
+            pid = safe_str(
+                anchor.get("product_id")
+                or anchor.get("productId")
+                or extra.get("product_id")
+                or extra.get("productId")
+            )
+            built = _from_pid(pid)
+            if built:
+                return built
+
+    for key in ("anc_goods_list", "ancGoodsList", "products", "product_infos", "productInfos"):
+        goods = item.get(key)
+        if not isinstance(goods, list):
+            continue
+        for goods_item in goods:
+            if not isinstance(goods_item, dict):
+                continue
+            url = safe_str(
+                goods_item.get("url")
+                or goods_item.get("product_url")
+                or goods_item.get("productUrl")
+                or goods_item.get("shop_product_url")
+            )
+            if url and "tiktok.com" in url:
+                return url
+            built = _from_pid(
+                safe_str(
+                    goods_item.get("product_id")
+                    or goods_item.get("productId")
+                    or goods_item.get("id")
+                )
+            )
+            if built:
+                return built
+
+    commerce = item.get("commerce_info") or item.get("commerceInfo")
+    if isinstance(commerce, dict):
+        built = _from_pid(
+            safe_str(commerce.get("product_id") or commerce.get("productId"))
+        )
+        if built:
+            return built
+        url = safe_str(commerce.get("shop_product_url") or commerce.get("url"))
+        if url and "tiktok.com" in url:
+            return url
+    return None
+
+
 def item_has_hashtag(item: dict[str, Any], tag: str) -> bool:
     """True when the post is tagged with ``tag`` (structured fields or ``#tag`` in caption).
 
@@ -1405,12 +1538,25 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
             or (images[0] if images else None)
         )
 
+    author_region = safe_str(author.get("region") or author.get("region_code") or author.get("regionCode"))
     author_out = build_author(author, author_stats=author_stats, profile_image=avatar)
+    if author_region:
+        author_out["region"] = author_region
     kind = "photo" if is_photo else "video"
     url = (
         f"https://www.tiktok.com/@{username}/{kind}/{aweme_id}"
         if username
         else safe_str(item.get("share_url") or item.get("shareUrl"))
+    )
+    shop_url = extract_shop_product_url(item)
+    video_region = safe_str(
+        item.get("region") or item.get("location_created") or item.get("locationCreated")
+    )
+    desc_lang = safe_str(
+        item.get("desc_language")
+        or item.get("descLanguage")
+        or item.get("text_language")
+        or item.get("textLanguage")
     )
 
     out: dict[str, Any] = {
@@ -1441,6 +1587,9 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
             or music.get("ownerNickname")
             or music.get("owner_nickname")
         ),
+        "region": video_region,
+        "authorRegion": author_region,
+        "descLanguage": desc_lang,
         "isAd": bool(item.get("is_ad") or item.get("isAd")),
         "isPaidPartnership": bool(
             item.get("is_paid_partnership")
@@ -1448,9 +1597,25 @@ def _map_aweme_post(item: dict[str, Any]) -> dict[str, Any] | None:
             or item.get("is_paid_content")
             or item.get("isPaidContent")
         ),
+        "isEligibleForCommission": bool(
+            item.get("is_eligible_for_commission")
+            or item.get("isEligibleForCommission")
+            or item.get("eligible_for_commission")
+        )
+        if (
+            item.get("is_eligible_for_commission") is not None
+            or item.get("isEligibleForCommission") is not None
+            or item.get("eligible_for_commission") is not None
+        )
+        else None,
     }
+    if shop_url:
+        out["shopProductUrl"] = shop_url
     if images:
         out["images"] = images
+    # Drop null commission flag so strip_empty stays quiet.
+    if out.get("isEligibleForCommission") is None:
+        out.pop("isEligibleForCommission", None)
     return out
 
 
@@ -3190,20 +3355,159 @@ def creator_engagement_rate(
 
 def extract_bio_contact(bio: str | None) -> dict[str, list[str]] | None:
     """Pull emails / payment links from a creator bio for outreach."""
-    if not bio:
-        return None
-    emails = list(dict.fromkeys(_BIO_EMAIL_RE.findall(bio)))
-    links: list[str] = []
-    for m in _BIO_LINK_RE.finditer(bio):
-        token = m.group(0).rstrip(".,);]")
-        # Skip bare emails matched by the $ / link heuristics.
-        if "@" in token and "://" not in token.lower() and not token.lower().startswith("www."):
+    return build_contact(bio=bio)
+
+
+def build_contact(
+    *,
+    bio: str | None = None,
+    tipjar: dict[str, Any] | None = None,
+    links: list[str] | None = None,
+    bio_urls: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    """Unified outreach contact: emails + paymentHandles + expanded links."""
+    emails: list[str] = []
+    out_links: list[str] = []
+    if bio:
+        emails = list(dict.fromkeys(_BIO_EMAIL_RE.findall(bio)))
+        for m in _BIO_LINK_RE.finditer(bio):
+            token = m.group(0).rstrip(".,);]")
+            if "@" in token and "://" not in token.lower() and not token.lower().startswith(
+                "www."
+            ):
+                continue
+            if token not in out_links:
+                out_links.append(token)
+    for link in links or []:
+        s = safe_str(link)
+        if s and s not in out_links:
+            out_links.append(s)
+    for row in bio_urls or []:
+        if not isinstance(row, dict):
             continue
-        if token not in links:
-            links.append(token)
-    if not emails and not links:
+        expanded = safe_str(
+            row.get("expandedUrl") or row.get("expanded_url") or row.get("url")
+        )
+        if expanded and expanded not in out_links:
+            out_links.append(expanded)
+
+    payment: dict[str, str] = {}
+    if isinstance(tipjar, dict) and tipjar:
+        mapping = (
+            ("patreon", "patreon_handle"),
+            ("paypal", "pay_pal_handle"),
+            ("venmo", "venmo_handle"),
+            ("cashApp", "cash_app_handle"),
+            ("gofundme", "gofundme_handle"),
+            ("bitcoin", "bitcoin_handle"),
+            ("ethereum", "ethereum_handle"),
+            ("bandcamp", "bandcamp_handle"),
+        )
+        for out_key, src_key in mapping:
+            handle = safe_str(tipjar.get(src_key) or tipjar.get(out_key))
+            if handle:
+                payment[out_key] = handle
+
+    if not emails and not out_links and not payment:
         return None
-    return {"emails": emails, "links": links}
+    out: dict[str, Any] = {}
+    if emails:
+        out["emails"] = emails
+    if payment:
+        out["paymentHandles"] = payment
+    if out_links:
+        out["links"] = out_links
+    return out or None
+
+
+def trust_fields_from_user_info(ui: dict[str, Any]) -> dict[str, Any]:
+    """Account-age / commerce / risk signals from ``webapp.user-detail``."""
+    user = ui.get("user") if isinstance(ui.get("user"), dict) else {}
+    stats_v2 = ui.get("statsV2") if isinstance(ui.get("statsV2"), dict) else {}
+    stats = ui.get("stats") if isinstance(ui.get("stats"), dict) else {}
+    bio_link_raw = user.get("bioLink")
+    bio_link_risk = None
+    external_url = None
+    if isinstance(bio_link_raw, dict):
+        external_url = safe_str(bio_link_raw.get("link"))
+        bio_link_risk = bio_link_raw.get("risk")
+    elif bio_link_raw:
+        external_url = safe_str(bio_link_raw)
+    create_unix = safe_int(user.get("createTime"))
+    tt_seller = user.get("ttSeller")
+    commerce = user.get("commerceUserInfo") if isinstance(user.get("commerceUserInfo"), dict) else {}
+    bio = safe_str(user.get("signature"))
+    contact = build_contact(bio=bio, links=[external_url] if external_url else None)
+    out: dict[str, Any] = {
+        "createTime": _iso(create_unix),
+        "createTimeUnix": create_unix,
+        "bioLinkRisk": bio_link_risk,
+        "isSeller": bool(tt_seller) if tt_seller is not None else None,
+        "ttSeller": bool(tt_seller) if tt_seller is not None else None,
+        "isCommerceUser": bool(commerce.get("commerceUser"))
+        if commerce.get("commerceUser") is not None
+        else None,
+        "isOrganization": user.get("isOrganization"),
+        "friendCount": _stat(stats_v2, stats, "friendCount"),
+        "language": safe_str(user.get("language")),
+        "secUid": safe_str(user.get("secUid") or user.get("sec_uid")),
+        "id": safe_str(user.get("id") or user.get("uid")),
+        "contact": contact,
+    }
+    return {k: v for k, v in out.items() if v is not None}
+
+
+async def hydrate_creators_trust(
+    creators: list[dict[str, Any]], *, concurrency: int = 6
+) -> list[dict[str, Any]]:
+    """Overlay createTime / bioLinkRisk / contact onto popular-creators rows."""
+    import asyncio
+
+    if not creators:
+        return creators
+    sem = asyncio.Semaphore(max(1, concurrency))
+
+    async def one(row: dict[str, Any]) -> dict[str, Any]:
+        username = safe_str(row.get("username"))
+        if not username:
+            return row
+        # Skip when account age already present (FYP hydrate path).
+        if row.get("createTime") or row.get("createTimeUnix"):
+            return row
+        async with sem:
+            try:
+                ui = await _user_info(username)
+            except Exception:  # noqa: BLE001
+                return row
+        if not ui:
+            return row
+        trust = trust_fields_from_user_info(ui)
+        merged = {**row, **{k: v for k, v in trust.items() if k not in row or row.get(k) is None}}
+        # Prefer richer contact merge.
+        if trust.get("contact"):
+            existing = row.get("contact") if isinstance(row.get("contact"), dict) else {}
+            tc = trust["contact"]
+            merged["contact"] = {
+                "emails": list(
+                    dict.fromkeys((existing.get("emails") or []) + (tc.get("emails") or []))
+                )
+                or None,
+                "paymentHandles": {
+                    **(existing.get("paymentHandles") or {}),
+                    **(tc.get("paymentHandles") or {}),
+                }
+                or None,
+                "links": list(
+                    dict.fromkeys((existing.get("links") or []) + (tc.get("links") or []))
+                )
+                or None,
+            }
+            merged["contact"] = {
+                k: v for k, v in merged["contact"].items() if v is not None
+            } or None
+        return {k: v for k, v in merged.items() if v is not None}
+
+    return list(await asyncio.gather(*(one(c) for c in creators)))
 
 
 async def popular_creators_native(
@@ -3274,9 +3578,9 @@ async def popular_creators_native(
         avg_views = int(slot["views"] / slot["posts"]) if slot["posts"] else 0
         eng = creator_engagement_rate(likes, videos, followers)
         bio = safe_str(user.get("signature"))
-        contact = extract_bio_contact(bio)
         # Creator locale from TikTok profile — never echo the feed `country` query.
         region = safe_str(user.get("region") or user.get("regionCode"))
+        trust = trust_fields_from_user_info(ui)
         row: dict[str, Any] = {
             "id": safe_str(user.get("id") or user.get("uid")),
             "secUid": safe_str(user.get("secUid") or user.get("sec_uid")),
@@ -3295,9 +3599,8 @@ async def popular_creators_native(
             "profileImage": safe_str(
                 user.get("avatarLarger") or user.get("avatarMedium") or user.get("avatarThumb")
             ),
+            **trust,
         }
-        if contact:
-            row["contact"] = contact
         creators.append(row)
 
     if not creators:

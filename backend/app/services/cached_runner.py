@@ -71,6 +71,12 @@ async def cached_or_run(
                 return stale
 
     result = await runner()
+    # Stamp fetchedAt so cache hits can expose cachedAt in the JSON envelope
+    # (BillingHeaderMiddleware reads data.fetchedAt when request_meta lacks it).
+    if isinstance(result, dict) and not result.get("fetchedAt"):
+        from app.utils.media_urls import utc_now_iso
+
+        result["fetchedAt"] = utc_now_iso()
     ctx["data"] = result
     if effective_ttl > 0 and not _looks_empty(result):
         await cache_set(key, result, ttl=effective_ttl)

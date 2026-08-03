@@ -65,6 +65,16 @@ def _to_normalize_shape(row: dict[str, Any]) -> dict[str, Any]:
         "adId": ad_id,
         "id": ad_id,
         "advertiserName": name,
+        "advertiserId": row.get("advertiser_id")
+        or advertiser.get("id")
+        or row.get("advertiserId"),
+        "advertiserUrl": row.get("advertiser_url") or advertiser.get("url"),
+        "cta": row.get("cta") or row.get("cta_text") or row.get("ctaText"),
+        "landingUrl": row.get("landing_url")
+        or row.get("landingUrl")
+        or row.get("destination_url")
+        or row.get("click_url"),
+        "headline": row.get("headline") or row.get("title"),
         "adFormat": row.get("ad_format") or row.get("format") or "video",
         "first_shown_date": row.get("first_shown_date") or row.get("firstShownDate"),
         "last_shown_date": row.get("last_shown_date") or row.get("lastShownDate"),
@@ -74,6 +84,47 @@ def _to_normalize_shape(row: dict[str, Any]) -> dict[str, Any]:
         "text": caption,
         "body": caption,
     }
+
+
+def _query_tokens(q: str) -> list[str]:
+    return [t for t in re.split(r"\W+", (q or "").lower()) if len(t) >= 2]
+
+
+def ad_matches_query(row: dict[str, Any], q: str) -> bool:
+    """True when every query token appears in advertiser name or ad copy.
+
+    TikTok's library SERP is noisy (keyword soft-match); without this filter
+    ``q=fashion`` can return Romanian good-morning ads. Prefer empty over
+    irrelevant — brand performance intel belongs on Creative Center Top Ads.
+    """
+    tokens = _query_tokens(q)
+    if not tokens:
+        return True
+    hay_parts = [
+        row.get("advertiserName"),
+        row.get("advertiser_name"),
+        row.get("brand_name"),
+        row.get("payer"),
+        row.get("text"),
+        row.get("body"),
+        row.get("caption"),
+        row.get("headline"),
+        row.get("cta"),
+        row.get("landingUrl"),
+    ]
+    adv = row.get("advertiser") if isinstance(row.get("advertiser"), dict) else {}
+    if adv:
+        hay_parts.extend([adv.get("name"), adv.get("business_name")])
+    hay = " ".join(str(p) for p in hay_parts if p).lower()
+    if not hay.strip():
+        # No copy yet (pre-hydrate) — keep for hydrate, filter again later.
+        return True
+    return all(t in hay for t in tokens)
+
+
+def filter_ads_by_query(rows: list[dict[str, Any]], q: str) -> list[dict[str, Any]]:
+    """Drop ads that do not mention the query tokens after captions are filled."""
+    return [r for r in rows if isinstance(r, dict) and ad_matches_query(r, q)]
 
 
 async def _post_search(
@@ -176,6 +227,8 @@ async def _hydrate_captions(
         # Detail page often has richer advertiser / delivery fields than SERP.
         for key in (
             "advertiserName",
+            "advertiserId",
+            "advertiserUrl",
             "payer",
             "advertiserLocation",
             "first_shown_date",
@@ -185,6 +238,9 @@ async def _hydrate_captions(
             "imageUrls",
             "media",
             "adFormat",
+            "cta",
+            "landingUrl",
+            "headline",
         ):
             if detail.get(key) not in (None, "", [], {}) and out.get(key) in (None, "", [], {}):
                 out[key] = detail[key]
@@ -208,12 +264,14 @@ async def search_ads(
 
     region = (country or "GB").upper()
     want = max(1, int(limit))
+    # Over-fetch SERP candidates — TikTok soft-matches, then we relevance-filter.
+    serp_limit = min(60, max(want * 3, want))
     rows: list[dict[str, Any]] | None = None
 
     # 1) Decodo SERP first (reliable; ~1 headless render).
-    decodo_rows = await search_ads_via_decodo(query, country=region, limit=want)
+    decodo_rows = await search_ads_via_decodo(query, country=region, limit=serp_limit)
     if decodo_rows is not None:
-        rows = decodo_rows[:want]
+        rows = decodo_rows[:serp_limit]
 
     # 2) JSON API secondary (cheap when TikTok stops returning 421).
     if rows is None:
@@ -225,7 +283,9 @@ async def search_ads(
         for tier, proxy in tiers:
             if tier != "direct" and not proxy:
                 continue
-            page = await _post_search(query, region=region, limit=min(12, want), proxy=proxy)
+            page = await _post_search(
+                query, region=region, limit=min(12, serp_limit), proxy=proxy
+            )
             if page is None:
                 continue
             log.info(
@@ -235,7 +295,7 @@ async def search_ads(
                 q=query[:40],
                 region=region,
             )
-            rows = page[:want]
+            rows = page[:serp_limit]
             break
 
     if rows is None:
@@ -243,15 +303,18 @@ async def search_ads(
     if not rows:
         return []
     hydrated = await _hydrate_captions(rows, country=region)
-    filled = sum(1 for r in hydrated if r.get("text") or r.get("body"))
+    # Filter after hydrate — SERP rows often lack text until detail fetch.
+    matched = filter_ads_by_query(hydrated, query)
+    filled = sum(1 for r in matched if r.get("text") or r.get("body"))
     log.info(
         "tiktok_ads_native_search_captions",
         q=query[:40],
         region=region,
         n=len(hydrated),
+        matched=len(matched),
         with_text=filled,
     )
-    return hydrated
+    return matched[:want]
 
 
 def detail_url(ad_id: str, *, region: str = "GB") -> str:
@@ -276,6 +339,70 @@ def _label_value(html: str, label: str) -> str | None:
     return None
 
 
+def _metric_from_text_nodes(html: str, label: str) -> str | None:
+    """SERP/detail pages often put label and value in consecutive text nodes."""
+    import html as html_lib
+
+    texts = [
+        html_lib.unescape(t).strip()
+        for t in re.findall(r">([^<>]{1,200})<", html or "")
+        if t and t.strip()
+    ]
+    want = label.lower().rstrip(":")
+    skip = {want, "-", "n/a", "na", "—", "–"}
+    for i, t in enumerate(texts):
+        if t.lower().rstrip(":") == want and i + 1 < len(texts):
+            cand = re.sub(r"\s+", " ", texts[i + 1]).strip()
+            if cand and cand.lower() not in skip:
+                return cand
+    return None
+
+
+def _first_label(html: str, *labels: str) -> str | None:
+    for label in labels:
+        for getter in (_label_value, _metric_from_text_nodes):
+            val = getter(html, label)
+            if val:
+                return val
+    return None
+
+
+def _reach_from_html(html: str) -> str | None:
+    """Unique-users / impressions band from detail HTML (search parity)."""
+    for label in (
+        "Unique users seen",
+        "Unique user seen",
+        "Users seen",
+        "Impressions",
+        "Estimated audience",
+    ):
+        val = _first_label(html, label)
+        if val and re.search(r"\d", val):
+            return val
+    for key in (
+        "unique_users_seen",
+        "uniqueUsersSeen",
+        "estimated_audience",
+        "estimatedAudience",
+        "impressions",
+        "impression",
+    ):
+        m = re.search(rf'"{key}"\s*:\s*"([^"]+)"', html or "", re.I)
+        if m and re.search(r"\d", m.group(1)):
+            return m.group(1).strip()
+    m = re.search(
+        r"(?:Unique users seen|Impressions?)[^0-9<>]{0,80}"
+        r"([<>]?\s*[0-9][\d,.]*\s*(?:[-–—]\s*[0-9][\d,.]*\s*)?[KMB]?)",
+        html or "",
+        re.I,
+    )
+    if m:
+        band = re.sub(r"\s+", " ", m.group(1)).strip()
+        if band:
+            return band
+    return None
+
+
 _CAPTION_RE = re.compile(
     r"Ad caption[\s\S]{0,4000}?<div[^>]*>([^<]{1,500})</div>\s*<div[^>]*>\s*Call to action",
     re.I,
@@ -289,7 +416,7 @@ def _caption_from_html(html: str) -> str | None:
         text = re.sub(r"\s+", " ", m.group(1)).strip()
         if text and text not in {"-", "N/A", "n/a"}:
             return text
-    return _label_value(html or "", "Ad caption")
+    return _first_label(html or "", "Ad caption")
 
 
 def extract_ad_details(html: str, *, ad_id: str) -> dict[str, Any] | None:
@@ -299,16 +426,55 @@ def extract_ad_details(html: str, *, ad_id: str) -> dict[str, Any] | None:
     if ad_id not in html and f"Ad ID" not in html:
         return None
 
-    advertiser = _label_value(html, "Advertiser")
+    advertiser = _first_label(html, "Advertiser")
     # Skip section headers that leak through.
     if advertiser and advertiser.lower() in {"advertiser", "ad paid for by"}:
         advertiser = None
-    paid_by = _label_value(html, "Ad paid for by")
-    first_shown = _label_value(html, "First shown")
-    last_shown = _label_value(html, "Last shown")
-    reach = _label_value(html, "Unique users seen")
-    location = _label_value(html, "Advertiser's registered location")
+    paid_by = _first_label(html, "Ad paid for by")
+    first_shown = _first_label(html, "First shown")
+    last_shown = _first_label(html, "Last shown")
+    reach = _reach_from_html(html)
+    location = _first_label(html, "Advertiser's registered location", "Registered location")
     caption = _caption_from_html(html)
+    cta = _first_label(html, "Call to action")
+    if cta and cta.lower() in {"call to action", "cta", "-"}:
+        cta = None
+
+    landing = None
+    for pat in (
+        r'Call to action[\s\S]{0,800}?href="(https?://[^"]+)"',
+        r'"landing_page_url"\s*:\s*"(https?://[^"]+)"',
+        r'"click_url"\s*:\s*"(https?://[^"]+)"',
+        r'"destination_url"\s*:\s*"(https?://[^"]+)"',
+    ):
+        lm = re.search(pat, html or "", re.I)
+        if lm:
+            cand = lm.group(1).replace("&amp;", "&")
+            if "library.tiktok.com" not in cand and "tiktok.com/@" not in cand:
+                landing = cand
+                break
+            if landing is None:
+                landing = cand
+
+    advertiser_id = None
+    for pat in (
+        r'"advertiser_id"\s*:\s*"?(\d{5,})"?',
+        r'"business_id"\s*:\s*"?(\d{5,})"?',
+        r'advertiserId["\s:=]+(\d{5,})',
+    ):
+        am = re.search(pat, html or "", re.I)
+        if am:
+            advertiser_id = am.group(1)
+            break
+
+    advertiser_url = None
+    um = re.search(
+        r'Advertiser[\s\S]{0,400}?href="(https?://(?:www\.)?tiktok\.com/@[^"]+)"',
+        html or "",
+        re.I,
+    )
+    if um:
+        advertiser_url = um.group(1).replace("&amp;", "&")
 
     video_url = None
     vm = re.search(
@@ -340,14 +506,19 @@ def extract_ad_details(html: str, *, ad_id: str) -> dict[str, Any] | None:
         "adId": ad_id,
         "id": ad_id,
         "advertiserName": advertiser or paid_by,
+        "advertiserId": advertiser_id,
+        "advertiserUrl": advertiser_url,
         "payer": paid_by,
         "advertiserLocation": location,
         "adFormat": "video" if video_url else "image",
         "text": caption,
         "body": caption,
+        "cta": cta,
+        "landingUrl": landing,
         "first_shown_date": first_shown,
         "last_shown_date": last_shown,
         "estimatedAudience": reach,
+        "impressions": reach,
         "imageUrls": [m for m in media if "video" not in m.lower() or "cdn" not in m],
         "videoUrl": video_url,
         "media": media,

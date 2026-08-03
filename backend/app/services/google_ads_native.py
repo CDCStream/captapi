@@ -190,6 +190,70 @@ async def _post_suggestions(query: str, limit: int, proxy: str | None) -> dict[s
     return payload
 
 
+def _suggestion_queries(query: str) -> list[str]:
+    """Expand a brand/domain query so ATC returns Inc./regional entities, not one SRL.
+
+    Bare ``nike`` often autocompletes only to ``NIKE SRL``; also querying
+    ``Nike, Inc.`` / ``Nike`` surfaces the parent entity used by company-ads.
+    """
+    q = (query or "").strip()
+    if not q:
+        return []
+    if re.fullmatch(r"AR\d+", q, flags=re.I):
+        return [q.upper() if q.startswith("AR") else q]
+    brand = _brand_from_query(q)
+    out: list[str] = []
+    for candidate in (q, f"{brand.title()}, Inc.", brand.title(), brand):
+        c = (candidate or "").strip()
+        if not c:
+            continue
+        if c.lower() in {x.lower() for x in out}:
+            continue
+        out.append(c)
+    return out
+
+
+async def _merge_suggestions(
+    queries: list[str],
+    *,
+    per_query: int = 30,
+) -> list[dict[str, Any]] | None:
+    """Run SearchSuggestions for each query; merge by AR id. None = all tiers failed."""
+    merged: dict[str, dict[str, Any]] = {}
+    any_ok = False
+    for search_q in queries:
+        got_page = False
+        for tier, proxy in _proxy_tiers():
+            payload = await _post_suggestions(search_q, per_query, proxy)
+            if payload is None:
+                continue
+            any_ok = True
+            got_page = True
+            parsed = _parse_suggestions(payload, limit=per_query, country=None)
+            for adv in parsed:
+                prev = merged.get(adv["id"])
+                if prev is None:
+                    merged[adv["id"]] = adv
+                else:
+                    # Keep richer adsCount / country when a later query has them.
+                    if adv.get("adsCount") and not prev.get("adsCount"):
+                        prev["adsCount"] = adv["adsCount"]
+                    if adv.get("country") and not prev.get("country"):
+                        prev["country"] = adv["country"]
+            log.info(
+                "google_ads_suggestions_ok",
+                tier=tier,
+                count=len(parsed),
+                q=search_q[:40],
+            )
+            break
+        if not got_page and not any_ok:
+            continue
+    if not any_ok:
+        return None
+    return list(merged.values())
+
+
 async def search_advertisers(
     query: str,
     *,
@@ -198,6 +262,10 @@ async def search_advertisers(
 ) -> list[dict[str, Any]] | None:
     """Search advertisers via Google ATC SearchSuggestions.
 
+    Expands brand queries (same family as company-ads resolve) and ranks with
+    ``_rank_advertisers`` so ``q=nike&country=US`` returns Nike, Inc. ahead of
+    NIKE SRL, plus sibling entities the caller can pick for company-ads.
+
     Returns a list of ``{id, name, url, country?, adsCount?}`` or ``None`` when
     every transport tier fails (caller should fall back to Apify).
     """
@@ -205,30 +273,20 @@ async def search_advertisers(
     if len(q) < 2:
         return []
 
-    tiers: list[tuple[str, str | None]] = [
-        ("datacenter", proxy_for("datacenter")),
-        ("residential", proxy_for("residential")),
-        ("direct", None),
-    ]
-    # Skip duplicate None proxies.
-    seen_proxy: set[str | None] = set()
-    for tier, proxy in tiers:
-        if proxy in seen_proxy and proxy is not None:
-            continue
-        if proxy is None and tier != "direct":
-            continue
-        seen_proxy.add(proxy)
-        payload = await _post_suggestions(q, limit, proxy)
-        if payload is None:
-            continue
-        rows = _parse_suggestions(payload, limit=limit, country=country)
-        if rows:
-            log.info("google_ads_suggestions_ok", tier=tier, count=len(rows), q=q[:40])
-            return rows
-        # Empty but valid response — still a success (no matches).
-        if isinstance(payload, dict) and "1" in payload:
-            return []
-    return None
+    want = max(1, min(int(limit), 50))
+    raw = await _merge_suggestions(_suggestion_queries(q), per_query=30)
+    if raw is None:
+        return None
+    ranked = _rank_advertisers(raw, query=q, country=country)
+    log.info(
+        "google_ads_search_ranked",
+        q=q[:40],
+        country=(country or "").upper(),
+        candidates=len(raw),
+        returned=min(want, len(ranked)),
+        top=(ranked[0].get("name") if ranked else None),
+    )
+    return ranked[:want]
 
 
 def _proxy_tiers() -> list[tuple[str, str | None]]:
@@ -308,6 +366,64 @@ def _extract_urls(blob: str) -> list[str]:
     return out
 
 
+_GOOGLE_CDN_HINTS = (
+    "googlesyndication.com",
+    "googleusercontent.com",
+    "gstatic.com",
+    "adstransparency.google.com",
+    "google.com/aclk",
+    "doubleclick.net",
+    "displayads-formats",
+)
+
+
+def _extract_landing_url(blob: str) -> str | None:
+    """Best-effort destination URL from ATC creative payload JSON."""
+    if not blob:
+        return None
+    for pat in (
+        r'"(?:finalUrl|destinationUrl|clickUrl|landingUrl|exitUrl)"\s*:\s*"(https?://[^"]+)"',
+        r'"(?:final_url|destination_url|click_url)"\s*:\s*"(https?://[^"]+)"',
+    ):
+        m = re.search(pat, blob, re.I)
+        if m:
+            url = m.group(1).replace("\\u003d", "=").replace("\\/", "/")
+            if not any(h in url for h in _GOOGLE_CDN_HINTS):
+                return url
+    for url in re.findall(r"https?://[^\s\\\"'<>]+", blob):
+        url = url.rstrip("\\").rstrip(")").replace("\\u003d", "=").replace("\\/", "/")
+        if any(h in url for h in _GOOGLE_CDN_HINTS):
+            continue
+        if url.endswith((".jpg", ".jpeg", ".png", ".webp", ".gif", ".mp4", ".js", ".css")):
+            continue
+        return url
+    return None
+
+
+def _extract_creative_text(blob: str) -> tuple[str | None, str | None]:
+    """Return (body, headline) when ATC embeds copy in the creative archive."""
+    if not blob:
+        return None, None
+    body = None
+    headline = None
+    for pat in (
+        r'"(?:adText|description|body|bodyText)"\s*:\s*"([^"]{2,500})"',
+        r'"(?:text)"\s*:\s*"([^"]{2,500})"',
+    ):
+        m = re.search(pat, blob, re.I)
+        if m:
+            body = m.group(1).encode("utf-8").decode("unicode_escape", errors="ignore")
+            break
+    for pat in (
+        r'"(?:headline|title|adTitle)"\s*:\s*"([^"]{2,200})"',
+    ):
+        m = re.search(pat, blob, re.I)
+        if m:
+            headline = m.group(1).encode("utf-8").decode("unicode_escape", errors="ignore")
+            break
+    return body, headline
+
+
 def _creative_format(row: dict[str, Any], media: list[str], html: str) -> str:
     kind = row.get("13")
     if kind == 7 or media:
@@ -327,6 +443,8 @@ def _to_normalize_shape(row: dict[str, Any]) -> dict[str, Any] | None:
     html = json.dumps(row.get("3") or {}, ensure_ascii=False)
     media = _extract_urls(html)
     name = str(row.get("12") or "").strip() or None
+    body, headline = _extract_creative_text(html)
+    landing = _extract_landing_url(html)
     return {
         "creativeId": creative_id,
         "adCreativeId": creative_id,
@@ -341,6 +459,9 @@ def _to_normalize_shape(row: dict[str, Any]) -> dict[str, Any] | None:
             if adv_id
             else f"https://adstransparency.google.com/creative/{creative_id}"
         ),
+        "text": body,
+        "headline": headline,
+        "landingUrl": landing,
         "adFormat": _creative_format(row, media, html),
         "firstShown": _ts_iso(row.get("6")),
         "lastShown": _ts_iso(row.get("7")),
@@ -354,9 +475,17 @@ def _rank_advertisers(
 ) -> list[dict[str, Any]]:
     brand = _brand_from_query(query).lower()
     q_norm = query.strip().lower().removeprefix("www.")
+    if q_norm.endswith(".com") or _looks_like_domain(query):
+        q_norm = brand
     want = (country or "").strip().upper()
     corp_re = re.compile(
         r"\b(inc\.?|ltd\.?|llc|gmbh|b\.?v\.?|s\.?r\.?l\.?|corp\.?|company|co\.)\b",
+        re.I,
+    )
+    # Prefer US-style entities when country=US; demote EU subsidiaries (SRL/BV).
+    us_corp_re = re.compile(r"\b(inc\.?|llc|corp\.?)\b", re.I)
+    eu_corp_re = re.compile(
+        r"\b(s\.?r\.?l\.?|b\.?v\.?|gmbh|s\.?a\.?s\.?|oyj?|ab|ag|nv)\b",
         re.I,
     )
     person_re = re.compile(r"^[A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,2}$")
@@ -365,14 +494,29 @@ def _rank_advertisers(
         raw_name = adv.get("name") or ""
         name = raw_name.lower()
         ads = int(adv.get("adsCount") or 0)
-        exact = 1 if name in {q_norm, brand, f"{brand}, inc."} else 0
+        exact = 1 if name in {q_norm, brand, f"{brand}, inc.", f"{brand} inc."} else 0
+        inc_exact = 1 if name in {f"{brand}, inc.", f"{brand} inc."} else 0
         corp = 1 if corp_re.search(raw_name) else 0
+        us_corp = 1 if want == "US" and us_corp_re.search(raw_name) else 0
+        eu_pen = 1 if want == "US" and eu_corp_re.search(raw_name) else 0
         brand_word = 1 if brand and re.search(rf"\b{re.escape(brand)}\b", name) else 0
         starts = 1 if name.startswith(brand) else 0
         contains = 1 if brand and brand in name else 0
         country_hit = 1 if want and adv.get("country") == want else 0
         personish = 1 if person_re.match(raw_name) and not corp else 0
-        return (exact, corp, brand_word, starts, contains, country_hit, ads, -personish)
+        return (
+            exact,
+            inc_exact,
+            us_corp,
+            brand_word,
+            corp,
+            starts,
+            contains,
+            country_hit,
+            ads,
+            -eu_pen,
+            -personish,
+        )
 
     return sorted(rows, key=score, reverse=True)
 
@@ -513,47 +657,30 @@ async def resolve_advertisers(
         return {"ids": [aid], "adsCountEstimate": None, "name": None}
 
     brand = _brand_from_query(q)
-    if _looks_like_domain(q):
-        queries = [f"{brand.title()}, Inc.", brand.title(), brand]
-    else:
-        queries = [q]
-
-    raw: list[dict[str, Any]] | None = None
-    merged: dict[str, dict[str, Any]] = {}
+    queries = _suggestion_queries(q)
     corp_re = re.compile(
         r"\b(inc\.?|ltd\.?|llc|gmbh|b\.?v\.?|s\.?r\.?l\.?|corp\.?|company|co\.)\b",
         re.I,
     )
-    for search_q in queries:
-        for tier, proxy in _proxy_tiers():
-            payload = await _post_suggestions(search_q, 30, proxy)
-            if payload is None:
-                continue
-            parsed = _parse_suggestions(payload, limit=30, country=None)
-            for adv in parsed:
-                merged.setdefault(adv["id"], adv)
-            raw = list(merged.values())
-            log.info(
-                "google_ads_resolve_suggestions",
-                tier=tier,
-                count=len(parsed),
-                q=search_q[:40],
-            )
-            break
-        # Domains: stop once we have a corporate brand match with volume.
-        if raw and _looks_like_domain(q):
-            ranked_early = _rank_advertisers(raw, query=q, country=country)
-            top = ranked_early[0] if ranked_early else None
-            if (
-                top
-                and corp_re.search(top.get("name") or "")
-                and brand.lower() in (top.get("name") or "").lower()
-                and int(top.get("adsCount") or 0) >= 50
-            ):
-                break
+    raw = await _merge_suggestions(queries, per_query=30)
     if raw is None:
         return None
-    ranked = _rank_advertisers(raw, query=q, country=country)
+    # Domains / brands: if top Inc. already has volume, we still rank the full set.
+    ranked_early = _rank_advertisers(raw, query=q, country=country)
+    top_early = ranked_early[0] if ranked_early else None
+    if (
+        top_early
+        and corp_re.search(top_early.get("name") or "")
+        and brand.lower() in (top_early.get("name") or "").lower()
+        and int(top_early.get("adsCount") or 0) >= 50
+    ):
+        log.info(
+            "google_ads_resolve_early",
+            q=q[:40],
+            top=top_early.get("name"),
+            ads=top_early.get("adsCount"),
+        )
+    ranked = ranked_early
     ids: list[str] = []
     for adv in ranked:
         aid = adv["id"]
@@ -914,4 +1041,5 @@ async def fetch_company_ads(
         "hasMore": next_cursor is not None,
         "adsCountEstimate": meta.get("adsCountEstimate"),
         "resolvedName": meta.get("name"),
+        "resolvedId": ids[0] if ids else None,
     }

@@ -1,6 +1,8 @@
 """Native Facebook profile/page photos via Decodo.
 
-Scroll ``/photos`` and collect ``Photo`` Relay nodes (viewer_image + caption).
+Scroll ``/photos`` and collect ``Photo`` Relay nodes (viewer_image +
+accessibility_caption). Facebook's photos surface does not expose a true post
+caption, publish time, or engagement — only alt-text when present.
 No Apify.
 """
 
@@ -69,6 +71,12 @@ def _walk(obj: Any, out: list[dict[str, Any]], depth: int = 0) -> None:
             _walk(value, out, depth + 1)
 
 
+def _image_uri(block: Any) -> str | None:
+    if isinstance(block, dict):
+        return safe_str(block.get("uri") or block.get("url"))
+    return None
+
+
 def _from_photo_node(node: dict[str, Any]) -> dict[str, Any] | None:
     pid = safe_str(node.get("id"))
     if not pid:
@@ -77,28 +85,42 @@ def _from_photo_node(node: dict[str, Any]) -> dict[str, Any] | None:
     image = node.get("image") if isinstance(node.get("image"), dict) else {}
     photo_image = node.get("photo_image") if isinstance(node.get("photo_image"), dict) else {}
     uri = (
-        safe_str(viewer.get("uri"))
-        or safe_str(image.get("uri"))
-        or safe_str(photo_image.get("uri"))
+        _image_uri(viewer)
+        or _image_uri(image)
+        or _image_uri(photo_image)
     )
     width = safe_int(viewer.get("width") or image.get("width") or photo_image.get("width"))
     height = safe_int(viewer.get("height") or image.get("height") or photo_image.get("height"))
-    caption = safe_str(node.get("accessibility_caption") or node.get("caption"))
-    if not uri and not caption:
+    # This is Facebook's accessibility / alt-text — NOT a user-written caption.
+    accessibility = safe_str(
+        node.get("accessibility_caption")
+        or node.get("accessibilityCaption")
+        or node.get("alt_text")
+        or node.get("altText")
+    )
+    thumb = (
+        _image_uri(node.get("thumbnailImage") or node.get("thumbnail_image"))
+        or _image_uri(node.get("preferred_thumbnail") or node.get("preferredThumbnail"))
+        or _image_uri(node.get("small_image") or node.get("smallImage"))
+    )
+    if not uri and not accessibility:
         return None
     url = f"https://www.facebook.com/photo.php?fbid={pid}"
-    return {
+    out: dict[str, Any] = {
         "id": pid,
         "photoId": pid,
         "url": url,
         "photoUrl": url,
         "imageUrl": uri,
         "image": uri,
-        "caption": caption,
-        "text": caption,
+        "accessibilityCaption": accessibility,
         "width": width,
         "height": height,
     }
+    if thumb and thumb != uri:
+        out["thumbnailUrl"] = thumb
+        out["thumbnail"] = thumb
+    return out
 
 
 async def profile_photos_native(url: str, limit: int) -> list[dict[str, Any]] | None:

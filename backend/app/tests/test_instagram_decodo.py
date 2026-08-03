@@ -63,7 +63,8 @@ def test_post_mapper_preserves_public_contract() -> None:
     assert post["id"] == "ABC"
     assert post["caption"] == "hello @NASAHubble @NASAHubble"
     assert post["postType"] == "Image"
-    assert post["productType"] is None
+    # Empty productType is stripped (never return "" / null on Image).
+    assert "productType" not in post
     # Timestamps use the ISO "Z" suffix, matching the native feed mapper so a
     # mixed Decodo+native page never returns two datetime formats.
     assert post["publishedAt"] == "2023-11-14T22:13:20Z"
@@ -85,7 +86,7 @@ def test_pick_video_views_drops_impossible_graphql_view_count() -> None:
     assert views is None
     assert plays is None
 
-    # Prefer play_count when present (native feed). GraphQL undercount ignored.
+    # Reject undercount view_count; fall back views to play_count; plays always set.
     views, plays = decodo.pick_video_views(
         view_count=112_487,
         play_count=13_000_000,
@@ -93,7 +94,7 @@ def test_pick_video_views_drops_impossible_graphql_view_count() -> None:
         is_video=True,
     )
     assert views == 13_000_000
-    assert plays is None
+    assert plays == 13_000_000
 
 
 def test_feed_play_metrics_per_item_no_zip() -> None:

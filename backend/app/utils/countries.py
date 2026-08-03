@@ -6,6 +6,8 @@ to the code itself via :func:`country_name`.
 """
 from __future__ import annotations
 
+import re
+
 # Compact "CODE:Name" table (kept as one string to stay maintainable); parsed
 # into COUNTRY_NAMES at import time.
 _TABLE = (
@@ -69,6 +71,30 @@ COUNTRY_NAMES: dict[str, str] = {
     for code, name in [pair.split(":", 1)]
 }
 
+# Reverse lookup (lowercased English name → ISO). Plus common ATC aliases.
+_NAME_TO_CODE: dict[str, str] = {name.lower(): code for code, name in COUNTRY_NAMES.items()}
+_NAME_TO_CODE.update(
+    {
+        "united states of america": "US",
+        "usa": "US",
+        "u.s.": "US",
+        "u.s.a.": "US",
+        "uk": "GB",
+        "great britain": "GB",
+        "england": "GB",
+        "czech republic": "CZ",
+        "russia": "RU",
+        "south korea": "KR",
+        "north korea": "KP",
+        "vietnam": "VN",
+        "taiwan": "TW",
+        "hong kong": "HK",
+        "uae": "AE",
+        "holland": "NL",
+        "the netherlands": "NL",
+    }
+)
+
 
 def country_name(code: str | None) -> str | None:
     """English country name for an ISO-3166 alpha-2 code, or the code itself
@@ -77,4 +103,16 @@ def country_name(code: str | None) -> str | None:
         return None
     code = code.strip().upper()
     return COUNTRY_NAMES.get(code, code)
+
+
+def country_code_from_name(name: str | None) -> str | None:
+    """Best-effort English country name → ISO-3166 alpha-2. Already-ISO passes through."""
+    if not name:
+        return None
+    raw = str(name).strip()
+    if not raw:
+        return None
+    if re.fullmatch(r"[A-Za-z]{2}", raw):
+        return raw.upper()
+    return _NAME_TO_CODE.get(raw.lower())
 

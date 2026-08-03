@@ -592,7 +592,7 @@ const FACEBOOK_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
   },
   { tool: "facebook_ad_library_company_ads", name: "Facebook Company Ads", path: "/v1/ad-library/facebook/company-ads", credits: 2, summary: "Ads for a Facebook page or Meta Ad Library URL.", params: [url("Facebook page URL or Meta Ad Library URL."), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
   { tool: "facebook_ad_library_search_companies", name: "Facebook Ad Library Search Companies", path: "/v1/ad-library/facebook/search-companies", credits: 2, summary: "Find advertisers/pages in the Meta Ad Library by name.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(20, 200)] },
-  { tool: "facebook_ad_library_ad_details", name: "Facebook Ad Details", path: "/v1/ad-library/facebook/ad-details", credits: 17, summary: "Meta/Facebook ad details.", params: [url("Meta Ad Library ad URL.")] },
+  { tool: "facebook_ad_library_ad_details", name: "Facebook Ad Details", path: "/v1/ad-library/facebook/ad-details", credits: 2, summary: "Meta/Facebook ad details.", params: [url("Meta Ad Library ad URL.")] },
   { tool: "facebook_ad_library_ad_transcript", name: "Facebook Ad Transcript", path: "/v1/ad-library/facebook/ad-transcript", credits: 17, summary: "Extract creative text from a Meta/Facebook ad as transcript text.", params: [url("Meta Ad Library ad URL or ad ID.")] },
 ];
 
@@ -615,12 +615,12 @@ const TIKTOK_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
       limit(20, 100),
     ],
   },
-  { tool: "tiktok_ad_library_ad_details", name: "TikTok Ad Details", path: "/v1/ad-library/tiktok/ad-details", credits: 17, summary: "TikTok ad details by ad URL or ID.", params: [url("TikTok Ad Library URL or ad ID."), { name: "country", type: "string", required: false, description: "ISO country code. Default GB." }] },
+  { tool: "tiktok_ad_library_ad_details", name: "TikTok Ad Details", path: "/v1/ad-library/tiktok/ad-details", credits: 2, summary: "TikTok ad details by ad URL or ID.", params: [url("TikTok Ad Library URL or ad ID."), { name: "country", type: "string", required: false, description: "ISO country code. Default GB." }] }
 ];
 
 const GOOGLE_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
   { tool: "google_ad_library_company_ads", name: "Google Company Ads", path: "/v1/ad-library/google/company-ads", credits: 2, summary: "List Google Ads Transparency creatives for an advertiser (name, domain, or AR id) with media, cursor paging, and optional date filters. Public commercial ads only.", params: [{ name: "advertiser", type: "string", required: true, description: "Advertiser name, domain (e.g. nike.com), or AR id." }, { name: "country", type: "string", required: false, description: "ISO country / region code. Default US." }, { name: "region", type: "string", required: false, description: "Alias for country." }, { name: "start_date", type: "string", required: false, description: "YYYY-MM-DD overlap filter start." }, { name: "end_date", type: "string", required: false, description: "YYYY-MM-DD overlap filter end." }, { name: "cursor", type: "string", required: false, description: "Pagination cursor from nextCursor." }, { name: "limit", type: "number", required: false, description: "Max results per page (default 20, max 200)." }, { name: "cache", type: "boolean", required: false, description: "Serve from 24h cache when available." }] },
-  { tool: "google_ad_library_ad_details", name: "Google Ad Details", path: "/v1/ad-library/google/ad-details", credits: 17, summary: "Google ad details by Transparency Center URL.", params: [{ name: "creative_id", type: "string", required: true, description: "Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID." }, { name: "country", type: "string", required: false, description: "ISO country code. Default US." }] },
+  { tool: "google_ad_library_ad_details", name: "Google Ad Details", path: "/v1/ad-library/google/ad-details", credits: 2, summary: "Google ad details by Transparency Center URL.", params: [{ name: "creative_id", type: "string", required: true, description: "Google Ads Transparency Center URL containing AR advertiser ID and CR creative ID." }, { name: "country", type: "string", required: false, description: "ISO country code. Default US." }] },
   { tool: "google_ad_library_advertiser_search", name: "Google Advertiser Search", path: "/v1/ad-library/google/advertiser-search", credits: 1, summary: "Search Google Ads advertisers.", params: [q(), { name: "country", type: "string", required: false, description: "ISO country code. Default US." }, limit(10, 50)] },
 ];
 
@@ -643,7 +643,7 @@ const LINKEDIN_AD_LIBRARY: Omit<Endpoint, "platform">[] = [
       limit(20, 200),
     ],
   },
-  { tool: "linkedin_ad_library_ad_details", name: "LinkedIn Ad Details", path: "/v1/ad-library/linkedin/ad-details", credits: 17, summary: "LinkedIn ad details by URL or ID.", params: [url("LinkedIn Ad Library URL or ad ID.")] },
+  { tool: "linkedin_ad_library_ad_details", name: "LinkedIn Ad Details", path: "/v1/ad-library/linkedin/ad-details", credits: 2, summary: "LinkedIn ad details by URL or ID.", params: [url("LinkedIn Ad Library URL or ad ID.")] },
 ];
 
 function withPlatform(

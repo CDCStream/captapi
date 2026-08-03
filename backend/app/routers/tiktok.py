@@ -27,6 +27,7 @@ from app.services.openai_client import (
 )
 from app.services import tiktok_native
 from app.utils.retry import retry_none
+from app.core.cache_params import CACHE_MAX_AGE_DESC, resolve_cache_options
 from app.services.tiktok_native import (
     AUTHOR_NULLABLE_KEYS,
     ENGAGEMENT_RATE_BASIS,
@@ -38,6 +39,7 @@ from app.services.tiktok_native import (
     comment_replies_native,
     creator_engagement_rate,
     extract_bio_contact,
+    hydrate_creators_trust,
     _collect_hashtags,
     _collect_mentions,
     hashtag_posts_native,
@@ -148,6 +150,8 @@ RATE_TREND_MARGIN = 1.4
 # Center fallthrough stays per-result (RATE_TREND_MARGIN). SC bills ~1 credit
 # for TCM-backed /creators/popular; we are not that source.
 CREDIT_POPULAR_CREATORS_NATIVE = 2
+# Creative Center trend charts (hashtags / songs / creators) — one Decodo XHR.
+CREDIT_CC_TREND = 2
 
 # Reply scraper crawls a video's comments to find one comment's replies, and is
 # billed per ROW pushed (comment or reply) at $2.40/1k = $0.0024/row. We
@@ -464,7 +468,13 @@ def _normalize(item: dict) -> dict:
     caption = safe_str(item.get("text") or item.get("desc"))
     # Metadata+stats only — CDN play URLs are IP/cookie-bound (usually 403),
     # so we omit videoUrl rather than always returning null.
-    return {
+    from app.services.tiktok_native import extract_shop_product_url
+
+    author_region = safe_str(author.get("region") or author.get("regionCode"))
+    author_out = build_author(author, author_stats=stats if isinstance(stats, dict) else None)
+    if author_region:
+        author_out["region"] = author_region
+    out = {
         "platform": "tiktok",
         "url": safe_str(item.get("webVideoUrl") or item.get("url")),
         "id": safe_str(item.get("id") or item.get("videoId")),
@@ -476,7 +486,7 @@ def _normalize(item: dict) -> dict:
             or video_meta.get("originalCoverUrl")
             or (covers[0] if covers else None)
         ),
-        "author": build_author(author, author_stats=stats if isinstance(stats, dict) else None),
+        "author": author_out,
         "engagement": _tt_coerce_engagement(
             {
                 "views": item.get("playCount") or stats.get("playCount"),
@@ -489,6 +499,16 @@ def _normalize(item: dict) -> dict:
         "hashtags": _tt_hashtags(item, caption),
         "mentions": _tt_mentions(item),
         "musicName": _music_name(item, music),
+        "region": safe_str(
+            item.get("region") or item.get("locationCreated") or item.get("location_created")
+        ),
+        "authorRegion": author_region,
+        "descLanguage": safe_str(
+            item.get("descLanguage")
+            or item.get("desc_language")
+            or item.get("textLanguage")
+            or item.get("text_language")
+        ),
         "isAd": bool(item.get("isAd") or item.get("is_ad")),
         "isPaidPartnership": bool(
             item.get("isPaidPartnership")
@@ -497,6 +517,16 @@ def _normalize(item: dict) -> dict:
             or item.get("is_paid_content")
         ),
     }
+    shop = extract_shop_product_url(item) or safe_str(item.get("shopProductUrl") or item.get("shop_product_url"))
+    if shop:
+        out["shopProductUrl"] = shop
+    if item.get("isEligibleForCommission") is not None or item.get("is_eligible_for_commission") is not None:
+        out["isEligibleForCommission"] = bool(
+            item.get("isEligibleForCommission")
+            if item.get("isEligibleForCommission") is not None
+            else item.get("is_eligible_for_commission")
+        )
+    return out
 
 
 def _music_name_from_url(url: str | None) -> str | None:
@@ -1149,13 +1179,18 @@ async def tiktok_comments(
         return ApiResponse(data=data)
 
 
-@router.get("/channel-details", summary="TikTok profile / channel info")
+@router.get(
+    "/channel-details",
+    summary="TikTok profile — createTime, bioLink.risk, Shop/commerce, contact",
+)
 async def tiktok_channel_details(
     url: str = Query(..., description="TikTok profile URL, @handle, or username"),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the default cache TTL. Default false — always fetch fresh."),
+    cacheMaxAge: str | None = Query(None, description=CACHE_MAX_AGE_DESC),
     caller: ApiCaller = Depends(require_api_key),
 ):
     handle = _require_tiktok_profile(url)
+    use_cache, ttl = resolve_cache_options(cache, cacheMaxAge)
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/channel-details",
@@ -1173,10 +1208,11 @@ async def tiktok_channel_details(
 
         data = await cached_or_run(
             endpoint="tiktok.channel-details",
-            params={"url": url, "v": 3},
+            params={"url": url, "v": 4, "cacheMaxAge": cacheMaxAge},
             runner=_run,
             ctx=ctx,
-            use_cache=cache,
+            use_cache=use_cache,
+            ttl=ttl,
         )
         return ApiResponse(data=data)
 
@@ -1662,26 +1698,31 @@ async def tiktok_search_suggestions(
 
 @router.get(
     "/popular-creators",
-    summary="Popular TikTok creators by feed market",
+    summary="Popular TikTok creators (Creative Center)",
     description=(
-        "Ranks creators appearing in a market's For You feed, then hydrates "
-        "profile stats. engagementRate is (avg likes per video)/followers×100 "
-        "(see engagementRateBasis) — not lifetime likes÷followers. "
-        "This is not TikTok Creator Marketplace (no tcm_id / audienceCountry); "
-        "country is the feed market you query, not audience geography."
+        "TikTok Creative Center creator chart "
+        "(ads.tiktok.com/business/creativecenter/inspiration/popular/creator). "
+        "engagementRate is TikTok's official interact rate when exposed "
+        "(engagementRateBasis=creative_center). Falls back to For You feed "
+        "hydrate, then Apify. Flat 2 credits on Creative Center / FYP native."
     ),
 )
 async def tiktok_popular_creators(
     country: str = Query("US", min_length=2, max_length=2),
     sort: str = Query("follower", pattern="^(follower|engagement|popularity)$"),
-    follower_count: str | None = Query(None, description="Optional range: 10k-100k, 100k-1m, 1m-10m, >10m"),
+    follower_count: str | None = Query(None, description="Optional range: 10k-100k, 100k-1m, 1m-10m, >10m (FYP/Apify fallthrough)"),
+    page: int = Query(1, ge=1, le=20, description="Creative Center page (default 1)."),
     limit: int = Query(20, ge=1, le=100),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the default cache TTL. Default false — always fetch fresh."),
+    cacheMaxAge: str | None = Query(None, description=CACHE_MAX_AGE_DESC),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    from app.services import tiktok_creative_center_trends as cc_trends
+
     settings = get_settings()
-    # Reserve Apify worst-case; native path overrides to flat CREDIT_POPULAR_CREATORS_NATIVE.
-    cost = _scaled_credits(limit, RATE_TREND_MARGIN, CREDIT_POPULAR_CREATORS_NATIVE)
+    use_cache, ttl = resolve_cache_options(cache, cacheMaxAge)
+    # Reserve Apify worst-case; native path overrides to flat CREDIT_CC_TREND.
+    cost = _scaled_credits(limit, RATE_TREND_MARGIN, CREDIT_CC_TREND)
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/popular-creators",
@@ -1690,6 +1731,18 @@ async def tiktok_popular_creators(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
+            cc = await cc_trends.search_popular_creators(
+                country=country.upper(),
+                page=page,
+                limit=limit,
+                sort=sort,
+            )
+            if cc and cc.get("creators"):
+                ctx["source"] = "direct"
+                creators = await hydrate_creators_trust(list(cc["creators"]))
+                cc = {**cc, "creators": creators, "totalReturned": len(creators)}
+                return cc
+
             native = await popular_creators_native(
                 country.upper(),
                 sort=sort,
@@ -1706,13 +1759,12 @@ async def tiktok_popular_creators(
                     "totalReturned": len(native),
                     "creators": native,
                     "note": (
-                        "Ranked from this market's For You feed + profile hydrate. "
-                        "Not Creator Marketplace — no tcm_id or audienceCountry filter."
+                        "Creative Center unavailable — ranked from this market's "
+                        "For You feed + profile hydrate. engagementRate uses "
+                        f"{ENGAGEMENT_RATE_BASIS}."
                     ),
                 }
 
-            # Creative Center trends actor: only trendType/countryCode/maxResults
-            # are supported; sort/follower filters apply to fallback actors only.
             run_input: dict[str, Any] = {
                 "trendType": "creator",
                 "countryCode": country.upper(),
@@ -1743,6 +1795,7 @@ async def tiktok_popular_creators(
             ]
             if not creators:
                 raise HTTPException(status_code=404, detail="No popular creators found for this country")
+            creators = await hydrate_creators_trust(creators)
             ctx["source"] = "apify"
             return {
                 "platform": "tiktok",
@@ -1751,10 +1804,7 @@ async def tiktok_popular_creators(
                 "source": "apify",
                 "totalReturned": len(creators),
                 "creators": creators,
-                "note": (
-                    "Fallthrough list — still not Creator Marketplace. "
-                    "No tcm_id or audienceCountry filter."
-                ),
+                "note": "Apify fallthrough — Creative Center + FYP unavailable.",
             }
 
         data = await cached_or_run(
@@ -1763,18 +1813,21 @@ async def tiktok_popular_creators(
                 "country": country.upper(),
                 "sort": sort,
                 "follower_count": follower_count or "",
+                "page": page,
                 "limit": limit,
-                "v": 8,
+                "v": 10,
+                "cacheMaxAge": cacheMaxAge,
             },
             runner=_run,
             ctx=ctx,
-            use_cache=cache,
+            use_cache=use_cache,
+            ttl=ttl,
         )
         if ctx.get("source") == "direct":
-            ctx["credits_override"] = CREDIT_POPULAR_CREATORS_NATIVE
+            ctx["credits_override"] = CREDIT_CC_TREND
         else:
             ctx["credits_override"] = _scaled_credits(
-                len(data["creators"]), RATE_TREND_MARGIN, CREDIT_POPULAR_CREATORS_NATIVE
+                len(data["creators"]), RATE_TREND_MARGIN, CREDIT_CC_TREND
             )
         return ApiResponse(data=data)
 
@@ -2808,22 +2861,72 @@ async def tiktok_song_details(
         return ApiResponse(data=data)
 
 
-@router.get("/trending-feed", summary="TikTok trending (For You) feed by region")
+@router.get(
+    "/trending-feed",
+    summary="TikTok trending feed (For You or Creative Center popular)",
+    description=(
+        "Default: For You / recommend feed with engagement, rank, and author. "
+        "Pass orderBy, period, page, or countryCode to switch to TikTok Creative "
+        "Center popular videos (SC videos/popular filters) — same rich item shape "
+        "when hydration succeeds, plus pagination.totalCount (typically 500)."
+    ),
+)
 async def tiktok_trending_feed(
     country: str = Query(
         "US",
         min_length=2,
         max_length=2,
         description=(
-            "ISO country code used as a region hint (e.g. US, TR). "
-            "You see content available in that market — not only creators from that country."
+            "ISO country code (alias of countryCode). For You: region-availability "
+            "hint. Creative Center mode: chart market."
         ),
     ),
-    limit: int = Query(20, ge=1, le=200, description="Max items to return (default 20, max 200). Flat 2 credits per call."),
+    countryCode: str | None = Query(
+        None,
+        min_length=2,
+        max_length=2,
+        description="Alias of country (SC-compatible). Wins when both are set.",
+    ),
+    limit: int = Query(
+        20,
+        ge=1,
+        le=200,
+        description="Max items (default 20). Creative Center caps at 20/page. Flat 2 credits.",
+    ),
+    orderBy: str | None = Query(
+        None,
+        description=(
+            "Creative Center sort: hot (views), like, comment, repost. "
+            "When set (or period/page>1), uses the popular-videos chart instead of For You."
+        ),
+    ),
+    period: int | None = Query(
+        None,
+        description="Creative Center lookback days: 7, 30, or 120 (180→120). Triggers chart mode.",
+    ),
+    page: int = Query(
+        1,
+        ge=1,
+        le=25,
+        description="Creative Center page (default 1). page>1 triggers chart mode.",
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    # Native-only For You feed — flat fee.
+    from app.services import tiktok_creative_center_trends as cc_trends
+    from app.utils.media_urls import utc_now_iso
+
+    region = (countryCode or country or "US").strip().upper()
+    chart_mode = bool(orderBy) or period is not None or page > 1
+    order_by_cc = "vv"
+    period_days = 7
+    if chart_mode:
+        try:
+            order_by_cc = cc_trends.normalize_video_order_by(orderBy or "hot")
+            period_days = cc_trends.normalize_trend_period(period if period is not None else 7)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/trending-feed",
@@ -2831,17 +2934,102 @@ async def tiktok_trending_feed(
         resource_url=None,
         base_credits=CREDIT_SEARCH,
     ) as ctx:
+        async def _hydrate_cc(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+            """Best-effort video-details overlay so CC rows keep Captapi richness."""
+            sem = asyncio.Semaphore(4)
+
+            async def one(row: dict[str, Any]) -> dict[str, Any]:
+                url = safe_str(row.get("url"))
+                if not url:
+                    return row
+                async with sem:
+                    try:
+                        detail = await video_details_native(url)
+                    except Exception:  # noqa: BLE001
+                        return row
+                if not detail:
+                    return row
+                eng = detail.get("engagement") if isinstance(detail.get("engagement"), dict) else {}
+                author = detail.get("author") if isinstance(detail.get("author"), dict) else {}
+                merged = {
+                    **row,
+                    "caption": detail.get("caption") or row.get("caption"),
+                    "publishedAt": detail.get("publishedAt") or row.get("publishedAt"),
+                    "createTime": detail.get("createTime") or row.get("createTime"),
+                    "mediaType": detail.get("mediaType") or row.get("mediaType"),
+                    "durationSeconds": detail.get("durationSeconds")
+                    if detail.get("durationSeconds") is not None
+                    else row.get("durationSeconds"),
+                    "coverUrl": detail.get("thumbnailUrl") or row.get("coverUrl"),
+                    "thumbnailUrl": detail.get("thumbnailUrl") or row.get("thumbnailUrl"),
+                    "videoUrl": detail.get("videoUrl") or row.get("videoUrl"),
+                    "author": author.get("username") or row.get("author"),
+                    "authorId": author.get("id") or row.get("authorId"),
+                    "secUid": author.get("secUid") or row.get("secUid"),
+                    "authorName": author.get("displayName") or row.get("authorName"),
+                    "views": eng.get("views") if eng.get("views") is not None else row.get("views"),
+                    "likes": eng.get("likes") if eng.get("likes") is not None else row.get("likes"),
+                    "comments": eng.get("comments")
+                    if eng.get("comments") is not None
+                    else row.get("comments"),
+                    "shares": eng.get("shares")
+                    if eng.get("shares") is not None
+                    else row.get("shares"),
+                    "saves": eng.get("saves") if eng.get("saves") is not None else row.get("saves"),
+                    "isAd": bool(detail.get("isAd")) if detail.get("isAd") is not None else row.get("isAd"),
+                }
+                return {k: v for k, v in merged.items() if v is not None}
+
+            return list(await asyncio.gather(*(one(r) for r in rows)))
+
         async def _run() -> dict[str, Any]:
-            native = await trending_feed_native(country.upper(), limit=limit)
+            scraped = utc_now_iso()
+            if chart_mode:
+                cc = await cc_trends.search_popular_videos(
+                    country=region,
+                    period=period_days,
+                    page=page,
+                    limit=min(limit, 20),
+                    order_by=order_by_cc,
+                )
+                if cc and cc.get("results"):
+                    ctx["source"] = "direct"
+                    results = await _hydrate_cc(list(cc["results"]))
+                    return {
+                        "country": region,
+                        "countryCode": region,
+                        "period": period_days,
+                        "page": page,
+                        "orderBy": order_by_cc,
+                        "source": "creative_center",
+                        "totalReturned": len(results),
+                        "pagination": cc.get("pagination"),
+                        "results": results,
+                        "scrapedAt": scraped,
+                        "fetchedAt": scraped,
+                    }
+                # Chart miss → For You fallthrough (still honor country).
+            native = await trending_feed_native(region, limit=limit)
             if native:
                 ctx["source"] = "direct"
-                scraped = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-                return {
-                    "country": country.upper(),
+                out: dict[str, Any] = {
+                    "country": region,
+                    "countryCode": region,
+                    "source": "for_you",
                     "totalReturned": len(native),
                     "results": native,
                     "scrapedAt": scraped,
+                    "fetchedAt": scraped,
                 }
+                if chart_mode:
+                    out["period"] = period_days
+                    out["page"] = page
+                    out["orderBy"] = order_by_cc
+                    out["note"] = (
+                        "Creative Center chart unavailable; returned For You feed "
+                        "for the same country."
+                    )
+                return out
             raise HTTPException(
                 status_code=502,
                 detail="TikTok trending feed temporarily unavailable",
@@ -2849,7 +3037,14 @@ async def tiktok_trending_feed(
 
         data = await cached_or_run(
             endpoint="tiktok.trending-feed",
-            params={"country": country.upper(), "limit": limit, "v": 4},
+            params={
+                "country": region,
+                "limit": limit,
+                "orderBy": order_by_cc if chart_mode else None,
+                "period": period_days if chart_mode else None,
+                "page": page if chart_mode else 1,
+                "v": 5,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2859,36 +3054,73 @@ async def tiktok_trending_feed(
 
 @router.get(
     "/popular-hashtags",
-    summary="Related TikTok hashtags with real population totals",
+    summary="TikTok Creative Center popular hashtags",
     description=(
-        "Discovers co-occurring hashtags from a sample of seed videos, then "
-        "enriches each tag from TikTok's challenge/detail API (statsV2) so "
-        "videoCount and totalPlays are population totals — not sample tallies. "
-        "Sample co-occurrence stays in sampleVideoCount / samplePlays. "
-        "rank is by population videoCount. Default query=trending is a keyword "
-        "seed (top-search), not TikTok's official trending chart. "
-        "growthRate is null — TikTok does not expose it on challenge/detail."
+        "Official TikTok Creative Center hashtag chart "
+        "(ads.tiktok.com/business/creativecenter/inspiration/popular/hashtag). "
+        "videoCount / totalPlays are Creative Center population totals — not "
+        "sample tallies. Also returns rankDiff, trend[] time series, and "
+        "growthRate derived from trend. Pass query for legacy co-occurrence "
+        "related-tag discovery (challenge/detail enrich). Flat 2 credits on "
+        "the Creative Center path."
     ),
 )
 async def tiktok_popular_hashtags(
-    query: str = Query(
-        "trending",
-        min_length=1,
+    country: str = Query(
+        "US",
+        min_length=2,
+        max_length=2,
+        description="Two-letter ISO country code for the Creative Center chart. Default US.",
+    ),
+    period: int = Query(
+        7,
+        description="Lookback window in days: 7, 30, or 120 (180 maps to 120). Default 7.",
+    ),
+    page: int = Query(1, ge=1, le=20, description="Creative Center page (default 1)."),
+    sort_by: str = Query(
+        "popular",
+        alias="sortBy",
+        description="Chart sort: popular (default).",
+    ),
+    new_on_board: bool = Query(
+        False,
+        alias="newOnBoard",
+        description="If true, only hashtags newly on the Top 100 board.",
+    ),
+    industry_id: str | None = Query(
+        None,
+        alias="industryId",
+        description="Optional Creative Center industry_id filter.",
+    ),
+    query: str | None = Query(
+        None,
         description=(
-            "Seed topic/hashtag for co-occurrence discovery. Default \"trending\" "
-            "searches that keyword — it is not TikTok's official trending-hashtag chart."
+            "Optional niche seed for legacy co-occurrence discovery. When set "
+            "(and not \"trending\"), skips the Creative Center chart and finds "
+            "related tags from seed videos + challenge/detail enrich."
         ),
     ),
     limit: int = Query(20, ge=1, le=100),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    from app.services import tiktok_creative_center_trends as cc_trends
     from app.utils.media_urls import utc_now_iso
 
     settings = get_settings()
-    # Apify cost is driven by the number of videos fetched, not returned tags.
+    seed = (query or "").lstrip("#").strip()
+    use_cooccurrence = bool(seed) and seed.lower() != "trending"
     n_videos = max(limit, 25)
-    cost = _scaled_credits(n_videos, RATE_TREND, CREDIT_SEARCH)
+    cost = (
+        _scaled_credits(n_videos, RATE_TREND, CREDIT_SEARCH)
+        if use_cooccurrence
+        else CREDIT_CC_TREND
+    )
+    try:
+        period_days = cc_trends.normalize_trend_period(period)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/popular-hashtags",
@@ -2897,23 +3129,81 @@ async def tiktok_popular_hashtags(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            seed = query.lstrip("#").strip()
-            native_payload = await popular_hashtags_native(seed, limit=limit, n_videos=n_videos)
+            if not use_cooccurrence:
+                cc = await cc_trends.search_popular_hashtags(
+                    country=country.upper(),
+                    period=period_days,
+                    page=page,
+                    limit=limit,
+                    sort_by=sort_by,
+                    new_on_board=new_on_board,
+                    industry_id=industry_id,
+                )
+                if cc and cc.get("hashtags"):
+                    ctx["source"] = "direct"
+                    cc["fetchedAt"] = utc_now_iso()
+                    return cc
+                # Apify Creative Center trends fallthrough.
+                try:
+                    items, _actor = await get_apify().run_with_fallback(
+                        [
+                            (
+                                settings.APIFY_ACTOR_TIKTOK_CREATIVE_CENTER_TRENDS,
+                                cc_trends.apify_trends_input(
+                                    mode="hashtags",
+                                    country=country.upper(),
+                                    period=period_days,
+                                    limit=limit,
+                                ),
+                            )
+                        ],
+                        max_items=limit,
+                    )
+                except Exception:  # noqa: BLE001
+                    items = []
+                if items:
+                    hashtags = []
+                    for i, raw in enumerate(items[:limit]):
+                        if not isinstance(raw, dict):
+                            continue
+                        mapped = cc_trends.normalize_trend_hashtag(
+                            raw, country=country.upper(), period=period_days
+                        )
+                        if mapped:
+                            mapped.setdefault("rank", i + 1)
+                            hashtags.append(mapped)
+                    if hashtags:
+                        ctx["source"] = "apify"
+                        return {
+                            "country": country.upper(),
+                            "period": period_days,
+                            "page": page,
+                            "source": "apify",
+                            "discovery": "creative_center",
+                            "rankBy": "creative_center_rank",
+                            "fetchedAt": utc_now_iso(),
+                            "totalReturned": len(hashtags),
+                            "hashtags": hashtags,
+                        }
+
+            # Legacy / related-tag path (or CC miss with a seed).
+            seed_q = seed or "trending"
+            native_payload = await popular_hashtags_native(
+                seed_q, limit=limit, n_videos=n_videos
+            )
             if native_payload and native_payload.get("hashtags"):
                 ctx["source"] = "direct"
                 native_payload["fetchedAt"] = utc_now_iso()
                 return native_payload
 
             apify = get_apify()
-            # Seed hashtag → sample videos → co-occurring tags → challenge/detail
-            # population enrich (same honesty contract as the native path).
             items, _actor = await apify.run_with_fallback(
                 [
                     (
                         settings.APIFY_ACTOR_TIKTOK_TREND_DISCOVERY,
                         {
                             "searchQueries": [],
-                            "hashtags": [seed],
+                            "hashtags": [seed_q],
                             "resultsPerQuery": n_videos,
                             "includeVideos": True,
                             "includeHashtags": False,
@@ -2923,7 +3213,11 @@ async def tiktok_popular_hashtags(
                     ),
                     (
                         settings.APIFY_ACTOR_TIKTOK,
-                        {"hashtags": [seed], "resultsPerPage": n_videos, "shouldDownloadVideos": False},
+                        {
+                            "hashtags": [seed_q],
+                            "resultsPerPage": n_videos,
+                            "shouldDownloadVideos": False,
+                        },
                     ),
                 ],
                 max_items=n_videos,
@@ -2983,7 +3277,7 @@ async def tiktok_popular_hashtags(
                 hashtags.append(row)
             ctx["source"] = "apify"
             return {
-                "query": query,
+                "query": seed_q,
                 "discovery": "co_occurrence",
                 "discoverySource": "apify_hashtag_videos",
                 "sampleSize": sample_videos,
@@ -2995,10 +3289,158 @@ async def tiktok_popular_hashtags(
 
         data = await cached_or_run(
             endpoint="tiktok.popular-hashtags",
-            params={"query": query, "limit": limit, "v": 4},
+            params={
+                "country": country.upper(),
+                "period": period_days,
+                "page": page,
+                "sortBy": sort_by,
+                "newOnBoard": new_on_board,
+                "industryId": industry_id or "",
+                "query": seed,
+                "limit": limit,
+                "v": 5,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = cost
+        if data.get("discovery") == "creative_center" or data.get("source") == "creative_center":
+            ctx["credits_override"] = CREDIT_CC_TREND
+        else:
+            ctx["credits_override"] = cost
+        return ApiResponse(data=data)
+
+
+@router.get(
+    "/popular-songs",
+    summary="TikTok Creative Center popular / surging songs",
+    description=(
+        "Official TikTok Creative Center sound chart "
+        "(ads.tiktok.com/business/creativecenter/inspiration/popular/music). "
+        "Filters: rankType=popular|surging, newOnBoard, commercialMusic "
+        "(Commercial Music Library / ifCml), country, period (7/30/120), page. "
+        "Each song includes rankDiff, trend[] time series, and growthRate. "
+        "Can take up to ~30 seconds. Flat 2 credits."
+    ),
+)
+async def tiktok_popular_songs(
+    country: str = Query("US", min_length=2, max_length=2),
+    period: int = Query(7, description="Lookback days: 7, 30, or 120 (180→120)."),
+    page: int = Query(1, ge=1, le=20),
+    rank_type: str = Query(
+        "popular",
+        alias="rankType",
+        description="popular (chart) or surging (rising).",
+    ),
+    new_on_board: bool = Query(
+        False,
+        alias="newOnBoard",
+        description="Only sounds newly on the Top 100 board.",
+    ),
+    commercial_music: bool = Query(
+        False,
+        alias="commercialMusic",
+        description="Only Commercial Music Library–cleared sounds (brand-safe).",
+    ),
+    limit: int = Query(20, ge=1, le=20),
+    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    caller: ApiCaller = Depends(require_api_key),
+):
+    from app.services import tiktok_creative_center_trends as cc_trends
+    from app.utils.media_urls import utc_now_iso
+
+    settings = get_settings()
+    try:
+        period_days = cc_trends.normalize_trend_period(period)
+        rt = cc_trends.normalize_rank_type(rank_type)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    async with billed_call(
+        caller=caller,
+        endpoint="/v1/tiktok/popular-songs",
+        platform="tiktok",
+        resource_url=None,
+        base_credits=CREDIT_CC_TREND,
+    ) as ctx:
+        async def _run() -> dict[str, Any]:
+            cc = await cc_trends.search_popular_songs(
+                country=country.upper(),
+                period=period_days,
+                page=page,
+                limit=limit,
+                rank_type=rt,
+                new_on_board=new_on_board,
+                commercial_music=commercial_music,
+            )
+            if cc and cc.get("songs"):
+                ctx["source"] = "direct"
+                cc["fetchedAt"] = utc_now_iso()
+                return cc
+
+            try:
+                items, _actor = await get_apify().run_with_fallback(
+                    [
+                        (
+                            settings.APIFY_ACTOR_TIKTOK_CREATIVE_CENTER_TRENDS,
+                            cc_trends.apify_trends_input(
+                                mode="songs",
+                                country=country.upper(),
+                                period=period_days,
+                                limit=limit,
+                                rank_type=rt,
+                            ),
+                        )
+                    ],
+                    max_items=limit,
+                )
+            except Exception:  # noqa: BLE001
+                items = []
+            songs = []
+            for i, raw in enumerate(items[:limit]):
+                if not isinstance(raw, dict):
+                    continue
+                mapped = cc_trends.normalize_trend_song(
+                    raw, country=country.upper(), period=period_days, rank_type=rt
+                )
+                if mapped:
+                    mapped.setdefault("rank", i + 1)
+                    songs.append(mapped)
+            if not songs:
+                raise HTTPException(
+                    status_code=503,
+                    detail="Creative Center popular songs unavailable right now. Retry shortly.",
+                )
+            ctx["source"] = "apify"
+            return {
+                "country": country.upper(),
+                "period": period_days,
+                "page": page,
+                "rankType": rt,
+                "newOnBoard": new_on_board,
+                "commercialMusic": commercial_music,
+                "source": "apify",
+                "fetchedAt": utc_now_iso(),
+                "totalReturned": len(songs),
+                "songs": songs,
+                "note": "Apify Creative Center fallthrough. Can take up to ~30 seconds.",
+            }
+
+        data = await cached_or_run(
+            endpoint="tiktok.popular-songs",
+            params={
+                "country": country.upper(),
+                "period": period_days,
+                "page": page,
+                "rankType": rt,
+                "newOnBoard": new_on_board,
+                "commercialMusic": commercial_music,
+                "limit": limit,
+                "v": 1,
+            },
+            runner=_run,
+            ctx=ctx,
+            use_cache=cache,
+        )
+        ctx["credits_override"] = CREDIT_CC_TREND
         return ApiResponse(data=data)

@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import base64
+import json
 import math
 import re
 from typing import Any, Literal
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -21,6 +24,7 @@ from app.services import (
     tiktok_ads_native,
     tiktok_creative_center,
 )
+from app.utils.countries import country_code_from_name
 from app.utils.formatters import safe_float, safe_int, safe_str
 from app.utils.media_urls import utc_now_iso
 from app.utils.url import detect_url_platform, platform_mismatch_detail
@@ -35,6 +39,8 @@ CREDIT_GOOGLE_ADVERTISER = 1
 # Native ATC SearchCreatives (+ resolve): a few proxied RPCs (~$0.001–0.003).
 # 120% markup → ~1–2 credits; bill 2 flat when native succeeds.
 CREDIT_GOOGLE_COMPANY_ADS = 2
+# Apify fallback for single-ad Google/LinkedIn details (capped — never silent 17).
+CREDIT_AD_DETAILS_APIFY = 5
 # FB/LI Ad Library lists: one Decodo headless render (~$0.001–0.0015 Premium+JS).
 # 120% markup → ~1 credit; bill 2 flat when native succeeds. Apify fallback keeps
 # the legacy per-result RATE_AD_LIST scale.
@@ -48,6 +54,11 @@ CREDIT_TIKTOK_AD_SEARCH_APIFY = 5
 CREDIT_TIKTOK_TOP_ADS = 2
 RATE_TIKTOK_TOP_ADS = 1.0
 CREDIT_TIKTOK_TOP_ADS_MIN = 2
+
+_DKI_RE = re.compile(
+    r"\{(?:KeyWord|KEYWORD|Keyword|param\d*|CUSTOMIZER\.[^}:]+)(?::[^}]*)?\}",
+    re.I,
+)
 
 
 def _scaled(limit: int, rate: float = RATE_AD_LIST, minimum: int = 2) -> int:
@@ -299,6 +310,183 @@ def _facebook_search_url(
     )
 
 
+def _fb_profile_id_from_url(url: str | None) -> str | None:
+    """Numeric id in ``facebook.com/{digits}/`` (often ≠ Ad Library page_id)."""
+    raw = safe_str(url)
+    if not raw:
+        return None
+    m = re.search(r"facebook\.com/(?:profile\.php\?id=)?(\d{5,})/?", raw, re.I)
+    return m.group(1) if m else None
+
+
+def _fb_company_matches_query(name: str | None, query: str) -> bool:
+    """Entity search: brand tokens must appear in the page name (not ad copy)."""
+    q = (query or "").strip().lower()
+    n = (name or "").strip().lower()
+    if len(q) < 2 or not n:
+        return False
+    if q == n or n.startswith(q) or q in n:
+        return True
+    tokens = [t for t in re.findall(r"[a-z0-9]+", q) if len(t) >= 2]
+    if not tokens:
+        return False
+    return all(t in n for t in tokens)
+
+
+def _rank_fb_companies(companies: list[dict[str, Any]], query: str) -> list[dict[str, Any]]:
+    """Filter off-brand pages, then prefer exact / vanity matches."""
+    matched = [c for c in companies if _fb_company_matches_query(c.get("name"), query)]
+    # Empty beats Sukeban-for-nike spam — same stance as TikTok Ad Library search.
+    if not matched:
+        return []
+    q = (query or "").strip().lower()
+
+    def score(c: dict[str, Any]) -> tuple:
+        name = (c.get("name") or "").lower()
+        url = (c.get("url") or "").lower()
+        exact = 1 if name == q else 0
+        starts = 1 if name.startswith(q) else 0
+        word = 1 if q and re.search(rf"\b{re.escape(q)}\b", name) else 0
+        vanity = 1 if q and q in url and "/ads/" not in url else 0
+        return (exact, starts, word, vanity, -(len(name) or 0))
+
+    return sorted(matched, key=score, reverse=True)
+
+
+def _fb_company_from_advertiser(
+    adv: dict[str, Any], *, country: str = "US"
+) -> dict[str, Any]:
+    """Shape a search-companies row with pageId vs profileId disambiguated."""
+    page_id = safe_str(adv.get("pageId") or adv.get("advertiserId") or adv.get("id"))
+    url = safe_str(adv.get("url"))
+    profile_id = _fb_profile_id_from_url(url)
+    if profile_id and page_id and profile_id == page_id:
+        profile_id = None
+    library_url = None
+    if page_id:
+        library_url = (
+            "https://www.facebook.com/ads/library/?"
+            + urlencode(
+                {
+                    "active_status": "all",
+                    "ad_type": "all",
+                    "country": (country or "US").upper(),
+                    "view_all_page_id": page_id,
+                    "media_type": "all",
+                }
+            )
+        )
+    return {
+        # `id` = Ad Library page_id — pass this (or libraryUrl) to /facebook/company-ads.
+        "id": page_id,
+        "pageId": page_id,
+        "advertiserId": page_id,
+        "profileId": profile_id,
+        "name": safe_str(adv.get("name")),
+        "url": url,
+        "logo": safe_str(adv.get("logo")),
+        "libraryUrl": library_url,
+    }
+
+
+def _unify_advertisers_by_id(ads: list[dict[str, Any]]) -> None:
+    """Same advertiser id → one canonical name/url/logo within a response.
+
+    Meta often emits both ``Facebook`` and ``Facebook App`` for page id
+    20531316728 in one search — grouping by name then invents two brands.
+    Prefer the longest non-empty name (usually the fuller brand string) and
+    the richest url/logo among rows sharing that id.
+    """
+    if not ads:
+        return
+    by_id: dict[str, list[dict[str, Any]]] = {}
+    for ad in ads:
+        adv = ad.get("advertiser") if isinstance(ad.get("advertiser"), dict) else None
+        if not adv:
+            continue
+        aid = safe_str(adv.get("id"))
+        if not aid:
+            continue
+        by_id.setdefault(aid, []).append(adv)
+    for aid, group in by_id.items():
+        if len(group) < 2:
+            continue
+        names = [safe_str(a.get("name")) for a in group if safe_str(a.get("name"))]
+        # Prefer longer display name; ties → first seen.
+        canon_name = max(names, key=len) if names else None
+        canon_url = next((safe_str(a.get("url")) for a in group if safe_str(a.get("url"))), None)
+        canon_logo = next((safe_str(a.get("logo")) for a in group if safe_str(a.get("logo"))), None)
+        for adv in group:
+            if canon_name:
+                adv["name"] = canon_name
+            if canon_url and not adv.get("url"):
+                adv["url"] = canon_url
+            if canon_logo and not adv.get("logo"):
+                adv["logo"] = canon_logo
+
+
+def _encode_fb_page_cursor(after_id: str) -> str:
+    payload = json.dumps({"a": after_id}, separators=(",", ":")).encode()
+    return base64.urlsafe_b64encode(payload).decode().rstrip("=")
+
+
+def _decode_fb_page_cursor(cursor: str | None) -> str | None:
+    raw = (cursor or "").strip()
+    if not raw:
+        return None
+    pad = "=" * (-len(raw) % 4)
+    try:
+        data = json.loads(base64.urlsafe_b64decode(raw + pad).decode())
+    except (ValueError, json.JSONDecodeError, UnicodeDecodeError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    return safe_str(data.get("a"))
+
+
+def _paginate_ads(
+    ads: list[dict[str, Any]],
+    *,
+    limit: int,
+    cursor: str | None,
+) -> tuple[list[dict[str, Any]], str | None, bool]:
+    """Slice a single upstream page with an opaque after-id cursor."""
+    after = _decode_fb_page_cursor(cursor)
+    start = 0
+    if after:
+        for i, ad in enumerate(ads):
+            if safe_str(ad.get("id")) == after:
+                start = i + 1
+                break
+    page = ads[start : start + limit]
+    has_more_in_page = start + limit < len(ads)
+    next_cursor = (
+        _encode_fb_page_cursor(safe_str(page[-1].get("id")) or "")
+        if has_more_in_page and page and safe_str(page[-1].get("id"))
+        else None
+    )
+    return page, next_cursor, has_more_in_page
+
+
+def _filter_ads_by_platforms(
+    ads: list[dict[str, Any]], platforms: list[str] | None
+) -> list[dict[str, Any]]:
+    if not platforms:
+        return ads
+    want = {p.upper() for p in platforms if p}
+    if not want:
+        return ads
+    out: list[dict[str, Any]] = []
+    for ad in ads:
+        got = ad.get("publisherPlatforms") or []
+        if not isinstance(got, list):
+            continue
+        labels = {str(p).upper() for p in got if p}
+        if labels & want:
+            out.append(ad)
+    return out
+
+
 def _tiktok_ad_id(value: str) -> str:
     _reject_ad_platform_mismatch(value, "tiktok", "https://ads.tiktok.com/business/creativecenter/inspiration/topads/detail/123456789")
     match = re.search(r"(?:ad_id|id)=([0-9]+)", value)
@@ -366,6 +554,48 @@ def _tiktok_reach_range(value: Any) -> dict[str, Any] | None:
     return {"min": None, "max": None, "raw": raw}
 
 
+def _fb_pct(value: Any) -> float | None:
+    try:
+        if value in (None, ""):
+            return None
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _fb_demographic_rows(raw: Any) -> list[dict[str, Any]] | None:
+    if not isinstance(raw, list):
+        return None
+    out: list[dict[str, Any]] = []
+    for row in raw:
+        if not isinstance(row, dict):
+            continue
+        age = safe_str(row.get("age") or row.get("age_range") or row.get("ageRange"))
+        gender = safe_str(row.get("gender"))
+        pct = _fb_pct(row.get("percentage"))
+        if not age and not gender and pct is None:
+            continue
+        out.append({"age": age, "gender": gender, "percentage": pct})
+    return out or None
+
+
+def _fb_region_rows(raw: Any) -> list[dict[str, Any]] | None:
+    if not isinstance(raw, list):
+        return None
+    out: list[dict[str, Any]] = []
+    for row in raw:
+        if not isinstance(row, dict):
+            continue
+        region = safe_str(
+            row.get("region") or row.get("name") or row.get("location") or row.get("key")
+        )
+        pct = _fb_pct(row.get("percentage"))
+        if not region and pct is None:
+            continue
+        out.append({"region": region, "percentage": pct})
+    return out or None
+
+
 def _linkedin_ad_url(value: str) -> str:
     _reject_ad_platform_mismatch(value, "linkedin", "https://www.linkedin.com/ad-library/detail/123456789")
     value = value.strip()
@@ -379,11 +609,11 @@ def _linkedin_ad_url(value: str) -> str:
 
 def _google_ids(value: str) -> tuple[str | None, str | None]:
     _reject_ad_platform_mismatch(value, "google_ad_library", "https://adstransparency.google.com/advertiser/AR123/creative/CR123")
-    advertiser = re.search(r"\b(AR[0-9]+)\b", value)
-    creative = re.search(r"\b(CR[0-9]+)\b", value)
+    advertiser = re.search(r"\b(AR[0-9]+)\b", value, re.I)
+    creative = re.search(r"\b(CR[0-9]+)\b", value, re.I)
     return (
-        advertiser.group(1) if advertiser else None,
-        creative.group(1) if creative else None,
+        advertiser.group(1).upper() if advertiser else None,
+        creative.group(1).upper() if creative else None,
     )
 
 
@@ -402,6 +632,69 @@ def _google_impressions(item: dict[str, Any]) -> str | None:
     if lo and hi and lo != hi:
         return f"{lo}-{hi}"
     return lo or hi
+
+
+def _split_country_tokens(value: Any) -> list[str]:
+    if value in (None, "", [], {}):
+        return []
+    if isinstance(value, list):
+        out: list[str] = []
+        for item in value:
+            if isinstance(item, dict):
+                token = item.get("country") or item.get("name") or item.get("code")
+                if token:
+                    out.append(str(token))
+            elif item not in (None, ""):
+                out.append(str(item))
+        return out
+    raw = str(value).strip()
+    if not raw:
+        return []
+    return [p.strip() for p in re.split(r"\s*,\s*", raw) if p.strip()]
+
+
+def _countries_iso(value: Any) -> list[str]:
+    """Normalize country names / ISO tokens → unique ISO-3166 alpha-2 list."""
+    out: list[str] = []
+    seen: set[str] = set()
+    for token in _split_country_tokens(value):
+        code = country_code_from_name(token)
+        if not code or code in seen:
+            continue
+        seen.add(code)
+        out.append(code)
+    return out
+
+
+def _is_ad_text_template(*parts: Any) -> bool:
+    """True when Google Ads DKI / customizer macros appear in creative copy."""
+    for part in parts:
+        text = safe_str(part)
+        if text and _DKI_RE.search(text):
+            return True
+    return False
+
+
+def _linkedin_company_id(value: Any) -> str | None:
+    raw = safe_str(value)
+    if not raw:
+        return None
+    if raw.isdigit():
+        return raw
+    m = re.search(r"/company/(\d+)", raw)
+    return m.group(1) if m else None
+
+
+def _linkedin_date_iso(value: Any) -> str | None:
+    """Normalize LinkedIn dates to ISO-8601 UTC (SC parity)."""
+    raw = safe_str(value)
+    if not raw:
+        return None
+    if re.match(r"^\d{4}-\d{2}-\d{2}T", raw):
+        return raw
+    if re.match(r"^\d{4}-\d{2}-\d{2}$", raw):
+        return f"{raw}T00:00:00.000Z"
+    return raw
 
 
 def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
@@ -708,6 +1001,13 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
                     item.get("organizationUrl"),
                     snapshot.get("pageProfileUri"),
                     snapshot.get("advertiserUrl"),
+                    # Synthesize a stable page URL when Meta only gave pageId.
+                    (
+                        f"https://www.facebook.com/{item.get('pageId')}"
+                        if platform == "facebook_ad_library"
+                        and (item.get("pageId") or item.get("pageID"))
+                        else None
+                    ),
                 )
             ),
             "logo": safe_str(
@@ -773,20 +1073,41 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             for u in _listify(item.get("carouselImages") or item.get("carousel_images"))
             if isinstance(u, str) and u.startswith("http")
         ]
-        countries = item.get("countries")
-        if isinstance(countries, str):
-            countries = [c.strip().upper() for c in countries.split(",") if c.strip()]
-        elif isinstance(countries, list):
-            countries = [str(c).upper() for c in countries if c]
-        else:
-            countries = []
+        countries = _countries_iso(
+            item.get("countries")
+            or item.get("country")
+            or [row.get("country") for row in impressions_by_country]
+            or (
+                (targeting or {}).get("location")
+                if isinstance(targeting, dict)
+                else None
+            )
+        )
+        # Prefer a single ISO for `country` (search filter echo / primary market).
+        country_iso = countries[0] if len(countries) == 1 else None
+        if not country_iso and isinstance(country_value, str) and len(country_value) == 2:
+            country_iso = country_value.upper()
         normalized.update(
             {
                 "description": description,
                 "destinationUrl": destination,
                 "adDuration": safe_str(item.get("adDuration") or item.get("dateRange")),
-                "startDate": safe_str(item.get("startDate") or normalized.get("firstShown")),
-                "endDate": safe_str(item.get("endDate") or normalized.get("lastShown")),
+                "startDate": _linkedin_date_iso(
+                    item.get("startDate") or normalized.get("firstShown")
+                ),
+                "endDate": _linkedin_date_iso(
+                    item.get("endDate") or normalized.get("lastShown")
+                ),
+                "firstShown": _linkedin_date_iso(
+                    normalized.get("firstShown")
+                    or item.get("startDate")
+                    or item.get("firstShown")
+                ),
+                "lastShown": _linkedin_date_iso(
+                    normalized.get("lastShown")
+                    or item.get("endDate")
+                    or item.get("lastShown")
+                ),
                 "totalImpressions": safe_str(
                     item.get("totalImpressions") or normalized.get("impressions")
                 ),
@@ -795,11 +1116,50 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
                 "carouselImages": carousel,
                 "paidForBy": safe_str(item.get("paidForBy") or item.get("payer")),
                 "countries": countries,
+                "country": country_iso or normalized.get("country"),
             }
         )
         if not normalized.get("landingUrl") and destination:
             normalized["landingUrl"] = destination
+        # SC DX alias — same as advertiser.url (linkedin.com/company/…).
+        if adv_url := safe_str(
+            (normalized.get("advertiser") or {}).get("url")
+            if isinstance(normalized.get("advertiser"), dict)
+            else None
+        ):
+            normalized["advertiserLinkedinPage"] = adv_url
+        else:
+            normalized["advertiserLinkedinPage"] = None
     adv = normalized["advertiser"]
+    if platform == "linkedin_ad_library":
+        # advertiser.id is often only embedded in /company/{id} — surface it.
+        if not adv.get("id"):
+            adv["id"] = _linkedin_company_id(adv.get("url") or item.get("advertiserUrl"))
+        elif not str(adv.get("id")).isdigit():
+            extracted = _linkedin_company_id(adv.get("id")) or _linkedin_company_id(
+                adv.get("url")
+            )
+            if extracted:
+                adv["id"] = extracted
+        # Never echo creative headline as the company name (thin SERP stubs).
+        adv_name = safe_str(adv.get("name"))
+        headline = safe_str(normalized.get("headline") or normalized.get("text"))
+        if adv_name and headline and adv_name.lower() == headline.lower():
+            adv["name"] = None
+        if not normalized.get("advertiserLinkedinPage") and adv.get("url"):
+            normalized["advertiserLinkedinPage"] = adv.get("url")
+    if platform == "tiktok_ad_library":
+        # Stable schema (FB parity): keep null keys — never omit text/cta/….
+        for key in ("headline", "cta", "landingUrl", "spend", "text"):
+            if normalized.get(key) in ("", [], {}):
+                normalized[key] = None
+            elif key not in normalized:
+                normalized[key] = None
+        for key in ("id", "url", "logo"):
+            if adv.get(key) in ("", []):
+                adv[key] = None
+            elif key not in adv:
+                adv[key] = None
     if platform == "facebook_ad_library":
         # Additive fields for competitor intel — existing keys above stay stable.
         spend_raw = normalized.get("spend")
@@ -821,19 +1181,81 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             reach_display = safe_str(reach_raw.get("text") or reach_raw.get("raw"))
         else:
             reach_display = safe_str(reach_raw) if reach_raw not in (None, "", [], {}) else None
-        platforms = item.get("publisherPlatforms") or item.get("publisher_platform") or []
+        platforms = (
+            item.get("publisherPlatforms")
+            or item.get("publisher_platforms")
+            or item.get("publisher_platform")
+            or item.get("publisherPlatform")
+            or []
+        )
         if isinstance(platforms, str):
             platforms = [platforms]
+        platforms_list = [str(p).upper() for p in platforms if p]
         categories = snapshot.get("pageCategories") or []
         if not isinstance(categories, list):
             categories = [categories] if categories else []
         political = item.get("politicalCountries") or []
         if not isinstance(political, list):
             political = [political] if political else []
+        demo = _fb_demographic_rows(
+            item.get("demographicDistribution") or item.get("demographic_distribution")
+        )
+        region = _fb_region_rows(
+            item.get("regionDistribution")
+            or item.get("region_distribution")
+            or item.get("deliveryByRegion")
+            or item.get("delivery_by_region")
+        )
+        age_break = (
+            item.get("ageCountryGenderReachBreakdown")
+            or item.get("age_country_gender_reach_breakdown")
+        )
+        if age_break in ("", [], {}):
+            age_break = None
+        variant_count = safe_int(
+            item.get("collationCount")
+            or item.get("collation_count")
+            or item.get("variantCount")
+        )
+        collation_id = safe_str(item.get("collationId") or item.get("collation_id"))
+        aaa = item.get("isAaaEligible")
+        if aaa is None:
+            aaa = item.get("is_aaa_eligible")
+        target_ages = item.get("targetAges") or item.get("target_ages")
+        if isinstance(target_ages, str):
+            target_ages = [target_ages]
+        elif not isinstance(target_ages, list):
+            target_ages = None
+        target_gender = safe_str(item.get("targetGender") or item.get("target_gender"))
+        target_locations = item.get("targetLocations") or item.get("target_locations")
+        if target_locations in ("", [], {}):
+            target_locations = None
+        eu_reach = safe_int(item.get("euTotalReach") or item.get("eu_total_reach"))
+        detail_fetch = bool(item.get("_detailFetch"))
+        eu_transparency = None
+        if any(
+            v is not None
+            for v in (age_break, target_ages, target_gender, target_locations, eu_reach)
+        ):
+            eu_transparency = {
+                "euTotalReach": eu_reach,
+                "targetAges": target_ages,
+                "targetGender": target_gender,
+                "targetLocations": target_locations,
+                "ageCountryGenderReachBreakdown": age_break,
+            }
+        cta_type = safe_str(
+            snapshot.get("ctaType")
+            or item.get("ctaType")
+            or item.get("cta_type")
+            or _dig(item, "snapshot", "cta_type")
+        )
         normalized.update(
             {
                 "isActive": item.get("isActive"),
-                "publisherPlatforms": [str(p).upper() for p in platforms if p],
+                "publisherPlatforms": platforms_list,
+                "platforms": platforms_list,
+                "ctaType": cta_type,
                 "caption": safe_str(snapshot.get("caption")),
                 "linkDescription": safe_str(snapshot.get("linkDescription")),
                 "brandedContent": snapshot.get("brandedContent"),
@@ -854,6 +1276,21 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
                 "fetchedAt": utc_now_iso(),
             }
         )
+        # Delivery extras: always on ad-details (null when Meta withholds); on search only when present.
+        if detail_fetch or demo is not None:
+            normalized["demographicDistribution"] = demo
+        if detail_fetch or region is not None:
+            normalized["regionDistribution"] = region
+        if detail_fetch or age_break is not None:
+            normalized["ageCountryGenderReachBreakdown"] = age_break
+        if detail_fetch or variant_count is not None:
+            normalized["variantCount"] = variant_count
+        if detail_fetch or collation_id:
+            normalized["collationId"] = collation_id
+        if detail_fetch or aaa is not None:
+            normalized["isAaaEligible"] = aaa
+        if detail_fetch or eu_transparency is not None:
+            normalized["euTransparency"] = eu_transparency
         like_count = safe_int(snapshot.get("pageLikeCount"))
         if like_count is not None:
             adv["likeCount"] = like_count
@@ -864,40 +1301,96 @@ def _normalize_ad(item: dict[str, Any], platform: str) -> dict[str, Any]:
             adv["entityType"] = entity
     if platform == "google_ad_library" and not adv["url"] and adv["id"]:
         adv["url"] = f"https://adstransparency.google.com/advertiser/{adv['id']}"
-    # TikTok withhold most delivery metadata — omit empties.
-    # LinkedIn now surfaces targeting/dates/impressions; keep stable nulls there.
-    # Facebook sometimes returns spend/impressions, so keep explicit nulls there.
-    if platform == "tiktok_ad_library":
-        for key in (
-            "cta",
-            "landingUrl",
-            "firstShown",
-            "lastShown",
-            "impressions",
-            "spend",
-            "country",
-            "headline",
-            "text",
-        ):
-            if normalized.get(key) in (None, "", [], {}):
-                normalized.pop(key, None)
-    elif platform == "linkedin_ad_library":
-        # Drop only legacy empties that stay unused; keep new transparency keys.
-        for key in ("spend",):
-            if normalized.get(key) in (None, "", [], {}):
-                normalized.pop(key, None)
-    elif platform == "google_ad_library":
-        # SearchCreatives (native) returns image/video creatives without copy /
-        # landing / country; detail actors sometimes fill those — omit empties.
-        for key in ("cta", "spend", "impressions", "text", "headline", "landingUrl", "country"):
-            if normalized.get(key) in (None, "", [], {}):
-                normalized.pop(key, None)
-    # Advertiser logo is never supplied by Google Ads Transparency; omit empty
-    # advertiser keys across libraries when upstream gave nothing.
-    for key in ("id", "name", "url", "logo", "location"):
-        if adv.get(key) in (None, "", []):
-            adv.pop(key, None)
+    if platform == "google_ad_library":
+        countries = _countries_iso(
+            item.get("countries")
+            or item.get("targetCountries")
+            or item.get("targetedOrReachedCountries")
+            or item.get("regions")
+            or country_value
+        )
+        # `country` stays a single ISO when unambiguous; multi-region → null + countries[].
+        if len(countries) == 1:
+            normalized["country"] = countries[0]
+        elif len(countries) > 1:
+            normalized["country"] = None
+        elif isinstance(country_value, str) and len(country_value.strip()) == 2:
+            normalized["country"] = country_value.strip().upper()
+            countries = [normalized["country"]]
+        else:
+            normalized["country"] = None
+        normalized["countries"] = countries
+        normalized["textIsTemplate"] = _is_ad_text_template(
+            normalized.get("text"), normalized.get("headline")
+        )
+        # Stable schema (FB parity): keep null keys — never omit text/cta/….
+        for key in ("text", "headline", "cta", "landingUrl", "spend", "impressions", "country"):
+            if normalized.get(key) in ("", [], {}):
+                normalized[key] = None
+            elif key not in normalized:
+                normalized[key] = None
+        for key in ("id", "name", "url", "logo", "location"):
+            if adv.get(key) in ("", []):
+                adv[key] = None
+            elif key not in adv:
+                adv[key] = None
+    # LinkedIn: keep stable nulls (search parity) — never drop logo/country/id.
+    if platform == "linkedin_ad_library":
+        for key in ("headline", "cta", "landingUrl", "spend", "impressions", "country", "text"):
+            if normalized.get(key) in ("", [], {}):
+                normalized[key] = None
+            elif key not in normalized:
+                normalized[key] = None
+        for key in ("id", "name", "url", "logo", "location"):
+            if adv.get(key) in ("", []):
+                adv[key] = None
+            elif key not in adv:
+                adv[key] = None
+        if "countries" not in normalized:
+            normalized["countries"] = []
+    elif platform == "facebook_ad_library":
+        page_id = safe_str(
+            item.get("pageId") or item.get("pageID") or adv.get("id")
+        )
+        profile_id = _fb_profile_id_from_url(adv.get("url"))
+        if profile_id and page_id and profile_id == page_id:
+            profile_id = None
+        if page_id:
+            adv["pageId"] = page_id
+            adv["advertiserId"] = page_id
+            # Keep id = page_id (company-ads / view_all_page_id).
+            adv["id"] = page_id
+        if profile_id:
+            adv["profileId"] = profile_id
+        elif "profileId" not in adv:
+            adv["profileId"] = None
+        for key in ("id", "name", "url", "logo", "location"):
+            if adv.get(key) in ("", []):
+                adv.pop(key, None)
     return normalized
+
+
+def _google_resolved_advertiser(
+    native: dict[str, Any],
+    ads: list[dict[str, Any]],
+    advertiser_input: str,
+) -> dict[str, Any] | None:
+    """Surface the AR entity company-ads actually queried (chain with advertiser-search)."""
+    aid = safe_str(native.get("resolvedId"))
+    name = safe_str(native.get("resolvedName"))
+    if not aid and ads:
+        adv0 = ads[0].get("advertiser") if isinstance(ads[0].get("advertiser"), dict) else {}
+        aid = safe_str(adv0.get("id"))
+        name = name or safe_str(adv0.get("name"))
+    if not aid and re.fullmatch(r"AR\d+", (advertiser_input or "").strip(), flags=re.I):
+        aid = advertiser_input.strip().upper()
+    if not aid and not name:
+        return None
+    return {
+        "id": aid,
+        "name": name,
+        "url": f"https://adstransparency.google.com/advertiser/{aid}" if aid else None,
+    }
 
 
 async def _run_actor(actor: str, payload: dict[str, Any], limit: int) -> list[dict[str, Any]]:
@@ -926,6 +1419,14 @@ async def facebook_search(
         "ALL",
         description="Creative media filter (Meta Ad Library media_type).",
     ),
+    platforms: str | None = Query(
+        None,
+        description=(
+            "Comma-separated publisher platforms to keep: FACEBOOK, INSTAGRAM, "
+            "MESSENGER, AUDIENCE_NETWORK, THREADS. Filters the returned page "
+            "(Meta's HTML search does not always honor this server-side)."
+        ),
+    ),
     ad_type: Literal["all", "political_and_issue_ads"] = Query(
         "all",
         description="Ad type filter. political_and_issue_ads is required for spend/impressions on many markets.",
@@ -948,12 +1449,44 @@ async def facebook_search(
         description="Only ads with delivery start on/before this date (YYYY-MM-DD).",
         pattern=r"^\d{4}-\d{2}-\d{2}$",
     ),
+    cursor: str | None = Query(
+        None,
+        description=(
+            "Pagination cursor from a previous nextCursor. Pages through the "
+            "current Meta HTML result batch (same filters). When nextCursor is "
+            "null, refine with start_date/status or a narrower query."
+        ),
+    ),
+    trim: bool = Query(
+        False,
+        description=(
+            "SC-compatible. Captapi payloads are already lean vs Meta nested "
+            "snapshots; when true, omit cards/images/videos typed arrays (media[] stays)."
+        ),
+    ),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
     active_status = status.lower()
     media = media_type.lower()
+    platform_filter = [
+        p.strip().upper() for p in (platforms or "").split(",") if p.strip()
+    ] or None
+
+    def _maybe_trim(ads: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        if not trim:
+            return ads
+        out: list[dict[str, Any]] = []
+        for ad in ads:
+            row = dict(ad)
+            for key in ("cards", "images", "videos"):
+                row.pop(key, None)
+            out.append(row)
+        return out
+
+    # Pull a full HTML batch so cursor can page within it (Meta UI ~30–50 ads).
+    fetch_limit = 200
     async with billed_call(
         caller=caller,
         endpoint="/v1/ad-library/facebook/search",
@@ -965,7 +1498,7 @@ async def facebook_search(
             native = await facebook_ads_native.search_ads(
                 q,
                 country=country,
-                limit=limit,
+                limit=fetch_limit,
                 active_status=active_status,
                 ad_type=ad_type,
                 search_type=search_type,
@@ -977,17 +1510,24 @@ async def facebook_search(
             if native is not None:
                 ctx["source"] = "direct"
                 ads = [_normalize_ad(i, "facebook_ad_library") for i in (native.get("ads") or [])]
+                ads = _filter_ads_by_platforms(ads, platform_filter)
+                _unify_advertisers_by_id(ads)
+                page, next_cursor, more_in_page = _paginate_ads(
+                    ads, limit=limit, cursor=cursor
+                )
+                page = _maybe_trim(page)
                 ctx["credits_override"] = CREDIT_AD_LIBRARY_NATIVE
+                count = native.get("searchResultsCount")
                 return {
                     "query": q,
                     "country": country.upper(),
                     "status": status,
                     "limit": limit,
-                    "totalReturned": len(ads),
-                    "searchResultsCount": native.get("searchResultsCount"),
-                    "hasMore": bool(native.get("hasMore")),
-                    "nextCursor": None,
-                    "ads": ads,
+                    "totalReturned": len(page),
+                    "searchResultsCount": count,
+                    "hasMore": bool(more_in_page or (count and isinstance(count, int) and count > len(page))),
+                    "nextCursor": next_cursor,
+                    "ads": page,
                 }
 
             library_url = _facebook_search_url(
@@ -1003,21 +1543,27 @@ async def facebook_search(
             )
             items = await _run_actor(
                 settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2,
-                {"startUrls": [{"url": library_url}], "resultsLimit": limit, "isDetailsPerAd": False},
-                limit,
+                {"startUrls": [{"url": library_url}], "resultsLimit": fetch_limit, "isDetailsPerAd": False},
+                fetch_limit,
             )
             ctx["source"] = "apify"
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
+            ads = _filter_ads_by_platforms(ads, platform_filter)
+            _unify_advertisers_by_id(ads)
+            page, next_cursor, more_in_page = _paginate_ads(
+                ads, limit=limit, cursor=cursor
+            )
+            page = _maybe_trim(page)
             return {
                 "query": q,
                 "country": country.upper(),
                 "status": status,
                 "limit": limit,
-                "totalReturned": len(ads),
+                "totalReturned": len(page),
                 "searchResultsCount": None,
-                "hasMore": len(ads) >= limit,
-                "nextCursor": None,
-                "ads": ads,
+                "hasMore": more_in_page,
+                "nextCursor": next_cursor,
+                "ads": page,
             }
 
         data = await cached_or_run(
@@ -1028,12 +1574,15 @@ async def facebook_search(
                 "limit": limit,
                 "status": status,
                 "media_type": media_type,
+                "platforms": ",".join(platform_filter or []),
                 "ad_type": ad_type,
                 "search_type": search_type,
                 "sort_by": sort_by or "",
                 "start_date": start_date or "",
                 "end_date": end_date or "",
-                "v": 7,
+                "cursor": cursor or "",
+                "trim": trim,
+                "v": 9,
             },
             _run,
             ctx,
@@ -1044,9 +1593,24 @@ async def facebook_search(
         return ApiResponse(data=data)
 
 
-@router.get("/facebook/company-ads", summary="Meta/Facebook ads for a page or advertiser")
+@router.get(
+    "/facebook/company-ads",
+    summary="Meta/Facebook ads for a page or advertiser",
+    description=(
+        "List ads for one Meta page/advertiser. Prefer pageId (or libraryUrl) from "
+        "/facebook/search-companies — that id is view_all_page_id. A facebook.com/"
+        "{digits}/ profileId in the page URL is a different namespace and may 404 or "
+        "miss ads if used alone; vanity URLs (facebook.com/nike/) work when Meta resolves them."
+    ),
+)
 async def facebook_company_ads(
-    url: str = Query(..., description="Facebook page URL or Meta Ad Library URL"),
+    url: str = Query(
+        ...,
+        description=(
+            "Page id from search-companies (pageId), libraryUrl, Facebook page URL, "
+            "or Ad Library URL with view_all_page_id."
+        ),
+    ),
     country: str = Query("US", min_length=2, max_length=2),
     limit: int = Query(20, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -1066,6 +1630,7 @@ async def facebook_company_ads(
             if native is not None:
                 ctx["source"] = "direct"
                 ads = [_normalize_ad(i, "facebook_ad_library") for i in native]
+                _unify_advertisers_by_id(ads)
                 ctx["credits_override"] = CREDIT_AD_LIBRARY_NATIVE
                 return {"url": url, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
@@ -1076,6 +1641,7 @@ async def facebook_company_ads(
             )
             ctx["source"] = "apify"
             ads = [_normalize_ad(i, "facebook_ad_library") for i in items]
+            _unify_advertisers_by_id(ads)
             return {"url": url, "country": country.upper(), "totalReturned": len(ads), "ads": ads}
 
         data = await cached_or_run("ad-library.facebook.company-ads", {"url": url, "country": country, "limit": limit, "v": 6}, _run, ctx, use_cache=cache)
@@ -1084,7 +1650,18 @@ async def facebook_company_ads(
         return ApiResponse(data=data)
 
 
-@router.get("/facebook/search-companies", summary="Find advertisers/pages in Meta Ad Library")
+@router.get(
+    "/facebook/search-companies",
+    summary="Find advertisers/pages in Meta Ad Library",
+    description=(
+        "Find Meta Ad Library advertisers/pages by brand name. Results are "
+        "relevance-filtered so the query must appear in the page name (empty beats "
+        "off-brand pages that merely ran ads near the keyword). Each company exposes "
+        "pageId / advertiserId (same value — pass to /facebook/company-ads as url=) "
+        "and profileId when the facebook.com/{digits}/ URL uses a different numeric "
+        "identity. libraryUrl is the ready view_all_page_id link. Flat 2 credits native."
+    ),
+)
 async def facebook_search_companies(
     q: str = Query(..., min_length=2, description="Company or brand name to search for"),
     country: str = Query("US", min_length=2, max_length=2),
@@ -1098,10 +1675,13 @@ async def facebook_search_companies(
         endpoint="/v1/ad-library/facebook/search-companies",
         platform="facebook_ad_library",
         resource_url=None,
-        base_credits=_scaled(limit),
+        base_credits=CREDIT_AD_LIBRARY_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await facebook_ads_native.search_companies(q, country=country, limit=limit)
+            # Wider ad window so ranking has enough distinct pages to choose from.
+            native = await facebook_ads_native.search_companies(
+                q, country=country, limit=max(limit * 5, 40)
+            )
             items = native
             if native is not None:
                 ctx["source"] = "direct"
@@ -1109,26 +1689,42 @@ async def facebook_search_companies(
             else:
                 items = await _run_actor(
                     settings.APIFY_ACTOR_FACEBOOK_AD_LIBRARY_V2,
-                    {"startUrls": [{"url": _facebook_search_url(q, country)}], "resultsLimit": limit, "isDetailsPerAd": False},
-                    limit,
+                    {
+                        "startUrls": [{"url": _facebook_search_url(q, country)}],
+                        "resultsLimit": max(limit * 5, 40),
+                        "isDetailsPerAd": False,
+                    },
+                    max(limit * 5, 40),
                 )
                 ctx["source"] = "apify"
 
-            advertisers: dict[str, Any] = {}
+            advertisers: dict[str, dict[str, Any]] = {}
             for item in items or []:
                 ad = _normalize_ad(item, "facebook_ad_library")
-                adv = ad["advertiser"]
+                adv = ad.get("advertiser") if isinstance(ad.get("advertiser"), dict) else {}
                 key = adv.get("id") or adv.get("name")
-                if key and key not in advertisers:
-                    advertisers[key] = adv
-                if len(advertisers) >= limit:
-                    break
-            companies = list(advertisers.values())
-            return {"query": q, "country": country.upper(), "totalReturned": len(companies), "companies": companies}
+                if not key or key in advertisers:
+                    continue
+                advertisers[key] = _fb_company_from_advertiser(
+                    adv, country=country.upper()
+                )
+            companies = _rank_fb_companies(list(advertisers.values()), q)[:limit]
+            return {
+                "query": q,
+                "country": country.upper(),
+                "totalReturned": len(companies),
+                "companies": companies,
+            }
 
-        data = await cached_or_run("ad-library.facebook.search-companies", {"q": q, "country": country, "limit": limit, "v": 4}, _run, ctx, use_cache=cache)
+        data = await cached_or_run(
+            "ad-library.facebook.search-companies",
+            {"q": q, "country": country, "limit": limit, "v": 5},
+            _run,
+            ctx,
+            use_cache=cache,
+        )
         if ctx.get("source") != "direct":
-            ctx["credits_override"] = _scaled(len(data["companies"]))
+            ctx["credits_override"] = CREDIT_AD_LIBRARY_NATIVE
         return ApiResponse(data=data)
 
 
@@ -1177,10 +1773,27 @@ async def _facebook_ad_native_or_apify(ad_url: str, ctx: dict[str, Any]) -> dict
         raise HTTPException(status_code=404, detail="Ad not found")
     ctx["source"] = "apify"
     ctx["credits_override"] = 17
-    return _normalize_ad(items[0], "facebook_ad_library")
+    row = dict(items[0])
+    row["_detailFetch"] = True
+    return _normalize_ad(row, "facebook_ad_library")
 
 
-@router.get("/facebook/ad-details", summary="Meta/Facebook ad details")
+@router.get(
+    "/facebook/ad-details",
+    summary="Meta/Facebook ad details",
+    description=(
+        "Fetch one Meta Ad Library ad by URL or archive ID. Creative fields "
+        "(text/headline/cta/landingUrl/media/advertiser) match a search hit for the "
+        "same id — use this endpoint for ID lookup without paging search. "
+        "Delivery extras are returned when Meta publishes them (mostly political/"
+        "issue and EU AAA ads): platforms / publisherPlatforms, "
+        "demographicDistribution[], regionDistribution[], "
+        "ageCountryGenderReachBreakdown / euTransparency, variantCount "
+        "(collation), isAaaEligible. On commercial ads Meta often withholds those "
+        "breakdowns — keys stay present as null so the schema is stable. Flat 2 "
+        "credits on the native path."
+    ),
+)
 async def facebook_ad_details(
     url: str = Query(..., description="Meta Ad Library ad URL or ad ID"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -1200,7 +1813,7 @@ async def facebook_ad_details(
         return ApiResponse(
             data=await cached_or_run(
                 "ad-library.facebook.ad-details",
-                {"url": ad_url, "v": 5},
+                {"url": ad_url, "v": 6},
                 _run,
                 ctx,
                 use_cache=cache,
@@ -1242,10 +1855,14 @@ async def facebook_ad_transcript(
     summary="Search TikTok Ad Library",
     description=(
         "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) "
-        "as clean JSON. Flat 2 credits on the native path. firstShown/lastShown are "
-        "ISO-8601. Default country is GB (this library is EU-led; region=US is often "
-        "empty). This is not TikTok Creative Center — CTR / play-rate ranking metrics "
-        "live on Creative Center, a different public surface."
+        "as clean JSON. Flat 2 credits on the native path (Apify fallback capped at "
+        f"{CREDIT_TIKTOK_AD_SEARCH_APIFY} — never the old ~70-credit per-result trap). "
+        "Results are relevance-filtered so keyword tokens must appear in advertiser "
+        "or ad copy. Schema keeps nulls for headline/cta/landingUrl/spend/advertiser.id "
+        "when TikTok withholds them (DSA library does not publish Meta-style spend). "
+        "firstShown/lastShown are ISO-8601. Default country is GB (EU-led; US often "
+        "empty). For Creative Center Top Ads (CTR, likes, brand ranking), use "
+        "/v1/ad-library/tiktok/top-ads."
     ),
 )
 async def tiktok_search(
@@ -1254,7 +1871,7 @@ async def tiktok_search(
         "GB",
         min_length=2,
         max_length=2,
-        description="Two-letter ISO country code. Default GB (EU Commercial Content Library; US often empty).",
+        description="Two-letter ISO country code (e.g. GB, DE, FR). Default GB — EU Commercial Content Library; US often empty.",
     ),
     limit: int = Query(20, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -1262,6 +1879,8 @@ async def tiktok_search(
 ):
     settings = get_settings()
     region = _tiktok_region(country)
+    # Over-fetch then relevance-filter so limit is filled with on-topic ads.
+    fetch_limit = min(200, max(limit * 3, limit))
     async with billed_call(
         caller=caller,
         endpoint="/v1/ad-library/tiktok/search",
@@ -1271,25 +1890,44 @@ async def tiktok_search(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             # Decodo-native Commercial Content Library first (flat 2 credits).
-            native = await tiktok_ads_native.search_ads(q, country=region, limit=limit)
+            native = await tiktok_ads_native.search_ads(
+                q, country=region, limit=fetch_limit
+            )
             if native is not None:
                 ctx["source"] = "direct"
-                ads = [_normalize_ad(i, "tiktok_ad_library") for i in native]
+                matched = tiktok_ads_native.filter_ads_by_query(native, q)[:limit]
+                ads = [_normalize_ad(i, "tiktok_ad_library") for i in matched]
                 ctx["credits_override"] = CREDIT_TIKTOK_AD_SEARCH
-                return {"query": q, "country": region, "totalReturned": len(ads), "ads": ads}
+                return {
+                    "query": q,
+                    "country": region,
+                    "totalReturned": len(ads),
+                    "ads": ads,
+                }
 
             items = await _run_actor(
                 settings.APIFY_ACTOR_TIKTOK_AD_LIBRARY,
-                {"source": "both", "searchTerms": [q], "countries": [region], "maxResults": limit},
-                limit,
+                {
+                    "source": "both",
+                    "searchTerms": [q],
+                    "countries": [region],
+                    "maxResults": fetch_limit,
+                },
+                fetch_limit,
             )
             ctx["source"] = "apify"
-            ads = [_normalize_ad(i, "tiktok_ad_library") for i in items]
-            return {"query": q, "country": region, "totalReturned": len(ads), "ads": ads}
+            matched = tiktok_ads_native.filter_ads_by_query(items, q)[:limit]
+            ads = [_normalize_ad(i, "tiktok_ad_library") for i in matched]
+            return {
+                "query": q,
+                "country": region,
+                "totalReturned": len(ads),
+                "ads": ads,
+            }
 
         data = await cached_or_run(
             "ad-library.tiktok.search",
-            {"q": q, "country": region, "limit": limit, "v": 6},
+            {"q": q, "country": region, "limit": limit, "v": 7},
             _run,
             ctx,
             use_cache=cache,
@@ -1458,7 +2096,17 @@ async def tiktok_top_ads(
         return ApiResponse(data=data)
 
 
-@router.get("/tiktok/ad-details", summary="TikTok ad details")
+@router.get(
+    "/tiktok/ad-details",
+    summary="TikTok ad details",
+    description=(
+        "Fetch one TikTok Commercial Content Library ad by URL or ad ID. Same "
+        "schema as search hits (text/cta/landingUrl/impressions/advertiser.* with "
+        "nulls when DSA withholds). Useful for ID lookup without a search page. "
+        f"Flat {CREDIT_AD_LIBRARY_NATIVE} credits on the native path; Apify fallback "
+        f"capped at {CREDIT_TIKTOK_AD_SEARCH_APIFY} (not 17). Default country GB."
+    ),
+)
 async def tiktok_ad_details(
     url: str = Query(..., description="TikTok Ad Library URL or ad ID"),
     country: str = Query(
@@ -1528,13 +2176,13 @@ async def tiktok_ad_details(
             if best is None:
                 raise HTTPException(status_code=404, detail="Ad not found")
             ctx["source"] = "apify"
-            ctx["credits_override"] = 17
+            ctx["credits_override"] = CREDIT_TIKTOK_AD_SEARCH_APIFY
             return _normalize_ad(best, "tiktok_ad_library")
 
         return ApiResponse(
             data=await cached_or_run(
                 "ad-library.tiktok.ad-details",
-                {"ad_id": ad_id, "country": region, "v": 5},
+                {"ad_id": ad_id, "country": region, "v": 6},
                 _run,
                 ctx,
                 use_cache=cache,
@@ -1547,7 +2195,10 @@ async def google_company_ads(
     advertiser: str = Query(
         ...,
         min_length=2,
-        description="Advertiser name, domain (e.g. nike.com), or Google advertiser ID (AR…).",
+        description=(
+            "Advertiser name, domain (e.g. nike.com), or Google advertiser ID (AR…). "
+            "Prefer AR… from /google/advertiser-search for a deterministic entity."
+        ),
     ),
     country: str = Query(
         "US",
@@ -1573,6 +2224,13 @@ async def google_company_ads(
     end_date: str | None = Query(
         None,
         description="Optional YYYY-MM-DD — keep creatives whose shown window overlaps this end.",
+    ),
+    sort: Literal["last_shown", "first_shown"] | None = Query(
+        None,
+        description=(
+            "Client-side sort before slicing: last_shown (recent activity first) or "
+            "first_shown. Default is ATC order (often oldest creatives first)."
+        ),
     ),
     topic: str = Query(
         "all",
@@ -1624,9 +2282,15 @@ async def google_company_ads(
                     raise HTTPException(status_code=400, detail="Invalid cursor")
                 ctx["source"] = "direct"
                 ads = [_normalize_ad(i, "google_ad_library") for i in (native.get("ads") or [])]
+                if sort == "last_shown":
+                    ads.sort(key=lambda a: a.get("lastShown") or "", reverse=True)
+                elif sort == "first_shown":
+                    ads.sort(key=lambda a: a.get("firstShown") or "", reverse=True)
+                resolved = _google_resolved_advertiser(native, ads, advertiser)
                 ctx["credits_override"] = CREDIT_GOOGLE_COMPANY_ADS
                 return {
                     "advertiser": advertiser,
+                    "resolvedAdvertiser": resolved,
                     "country": country_code,
                     "totalReturned": len(ads),
                     "adsCountEstimate": native.get("adsCountEstimate"),
@@ -1656,8 +2320,13 @@ async def google_company_ads(
                     for a in ads
                     if google_ads_native._creative_in_date_window(a, start_d, end_d)
                 ]
+            if sort == "last_shown":
+                ads.sort(key=lambda a: a.get("lastShown") or "", reverse=True)
+            elif sort == "first_shown":
+                ads.sort(key=lambda a: a.get("firstShown") or "", reverse=True)
             return {
                 "advertiser": advertiser,
+                "resolvedAdvertiser": _google_resolved_advertiser({}, ads, advertiser),
                 "country": country_code,
                 "totalReturned": len(ads),
                 "adsCountEstimate": None,
@@ -1675,7 +2344,8 @@ async def google_company_ads(
                 "cursor": cursor or "",
                 "start_date": start_date or "",
                 "end_date": end_date or "",
-                "v": 7,
+                "sort": sort or "",
+                "v": 8,
             },
             _run,
             ctx,
@@ -1686,7 +2356,46 @@ async def google_company_ads(
         return ApiResponse(data=data)
 
 
-@router.get("/google/ad-details", summary="Google ad details")
+def _google_detail_identity(
+    row: dict[str, Any], *, advertiser_id: str, creative: str
+) -> dict[str, Any] | None:
+    """Normalize + enforce AR/CR identity (never return a different creative)."""
+    out = _normalize_ad(row, "google_ad_library")
+    got_cr = safe_str(out.get("id")) or ""
+    got_ar = safe_str((out.get("advertiser") or {}).get("id")) or ""
+    if got_cr.upper() != creative.upper():
+        return None
+    # Stamp request identity so chain never drifts even if a scraper mislabels AR.
+    out["id"] = creative
+    out["url"] = (
+        f"https://adstransparency.google.com/advertiser/{advertiser_id}/creative/{creative}"
+    )
+    adv = out.setdefault("advertiser", {})
+    if not isinstance(adv, dict):
+        adv = {}
+        out["advertiser"] = adv
+    if got_ar and got_ar.upper() != advertiser_id.upper():
+        # Wrong legal entity for this CR — reject (do not silently swap Nike entities).
+        return None
+    adv["id"] = advertiser_id
+    adv["url"] = f"https://adstransparency.google.com/advertiser/{advertiser_id}"
+    return out
+
+
+@router.get(
+    "/google/ad-details",
+    summary="Google ad details",
+    description=(
+        "Fetch one Google Ads Transparency creative by AR… + CR… URL. Adds text/"
+        "headline/landingUrl/impressions when ATC publishes them (beyond company-ads "
+        "list rows). Response id + advertiser.id always match the request — different "
+        "Nike legal entities (Inc. vs Retail BV vs SRL) are not interchangeable. "
+        "countries[] is ISO-3166 alpha-2; country is a single ISO when unambiguous. "
+        "textIsTemplate marks Google Ads Dynamic Keyword Insertion macros "
+        "({KeyWord:…}). Flat 2 credits native; Apify fallback capped at "
+        f"{CREDIT_AD_DETAILS_APIFY}."
+    ),
+)
 async def google_ad_details(
     creative_id: str = Query(..., description="Google Ads Transparency URL containing AR... and CR... IDs"),
     country: str = Query("US", min_length=2, max_length=2),
@@ -1709,25 +2418,45 @@ async def google_ad_details(
                 advertiser_id, creative, country=country
             )
             if native:
-                ctx["source"] = "direct"
-                return _normalize_ad(native, "google_ad_library")
+                out = _google_detail_identity(
+                    native, advertiser_id=advertiser_id, creative=creative
+                )
+                if out:
+                    ctx["source"] = "direct"
+                    return out
 
             items = await _run_actor(
                 settings.APIFY_ACTOR_GOOGLE_AD_LIBRARY_V2,
                 {"advertisers": [advertiser_id], "region": country.upper(), "maxResults": 50},
                 50,
             )
+            want = creative.upper()
             for item in items:
-                if item.get("creativeId") == creative or item.get("adCreativeId") == creative:
+                cand = str(
+                    item.get("creativeId") or item.get("adCreativeId") or item.get("id") or ""
+                ).upper()
+                if cand != want:
+                    continue
+                out = _google_detail_identity(
+                    item, advertiser_id=advertiser_id, creative=creative
+                )
+                if out:
                     ctx["source"] = "apify"
-                    ctx["credits_override"] = 17
-                    return _normalize_ad(item, "google_ad_library")
-            raise HTTPException(status_code=404, detail="Ad not found")
+                    ctx["credits_override"] = CREDIT_AD_DETAILS_APIFY
+                    return out
+            raise HTTPException(
+                status_code=404,
+                detail=(
+                    f"Creative {creative} not found under advertiser {advertiser_id}. "
+                    "Pass the AR… from /google/advertiser-search or company-ads "
+                    "resolvedAdvertiser.id — Nike Inc / Retail BV / SRL are different entities."
+                ),
+            )
 
         return ApiResponse(
             data=await cached_or_run(
                 "ad-library.google.ad-details",
-                {"creative_id": creative_id, "country": country, "v": 5},
+                {"creative_id": f"{advertiser_id}/{creative}", "country": country, "v": 7},
                 _run,
                 ctx,
                 use_cache=cache,
@@ -1735,10 +2464,25 @@ async def google_ad_details(
         )
 
 
-@router.get("/google/advertiser-search", summary="Search Google Ads advertisers")
+@router.get(
+    "/google/advertiser-search",
+    summary="Search Google Ads advertisers",
+    description=(
+        "Search Google Ads Transparency advertisers and return ranked AR… entities. "
+        "Brand queries are expanded (e.g. nike → Nike, Inc. + NIKE SRL) so country=US "
+        "surfaces the parent company first. Pass advertisers[].id into "
+        "/v1/ad-library/google/company-ads?advertiser=AR… for a deterministic creatives chain. "
+        "Flat 1 credit."
+    ),
+)
 async def google_advertiser_search(
-    q: str = Query(..., min_length=2),
-    country: str = Query("US", min_length=2, max_length=2),
+    q: str = Query(..., min_length=2, description="Brand, domain, or advertiser name (min 2 characters)."),
+    country: str = Query(
+        "US",
+        min_length=2,
+        max_length=2,
+        description="Two-letter ISO country code used to rank entities (e.g. US prefers Inc. over SRL).",
+    ),
     limit: int = Query(10, ge=1, le=50),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
@@ -1788,7 +2532,7 @@ async def google_advertiser_search(
         return ApiResponse(
             data=await cached_or_run(
                 "ad-library.google.advertiser-search",
-                {"q": q, "country": country, "limit": limit, "v": 5},
+                {"q": q, "country": country, "limit": limit, "v": 6},
                 _run,
                 ctx,
                 use_cache=cache,
@@ -1811,6 +2555,10 @@ async def linkedin_search_ads(
     q: str | None = Query(
         None,
         description="Advertiser / account owner name (LinkedIn accountOwner). Min 2 chars when used.",
+    ),
+    company: str | None = Query(
+        None,
+        description="SC alias of q — advertiser / account owner name.",
     ),
     keyword: str | None = Query(
         None,
@@ -1845,18 +2593,24 @@ async def linkedin_search_ads(
         None,
         description="Pagination token from a previous response (paginationToken / nextCursor).",
     ),
+    pagination_token: str | None = Query(
+        None,
+        alias="paginationToken",
+        description="SC alias of cursor — pagination token from a previous response.",
+    ),
     limit: int = Query(20, ge=1, le=200),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    owner = (q or "").strip()
+    owner = (q or company or "").strip()
     kw = (keyword or "").strip()
     cid = (company_id or "").strip()
+    page_cursor = (cursor or pagination_token or "").strip() or None
     if len(owner) < 2 and len(kw) < 2 and not cid:
         raise HTTPException(
             status_code=400,
-            detail="Provide q (advertiser), keyword, or companyId.",
+            detail="Provide q/company (advertiser), keyword, or companyId.",
         )
     if (start_date and not end_date) or (end_date and not start_date):
         raise HTTPException(
@@ -1887,7 +2641,7 @@ async def linkedin_search_ads(
                 company_id=cid or None,
                 start_date=start_date,
                 end_date=end_date,
-                pagination_token=cursor,
+                pagination_token=page_cursor,
                 enrich=True,
             )
             if native is not None:
@@ -1967,7 +2721,19 @@ async def linkedin_search_ads(
         return ApiResponse(data=data)
 
 
-@router.get("/linkedin/ad-details", summary="LinkedIn ad details")
+@router.get(
+    "/linkedin/ad-details",
+    summary="LinkedIn ad details",
+    description=(
+        "Fetch one LinkedIn Ad Library ad by URL or ID. Adds headline, destination/"
+        "landingUrl, targeting{}, impressionsByCountry[], and advertiser.url when the "
+        "detail page publishes them. advertiser.id is extracted from "
+        "/company/{id} for joins with LinkedIn Company endpoints. Schema keeps "
+        "null keys for fields search may have (country, logo) so details is never "
+        "thinner by omission. Flat 2 credits native; Apify fallback capped at "
+        f"{CREDIT_AD_DETAILS_APIFY}."
+    ),
+)
 async def linkedin_ad_details(
     url: str = Query(..., description="LinkedIn Ad Library URL or ad ID"),
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
@@ -2007,13 +2773,13 @@ async def linkedin_ad_details(
             if not items:
                 raise HTTPException(status_code=404, detail="Ad not found")
             ctx["source"] = "apify"
-            ctx["credits_override"] = 17
+            ctx["credits_override"] = CREDIT_AD_DETAILS_APIFY
             return _normalize_ad(items[0], "linkedin_ad_library")
 
         return ApiResponse(
             data=await cached_or_run(
                 "ad-library.linkedin.ad-details",
-                {"url": ad_url, "v": 6},
+                {"url": ad_url, "v": 7},
                 _run,
                 ctx,
                 use_cache=cache,

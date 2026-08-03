@@ -311,22 +311,32 @@ def _verified_flag(item: dict[str, Any]) -> bool | None:
 
 
 def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
+    from app.services.tiktok_native import build_contact
+    from app.utils.media_urls import utc_now_iso
+
     username = item.get("userName") or item.get("screen_name") or item.get("username")
-    # Guest GraphQL exposes the modern triad: blue check / identity / affiliate.
-    blue = first_present(
-        item.get("isBlueVerified"),
-        item.get("is_blue_verified"),
-        item.get("isVerified"),
-        item.get("verified"),
+    # Blue / legacy / identity stay independent — never use legacy.verified as blue.
+    blue = first_present(item.get("isBlueVerified"), item.get("is_blue_verified"))
+    legacy_v = first_present(
+        item.get("isLegacyVerified"),
+        item.get("is_legacy_verified"),
+        (item.get("legacy") or {}).get("verified")
+        if isinstance(item.get("legacy"), dict)
+        else None,
     )
     identity = first_present(item.get("isIdentityVerified"), item.get("is_identity_verified"))
     affiliate = item.get("affiliate") if isinstance(item.get("affiliate"), dict) else None
-    verified = _verified_flag(item)
-    if verified is None and (blue is not None or identity is not None or affiliate is not None):
-        verified = bool(blue) or bool(identity) or bool(affiliate)
+    verified = None
+    if blue is not None or legacy_v is not None or identity is not None or affiliate is not None:
+        verified = bool(blue) or bool(legacy_v) or bool(identity) or bool(affiliate)
+    elif item.get("verified") is not None:
+        # Opaque aggregate from a thin source — keep as last resort only.
+        verified = bool(item.get("verified"))
 
     verification = strip_empty(
         {
+            "isBlueVerified": bool(blue) if blue is not None else None,
+            "isLegacyVerified": bool(legacy_v) if legacy_v is not None else None,
             "isIdentityVerified": bool(identity) if identity is not None else None,
             "verifiedType": safe_str(item.get("verifiedType") or item.get("verified_type")),
             "reason": safe_str(item.get("verificationReason")),
@@ -371,6 +381,19 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
     if created and "T" not in created:
         created = native._twitter_created_at_iso(created) or created
 
+    tipjar = item.get("tipjarSettings") or item.get("tipjar_settings")
+    if not isinstance(tipjar, dict):
+        tipjar = None
+    bio_text = safe_str(item.get("description") or item.get("bio"))
+    contact = build_contact(
+        bio=bio_text,
+        tipjar=tipjar,
+        bio_urls=bio_urls if isinstance(bio_urls, list) else None,
+        links=[safe_str(item.get("website")) or _entities_website(item)]
+        if (item.get("website") or _entities_website(item))
+        else None,
+    )
+
     return strip_empty(
         {
             "platform": "twitter",
@@ -379,16 +402,23 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
             "id": safe_str(item.get("id") or item.get("id_str")),
             "username": safe_str(username),
             "name": safe_str(item.get("name") or item.get("fullName")),
-            "bio": safe_str(item.get("description") or item.get("bio")),
+            "bio": bio_text,
             "location": safe_str(item.get("location")),
             "verified": verified,
             "isBlueVerified": bool(blue) if blue is not None else None,
+            "isLegacyVerified": bool(legacy_v) if legacy_v is not None else None,
             "isIdentityVerified": bool(identity) if identity is not None else None,
             "verification": verification or None,
             "affiliate": affiliate,
             "followers": safe_int(first_present(item.get("followers"), item.get("followersCount"))),
             "following": safe_int(
                 first_present(item.get("following"), item.get("followingCount"), item.get("friendsCount"))
+            ),
+            "fastFollowers": safe_int(
+                first_present(item.get("fastFollowers"), item.get("fast_followers_count"))
+            ),
+            "normalFollowers": safe_int(
+                first_present(item.get("normalFollowers"), item.get("normal_followers_count"))
             ),
             "tweetCount": safe_int(
                 first_present(item.get("statusesCount"), item.get("tweetsCount"), item.get("statuses_count"))
@@ -401,6 +431,8 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
             "pinnedTweetIds": pinned_ids,
             "website": safe_str(item.get("website")) or _entities_website(item),
             "bioUrls": bio_urls,
+            "contact": contact,
+            "tipjarSettings": tipjar,
             "profileImage": safe_str(item.get("profilePicture") or item.get("profile_image_url_https")),
             "bannerImage": safe_str(item.get("coverPicture") or item.get("profile_banner_url")),
             "profileImageShape": safe_str(item.get("profileImageShape") or item.get("profile_image_shape")),
@@ -430,6 +462,7 @@ def _normalize_profile(item: dict[str, Any]) -> dict[str, Any]:
                 )
             ),
             "createdAt": created,
+            "fetchedAt": utc_now_iso(),
         }
     )
 
@@ -527,14 +560,24 @@ async def twitter_transcript(
 
 @router.get(
     "/profile",
-    summary="Twitter/X profile — verification triad, listed/media/likes, banner",
+    summary="Twitter/X profile — blue/legacy/identity verification, tipjar, fastFollowers",
 )
 async def twitter_profile(
     url: str = Query(..., description="Profile URL or @handle, e.g. https://x.com/username"),
-    cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
+    cache: bool = Query(False, description="Set true to use the default cache TTL. Default false — always fetch fresh."),
+    cacheMaxAge: str | None = Query(
+        None,
+        description=(
+            "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. "
+            "When set, enables caching with that TTL. Envelope includes cached + cachedAt."
+        ),
+    ),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    from app.core.cache_params import resolve_cache_options
+
     handle = _require_twitter_handle(url)
+    use_cache, ttl = resolve_cache_options(cache, cacheMaxAge)
     async with billed_call(
         caller=caller,
         endpoint="/v1/twitter/profile",
@@ -553,13 +596,14 @@ async def twitter_profile(
 
         data = await cached_or_run(
             endpoint="twitter.profile",
-            params={"handle": handle, "v": 6},
+            params={"handle": handle, "v": 7, "cacheMaxAge": cacheMaxAge},
             runner=_run,
             ctx=ctx,
             # Profiles are polled repeatedly; follower counts drift slowly, so
             # serve the last copy instantly after TTL and refresh in background.
             stale_while_revalidate=True,
-            use_cache=cache,
+            use_cache=use_cache,
+            ttl=ttl,
         )
         return ApiResponse(data=data)
 

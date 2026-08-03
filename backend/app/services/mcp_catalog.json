@@ -1952,8 +1952,8 @@
     "platform": "facebook",
     "name": "Facebook Profile Photos",
     "path": "/v1/facebook/profile-photos",
-    "credits": 12,
-    "summary": "Photos from a Facebook profile or page.",
+    "credits": 2,
+    "summary": "Page photos — image URL + accessibilityCaption (alt-text, not caption).",
     "params": [
       {
         "name": "url",

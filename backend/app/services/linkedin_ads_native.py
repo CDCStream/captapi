@@ -206,14 +206,23 @@ def extract_ads(html: str, *, country: str, limit: int) -> list[dict[str, Any]]:
             if "company-logo" in src or "ghost" in src or "entity-ghost" in src:
                 if not logo:
                     logo = src
-                if advertiser is None and not _bad_name(alt):
+                if (
+                    advertiser is None
+                    and not _bad_name(alt)
+                    and (not headline or alt.lower() != headline.lower())
+                ):
                     advertiser = alt
                 continue
             if "media.licdn.com" in src and src not in media:
                 media.append(src)
             if not headline and not _bad_name(alt):
                 headline = alt
-            if advertiser is None and not _bad_name(alt):
+            # Never treat creative alt/headline as the advertiser name.
+            if (
+                advertiser is None
+                and not _bad_name(alt)
+                and (not headline or alt.lower() != headline.lower())
+            ):
                 advertiser = alt
 
         row: dict[str, Any] = {

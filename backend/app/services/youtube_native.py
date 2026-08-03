@@ -433,6 +433,7 @@ def normalize_video_renderer(vr: dict[str, Any]) -> dict[str, Any] | None:
     video_id = safe_str(vr.get("videoId"))
     if not video_id:
         return None
+    view_text = text_of(vr.get("viewCountText") or vr.get("shortViewCountText"))
     view_count, view_approx = parse_count_text_meta(vr.get("viewCountText"))
     if view_count is None:
         view_count, view_approx = parse_count_text_meta(vr.get("shortViewCountText"))
@@ -456,6 +457,9 @@ def normalize_video_renderer(vr: dict[str, Any]) -> dict[str, Any] | None:
         "publishedAt": published_at,
         "publishedTimeText": published_text,
         "viewCount": view_count,
+        # Compact label + parsed int (SC-style) — round numbers stay honest.
+        "viewCountText": view_text,
+        "viewCountInt": view_count,
         "durationSeconds": duration,
         "thumbnailUrl": _best_thumb(vr.get("thumbnail")),
         "channelName": channel.get("title"),

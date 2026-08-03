@@ -734,17 +734,25 @@ def parse_user_result(user: dict[str, Any]) -> dict[str, Any] | None:
     if not screen_name and not rest_id:
         return None
 
+    # Keep blue / legacy / identity as separate bits — never collapse them.
+    # is_blue_verified=true + legacy.verified=false is a real (and common) state.
     is_blue = user.get("is_blue_verified")
-    if is_blue is None:
-        is_blue = legacy.get("verified")
+    is_legacy = legacy.get("verified")
     is_identity = verification_info.get("is_identity_verified")
     identity_flag: bool | None = is_identity if isinstance(is_identity, bool) else None
+    legacy_flag: bool | None = bool(is_legacy) if is_legacy is not None else None
+    blue_flag: bool | None = bool(is_blue) if is_blue is not None else None
     affiliate = _affiliate_label(user)
     verified_type = safe_str(verification.get("verified_type"))
-    # Any of the three modern X verification signals counts as verified.
+    # Aggregate OR for back-compat — clients that need the type must read the triad.
     verified = None
-    if is_blue is not None or identity_flag is not None or affiliate is not None:
-        verified = bool(is_blue) or bool(identity_flag) or bool(affiliate)
+    if (
+        blue_flag is not None
+        or legacy_flag is not None
+        or identity_flag is not None
+        or affiliate is not None
+    ):
+        verified = bool(blue_flag) or bool(legacy_flag) or bool(identity_flag) or bool(affiliate)
 
     website_urls = _entity_urls(entities.get("url"))
     bio_urls = _entity_urls(entities.get("description"))
@@ -779,6 +787,9 @@ def parse_user_result(user: dict[str, Any]) -> dict[str, Any] | None:
             verified_since = None
 
     sensitive = first_present(user.get("possibly_sensitive"), legacy.get("possibly_sensitive"))
+    tipjar = user.get("tipjar_settings") if isinstance(user.get("tipjar_settings"), dict) else None
+    if tipjar is None and isinstance(user.get("tipjarSettings"), dict):
+        tipjar = user.get("tipjarSettings")
 
     return {
         "id": rest_id,
@@ -792,6 +803,18 @@ def parse_user_result(user: dict[str, Any]) -> dict[str, Any] | None:
         "following": safe_int(
             first_present(rel.get("following"), legacy.get("friends_count"))
         ),
+        "fastFollowers": safe_int(
+            first_present(
+                legacy.get("fast_followers_count"),
+                user.get("fast_followers_count"),
+            )
+        ),
+        "normalFollowers": safe_int(
+            first_present(
+                legacy.get("normal_followers_count"),
+                user.get("normal_followers_count"),
+            )
+        ),
         "statusesCount": safe_int(
             first_present(tweets.get("tweets"), legacy.get("statuses_count"))
         ),
@@ -803,7 +826,8 @@ def parse_user_result(user: dict[str, Any]) -> dict[str, Any] | None:
         ),
         # listed_count still lives on classic legacy; new schema often omits it.
         "listedCount": safe_int(legacy.get("listed_count")),
-        "isBlueVerified": bool(is_blue) if is_blue is not None else None,
+        "isBlueVerified": blue_flag,
+        "isLegacyVerified": legacy_flag,
         "isIdentityVerified": identity_flag,
         "verified": verified,
         "verifiedType": verified_type,
@@ -813,6 +837,7 @@ def parse_user_result(user: dict[str, Any]) -> dict[str, Any] | None:
         "website": website,
         "bioUrls": bio_urls or None,
         "websiteUrls": website_urls or None,
+        "tipjarSettings": tipjar,
         "profilePicture": _upgrade_profile_image(
             safe_str(avatar.get("image_url") or legacy.get("profile_image_url_https"))
         ),

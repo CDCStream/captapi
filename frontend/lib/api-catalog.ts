@@ -232,11 +232,11 @@ const YOUTUBE: Spec[] = [
     tagline:
       "YouTube search with cursor pagination — typed hits, ids, canonical URLs, filters (2 credits/page).",
     longDescription:
-      "Search YouTube by keyword and get a cursor-paginated page of clean JSON: results[] with type (video|short|channel|playlist|live), id, canonical url (no radio/mix junk), title, publishedAt, viewCount, durationSeconds, thumbnailUrl, channelName, channelId, channel{id,title,handle,url}, and badges[]. Also partitioned as videos[] / shorts[] / channels[] / playlists[]. Filter with type, sortBy (relevance|date|views|rating), uploadDate (today|this_week|this_month|this_year), duration (under_4|4_20|over_20), and region. Pass nextCursor for the next page. Flat 2 credits per page. cache=true uses the 24h shared cache.",
+      "Search YouTube by keyword and get a cursor-paginated page of clean JSON: results[] with type (video|short|channel|playlist|live), id, canonical url (no radio/mix junk), title, publishedAt, viewCount + viewCountText/viewCountInt (compact label + parsed number), durationSeconds, thumbnailUrl, channelName, channelId, channel{id,title,handle,url,thumbnail}, and badges[]. Partitioned as videos[] / shorts[] / channels[] / playlists[] / lives[] / shelves[]. Filter with type, sortBy (relevance|date|views|rating), uploadDate (today|this_week|this_month|this_year), duration (under_4|4_20|over_20 — applies to long-form videos, not Shorts), and region. nextCursor / continuationToken for the next page. Flat 2 credits per page. cache=true uses the 24h shared cache.",
     delivers: [
-      "Cursor pagination via nextCursor + hasMore",
-      "Typed results with stable id and canonical URL",
-      "channelId + channel{handle,url} when YouTube exposes them",
+      "Typed arrays: videos / shorts / channels / playlists / lives / shelves",
+      "viewCountText + viewCountInt (no silent million-rounding)",
+      "channel{id,title,handle,url} + channelId",
       "Filters: type, sortBy, uploadDate, duration, region",
     ],
   },
@@ -376,7 +376,7 @@ const TIKTOK: Spec[] = [
   { slug: "tiktok-summarizer", name: "TikTok Summarizer API", shortName: "Summarizer", category: "summarize", method: "GET", path: "/v1/tiktok/summarize", credits: 4 },
   { slug: "tiktok-video-details", name: "TikTok Video Details API", shortName: "Video Details", category: "details", method: "GET", path: "/v1/tiktok/video-details", credits: 1, tagline: "Get everything about one TikTok video from its URL — caption, view/like/comment/share/save counts, creator, sound, hashtags, and thumbnail.", longDescription: "Paste any public TikTok video URL and the TikTok Video Details API returns the full picture as clean JSON: the caption, when it was posted, how long it runs, and its engagement — views, likes, comments, shares, and saves. You also get the creator (username, display name, follower count, verified badge, and avatar), the sound/music name, the list of hashtags, and a thumbnail image. Use it to build analytics dashboards, track a campaign, or enrich a content database. This endpoint focuses on metadata and stats. No TikTok login and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Caption, publish date, and video duration", "Views, likes, comments, shares, and saves", "Creator profile — handle, name, followers, verified, avatar", "Sound name, hashtags, and thumbnail image"] },
   { slug: "tiktok-comments", name: "TikTok Comments API", shortName: "Comments", category: "comments", method: "GET", path: "/v1/tiktok/comments", credits: 2, tagline: "TikTok comments — clean schema plus stable authorId/authorSecUid and commentLanguage for listening loops.", longDescription: "Paste a public TikTok video URL and get comments as clean JSON (not TikTok's 40+ junk user fields). Each comment keeps username + avatar, and adds stable authorId (uid) and authorSecUid for repeat-commenter detection, plus commentLanguage for market listening without a separate language detector. replyCount when TikTok exposes it. totalComments + cursor pagination (nextCursor/hasMore). Flat 2 credits per call. Need replies? Use TikTok Comment Replies with the parent comment id.", delivers: ["Stable authorId + authorSecUid (not just username)", "commentLanguage for market listening", "replyCount when TikTok exposes it", "Like count, publish time, totalComments + cursor pagination", "limit up to 500 — flat 2 credits per call"] },
-  { slug: "tiktok-channel-details", name: "TikTok Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/tiktok/channel-details", credits: 1 , tagline: "Get a TikTok profile's key stats — followers, following, likes, video count, bio, and verification." },
+  { slug: "tiktok-channel-details", name: "TikTok Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/tiktok/channel-details", credits: 1, tagline: "TikTok profile with createTime (account age), bioLink.risk, ttSeller, commerce flags, and contact{}.", longDescription: "Pass a profile URL or @handle and get clean JSON: followers/following/likes/postCount, verified, plus trust signals — createTime / createTimeUnix (account age for bot detection), bioLink{link,risk} (TikTok's own link risk score), ttSeller / isSeller (TikTok Shop), isCommerceUser, isOrganization, friendCount, diggCount, language, duet/stitch/download/comment settings, secUid, and contact{emails,links} from the bio. Pass cacheMaxAge=1d|3d|7d|14d|30d to reuse a cached copy (envelope cached + cachedAt). Flat 1 credit." },
   { slug: "tiktok-profile-region", name: "TikTok Profile Region API", shortName: "Profile Region", category: "channel", method: "GET", path: "/v1/tiktok/profile-region", credits: 2 , tagline: "Find out where a TikTok creator is likely based and what language they use — country, language, and core profile stats.", longDescription: "Give the TikTok Profile Region API a profile URL, @handle, or username and it returns location and language as clean JSON. TikTok almost never shows an account's country publicly, so when that value is missing we estimate the country from public cues like the bio, display name, and language. The response tells you whether the country came from TikTok itself or from that estimate, and how confident the estimate is (high, medium, or low). You also get the interface language and core profile stats — followers, following, total likes, and video count — plus display name, verified and private flags, and the avatar. Use it for audience and geo analysis, content localization, compliance checks, or vetting creators before a partnership. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Creator country — TikTok's own when available, otherwise an AI estimate", "Whether the country came from TikTok or was estimated, plus confidence", "Interface language plus followers, following, likes, and video count", "Display name, verified and private flags, and avatar"] },
   {
     slug: "tiktok-audience-demographics",
@@ -437,12 +437,12 @@ const TIKTOK: Spec[] = [
     tagline:
       "Videos from TikTok's /tag/{name} challenge feed — not keyword or username search. Cursor + hasMore.",
     longDescription:
-      "Pass a hashtag (with or without #) and get videos from TikTok's /tag/{name} challenge feed as clean JSON — the same feed as the tag page in the app. This is not keyword search: an @comedy… account with no #comedy tag is dropped. Each result must carry the hashtag in structured tags or as #tag in the caption. Fields: url, id, caption (TikTok has no separate description), publishedAt, durationSeconds, thumbnail, author, engagement, hashtags, musicName. Cursor pagination via nextCursor + hasMore (nextCursor null = last page). An optional region parameter only chooses which country our request is sent from — it does not filter results by country. Use it to track a campaign or branded hashtag. Billed per result — about 0.7 credits each.",
+      "Pass a hashtag (with or without #) and get videos from TikTok's /tag/{name} challenge feed (CHALLENGE_AWEME / api/challenge/item_list) as clean JSON — the same feed as the tag page in the app. This is not keyword search: an @comedy… account with no #comedy tag is dropped. Each result must carry the hashtag in structured tags or as #tag in the caption. Fields: url, id, caption, publishedAt, durationSeconds, thumbnail, author (+ author.region when present), engagement, hashtags, musicName, plus region / shopProductUrl / isPaidPartnership / descLanguage when TikTok exposes them. Cursor pagination via nextCursor + hasMore. The optional region query param only chooses the proxy exit country — it does not filter results by country. Billed per result — about 0.7 credits each.",
     delivers: [
-      "Real /tag/{name} challenge feed (not keyword search)",
+      "Real /tag/{name} challenge feed (CHALLENGE_AWEME — not keyword search)",
       "Hashtag required on every result (structured or #tag in caption)",
+      "shopProductUrl + per-video region / authorRegion when present",
       "hasMore + nextCursor (null = end)",
-      "region = proxy exit only — does not filter by country",
       "Caption only — no duplicate description field",
     ],
   },
@@ -493,13 +493,15 @@ const TIKTOK: Spec[] = [
     method: "GET",
     path: "/v1/tiktok/trending-feed",
     credits: 2,
-    tagline: "TikTok For You feed by region — rank, publishedAt, caption, mediaType, videoUrl, saves, isAd. Flat 2 credits.",
-    longDescription: "Get what's currently surfacing on TikTok's For You / recommend feed for a region as clean JSON. Each result includes rank (For You position — unique to Captapi), publishedAt + createTime, caption, mediaType (video|photo), coverUrl/videoUrl, author + authorId/secUid, views/likes/comments/shares/saves, and isAd. country is a region-availability hint: you see content that isn't banned in that market, not only creators from that country. Flat 2 credits per call regardless of limit.",
+    tagline:
+      "For You by default; pass orderBy/period/page for Creative Center popular videos (like/hot/comment/repost) with totalCount. Flat 2 credits.",
+    longDescription:
+      "Default: TikTok For You / recommend feed with rank, publishedAt, caption, mediaType, coverUrl/videoUrl, author + authorId/secUid, and views/likes/comments/shares/saves. Pass orderBy (hot|like|comment|repost), period (7|30|120), page, or countryCode to switch to the TikTok Creative Center popular-videos chart (same filters as SC videos/popular) — Captapi still hydrates engagement/author when possible and returns pagination.totalCount (typically 500). country / countryCode is the chart market in Creative Center mode; on For You it is a region-availability hint. Flat 2 credits per call.",
     delivers: [
-      "rank — For You position (Captapi-only vs SC)",
-      "publishedAt + createTime so you can tell 2h vs 2-week virals",
-      "mediaType video|photo, videoUrl, saves, isAd",
-      "authorId + secUid; flat 2 credits",
+      "For You richness: engagement + rank + author",
+      "orderBy / period / countryCode / page → Creative Center chart",
+      "pagination.totalCount (~500) in chart mode",
+      "Flat 2 credits",
     ],
   },
   {
@@ -509,18 +511,35 @@ const TIKTOK: Spec[] = [
     category: "list",
     method: "GET",
     path: "/v1/tiktok/popular-hashtags",
-    credits: 14,
-    creditsPerResult: 0.7,
+    credits: 2,
     tagline:
-      "Related TikTok hashtags for a topic — real videoCount/totalPlays from challenge/detail, plus sample co-occurrence counts.",
+      "TikTok Creative Center hashtag chart — real videoCount/totalPlays, rankDiff, trend[]. Flat 2 credits.",
     longDescription:
-      "Pass a seed topic or hashtag and get related tags discovered by co-occurrence in a sample of seed videos. Each tag is then enriched from TikTok's challenge/detail API (statsV2): videoCount and totalPlays are population totals (e.g. #skincare ≈ tens of millions of videos), while sampleVideoCount / samplePlays show how often the tag appeared in your sample. rank is by population videoCount (rankBy=videoCount). Also returns hashtagId (TikTok challenge id), sampleSize, discovery=co_occurrence, discoverySource, fetchedAt, and growthRate (null — TikTok does not expose growth on this path). Default query=trending is a keyword seed via top-search — not TikTok's official trending-hashtag chart. Prefer a real niche seed (e.g. skincare). Billed by videos sampled (~0.7 credits each, min search floor).",
+      "Official TikTok Creative Center popular-hashtag chart (ads.tiktok.com/business/creativecenter/inspiration/popular/hashtag) as clean JSON. videoCount and totalPlays are Creative Center population totals — never a 20-video sample tally. Each row: rank, rankDiff, hashtagId, trend[] time series, growthRate (from trend), optional newOnBoard / industryId filters, country + period (7/30/120). Optional query=niche seed switches to legacy co-occurrence + challenge/detail enrich for related tags. Flat 2 credits on the Creative Center path.",
     delivers: [
-      "Population videoCount + totalPlays from challenge/detail (statsV2)",
-      "sampleVideoCount / samplePlays for co-occurrence transparency",
-      "hashtagId + rank by population videoCount",
-      "sampleSize, discoverySource, fetchedAt",
-      "growthRate null until TikTok exposes a public growth signal",
+      "Creative Center population videoCount + totalPlays",
+      "rankDiff + trend[] time series + growthRate",
+      "country / period / page / newOnBoard filters",
+      "Flat 2 credits (not per-video sampling)",
+    ],
+  },
+  {
+    slug: "tiktok-popular-songs",
+    name: "TikTok Popular Songs API",
+    shortName: "Popular Songs",
+    category: "list",
+    method: "GET",
+    path: "/v1/tiktok/popular-songs",
+    credits: 2,
+    tagline:
+      "Creative Center popular/surging sounds — rankDiff, trend[], commercialMusic. Flat 2 credits.",
+    longDescription:
+      "TikTok Creative Center sound chart (inspiration/popular/music). rankType=popular|surging, newOnBoard, commercialMusic (Commercial Music Library / ifCml — brand-safe), country, period (7/30/120), page. Each song: songId, clipId, title, artist, rankDiff, trend[] time series, growthRate, promoted. Can take up to ~30 seconds. Flat 2 credits. Pair with song-details / music-posts for a single sound's metadata and videos.",
+    delivers: [
+      "rankType popular | surging",
+      "commercialMusic / ifCml brand-safe filter",
+      "rankDiff + trend[] time series",
+      "Flat 2 credits",
     ],
   },
   { slug: "tiktok-live", name: "TikTok Live API", shortName: "Live", category: "details", method: "GET", path: "/v1/tiktok/live", credits: 1 , tagline: "Is this TikTok creator live right now — authoritative isLive/status, last room, and parsed stream qualities.", longDescription: "Send a TikTok profile URL or @handle and learn if that creator is currently live. isLive is true only when TikTok's liveRoom.status is 2 (also exposed as top-level status and room.status). When offline, room may still describe the last broadcast (title, startedAt, viewer/enter counts, stream pull URLs) — trust isLive/status, not a non-empty room. Response also includes creator.id / secUid / following, liveSubOnly, gameTagId / hashTagId when set, streamUrls[], streamQualities[{quality,codec,resolution,bitrate,flv,hls,dash}], and streams{hd,sd,ld,origin,ao,…}. Flat 1 credit per call. Live Info is the same payload at 7 credits for SC compatibility." },
@@ -534,15 +553,14 @@ const TIKTOK: Spec[] = [
     path: "/v1/tiktok/popular-creators",
     credits: 2,
     tagline:
-      "Creators ranking in a market's For You feed — real engagementRate formula, flat 2 credits native.",
+      "Creative Center creators + createTime / bioLinkRisk / ttSeller hydrate for partnership vetting.",
     longDescription:
-      "Pass a two-letter country code (feed market, e.g. US) and get creators appearing in that market's For You feed, hydrated with profile stats. engagementRate is (avg likes per video) / followers × 100 — not lifetime likes÷followers — with engagementRateBasis on every row. sort=engagement | follower | popularity; optional follower_count ranges. Top-level country is the feed market; each creator may include region from TikTok's profile (null when unknown). id + secUid when available. Honest gaps vs Creator Marketplace APIs: no tcm_id / tcm_link, no audienceCountry filter (that needs TCM audience data we do not have). Flat 2 credits on the native path; Apify fallthrough scales ~1.4/creator (min 2).",
+      "Primary source: TikTok Creative Center creator chart with official interact rate (engagementRateBasis=creative_center) plus rankDiff. Each creator is profile-hydrated with createTime / createTimeUnix (account age — the #1 bot signal), bioLinkRisk, ttSeller, and contact{emails,links} when present — so Creator Verification and Partnership Qualification actually work. Falls back to For You feed hydrate then Apify. sort=follower|engagement|popularity. Flat 2 credits on Creative Center / FYP native. Pass cacheMaxAge=1d|3d|7d|14d|30d for freshness-tolerant caching.",
     delivers: [
-      "Flat 2 credits native (not per-result)",
-      "engagementRate = avgLikesPerVideo/followers × 100 (+ engagementRateBasis)",
-      "id + secUid when TikTok exposes them",
-      "sort=follower | engagement | popularity + follower_count ranges",
-      "Honest: no tcm_id / audienceCountry (not Marketplace)",
+      "createTime account age on every hydrated creator",
+      "bioLinkRisk + ttSeller + contact{}",
+      "Creative Center official ER + rankDiff",
+      "Flat 2 credits native",
     ],
   },
 ];
@@ -561,16 +579,16 @@ const INSTAGRAM: Spec[] = [
     tagline:
       "Get an Instagram post or Reel — caption, likes, comments, media URLs, author, and split view counts on Reels.",
     longDescription:
-      "Paste an Instagram post or Reel URL and get the item as clean JSON: caption, like and comment counts, media URLs, author profile, duration when it is a Reel, and publish date. On Reels, engagement.views is the total play count (Instagram + Facebook cross-post); use engagement.viewsInstagram for Instagram-only views and engagement.viewsFacebook for Facebook plays when Instagram exposes the split (~20% of plays can be FB). Flat 1 credit. Pass cache=true for the 24h shared cache.",
+      "Paste an Instagram post or Reel URL and get the item as clean JSON: caption, like and comment counts, media URLs, author profile, duration when it is a Reel, and publish date. On Reels, engagement.views is video_view_count when Instagram exposes it (reach-style); engagement.plays is the total play count including replays (often ~2× views). viewsInstagram is Instagram-only plays (excludes Facebook cross-post); viewsFacebook is the FB share — total plays can be ~20% higher from Facebook. Flat 1 credit. Pass cache=true for the 24h shared cache.",
     delivers: [
       "Caption, media URLs, and publish date",
-      "views + viewsInstagram + viewsFacebook on Reels when available",
+      "views + plays + viewsInstagram + viewsFacebook on Reels when available",
       "Like and comment counts",
       "Author profile fields",
     ],
   },
   { slug: "instagram-comments", name: "Instagram Post Comments API", shortName: "Post Comments", category: "comments", method: "GET", path: "/v1/instagram/comments", credits: 45, creditsPerResult: 0.9, tagline: "Get the comments on any Instagram post or Reel — text, author, avatar, likes, and timestamp for each comment.", longDescription: "Send a post or Reel URL and the Instagram Post Comments API returns its comments as clean, structured JSON. Each comment includes the text, author username and avatar, like count, and when it was posted. Use the limit parameter (up to 500) to control how many you fetch — billing scales with results returned. Ideal for sentiment analysis, social listening, comment moderation, and finding engaged fans or customer feedback. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
-  { slug: "instagram-channel-details", name: "Instagram Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/instagram/channel-details", credits: 1, tagline: "Get any public Instagram profile's key stats in one call — followers, following, post count, bio, and verification status.", longDescription: "Send a profile URL or @handle and the Instagram Channel Details API returns the account's profile as clean, structured JSON: display name, bio, follower and following counts, total posts, profile image, and whether it's verified. It's the go-to endpoint for creator verification, competitor tracking, audience dashboards, and enriching user records with live Instagram stats. No Instagram login, no OAuth, and no proxies or infrastructure to maintain on your side. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
+  { slug: "instagram-channel-details", name: "Instagram Channel Details API", shortName: "Channel Details", category: "channel", method: "GET", path: "/v1/instagram/channel-details", credits: 1, tagline: "Instagram profile stats plus categoryName, fbid, relatedProfiles, businessAddress, and likeAndViewCountsDisabled.", longDescription: "Send a profile URL or @handle and get clean JSON: displayName, bio, followers/following/postCount, verified, profileImage, externalUrl/bioLinks, plus additive categoryName (Instagram niche label), fbid (cross-platform join to Facebook), relatedProfiles[] (similar accounts from edge_related_profiles), businessAddress{cityName,latitude,longitude,…}, and likeAndViewCountsDisabled. Flat 1 credit. Pass cache=true for the 24h shared cache." },
   {
     slug: "instagram-channel-posts",
     name: "Instagram Channel Posts API",
@@ -583,11 +601,11 @@ const INSTAGRAM: Spec[] = [
     tagline:
       "Latest posts from a public Instagram profile — viewsInstagram vs Facebook, profile user{} in one call.",
     longDescription:
-      "Send a profile URL or @handle and get recent posts as JSON plus a top-level user{} profile block (id, username, displayName, verified, followers, profileImage) so you do not need a second channel-details call. Each item includes postType, productType (clips/feed — never an empty string), caption, media, likes, comments, and on videos: durationSeconds, hasAudio, music{}, isPaidPartnership when Instagram exposes them. Play counts are split: engagement.views = total (IG+FB), viewsInstagram = Instagram-only, viewsFacebook = Facebook cross-post — use viewsInstagram for Instagram-only analytics (total can be ~20% higher from Facebook). Image/Sidecar keep engagement.views as null. Cursor pagination via nextCursor + hasMore. Pass cache=true for the 24h shared cache.",
+      "Send a profile URL or @handle and get recent posts as JSON plus a top-level user{} profile block (id, username, displayName, verified, followers, profileImage) so you do not need a second channel-details call. Each item includes postType, productType (clips/feed — never an empty string), caption, media, likes, comments, and on videos: durationSeconds, hasAudio, music{}, location{}, isAd / isAffiliate / isPaidPartnership when Instagram exposes them. Metrics: views (video_view_count when present), plays (total play count), viewsInstagram (IG-only plays — excludes Facebook cross-post), viewsFacebook. Image/Sidecar keep engagement.views as null. Cursor pagination via nextCursor + hasMore. Pass cache=true for the 24h shared cache.",
     delivers: [
       "Top-level user{} profile (no second call)",
-      "views + viewsInstagram + viewsFacebook on videos",
-      "productType, durationSeconds, hasAudio, music{}, isPaidPartnership",
+      "views + plays + viewsInstagram + viewsFacebook on videos",
+      "productType, durationSeconds, hasAudio, music{}, location{}, commercial flags",
       "nextCursor + hasMore pagination",
     ],
   },
@@ -603,15 +621,33 @@ const INSTAGRAM: Spec[] = [
     tagline:
       "Latest Reels from a public Instagram profile — pass userId for a faster lookup, paginate with nextCursor + hasMore.",
     longDescription:
-      "Send a profile URL/@handle or a numeric userId and get that account's recent Reels (videos only). Prefer userId when you already have it (from basic-profile or another call) — it skips handle→ID resolve and responds faster. Each Reel includes video URL, caption, likes, comments, duration, and publish date. Play counts are split when Instagram exposes them: engagement.views = total (IG+FB), viewsInstagram = Instagram-only, viewsFacebook = Facebook cross-post. Instagram-only performance reports should use viewsInstagram — total views can be ~20% higher from Facebook. Cursor pagination via nextCursor; hasMore is true until the end of the list. Pass cache=true for the 24h shared cache.",
+      "Send a profile URL/@handle or a numeric userId and get that account's recent Reels (videos only). Prefer userId when you already have it (from basic-profile or another call) — it skips handle→ID resolve and responds faster. Each Reel includes video URL, caption, likes, comments, duration, and publish date. Metrics when Instagram exposes them: views (video_view_count), plays (total plays incl. replays), viewsInstagram (Instagram-only plays — excludes Facebook cross-post), viewsFacebook. Cursor pagination via nextCursor; hasMore is true until the end of the list. Pass cache=true for the 24h shared cache.",
     delivers: [
       "Reels only (photos/carousels filtered out)",
       "url or userId input (userId skips handle resolve)",
-      "views + viewsInstagram + viewsFacebook when available",
+      "views + plays + viewsInstagram + viewsFacebook when available",
       "nextCursor + hasMore pagination",
     ],
   },
-  { slug: "instagram-reels-search", name: "Instagram Reels Search API", shortName: "Reels Search", category: "search", method: "GET", path: "/v1/instagram/reels-search", credits: 2, tagline: "Native Instagram Reels hashtag search — views + plays, author verified/followers, audio, location. Flat 2 credits.", longDescription: "Send a hashtag (without the #) or keyword and get matching Reels from Instagram's native hashtag grid as clean JSON — videos only. Same enriched shape as Hashtag Search: author (verified, profileImage, followers, postCount), engagement.views plus engagement.plays when Instagram exposes both, music{}, location{}, paid/ad/affiliate flags, preview comments when present, duration, and publish date. Optional datePosted=last_24_hours|last_week|last_month|last_year. Flat 2 credits per call (same as hashtag-search). Pass cache=true for the 24h shared cache." },
+  {
+    slug: "instagram-reels-search",
+    name: "Instagram Reels Search API",
+    shortName: "Reels Search",
+    category: "search",
+    method: "GET",
+    path: "/v1/instagram/reels-search",
+    credits: 2,
+    tagline:
+      "Native Instagram Reels hashtag search — views vs plays, IG/FB split, location, commercial flags. Flat 2 credits.",
+    longDescription:
+      "Send a hashtag (without the #) or keyword and get matching Reels from Instagram's native hashtag grid as clean JSON — videos only. Engagement is explicit: views = video_view_count (reach-style), plays = video_play_count (replays included; often ~2× views when both exist), viewsInstagram = Instagram-only plays (excludes Facebook cross-post), viewsFacebook = FB plays. Author includes id / verified / profileImage / followers / postCount when available. Also music{}, location{id,name,slug,address}, isAd / isAffiliate / isPaidPartnership, previewComments with authorId, hasAudio, accessibilityCaption, duration, and publish date. Optional datePosted=last_24_hours|last_week|last_month|last_year. Flat 2 credits. Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "views ≠ plays when Instagram exposes both (up to ~2× gap)",
+      "viewsInstagram / viewsFacebook for cross-post split",
+      "location{} with address when tagged",
+      "isAd / isAffiliate / isPaidPartnership",
+    ],
+  },
   {
     slug: "instagram-trending-reels",
     name: "Instagram Trending Reels API",
@@ -681,10 +717,10 @@ const INSTAGRAM: Spec[] = [
     tagline:
       "Native Instagram hashtag Explore — Reels-heavy top surface with real likes, views, captions, and paid flags. Flat 2 credits.",
     longDescription:
-      "Pass a hashtag without the # (e.g. travel or foodie) and get posts from Instagram's hashtag Explore as clean JSON — not keyword search and not a Google-indexed subset. Instagram's top/hashtag surface is Reels-heavy (productType clips); photos and Sidecars appear when the tag grid includes them, or use mediaType=reels for clips only. Each result includes url, postType, productType, caption, author (followers / postCount when available), engagement.views (play total on videos; null on Image/Sidecar) plus likes and comments — likes come from like_count, never from play totals — and on Reels viewsInstagram / viewsFacebook when Instagram exposes the split. Also paid-partnership / ad / affiliate flags, audio (musicId), location, preview comments when present, thumbnail, and hashtags / @mentions. Use it to track a campaign or branded hashtag, separate organic from sponsored hits, or discover creators. Flat 2 credits per call. Pass cache=true for the 24h shared cache (0 credits on hit); default is always fresh.",
+      "Pass a hashtag without the # (e.g. travel or foodie) and get posts from Instagram's hashtag Explore as clean JSON — not keyword search and not a Google-indexed subset. Instagram's top/hashtag surface is Reels-heavy (productType clips); photos and Sidecars appear when the tag grid includes them, or use mediaType=reels for clips only. Each result includes url, postType, productType, caption, author (followers / postCount when available), engagement.views (video_view_count when present) plus engagement.plays (total plays incl. replays — often ~2× views), likes and comments — likes come from like_count, never from play totals — and viewsInstagram / viewsFacebook when Instagram exposes the IG vs Facebook split (viewsInstagram excludes Facebook cross-post). Also paid-partnership / ad / affiliate flags, audio (musicId), location{id,name,slug,address}, preview comments with authorId when present, thumbnail, and hashtags / @mentions. Flat 2 credits per call. Pass cache=true for the 24h shared cache (0 credits on hit); default is always fresh.",
     delivers: [
       "Hashtag Explore posts (Reels-heavy top surface; not keyword search)",
-      "engagement.views + likes + comments (likes ≠ plays)",
+      "views + plays + likes + comments (likes ≠ plays; views ≠ plays)",
       "viewsInstagram / viewsFacebook on Reels when available",
       "isPaidPartnership / isAd / isAffiliate, musicId, location, mediaType=reels",
     ],
@@ -706,9 +742,47 @@ const INSTAGRAM: Spec[] = [
       "followers / following / postCount + verified, private, business flags",
     ],
     longDescription:
-      "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, instagram.com/natgeo) and this endpoint resolves it to the matching public Instagram account — a name→handle resolver, not a Google-style niche discovery search (queries like \"fitness coach\" will not return a creator list). Response: mode=resolve, users[0] with id (numeric), username, displayName, url, bio, bioLinks[], externalUrl, categoryName, followers/following/postCount, verified, private/isPrivate, isBusinessAccount/isProfessionalAccount, and profile images. Use it to confirm a brand handle and enrich a CRM without a second Channel Details call. Flat 1 credit. Pass cache=true for the 24h shared cache.",
+      "Pass an account name, @handle, or profile URL (e.g. nike, @nasa, instagram.com/natgeo) and this endpoint resolves it to the matching public Instagram account — a name→handle resolver, not a Google-style niche discovery search (queries like \"fitness coach\" will not return a creator list). Response: mode=resolve, users[0] with id (numeric), username, displayName, url, bio, bioLinks[], externalUrl, categoryName, fbid, relatedProfiles[], businessAddress, likeAndViewCountsDisabled, followers/following/postCount, verified, private/isPrivate, isBusinessAccount/isProfessionalAccount, and profile images. Walk relatedProfiles for niche discovery without a separate creator-search endpoint. Flat 1 credit. Pass cache=true for the 24h shared cache.",
   },
   { slug: "instagram-embed", name: "Instagram Embed HTML API", shortName: "Embed HTML", category: "details", method: "GET", path: "/v1/instagram/embed", credits: 1, tagline: "Get Instagram's own self-contained embed HTML for any post, reel, or profile — ready to drop into an iframe on your site.", longDescription: "Pass an Instagram post, reel, or profile URL (or an @handle) and get back Instagram's own self-contained embed page as ready-to-use HTML — the full <html> document Instagram serves at /embed/, which you can drop straight into an <iframe srcdoc> or render server-side. The response also returns embedUrl, so you can point an <iframe src> at it directly instead. Posts and reels come back as a rich media card (with caption); profiles come back as a profile card that links to the account. No login or OAuth needed — it's fast, costs just 1 credit. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh. If Instagram's embed page is ever unavailable, the response falls back to the classic blockquote + embed.js snippet.", delivers: ["Instagram's full self-contained embed HTML document", "embedUrl you can load directly in an <iframe src>", "Canonical Instagram permalink for the post/reel/profile", "Type flag (post/reel/profile) plus shortcode or username"] },
+  {
+    slug: "instagram-highlights",
+    name: "Instagram Highlights API",
+    shortName: "Highlights",
+    category: "list",
+    method: "GET",
+    path: "/v1/instagram/highlights",
+    credits: 1,
+    tagline:
+      "Persistent Story Highlight albums for a public profile — id, title, cover, owner. Flat 1 credit.",
+    longDescription:
+      "Pass a profile URL/@handle or numeric userId and get that account's Story Highlight albums as clean JSON — persistent collections (GRWM, Travel, Products…), not live 24h Stories. Each item: id, title (niche signal without AI), coverUrl, itemCount when available, and owner{id,username}. Use titles for category discovery or brand product catalogs stored in highlights. Flat 1 credit. Pass cache=true for the 24h shared cache. Pair with /v1/instagram/highlights-details for album items.",
+    delivers: [
+      "Highlight id + title + coverUrl",
+      "owner{id, username}",
+      "Persistent albums (not live Stories)",
+      "Flat 1 credit",
+    ],
+  },
+  {
+    slug: "instagram-highlights-details",
+    name: "Instagram Highlights Details API",
+    shortName: "Highlight Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/instagram/highlights-details",
+    credits: 1,
+    tagline:
+      "Items inside one Instagram Story Highlight album — media URLs, type, takenAt. Flat 1 credit.",
+    longDescription:
+      "Pass a highlight id from /v1/instagram/highlights and get the album's items as clean JSON: type (Image/Video), url, thumbnailUrl, takenAt, dimensions, durationSeconds on videos, plus coverUrl and title. Flat 1 credit. Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "Per-item media URLs + takenAt",
+      "Video duration when applicable",
+      "coverUrl + title + itemCount",
+      "Flat 1 credit",
+    ],
+  },
   {
     slug: "instagram-basic-profile",
     name: "Instagram Basic Profile API",
@@ -720,11 +794,11 @@ const INSTAGRAM: Spec[] = [
     tagline:
       "Instagram profile by user ID or @handle — camelCase schema aligned with Channel Details (followers, externalUrl, businessAddress).",
     longDescription:
-      "Pass an Instagram numeric user ID (e.g. 13460080) or a profile URL / @handle and get that account's public profile as clean Captapi JSON — same naming as Channel Details: displayName, bio, followers / following / postCount, verified, isPrivate, profileImage / profileImageHd, externalUrl, bioLinks[], categoryName, isBusinessAccount / isProfessionalAccount, businessAddress{cityName,streetAddress,zipCode,…}, fbid, highlightReelCount, hasClips, and transparency flags when Instagram exposes them. Empty/null fields are omitted. Flat 1 credit. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.",
+      "Pass an Instagram numeric user ID (e.g. 13460080) or a profile URL / @handle and get that account's public profile as clean Captapi JSON — same naming as Channel Details: displayName, bio, followers / following / postCount, verified, isPrivate, profileImage / profileImageHd, externalUrl, bioLinks[], categoryName (Instagram business niche — Entrepreneur, Digital Creator, …), isBusinessAccount / isProfessionalAccount, businessAddress{cityName,latitude,longitude,…}, fbid (Instagram↔Facebook join key), relatedProfiles[] (edge_related_profiles discovery graph), likeAndViewCountsDisabled (distinguishes hidden likes from true zero), highlightReelCount, hasClips, and transparency flags when Instagram exposes them. Empty/null fields are omitted. Flat 1 credit. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.",
     delivers: [
-      "camelCase profile fields (displayName, followers, verified, …)",
+      "categoryName + fbid + businessAddress + relatedProfiles",
+      "likeAndViewCountsDisabled (0 ≠ hidden)",
       "externalUrl + bioLinks[] when present",
-      "Business address / category for business accounts",
       "Lookup by numeric user ID or @handle (1 credit)",
     ],
   },
@@ -785,7 +859,24 @@ const FACEBOOK: Spec[] = [
   { slug: "facebook-profile-reels", name: "Facebook Profile Reels API", shortName: "Profile Reels", category: "list", method: "GET", path: "/v1/facebook/profile-reels", credits: 2, tagline: "Latest Facebook page Reels — views, likes, comments, shares; newest-first without archive padding.", longDescription: "Pass a Facebook page or profile URL and get that account's recent Reels as clean JSON: caption, publishedAt, duration, thumbnail / video URL, author, and full engagement (views, likes, comments, shares). Results are newest-first. Listing uses the Reels tab when available (else Videos), with a shallow scroll so years-old archive videos from deep /videos history are not mixed in; a >1 year gap between consecutive items stops the page (recency cliff). Includes scrapedAt so you can compare counts with Profile Posts from the same moment. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
   { slug: "facebook-group-posts", name: "Facebook Group Posts API", shortName: "Group Posts", category: "list", method: "GET", path: "/v1/facebook/group-posts", credits: 2 },
   { slug: "facebook-comment-replies", name: "Facebook Comment Replies API", shortName: "Comment Replies", category: "comments", method: "GET", path: "/v1/facebook/comment-replies", credits: 2 },
-  { slug: "facebook-profile-photos", name: "Facebook Profile Photos API", shortName: "Profile Photos", category: "list", method: "GET", path: "/v1/facebook/profile-photos", credits: 2 },
+  {
+    slug: "facebook-profile-photos",
+    name: "Facebook Profile Photos API",
+    shortName: "Profile Photos",
+    category: "list",
+    method: "GET",
+    path: "/v1/facebook/profile-photos",
+    credits: 2,
+    tagline:
+      "Photo grid from a Facebook Page — full image URL plus accessibilityCaption (alt-text, not a post caption).",
+    longDescription:
+      "Pass a Facebook Page URL or @handle and get photos from the public /photos grid as clean JSON: id, url, image (full-size CDN), optional thumbnailUrl, width/height when Facebook exposes them, and accessibilityCaption — Facebook's image alt-text / accessibility description, not a user-written post caption. Publish time and likes/comments are usually absent on this surface (platform limit, not a Captapi gap). Flat 2 credits. Pass cache=true for the 24h shared cache.",
+    delivers: [
+      "accessibilityCaption = alt-text (never mislabeled as caption)",
+      "Full-size image URL (+ thumbnailUrl when present)",
+      "Honest: date/engagement usually unavailable on /photos",
+    ],
+  },
 ];
 
 const FACEBOOK_MARKETPLACE: Spec[] = [
@@ -812,13 +903,14 @@ const TWITTER: Spec[] = [
     path: "/v1/twitter/profile",
     credits: 1,
     tagline:
-      "X profile with verification triad — blue check, identity verified, affiliate label — plus listed/media/likes counts.",
+      "X profile: blue vs legacy vs identity verification, tipjar→contact{}, fastFollowers, createdAt.",
     longDescription:
-      "Paste a profile URL or @handle and get the public X profile as clean JSON: username, name, bio, location, website, followers/following/tweetCount, likesCount/mediaCount/listedCount, pinnedTweetIds, bannerImage, profileImageShape, and ISO createdAt. Verification is explicit: verified + isBlueVerified + isIdentityVerified + verification{verifiedType, reason, verifiedSince} and affiliate{description,url,badgeUrl} when X exposes an org affiliation. Also returns bioUrls[], highlightedTweets, creatorSubscriptionsCount, businessAffiliatesCount, and possiblySensitive when present. Flat 1 credit. Pass cache=true for the 24h shared cache.",
+      "Paste a profile URL or @handle and get clean JSON. Verification is three independent bits — isBlueVerified (paid blue), isLegacyVerified (old celebrity check), isIdentityVerified — plus aggregate verified, verification{reason,verifiedSince,verifiedType}, and affiliate{description,url,badgeUrl}. Trust signals: ISO createdAt (account age), fastFollowers / normalFollowers (X's own suspicious-follower split), possiblySensitive, withheldInCountries. Outreach: tipjarSettings + contact{emails,paymentHandles,links} and bioUrls[] with expandedUrl (not raw t.co). Also listedCount, mediaCount, likesCount, pinnedTweetIds, bannerImage, highlightedTweets. Flat 1 credit. Pass cacheMaxAge=1d|3d|7d|14d|30d (envelope cached + cachedAt).",
     delivers: [
-      "Blue check vs identity vs affiliate verification",
-      "listedCount, mediaCount, likesCount, pinnedTweetIds",
-      "bannerImage + bioUrls + ISO createdAt",
+      "isBlueVerified ≠ isLegacyVerified ≠ isIdentityVerified",
+      "contact{emails,paymentHandles,links} from tipjar + bio",
+      "fastFollowers / normalFollowers + createdAt",
+      "bioUrls with expandedUrl (not t.co)",
     ],
   },
   { slug: "twitter-user-tweets", name: "Twitter/X User Tweets API", shortName: "User Tweets", category: "list", method: "GET", path: "/v1/twitter/user-tweets", credits: 2, tagline: "List recent tweets from a Twitter/X profile — text, author, likes, reposts, hashtags, and media. Flat 2 credits per call.", longDescription: "Pass a profile URL or @handle and get recent public tweets as clean JSON. Each result includes the tweet URL and id, full text, language, publish time, the author (username, display name, followers, verified, avatar), engagement (likes, replies, retweets, quotes when available), reply/retweet flags, hashtags, and media URLs when present. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
@@ -911,9 +1003,15 @@ const LINKEDIN: Spec[] = [
     path: "/v1/linkedin/profile",
     credits: 2,
     tagline:
-      "Public LinkedIn person profile — name, headline, about, followers, and company — without SEO meta pollution.",
+      "LinkedIn person profile with experience[], education[], similarProfiles[] — masked guest text becomes restricted:true.",
     longDescription:
-      "Return a public LinkedIn person profile as clean JSON. about comes from the real profile bio (JSON-LD), not LinkedIn's og:description SEO blurb. connections are only returned when LinkedIn exposes a trustworthy count (never the fake “N connections on LinkedIn” meta placeholder). When the Apify fallback has experience/education sections, those arrays are included additively. Native path bills 1 credit; catalog list price is 2.",
+      "Public LinkedIn person profile as clean JSON for B2B sales intel. Core identity: name, headline, about, followers, currentCompany — about from the real bio (JSON-LD), never LinkedIn's og:description SEO blurb. connections only when LinkedIn exposes a trustworthy count (logged-out LinkedIn often omits it — a platform limit, not a Captapi gap). B2B sections when upstream exposes them: experience[], education[], similarProfiles[] (people-also-viewed discovery graph), plus projects / publications / articles / activity / recommendations / certifications / languages. Guest-masked asterisk descriptions (******* …) are returned as description:null with restricted:true — not as fake star text. Native HTML bills 1 credit; Apify section enrich is 2.",
+    delivers: [
+      "experience[] + education[] for B2B qualification",
+      "similarProfiles[] discovery graph",
+      "restricted:true instead of ******* masking",
+      "SEO-clean about + honest connections nullability",
+    ],
   },
   { slug: "linkedin-company", name: "LinkedIn Company API", shortName: "Company", category: "channel", method: "GET", path: "/v1/linkedin/company", credits: 2 },
   { slug: "linkedin-post-details", name: "LinkedIn Post Details API", shortName: "Post Details", category: "details", method: "GET", path: "/v1/linkedin/post-details", credits: 1 , tagline: "Get a LinkedIn post — text, author, reactions, and comments count as structured JSON." },
@@ -1190,7 +1288,7 @@ const UTILITIES: Spec[] = [
     path: "/v1/analytics/post",
     credits: 1,
     tagline: "Unified metrics for one post, video, or reel — platform auto-detected (1 credit).",
-    longDescription: "Pass any supported post, video, or reel URL (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble) and get one normalized metrics object — views, likes, comments, shares, saves, interactions, and engagementRate (interactions / views) — with the platform auto-detected. Schema is stable across networks; unavailable values are null (YouTube has no public share/save counts and verified stays null without a channel badge lookup). Flat 1 credit per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.",
+    longDescription: "Pass any supported post, video, or reel URL (YouTube, TikTok, Instagram, Facebook, X, Reddit, Threads, Bluesky, Pinterest, LinkedIn, or Rumble) and get one normalized metrics object — views, likes, comments, shares, saves, interactions, and engagementRate with engagementRateBasis=interactions/views (ratio). Platform is auto-detected. Schema is stable across networks; unavailable values are null (YouTube has no public share/save counts; author.username is the @handle when known, never the display name; verified stays null without a channel badge). Do not compare this engagementRate to TikTok popular-creators — that field uses a different engagementRateBasis (percent). Flat 1 credit per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.",
   },
   {
     slug: "analytics-compare",
@@ -1201,7 +1299,7 @@ const UTILITIES: Spec[] = [
     path: "/v1/analytics/compare",
     credits: 1,
     tagline: "Compare unified metrics across up to 10 URLs in one call — 1 credit per resolved URL (cache hits free).",
-    longDescription: "Pass up to 10 comma-separated post/video/reel URLs (any mix of supported platforms) and get count/resolved plus results[] — each item is the same shape as /v1/analytics/post (platform, title, publishedAt, author including verified, metrics{views,likes,comments,shares,saves,interactions,engagementRate}). Unavailable values are null; keys are never omitted. Bills 1 credit per successfully resolved URL that is not served from the 24h cache (shared with post analytics); there is no bulk discount vs N separate /post calls — the win is one HTTP round-trip. Pass cache=true for free cache hits.",
+    longDescription: "Pass up to 10 comma-separated post/video/reel URLs (any mix of supported platforms) and get count/resolved/failedCount plus results[] and failed[]. Each ok row is the same shape as /v1/analytics/post (platform, status, title, publishedAt, author, metrics{views,likes,comments,shares,saves,interactions,engagementRate,engagementRateBasis}). Failed URLs keep platform when detected and appear in failed[] with a reason — so a partial batch never silently drops rows. Bills 1 credit per successfully resolved URL that is not served from the 24h cache (shared with post analytics); there is no bulk discount vs N separate /post calls — the win is one HTTP round-trip. Pass cache=true for free cache hits.",
   },
   {
     slug: "video-transcript",
@@ -1271,13 +1369,52 @@ const FACEBOOK_AD_LIBRARY: Spec[] = [
     path: "/v1/ad-library/facebook/search",
     credits: 2,
     tagline:
-      "Search Meta Ad Library by keyword — active/inactive filter, media type, date range, platforms, carousel cards, and structured spend/impressions when Meta publishes them.",
+      "Search Meta Ad Library by keyword — active/inactive, media type, date range, platforms, cursor, and spend/impressions when Meta publishes them.",
     longDescription:
-      "Search Meta's Ad Library and get competitor creatives as clean JSON. Filter by status (default ACTIVE), media type, ad type, exact phrase, sort mode, and delivery start date range. Each ad keeps the original fields (text, headline, cta, media[], spend/impressions strings) and adds isActive, publisherPlatforms, cards[], typed images/videos, pageLikeCount, disclaimer/byline, and spendRange/impressionsRange for sorting. Important: spend and impressions are only populated for political and issue ads in most markets — commercial ads usually return null. Max 200 ads per call; searchResultsCount is best-effort when Meta embeds a total. Flat 2 credits on the native path.",
+      "Search Meta's Ad Library and get competitor creatives as clean JSON — SC filter set: status (default ACTIVE), media_type, platforms, ad_type, search_type (exact phrase), sort_by (total_impressions|relevancy_monthly_grouped), start_date/end_date, cursor, trim. Cursor pages the current HTML result batch via nextCursor (not Meta's multi-thousand POST cursor). Same advertiser id collapses to one name within a response. Each ad: text/headline/cta/ctaType/landingUrl, media[] plus typed images/videos + cards[], isActive, publisherPlatforms, pageLikeCount/pageCategories/pageEntityType, politicalCountries, reachEstimate, spend/impressions when Meta publishes them (political/issue ads — commercial usually null). searchResultsCount is best-effort. Flat 2 credits on the native path.",
   },
   { slug: "facebook-ad-library-company-ads", name: "Facebook Company Ads API", shortName: "Company Ads", category: "list", method: "GET", path: "/v1/ad-library/facebook/company-ads", credits: 2 },
-  { slug: "facebook-ad-library-search-companies", name: "Facebook Ad Library Search Companies API", shortName: "Search Companies", category: "search", method: "GET", path: "/v1/ad-library/facebook/search-companies", credits: 2 },
-  { slug: "facebook-ad-library-ad-details", name: "Facebook Ad Details API", shortName: "Ad Details", category: "details", method: "GET", path: "/v1/ad-library/facebook/ad-details", credits: 2 , tagline: "Get a Meta Ad Library ad — creative text, media, advertiser, and delivery fields as structured JSON.", longDescription: "Paste a Meta Ad Library ad URL or ad ID and get the creative as clean JSON: body text, headline, CTA, landing URL, media, advertiser, and delivery signals when available. Flat 2 credits per call." },
+  {
+    slug: "facebook-ad-library-search-companies",
+    name: "Facebook Ad Library Search Companies API",
+    shortName: "Search Companies",
+    category: "search",
+    method: "GET",
+    path: "/v1/ad-library/facebook/search-companies",
+    credits: 2,
+    tagline:
+      "Find Meta Ad Library pages by brand — name-matched, pageId for company-ads (not profileId).",
+    longDescription:
+      "Search Meta Ad Library advertisers/pages by brand name. Results are relevance-filtered so query tokens must appear in the page name — off-brand pages that merely appeared near the keyword (e.g. Sukeban for q=nike) are dropped; empty beats spam. Each company returns id = pageId = advertiserId (pass to /facebook/company-ads), profileId when the facebook.com/{digits}/ URL uses a different numeric identity, vanity or numeric url, logo, and libraryUrl (ready view_all_page_id link). Chain: search-companies → companies[0].pageId → company-ads?url=. Flat 2 credits.",
+    delivers: [
+      "Name-matched ranking (exact brand first)",
+      "pageId / advertiserId for company-ads (view_all_page_id)",
+      "profileId when facebook.com/{digits}/ ≠ pageId",
+      "libraryUrl ready for Ad Library page view",
+      "Empty beats off-brand spam",
+    ],
+  },
+  {
+    slug: "facebook-ad-library-ad-details",
+    name: "Facebook Ad Details API",
+    shortName: "Ad Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/ad-library/facebook/ad-details",
+    credits: 2,
+    tagline:
+      "One Meta ad by ID — same creative as search, plus delivery breakdowns when Meta publishes them.",
+    longDescription:
+      "Paste a Meta Ad Library ad URL or archive ID and get that creative as clean JSON. Creative fields (text, headline, cta, landingUrl, media, advertiser) match a search hit for the same id — use this for ID lookup without paging search. Delivery extras when Meta publishes them (mostly political/issue and EU AAA ads): platforms / publisherPlatforms, demographicDistribution[], regionDistribution[], ageCountryGenderReachBreakdown / euTransparency, variantCount (collation), isAaaEligible. On commercial ads Meta often withholds those breakdowns — keys stay present as null so the schema is stable. Flat 2 credits on the native path.",
+    delivers: [
+      "ID lookup without paging Ad Library search",
+      "platforms / publisherPlatforms when Meta lists them",
+      "demographicDistribution[] + regionDistribution[] when published",
+      "EU AAA: euTransparency + ageCountryGenderReachBreakdown",
+      "variantCount (collation) + isAaaEligible",
+      "Stable null keys when Meta withholds delivery extras",
+    ],
+  },
   { slug: "facebook-ad-library-ad-transcript", name: "Facebook Ad Transcript API", shortName: "Ad Transcript", category: "transcript", method: "GET", path: "/v1/ad-library/facebook/ad-transcript", credits: 2 , tagline: "Get a Meta Ad Library ad's creative text — headline, body, CTA, and landing URL as a transcript-style payload.", longDescription: "Paste a Meta Ad Library ad URL or ad ID and get the creative copy as structured transcript text (headline, body, CTA, landing URL). Flat 2 credits per call." },
 ];
 
@@ -1291,9 +1428,9 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     path: "/v1/ad-library/tiktok/search",
     credits: 2,
     tagline:
-      "Search TikTok Commercial Content Library ads — ISO dates, advertiser location, reach bands (2 credits native).",
+      "Search TikTok Commercial Content Library — relevance-filtered, ISO dates, stable null schema (2 credits native).",
     longDescription:
-      "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) by keyword. Returns ads with id, url, text, adFormat, ISO firstShown/lastShown, impressions + impressionsRange, advertiser{name, location}, and media[]. Flat 2 credits on the native path (Apify fallback capped at 5). Default country is GB — this library is EU-led; region=US is often empty. For Creative Center Top Ads (CTR, likes, industry/objective, orderBy), use /v1/ad-library/tiktok/top-ads instead.",
+      "Search TikTok's Commercial Content Library (library.tiktok.com / EU DSA) by keyword. Results are relevance-filtered so query tokens must appear in advertiser or ad copy (empty beats Romanian good-morning spam for q=fashion). Schema matches Facebook shape: headline/cta/landingUrl/spend/advertiser.id stay present as null when TikTok withholds them (DSA does not publish Meta-style spend). firstShown/lastShown are ISO-8601. Flat 2 credits on the native path; Apify fallback is capped at 5 — never the old ~70-credit per-result trap. country is a two-letter ISO code (default GB — EU-led; US often empty). For brand performance (CTR, likes, ranking), use /v1/ad-library/tiktok/top-ads instead — that is Creative Center, a different product.",
   },
   {
     slug: "tiktok-ad-library-top-ads",
@@ -1308,13 +1445,73 @@ const TIKTOK_AD_LIBRARY: Spec[] = [
     longDescription:
       "Pull high-performing auction ads from TikTok Creative Center Top Ads as clean JSON: id, title, brandName, likes, ctr/ctrTier, costTier, favorite, isSparkAd, industry/industryKey, objective, countries, and video{url,urlHd,cover,durationSeconds,width,height}. Filter with country (default US), period (7/30/180), orderBy (for_you|likes|ctr|impressions|cost), and optional q/industry/objective/adFormat. Flat 2 credits on the Decodo-native path; Apify fallback is ~1 credit per returned ad (minimum 2). This is Creative Center — not the EU Commercial Content Library (use /tiktok/search for DSA transparency).",
   },
-  { slug: "tiktok-ad-library-ad-details", name: "TikTok Ad Details API", shortName: "Ad Details", category: "details", method: "GET", path: "/v1/ad-library/tiktok/ad-details", credits: 17 , tagline: "Get a TikTok Ad Library ad — creative, advertiser, and delivery fields as structured JSON." },
+  {
+    slug: "tiktok-ad-library-ad-details",
+    name: "TikTok Ad Details API",
+    shortName: "Ad Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/ad-library/tiktok/ad-details",
+    credits: 2,
+    tagline:
+      "One TikTok Commercial Content Library ad by ID — search-parity schema, 2 credits native.",
+    longDescription:
+      "Paste a TikTok Ad Library URL or ad ID and get that creative as clean JSON with the same schema as /tiktok/search hits: text, cta, landingUrl, impressions (Unique users seen), firstShown/lastShown (ISO), advertiser{id,name,url,logo,location} with nulls when DSA withholds them. Useful for ID lookup without a search page — not a richer Graph than search. Flat 2 credits on the native path; Apify fallback capped at 5 (never 17). Default country GB (EU-led library).",
+    delivers: [
+      "ID lookup with search-parity fields (including impressions)",
+      "Stable null keys for headline/cta/landingUrl/spend/advertiser.id",
+      "ISO firstShown / lastShown",
+      "Flat 2 credits native; Apify cap 5",
+    ],
+  },
 ];
 
 const GOOGLE_AD_LIBRARY: Spec[] = [
-  { slug: "google-ad-library-company-ads", name: "Google Company Ads API", shortName: "Company Ads", category: "list", method: "GET", path: "/v1/ad-library/google/company-ads", credits: 2, tagline: "List an advertiser's Google Ads Transparency creatives with media — 2 credits, cursor paging, and date filters.", longDescription: "Pass an advertiser name, domain (nike.com), or AR… id and get public commercial creatives as clean JSON: nested advertiser{id,name,url}, firstShown/lastShown, adFormat, and media[] (creatives included — no 25-credit upcharge). Supports country/region, start_date/end_date (YYYY-MM-DD overlap filter), cursor pagination (nextCursor + hasMore), and adsCountEstimate from Google's advertiser suggestions. Returns only public Ads Transparency creatives — some ads require login and cannot be fetched; creative shapes can vary. Political ads are not available on this endpoint (topic=all only). Flat 2 credits on the native path (max 200 per page)." },
-  { slug: "google-ad-library-ad-details", name: "Google Ad Details API", shortName: "Ad Details", category: "details", method: "GET", path: "/v1/ad-library/google/ad-details", credits: 17 , tagline: "Get a Google Ads Transparency ad — creative, advertiser, and delivery fields as structured JSON." },
-  { slug: "google-ad-library-advertiser-search", name: "Google Advertiser Search API", shortName: "Advertiser Search", category: "search", method: "GET", path: "/v1/ad-library/google/advertiser-search", credits: 1 },
+  {
+    slug: "google-ad-library-company-ads",
+    name: "Google Company Ads API",
+    shortName: "Company Ads",
+    category: "list",
+    method: "GET",
+    path: "/v1/ad-library/google/company-ads",
+    credits: 2,
+    tagline:
+      "List an advertiser's Google Ads Transparency creatives — AR chain, cursor, dates, sort (2 credits).",
+    longDescription:
+      "Pass an advertiser name, domain (nike.com), or AR… id from advertiser-search and get public commercial creatives as clean JSON. Response includes resolvedAdvertiser{id,name,url} (the entity actually queried), stable nulls for text/headline/cta/landingUrl/spend/impressions when ATC withholds them, firstShown/lastShown, adFormat, and media[]. Supports country/region, start_date/end_date, sort=last_shown|first_shown, cursor pagination (nextCursor + hasMore), and adsCountEstimate. Prefer advertiser=AR… from /google/advertiser-search for a deterministic chain. Spend/impressions are usually null for commercial ads (Google only publishes them for political). Flat 2 credits on the native path (max 200 per page).",
+  },
+  {
+    slug: "google-ad-library-ad-details",
+    name: "Google Ad Details API",
+    shortName: "Ad Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/ad-library/google/ad-details",
+    credits: 2,
+    tagline:
+      "One Google ATC creative by AR…+CR… — text/headline/impressions + countries[] ISO (not an alias of company-ads).",
+    longDescription:
+      "Paste a Google Ads Transparency URL with both AR… advertiser and CR… creative IDs. Unlike company-ads list rows, ad-details adds text, headline, landingUrl, and impressions when ATC publishes them. Response id and advertiser.id always match the request — Nike, Inc. / Nike Retail BV / NIKE SRL are different legal entities and are never swapped. countries[] is ISO-3166 alpha-2 (country is a single ISO only when unambiguous). textIsTemplate is true when Dynamic Keyword Insertion macros like {KeyWord:Nike Shoes} appear. Chain: advertiser-search → company-ads?advertiser=AR… → ad-details with that AR + a CR from ads[]. Flat 2 credits native; Apify fallback capped at 5.",
+    delivers: [
+      "text / headline / landingUrl / impressions beyond company-ads rows",
+      "Strict AR+CR identity (no cross-entity Nike swaps)",
+      "countries[] ISO codes (not a comma-name string)",
+      "textIsTemplate for Google Ads DKI macros",
+      "Flat 2 credits native; Apify cap 5",
+    ],
+  },
+  {
+    slug: "google-ad-library-advertiser-search",
+    name: "Google Advertiser Search API",
+    shortName: "Advertiser Search",
+    category: "search",
+    method: "GET",
+    path: "/v1/ad-library/google/advertiser-search",
+    credits: 1,
+    tagline: "Find Google Ads Transparency AR… entities — ranked multi-result (1 credit).",
+    longDescription:
+      "Search advertisers on Google Ads Transparency and get ranked AR… entities with name, url, optional country/adsCount. Brand queries are expanded (nike → Nike, Inc. + regional entities) so country=US prefers the parent company over NIKE SRL. Pass advertisers[0].id into /google/company-ads?advertiser=AR… to complete the chain. Flat 1 credit.",
+  },
 ];
 
 const LINKEDIN_AD_LIBRARY: Spec[] = [
@@ -1337,7 +1534,26 @@ const LINKEDIN_AD_LIBRARY: Spec[] = [
       "Cursor pagination via paginationToken / nextCursor + totalAds",
     ],
   },
-  { slug: "linkedin-ad-library-ad-details", name: "LinkedIn Ad Details API", shortName: "Ad Details", category: "details", method: "GET", path: "/v1/ad-library/linkedin/ad-details", credits: 17 , tagline: "Get a LinkedIn Ad Library ad — creative, advertiser, and delivery fields as structured JSON." },
+  {
+    slug: "linkedin-ad-library-ad-details",
+    name: "LinkedIn Ad Details API",
+    shortName: "Ad Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/ad-library/linkedin/ad-details",
+    credits: 2,
+    tagline:
+      "One LinkedIn Ad Library ad by ID — headline, targeting, advertiser.id from /company/{id} (2 credits).",
+    longDescription:
+      "Paste a LinkedIn Ad Library URL or ad ID. Detail pages add headline, destination/landingUrl, targeting{}, impressionsByCountry[], and advertiser.url when LinkedIn publishes them. advertiser.id is extracted from linkedin.com/company/{id} so you can join to LinkedIn Company endpoints. Schema keeps null keys for country/logo so details is never thinner by omission vs search. Flat 2 credits native; Apify fallback capped at 5.",
+    delivers: [
+      "headline + landingUrl/destination when published",
+      "advertiser.id from /company/{id} (joinable)",
+      "targeting{} + impressionsByCountry[]",
+      "Stable null keys (country, logo) — no silent field loss",
+      "Flat 2 credits native; Apify cap 5",
+    ],
+  },
 ];
 
 export const PLATFORM_GROUPS: PlatformGroup[] = [
@@ -2087,7 +2303,20 @@ const langOut = (): ApiParam => ({ name: "language", type: "string", required: f
 const langUi = (): ApiParam => ({ name: "language", type: "string", required: false, description: "Interface language for localized results, e.g. en-US or de-DE. Default en-US." });
 const cid = (): ApiParam => ({ name: "comment_id", type: "string", required: true, description: "ID of the parent comment to fetch replies for (from the comments endpoint)." });
 const fastRss = (): ApiParam => ({ name: "fast", type: "boolean", required: false, description: "Set true to use YouTube RSS for faster results with less detailed metadata. Leave false when viewCount/duration quality matters." });
-const cacheP = (): ApiParam => ({ name: "cache", type: "boolean", required: false, description: "Set true to serve from the 24h response cache. Default false — always fetch fresh data." });
+const cacheP = (): ApiParam => ({
+  name: "cache",
+  type: "boolean",
+  required: false,
+  description:
+    "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control. Envelope includes cached + cachedAt on hits.",
+});
+const cacheMaxAgeP = (): ApiParam => ({
+  name: "cacheMaxAge",
+  type: "string",
+  required: false,
+  description:
+    "Max age of a cached response: 1d, 3d, 7d, 14d, or 30d. When set, enables caching with that TTL (SC cache_max_age). Envelope: cached + cachedAt.",
+});
 /** TikTok transcript defaults to cache=true (0 credits on hit). */
 const cachePDefaultTrue = (): ApiParam => ({
   name: "cache",
@@ -2097,7 +2326,7 @@ const cachePDefaultTrue = (): ApiParam => ({
     "Serve from the 24h shared cache when available (0 credits on hit). Default true — set false to always fetch fresh.",
 });
 const CACHE_NOTE =
-  "Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.";
+  "Pass cache=true or cacheMaxAge=1d|3d|7d|14d|30d to serve from cache (0 credits on hit); default is always fresh. Hits include cached + cachedAt in the JSON envelope.";
 const CACHE_NOTE_DEFAULT_TRUE =
   "Cache is on by default (0 credits on hit); pass cache=false to always fetch fresh.";
 
@@ -2145,7 +2374,13 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     { name: "type", type: "string", required: false, description: "all | videos | shorts | channels | playlists." },
     { name: "sortBy", type: "string", required: false, description: "relevance | date | views | rating." },
     { name: "uploadDate", type: "string", required: false, description: "any | today | this_week | this_month | this_year." },
-    { name: "duration", type: "string", required: false, description: "any | under_4 | 4_20 | over_20." },
+    {
+      name: "duration",
+      type: "string",
+      required: false,
+      description:
+        "any | under_4 | 4_20 | over_20. Applies to long-form videos (not Shorts).",
+    },
     { name: "region", type: "string", required: false, description: "ISO country code for localized results (default US)." },
   ],
   "youtube-channel-videos": [up(YT_CHANNEL), lp(20, 200), fastRss()],
@@ -2179,7 +2414,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-summarizer": [up(TT_VIDEO), langOut(), cacheP()],
   "tiktok-video-details": [up(TT_VIDEO)],
   "tiktok-comments": [up(TT_VIDEO), lpFlat(50, 500, 2), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset, e.g. 50). A null nextCursor means the end of the comments." }],
-  "tiktok-channel-details": [up(TT_PROFILE)],
+  "tiktok-channel-details": [up(TT_PROFILE), cacheP(), cacheMaxAgeP()],
   "tiktok-profile-region": [up(TT_PROFILE)],
   "tiktok-audience-demographics": [
     up(TT_PROFILE),
@@ -2247,29 +2482,77 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       type: "string",
       required: false,
       description:
-        "Two-letter ISO country code (default US). Region-availability hint — you see content that isn't banned in that market, not only creators from that country.",
+        "Two-letter ISO country (default US). For You: region-availability hint. Creative Center mode: chart market.",
+    },
+    {
+      name: "countryCode",
+      type: "string",
+      required: false,
+      description: "Alias of country (SC-compatible). Wins when both are set.",
+    },
+    {
+      name: "orderBy",
+      type: "string",
+      required: false,
+      description:
+        "Creative Center sort: hot (views), like, comment, repost. Setting this (or period / page>1) switches from For You to the popular-videos chart.",
+    },
+    {
+      name: "period",
+      type: "integer",
+      required: false,
+      description: "Creative Center lookback days: 7, 30, or 120 (180→120). Triggers chart mode.",
+    },
+    {
+      name: "page",
+      type: "integer",
+      required: false,
+      description: "Creative Center page (default 1). page>1 triggers chart mode.",
     },
     lpFlat(20, 200, 2),
   ],
   "tiktok-popular-hashtags": [
+    { name: "country", type: "string", required: false, description: "Two-letter ISO country for the Creative Center chart. Default US." },
+    { name: "period", type: "integer", required: false, description: "Lookback days: 7, 30, or 120 (180→120). Default 7." },
+    { name: "page", type: "integer", required: false, description: "Creative Center page (default 1)." },
+    { name: "sortBy", type: "string", required: false, description: "Chart sort: popular (default)." },
+    { name: "newOnBoard", type: "boolean", required: false, description: "Only hashtags newly on the Top 100." },
+    { name: "industryId", type: "string", required: false, description: "Optional Creative Center industry_id." },
     {
       name: "query",
       type: "string",
       required: false,
       description:
-        'Seed topic/hashtag for co-occurrence discovery. Default "trending" is a keyword search seed — not TikTok\'s official trending chart. Prefer a niche (e.g. skincare).',
+        "Optional niche seed for legacy co-occurrence + challenge/detail enrich. Omit (or trending) to use the Creative Center chart.",
     },
-    lp(20, 100),
+    lpFlat(20, 100, 2),
+  ],
+  "tiktok-popular-songs": [
+    { name: "country", type: "string", required: false, description: "Two-letter ISO country. Default US." },
+    { name: "period", type: "integer", required: false, description: "7, 30, or 120 days (180→120). Default 7." },
+    { name: "page", type: "integer", required: false, description: "Page number (default 1)." },
+    { name: "rankType", type: "string", required: false, description: "popular | surging. Default popular." },
+    { name: "newOnBoard", type: "boolean", required: false, description: "Only sounds newly on the Top 100." },
+    { name: "commercialMusic", type: "boolean", required: false, description: "Only Commercial Music Library–cleared sounds." },
+    lpFlat(20, 20, 2),
   ],
   "tiktok-live": [up(TT_PROFILE)],
   "tiktok-live-info": [up(TT_PROFILE)],
-  "tiktok-popular-creators": [{ name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, { name: "sort", type: "string", required: false, description: "follower, engagement, or popularity. Default follower." }, { name: "follower_count", type: "string", required: false, description: "Optional range: 10k-100k, 100k-1m, 1m-10m, >10m." }, lp(20, 100)],
+  "tiktok-popular-creators": [
+    { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." },
+    { name: "sort", type: "string", required: false, description: "follower, engagement, or popularity. Default follower." },
+    { name: "page", type: "integer", required: false, description: "Creative Center page (default 1)." },
+    { name: "follower_count", type: "string", required: false, description: "Optional range on FYP/Apify fallthrough: 10k-100k, 100k-1m, 1m-10m, >10m." },
+    lpFlat(20, 100, 2),
+    cacheP(),
+    cacheMaxAgeP(),
+  ],
   // Instagram
   "instagram-transcript": [up(IG_REEL), lang(), cacheP()],
   "instagram-summarizer": [up(IG_REEL), langOut(), cacheP()],
   "instagram-details": [up(IG_POST)],
   "instagram-comments": [up(IG_POST), lp(50, 500)],
-  "instagram-channel-details": [up(IG_PROFILE)],
+  "instagram-channel-details": [up(IG_PROFILE), cacheP(), cacheMaxAgeP()],
   "instagram-channel-posts": [up(IG_PROFILE), lp(20, 200), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (e.g. 3937014945555313553_1697296). A null nextCursor means the end of the list." }],
   "instagram-channel-reels": [
     {
@@ -2338,7 +2621,37 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     cacheP(),
   ],
   "instagram-embed": [up("Instagram post, reel, or profile URL (or @handle), e.g. https://instagram.com/reel/ID/ or https://instagram.com/username/.")],
-  "instagram-basic-profile": [{ name: "userId", type: "string", required: true, description: "Instagram numeric user ID (e.g. 13460080). A profile URL, @handle, or username is also accepted and resolved automatically." }],
+  "instagram-highlights": [
+    {
+      name: "url",
+      type: "string",
+      required: false,
+      description:
+        "Instagram profile URL, @handle, or username. Omit when userId is set.",
+    },
+    {
+      name: "userId",
+      type: "string",
+      required: false,
+      description:
+        "Numeric Instagram user ID. Prefer when known — skips handle→ID resolve.",
+    },
+    cacheP(),
+  ],
+  "instagram-highlights-details": [
+    {
+      name: "id",
+      type: "string",
+      required: true,
+      description: "Highlight id from /v1/instagram/highlights (with or without highlight: prefix).",
+    },
+    cacheP(),
+  ],
+  "instagram-basic-profile": [
+    { name: "userId", type: "string", required: true, description: "Instagram numeric user ID (e.g. 13460080). A profile URL, @handle, or username is also accepted and resolved automatically." },
+    cacheP(),
+    cacheMaxAgeP(),
+  ],
   // Facebook
   "facebook-details": [up(FB_VIDEO)],
   "facebook-summarizer": [up(FB_VIDEO), cacheP()],
@@ -2402,7 +2715,11 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   // Twitter / X
   "twitter-tweet-details": [up("Public tweet URL, e.g. https://x.com/user/status/ID.")],
   "twitter-transcript": [up("Public tweet URL, e.g. https://x.com/user/status/ID."), cacheP()],
-  "twitter-profile": [up("Twitter/X profile URL or @handle, e.g. https://x.com/username.")],
+  "twitter-profile": [
+    up("Twitter/X profile URL or @handle, e.g. https://x.com/username."),
+    cacheP(),
+    cacheMaxAgeP(),
+  ],
   "twitter-user-tweets": [up("Twitter/X profile URL or @handle."), lp(20, 200)],
   "twitter-search": [qp("Keyword or phrase to search public tweets on X (min 2 characters)."), lp(20, 200)],
   "twitter-community": [up("X community URL (x.com/i/communities/ID) or community ID.")],
@@ -2595,7 +2912,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   // Ad Library
   "facebook-ad-library-search": [
     qp("Keyword, brand, or advertiser to search Meta Ad Library (min 2 characters)."),
-    { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." },
+    { name: "country", type: "string", required: false, description: "Two-letter ISO country code (e.g. US, GB, DE). Default US." },
     lpFlat(20, 200, 2),
     {
       name: "status",
@@ -2608,6 +2925,12 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       type: "string",
       required: false,
       description: "Creative filter: ALL (default), IMAGE, VIDEO, MEME, IMAGE_AND_MEME, or NONE.",
+    },
+    {
+      name: "platforms",
+      type: "string",
+      required: false,
+      description: "Comma-separated publisher platforms to keep: FACEBOOK, INSTAGRAM, MESSENGER, AUDIENCE_NETWORK, THREADS.",
     },
     {
       name: "ad_type",
@@ -2639,9 +2962,34 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       required: false,
       description: "Only ads with delivery start on/before this date (YYYY-MM-DD).",
     },
+    {
+      name: "cursor",
+      type: "string",
+      required: false,
+      description: "Pagination cursor from a previous nextCursor. Pages through the current Meta HTML result batch.",
+    },
+    {
+      name: "trim",
+      type: "boolean",
+      required: false,
+      description:
+        "SC-compatible. Captapi is already lean vs Meta nested snapshots; when true, omit cards/images/videos typed arrays (media[] stays).",
+    },
+    cacheP(),
   ],
-  "facebook-ad-library-company-ads": [up("Facebook page URL or Meta Ad Library URL, e.g. https://www.facebook.com/Meta."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
-  "facebook-ad-library-search-companies": [qp("Company or brand name to search for (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(20, 200)],
+  "facebook-ad-library-company-ads": [
+    up(
+      "pageId from /search-companies (preferred), libraryUrl, vanity page URL (facebook.com/nike/), or Ad Library URL with view_all_page_id. Do not pass profileId from facebook.com/{digits}/ when it differs from pageId."
+    ),
+    { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." },
+    lp(20, 200),
+  ],
+  "facebook-ad-library-search-companies": [
+    qp("Company or brand name to search for (min 2 characters). Name-matched — off-brand pages are dropped."),
+    { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." },
+    lp(20, 200),
+    cacheP(),
+  ],
   "facebook-ad-library-ad-details": [up("Meta Ad Library ad URL or ad ID.")],
   "facebook-ad-library-ad-transcript": [up("Meta Ad Library ad URL or ad ID.")],
   "tiktok-ad-library-search": [
@@ -2650,9 +2998,9 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
       name: "country",
       type: "string",
       required: false,
-      description: "Two-letter ISO country code. Default GB (EU DSA library; US often empty).",
+      description: "Two-letter ISO country code (e.g. GB, DE, FR). Default GB (EU DSA library; US often empty).",
     },
-    lp(20, 200),
+    lpFlat(20, 200, 2),
     cacheP(),
   ],
   "tiktok-ad-library-top-ads": [
@@ -2711,7 +3059,8 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     },
   ],
   "linkedin-ad-library-search-ads": [
-    { name: "q", type: "string", required: false, description: "Advertiser / account owner name (min 2 when used). Provide q, keyword, or companyId." },
+    { name: "q", type: "string", required: false, description: "Advertiser / account owner name (min 2 when used). Provide q/company, keyword, or companyId." },
+    { name: "company", type: "string", required: false, description: "SC alias of q — advertiser / account owner name." },
     { name: "keyword", type: "string", required: false, description: "Optional keyword filter on ad creative copy." },
     { name: "companyId", type: "string", required: false, description: "LinkedIn numeric company id for exact advertiser match." },
     { name: "country", type: "string", required: false, description: "Single ISO country code. Default US. Ignored when countries is set." },
@@ -2719,21 +3068,45 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     { name: "startDate", type: "string", required: false, description: "Custom range start YYYY-MM-DD (use with endDate)." },
     { name: "endDate", type: "string", required: false, description: "Custom range end YYYY-MM-DD (use with startDate)." },
     { name: "cursor", type: "string", required: false, description: "Pagination token from paginationToken / nextCursor." },
+    { name: "paginationToken", type: "string", required: false, description: "SC alias of cursor." },
     lp(20, 200),
   ],
   "linkedin-ad-library-ad-details": [up("LinkedIn Ad Library URL or ad ID.")],
   "google-ad-library-company-ads": [
-    { name: "advertiser", type: "string", required: true, description: "Advertiser name, domain (e.g. nike.com), or Google advertiser ID (AR…)." },
+    {
+      name: "advertiser",
+      type: "string",
+      required: true,
+      description:
+        "Advertiser name, domain (e.g. nike.com), or Google advertiser ID (AR…). Prefer AR… from advertiser-search.",
+    },
     { name: "country", type: "string", required: false, description: "Two-letter ISO country / region code (soft filter). Default US. Alias: region." },
     { name: "region", type: "string", required: false, description: "Alias for country." },
     { name: "start_date", type: "string", required: false, description: "YYYY-MM-DD — keep creatives whose shown window overlaps this start." },
     { name: "end_date", type: "string", required: false, description: "YYYY-MM-DD — keep creatives whose shown window overlaps this end." },
+    {
+      name: "sort",
+      type: "string",
+      required: false,
+      description: "Client-side sort: last_shown (recent activity first) or first_shown. Default is ATC order.",
+    },
     { name: "cursor", type: "string", required: false, description: "Pagination cursor from nextCursor." },
     { name: "topic", type: "string", required: false, description: 'Only "all" is supported (commercial ATC).' },
-    lp(20, 200),
+    lpFlat(20, 200, 2),
+    cacheP(),
   ],
   "google-ad-library-ad-details": [{ name: "creative_id", type: "string", required: true, description: "Google Ads Transparency URL containing AR... advertiser and CR... creative IDs." }, { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }],
-  "google-ad-library-advertiser-search": [qp("Advertiser or brand to search for (min 2 characters)."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code. Default US." }, lp(10, 50)],
+  "google-ad-library-advertiser-search": [
+    qp("Brand, domain, or advertiser name (min 2 characters). Expanded + ranked so US prefers Inc. over SRL."),
+    {
+      name: "country",
+      type: "string",
+      required: false,
+      description: "Two-letter ISO country code used for ranking (e.g. US). Default US.",
+    },
+    lpFlat(10, 50, 1),
+    cacheP(),
+  ],
 };
 
 export function params(ep: ApiEndpoint): ApiParam[] {
@@ -2766,6 +3139,88 @@ function withCacheParam(ep: ApiEndpoint, list: ApiParam[]): ApiParam[] {
 function exampleData(ep: ApiEndpoint): Record<string, unknown> {
   const real = API_EXAMPLES[ep.slug];
   if (real) return real;
+  // Never fall through to the generic list lorem (example.com) for the
+  // showcase compare endpoint — that kills the cross-platform positioning.
+  if (ep.slug === "analytics-compare") {
+    return {
+      count: 2,
+      resolved: 2,
+      failedCount: 0,
+      results: [
+        {
+          platform: "youtube",
+          status: "ok",
+          url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+          id: "dQw4w9WgXcQ",
+          title: "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
+          publishedAt: "2009-10-25T06:57:33.000Z",
+          author: {
+            username: "RickAstleyYT",
+            displayName: "Rick Astley",
+            verified: null,
+          },
+          metrics: {
+            views: 1799593805,
+            likes: 19303349,
+            comments: 2400000,
+            shares: null,
+            saves: null,
+            interactions: 21703349,
+            engagementRate: 0.0121,
+            engagementRateBasis: "interactions/views",
+          },
+        },
+        {
+          platform: "youtube",
+          status: "ok",
+          url: "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+          id: "jNQXAC9IVRw",
+          title: "Me at the zoo",
+          publishedAt: "2005-04-24T03:31:52.000Z",
+          author: {
+            username: "jawed",
+            displayName: "jawed",
+            verified: null,
+          },
+          metrics: {
+            views: 402652118,
+            likes: 19283609,
+            comments: 10000000,
+            shares: null,
+            saves: null,
+            interactions: 29283609,
+            engagementRate: 0.0727,
+            engagementRateBasis: "interactions/views",
+          },
+        },
+      ],
+      failed: [],
+    };
+  }
+  if (ep.slug === "analytics-post") {
+    return {
+      platform: "youtube",
+      url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      id: "dQw4w9WgXcQ",
+      title: "Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)",
+      publishedAt: "2009-10-25T06:57:33.000Z",
+      author: {
+        username: "RickAstleyYT",
+        displayName: "Rick Astley",
+        verified: null,
+      },
+      metrics: {
+        views: 1799593805,
+        likes: 19303349,
+        comments: 2400000,
+        shares: null,
+        saves: null,
+        interactions: 21703349,
+        engagementRate: 0.0121,
+        engagementRateBasis: "interactions/views",
+      },
+    };
+  }
   switch (ep.category) {
     case "transcript":
       return {
@@ -3061,7 +3516,7 @@ function exampleValue(ep: ApiEndpoint, p: ApiParam): string {
     case "advertiser":
       return "nike.com";
     case "creative_id":
-      return "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR10754779872199966721";
+      return "https://adstransparency.google.com/advertiser/AR16735076323512287233/creative/CR13596485266373083137";
     case "comment_id":
       return "7311234567890123456";
     case "limit":
@@ -3337,7 +3792,7 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
         ep.platform === "account" || ep.credits === 0
           ? `Account endpoints are free — they do not consume credits.`
           : ep.slug === "analytics-compare"
-            ? `Billing is 1 credit per successfully resolved URL that is not served from cache. Cache hits (cache=true) are free, same as Post Analytics. There is no bulk discount vs calling /v1/analytics/post once per URL — compare saves HTTP round-trips. A fully failed batch still records a minimal 1-credit charge.`
+            ? `Billing is 1 credit per successfully resolved URL that is not served from cache. Cache hits (cache=true) are free, same as Post Analytics. Failed URLs appear in failed[] and are not billed. There is no bulk discount vs calling /v1/analytics/post once per URL — compare saves HTTP round-trips. A fully failed batch still records a minimal 1-credit charge.`
             : ep.slug === "video-transcript"
               ? `Billing is 1 credit per minute of audio (rounded up, minimum 1). Failed or empty results are never charged.`
               : ep.slug === "video-summarize"
@@ -3357,6 +3812,18 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     },
   ];
 
+  if (ep.slug === "analytics-post" || ep.slug === "analytics-compare") {
+    list.push({
+      q: `How is engagementRate calculated?`,
+      a: `On Post Analytics and Compare, engagementRate is always interactions ÷ views (a ratio). Every metrics object includes engagementRateBasis: "interactions/views". TikTok popular-creators uses a different basis (Creative Center percent or avgLikesPerVideo/followers) — do not compare those numbers to post analytics without reading engagementRateBasis.`,
+    });
+  }
+  if (ep.slug === "analytics-compare") {
+    list.push({
+      q: `What happens when some URLs fail?`,
+      a: `Each results[] row has status ok or error and a platform field when detected. Failed URLs also appear in failed[] as {url, platform, reason}. Only successfully resolved URLs are billed (1 credit each; cache hits free).`,
+    });
+  }
   if (
     ep.category === "transcript" &&
     ep.platform !== "account" &&
@@ -3403,8 +3870,8 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
   }
   if (ep.slug === "tiktok-popular-creators") {
     list.push({
-      q: `Is this TikTok Creator Marketplace (tcm_id / audienceCountry)?`,
-      a: `No. We rank creators from a market's For You feed and hydrate public profile stats. You get id/secUid, engagementRate with an explicit formula, and region when TikTok exposes it — not tcm_id, tcm_link, or audienceCountry. Flat 2 credits on the native path.`,
+      q: `Can I vet creators for bots / fake growth?`,
+      a: `Yes. Each creator is profile-hydrated with createTime / createTimeUnix (account age), bioLinkRisk (TikTok's link risk score), and ttSeller. A high-follower account with a very recent createTime is the classic red flag. contact{emails,links} is filled when the bio exposes outreach channels.`,
     });
   }
   if (ep.slug === "instagram-tagged-posts") {
@@ -3423,6 +3890,32 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
     list.push({
       q: `Is this TikTok Creative Center (CTR / Top Ads)?`,
       a: `No. This endpoint searches TikTok's Commercial Content Library (library.tiktok.com — EU DSA transparency). For Creative Center Top Ads with CTR, likes, industry/objective, and orderBy, use GET /v1/ad-library/tiktok/top-ads.`,
+    });
+    list.push({
+      q: `Why is this only 2 credits when older docs said ~70?`,
+      a: `Native Decodo search is flat 2 credits. The old ~70 figure was Apify billed at ~3.5 credits per result (limit 20). Apify fallback is now capped at 5 credits total. TikTok DSA still withholds spend/CTA more often than Meta — that is a data-source limit, not a reason to charge 35× Facebook.`,
+    });
+    list.push({
+      q: `Why did my keyword return zero ads?`,
+      a: `We relevance-filter so every query token must appear in advertiser name or ad copy. TikTok's library soft-matches aggressively; without filtering, fashion queries returned Romanian good-morning ads. Empty is intentional — try a brand/advertiser name, another EU country code, or Creative Center Top Ads for performance creatives.`,
+    });
+  }
+  if (ep.slug === "facebook-ad-library-search") {
+    list.push({
+      q: `How do I find current campaigns instead of 2020 ads?`,
+      a: `Use status=ACTIVE (default) plus start_date (YYYY-MM-DD). For spend/impressions in most markets set ad_type=political_and_issue_ads — commercial ads usually return null spend. Page with nextCursor within the current HTML batch; refine the query when nextCursor is null.`,
+    });
+  }
+  if (ep.slug === "google-ad-library-advertiser-search") {
+    list.push({
+      q: `How do I get Nike, Inc. creatives (not NIKE SRL)?`,
+      a: `Call advertiser-search?q=nike&country=US — results are expanded and ranked so Nike, Inc. leads, with regional entities (SRL, BV) listed after. Pass advertisers[0].id into /google/company-ads?advertiser=AR…. Using a bare name/domain on company-ads also resolves, but AR… is deterministic.`,
+    });
+  }
+  if (ep.slug === "google-ad-library-company-ads") {
+    list.push({
+      q: `Why are text/spend null on Google creatives?`,
+      a: `Keys stay present as null for a stable parser. Google Ads Transparency rarely exposes copy or spend on commercial image creatives (spend/impressions are mostly political). landingUrl is filled when ATC embeds a destination. Use sort=last_shown and start_date/end_date for recent activity; page with nextCursor.`,
     });
   }
   if (ep.slug === "tiktok-ad-library-top-ads") {
@@ -3619,12 +4112,16 @@ const FIELD_DESCS: Record<string, string> = {
     "Population total plays/views for a hashtag when from challenge/detail (statsV2). On popular-hashtags this is not the sample sum — see samplePlays.",
   hashtagId: "TikTok challenge / hashtag id (cid) when available.",
   growthRate:
-    "Hashtag growth signal when the platform exposes one. On tiktok/popular-hashtags: null — challenge/detail has no growth field.",
+    "Hashtag/song growth signal. On Creative Center charts: derived from trend[] when present. On challenge/detail co-occurrence path: null.",
   discovery:
-    'How related hashtags were found. popular-hashtags: "co_occurrence" (tags seen together on seed videos).',
+    'How hashtags were found. popular-hashtags: "creative_center" (official chart) or "co_occurrence" (related tags from seed videos).',
   discoverySource:
-    "Where the seed video sample came from (hashtag_page, top_search, or apify_hashtag_videos).",
-  rankBy: "Metric used for rank (popular-hashtags: videoCount = population total).",
+    "Where the seed video sample came from (hashtag_page, top_search, or apify_hashtag_videos) — co-occurrence path only.",
+  rankBy: "Metric used for rank (creative_center_rank on Creative Center; videoCount on co-occurrence enrich).",
+  rankDiff: "Rank change vs the previous Creative Center period (positive = moved up).",
+  trend: "Time series of relative popularity {time, value} from Creative Center.",
+  viewCountText: "Compact view label as YouTube shows it (e.g. 750K).",
+  viewCountInt: "Parsed integer from viewCountText (750000). Prefer with viewCountText when counts may be rounded.",
   tweetCount: "Total number of tweets.",
   mediaCount: "Total number of media posts.",
   location: "Location shown on the profile or item.",
@@ -3678,6 +4175,15 @@ const FIELD_DESCS: Record<string, string> = {
     "Numeric share of the sample (e.g. 26.02). Never a string — use percentageText for display. Values across audienceLocations (+ other) sum to ~100.",
   percentageText:
     'Display form of percentage with a % suffix (e.g. "26.02%"). Prefer percentage for math.',
+  accessibilityCaption:
+    "Facebook (or Instagram) image alt-text / accessibility description — not a user-written post caption.",
+  shopProductUrl:
+    "TikTok Shop product page URL when the video anchors a product (https://www.tiktok.com/shop/pdp/…). Null/omitted when the video does not sell.",
+  authorRegion:
+    "Author's TikTok profile region (ISO country) when present on the aweme — avoids a separate profile-region call per video.",
+  descLanguage: "Language code TikTok assigns to the video caption when exposed.",
+  isEligibleForCommission:
+    "Whether the video is marked eligible for affiliate commission when TikTok exposes the flag.",
   sampleSize: "Total number of commenter countries counted across the sampled videos.",
   videosSampled: "How many of the creator's recent videos were sampled to build the breakdown.",
   usageCount:
@@ -3794,10 +4300,15 @@ const FIELD_DESCS: Record<string, string> = {
 
   // Engagement
   engagement: "Engagement metrics for the item.",
-  views: "View count.",
+  views:
+    "On Instagram Reels: video_view_count (reach-style) when exposed; otherwise falls back to total plays. Not the same as plays — the gap can be ~2×.",
   viewCount: "View count.",
-  plays: "Play count.",
+  plays:
+    "On Instagram Reels: total play count including replays (video_play_count / play_count). Often higher than views. Instagram-only analytics should use viewsInstagram.",
   playCount: "Play count.",
+  viewsInstagram:
+    "Instagram-only play count (excludes Facebook cross-post plays). Prefer this for Instagram performance reports.",
+  viewsFacebook: "Facebook cross-post play count when Instagram exposes the split.",
   likes: "Like count.",
   likeCount: "Like count.",
   comments: "Comment count.",
@@ -3818,9 +4329,11 @@ const FIELD_DESCS: Record<string, string> = {
   score: "Vote score.",
   rank: "Rank position in the list.",
   engagementRate:
-    "Engagement rate. On post analytics: interactions / views (ratio). On TikTok popular-creators: (avg likes per video) / followers × 100 (percent) — see engagementRateBasis.",
+    "Engagement rate. Meaning depends on engagementRateBasis — never compare values across different bases. Post/compare analytics: interactions/views (ratio 0–1+). TikTok popular-creators: Creative Center interact rate (percent) or avgLikesPerVideo/followers × 100.",
   engagementRateBasis:
-    "Formula for engagementRate on this row (popular-creators: avgLikesPerVideo/followers).",
+    "Canonical formula key for engagementRate: interactions/views (post analytics) | creative_center | avgLikesPerVideo/followers.",
+  failedCount: "Number of URLs that could not be resolved in this compare batch.",
+  failed: "URLs that failed resolution ({url, platform, reason}).",
   avgViews: "Average views across the sampled For You videos that surfaced this creator.",
   contact: "Outreach contacts parsed from the bio when present (emails[], links[]).",
   suggestion: "A search term TikTok autocompletes for your keyword — a phrase real users search for.",
@@ -3861,7 +4374,8 @@ const FIELD_DESCS: Record<string, string> = {
   searchResultsCount: "Best-effort total hits Meta reports for the query (not just this page).",
   hasMore: "Whether more results likely exist beyond this page.",
   nextCursor: "Pagination cursor for the next page when available; currently null for Facebook search.",
-  status: "Delivery status filter applied to the search (ACTIVE, INACTIVE, or ALL).",
+  status:
+    "Context-dependent: on analytics/compare rows, ok or error; on ad-library search, the delivery filter (ACTIVE, INACTIVE, or ALL).",
   limit: "Requested max items for this call.",
   authorFullname: "Stable Reddit account fullname (t2_…). Prefer this over author for joins.",
   score: "Reddit score (ups − downs when both are exposed).",
@@ -4310,6 +4824,7 @@ const VIDEOISH_DETAILS_SLUGS = new Set([
   "youtube-community-post-details",
   "tiktok-video-details",
   "instagram-details",
+  "instagram-highlights-details",
   "instagram-embed",
   "facebook-details",
   "twitter-tweet-details",
@@ -4403,10 +4918,15 @@ const SLUG_USE_CASES: Record<string, UseCase[]> = {
     { title: "Monitoring", desc: "Track community identity for listening workflows." },
   ],
   "tiktok-popular-hashtags": [
-    { title: "Hashtag Research", desc: "Find related tags for a niche with real TikTok-wide video counts." },
-    { title: "Content Planning", desc: "Pick high-reach hashtags using population totals, not sample co-occurrence." },
+    { title: "Trend Charts", desc: "Pull Creative Center Top-100 hashtags by country and period." },
+    { title: "Rising Tags", desc: "Use rankDiff + trend[] to spot surging hashtags early." },
     { title: "Campaign Tracking", desc: "Monitor hashtagId + videoCount/totalPlays for branded tags over time." },
-    { title: "Competitive Analysis", desc: "Compare related tags in a niche by population size." },
+    { title: "Related Discovery", desc: "Pass query=niche for co-occurrence related tags when you need adjacency, not the chart." },
+  ],
+  "tiktok-popular-songs": [
+    { title: "Sound Trends", desc: "Track popular and surging TikTok sounds by market." },
+    { title: "Brand-Safe Audio", desc: "Filter commercialMusic / ifCml before putting a sound in paid ads." },
+    { title: "Trend Analysis", desc: "Use trend[] time series and rankDiff for music marketing." },
   ],
   "tiktok-music-posts": [
     { title: "Sound Tracking", desc: "List public videos that use a specific TikTok sound." },
@@ -4418,12 +4938,14 @@ const SLUG_USE_CASES: Record<string, UseCase[]> = {
     { title: "Content Research", desc: "Inspect captions, sounds, and engagement on trending posts." },
   ],
   "tiktok-popular-creators": [
-    { title: "Creator Discovery", desc: "Find creators appearing in a market's For You feed." },
-    { title: "Outreach Shortlists", desc: "Rank candidates by followers or engagementRate for a country." },
+    { title: "Creator Verification", desc: "Reject inflated accounts using createTime (account age) + bioLinkRisk." },
+    { title: "Partnership Qualification", desc: "Shortlist by engagementRate, then vet with ttSeller and contact{}." },
+    { title: "Creator Discovery", desc: "Rank Creative Center / For You creators for a market." },
   ],
   "facebook-profile-photos": [
-    { title: "Photo Archive", desc: "Pull a Page or profile's public photo album items." },
-    { title: "Brand Monitoring", desc: "Watch new photos posted by a known Page." },
+    { title: "Photo Archive", desc: "Pull a Page's public /photos grid with image URLs." },
+    { title: "Alt-text Mining", desc: "Read accessibilityCaption for image descriptions Facebook exposes." },
+    { title: "Brand Visuals", desc: "Collect creative stills from a Page without inventing captions." },
   ],
 };
 

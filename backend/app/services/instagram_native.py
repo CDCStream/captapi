@@ -121,21 +121,24 @@ def _video_duration(media: dict[str, Any], cover: dict[str, Any]) -> float | Non
 
 
 def _location_from_media(media: dict[str, Any]) -> dict[str, Any] | None:
-    loc = media.get("location")
-    if not isinstance(loc, dict):
+    from app.services.instagram_decodo import map_ig_location
+
+    return map_ig_location(media.get("location") if isinstance(media.get("location"), dict) else None)
+
+
+def _pinned_for_users(media: dict[str, Any]) -> list[str] | None:
+    raw = media.get("pinned_for_users") or media.get("pinnedForUsers") or []
+    if not isinstance(raw, list) or not raw:
         return None
-    name = safe_str(loc.get("name"))
-    lid = safe_str(loc.get("pk") or loc.get("id"))
-    if not name and not lid:
-        return None
-    out: dict[str, Any] = {"id": lid, "name": name}
-    lat = safe_float(loc.get("lat") or loc.get("latitude"))
-    lng = safe_float(loc.get("lng") or loc.get("longitude"))
-    if lat is not None:
-        out["latitude"] = lat
-    if lng is not None:
-        out["longitude"] = lng
-    return out
+    out: list[str] = []
+    for p in raw:
+        if isinstance(p, dict):
+            uid = safe_str(p.get("pk") or p.get("id") or p.get("pk_id"))
+        else:
+            uid = safe_str(p)
+        if uid:
+            out.append(uid)
+    return out or None
 
 
 def _coauthors_from_media(media: dict[str, Any]) -> list[dict[str, Any]]:
@@ -376,7 +379,15 @@ def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) 
     is_video = media_type == 2
     product = safe_str(media.get("product_type")) or ("clips" if is_video else None)
     play_count, ig_play_count, fb_play_count = feed_play_metrics(media)
-    likes = hidden_count(media.get("like_count"))
+    likes_disabled = _like_and_view_counts_disabled(media)
+    likes = None if likes_disabled else hidden_count(media.get("like_count"))
+    # GraphQL-style view metric when present; bare feed ``view_count`` is IG-only
+    # and already mapped into ig_play_count by feed_play_metrics — do not reuse.
+    video_view_count = None if likes_disabled else safe_int(media.get("video_view_count"))
+    if likes_disabled:
+        play_count = None
+        ig_play_count = None
+        fb_play_count = None
 
     music = _music_from_media(media)
     location = _location_from_media(media)
@@ -395,7 +406,9 @@ def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) 
                     preview_comments.append(mapped)
 
     affiliate = media.get("affiliate_info")
-    is_affiliate = bool(affiliate) if affiliate not in (None, [], {}, False) else False
+    is_affiliate = bool(affiliate) if affiliate not in (None, [], {}, False) else bool(
+        media.get("is_affiliate")
+    )
     is_ad = bool(media.get("is_ad") or media.get("ad_id") or media.get("injected"))
     is_paid = media.get("is_paid_partnership")
     if is_paid is None and media.get("sponsor_tags"):
@@ -427,6 +440,7 @@ def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) 
             play_count=play_count,
             ig_play_count=ig_play_count,
             fb_play_count=fb_play_count,
+            video_view_count=video_view_count,
             likes=likes,
             is_video=is_video,
         ),
@@ -443,6 +457,13 @@ def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) 
         "coauthors": _coauthors_from_media(media) or None,
         "mashupInfo": _mashup_from_media(media),
         "previewComments": preview_comments or None,
+        "likeAndViewCountsDisabled": likes_disabled,
+        "commentsDisabled": (
+            bool(media.get("comments_disabled"))
+            if media.get("comments_disabled") is not None
+            else None
+        ),
+        "pinnedForUsers": _pinned_for_users(media),
     }
     return strip_null_post_fields(post)
 
@@ -497,11 +518,13 @@ def _map_preview_comment(raw: dict[str, Any], *, post_url: str) -> dict[str, Any
         or raw.get("repliesCount")
         or (child_n if child_n else None)
     )
+    author_id = safe_str(user.get("pk") or user.get("pk_id") or user.get("id"))
     return {
         "id": cid,
         "url": f"{post_url.rstrip('/')}/c/{cid}/" if cid and post_url else None,
         "text": text,
         "author": author,
+        "authorId": author_id,
         "authorAvatarUrl": safe_str(user.get("profile_pic_url")),
         "authorIsVerified": bool(user.get("is_verified")) if user.get("is_verified") is not None else False,
         "likeCount": like_count,
@@ -887,13 +910,114 @@ async def _fetch_comments_page(
     return None, None, False
 
 
+def _normalize_highlight_id(raw: Any) -> str | None:
+    hid = safe_str(raw)
+    if not hid:
+        return None
+    if hid.startswith("highlight:"):
+        hid = hid.split(":", 1)[1]
+    return hid or None
+
+
+async def fetch_highlights_tray(user_id: str) -> list[dict[str, Any]] | None:
+    """Story Highlight albums for a user via ``/api/v1/highlights/{id}/highlights_tray/``.
+
+    Persistent albums (not live 24h Stories). Session cookies unlock the tray
+    on many IPs; datacenter often works logged-out. Returns raw tray nodes or
+    None when unreachable.
+    """
+    uid = safe_str(user_id)
+    if not uid or not uid.isdigit():
+        return None
+    tiers: list[tuple[str | None, dict[str, str]]] = []
+    for sid in _sessions_rotated():
+        cks = _cookies_for_session(sid)
+        tiers.append((None, cks))
+        tiers.append(("residential", cks))
+    tiers.append(("datacenter", {}))
+    tiers.append(("residential", {}))
+    for tier, cks in tiers:
+        try:
+            async with httpx.AsyncClient(
+                timeout=12,
+                proxy=proxy_for(tier) if tier else None,
+                follow_redirects=True,
+                cookies=cks,
+            ) as client:
+                await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
+                resp = await client.get(
+                    f"https://www.instagram.com/api/v1/highlights/{uid}/highlights_tray/",
+                    headers={
+                        "User-Agent": _UA,
+                        "X-IG-App-ID": _IG_APP_ID,
+                        "X-CSRFToken": client.cookies.get("csrftoken") or "",
+                        "Accept": "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Referer": "https://www.instagram.com/",
+                    },
+                )
+        except httpx.HTTPError as exc:
+            log.info(
+                "ig_highlights_tray_transport_error",
+                tier=tier or "direct",
+                error=str(exc)[:120],
+            )
+            continue
+        if resp.status_code != 200:
+            continue
+        body = (resp.text or "").lstrip()
+        if not body.startswith("{"):
+            continue
+        try:
+            payload = resp.json()
+        except ValueError:
+            continue
+        tray = payload.get("tray") or payload.get("highlights")
+        if isinstance(tray, list):
+            return [n for n in tray if isinstance(n, dict)]
+    return None
+
+
+def map_highlight_tray_item(node: dict[str, Any]) -> dict[str, Any]:
+    """Map one highlights_tray node to the public list shape."""
+    cover = node.get("cover_media") or {}
+    cover_url = (
+        safe_str((cover.get("cropped_image_version") or {}).get("url"))
+        or safe_str((cover.get("full_image_version") or {}).get("url"))
+        or safe_str(cover.get("thumbnail_src"))
+        or safe_str((node.get("cover_media_cropped_thumbnail") or {}).get("url"))
+    )
+    owner = node.get("user") if isinstance(node.get("user"), dict) else {}
+    if not owner and isinstance(node.get("owner"), dict):
+        owner = node["owner"]
+    owner_username = safe_str(owner.get("username"))
+    hid = _normalize_highlight_id(node.get("id") or node.get("pk"))
+    out: dict[str, Any] = {
+        "id": hid,
+        "title": safe_str(node.get("title")),
+        "coverUrl": cover_url,
+        "itemCount": safe_int(node.get("media_count")),
+        "owner": {
+            "id": safe_str(owner.get("pk") or owner.get("id")),
+            "username": owner_username,
+            "url": f"https://instagram.com/{owner_username}" if owner_username else None,
+            "profileImage": safe_str(owner.get("profile_pic_url")),
+        },
+    }
+    out["owner"] = {k: v for k, v in out["owner"].items() if v is not None}
+    return {k: v for k, v in out.items() if v is not None and v != {}}
+
+
 async def fetch_highlight_reel(highlight_id: str) -> dict[str, Any] | None:
     """Details for one Story Highlight album via the logged-out reels_media
     endpoint. ``highlight_id`` is the numeric id (no ``highlight:`` prefix).
     Datacenter IPs get the full tray here; residential often returns an empty
     tray, so try datacenter first. Returns the raw reel node or None.
     """
-    reel_id = f"highlight:{highlight_id}"
+    hid = _normalize_highlight_id(highlight_id)
+    if not hid:
+        return None
+    reel_id = f"highlight:{hid}"
     for tier in ("datacenter", "residential"):
         try:
             node = await _fetch_reels_media_once(tier, reel_id)
@@ -902,12 +1026,31 @@ async def fetch_highlight_reel(highlight_id: str) -> dict[str, Any] | None:
             continue
         if node is not None:
             return node
+    # Session cookie path as a third attempt (login wall on some IPs).
+    for sid in _sessions_rotated()[:2]:
+        try:
+            node = await _fetch_reels_media_once(
+                "residential", reel_id, cookies=_cookies_for_session(sid)
+            )
+        except (httpx.HTTPError, ValueError, KeyError) as exc:
+            log.info("ig_highlight_session_failed", error=str(exc)[:120])
+            continue
+        if node is not None:
+            return node
     return None
 
 
-async def _fetch_reels_media_once(tier: str, reel_id: str) -> dict[str, Any] | None:
+async def _fetch_reels_media_once(
+    tier: str,
+    reel_id: str,
+    *,
+    cookies: dict[str, str] | None = None,
+) -> dict[str, Any] | None:
     async with httpx.AsyncClient(
-        timeout=12, proxy=proxy_for(tier), follow_redirects=True
+        timeout=12,
+        proxy=proxy_for(tier) if tier else None,
+        follow_redirects=True,
+        cookies=cookies or {},
     ) as client:
         await client.get("https://www.instagram.com/", headers={"User-Agent": _UA})
         csrf = client.cookies.get("csrftoken")
@@ -918,7 +1061,7 @@ async def _fetch_reels_media_once(tier: str, reel_id: str) -> dict[str, Any] | N
             params={"reel_ids": reel_id},
             headers={
                 "User-Agent": _UA,
-                "X-IG-App-ID": "936619743392459",
+                "X-IG-App-ID": _IG_APP_ID,
                 "X-CSRFToken": csrf,
                 "Referer": "https://www.instagram.com/",
             },
@@ -967,13 +1110,27 @@ def map_highlight_reel(node: dict[str, Any]) -> dict[str, Any]:
     raw_items = node.get("items") or []
     items = [_map_story_item(it) for it in raw_items if isinstance(it, dict)]
     media_count = safe_int(node.get("media_count"))
-    return {
-        "id": safe_str(node.get("id")),
+    owner = node.get("user") if isinstance(node.get("user"), dict) else {}
+    if not owner and isinstance(node.get("owner"), dict):
+        owner = node["owner"]
+    owner_username = safe_str(owner.get("username"))
+    out: dict[str, Any] = {
+        "id": _normalize_highlight_id(node.get("id") or node.get("pk")),
         "title": safe_str(node.get("title")),
         "coverUrl": safe_str(cover_url),
         "itemCount": media_count if media_count is not None else (len(items) or None),
         "items": items,
+        "owner": {
+            "id": safe_str(owner.get("pk") or owner.get("id")),
+            "username": owner_username,
+            "url": f"https://instagram.com/{owner_username}" if owner_username else None,
+            "profileImage": safe_str(owner.get("profile_pic_url")),
+        },
     }
+    out["owner"] = {k: v for k, v in out["owner"].items() if v is not None}
+    if not out["owner"]:
+        out.pop("owner", None)
+    return {k: v for k, v in out.items() if v is not None}
 
 
 def map_feed_post(
@@ -1017,11 +1174,16 @@ def map_feed_post(
 
     play_count, ig_play_count, fb_play_count = feed_play_metrics(media)
     likes = hidden_count(media.get("like_count"))
+    video_view_count = safe_int(media.get("video_view_count"))
     product = safe_str(media.get("product_type")) or ("clips" if is_video else None)
     music = _music_from_media(media)
     is_paid = media.get("is_paid_partnership")
     if is_paid is None and media.get("sponsor_tags"):
         is_paid = True
+    affiliate = media.get("affiliate_info")
+    is_affiliate = bool(affiliate) if affiliate not in (None, [], {}, False) else bool(
+        media.get("is_affiliate")
+    )
 
     return strip_null_post_fields(
         {
@@ -1047,6 +1209,7 @@ def map_feed_post(
                 play_count=play_count,
                 ig_play_count=ig_play_count,
                 fb_play_count=fb_play_count,
+                video_view_count=video_view_count,
                 likes=likes,
                 is_video=bool(is_video),
             ),
@@ -1054,6 +1217,8 @@ def map_feed_post(
             "mentions": dedupe_preserve(_MENTION_RE.findall(caption)),
             "isPaidPartnership": bool(is_paid) if is_paid is not None else False,
             "isAd": bool(media.get("is_ad") or media.get("ad_id") or media.get("injected")),
+            "isAffiliate": is_affiliate,
+            "accessibilityCaption": safe_str(media.get("accessibility_caption")),
             "music": music,
             "musicId": (music or {}).get("id") if music else None,
             "location": _location_from_media(media),
@@ -1807,6 +1972,60 @@ def _linked_fb_info(user: dict[str, Any]) -> dict[str, Any] | None:
     return None
 
 
+def _related_profiles(user: dict[str, Any]) -> list[dict[str, Any]] | None:
+    """Instagram ``edge_related_profiles`` — free niche discovery graph."""
+    edge = user.get("edge_related_profiles") or user.get("related_profiles")
+    nodes: list[Any] = []
+    if isinstance(edge, dict):
+        raw_edges = edge.get("edges")
+        if isinstance(raw_edges, list):
+            for e in raw_edges:
+                if isinstance(e, dict):
+                    nodes.append(e.get("node") if isinstance(e.get("node"), dict) else e)
+        elif isinstance(edge.get("nodes"), list):
+            nodes.extend(edge["nodes"])
+    elif isinstance(edge, list):
+        nodes = edge
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for node in nodes:
+        if not isinstance(node, dict):
+            continue
+        username = safe_str(node.get("username"))
+        uid = safe_str(node.get("id") or node.get("pk"))
+        key = username or uid
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        verified = node.get("is_verified")
+        row = {
+            "id": uid,
+            "username": username,
+            "displayName": safe_str(node.get("full_name") or node.get("fullName")),
+            "verified": False if verified is None else bool(verified),
+            "profileImage": safe_str(
+                node.get("profile_pic_url")
+                or node.get("profile_pic_url_hd")
+                or node.get("profilePicUrl")
+            ),
+            "url": f"https://instagram.com/{username}" if username else None,
+        }
+        out.append({k: v for k, v in row.items() if v is not None})
+    return out or None
+
+
+def _like_and_view_counts_disabled(obj: dict[str, Any]) -> bool | None:
+    """True when the account/post hides like & view counts (0 ≠ hidden)."""
+    for key in (
+        "like_and_view_counts_disabled",
+        "likeAndViewCountsDisabled",
+        "like_and_view_counts_disabled_v2",
+    ):
+        if obj.get(key) is not None:
+            return bool(obj.get(key))
+    return None
+
+
 def map_basic_profile(user: dict[str, Any]) -> dict[str, Any]:
     """Map a web_profile_info user node to Captapi camelCase profile shape.
 
@@ -1933,6 +2152,8 @@ def map_basic_profile(user: dict[str, Any]) -> dict[str, Any]:
         "businessPhoneNumber": safe_str(user.get("business_phone_number")),
         "businessContactMethod": safe_str(user.get("business_contact_method")),
         "linkedFbInfo": _linked_fb_info(user),
+        "relatedProfiles": _related_profiles(user),
+        "likeAndViewCountsDisabled": _like_and_view_counts_disabled(user),
         "latestReelMedia": safe_int(latest_reel) if latest_reel is not None else None,
         "aiAgentType": user.get("ai_agent_type"),
         "fetchedAt": utc_now_iso(),
@@ -2044,6 +2265,14 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
     external = _external_url_from_user(user)
     # Prefer HD for profileImage when available (previous behavior); expose both.
     profile_image = pic_hd or pic
+    category = safe_str(
+        user.get("category_name")
+        or user.get("categoryName")
+        or user.get("business_category_name")
+        or user.get("overall_category_name")
+        or user.get("category")
+        or user.get("category_enum")
+    )
     return {
         "platform": "instagram",
         "url": f"https://instagram.com/{username}" if username else None,
@@ -2070,10 +2299,12 @@ def map_channel_details(user: dict[str, Any], *, handle: str | None = None) -> d
             if user.get("is_professional_account") is None
             else bool(user.get("is_professional_account"))
         ),
-        "categoryName": safe_str(user.get("category_name") or user.get("category")),
+        "categoryName": category,
         "bioLinks": bio_links,
         "profileImageHd": pic_hd,
         "businessAddress": _business_address(user),
+        "relatedProfiles": _related_profiles(user),
+        "likeAndViewCountsDisabled": _like_and_view_counts_disabled(user),
         "followersIsApproximate": False,
         "followingIsApproximate": False,
         "postCountIsApproximate": False,
@@ -2136,6 +2367,10 @@ def map_profile_search_user(user: dict[str, Any]) -> dict[str, Any]:
         "bioLinks": bio_links,
         "profileImage": pic_hd or pic,
         "profileImageHd": pic_hd,
+        "fbid": safe_str(user.get("fbid") or user.get("fbid_v2")),
+        "businessAddress": _business_address(user),
+        "relatedProfiles": _related_profiles(user),
+        "likeAndViewCountsDisabled": _like_and_view_counts_disabled(user),
     }
     return strip_empty(out)
 
@@ -2631,8 +2866,9 @@ async def enrich_posts_from_author_feeds(
     for post in posts:
         code = _feed_key(post)
         engagement = post.get("engagement") if isinstance(post.get("engagement"), dict) else {}
-        # Prefer feed metrics whenever available — GraphQL video_view_count
-        # undercounts Reels; hashtag cards put plays into the like slot.
+        # Prefer feed play totals whenever available. Preserve a distinct
+        # GraphQL ``video_view_count`` (engagement.views ≠ plays) so clients
+        # still see both metrics after enrich.
         if code and code in feed_by_code:
             plays, ig_plays, fb_plays, feed_likes = feed_by_code[code]
             likes = feed_likes if feed_likes is not None else engagement.get("likes")
@@ -2641,11 +2877,20 @@ async def enrich_posts_from_author_feeds(
                 or safe_str(post.get("productType")) in {"clips", "reel", "reels"}
                 or bool(post.get("videoUrl"))
             )
+            prior_views = safe_int(engagement.get("views"))
+            prior_plays = safe_int(engagement.get("plays"))
+            preserved_view_count = None
+            if prior_views is not None and (
+                (prior_plays is not None and prior_views != prior_plays)
+                or (prior_plays is None and plays is not None and prior_views != plays)
+            ):
+                preserved_view_count = prior_views
             post["engagement"] = engagement_with_play_split(
                 {**engagement, "likes": likes},
                 play_count=plays,
                 ig_play_count=ig_plays,
                 fb_play_count=fb_plays,
+                video_view_count=preserved_view_count,
                 likes=likes,
                 is_video=is_video,
             )

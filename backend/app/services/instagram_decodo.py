@@ -328,23 +328,27 @@ def split_play_counts(
     likes: int | None = None,
     is_video: bool = True,
 ) -> dict[str, int | None]:
-    """Split Instagram's three play metrics into public engagement fields.
+    """Split Instagram view/play metrics into public engagement fields.
 
-    Instagram Reels (api/v1 feed) expose:
-      - ``play_count`` — total plays (Instagram + Facebook cross-post)
-      - ``ig_play_count`` — Instagram-only views
-      - ``fb_play_count`` — Facebook cross-post views
+    Upstream signals (often all present on the same Reel):
+      - ``video_view_count`` — reach-style view metric (unique / ~3s views)
+      - ``play_count`` / ``video_play_count`` — total plays incl. replays
+        (typically Instagram + Facebook cross-post when IG exposes the split)
+      - ``ig_play_count`` — Instagram-only plays (excludes Facebook cross-post)
+      - ``fb_play_count`` — Facebook cross-post plays
 
     Public shape:
-      - ``views`` — total (prefer ``play_count``, else IG-only)
-      - ``viewsInstagram`` — IG-only (use this for Instagram performance)
+      - ``views`` — ``video_view_count`` when present and sane; otherwise falls
+        back to total plays so typed clients always have a primary metric
+      - ``plays`` — total play count when Instagram exposes it (may be ~2×
+        ``views`` when both are present — they are different metrics)
+      - ``viewsInstagram`` — IG-only plays (use for Instagram-only analytics)
       - ``viewsFacebook`` — FB cross-post (derived as total−IG when missing)
-      - ``plays`` — backward-compat secondary when IG ≠ total
 
     GraphQL ``video_view_count`` undercounts many Reels (e.g. 112k vs 485k
-    likes) — last resort only when it passes ``likes <= views``. Prefer null
-    over a lie. Image/Sidecar always return null views (key kept by
-    strip_null_post_fields).
+    likes) — reject when ``likes > video_view_count``. Prefer null over a lie
+    when that is the only signal. Image/Sidecar always return null views
+    (key kept by strip_null_post_fields).
     """
     if not is_video:
         return {
@@ -364,18 +368,18 @@ def split_play_counts(
         if derived > 0:
             fb = derived
 
-    # Prefer total play_count; fall back to IG-only. GraphQL/Apify
-    # ``video_view_count`` is last resort only when it passes likes sanity
-    # (NASA reel: 112k views vs 485k likes must become null, not views).
-    views = total if total is not None else ig
-    if views is None and gql is not None and (likes is None or likes <= gql):
+    # Total plays: prefer play_count, else IG-only.
+    plays = total if total is not None else ig
+
+    # Distinct view metric when sane; never use the NASA undercount as views.
+    views: int | None = None
+    if gql is not None and (likes is None or likes <= gql):
         views = gql
+    if views is None and plays is not None:
+        # Backward compatible primary metric when Instagram omitted view_count.
+        views = plays
     if likes is not None and views is not None and likes > views:
         views = None
-
-    plays = None
-    if ig is not None and views is not None and ig != views:
-        plays = ig
 
     return {
         "views": views,
@@ -394,17 +398,12 @@ def pick_video_views(
     ig_play_count: int | None = None,
     fb_play_count: int | None = None,
 ) -> tuple[int | None, int | None]:
-    """Legacy ``(views, plays)`` helper — prefer :func:`split_play_counts`.
-
-    ``view_count`` is the GraphQL undercount field and is **not** used for
-    views (kept as a no-op parameter so old call sites keep compiling).
-    """
-    _ = view_count
+    """Legacy ``(views, plays)`` helper — prefer :func:`split_play_counts`."""
     split = split_play_counts(
         play_count=play_count,
         ig_play_count=ig_play_count,
         fb_play_count=fb_play_count,
-        video_view_count=None,
+        video_view_count=view_count,
         likes=likes,
         is_video=is_video,
     )
@@ -437,13 +436,52 @@ def engagement_with_play_split(
         out["viewsFacebook"] = split["viewsFacebook"]
         if split["plays"] is not None:
             out["plays"] = split["plays"]
-        elif "plays" in out and out["plays"] is None:
+        else:
             out.pop("plays", None)
     else:
         out.pop("viewsInstagram", None)
         out.pop("viewsFacebook", None)
         out.pop("plays", None)
     return out
+
+
+def map_ig_location(loc: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Normalize Instagram location nodes (GraphQL / api/v1 / Apify)."""
+    if not isinstance(loc, dict):
+        return None
+    name = safe_str(loc.get("name"))
+    lid = safe_str(loc.get("pk") or loc.get("id"))
+    if not name and not lid:
+        return None
+    out: dict[str, Any] = {"id": lid, "name": name}
+    slug = safe_str(loc.get("slug"))
+    if slug:
+        out["slug"] = slug
+    if loc.get("has_public_page") is not None:
+        out["hasPublicPage"] = bool(loc.get("has_public_page"))
+    lat = safe_float(loc.get("lat") or loc.get("latitude"))
+    lng = safe_float(loc.get("lng") or loc.get("longitude"))
+    if lat is not None:
+        out["latitude"] = lat
+    if lng is not None:
+        out["longitude"] = lng
+    address_json = safe_str(loc.get("address_json") or loc.get("addressJson"))
+    if address_json:
+        out["addressJson"] = address_json
+        try:
+            parsed = json.loads(address_json)
+        except (TypeError, ValueError):
+            parsed = None
+        if isinstance(parsed, dict):
+            address = {
+                "streetAddress": safe_str(parsed.get("street_address")),
+                "zipCode": safe_str(parsed.get("zip_code")),
+                "cityName": safe_str(parsed.get("city_name")),
+            }
+            address = {k: v for k, v in address.items() if v}
+            if address:
+                out["address"] = address
+    return {k: v for k, v in out.items() if v is not None}
 
 
 def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
@@ -474,6 +512,11 @@ def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
         keep_null = {"views"}
         if is_video:
             keep_null |= {"viewsInstagram", "viewsFacebook"}
+        # Hidden counts: keep likes:null so clients can pair with
+        # likeAndViewCountsDisabled (0 ≠ omitted ≠ hidden).
+        if post.get("likeAndViewCountsDisabled"):
+            keep_null |= {"likes", "plays", "viewsInstagram", "viewsFacebook"}
+            engagement.setdefault("likes", None)
         cleaned = {
             k: v for k, v in engagement.items() if v is not None or k in keep_null
         }
@@ -594,8 +637,23 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
     likes, play_count, video_view_count = resolve_graphql_likes_and_plays(
         node, is_video=is_video
     )
-    ig_play_count = safe_int(node.get("ig_play_count"))
-    fb_play_count = safe_int(node.get("fb_play_count") or node.get("fbPlayCount"))
+    likes_disabled = node.get("like_and_view_counts_disabled")
+    if likes_disabled is None:
+        likes_disabled = node.get("likeAndViewCountsDisabled")
+    if likes_disabled is not None:
+        likes_disabled = bool(likes_disabled)
+        if likes_disabled:
+            likes = None
+            play_count = None
+            video_view_count = None
+    ig_play_count = (
+        None if likes_disabled else safe_int(node.get("ig_play_count"))
+    )
+    fb_play_count = (
+        None
+        if likes_disabled
+        else safe_int(node.get("fb_play_count") or node.get("fbPlayCount"))
+    )
     product = safe_str(node.get("product_type")) or ("clips" if is_video else None)
     # Prefer shortcode as id (matches Polaris hydrate + enrich_posts_from_author_feeds).
     result = {
@@ -641,16 +699,18 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         "isAd": bool(node.get("is_ad") or node.get("ad_id")),
         "isAffiliate": bool(node.get("affiliate_info") or node.get("is_affiliate")),
         "accessibilityCaption": safe_str(node.get("accessibility_caption")),
+        "likeAndViewCountsDisabled": likes_disabled,
+        "commentsDisabled": (
+            bool(node.get("comments_disabled"))
+            if node.get("comments_disabled") is not None
+            else None
+        ),
     }
-    loc = node.get("location") if isinstance(node.get("location"), dict) else None
-    if loc and (loc.get("name") or loc.get("id") or loc.get("pk")):
-        result["location"] = {
-            "id": safe_str(loc.get("pk") or loc.get("id")),
-            "name": safe_str(loc.get("name")),
-            "latitude": safe_float(loc.get("lat") or loc.get("latitude")),
-            "longitude": safe_float(loc.get("lng") or loc.get("longitude")),
-        }
-        result["location"] = {k: v for k, v in result["location"].items() if v is not None}
+    location = map_ig_location(
+        node.get("location") if isinstance(node.get("location"), dict) else None
+    )
+    if location:
+        result["location"] = location
     music = node.get("clips_music_attribution_info")
     if isinstance(music, dict) and (
         music.get("audio_id") or music.get("song_name") or music.get("artist_name")

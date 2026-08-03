@@ -1566,24 +1566,45 @@ async def facebook_comment_replies(
 
 
 def _normalize_photo(item: dict) -> dict:
-    """Map Facebook photo actor rows; omit fields the actor never fills."""
+    """Map Facebook photo rows. ``accessibilityCaption`` is alt-text, not a post caption.
+
+    Facebook's /photos surface typically omits publish time and engagement — do
+    not invent zeros. Prefer full-size ``image``; optional ``thumbnailUrl`` when
+    a smaller CDN asset is present.
+    """
+    image = safe_str(
+        item.get("imageUrl")
+        or item.get("image_url")
+        or item.get("image")
+        or item.get("imageUri")
+        or item.get("src")
+    )
+    thumb = safe_str(
+        item.get("thumbnailUrl")
+        or item.get("thumbnail")
+        or item.get("thumbnail_url")
+    )
+    # Prefer explicit accessibility fields. Never treat legacy ``caption`` as a
+    # user post — native path used to mislabel alt-text as caption.
+    accessibility = safe_str(
+        item.get("accessibilityCaption")
+        or item.get("accessibility_caption")
+        or item.get("altText")
+        or item.get("alt_text")
+        # Legacy native rows only — still alt-text, not a written caption.
+        or item.get("caption")
+        or item.get("text")
+        or item.get("ocrText")
+    )
     out: dict[str, Any] = {
         "platform": "facebook",
         "id": safe_str(item.get("id") or item.get("photoId") or item.get("photo_id")),
         "url": safe_str(item.get("url") or item.get("photoUrl") or item.get("postUrl")),
-        "image": safe_str(
-            item.get("imageUrl")
-            or item.get("image_url")
-            or item.get("image")
-            or item.get("imageUri")
-            or item.get("src")
-            or item.get("thumbnail")
-            or item.get("thumbnail_url")
-        ),
-        "caption": safe_str(
-            item.get("caption") or item.get("text") or item.get("ocrText") or item.get("altText")
-        ),
+        "image": image,
+        "accessibilityCaption": accessibility,
     }
+    if thumb and thumb != image:
+        out["thumbnailUrl"] = thumb
     published = safe_str(
         item.get("timestamp") or item.get("date") or item.get("publishedAt") or item.get("time")
     )
@@ -1606,7 +1627,15 @@ def _normalize_photo(item: dict) -> dict:
     return out
 
 
-@router.get("/profile-photos", summary="Photos from a Facebook profile/page")
+@router.get(
+    "/profile-photos",
+    summary="Photos from a Facebook profile/page",
+    description=(
+        "Returns photo grid items with image URL and accessibilityCaption "
+        "(Facebook alt-text — not a user-written post caption). Publish time "
+        "and engagement are usually absent on this surface."
+    ),
+)
 async def facebook_profile_photos(
     url: str = Query(..., description="Facebook profile/page URL, @handle, or page name"),
     limit: int = Query(20, ge=1, le=200),
@@ -1627,11 +1656,20 @@ async def facebook_profile_photos(
                 raise HTTPException(status_code=404, detail="Photos not found")
             photos = [strip_empty(_normalize_photo(i)) for i in raws]
             ctx["source"] = "direct"
-            return {"url": url, "totalReturned": len(photos), "photos": photos}
+            return {
+                "url": url,
+                "totalReturned": len(photos),
+                "photos": photos,
+                "note": (
+                    "accessibilityCaption is Facebook's image alt-text, not a "
+                    "post caption. Date and engagement are usually unavailable "
+                    "on the photos surface."
+                ),
+            }
 
         data = await cached_or_run(
             endpoint="facebook.profile-photos",
-            params={"url": url, "limit": limit, "v": 4},
+            params={"url": url, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
