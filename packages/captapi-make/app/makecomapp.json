@@ -2282,7 +2282,7 @@
       },
       "spotifySearch": {
         "label": "Spotify Search",
-        "description": "Search Spotify tracks, albums, artists, podcasts or episodes. Costs ~23 credits (cached results free, failures never charged).",
+        "description": "Search Spotify by type (tracks/albums/artists/podcasts/episodes) — canonical URIs, explicit/playable, scrapedAt. Costs 2 credits native (cached results free, failures never charged).",
         "connection": "captapi",
         "altConnection": null,
         "webhook": null,

@@ -3842,8 +3842,8 @@
     "platform": "spotify",
     "name": "Spotify Search",
     "path": "/v1/spotify/search",
-    "credits": 23,
-    "summary": "Search Spotify tracks, albums, artists, podcasts or episodes.",
+    "credits": 2,
+    "summary": "Search Spotify by type (tracks/albums/artists/podcasts/episodes) - canonical URIs, explicit/playable, scrapedAt. Flat 2 credits.",
     "params": [
       {
         "name": "q",
@@ -3855,13 +3855,13 @@
         "name": "type",
         "type": "string",
         "required": false,
-        "description": "tracks, albums, artists, podcasts, or episodes. Default tracks."
+        "description": "Result kind: tracks (default), albums, artists, podcasts, or episodes."
       },
       {
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 50. Billed per result."
+        "description": "Max items to return. Default 20, max 50."
       },
       {
         "name": "cache",

@@ -9525,7 +9525,7 @@
         {
           "platform": "spotify",
           "type": "track",
-          "uri": "1S7FNazOUQc21EaQyh5nJT",
+          "uri": "spotify:track:1S7FNazOUQc21EaQyh5nJT",
           "url": "https://open.spotify.com/track/1S7FNazOUQc21EaQyh5nJT",
           "name": "Nightmote - Lofi Remix",
           "artists": [
@@ -9534,27 +9534,17 @@
           ],
           "album": "Nightmote (Lofi Remix)",
           "durationMs": 207620,
+          "durationFormatted": "3:27",
           "image": "https://i.scdn.co/image/ab67616d0000b2735d372fc451453e8b83900014",
-          "raw": {
-            "type": "track",
-            "id": "1S7FNazOUQc21EaQyh5nJT",
-            "name": "Nightmote - Lofi Remix",
-            "artists": "Yoylecake Michael, 111robloxdude",
-            "albumName": "Nightmote (Lofi Remix)",
-            "albumArt": "https://i.scdn.co/image/ab67616d0000b2735d372fc451453e8b83900014",
-            "duration": 207620,
-            "durationFormatted": "3:27",
-            "isExplicit": false,
-            "isPlayable": true,
-            "url": "https://open.spotify.com/track/1S7FNazOUQc21EaQyh5nJT",
-            "scrapedAt": "2026-07-18T11:28:01.801Z",
-            "searchTerm": "lofi beats"
-          }
+          "id": "1S7FNazOUQc21EaQyh5nJT",
+          "explicit": false,
+          "playable": true,
+          "scrapedAt": "2026-07-18T11:28:01.801Z"
         },
         {
           "platform": "spotify",
           "type": "track",
-          "uri": "6AOXQYGPpd7KIIBxCCZzUx",
+          "uri": "spotify:track:6AOXQYGPpd7KIIBxCCZzUx",
           "url": "https://open.spotify.com/track/6AOXQYGPpd7KIIBxCCZzUx",
           "name": "Lofi Beats",
           "artists": [
@@ -9562,27 +9552,17 @@
           ],
           "album": "Wave Heart: Chill Lofi Music",
           "durationMs": 120000,
+          "durationFormatted": "2:00",
           "image": "https://i.scdn.co/image/ab67616d0000b27391027e42977d144b3db3f705",
-          "raw": {
-            "type": "track",
-            "id": "6AOXQYGPpd7KIIBxCCZzUx",
-            "name": "Lofi Beats",
-            "artists": "Lofi Sleep Chill & Study",
-            "albumName": "Wave Heart: Chill Lofi Music",
-            "albumArt": "https://i.scdn.co/image/ab67616d0000b27391027e42977d144b3db3f705",
-            "duration": 120000,
-            "durationFormatted": "2:00",
-            "isExplicit": false,
-            "isPlayable": true,
-            "url": "https://open.spotify.com/track/6AOXQYGPpd7KIIBxCCZzUx",
-            "scrapedAt": "2026-07-18T11:28:01.901Z",
-            "searchTerm": "lofi beats"
-          }
+          "id": "6AOXQYGPpd7KIIBxCCZzUx",
+          "explicit": false,
+          "playable": true,
+          "scrapedAt": "2026-07-18T11:28:01.901Z"
         },
         {
           "platform": "spotify",
           "type": "track",
-          "uri": "5yw15MbdXGw2ngbqmd7E3m",
+          "uri": "spotify:track:5yw15MbdXGw2ngbqmd7E3m",
           "url": "https://open.spotify.com/track/5yw15MbdXGw2ngbqmd7E3m",
           "name": "Lofi Beats",
           "artists": [
@@ -9590,27 +9570,17 @@
           ],
           "album": "Lofi Dreams: Soft Lofi Beats",
           "durationMs": 120000,
+          "durationFormatted": "2:00",
           "image": "https://i.scdn.co/image/ab67616d0000b2730cea6601096d5b32c8b28f71",
-          "raw": {
-            "type": "track",
-            "id": "5yw15MbdXGw2ngbqmd7E3m",
-            "name": "Lofi Beats",
-            "artists": "Lo Fi Hip Hop",
-            "albumName": "Lofi Dreams: Soft Lofi Beats",
-            "albumArt": "https://i.scdn.co/image/ab67616d0000b2730cea6601096d5b32c8b28f71",
-            "duration": 120000,
-            "durationFormatted": "2:00",
-            "isExplicit": false,
-            "isPlayable": true,
-            "url": "https://open.spotify.com/track/5yw15MbdXGw2ngbqmd7E3m",
-            "scrapedAt": "2026-07-18T11:28:01.961Z",
-            "searchTerm": "lofi beats"
-          }
+          "id": "5yw15MbdXGw2ngbqmd7E3m",
+          "explicit": false,
+          "playable": true,
+          "scrapedAt": "2026-07-18T11:28:01.961Z"
         },
         {
           "platform": "spotify",
           "type": "track",
-          "uri": "7zGzS7L6LnI5qQqMm8wTPB",
+          "uri": "spotify:track:7zGzS7L6LnI5qQqMm8wTPB",
           "url": "https://open.spotify.com/track/7zGzS7L6LnI5qQqMm8wTPB",
           "name": "New Look - Wii U Mii Maker Lofi Mix",
           "artists": [
@@ -9620,27 +9590,17 @@
           ],
           "album": "Frutiger Aero Remixes",
           "durationMs": 162897,
+          "durationFormatted": "2:42",
           "image": "https://i.scdn.co/image/ab67616d0000b27365bc1eef471caed82cd5c3d9",
-          "raw": {
-            "type": "track",
-            "id": "7zGzS7L6LnI5qQqMm8wTPB",
-            "name": "New Look - Wii U Mii Maker Lofi Mix",
-            "artists": "Secret Potion, Lofi Beats To Chill Study Sleep, Nostalgiacore",
-            "albumName": "Frutiger Aero Remixes",
-            "albumArt": "https://i.scdn.co/image/ab67616d0000b27365bc1eef471caed82cd5c3d9",
-            "duration": 162897,
-            "durationFormatted": "2:42",
-            "isExplicit": false,
-            "isPlayable": true,
-            "url": "https://open.spotify.com/track/7zGzS7L6LnI5qQqMm8wTPB",
-            "scrapedAt": "2026-07-18T11:28:02.011Z",
-            "searchTerm": "lofi beats"
-          }
+          "id": "7zGzS7L6LnI5qQqMm8wTPB",
+          "explicit": false,
+          "playable": true,
+          "scrapedAt": "2026-07-18T11:28:02.011Z"
         },
         {
           "platform": "spotify",
           "type": "track",
-          "uri": "4LQ0TjIFk38xXNJVNoonSW",
+          "uri": "spotify:track:4LQ0TjIFk38xXNJVNoonSW",
           "url": "https://open.spotify.com/track/4LQ0TjIFk38xXNJVNoonSW",
           "name": "slow river",
           "artists": [
@@ -9648,22 +9608,12 @@
           ],
           "album": "slow river",
           "durationMs": 103317,
+          "durationFormatted": "1:43",
           "image": "https://i.scdn.co/image/ab67616d0000b273396a89f358a81646ed6259b8",
-          "raw": {
-            "type": "track",
-            "id": "4LQ0TjIFk38xXNJVNoonSW",
-            "name": "slow river",
-            "artists": "ourchase",
-            "albumName": "slow river",
-            "albumArt": "https://i.scdn.co/image/ab67616d0000b273396a89f358a81646ed6259b8",
-            "duration": 103317,
-            "durationFormatted": "1:43",
-            "isExplicit": false,
-            "isPlayable": true,
-            "url": "https://open.spotify.com/track/4LQ0TjIFk38xXNJVNoonSW",
-            "scrapedAt": "2026-07-18T11:28:02.289Z",
-            "searchTerm": "lofi beats"
-          }
+          "id": "4LQ0TjIFk38xXNJVNoonSW",
+          "explicit": false,
+          "playable": true,
+          "scrapedAt": "2026-07-18T11:28:02.289Z"
         }
       ]
     }

@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "fix",
+    title: "Spotify search: full URIs, explicit/playable, scrapedAt",
+    description:
+      "GET /v1/spotify/search now returns canonical Spotify URIs (spotify:track:… etc.) so search hits chain into Track/Album/Artist/Podcast endpoints without prefixing bare IDs. Promotes explicit, playable, durationFormatted, and scrapedAt onto each result (no longer buried in raw). type=tracks|albums|artists|podcasts|episodes filter kept. Flat 2 credits native.",
+    items: [
+      "uri always spotify:{type}:{id} (Search ↔ Track parity)",
+      "explicit / playable / durationFormatted on results",
+      "scrapedAt per result (Apify sequential stamps preserved)",
+      "raw dropped for track hits (same as Track details)",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
     title: "Twitch user videos: filterBy, sortBy, cursor, broadcaster object",
     description:
       "GET /v1/twitch/user-videos now supports filterBy=ARCHIVE|HIGHLIGHT|UPLOAD, sortBy=TIME|VIEWS, limit up to 100, and cursor pagination (nextCursor/hasMore) over the first 100 matches. Response adds top-level broadcaster{id,username,displayName,followers,profileImage,isPartner}, plus per-video broadcastType, gameId/gameSlug, animatedPreviewUrl, and channel{}. Still a clean videos[] list (not a profile dump). Flat 2 credits native.",

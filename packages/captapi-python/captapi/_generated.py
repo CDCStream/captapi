@@ -2938,7 +2938,7 @@ class SpotifyApi:
         return self._t.get("/v1/spotify/album", {"url": url, "cache": cache})
 
     def search(self, *, q: str, type_: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Spotify Search — Search Spotify tracks, albums, artists, podcasts or episodes. (23 credits)
+        """Spotify Search — Search Spotify by type (tracks/albums/artists/podcasts/episodes) - canonical URIs, explicit/playable, scrapedAt. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param type_: tracks, albums, artists, podcasts, or episodes. Default tracks.
@@ -2995,7 +2995,7 @@ class AsyncSpotifyApi:
         return await self._t.get("/v1/spotify/album", {"url": url, "cache": cache})
 
     async def search(self, *, q: str, type_: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Spotify Search — Search Spotify tracks, albums, artists, podcasts or episodes. (23 credits)
+        """Spotify Search — Search Spotify by type (tracks/albums/artists/podcasts/episodes) - canonical URIs, explicit/playable, scrapedAt. (2 credits)
 
         :param q: Search query or keywords (min 2 chars).
         :param type_: tracks, albums, artists, podcasts, or episodes. Default tracks.

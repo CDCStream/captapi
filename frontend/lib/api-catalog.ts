@@ -673,7 +673,19 @@ const SPOTIFY: Spec[] = [
       "Pass a Spotify track URL, URI, or ID and get clean JSON: id, name, playCount (stream count from Spotify's web GraphQL), trackNumber, contentRating/explicit, durationMs, artistItems[{id,uri,name,url}], albumInfo[{id,uri,name,url,releaseDate}], and previewUrl when Spotify exposes one. Flat artists[] name strings and album name kept for back-compat. Flat 1 credit. Note: Spotify's 0–100 popularity score is not on this Pathfinder surface — playCount is the listen metric.",
   },
   { slug: "spotify-album", name: "Spotify Album API", shortName: "Album", category: "details", method: "GET", path: "/v1/spotify/album", credits: 2 , tagline: "Get a Spotify album — title, artists, tracks, release date, and cover art as structured JSON." },
-  { slug: "spotify-search", name: "Spotify Search API", shortName: "Search", category: "search", method: "GET", path: "/v1/spotify/search", credits: 2 },
+  {
+    slug: "spotify-search",
+    name: "Spotify Search API",
+    shortName: "Search",
+    category: "search",
+    method: "GET",
+    path: "/v1/spotify/search",
+    credits: 2,
+    tagline:
+      "Search Spotify tracks, albums, artists, podcasts, or episodes — full URIs, explicit/playable, scrapedAt.",
+    longDescription:
+      "Pass q plus optional type=tracks|albums|artists|podcasts|episodes (default tracks) and limit (max 50). Each result ships a canonical Spotify URI (spotify:track:… / album:… / artist:… / show:… / episode:…) so you can chain into Track / Album / Artist / Podcast endpoints without guessing prefixes, plus url, name, artists[], album, durationMs/durationFormatted, explicit, playable, image, and scrapedAt (per-result fetch time — Apify sequential stamps when present, otherwise the request fetch time). Flat 2 credits on native Pathfinder; Apify fallthrough scales per result.",
+  },
   {
     slug: "spotify-podcast",
     name: "Spotify Podcast API",
@@ -1973,7 +1985,18 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "spotify-artist": [up(SPOTIFY_URL), cacheP()],
   "spotify-track": [up(SPOTIFY_URL), cacheP()],
   "spotify-album": [up(SPOTIFY_URL), cacheP()],
-  "spotify-search": [qp(), { name: "type", type: "string", required: false, description: "tracks, albums, artists, podcasts, or episodes. Default tracks." }, lp(20, 50)],
+  "spotify-search": [
+    qp("Search term (min 2 chars)."),
+    {
+      name: "type",
+      type: "string",
+      required: false,
+      description:
+        "Result kind: tracks (default), albums, artists, podcasts, or episodes.",
+    },
+    lpFlat(20, 50, 2),
+    cacheP(),
+  ],
   "spotify-podcast": [up(SPOTIFY_URL), lpFlat(20, 50, 1), cacheP()],
   "spotify-podcast-episodes": [up(SPOTIFY_URL), lp(20, 50)],
   // SoundCloud
@@ -3070,6 +3093,8 @@ const FIELD_DESCS: Record<string, string> = {
   previewUrl: "30s MP3 preview URL when Spotify exposes one.",
   mediaType: "Spotify media type (e.g. AUDIO).",
   playable: "Whether the track is playable in the web player.",
+  scrapedAt:
+    "When this result was collected (ISO 8601). On Spotify Search, Apify may stamp each hit a few hundred ms apart; native Pathfinder uses the request fetch time.",
   videoCount: "Total number of videos.",
   tweetCount: "Total number of tweets.",
   mediaCount: "Total number of media posts.",

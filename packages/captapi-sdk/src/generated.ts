@@ -2123,7 +2123,7 @@ export class SpotifyApi {
   album(params: SpotifyAlbumParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/spotify/album", params);
   }
-  /** Spotify Search — Search Spotify tracks, albums, artists, podcasts or episodes. (23 credits) */
+  /** Spotify Search — Search Spotify by type (tracks/albums/artists/podcasts/episodes) - canonical URIs, explicit/playable, scrapedAt. (2 credits) */
   search(params: SpotifySearchParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/spotify/search", params);
   }

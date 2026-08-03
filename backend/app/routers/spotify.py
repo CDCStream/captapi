@@ -17,6 +17,7 @@ from app.services.apify_client import ApifyError, get_apify
 from app.services.cached_runner import cached_or_run
 from app.services import spotify_native
 from app.utils.formatters import safe_int, safe_str
+from app.utils.media_urls import utc_now_iso
 from app.utils.url import detect_url_platform, platform_mismatch_detail
 
 router = APIRouter()
@@ -119,11 +120,26 @@ def _episodes_v2(item: dict[str, Any]) -> dict[str, Any]:
 # Fields that never apply to a given entity type — omit rather than null.
 _OMIT_BY_KIND: dict[str, frozenset[str]] = {
     "artist": frozenset(
-        {"artists", "album", "durationMs", "releaseYear", "totalTracks", "totalEpisodes"}
+        {
+            "artists",
+            "album",
+            "durationMs",
+            "durationFormatted",
+            "releaseYear",
+            "totalTracks",
+            "totalEpisodes",
+        }
     ),
     "track": frozenset({"followers", "monthlyListeners", "totalTracks", "totalEpisodes"}),
     "album": frozenset(
-        {"album", "durationMs", "followers", "monthlyListeners", "totalEpisodes"}
+        {
+            "album",
+            "durationMs",
+            "durationFormatted",
+            "followers",
+            "monthlyListeners",
+            "totalEpisodes",
+        }
     ),
     # Podcast publisher ≠ music artists — never ship artists[] for shows.
     "podcast": frozenset(
@@ -131,6 +147,7 @@ _OMIT_BY_KIND: dict[str, frozenset[str]] = {
             "album",
             "artists",
             "durationMs",
+            "durationFormatted",
             "followers",
             "monthlyListeners",
             "releaseYear",
@@ -193,6 +210,28 @@ def _spotify_id(uri: str | None, kind: str) -> str | None:
         part = u.split(f"/{kind}/", 1)[-1]
         return part.split("?", 1)[0].strip("/") or None
     return u if ":" not in u else None
+
+
+def _uri_kind(kind: str) -> str:
+    """Spotify URI path segment — podcast shows use ``show``."""
+    return "show" if kind == "podcast" else kind
+
+
+def _format_duration_ms(ms: int | None) -> str | None:
+    if ms is None or ms < 0:
+        return None
+    total_sec = int(ms) // 1000
+    minutes, seconds = divmod(total_sec, 60)
+    hours, minutes = divmod(minutes, 60)
+    if hours:
+        return f"{hours}:{minutes:02d}:{seconds:02d}"
+    return f"{minutes}:{seconds:02d}"
+
+
+def _as_bool(value: Any) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    return None
 
 
 def _items(block: Any) -> list[Any]:
@@ -534,6 +573,16 @@ def _track_fields(item: dict[str, Any], album: dict[str, Any]) -> dict[str, Any]
             }.items()
             if v not in (None, "", [])
         }
+    explicit = True if label == "EXPLICIT" else (False if label else None)
+    if explicit is None:
+        explicit = _as_bool(item.get("isExplicit"))
+        if explicit is None:
+            explicit = _as_bool(item.get("explicit"))
+    playable = playability.get("playable") if isinstance(playability.get("playable"), bool) else None
+    if playable is None:
+        playable = _as_bool(item.get("isPlayable"))
+        if playable is None:
+            playable = _as_bool(item.get("playable"))
     return {
         "id": tid,
         "playCount": safe_int(item.get("playcount") or item.get("playCount")),
@@ -541,9 +590,9 @@ def _track_fields(item: dict[str, Any], album: dict[str, Any]) -> dict[str, Any]
         "trackNumber": safe_int(item.get("trackNumber") or item.get("track_number")),
         "discNumber": safe_int(item.get("discNumber") or item.get("disc_number")),
         "contentRating": label,
-        "explicit": True if label == "EXPLICIT" else (False if label else None),
+        "explicit": explicit,
         "mediaType": safe_str(item.get("mediaType")),
-        "playable": playability.get("playable") if isinstance(playability.get("playable"), bool) else None,
+        "playable": playable,
         "previewUrl": _track_preview_url(item),
         "releaseDate": release_date,
         "artistItems": artist_items,
@@ -590,16 +639,25 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
     profile = item.get("profile") if isinstance(item.get("profile"), dict) else {}
     name = safe_str(item.get("name") or item.get("title") or profile.get("name"))
 
+    uri_kind = _uri_kind(kind)
+    raw_uri = safe_str(item.get("uri") or item.get("id"))
+    sid = _spotify_id(raw_uri, uri_kind) or _spotify_id(safe_str(item.get("id")), uri_kind)
+    canonical_uri = f"spotify:{uri_kind}:{sid}" if sid else raw_uri
+
+    duration_formatted = safe_str(item.get("durationFormatted")) or _format_duration_ms(duration_ms)
+    scraped_at = safe_str(item.get("scrapedAt") or item.get("scraped_at"))
+
     out: dict[str, Any] = {
         "platform": "spotify",
         "type": kind,
-        "uri": safe_str(item.get("uri") or item.get("id")),
+        "uri": canonical_uri,
         "url": safe_str(item.get("url") or item.get("externalUrl") or item.get("shareUrl") or sharing.get("shareUrl")),
         "name": name,
         "description": description,
         "artists": artists,
         "album": safe_str(album.get("name") if isinstance(album, dict) else None) or safe_str(item.get("albumName")),
         "durationMs": duration_ms,
+        "durationFormatted": duration_formatted,
         "followers": safe_int(stats.get("followers") or item.get("followers")),
         "monthlyListeners": safe_int(stats.get("monthlyListeners") or item.get("monthlyListeners")),
         "releaseYear": release_year,
@@ -608,8 +666,11 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
         or (_image(album) if isinstance(album, dict) else None),
         "totalTracks": safe_int(tracks.get("totalCount") if isinstance(tracks, dict) else item.get("totalTracks")),
         "totalEpisodes": safe_int(episodes.get("totalCount") if isinstance(episodes, dict) else item.get("totalEpisodes")),
+        "scrapedAt": scraped_at,
         "raw": _strip_empty_keys(item),
     }
+    if sid and not out.get("url"):
+        out["url"] = f"https://open.spotify.com/{uri_kind}/{sid}"
     if kind == "artist":
         out.update(_artist_fields(item))
     if kind == "track":
@@ -624,11 +685,12 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
             ]
         if not out.get("album") and isinstance(track_extra.get("albumInfo"), dict):
             out["album"] = track_extra["albumInfo"].get("name")
-        if track_extra.get("id"):
-            # Prefer canonical URL over shareUrl (?si=…).
-            out["url"] = f"https://open.spotify.com/track/{track_extra['id']}"
-            if not out.get("uri"):
-                out["uri"] = f"spotify:track:{track_extra['id']}"
+        tid = track_extra.get("id") or sid
+        if tid:
+            # Always ship full spotify:track:… URI (search Apify used bare ids).
+            out["id"] = tid
+            out["uri"] = f"spotify:track:{tid}"
+            out["url"] = f"https://open.spotify.com/track/{tid}"
         if not out.get("releaseYear") and track_extra.get("releaseDate"):
             out["releaseYear"] = _year_of(track_extra["releaseDate"])
     if kind == "podcast":
@@ -638,13 +700,30 @@ def _normalize(item: dict[str, Any], kind: str) -> dict[str, Any]:
         out.update(podcast_extra)
         if podcast_extra.get("id"):
             out["url"] = f"https://open.spotify.com/show/{podcast_extra['id']}"
-            if not out.get("uri") or not str(out["uri"]).startswith("spotify:show:"):
-                out["uri"] = f"spotify:show:{podcast_extra['id']}"
+            out["uri"] = f"spotify:show:{podcast_extra['id']}"
+    elif kind in ("album", "artist", "episode") and sid:
+        out.setdefault("id", sid)
+        out["uri"] = f"spotify:{uri_kind}:{sid}"
+        if not out.get("url") or "open.spotify.com" not in str(out.get("url")):
+            out["url"] = f"https://open.spotify.com/{uri_kind}/{sid}"
+    # Episodes/albums/artists: lift Apify explicit/playable when Pathfinder fields absent.
+    if kind in ("album", "artist", "episode", "podcast") and out.get("explicit") is None:
+        lifted = _as_bool(item.get("isExplicit"))
+        if lifted is not None:
+            out["explicit"] = lifted
+    if kind in ("album", "artist", "episode", "podcast") and out.get("playable") is None:
+        lifted_p = _as_bool(item.get("isPlayable"))
+        if lifted_p is not None:
+            out["playable"] = lifted_p
     for key in _OMIT_BY_KIND.get(kind, frozenset()):
         out.pop(key, None)
     for key in _OMIT_IF_EMPTY:
         if key in out and out[key] in (None, "", []):
             out.pop(key, None)
+    if out.get("durationFormatted") in (None, ""):
+        out.pop("durationFormatted", None)
+    if out.get("scrapedAt") in (None, ""):
+        out.pop("scrapedAt", None)
     # Track-only empties (keep falsey bools).
     if kind == "track":
         for key in (
@@ -961,9 +1040,18 @@ async def search(
     ) as ctx:
         async def _run() -> dict[str, Any]:
             kind = type[:-1] if type.endswith("s") else type
+            fetched_at = utc_now_iso()
+
+            def _stamp(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+                # Promote per-item Apify scrapedAt when present; else stamp fetch time.
+                for row in results:
+                    if not row.get("scrapedAt"):
+                        row["scrapedAt"] = fetched_at
+                return results
+
             native_items = await spotify_native.search_native(q, type, limit)
             if native_items is not None:
-                results = [_normalize(i, kind) for i in native_items]
+                results = _stamp([_normalize(i, kind) for i in native_items])
                 ctx["source"] = "direct"
                 return {
                     "platform": "spotify",
@@ -994,13 +1082,13 @@ async def search(
                     },
                     max_items=limit,
                 )
-            results = [_normalize(i, kind) for i in items[:limit] if not i.get("error")]
+            results = _stamp([_normalize(i, kind) for i in items[:limit] if not i.get("error")])
             ctx["source"] = "apify"
             return {"platform": "spotify", "query": q, "type": type, "totalReturned": len(results), "results": results}
 
         data = await cached_or_run(
             "spotify.search",
-            {"q": q, "type": type, "limit": limit, "v": 7},
+            {"q": q, "type": type, "limit": limit, "v": 8},
             _run,
             ctx,
             use_cache=cache,
