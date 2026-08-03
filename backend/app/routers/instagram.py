@@ -1446,9 +1446,7 @@ def _normalize_trending_item(item: dict) -> dict:
     normalizer maps it to empty/raw values."""
     username = safe_str(item.get("username"))
     product = safe_str(item.get("type"))  # feed | carousel_container | clips
-    is_video = bool(item.get("is_video"))
-    # Match the rest of the platform: postType reflects the container, so a
-    # carousel is "Sidecar" even when its first media is a video.
+    is_video = bool(item.get("is_video")) or product in {"clips", "reel", "reels"}
     if product == "carousel_container":
         post_type = "Sidecar"
     elif is_video:
@@ -1458,12 +1456,27 @@ def _normalize_trending_item(item: dict) -> dict:
     caption = safe_str(item.get("caption")) or ""
     duration = safe_float(item.get("duration"))
     published = safe_str(item.get("date"))
+    raw_id = safe_str(item.get("id") or item.get("pk"))
+    shortcode = safe_str(item.get("code") or item.get("shortcode"))
+    media_id = None
+    if raw_id and "_" in raw_id and raw_id.split("_", 1)[0].isdigit():
+        media_id = raw_id.split("_", 1)[0]
+    elif raw_id and raw_id.isdigit():
+        media_id = raw_id
+    url = safe_str(item.get("url"))
+    if not shortcode and url:
+        m = re.search(r"/(?:reel|p|tv)/([^/?#]+)/?", url, re.I)
+        if m:
+            shortcode = m.group(1)
+    if shortcode and is_video:
+        url = f"https://www.instagram.com/reel/{shortcode}/"
     return {
         "platform": "instagram",
-        "url": safe_str(item.get("url")),
-        "id": safe_str(item.get("id") or item.get("code")),
+        "url": url,
+        "id": media_id or shortcode or raw_id,
+        "shortcode": shortcode,
         "postType": post_type,
-        "productType": product,
+        "productType": product or ("clips" if is_video else None),
         # Explore feed category, e.g. "TV & Movies" / "Bollywood TV & Movies".
         "section": safe_str(item.get("section")),
         "topic": safe_str(item.get("topic")),
@@ -1485,6 +1498,18 @@ def _normalize_trending_item(item: dict) -> dict:
         "hashtags": decodo.dedupe_preserve(decodo._HASHTAG_RE.findall(caption)),
         "mentions": decodo.dedupe_preserve(decodo._MENTION_RE.findall(caption)),
     }
+
+
+def _filter_trending_reels_only(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Drop photos/carousels and years-old Explore junk — keep real Reels."""
+    out: list[dict[str, Any]] = []
+    for item in items:
+        if not instagram_native.is_reel_post(item):
+            continue
+        if instagram_native._is_stale_explore_post(item):
+            continue
+        out.append(item)
+    return out
 
 
 # Countries supported by the trending actor's input enum. Anything else makes
@@ -1528,7 +1553,7 @@ def _normalize_trending_country(raw: str) -> str:
     )
 
 
-@router.get("/trending-reels", summary="Instagram trending Reels / Explore posts")
+@router.get("/trending-reels", summary="Instagram trending Reels from Explore")
 async def instagram_trending_reels(
     country: str = Query("United States", description="Country name or ISO code (e.g. 'United States' or 'US') for Explore localization"),
     limit: int = Query(20, ge=10, le=200),
@@ -1546,7 +1571,7 @@ async def instagram_trending_reels(
         base_credits=cost,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            # 1) Native Explore (Decodo HTML ``code`` fields + Polaris hydrate).
+            # 1) Native Explore Reels (Decodo HTML + Polaris hydrate), videos only.
             native = await instagram_native.trending_reels_native(country, limit=limit)
             if native:
                 reels = [decodo.strip_null_post_fields(r) for r in native[:limit]]
@@ -1561,41 +1586,58 @@ async def instagram_trending_reels(
             # 2) Apify fallthrough — Explore actor runs take ~10-12 minutes, so
             # serve a recent snapshot (<=48h), kick a background refresh when
             # older than 6h, and for a cold country wait out the request budget.
+            # Over-fetch then filter: the actor returns mixed Explore media.
             client = ApifyClient(timeout=280, max_attempts=1)
             actor = settings.APIFY_ACTOR_INSTAGRAM_TRENDING
-            # Actor schema dropped download_medias; only max_results + country.
-            run_input = {"max_results": limit, "country": country}
+            fetch_n = min(200, max(limit * 5, limit + 40))
+            run_input = {"max_results": fetch_n, "country": country}
             match = {"country": country}
 
-            def _payload(items: list[dict[str, Any]]) -> dict[str, Any]:
-                reels = [decodo.strip_null_post_fields(_normalize_trending_item(i)) for i in items[:limit] if not i.get("error")]
+            def _payload(items: list[dict[str, Any]]) -> dict[str, Any] | None:
+                mapped = [
+                    decodo.strip_null_post_fields(_normalize_trending_item(i))
+                    for i in items
+                    if not i.get("error")
+                ]
+                reels = _filter_trending_reels_only(mapped)[:limit]
+                if not reels:
+                    return None
                 ctx["source"] = "apify"
-                return {"platform": "instagram", "country": country, "totalReturned": len(reels), "reels": reels}
+                return {
+                    "platform": "instagram",
+                    "country": country,
+                    "totalReturned": len(reels),
+                    "reels": reels,
+                }
 
             last = await client.last_succeeded_run(actor, max_age_secs=48 * 3600, input_match=match)
             if last:
-                items = await client.dataset_items(last["defaultDatasetId"], max_items=limit)
+                items = await client.dataset_items(last["defaultDatasetId"], max_items=fetch_n)
                 if items:
                     finished = datetime.fromisoformat(last["finishedAt"].replace("Z", "+00:00"))
                     age_secs = (datetime.now(timezone.utc) - finished).total_seconds()
                     if age_secs > 6 * 3600 and not await client.find_active_run(actor, input_match=match):
                         await client.start_run(actor, run_input)
-                    return _payload(items)
+                    payload = _payload(items)
+                    if payload is not None:
+                        return payload
+                    # Cached run was photos-only — kick a refresh and keep waiting.
 
             active = await client.find_active_run(actor, input_match=match)
             if active is None:
                 active = await client.start_run(actor, run_input)
-            items = await client.wait_for_run_items(active["id"], wait_secs=270, max_items=limit) if active else []
-            if not items:
+            items = await client.wait_for_run_items(active["id"], wait_secs=270, max_items=fetch_n) if active else []
+            payload = _payload(items) if items else None
+            if payload is None:
                 raise HTTPException(
                     status_code=503,
                     detail="Trending Reels for this country are being refreshed right now (Explore scraping takes ~10 minutes). Please retry in a few minutes.",
                 )
-            return _payload(items)
+            return payload
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit, "v": 11},
+            params={"country": country, "limit": limit, "v": 12},
             runner=_run,
             ctx=ctx,
             # Native path is seconds; Apify path still SWR for long actor runs.

@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "fix",
+    title: "Instagram Trending Reels actually returns Reels",
+    description:
+      "Trending Reels was returning Explore photos/carousels (including 2018–2019 posts) because the native path padded with non-video cards and the Apify actor's mixed Explore dump was passed through unfiltered. Now both paths keep Video/clips only, drop posts older than ~180 days, prefer Explore Reels URLs, and expose numeric id + shortcode.",
+    items: [
+      "Filter Image/Sidecar out of trending-reels (channel-reels contract)",
+      "Scrape explore/reels + reels before mixed explore/",
+      "id = numeric media id when available; shortcode for URLs",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
     title: "Instagram: never return likes > views on Reels",
     description:
       "GraphQL video_view_count undercounts many Reels and can sit below like_count (impossible). Channel Posts / Hashtag Search now prefer api/v1 play_count, drop untrustworthy views when likes > views, always expose engagement.views (null on Image/Sidecar), use null instead of empty productType, and dedupe caption @mentions. Facebook comments always include authorUrl (null when FB omits it).",

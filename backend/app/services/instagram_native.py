@@ -187,6 +187,11 @@ def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) 
     user = media.get("user") if isinstance(media.get("user"), dict) else {}
     username = safe_str(user.get("username"))
     owner_id = safe_str(user.get("pk") or user.get("pk_id") or user.get("id"))
+    media_pk = safe_str(media.get("pk") or media.get("pk_id") or media.get("id"))
+    if media_pk and "_" in media_pk:
+        media_pk = media_pk.split("_", 1)[0]
+    if media_pk and not media_pk.isdigit():
+        media_pk = None
 
     cover = (media.get("carousel_media") or [media])[0]
     videos = cover.get("video_versions") or []
@@ -250,7 +255,10 @@ def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) 
     post: dict[str, Any] = {
         "platform": "instagram",
         "url": post_url or (f"https://www.instagram.com/p/{code}/" if code else None),
-        "id": code or shortcode,
+        # Public id prefers numeric media pk when present; shortcode stays for URLs.
+        "id": media_pk or code or shortcode,
+        "shortcode": code or shortcode or None,
+        "mediaId": media_pk,
         "postType": _MEDIA_TYPE_NAMES.get(media_type),
         "productType": product,
         "caption": caption,
@@ -2131,29 +2139,88 @@ async def reels_by_audio_native(audio_id: str, *, limit: int = 20) -> list[dict[
     return posts
 
 
+def is_reel_post(post: dict[str, Any]) -> bool:
+    """True for Reels/clips/videos — photos and carousels are excluded."""
+    product = (safe_str(post.get("productType")) or "").lower()
+    post_type = (safe_str(post.get("postType")) or "").lower()
+    if product in {"clips", "reel", "reels"}:
+        return True
+    if post_type in {"video", "reel", "clips"}:
+        return True
+    if post.get("videoUrl") and post_type not in {"sidecar", "carousel", "album"}:
+        return True
+    return False
+
+
+def _parse_published_at(value: Any) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        try:
+            return datetime.fromtimestamp(int(value), tz=timezone.utc)
+        except (OverflowError, OSError, ValueError):
+            return None
+    s = safe_str(value)
+    if not s:
+        return None
+    try:
+        if s.endswith("Z"):
+            s = s[:-1] + "+00:00"
+        return datetime.fromisoformat(s)
+    except ValueError:
+        return None
+
+
+def _is_stale_explore_post(post: dict[str, Any], *, max_age_days: int = 180) -> bool:
+    """Explore actors sometimes resurface years-old photos — not 'trending'."""
+    published = _parse_published_at(post.get("publishedAt"))
+    if published is None:
+        return False
+    if published.tzinfo is None:
+        published = published.replace(tzinfo=timezone.utc)
+    age = datetime.now(timezone.utc) - published
+    return age.days > max_age_days
+
+
+def _trending_ids(post: dict[str, Any]) -> tuple[str | None, str | None]:
+    """Return (numeric_media_id, shortcode) for a stable public contract."""
+    shortcode = safe_str(post.get("shortcode") or post.get("shortCode"))
+    media_id = safe_str(post.get("mediaId"))
+    raw = safe_str(post.get("id"))
+    if raw and "_" in raw:
+        head, _, _tail = raw.partition("_")
+        if head.isdigit():
+            media_id = media_id or head
+    elif raw and raw.isdigit():
+        media_id = media_id or raw
+    elif raw and not shortcode and not raw.isdigit():
+        shortcode = raw
+    url = safe_str(post.get("url")) or ""
+    m = re.search(r"/(?:reel|p|tv)/([^/?#]+)/?", url, re.I)
+    if m and not shortcode:
+        shortcode = m.group(1)
+    return media_id, shortcode
+
+
 def _as_trending_reel(post: dict[str, Any]) -> dict[str, Any]:
     """Align Polaris post details with the trending-reels response shape."""
-    code = safe_str(post.get("id"))
-    product = safe_str(post.get("productType"))
-    post_type = safe_str(post.get("postType"))
-    is_reel = (
-        post_type == "Video"
-        or product in {"clips", "reel", "reels"}
-        or bool(post.get("videoUrl"))
-    )
+    media_id, shortcode = _trending_ids(post)
+    product = safe_str(post.get("productType")) or "clips"
     url = safe_str(post.get("url"))
-    if code and is_reel:
-        url = f"https://www.instagram.com/reel/{code}/"
+    if shortcode:
+        url = f"https://www.instagram.com/reel/{shortcode}/"
     engagement = post.get("engagement") if isinstance(post.get("engagement"), dict) else {}
     author = post.get("author") if isinstance(post.get("author"), dict) else {}
     return {
         "platform": "instagram",
         "url": url,
-        "id": code,
-        "postType": post_type or ("Video" if is_reel else "Image"),
-        "productType": product,
-        "section": None,
-        "topic": None,
+        # Prefer numeric media id (matches channel-reels); shortcode for URLs.
+        "id": media_id or shortcode,
+        "shortcode": shortcode,
+        "postType": "Video",
+        "productType": product if product else "clips",
+        "section": post.get("section"),
+        "topic": post.get("topic"),
         "caption": post.get("caption"),
         "description": post.get("description") or post.get("caption"),
         "publishedAt": post.get("publishedAt"),
@@ -2169,50 +2236,67 @@ def _as_trending_reel(post: dict[str, Any]) -> dict[str, Any]:
             "likes": engagement.get("likes"),
             "comments": engagement.get("comments"),
         },
-        "hashtags": post.get("hashtags") or [],
-        "mentions": post.get("mentions") or [],
+        "hashtags": dedupe_preserve(post.get("hashtags") or []),
+        "mentions": dedupe_preserve(post.get("mentions") or []),
     }
 
 
 async def trending_reels_native(
     country: str = "United States", *, limit: int = 20
 ) -> list[dict[str, Any]] | None:
-    """Explore grid via Decodo (optional geo) + Polaris hydrate.
+    """Explore Reels via Decodo (optional geo) + Polaris hydrate.
 
-    Explore HTML embeds media codes as JSON ``code`` fields (no /reel/ hrefs).
-    Apify remains fallthrough for cold countries / empty grids.
+    Scrapes Reels-first URLs, hydrates shortcodes, then **keeps only videos**
+    (same contract as channel-reels). Photos/carousels are never returned —
+    padding with Explore images made the docs lie. Apify remains fallthrough.
     """
     if limit <= 0:
         return []
     geo = _TRENDING_GEO.get((country or "").strip()) or None
-    # Over-fetch shortcodes — hydrate can 401 a few; Explore mixes photos.
-    fetch_n = min(200, max(limit * 2, limit + 10))
-    codes = await fetch_shortcodes_via_decodo(
+    # Over-fetch: Explore HTML mixes photos; hydrate 401s some codes.
+    fetch_n = min(200, max(limit * 5, limit + 40))
+    urls = (
+        "https://www.instagram.com/explore/reels/",
+        "https://www.instagram.com/reels/",
         "https://www.instagram.com/explore/",
-        limit=fetch_n,
-        geo=geo,
     )
+    codes: list[str] = []
+    seen: set[str] = set()
+    for page_url in urls:
+        got = await fetch_shortcodes_via_decodo(page_url, limit=fetch_n, geo=geo)
+        if not got:
+            continue
+        for code in got:
+            if code in seen:
+                continue
+            seen.add(code)
+            codes.append(code)
+            if len(codes) >= fetch_n:
+                break
+        if len(codes) >= fetch_n:
+            break
     if not codes:
         return None
     posts = await hydrate_shortcodes(codes, limit=fetch_n)
     if not posts:
         return None
-    # Prefer Reels/clips first, then fill with remaining Explore posts.
     reels: list[dict[str, Any]] = []
-    rest: list[dict[str, Any]] = []
     for post in posts:
-        product = safe_str(post.get("productType"))
-        is_reel = (
-            post.get("postType") == "Video"
-            or product in {"clips", "reel", "reels"}
-            or bool(post.get("videoUrl"))
-        )
-        row = _as_trending_reel(post)
-        if is_reel:
-            reels.append(row)
-        else:
-            rest.append(row)
-    out = (reels + rest)[:limit]
+        if not is_reel_post(post):
+            continue
+        if _is_stale_explore_post(post):
+            continue
+        reels.append(_as_trending_reel(post))
+
+    def _rank(row: dict[str, Any]) -> tuple[int, float]:
+        eng = row.get("engagement") if isinstance(row.get("engagement"), dict) else {}
+        likes = safe_int(eng.get("likes")) or 0
+        published = _parse_published_at(row.get("publishedAt"))
+        ts = published.timestamp() if published else 0.0
+        return likes, ts
+
+    reels.sort(key=_rank, reverse=True)
+    out = reels[:limit]
     if not out:
         return None
     log.info(
@@ -2220,6 +2304,7 @@ async def trending_reels_native(
         country=country,
         geo=geo,
         n=len(out),
+        hydrated=len(posts),
         reels=len(reels),
     )
     return out
