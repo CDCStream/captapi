@@ -688,16 +688,43 @@ def _map_comment(c: dict[str, Any]) -> dict[str, Any] | None:
     cid = safe_str(c.get("cid") or c.get("id"))
     if not cid:
         return None
-    user = c.get("user") or {}
+    user = c.get("user") if isinstance(c.get("user"), dict) else {}
     avatars = (user.get("avatar_thumb") or {}).get("url_list") or []
-    return {
+    # Stable commenter identity — handles rename/emoji display names.
+    author_id = safe_str(user.get("uid") or user.get("id"))
+    author_sec = safe_str(user.get("sec_uid") or user.get("secUid"))
+    # Text-level language when TikTok sends comment_language; else the
+    # commenter's account language (still useful for market listening).
+    comment_language = safe_str(
+        c.get("comment_language") or c.get("commentLanguage") or user.get("language")
+    )
+    reply_total = safe_int(
+        c.get("reply_comment_total")
+        or c.get("reply_comment_count")
+        or c.get("reply_count")
+        or c.get("replyCount")
+    )
+    if reply_total is None:
+        nested = c.get("reply_comment")
+        if isinstance(nested, list):
+            reply_total = len(nested)
+    like_count = safe_int(c.get("digg_count"))
+    if like_count is None:
+        like_count = safe_int(c.get("diggCount"))
+    out: dict[str, Any] = {
         "id": cid,
         "text": (safe_str(c.get("text")) or "").strip(),
+        # Keep username string (BC + still a useful key) — ids are additive.
         "author": safe_str(user.get("unique_id") or user.get("nickname")),
+        "authorId": author_id,
+        "authorSecUid": author_sec,
         "authorAvatarUrl": safe_str(avatars[0] if avatars else None),
-        "likeCount": safe_int(c.get("digg_count")),
-        "publishedAt": _iso(c.get("create_time")),
+        "commentLanguage": comment_language,
+        "likeCount": like_count,
+        "replyCount": reply_total,
+        "publishedAt": _iso(c.get("create_time") or c.get("createTime")),
     }
+    return {k: v for k, v in out.items() if v is not None}
 
 
 def _residential_proxy(country: str = "US") -> str | None:
@@ -898,18 +925,22 @@ def _map_reply(c: dict[str, Any]) -> dict[str, Any] | None:
     mapped = _map_comment(c)
     if mapped is None:
         return None
-    user = c.get("user") or {}
+    user = c.get("user") if isinstance(c.get("user"), dict) else {}
     verified = user.get("is_verified") or user.get("verified")
-    return {
+    out: dict[str, Any] = {
         "id": mapped["id"],
         "text": mapped["text"],
         "author": mapped["author"],
+        "authorId": mapped.get("authorId"),
+        "authorSecUid": mapped.get("authorSecUid"),
         "authorName": safe_str(user.get("nickname") or user.get("nickName")),
-        "likeCount": mapped["likeCount"],
+        "commentLanguage": mapped.get("commentLanguage"),
+        "likeCount": mapped.get("likeCount"),
         "publishedAt": mapped["publishedAt"],
         "verified": False if verified is None else bool(verified),
         "profileImage": mapped.get("authorAvatarUrl"),
     }
+    return {k: v for k, v in out.items() if v is not None}
 
 
 async def _reply_page(

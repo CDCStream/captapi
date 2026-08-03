@@ -1772,20 +1772,26 @@
     "platform": "facebook",
     "name": "Facebook Comments",
     "path": "/v1/facebook/comments",
-    "credits": 30,
-    "summary": "Comments on a Facebook post.",
+    "credits": 2,
+    "summary": "Facebook comments — 10-type reactions{}, stable author.id, replyCount, hasMore.",
     "params": [
       {
         "name": "url",
         "type": "string",
-        "required": true,
-        "description": "Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+        "required": false,
+        "description": "Facebook post or Reel URL. Omit when feedbackId is set."
+      },
+      {
+        "name": "feedbackId",
+        "type": "string",
+        "required": false,
+        "description": "Post feedback id from /v1/facebook/details. Prefer when you already have it."
       },
       {
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 50, max 500. Billed per result."
+        "description": "Max items to return. Default 50, max 500. Flat 2 credits per call."
       },
       {
         "name": "cache",
@@ -1912,8 +1918,8 @@
     "platform": "facebook",
     "name": "Facebook Comment Replies",
     "path": "/v1/facebook/comment-replies",
-    "credits": 30,
-    "summary": "Replies to a specific Facebook comment.",
+    "credits": 2,
+    "summary": "Replies to a Facebook comment — same author/reactions shape as comments.",
     "params": [
       {
         "name": "url",
@@ -1931,7 +1937,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 50, max 500. Billed per result."
+        "description": "Max items to return. Default 50, max 500. Flat 2 credits per call."
       },
       {
         "name": "cache",

@@ -239,12 +239,16 @@ const INSTAGRAM: Omit<Endpoint, "platform">[] = [
 const FACEBOOK: Omit<Endpoint, "platform">[] = [
   { tool: "facebook_details", name: "Facebook Details", path: "/v1/facebook/details", credits: 2, summary: "Facebook post or Reel details — engagement, author id, SD/HD video, captions, and music when exposed.", params: [url(FB_VIDEO)] },
   { tool: "facebook_summarize", name: "Facebook Summarizer", path: "/v1/facebook/summarize", credits: 4, summary: "AI summary of a Facebook video or post.", params: [url(FB_VIDEO), cacheParam()] },
-  { tool: "facebook_comments", name: "Facebook Comments", path: "/v1/facebook/comments", credits: 30, summary: "Comments on a Facebook post.", params: [url(FB_VIDEO), limit(50, 500)] },
+  { tool: "facebook_comments", name: "Facebook Comments", path: "/v1/facebook/comments", credits: 2, summary: "Facebook comments — 10-type reactions{}, stable author.id, replyCount, hasMore.", params: [
+    { name: "url", type: "string", required: false, description: "Facebook post or Reel URL. Omit when feedbackId is set." },
+    { name: "feedbackId", type: "string", required: false, description: "Post feedback id from /v1/facebook/details. Prefer when you already have it." },
+    limitFlat(50, 500, 2),
+  ] },
   { tool: "facebook_page_details", name: "Facebook Page Details", path: "/v1/facebook/page-details", credits: 2, summary: "Facebook page profile — distinct likes vs followers, talkingAbout, category, website, public email. Flat 2 credits.", params: [url("Facebook page URL, e.g. https://facebook.com/PageName.")] },
   { tool: "facebook_profile_posts", name: "Facebook Profile Posts", path: "/v1/facebook/profile-posts", credits: 12, summary: "Latest posts from a Facebook profile/page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
   { tool: "facebook_profile_reels", name: "Facebook Profile Reels", path: "/v1/facebook/profile-reels", credits: 2, summary: "Latest page Reels with full engagement; newest-first, archive cliff.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
   { tool: "facebook_group_posts", name: "Facebook Group Posts", path: "/v1/facebook/group-posts", credits: 2, summary: "Public Facebook group posts — author IDs, permalink, sortBy, engagement (shares null when unknown).", params: [url("Public Facebook group URL, e.g. https://facebook.com/groups/ID."), limitFlat(20, 200, 2), { name: "sortBy", type: "string", required: false, description: "TOP_POSTS | RECENT_ACTIVITY | CHRONOLOGICAL (default) | CHRONOLOGICAL_LISTINGS." }] },
-  { tool: "facebook_comment_replies", name: "Facebook Comment Replies", path: "/v1/facebook/comment-replies", credits: 30, summary: "Replies to a specific Facebook comment.", params: [url("Facebook post URL the comment belongs to."), commentId(), limit(50, 500)] },
+  { tool: "facebook_comment_replies", name: "Facebook Comment Replies", path: "/v1/facebook/comment-replies", credits: 2, summary: "Replies to a Facebook comment — same author/reactions shape as comments.", params: [url("Facebook post URL the comment belongs to."), commentId(), limitFlat(50, 500, 2)] },
   { tool: "facebook_profile_photos", name: "Facebook Profile Photos", path: "/v1/facebook/profile-photos", credits: 12, summary: "Photos from a Facebook profile or page.", params: [url("Facebook profile or page URL."), limit(20, 200)] },
 ];
 

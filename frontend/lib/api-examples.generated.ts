@@ -880,54 +880,153 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "id": "1003271445544158",
         "url": "https://www.facebook.com/NASA/posts/pfbid0ozvoLoowKvCysA2CZkXKTAVCRLoVECcrC7W8eQbQYvxBNKMCQAzV8baSgDa8t5Hol?comment_id=1003271445544158",
         "text": "how is this different from JWST?",
-        "author": "Jack Ryan Miller",
+        "author": {
+          "id": "pfbid02SdzVLPYTHY2eGMdrwFrLw54sVZdguAGnLUj4RPL3HxFtG2D4PBBjptiMEwpB21Ehl",
+          "name": "Robin Bergsagel",
+          "shortName": "Robin",
+          "gender": "FEMALE",
+          "avatarUrl": "https://scontent.fsgn24-1.fna.fbcdn.net/v/t39.30808-1/692472460_26663220403348161_6124206666765972294_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x960&ctp=s32x32&_nc_cat=102&ccb=1-7&_nc_sid=e99d92&_nc_ohc=3HNDMjGZhBIQ7kNvwH_Yi6V&_nc_oc=AdoxMiMSoY_ToCduVunc3YCOZtk_SXSgox578bFFqLiP_4rQwkwI465-N_iYgGAJFKc&_nc_zt=24&_nc_ht=scontent.fsgn24-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQDnijJpCb3QQr1TMy3wnG3ZpT2laUi0wvxSIlu-E9nHXw&oe=6A6C3A29"
+        },
         "authorAvatarUrl": "https://scontent.fsgn24-1.fna.fbcdn.net/v/t39.30808-1/692472460_26663220403348161_6124206666765972294_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x960&ctp=s32x32&_nc_cat=102&ccb=1-7&_nc_sid=e99d92&_nc_ohc=3HNDMjGZhBIQ7kNvwH_Yi6V&_nc_oc=AdoxMiMSoY_ToCduVunc3YCOZtk_SXSgox578bFFqLiP_4rQwkwI465-N_iYgGAJFKc&_nc_zt=24&_nc_ht=scontent.fsgn24-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQDnijJpCb3QQr1TMy3wnG3ZpT2laUi0wvxSIlu-E9nHXw&oe=6A6C3A29",
-        "likeCount": 7,
+        "likeCount": 95,
         "publishedAt": "2026-06-02T19:30:33+00:00",
-        "replyCount": 6
+        "replyCount": 1,
+        "reactionCount": 95,
+        "reactions": {
+          "like": 79,
+          "love": 4,
+          "care": 0,
+          "haha": 1,
+          "wow": 11,
+          "sad": 0,
+          "anger": 0,
+          "thankful": 0,
+          "pride": 0,
+          "confused": 0
+        }
       },
       {
         "id": "1565653145168639",
         "url": "https://www.facebook.com/NASA/posts/pfbid0ozvoLoowKvCysA2CZkXKTAVCRLoVECcrC7W8eQbQYvxBNKMCQAzV8baSgDa8t5Hol?comment_id=1565653145168639",
         "text": "You had me at Roman",
-        "author": "Mike Harwick",
+        "author": {
+          "id": "pfbid0exampleAuthorIdFor15656531",
+          "name": "Mike Harwick",
+          "shortName": "Mike",
+          "gender": "MALE",
+          "avatarUrl": "https://scontent.fsgn13-1.fna.fbcdn.net/v/t39.30808-1/708345356_26903531449306692_9193818255719987217_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x960&ctp=s32x32&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=TzWa-f368dwQ7kNvwEMPaUV&_nc_oc=AdpdLHrvXy7m167xxHhinaiUIlBoo2jzN-yKoz2hmtKPDhZMy8t4wFudGRE1dEwFuas&_nc_zt=24&_nc_ht=scontent.fsgn13-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQCw8rv9R1a-kXHBcH09C7AdRzTbIlhxf4mps8XzaYwIlQ&oe=6A6C1254"
+        },
         "authorAvatarUrl": "https://scontent.fsgn13-1.fna.fbcdn.net/v/t39.30808-1/708345356_26903531449306692_9193818255719987217_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x960&ctp=s32x32&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=TzWa-f368dwQ7kNvwEMPaUV&_nc_oc=AdpdLHrvXy7m167xxHhinaiUIlBoo2jzN-yKoz2hmtKPDhZMy8t4wFudGRE1dEwFuas&_nc_zt=24&_nc_ht=scontent.fsgn13-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQCw8rv9R1a-kXHBcH09C7AdRzTbIlhxf4mps8XzaYwIlQ&oe=6A6C1254",
         "likeCount": 3,
         "publishedAt": "2026-06-03T12:30:24+00:00",
-        "replyCount": 0
+        "replyCount": 0,
+        "reactionCount": 3,
+        "reactions": {
+          "like": 3,
+          "love": 0,
+          "care": 0,
+          "haha": 0,
+          "wow": 0,
+          "sad": 0,
+          "anger": 0,
+          "thankful": 0,
+          "pride": 0,
+          "confused": 0
+        }
       },
       {
         "id": "3207368056140091",
         "url": "https://www.facebook.com/NASA/posts/pfbid0ozvoLoowKvCysA2CZkXKTAVCRLoVECcrC7W8eQbQYvxBNKMCQAzV8baSgDa8t5Hol?comment_id=3207368056140091",
         "text": "This is the era of space initiatives. 👏",
-        "author": "Megan Kelly",
+        "author": {
+          "id": "pfbid0exampleAuthorIdFor32073680",
+          "name": "Megan Kelly",
+          "shortName": "Megan",
+          "gender": "FEMALE",
+          "avatarUrl": "https://scontent.fsgn13-2.fna.fbcdn.net/v/t39.30808-1/699650025_27974478592140854_2536163107065285396_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1536x1539&ctp=s32x32&_nc_cat=108&ccb=1-7&_nc_sid=e99d92&_nc_ohc=DLdsVhSx314Q7kNvwFPFx_P&_nc_oc=AdoywI2Pu2eRocI1x08wKLm5TPLL1p0dcZv2yCYoyXem_bje8s-ShUWiB9XjGXJ4DjY&_nc_zt=24&_nc_ht=scontent.fsgn13-2.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQAx63COUzJwva3qfF26jgiDtZQTS3ztq6nx5_jg4waN-Q&oe=6A6C0909"
+        },
         "authorAvatarUrl": "https://scontent.fsgn13-2.fna.fbcdn.net/v/t39.30808-1/699650025_27974478592140854_2536163107065285396_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1536x1539&ctp=s32x32&_nc_cat=108&ccb=1-7&_nc_sid=e99d92&_nc_ohc=DLdsVhSx314Q7kNvwFPFx_P&_nc_oc=AdoywI2Pu2eRocI1x08wKLm5TPLL1p0dcZv2yCYoyXem_bje8s-ShUWiB9XjGXJ4DjY&_nc_zt=24&_nc_ht=scontent.fsgn13-2.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQAx63COUzJwva3qfF26jgiDtZQTS3ztq6nx5_jg4waN-Q&oe=6A6C0909",
         "likeCount": 4,
         "publishedAt": "2026-06-03T13:15:11+00:00",
-        "replyCount": 0
+        "replyCount": 0,
+        "reactionCount": 4,
+        "reactions": {
+          "like": 4,
+          "love": 0,
+          "care": 0,
+          "haha": 0,
+          "wow": 0,
+          "sad": 0,
+          "anger": 0,
+          "thankful": 0,
+          "pride": 0,
+          "confused": 0
+        }
       },
       {
         "id": "2545567982564356",
         "url": "https://www.facebook.com/NASA/posts/pfbid0ozvoLoowKvCysA2CZkXKTAVCRLoVECcrC7W8eQbQYvxBNKMCQAzV8baSgDa8t5Hol?comment_id=2545567982564356",
         "text": "For those confused about whom this was named after. Nancy Grace Roman (May 16, 1925 – December 25, 2018) was an American astronomer who made important contributions to stellar classification and stellar motions. The first female executive at NASA, Roman served as NASA's first Chief of Astronomy throughout the 1960s and 1970s, establishing her as one of the \"visionary founders of the US civilian space program\"",
-        "author": "Michael Johnson",
+        "author": {
+          "id": "pfbid0exampleAuthorIdFor25455679",
+          "name": "Michael Johnson",
+          "shortName": "Michael",
+          "gender": "MALE",
+          "avatarUrl": "https://scontent.fsgn4-1.fna.fbcdn.net/v/t39.30808-1/715464960_1534487678342523_3205477696229619791_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1200x1200&ctp=s32x32&_nc_cat=101&ccb=1-7&_nc_sid=e99d92&_nc_ohc=CJj1uW-M8GwQ7kNvwEtSEkj&_nc_oc=AdqxXLSgPh7vA23eS3lVfR0fcPu5vszVJRfA1BgRw1bFuOuA89aeo3wyIsF17qX4b3g&_nc_zt=24&_nc_ht=scontent.fsgn4-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQCKv92W24kCoyyAyQ5pt-ZgDDeNu4IqJ9g6RbFvJd9qfQ&oe=6A6C180B"
+        },
         "authorAvatarUrl": "https://scontent.fsgn4-1.fna.fbcdn.net/v/t39.30808-1/715464960_1534487678342523_3205477696229619791_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx1200x1200&ctp=s32x32&_nc_cat=101&ccb=1-7&_nc_sid=e99d92&_nc_ohc=CJj1uW-M8GwQ7kNvwEtSEkj&_nc_oc=AdqxXLSgPh7vA23eS3lVfR0fcPu5vszVJRfA1BgRw1bFuOuA89aeo3wyIsF17qX4b3g&_nc_zt=24&_nc_ht=scontent.fsgn4-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQCKv92W24kCoyyAyQ5pt-ZgDDeNu4IqJ9g6RbFvJd9qfQ&oe=6A6C180B",
         "likeCount": 5,
         "publishedAt": "2026-06-05T19:10:38+00:00",
-        "replyCount": 0
+        "replyCount": 0,
+        "reactionCount": 5,
+        "reactions": {
+          "like": 5,
+          "love": 0,
+          "care": 0,
+          "haha": 0,
+          "wow": 0,
+          "sad": 0,
+          "anger": 0,
+          "thankful": 0,
+          "pride": 0,
+          "confused": 0
+        }
       },
       {
         "id": "1009195248315125",
         "url": "https://www.facebook.com/NASA/posts/pfbid0ozvoLoowKvCysA2CZkXKTAVCRLoVECcrC7W8eQbQYvxBNKMCQAzV8baSgDa8t5Hol?comment_id=1009195248315125",
         "text": "Anxious to see what the new scope sees.",
-        "author": "Richard Alexandrowich",
+        "author": {
+          "id": "pfbid0exampleAuthorIdFor10091952",
+          "name": "Richard Alexandrowich",
+          "shortName": "Richard",
+          "gender": "MALE",
+          "avatarUrl": "https://scontent.fsgn13-1.fna.fbcdn.net/v/t39.30808-1/449687176_1970527473417419_1705720154636413099_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x957&ctp=s32x32&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=bCu8aO2reIoQ7kNvwHtIyP4&_nc_oc=Ado8EmORytYJyvsPBBz8rKe1pliFYfaZhRWBiXTfIt1RBjFh-vpPtTWvhICw9rQTuUg&_nc_zt=24&_nc_ht=scontent.fsgn13-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQBA1O-NdA_rsrXqOjaw5n4Nvuuk27jRjIyAC9M0AgwvyQ&oe=6A6C31C4",
+          "url": "https://www.facebook.com/richard.alexandrowich.1"
+        },
         "authorUrl": "https://www.facebook.com/richard.alexandrowich.1",
         "authorAvatarUrl": "https://scontent.fsgn13-1.fna.fbcdn.net/v/t39.30808-1/449687176_1970527473417419_1705720154636413099_n.jpg?stp=cp0_dst-jpg_tt6&cstp=mx960x957&ctp=s32x32&_nc_cat=100&ccb=1-7&_nc_sid=e99d92&_nc_ohc=bCu8aO2reIoQ7kNvwHtIyP4&_nc_oc=Ado8EmORytYJyvsPBBz8rKe1pliFYfaZhRWBiXTfIt1RBjFh-vpPtTWvhICw9rQTuUg&_nc_zt=24&_nc_ht=scontent.fsgn13-1.fna&_nc_gid=HH_crC25V3cxSQmbs1qi6w&_nc_ss=7b289&oh=00_AQBA1O-NdA_rsrXqOjaw5n4Nvuuk27jRjIyAC9M0AgwvyQ&oe=6A6C31C4",
         "likeCount": 3,
         "publishedAt": "2026-06-03T02:04:15+00:00",
-        "replyCount": 7
+        "replyCount": 7,
+        "reactionCount": 3,
+        "reactions": {
+          "like": 3,
+          "love": 0,
+          "care": 0,
+          "haha": 0,
+          "wow": 0,
+          "sad": 0,
+          "anger": 0,
+          "thankful": 0,
+          "pride": 0,
+          "confused": 0
+        }
       }
-    ]
+    ],
+    "hasMore": true,
+    "nextCursor": null,
+    "feedbackId": "ZmVlZGJhY2s6MTU0MTc1MzUyMzk4NjY4NQ=="
   },
   "facebook-details": {
     "platform": "facebook",
@@ -9828,7 +9927,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "yeasin3344556677",
         "authorAvatarUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/1e20d2d83b1200c623f0dec26603356f~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=7098d2d1&s=COMMENT_LIST&sc=avatar&shcp=5597e28e&shp=30310797&t=223449c4&x-expires=1784300400&x-signature=%2FbEc5ajSBQOMXt9rOeQY8GO%2Beh8%3D",
         "likeCount": 223,
-        "publishedAt": "2026-06-02T16:23:41.000Z"
+        "publishedAt": "2026-06-02T16:23:41.000Z",
+        "authorId": "6958917445306926086",
+        "authorSecUid": "MS4wLjABAAAA9rB4k_Ei3NexA5p2exampleSecUid",
+        "commentLanguage": "en",
+        "replyCount": 14
       },
       {
         "id": "7647102586621297429",
@@ -9836,7 +9939,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "gudingar",
         "authorAvatarUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/56317ccbf99872b4f14448d7fb959826~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=9f5971b4&s=COMMENT_LIST&sc=avatar&shcp=5597e28e&shp=30310797&t=223449c4&x-expires=1784300400&x-signature=FXHzE%2FNLM2v17bh45RTPVfe8%2BDA%3D",
         "likeCount": 635,
-        "publishedAt": "2026-06-03T09:43:54.000Z"
+        "publishedAt": "2026-06-03T09:43:54.000Z",
+        "authorId": "6958917445306926086",
+        "authorSecUid": "MS4wLjABAAAA9rB4k_Ei3NexA5p2exampleSecUid",
+        "commentLanguage": "ru",
+        "replyCount": 0
       },
       {
         "id": "7646848703109612308",
@@ -9844,7 +9951,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "hassanmahadhi44",
         "authorAvatarUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/8c3fd35abfa9ca1f0289ce7dfb474955~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=be09752c&s=COMMENT_LIST&sc=avatar&shcp=5597e28e&shp=30310797&t=223449c4&x-expires=1784300400&x-signature=xpaGPkcaLHexRPPfuBjFZh8oOGc%3D",
         "likeCount": 405,
-        "publishedAt": "2026-06-02T17:18:38.000Z"
+        "publishedAt": "2026-06-02T17:18:38.000Z",
+        "authorId": "6958917445306926086",
+        "authorSecUid": "MS4wLjABAAAA9rB4k_Ei3NexA5p2exampleSecUid",
+        "commentLanguage": "ar",
+        "replyCount": 0
       },
       {
         "id": "7646829101696795412",
@@ -9852,7 +9963,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "flamefaisal",
         "authorAvatarUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/ccf74b3284cccc970c60ec8479d83055~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=f9e4b949&s=COMMENT_LIST&sc=avatar&shcp=5597e28e&shp=30310797&t=223449c4&x-expires=1784300400&x-signature=MDbiuKJH8omek6ps9Z%2FD9xfe4ZY%3D",
         "likeCount": 9613,
-        "publishedAt": "2026-06-02T16:02:29.000Z"
+        "publishedAt": "2026-06-02T16:02:29.000Z",
+        "authorId": "6958917445306926086",
+        "authorSecUid": "MS4wLjABAAAA9rB4k_Ei3NexA5p2exampleSecUid",
+        "commentLanguage": "ar",
+        "replyCount": 0
       },
       {
         "id": "7646812491309564673",
@@ -9860,7 +9975,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "pabloescoba.25666",
         "authorAvatarUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/e64b23b557494ea765ecf470ba8e1d95~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=6adf42ed&s=COMMENT_LIST&sc=avatar&shcp=5597e28e&shp=30310797&t=223449c4&x-expires=1784300400&x-signature=Pgbx2BmKC7SAoHOH7KN%2F6mxAwa0%3D",
         "likeCount": 2365,
-        "publishedAt": "2026-06-02T14:58:21.000Z"
+        "publishedAt": "2026-06-02T14:58:21.000Z",
+        "authorId": "6958917445306926086",
+        "authorSecUid": "MS4wLjABAAAA9rB4k_Ei3NexA5p2exampleSecUid",
+        "commentLanguage": "en",
+        "replyCount": 0
       },
       {
         "id": "7648688233429566225",
@@ -9868,7 +9987,11 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "author": "udaymuhammed",
         "authorAvatarUrl": "https://p16-common-sign.tiktokcdn-eu.com/tos-alisg-avt-0068/9f2f295378b728ea2478292e32a10122~tplv-tiktokx-cropcenter-q:100:100:q70.webp?dr=9606&idc=useast2b&ps=87d6e48a&refresh_token=902fa2e2&s=COMMENT_LIST&sc=avatar&shcp=5597e28e&shp=30310797&t=223449c4&x-expires=1784300400&x-signature=rGtZD7vu36YGKscvIUOG79999q4%3D",
         "likeCount": 539,
-        "publishedAt": "2026-06-07T16:16:53.000Z"
+        "publishedAt": "2026-06-07T16:16:53.000Z",
+        "authorId": "6958917445306926086",
+        "authorSecUid": "MS4wLjABAAAA9rB4k_Ei3NexA5p2exampleSecUid",
+        "commentLanguage": "en",
+        "replyCount": 0
       }
     ],
     "nextCursor": "6",

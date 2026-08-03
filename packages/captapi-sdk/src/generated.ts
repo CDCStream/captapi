@@ -819,9 +819,11 @@ export interface FacebookSummarizeParams {
 }
 
 export interface FacebookCommentsParams {
-  /** Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble. */
-  url: string;
-  /** Max items to return. Default 50, max 500. Billed per result. */
+  /** Facebook post or Reel URL. Omit when feedbackId is set. */
+  url?: string;
+  /** Post feedback id from /v1/facebook/details. Prefer when you already have it. */
+  feedbackId?: string;
+  /** Max items to return. Default 50, max 500. Flat 2 credits per call. */
   limit?: number;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -868,7 +870,7 @@ export interface FacebookCommentRepliesParams {
   url: string;
   /** ID of the parent comment to fetch replies for (from the comments endpoint). */
   comment_id: string;
-  /** Max items to return. Default 50, max 500. Billed per result. */
+  /** Max items to return. Default 50, max 500. Flat 2 credits per call. */
   limit?: number;
   /** Set true to serve from the 24h response cache. Default false — always fetch fresh data. */
   cache?: boolean;
@@ -893,8 +895,8 @@ export class FacebookApi {
   summarize(params: FacebookSummarizeParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/summarize", params);
   }
-  /** Facebook Comments — Comments on a Facebook post. (30 credits) */
-  comments(params: FacebookCommentsParams): Promise<ApiEnvelope> {
+  /** Facebook Comments — Facebook comments — 10-type reactions{}, stable author.id, replyCount, hasMore. (2 credits) */
+  comments(params: FacebookCommentsParams = {}): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/comments", params);
   }
   /** Facebook Page Details — Facebook page profile — distinct likes vs followers, talkingAbout, category, website, public email. Flat 2 credits. (2 credits) */
@@ -913,7 +915,7 @@ export class FacebookApi {
   groupPosts(params: FacebookGroupPostsParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/group-posts", params);
   }
-  /** Facebook Comment Replies — Replies to a specific Facebook comment. (30 credits) */
+  /** Facebook Comment Replies — Replies to a Facebook comment — same author/reactions shape as comments. (2 credits) */
   commentReplies(params: FacebookCommentRepliesParams): Promise<ApiEnvelope> {
     return this.core.get("/v1/facebook/comment-replies", params);
   }

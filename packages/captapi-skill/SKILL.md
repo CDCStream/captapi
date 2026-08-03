@@ -166,12 +166,12 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | --- | --- | --- | --- |
 | `facebook_details` | `/v1/facebook/details` | `url` (string), `cache`? (boolean) | 1 |
 | `facebook_summarize` | `/v1/facebook/summarize` | `url` (string), `cache`? (boolean) | 4 |
-| `facebook_comments` | `/v1/facebook/comments` | `url` (string), `limit`? (number), `cache`? (boolean) | 30 |
+| `facebook_comments` | `/v1/facebook/comments` | `url`? (string), `feedbackId`? (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `facebook_page_details` | `/v1/facebook/page-details` | `url` (string), `cache`? (boolean) | 2 |
 | `facebook_profile_posts` | `/v1/facebook/profile-posts` | `url` (string), `limit`? (number), `cache`? (boolean) | 12 |
 | `facebook_profile_reels` | `/v1/facebook/profile-reels` | `url` (string), `limit`? (number), `cache`? (boolean) | 36 |
 | `facebook_group_posts` | `/v1/facebook/group-posts` | `url` (string), `limit`? (number), `sortBy`? (string), `cache`? (boolean) | 2 |
-| `facebook_comment_replies` | `/v1/facebook/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number), `cache`? (boolean) | 30 |
+| `facebook_comment_replies` | `/v1/facebook/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `facebook_marketplace_search` | `/v1/facebook/marketplace-search` | `q` (string), `location` (string), `limit`? (number), `details`? (string), `cache`? (boolean) | 28 |
 | `facebook_marketplace_location_search` | `/v1/facebook/marketplace-location-search` | `q` (string), `limit`? (number), `details`? (string), `cache`? (boolean) | 17 |
 | `facebook_event_search` | `/v1/facebook/event-search` | `q` (string), `limit`? (number), `cache`? (boolean) | 40 |

@@ -1021,17 +1021,40 @@ async def tiktok_comments(
             for c in items[:limit]:
                 if not isinstance(c, dict):
                     continue
-                user = c.get("user") or {}
-                comments.append(
-                    {
-                        "id": safe_str(c.get("cid") or c.get("id")),
-                        "text": (c.get("text") or "").strip(),
-                        "author": safe_str(c.get("uniqueId") or user.get("uniqueId") or c.get("authorName")),
-                        "authorAvatarUrl": safe_str(c.get("avatarThumbnail") or user.get("avatarThumb")),
-                        "likeCount": safe_int(c.get("diggCount") or c.get("likeCount")),
-                        "publishedAt": safe_str(c.get("createTimeISO")),
-                    }
-                )
+                user = c.get("user") if isinstance(c.get("user"), dict) else {}
+                row: dict[str, Any] = {
+                    "id": safe_str(c.get("cid") or c.get("id")),
+                    "text": (c.get("text") or "").strip(),
+                    "author": safe_str(
+                        c.get("uniqueId") or user.get("uniqueId") or user.get("unique_id") or c.get("authorName")
+                    ),
+                    "authorId": safe_str(
+                        c.get("uid") or c.get("authorId") or user.get("uid") or user.get("id")
+                    ),
+                    "authorSecUid": safe_str(
+                        c.get("secUid")
+                        or c.get("sec_uid")
+                        or user.get("secUid")
+                        or user.get("sec_uid")
+                    ),
+                    "authorAvatarUrl": safe_str(
+                        c.get("avatarThumbnail") or user.get("avatarThumb") or user.get("avatar_thumb")
+                    ),
+                    "commentLanguage": safe_str(
+                        c.get("commentLanguage")
+                        or c.get("comment_language")
+                        or user.get("language")
+                    ),
+                    "likeCount": safe_int(c.get("diggCount") or c.get("likeCount") or c.get("digg_count")),
+                    "replyCount": safe_int(
+                        c.get("replyCommentTotal")
+                        or c.get("reply_comment_total")
+                        or c.get("replyCount")
+                        or c.get("reply_count")
+                    ),
+                    "publishedAt": safe_str(c.get("createTimeISO") or c.get("createTime")),
+                }
+                comments.append({k: v for k, v in row.items() if v is not None})
             if not comments:
                 raise HTTPException(status_code=404, detail="Video not found or has no comments")
             ctx["source"] = "apify"
@@ -1048,7 +1071,7 @@ async def tiktok_comments(
 
         data = await cached_or_run(
             endpoint="tiktok.comments",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 7},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 8},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1824,34 +1847,38 @@ async def tiktok_comment_replies(
                     if isinstance(nested, list) and safe_str(r.get("id") or r.get("cid")) == comment_id:
                         for child in nested:
                             verified = child.get("replyAuthorVerified") or child.get("verified")
-                            replies.append(
-                                {
-                                    "id": safe_str(child.get("replyId") or child.get("cid") or child.get("id")),
-                                    "text": (child.get("replyText") or child.get("text") or child.get("body") or "").strip(),
-                                    "author": safe_str(child.get("replyAuthorUsername") or child.get("author") or child.get("uniqueId")),
-                                    "authorName": safe_str(child.get("replyAuthorNickname") or child.get("authorName") or child.get("nickname")),
-                                    "likeCount": safe_int(child.get("replyLikeCount") or child.get("likeCount") or child.get("likes")),
-                                    "publishedAt": safe_str(child.get("replyCreateTime") or child.get("createdAt") or child.get("createTimeISO")),
-                                    "verified": False if verified is None else bool(verified),
-                                    "profileImage": safe_str(child.get("replyAuthorAvatar") or child.get("avatar")),
-                                }
-                            )
+                            reply_row = {
+                                "id": safe_str(child.get("replyId") or child.get("cid") or child.get("id")),
+                                "text": (child.get("replyText") or child.get("text") or child.get("body") or "").strip(),
+                                "author": safe_str(child.get("replyAuthorUsername") or child.get("author") or child.get("uniqueId")),
+                                "authorId": safe_str(child.get("uid") or child.get("authorId") or child.get("userId")),
+                                "authorSecUid": safe_str(child.get("secUid") or child.get("sec_uid") or child.get("authorSecUid")),
+                                "authorName": safe_str(child.get("replyAuthorNickname") or child.get("authorName") or child.get("nickname")),
+                                "commentLanguage": safe_str(child.get("commentLanguage") or child.get("comment_language")),
+                                "likeCount": safe_int(child.get("replyLikeCount") or child.get("likeCount") or child.get("likes")),
+                                "publishedAt": safe_str(child.get("replyCreateTime") or child.get("createdAt") or child.get("createTimeISO")),
+                                "verified": False if verified is None else bool(verified),
+                                "profileImage": safe_str(child.get("replyAuthorAvatar") or child.get("avatar")),
+                            }
+                            replies.append({k: v for k, v in reply_row.items() if v is not None})
                             if len(replies) >= limit:
                                 break
                     continue
                 verified = r.get("replyAuthorVerified") or r.get("verified")
-                replies.append(
-                    {
-                        "id": safe_str(r.get("replyId") or r.get("cid") or r.get("id")),
-                        "text": (r.get("replyText") or r.get("text") or r.get("body") or "").strip(),
-                        "author": safe_str(r.get("replyAuthorUsername") or r.get("uniqueId") or r.get("authorId") or r.get("author")),
-                        "authorName": safe_str(r.get("replyAuthorNickname") or r.get("authorName") or r.get("nickname") or r.get("author")),
-                        "likeCount": safe_int(r.get("replyLikeCount") or r.get("likeCount") or r.get("likes")),
-                        "publishedAt": safe_str(r.get("replyCreateTime") or r.get("createdAt") or r.get("createTimeISO")),
-                        "verified": False if verified is None else bool(verified),
-                        "profileImage": safe_str(r.get("replyAuthorAvatar") or r.get("avatar") or r.get("authorAvatarUrl")),
-                    }
-                )
+                reply_row = {
+                    "id": safe_str(r.get("replyId") or r.get("cid") or r.get("id")),
+                    "text": (r.get("replyText") or r.get("text") or r.get("body") or "").strip(),
+                    "author": safe_str(r.get("replyAuthorUsername") or r.get("uniqueId") or r.get("author")),
+                    "authorId": safe_str(r.get("uid") or r.get("userId") or r.get("authorUid")),
+                    "authorSecUid": safe_str(r.get("secUid") or r.get("sec_uid") or r.get("authorSecUid")),
+                    "authorName": safe_str(r.get("replyAuthorNickname") or r.get("authorName") or r.get("nickname") or r.get("author")),
+                    "commentLanguage": safe_str(r.get("commentLanguage") or r.get("comment_language")),
+                    "likeCount": safe_int(r.get("replyLikeCount") or r.get("likeCount") or r.get("likes")),
+                    "publishedAt": safe_str(r.get("replyCreateTime") or r.get("createdAt") or r.get("createTimeISO")),
+                    "verified": False if verified is None else bool(verified),
+                    "profileImage": safe_str(r.get("replyAuthorAvatar") or r.get("avatar") or r.get("authorAvatarUrl")),
+                }
+                replies.append({k: v for k, v in reply_row.items() if v is not None})
                 if len(replies) >= limit:
                     break
             ctx["source"] = "apify"

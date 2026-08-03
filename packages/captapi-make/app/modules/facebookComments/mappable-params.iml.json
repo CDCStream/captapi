@@ -3,15 +3,22 @@
     "name": "url",
     "type": "text",
     "label": "URL",
-    "required": true,
-    "help": "Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble."
+    "required": false,
+    "help": "Facebook post or Reel URL. Omit when feedbackId is set."
+  },
+  {
+    "name": "feedbackId",
+    "type": "text",
+    "label": "Feedback ID",
+    "required": false,
+    "help": "Post feedback id from /v1/facebook/details. Prefer when you already have it."
   },
   {
     "name": "limit",
     "type": "number",
     "label": "Limit",
     "required": false,
-    "help": "Max items to return. Default 50, max 500. Billed per result."
+    "help": "Max items to return. Default 50, max 500. Flat 2 credits per call."
   },
   {
     "name": "cache",

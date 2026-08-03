@@ -102,6 +102,61 @@ def _require_facebook_path(url: str, path: str, example: str, label: str) -> Non
         )
 
 
+def _fb_comment_author(
+    *,
+    name: str | None,
+    author_id: str | None = None,
+    gender: str | None = None,
+    short_name: str | None = None,
+    url: str | None = None,
+    avatar_url: str | None = None,
+) -> dict[str, Any]:
+    """Nested author object (stable id / gender) plus flat BC url fields."""
+    display = safe_str(name)
+    short = safe_str(short_name)
+    if not short and display:
+        short = display.split(None, 1)[0]
+    author: dict[str, Any] = {
+        "id": safe_str(author_id),
+        "name": display,
+        "shortName": short,
+        "gender": safe_str(gender),
+        "url": safe_str(url),
+        "avatarUrl": safe_str(avatar_url),
+    }
+    return {k: v for k, v in author.items() if v is not None}
+
+
+def _fb_apify_reactions(item: dict[str, Any]) -> tuple[int, dict[str, int]]:
+    """Best-effort reactions from Apify rows (often only a total)."""
+    reactions = facebook_comments_native.empty_reactions()
+    raw = item.get("reactions") if isinstance(item.get("reactions"), dict) else None
+    if raw:
+        for key in reactions:
+            n = safe_int(raw.get(key) or raw.get(key.capitalize()) or raw.get(key.upper()))
+            if n is not None:
+                reactions[key] = n
+        # Common Apify aliases
+        for src, dst in (("angry", "anger"), ("Angry", "anger"), ("LIKE", "like")):
+            n = safe_int(raw.get(src))
+            if n is not None:
+                reactions[dst] = max(reactions[dst], n)
+    total = safe_int(
+        item.get("likesCount")
+        or item.get("likes")
+        or item.get("reactionsCount")
+        or item.get("reactionCount")
+        or item.get("reaction_count")
+    )
+    summed = sum(reactions.values())
+    if total is None or total < summed:
+        total = summed
+    if total and summed == 0:
+        # Actor only gave a total — put it under like (unknown mix).
+        reactions["like"] = total
+    return total or 0, reactions
+
+
 def _reply_payload(r: dict) -> dict:
     # On flat nested rows `commentId` is the parent's id; the reply's own
     # numeric id only lives in the commentUrl's reply_comment_id param.
@@ -109,14 +164,31 @@ def _reply_payload(r: dict) -> dict:
     m = re.search(r"[?&]reply_comment_id=(\d+)", r.get("commentUrl") or "")
     if m:
         reply_id = m.group(1)
+    author_url = safe_str(r.get("profileUrl"))
+    avatar = safe_str(r.get("profilePicture"))
+    name = safe_str(r.get("profileName") or r.get("authorName"))
+    reaction_count, reactions = _fb_apify_reactions(r)
+    author_raw = r.get("author") if isinstance(r.get("author"), dict) else {}
+    author = _fb_comment_author(
+        name=name,
+        author_id=safe_str(r.get("authorId") or r.get("profileId") or author_raw.get("id")),
+        gender=safe_str(r.get("gender") or author_raw.get("gender")),
+        short_name=safe_str(
+            r.get("shortName") or r.get("short_name") or author_raw.get("short_name") or author_raw.get("shortName")
+        ),
+        url=author_url,
+        avatar_url=avatar,
+    )
     return {
         "id": safe_str(reply_id or r.get("id") or r.get("commentId")),
         "url": safe_str(r.get("commentUrl")),
         "text": (r.get("text") or "").strip(),
-        "author": safe_str(r.get("profileName") or r.get("authorName")),
-        "authorUrl": safe_str(r.get("profileUrl")),
-        "authorAvatarUrl": safe_str(r.get("profilePicture")),
-        "likeCount": safe_int(r.get("likesCount") or r.get("reactionsCount")),
+        "author": author,
+        "authorUrl": author_url,
+        "authorAvatarUrl": avatar,
+        "likeCount": reaction_count,
+        "reactionCount": reaction_count,
+        "reactions": reactions,
         "publishedAt": safe_str(r.get("date") or r.get("publishedAt")),
     }
 
@@ -1124,7 +1196,23 @@ async def facebook_summarize(
 
 @router.get("/comments", summary="Facebook post comments")
 async def facebook_comments(
-    url: str = Query(...),
+    url: str | None = Query(
+        None,
+        description="Facebook post or Reel URL. Omit when feedbackId is set.",
+    ),
+    feedbackId: str | None = Query(
+        None,
+        description=(
+            "Post feedback id from /v1/facebook/details (base64 feedback:POSTID). "
+            "Prefer when you already have it from details — skips needing the post URL. "
+            "Also accepts feedback_id."
+        ),
+    ),
+    feedback_id: str | None = Query(
+        None,
+        description="Snake_case alias for feedbackId (ScrapeCreators-compatible).",
+        include_in_schema=False,
+    ),
     limit: int = Query(
         50,
         ge=1,
@@ -1134,7 +1222,13 @@ async def facebook_comments(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
-    _reject_facebook_platform_mismatch(url, "https://www.facebook.com/page/posts/123")
+    fid = (feedbackId or feedback_id or "").strip() or None
+    try:
+        target = facebook_comments_native.resolve_comments_url(url=url, feedback_id=fid)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if url and str(url).strip():
+        _reject_facebook_platform_mismatch(url, "https://www.facebook.com/page/posts/123")
     settings = get_settings()
     # Flat fee: Decodo HTML path is cheap; Apify fallback is rare and covered
     # by the same 2-credit charge.
@@ -1142,53 +1236,88 @@ async def facebook_comments(
         caller=caller,
         endpoint="/v1/facebook/comments",
         platform="facebook",
-        resource_url=url,
+        resource_url=target,
         base_credits=CREDIT_FB_COMMENTS_NATIVE,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await facebook_comments_native.comments_native(url, limit)
+            native = await facebook_comments_native.comments_native(target, limit)
             if native is not None:
                 ctx["source"] = "direct"
-                return {
+                out: dict[str, Any] = {
                     "platform": "facebook",
-                    "url": url,
-                    "totalReturned": len(native),
-                    "comments": native,
+                    "url": target,
+                    "totalReturned": len(native["comments"]),
+                    "comments": native["comments"],
+                    "hasMore": bool(native.get("hasMore")),
+                    "nextCursor": native.get("nextCursor"),
                 }
+                if native.get("feedbackId") or fid:
+                    out["feedbackId"] = native.get("feedbackId") or fid
+                return out
 
             apify = get_apify()
             items = await apify.run_actor_sync(
                 settings.APIFY_ACTOR_FACEBOOK_COMMENTS,
-                {"startUrls": [{"url": url}], "resultsLimit": limit},
+                {"startUrls": [{"url": target}], "resultsLimit": limit},
                 max_items=limit,
             )
             comments = []
             for c in items[:limit]:
+                author_url = safe_str(c.get("profileUrl"))
+                avatar = safe_str(c.get("profilePicture"))
+                name = safe_str(c.get("profileName") or c.get("authorName"))
+                reaction_count, reactions = _fb_apify_reactions(c)
+                author_raw = c.get("author") if isinstance(c.get("author"), dict) else {}
                 comments.append(
                     {
                         "id": safe_str(c.get("commentId") or c.get("id")),
                         "url": safe_str(c.get("commentUrl")),
                         "text": (c.get("text") or "").strip(),
-                        "author": safe_str(c.get("profileName") or c.get("authorName")),
-                        # Always present (null when actor omits) — same shape as native.
-                        "authorUrl": safe_str(c.get("profileUrl")),
-                        "authorAvatarUrl": safe_str(c.get("profilePicture")),
-                        "likeCount": safe_int(c.get("likesCount") or c.get("reactionsCount")),
+                        "author": _fb_comment_author(
+                            name=name,
+                            author_id=safe_str(
+                                c.get("authorId") or c.get("profileId") or author_raw.get("id")
+                            ),
+                            gender=safe_str(c.get("gender") or author_raw.get("gender")),
+                            short_name=safe_str(
+                                c.get("shortName")
+                                or c.get("short_name")
+                                or author_raw.get("short_name")
+                                or author_raw.get("shortName")
+                            ),
+                            url=author_url,
+                            avatar_url=avatar,
+                        ),
+                        "authorUrl": author_url,
+                        "authorAvatarUrl": avatar,
+                        "likeCount": reaction_count,
+                        "reactionCount": reaction_count,
+                        "reactions": reactions,
                         "publishedAt": safe_str(c.get("date") or c.get("publishedAt")),
-                        "replyCount": safe_int(c.get("repliesCount") or c.get("commentsCount")),
+                        "replyCount": safe_int(c.get("repliesCount") or c.get("commentsCount")) or 0,
                     }
                 )
             ctx["source"] = "apify"
-            return {
+            out = {
                 "platform": "facebook",
-                "url": url,
+                "url": target,
                 "totalReturned": len(comments),
                 "comments": comments,
+                "hasMore": len(items) >= limit,
+                "nextCursor": None,
             }
+            if fid:
+                out["feedbackId"] = fid
+            return out
 
         data = await cached_or_run(
             endpoint="facebook.comments",
-            params={"url": url, "limit": limit, "v": 4},
+            params={
+                "url": (url or "").strip(),
+                "feedbackId": fid or "",
+                "limit": limit,
+                "v": 5,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1381,8 +1510,10 @@ async def facebook_comment_replies(
                     "platform": "facebook",
                     "url": url,
                     "commentId": comment_id,
-                    "totalReturned": len(native),
-                    "replies": native,
+                    "totalReturned": len(native["replies"]),
+                    "replies": native["replies"],
+                    "hasMore": bool(native.get("hasMore")),
+                    "nextCursor": native.get("nextCursor"),
                 }
 
             apify = get_apify()
@@ -1413,17 +1544,20 @@ async def facebook_comment_replies(
                 if len(replies) >= limit:
                     break
             ctx["source"] = "apify"
+            page = replies[:limit]
             return {
                 "platform": "facebook",
                 "url": url,
                 "commentId": comment_id,
-                "totalReturned": len(replies[:limit]),
-                "replies": replies[:limit],
+                "totalReturned": len(page),
+                "replies": page,
+                "hasMore": len(replies) > limit,
+                "nextCursor": None,
             }
 
         data = await cached_or_run(
             endpoint="facebook.comment-replies",
-            params={"url": url, "comment_id": comment_id, "limit": limit, "v": 3},
+            params={"url": url, "comment_id": comment_id, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

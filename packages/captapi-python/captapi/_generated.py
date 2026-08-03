@@ -1141,14 +1141,15 @@ class FacebookApi:
         """
         return self._t.get("/v1/facebook/summarize", {"url": url, "cache": cache})
 
-    def comments(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Comments — Comments on a Facebook post. (30 credits)
+    def comments(self, *, url: str | None = None, feedbackId: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Comments — Facebook comments — 10-type reactions{}, stable author.id, replyCount, hasMore. (2 credits)
 
-        :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param url: Facebook post or Reel URL. Omit when feedbackId is set.
+        :param feedbackId: Post feedback id from /v1/facebook/details. Prefer when you already have it.
+        :param limit: Max items to return. Default 50, max 500. Flat 2 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return self._t.get("/v1/facebook/comments", {"url": url, "limit": limit, "cache": cache})
+        return self._t.get("/v1/facebook/comments", {"url": url, "feedbackId": feedbackId, "limit": limit, "cache": cache})
 
     def page_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Page Details — Facebook page profile — distinct likes vs followers, talkingAbout, category, website, public email. Flat 2 credits. (2 credits)
@@ -1187,11 +1188,11 @@ class FacebookApi:
         return self._t.get("/v1/facebook/group-posts", {"url": url, "limit": limit, "sortBy": sortBy, "cache": cache})
 
     def comment_replies(self, *, url: str, comment_id: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Comment Replies — Replies to a specific Facebook comment. (30 credits)
+        """Facebook Comment Replies — Replies to a Facebook comment — same author/reactions shape as comments. (2 credits)
 
         :param url: Facebook post URL the comment belongs to. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param comment_id: ID of the parent comment to fetch replies for (from the comments endpoint).
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param limit: Max items to return. Default 50, max 500. Flat 2 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return self._t.get("/v1/facebook/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})
@@ -1226,14 +1227,15 @@ class AsyncFacebookApi:
         """
         return await self._t.get("/v1/facebook/summarize", {"url": url, "cache": cache})
 
-    async def comments(self, *, url: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Comments — Comments on a Facebook post. (30 credits)
+    async def comments(self, *, url: str | None = None, feedbackId: str | None = None, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
+        """Facebook Comments — Facebook comments — 10-type reactions{}, stable author.id, replyCount, hasMore. (2 credits)
 
-        :param url: Public Facebook video or post URL. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param url: Facebook post or Reel URL. Omit when feedbackId is set.
+        :param feedbackId: Post feedback id from /v1/facebook/details. Prefer when you already have it.
+        :param limit: Max items to return. Default 50, max 500. Flat 2 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
-        return await self._t.get("/v1/facebook/comments", {"url": url, "limit": limit, "cache": cache})
+        return await self._t.get("/v1/facebook/comments", {"url": url, "feedbackId": feedbackId, "limit": limit, "cache": cache})
 
     async def page_details(self, *, url: str, cache: bool | None = None) -> dict[str, Any]:
         """Facebook Page Details — Facebook page profile — distinct likes vs followers, talkingAbout, category, website, public email. Flat 2 credits. (2 credits)
@@ -1272,11 +1274,11 @@ class AsyncFacebookApi:
         return await self._t.get("/v1/facebook/group-posts", {"url": url, "limit": limit, "sortBy": sortBy, "cache": cache})
 
     async def comment_replies(self, *, url: str, comment_id: str, limit: float | None = None, cache: bool | None = None) -> dict[str, Any]:
-        """Facebook Comment Replies — Replies to a specific Facebook comment. (30 credits)
+        """Facebook Comment Replies — Replies to a Facebook comment — same author/reactions shape as comments. (2 credits)
 
         :param url: Facebook post URL the comment belongs to. The URL platform must match this tool's platform. Do not pass cross-platform URLs, e.g. YouTube to TikTok, Instagram to Facebook, LinkedIn to X/Twitter, or Pinterest to Rumble.
         :param comment_id: ID of the parent comment to fetch replies for (from the comments endpoint).
-        :param limit: Max items to return. Default 50, max 500. Billed per result.
+        :param limit: Max items to return. Default 50, max 500. Flat 2 credits per call.
         :param cache: Set true to serve from the 24h response cache. Default false — always fetch fresh data.
         """
         return await self._t.get("/v1/facebook/comment-replies", {"url": url, "comment_id": comment_id, "limit": limit, "cache": cache})

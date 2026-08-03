@@ -51,6 +51,30 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "improvement",
+    title: "TikTok comments: authorId, authorSecUid, commentLanguage",
+    description:
+      "TikTok comments already beat SC on schema cleanliness, but were missing the three fields that make commenter identity and market listening work: authorId (uid), authorSecUid (sec_uid), and commentLanguage. Username alone is not a durable key. replyCount is included when TikTok exposes reply_comment_total. Lean schema kept — no 40-field user dumps.",
+    items: [
+      "authorId + authorSecUid on each comment",
+      "commentLanguage (comment_language, else account language)",
+      "replyCount when TikTok sends reply_comment_total",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "Facebook comments: 10-type reactions + stable author.id",
+    description:
+      "Facebook comments were returning a single likeCount — useless for sentiment (anger vs love can share the same total). Each comment now includes reactionCount and reactions{like,love,care,haha,wow,sad,anger,thankful,pride,confused} from Facebook's top_reactions. author is an object with stable id (pfbid), name, shortName, gender when exposed; replyCount and hasMore are returned; optional feedbackId (from details) accepted as a faster alternative to url.",
+    items: [
+      "reactions{} 10-type breakdown + reactionCount",
+      "author.id (pfbid) / gender / shortName",
+      "Optional feedbackId param; hasMore on the response",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "improvement",
     title: "Instagram channel-reels: userId param + hasMore",
     description:
       "channel-reels now accepts optional userId (numeric Instagram ID) alongside url/@handle — skips the handle→ID resolve step when you already have the ID from basic-profile or another call. Response includes hasMore (boolean) with nextCursor so pagination loops don't have to infer end-of-list from a null cursor alone. No trim mode — Captapi responses stay lean by default.",

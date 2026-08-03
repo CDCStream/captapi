@@ -5310,11 +5310,38 @@
           {
             "name": "url",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Facebook post or Reel URL. Omit when feedbackId is set.",
               "title": "Url"
-            }
+            },
+            "description": "Facebook post or Reel URL. Omit when feedbackId is set."
+          },
+          {
+            "name": "feedbackId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Post feedback id from /v1/facebook/details (base64 feedback:POSTID). Prefer when you already have it from details — skips needing the post URL. Also accepts feedback_id.",
+              "title": "Feedbackid"
+            },
+            "description": "Post feedback id from /v1/facebook/details (base64 feedback:POSTID). Prefer when you already have it from details — skips needing the post URL. Also accepts feedback_id."
           },
           {
             "name": "limit",
