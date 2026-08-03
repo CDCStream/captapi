@@ -50,6 +50,44 @@ function parseRow(row: ChangelogRow): ChangelogEntry {
 const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
+    category: "fix",
+    title: "Community posts: numeric likes + pollOptions; /apis ISR; cache docs no longer overclaim cacheMaxAge",
+    description:
+      "community-post-details now shares the list schema: likeCount (int) + likeCountText (was string likes like \"727K\"), channel{}, ISO publishedAt/publishedTime, and pollOptions[{text,voteCount,percentage}] + totalVotes for polls (per-choice votes often null publicly — YouTube gates them). Marketing /apis pages use revalidate=3600 so PLATFORM_COUNT/ENDPOINT_COUNT cannot stick across mixed SSG deploys; OG image reads live catalog counts (was hardcoded 173). Generic cache= param copy no longer tells every endpoint to prefer cacheMaxAge — only profile endpoints that actually accept it.",
+    items: [
+      "community-post-details: likeCount int + likeCountText; drop string likes",
+      "polls: postType=poll + pollOptions[] + totalVotes",
+      "/apis ISR 1h; OG uses ENDPOINT_COUNT/PLATFORM_COUNT",
+      "cache param docs: cacheMaxAge only where supported",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "YouTube comments: ISO publishedTime + comment field docs; stale marketing copy audit",
+    description:
+      "Comment rows now approximate publishedTime (ISO) from publishedTimeText (including \"… (edited)\" labels) so they are sortable like SC. Generic comments responseStructure fallback no longer documents wrong names (total/likes/replies → totalReturned/likeCount/replyCount). shorts-comments params are flat 2 credits + cache (same engine as /comments). Production /apis scan: 210 pages, 0 with stale \"29 platforms / 179 endpoints\" footer — remaining \"29 platforms\" hits are blog body copy in Supabase and a historical changelog title. hasCreatorHeart rejects inactive chrome tooltips like \"❤ by @Channel\".",
+    items: [
+      "comments: publishedTime ISO from relative labels; keep publishedTimeText",
+      "docs: comments structure uses likeCount/replyCount/totalReturned",
+      "shorts-comments: lpFlat 2 + cache; SKILL credits 2",
+      "hasCreatorHeart: ignore ❤ by @Channel inactive tooltips",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
+    title: "YouTube Shorts: real trending feed + channel-shorts field fill (SC-first)",
+    description:
+      "channel-shorts was returning shelf stubs (thumbnailUrl/publishedAt/durationSeconds null, rounded viewCount) at 20 credits — ScrapeCreators' /v1/youtube/channel/shorts returns player-enriched rows for 1 credit. We now derive thumbnailUrl from the video id, enrich each Short via InnerTube player (exact views, publish date, duration, description, genre, engagement when exposed), and bill flat 2 credits. trending-shorts no longer searches the keyword \"trending\" (which surfaced 11-view videos with #Trending in the title); it uses YouTube's reel_watch_sequence feed — the same surface SC documents for /v1/youtube/shorts/trending. Optional q only seeds that sequence.",
+    items: [
+      "channel-shorts: thumbnail from id + player enrich; flat 2 credits (was 20)",
+      "trending-shorts: reel_watch_sequence feed, not q=trending keyword search",
+      "SC-style viewCountText/Int, durationMs/Formatted, like/comment when exposed",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
     category: "improvement",
     title: "Ad Library SC-parity audit: ctaType, trim, LinkedIn aliases — most fields already shipped",
     description:

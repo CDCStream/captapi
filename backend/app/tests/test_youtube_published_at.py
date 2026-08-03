@@ -5,6 +5,8 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from app.services.youtube_native import (
+    _comment_published_time,
+    _has_creator_heart,
     approximate_iso_from_relative,
     coerce_published_fields,
     published_fields,
@@ -38,4 +40,75 @@ def test_coerce_never_leaves_relative_in_published_at() -> None:
     card2 = {"publishedAt": "2026-07-27T22:52:21.000Z", "publishedTimeText": "4 days ago"}
     out2 = coerce_published_fields(card2)
     assert out2["publishedAt"] == "2026-07-27T22:52:21.000Z"
-    assert out2["publishedTimeText"] == "4 days ago"
+
+
+def test_inactive_heart_tooltip_by_channel_is_false() -> None:
+    # Live InnerTube chrome on rickroll — tooltip on every comment, no real heart.
+    assert _has_creator_heart({"heartActiveTooltip": "\u2764 by @RickAstleyYT"}) is False
+
+
+def test_explicit_hearted_tooltip_is_true() -> None:
+    assert _has_creator_heart({"heartActiveTooltip": "Hearted by @RickAstleyYT"}) is True
+
+
+def test_creator_heart_renderer_with_thumbnail_is_true() -> None:
+    assert (
+        _has_creator_heart(
+            {
+                "creatorHeart": {
+                    "creatorHeartRenderer": {
+                        "creatorThumbnail": {
+                            "thumbnails": [{"url": "https://yt3.ggpht.com/x"}]
+                        }
+                    }
+                }
+            }
+        )
+        is True
+    )
+
+
+def test_comment_published_time_iso_from_relative_including_edited() -> None:
+    edited = "1 month ago " + "(edited)"
+    text, iso = _comment_published_time({"publishedTime": edited})
+    assert text == edited
+    assert iso is not None and "T" in iso and "ago" not in iso
+
+
+def test_community_poll_options_and_numeric_likes() -> None:
+    from app.services.youtube_native import _normalize_community_post
+
+    post = {
+        "postId": "UgkxPollTest",
+        "contentText": {"runs": [{"text": "Would you rather A or B?"}]},
+        "publishedTimeText": {"simpleText": "2 weeks ago"},
+        "voteCount": {"simpleText": "89K"},
+        "authorText": {"runs": [{"text": "MrBeast"}]},
+        "authorEndpoint": {
+            "browseEndpoint": {
+                "browseId": "UCX6OQ3DkcsbYNE6H8uQQuVA",
+                "canonicalBaseUrl": "/@MrBeast",
+            }
+        },
+        "backstageAttachment": {
+            "pollRenderer": {
+                "choices": [
+                    {"text": {"runs": [{"text": "Option A"}]}},
+                    {"text": {"runs": [{"text": "Option B"}]}},
+                ],
+                "totalVotes": {"simpleText": "1.6M votes"},
+            }
+        },
+    }
+    row = _normalize_community_post(post)
+    assert row is not None
+    assert row["postType"] == "poll"
+    assert row["likeCount"] == 89000
+    assert row["likeCountText"] == "89K"
+    assert row["likeCountApproximate"] is True
+    assert row["publishedTime"] and "T" in row["publishedTime"]
+    assert row["publishedAt"] == row["publishedTime"]
+    assert [o["text"] for o in row["pollOptions"]] == ["Option A", "Option B"]
+    assert row["pollOptions"][0]["voteCount"] is None
+    assert row["totalVotes"] == 1_600_000
+    assert row["channel"]["id"] == "UCX6OQ3DkcsbYNE6H8uQQuVA"

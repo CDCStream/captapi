@@ -17,6 +17,8 @@ Approach:
 
 from __future__ import annotations
 
+import asyncio
+import base64
 import json
 import re
 import xml.etree.ElementTree as ET
@@ -369,6 +371,56 @@ def _best_thumb(node: Any) -> str | None:
     return None
 
 
+def thumbnail_url_for_video_id(video_id: str | None) -> str | None:
+    """Stable YouTube thumbnail from a watch/shorts id (SC uses the same pattern)."""
+    vid = (video_id or "").strip()
+    if len(vid) != 11:
+        return None
+    return f"https://i.ytimg.com/vi/{vid}/maxresdefault.jpg"
+
+
+def format_count_text(n: int | None) -> str | None:
+    """SC-style ``viewCountText`` / ``likeCountText`` (thousands separators)."""
+    if n is None:
+        return None
+    try:
+        return f"{int(n):,}"
+    except (TypeError, ValueError):
+        return None
+
+
+def format_duration_hms(seconds: int | None) -> str | None:
+    if seconds is None:
+        return None
+    try:
+        total = int(seconds)
+    except (TypeError, ValueError):
+        return None
+    if total < 0:
+        return None
+    h, rem = divmod(total, 3600)
+    m, s = divmod(rem, 60)
+    return f"{h:02d}:{m:02d}:{s:02d}"
+
+
+def _stamp_count_fields(
+    card: dict[str, Any],
+    *,
+    count: int | None,
+    text: str | None = None,
+    approximate: bool = False,
+) -> dict[str, Any]:
+    """Attach ``viewCount`` + SC-style ``viewCountInt`` / ``viewCountText``."""
+    card["viewCount"] = count
+    card["viewCountInt"] = count
+    card["viewCountText"] = text or format_count_text(count)
+    if approximate and count is not None:
+        card["viewCountApproximate"] = True
+    elif "viewCountApproximate" in card and not approximate:
+        card.pop("viewCountApproximate", None)
+    return card
+
+
 def _channel_from_text_runs(node: Any) -> dict[str, Any]:
     """Extract channel id/handle/name from owner/byline text runs."""
     name = text_of(node)
@@ -485,20 +537,30 @@ def _normalize_shorts_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
     if not video_id:
         return None
     overlay = lk.get("overlayMetadata") or {}
-    return {
+    view_text = text_of(overlay.get("secondaryText"))
+    view_count, view_approx = parse_count_text_meta(overlay.get("secondaryText"))
+    # Modern shelf uses thumbnailViewModel (not thumbnail); always fall back to
+    # the stable i.ytimg.com URL ScrapeCreators derives from the video id.
+    thumb = (
+        _best_thumb(lk.get("thumbnailViewModel"))
+        or _best_thumb(lk.get("thumbnail"))
+        or _best_thumb(((on_tap.get("innertubeCommand") or {}).get("reelWatchEndpoint") or {}).get("thumbnail"))
+        or thumbnail_url_for_video_id(video_id)
+    )
+    card = {
         "type": "short",
         "id": video_id,
         "url": f"https://www.youtube.com/shorts/{video_id}",
         "title": text_of((overlay.get("primaryText") or {})) or "",
         "publishedAt": None,
-        "viewCount": parse_count_text(overlay.get("secondaryText")),
         "durationSeconds": None,
-        "thumbnailUrl": _best_thumb(lk.get("thumbnail")),
+        "thumbnailUrl": thumb,
         "channelName": None,
         "channelId": None,
         "channel": None,
         "badges": [],
     }
+    return _stamp_count_fields(card, count=view_count, text=view_text, approximate=view_approx)
 
 
 def _normalize_reel_item(r: dict[str, Any]) -> dict[str, Any] | None:
@@ -506,20 +568,22 @@ def _normalize_reel_item(r: dict[str, Any]) -> dict[str, Any] | None:
     video_id = safe_str(r.get("videoId"))
     if not video_id:
         return None
-    return {
+    view_text = text_of(r.get("viewCountText"))
+    view_count, view_approx = parse_count_text_meta(r.get("viewCountText"))
+    card = {
         "type": "short",
         "id": video_id,
         "url": f"https://www.youtube.com/shorts/{video_id}",
         "title": text_of(r.get("headline")) or "",
         "publishedAt": None,
-        "viewCount": parse_count_text(r.get("viewCountText")),
         "durationSeconds": None,
-        "thumbnailUrl": _best_thumb(r.get("thumbnail")),
+        "thumbnailUrl": _best_thumb(r.get("thumbnail")) or thumbnail_url_for_video_id(video_id),
         "channelName": None,
         "channelId": None,
         "channel": None,
         "badges": [],
     }
+    return _stamp_count_fields(card, count=view_count, text=view_text, approximate=view_approx)
 
 
 def _normalize_video_lockup(lk: dict[str, Any]) -> dict[str, Any] | None:
@@ -837,8 +901,13 @@ async def innertube(
     *,
     timeout: float = 12.0,
     region: str | None = None,
+    direct_first: bool = False,
 ) -> dict[str, Any] | None:
-    """POST to InnerTube (web client). ``endpoint``: search | browse | next."""
+    """POST to InnerTube (web client). ``endpoint``: search | browse | next | reel/...
+
+    ``direct_first``: try the host IP before proxies. Required for Shorts reel
+    endpoints — datacenter proxies often return an empty ``playerResponse``.
+    """
     context = {
         "client": {
             **_INNERTUBE_CONTEXT["client"],
@@ -847,7 +916,8 @@ async def innertube(
     gl = (region or "").strip().upper()
     if gl and len(gl) == 2:
         context["client"]["gl"] = gl
-    for tier in _proxy_tiers():
+    tiers = _player_tiers() if direct_first else _proxy_tiers()
+    for tier in tiers:
         try:
             resp = await post_json(
                 f"https://www.youtube.com/youtubei/v1/{endpoint}",
@@ -869,8 +939,19 @@ async def innertube(
             data = resp.json()
         except ValueError:
             continue
-        if isinstance(data, dict):
-            return data
+        if not isinstance(data, dict):
+            continue
+        # Shorts reel watch via proxy can 200 with a hollow playerResponse.
+        if endpoint.startswith("reel/") and direct_first:
+            pr = data.get("playerResponse")
+            if isinstance(pr, dict):
+                details = pr.get("videoDetails") or {}
+                if not details.get("videoId") and not details.get("title"):
+                    continue
+            entries = data.get("entries")
+            if endpoint.endswith("reel_watch_sequence") and not entries and not _reel_sequence_video_ids(data):
+                continue
+        return data
     return None
 
 
@@ -1055,6 +1136,277 @@ async def search_shorts_native(q: str, limit: int) -> list[dict[str, Any]] | Non
         return None
     cards = await _paginate(data, limit=limit, continuation_endpoint="search", shorts=True)
     return cards if cards else None
+
+
+def encode_reel_sequence_params(short_id: str) -> str:
+    """Build InnerTube ``reel/reel_watch_sequence`` ``sequenceParams`` (youtube.js ReelSequence)."""
+    vid = (short_id or "").strip()
+    if len(vid) != 11:
+        raise ValueError("short_id must be an 11-char YouTube video id")
+    # field1=shortId, field2={number:5}, field3=25, field4=0
+    inner = _pb_key(1, 0) + _pb_varint(5)
+    msg = (
+        _pb_key(1, 2)
+        + _pb_varint(len(vid.encode()))
+        + vid.encode()
+        + _pb_key(2, 2)
+        + _pb_varint(len(inner))
+        + inner
+        + _pb_key(3, 0)
+        + _pb_varint(25)
+        + _pb_key(4, 0)
+        + _pb_varint(0)
+    )
+    return base64.urlsafe_b64encode(msg).decode("ascii").rstrip("=")
+
+
+def _reel_sequence_video_ids(payload: dict[str, Any] | None) -> list[str]:
+    if not isinstance(payload, dict):
+        return []
+    out: list[str] = []
+    seen: set[str] = set()
+    for rw in walk_find(payload, "reelWatchEndpoint"):
+        vid = safe_str(rw.get("videoId"))
+        if vid and len(vid) == 11 and vid not in seen:
+            seen.add(vid)
+            out.append(vid)
+    return out
+
+
+def _reel_sequence_next_params(payload: dict[str, Any] | None) -> str | None:
+    if not isinstance(payload, dict):
+        return None
+    for c in walk_find(payload, "continuationCommand"):
+        token = safe_str(c.get("token"))
+        if token:
+            return token
+    return None
+
+
+async def _seed_short_id_for_trending(q: str | None = None) -> str | None:
+    """Pick a Short id to seed the reel sequence (homepage or optional topic)."""
+    seed_q = (q or "").strip()
+    if seed_q and seed_q.lower() not in {"trending", "shorts", "#shorts"}:
+        found = await search_shorts_native(seed_q, 3)
+        if found:
+            for row in found:
+                vid = safe_str(row.get("id"))
+                if vid and len(vid) == 11:
+                    return vid
+    _, html = await fetch_page_data("https://www.youtube.com/shorts/", timeout=12.0)
+    if html:
+        for m in re.finditer(r"/shorts/([\w-]{11})", html):
+            return m.group(1)
+        for m in re.finditer(r'"videoId"\s*:\s*"([\w-]{11})"', html):
+            return m.group(1)
+    # Last resort: a known Shorts-eligible seed so the sequence still boots.
+    fallback = await search_shorts_native("#shorts", 1)
+    if fallback:
+        return safe_str(fallback[0].get("id"))
+    return None
+
+
+async def trending_shorts_native(
+    limit: int,
+    *,
+    q: str | None = None,
+) -> list[dict[str, Any]] | None:
+    """YouTube Shorts recommendation / trending reel sequence (not keyword search).
+
+    Uses InnerTube ``reel/reel_watch_sequence`` — the same surface ScrapeCreators
+    hits for ``GET /v1/youtube/shorts/trending`` (~48 per batch, fresh each call).
+    Optional ``q`` only seeds the sequence from a topic Short; it is not a search
+    of the word \"trending\".
+    """
+    seed = await _seed_short_id_for_trending(q)
+    if not seed:
+        return None
+    try:
+        params = encode_reel_sequence_params(seed)
+    except ValueError:
+        return None
+    ids: list[str] = []
+    seen: set[str] = set()
+    body: dict[str, Any] = {"sequenceParams": params}
+    hops = 0
+    while len(ids) < limit and hops < 8:
+        hops += 1
+        payload = await innertube(
+            "reel/reel_watch_sequence", body, timeout=18, direct_first=True
+        )
+        if payload is None:
+            break
+        for vid in _reel_sequence_video_ids(payload):
+            if vid in seen:
+                continue
+            seen.add(vid)
+            ids.append(vid)
+            if len(ids) >= limit:
+                break
+        nxt = _reel_sequence_next_params(payload)
+        if not nxt or nxt == body.get("sequenceParams"):
+            break
+        body = {"sequenceParams": nxt}
+    if not ids:
+        return None
+    cards = [
+        {
+            "type": "short",
+            "id": vid,
+            "url": f"https://www.youtube.com/shorts/{vid}",
+            "title": "",
+            "publishedAt": None,
+            "durationSeconds": None,
+            "thumbnailUrl": thumbnail_url_for_video_id(vid),
+            "channelName": None,
+            "channelId": None,
+            "channel": None,
+            "badges": [],
+        }
+        for vid in ids[:limit]
+    ]
+    return await enrich_short_cards(cards)
+
+
+async def short_details_via_reel_watch(video_id: str, norm_url: str) -> dict[str, Any] | None:
+    """Shorts-optimized details via ``reel/reel_item_watch`` (has microformat publishDate).
+
+    ANDROID ``player`` often omits ``playerMicroformatRenderer`` for Shorts, which
+    is why shelf enrichment previously left ``publishedAt`` / ``genre`` null even
+    after a successful player call. WEB reel_item_watch returns both.
+    """
+    vid = (video_id or "").strip()
+    if len(vid) != 11:
+        return None
+    payload = await innertube(
+        "reel/reel_item_watch",
+        {"playerRequest": {"videoId": vid}, "params": "CAUwAg%3D%3D"},
+        timeout=15,
+        direct_first=True,
+    )
+    if not isinstance(payload, dict):
+        return None
+    player = payload.get("playerResponse")
+    if not isinstance(player, dict):
+        return None
+    return build_youtube_video_details(
+        player=player,
+        video_id=vid,
+        norm_url=norm_url,
+        require_playable=False,
+    )
+
+
+async def enrich_short_cards(
+    cards: list[dict[str, Any]],
+    *,
+    concurrency: int = 8,
+    with_engagement: bool = True,
+) -> list[dict[str, Any]]:
+    """Fill Shorts list rows via InnerTube player (SC channel/trending Shorts parity).
+
+    Shelf cards only expose title + compact views. Player gives exact viewCount,
+    duration, publishDate, description, genre, keywords, and channel identity.
+    Optional ``next`` pass fills commentCount (and likeCount when exposed).
+    """
+    if not cards:
+        return cards
+    sem = asyncio.Semaphore(max(1, concurrency))
+
+    async def _one(card: dict[str, Any]) -> dict[str, Any]:
+        async with sem:
+            vid = safe_str(card.get("id"))
+            if not vid and card.get("url"):
+                m = re.search(r"(?:shorts/|v=)([\w-]{11})", str(card.get("url")))
+                vid = m.group(1) if m else None
+            if not vid:
+                return card
+            url = safe_str(card.get("url")) or f"https://www.youtube.com/shorts/{vid}"
+            out = {**card, "id": vid, "url": url, "type": "short"}
+            out["thumbnailUrl"] = (
+                out.get("thumbnailUrl") or thumbnail_url_for_video_id(vid)
+            )
+            details = await short_details_via_reel_watch(vid, url)
+            if details is None:
+                details = await video_details_native(vid, url)
+            if isinstance(details, dict):
+                exact_views = safe_int(details.get("viewCount"))
+                if exact_views is not None:
+                    _stamp_count_fields(out, count=exact_views, approximate=False)
+                for src, dest in (
+                    ("title", "title"),
+                    ("description", "description"),
+                    ("publishedAt", "publishedAt"),
+                    ("durationSeconds", "durationSeconds"),
+                    ("channelName", "channelName"),
+                    ("channelId", "channelId"),
+                    ("channelHandle", "channelHandle"),
+                    ("channelUrl", "channelUrl"),
+                    ("genre", "genre"),
+                    ("thumbnailUrl", "thumbnailUrl"),
+                ):
+                    val = details.get(src)
+                    if val not in (None, "", []):
+                        out[dest] = val
+                tags = details.get("tags")
+                if isinstance(tags, list) and tags:
+                    out["keywords"] = tags
+                if out.get("channelId") or out.get("channelName"):
+                    out["channel"] = {
+                        "id": out.get("channelId"),
+                        "title": out.get("channelName"),
+                        "handle": out.get("channelHandle"),
+                        "url": out.get("channelUrl"),
+                        "thumbnail": None,
+                    }
+            dur = out.get("durationSeconds")
+            if dur is not None:
+                try:
+                    secs = int(dur)
+                except (TypeError, ValueError):
+                    secs = None
+                if secs is not None:
+                    out["durationSeconds"] = secs
+                    out["durationMs"] = secs * 1000
+                    out["durationFormatted"] = format_duration_hms(secs)
+            if not out.get("thumbnailUrl"):
+                out["thumbnailUrl"] = thumbnail_url_for_video_id(vid)
+            if with_engagement:
+                # commentCount via next engagement panel; likes from like-button a11y.
+                boot = await innertube("next", {"videoId": vid}, timeout=12)
+                if boot is not None:
+                    cc = _comments_total(boot)
+                    if cc is not None:
+                        out["commentCount"] = cc
+                        out["commentCountInt"] = cc
+                        out["commentCountText"] = format_count_text(cc)
+                    like = None
+                    for btn in walk_find(boot, "toggleButtonRenderer"):
+                        a11y = (
+                            ((btn.get("defaultText") or {}).get("accessibility") or {}).get(
+                                "accessibilityData"
+                            )
+                            or {}
+                        )
+                        label = text_of(a11y) or text_of(btn.get("defaultText")) or ""
+                        if "like" in label.lower():
+                            like = parse_count_text(label)
+                            if like is not None:
+                                break
+                    if like is None:
+                        for vm in walk_find(boot, "likeButtonViewModel"):
+                            like = parse_count_text(vm.get("likeCountEntity")) or parse_count_text(
+                                vm
+                            )
+                            if like is not None:
+                                break
+                    if like is not None:
+                        out["likeCount"] = like
+                        out["likeCountInt"] = like
+                        out["likeCountText"] = format_count_text(like)
+            return out
+
+    return list(await asyncio.gather(*[_one(c) for c in cards]))
 
 
 # ---------------------------------------------------------------- playlist -
@@ -1951,6 +2303,7 @@ def build_youtube_video_details(
     like_count: int | None = None,
     comment_count: int | None = None,
     fetched_at: str | None = None,
+    require_playable: bool = True,
 ) -> dict[str, Any] | None:
     """Normalize an InnerTube player payload into the public video-details shape."""
     from app.utils.media_urls import (
@@ -1960,9 +2313,12 @@ def build_youtube_video_details(
         utc_now_iso,
     )
 
-    if ((player.get("playabilityStatus") or {}).get("status")) != "OK":
-        return None
+    status = ((player.get("playabilityStatus") or {}).get("status")) or ""
     details = player.get("videoDetails") or {}
+    # reel/reel_item_watch often returns UNPLAYABLE ("reload page") while still
+    # shipping full videoDetails + microformat — enough for list enrichment.
+    if require_playable and status != "OK":
+        return None
     if not details.get("title"):
         return None
     micro = (player.get("microformat") or {}).get("playerMicroformatRenderer") or {}
@@ -2124,35 +2480,52 @@ def _comment_published_time(props: dict[str, Any]) -> tuple[str | None, str | No
             break
         ts = safe_int(raw)
         if ts and ts > 1_000_000_000:
-            from datetime import datetime, timezone
-
             iso = datetime.fromtimestamp(ts, tz=timezone.utc).strftime(
                 "%Y-%m-%dT%H:%M:%S.000Z"
             )
             break
+    if iso is None and text:
+        # Strip YouTube's "(edited)" suffix before approximating ISO.
+        clean = re.sub(r"\s*\(edited\)\s*$", "", text, flags=re.I).strip()
+        iso = approximate_iso_from_relative(clean)
     return text, iso
 
 
 def _has_creator_heart(toolbar: dict[str, Any]) -> bool:
     """True only when the creator actually hearted the comment.
 
-    Do not trust emoji or generic heart-button tooltips — YouTube often ships a
-    non-empty ``heartActiveTooltip`` for the inactive control, which made every
-    comment look hearted. Require an explicit heart payload or wording that the
-    creator already hearted it.
+    Do not trust emoji or generic heart-button tooltips — YouTube often ships
+    ``heartActiveTooltip`` like ``❤ by @Channel`` for the *inactive* control on
+    every comment (Rick Astley video: 5/5 tooltips, 0 real hearts). Require an
+    explicit hearted payload or past-tense wording.
     """
-    heart = toolbar.get("creatorHeart")
-    if isinstance(heart, dict) and heart:
-        return True
     if toolbar.get("isHeartedByCreator") is True:
         return True
+    heart = toolbar.get("creatorHeart")
+    if isinstance(heart, dict) and heart:
+        # Real hearts carry a renderer/view-model with creator identity — not an
+        # empty shell or tracking-only object.
+        renderer = (
+            heart.get("creatorHeartRenderer")
+            or heart.get("creatorHeartViewModel")
+            or heart.get("heartedCreatorHeartViewModel")
+        )
+        if isinstance(renderer, dict) and (
+            renderer.get("creatorThumbnail")
+            or renderer.get("creatorThumbnailEndpoint")
+            or renderer.get("creatorName")
+            or next(walk_find(renderer, "thumbnail"), None) is not None
+        ):
+            return True
     tip = toolbar.get("heartActiveTooltip")
     if not isinstance(tip, str):
         tip = text_of(tip) or ""
     t = tip.strip().lower()
     if not t:
         return False
-    # Explicit past-tense / creator attribution only — not bare ❤ UI chrome.
+    # Reject inactive chrome: "❤ by @Channel" / "heart by @…" without past tense.
+    if re.fullmatch(r"[❤❤️♥]\s*by\s+@?\S+", t) or re.fullmatch(r"by\s+@?\S+", t):
+        return False
     return any(
         needle in t
         for needle in (
@@ -2432,6 +2805,57 @@ def _video_from_community_renderer(vr: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
+def _poll_from_attachment(attachment: Any) -> dict[str, Any] | None:
+    """Extract poll options (+ totalVotes when YouTube exposes them).
+
+    Public HTML/InnerTube often omits per-choice vote counts until the viewer
+    is signed in — in that case ``voteCount`` / ``percentage`` are null but
+    option ``text`` and ``totalVotes`` still return.
+    """
+    if not isinstance(attachment, dict):
+        return None
+    poll = next(walk_find(attachment, "pollRenderer"), None)
+    if not isinstance(poll, dict):
+        return None
+    options: list[dict[str, Any]] = []
+    for choice in poll.get("choices") or []:
+        if not isinstance(choice, dict):
+            continue
+        label = text_of(choice.get("text"))
+        if not label:
+            continue
+        vote_text = text_of(choice.get("voteCount") or choice.get("numVotes"))
+        pct_raw = choice.get("votePercentage") or choice.get("percentage")
+        pct: float | None = None
+        if isinstance(pct_raw, (int, float)):
+            pct = float(pct_raw)
+        elif isinstance(pct_raw, str):
+            try:
+                pct = float(pct_raw.replace("%", "").strip())
+            except ValueError:
+                pct = None
+        vote_n = parse_count_text(vote_text) if vote_text else safe_int(choice.get("numVotes"))
+        options.append(
+            {
+                "text": label,
+                "voteCount": vote_n,
+                "percentage": pct,
+            }
+        )
+    if not options:
+        return None
+    total_text = text_of(poll.get("totalVotes"))
+    total_n, total_approx = parse_count_text_meta(total_text)
+    out: dict[str, Any] = {
+        "pollOptions": options,
+        "totalVotes": total_n,
+        "totalVotesText": total_text,
+    }
+    if total_approx:
+        out["totalVotesApproximate"] = True
+    return out
+
+
 def _normalize_community_post(post: dict[str, Any]) -> dict[str, Any] | None:
     """Shape matching ``/v1/youtube/community-posts`` list items."""
     if not isinstance(post, dict):
@@ -2455,8 +2879,15 @@ def _normalize_community_post(post: dict[str, Any]) -> dict[str, Any] | None:
                 url = "https:" + url
             images.append(url)
             post_type = "image"
-    if list(walk_find(attachment, "pollRenderer")):
+    poll_meta = _poll_from_attachment(attachment)
+    if poll_meta:
         post_type = "poll"
+    elif next(walk_find(attachment, "quizRenderer"), None) is not None:
+        post_type = "quiz"
+    elif next(walk_find(attachment, "playlistRenderer"), None) is not None or next(
+        walk_find(attachment, "compactPlaylistRenderer"), None
+    ) is not None:
+        post_type = "playlist"
     for key in (
         "videoRenderer",
         "compactVideoRenderer",
@@ -2482,7 +2913,9 @@ def _normalize_community_post(post: dict[str, Any]) -> dict[str, Any] | None:
                     "lengthSeconds": video.get("lengthSeconds"),
                 }
             )
-            post_type = "video"
+            # Poll/quiz/playlist type wins over a linked video card.
+            if post_type in {"text", "image"}:
+                post_type = "video"
     # Deduplicate images / videos while preserving order.
     seen_img: set[str] = set()
     uniq_images: list[str] = []
@@ -2532,6 +2965,8 @@ def _normalize_community_post(post: dict[str, Any]) -> dict[str, Any] | None:
         # YouTube UI string separately — same dual-field pattern as playlist.
         "publishedTime": published_iso,
         "publishedTimeText": published_text,
+        # Alias used by /community-post-details docs historically.
+        "publishedAt": published_iso,
         "postType": post_type,
         "images": uniq_images,
         "image": uniq_images[0] if uniq_images else None,
@@ -2539,6 +2974,8 @@ def _normalize_community_post(post: dict[str, Any]) -> dict[str, Any] | None:
     }
     if like_approx:
         out["likeCountApproximate"] = True
+    if poll_meta:
+        out.update(poll_meta)
     return out
 
 

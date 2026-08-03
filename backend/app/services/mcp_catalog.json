@@ -410,8 +410,8 @@
     "platform": "youtube",
     "name": "YouTube Channel Shorts",
     "path": "/v1/youtube/channel-shorts",
-    "credits": 20,
-    "summary": "List a channel's Shorts.",
+    "credits": 2,
+    "summary": "List a channel's Shorts with player-enriched fields.",
     "params": [
       {
         "name": "url",
@@ -423,7 +423,7 @@
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 200. Billed per result."
+        "description": "Max items to return. Default 20, max 200. Flat 2 credits on the native path."
       },
       {
         "name": "cache",
@@ -438,20 +438,20 @@
     "platform": "youtube",
     "name": "YouTube Trending Shorts",
     "path": "/v1/youtube/trending-shorts",
-    "credits": 28,
-    "summary": "Discover trending YouTube Shorts by seed keyword.",
+    "credits": 2,
+    "summary": "YouTube Shorts reel/trending sequence (not keyword search).",
     "params": [
       {
         "name": "q",
         "type": "string",
         "required": false,
-        "description": "Seed keyword for trending Shorts. Default trending."
+        "description": "Optional topic seed for the reel sequence. Omit for default trending feed."
       },
       {
         "name": "limit",
         "type": "number",
         "required": false,
-        "description": "Max items to return. Default 20, max 100. Billed per result."
+        "description": "Max items to return. Default 20, max 100. Flat 2 credits."
       },
       {
         "name": "cache",

@@ -15,6 +15,9 @@ import {
   platformSlug,
 } from "@/lib/api-catalog";
 
+/** Shared footer bakes PLATFORM_COUNT/ENDPOINT_COUNT at render — ISR avoids sticky multi-version SSG. */
+export const revalidate = 3600;
+
 const NAV_PLATFORMS: NavPlatform[] = PLATFORM_PAGES.map((g) => ({
   label: g.name,
   href: `/apis/${platformSlug(g.id)}`,

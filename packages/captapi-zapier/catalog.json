@@ -410,8 +410,8 @@
     "platform": "youtube",
     "name": "YouTube Channel Shorts",
     "path": "/v1/youtube/channel-shorts",
-    "credits": 20,
-    "summary": "List a channel's Shorts.",
+    "credits": 2,
+    "summary": "List a channel Shorts with player-enriched fields.",
     "params": [
       {
         "name": "url",
@@ -438,14 +438,14 @@
     "platform": "youtube",
     "name": "YouTube Trending Shorts",
     "path": "/v1/youtube/trending-shorts",
-    "credits": 28,
-    "summary": "Discover trending YouTube Shorts by seed keyword.",
+    "credits": 2,
+    "summary": "YouTube Shorts reel/trending sequence (not keyword search).",
     "params": [
       {
         "name": "q",
         "type": "string",
         "required": false,
-        "description": "Seed keyword for trending Shorts. Default trending."
+        "description": "Optional topic seed for the reel sequence. Omit for default trending feed."
       },
       {
         "name": "limit",

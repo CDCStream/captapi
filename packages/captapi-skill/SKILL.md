@@ -102,9 +102,9 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `youtube_shorts_transcript` | `/v1/youtube/shorts/transcript` | `url` (string), `language`? (string), `cache`? (boolean) | 1 |
 | `youtube_shorts_summarize` | `/v1/youtube/shorts/summarize` | `url` (string), `language`? (string), `cache`? (boolean) | 3 |
 | `youtube_shorts_details` | `/v1/youtube/shorts/video-details` | `url` (string), `cache`? (boolean) | 1 |
-| `youtube_shorts_comments` | `/v1/youtube/shorts/comments` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
-| `youtube_channel_shorts` | `/v1/youtube/channel-shorts` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
-| `youtube_trending_shorts` | `/v1/youtube/trending-shorts` | `q`? (string), `limit`? (number), `cache`? (boolean) | 28 |
+| `youtube_shorts_comments` | `/v1/youtube/shorts/comments` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `youtube_channel_shorts` | `/v1/youtube/channel-shorts` | `url` (string), `limit`? (number), `cache`? (boolean) | 2 |
+| `youtube_trending_shorts` | `/v1/youtube/trending-shorts` | `q`? (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `youtube_channel_streams` | `/v1/youtube/channel-streams` | `url` (string), `limit`? (number), `cache`? (boolean) | 20 |
 | `youtube_hashtag_search` | `/v1/youtube/hashtag-search` | `q` (string), `limit`? (number), `cache`? (boolean) | 20 |
 | `youtube_comment_replies` | `/v1/youtube/comment-replies` | `url` (string), `comment_id` (string), `limit`? (number), `cache`? (boolean) | 20 |
@@ -135,7 +135,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `tiktok_search_users` | `/v1/tiktok/search/users` | `q` (string), `limit`? (number), `cursor`? (number), `cache`? (boolean) | 1 |
 | `tiktok_song_details` | `/v1/tiktok/song-details` | `url` (string), `cache`? (boolean) | 1 |
 | `tiktok_trending_feed` | `/v1/tiktok/trending-feed` | `country`? (string), `limit`? (number), `cache`? (boolean) | 14 |
-| `tiktok_popular_hashtags` | `/v1/tiktok/popular-hashtags` | `query`? (string), `limit`? (number), `cache`? (boolean) | 14 |
+| `tiktok_popular_hashtags` | `/v1/tiktok/popular-hashtags` | `query`? (string), `limit`? (number), `cache`? (boolean) | 2 |
 | `tiktok_live` | `/v1/tiktok/live` | `url` (string), `cache`? (boolean) | 1 |
 | `tiktok_live_info` | `/v1/tiktok/live-info` | `url` (string), `cache`? (boolean) | 7 |
 | `tiktok_popular_creators` | `/v1/tiktok/popular-creators` | `country`? (string), `sort`? (string), `follower_count`? (string), `limit`? (number), `cache`? (boolean) | 28 |
@@ -152,7 +152,7 @@ On Apify, the Captapi Actor is a bring-your-own-key wrapper around the REST API 
 | `instagram_channel_posts` | `/v1/instagram/channel-posts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 6 |
 | `instagram_channel_reels` | `/v1/instagram/channel-reels` | `url`? (string), `userId`? (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 6 |
 | `instagram_reels_search` | `/v1/instagram/reels-search` | `q` (string), `limit`? (number), `datePosted`? (string), `cache`? (boolean) | 2 |
-| `instagram_trending_reels` | `/v1/instagram/trending-reels` | `country`? (string), `limit`? (number), `cache`? (boolean) | 28 |
+| `instagram_trending_reels` | `/v1/instagram/trending-reels` | `country`? (string), `limit`? (number), `cache`? (boolean) | 1 |
 | `instagram_tagged_posts` | `/v1/instagram/tagged-posts` | `url` (string), `limit`? (number), `cursor`? (string), `cache`? (boolean) | 1 |
 | `instagram_reels_by_audio_id` | `/v1/instagram/reels-by-audio-id` | `audio_id` (string), `limit`? (number), `cache`? (boolean) | 28 |
 | `instagram_hashtag_search` | `/v1/instagram/hashtag-search` | `q` (string), `limit`? (number), `cache`? (boolean) | 12 |

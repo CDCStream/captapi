@@ -318,13 +318,23 @@ const YOUTUBE: Spec[] = [
     category: "list",
     method: "GET",
     path: "/v1/youtube/channel-shorts",
-    credits: 20,
-    creditsPerResult: 1,
-    tagline: "List videos from a channel's Shorts tab (not an alias of Video Details).",
+    credits: 2,
+    tagline: "Channel Shorts shelf with player-enriched fields (SC channel/shorts parity).",
     longDescription:
-      "Returns the channel Shorts shelf — a real list endpoint, unlike Shorts Stats/Transcript/Summarizer/Comments which wrap the main video endpoints with Short validation. 1 credit per Short returned (min 2).",
+      "Lists a channel's Shorts tab, then fills each row via InnerTube player — id, exact viewCount/viewCountText, thumbnailUrl (from video id when the shelf omits it), publishedAt, durationSeconds/durationMs, description, genre, likeCount/commentCount when exposed. Flat 2 credits on the native path (was incorrectly 1/result at 20). Not an alias of Video Details.",
   },
-  { slug: "youtube-trending-shorts", name: "YouTube Trending Shorts API", shortName: "Trending Shorts", category: "list", method: "GET", path: "/v1/youtube/trending-shorts", credits: 2 },
+  {
+    slug: "youtube-trending-shorts",
+    name: "YouTube Trending Shorts API",
+    shortName: "Trending Shorts",
+    category: "list",
+    method: "GET",
+    path: "/v1/youtube/trending-shorts",
+    credits: 2,
+    tagline: "YouTube Shorts reel/trending sequence — not a keyword search for \"trending\".",
+    longDescription:
+      "Fetches Shorts from YouTube's reel_watch_sequence feed (same surface ScrapeCreators uses for /v1/youtube/shorts/trending). Each call returns a fresh batch with channel, exact views, duration, publish date, and engagement when available. Optional q only seeds the sequence from a topic Short — it is not a search of the word trending. Flat 2 credits.",
+  },
   { slug: "youtube-channel-streams", name: "YouTube Channel Streams API", shortName: "Channel Streams", category: "list", method: "GET", path: "/v1/youtube/channel-streams", credits: 20, creditsPerResult: 1 },
   {
     slug: "youtube-hashtag-search",
@@ -359,15 +369,33 @@ const YOUTUBE: Spec[] = [
     tagline:
       "List a YouTube channel's community posts — numeric likes, ISO dates, channel{}, linked video{}, cursor pagination (1 credit native).",
     longDescription:
-      "Pass a channel URL, @handle, or UC… ID and get that channel's community /posts tab as clean JSON. Each post includes id/url, author + channel{id,title,url,handle}, text, likeCount (number) + likeCountText (e.g. \"3.2M\"; likeCountApproximate=true for compact K/M/B labels), publishedTime (ISO-8601; approximate when derived from YouTube's relative label) + publishedTimeText, postType, images[] / image, hashtags[], and when the post links a video — video{id,title,thumbnail,url,viewCountText,viewCountInt,lengthText,lengthSeconds} plus linkedVideos[]. Cursor pagination via nextCursor + hasMore. Flat 1 credit on the native path; Apify fallback bills about 0.5 credits per returned post (min 2).",
+      "Pass a channel URL, @handle, or UC… ID and get that channel's community /posts tab as clean JSON. Each post includes id/url, author + channel{id,title,url,handle}, text, likeCount (number) + likeCountText (e.g. \"3.2M\"; likeCountApproximate=true for compact K/M/B labels), publishedTime/publishedAt (ISO-8601; approximate when derived from YouTube's relative label) + publishedTimeText, postType (text|image|poll|video|playlist|quiz), pollOptions[] + totalVotes when postType is poll, images[] / image, hashtags[], and when the post links a video — video{id,title,thumbnail,url,viewCountText,viewCountInt,lengthText,lengthSeconds} plus linkedVideos[]. Cursor pagination via nextCursor + hasMore. Flat 1 credit on the native path; Apify fallback bills about 0.5 credits per returned post (min 2).",
     delivers: [
-      "Community posts with text, images, and post type",
-      "likeCount number + likeCountText; ISO publishedTime + publishedTimeText",
+      "Community posts with text, images, polls (pollOptions), and post type",
+      "likeCount number + likeCountText; ISO publishedTime/publishedAt + publishedTimeText",
       "channel{id,title,url,handle} and linked video{} when present",
       "Cursor pagination (nextCursor + hasMore); 1 credit native",
     ],
   },
-  { slug: "youtube-community-post-details", name: "YouTube Community Post Details API", shortName: "Community Post Details", category: "details", method: "GET", path: "/v1/youtube/community-post-details", credits: 1 , tagline: "Get a YouTube community post — text, images, poll options, likes, and comments as structured JSON.", longDescription: "Paste a YouTube community post URL and get the post as clean JSON: the text, attached images, poll options when present, like and comment counts, publish date, and the channel that posted it. Use it to archive community updates, track polls, or feed a content calendar. No YouTube OAuth required. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh." },
+  {
+    slug: "youtube-community-post-details",
+    name: "YouTube Community Post Details API",
+    shortName: "Community Post Details",
+    category: "details",
+    method: "GET",
+    path: "/v1/youtube/community-post-details",
+    credits: 1,
+    tagline:
+      "One YouTube community post — same schema as the list endpoint plus comments (pollOptions, numeric likeCount, channel{}, ISO dates).",
+    longDescription:
+      "Paste a YouTube community post URL and get the same clean shape as Community Posts list items: text, images[], postType (text|image|poll|video|playlist|quiz), pollOptions[{text,voteCount,percentage}] + totalVotes when the post is a poll, likeCount (number) + likeCountText, publishedAt/publishedTime (ISO; approximate from relative labels) + publishedTimeText, channel{id,title,url,handle}, linked video{} when present, and comments. Per-choice vote counts are often null on public pages (YouTube gates them behind sign-in); option text and totalVotes still return. Flat 1 credit. Pass cache=true for the 24h shared cache (0 credits on hit); default is always fresh.",
+    delivers: [
+      "Same fields as community-posts list items + comments",
+      "pollOptions[] + totalVotes for polls",
+      "likeCount number + likeCountText (not a \"727K\" string)",
+      "channel{id,title,url,handle}; ISO publishedAt / publishedTime",
+    ],
+  },
   { slug: "youtube-video-sponsors", name: "YouTube Video Sponsors API", shortName: "Video Sponsors", category: "details", method: "GET", path: "/v1/youtube/video-sponsors", credits: 1 , tagline: "Find sponsor, self-promo, and interaction segments inside a YouTube video — start/end times and category for each segment.", longDescription: "Paste a YouTube video URL and get the sponsor and promo segments viewers have marked for that video: each segment includes a category (sponsor, self-promo, interaction, and similar), plus start and end timestamps. Useful for skipping ads in players, estimating brand-deal density, or cleaning footage for reuse. No YouTube OAuth required." },
 ];
 
@@ -2308,6 +2336,14 @@ const cacheP = (): ApiParam => ({
   type: "boolean",
   required: false,
   description:
+    "Set true to serve from the 24h response cache (0 credits on hit). Default false — always fetch fresh. Envelope includes cached + cachedAt on hits.",
+});
+/** Use on endpoints that also accept cacheMaxAge (profile trust layer). */
+const cachePWithMaxAge = (): ApiParam => ({
+  name: "cache",
+  type: "boolean",
+  required: false,
+  description:
     "Set true to serve from the response cache (default TTL). Default false — always fetch fresh. Prefer cacheMaxAge when you need 1d–30d freshness control. Envelope includes cached + cachedAt on hits.",
 });
 const cacheMaxAgeP = (): ApiParam => ({
@@ -2326,7 +2362,7 @@ const cachePDefaultTrue = (): ApiParam => ({
     "Serve from the 24h shared cache when available (0 credits on hit). Default true — set false to always fetch fresh.",
 });
 const CACHE_NOTE =
-  "Pass cache=true or cacheMaxAge=1d|3d|7d|14d|30d to serve from cache (0 credits on hit); default is always fresh. Hits include cached + cachedAt in the JSON envelope.";
+  "Pass cache=true to serve from the 24h cache (0 credits on hit); default is always fresh. Hits include cached + cachedAt. Selected profile endpoints also accept cacheMaxAge=1d|3d|7d|14d|30d.";
 const CACHE_NOTE_DEFAULT_TRUE =
   "Cache is on by default (0 credits on hit); pass cache=false to always fetch fresh.";
 
@@ -2389,9 +2425,18 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "youtube-shorts-transcript": [up(YT_SHORTS), lang(), cacheP()],
   "youtube-shorts-summarizer": [up(YT_SHORTS), lang(), cacheP()],
   "youtube-shorts-stats": [up(YT_SHORTS)],
-  "youtube-shorts-comments": [up(YT_SHORTS), lp(50, 500), CURSOR],
-  "youtube-channel-shorts": [up(YT_CHANNEL), lp(20, 200)],
-  "youtube-trending-shorts": [{ name: "q", type: "string", required: false, description: "Seed keyword for trending Shorts. Defaults to trending." }, lpFlat(20, 100, 2)],
+  "youtube-shorts-comments": [up(YT_SHORTS), lpFlat(50, 500, 2), CURSOR, cacheP()],
+  "youtube-channel-shorts": [up(YT_CHANNEL), lpFlat(20, 200, 2)],
+  "youtube-trending-shorts": [
+    {
+      name: "q",
+      type: "string",
+      required: false,
+      description:
+        "Optional topic seed for the Shorts reel sequence. Omit for the default trending feed — not a keyword search for \"trending\".",
+    },
+    lpFlat(20, 100, 2),
+  ],
   "youtube-channel-streams": [up(YT_CHANNEL), lp(20, 200)],
   "youtube-hashtag-search": [qp("Hashtag with or without the # (min 2 characters)."), lp(20, 200)],
   "youtube-comment-replies": [up(YT_VIDEO), cid(), lp(50, 500)],
@@ -2414,7 +2459,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-summarizer": [up(TT_VIDEO), langOut(), cacheP()],
   "tiktok-video-details": [up(TT_VIDEO)],
   "tiktok-comments": [up(TT_VIDEO), lpFlat(50, 500, 2), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset, e.g. 50). A null nextCursor means the end of the comments." }],
-  "tiktok-channel-details": [up(TT_PROFILE), cacheP(), cacheMaxAgeP()],
+  "tiktok-channel-details": [up(TT_PROFILE), cachePWithMaxAge(), cacheMaxAgeP()],
   "tiktok-profile-region": [up(TT_PROFILE)],
   "tiktok-audience-demographics": [
     up(TT_PROFILE),
@@ -2544,7 +2589,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
     { name: "page", type: "integer", required: false, description: "Creative Center page (default 1)." },
     { name: "follower_count", type: "string", required: false, description: "Optional range on FYP/Apify fallthrough: 10k-100k, 100k-1m, 1m-10m, >10m." },
     lpFlat(20, 100, 2),
-    cacheP(),
+    cachePWithMaxAge(),
     cacheMaxAgeP(),
   ],
   // Instagram
@@ -2552,7 +2597,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "instagram-summarizer": [up(IG_REEL), langOut(), cacheP()],
   "instagram-details": [up(IG_POST)],
   "instagram-comments": [up(IG_POST), lp(50, 500)],
-  "instagram-channel-details": [up(IG_PROFILE), cacheP(), cacheMaxAgeP()],
+  "instagram-channel-details": [up(IG_PROFILE), cachePWithMaxAge(), cacheMaxAgeP()],
   "instagram-channel-posts": [up(IG_PROFILE), lp(20, 200), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (e.g. 3937014945555313553_1697296). A null nextCursor means the end of the list." }],
   "instagram-channel-reels": [
     {
@@ -2649,7 +2694,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   ],
   "instagram-basic-profile": [
     { name: "userId", type: "string", required: true, description: "Instagram numeric user ID (e.g. 13460080). A profile URL, @handle, or username is also accepted and resolved automatically." },
-    cacheP(),
+    cachePWithMaxAge(),
     cacheMaxAgeP(),
   ],
   // Facebook
@@ -2717,7 +2762,7 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "twitter-transcript": [up("Public tweet URL, e.g. https://x.com/user/status/ID."), cacheP()],
   "twitter-profile": [
     up("Twitter/X profile URL or @handle, e.g. https://x.com/username."),
-    cacheP(),
+    cachePWithMaxAge(),
     cacheMaxAgeP(),
   ],
   "twitter-user-tweets": [up("Twitter/X profile URL or @handle."), lp(20, 200)],
@@ -3253,10 +3298,33 @@ function exampleData(ep: ApiEndpoint): Record<string, unknown> {
       };
     case "comments":
       return {
-        total: 2,
+        totalReturned: 2,
+        totalComments: 2446085,
+        nextCursor: null,
+        hasMore: false,
         comments: [
-          { author: "@viewer1", text: "This is exactly what I needed!", likes: 42, replies: 3 },
-          { author: "@viewer2", text: "Great breakdown.", likes: 11, replies: 0 },
+          {
+            id: "Ugcomment001",
+            author: "@viewer1",
+            authorChannelId: "UCexample001",
+            text: "This is exactly what I needed!",
+            likeCount: 42,
+            replyCount: 3,
+            hasCreatorHeart: false,
+            publishedTimeText: "6 years ago",
+            publishedTime: "2020-08-03T12:00:00.000Z",
+          },
+          {
+            id: "Ugcomment002",
+            author: "@viewer2",
+            authorChannelId: "UCexample002",
+            text: "Great breakdown.",
+            likeCount: 11,
+            replyCount: 0,
+            hasCreatorHeart: false,
+            publishedTimeText: "1 month ago",
+            publishedTime: "2026-07-03T12:00:00.000Z",
+          },
         ],
       };
     case "channel":
@@ -4153,8 +4221,18 @@ const FIELD_DESCS: Record<string, string> = {
   updatedAt: "Last update date (ISO 8601).",
   timestamp: "Human-readable timestamp (MM:SS format).",
   type: "Content type of the item.",
-  postType: 'Post type ("Image", "Video" or "Sidecar" for carousels).',
+  postType:
+    'Content type. YouTube community: "text" | "image" | "poll" | "video" | "playlist" | "quiz". Instagram: "Image" | "Video" | "Sidecar" (carousel).',
   productType: "Platform product type (e.g. clips, feed). Null when not applicable (Image/Sidecar) — never an empty string.",
+  pollOptions:
+    "Poll choices when postType is poll. Each item has text, voteCount (null when YouTube gates counts behind sign-in), and percentage.",
+  totalVotes: "Total poll votes when YouTube exposes them (often approximate from a compact label).",
+  totalVotesText: "Original poll vote-count label from YouTube (e.g. \"1.6M votes\").",
+  totalVotesApproximate:
+    "True when totalVotes was parsed from a compact K/M/B label rather than an exact integer.",
+  likeCountText: "Original like-count label from the platform (e.g. \"727K\", \"3.2M\").",
+  likeCountApproximate:
+    "True when likeCount was parsed from a compact K/M/B label rather than an exact integer.",
   language: "Detected or requested language code.",
   region: "Creator's country as an ISO code (e.g. IT, US). TikTok's authoritative value when it exposes one (rare); otherwise an AI-inferred guess from public profile cues (bio, display name, language). Check regionSource. Can be null when there is no usable signal.",
   regionConfidence: 'For an inferred region, confidence of the guess: "high", "medium", or "low". Null when the region came from TikTok.',
@@ -4285,7 +4363,7 @@ const FIELD_DESCS: Record<string, string> = {
   audioUrl: "Audio file URL.",
   media: "Media attached to the item.",
   images:
-    "Image assets — typed {url,resizedUrl} on Ad Library, gallery URLs on TikTok Shop, else URL list.",
+    "Attached image URL list (YouTube community / most feeds). Ad Library may use typed {url,resizedUrl}; TikTok Shop uses gallery URLs.",
   photos: "Photo URLs attached to the item.",
 
   // Duration
@@ -4306,8 +4384,9 @@ const FIELD_DESCS: Record<string, string> = {
   viewsInstagram:
     "Instagram-only play count (excludes Facebook cross-post plays). Prefer this for Instagram performance reports.",
   viewsFacebook: "Facebook cross-post play count when Instagram exposes the split.",
-  likes: "Like count.",
-  likeCount: "Like count.",
+  likes: "Like count (number). Prefer likeCount on YouTube community endpoints.",
+  likeCount:
+    "Like count as an integer. Compact UI labels (\"727K\") are expanded here; see likeCountText for the original string.",
   comments: "Comment count.",
   commentCount: "Comment count.",
   totalComments: "The video's total number of comments, across all pages.",
@@ -4688,16 +4767,32 @@ export function responseStructure(ep: ApiEndpoint): ResponseGroup[] {
       return [
         {
           title: "Result",
-          fields: [{ name: "total", desc: "Number of comments returned." }],
+          fields: [
+            { name: "totalReturned", desc: "Number of comments returned in this page." },
+            { name: "totalComments", desc: "Total comments on the video when the platform exposes it." },
+            { name: "nextCursor", desc: "Cursor for the next page of comments." },
+            { name: "hasMore", desc: "Whether another page is available." },
+          ],
         },
         {
           title: "Each comment",
           note: "Each item in comments contains:",
           fields: [
+            { name: "id", desc: "Stable comment id." },
             { name: "author", desc: "Comment author name or handle." },
+            { name: "authorChannelId", desc: "Author channel id when exposed." },
             { name: "text", desc: "The comment text." },
-            { name: "likes", desc: "Number of likes on the comment." },
-            { name: "replies", desc: "Number of replies in the thread." },
+            { name: "likeCount", desc: "Number of likes on the comment." },
+            { name: "replyCount", desc: "Number of replies in the thread." },
+            { name: "hasCreatorHeart", desc: "Whether the creator hearted the comment." },
+            {
+              name: "publishedTimeText",
+              desc: 'Relative label from the platform (e.g. "6 years ago", may include "(edited)").',
+            },
+            {
+              name: "publishedTime",
+              desc: "Approximate ISO-8601 timestamp derived from publishedTimeText when exact time is unavailable.",
+            },
           ],
         },
       ];

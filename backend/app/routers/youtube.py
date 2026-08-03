@@ -23,6 +23,9 @@ from app.services.cached_runner import cached_or_run
 from app.services.http_fetch import fetch as proxy_fetch
 from app.services.openai_client import summarize_transcript
 from app.services.youtube_native import (
+    YT_COOKIES,
+    YT_HEADERS,
+    _normalize_community_post,
     coerce_published_fields,
     published_fields,
     build_youtube_video_details,
@@ -33,6 +36,8 @@ from app.services.youtube_native import (
     comment_replies_native,
     comments_native,
     community_posts_native,
+    enrich_short_cards,
+    extract_initial_json,
     find_continuation_token,
     hashtag_native,
     innertube,
@@ -41,7 +46,9 @@ from app.services.youtube_native import (
     search_native,
     search_shorts_native,
     text_of,
+    thumbnail_url_for_video_id,
     transcript_native,
+    trending_shorts_native,
     video_details_native,
     walk_find,
 )
@@ -1220,7 +1227,7 @@ async def youtube_comments(
 
         data = await cached_or_run(
             endpoint="youtube.comments",
-            params={"url": norm_url, "limit": limit, "cursor": cursor or "", "v": 6},
+            params={"url": norm_url, "limit": limit, "cursor": cursor or "", "v": 7},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1630,7 +1637,15 @@ async def youtube_search(
 
 @router.get("/trending-shorts", summary="Trending YouTube Shorts")
 async def youtube_trending_shorts(
-    q: str = Query("trending", min_length=2, description="Seed keyword for trending Shorts"),
+    q: str | None = Query(
+        None,
+        min_length=2,
+        description=(
+            "Optional topic seed for the Shorts reel sequence (not a keyword search). "
+            "Omit for the default trending/recommendation feed — same surface as "
+            "ScrapeCreators GET /v1/youtube/shorts/trending."
+        ),
+    ),
     limit: int = Query(
         20,
         ge=1,
@@ -1641,7 +1656,7 @@ async def youtube_trending_shorts(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    # Flat fee: native shorts search is ~$0; Apify browser actor is rare fallback.
+    # Flat fee: reel sequence + player enrich is native; Apify is rare fallback.
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/trending-shorts",
@@ -1650,22 +1665,25 @@ async def youtube_trending_shorts(
         base_credits=2,
     ) as ctx:
         async def _run() -> dict[str, Any]:
-            native = await search_shorts_native(q, limit)
-            if native is not None:
+            native = await trending_shorts_native(limit, q=q)
+            if native:
                 ctx["source"] = "direct"
-                shorts = [_video_card(v) for v in native[:limit]]
-                return {"platform": "youtube", "query": q, "totalReturned": len(shorts), "shorts": shorts}
+                return {
+                    "platform": "youtube",
+                    "query": q,
+                    "source": "reel_watch_sequence",
+                    "totalReturned": len(native),
+                    "shorts": native[:limit],
+                }
 
-            # Browser-based actor regularly needs >120s; the default sync
-            # timeout turns those runs into 502s. When even 280s is not
-            # enough, reuse the actor's latest successful run instead of
-            # failing -- trending content stays relevant for hours.
+            # Legacy fallback only — keyword Shorts search is NOT the product path.
+            seed = (q or "").strip() or "#shorts"
             client = ApifyClient(timeout=280, max_attempts=1)
             try:
                 items = await client.run_actor_sync(
                     settings.APIFY_ACTOR_YOUTUBE_SHORTS,
                     {
-                        "searchQuery": q,
+                        "searchQuery": seed,
                         "searchQueries": [],
                         "channelUrls": [],
                         "hashtagUrls": [],
@@ -1680,21 +1698,29 @@ async def youtube_trending_shorts(
                     settings.APIFY_ACTOR_YOUTUBE_SHORTS,
                     max_age_secs=48 * 3600,
                     max_items=limit,
-                    input_match={"searchQuery": q},
+                    input_match={"searchQuery": seed},
                 )
                 if not items:
                     raise
             ctx["source"] = "apify"
             shorts = [_video_card(v) for v in items[:limit]]
-            return {"platform": "youtube", "query": q, "totalReturned": len(shorts), "shorts": shorts}
+            for row in shorts:
+                vid = safe_str(row.get("id"))
+                if vid and not row.get("thumbnailUrl"):
+                    row["thumbnailUrl"] = thumbnail_url_for_video_id(vid)
+            return {
+                "platform": "youtube",
+                "query": q,
+                "source": "apify_fallback",
+                "totalReturned": len(shorts),
+                "shorts": shorts,
+            }
 
         data = await cached_or_run(
             endpoint="youtube.trending-shorts",
-            params={"q": q, "limit": limit, "v": 7},
+            params={"q": q or "", "limit": limit, "v": 8},
             runner=_run,
             ctx=ctx,
-            # Trending actor runs take minutes; serve the last list instantly
-            # after TTL expiry and refresh in the background.
             stale_while_revalidate=True,
             use_cache=cache,
         )
@@ -1709,23 +1735,29 @@ async def youtube_channel_shorts(
     cache: bool = Query(False, description="Set true to use the 24h cache. Default false — always fetch fresh data."),
     caller: ApiCaller = Depends(require_api_key),
 ):
+    """Channel Shorts shelf + player enrich (SC ``/v1/youtube/channel/shorts`` parity).
+
+    Flat 2 credits on the native path — shelf cards alone omit publish/duration/
+    thumbnail nesting; we fill those (and exact viewCount) via InnerTube player.
+    """
     url = normalize_youtube_channel_url(url)
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_YT_VIDEO, 2)
+    # Flat 2: native shelf + player enrich is cheap; never charge 1/result (was 20).
     async with billed_call(
         caller=caller,
         endpoint="/v1/youtube/channel-shorts",
         platform="youtube",
         resource_url=url,
-        base_credits=cost,
+        base_credits=2,
     ) as ctx:
         async def _run() -> dict[str, Any]:
             native_shorts = await channel_tab_native(
                 _channel_tab_url(url, "shorts"), limit, shorts=True, tab="shorts"
             )
             if native_shorts:
+                enriched = await enrich_short_cards(native_shorts[:limit])
                 ctx["source"] = "direct"
-                return {"url": url, "totalReturned": len(native_shorts), "shorts": native_shorts}
+                return {"url": url, "totalReturned": len(enriched), "shorts": enriched}
 
             apify = get_apify()
             items = await apify.run_actor_sync(
@@ -1734,17 +1766,23 @@ async def youtube_channel_shorts(
                 max_items=limit,
             )
             shorts = [_video_card(v) for v in items[:limit]]
+            for row in shorts:
+                vid = safe_str(row.get("id"))
+                if vid and not row.get("thumbnailUrl"):
+                    row["thumbnailUrl"] = thumbnail_url_for_video_id(vid)
             ctx["source"] = "apify"
             return {"url": url, "totalReturned": len(shorts), "shorts": shorts}
 
         data = await cached_or_run(
             endpoint="youtube.channel-shorts",
-            params={"url": url, "limit": limit, "v": 5},
+            params={"url": url, "limit": limit, "v": 6},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["shorts"]), RATE_YT_VIDEO, 2)
+        ctx["credits_override"] = 2 if ctx.get("source") == "direct" else _scaled_credits(
+            len(data["shorts"]), RATE_YT_VIDEO, 2
+        )
         return ApiResponse(data=data)
 
 
@@ -2231,7 +2269,7 @@ async def youtube_community_posts(
 
         data = await cached_or_run(
             endpoint="youtube.community-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 4},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -2281,56 +2319,39 @@ async def _community_post_comment_count(page_data: dict[str, Any]) -> int | None
 
 
 async def _fetch_community_post_page(url: str) -> dict[str, Any]:
-    """Parse a single community post from the public post page's
-    ytInitialData (the community actor only accepts channel URLs)."""
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
-        ),
-        "Accept-Language": "en-US,en;q=0.9",
-    }
-    cookies = {"CONSENT": "YES+1", "SOCS": "CAI"}
-    async with httpx.AsyncClient(timeout=30, follow_redirects=True, headers=headers, cookies=cookies) as client:
-        resp = await client.get(url)
+    """Parse a single community post — same shape as list items + comments.
+
+    Uses en-US cookies/headers so likeCountText parses as ``727K`` not locale
+    forms. ``likes`` (string) is no longer returned — use ``likeCount`` (int)
+    + ``likeCountText``.
+    """
+    try:
+        resp = await proxy_fetch(
+            url, tier="none", headers=YT_HEADERS, cookies=YT_COOKIES, timeout=30
+        )
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail="Failed to fetch community post page") from exc
     if resp.status_code >= 400:
         raise HTTPException(status_code=404, detail="Community post not found")
-    match = re.search(r"var ytInitialData = (\{.*?\});</script>", resp.text, flags=re.DOTALL)
-    if not match:
+    data = extract_initial_json(resp.text or "", "ytInitialData")
+    if data is None:
         raise HTTPException(status_code=404, detail="Community post not found")
-    try:
-        data = json.loads(match.group(1))
-    except json.JSONDecodeError as exc:
-        raise HTTPException(status_code=502, detail="Failed to parse community post page") from exc
     post = next(_find_backstage_post(data), None)
     if not post:
         raise HTTPException(status_code=404, detail="Community post not found")
 
-    post_id = safe_str(post.get("postId"))
-    author = post.get("authorText") or {}
-    author_browse = (
-        ((post.get("authorEndpoint") or {}).get("browseEndpoint") or {}).get("canonicalBaseUrl")
-    )
-    attachment = post.get("backstageAttachment") or {}
-    images = []
-    for renderer in _find_images(attachment):
-        thumbs = (renderer.get("image") or {}).get("thumbnails") or []
-        if thumbs:
-            images.append(safe_str(thumbs[-1].get("url")))
+    item = _normalize_community_post(post)
+    if not item:
+        raise HTTPException(status_code=404, detail="Community post not found")
     comments = await _community_post_comment_count(data)
-    published_iso, published_text = published_fields(_runs_text(post.get("publishedTimeText")))
+    channel = item.get("channel") if isinstance(item.get("channel"), dict) else {}
     return {
         "platform": "youtube",
-        "id": post_id,
-        "url": f"https://www.youtube.com/post/{post_id}" if post_id else url,
-        "text": safe_str(_runs_text(post.get("contentText"))),
-        "publishedAt": published_iso,
-        "publishedTimeText": published_text,
-        "channelName": safe_str(_runs_text(author)),
-        "channelUrl": f"https://www.youtube.com{author_browse}" if author_browse else None,
-        "likes": safe_str(_runs_text(post.get("voteCount"))),
+        **item,
         "comments": comments,
-        "images": [i for i in images if i],
+        # Soft aliases for older clients that read channelName/channelUrl.
+        "channelName": channel.get("title") or item.get("author"),
+        "channelUrl": channel.get("url"),
     }
 
 
@@ -2365,7 +2386,7 @@ async def youtube_community_post_details(
 
         data = await cached_or_run(
             endpoint="youtube.community-post-details",
-            params={"url": url, "v": 4},
+            params={"url": url, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

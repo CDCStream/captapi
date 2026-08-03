@@ -13519,16 +13519,32 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
     "platform": "youtube",
     "id": "UgkxfMvMnSnV3Ww9HwAY2wFGmVevmhRaYAYO",
     "url": "https://www.youtube.com/post/UgkxfMvMnSnV3Ww9HwAY2wFGmVevmhRaYAYO",
+    "author": "MrBeast",
+    "channel": {
+      "id": "UCX6OQ3DkcsbYNE6H8uQQuVA",
+      "title": "MrBeast",
+      "url": "https://www.youtube.com/@MrBeast",
+      "handle": "@MrBeast"
+    },
     "text": "Inside this box is the world's FIRST 500M Play Button. We're 10M away from 500M and I cannot wait to see what’s in here so help me out.",
+    "likeCount": 727000,
+    "likeCountText": "727K",
+    "likeCountApproximate": true,
     "publishedAt": "2026-07-03T19:42:10.000Z",
+    "publishedTime": "2026-07-03T19:42:10.000Z",
+    "publishedTimeText": "1 month ago (edited)",
+    "postType": "image",
     "channelName": "MrBeast",
     "channelUrl": "https://www.youtube.com/@MrBeast",
-    "likes": "727K",
     "comments": 16260,
     "images": [
       "https://yt3.ggpht.com/BgBr4f_nvLm84HY2JVaPiDZRLZXJsqA7Q29CJkAksrwRFNXN1GgQJxzjYfzWUYR6ZekKBXCVwxPQKw=s1000-rw-nd-v1"
     ],
-    "publishedTimeText": "1 month ago (edited)"
+    "image": "https://yt3.ggpht.com/BgBr4f_nvLm84HY2JVaPiDZRLZXJsqA7Q29CJkAksrwRFNXN1GgQJxzjYfzWUYR6ZekKBXCVwxPQKw=s1000-rw-nd-v1",
+    "hashtags": [],
+    "linkedVideos": [],
+    "video": null,
+    "sourceUrl": "https://www.youtube.com/post/UgkxfMvMnSnV3Ww9HwAY2wFGmVevmhRaYAYO"
   },
   "youtube-community-posts": {
     "url": "https://www.youtube.com/@MrBeast",
@@ -13637,8 +13653,16 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "linkedVideos": [],
         "video": null,
         "publishedTime": "2026-07-19T19:42:10.000Z",
+        "publishedAt": "2026-07-19T19:42:10.000Z",
         "publishedTimeText": "2 weeks ago",
         "postType": "poll",
+        "pollOptions": [
+          { "text": "100 Years Of No Aging", "voteCount": null, "percentage": null },
+          { "text": "1 Billion Dollars", "voteCount": null, "percentage": null }
+        ],
+        "totalVotes": 1600000,
+        "totalVotesText": "1.6M votes",
+        "totalVotesApproximate": true,
         "images": [],
         "image": null,
         "sourceUrl": "https://www.youtube.com/post/UgkxZusu9I1Z-VuU5PGZNA2gclHi8V9CJVZk",
@@ -14109,7 +14133,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 50000,
         "replyCount": 1200,
         "hasCreatorHeart": true,
-        "publishedTimeText": "1 year ago"
+        "publishedTimeText": "1 year ago",
+        "publishedTime": "2025-08-03T12:00:00.000Z"
       },
       {
         "id": "Ugshortcomment002",
@@ -14121,7 +14146,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "likeCount": 8000,
         "replyCount": 40,
         "hasCreatorHeart": false,
-        "publishedTimeText": "1 year ago"
+        "publishedTimeText": "1 year ago",
+        "publishedTime": "2025-08-03T12:00:00.000Z"
       }
     ]
   },

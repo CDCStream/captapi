@@ -36,6 +36,9 @@ import { PlatformGlyph } from "@/components/marketing/platform-glyph";
 import { Tldr } from "@/components/marketing/tldr";
 import { CONTENT_UPDATED } from "@/lib/seo";
 
+/** Revalidate so footer PLATFORM_COUNT / ENDPOINT_COUNT cannot stick on a stale SSG deploy forever. */
+export const revalidate = 3600;
+
 export function generateStaticParams() {
   return [
     ...PLATFORM_PAGES.map((g) => ({ slug: platformSlug(g.id) })),
