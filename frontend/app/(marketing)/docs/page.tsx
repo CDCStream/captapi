@@ -280,11 +280,11 @@ export default function DocsPage() {
       <H2 id="introduction">Introduction</H2>
       <p className="text-muted-foreground leading-relaxed max-w-3xl">
         Captapi gives you <strong className="text-foreground">structured data
-        from social media video</strong> through one consistent REST API. Send a
-        public URL from YouTube, TikTok, Instagram, or Facebook and get back
-        clean JSON — transcripts, AI summaries, video details, comments, and
-        search results. No OAuth, no per-platform SDKs, no data-collection
-        infrastructure to maintain.
+        from public social media</strong> through one consistent REST API. Send a
+        public URL from YouTube, TikTok, Instagram, Facebook, and more and get
+        back clean JSON — profiles, posts, transcripts, AI summaries, comments,
+        search results, and ad-library data. No OAuth, no per-platform SDKs, no
+        data-collection infrastructure to maintain.
       </p>
       <ul className="mt-4 space-y-2 text-sm text-muted-foreground max-w-3xl">
         <li>• One API key works across all {PLATFORM_COUNT} platforms.</li>
