@@ -197,6 +197,78 @@ _HASHTAG_RE = re.compile(r"#(\w*[^\W\d]\w*)", re.UNICODE)
 _MENTION_RE = re.compile(r"@([A-Za-z0-9_](?:[A-Za-z0-9_.]*[A-Za-z0-9_])?)")
 
 
+def build_ig_author(
+    user: dict[str, Any] | None = None,
+    *,
+    username: str | None = None,
+    followers: int | None = None,
+    post_count: int | None = None,
+) -> dict[str, Any]:
+    """One author shape for hashtag / reels / tagged / channel list items.
+
+    Always emits the same keys when values exist: id, username, displayName,
+    url, verified, profileImage, followers, postCount, private. Callers that
+    only have a lean owner still get username + url; enrich fills the rest.
+    """
+    src = user if isinstance(user, dict) else {}
+    uname = safe_str(username or src.get("username"))
+    verified = src.get("is_verified")
+    if verified is None:
+        verified = src.get("verified")
+    private = src.get("is_private")
+    if private is None:
+        private = src.get("private")
+    followers_n = followers
+    if followers_n is None:
+        followers_n = _count(src.get("edge_followed_by")) or safe_int(
+            src.get("follower_count") or src.get("followers")
+        )
+    posts_n = post_count
+    if posts_n is None:
+        posts_n = _count(src.get("edge_owner_to_timeline_media")) or safe_int(
+            src.get("media_count") or src.get("post_count") or src.get("postCount")
+        )
+    out: dict[str, Any] = {
+        "id": safe_str(src.get("id") or src.get("pk") or src.get("pk_id")),
+        "username": uname,
+        "displayName": safe_str(src.get("full_name") or src.get("displayName")),
+        "url": f"https://instagram.com/{uname}" if uname else None,
+        "verified": verified,
+        "profileImage": _image_url(src)
+        or safe_str(src.get("profile_pic_url") or src.get("profileImage"))
+        or None,
+        "followers": followers_n,
+        "postCount": posts_n,
+        "private": private,
+    }
+    return {k: v for k, v in out.items() if v is not None}
+
+
+def merge_ig_author(
+    author: dict[str, Any] | None, enrich: dict[str, Any] | None
+) -> dict[str, Any]:
+    """Fill missing author fields from a richer profile/stats dict."""
+    base = dict(author) if isinstance(author, dict) else {}
+    extra = enrich if isinstance(enrich, dict) else {}
+    for key in (
+        "id",
+        "username",
+        "displayName",
+        "url",
+        "verified",
+        "profileImage",
+        "followers",
+        "postCount",
+        "private",
+    ):
+        if base.get(key) is None and extra.get(key) is not None:
+            base[key] = extra[key]
+    uname = safe_str(base.get("username"))
+    if uname and not base.get("url"):
+        base["url"] = f"https://instagram.com/{uname}"
+    return {k: v for k, v in base.items() if v is not None}
+
+
 def hidden_count(value: Any) -> int | None:
     """Normalize Instagram engagement counts.
 
@@ -385,8 +457,8 @@ def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
         post.pop("videoUrl", None)
     if post.get("durationSeconds") is None:
         post.pop("durationSeconds", None)
-    if post.get("productType") == "":
-        post["productType"] = None
+    if not safe_str(post.get("productType")):
+        post.pop("productType", None)
     engagement = post.get("engagement")
     is_video = (
         post.get("postType") == "Video"
@@ -436,6 +508,65 @@ def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
     return post
 
 
+def resolve_graphql_likes_and_plays(
+    node: dict[str, Any], *, is_video: bool
+) -> tuple[int | None, int | None, int | None]:
+    """Separate likes from plays on Instagram GraphQL media nodes.
+
+    Hashtag / Explore Reel cards often put the **view** total in
+    ``edge_media_preview_like.count`` (or a flattened ``likes`` field) while
+    omitting real ``like_count``. Treating that as likes inflates engagement
+    ~50× and leaves ``engagement.views`` empty.
+
+    Rule: for videos, only ``like_count`` (and aliases) count as likes.
+    Preview / flattened ``likes`` are reclaimable as play totals when GraphQL
+    omitted ``play_count``. Images/Sidecars still use preview as likes.
+
+    Returns ``(likes, play_count, video_view_count)``.
+    """
+    # Authoritative like total (Polaris / api/v1 / richer GraphQL). Never use
+    # edge_media_preview_like / flattened likes here for videos — those are
+    # the hashtag Reel view trap.
+    true_likes = hidden_count(
+        first_present(
+            node.get("like_count"),
+            node.get("likeCount"),
+            node.get("likes_count"),
+        )
+    )
+    preview_like = hidden_count(
+        first_present(
+            _count(node.get("edge_media_preview_like")),
+            _count(node.get("edge_liked_by")),
+            node.get("likes"),
+        )
+    )
+    play_count = safe_int(node.get("video_play_count") or node.get("play_count"))
+    video_view_count = safe_int(node.get("video_view_count") or node.get("view_count"))
+
+    if is_video:
+        likes = true_likes
+        if preview_like is not None and play_count is None:
+            # No like_count → preview is the view total on hashtag Reel cards.
+            # With like_count, only reclaim when preview ≈ video_view_count.
+            if true_likes is None:
+                play_count = preview_like
+            elif (
+                video_view_count is not None
+                and video_view_count > 0
+                and abs(preview_like - video_view_count) / video_view_count <= 0.05
+            ):
+                play_count = preview_like
+        if video_view_count is None and play_count is not None and true_likes is None:
+            # Keep video_view_count for split_play_counts fallthrough when
+            # Instagram only stuffed the total into preview_like.
+            video_view_count = play_count
+        return likes, play_count, video_view_count
+
+    likes = true_likes if true_likes is not None else preview_like
+    return likes, play_count, video_view_count
+
+
 def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[str, Any]:
     # Per-post nodes only carry a minimal owner ({id, username}); the full
     # author (name, verified, avatar, followers) lives on the profile object,
@@ -457,19 +588,14 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
     is_video = bool(node.get("is_video")) or typename == "GraphVideo"
     is_sidecar = typename == "GraphSidecar"
     caption = _caption(node) or ""
-    # GraphQL ``video_view_count`` undercounts Reels — never map it into views.
-    # Real plays come from api/v1 overlay (``play_count`` / ``ig_play_count``).
-    play_count = safe_int(node.get("video_play_count") or node.get("play_count"))
+    # GraphQL often undercounts plays vs api/v1 ``play_count`` — still emit
+    # views when we have a signal; feed enrich upgrades totals when matched.
+    # Never put view totals into ``likes`` (see resolve_graphql_likes_and_plays).
+    likes, play_count, video_view_count = resolve_graphql_likes_and_plays(
+        node, is_video=is_video
+    )
     ig_play_count = safe_int(node.get("ig_play_count"))
     fb_play_count = safe_int(node.get("fb_play_count") or node.get("fbPlayCount"))
-    likes = hidden_count(
-        first_present(
-            _count(node.get("edge_media_preview_like")),
-            _count(node.get("edge_liked_by")),
-            node.get("like_count"),
-            node.get("likes"),
-        )
-    )
     product = safe_str(node.get("product_type")) or ("clips" if is_video else None)
     # Prefer shortcode as id (matches Polaris hydrate + enrich_posts_from_author_feeds).
     result = {
@@ -488,14 +614,7 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         "thumbnailUrl": _image_url(node),
         "videoUrl": safe_str(node.get("video_url")) or None,
         "hasAudio": node.get("has_audio") if node.get("has_audio") is not None else None,
-        "author": {
-            "username": username,
-            "displayName": safe_str(author.get("full_name")),
-            "url": f"https://instagram.com/{username}" if username else None,
-            "followers": _count(author.get("edge_followed_by")),
-            "verified": author.get("is_verified"),
-            "profileImage": _image_url(author),
-        },
+        "author": build_ig_author(author, username=username),
         "engagement": engagement_with_play_split(
             {
                 "likes": likes,
@@ -510,6 +629,7 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
             play_count=play_count,
             ig_play_count=ig_play_count,
             fb_play_count=fb_play_count,
+            video_view_count=video_view_count,
             likes=likes,
             is_video=is_video,
         ),
@@ -541,21 +661,6 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
             "artist": safe_str(music.get("artist_name")),
         }
         result["musicId"] = result["music"].get("id")
-    # Owner stats when the GraphQL node carries them (often only on richer edges).
-    if isinstance(owner, dict):
-        followers = _count(owner.get("edge_followed_by")) or safe_int(owner.get("follower_count"))
-        posts = _count(owner.get("edge_owner_to_timeline_media")) or safe_int(
-            owner.get("media_count") or owner.get("post_count")
-        )
-        if followers is not None:
-            result["author"]["followers"] = followers
-        if posts is not None:
-            result["author"]["postCount"] = posts
-        if owner.get("is_private") is not None:
-            result["author"]["private"] = owner.get("is_private")
-        oid = safe_str(owner.get("id") or owner.get("pk"))
-        if oid:
-            result["author"]["id"] = oid
     return strip_null_post_fields(result)
 
 

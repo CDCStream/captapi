@@ -532,19 +532,17 @@ const TIKTOK: Spec[] = [
     category: "list",
     method: "GET",
     path: "/v1/tiktok/popular-creators",
-    credits: 28,
-    creditsPerResult: 1.4,
+    credits: 2,
     tagline:
-      "Discover popular TikTok creators by market — sort by followers, true engagement %, or FYP popularity.",
+      "Creators ranking in a market's For You feed — real engagementRate formula, flat 2 credits native.",
     longDescription:
-      "Pass a two-letter country code (feed market, e.g. US) and get ranked creators appearing in that market's For You feed, hydrated with profile stats. engagementRate is (avg likes per video) / followers × 100 — not lifetime likes÷followers — and every row includes engagementRateBasis so the formula is explicit. sort=engagement uses that rate; sort=follower / popularity also supported. Optional follower_count ranges (10k-100k, 100k-1m, 1m-10m, >10m). Top-level country is the feed market you queried; each creator may include region from TikTok's profile (null when unknown) — we never echo the query country onto the creator. Bios with emails or payment links get contact{emails[],links[]}. ~1.4 credits per returned creator (min 2).",
+      "Pass a two-letter country code (feed market, e.g. US) and get creators appearing in that market's For You feed, hydrated with profile stats. engagementRate is (avg likes per video) / followers × 100 — not lifetime likes÷followers — with engagementRateBasis on every row. sort=engagement | follower | popularity; optional follower_count ranges. Top-level country is the feed market; each creator may include region from TikTok's profile (null when unknown). id + secUid when available. Honest gaps vs Creator Marketplace APIs: no tcm_id / tcm_link, no audienceCountry filter (that needs TCM audience data we do not have). Flat 2 credits on the native path; Apify fallthrough scales ~1.4/creator (min 2).",
     delivers: [
+      "Flat 2 credits native (not per-result)",
       "engagementRate = avgLikesPerVideo/followers × 100 (+ engagementRateBasis)",
-      "sort=follower | engagement | popularity",
-      "follower_count range filter",
-      "region from profile when TikTok exposes it (not query echo)",
-      "contact{emails,links} parsed from bio when present",
-      "avgViews from FYP sample + rank",
+      "id + secUid when TikTok exposes them",
+      "sort=follower | engagement | popularity + follower_count ranges",
+      "Honest: no tcm_id / audienceCountry (not Marketplace)",
     ],
   },
 ];
@@ -642,13 +640,13 @@ const INSTAGRAM: Spec[] = [
     path: "/v1/instagram/tagged-posts",
     credits: 1,
     tagline:
-      "Posts that tag an Instagram account — author id, views, hashtags/mentions, cursor pagination (1 credit native).",
+      "Posts that tag an Instagram account — author verified/avatar when available, staleFeed when Instagram only exposes an archive.",
     longDescription:
-      "Pass a profile URL or @handle (no numeric user_id required) and get the profile's Tagged tab as clean JSON: each post includes id/shortcode, postType, caption, publishedAt, author{id,username,displayName,url}, engagement{views,likes,comments}, hashtags[], and mentions[]. Cursor pagination via nextCursor + hasMore (same shape as channel-posts). Flat 1 credit on the native usertags path; Apify fallback bills about 0.9 credits per returned post (min 2). Note: Instagram's usertags feed only returns tags the account still exposes — some large brands (e.g. natgeo) surface a truncated historical window while accounts like nasa return recent UGC.",
+      "Pass a profile URL or @handle and get the profile's Tagged tab as clean JSON: id/shortcode, postType, caption, publishedAt, author{id,username,displayName,url,verified,profileImage when Instagram exposes them}, engagement{views,likes,comments}, hashtags[], mentions[]. Cursor pagination via nextCursor + hasMore. Every response includes staleFeed plus newestPublishedAt / oldestPublishedAt — when Instagram only exposes a truncated historical window (e.g. natgeo returning only 2018 tags), staleFeed is true and note explains why this is not live brand monitoring. Accounts like nasa still return recent UGC with staleFeed false. Flat 1 credit on the native path; Apify fallback is ~0.9/result only when the feed is fresh — archived windows stay flat 1 credit.",
     delivers: [
-      "author.id + username for the tagging creator",
+      "staleFeed + newest/oldestPublishedAt (archive window honesty)",
+      "author.verified / profileImage when available",
       "engagement.views on video/Reel tags when Instagram exposes them",
-      "hashtags[] / mentions[] / postType",
       "Cursor pagination (nextCursor + hasMore)",
     ],
   },
@@ -672,7 +670,25 @@ const INSTAGRAM: Spec[] = [
       "Video URL, caption, engagement, durationSeconds",
     ],
   },
-  { slug: "instagram-hashtag-search", name: "Instagram Hashtag Search API", shortName: "Hashtag Search", category: "search", method: "GET", path: "/v1/instagram/hashtag-search", credits: 2, tagline: "Native Instagram hashtag grid — posts with media, caption, author followers, views, paid-partnership flags, audio, and location. Flat 2 credits per call.", longDescription: "Pass a hashtag without the # (e.g. travel or foodie) and the Instagram Hashtag Search API returns the public posts and Reels from that tag's Explore grid as clean JSON — the same grid you'd see on the hashtag's page in the app (not a Google-indexed subset). Each result includes the post URL, media type, caption, author (with followers / postCount when available), like / comment / view counts, paid-partnership / ad / affiliate flags, audio (musicId), location, sample preview comments, a thumbnail, and hashtags / @mentions. Optional mediaType=reels filters to Reels only. Use it to track a campaign or branded hashtag, separate organic from sponsored hits, discover creators by size, or watch a trend grow. No Instagram login, no OAuth, and no infrastructure to maintain. Flat 2 credits per call. Pass cache=true to serve from the 24h shared cache (0 credits on hit); default is always fresh.", delivers: ["Native hashtag grid posts and Reels (not Google index)", "Author followers / postCount plus like / comment / view counts", "isPaidPartnership / isAd / isAffiliate flags", "musicId, location, previewComments, mediaType=reels filter"] },
+  {
+    slug: "instagram-hashtag-search",
+    name: "Instagram Hashtag Search API",
+    shortName: "Hashtag Search",
+    category: "search",
+    method: "GET",
+    path: "/v1/instagram/hashtag-search",
+    credits: 2,
+    tagline:
+      "Native Instagram hashtag Explore — Reels-heavy top surface with real likes, views, captions, and paid flags. Flat 2 credits.",
+    longDescription:
+      "Pass a hashtag without the # (e.g. travel or foodie) and get posts from Instagram's hashtag Explore as clean JSON — not keyword search and not a Google-indexed subset. Instagram's top/hashtag surface is Reels-heavy (productType clips); photos and Sidecars appear when the tag grid includes them, or use mediaType=reels for clips only. Each result includes url, postType, productType, caption, author (followers / postCount when available), engagement.views (play total on videos; null on Image/Sidecar) plus likes and comments — likes come from like_count, never from play totals — and on Reels viewsInstagram / viewsFacebook when Instagram exposes the split. Also paid-partnership / ad / affiliate flags, audio (musicId), location, preview comments when present, thumbnail, and hashtags / @mentions. Use it to track a campaign or branded hashtag, separate organic from sponsored hits, or discover creators. Flat 2 credits per call. Pass cache=true for the 24h shared cache (0 credits on hit); default is always fresh.",
+    delivers: [
+      "Hashtag Explore posts (Reels-heavy top surface; not keyword search)",
+      "engagement.views + likes + comments (likes ≠ plays)",
+      "viewsInstagram / viewsFacebook on Reels when available",
+      "isPaidPartnership / isAd / isAffiliate, musicId, location, mediaType=reels",
+    ],
+  },
   {
     slug: "instagram-profile-search",
     name: "Instagram Profile Search API",
@@ -2165,7 +2181,24 @@ const ENDPOINT_PARAMS: Record<string, ApiParam[]> = {
   "tiktok-comments": [up(TT_VIDEO), lpFlat(50, 500, 2), { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (a numeric offset, e.g. 50). A null nextCursor means the end of the comments." }],
   "tiktok-channel-details": [up(TT_PROFILE)],
   "tiktok-profile-region": [up(TT_PROFILE)],
-  "tiktok-audience-demographics": [up(TT_PROFILE)],
+  "tiktok-audience-demographics": [
+    up(TT_PROFILE),
+    {
+      name: "videos",
+      type: "integer",
+      required: false,
+      description:
+        "How many recent videos to sample comments from: 12 (default, 3 credits), 30 (5 credits), or 60 (8 credits).",
+    },
+    {
+      name: "countriesLimit",
+      type: "integer",
+      required: false,
+      description:
+        "Max countries in audienceLocations; remainder folds into other{count,percentage}. Omit for the full list.",
+    },
+    cacheP(),
+  ],
   "tiktok-search-suggestions": [qp("Seed keyword to expand into autocomplete suggestions, e.g. skincare."), { name: "country", type: "string", required: false, description: "Two-letter ISO country code that localizes the suggestions to a market, e.g. US, GB, DE. Default US." }, { name: "language", type: "string", required: false, description: "Interface language for the suggestions, e.g. en-US or de-DE. Default en-US." }, lpFlat(20, 100, 2)],
   "tiktok-channel-posts": [up(TT_PROFILE), { name: "limit", type: "integer", required: false, description: "How many of the creator's latest videos to return on this page (default 20, max 200). Newest first. Flat 2 credits per call." }, { name: "cursor", type: "string", required: false, description: "Pagination cursor. Leave empty for the first page; then pass the nextCursor value returned in the previous response (TikTok's max_cursor timestamp, e.g. 1783614676000). A null nextCursor means the end of the list." }],
   "tiktok-comment-replies": [
@@ -3362,10 +3395,22 @@ export function faqs(ep: ApiEndpoint): FaqItem[] {
       a: `Handles change; id and secUid do not. TikTok's follower lists, video lists, and many internal calls require secUid. Prefer id/secUid for CRM joins and chaining — use username for display.`,
     });
   }
+  if (ep.slug === "tiktok-audience-demographics") {
+    list.push({
+      q: `Is this follower geography?`,
+      a: `No. TikTok does not publish follower country. We sample people commenting on recent videos (basis=commenters) and report sampleSize, videosSampled, and confidence. Percentages are numeric. Use videos=12|30|60 for deeper samples (3/5/8 credits). Do not treat this as a full follower census.`,
+    });
+  }
+  if (ep.slug === "tiktok-popular-creators") {
+    list.push({
+      q: `Is this TikTok Creator Marketplace (tcm_id / audienceCountry)?`,
+      a: `No. We rank creators from a market's For You feed and hydrate public profile stats. You get id/secUid, engagementRate with an explicit formula, and region when TikTok exposes it — not tcm_id, tcm_link, or audienceCountry. Flat 2 credits on the native path.`,
+    });
+  }
   if (ep.slug === "instagram-tagged-posts") {
     list.push({
       q: `Why do some brands return only old tagged posts?`,
-      a: `Instagram's usertags feed only returns tags the account still exposes. Mega brands that stopped approving tags (e.g. natgeo) can surface a truncated historical window — verified live — while accounts like nasa or cristiano return recent UGC. Captapi does not invent newer tags than Instagram provides.`,
+      a: `Instagram's usertags feed only returns tags the account still exposes. Mega brands that stopped approving tags (e.g. natgeo) can surface a truncated historical window — all from one day years ago — while accounts like nasa or cristiano return recent UGC. Captapi does not invent newer tags. Check staleFeed / newestPublishedAt on every response: when staleFeed is true, do not use the page for live brand or collaboration monitoring.`,
     });
   }
   if (ep.slug === "threads-profile") {
@@ -3630,8 +3675,9 @@ const FIELD_DESCS: Record<string, string> = {
   count: "Number of items in this bucket (e.g. commenters from this country in the sample).",
   countryCode: "ISO-3166 alpha-2 country code (e.g. US, MX).",
   percentage:
-    "Share of the sample this bucket represents, as a number (e.g. 26.02). Use percentageText for a display string.",
-  percentageText: 'Display form of percentage, e.g. "26.02%". Prefer percentage for math.',
+    "Numeric share of the sample (e.g. 26.02). Never a string — use percentageText for display. Values across audienceLocations (+ other) sum to ~100.",
+  percentageText:
+    'Display form of percentage with a % suffix (e.g. "26.02%"). Prefer percentage for math.',
   sampleSize: "Total number of commenter countries counted across the sampled videos.",
   videosSampled: "How many of the creator's recent videos were sampled to build the breakdown.",
   usageCount:

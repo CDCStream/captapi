@@ -26,10 +26,12 @@ import structlog
 
 from app.services.http_fetch import proxy_for
 from app.services.instagram_decodo import (
+    build_ig_author,
     dedupe_preserve,
     engagement_with_play_split,
     feed_play_metrics,
     hidden_count,
+    merge_ig_author,
 )
 from app.utils.formatters import safe_float, safe_int, safe_str
 
@@ -399,17 +401,7 @@ def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) 
     if is_paid is None and media.get("sponsor_tags"):
         is_paid = True
 
-    author: dict[str, Any] = {
-        "id": owner_id,
-        "username": username,
-        "displayName": safe_str(user.get("full_name")),
-        "url": f"https://instagram.com/{username}" if username else None,
-        "verified": user.get("is_verified"),
-        "profileImage": safe_str(user.get("profile_pic_url")),
-        "followers": safe_int(user.get("follower_count")),
-        "postCount": safe_int(user.get("media_count")),
-        "private": user.get("is_private"),
-    }
+    author = build_ig_author(user, username=username)
 
     post: dict[str, Any] = {
         "platform": "instagram",
@@ -1017,14 +1009,7 @@ def map_feed_post(
     )
 
     owner_id = safe_str(user.get("pk") or user.get("pk_id") or user.get("id"))
-    author: dict[str, Any] = {
-        "id": owner_id,
-        "username": username,
-        "displayName": safe_str(user.get("full_name")),
-        "url": f"https://instagram.com/{username}" if username else None,
-        "verified": user.get("is_verified"),
-        "profileImage": safe_str(user.get("profile_pic_url")) or None,
-    }
+    author = build_ig_author(user, username=username)
     if followers is not None and (
         profile_user_id is None or owner_id is None or owner_id == profile_user_id
     ):
@@ -2380,10 +2365,14 @@ def _parse_published_at(value: Any) -> datetime | None:
 
 
 def _is_stale_explore_post(post: dict[str, Any], *, max_age_days: int = 180) -> bool:
-    """Explore actors sometimes resurface years-old photos — not 'trending'."""
+    """Explore actors sometimes resurface years-old photos — not 'trending'.
+
+    Missing ``publishedAt`` is treated as stale: undated Explore junk must not
+    bypass the age filter (2018 resurfaces with null dates were slipping through).
+    """
     published = _parse_published_at(post.get("publishedAt"))
     if published is None:
-        return False
+        return True
     if published.tzinfo is None:
         published = published.replace(tzinfo=timezone.utc)
     age = datetime.now(timezone.utc) - published
@@ -2435,10 +2424,7 @@ def _as_trending_reel(post: dict[str, Any]) -> dict[str, Any]:
         "durationSeconds": post.get("durationSeconds"),
         "thumbnailUrl": post.get("thumbnailUrl"),
         "videoUrl": post.get("videoUrl"),
-        "author": {
-            "username": author.get("username"),
-            "url": author.get("url"),
-        },
+        "author": build_ig_author(author, username=safe_str(author.get("username"))),
         "engagement": {
             "views": engagement.get("views"),
             "likes": engagement.get("likes"),
@@ -2530,13 +2516,14 @@ async def trending_reels_native(
 async def enrich_posts_from_author_feeds(
     posts: list[dict[str, Any]], *, max_authors: int = 12
 ) -> list[dict[str, Any]]:
-    """Backfill ``engagement.views`` + author followers/postCount.
+    """Backfill engagement views/likes + author followers/postCount.
 
-    Polaris media info (used by hydrate) returns real ``like_count`` but hides
-    play counts logged-out. The owner's ``api/v1`` feed still exposes
-    ``play_count`` / ``ig_play_count`` for recent posts — merge those in when
-    the hashtag hit is still on the creator's timeline. Profile lookup fills
-    ``author.followers`` / ``author.postCount`` for campaign sizing.
+    Hashtag GraphQL often stuffs play totals into preview-like / flattened
+    ``likes`` and omits real ``like_count``. Polaris hydrate can return real
+    likes but hide plays logged-out. The owner's ``api/v1`` feed exposes both
+    ``like_count`` and ``play_count`` / ``ig_play_count`` for recent posts —
+    merge those when the hashtag hit is still on the creator's timeline.
+    Profile lookup fills ``author.followers`` / ``author.postCount``.
     """
     from app.services.instagram_decodo import strip_null_post_fields
 
@@ -2561,21 +2548,39 @@ async def enrich_posts_from_author_feeds(
         return posts
 
     sem = asyncio.Semaphore(3)
-    # shortcode -> (play_count, ig_play_count, fb_play_count)
-    play_by_code: dict[str, tuple[int | None, int | None, int | None]] = {}
+    # shortcode -> (play_count, ig_play_count, fb_play_count, like_count)
+    feed_by_code: dict[
+        str, tuple[int | None, int | None, int | None, int | None]
+    ] = {}
     stats_by_user: dict[str, dict[str, Any]] = {}
 
     def _stats_from_profile(profile: dict[str, Any]) -> dict[str, Any]:
-        return {
-            "followers": _edge_count(
-                profile.get("edge_followed_by") or profile.get("follower_count")
-            ),
-            "postCount": _edge_count(
-                profile.get("edge_owner_to_timeline_media") or profile.get("media_count")
-            ),
-            "private": profile.get("is_private"),
-            "id": safe_str(profile.get("id") or profile.get("pk")),
-        }
+        from app.services.instagram_decodo import _image_url
+
+        return build_ig_author(
+            {
+                **profile,
+                "profile_pic_url": profile.get("profile_pic_url")
+                or _image_url(profile),
+            }
+        )
+
+    def _remember_feed_item(item: dict[str, Any]) -> None:
+        code = safe_str(item.get("code"))
+        pk = safe_str(item.get("pk") or item.get("pk_id") or item.get("id"))
+        if pk and "_" in pk:
+            pk = pk.split("_", 1)[0]
+        plays, ig_plays, fb_plays = feed_play_metrics(item)
+        metrics = (
+            plays,
+            ig_plays,
+            fb_plays,
+            hidden_count(item.get("like_count")),
+        )
+        if code:
+            feed_by_code[code] = metrics
+        if pk:
+            feed_by_code[pk] = metrics
 
     async def _one(username: str, user_id: str) -> None:
         async with sem:
@@ -2587,10 +2592,7 @@ async def enrich_posts_from_author_feeds(
                 page = await fetch_user_feed_page(uid, count=33)
                 if page:
                     for item in page[0]:
-                        code = safe_str(item.get("code"))
-                        if not code:
-                            continue
-                        play_by_code[code] = feed_play_metrics(item)
+                        _remember_feed_item(item)
             profile, _missing = await profile_task
             if isinstance(profile, dict):
                 stats = _stats_from_profile(profile)
@@ -2600,10 +2602,7 @@ async def enrich_posts_from_author_feeds(
                     page = await fetch_user_feed_page(uid, count=33)
                     if page:
                         for item in page[0]:
-                            code = safe_str(item.get("code"))
-                            if not code:
-                                continue
-                            play_by_code[code] = feed_play_metrics(item)
+                            _remember_feed_item(item)
             elif username not in stats_by_user:
                 # Last resort — full WPI ladder (slow / rate-limited).
                 profile = await fetch_web_profile_info(username)
@@ -2612,32 +2611,38 @@ async def enrich_posts_from_author_feeds(
 
     await asyncio.gather(*[_one(u, i) for u, i in authors])
 
-    def _post_shortcode(post: dict[str, Any]) -> str | None:
-        # Hydrated posts use shortcode as id; GraphQL nodes often use numeric id.
-        code = safe_str(post.get("id") or post.get("shortcode") or post.get("shortCode"))
-        if code and not code.isdigit() and code in play_by_code:
-            return code
+    def _feed_key(post: dict[str, Any]) -> str | None:
+        # Prefer shortcode / URL code; numeric id works when feed indexed by pk.
+        for key in (
+            safe_str(post.get("shortcode") or post.get("shortCode")),
+            safe_str(post.get("mediaId")),
+            safe_str(post.get("id")),
+        ):
+            if key and key in feed_by_code:
+                return key
         url = safe_str(post.get("url")) or ""
         m = re.search(r"/(?:reel|p|tv)/([^/?#]+)/?", url, re.I)
+        if m and m.group(1) in feed_by_code:
+            return m.group(1)
         if m:
             return m.group(1)
-        return code if code and code in play_by_code else None
+        return None
 
     for post in posts:
-        code = _post_shortcode(post)
+        code = _feed_key(post)
         engagement = post.get("engagement") if isinstance(post.get("engagement"), dict) else {}
-        # Prefer feed play counts whenever available — GraphQL video_view_count
-        # often undercounts Reels and can sit below like_count.
-        if code and code in play_by_code:
-            plays, ig_plays, fb_plays = play_by_code[code]
-            likes = engagement.get("likes")
+        # Prefer feed metrics whenever available — GraphQL video_view_count
+        # undercounts Reels; hashtag cards put plays into the like slot.
+        if code and code in feed_by_code:
+            plays, ig_plays, fb_plays, feed_likes = feed_by_code[code]
+            likes = feed_likes if feed_likes is not None else engagement.get("likes")
             is_video = (
                 post.get("postType") == "Video"
                 or safe_str(post.get("productType")) in {"clips", "reel", "reels"}
                 or bool(post.get("videoUrl"))
             )
             post["engagement"] = engagement_with_play_split(
-                engagement,
+                {**engagement, "likes": likes},
                 play_count=plays,
                 ig_play_count=ig_plays,
                 fb_play_count=fb_plays,
@@ -2648,13 +2653,7 @@ async def enrich_posts_from_author_feeds(
         username = safe_str(author.get("username"))
         stats = stats_by_user.get(username or "")
         if stats:
-            if author.get("followers") is None and stats.get("followers") is not None:
-                author["followers"] = stats["followers"]
-            if author.get("postCount") is None and stats.get("postCount") is not None:
-                author["postCount"] = stats["postCount"]
-            if author.get("private") is None and stats.get("private") is not None:
-                author["private"] = stats["private"]
-            post["author"] = author
+            post["author"] = merge_ig_author(author, stats)
         mentions = post.get("mentions")
         if isinstance(mentions, list):
             post["mentions"] = dedupe_preserve(mentions)

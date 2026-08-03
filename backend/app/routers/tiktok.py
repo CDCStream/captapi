@@ -144,6 +144,10 @@ CREDIT_USER_SEARCH_NATIVE = 1  # signer /api/search/user/full/ — SC parity
 # in the Apify console, so rates are conservative until confirmed.
 RATE_TREND = 0.7
 RATE_TREND_MARGIN = 1.4
+# FYP sample + profile hydrate — flat when native succeeds. Apify Creative
+# Center fallthrough stays per-result (RATE_TREND_MARGIN). SC bills ~1 credit
+# for TCM-backed /creators/popular; we are not that source.
+CREDIT_POPULAR_CREATORS_NATIVE = 2
 
 # Reply scraper crawls a video's comments to find one comment's replies, and is
 # billed per ROW pushed (comment or reply) at $2.40/1k = $0.0024/row. We
@@ -1656,7 +1660,17 @@ async def tiktok_search_suggestions(
         return ApiResponse(data=data)
 
 
-@router.get("/popular-creators", summary="Popular TikTok creators by country")
+@router.get(
+    "/popular-creators",
+    summary="Popular TikTok creators by feed market",
+    description=(
+        "Ranks creators appearing in a market's For You feed, then hydrates "
+        "profile stats. engagementRate is (avg likes per video)/followers×100 "
+        "(see engagementRateBasis) — not lifetime likes÷followers. "
+        "This is not TikTok Creator Marketplace (no tcm_id / audienceCountry); "
+        "country is the feed market you query, not audience geography."
+    ),
+)
 async def tiktok_popular_creators(
     country: str = Query("US", min_length=2, max_length=2),
     sort: str = Query("follower", pattern="^(follower|engagement|popularity)$"),
@@ -1666,7 +1680,8 @@ async def tiktok_popular_creators(
     caller: ApiCaller = Depends(require_api_key),
 ):
     settings = get_settings()
-    cost = _scaled_credits(limit, RATE_TREND_MARGIN, 2)
+    # Reserve Apify worst-case; native path overrides to flat CREDIT_POPULAR_CREATORS_NATIVE.
+    cost = _scaled_credits(limit, RATE_TREND_MARGIN, CREDIT_POPULAR_CREATORS_NATIVE)
     async with billed_call(
         caller=caller,
         endpoint="/v1/tiktok/popular-creators",
@@ -1687,8 +1702,13 @@ async def tiktok_popular_creators(
                     "platform": "tiktok",
                     "country": country.upper(),
                     "sort": sort,
+                    "source": "fyp",
                     "totalReturned": len(native),
                     "creators": native,
+                    "note": (
+                        "Ranked from this market's For You feed + profile hydrate. "
+                        "Not Creator Marketplace — no tcm_id or audienceCountry filter."
+                    ),
                 }
 
             # Creative Center trends actor: only trendType/countryCode/maxResults
@@ -1728,18 +1748,34 @@ async def tiktok_popular_creators(
                 "platform": "tiktok",
                 "country": country.upper(),
                 "sort": sort,
+                "source": "apify",
                 "totalReturned": len(creators),
                 "creators": creators,
+                "note": (
+                    "Fallthrough list — still not Creator Marketplace. "
+                    "No tcm_id or audienceCountry filter."
+                ),
             }
 
         data = await cached_or_run(
             endpoint="tiktok.popular-creators",
-            params={"country": country.upper(), "sort": sort, "follower_count": follower_count or "", "limit": limit, "v": 7},
+            params={
+                "country": country.upper(),
+                "sort": sort,
+                "follower_count": follower_count or "",
+                "limit": limit,
+                "v": 8,
+            },
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
-        ctx["credits_override"] = _scaled_credits(len(data["creators"]), RATE_TREND_MARGIN, 2)
+        if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_POPULAR_CREATORS_NATIVE
+        else:
+            ctx["credits_override"] = _scaled_credits(
+                len(data["creators"]), RATE_TREND_MARGIN, CREDIT_POPULAR_CREATORS_NATIVE
+            )
         return ApiResponse(data=data)
 
 

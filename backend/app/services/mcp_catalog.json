@@ -1262,8 +1262,8 @@
     "platform": "tiktok",
     "name": "TikTok Popular Creators",
     "path": "/v1/tiktok/popular-creators",
-    "credits": 28,
-    "summary": "Popular TikTok creators by country and ranking mode.",
+    "credits": 2,
+    "summary": "FYP-market creators; engagementRate formula; flat 2 credits native.",
     "params": [
       {
         "name": "country",
@@ -1567,7 +1567,7 @@
     "name": "Instagram Tagged Posts",
     "path": "/v1/instagram/tagged-posts",
     "credits": 1,
-    "summary": "Tagged posts — author id, views, hashtags/mentions; cursor pagination.",
+    "summary": "Tagged posts — staleFeed honesty, author verified/avatar, cursor pagination.",
     "params": [
       {
         "name": "url",
@@ -1629,7 +1629,7 @@
     "name": "Instagram Hashtag Search",
     "path": "/v1/instagram/hashtag-search",
     "credits": 2,
-    "summary": "Search Instagram posts by hashtag (native grid).",
+    "summary": "Hashtag Explore posts (Reels-heavy); engagement.views + real likes.",
     "params": [
       {
         "name": "q",

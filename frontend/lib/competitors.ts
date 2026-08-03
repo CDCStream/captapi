@@ -121,15 +121,15 @@ export const COMPETITORS: Record<string, Competitor> = {
     pricing: "Credits",
     edge: [
       "Purpose-built for video content: transcripts, AI summaries, comments and engagement",
-      "Simple, predictable per-call credit pricing",
+      "Platforms SC does not cover: Spotify, SoundCloud, Rumble, Kwai — plus summarizers on YT/TT/IG/FB",
+      "Honest methodology where it matters (e.g. TikTok audience = commenter sample with sampleSize, not a fake follower census)",
       "100 free credits on signup — no credit card",
-      "Free public tools (no account needed) for quick tasks",
       "Clean, consistent JSON — pass cache=true for a free 24h hit; default is always fresh",
     ],
     faqs: [
       {
         q: "Is Captapi a good Scrape Creators alternative?",
-        a: "If you need transcripts, summaries, comments, profiles, search, engagement metrics, ad intelligence, or commerce data across many public platforms, Captapi is a focused, developer-friendly option with a free tier and free tools.",
+        a: "If you need transcripts, summaries, comments, profiles, search, engagement metrics, or platforms SC omits (Spotify, SoundCloud, Rumble, Kwai), Captapi is a focused option with a free tier. For Creator Marketplace fields (tcm_id, audienceCountry) or Instagram Stories / large Ad Library coverage, compare endpoint-by-endpoint — Captapi is not a full SC clone.",
       },
     ],
   },

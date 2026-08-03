@@ -950,6 +950,60 @@ def _sort_posts_newest_first(posts: list[dict[str, Any]]) -> list[dict[str, Any]
     return sorted(posts, key=_key, reverse=True)
 
 
+def _tagged_feed_freshness(posts: list[dict[str, Any]]) -> dict[str, Any]:
+    """Machine-readable signal when Instagram only exposes an archived Tagged window.
+
+    Mega brands (e.g. natgeo) often return a truncated historical usertags page —
+    all from one day years ago. Brand-monitoring clients must see ``staleFeed``
+    instead of treating 2018 UGC as live.
+    """
+    dated: list[datetime] = []
+    for post in posts:
+        dt = _parse_published_at(post.get("publishedAt"))
+        if dt is not None:
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            dated.append(dt)
+    if not dated:
+        return {
+            "staleFeed": True,
+            "newestPublishedAt": None,
+            "oldestPublishedAt": None,
+            "note": (
+                "Tagged posts came back without publish dates. Do not treat this "
+                "page as a live brand-monitoring feed."
+            ),
+        }
+    newest = max(dated)
+    oldest = min(dated)
+    age_days = (datetime.now(timezone.utc) - newest).days
+    stale = age_days > 365
+
+    def _iso(dt: datetime) -> str:
+        return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+    out: dict[str, Any] = {
+        "staleFeed": stale,
+        "newestPublishedAt": _iso(newest),
+        "oldestPublishedAt": _iso(oldest),
+    }
+    if stale:
+        out["note"] = (
+            "Instagram's Tagged tab for this account only exposes an archived "
+            f"window (newest tag is {age_days} days old). Not suitable for live "
+            "brand / collaboration monitoring — try nasa or similar accounts that "
+            "still surface recent UGC."
+        )
+    return out
+
+
+def _with_tagged_meta(
+    payload: dict[str, Any], posts: list[dict[str, Any]]
+) -> dict[str, Any]:
+    payload.update(_tagged_feed_freshness(posts))
+    return payload
+
+
 async def _ig_usertags_collect(
     user_id: str,
     cursor: str | None,
@@ -964,7 +1018,9 @@ async def _ig_usertags_collect(
             await asyncio.sleep(0.4)
             page = await instagram_native.fetch_usertags_page(user_id, next_cursor, count=min(33, max(limit, 12)))
         if page is None:
-            return None if not collected else (_sort_posts_newest_first(collected)[:limit], next_cursor)
+            if not collected:
+                return None
+            break
         items, next_max_id, more = page
         for raw in items:
             collected.append(
@@ -980,7 +1036,12 @@ async def _ig_usertags_collect(
             next_cursor = f"{next_cursor.split('_')[0]}_{user_id}"
         if len(collected) >= limit or next_cursor is None:
             break
-    return _sort_posts_newest_first(collected)[:limit], next_cursor
+    if not collected:
+        return None
+    posts = _sort_posts_newest_first(collected)[:limit]
+    # Backfill author.verified / profileImage (usertag rows are lean).
+    posts = await instagram_native.enrich_posts_from_author_feeds(posts, max_authors=8)
+    return posts, next_cursor
 
 
 async def _ig_feed_collect(
@@ -1086,7 +1147,7 @@ async def _overlay_feed_engagement(
             )
             # Backfill video/meta fields GraphQL timeline often omits.
             product = safe_str(raw.get("product_type")) or ("clips" if is_video else None)
-            if product and not post.get("productType"):
+            if product and not safe_str(post.get("productType")):
                 post["productType"] = product
             cover = (raw.get("carousel_media") or [raw])[0]
             duration = instagram_native._video_duration(raw, cover)
@@ -1557,7 +1618,7 @@ async def instagram_reels_search(
 
         data = await cached_or_run(
             endpoint="instagram.reels-search",
-            params={"q": q, "limit": limit, "datePosted": datePosted or "", "v": 14},
+            params={"q": q, "limit": limit, "datePosted": datePosted or "", "v": 15},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1611,10 +1672,17 @@ def _normalize_trending_item(item: dict) -> dict:
         "durationSeconds": round(duration, 3) if duration is not None else None,
         "thumbnailUrl": safe_str(item.get("thumbnail_url") or item.get("image_url")),
         "videoUrl": safe_str(item.get("video_url")),
-        "author": {
-            "username": username,
-            "url": f"https://instagram.com/{username}" if username else None,
-        },
+        "author": decodo.build_ig_author(
+            {
+                "username": username,
+                "full_name": item.get("full_name") or item.get("fullName"),
+                "is_verified": item.get("is_verified") or item.get("verified"),
+                "profile_pic_url": item.get("profile_pic_url")
+                or item.get("profilePicUrl")
+                or item.get("profile_image"),
+            },
+            username=username,
+        ),
         "engagement": {
             "views": safe_int(item.get("plays")),
             "likes": decodo.hidden_count(item.get("likes")),
@@ -1781,7 +1849,7 @@ async def instagram_trending_reels(
 
         data = await cached_or_run(
             endpoint="instagram.trending-reels",
-            params={"country": country, "limit": limit, "v": 13},
+            params={"country": country, "limit": limit, "v": 14},
             runner=_run,
             ctx=ctx,
             # Native path is seconds; Apify path still SWR for long actor runs.
@@ -1909,13 +1977,16 @@ async def instagram_tagged_posts(
                     )
                 posts, next_cursor = result
                 ctx["source"] = "direct"
-                return {
-                    "url": url,
-                    "totalReturned": len(posts),
-                    "hasMore": next_cursor is not None,
-                    "nextCursor": next_cursor,
-                    "posts": posts,
-                }
+                return _with_tagged_meta(
+                    {
+                        "url": url,
+                        "totalReturned": len(posts),
+                        "hasMore": next_cursor is not None,
+                        "nextCursor": next_cursor,
+                        "posts": posts,
+                    },
+                    posts,
+                )
 
             # Resolve user id: native web_profile_info first, Decodo GraphQL profile
             # as fallthrough (same pattern as channel-posts when IG rate-limits).
@@ -1932,13 +2003,16 @@ async def instagram_tagged_posts(
                 if result is not None and result[0]:
                     posts, next_cursor = result
                     ctx["source"] = "direct"
-                    return {
-                        "url": url,
-                        "totalReturned": len(posts),
-                        "hasMore": next_cursor is not None,
-                        "nextCursor": next_cursor,
-                        "posts": posts,
-                    }
+                    return _with_tagged_meta(
+                        {
+                            "url": url,
+                            "totalReturned": len(posts),
+                            "hasMore": next_cursor is not None,
+                            "nextCursor": next_cursor,
+                            "posts": posts,
+                        },
+                        posts,
+                    )
 
             apify = get_apify()
             items = await apify.run_actor_sync(
@@ -1953,23 +2027,33 @@ async def instagram_tagged_posts(
                     if not i.get("error")
                 ]
             )
+            posts = await instagram_native.enrich_posts_from_author_feeds(
+                posts, max_authors=8
+            )
             ctx["source"] = "apify"
-            return {
-                "url": url,
-                "totalReturned": len(posts),
-                "hasMore": None,
-                "nextCursor": None,
-                "posts": posts,
-            }
+            return _with_tagged_meta(
+                {
+                    "url": url,
+                    "totalReturned": len(posts),
+                    "hasMore": None,
+                    "nextCursor": None,
+                    "posts": posts,
+                },
+                posts,
+            )
 
         data = await cached_or_run(
             endpoint="instagram.tagged-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 12},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 13},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
         )
         if ctx.get("source") == "direct":
+            ctx["credits_override"] = CREDIT_TAGGED_NATIVE
+        elif data.get("staleFeed"):
+            # Archived Tagged windows (e.g. natgeo 2018) are not live monitoring —
+            # don't bill Apify's per-result rate for a historical dump.
             ctx["credits_override"] = CREDIT_TAGGED_NATIVE
         else:
             ctx["credits_override"] = _scaled_credits(len(data["posts"]), RATE_IG_RICH, 2)
@@ -1978,10 +2062,11 @@ async def instagram_tagged_posts(
 
 @router.get(
     "/hashtag-search",
-    summary="Instagram posts from a hashtag grid (not keyword search)",
+    summary="Instagram hashtag Explore posts (not keyword search)",
     description=(
-        "Returns posts from Instagram's hashtag Explore grid "
-        "(instagram_graphql_hashtag /tag page) — not keyword or username search. "
+        "Returns posts from Instagram's hashtag Explore surface "
+        "(top/recent tag page — Reels-heavy; not keyword or username search). "
+        "engagement.likes is like_count; play totals go to engagement.views. "
         "Optional mediaType=reels filters to Reels only."
     ),
 )
@@ -2049,7 +2134,7 @@ async def instagram_hashtag_search(
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",
-            params={"q": tag, "limit": limit, "mediaType": mediaType, "v": 16},
+            params={"q": tag, "limit": limit, "mediaType": mediaType, "v": 17},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
