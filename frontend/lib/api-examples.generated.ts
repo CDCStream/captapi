@@ -1609,13 +1609,15 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "publishedAt": "2026-07-27T15:33:07.000Z",
         "thumbnailUrl": "https://scontent-dfw5-2.xx.fbcdn.net/v/t39.99422-6/758964186_1384158170473704_9008748322111971488_n.png?stp=dst-jpg_tt6&cstp=mx2047x1012&ctp=s1080x2048&_nc_cat=1&ccb=1-7&_nc_sid=12...",
         "author": {
-          "username": "nasa",
+          "username": "NASA",
           "displayName": "NASA - National Aeronautics and Space Administration",
           "url": "https://www.facebook.com/NASA"
         },
         "engagement": {
           "likes": 1861,
-          "comments": 84
+          "comments": 84,
+          "views": null,
+          "shares": null
         },
         "isVideo": false
       },
@@ -1723,7 +1725,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "isVideo": true,
         "link": "https://www.nasa.gov/freedom250/#american-state-fair"
       }
-    ]
+    ],
+    "scrapedAt": "2026-08-03T11:00:00Z"
   },
   "facebook-profile-reels": {
     "url": "https://www.facebook.com/NASA",
@@ -1885,7 +1888,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "isVideo": true,
         "link": "https://www.nasa.gov/mission/artemis-iii/"
       }
-    ]
+    ],
+    "scrapedAt": "2026-08-03T11:00:00Z"
   },
   "facebook-summarizer": {
     "platform": "facebook",

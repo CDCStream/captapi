@@ -302,10 +302,20 @@ def _engagement_for_post(blobs: list[Any], post_id: str | None) -> dict[str, Any
             continue
         if fid and fid != post_id:
             continue
-        if not fid and post_id not in (url or ""):
-            # Still accept nodes that only expose counts without a feedback id
-            # when they sit next to matching post context (reel hydration).
+        id_matched = bool(fid and fid == post_id) or bool(post_id and post_id in (url or ""))
+        if not id_matched:
+            # Listing HTML is full of other posts' feedback stubs. A bare
+            # share_count_reduced: 0 without an id match invents silent zeros.
             if node.get("total_comment_count") is None and node.get("share_count_reduced") is None:
+                continue
+            likes_probe = _reaction_total(node)
+            comments_probe = safe_int(node.get("total_comment_count"))
+            shares_probe = _parse_count(node.get("share_count_reduced") or node.get("share_count"))
+            if (
+                (likes_probe is None or likes_probe == 0)
+                and (comments_probe is None or comments_probe == 0)
+                and (shares_probe is None or shares_probe == 0)
+            ):
                 continue
 
         likes = _reaction_total(node)
@@ -325,10 +335,16 @@ def _engagement_for_post(blobs: list[Any], post_id: str | None) -> dict[str, Any
             out["likes"] = likes
             if raw_fid and (fid == post_id or not out.get("feedbackId")):
                 out["feedbackId"] = raw_fid
-        if comments is not None:
-            out["comments"] = max(out["comments"] or 0, comments)
-        if shares is not None:
-            out["shares"] = max(out["shares"] or 0, shares)
+        if comments is not None and (comments > 0 or id_matched):
+            if comments > 0:
+                out["comments"] = max(out["comments"] or 0, comments)
+            elif out["comments"] is None:
+                out["comments"] = 0
+        if shares is not None and (shares > 0 or id_matched):
+            if shares > 0:
+                out["shares"] = max(out["shares"] or 0, shares)
+            elif out["shares"] is None:
+                out["shares"] = 0
         if out.get("feedbackId") is None and raw_fid and fid == post_id:
             out["feedbackId"] = raw_fid
     return out
@@ -509,6 +525,17 @@ def _from_creation_story(cs: dict[str, Any], blobs: list[Any], page_url: str) ->
     message = cs.get("message") if isinstance(cs.get("message"), dict) else {}
     playback = sf.get("playback_video") if isinstance(sf.get("playback_video"), dict) else {}
     video_owner = sf.get("video_owner") if isinstance(sf.get("video_owner"), dict) else {}
+    owner_url = safe_str(video_owner.get("url"))
+    owner_username = None
+    if owner_url and "/groups/" not in owner_url.lower():
+        m = re.search(r"facebook\.com/([A-Za-z0-9.\-_]+)/?", owner_url)
+        if m:
+            handle = m.group(1)
+            if handle.lower() not in {
+                "profile.php", "people", "pages", "watch", "reel", "groups", "photo",
+            } and not handle.isdigit():
+                owner_username = handle
+    display_pic = video_owner.get("displayPicture") if isinstance(video_owner.get("displayPicture"), dict) else {}
     item: dict[str, Any] = {
         "short_form_video_context": sf,
         "postId": post_id,
@@ -520,6 +547,7 @@ def _from_creation_story(cs: dict[str, Any], blobs: list[Any], page_url: str) ->
         or safe_str(playback.get("permalink_url"))
         or page_url,
         "facebookUrl": page_url,
+        "pageUsername": owner_username,
         "likes": eng["likes"],
         "comments": eng["comments"],
         "shares": eng["shares"],
@@ -535,7 +563,9 @@ def _from_creation_story(cs: dict[str, Any], blobs: list[Any], page_url: str) ->
         "user": {
             "id": safe_str(video_owner.get("id")),
             "name": safe_str(video_owner.get("name")),
-            "profileUrl": safe_str(video_owner.get("url")),
+            "username": owner_username,
+            "profileUrl": owner_url,
+            "profilePic": safe_str(display_pic.get("uri")),
             "isVerified": video_owner.get("is_verified")
             if video_owner.get("is_verified") is not None
             else video_owner.get("isVerified"),
@@ -684,12 +714,15 @@ async def details_native(url: str) -> dict[str, Any] | None:
             return None
         # Page vanity is useful for /PageName/posts/… — never for /groups/{slug}/…
         # (that slug is the group, not the author; stamping it caused author.username=group).
+        # Don't overwrite actor URL casing with a differently-cased page slug.
         is_group_url = "/groups/" in (url or "").lower()
         if page and not is_group_url:
-            item["pageUsername"] = page
+            existing = safe_str(item.get("pageUsername"))
+            if not existing:
+                item["pageUsername"] = page
             user = item.get("user") if isinstance(item.get("user"), dict) else {}
             if not user.get("username"):
-                user["username"] = page
+                user["username"] = existing or page
                 item["user"] = user
         og_image = _meta_content(html, "og:image")
         if og_image and not item.get("thumbnailUrl"):

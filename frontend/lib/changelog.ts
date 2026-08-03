@@ -51,6 +51,18 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "fix",
+    title: "Facebook profile-posts: one author identity + honest shares",
+    description:
+      "Mixed post+Reel listings stamped a lowercased page slug onto Story authors (nasa) while Reels kept Facebook's URL casing (NASA). Listing feedback stubs also injected shares:0. Authors are now unified per response, engagement.views/shares stay present (null when unknown), unmatched zero share stubs are ignored, and scrapedAt is returned so profile-posts vs profile-reels counts can be compared by freshness.",
+    items: [
+      "Unify author.username casing across a profile-posts / profile-reels page",
+      "Do not invent shares:0 from unmatched listing feedback",
+      "engagement.views + shares always present; scrapedAt on the payload",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
     title: "Instagram Trending Reels actually returns Reels",
     description:
       "Trending Reels was returning Explore photos/carousels (including 2018–2019 posts) because the native path padded with non-video cards and the Apify actor's mixed Explore dump was passed through unfiltered. Now both paths keep Video/clips only, drop posts older than ~180 days, prefer Explore Reels URLs, and expose numeric id + shortcode.",

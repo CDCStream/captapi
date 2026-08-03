@@ -513,12 +513,86 @@ def _normalize_post(item: dict) -> dict:
     top_comments = item.get("topComments")
     if isinstance(top_comments, list) and top_comments:
         out["topComments"] = top_comments
-    # Drop null author/engagement keys (e.g. group slug must not become username).
+    # Drop null author keys (e.g. group slug must not become username).
     if isinstance(out.get("author"), dict):
         out["author"] = {k: v for k, v in out["author"].items() if v is not None and v != ""}
     if isinstance(out.get("engagement"), dict):
-        out["engagement"] = {k: v for k, v in out["engagement"].items() if v is not None}
+        # Always expose views + shares (null when N/A / unknown) so mixed
+        # post+reel pages keep one engagement shape for typed clients.
+        eng = out["engagement"]
+        views = eng.get("views")
+        shares = eng.get("shares")
+        cleaned = {k: v for k, v in eng.items() if v is not None}
+        cleaned["views"] = views
+        cleaned["shares"] = shares
+        out["engagement"] = cleaned
     return out
+
+
+def _unify_listing_authors(posts: list[dict[str, Any]], page_url: str) -> None:
+    """One page must not appear as both ``nasa`` and ``NASA`` in the same page."""
+    if not posts:
+        return
+    page_handle = _fb_username_from_url(page_url)
+    scored: list[tuple[int, str]] = []
+    for post in posts:
+        author = post.get("author") if isinstance(post.get("author"), dict) else {}
+        username = safe_str(author.get("username"))
+        if not username:
+            continue
+        score = 0
+        if author.get("verified"):
+            score += 4
+        if author.get("profileImage"):
+            score += 2
+        score += sum(1 for ch in username if ch.isupper())
+        scored.append((score, username))
+    canonical = None
+    if scored:
+        scored.sort(key=lambda t: t[0], reverse=True)
+        canonical = scored[0][1]
+    if page_handle:
+        if canonical and canonical.lower() == page_handle.lower():
+            # Prefer richer casing, but never disagree with the request URL when
+            # the request URL itself has uppercase (facebook.com/NASA).
+            if sum(ch.isupper() for ch in page_handle) >= sum(ch.isupper() for ch in canonical):
+                canonical = page_handle
+        elif not canonical:
+            canonical = page_handle
+    if not canonical:
+        return
+    canon_url = f"https://www.facebook.com/{canonical}"
+    for post in posts:
+        author = post.get("author") if isinstance(post.get("author"), dict) else None
+        if not author:
+            continue
+        username = safe_str(author.get("username"))
+        if username and username.lower() == canonical.lower():
+            author["username"] = canonical
+            url = safe_str(author.get("url"))
+            if url and _fb_username_from_url(url) and _fb_username_from_url(url).lower() == canonical.lower():
+                author["url"] = canon_url
+        elif not username and page_handle and page_handle.lower() == canonical.lower():
+            author["username"] = canonical
+            if not author.get("url"):
+                author["url"] = canon_url
+
+
+def _finalize_fb_listing_item(item: dict[str, Any]) -> dict[str, Any]:
+    """strip_empty but keep engagement.views / engagement.shares (may be null)."""
+    eng = item.get("engagement") if isinstance(item.get("engagement"), dict) else {}
+    views = eng.get("views")
+    shares = eng.get("shares")
+    out = strip_empty(item)
+    out_eng = out.get("engagement") if isinstance(out.get("engagement"), dict) else {}
+    out_eng["views"] = views
+    out_eng["shares"] = shares
+    out["engagement"] = out_eng
+    return out
+
+
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def _is_reel(item: dict) -> bool:
@@ -1172,13 +1246,19 @@ async def facebook_profile_posts(
             raws = await facebook_profile_posts_native.profile_posts_native(url, limit)
             if raws is None:
                 raise HTTPException(status_code=404, detail="Posts not found")
-            posts = [strip_empty(_normalize_post(i)) for i in raws]
+            posts = [_finalize_fb_listing_item(_normalize_post(i)) for i in raws]
+            _unify_listing_authors(posts, url)
             ctx["source"] = "direct"
-            return {"url": url, "totalReturned": len(posts), "posts": posts}
+            return {
+                "url": url,
+                "totalReturned": len(posts),
+                "posts": posts,
+                "scrapedAt": _now_iso(),
+            }
 
         data = await cached_or_run(
             endpoint="facebook.profile-posts",
-            params={"url": url, "limit": limit, "v": 4},
+            params={"url": url, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1205,13 +1285,19 @@ async def facebook_profile_reels(
             raws = await facebook_profile_reels_native.profile_reels_native(url, limit)
             if raws is None:
                 raise HTTPException(status_code=404, detail="Reels not found")
-            reels = [strip_empty(_normalize_post(i)) for i in raws]
+            reels = [_finalize_fb_listing_item(_normalize_post(i)) for i in raws]
+            _unify_listing_authors(reels, url)
             ctx["source"] = "direct"
-            return {"url": url, "totalReturned": len(reels), "reels": reels}
+            return {
+                "url": url,
+                "totalReturned": len(reels),
+                "reels": reels,
+                "scrapedAt": _now_iso(),
+            }
 
         data = await cached_or_run(
             endpoint="facebook.profile-reels",
-            params={"url": url, "limit": limit, "v": 4},
+            params={"url": url, "limit": limit, "v": 5},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

@@ -97,7 +97,11 @@ def _inline_raw_posts(html: str, page_url: str) -> list[dict[str, Any]]:
     """Map full Story / creation_story nodes already present in the listing HTML."""
     blobs = facebook_details_native._load_blobs(html)
     signals = facebook_details_native._url_signals(page_url)
-    slug = (_page_slug(page_url) or "").lower()
+    # Preserve vanity casing from the request URL ("NASA" vs "nasa"). Lowercase
+    # only for membership checks — stamping .lower() into pageUsername made
+    # Story rows disagree with Reel rows that keep Facebook's URL casing.
+    slug_raw = _page_slug(page_url) or ""
+    slug = slug_raw.lower()
     raws: list[dict[str, Any]] = []
     seen: set[str] = set()
 
@@ -137,11 +141,14 @@ def _inline_raw_posts(html: str, page_url: str) -> list[dict[str, Any]]:
             if not actor_ok:
                 continue
         item = facebook_details_native._from_story(st, blobs, page_url)
-        if slug:
-            item["pageUsername"] = slug
+        if slug_raw:
+            existing = safe_str(item.get("pageUsername"))
+            # Fill gaps only — never overwrite actor/URL casing with a lowercased slug.
+            if not existing:
+                item["pageUsername"] = slug_raw
             user = item.get("user") if isinstance(item.get("user"), dict) else {}
             if not user.get("username"):
-                user["username"] = slug
+                user["username"] = existing or slug_raw
                 item["user"] = user
         pid = safe_str(item.get("postId") or item.get("post_id"))
         if pid and pid not in seen and (item.get("text") or item.get("media") or item.get("short_form_video_context")):
