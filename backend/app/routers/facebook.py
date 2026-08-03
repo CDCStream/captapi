@@ -1096,6 +1096,7 @@ async def facebook_comments(
                         "url": safe_str(c.get("commentUrl")),
                         "text": (c.get("text") or "").strip(),
                         "author": safe_str(c.get("profileName") or c.get("authorName")),
+                        # Always present (null when actor omits) — same shape as native.
                         "authorUrl": safe_str(c.get("profileUrl")),
                         "authorAvatarUrl": safe_str(c.get("profilePicture")),
                         "likeCount": safe_int(c.get("likesCount") or c.get("reactionsCount")),
@@ -1113,7 +1114,7 @@ async def facebook_comments(
 
         data = await cached_or_run(
             endpoint="facebook.comments",
-            params={"url": url, "limit": limit, "v": 3},
+            params={"url": url, "limit": limit, "v": 4},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

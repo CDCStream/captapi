@@ -25,7 +25,7 @@ import httpx
 import structlog
 
 from app.services.http_fetch import proxy_for
-from app.services.instagram_decodo import hidden_count
+from app.services.instagram_decodo import dedupe_preserve, hidden_count, pick_video_views
 from app.utils.formatters import safe_float, safe_int, safe_str
 
 log = structlog.get_logger(__name__)
@@ -201,10 +201,16 @@ def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) 
 
     media_type = safe_int(media.get("media_type")) or 0
     is_video = media_type == 2
-    product = safe_str(media.get("product_type"))
+    product = safe_str(media.get("product_type")) or ("clips" if is_video else None)
     plays = safe_int(media.get("play_count"))
     ig_plays = safe_int(media.get("ig_play_count") or media.get("view_count"))
-    views = plays or ig_plays
+    likes = hidden_count(media.get("like_count"))
+    views, plays_field = pick_video_views(
+        view_count=ig_plays,
+        play_count=plays,
+        likes=likes,
+        is_video=is_video,
+    )
 
     music = _music_from_media(media)
     location = _location_from_media(media)
@@ -256,12 +262,12 @@ def map_post_from_media(media: dict[str, Any], *, shortcode: str | None = None) 
         "author": author,
         "engagement": {
             "views": views,
-            "plays": plays if plays is not None and ig_plays is not None and plays != ig_plays else None,
-            "likes": hidden_count(media.get("like_count")),
+            "plays": plays_field,
+            "likes": likes,
             "comments": hidden_count(media.get("comment_count")),
         },
-        "hashtags": _HASHTAG_RE.findall(caption or ""),
-        "mentions": _MENTION_RE.findall(caption or ""),
+        "hashtags": dedupe_preserve(_HASHTAG_RE.findall(caption or "")),
+        "mentions": dedupe_preserve(_MENTION_RE.findall(caption or "")),
         "isPaidPartnership": bool(is_paid) if is_paid is not None else False,
         "isAd": is_ad,
         "isAffiliate": is_affiliate,
@@ -851,7 +857,14 @@ def map_feed_post(
 
     plays = safe_int(media.get("play_count"))
     ig_plays = safe_int(media.get("ig_play_count") or media.get("view_count"))
-    views = plays or ig_plays
+    likes = hidden_count(media.get("like_count"))
+    views, plays_field = pick_video_views(
+        view_count=ig_plays,
+        play_count=plays,
+        likes=likes,
+        is_video=bool(is_video),
+    )
+    product = safe_str(media.get("product_type")) or ("clips" if is_video else None)
 
     return strip_null_post_fields(
         {
@@ -860,7 +873,7 @@ def map_feed_post(
             "id": safe_str(media.get("pk") or media.get("id")),
             "shortcode": shortcode,
             "postType": _MEDIA_TYPE_NAMES.get(media_type or 0),
-            "productType": safe_str(media.get("product_type")),
+            "productType": product,
             "caption": caption,
             "description": caption,
             "publishedAt": published,
@@ -870,14 +883,12 @@ def map_feed_post(
             "author": author,
             "engagement": {
                 "views": views,
-                "plays": plays
-                if plays is not None and ig_plays is not None and plays != ig_plays
-                else None,
-                "likes": hidden_count(media.get("like_count")),
+                "plays": plays_field,
+                "likes": likes,
                 "comments": hidden_count(media.get("comment_count")),
             },
-            "hashtags": _HASHTAG_RE.findall(caption),
-            "mentions": _MENTION_RE.findall(caption),
+            "hashtags": dedupe_preserve(_HASHTAG_RE.findall(caption)),
+            "mentions": dedupe_preserve(_MENTION_RE.findall(caption)),
         }
     )
 
@@ -2318,17 +2329,22 @@ async def enrich_posts_from_author_feeds(
     for post in posts:
         code = _post_shortcode(post)
         engagement = post.get("engagement") if isinstance(post.get("engagement"), dict) else {}
-        if code and code in play_by_code and engagement.get("views") is None:
+        # Prefer feed play counts whenever available — GraphQL video_view_count
+        # often undercounts Reels and can sit below like_count.
+        if code and code in play_by_code:
             plays, ig_plays = play_by_code[code]
-            views = plays or ig_plays
-            if views is not None:
-                engagement["views"] = views
+            feed_views = plays or ig_plays
+            likes = engagement.get("likes")
+            if feed_views is not None:
+                engagement["views"] = feed_views
             if (
                 plays is not None
                 and ig_plays is not None
                 and plays != ig_plays
             ):
                 engagement["plays"] = plays
+            if likes is not None and engagement.get("views") is not None and likes > engagement["views"]:
+                engagement["views"] = None
             post["engagement"] = engagement
         author = post.get("author") if isinstance(post.get("author"), dict) else {}
         username = safe_str(author.get("username"))
@@ -2341,6 +2357,9 @@ async def enrich_posts_from_author_feeds(
             if author.get("private") is None and stats.get("private") is not None:
                 author["private"] = stats["private"]
             post["author"] = author
+        mentions = post.get("mentions")
+        if isinstance(mentions, list):
+            post["mentions"] = dedupe_preserve(mentions)
         strip_null_post_fields(post)
     return posts
 

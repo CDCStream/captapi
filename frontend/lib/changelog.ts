@@ -51,6 +51,19 @@ const FALLBACK_ENTRIES: Omit<ChangelogEntry, "id">[] = [
   {
     publishedAt: "2026-08-03",
     category: "fix",
+    title: "Instagram: never return likes > views on Reels",
+    description:
+      "GraphQL video_view_count undercounts many Reels and can sit below like_count (impossible). Channel Posts / Hashtag Search now prefer api/v1 play_count, drop untrustworthy views when likes > views, always expose engagement.views (null on Image/Sidecar), use null instead of empty productType, and dedupe caption @mentions. Facebook comments always include authorUrl (null when FB omits it).",
+    items: [
+      "IG channel-posts / hashtag-search: prefer play_count; sanitize likes>views",
+      "engagement.views always present (null when N/A or untrusted)",
+      "productType: null instead of \"\"; mentions[] deduped",
+      "Facebook comments: authorUrl always on every comment object",
+    ],
+  },
+  {
+    publishedAt: "2026-08-03",
+    category: "fix",
     title: "Stop inventing engagement zeros (IG/FB/YT/TikTok/Rumble)",
     description:
       "Missing like/comment/share/reply counts now stay null instead of becoming 0. Root cause: shared patterns like Instagram hidden_count(None)→0 and safe_int(...) or 0 across comments and post engagement. Also tightened YouTube hasCreatorHeart (emoji tooltips no longer force true) and stopped mapping Rumble engagementCount into likes. Kick likes:0 is Kick's own API returning zero — not invented. Prefer null over silent zeros so averages and engagement rates are not poisoned.",

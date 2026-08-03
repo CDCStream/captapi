@@ -146,7 +146,30 @@ def _normalize_post(item: dict) -> dict:
     # Prefer shortcode as the public id (matches hashtag-search / details).
     public_id = shortcode or media_id
     view_count = safe_int(item.get("videoViewCount") or item.get("video_view_count"))
-    play_count = safe_int(item.get("videoPlayCount") or item.get("video_play_count"))
+    play_count = safe_int(
+        item.get("videoPlayCount")
+        or item.get("video_play_count")
+        or item.get("playCount")
+        or item.get("play_count")
+        or item.get("igPlayCount")
+        or item.get("ig_play_count")
+    )
+    likes = decodo.hidden_count(item.get("likesCount") or item.get("likeCount"))
+    is_video = (post_type or "").lower() in {"video", "reel", "clips"} or bool(
+        item.get("videoUrl") or item.get("video_url") or item.get("isVideo")
+    )
+    views, plays = decodo.pick_video_views(
+        view_count=view_count,
+        play_count=play_count,
+        likes=likes,
+        is_video=is_video,
+    )
+    product = safe_str(item.get("productType") or item.get("product_type")) or (
+        "clips" if is_video else None
+    )
+    mentions_raw = item.get("mentions")
+    if not isinstance(mentions_raw, list):
+        mentions_raw = decodo._MENTION_RE.findall(caption)
     verified = owner.get("isVerified") if owner.get("isVerified") is not None else owner.get("is_verified")
     if verified is None:
         verified = item.get("ownerIsVerified") or item.get("isVerified")
@@ -180,7 +203,7 @@ def _normalize_post(item: dict) -> dict:
         # "Image" | "Video" | "Sidecar" (carousel) - video-only fields are
         # stripped for non-video posts.
         "postType": post_type,
-        "productType": safe_str(item.get("productType") or item.get("product_type")),
+        "productType": product,
         "caption": caption,
         "description": caption,
         "publishedAt": safe_str(item.get("timestamp") or item.get("takenAt") or item.get("taken_at")),
@@ -206,16 +229,13 @@ def _normalize_post(item: dict) -> dict:
             ),
         },
         "engagement": {
-            # Keep view_count and play_count distinct when Instagram exposes both.
-            "views": view_count or play_count,
-            "plays": play_count
-            if view_count is not None and play_count is not None and view_count != play_count
-            else None,
-            "likes": decodo.hidden_count(item.get("likesCount") or item.get("likeCount")),
+            "views": views,
+            "plays": plays,
+            "likes": likes,
             "comments": decodo.hidden_count(item.get("commentsCount") or item.get("commentCount")),
         },
         "hashtags": _clean_hashtags(item.get("hashtags")),
-        "mentions": safe_list(item.get("mentions")),
+        "mentions": decodo.dedupe_preserve(mentions_raw),
         "isPaidPartnership": bool(item.get("isPaidPartnership") or item.get("is_paid_partnership"))
         if (item.get("isPaidPartnership") is not None or item.get("is_paid_partnership") is not None)
         else False,
@@ -1001,6 +1021,62 @@ async def _ig_feed_collect(
     return collected[:limit], next_cursor
 
 
+async def _overlay_feed_engagement(
+    posts: list[dict[str, Any]], user_id: str | None
+) -> list[dict[str, Any]]:
+    """Replace GraphQL view_count with api/v1 play counts when the feed is reachable.
+
+    Decodo timeline nodes often expose a partial ``video_view_count`` that can
+    sit below ``like_count`` on Reels. Feed ``play_count`` / ``ig_play_count``
+    are the trustworthy metrics.
+    """
+    if not posts or not user_id:
+        return posts
+    page = await instagram_native.fetch_user_feed_page(user_id, count=33)
+    if page is None:
+        for post in posts:
+            decodo.strip_null_post_fields(post)
+        return posts
+    by_code: dict[str, dict[str, Any]] = {}
+    for raw in page[0]:
+        code = safe_str(raw.get("code"))
+        if code:
+            by_code[code] = raw
+    for post in posts:
+        code = safe_str(post.get("shortcode") or post.get("id"))
+        raw = by_code.get(code or "")
+        eng = post.get("engagement") if isinstance(post.get("engagement"), dict) else {}
+        if raw:
+            plays = safe_int(raw.get("play_count"))
+            ig_plays = safe_int(raw.get("ig_play_count") or raw.get("view_count"))
+            likes = decodo.hidden_count(raw.get("like_count"))
+            views, plays_field = decodo.pick_video_views(
+                view_count=ig_plays,
+                play_count=plays,
+                likes=likes if likes is not None else eng.get("likes"),
+                is_video=bool(
+                    post.get("postType") == "Video"
+                    or safe_str(post.get("productType")) in {"clips", "reel", "reels"}
+                    or raw.get("media_type") == 2
+                ),
+            )
+            if views is not None:
+                eng["views"] = views
+            if plays_field is not None:
+                eng["plays"] = plays_field
+            if likes is not None:
+                eng["likes"] = likes
+            comments = decodo.hidden_count(raw.get("comment_count"))
+            if comments is not None:
+                eng["comments"] = comments
+            post["engagement"] = eng
+        mentions = post.get("mentions")
+        if isinstance(mentions, list):
+            post["mentions"] = decodo.dedupe_preserve(mentions)
+        decodo.strip_null_post_fields(post)
+    return posts
+
+
 def _ig_channel_page(
     first_page: dict[str, Any] | None, limit: int
 ) -> tuple[list[dict[str, Any]], str | None, str | None, int | None] | None:
@@ -1013,7 +1089,15 @@ def _ig_channel_page(
     if followers is None and posts:
         followers = posts[0].get("author", {}).get("followers")
     next_cursor = None
-    if first_page.get("hasMore") and posts and user_id and posts[-1].get("id"):
+    # Cursor must use the numeric media id (feed max_id), not the shortcode.
+    last_media = None
+    if posts:
+        last = posts[-1]
+        last_media = safe_str(last.get("mediaId") or last.get("id"))
+    if first_page.get("hasMore") and last_media and user_id and str(last_media).isdigit():
+        next_cursor = f"{last_media}_{user_id}"
+    elif first_page.get("hasMore") and posts and user_id and posts[-1].get("id"):
+        # Fallback when mediaId wasn't mapped (legacy).
         next_cursor = f"{posts[-1]['id']}_{user_id}"
     return posts, next_cursor, user_id, followers
 
@@ -1104,6 +1188,7 @@ async def instagram_channel_posts(
                 if page is None:
                     return None
                 posts, next_cursor, user_id, followers = page
+                posts = await _overlay_feed_engagement(posts, user_id)
                 if len(posts) < limit and next_cursor and user_id:
                     extra = await _ig_feed_collect(user_id, next_cursor, limit - len(posts), followers=followers)
                     if extra is not None:
@@ -1121,7 +1206,7 @@ async def instagram_channel_posts(
 
         data = await cached_or_run(
             endpoint="instagram.channel-posts",
-            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 15},
+            params={"url": url, "limit": limit, "cursor": cursor or "", "v": 16},
             runner=_run,
             ctx=ctx,
             use_cache=cache,
@@ -1397,8 +1482,8 @@ def _normalize_trending_item(item: dict) -> dict:
             "likes": decodo.hidden_count(item.get("likes")),
             "comments": decodo.hidden_count(item.get("comments")),
         },
-        "hashtags": decodo._HASHTAG_RE.findall(caption),
-        "mentions": decodo._MENTION_RE.findall(caption),
+        "hashtags": decodo.dedupe_preserve(decodo._HASHTAG_RE.findall(caption)),
+        "mentions": decodo.dedupe_preserve(decodo._MENTION_RE.findall(caption)),
     }
 
 
@@ -1748,7 +1833,7 @@ async def instagram_hashtag_search(
 
         data = await cached_or_run(
             endpoint="instagram.hashtag-search",
-            params={"q": q, "limit": limit, "mediaType": mediaType, "v": 14},
+            params={"q": q, "limit": limit, "mediaType": mediaType, "v": 15},
             runner=_run,
             ctx=ctx,
             use_cache=cache,

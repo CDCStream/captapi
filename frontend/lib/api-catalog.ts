@@ -3159,7 +3159,7 @@ const FIELD_DESCS: Record<string, string> = {
   timestamp: "Human-readable timestamp (MM:SS format).",
   type: "Content type of the item.",
   postType: 'Post type ("Image", "Video" or "Sidecar" for carousels).',
-  productType: "Platform product type (e.g. clips, feed).",
+  productType: "Platform product type (e.g. clips, feed). Null when not applicable (Image/Sidecar) — never an empty string.",
   language: "Detected or requested language code.",
   region: "Creator's country as an ISO code (e.g. IT, US). TikTok's authoritative value when it exposes one (rare); otherwise an AI-inferred guess from public profile cues (bio, display name, language). Check regionSource. Can be null when there is no usable signal.",
   regionConfidence: 'For an inferred region, confidence of the guess: "high", "medium", or "low". Null when the region came from TikTok.',

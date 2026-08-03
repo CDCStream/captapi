@@ -111,19 +111,23 @@ def _map_comment(node: dict[str, Any], *, include_reply_count: bool) -> dict[str
     author = node.get("author") if isinstance(node.get("author"), dict) else {}
     feedback = node.get("feedback") if isinstance(node.get("feedback"), dict) else {}
     replies = feedback.get("replies_fields") if isinstance(feedback.get("replies_fields"), dict) else {}
+    author_url = safe_str(author.get("url"))
     row: dict[str, Any] = {
         "id": cid,
         "url": safe_str(feedback.get("url")),
         "text": text,
         "author": safe_str(author.get("name")),
-        "authorUrl": safe_str(author.get("url")),
+        "authorUrl": author_url,
         "authorAvatarUrl": _avatar(author),
         "likeCount": _like_count(feedback),
         "publishedAt": _iso(node.get("created_time")),
     }
     if include_reply_count:
         row["replyCount"] = safe_int(replies.get("total_count") or replies.get("count")) or 0
-    return strip_empty(row)
+    cleaned = strip_empty(row)
+    # Always expose authorUrl for typed clients (null when FB omits profile url).
+    cleaned["authorUrl"] = author_url
+    return cleaned
 
 
 def _walk_comments(obj: Any, found: list[dict[str, Any]], depth: int = 0) -> None:

@@ -2693,7 +2693,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://www.instagram.com/p/DbYaLffE2DD/",
         "id": "3952023811948503235",
         "postType": "Sidecar",
-        "productType": "",
+        "productType": null,
         "caption": "Suit up!\n\nThese photos show NASA astronaut candidates @astro_fuhrmann and @astro_lawler preparing for their training flights aboard a high-flying WB-57 aircraft. These high-altitude flights train astronaut candidates to operate in tight spaces while wearing a pressure suit—a feat that prepares them for missions to the @ISS, Moon, or beyond.\n\nWhy are pressure suits necessary? The two main bodily dangers of high altitude are extremely thin air and low oxygen. Pressure suits counteract those dangers and make it possible to survive if something goes wrong in the aircraft.\n\nCredit: NASA\n\n#NASA #FlightSuit #Aircraft",
         "description": "Suit up!\n\nThese photos show NASA astronaut candidates @astro_fuhrmann and @astro_lawler preparing for their training flights aboard a high-flying WB-57 aircraft. These high-altitude flights train astronaut candidates to operate in tight spaces while wearing a pressure suit—a feat that prepares them for missions to the @ISS, Moon, or beyond.\n\nWhy are pressure suits necessary? The two main bodily dangers of high altitude are extremely thin air and low oxygen. Pressure suits counteract those dangers and make it possible to survive if something goes wrong in the aircraft.\n\nCredit: NASA\n\n#NASA #FlightSuit #Aircraft",
         "publishedAt": "2026-07-29T15:12:56Z",
@@ -2708,7 +2708,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "engagement": {
           "likes": 34106,
-          "comments": 177
+          "comments": 177,
+          "views": null
         },
         "hashtags": [
           "NASA",
@@ -2726,7 +2727,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://www.instagram.com/p/DbTmwYKFkZo/",
         "id": "3950671748375397992",
         "postType": "Image",
-        "productType": "",
+        "productType": null,
         "caption": "Hi, Earth! 📱\n\nAfter eight months living and working aboard the @ISS, NASA astronaut Chris Williams returned to Earth on Sunday, July 26.⁣\n\nIn his first space mission, he worked on many experiments and tech demonstrations, including new cancer treatment research and manufacturing materials used in computers and electronics. In addition, he completed two spacewalks – another first (and second)!⁣\n\nNow back on our home planet, Chris will readjust to gravity and the sights and sounds of Earth. In the coming weeks, he'll talk about his experience on the space station. Keep an eye on our website for more details.⁣\n\n#NASA #Space #Astronaut⁣\n\nCredit: NASA",
         "description": "Hi, Earth! 📱\n\nAfter eight months living and working aboard the @ISS, NASA astronaut Chris Williams returned to Earth on Sunday, July 26.⁣\n\nIn his first space mission, he worked on many experiments and tech demonstrations, including new cancer treatment research and manufacturing materials used in computers and electronics. In addition, he completed two spacewalks – another first (and second)!⁣\n\nNow back on our home planet, Chris will readjust to gravity and the sights and sounds of Earth. In the coming weeks, he'll talk about his experience on the space station. Keep an eye on our website for more details.⁣\n\n#NASA #Space #Astronaut⁣\n\nCredit: NASA",
         "publishedAt": "2026-07-27T18:26:43Z",
@@ -2741,7 +2742,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "engagement": {
           "likes": 62909,
-          "comments": 621
+          "comments": 621,
+          "views": null
         },
         "hashtags": [
           "NASA",
@@ -2772,7 +2774,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "profileImage": "https://scontent-lga3-1.cdninstagram.com/v/t51.2885-19/29090066_159271188110124_1152068159029641216_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-lga3-1.cdninstagram.com&_nc_cat=1&_nc_oc=Q6cZ2gGam1aPbxqnPf0b0JKP7tArIHvIrXRHft307eWE7UMXS_pr6S4N6-Dm4L-cNp1JOIg&_nc_ohc=sUQGBsPKUTMQ7kNvwEjppQT&_nc_gid=EJ9eFsuBV8RTUu0BGi0U6A&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQABrOC8fhriT4lnoxQ6_A9newYDo18-mqvkuOv21yGkUQ&oe=6A701229&_nc_sid=8b3546"
         },
         "engagement": {
-          "views": 112487,
+          "views": null,
           "likes": 485567,
           "comments": 2174
         },
@@ -2790,7 +2792,7 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         "url": "https://www.instagram.com/p/DbJML3hGVVJ/",
         "id": "3947740140450436425",
         "postType": "Image",
-        "productType": "",
+        "productType": null,
         "caption": "I spy… something dark 🔎\n\nIn this photo snapped by @NASAHubble, this ghostly cloud appears to have a dark ring around the central galaxy cluster. That ring is evidence of dark matter, the invisible glue that holds the universe together.\n\nVisible matter, or the stuff we can see, makes up only 5% of the universe. Dark matter makes up over five times as much of the universe, but we can’t see it because it doesn’t emit, reflect, or absorb any light. However, dark matter interacts with ordinary visible matter through gravity, so that’s how scientists detect it.\n\nThe exact nature of this abundant, invisible substance is still unknown, but our soon-to-launch Nancy Grace Roman Space Telescope aims to shed light on the subject. With a field of view over 100 times that of @NASAHubble’s, Roman’s enormous perspective will measure the distribution of both visible and dark matter in hundreds of millions of galaxies, helping scientists understand how dark matter has evolved in the universe.\n\nCredit: NASA\n\n#NASA #Roman #DarkMatter",
         "description": "I spy… something dark 🔎\n\nIn this photo snapped by @NASAHubble, this ghostly cloud appears to have a dark ring around the central galaxy cluster. That ring is evidence of dark matter, the invisible glue that holds the universe together.\n\nVisible matter, or the stuff we can see, makes up only 5% of the universe. Dark matter makes up over five times as much of the universe, but we can’t see it because it doesn’t emit, reflect, or absorb any light. However, dark matter interacts with ordinary visible matter through gravity, so that’s how scientists detect it.\n\nThe exact nature of this abundant, invisible substance is still unknown, but our soon-to-launch Nancy Grace Roman Space Telescope aims to shed light on the subject. With a field of view over 100 times that of @NASAHubble’s, Roman’s enormous perspective will measure the distribution of both visible and dark matter in hundreds of millions of galaxies, helping scientists understand how dark matter has evolved in the universe.\n\nCredit: NASA\n\n#NASA #Roman #DarkMatter",
         "publishedAt": "2026-07-23T17:22:07Z",
@@ -2805,7 +2807,8 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
         },
         "engagement": {
           "likes": 156307,
-          "comments": 846
+          "comments": 846,
+          "views": null
         },
         "hashtags": [
           "NASA",
@@ -2813,7 +2816,6 @@ export const API_EXAMPLES: Record<string, Record<string, unknown>> = {
           "DarkMatter"
         ],
         "mentions": [
-          "NASAHubble",
           "NASAHubble"
         ]
       }

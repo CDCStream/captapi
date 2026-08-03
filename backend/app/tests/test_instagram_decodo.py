@@ -32,7 +32,7 @@ PROFILE = {
                             "edge_media_preview_like": {"count": 12},
                             "edge_media_to_comment": {"count": 3},
                             "edge_media_to_caption": {
-                                "edges": [{"node": {"text": "hello"}}]
+                                "edges": [{"node": {"text": "hello @NASAHubble @NASAHubble"}}]
                             },
                             "owner": {"username": "captapi"},
                         }
@@ -60,17 +60,40 @@ def test_post_mapper_preserves_public_contract() -> None:
     post = decodo._post(node)
 
     assert post["platform"] == "instagram"
-    assert post["id"] == "p1"
-    assert post["caption"] == "hello"
+    assert post["id"] == "ABC"
+    assert post["caption"] == "hello @NASAHubble @NASAHubble"
     assert post["postType"] == "Image"
+    assert post["productType"] is None
     # Timestamps use the ISO "Z" suffix, matching the native feed mapper so a
     # mixed Decodo+native page never returns two datetime formats.
     assert post["publishedAt"] == "2023-11-14T22:13:20Z"
     assert post["author"]["username"] == "captapi"
-    # Image posts carry no video-only fields, and null engagement counts are
-    # dropped rather than returned as null.
-    assert post["engagement"] == {"likes": 12, "comments": 3}
+    # Image posts always expose engagement.views as null (typed clients).
+    assert post["engagement"] == {"views": None, "likes": 12, "comments": 3}
+    assert post["mentions"] == ["NASAHubble"]
     assert "videoUrl" not in post
+
+
+def test_pick_video_views_drops_impossible_graphql_view_count() -> None:
+    # NASA reel case: GraphQL video_view_count << like_count.
+    views, plays = decodo.pick_video_views(
+        view_count=112_487,
+        play_count=None,
+        likes=485_567,
+        is_video=True,
+    )
+    assert views is None
+    assert plays is None
+
+    # Prefer play_count when present (native feed).
+    views, plays = decodo.pick_video_views(
+        view_count=112_487,
+        play_count=13_000_000,
+        likes=485_567,
+        is_video=True,
+    )
+    assert views == 13_000_000
+    assert plays == 112_487
 
 
 def test_profile_and_timeline_functions(monkeypatch) -> None:
@@ -88,11 +111,11 @@ def test_profile_and_timeline_functions(monkeypatch) -> None:
     assert details and details["followers"] == 1234
     assert details["postCount"] == 2
     # channel_posts returns a page envelope covering every post type; reels
-    # keeps only videos.
-    assert posts and [post["id"] for post in posts["items"]] == ["p1", "r1"]
+    # keeps only videos. Public id is shortcode.
+    assert posts and [post["id"] for post in posts["items"]] == ["ABC", "REEL"]
     assert posts["userId"] == "42"
     assert posts["followers"] == 1234
-    assert reels and [reel["id"] for reel in reels["items"]] == ["r1"]
+    assert reels and [reel["id"] for reel in reels["items"]] == ["REEL"]
     assert reels["followers"] == 1234
 
 

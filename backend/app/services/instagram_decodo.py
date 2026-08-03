@@ -210,18 +210,69 @@ def hidden_count(value: Any) -> int | None:
     return n
 
 
+def dedupe_preserve(items: Iterable[Any] | None) -> list[str]:
+    """Stable unique strings (caption @mentions often repeat)."""
+    out: list[str] = []
+    seen: set[str] = set()
+    for raw in items or []:
+        s = safe_str(raw)
+        if not s or s in seen:
+            continue
+        seen.add(s)
+        out.append(s)
+    return out
+
+
+def pick_video_views(
+    *,
+    view_count: int | None,
+    play_count: int | None,
+    likes: int | None,
+    is_video: bool,
+) -> tuple[int | None, int | None]:
+    """Pick ``(views, plays)`` for a post.
+
+    GraphQL ``video_view_count`` undercounts many Reels vs real ``play_count``
+    (and can sit *below* ``like_count`` — impossible for a real view metric).
+    Prefer play counts for video; drop views when likes > views rather than
+    inventing a swap.
+    """
+    if not is_video:
+        return None, None
+    # Prefer play_count — GraphQL video_view_count undercounts many Reels.
+    views = play_count or view_count
+    plays = None
+    if view_count is not None and play_count is not None and view_count != play_count:
+        # Secondary metric = the one not chosen as views.
+        plays = view_count if views == play_count else play_count
+    if likes is not None and views is not None and likes > views:
+        views = None
+    return views, plays
+
+
 def strip_null_post_fields(post: dict[str, Any]) -> dict[str, Any]:
     """Drop fields we can't fill instead of returning nulls: video-only
-    fields (videoUrl, durationSeconds, views) on images/carousels, hidden
-    engagement counts (None), and author fields the source doesn't provide
-    (e.g. Apify post listings carry no owner object)."""
+    fields (videoUrl, durationSeconds) on images/carousels, hidden engagement
+    counts (None) except ``engagement.views`` (always present — null on
+    Image/Sidecar), and author fields the source doesn't provide.
+    """
     if not post.get("videoUrl"):
         post.pop("videoUrl", None)
     if post.get("durationSeconds") is None:
         post.pop("durationSeconds", None)
+    if post.get("productType") == "":
+        post["productType"] = None
     engagement = post.get("engagement")
     if isinstance(engagement, dict):
-        post["engagement"] = {k: v for k, v in engagement.items() if v is not None}
+        likes = engagement.get("likes")
+        views = engagement.get("views")
+        if likes is not None and views is not None and likes > views:
+            engagement["views"] = None
+            views = None
+        cleaned = {k: v for k, v in engagement.items() if v is not None or k == "views"}
+        # Typed clients always read engagement.views (null when unknown / N/A).
+        cleaned["views"] = views
+        post["engagement"] = cleaned
     author = post.get("author")
     if isinstance(author, dict):
         post["author"] = {k: v for k, v in author.items() if v is not None}
@@ -263,7 +314,24 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
     is_sidecar = typename == "GraphSidecar"
     caption = _caption(node) or ""
     view_count = safe_int(node.get("video_view_count") or node.get("views"))
-    play_count = safe_int(node.get("video_play_count"))
+    play_count = safe_int(
+        node.get("video_play_count") or node.get("play_count") or node.get("ig_play_count")
+    )
+    likes = hidden_count(
+        first_present(
+            _count(node.get("edge_media_preview_like")),
+            _count(node.get("edge_liked_by")),
+            node.get("like_count"),
+            node.get("likes"),
+        )
+    )
+    views, plays = pick_video_views(
+        view_count=view_count,
+        play_count=play_count,
+        likes=likes,
+        is_video=is_video,
+    )
+    product = safe_str(node.get("product_type")) or ("clips" if is_video else None)
     # Prefer shortcode as id (matches Polaris hydrate + enrich_posts_from_author_feeds).
     result = {
         "platform": "instagram",
@@ -273,7 +341,7 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
         "shortcode": shortcode,
         "mediaId": media_id if media_id and media_id != shortcode else None,
         "postType": "Sidecar" if is_sidecar else ("Video" if is_video else "Image"),
-        "productType": safe_str(node.get("product_type")) or ("clips" if is_video else ""),
+        "productType": product,
         "caption": caption,
         "description": caption,
         "publishedAt": _iso_timestamp(node.get("taken_at_timestamp") or node.get("date_posted")),
@@ -290,19 +358,9 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
             "profileImage": _image_url(author),
         },
         "engagement": {
-            # Instagram distinguishes view_count (IG-only) vs play_count (incl. cross-post).
-            "views": view_count or play_count,
-            "plays": play_count
-            if view_count is not None and play_count is not None and view_count != play_count
-            else None,
-            "likes": hidden_count(
-                first_present(
-                    _count(node.get("edge_media_preview_like")),
-                    _count(node.get("edge_liked_by")),
-                    node.get("like_count"),
-                    node.get("likes"),
-                )
-            ),
+            "views": views,
+            "plays": plays,
+            "likes": likes,
             "comments": hidden_count(
                 first_present(
                     _count(node.get("edge_media_to_comment")),
@@ -311,8 +369,8 @@ def _post(node: dict[str, Any], profile: dict[str, Any] | None = None) -> dict[s
                 )
             ),
         },
-        "hashtags": _HASHTAG_RE.findall(caption),
-        "mentions": _MENTION_RE.findall(caption),
+        "hashtags": dedupe_preserve(_HASHTAG_RE.findall(caption)),
+        "mentions": dedupe_preserve(_MENTION_RE.findall(caption)),
         "isPaidPartnership": bool(node.get("is_paid_partnership"))
         if node.get("is_paid_partnership") is not None
         else False,
